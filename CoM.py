@@ -11,28 +11,28 @@ def centre_of_mass(image):
     
 #Centre of Mass calculation with thresholding from Magnus
 def centre_of_disk_centre_of_mass(
-            image,
-            threshold=None):
-        if threshold == None:
+        image,
+        threshold=None):
+    if threshold == None:
 #            threshold = (image.max()-image.min())*0.5
-            threshold = np.mean(image)
-        image[image<threshold] = 0
-        image[image<threshold] = 1
-        disk_centre = centre_of_mass(image)
+        threshold = np.mean(image)
+    image[image<threshold] = 0
+    image[image<threshold] = 1
+    disk_centre = centre_of_mass(image)
 
-        return(disk_centre)
+    return(disk_centre)
           
 
 #centre profile calculation from StackOverflow
 def radial_profile(data,centre):
-	y, x = np.indices((data.shape))
-	r = np.sqrt((x - centre[0])**2 + (y - centre[1])**2)
-	r = r.astype(np.int)
+    y, x = np.indices((data.shape))
+    r = np.sqrt((x - centre[0])**2 + (y - centre[1])**2)
+    r = r.astype(np.int)
 
-	tbin =  np.bincount(r.ravel(), data.ravel())
-	nr = np.bincount(r.ravel())
-	radialprofile = tbin / nr
-	return radialprofile
+    tbin =  np.bincount(r.ravel(), data.ravel())
+    nr = np.bincount(r.ravel())
+    radialprofile = tbin / nr
+    return radialprofile
 
 	
 #integrate in a range
