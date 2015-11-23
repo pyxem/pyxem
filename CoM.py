@@ -15,9 +15,9 @@ def centre_of_disk_centre_of_mass(
         threshold=None):
     if threshold == None:
 #            threshold = (image.max()-image.min())*0.5
-        threshold = np.mean(image)
+        threshold = np.mean(image, dtype='float64')
     image[image<threshold] = 0
-    image[image<threshold] = 1
+    image[image>threshold] = 1
     disk_centre = centre_of_mass(image)
 
     return(disk_centre)
@@ -31,7 +31,11 @@ def radial_profile(data,centre):
 
     tbin =  np.bincount(r.ravel(), data.ravel())
     nr = np.bincount(r.ravel())
+    #for somevalues, tbin and nr are 0 leading to 1's everywhere       
     radialprofile = tbin / nr
+    if (0 in tbin) and (0 in nr):
+        zeroIndex = tbin.index(0)
+        radialProfile[zeroIndex] = 0
     return radialprofile
 
 	
