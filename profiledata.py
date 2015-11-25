@@ -37,8 +37,8 @@ def radial_profile_dataset(i, save):
 
             rad = CoM.radial_profile(im[i,j].data, centre)
 
-            if len(rad) > 185:
-                while len(rad) > 185:
+            if len(rad) > 179:
+                while len(rad) > 179:
                     rad = np.delete(rad, [len(rad)-1])
 #           Shortens the array of rad to create a uniform 
 #           Length          
