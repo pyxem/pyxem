@@ -15,10 +15,16 @@ def centre_of_disk_centre_of_mass(
         threshold=None):
     if threshold == None:
 #            threshold = (image.max()-image.min())*0.5
-        threshold = np.mean(image, dtype='float64')
+        threshold = np.mean(image, dtype='float64') * (45/2)
+#       The mean of the data set being used to write this is roughly
+#       1/45 the max value. This threshold is too low and means that
+#       Lower intensity features are interfering with the creation
+#       Of the boolean disk
+        
     image[image<threshold] = 0
     image[image>threshold] = 1
-    disk_centre = centre_of_mass(image)
+    booleanArray = image.astype(bool)
+    disk_centre = centre_of_mass(booleanArray)
 
     return(disk_centre)
           
