@@ -41,27 +41,6 @@ def radial_profile(data,centre):
     radialProfile = tbin / nr
 
     return radialProfile
-
-def radial_profile_segment(data, centre, Threshold = None):
-    y,x = np.indices((data.shape))
-    r = np.sqrt((x-centre[0])**2 + (y-centre[1])**2)
-    r = r.astype(np.int)
-    
-    tbin = np.bincount(r.ravel(), data.ravel())
-    nr = np.bincount(r.ravel())
-    radialProfileSegment = tbin/nr
-    if Threshold == None:
-        Threshold = radialProfileSegment > 0.2*max(
-        radialProfileSegment)
-         
-    radialProfileSegment[radialProfileSegment > Threshold] = 0
-    
-    if (0 in tbin) and (0 in nr):
-        zeroIndex = tbin.index(0)
-        radialProfileSegment[zeroIndex] = 0
-       
-    return radialProfileSegment
-    
     	
 #integrate in a range
 def pixel(image,centre,s,e):
