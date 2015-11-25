@@ -42,6 +42,12 @@ def radial_profile_dataset(i, save):
 #           Radial profiler in CoM and saves the profile data
 #           In a multidimensional numpy array
 
+            if len(rad) > 185:
+                while len(rad) > 185:
+                    rad = np.delete(rad, [len(rad)-1])
+#           Shortens the array of rad to create a uniform 
+#           Length          
+          
     s = hs.signals.Image(blankFileToSave)
     s.save(save + ".hdf5")        
 #   Changes the numpy array with the profiles in it into a hyperspy
