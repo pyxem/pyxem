@@ -36,11 +36,6 @@ def radial_profile_dataset(i, save):
 #   Iterates over each individual 256x256 image (4096 in total)
 
             rad = CoM.radial_profile(im[i,j].data, centre)
-            blankFileToSave[i,j] = rad
-#           Passes the numpy array for each image alone with the
-#           Average centre of mass calculated earlier to the 
-#           Radial profiler in CoM and saves the profile data
-#           In a multidimensional numpy array
 
             if len(rad) > 185:
                 while len(rad) > 185:
@@ -48,6 +43,14 @@ def radial_profile_dataset(i, save):
 #           Shortens the array of rad to create a uniform 
 #           Length          
           
+            blankFileToSave[i,j] = rad
+
+#           Passes the numpy array for each image alone with the
+#           Average centre of mass calculated earlier to the 
+#           Radial profiler in CoM and saves the profile data
+#           In a multidimensional numpy array
+
+
     s = hs.signals.Image(blankFileToSave)
     s.save(save + ".hdf5")        
 #   Changes the numpy array with the profiles in it into a hyperspy
