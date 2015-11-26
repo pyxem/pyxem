@@ -33,17 +33,20 @@ def centre_of_disk_centre_of_mass(
 def radial_profile(data,centre):
     y, x = np.indices((data.shape))
     r = np.sqrt((x - centre[0])**2 + (y - centre[1])**2)
-    r = r.astype(np.int)
     r_max = np.max(r)
-    rings, radius = np.histogram(r, weights = data, bins = r_max/3)
-    plt.plot(radius[1:],rings)
-    plt.show()
+    
+    rings, radius = np.histogram(r, weights = data, bins = r_max)
+    radialProfile = rings / radius[1:]
+#   probelm with the rings and radius being different shapes - (61,)
+#   and (62,)
+#    plt.plot(radius[1:],rings)
+#    plt.show()
 #    tbin =  np.bincount(r.ravel(), data.ravel())
 #    nr = np.bincount(r.ravel())
     #for somevalues, tbin and nr are 0 leading to 1's everywhere       
 #    radialProfile = tbin / nr
 
-#    return radialProfile
+    return radialProfile
     	
 #integrate in a range
 def pixel(image,centre,s,e):
