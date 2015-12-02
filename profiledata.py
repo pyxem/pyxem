@@ -10,7 +10,7 @@ def radial_profile_dataset(i, save):
 #   Creates a hfd5 of the summed radial profiles for an input
 #   hfd5 file
 
-    blankFileToSave = np.zeros((64,64,179)) 
+    blankFileToSave = np.zeros((64,64,180)) 
 #   the length of rad varies and a numpy array needs a 
 #   fixed row length for each entry
     
@@ -37,8 +37,8 @@ def radial_profile_dataset(i, save):
 
             rad = CoM.radial_profile(im[i,j].data, centre)
 
-            if len(rad) > 179:
-                while len(rad) > 179:
+            if len(rad) > 180:
+                while len(rad) > 180:
                     rad = np.delete(rad, [len(rad)-1])
 #           Shortens the array of rad to create a uniform 
 #           Length          
@@ -57,30 +57,7 @@ def radial_profile_dataset(i, save):
 #   signal and saves it based on the chosen save name
     del im        
     del blankFileToSave
-    
-def radial_profile_segment(i, save):
-    blankFileToSave = np.zeros((64,64, 185)) #the length of rad varies from 185-188
-    fpdfile = h5py.File(i,'r') #find data file in a read only format
-    data = fpdfile['fpd_expt']['fpd_data']['data'][:]
-    im = hs.signals.Image(data[:,:,0,:,:])
-    centre = CoM.centre_of_disk_centre_of_mass(im.data)[2:]
-
-    for i in range(0,64):
-        for j in range (0,64):
-            rad = CoM.radial_profile_segment(im[i,j].data, centre)
-                           
-            if len(rad) > 185:
-                while len(rad) > 185:
-                    rad = np.delete(rad, [len(rad)-1])
-            
-            
-            blankFileToSave[i,j] = rad
-            del rad 
-     
-    del im        
-    s = hs.signals.Image(blankFileToSave)
-    del blankFileToSave
-    s.save(save + ".hdf5")        
-    
-    return
-
+    del rad
+    del centre
+    del data
+    del fpdfile

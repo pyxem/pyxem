@@ -24,7 +24,8 @@ def centre_of_disk_centre_of_mass(
     image[image<threshold] = 0
     image[image>threshold] = 1
     booleanArray = image.astype(bool)
-    disk_centre = centre_of_mass(booleanArray)
+    disk_centre = sp.ndimage.measurements.center_of_mass(
+            booleanArray)
 
     return(disk_centre)
           
@@ -33,18 +34,19 @@ def centre_of_disk_centre_of_mass(
 def radial_profile(data,centre):
     y, x = np.indices((data.shape))
     r = np.sqrt((x - centre[0])**2 + (y - centre[1])**2)
+    r = r.astype(int)
     r_max = np.max(r)
     
-    rings, radius = np.histogram(r, weights = data, bins = r_max)
-    radialProfile = rings / radius[1:]
+#    rings, radius = np.histogram(r, weights = data, bins = r_max)
+#    radialProfile = rings / radius[1:]
 #   probelm with the rings and radius being different shapes - (61,)
 #   and (62,)
 #    plt.plot(radius[1:],rings)
 #    plt.show()
-#    tbin =  np.bincount(r.ravel(), data.ravel())
-#    nr = np.bincount(r.ravel())
+    tbin =  np.bincount(r.ravel(), data.ravel())
+    nr = np.bincount(r.ravel())
     #for somevalues, tbin and nr are 0 leading to 1's everywhere       
-#    radialProfile = tbin / nr
+    radialProfile = tbin / nr
 
     return radialProfile
     	
@@ -54,28 +56,3 @@ def pixel(image,centre,s,e):
     sumRange = sp.integrate.simps(rad[s:e])
     return sumRange
 
-
-#Summed intensities
-def summed_intensity(dataSet):
-    summedIntensity = dataSet.sum(-1).sum(-1).plot()
-    return summedIntensity	
-
-def single_profile(im,i,j):
-    singleImage = im[i,j].data #printing radial profile for a particular image of interest
-
-    centre = centre_of_mass(singleImage) #finds the centre of mass 
-    rad = radial_profile (singleImage, centre) 
-
-    plt.plot(rad[:])
-    plt.show()
-    return
-
-def single_profile_threshold(im,i,j):
-    singleImage = im[i,j].data
-    centre = centre_of_disk_centre_of_mass(im.data, 
-        threshold = None)
-    rad = radial_profile(singleImage,centre)
-    
-    plt.plot(rad[:])
-    plt.show()
-    return
