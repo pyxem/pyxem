@@ -1,7 +1,6 @@
 import hyperspy.api as hs
 import numpy as np
 import h5py
-import loaddata
 import CoM
 import copy
 
@@ -52,6 +51,7 @@ def radial_profile_dataset(i, save):
 
 
     s = hs.signals.Image(blankFileToSave)
+    s = CoM.calibration(centre, s, scale = None)
     s.save(save + ".hdf5")        
 #   Changes the numpy array with the profiles in it into a hyperspy
 #   signal and saves it based on the chosen save name
@@ -61,3 +61,4 @@ def radial_profile_dataset(i, save):
     del centre
     del data
     del fpdfile
+    del s

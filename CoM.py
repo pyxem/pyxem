@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 import scipy as sp
 import h5py
 
-#Centre of mass calculation already in Scipy
-def centre_of_mass(image):
-    centreOfMass = sp.ndimage.measurements.center_of_mass(image)
-    return centreOfMass
-    
+def loadh5py(i):
+	fpdfile = h5py.File(i,'r') #find data file in a read only format
+	data = fpdfile['fpd_expt']['fpd_data']['data'][:]
+	im = hs.signals.Image(data[:,:,0,:,:])
+	return im
+
 #Centre of Mass calculation with thresholding from Magnus
 def centre_of_disk_centre_of_mass(
         image,
@@ -24,8 +25,7 @@ def centre_of_disk_centre_of_mass(
     image[image<threshold] = 0
     image[image>threshold] = 1
     booleanArray = image.astype(bool)
-    disk_centre = sp.ndimage.measurements.center_of_mass(
-            booleanArray)
+    disk_centre = sp.ndimage.measurements.center_of_mass(booleanArray)
 
     return(disk_centre)
           
@@ -44,8 +44,7 @@ def radial_profile(data,centre):
 #    plt.plot(radius[1:],rings)
 #    plt.show()
     tbin =  np.bincount(r.ravel(), data.ravel())
-    nr = np.bincount(r.ravel())
-    #for somevalues, tbin and nr are 0 leading to 1's everywhere       
+    nr = np.bincount(r.ravel())   
     radialProfile = tbin / nr
 
     return radialProfile
@@ -55,4 +54,45 @@ def pixel(image,centre,s,e):
     rad = radial_profile (image, centre)
     sumRange = sp.integrate.simps(rad[s:e])
     return sumRange
+    
+def calibration(centre,
+        im = None,
+		scale = None,
+		):
+#	This function takes the raw data input & crops the data set to the last 14 rows
+#	This assumes that bulk STO is all that exists in these 14 rows. It then sums
+#	Over the 0th and 1st axes into a single	.tif image that we can put into ImageJ
+#   To get a "scale". It then applies the calibration to the data and returns it
+#   Unchanged other than the addition of the calibration
+	
+#   If no data is inputted, it asks the user for the name of the data file
+	if im == None:	
+		data = input("Please enter the name of data file as a string: ")
+		im = loadh5py(data)
+
+#   If no scale is inputted, the data is converted to a .tif image and saved
+	if scale == None:
+		rawSTO = im[:,50:]
+		rawSumSTO = rawSTO.sum(0).sum(0)
+		saveName = input("Please enter the name of the save file as a string: ")
+		rawSumSTO32 = rawSumSTO.change_dtype('float32')
+		save = rawSumSTO32.save(saveName + ".tif")
+		print("Please use ImageJ to load the .tif file and find the radius of the STO Laue zone")
+		print("The diameter of the STO Laue zone is ...mrad")
+		scale = input("Scale found from ImageJ: ")
+	
+# 	This takes the input of the number of pixels per "unit" and applies this calibration to
+#	The dataset and centres the axes
+
+	a2 = im.axes_manager[2]
+	a2.scale = scale
+	a2.units = "mrad"
+	a2.offset = -centre[0]
+	
+	a3 = im.axes_manager[3]
+	a3.scale = scale
+	a3.units = "mrad"
+	a3.offset = -centre[1]
+	return im
+
 
