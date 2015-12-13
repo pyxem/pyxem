@@ -55,10 +55,7 @@ def pixel(image,centre,s,e):
     sumRange = sp.integrate.simps(rad[s:e])
     return sumRange
     
-def calibration(centre,
-        im = None,
-		scale = None,
-		):
+def calibration(centre, im = None, scale = None):
 #	This function takes the raw data input & crops the data set to the last 14 rows
 #	This assumes that bulk STO is all that exists in these 14 rows. It then sums
 #	Over the 0th and 1st axes into a single	.tif image that we can put into ImageJ
@@ -66,17 +63,17 @@ def calibration(centre,
 #   Unchanged other than the addition of the calibration
 	
 #   If no data is inputted, it asks the user for the name of the data file
-	if im == None:	
+	if im is None:	
 		data = input("Please enter the name of data file as a string: ")
 		im = loadh5py(data)
 
 #   If no scale is inputted, the data is converted to a .tif image and saved
-	if scale == None:
+	if scale is None:
 		rawSTO = im[:,50:]
 		rawSumSTO = rawSTO.sum(0).sum(0)
 		saveName = input("Please enter the name of the save file as a string: ")
 		rawSumSTO32 = rawSumSTO.change_dtype('float32')
-		save = rawSumSTO32.save(saveName + ".tif")
+		rawSumSTO32.save(saveName + ".tif")
 		print("Please use ImageJ to load the .tif file and find the radius of the STO Laue zone")
 		print("The diameter of the STO Laue zone is ...mrad")
 		scale = input("Scale found from ImageJ: ")
@@ -95,4 +92,5 @@ def calibration(centre,
 	a3.offset = -centre[1]
 	return im
 
-
+def gaussian_fit():
+    pass
