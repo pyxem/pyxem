@@ -51,7 +51,6 @@ def radial_profile_dataset(i, save, calibrationScale = None):
 
 
     s = hs.signals.Image(blankFileToSave)
-    s = CoM.calibration(centre, s, calibrationScale)
     s.save(save + ".hdf5")        
 #   Changes the numpy array with the profiles in it into a hyperspy
 #   signal and saves it based on the chosen save name
