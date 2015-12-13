@@ -5,7 +5,7 @@ import CoM
 import copy
 
 
-def radial_profile_dataset(i, save):
+def radial_profile_dataset(i, save, calibrationScale = None):
 #   Creates a hfd5 of the summed radial profiles for an input
 #   hfd5 file
 
@@ -51,7 +51,7 @@ def radial_profile_dataset(i, save):
 
 
     s = hs.signals.Image(blankFileToSave)
-    s = CoM.calibration(centre, s, scale = None)
+    s = CoM.calibration(centre, s, calibrationScale)
     s.save(save + ".hdf5")        
 #   Changes the numpy array with the profiles in it into a hyperspy
 #   signal and saves it based on the chosen save name
@@ -62,3 +62,5 @@ def radial_profile_dataset(i, save):
     del data
     del fpdfile
     del s
+    
+    
