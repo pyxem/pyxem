@@ -3,6 +3,7 @@ import profiledata
 import CoM
 from numpy import unravel_index
 import copy
+from scipy.optimize import curve_fit
 
 im = hs.load("test_hist.hdf5").as_image((0,2)) #load data
 im2 = im.to_spectrum() #change signal type
@@ -65,7 +66,7 @@ centreGaussian = gaussian.centre.as_signal() #create a signal of all centre valu
 aGaussian = gaussian.A.as_signal() # create a signal of all A values
 aGaussianMax = aGaussian.max(axis=1).max(axis=0).data # find the max value of A
 aData = copy.deepcopy(aGaussian.data) # create a copy of the A signal data
-aData[aData < 10] = 0. #threshold the A data to remove low values
+aData[aData < 20] = 0. #threshold the A data to remove low values
 # aData[aData < (aGaussianMax[0] * 0.2)]
 centreData = copy.deepcopy(centreGaussian.data) # create a copy of the centre data
 centreData[aData == 0.] = 0. #threshold the centre data for low intensity signals
@@ -76,3 +77,24 @@ centreGaussian.data[centreData == 0.] = 0. #apply the thresholded data map to th
 aGaussian.data[centreData == 0.] = 0. 
 del centreData #bookeeping
 
+##############################
+
+centreMeans = centreGaussian.data.mean(axis = 1)
+aMeans = aGaussian.data.mean(axis = 1)
+aMeans[centreMeans <= 100] = 0.
+centreMeans [aMeans == 0.] = 0.
+
+##############################
+# Fit a Gaussian to the intensities to see how they vary
+# p0 is the initial guess for the fitting coefficients
+p0 = [114., 15., 8.]
+counting = list(range(51))
+coeff, var_matrix = curve_fit(CoM.gauss, counting, aMeans, p0=p0)
+dataFit = gauss(counting, *coeff)
+
+plt.plot(counting, aMeans, 'ro', label='Data')
+plt.plot(counting, dataFit, 'bo', label='Fit')
+
+print 'mean = ', coeff[1]
+print 'std = ', coeff[2]
+plt.show()
