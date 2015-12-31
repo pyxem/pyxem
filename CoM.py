@@ -55,8 +55,9 @@ def pixel(image,centre,s,e):
     sumRange = sp.integrate.simps(rad[s:e])
     return sumRange
     
-def calibration(centre, im = None, scale = None):
-#	This function takes the raw data input & crops the data set to the last 14 rows
+def diffraction_calibration(centre, im = None, scale = None):
+#	This function calibrates the diffraction patters
+#   It takes the raw data input & crops the data set to the last 14 rows
 #	This assumes that bulk STO is all that exists in these 14 rows. It then sums
 #	Over the 0th and 1st axes into a single	.tif image that we can put into ImageJ
 #   To get a "scale". It then applies the calibration to the data and returns it
@@ -75,7 +76,7 @@ def calibration(centre, im = None, scale = None):
 		rawSumSTO32 = rawSumSTO.change_dtype('float32')
 		rawSumSTO32.save(saveName + ".tif")
 		print("Please use ImageJ to load the .tif file and find the radius of the STO Laue zone")
-		print("The diameter of the STO Laue zone is ...mrad")
+		print("The diameter of the STO Laue zone is 133.32 mrad")
 		scale = input("Scale found from ImageJ: ")
 	
 # 	This takes the input of the number of pixels per "unit" and applies this calibration to
@@ -91,6 +92,13 @@ def calibration(centre, im = None, scale = None):
 	a3.units = "mrad"
 	a3.offset = -centre[1]
 	return im
+	
+def calibration():
+    pass
 
 def gaussian_fit():
     pass
+    
+def gauss(x, *p):
+    A, mu, sigma = p
+    return A*numpy.exp(-(x-mu)**2/(2.*sigma**2))
