@@ -2,6 +2,7 @@ import hyperspy.api as hs
 import profiledata
 import CoM
 from numpy import unravel_index
+import copy
 
 im = hs.load("test_hist.hdf5").as_image((0,2)) #load data
 im2 = im.to_spectrum() #change signal type
@@ -36,12 +37,13 @@ gaussian.centre.value = 105
 m3.fit(fitter = "mpfit")
 
 ################################
+# Fit a Gaussian to the whole data set using the values from the 
+# Strongest signal as initial conditions and apply bounds on the 
+# Extremes
 
 m2 = im5.create_model()
-m2.append(gaussian) #append gaussian to the model
-
-m2.set_signal_range(90,120) #set the range of the gaussian
-#Set bounds and initial values for the A,sigma and centre of Gaussian
+m2.append(gaussian) 
+m2.set_signal_range(90,120)
 
 gaussian.centre.bmin = 100
 gaussian.centre.bmax = 110
@@ -52,15 +54,25 @@ gaussian.A.assign_current_value_to_all()
 
 gaussian.sigma.bmin = 0.1
 gaussian.sigma.bmax = 15
-#gaussian.sigma.bmax = 25
 gaussian.sigma.assign_current_value_to_all()
 
-m2.multifit(fitter="mpfit", bounded = True) #fit the Gaussian with the aforementioned bounds
+m2.multifit(fitter="mpfit", bounded = True) 
 m2.reset_signal_range()
 
-centreGaussian = gaussian.centre.as_signal()
-aGaussian = gaussian.A.as_signal()
-aGaussianMax = aGaussian.max(axis=1).max(axis=0).data
-'''aGaussian.data[aGaussian.data < (0.6*aGaussianMax)] = 0.
-centreGaussian.data[aGaussian.data == 0.] = 0.''' ###The non-fitting of some of the data set is caused by these two lines...
+###############################
+
+centreGaussian = gaussian.centre.as_signal() #create a signal of all centre values
+aGaussian = gaussian.A.as_signal() # create a signal of all A values
+aGaussianMax = aGaussian.max(axis=1).max(axis=0).data # find the max value of A
+aData = copy.deepcopy(aGaussian.data) # create a copy of the A signal data
+aData[aData < 10] = 0. #threshold the A data to remove low values
+# aData[aData < (aGaussianMax[0] * 0.2)]
+centreData = copy.deepcopy(centreGaussian.data) # create a copy of the centre data
+centreData[aData == 0.] = 0. #threshold the centre data for low intensity signals
+del aData # bookeeping
+centreData[centreData == 110.] = 0.
+centreData[centreData == 100.] = 0. #remove signals that are just saturated values
+centreGaussian.data[centreData == 0.] = 0. #apply the thresholded data map to the original signals
+aGaussian.data[centreData == 0.] = 0. 
+del centreData #bookeeping
 
