@@ -1,0 +1,7 @@
+*.o
+.deps
+refinetest2d
+refinetest3d1
+refinetest3d2
+refinetest3d3
+dtr
