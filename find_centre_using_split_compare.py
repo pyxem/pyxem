@@ -41,7 +41,7 @@ def find_centre_using_split_top(image, centre, sub_image_size):
     
     diff_array = [diff_sum_original, diff_sum_0, diff_sum_1]
     
-    print(diff_sum_original, diff_sum_0, diff_sum_1)   
+#    print(diff_sum_original, diff_sum_0, diff_sum_1)   
 
     min_diff_array = np.min(diff_array)
 
@@ -80,7 +80,7 @@ def find_centre_using_split_left(image, centre, sub_image_size):
     
     diff_array = [diff_sum_original, diff_sum_0, diff_sum_1]
 
-    print(diff_sum_original, diff_sum_0, diff_sum_1)   
+#    print(diff_sum_original, diff_sum_0, diff_sum_1)   
 
     min_diff_array = np.min(diff_array)
 
@@ -94,18 +94,26 @@ def find_centre_using_split_left(image, centre, sub_image_size):
         return image_1_centre, False        
         
 def _centre_finder_iterative_method(original_dataset):
-    original_dataset.change_dtype('float64')
-    array_of_centres = np.zeros(shape=(64,64)) #To store all centre values in
+   
     sub_image_size = 50.
     array_of_centres = np.zeros((64,64,2))
     centre = CoM.centre_of_disk_centre_of_mass(copy.deepcopy(original_dataset.data))[2:]
     centre = list(centre) #issue with tuple so cast to a list
-    image_spectrum = original_dataset.to_spectrum()
+    centre = [int(i) for i in centre]
+    centre_reset = centre
+#    image_spectrum = original_dataset.to_spectrum()
+  
+    print "Inital centre: ", centre 
+    
+    original_dataset.change_dtype('float64') 
     
     for i in range(0,64):
         for j in range(0,64):
-            
+            single_image = original_dataset.inav[i,j]
+            image_spectrum = single_image.to_spectrum()
+                        
 #          compare all the images until find the minimum
+
             check = False
             while check == False:
                 centre,check = find_centre_using_split_top(image_spectrum,centre, sub_image_size)
@@ -114,9 +122,9 @@ def _centre_finder_iterative_method(original_dataset):
             while check == False: 
                 centre, check = find_centre_using_split_left(image_spectrum, centre, sub_image_size)
                 
-            print centre
+            print "Calibrated centre: ", centre
             array_of_centres[i,j] = centre
-            
+            centre = centre_reset
     return array_of_centres
 
 original_dataset = CoM.loadh5py("default1.hdf5")
