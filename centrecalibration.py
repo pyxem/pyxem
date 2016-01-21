@@ -3,32 +3,64 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 
-## This just subtracts the two images and sums the total intensity
-## Hyperspy returns uint16 hence I manually set what would be negative
-## numbers to be 0
-def flip_and_compare(imOriginal, imFlip):
-    imDiff = imFlip - imOriginal
-    imDiff[imFlip>imOriginal]  == 0.
-    imDiffSum = imDiff.sum(0).sum(0)
-    return imDiffSum
-    
-## This function creates 4 new images to compare to the current "best guess"
-## It then returns the new "best guess" along with the corresponding 
-## centre value
-def compare_around(im3, imOriginal, imFlip, imDiffSum, centre, spread):  
-#   create 4 images each one shift 1 pixel in each direction from the centre which is update each iteration
-    compare_1 = im3[round(centre[0])-spread-1:round(centre[0])+spread-1,round(centre[1])-spread:round(centre[1])+spread]
-    compare_2 = im3[round(centre[0])-spread+1:round(centre[0])+spread+1,round(centre[1])-spread:round(centre[1])+spread]
-    compare_3 = im3[round(centre[0])-spread:round(centre[0])+spread,round(centre[1])-spread-1:round(centre[1])+spread-1]
-    compare_4 = im3[round(centre[0])-spread:round(centre[0])+spread,round(centre[1])-spread+1:round(centre[1])+spread+1]
+def _plot_compare_around_debug(image_compare_array, diff_compare_array):
+    c0 = image_compare_array[0]
+    c1 = image_compare_array[1]
+    c2 = image_compare_array[2]
+    c3 = image_compare_array[3]
 
-#   compare each shifted image to the flipped image and find the total sum of intensites  
-    diff_1 = flip_and_compare(compare_1.data, imFlip)
-    diff_2 = flip_and_compare(compare_2.data, imFlip)
-    diff_3 = flip_and_compare(compare_3.data, imFlip)
-    diff_4 = flip_and_compare(compare_4.data, imFlip)
+    diff0 = diff_compare_array[0]
+    diff1 = diff_compare_array[1]
+    diff2 = diff_compare_array[2]
+    diff3 = diff_compare_array[3]
+
+    fig, axarr = plt.subplots(4,2, figsize=(5,10))
+    axarr[0][0].imshow(c0) 
+    axarr[0][1].imshow(diff0) 
+    axarr[1][0].imshow(c1)
+    axarr[1][1].imshow(diff1) 
+    axarr[2][0].imshow(c2) 
+    axarr[2][1].imshow(diff2) 
+    axarr[3][0].imshow(c3) 
+    axarr[3][1].imshow(diff3) 
+
+    fig.tight_layout()
+    fig.savefig("compare_images.jpg")
+
+def find_center_using_image_flip(image, centre, sub_image_size):
+    image.change_dtype('float64')
     
-#   finds the minimum value for a quick check to see if the current image is infact a minimum
+    image_0_centre = (centre[0]+1, centre[1])
+    image_1_centre = (centre[0]-1, centre[1])
+    image_2_centre = (centre[0], centre[1]+1)
+    image_3_centre = (centre[0], centre[1]-1)
+
+    image_compare_original = image[round(centre[0])-sub_image_size:round(centre[0])+sub_image_size,round(centre[1])-sub_image_size:round(centre[1])+sub_image_size].data
+    image_compare_0 = image[round(centre[0])-sub_image_size-1:round(centre[0])+sub_image_size-1,round(centre[1])-sub_image_size:round(centre[1])+sub_image_size].data
+    image_compare_1 = image[round(centre[0])-sub_image_size+1:round(centre[0])+sub_image_size+1,round(centre[1])-sub_image_size:round(centre[1])+sub_image_size].data
+    image_compare_2 = image[round(centre[0])-sub_image_size:round(centre[0])+sub_image_size,round(centre[1])-sub_image_size-1:round(centre[1])+sub_image_size-1].data
+    image_compare_3 = image[round(centre[0])-sub_image_size:round(centre[0])+sub_image_size,round(centre[1])-sub_image_size+1:round(centre[1])+sub_image_size+1].data
+    
+    image_diff_original = np.fliplr(image_compare_original) - image_compare_original
+    image_diff_0 = np.fliplr(image_compare_0) - image_compare_0
+    image_diff_1 = np.fliplr(image_compare_1) - image_compare_1
+    image_diff_2 = np.fliplr(image_compare_2) - image_compare_2
+    image_diff_3 = np.fliplr(image_compare_3) - image_compare_3
+
+    compare_image_array = [image_compare_0, image_compare_1, image_compare_2, image_compare_3]
+    diff_image_array = [image_diff_0, image_diff_1, image_diff_2, image_diff_3]
+    _plot_compare_around_debug(compare_image_array, diff_image_array)
+
+    diff_sum_original = np.abs(image_diff_original).sum()
+    diff_sum_0 = np.abs(image_diff_0).sum()
+    diff_sum_1 = np.abs(image_diff_1).sum()
+    diff_sum_2 = np.abs(image_diff_2).sum()
+    diff_sum_3 = np.abs(image_diff_3).sum()
+
+    diff_array = [diff_sum_0, diff_sum_1, diff_sum_2, diff_sum_3, diff_sum_original]
+
+    print(diff_sum_original, diff_sum_0, diff_sum_1, diff_sum_2, diff_sum_3)   
+
     diff_array = [diff_1, diff_2, diff_3, diff_4]
     min_diff = np.min(diff_array) - imDiffSum
     if np.min(diff_array) > imDiffSum:
