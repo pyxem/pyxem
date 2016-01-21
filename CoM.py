@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import h5py
+import copy
 
 def loadh5py(i):
 	fpdfile = h5py.File(i,'r') #find data file in a read only format
@@ -37,24 +38,12 @@ def radial_profile(data,centre):
     r = r.astype(int)
     r_max = np.max(r)
     
-#    rings, radius = np.histogram(r, weights = data, bins = r_max)
-#    radialProfile = rings / radius[1:]
-#   probelm with the rings and radius being different shapes - (61,)
-#   and (62,)
-#    plt.plot(radius[1:],rings)
-#    plt.show()
     tbin =  np.bincount(r.ravel(), data.ravel())
     nr = np.bincount(r.ravel())   
     radialProfile = tbin / nr
 
     return radialProfile
-    	
-#integrate in a range
-def pixel(image,centre,s,e):
-    rad = radial_profile (image, centre)
-    sumRange = sp.integrate.simps(rad[s:e])
-    return sumRange
-    
+    	   
 def diffraction_calibration(centre, im = None, scale = None):
 #	This function calibrates the diffraction patters
 #   It takes the raw data input & crops the data set to the last 14 rows
@@ -91,14 +80,118 @@ def diffraction_calibration(centre, im = None, scale = None):
 	a3.scale = scale
 	a3.units = "mrad"
 	a3.offset = -centre[1]
-	return im
-	
-def calibration():
-    pass
+	return im 
 
-def gaussian_fit():
-    pass
+def radial_profile_dataset(i, calibrationScale = None):
+#   Creates a hfd5 of the summed radial profiles for an input
+#   hfd5 file
+
+    blankFileToSave = np.zeros((64,64,180)) 
+#   the length of rad varies and a numpy array needs a 
+#   fixed row length for each entry
     
-def gauss(x, *p):
-    A, mu, sigma = p
-    return A*numpy.exp(-(x-mu)**2/(2.*sigma**2))
+    fpdfile = h5py.File(i,'r') 
+#   find data file in a read only format
+
+    data = fpdfile['fpd_expt']['fpd_data']['data'][:]
+#   Opens the keys within the h5py file to access image
+
+    im = hs.signals.Image(data[:,:,0,:,:])
+#   Copies image from a hfd5 file into hyperspy image class
+#   and sets the singular "z" axis to 0, reducing it to 
+#   2 navigation (plane) and 2 signal axis
+
+    centre = centre_of_disk_centre_of_mass(copy.deepcopy(
+        im.data))[2:]
+#   Passes a copy of a numpy array based on the entire image to the 
+#   function in CoM to calculate the centre of mass
+#   A copy is passed so that the original image isn't altered
+
+    for i in range(0,64):
+        for j in range (0,64):
+#   Iterates over each individual 256x256 image (4096 in total)
+
+            rad = radial_profile(im[i,j].data, centre)
+
+            if len(rad) > 180:
+                while len(rad) > 180:
+                    rad = np.delete(rad, [len(rad)-1])
+#           Shortens the array of rad to create a uniform 
+#           Length          
+          
+            blankFileToSave[i,j] = rad
+
+#           Passes the numpy array for each image alone with the
+#           Average centre of mass calculated earlier to the 
+#           Radial profiler in CoM and saves the profile data
+#           In a multidimensional numpy array
+
+
+    s = hs.signals.Image(blankFileToSave)
+    s.axes_manager[1].scale = calibrationScale
+    s.save("profileddataset.hdf5")        
+#   Changes the numpy array with the profiles in it into a hyperspy
+#   signal and saves it based on the chosen save name
+    del im        
+    del blankFileToSave
+    del rad
+    del centre
+    del data
+    del fpdfile
+    return s	
+	    
+def _annular_dark_field_image(dataset, centre):
+#   Returns a numpy array of the ADF that can be displayed as an image.
+#   Input is the radially profiled dataset from the radial_profile_dataset function
+    results = []
+    for i in range (0,64):
+        for i in range (0,64):
+            radial_profile = image[i,j].data
+            sum_range = sp.integrate.simps(radial_profile[120:180])
+            results.append(sum_range)
+    adf_array = np.array(results)
+    adf_array = data.reshape(64,64)
+    del results
+    return adf_array
+    
+def _figure_compare(image_array, centring_method):
+#   Input an array of images to be displayed. Initally lets assume we are going to have 14 images.
+    a_gauss_bounded         = image_array[0]
+    a_gauss_unbounded       = image_array[1]
+    centre_gauss_bounded    = image_array[2]
+    centre_gauss_unbounded  = image_array[3]
+    sigma_gauss_bounded     = image_array[4]
+    sigma_gauss_unbounded   = image_array[5]
+    a_mean_bounded          = image_array[6]
+    a_mean_unbounded        = image_array[7]
+    centre_mean_bounded     = image_array[8]
+    centre_mean_unbounded   = image_array[9]
+    sigma_mean_bounded      = image_array[10]
+    sigma_mean_unbounded    = image_array[11]
+    adf_image               = image_array[12]
+    adf_holz                = image_array[13]
+
+
+    fig, axarr = plt.subplots(5,3, figsize=(5,10))
+    axarr[0][0].imshow(a_gauss_bounded) 
+    axarr[0][1].imshow(centre_gauss_bounded)
+    axarr[0][2].imshow(sigma_gauss_bounded)
+
+    axarr[1][0].imshow(a_gauss_unbounded)
+    axarr[1][1].imshow(centre_gauss_unbounded)
+    axarr[1][2].imshow(sigma_gauss_unbounded)
+         
+    axarr[2][0].imshow(a_mean_bounded)
+    axarr[2][1].imshow(centre_mean_bounded) 
+    axarr[2][2].imshow(sigma_mean_bounded)
+     
+    axarr[3][0].imshow(a_mean_unbounded) 
+    axarr[3][1].imshow(centre_mean_unbounded)
+    axarr[3][2].imshow(sigma_mean_unbounded)
+    
+    axarr[4][0].imshow(adf_image)
+    axarr[4][1].imshow(adf_holz)
+    
+    fig.tight_layout()
+    fig.savefig("compare_images" + centring_method + ".jpg")
+
