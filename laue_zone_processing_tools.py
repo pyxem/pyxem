@@ -2,6 +2,7 @@ import hyperspy.api as hs
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
+from scipy.ndimage.measurements import center_of_mass
 import h5py
 import copy
 from numpy import unravel_index
@@ -11,61 +12,296 @@ from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
 import math
 
+def _set_metadata_from_hdf5(hdf5_file, signal):
+    """Get microscope and scan metadata from fpd HDF5-file reference.
+    Will set acceleration voltage and camera length, store it
+    in the signal. Will set probe position axis scales.
+    Operates in-place.
 
-def _file_search(data_file):
-#   Looks for a file of a certain name. Built in function
-    file_exists = os.path.isfile(data_file)
-    return file_exists
+    Parameters
+    ----------
+    hdf5_file : hdf5 file reference(?)
+        An opened fpd hdf5 file reference
+    signal : HyperSpy signal instance
+    """
+    signal.metadata.add_node("Microscope")
+    dm_data = hdf5_file['fpd_expt']['DM0']['tags']['ImageList']['TagGroup0']
+    metadata_ref = dm_data['ImageTags']['Microscope Info']
+
+    signal.metadata.Microscope['Voltage'] = metadata_ref['Voltage'].value
+    signal.metadata.Microscope['Camera length'] = metadata_ref['STEM Camera Length'].value
+
+    axis_scale_x = hdf5_file['fpd_expt']['fpd_data']['dim2'][0:2]
+    axis_scale_y = hdf5_file['fpd_expt']['fpd_data']['dim1'][0:2]
+    axis_units_x = hdf5_file['fpd_expt']['fpd_data']['dim2'].attrs['units']
+    axis_units_y = hdf5_file['fpd_expt']['fpd_data']['dim1'].attrs['units']
+
+    signal.axes_manager[0].scale = axis_scale_x[1]-axis_scale_x[0]
+    signal.axes_manager[1].scale = axis_scale_y[1]-axis_scale_y[0]
+    signal.axes_manager[0].units = axis_units_x
+    signal.axes_manager[1].units = axis_units_y
     
-def _camera_length(data_file):
-#   Looks through the keys of the data file being used to find the camera length. 
-#   This is to check if a calibration has been performed already
-    camera_length = h5py.File(data_file)['fpd_expt']['DM0']['tags']['ImageList']['TagGroup0']['ImageTags']['Microscope Info']['STEM Camera Length'].value
-    return camera_length
+def _set_hardcoded_metadata(signal):
+    """Sets some metadata values, like axis names.
+    Operates in-place.
     
-def loadh5py(i):
-#   Loads the data set into memory and removes the 3rd axis (which has no information)
-	fpdfile = h5py.File(i,'r') #find data file in a read only format
-	data = fpdfile['fpd_expt']['fpd_data']['data'][:]
-	im = hs.signals.Image(data[:,:,0,:,:])
-	return im
-   
-'''def _dead_indices(image1,image2,image3):
-    image1_data = image1.data
-    image2_data = image2.data
-    image3_data = image3.data
-    image_difference = image1_data - image2_data
-    dead_candidates = [x for x,value in np.ndenumerate(image_difference) if image_difference[x] == 0.]
-    dead_pixels_1 = [dead_candidates for dead_candidates,value in np.ndenumerate(image1_data) if image1_data[dead_candidates] == 0.]
-    dead_pixels_2 = [dead_candidates for dead_candidates,value in np.ndenumerate(image2_data) if image2_data[dead_candidates] == 0.]
-    dead_pixels_3 = [dead_candidates for dead_candidates,value in np.ndenumerate(image3_data) if image3_data[dead_candidates] == 0.]
-    return set(dead_pixels_1).intersection(dead_pixels_2, dead_pixels_3)'''
-  
-def _dead_indices(summed_dataset):
-#   looks at the summed dataset passed to it. The chances of a zero appearing in all the images simultaneuosly is 
-#   highly unlikely unless it is a dead pixel common to all images. It then extracts the indices for all the pixels
-#   that are dead
-    dataset_data = summed_dataset.data
-    dead_pixels = [x for x,value in np.ndenumerate(dataset_data) if dataset_data[x] == 0.]    
-    return dead_pixels
-                         
-def _dead_pixel(dataset, indices, data_file):
-#   Takes the dataset and uses numpy slicing to set all the indices that have been found as common zeros in all images
-#   to the average of the four nearest neighbours. This could be expanded to be the eight nearest neighbours if higher
-#   precision is required but I don't think that it is necessary. The data set is then saved and used for the rest of 
-#   the program
+    Parameters
+    ----------
 
-    for k in indices:
-        dead_pixel_index = (k[1],k[0])
-        neighbor_pixel0 = dataset[:,:,dead_pixel_index[0]+1,dead_pixel_index[1]]
-        neighbor_pixel1 = dataset[:,:,dead_pixel_index[0]-1,dead_pixel_index[1]]
-        neighbor_pixel2 = dataset[:,:,dead_pixel_index[0],dead_pixel_index[1]+1]
-        neighbor_pixel3 = dataset[:,:,dead_pixel_index[0],dead_pixel_index[1]-1]
+    """
+    signal.axes_manager[0].name = "Probe x"
+    signal.axes_manager[1].name = "Probe y"
+    signal.axes_manager[2].name = "Detector x"
+    signal.axes_manager[3].name = "Detector y"
 
-        dataset[:,:,dead_pixel_index[0],dead_pixel_index[1]] = (neighbor_pixel0+neighbor_pixel1+neighbor_pixel2+neighbor_pixel3)/4
-#        s = hs.signals.Image(dataset)
-    dataset.save(data_file.replace(".hdf5","")+"_dead_pixels_removed")
-    return dataset
+def load_fpd_dataset(filename, x_range=None, y_range=None):
+    """Load data from a fast-pixelated data HDF5-file.
+    Can get a partial file by using x_range and y_range.
+    
+    Parameters
+    ----------
+    filename : string
+        Name of the fpd HDF5 file.
+    x_range : tuple, optional
+        Instead of returning the full dataset, only parts
+        of the x probe positions will be returned. Useful for very large
+        datasets. Default is None, which will return all the x probe
+        positions. This _might_ greatly increase the loading time.
+    y_range : tuple, optional
+        Instead of returning the full dataset, only parts
+        of the y probe positions will be returned. Useful for very large
+        datasets. Default is None, which will return all the y probe
+        positions. This _might_ greatly increase the loading time.
+
+    Returns
+    -------
+    4-D HyperSpy image signal
+
+    """
+    fpdfile = h5py.File(filename,'r') #find data file in a read only format
+    data_reference = fpdfile['fpd_expt']['fpd_data']['data']
+    # Slightly convoluted way of loading parts of a dataset, since it takes
+    # a very long time to do slicing directly on a HDF5-file
+    if (x_range == None) and (y_range == None):
+        data = data_reference[:][:,:,0,:,:]
+    elif (not (x_range == None)) and (not(y_range==None)):
+        data = data_reference[y_range[0]:y_range[1],x_range[0]:x_range[1],:,:,:][:,:,0,:,:]
+    elif x_range == None:
+        data = data_reference[y_range[0]:y_range[1],:,:,:,:][:,:,0,:,:]
+    elif y_range == None:
+        data = data_reference[:,x_range[0]:x_range[1],:,:,:][:,:,0,:,:]
+    else:
+        print("Something went wrong in the data loading")
+    im = hs.signals.Image(data)
+    _set_metadata_from_hdf5(fpdfile, im)
+    _set_hardcoded_metadata(im)
+    fpdfile.close()
+    remove_dead_pixels(im)
+    return(im)
+
+def remove_dead_pixels(s_fpd):
+    """Removes dead pixels from a fpd dataset in-place. 
+    Replaces them with an average of the four nereast neighbors.
+    
+    Parameters
+    ----------
+    s_fpd : HyperSpy signal
+    """
+    s_sum = s_fpd.sum(0).sum(0)
+    dead_pixels_x, dead_pixels_y = np.where(s_sum.data==0)
+
+    for x, y in zip(dead_pixels_x, dead_pixels_y):
+        n_pixel0 = s_fpd.data[:,:,x+1,y]
+        n_pixel1 = s_fpd.data[:,:,x-1,y]
+        n_pixel2 = s_fpd.data[:,:,x,y+1]
+        n_pixel3 = s_fpd.data[:,:,x,y-1]
+        s_fpd.data[:,:,x,y] = (n_pixel0+n_pixel1+n_pixel2+n_pixel3)/4
+
+
+def _get_disk_centre_from_signal(signal, threshold=1.):
+    """Get the centre of the disk using thresholded center of mass.
+    Threshold is set to the mean of individual diffration images.
+
+    Parameters
+    ----------
+    signal : HyperSpy 4-D fpd signal
+    threshold : number, optional
+        The thresholding will be done at mean times 
+        this threshold value.
+
+    Returns
+    -------
+    tuple with center x and y arrays. (com x, com y)"""
+        
+
+    mean_diff_array = signal.data.mean(axis=(2,3), dtype=np.float32)*threshold
+
+    com_x_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
+    com_y_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
+    
+    image_data = np.zeros(signal.data.shape[2:], dtype=np.uint16)
+
+    # Slow, but memory efficient way
+    for x in range(signal.axes_manager[0].size):
+        for y in range(signal.axes_manager[1].size):
+            image_data[:] = signal.data[x,y,:,:]
+            image_data[image_data<mean_diff_array[x,y]] = 0
+            image_data[image_data>mean_diff_array[x,y]] = 1
+            com_y, com_x = center_of_mass(image_data)
+            com_x_array[x,y] = com_x
+            com_y_array[x,y] = com_y
+    return(com_x_array, com_y_array)
+
+def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y):
+    """Radially integrates a single diffraction image.
+
+    Parameters
+    ----------
+    diff_image : 2-D numpy array
+        Array consisting of a single diffraction image.
+    centre_x : number
+        Centre x position of the diffraction image.
+    centre_y : number
+        Centre y position of the diffraction image.
+
+    Returns
+    -------
+    1-D numpy array of the radial profile."""
+#   Radially profiles the data, integrating the intensity in rings out from the centre. 
+#   Unreliable as we approach the edges of the image as it just profiles the corners.
+#   Less pixels there so become effectively zero after a certain point
+    y, x = np.indices((diff_image.shape))
+    r = np.sqrt((x - centre_x)**2 + (y - centre_y)**2)
+    r = r.astype(int)       
+    tbin =  np.bincount(r.ravel(), diff_image.ravel())
+    nr = np.bincount(r.ravel())   
+    radialProfile = tbin / nr
+
+    return(radialProfile)
+
+def _get_lowest_index_radial_array(radial_array):
+    """Returns the lowest index of in a radial array.
+
+    Parameters
+    ----------
+    radial_array : 3-D numpy array
+        The last dimension must be the reciprocal dimension.
+
+    Returns
+    -------
+    Number, lowest index."""
+
+    lowest_index = radial_array.shape[-1]
+    for x in range(radial_array.shape[0]):
+        for y in range(radial_array.shape[1]):
+            radial_data = radial_array[x,y,:]
+            lowest_index_in_image = np.where(radial_data==0)[0][0]
+            if lowest_index_in_image < lowest_index:
+                lowest_index = lowest_index_in_image
+    return(lowest_index)
+
+def get_radial_profile_signal(signal):
+    """Radially integrates a 4-D pixelated STEM diffraction signal.
+
+    Parameters
+    ----------
+    signal : 4-D HyperSpy signal
+        First two axes: 2 spatial dimensions.
+        Last two axes: 2 reciprocal dimensions.
+
+    Returns
+    -------
+    3-D HyperSpy signal, 2 spatial dimensions,
+    1 integrated reciprocal dimension."""
+
+    com_x_array, com_y_array = _get_disk_centre_from_signal(
+            signal, threshold=1.)
+    
+    radial_profile_array = np.zeros(signal.data.shape[0:-1], dtype=np.float64)
+    diff_image = np.zeros(signal.data.shape[2:], dtype=np.uint16)
+    for x in range(signal.axes_manager[0].size):
+        for y in range(signal.axes_manager[1].size):
+            diff_image[:] = signal.data[x,y,:,:]
+            centre_x = com_x_array[x,y]
+            centre_y = com_y_array[x,y]
+            radial_profile = _get_radial_profile_of_diff_image(
+                    diff_image, centre_x, centre_y)
+            radial_profile_array[x,y,0:len(radial_profile)] = radial_profile
+    lowest_radial_zero_index = _get_lowest_index_radial_array(
+            radial_profile_array)
+    signal_radial = hs.signals.Spectrum(
+            radial_profile_array[:,:,0:lowest_radial_zero_index])
+    # TODO: ADD METADATA AND SCALING
+    return(signal_radial)
+
+"""
+def radial_profile_dataset(im, centre, size, data_file, bulk_sto, flip = True):
+#   Creates a hfd5 of the summed radial profiles for an input
+#   hfd5 file
+#   im is the dataset to be profiled
+#   centre is the centre of each image in the dataset
+#   save is the name that the profile will be saved under
+#   flip is whether there is a single centre value or an array of centre values
+#   rotation is whether the dataset is rotated or not
+
+    
+    rad_size = [] 
+#   the length of rad varies and a numpy array needs a 
+#   fixed row length for each entry
+
+    for i in range(0,size[0]):
+        for j in range (0,size[1]):
+#   Iterates over each individual 256x256 image
+
+            if flip == True:          
+                rad = radial_profile(im[i,j].data, centre[i,j])
+            else: rad = radial_profile(im[i,j].data, centre)
+            rad_length = len(rad)
+            rad_size.append(rad_length)
+
+    min_rad_size = min(rad_size)
+    np.save(data_file.replace(".hdf5","") + "_minimum_radial_length", min_rad_size)
+    rad_size = np.reshape(rad_size, [size[0],size[1]])
+    print rad_size
+    centre_index = np.where(rad_size == min_rad_size)
+    print centre_index
+    min_rad_centre = centre[centre_index[0][0],centre_index[0][1]]
+    print min_rad_centre
+    del rad_size
+    blankFileToSave = np.zeros((size[0],size[1],min_rad_size))
+    for i in range(0,size[0]):
+        for j in range(0,size[1]):
+            
+            if flip == True:
+                rad = radial_profile(im[i,j].data, centre[i,j])
+            else: rad = radial_profile(im[i,j].data, centre)
+            
+            if len(rad) > min_rad_size:
+                while len(rad) > min_rad_size:
+                    rad = np.delete(rad, [len(rad)-1])
+
+#           Shortens the array of rad to create a uniform 
+#           Length          
+          
+            blankFileToSave[i,j] = rad
+
+#           Passes the numpy array for each image alone with the
+#           Average centre of mass calculated earlier to the 
+#           Radial profiler in CoM and saves the profile data
+#           In a multidimensional numpy array
+
+    mrad_per_step = _radial_calibration_value(bulk_sto, data_file, min_rad_size, min_rad_centre)
+    
+    s = hs.signals.Image(blankFileToSave)
+    s.axes_manager[1].scale = mrad_per_step[()]
+    s.axes_manager[1].units = "mrad"
+    s.axes_manager[1].name  = "Scattering Angle"
+    s.save(data_file.replace(".hdf5","_dataset_profile"))        
+    np.save(data_file.replace(".hdf5","_dataset_profile"), blankFileToSave)
+#   Changes the numpy array with the profiles in it into a hyperspy
+#   signal and saves it based on the chosen save name
+    return blankFileToSave 
+#
     
 def _dataset_dimensions(dataset):
 #   The datasets are different sizes so we need to figure out how many images are in the set
@@ -891,4 +1127,4 @@ def _sigma_centre_plot(sigma, centre, intensity,save):
     host.legend(loc=4)
     plt.savefig(save)
     plt.draw()
-    plt.show()
+    plt.show()"""
