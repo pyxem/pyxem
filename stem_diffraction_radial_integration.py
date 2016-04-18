@@ -5,7 +5,7 @@ from scipy.ndimage.measurements import center_of_mass
 import h5py
 import copy
 import warnings
-import laue_zone_processing as lzp
+import laue_zone_modelling as lzm
 
 def _set_metadata_from_hdf5(hdf5_file, signal):
     """Get microscope and scan metadata from fpd HDF5-file reference.
@@ -42,7 +42,7 @@ def _set_hardcoded_metadata(signal):
     
     Parameters
     ----------
-
+    signal : HyperSpy signal
     """
     signal.axes_manager[0].name = "Probe x"
     signal.axes_manager[1].name = "Probe y"
@@ -71,7 +71,6 @@ def _load_fpd_dataset(filename, x_range=None, y_range=None):
     Returns
     -------
     4-D HyperSpy image signal
-
     """
     fpdfile = h5py.File(filename,'r') #find data file in a read only format
     data_reference = fpdfile['fpd_expt']['fpd_data']['data']
@@ -127,7 +126,6 @@ def _get_disk_centre_from_signal(signal, threshold=1.):
     Returns
     -------
     tuple with center x and y arrays. (com x, com y)"""
-        
 
     mean_diff_array = signal.data.mean(axis=(2,3), dtype=np.float32)*threshold
 
@@ -309,7 +307,7 @@ def _get_sto_calibration_gaussian(
     """Get scaling for radially integrated dataset using
     HyperSpy modelling with a powerlaw background and 
     Gaussian to fit the SrTiO3 Laue Zone peak."""
-    m = lzp.model_radial_profile_data_with_gaussian(
+    m = lzm.model_radial_profile_data_with_gaussian(
             signal_radial,
             background_range,
             gaussian_range)
@@ -345,12 +343,14 @@ def _get_sto_index_ranges_for_cameralengths(camera_length):
     calibration_dict['gaussian_range'] = sto_gaussian_range
     return(calibration_dict)
 
-def save_fpd_dataset_as_radial_profile_signal(
+def get_fpd_dataset_as_radial_profile_signal(
         filename,
         mrad_per_pixel=None,
         background_range=None,
         gaussian_range=None,
-        calibration_region=None):
+        calibration_region=None,
+        crop_dataset=None,
+        spatial_scale=None):
     """Make a radially integrated HyperSpy HDF5 spectrum
     file from fpd 4-D diffraction HDF5. Uses center of mass
     to find the centre of the diffraction disk, and radial
@@ -384,6 +384,15 @@ def save_fpd_dataset_as_radial_profile_signal(
         used, which will work for most datasets acquired 
         on the ARM200CF. However, this might go horribly
         wrong.
+    crop_dataset : (float, float, float, float), optional
+        If given, the signal will be cropped. Crop ranges
+        given in physical units (um, nm, Å), order (x0,x1,y0,y1). 
+        Useful for removing unecessary parts of the dataset,
+        like platinum protective layer.
+    spatial_scale : None, optional
+        Scale for the spatial dimensions, in nanometers per
+        pixel. If not given, the metadata in the fpd-hdf5 file
+        will be used (which is from a DM-file).
 
     Examples
     --------
@@ -397,9 +406,12 @@ def save_fpd_dataset_as_radial_profile_signal(
             "default.hdf5", 
             background_range=(100, 120), 
             gaussian_range=(120,130),
-            sto_region=(0,10,-2,-1))
+            calibration_region=(0,10,-2,-1))
     """
     s_fpd = _load_fpd_dataset(filename)
+    if not(spatial_scale == None):
+        s_fpd.axes_manager[0].scale = spatial_scale
+        s_fpd.axes_manager[1].scale = spatial_scale
     s_radial = _get_radial_profile_signal(s_fpd)
     if mrad_per_pixel == None:
         if background_range == None:
@@ -428,6 +440,10 @@ def save_fpd_dataset_as_radial_profile_signal(
         _set_radial_scale(
                 s_radial, 
                 mrad_per_pixel=mrad_per_pixel)
+
+    if not(crop_dataset == None):
+        s_radial = s_radial.inav[
+                crop_dataset[0]:crop_dataset[1],
+                crop_dataset[2]:crop_dataset[3]]
     
-    new_filename = filename.replace(".hdf5","_radial.hdf5")
-    s_radial.save(new_filename, overwrite=True)
+    return(s_radial)
