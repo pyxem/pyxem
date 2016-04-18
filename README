@@ -26,3 +26,8 @@ How to use it:
 >>>> ipython3
 >>>> import laue_zone_tools as lzt
 >>>> run_full_process_on_fpd_dataset("default.hdf5") # 4-D pixelated dataset
+
+--------------
+TODO:
+
+Make unit tests
