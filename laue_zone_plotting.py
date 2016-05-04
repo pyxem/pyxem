@@ -1,6 +1,7 @@
 import hyperspy.api as hs
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+import glob
 
 def _make_subplot(signal, ax):
     ax.imshow(signal.data,
@@ -245,3 +246,32 @@ def plot_lfo_sto_laue_zone_line_profile_report(
     
     fig.tight_layout()
     fig.savefig("lfo_sto_laue_zone_line_profile_report.jpg", dpi=300)
+
+def plot_sto_lfo_simulated_report_from_model_files(filename_list=None):
+    fig = plt.figure(figsize=(8,16))
+    gs = gridspec.GridSpec(90,90)
+
+    ax_A_sto = fig.add_subplot(gs[30:60,0:30])
+    ax_centre_sto = fig.add_subplot(gs[30:60,30:60])
+    ax_sigma_sto = fig.add_subplot(gs[30:60,60:90])
+
+    ax_A_lfo = fig.add_subplot(gs[60:90,0:30])
+    ax_centre_lfo = fig.add_subplot(gs[60:90,30:60])
+    ax_sigma_lfo = fig.add_subplot(gs[60:90,60:90])
+
+    if filename_list == None:
+        filename_list = glob.glob("*_model.hdf5")
+        filename_list.sort()
+
+    for index, filename in enumerate(filename_list):
+        if "*_LFO_model.hdf5" in filename:
+            s = hs.load(filename)
+            m = s.models.a.restore()
+
+            g_A = m['Gaussian'].A.as_signal()
+            g_centre = m['Gaussian'].centre.as_signal() 
+            g_sigma = m['Gaussian'].sigma.as_signal() 
+
+            ax_A_lfo.plot(index, g_A.data)
+            ax_centre_lfo.plot(index, g_A.data)
+            ax_sigma_lfo.plot(index, g_A.data)

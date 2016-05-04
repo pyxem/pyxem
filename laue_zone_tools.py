@@ -1,6 +1,7 @@
 import stem_diffraction_radial_integration as sdri
 import laue_zone_modelling as lzm
 import laue_zone_plotting as lzp
+import hyperspy.api as hs
 
 def run_full_process_on_fpd_dataset(
         filename,
@@ -44,3 +45,53 @@ def run_full_process_on_fpd_dataset(
 
     lzp.plot_lfo_sto_laue_zone_report(m_lfo, m_sto, s_radial)
     lzp.plot_lfo_sto_laue_zone_line_profile_report(m_lfo, m_sto, s_radial)
+
+def run_full_process_on_simulated_image(
+        filename,
+        crop=120.):
+    """Fully process a simulated STEM diffraction
+    image, using the same methods as the experimental
+    ones. Assumes the image is calibrated to mrad, and
+    the x- and y-scale has is equal.
+
+    Parameters:
+    -----------
+    filename : string
+        Name of the simulated STEM diffraction image.
+        Can be in any format HyperSpy can load, but
+        needs to properly calibrated in mrad. With
+        the position of the centre of the disk being 
+        defined as 0 in both x- and y-directions.
+    crop : number, optional
+        How much of the diffraction imageshould be
+        used in the calculations. Default value is
+        120 mrad, which will include the first 
+        STO laue circle.
+    """
+    s_diff = hs.load(filename)
+    s_diff = s_diff.isig[
+            float(-crop):float(crop),
+            float(-crop):float(crop)]
+
+    radial_data = sdri._get_radial_profile_of_diff_image(
+            s_diff.data, 
+            s_diff.axes_manager[0].value2index(0), 
+            s_diff.axes_manager[1].value2index(0))
+    
+    s_radial = hs.signals.Spectrum(radial_data)
+    s_radial.axes_manager[0].scale = 0.5*(
+            s_diff.axes_manager[0].scale +
+            s_diff.axes_manager[1].scale)
+    s_radial.axes_manager[0].units = s_diff.axes_manager[0].units
+
+    s_lfo = s_radial.isig[47.:78.]
+    s_sto = s_radial.isig[77.:107.]
+
+    m_lfo = lzm.model_lfo_with_one_gaussian(
+            s_lfo)
+    m_sto = lzm.model_sto(s_sto)
+
+    lfo_model_filename = filename.replace(".hdf5","_lfo_model.hdf5")
+    m_lfo.save(lfo_model_filename, overwrite=True)
+    sto_model_filename = filename.replace(".hdf5","_sto_model.hdf5")
+    m_sto.save(sto_model_filename, overwrite=True)
