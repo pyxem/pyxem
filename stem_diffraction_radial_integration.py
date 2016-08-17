@@ -86,7 +86,7 @@ def _load_fpd_dataset(filename, x_range=None, y_range=None):
         data = data_reference[:,x_range[0]:x_range[1],:,:,:][:,:,0,:,:]
     else:
         print("Something went wrong in the data loading")
-    im = hs.signals.Image(data)
+    im = hs.signals.Signal2D(data)
     _set_metadata_from_hdf5(fpdfile, im)
     _set_hardcoded_metadata(im)
     fpdfile.close()
