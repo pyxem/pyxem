@@ -1,1 +1,33 @@
-Code for analysing scattering angles for high order laue zones
+Code for analysing laue zones from 4-D pixelated scanning transmission electron microscopy datasets.
+Works by firstly centering all the diffraction patterns, then doing a radial integration as a function of scattering angle.
+Next, the Laue zones are modelled using a powerlaw to remove the background, and a Gaussian for fitting the Laue zone peak itself.
+
+Currently, this program is made for analysing peroskite structures with the electron beam parallel to the (110)-direction, so 
+all the default values are optimized for the STO lattice parameter and the LFO doubled lattice parameter.
+
+----------
+Structure:
+
+stem_diffraction_radial_integration.py contains all the functions for loading the 4-D pixelated dataset,
+scaling, and radially integrating it.
+
+laue_zone_modelling.py contains the functions for modelling the radially integrated Laue zone peaks with 
+a powerlaw background and a Gaussian.
+
+laue_zone_plotting.py contains function for visualising the data extracted using the modelling.
+
+laue_zone_tools.py contains a function for running all of these functions on a 4-D pixelated dataset.
+Assuming the default perovskite values are correct. However this can easily go very wrong, so check
+the intermediate data files which are generated when running this.
+
+--------------
+How to use it:
+
+>>>> ipython3
+>>>> import laue_zone_tools as lzt
+>>>> run_full_process_on_fpd_dataset("default.hdf5") # 4-D pixelated dataset
+
+--------------
+TODO:
+
+Make unit tests
