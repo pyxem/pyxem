@@ -112,7 +112,11 @@ def _remove_dead_pixels(s_fpd):
         s_fpd.data[:,:,x,y] = (n_pixel0+n_pixel1+n_pixel2+n_pixel3)/4
 
 
-def _get_disk_centre_from_signal(signal, threshold=1.):
+def _get_disk_centre_from_signal(
+        signal,
+        threshold=1.,
+        detector_slice=None,
+        ):
     """Get the centre of the disk using thresholded center of mass.
     Threshold is set to the mean of individual diffration images.
 
@@ -122,27 +126,38 @@ def _get_disk_centre_from_signal(signal, threshold=1.):
     threshold : number, optional
         The thresholding will be done at mean times 
         this threshold value.
+    detector_slice : tuple, (x0, x1, y0, y1), optional
+        Find disk centre from a subset of the detector
+        image. Useful if the STEM centre beam is only a 
+        small part of the full image. Default use the 
+        whole image.
 
     Returns
     -------
     tuple with center x and y arrays. (com x, com y)"""
 
-    mean_diff_array = signal.data.mean(axis=(2,3), dtype=np.float32)*threshold
-
     com_x_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
     com_y_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
     
-    image_data = np.zeros(signal.data.shape[2:], dtype=np.uint16)
+    if detector_slice is None:
+        image_data = np.zeros(signal.data.shape[2:], dtype=np.uint16)
+    else:
+        x0, x1, y0, y1 = detector_slice
+        image_data = np.zeros((x1-x0, y1-y0), dtype=np.uint16)
 
     # Slow, but memory efficient way
     for x in range(signal.axes_manager[0].size):
         for y in range(signal.axes_manager[1].size):
-            image_data[:] = signal.data[x,y,:,:]
-            image_data[image_data<mean_diff_array[x,y]] = 0
-            image_data[image_data>mean_diff_array[x,y]] = 1
+            if detector_slice is None:
+                image_data[:] = signal.data[x,y,:,:]
+            else:
+                image_data[:] = signal.data[x,y,x0:x1,y0:y1]
+            mean_diff = image_data.mean()
+            image_data[image_data<mean_diff] = 0
+            image_data[image_data>mean_diff] = 1
             com_y, com_x = center_of_mass(image_data)
-            com_x_array[x,y] = com_x
-            com_y_array[x,y] = com_y
+            com_x_array[x,y] = com_x + x0
+            com_y_array[x,y] = com_y + y0
     return(com_x_array, com_y_array)
 
 def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y):
@@ -210,7 +225,11 @@ def _set_radial_profile_axis_metadata(signal_radial):
     axis_m = signal_radial.axes_manager[-1]
     axis_m.name = "Scattering angle"
 
-def _get_radial_profile_signal(signal):
+def _get_radial_profile_signal(
+        signal,
+        center_of_mass_threshold=1.0,
+        center_of_mass_detector_slice=None,
+        ):
     """Radially integrates a 4-D pixelated STEM diffraction signal.
 
     Parameters
@@ -218,6 +237,19 @@ def _get_radial_profile_signal(signal):
     signal : 4-D HyperSpy signal
         First two axes: 2 spatial dimensions.
         Last two axes: 2 reciprocal dimensions.
+    center_of_mass_threshold : number, optional
+        When finding the center of the beam, thresholded center 
+        of mass is used. The threshold is the mean of the whole
+        image (or slice, if center_of_mass_detector_slice is used)
+        times the center_of_mass_threshold value.
+        image_data.mean()*center_of_mass_threshold.
+        Default 1.
+    center_of_mass_detector_slice : tuple, (x0, x1, y0, y1), optional
+        When doing center of mass to find the center of the 
+        beam, use a subset of the detector image. 
+        Useful if the STEM centre beam is only a 
+        small part of the full image. Default use the 
+        whole image.
 
     Returns
     -------
@@ -225,7 +257,9 @@ def _get_radial_profile_signal(signal):
     1 integrated reciprocal dimension."""
 
     com_x_array, com_y_array = _get_disk_centre_from_signal(
-            signal, threshold=1.)
+            signal, 
+            threshold=center_of_mass_threshold, 
+            detector_slice=center_of_mass_detector_slice)
     
     radial_profile_array = np.zeros(signal.data.shape[0:-1], dtype=np.float64)
     diff_image = np.zeros(signal.data.shape[2:], dtype=np.uint16)
@@ -240,7 +274,7 @@ def _get_radial_profile_signal(signal):
 
     lowest_radial_zero_index = _get_lowest_index_radial_array(
             radial_profile_array)
-    signal_radial = hs.signals.Spectrum(
+    signal_radial = hs.signals.Signal1D(
             radial_profile_array[:,:,0:lowest_radial_zero_index])
 
     _copy_fpd_metadata_to_radial_profile(signal, signal_radial)
