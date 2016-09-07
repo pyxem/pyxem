@@ -78,7 +78,7 @@ def run_full_process_on_simulated_image(
             s_diff.axes_manager[0].value2index(0), 
             s_diff.axes_manager[1].value2index(0))
     
-    s_radial = hs.signals.Spectrum(radial_data)
+    s_radial = hs.signals.Signal1D(radial_data)
     s_radial.axes_manager[0].scale = 0.5*(
             s_diff.axes_manager[0].scale +
             s_diff.axes_manager[1].scale)
@@ -95,3 +95,4 @@ def run_full_process_on_simulated_image(
     m_lfo.save(lfo_model_filename, overwrite=True)
     sto_model_filename = filename.replace(".hdf5","_sto_model.hdf5")
     m_sto.save(sto_model_filename, overwrite=True)
+    return(m_lfo, m_sto)

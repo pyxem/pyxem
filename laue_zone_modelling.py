@@ -41,14 +41,14 @@ def model_radial_profile_data_with_gaussian(
     """
 
     m = signal_radial.create_model()
-    powerlaw = hs.model.components.PowerLaw()
+    powerlaw = hs.model.components1D.PowerLaw()
     m.append(powerlaw)
     m.set_signal_range(background_range[0], background_range[1])
     m.multifit()
     m.reset_signal_range()
     powerlaw.set_parameters_not_free()
 
-    gaussian = hs.model.components.Gaussian()
+    gaussian = hs.model.components1D.Gaussian()
     m.append(gaussian)
     _set_gaussian_initial_values(gaussian, gaussian_range)
 
@@ -67,7 +67,7 @@ def model_radial_profile_data_with_gaussian(
         gaussian.centre.bmin = centre_b[0]
         gaussian.centre.bmax = centre_b[1]
     m.set_signal_range(gaussian_range[0], gaussian_range[1])
-    m.multifit(fitter='mpfit',bounded=True)
+    m.multifit(fitter='mpfit', bounded=True)
     m.reset_signal_range()
     return(m)
 
@@ -172,7 +172,7 @@ def model_lfo_with_two_gaussians(
             sigma_b=sigma_b1,
             centre_b=centre_b1)
     m_lfo.set_parameters_not_free()
-    gaussian0 = hs.model.components.Gaussian()
+    gaussian0 = hs.model.components1D.Gaussian()
     gaussian0.name = "Gaussian0"
     
     m_lfo.append(gaussian0)
