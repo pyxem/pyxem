@@ -13,10 +13,6 @@ setup(
     author_email='dnj23@cam.ac.uk',
     packages=[
         'pycrystem',
-        'pycrystem.diffraction_generator',
-        'pycrystem.diffraction_signal',
-        'pycrystem.expt_utils',
-        'pycrystem.sim_utils',
     ],
 
 )
