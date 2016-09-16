@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright 2007-2016 The HyperSpy developers
+# Copyright 2016 The PyCrystEM developers
 #
-# This file is part of  HyperSpy.
+# This file is part of  PyCrystEM.
 #
-#  HyperSpy is free software: you can redistribute it and/or modify
+#  PyCrystEM is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-#  HyperSpy is distributed in the hope that it will be useful,
+#  PyCrystEM is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with  HyperSpy.  If not, see <http://www.gnu.org/licenses/>.
+# along with  PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
 import math
@@ -25,124 +25,6 @@ from skimage import morphology, filters
 from skimage.morphology import square
 
 from hyperspy.signals import Signal2D, Signal1D
-
-
-def radial_average(z, center):
-    """Calculate the radial average profile about a defined center.
-
-    Parameters
-    ----------
-    center : array_like
-        The center about which the radial integration is performed.
-
-    Returns
-    -------
-
-    radial_profile :
-
-    """
-    y, x = np.indices(z.shape)
-    r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-    r = r.astype(np.int)
-
-    tbin = np.bincount(r.ravel(), z.ravel())
-    nr = np.bincount(r.ravel())
-    radial_average = tbin / nr
-
-    return radial_average
-
-
-def affine_transformation(z, order=3, **kwargs):
-    """Apply an affine transform to a 2-dimensional array.
-
-    Parameters
-    ----------
-    matrix : 3 x 3
-
-    Returns
-    -------
-    trans : array
-        Transformed 2-dimensional array
-    """
-    shift_y, shift_x = np.array(z.shape[:2]) / 2.
-    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
-    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-
-    transformation = tf.AffineTransform(**kwargs)
-    trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order)
-
-    return trans
-
-def circular_mask(shape, radius, center):
-    """
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
-    r = radius
-    nx, ny = shape[0], shape[1]
-    a, b = center
-
-    y, x = np.ogrid[-b:ny-b, -a:nx-a]
-    mask = x*x + y*y <= r*r
-
-    return mask
-
-
-def refine_beam_position(z, start, radius):
-    """
-    Refine the position of the direct beam and hence an estimate for the
-    position of the pattern center in each SED pattern.
-
-    Parameters
-    ----------
-    radius : int
-        Defines the size of the circular region within which the direct beam
-        position is refined.
-
-    center : bool
-        If True the direct beam position is refined to sub-pixel precision
-        via calculation of the intensity center of mass.
-
-    Return
-    ------
-    center: array
-        Refined position (x, y) of the direct beam.
-
-    Notes
-    -----
-    This method is based on work presented by Thomas White in his PhD (2009)
-    which itself built on Zaefferer (2000).
-    """
-    # initialise problem with initial center estimate
-    c_int = z[start[0], start[1]]
-    mask = circular_mask(shape=z.shape, radius=radius, center=start)
-    z_tmp = z * mask
-    # refine center position with shifting ROI
-    if c_int == z_tmp.max():
-        maxes = np.asarray(np.where(z_tmp == z_tmp.max()))
-        c = np.rint([np.average(maxes[0]), np.average(maxes[1])])
-        c = c.astype(int)
-        c_int = z[c[0], c[1]]
-        mask = circular_mask(shape=z.shape, radius=radius, center=c)
-        ztmp = z * mask
-    while c_int < z_tmp.max():
-        maxes = np.asarray(np.where(z_tmp == z_tmp.max()))
-        c = np.rint([np.average(maxes[0]),
-                            np.average(maxes[1])])
-        c = c.astype(int)
-        c_int = z[c[0], c[1]]
-        mask = circular_mask(shape=z.shape, radius=radius, center=c)
-        ztmp = z * mask
-
-    c = np.asarray(ndi.measurements.center_of_mass(ztmp))
-
-    return c
 
 
 class ElectronDiffraction(Signal2D):
@@ -157,6 +39,57 @@ class ElectronDiffraction(Signal2D):
                     "Acquisition_instrument.TEM",
                     self.metadata.Acquisition_instrument.SEM)
                 del self.metadata.Acquisition_instrument.SEM
+
+    def set_experimental_parameters(self,
+                                    accelerating_voltage=None,
+                                    camera_length=None,
+                                    scan_rotation=None,
+                                    convergence_angle=None,
+                                    rocking_angle=None,
+                                    rocking_frequency=None,
+                                    exposure_time=None):
+        """Set the experimental parameters.
+
+        Parameters
+        ----------
+        accelerating_voltage: float
+            Accelerating voltage in kV
+        camera_length: float
+            Camera length in cm
+        scan_rotation: float
+            Scan rotation in degrees
+        convergence_angle : float
+            Convergence angle in mrad
+        rocking_angle : float
+            Beam rocking angle in mrad
+        rocking_frequency : float
+            Beam rocking frequency in Hz
+        exposure_time : float
+            Exposure time in ms.
+        """
+        md = self.metadata
+
+        if accelerating_voltage is not None:
+            md.set_item("Acquisition_instrument.TEM.accelerating_voltage",
+                        accelerating_voltage)
+        if scan_rotation is not None:
+            md.set_item("Acquisition_instrument.TEM.scan_rotation",
+                        scan_rotation)
+        if convergence_angle is not None:
+            md.set_item("Acquisition_instrument.TEM.convergence_angle",
+                        convergence_angle)
+        if rocking_angle is not None:
+            md.set_item("Acquisition_instrument.TEM.rocking_angle",
+                        precession_angle)
+        if rocking_frequency is not None:
+            md.set_item("Acquisition_instrument.TEM.rocking_frequency",
+                        precession_frequency)
+        if camera_length is not None:
+            md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
+                        camera_length)
+        if exposure_time is not None:
+            md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
+                        exposure_time)
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
@@ -184,6 +117,53 @@ class ElectronDiffraction(Signal2D):
                                              center=center))
 
         return signal_mask
+
+    def get_vacuum_mask(self, radius=None, center=None, threshold=None,
+                        closing=True, opening=False):
+        """Generate a navigation mask to exlude SED patterns acquired in vacuum.
+
+        Vacuum regions are identified cruedly based on searching for a peak
+        value in each diffraction pattern, having masked the direct beam, above
+        a user defined threshold value. Morpohological opening or closing of the
+        mask obtained is supported.
+
+        Parameters
+        ----------
+        radius: float
+            Radius of circular mask to exclude direct beam.
+        center : tuple, None
+            User specified position of the diffraction pattern center. If None
+            it is assumed that the pattern center is the center of the image.
+        threshold : float
+            Minimum intensity required to consider a diffracted beam to be
+            present.
+        closing : bool
+            Flag to perform morphological closing on
+
+        Returns
+        -------
+        mask : signal
+            The mask of the region of interest. Vacuum regions to be masked are
+            set True.
+
+        See also
+        --------
+        get_direct_beam_mask
+        """
+        db = np.invert(self.get_direct_beam_mask(radius=radius, center=center))
+        diff_only = self * db
+        mask = (diff_only.max((-1, -2)) <= threshold)
+        if closing:
+            mask.data = ndi.morphology.binary_dilation(mask.data,
+                                                       border_value=0)
+            mask.data = ndi.morphology.binary_erosion(mask.data,
+                                                      border_value=1)
+        if opening:
+            mask.data = ndi.morphology.binary_erosion(mask.data,
+                                                      border_value=1)
+            mask.data = ndi.morphology.binary_dilation(mask.data,
+                                                       border_value=0)
+        return mask
 
     def get_direct_beam_position(self, radius=None):
         """
@@ -269,8 +249,7 @@ class ElectronDiffraction(Signal2D):
         return shifts
 
     def correct_geometric_distortion(self, D):
-        """Apply an affine transformation to all of the diffraction patterns to
-        correct for geometric distortion.
+        """Correct geometric distortion by applying an affine transformation.
 
         Parameters
         ----------
@@ -281,29 +260,27 @@ class ElectronDiffraction(Signal2D):
 
 
         """
+        #TODO:Add automatic method based on power spectrum optimisation as
+        #presented in Vigouroux et al...
         self.map(affine_transformation, matrix=D)
 
     def rotate_patterns(self, angle):
+        """Rotate the diffraction patterns in a clockwise direction.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
+        #TODO: Preserve knowledge of basis.
         a = angle * np.pi/180.0
         t = np.array([[math.cos(a), math.sin(a), 0.],
                       [-math.sin(a), math.cos(a), 0.],
                       [0., 0., 1.]])
 
         self.map(affine_transformation, matrix=t)
-
-    def _regional_filter(self, z, h):
-        seed = np.copy(z)
-        seed = z - h
-        mask = z
-        dilated = morphology.reconstruction(seed, mask, method='dilation')
-
-        return z - dilated
-
-    def remove_background(self, h):
-        self.data = self.data / self.data.max()
-        self.map(self._regional_filter, h=h)
-        self.map(filters.rank.mean, selem=square(3))
-        self.data = self.data / self.data.max()
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
@@ -326,7 +303,7 @@ class ElectronDiffraction(Signal2D):
         radial_average
         get_direct_beam_position
         """
-        #TODO: this method needs to preserve the navigation dimensions!
+        #TODO: preserve the navigation dimensions!
         if centers == None:
             c = self.get_direct_beam_position(radius=10)
         else:
@@ -344,52 +321,22 @@ class ElectronDiffraction(Signal2D):
 
         return radial_profile
 
-    def get_vacuum_mask(self, radius=None, center=None, threshold=None,
-                        closing=True, opening=False):
-        """Generate a navigation mask to exlude SED patterns acquired in vacuum.
-
-        Vacuum regions are identified cruedly based on searching for a peak
-        value in each diffraction pattern, having masked the direct beam, above
-        a user defined threshold value. Morpohological opening or closing of the
-        mask obtained is supported.
+    def remove_background(self, h):
+        """Perform background subtraction.
 
         Parameters
         ----------
-        radius: float
-            Radius of circular mask to exclude direct beam.
-        center : tuple, None
-            User specified position of the diffraction pattern center. If None
-            it is assumed that the pattern center is the center of the image.
-        threshold : float
-            Minimum intensity required to consider a diffracted beam to be
-            present.
-        closing : bool
-            Flag to perform morphological closing on
 
         Returns
         -------
-        mask : signal
-            The mask of the region of interest. Vacuum regions to be masked are
-            set True.
 
-        See also
-        --------
-        get_direct_beam_mask
         """
-        db = np.invert(self.get_direct_beam_mask(radius=radius, center=center))
-        diff_only = self * db
-        mask = (diff_only.max((-1, -2)) <= threshold)
-        if closing:
-            mask.data = ndi.morphology.binary_dilation(mask.data,
-                                                       border_value=0)
-            mask.data = ndi.morphology.binary_erosion(mask.data,
-                                                      border_value=1)
-        if opening:
-            mask.data = ndi.morphology.binary_erosion(mask.data,
-                                                      border_value=1)
-            mask.data = ndi.morphology.binary_dilation(mask.data,
-                                                       border_value=0)
-        return mask
+        #TODO: Add additional methods particularly based on taking radial
+        #profiles and fitting a power law or appropriate curve.
+        self.data = self.data / self.data.max()
+        self.map(self._regional_filter, h=h)
+        self.map(filters.rank.mean, selem=square(3))
+        self.data = self.data / self.data.max()
 
     def decomposition(self,
                       normalize_poissonian_noise=True,
