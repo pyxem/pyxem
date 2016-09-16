@@ -1,0 +1,42 @@
+.. pycrystem documentation master file, created by
+   sphinx-quickstart on Fri Sep 16 14:34:23 2016.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to PyCrystEM's documentation!
+=====================================
+
+PyCrystEM (Python Crystallographic Electron Microscopy) is an open-source Python library for crystallographic electron microscopy.
+
+PyCrystEM builds on the tools for multi-dimensional data analysis provided by the HyperSpy library for treatment of experimental electron diffraction data and tools for atomic structure manipulation provided by the PyMatGen library.
+
+PyCrystEM is released under the GPL v3 license.
+
+This version is currently under construction.
+
+
+Installation
+============
+
+1. Download or clone the repository_.
+    1. Unzip the archive if necessary.
+2. In the root directory of pycrystem, run::
+
+        python setup.py install
+
+.. note:: if installing in a virtualenv, ensure the virtualenv has been activated before running the above script. To check if the correct Python version is being used, run::
+
+        which python
+
+    and ensure the result is something like ``/path/to/your/venv/bin/python``
+
+
+.. _repository: https://github.com/dnjohnstone/pycrystem
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
