@@ -24,8 +24,20 @@ from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square
 
+from .expt_utils import *
+
 from hyperspy.signals import Signal2D, Signal1D
 
+"""
+This module implements an Electron Diffraction pattern calculator.
+"""
+
+__author_ = "Duncan Johnstone"
+__copyright__ = "Copyright 2016, The Materials Project"
+__version__ = "0.1"
+__maintainer__ = "Duncan Johnstone"
+__email__ = "duncanjohnstone@live.co.uk"
+__date__ = 9/15/16
 
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
