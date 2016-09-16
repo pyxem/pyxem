@@ -6,13 +6,25 @@
 Welcome to PyCrystEM's documentation!
 =====================================
 
-PyCrystEM (Python Crystallographic Electron Microscopy) is an open-source Python library for crystallographic electron microscopy.
+PyCrystEM (Python Crystallographic Electron Microscopy) is an open-source Python
+library for crystallographic electron microscopy.
 
-PyCrystEM builds on the tools for multi-dimensional data analysis provided by the HyperSpy library for treatment of experimental electron diffraction data and tools for atomic structure manipulation provided by the PyMatGen library.
+PyCrystEM builds on the tools for multi-dimensional data analysis provided by
+the HyperSpy library for treatment of experimental electron diffraction data and
+tools for atomic structure manipulation provided by the PyMatGen library.
 
 PyCrystEM is released under the GPL v3 license.
 
 This version is currently under construction.
+
+
+Contents
+========
+
+.. toctree::
+    :maxdepth: 2
+
+    modules
 
 
 Installation
@@ -24,7 +36,9 @@ Installation
 
         python setup.py install
 
-.. note:: if installing in a virtualenv, ensure the virtualenv has been activated before running the above script. To check if the correct Python version is being used, run::
+.. note:: if installing in a virtualenv, ensure the virtualenv has been
+activated before running the above script. To check if the correct Python
+version is being used, run::
 
         which python
 
