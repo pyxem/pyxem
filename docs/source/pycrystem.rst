@@ -20,6 +20,22 @@ pycrystem.diffraction_signal module
     :undoc-members:
     :show-inheritance:
 
+pycrystem.expt_utils module
+---------------------------
+
+.. automodule:: pycrystem.expt_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pycrystem.sim_utils module
+--------------------------
+
+.. automodule:: pycrystem.sim_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
