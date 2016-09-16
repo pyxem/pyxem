@@ -1,6 +1,26 @@
+# -*- coding: utf-8 -*-
+# Copyright 2016 The PyCrystEM developers
+#
+# This file is part of  PyCrystEM.
+#
+#  PyCrystEM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+#  PyCrystEM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with  PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import division
+
 from scipy.constants import h, m_e, e, c, pi
 import math
 import numpy as np
+from .sim_utils import *
 
 """
 This module implements an Electron Diffraction pattern calculator.
@@ -84,7 +104,7 @@ class ElectronDiffractionCalculator(object):
 
         return data
 
-    def get_ed_plot(self, data):
+    def get_ed_plot(self, structure, data):
         """
         Returns the Electron Diffraction plot as a matplotlib.pyplot.
         Args:
@@ -109,7 +129,7 @@ class ElectronDiffractionCalculator(object):
         plt.tight_layout()
         return plt
 
-    def show_ed_plot(self, data):
+    def show_ed_plot(self, structure, data):
         """
         Shows the Electron Diffraction plot.
         Args:
@@ -118,4 +138,4 @@ class ElectronDiffractionCalculator(object):
             annotate_peaks (bool): Whether to annotate the peaks with plane
                 information.
         """
-        self.get_ed_plot(data).show()
+        self.get_ed_plot(structure, data).show()
