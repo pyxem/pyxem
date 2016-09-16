@@ -17,7 +17,6 @@
 # along with  HyperSpy.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
-import traits.api as t
 import math
 import numpy as np
 import scipy.ndimage as ndi
@@ -26,15 +25,14 @@ from skimage import morphology, filters
 from skimage.morphology import square
 
 from hyperspy.signals import Signal2D, Signal1D
-from hyperspy.defaults_parser import preferences
-import hyperspy.gui.messages as messagesui
+
 
 def radial_average(z, center):
     """Calculate the radial average profile about a defined center.
 
     Parameters
     ----------
-    center : float
+    center : array_like
         The center about which the radial integration is performed.
 
     Returns
@@ -43,7 +41,7 @@ def radial_average(z, center):
     radial_profile :
 
     """
-    y, x = np.indices((z.shape))
+    y, x = np.indices(z.shape)
     r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
     r = r.astype(np.int)
 
@@ -52,6 +50,7 @@ def radial_average(z, center):
     radial_average = tbin / nr
 
     return radial_average
+
 
 def affine_transformation(z, order=3, **kwargs):
     """Apply an affine transform to a 2-dimensional array.
@@ -93,6 +92,7 @@ def circular_mask(shape, radius, center):
     mask = x*x + y*y <= r*r
 
     return mask
+
 
 def refine_beam_position(z, start, radius):
     """
@@ -157,9 +157,6 @@ class ElectronDiffraction(Signal2D):
                     "Acquisition_instrument.TEM",
                     self.metadata.Acquisition_instrument.SEM)
                 del self.metadata.Acquisition_instrument.SEM
-
-    def set_experimental_parameters(accelerating_voltage, camera_length,
-                                    convergence_angle)
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
@@ -292,7 +289,7 @@ class ElectronDiffraction(Signal2D):
                       [-math.sin(a), math.cos(a), 0.],
                       [0., 0., 1.]])
 
-        self.map(_affine_transformation, matrix=t)
+        self.map(affine_transformation, matrix=t)
 
     def _regional_filter(self, z, h):
         seed = np.copy(z)
