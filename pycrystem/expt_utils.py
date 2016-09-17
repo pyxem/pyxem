@@ -24,6 +24,11 @@ from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square
 
+"""
+This module contains utility functions for treating experimental (scanning)
+electron diffraction data.
+"""
+
 def radial_average(z, center):
     """Calculate the radial average profile about a defined center.
 

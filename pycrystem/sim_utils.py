@@ -21,6 +21,10 @@ from scipy.constants import h, m_e, e, c, pi
 import math
 import numpy as np
 
+"""
+This module contains utility functions for simulating electron diffraction.
+"""
+
 def get_electron_wavelength(accelerating_voltage):
     """Calculates the (relativistic) electron wavelength in Angstroms
     for a given accelerating voltage in kV.
