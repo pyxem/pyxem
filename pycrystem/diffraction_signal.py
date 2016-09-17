@@ -115,6 +115,21 @@ class ElectronDiffraction(Signal2D):
         #particular camera length
         pass
 
+    def get_virtual_image(self, roi=None):
+        """Returns virtual images
+        """
+        #TODO: if roi is None then return VBF and annular VDF. If roi is
+        #specified then return the vitual image associated with that ROI.
+        pass
+
+    def plot_virtual_image(self, roi=None, interactive=True):
+        """Plots a virtual image
+        """
+        #TODO: if roi is None then plots circular aperture around centre with
+        #interactivity enabled to move the aperture around and update in real
+        #time using HyperSpy events.
+        pass
+
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
 
