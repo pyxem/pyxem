@@ -43,6 +43,29 @@ def get_electron_wavelength(accelerating_voltage):
                                (1 + (e / (2 * m_e * c * c)) * E))*1e10
     return wavelength
 
+def get_interaction_constant(accelerating_voltage):
+    """Calculates the interaction constant, sigma, for a given
+    acelerating voltage.
+
+    Evaluates
+
+    Parameters
+    ----------
+    accelerating_voltage : float
+        The accelerating voltage in V.
+
+    Returns
+    -------
+    sigma : float
+        The relativistic electron wavelength in m.
+
+    """
+    E = accelerating_voltage
+    wavelength = get_electron_wavelength(accelerating_voltage)
+    sigma = (2 * pi * (m_e + e * E))
+
+    return sigma
+
 def get_structure_factors(fractional_coordinates, structure):
     """Get structure factors
 
