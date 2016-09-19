@@ -29,7 +29,7 @@ from .expt_utils import *
 from hyperspy.signals import Signal2D, Signal1D
 
 """
-This module implements an Electron Diffraction pattern calculator.
+This module implements an Electron Diffraction signal class.
 """
 
 __author_ = "Duncan Johnstone"
@@ -102,6 +102,18 @@ class ElectronDiffraction(Signal2D):
         if exposure_time is not None:
             md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                         exposure_time)
+
+    def set_calibration(self, calibration):
+        """Set pixel size in reciprocal Angstroms.
+
+        Parameters
+        ----------
+        calibration (float): Calibration in reciprocal Angstroms per pixel
+        """
+        #TODO: update axes manager for the appropriate calibration if None it
+        #would be ideal to get this from a list of stored calibrations for the
+        #particular camera length
+        pass
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
@@ -349,6 +361,41 @@ class ElectronDiffraction(Signal2D):
         self.map(self._regional_filter, h=h)
         self.map(filters.rank.mean, selem=square(3))
         self.data = self.data / self.data.max()
+
+    def index_reflections(self, peaks, g_vectors):
+        """Index reflections found in the experimental with respect to specified
+        crystal structures.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
+        #TODO: Basic idea is to find peaks with their lengths reported in
+        #reciprocal Angstroms. These lengths can then be compared to a list of
+        #g-vector lengths for specified structures to achieve indexation of the
+        #reflections. The deviation from the expected value should be stored for
+        #each reflection and it should be possible to plot the indexed peaks on
+        #top of the signal with their labels.
+        pass
+
+    def get_reflection_intensities(self, indexed_reflections):
+        """
+
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
+        #TODO:
+        #
+        #
+        pass
 
     def decomposition(self,
                       normalize_poissonian_noise=True,
