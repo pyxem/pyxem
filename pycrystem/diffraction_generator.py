@@ -120,9 +120,21 @@ class ElectronDiffractionCalculator(object):
         """
         from pymatgen.util.plotting_utils import get_publication_quality_plot
         plt = get_publication_quality_plot(10, 10)
-        plt.scatter(data[0][:, 0], data[0][:, 1],
-                    s=np.sqrt(get_structure_factors(data[1],
-                                                    structure))*(1-data[2][data[3]]))
+
+        # Get peak positions
+        peak_coordinates = data[0][:, 0], data[0][:, 1]
+
+        # The display intensity is the structure factor, decreased linearly
+        # depending on distance.
+        structure_factors = get_structure_factors(data[1], structure)
+        peak_proximity = data[2][data[3]]
+        peak_relative_proximity = 1 - peak_proximity / np.max(peak_proximity)
+        peak_intensities = np.sqrt(structure_factors * peak_relative_proximity)
+        plt.scatter(
+            peak_coordinates[0],
+            peak_coordinates[1],
+            s=peak_intensities
+        )
         plt.axis('equal')
         plt.xlabel("Reciprocal Dimension ($A^{-1}$)")
         plt.ylabel("Reciprocal Dimension ($A^{-1}$)")
