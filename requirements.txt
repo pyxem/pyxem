@@ -32,7 +32,6 @@ pockets==0.3
 prompt-toolkit==1.0.7
 ptyprocess==0.5.1
 pybtex==0.20.1
-pycrystem==0.2
 pyface==5.1.0
 Pygments==2.1.3
 pymatgen==4.3.1
