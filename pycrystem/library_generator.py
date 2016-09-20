@@ -17,6 +17,12 @@
 # along with  PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
+from math import radians, sin
+
+from transforms3d.euler import euler2axangle
+
+import numpy as np
+
 from pymatgen.transformations.standard_transformations import RotationTransformation, DeformStructureTransformation
 
 """
@@ -29,6 +35,9 @@ __version__ = "0.1"
 __maintainer__ = "Duncan Johnstone"
 __email__ = "duncanjohnstone@live.co.uk"
 __date__ = 9/15/16
+
+LAUE = ["-1", "2/m", "mmm", "4/m", "4/mmm",
+        "-3", "-3m", "6/m", "6/mmm", "m-3", "m-3m"]
 
 
 class DiffractionLibraryGenerator(object):
@@ -110,3 +119,45 @@ class DiffractionLibraryGenerator(object):
                 information.
         """
         self.get_ed_plot(data).show()
+
+
+def equispaced_s2_grid(theta_range, phi_range, resolution=2.5):
+    """Creates rotations approximately equispaced on a sphere.
+
+    Parameters
+    ----------
+    theta_range : tuple of float
+        (theta_min, theta_max)
+        The range of allowable polar angles.
+    phi_range : tuple of float
+        (phi_min, phi_max)
+        The range of allowable azimuthal angles.
+    resolution : float
+        The angular resolution of the grid in degrees.
+
+    Returns
+    -------
+    s2_grid : list of tuple
+        tuple[0] is an array specifying the axis of rotation
+        tuple[1] is the angle of rotation in radians
+
+    """
+    theta_min, theta_max = [radians(t) for t in theta_range]
+    phi_min, phi_max = [radians(r) for r in phi_range]
+    resolution = radians(resolution)
+    n_theta = int(theta_max/resolution)
+    theta_grid = np.linspace(theta_min, theta_max, n_theta+1)
+    phi_grid = []
+    for j, theta in enumerate(theta_grid):
+        steps = max(round(sin(theta) * phi_max / theta_max * n_theta), 1)
+        phi = phi_min\
+            + np.arange(steps) * (phi_max - phi_min) / steps \
+            + (j % 2) * (phi_max - phi_min) / steps / 2
+        phi_grid.append(phi)
+    s2_grid = np.array(
+        [(theta, phi) for phis, theta in zip(phi_grid, theta_grid) for phi in
+         phis])
+    x_rotations = np.zeros((len(s2_grid),))
+    s2_grid = [euler2axangle(ai, aj, ak, 'sxyz') for ai, aj, ak in
+               zip(x_rotations, s2_grid[:, 0], s2_grid[:, 1])]
+    return s2_grid
