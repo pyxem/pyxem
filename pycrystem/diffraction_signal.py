@@ -39,6 +39,7 @@ __maintainer__ = "Duncan Johnstone"
 __email__ = "duncanjohnstone@live.co.uk"
 __date__ = 9/15/16
 
+
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
 
