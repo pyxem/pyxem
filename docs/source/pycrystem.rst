@@ -28,6 +28,14 @@ pycrystem.expt_utils module
     :undoc-members:
     :show-inheritance:
 
+pycrystem.library_generator module
+----------------------------------
+
+.. automodule:: pycrystem.library_generator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pycrystem.sim_utils module
 --------------------------
 
