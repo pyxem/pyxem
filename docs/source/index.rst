@@ -37,8 +37,8 @@ Installation
         python setup.py install
 
 .. note:: if installing in a virtualenv, ensure the virtualenv has been
-activated before running the above script. To check if the correct Python
-version is being used, run::
+    activated before running the above script. To check if the correct Python
+    version is being used, run::
 
         which python
 

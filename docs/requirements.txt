@@ -18,6 +18,7 @@ Jinja2==2.8
 jupyter-client==4.4.0
 jupyter-core==4.2.0
 latexcodec==1.0.3
+lxml==3.6.4
 MarkupSafe==0.23
 matplotlib==1.5.3
 monty==0.9.4
@@ -51,6 +52,7 @@ six==1.10.0
 snowballstemmer==1.2.1
 spglib==1.9.5
 Sphinx==1.4.6
+sphinx-bootstrap-theme==0.4.12
 sphinxcontrib-napoleon==0.5.3
 sympy==1.0
 tabulate==0.7.5

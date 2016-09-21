@@ -1,43 +1,35 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016 The PyCrystEM developers
 #
-# This file is part of  PyCrystEM.
+# This file is part of PyCrystEM.
 #
-#  PyCrystEM is free software: you can redistribute it and/or modify
+# PyCrystEM is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-#  PyCrystEM is distributed in the hope that it will be useful,
+# PyCrystEM is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with  PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+"""Kinematical diffraction pattern calculation.
+
+"""
+
+
 from __future__ import division
 
-from scipy.constants import h, m_e, e, c, pi
-import math
 import numpy as np
-from .sim_utils import *
-
-"""
-This module implements an Electron Diffraction pattern calculator.
-"""
-
-__author_ = "Duncan Johnstone"
-__copyright__ = "Copyright 2016, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Duncan Johnstone"
-__email__ = "duncanjohnstone@live.co.uk"
-__date__ = 9/15/16
+from pycrystem.utils.sim_utils import get_electron_wavelength,\
+    get_structure_factors
+from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 
 class ElectronDiffractionCalculator(object):
-    """
-    Computes Electron Diffraction patterns of a crystal structure in any orientation.
-
+    """Computes electron diffraction patterns for a crystal structure.
 
     1. Calculate reciprocal lattice of structure. Find all reciprocal points
        within the limiting sphere given by :math:`\\frac{2}{\\lambda}`.
@@ -48,94 +40,150 @@ class ElectronDiffractionCalculator(object):
 
     3. The intensity of each reflection is then given in the kinematic
        approximation as the modulus square of the structure factor.
-       .. math::
-           I_{hkl} = F_{hkl}F_{hkl}^*
+           .. math::
+                I_{hkl} = F_{hkl}F_{hkl}^*
+
+    .. todo::
+        Include camera length, when implemented.
+    .. todo::
+        Refactor the excitation error to a structure property.
+
+    Parameters
+    ----------
+    accelerating_voltage : float
+        The accelerating voltage of the microscope in kV
+    reciprocal_radius : float
+        The maximum radius of the sphere of reciprocal space to sample, in
+        reciprocal angstroms.
+    excitation_error : float
+        The maximum extent of the relrods in reciprocal angstroms. Typically
+        equal to 1/{specimen thickness}.
+
     """
 
-    def __init__(self, accelerating_voltage):
-        """
-        Initialises the Electron Diffraction calculator with a given accelerating voltage
-        and camera length.
+    def __init__(self, accelerating_voltage, reciprocal_radius, excitation_error):
 
-
-        Args:
-            accelerating_voltage (float): The accelerating voltage of the microscope in kV
-
-            camera_length (float): The camera length at which the diffraction pattern
-                is to be calculated in cm.
-        """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
+        self.reciprocal_radius = reciprocal_radius
+        self.excitation_error = excitation_error
 
-    def get_ed_data(self, structure, max_r, excitation_error):
-        """
-        Calculates the Electron Diffraction data for a structure.
+    def calculate_ed_data(self, structure):
+        """Calculates the Electron Diffraction data for a structure.
 
-        Args:
-            structure (Structure): Input structure
+        Parameters
+        ----------
+        structure : Structure
+            The structure for which to derive the diffraction pattern. Note that
+            the structure must be rotated to the appropriate orientation.
 
-            max_r (float): The maximum angle
+        Returns
+        -------
+        DiffractionData
+            The data associated with this structure and diffraction setup.
 
-        Returns:
-            (Electron Diffraction pattern) in the form of
         """
         wavelength = self.wavelength
         latt = structure.lattice
 
-        # Obtain crystallographic reciprocal lattice points within range.
-        recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_zip = recip_latt.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], max_r)
-        recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
-                                                    max_r, zip_results=False)[0]
-        recip_cart = recip_latt.get_cartesian_coords(recip_pts)
+        # Obtain crystallographic reciprocal lattice points within `max_r`.
+        reciprocal_lattice = latt.reciprocal_lattice_crystallographic
+        fractional_coordinates = \
+            reciprocal_lattice.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
+                                                    self.reciprocal_radius,
+                                                    zip_results=False)[0]
+        cartesian_coordinates = reciprocal_lattice.get_cartesian_coords(
+            fractional_coordinates)
 
-        # Identify points intersecting the Ewald sphere within maximum excitation error
-        # and the magnitude of their excitation error.
+        # Identify points intersecting the Ewald sphere within maximum
+        # excitation error and the magnitude of their excitation error.
         radius = 1/wavelength
-        r = np.sqrt(np.sum(np.square(recip_cart[:, :2]), axis=1))
+        r = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
         theta = np.arcsin(r/radius)
         z_sphere = radius * (1 - np.cos(theta))
-        proximity = np.absolute(z_sphere - recip_cart[:, 2])
-        intersection = proximity < excitation_error
+        proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
+        intersection = proximity < self.excitation_error
 
-        icoords = recip_cart[intersection]
-        sfcoords = structure.lattice.reciprocal_lattice_crystallographic.get_fractional_coords(icoords)
+        intersection_coordinates = cartesian_coordinates[intersection]
+        intersection_indices = fractional_coordinates[intersection]
+        proximity = proximity[intersection]
+        intersection_intensities = \
+            self.get_peak_intensities(
+                structure,
+                intersection_indices,
+                proximity
+            )
 
-        data= [icoords, sfcoords, proximity, intersection]
+        return DiffractionData(
+            coordinates=intersection_coordinates,
+            indices=intersection_indices,
+            intensities=intersection_intensities
+        )
 
-        return data
+    @staticmethod
+    def get_peak_intensities(structure, indices, proximities):
+        """Calculates peak intensities.
 
-    def get_ed_plot(self, structure, data):
+        The peak intensity is a combination of the structure factor for a given
+        peak and the position the Ewald sphere intersects the relrod. In this
+        implementation, the intensity scales linearly with proximity.
+
+        Parameters
+        ----------
+        structure : Structure
+            The structure for which to derive the structure factors.
+        indices : array-like
+            The fractional coordinates of the peaks for which to calculate the
+            structure factor.
+        proximities : array-like
+            The distances between the Ewald sphere and the peak centres.
+
+        Returns
+        -------
+        peak_intensities : array-like
+            The intensities of the peaks.
+
         """
-        Returns the Electron Diffraction plot as a matplotlib.pyplot.
-        Args:
-            structure (Structure): Input structure
-            max_theta (float): Tuple for range of
-                two_thetas to calculate in degrees. Defaults to (0, 90). Set to
-                None if you want all diffracted beams within the limiting
-                sphere of radius 2 / wavelength.
-            annotate_peaks (bool): Whether to annotate the peaks with plane
-                information.
-        Returns:
-            (matplotlib.pyplot)
+        structure_factors = get_structure_factors(indices, structure)
+        peak_relative_proximity = 1 - proximities / np.max(proximities)
+        peak_intensities = np.sqrt(structure_factors * peak_relative_proximity)
+        return peak_intensities
+
+
+class DiffractionData:
+
+    def __init__(self, coordinates=None, indices=None, intensities=None):
+        """Holds the result of a given diffraction pattern.
+
+        coordinates : array-like
+            The x-y coordinates of points in reciprocal space.
+        indices : array-like
+            The indices of the reciprocal lattice points that intersect the
+            Ewald sphere.
+        proximity : array-like
+            The distance between the reciprocal lattice points that intersect
+            the Ewald sphere and the Ewald sphere itself in reciprocal
+            angstroms.
         """
-        from pymatgen.util.plotting_utils import get_publication_quality_plot
+        self.coordinates = coordinates
+        self.indices = indices
+        self.intensities = intensities
+
+    def plot(self):
+        """Returns the diffraction data as a plot.
+
+        Notes
+        -----
+        Run `.show()` on the result of this method to display the plot.
+
+        """
         plt = get_publication_quality_plot(10, 10)
-        plt.scatter(data[0][:, 0], data[0][:, 1],
-                    s=np.sqrt(get_structure_factors(data[1],
-                                                    structure))*(1-data[2][data[3]]))
+        plt.scatter(
+            self.coordinates[:, 0],
+            self.coordinates[:, 1],
+            s=self.intensities
+        )
         plt.axis('equal')
         plt.xlabel("Reciprocal Dimension ($A^{-1}$)")
         plt.ylabel("Reciprocal Dimension ($A^{-1}$)")
         plt.tight_layout()
         return plt
-
-    def show_ed_plot(self, structure, data):
-        """
-        Shows the Electron Diffraction plot.
-        Args:
-            structure (Structure): Input structure
-            max_theta (float): Float for maximum angle.
-            annotate_peaks (bool): Whether to annotate the peaks with plane
-                information.
-        """
-        self.get_ed_plot(structure, data).show()
