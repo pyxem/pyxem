@@ -45,7 +45,7 @@ class ElectronDiffractionCalculator(object):
 
     """
 
-    def __init__(self, accelerating_voltage):
+    def __init__(self, accelerating_voltage, reciprocal_radius, excitation_error):
         """Initializes the calculator with experimental parameters.
 
 
@@ -53,11 +53,20 @@ class ElectronDiffractionCalculator(object):
         ----------
         accelerating_voltage : float
             The accelerating voltage of the microscope in kV
+        reciprocal_radius : float
+            The maximum radius of the sphere of reciprocal space to sample, in
+            reciprocal angstroms.
+        excitation_error : float
+            The maximum extent of the relrods in reciprocal angstroms. Typically
+            equal to 1/{specimen thickness}.
         .. todo:: Include camera length, when implemented.
+        .. todo:: Refactor the excitation error to a structure property.
         """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
+        self.reciprocal_radius = reciprocal_radius
+        self.excitation_error = excitation_error
 
-    def calculate_ed_data(self, structure, max_r, excitation_error):
+    def calculate_ed_data(self, structure):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -65,12 +74,6 @@ class ElectronDiffractionCalculator(object):
         structure : Structure
             The structure for which to derive the diffraction pattern. Note that
             the structure must be rotated to the appropriate orientation.
-        max_r : float
-            The maximum radius of the sphere of reciprocal space to sample, in
-            reciprocal angstroms.
-        excitation_error : float
-            The maximum extent of the relrods in reciprocal angstroms. Typically
-            equal to 1/{specimen thickness}.
 
         Returns
         -------
@@ -85,7 +88,8 @@ class ElectronDiffractionCalculator(object):
         reciprocal_lattice = latt.reciprocal_lattice_crystallographic
         fractional_coordinates = \
             reciprocal_lattice.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
-                                                    max_r, zip_results=False)[0]
+                                                    self.reciprocal_radius,
+                                                    zip_results=False)[0]
         cartesian_coordinates = reciprocal_lattice.get_cartesian_coords(
             fractional_coordinates)
 
@@ -96,7 +100,7 @@ class ElectronDiffractionCalculator(object):
         theta = np.arcsin(r/radius)
         z_sphere = radius * (1 - np.cos(theta))
         proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
-        intersection = proximity < excitation_error
+        intersection = proximity < self.excitation_error
 
         intersection_coordinates = cartesian_coordinates[intersection]
         intersection_indices = fractional_coordinates[intersection]
