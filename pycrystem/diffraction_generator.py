@@ -40,28 +40,29 @@ class ElectronDiffractionCalculator(object):
 
     3. The intensity of each reflection is then given in the kinematic
        approximation as the modulus square of the structure factor.
-       .. math::
-           I_{hkl} = F_{hkl}F_{hkl}^*
+           .. math::
+                I_{hkl} = F_{hkl}F_{hkl}^*
+
+    .. todo::
+        Include camera length, when implemented.
+    .. todo::
+        Refactor the excitation error to a structure property.
+
+    Parameters
+    ----------
+    accelerating_voltage : float
+        The accelerating voltage of the microscope in kV
+    reciprocal_radius : float
+        The maximum radius of the sphere of reciprocal space to sample, in
+        reciprocal angstroms.
+    excitation_error : float
+        The maximum extent of the relrods in reciprocal angstroms. Typically
+        equal to 1/{specimen thickness}.
 
     """
 
     def __init__(self, accelerating_voltage, reciprocal_radius, excitation_error):
-        """Initializes the calculator with experimental parameters.
 
-
-        Parameters
-        ----------
-        accelerating_voltage : float
-            The accelerating voltage of the microscope in kV
-        reciprocal_radius : float
-            The maximum radius of the sphere of reciprocal space to sample, in
-            reciprocal angstroms.
-        excitation_error : float
-            The maximum extent of the relrods in reciprocal angstroms. Typically
-            equal to 1/{specimen thickness}.
-        .. todo:: Include camera length, when implemented.
-        .. todo:: Refactor the excitation error to a structure property.
-        """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
         self.reciprocal_radius = reciprocal_radius
         self.excitation_error = excitation_error

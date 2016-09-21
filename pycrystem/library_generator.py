@@ -89,7 +89,8 @@ class DiffractionLibrary(dict):
     def plot(self):
         """Plots the library interactively.
 
-        ..todo:: Implement this method.
+        .. todo::
+            Implement this method.
 
         """
         pass
