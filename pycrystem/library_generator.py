@@ -1,40 +1,34 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016 The PyCrystEM developers
 #
-# This file is part of  PyCrystEM.
+# This file is part of PyCrystEM.
 #
-#  PyCrystEM is free software: you can redistribute it and/or modify
+# PyCrystEM is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-#  PyCrystEM is distributed in the hope that it will be useful,
+# PyCrystEM is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with  PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+"""This module implements a Diffraction Library Generator.
+
+"""
+
 from __future__ import division
 
 from math import radians, sin
 
 from transforms3d.euler import euler2axangle
 
-import numpy as np
-
 from pymatgen.transformations.standard_transformations import RotationTransformation, DeformStructureTransformation
 
-"""
-This module implements a Diffraction Library Generator.
-"""
 
-__author_ = "Duncan Johnstone"
-__copyright__ = "Copyright 2016, Python Crystallographic Electron Microscopy"
-__version__ = "0.1"
-__maintainer__ = "Duncan Johnstone"
-__email__ = "duncanjohnstone@live.co.uk"
-__date__ = 9/15/16
+
 
 LAUE = ["-1", "2/m", "mmm", "4/m", "4/mmm",
         "-3", "-3m", "6/m", "6/mmm", "m-3", "m-3m"]
@@ -79,7 +73,7 @@ class DiffractionLibraryGenerator(object):
         for ori in orientations:
             rot = DeformStructureTransformation(ori)
             rotated_structure = rot.apply_transformation(structure)
-            data = ediff.get_ed_data(rotated_structure, self.max_r, self.excitation_error)
+            data = ediff.calculate_ed_data(rotated_structure, self.max_r, self.excitation_error)
             diffraction_library.append(data)
 
         return diffraction_library

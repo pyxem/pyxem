@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016 The PyCrystEM developers
 #
-# This file is part of  PyCrystEM.
+# This file is part of PyCrystEM.
 #
-#  PyCrystEM is free software: you can redistribute it and/or modify
+# PyCrystEM is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-#  PyCrystEM is distributed in the hope that it will be useful,
+# PyCrystEM is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with  PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
 from scipy.constants import h, m_e, e, c, pi
 import math
 import numpy as np
+
 
 def get_electron_wavelength(accelerating_voltage):
     """Calculates the (relativistic) electron wavelength in Angstroms
@@ -42,6 +43,7 @@ def get_electron_wavelength(accelerating_voltage):
     wavelength = h / math.sqrt(2 * m_e * e * E *\
                                (1 + (e / (2 * m_e * c * c)) * E))*1e10
     return wavelength
+
 
 def get_interaction_constant(accelerating_voltage):
     """Calculates the interaction constant, sigma, for a given
@@ -66,6 +68,7 @@ def get_interaction_constant(accelerating_voltage):
 
     return sigma
 
+
 def get_structure_factors(fractional_coordinates, structure):
     """Get structure factors
 
@@ -80,4 +83,8 @@ def get_structure_factors(fractional_coordinates, structure):
     structure_factors :
 
     """
-    return np.absolute(np.sum([atom.number*np.exp(2*1j*np.pi*np.dot(fractional_coordinates, position)) for position, atom in zip(structure.frac_coords, structure.species)], axis=0))**2
+    return np.absolute(np.sum([atom.number * np.exp(
+        2 * 1j * np.pi * np.dot(fractional_coordinates, position)) for
+                               position, atom in
+                               zip(structure.frac_coords, structure.species)],
+                              axis=0)) ** 2
