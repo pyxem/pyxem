@@ -19,10 +19,11 @@
 #
 import os
 import sys
-from pycrystem import __author__, __version__, __copyright__
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
+
+from pycrystem import __author__, __version__, __copyright__
 
 # -- General configuration ------------------------------------------------
 
