@@ -1,32 +1,24 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016 The PyCrystEM developers
 #
-# This file is part of  PyCrystEM.
+# This file is part of PyCrystEM.
 #
-#  PyCrystEM is free software: you can redistribute it and/or modify
+# PyCrystEM is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-#  PyCrystEM is distributed in the hope that it will be useful,
+# PyCrystEM is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with  PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
-import math
-import numpy as np
-import scipy.ndimage as ndi
-from skimage import transform as tf
-from skimage import morphology, filters
-from skimage.morphology import square
-
-from .expt_utils import *
-
 from hyperspy.signals import Signal2D, Signal1D
+from pycrystem.utils.expt_utils import *
 
 """
 This module implements an Electron Diffraction signal class.
@@ -38,6 +30,7 @@ __version__ = "0.1"
 __maintainer__ = "Duncan Johnstone"
 __email__ = "duncanjohnstone@live.co.uk"
 __date__ = 9/15/16
+
 
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
