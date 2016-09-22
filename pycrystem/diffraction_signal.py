@@ -23,7 +23,7 @@ import numpy as np
 from pycrystem.utils.expt_utils import *
 
 """
-Signal class object for the
+Signal class for Electron Diffraction Data
 """
 
 
