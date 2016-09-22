@@ -137,13 +137,13 @@ class ElectronDiffraction(Signal2D):
         ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
         ap.interactive(self, navigation_signal='same').plot()
 
-    def plot_line_profile(self, x1, y1, x2, y2):
+    def plot_line_profile(self, x1, y1, x2, y2, width):
         """Plots an interactive line profile.
         """
         self.plot()
-        ap = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2)
-        ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-        ap.interactive(self, navigation_signal='same').plot()
+        lin = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2, linewidth=width)
+        lin.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        lin.interactive(self, navigation_signal='same').plot()
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
