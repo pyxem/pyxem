@@ -78,7 +78,7 @@ class ElectronDiffractionCalculator(object):
 
         Returns
         -------
-        DiffractionData
+        DiffractionSimulation
             The data associated with this structure and diffraction setup.
 
         """
@@ -113,7 +113,7 @@ class ElectronDiffractionCalculator(object):
                 proximity
             )
 
-        return DiffractionData(
+        return DiffractionSimulation(
             coordinates=intersection_coordinates,
             indices=intersection_indices,
             intensities=intersection_intensities
@@ -149,7 +149,7 @@ class ElectronDiffractionCalculator(object):
         return peak_intensities
 
 
-class DiffractionData:
+class DiffractionSimulation:
 
     def __init__(self, coordinates=None, indices=None, intensities=None):
         """Holds the result of a given diffraction pattern.

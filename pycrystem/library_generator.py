@@ -64,7 +64,7 @@ class DiffractionLibraryGenerator(object):
 
         Returns
         -------
-        diffraction_library : dict of :class:`DiffractionData`
+        diffraction_library : dict of :class:`DiffractionSimulation`
             Mapping of Euler angles of rotation to diffraction data objects.
 
         """
@@ -73,7 +73,6 @@ class DiffractionLibraryGenerator(object):
         diffractor = self.electron_diffraction_calculator
 
         for orientation in orientations:
-            orientation = euler2axangle(*orientation, 0)
             axis = orientation[0]
             angle = orientation[1]
             euler = axangle2euler(axis, angle)
