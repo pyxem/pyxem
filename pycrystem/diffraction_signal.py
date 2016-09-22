@@ -21,15 +21,8 @@ from hyperspy.signals import Signal2D, Signal1D
 from pycrystem.utils.expt_utils import *
 
 """
-This module implements an Electron Diffraction signal class.
+Signal class object for the
 """
-
-__author_ = "Duncan Johnstone"
-__copyright__ = "Copyright 2016, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Duncan Johnstone"
-__email__ = "duncanjohnstone@live.co.uk"
-__date__ = 9/15/16
 
 
 class ElectronDiffraction(Signal2D):
@@ -96,17 +89,31 @@ class ElectronDiffraction(Signal2D):
             md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                         exposure_time)
 
-    def set_calibration(self, calibration):
-        """Set pixel size in reciprocal Angstroms.
+    def set_calibration(self, calibration, offset):
+        """Set pixel size in reciprocal Angstroms and origin location.
 
         Parameters
         ----------
-        calibration (float): Calibration in reciprocal Angstroms per pixel
+        calibration: float
+            Calibration in reciprocal Angstroms per pixel
+        offset: tuple
+            Offset of the pattern centre from the
         """
         #TODO: update axes manager for the appropriate calibration if None it
         #would be ideal to get this from a list of stored calibrations for the
         #particular camera length
-        pass
+        dx = self.axes_manager[2]
+        dy = self.axes_manager[3]
+
+        dx.name = 'dx'
+        dx.scale = calibration
+        dx.offset = offset[0]
+        dx.units = '$A^{-1}$'
+
+        dy.name = 'dy'
+        dy.scale = calibration
+        dy.offset = offset[1]
+        dy.units = '$A^{-1}$'
 
     def get_virtual_image(self, roi=None):
         """Returns virtual images
