@@ -18,6 +18,8 @@
 from __future__ import division
 
 from hyperspy.signals import Signal2D, Signal1D
+from hyperspy import roi
+import numpy as np
 from pycrystem.utils.expt_utils import *
 
 """
@@ -89,7 +91,7 @@ class ElectronDiffraction(Signal2D):
             md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                         exposure_time)
 
-    def set_calibration(self, calibration, offset):
+    def set_calibration(self, calibration, offset=None):
         """Set pixel size in reciprocal Angstroms and origin location.
 
         Parameters
@@ -99,9 +101,11 @@ class ElectronDiffraction(Signal2D):
         offset: tuple
             Offset of the pattern centre from the
         """
-        #TODO: update axes manager for the appropriate calibration if None it
-        #would be ideal to get this from a list of stored calibrations for the
-        #particular camera length
+        #TODO: extend to get calibration from a list of stored calibrations for
+        #the camera length recorded in metadata.
+        if offset=None:
+            offset = np.array(self.axes_manager.signal_shape)/2
+
         dx = self.axes_manager[2]
         dy = self.axes_manager[3]
 
@@ -115,26 +119,13 @@ class ElectronDiffraction(Signal2D):
         dy.offset = offset[1]
         dy.units = '$A^{-1}$'
 
-    def get_virtual_image(self, roi=None):
+    def plot_interactive_virtual_image(self, radius):
         """Returns virtual images
         """
-        #TODO: if roi is None then return VBF and annular VDF. If roi is
-        #specified then return the vitual image associated with that ROI.
-        pass
-
-    def plot_virtual_image(self, roi=None, interactive=True):
-        """Plots a virtual image
-        """
-        #TODO: if roi is None then plots circular aperture around centre with
-        #interactivity enabled to move the aperture around and update in real
-        #time using HyperSpy events.
-        if roi:
-            pass
-        else:
-            roi = hs.roi.CircleROI(cx=0.463808, cy=0.31174, r=0.0342)
-
-        roi.add_widget(dp, axes=dp.axes_manager.signal_axes, color='red')
-        roi.interactive(dp, navigation_signal='same').plot()
+        self.plot()
+        ap = roi.CircleROI(cx=0., cy=0., r=radius)
+        ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        ap.interactive(self, navigation_signal='same').plot()
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
