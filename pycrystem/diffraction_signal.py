@@ -104,19 +104,19 @@ class ElectronDiffraction(Signal2D):
         #TODO: extend to get calibration from a list of stored calibrations for
         #the camera length recorded in metadata.
         if offset==None:
-            offset = np.array(self.axes_manager.signal_shape)/2
+            offset = np.array(self.axes_manager.signal_shape)/2 * calibration
 
         dx = self.axes_manager[2]
         dy = self.axes_manager[3]
 
         dx.name = 'dx'
         dx.scale = calibration
-        dx.offset = offset[0]
+        dx.offset = -offset[0]
         dx.units = '$A^{-1}$'
 
         dy.name = 'dy'
         dy.scale = calibration
-        dy.offset = offset[1]
+        dy.offset = -offset[1]
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, radius):
