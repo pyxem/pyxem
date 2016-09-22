@@ -18,6 +18,8 @@
 from __future__ import division
 
 from hyperspy.signals import Signal2D, Signal1D
+from hyperspy import roi
+import numpy as np
 from pycrystem.utils.expt_utils import *
 
 """
@@ -96,17 +98,51 @@ class ElectronDiffraction(Signal2D):
             md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                         exposure_time)
 
-    def set_calibration(self, calibration):
-        """Set pixel size in reciprocal Angstroms.
+    def set_calibration(self, calibration, offset=None):
+        """Set pixel size in reciprocal Angstroms and origin location.
 
         Parameters
         ----------
-        calibration (float): Calibration in reciprocal Angstroms per pixel
+        calibration: float
+            Calibration in reciprocal Angstroms per pixel
+        offset: tuple
+            Offset of the pattern centre from the
         """
-        #TODO: update axes manager for the appropriate calibration if None it
-        #would be ideal to get this from a list of stored calibrations for the
-        #particular camera length
-        pass
+        #TODO: extend to get calibration from a list of stored calibrations for
+        #the camera length recorded in metadata.
+        if offset==None:
+            offset = np.array(self.axes_manager.signal_shape)/2 * calibration
+
+        dx = self.axes_manager[2]
+        dy = self.axes_manager[3]
+
+        dx.name = 'dx'
+        dx.scale = calibration
+        dx.offset = -offset[0]
+        dx.units = '$A^{-1}$'
+
+        dy.name = 'dy'
+        dy.scale = calibration
+        dy.offset = -offset[1]
+        dy.units = '$A^{-1}$'
+
+    def plot_interactive_virtual_image(self, inner_radius, outer_radius):
+        """Plots an interactive virtual image formed with a circular or annular
+        virtual aperture.
+
+        Parameters
+        ----------
+        inner_radius: float
+            Inner radius annular virtual aperture (if None a circular aperture
+            is used) in reciprocal Angstroms
+        outer_radius: float
+            Outer radius of the cirucular or annular virtual aperture in
+            reciprocal Angstroms.
+        """
+        self.plot()
+        ap = roi.CircleROI(cx=0., cy=0., r_inner=inner_radius, r=outer_radius)
+        ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        ap.interactive(self, navigation_signal='same').plot()
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
