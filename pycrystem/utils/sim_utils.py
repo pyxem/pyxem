@@ -18,6 +18,7 @@
 from __future__ import division
 
 from math import radians, sin
+from decimal import Decimal, ROUND_HALF_UP
 
 from scipy.constants import h, m_e, e, c, pi
 import math
@@ -93,7 +94,7 @@ def get_structure_factors(fractional_coordinates, structure):
                               axis=0)) ** 2
 
 
-def equispaced_s2_grid(theta_range, phi_range, resolution=2.5):
+def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
     """Creates rotations approximately equispaced on a sphere.
 
     Parameters
@@ -109,27 +110,30 @@ def equispaced_s2_grid(theta_range, phi_range, resolution=2.5):
 
     Returns
     -------
-    s2_grid : list of tuple
-        tuple[0] is an array specifying the axis of rotation
-        tuple[1] is the angle of rotation in radians
+    s2_grid : array-like
+        Each row contains `(theta, phi)`, the azimthal and polar angle
+        respectively.
 
     """
     theta_min, theta_max = [radians(t) for t in theta_range]
     phi_min, phi_max = [radians(r) for r in phi_range]
     resolution = radians(resolution)
-    n_theta = int(theta_max/resolution)
-    theta_grid = np.linspace(theta_min, theta_max, n_theta+1)
+    resolution = 2 * theta_max / int(Decimal(2 * theta_max / resolution).quantize(0, ROUND_HALF_UP))
+    n_theta = int(Decimal((2 * theta_max / resolution + no_center)).quantize(0, ROUND_HALF_UP) / 2)
+
+    if no_center:
+        theta_grid = np.arange(0.5, n_theta + 0.5) * resolution
+    else:
+        theta_grid = np.arange(n_theta + 1) * resolution
+
     phi_grid = []
     for j, theta in enumerate(theta_grid):
         steps = max(round(sin(theta) * phi_max / theta_max * n_theta), 1)
         phi = phi_min\
             + np.arange(steps) * (phi_max - phi_min) / steps \
-            + (j % 2) * (phi_max - phi_min) / steps / 2
+            + ((j+1) % 2) * (phi_max - phi_min) / steps / 2
         phi_grid.append(phi)
     s2_grid = np.array(
         [(theta, phi) for phis, theta in zip(phi_grid, theta_grid) for phi in
          phis])
-    x_rotations = np.zeros((len(s2_grid),))
-    s2_grid = [euler2axangle(ai, aj, ak, 'sxyz') for ai, aj, ak in
-               zip(x_rotations, s2_grid[:, 0], s2_grid[:, 1])]
     return s2_grid

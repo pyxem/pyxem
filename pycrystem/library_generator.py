@@ -23,7 +23,7 @@ from __future__ import division
 
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
-from transforms3d.euler import axangle2euler
+from transforms3d.euler import euler2axangle, axangle2euler
 
 LAUE = ["-1", "2/m", "mmm", "4/m", "4/mmm",
         "-3", "-3m", "6/m", "6/mmm", "m-3", "m-3m"]
@@ -64,7 +64,7 @@ class DiffractionLibraryGenerator(object):
 
         Returns
         -------
-        diffraction_library : dict of :class:`DiffractionData`
+        diffraction_library : dict of :class:`DiffractionSimulation`
             Mapping of Euler angles of rotation to diffraction data objects.
 
         """

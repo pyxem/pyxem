@@ -22,6 +22,7 @@ from pymatgen import Lattice, Structure
 
 from .diffraction_signal import ElectronDiffraction
 from .diffraction_generator import ElectronDiffractionCalculator
+from .library_generator import DiffractionLibraryGenerator
 
 __author__ = "Duncan Johnstone"
 __copyright__ = "Copyright 2016, Python Crystallographic Electron Microscopy"
