@@ -119,11 +119,21 @@ class ElectronDiffraction(Signal2D):
         dy.offset = -offset[1]
         dy.units = '$A^{-1}$'
 
-    def plot_interactive_virtual_image(self, radius):
-        """Returns virtual images
+    def plot_interactive_virtual_image(self, inner_radius, outer_radius):
+        """Plots an interactive virtual image formed with a circular or annular
+        virtual aperture.
+
+        Parameters
+        ----------
+        inner_radius: float
+            Inner radius annular virtual aperture (if None a circular aperture
+            is used) in reciprocal Angstroms
+        outer_radius: float
+            Outer radius of the cirucular or annular virtual aperture in
+            reciprocal Angstroms.
         """
         self.plot()
-        ap = roi.CircleROI(cx=0., cy=0., r=radius)
+        ap = roi.CircleROI(cx=0., cy=0., r_inner=inner_radius, r=outer_radius)
         ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
         ap.interactive(self, navigation_signal='same').plot()
 
