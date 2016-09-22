@@ -103,7 +103,7 @@ class ElectronDiffraction(Signal2D):
         """
         #TODO: extend to get calibration from a list of stored calibrations for
         #the camera length recorded in metadata.
-        if offset=None:
+        if offset==None:
             offset = np.array(self.axes_manager.signal_shape)/2
 
         dx = self.axes_manager[2]
