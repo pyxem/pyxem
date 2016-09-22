@@ -128,7 +128,13 @@ class ElectronDiffraction(Signal2D):
         #TODO: if roi is None then plots circular aperture around centre with
         #interactivity enabled to move the aperture around and update in real
         #time using HyperSpy events.
-        pass
+        if roi:
+            pass
+        else:
+            roi = hs.roi.CircleROI(cx=0.463808, cy=0.31174, r=0.0342)
+
+        roi.add_widget(dp, axes=dp.axes_manager.signal_axes, color='red')
+        roi.interactive(dp, navigation_signal='same').plot()
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
