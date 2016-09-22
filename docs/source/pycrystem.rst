@@ -1,6 +1,13 @@
 pycrystem package
 =================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pycrystem.utils
+
 Submodules
 ----------
 
@@ -20,18 +27,10 @@ pycrystem.diffraction_signal module
     :undoc-members:
     :show-inheritance:
 
-pycrystem.expt_utils module
----------------------------
+pycrystem.library_generator module
+----------------------------------
 
-.. automodule:: pycrystem.expt_utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pycrystem.sim_utils module
---------------------------
-
-.. automodule:: pycrystem.sim_utils
+.. automodule:: pycrystem.library_generator
     :members:
     :undoc-members:
     :show-inheritance:
