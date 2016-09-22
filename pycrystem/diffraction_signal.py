@@ -18,18 +18,13 @@
 from __future__ import division
 
 from hyperspy.signals import Signal2D, Signal1D
+from hyperspy import roi
+import numpy as np
 from pycrystem.utils.expt_utils import *
 
 """
-This module implements an Electron Diffraction signal class.
+Signal class object for the
 """
-
-__author_ = "Duncan Johnstone"
-__copyright__ = "Copyright 2016, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Duncan Johnstone"
-__email__ = "duncanjohnstone@live.co.uk"
-__date__ = 9/15/16
 
 
 class ElectronDiffraction(Signal2D):
@@ -96,38 +91,51 @@ class ElectronDiffraction(Signal2D):
             md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                         exposure_time)
 
-    def set_calibration(self, calibration):
-        """Set pixel size in reciprocal Angstroms.
+    def set_calibration(self, calibration, offset=None):
+        """Set pixel size in reciprocal Angstroms and origin location.
 
         Parameters
         ----------
-        calibration (float): Calibration in reciprocal Angstroms per pixel
+        calibration: float
+            Calibration in reciprocal Angstroms per pixel
+        offset: tuple
+            Offset of the pattern centre from the
         """
-        #TODO: update axes manager for the appropriate calibration if None it
-        #would be ideal to get this from a list of stored calibrations for the
-        #particular camera length
-        pass
+        #TODO: extend to get calibration from a list of stored calibrations for
+        #the camera length recorded in metadata.
+        if offset==None:
+            offset = np.array(self.axes_manager.signal_shape)/2 * calibration
 
-    def get_virtual_image(self, roi=None):
-        """Returns virtual images
+        dx = self.axes_manager[2]
+        dy = self.axes_manager[3]
+
+        dx.name = 'dx'
+        dx.scale = calibration
+        dx.offset = -offset[0]
+        dx.units = '$A^{-1}$'
+
+        dy.name = 'dy'
+        dy.scale = calibration
+        dy.offset = -offset[1]
+        dy.units = '$A^{-1}$'
+
+    def plot_interactive_virtual_image(self, inner_radius, outer_radius):
+        """Plots an interactive virtual image formed with a circular or annular
+        virtual aperture.
+
+        Parameters
+        ----------
+        inner_radius: float
+            Inner radius annular virtual aperture (if None a circular aperture
+            is used) in reciprocal Angstroms
+        outer_radius: float
+            Outer radius of the cirucular or annular virtual aperture in
+            reciprocal Angstroms.
         """
-        #TODO: if roi is None then return VBF and annular VDF. If roi is
-        #specified then return the vitual image associated with that ROI.
-        pass
-
-    def plot_virtual_image(self, roi=None, interactive=True):
-        """Plots a virtual image
-        """
-        #TODO: if roi is None then plots circular aperture around centre with
-        #interactivity enabled to move the aperture around and update in real
-        #time using HyperSpy events.
-        if roi:
-            pass
-        else:
-            roi = hs.roi.CircleROI(cx=0.463808, cy=0.31174, r=0.0342)
-
-        roi.add_widget(dp, axes=dp.axes_manager.signal_axes, color='red')
-        roi.interactive(dp, navigation_signal='same').plot()
+        self.plot()
+        ap = roi.CircleROI(cx=0., cy=0., r_inner=inner_radius, r=outer_radius)
+        ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        ap.interactive(self, navigation_signal='same').plot()
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
