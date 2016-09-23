@@ -23,15 +23,8 @@ import numpy as np
 from pycrystem.utils.expt_utils import *
 
 """
-This module implements an Electron Diffraction signal class.
+Signal class for Electron Diffraction Data
 """
-
-__author_ = "Duncan Johnstone"
-__copyright__ = "Copyright 2016, The Materials Project"
-__version__ = "0.1"
-__maintainer__ = "Duncan Johnstone"
-__email__ = "duncanjohnstone@live.co.uk"
-__date__ = 9/15/16
 
 
 class ElectronDiffraction(Signal2D):
