@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 
 
@@ -27,24 +29,37 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
 
     References
     ----------
-    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through template matching,” vol. 50, no. 1, pp. 87–99, 2005.
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
 
     """
-    ax = image.axes_manager.signal_axes[0]
-    ay = image.axes_manager.signal_axes[1]
+    # Fetch the axes
+    x_axis = image.axes_manager.signal_axes[0]
+    y_axis = image.axes_manager.signal_axes[1]
+
+    # Transform the pattern into image pixel space
     x = pattern.coordinates[:, 0]
     y = pattern.coordinates[:, 1]
-    x = x/ax.scale * scale
-    y = y/ay.scale * scale
-    x -= ax.offset/ax.scale + offset[0]
-    y -= ay.offset/ay.scale + offset[1]
+    x = x/x_axis.scale * scale
+    y = y/y_axis.scale * scale
+    x -= x_axis.offset/x_axis.scale + offset[0]
+    y -= y_axis.offset/y_axis.scale + offset[1]
     x = x.astype(int)
     y = y.astype(int)
-    condition = np.intersect1d(x < ax.size, y < ay.size)
+
+    # Constrain the positions to avoid `IndexError`s
+    x_bounds = np.intersect1d(0 <= x, x < x_axis.size)
+    y_bounds = np.intersect1d(0 <= y, y < y_axis.size)
+    condition = np.intersect1d(x_bounds, y_bounds)
+
+    # Get point-by-point intensities
     image_intensities = image.data[x[condition], y[condition]]
     pattern_intensities = pattern.intensities[condition]
     return _correlate(image_intensities, pattern_intensities)
 
 
 def _correlate(intensities_1, intensities_2):
-    return np.dot(intensities_1, intensities_2) / (np.sqrt(np.dot(intensities_1, intensities_1)) * np.sqrt(np.dot(intensities_2, intensities_2)))
+    return np.dot(intensities_1, intensities_2) / (
+        np.sqrt(np.dot(intensities_1, intensities_1)) *
+        np.sqrt(np.dot(intensities_2, intensities_2))
+    )
