@@ -107,6 +107,8 @@ def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
         The range of allowable azimuthal angles.
     resolution : float
         The angular resolution of the grid in degrees.
+    no_center : bool
+        If true, `theta` values will not start at zero.
 
     Returns
     -------
@@ -137,3 +139,51 @@ def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
         [(theta, phi) for phis, theta in zip(phi_grid, theta_grid) for phi in
          phis])
     return s2_grid
+
+
+def equispaced_so3_grid(alpha_max, beta_max, gamma_max, resolution=2.5,
+                        alpha_min=0, beta_min=0, gamma_min=0):
+    """Creates an approximately equispaced SO(3) grid.
+
+    Parameters
+    ----------
+    alpha_max : float
+    beta_max : float
+    gamma_max : float
+    resolution : float, optional
+    alpha_min : float, optional
+    beta_min : float, optional
+    gamma_min : float, optional
+
+    Returns
+    -------
+    so3_grid : array-like
+        Each row contains `(alpha, beta, gamma)`, the three Euler angles on the
+        SO(3) grid.
+
+    """
+
+    def no_center(res):
+        if round(2 * pi / res) % 2 == 0:
+            return True
+        else:
+            return False
+
+    s2_grid = equispaced_s2_grid((beta_min, beta_max), (alpha_min, alpha_max),
+                                 resolution, no_center=no_center(resolution))
+
+    gamma_min, gamma_max = radians(gamma_min), radians(gamma_max)
+    resolution = radians(resolution)
+
+    beta, alpha = s2_grid[:, 0], s2_grid[:, 1]
+    real_part = np.cos(beta) * np.cos(alpha) + np.cos(alpha)
+    imaginary_part = -(np.cos(beta) + 1) * np.sin(alpha)
+    d_gamma = np.arctan2(imaginary_part, real_part)
+    ap2 = int(np.round(gamma_max / resolution))
+    d_gamma = np.tile(d_gamma, (ap2, 1))
+    gamma = np.arange(ap2) * gamma_max / ap2 - gamma_max / 2
+    gamma = (d_gamma + np.tile(gamma.T, (len(s2_grid), 1)).T).flatten()
+    alpha = np.tile(alpha, (ap2, 1)).flatten()
+    beta = np.tile(beta, (ap2, 1)).flatten()
+    so3_grid = np.vstack((alpha, beta, gamma)).T
+    return so3_grid
