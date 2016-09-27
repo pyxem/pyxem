@@ -48,11 +48,12 @@ def run_full_process_on_fpd_dataset(
 
 def run_full_process_on_simulated_image(
         filename,
-        crop=120.):
+        crop=120.,
+        radial_bins=None):
     """Fully process a simulated STEM diffraction
     image, using the same methods as the experimental
-    ones. Assumes the image is calibrated to mrad, and
-    the x- and y-scale has is equal.
+    ones. Assumes the image is calibrated to mrad.
+    The x- and y-scale does not need to be the same.
 
     Parameters:
     -----------
@@ -67,21 +68,20 @@ def run_full_process_on_simulated_image(
         used in the calculations. Default value is
         120 mrad, which will include the first 
         STO laue circle.
+    radial_bins : int or list of scalars, optional
     """
+    if radial_bins is None:
+        radial_bins = 500
     s_diff = hs.load(filename)
     s_diff = s_diff.isig[
             float(-crop):float(crop),
             float(-crop):float(crop)]
+    radial_data, xaxis = sdri._get_radial_profile_of_simulated_image(
+            s_diff, bins=radial_bins)
 
-    radial_data = sdri._get_radial_profile_of_diff_image(
-            s_diff.data, 
-            s_diff.axes_manager[0].value2index(0), 
-            s_diff.axes_manager[1].value2index(0))
-    
     s_radial = hs.signals.Signal1D(radial_data)
-    s_radial.axes_manager[0].scale = 0.5*(
-            s_diff.axes_manager[0].scale +
-            s_diff.axes_manager[1].scale)
+    s_radial.axes_manager[0].scale = xaxis[1]-xaxis[0]
+    s_radial.axes_manager[0].offset = xaxis[0]
     s_radial.axes_manager[0].units = s_diff.axes_manager[0].units
 
     s_lfo = s_radial.isig[47.:78.]
@@ -91,6 +91,8 @@ def run_full_process_on_simulated_image(
             s_lfo)
     m_sto = lzm.model_sto(s_sto)
 
+    radial_signal_filename = filename.replace(".hdf5","_radial.hdf5")
+    s_radial.save(radial_signal_filename, overwrite=True)
     lfo_model_filename = filename.replace(".hdf5","_lfo_model.hdf5")
     m_lfo.save(lfo_model_filename, overwrite=True)
     sto_model_filename = filename.replace(".hdf5","_sto_model.hdf5")

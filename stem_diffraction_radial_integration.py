@@ -187,6 +187,46 @@ def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y):
 
     return(radialProfile)
 
+def _get_radial_profile_of_simulated_image(signal_simulated, bins=100):
+    """Radially integrates a single simulated image.
+    There might be some artifacts at very low scattering angles,
+    due to the small amount of pixels at the center.
+    This will mostly effect the center beam.
+    Having less bins will reduce these artifacts, but this will
+    also reduce the angle resolution.
+
+    Parameters
+    ----------
+    signal_simulated : HyperSpy signal object
+    bins : numpy array, optional
+
+    Returns
+    -------
+    Tuple of two numpy arrays (hist, xaxis).
+    hist : 1D numpy array, intensity radial profile.
+    xaxis : 1D numpy array, the scattering angle
+    """
+    image = signal_simulated.data
+
+    axesX = signal_simulated.axes_manager[1]
+    axesY = signal_simulated.axes_manager[0]
+
+    x, y = np.mgrid[
+            axesX.low_value:axesX.high_value+axesX.scale/2:axesX.scale,
+            axesY.low_value:axesY.high_value+axesY.scale/2:axesY.scale,
+            ]
+
+    r = (x**2 + y**2)**0.5
+    hist, bin_edges = np.histogram(r.ravel(), weights=image.ravel(), bins=bins)
+    number_of_bins, temp_bin_edges = np.histogram(r.ravel(), bins=bins)
+    number_of_bins[number_of_bins == 0] = 1
+
+    xaxis = 0.5*(bin_edges[1:]+bin_edges[:-1])
+
+    hist = hist/number_of_bins
+
+    return(hist, xaxis)
+
 def _get_lowest_index_radial_array(radial_array):
     """Returns the lowest index of in a radial array.
 
