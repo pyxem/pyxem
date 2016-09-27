@@ -53,9 +53,9 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
     condition = np.logical_and(x_bounds, y_bounds)
 
     # Get point-by-point intensities
-    image_intensities = image.data.T[x[condition], y[condition]]
+    image_intensities = image.data[x[condition], y[condition]]
     pattern_intensities = pattern.intensities[condition]
-    return image_intensities, pattern_intensities
+    return _correlate(image_intensities, pattern_intensities)
 
 
 def _correlate(intensities_1, intensities_2):
