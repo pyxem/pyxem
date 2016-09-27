@@ -77,7 +77,8 @@ class DiffractionLibraryGenerator(object):
             axis = orientation[0]
             angle = orientation[1]
             euler = axangle2euler(axis, angle)
-            rotation = RotationTransformation(axis, angle)
+            rotation = RotationTransformation(axis, angle,
+                                              angle_in_radians=True)
             rotated_structure = rotation.apply_transformation(structure)
             data = diffractor.calculate_ed_data(rotated_structure)
             diffraction_library[euler] = data
