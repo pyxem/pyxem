@@ -23,7 +23,7 @@ import numpy as np
 from pycrystem.utils.expt_utils import *
 
 """
-Signal class object for the
+Signal class for Electron Diffraction Data
 """
 
 
@@ -106,8 +106,8 @@ class ElectronDiffraction(Signal2D):
         if offset==None:
             offset = np.array(self.axes_manager.signal_shape)/2 * calibration
 
-        dx = self.axes_manager[2]
-        dy = self.axes_manager[3]
+        dx = self.axes_manager.signal_axes[0]
+        dy = self.axes_manager.signal_axes[1]
 
         dx.name = 'dx'
         dx.scale = calibration
