@@ -48,9 +48,9 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
     y = y.astype(int)
 
     # Constrain the positions to avoid `IndexError`s
-    x_bounds = np.intersect1d(0 <= x, x < x_axis.size)
-    y_bounds = np.intersect1d(0 <= y, y < y_axis.size)
-    condition = np.intersect1d(x_bounds, y_bounds)
+    x_bounds = np.logical_and(0 <= x, x < x_axis.size)
+    y_bounds = np.logical_and(0 <= y, y < y_axis.size)
+    condition = np.logical_and(x_bounds, y_bounds)
 
     # Get point-by-point intensities
     image_intensities = image.data[x[condition], y[condition]]
