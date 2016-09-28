@@ -3,7 +3,8 @@
 import numpy as np
 
 
-def correlate(image, pattern, scale=1., offset=(0., 0.)):
+def correlate(image, pattern, scale=1., offset=(0., 0.),
+              axes_manager=None):
     """The correlation between a diffraction pattern and a simulation.
 
     Calculated using
@@ -12,15 +13,18 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
 
     Parameters
     ----------
-    image : :class:`ElectronDiffraction`
-        A single electron diffraction signal. Should be appropriately scaled
-        and centered.
+    image : {:class:`ElectronDiffraction`, :class:`ndarray`}
+        Either a single electron diffraction signal (should be appropriately scaled
+        and centered) or a 1D or 2D numpy array.
     pattern : :class:`DiffractionSimulation`
         The pattern to compare to.
     scale : float
         A scale to fine-tune correlation.
     offset : :obj:tuple of :obj:float
         A centre offset to fine-tune correlation.
+    axes_manager : :class:`AxesManager`
+        If image is an array, the appropriate AxesManager to get axes, scaling
+        and shape information
 
     Returns
     -------
@@ -34,8 +38,22 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
 
     """
     # Fetch the axes
-    x_axis = image.axes_manager.signal_axes[0]
-    y_axis = image.axes_manager.signal_axes[1]
+    if axes_manager is None:
+        if isinstance(image, np.ndarray):
+            raise ValueError("No scaling information given")
+        else:
+            axes_manager = image.axes_manager
+            image = image.data
+    x_axis = axes_manager.signal_axes[0]
+    y_axis = axes_manager.signal_axes[1]
+
+    # Ensure correct data shape
+    shape = image.shape
+    if len(shape) not in [1, 2]:
+        raise ValueError("Only support 2D and 1D (i.e. 'raveled 2D') arrays")
+    else:
+        if len(shape) == 1:
+            image = image.reshape(axes_manager.signal_shape[::-1])
 
     # Transform the pattern into image pixel space
     x = pattern.coordinates[:, 0]
@@ -53,7 +71,7 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
     condition = np.logical_and(x_bounds, y_bounds)
 
     # Get point-by-point intensities
-    image_intensities = image.data[x[condition], y[condition]]
+    image_intensities = image[x[condition], y[condition]]
     pattern_intensities = pattern.intensities[condition]
     return _correlate(image_intensities, pattern_intensities)
 
