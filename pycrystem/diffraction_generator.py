@@ -152,7 +152,7 @@ class ElectronDiffractionCalculator(object):
 class DiffractionSimulation:
 
     def __init__(self, coordinates=None, indices=None, intensities=None,
-                 scale=(1., 1.), offset=(0., 0.)):
+                 scale=1., offset=(0., 0.)):
         """Holds the result of a given diffraction pattern.
 
         coordinates : array-like
@@ -164,24 +164,24 @@ class DiffractionSimulation:
             The distance between the reciprocal lattice points that intersect
             the Ewald sphere and the Ewald sphere itself in reciprocal
             angstroms.
-        scale : :obj:`tuple` of :obj:`float`, optional
+        scale : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
             The x- and y-scales of the pattern, with respect to the original
             reciprocal angstrom coordinates.
         offset : :obj:`tuple` of :obj:`float`, optional
             The x-y offset of the pattern in reciprocal angstroms. Defaults to
-            zero offset.
+            zero in each direction.
         """
         self.coordinates = coordinates
         self.indices = indices
         self.intensities = intensities
+        if isinstance(scale, float) or isinstance(scale, int):
+            scale = (scale, scale)
         self.scale = scale
         self.offset = offset
 
     @property
     def calibrated_coordinates(self):
-        """Offset and scaled coordinates.
-
-        """
+        """Offset and scaled coordinates."""
         coordinates = np.copy(self.coordinates)
         coordinates[:, 0] += self.offset[0]
         coordinates[:, 1] += self.offset[1]

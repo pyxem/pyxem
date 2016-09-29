@@ -125,3 +125,34 @@ class DiffractionLibrary(dict):
                 euler_angle_best = euler_angle
         diffraction_pattern_best = self[euler_angle_best]
         return euler_angle_best, diffraction_pattern_best, correlation_best
+
+    def set_scale(self, scale):
+        """Sets the scale of every diffraction pattern simulation in the
+        library.
+
+        Parameters
+        ----------
+        scale : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
+            The x- and y-scales of the patterns, with respect to the original
+            reciprocal angstrom coordinates.
+
+        """
+        for diffraction_pattern in self.values():
+            diffraction_pattern.scale = scale
+        return self
+
+    def set_offset(self, offset):
+        """Sets the offset of every diffraction pattern simulation in the
+        library.
+
+        Parameters
+        ----------
+        offset : :obj:`tuple` of :obj:`float`, optional
+            The x-y offset of the patterns in reciprocal angstroms. Defaults to
+            zero in each direction.
+
+        """
+        assert len(offset) == 2
+        for diffraction_pattern in self.values():
+            diffraction_pattern.offset = offset
+        return self
