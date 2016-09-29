@@ -97,7 +97,7 @@ class DiffractionLibrary(dict):
         pass
 
     def correlate(self, image):
-        """Finds the best-correlated simulation in the library.
+        """Finds the correlation between an image and the entire library.
 
         Parameters
         ----------
@@ -107,24 +107,15 @@ class DiffractionLibrary(dict):
 
         Returns
         -------
-        euler_angle_best : :obj:tuple of :obj:float
-            `(alpha, beta, gamma)`, the Euler angles describing the rotation of
-            the best-fit orientation.
-        diffraction_pattern_best : :class:`DiffractionSimulation`
-            The simulated diffraction pattern with the highest correlation.
-        correlation_best : float
-            The coefficient of correlation of the best fit.
+        correlations : dict
+            A mapping of Euler angles to correlation values.
 
         """
-        correlation_best = 0
-        euler_angle_best = None
+        correlations = {}
         for euler_angle, diffraction_pattern in self.items():
             correlation = correlate(image, diffraction_pattern)
-            if correlation > correlation_best:
-                correlation_best = correlation
-                euler_angle_best = euler_angle
-        diffraction_pattern_best = self[euler_angle_best]
-        return euler_angle_best, diffraction_pattern_best, correlation_best
+            correlations[euler_angle] = correlation
+        return correlations
 
     def set_scale(self, scale):
         """Sets the scale of every diffraction pattern simulation in the
