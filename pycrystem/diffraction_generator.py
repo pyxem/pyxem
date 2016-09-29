@@ -174,8 +174,7 @@ class DiffractionSimulation:
         self.coordinates = coordinates
         self.indices = indices
         self.intensities = intensities
-        if isinstance(scale, float) or isinstance(scale, int):
-            scale = (scale, scale)
+        self._scale = (1., 1.)
         self.scale = scale
         self.offset = offset
 
@@ -188,6 +187,20 @@ class DiffractionSimulation:
         coordinates[:, 0] *= self.scale[0]
         coordinates[:, 1] *= self.scale[1]
         return coordinates
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale):
+        if isinstance(scale, float) or isinstance(scale, int):
+            self._scale = (scale, scale)
+        elif len(scale) == 2:
+            self._scale = scale
+        else:
+            raise ValueError("`scale` must be a float, int, or length-2 tuple"
+                             "of floats or ints.")
 
     def plot(self):
         """Returns the diffraction data as a plot.
