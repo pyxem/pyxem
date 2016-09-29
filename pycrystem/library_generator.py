@@ -26,8 +26,7 @@ from pymatgen.transformations.standard_transformations \
 from transforms3d.euler import euler2axangle, axangle2euler
 from tqdm import tqdm
 
-LAUE = ["-1", "2/m", "mmm", "4/m", "4/mmm",
-        "-3", "-3m", "6/m", "6/mmm", "m-3", "m-3m"]
+from .utils import correlate
 
 
 class DiffractionLibraryGenerator(object):
@@ -96,3 +95,33 @@ class DiffractionLibrary(dict):
 
         """
         pass
+
+    def correlate(self, image):
+        """Finds the best-correlated simulation in the library.
+
+        Parameters
+        ----------
+        image : {:class:`ElectronDiffraction`, :class:`ndarray`}
+            Either a single electron diffraction signal (should be appropriately
+            scaled and centered) or a 1D or 2D numpy array.
+
+        Returns
+        -------
+        euler_angle_best : :obj:tuple of :obj:float
+            `(alpha, beta, gamma)`, the Euler angles describing the rotation of
+            the best-fit orientation.
+        diffraction_pattern_best : :class:`DiffractionSimulation`
+            The simulated diffraction pattern with the highest correlation.
+        correlation_best : float
+            The coefficient of correlation of the best fit.
+
+        """
+        correlation_best = 0
+        euler_angle_best = None
+        for euler_angle, diffraction_pattern in self.items():
+            correlation = correlate(image, diffraction_pattern)
+            if correlation > correlation_best:
+                correlation_best = correlation
+                euler_angle_best = euler_angle
+        diffraction_pattern_best = self[euler_angle_best]
+        return euler_angle_best, diffraction_pattern_best, correlation_best
