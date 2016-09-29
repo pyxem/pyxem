@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def correlate(image, pattern, scale=1., offset=(0., 0.)):
+def correlate(image, pattern):
     """The correlation between a diffraction pattern and a simulation.
 
     Calculated using
@@ -17,10 +17,6 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
         and centered.
     pattern : :class:`DiffractionSimulation`
         The pattern to compare to.
-    scale : float
-        A scale to fine-tune correlation.
-    offset : :obj:tuple of :obj:float
-        A centre offset to fine-tune correlation.
 
     Returns
     -------
@@ -38,14 +34,8 @@ def correlate(image, pattern, scale=1., offset=(0., 0.)):
     y_axis = image.axes_manager.signal_axes[1]
 
     # Transform the pattern into image pixel space
-    x = pattern.coordinates[:, 0]
-    y = pattern.coordinates[:, 1]
-    x = x/x_axis.scale * scale
-    y = y/y_axis.scale * scale
-    x -= x_axis.offset/x_axis.scale + offset[0]
-    y -= y_axis.offset/y_axis.scale + offset[1]
-    x = x.astype(int)
-    y = y.astype(int)
+    x = pattern.calibrated_coordinates[:, 0].astype(int)
+    y = pattern.calibrated_coordinates[:, 1].astype(int)
 
     # Constrain the positions to avoid `IndexError`s
     x_bounds = np.logical_and(0 <= x, x < x_axis.size)
