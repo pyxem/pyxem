@@ -151,7 +151,8 @@ class ElectronDiffractionCalculator(object):
 
 class DiffractionSimulation:
 
-    def __init__(self, coordinates=None, indices=None, intensities=None):
+    def __init__(self, coordinates=None, indices=None, intensities=None,
+                 scale=1., offset=(0., 0.)):
         """Holds the result of a given diffraction pattern.
 
         coordinates : array-like
@@ -163,10 +164,43 @@ class DiffractionSimulation:
             The distance between the reciprocal lattice points that intersect
             the Ewald sphere and the Ewald sphere itself in reciprocal
             angstroms.
+        scale : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
+            The x- and y-scales of the pattern, with respect to the original
+            reciprocal angstrom coordinates.
+        offset : :obj:`tuple` of :obj:`float`, optional
+            The x-y offset of the pattern in reciprocal angstroms. Defaults to
+            zero in each direction.
         """
         self.coordinates = coordinates
         self.indices = indices
         self.intensities = intensities
+        self._scale = (1., 1.)
+        self.scale = scale
+        self.offset = offset
+
+    @property
+    def calibrated_coordinates(self):
+        """Offset and scaled coordinates."""
+        coordinates = np.copy(self.coordinates)
+        coordinates[:, 0] += self.offset[0]
+        coordinates[:, 1] += self.offset[1]
+        coordinates[:, 0] *= self.scale[0]
+        coordinates[:, 1] *= self.scale[1]
+        return coordinates
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale):
+        if isinstance(scale, float) or isinstance(scale, int):
+            self._scale = (scale, scale)
+        elif len(scale) == 2:
+            self._scale = scale
+        else:
+            raise ValueError("`scale` must be a float, int, or length-2 tuple"
+                             "of floats or ints.")
 
     def plot(self):
         """Returns the diffraction data as a plot.
