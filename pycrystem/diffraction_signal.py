@@ -443,7 +443,7 @@ class ElectronDiffraction(Signal2D):
         self.map(filters.rank.mean, selem=square(3))
         self.data = self.data / self.data.max()
 
-    def get_gvector_magnitudes(self, peaks, calibration):
+    def get_gvector_magnitudes(self, peaks):
         """Obtain the magnitude of g-vectors in calibrated units
         from a structured array containing peaks in array units.
 
@@ -479,7 +479,7 @@ class ElectronDiffraction(Signal2D):
 
         return gvectors
 
-    def get_gvector_indexation(signal, glengths, calc_peaks, threshold):
+    def get_gvector_indexation(self, glengths, calc_peaks, threshold):
         """Index the magnitude of g-vectors in calibrated units
         from a structured array containing gvector magnitudes.
 
@@ -497,12 +497,12 @@ class ElectronDiffraction(Signal2D):
         """
         # TODO: Make it so that the threshold can be specified as a fraction of
         # the g-vector magnitude.
-        arr_shape = (signal.axes_manager._navigation_shape_in_array
-                     if signal.axes_manager.navigation_size > 0
+        arr_shape = (self.axes_manager._navigation_shape_in_array
+                     if self.axes_manager.navigation_size > 0
                      else [1, ])
         gindex = np.zeros(arr_shape, dtype=object)
 
-        for i in dp.axes_manager:
+        for i in self.axes_manager:
             it = (i[1], i[0])
             res = []
             for j in np.arange(len(glengths[it])):
