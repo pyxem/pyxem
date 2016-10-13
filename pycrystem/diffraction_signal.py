@@ -421,7 +421,7 @@ class ElectronDiffraction(Signal2D):
         #
         for i in self.axes_manager:
             it = (i[1], i[0])
-            gvectors[it] = radial_average(z, center=c[index])
+            gvectors[it] = radial_average(self.data[it], center=c[it])
 
         return Signal1D(rp)
 
