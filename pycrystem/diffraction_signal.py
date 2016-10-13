@@ -120,7 +120,7 @@ class ElectronDiffraction(Signal2D):
         dy.offset = -offset[1]
         dy.units = '$A^{-1}$'
 
-    def plot_interactive_virtual_image(self, inner_radius, outer_radius):
+    def plot_interactive_virtual_image(self, roi):
         """Plots an interactive virtual image formed with a circular or annular
         virtual aperture.
 
@@ -134,9 +134,25 @@ class ElectronDiffraction(Signal2D):
             reciprocal Angstroms.
         """
         self.plot()
-        ap = roi.CircleROI(cx=0., cy=0., r_inner=inner_radius, r=outer_radius)
-        ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-        ap.interactive(self, navigation_signal='same').plot()
+        roi.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        roi.interactive(self, navigation_signal='same').plot()
+
+    def get_virtual_image(self, roi):
+        """Plots an interactive virtual image formed with a circular or annular
+        virtual aperture.
+
+        Parameters
+        ----------
+        inner_radius: float
+            Inner radius annular virtual aperture (if None a circular aperture
+            is used) in reciprocal Angstroms
+        outer_radius: float
+            Outer radius of the cirucular or annular virtual aperture in
+            reciprocal Angstroms.
+        """
+        self.plot()
+        roi.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        roi.interactive(self, navigation_signal='same').plot()
 
     def plot_line_profile(self, x1, y1, x2, y2, width):
         """Plots an interactive line profile.
@@ -427,9 +443,9 @@ class ElectronDiffraction(Signal2D):
         self.map(filters.rank.mean, selem=square(3))
         self.data = self.data / self.data.max()
 
-    def index_reflections(self, peaks, g_vectors):
-        """Index reflections found in the experimental with respect to specified
-        crystal structures.
+    def get_gvector_magnitudes(self, peaks, calibration):
+        """Obtain the magnitude of g-vectors in calibrated units
+        from a structured array containing peaks in array units.
 
         Parameters
         ----------
@@ -438,13 +454,64 @@ class ElectronDiffraction(Signal2D):
         -------
 
         """
-        #TODO: Basic idea is to find peaks with their lengths reported in
-        #reciprocal Angstroms. These lengths can then be compared to a list of
-        #g-vector lengths for specified structures to achieve indexation of the
-        #reflections. The deviation from the expected value should be stored for
-        #each reflection and it should be possible to plot the indexed peaks on
-        #top of the signal with their labels.
-        pass
+        # Allocate an empty structured array in which to store the gvector
+        # magnitudes.
+        arr_shape = (self.axes_manager._navigation_shape_in_array
+                     if self.axes_manager.navigation_size > 0
+                     else [1, ])
+        gvectors = np.zeros(arr_shape, dtype=object)
+        #
+        for i in self.axes_manager:
+            it = (i[1], i[0])
+            res = []
+            centered = peaks[it] - [256,256]
+            for j in np.arange(len(centered)):
+                res.append(np.linalg.norm(centered[j]))
+
+            cent = peaks[it][np.where(res == min(res))[0]][0]
+            vectors = peaks[it] - cent
+
+            mags = []
+            for k in np.arange(len(vectors)):
+                mags.append(np.linalg.norm(vectors[k]))
+            maga = np.asarray(mags)
+            gvectors[it] = maga * self.axes_manager.signal_axes[0].scale
+
+        return gvectors
+
+    def get_gvector_indexation(signal, glengths, calc_peaks, threshold):
+        """Index the magnitude of g-vectors in calibrated units
+        from a structured array containing gvector magnitudes.
+
+        Parameters
+        ----------
+
+        signal : The original data to be indexed.
+
+        glengths : A structured array containing the
+
+
+        Returns
+        -------
+
+        """
+        # TODO: Make it so that the threshold can be specified as a fraction of
+        # the g-vector magnitude.
+        arr_shape = (signal.axes_manager._navigation_shape_in_array
+                     if signal.axes_manager.navigation_size > 0
+                     else [1, ])
+        gindex = np.zeros(arr_shape, dtype=object)
+
+        for i in dp.axes_manager:
+            it = (i[1], i[0])
+            res = []
+            for j in np.arange(len(glengths[it])):
+                peak_diff = (calc_peaks.T[1] - glengths[it][j]) * (calc_peaks.T[1] - glengths[it][j])
+                res.append((calc_peaks[np.where(peak_diff < threshold)],
+                            peak_diff[np.where(peak_diff < threshold)]))
+            gindex[it] = res
+
+        return gindex
 
     def get_reflection_intensities(self, indexed_reflections):
         """
