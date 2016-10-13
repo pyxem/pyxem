@@ -379,7 +379,8 @@ class ElectronDiffraction(Signal2D):
         -------
 
         """
-        #TODO: Preserve knowledge of basis.
+        #TODO: Preserve knowledge of basis - and eventually remove when the
+        # version in devlopment for HyperSpy is completed.
         a = angle * np.pi/180.0
         t = np.array([[math.cos(a), math.sin(a), 0.],
                       [-math.sin(a), math.cos(a), 0.],
@@ -408,23 +409,21 @@ class ElectronDiffraction(Signal2D):
         radial_average
         get_direct_beam_position
         """
-        #TODO: preserve the navigation dimensions!
         if centers == None:
             c = self.get_direct_beam_position(radius=10)
         else:
             c = centers
-        rp = []
 
-        for z, index in zip(self._iterate_signal(),
-                            np.arange(0, self.axes_manager.navigation_size, 1)):
-            rp.append(radial_average(z, center=c[index]))
+        arr_shape = (self.axes_manager._navigation_shape_in_array
+                     if self.axes_manager.navigation_size > 0
+                     else [1, ])
+        rp = np.zeros(arr_shape, dtype=object)
+        #
+        for i in self.axes_manager:
+            it = (i[1], i[0])
+            gvectors[it] = radial_average(z, center=c[index])
 
-        rp = np.array(rp)
-        #rp.resize((self.axes_manager.navigation_shape,
-        #rp.shape[-1]))
-        radial_profile = Signal1D(rp)
-
-        return radial_profile
+        return Signal1D(rp)
 
     def remove_background(self, h):
         """Perform background subtraction.
@@ -479,6 +478,20 @@ class ElectronDiffraction(Signal2D):
 
         return gvectors
 
+    def get_reflection_intensities(self, indexed_reflections):
+        """
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        # TODO: For each peak in a structured array of peaks obtain the
+        # intensity of the reflection associated with it. Multiple methods
+        # should be implemented including just summing or fitting a Gaussian.
+        pass
+
     def get_gvector_indexation(self, glengths, calc_peaks, threshold):
         """Index the magnitude of g-vectors in calibrated units
         from a structured array containing gvector magnitudes.
@@ -486,13 +499,18 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
 
-        signal : The original data to be indexed.
-
         glengths : A structured array containing the
 
+        calc_peaks : A structured array
+
+        threshold : Float indicating the maximum allowed deviation from the
+            theoretical value.
 
         Returns
         -------
+
+        gindex : Structured array containing possible indexation results
+            consistent with the data.
 
         """
         # TODO: Make it so that the threshold can be specified as a fraction of
@@ -512,22 +530,6 @@ class ElectronDiffraction(Signal2D):
             gindex[it] = res
 
         return gindex
-
-    def get_reflection_intensities(self, indexed_reflections):
-        """
-
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        #TODO:
-        #
-        #
-        pass
 
     def decomposition(self,
                       normalize_poissonian_noise=True,
