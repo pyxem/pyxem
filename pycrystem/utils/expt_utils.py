@@ -76,12 +76,11 @@ def affine_transformation(z, order=3, **kwargs):
 
     return trans
 
-def regional_filter(self, z, h):
+def regional_filter(z, h):
         seed = np.copy(z)
-        seed = z - h
+        seed = seed - h
         mask = z
         dilated = morphology.reconstruction(seed, mask, method='dilation')
-
         return z - dilated
 
 def circular_mask(shape, radius, center):

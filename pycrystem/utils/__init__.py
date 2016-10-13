@@ -34,8 +34,8 @@ def correlate(image, pattern):
     y_axis = image.axes_manager.signal_axes[1]
 
     # Transform the pattern into image pixel space
-    x = pattern.calibrated_coordinates[:, 0].astype(int)
-    y = pattern.calibrated_coordinates[:, 1].astype(int)
+    x = (pattern.calibrated_coordinates[:, 0] + x_axis.size/2).astype(int)
+    y = (pattern.calibrated_coordinates[:, 1] + y_axis.size/2).astype(int)
 
     # Constrain the positions to avoid `IndexError`s
     x_bounds = np.logical_and(0 <= x, x < x_axis.size)

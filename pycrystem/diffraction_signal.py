@@ -20,6 +20,7 @@ from __future__ import division
 from hyperspy.signals import Signal2D, Signal1D
 from hyperspy import roi
 import numpy as np
+
 from pycrystem.utils.expt_utils import *
 
 """
@@ -380,7 +381,7 @@ class ElectronDiffraction(Signal2D):
         #TODO: Add additional methods particularly based on taking radial
         #profiles and fitting a power law or appropriate curve.
         self.data = self.data / self.data.max()
-        self.map(self._regional_filter, h=h)
+        self.map(regional_filter, h=h)
         self.map(filters.rank.mean, selem=square(3))
         self.data = self.data / self.data.max()
 

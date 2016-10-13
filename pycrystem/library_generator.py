@@ -75,7 +75,7 @@ class DiffractionLibraryGenerator(object):
         for orientation in tqdm(orientations):
             axis = orientation[0]
             angle = orientation[1]
-            euler = axangle2euler(axis, angle)
+            euler = axangle2euler(axis, angle, axes='rzyz')
             rotation = RotationTransformation(axis, angle,
                                               angle_in_radians=True)
             rotated_structure = rotation.apply_transformation(structure)
