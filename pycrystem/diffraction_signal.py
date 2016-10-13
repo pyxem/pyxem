@@ -182,19 +182,19 @@ class ElectronDiffraction(Signal2D):
             The variance image as a HyperSpy Signal2D.
         """
         # Crop the data using the roi
-        annulus = roi(self)
+        annulus = roi(self, axes=self.axes_manager.signal_axes)
         annulus.change_dtype('float')
         # Create an empty array to contain the image.
         arr_shape = (annulus.axes_manager._navigation_shape_in_array
-                if annulus.axes_manager.navigation_size > 0
-                else [1, ])
+                     if annulus.axes_manager.navigation_size > 0
+                     else [1, ])
         var_image = np.zeros(arr_shape)
         # Calculate the variance within the roi for each DP.
-        for i in dp.axes_manager:
+        for i in annulus.axes_manager:
             it = (i[1], i[0])
-            var_image[it] = variance(dp.data[it])
+            var_image[it] = variance(annulus.data[it]) / (np.mean(annulus.data[it]) * np.mean(annulus.data[it]))
 
-    return hs.signals.Signal2D(var_image)
+        return Signal2D(var_image)
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
