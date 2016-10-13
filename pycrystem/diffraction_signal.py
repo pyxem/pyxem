@@ -20,6 +20,7 @@ from __future__ import division
 from hyperspy.signals import Signal2D, Signal1D
 from hyperspy import roi
 import numpy as np
+from scipy.ndimage import variance
 from pycrystem.utils.expt_utils import *
 
 """
@@ -144,6 +145,40 @@ class ElectronDiffraction(Signal2D):
         lin = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2, linewidth=width)
         lin.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
         lin.interactive(self, navigation_signal='same').plot()
+
+    def get_variance_image(self, roi):
+        """Form a variance image for a specified region of interest in the
+        diffraction signal.
+
+        The variance image plots the variance of values within a specified
+        set of pixels in the diffraction signal as a function of probe position.
+
+        Parameters
+        ----------
+
+        signal : ElectronDiffraction
+
+        roi : roi
+
+        Returns
+        -------
+        var : Signal2D
+            The variance image as a HyperSpy Signal2D.
+        """
+        # Crop the data using the roi
+        annulus = roi(self)
+        annulus.change_dtype('float')
+        # Create an empty array to contain the image.
+        arr_shape = (annulus.axes_manager._navigation_shape_in_array
+                if annulus.axes_manager.navigation_size > 0
+                else [1, ])
+        var_image = np.zeros(arr_shape)
+        # Calculate the variance within the roi for each DP.
+        for i in dp.axes_manager:
+            it = (i[1], i[0])
+            var_image[it] = variance(dp.data[it])
+
+    return hs.signals.Signal2D(var_image)
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
