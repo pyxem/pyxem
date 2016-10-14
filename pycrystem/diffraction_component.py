@@ -25,28 +25,15 @@ from __future__ import division
 import numpy as np
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
     get_structure_factors
+
+from pymatgen.transformations.standard_transformations \
+    import DeformStructureTransformation
+
 from hyperspy.component import Component
 
 
 class ElectronDiffractionCalculator(Component):
     """Computes electron diffraction patterns for a crystal structure.
-
-    1. Calculate reciprocal lattice of structure. Find all reciprocal points
-       within the limiting sphere given by :math:`\\frac{2}{\\lambda}`.
-
-    2. For each reciprocal point :math:`\\mathbf{g_{hkl}}` corresponding to
-       lattice plane :math:`(hkl)`, compute the Bragg condition
-       :math:`\\sin(\\theta) = \\frac{\\lambda}{2d_{hkl}}`
-
-    3. The intensity of each reflection is then given in the kinematic
-       approximation as the modulus square of the structure factor.
-           .. math::
-                I_{hkl} = F_{hkl}F_{hkl}^*
-
-    .. todo::
-        Include camera length, when implemented.
-    .. todo::
-        Refactor the excitation error to a structure property.
 
     Parameters
     ----------
@@ -61,12 +48,10 @@ class ElectronDiffractionCalculator(Component):
 
     """
 
-    def __init__(self,
-                 accelerating_voltage,
-                 reciprocal_radius,
-                 excitation_error,
-                 structure,
-                 orientation_matrix):
+    def __init__(self, electron_diffraction_calculator,
+                 D11=1., D12=0., D13=0.,
+                 D21=0., D22=1., D23=0.,
+                 D31=0., D32=0., D33=1.):
         Component.__init__(self, ['D11',
                                   'D12',
                                   'D13',
@@ -77,12 +62,18 @@ class ElectronDiffractionCalculator(Component):
                                   'D32',
                                   'D33',
                                   ])
+        self.electron_diffraction_calculator = electron_diffraction_calculator
+        self.D11.value = D11
+        self.D12.value = D12
+        self.D13.value = D13
+        self.D21.value = D21
+        self.D22.value = D22
+        self.D23.value = D23
+        self.D31.value = D31
+        self.D32.value = D32
+        self.D33.value = D33
 
-        self.wavelength.value = get_electron_wavelength(accelerating_voltage)
-        self.reciprocal_radius.value = reciprocal_radius
-        self.excitation_error.value = excitation_error
-
-    def forward_calculator(self, structure):
+    def simulate(self, structure):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -97,13 +88,19 @@ class ElectronDiffractionCalculator(Component):
             The data associated with this structure and diffraction setup.
 
         """
-        rotation = RotationTransformation(axis, angle,
-                                  angle_in_radians=True)
-        rotated_structure = rotation.apply_transformation(structure)
-        data = diffractor.calculate_ed_data(rotated_structure)
+        diffractor = self.electron_diffraction_calculator
+        D11 = self.D11.value
+        D12 = self.D12.value
+        D13 = self.D13.value
+        D21 = self.D21.value
+        D22 = self.D22.value
+        D23 = self.D23.value
+        D31 = self.D31.value
+        D32 = self.D32.value
+        D33 = self.D33.value
 
-        return DiffractionSimulation(
-            coordinates=intersection_coordinates,
-            indices=intersection_indices,
-            intensities=intersection_intensities
-        )
+        deformation = DeformStructureTransformation([[D11, D12, D13],
+                                                     [D21, D22, D23],
+                                                     [D31, D32, D33]])
+        deformed_structure = deformation.apply_transformation(structure)
+        return diffractor.calculate_ed_data(deformed_structure)
