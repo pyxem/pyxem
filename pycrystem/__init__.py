@@ -23,6 +23,7 @@ from pymatgen import Lattice, Structure
 from .diffraction_signal import ElectronDiffraction
 from .diffraction_generator import ElectronDiffractionCalculator
 from .library_generator import DiffractionLibraryGenerator
+from .diffraction_component import ElectronDiffractionForwardModel
 
 __author__ = "Duncan Johnstone"
 __copyright__ = "Copyright 2016, Python Crystallographic Electron Microscopy"
@@ -37,4 +38,3 @@ __status__ = "Development"
 def load(*args, **kwargs):
     signal = hsload(*args, **kwargs)
     return ElectronDiffraction(signal)
-

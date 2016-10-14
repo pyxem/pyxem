@@ -32,7 +32,7 @@ from pymatgen.transformations.standard_transformations \
 from hyperspy.component import Component
 
 
-class ElectronDiffractionCalculator(Component):
+class ElectronDiffractionForwardModel(Component):
     """Computes electron diffraction patterns for a crystal structure.
 
     Parameters
@@ -75,7 +75,7 @@ class ElectronDiffractionCalculator(Component):
         self.D32.value = D32
         self.D33.value = D33
 
-    def simulate(self):
+    def function(self):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
