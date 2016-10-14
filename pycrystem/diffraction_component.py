@@ -75,7 +75,10 @@ class ElectronDiffractionForwardModel(Component):
         self.D32.value = D32
         self.D33.value = D33
 
-    def function(self):
+    def function(self, *args, **kwargs):
+        return 1
+
+    def simulate(self):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters

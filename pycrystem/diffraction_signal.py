@@ -121,8 +121,8 @@ class ElectronDiffraction(Signal2D):
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, roi):
-        """Plots an interactive virtual image formed with a circular or annular
-        virtual aperture.
+        """Plots an interactive virtual image formed with a specifed but
+        adjustable roi.
 
         Parameters
         ----------
@@ -138,8 +138,7 @@ class ElectronDiffraction(Signal2D):
         roi.interactive(self, navigation_signal='same').plot()
 
     def get_virtual_image(self, roi):
-        """Plots an interactive virtual image formed with a circular or annular
-        virtual aperture.
+        """Obtains a virtual image associated with a specified roi.
 
         Parameters
         ----------
@@ -151,8 +150,7 @@ class ElectronDiffraction(Signal2D):
             reciprocal Angstroms.
         """
         self.plot()
-        roi.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-        roi.interactive(self, navigation_signal='same').plot()
+        return roi(self)
 
     def plot_line_profile(self, x1, y1, x2, y2, width):
         """Plots an interactive line profile.
