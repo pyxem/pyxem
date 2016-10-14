@@ -49,6 +49,7 @@ class ElectronDiffractionCalculator(Component):
     """
 
     def __init__(self, electron_diffraction_calculator,
+                 structure,
                  D11=1., D12=0., D13=0.,
                  D21=0., D22=1., D23=0.,
                  D31=0., D32=0., D33=1.):
@@ -63,6 +64,7 @@ class ElectronDiffractionCalculator(Component):
                                   'D33',
                                   ])
         self.electron_diffraction_calculator = electron_diffraction_calculator
+        self.structure = structure
         self.D11.value = D11
         self.D12.value = D12
         self.D13.value = D13
@@ -73,7 +75,7 @@ class ElectronDiffractionCalculator(Component):
         self.D32.value = D32
         self.D33.value = D33
 
-    def simulate(self, structure):
+    def simulate(self):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -89,6 +91,7 @@ class ElectronDiffractionCalculator(Component):
 
         """
         diffractor = self.electron_diffraction_calculator
+        structure = self.structure
         D11 = self.D11.value
         D12 = self.D12.value
         D13 = self.D13.value
