@@ -31,6 +31,35 @@ This module contains utility functions for manipulating the results of strain
 mapping analysis.
 """
 
+def get_strain_maps(dp, component):
+    """Gets the strain maps from model fitting results.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
+    #TODO:
+    D = construct_displacement_gradient(component)
+    R, U = polar_decomposition(D)
+
+    e11 = U.isig[0,0].as_signal2d(image_axes=e11.axes_manager.navigation_axes)
+    e12 = U.isig[0,1].as_signal2d(image_axes=e12.axes_manager.navigation_axes)
+    e21 = U.isig[1,0].as_signal2d(image_axes=e21.axes_manager.navigation_axes)
+    e22 = U.isig[1,1].as_signal2d(image_axes=e22.axes_manager.navigation_axes)
+    theta = get_rotation_angle(R)
+
+    strain_results = Signal2D(np.ones((4, dp.axes_manager.navigation_shape[1],
+                                       dp.axes_manager.navigation_shape[0])))
+
+    strain_results.data[0] = 1. - e11.data
+    strain_results.data[1] = 1. - e22.data
+    strain_results.data[2] = e12.data
+    strain_results.data[3] = theta.data
+
+    return strain_results
+
 def construct_displacement_gradient(dp, ref):
     """Construct TensorField object containing displacement gradient
     tensor obtained via fitting a two dimensionsal scalable reference
