@@ -86,7 +86,6 @@ def correlate_component(image, pattern, axes_manager):
     pattern_intensities = pattern.intensities[condition]
     return _correlate(image_intensities, pattern_intensities)
 
-
 def _correlate(intensities_1, intensities_2):
     return np.dot(intensities_1, intensities_2) / (
         np.sqrt(np.dot(intensities_1, intensities_1)) *
