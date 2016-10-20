@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
+import pycrystem.utils.strain_utils
 
 
 def correlate(image, pattern, axes_manager):
@@ -24,6 +24,7 @@ def correlate(image, pattern, axes_manager):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
         template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
+    import numpy as np
     # Fetch the axes
     x_axis = axes_manager.signal_axes[0]
     y_axis = axes_manager.signal_axes[1]
@@ -68,6 +69,7 @@ def correlate_component(image, pattern, axes_manager):
         template matching,” vol. 50, no. 1, pp. 87–99, 2005.
 
     """
+    import numpy as np
     # Fetch the axes
     x_axis = axes_manager.signal_axes[0]
     y_axis = axes_manager.signal_axes[1]
@@ -87,6 +89,7 @@ def correlate_component(image, pattern, axes_manager):
     return _correlate(image_intensities, pattern_intensities)
 
 def _correlate(intensities_1, intensities_2):
+    import numpy as np
     return np.dot(intensities_1, intensities_2) / (
         np.sqrt(np.dot(intensities_1, intensities_1)) *
         np.sqrt(np.dot(intensities_2, intensities_2))
