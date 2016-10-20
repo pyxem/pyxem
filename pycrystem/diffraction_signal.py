@@ -384,7 +384,7 @@ class ElectronDiffraction(Signal2D):
                       [-math.sin(a), math.cos(a), 0.],
                       [0., 0., 1.]])
 
-        self.map(affine_transformation, matrix=t)
+        self=self.map(affine_transformation, matrix=t)
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
