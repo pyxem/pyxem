@@ -440,6 +440,44 @@ class ElectronDiffraction(Signal2D):
         self.map(filters.rank.mean, selem=square(3))
         self.data = self.data / self.data.max()
 
+    def get_data_movie_frames(self, image, indices, save_path):
+        """
+        
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        import matplotlib.pyplot as plt
+        j=0
+        for i in indices:
+            j=j+1
+            fig, axes = plt.subplots(ncols=2)
+            ax1, ax2 = axes.ravel()
+
+            ax1.imshow(image)
+            ax2.imshow(self.inav[i].data)
+
+            ax1.set_title('Scan Position')
+            ax2.set_title('Diffraction Pattern')
+
+            ax1.plot(i[0],i[1],'.')
+
+            ax1.set_xlim(0, image.shape[1])
+            ax1.set_ylim(image.shape[0],0)
+
+            ax1.set_axis_off()
+            ax2.set_axis_off()
+
+            plt.xlabel('')
+            plt.ylabel('')
+            plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01,
+                                wspace=0.02)
+
+            plt.savefig(save_path +'{}.png'.format(j))
+            plt.close()
+
     def get_gvector_magnitudes(self, peaks):
         """Obtain the magnitude of g-vectors in calibrated units
         from a structured array containing peaks in array units.
