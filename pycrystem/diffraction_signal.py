@@ -416,10 +416,12 @@ class ElectronDiffraction(Signal2D):
                      if self.axes_manager.navigation_size > 0
                      else [1, ])
         rp = np.zeros(arr_shape, dtype=object)
-        #
-        for i in self.axes_manager:
-            it = (i[1], i[0])
-            gvectors[it] = radial_average(self.data[it], center=c[it])
+        if self.axes_manager.navigation_axes:
+            for i in self.axes_manager:
+                it = (i[1], i[0])
+                rp[it] = radial_average(self.data[it], center=c[it])
+        else:
+            rp = radial_average(self.data, center=c)
 
         return Signal1D(rp)
 
@@ -442,7 +444,7 @@ class ElectronDiffraction(Signal2D):
 
     def get_data_movie_frames(self, image, indices, save_path):
         """
-        
+
         Parameters
         ----------
 
