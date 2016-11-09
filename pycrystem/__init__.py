@@ -17,6 +17,7 @@
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 
 from hyperspy.api import load as hsload
+from hyperspy.api import roi
 
 from pymatgen import Lattice, Structure
 
@@ -24,6 +25,9 @@ from .diffraction_signal import ElectronDiffraction
 from .diffraction_generator import ElectronDiffractionCalculator
 from .library_generator import DiffractionLibraryGenerator
 from .diffraction_component import ElectronDiffractionForwardModel
+from .scalable_reference_pattern import ScalableReferencePattern
+from .tensor_field import TensorField
+from .tensor_field2d import TensorField2D
 
 __author__ = "Duncan Johnstone"
 __copyright__ = "Copyright 2016, Python Crystallographic Electron Microscopy"
