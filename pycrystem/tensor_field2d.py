@@ -24,7 +24,7 @@ Signal class for Tensor Fields
 """
 
 
-class TensorField2D(Signal2D):
+class TensorField2D(BaseTensorField):
     _signal_type = "tensor_field"
 
     def __init__(self, *args, **kwargs):
