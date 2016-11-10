@@ -25,8 +25,11 @@ from pymatgen import Structure
 class TestDiffractionComponent:
 
     def setUp(self):
+        #Specify Au Crystal structure as test case
         au = Structure()
+        #Define electron diffraction calculator
         ed = ElectronDiffractionCalculator(300, 3, 1)
+        #Assign component 
         diff = ElectronDiffractionForwardModel(electron_diffraction_calculator=ed,
                                                structure=au,
                                                D11=1., D12=0., D13=0.,
@@ -37,3 +40,4 @@ class TestDiffractionComponent:
     def test_simulate(self):
         diff = self.signal
         sim = diff.simulate()
+        #Assert is somthing known....

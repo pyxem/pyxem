@@ -18,25 +18,20 @@
 import numpy as np
 import nose.tools as nt
 
-from pycrystem.diffraction_signal import ElectronDiffraction
-from hyperspy.signals import Signal1D, Signal2D
+from pycrystem.tensor_field import TensorField
 
-
-class Test_metadata:
+class TestTensorField:
 
     def setUp(self):
         # Create an empty diffraction pattern
-        dp = ElectronDiffraction(np.ones((2, 2, 2, 2)))
-        dp.axes_manager.signal_axes[0].scale = 1e-3
-        dp.metadata.Acquisition_instrument.TEM.accelerating_voltage = 200
-        dp.metadata.Acquisition_instrument.TEM.convergence_angle = 15.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_angle = 18.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_frequency = 63
-        dp.metadata.Acquisition_instrument.TEM.Detector.Diffraction.exposure_time = 35
-        self.signal = dp
+        tf = TensorField(np.ones((2, 2, 2, 2)))
+        self.signal = tf
 
-    def test_default_param(self):
-        dp = self.signal
+    def test_polar_decomposition(self):
+        tf = self.signal
         md = dp.metadata
         nt.assert_equal(md.Acquisition_instrument.TEM.rocking_angle,
                         preferences.ElectronDiffraction.ed_precession_angle)
+
+    def test_change_basis(self):
+        pass

@@ -19,7 +19,6 @@ import numpy as np
 import nose.tools as nt
 
 from pycrystem.tensor_field2d import TensorField2D
-#from hyperspy.signals import Signal1D, Signal2D
 
 
 class TestTensorField2D:
@@ -28,9 +27,3 @@ class TestTensorField2D:
         # Create an empty diffraction pattern
         tf = TensorField2D(np.ones((2, 2, 3, 3)))
         self.signal = tf
-
-    def test_default_param(self):
-        dp = self.signal
-        md = dp.metadata
-        nt.assert_equal(md.Acquisition_instrument.TEM.rocking_angle,
-                        preferences.ElectronDiffraction.ed_precession_angle)
