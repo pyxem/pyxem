@@ -19,17 +19,21 @@ import numpy as np
 import nose.tools as nt
 
 from pycrystem.diffraction_component import ElectronDiffractionForwardModel
-
+from pycrystem.electron_diffraction_calculator import ElectronDiffractionCalculator
+from pymatgen import Structure
 
 class TestDiffractionComponent:
 
     def setUp(self):
-        # Create an empty diffraction pattern
-        diff = ElectronDiffractionForwardModel()
-        self.signal = dp
+        au = Structure()
+        ed = ElectronDiffractionCalculator(300, 3, 1)
+        diff = ElectronDiffractionForwardModel(electron_diffraction_calculator=ed,
+                                               structure=au,
+                                               D11=1., D12=0., D13=0.,
+                                               D21=0., D22=1., D23=0.,
+                                               D31=0., D32=0., D33=1.)
+        self.signal = diff
 
-    def test_default_param(self):
-        dp = self.signal
-        md = dp.metadata
-        nt.assert_equal(md.Acquisition_instrument.TEM.rocking_angle,
-                        preferences.ElectronDiffraction.ed_precession_angle)
+    def test_simulate(self):
+        diff = self.signal
+        sim = diff.simulate()

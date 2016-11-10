@@ -18,21 +18,13 @@
 import numpy as np
 import nose.tools as nt
 
-from pycrystem.diffraction_signal import ElectronDiffraction
-from hyperspy.signals import Signal1D, Signal2D
+from pycrystem.scalable_reference_pattern import ScalableReferencePattern
 
 
-class Test_metadata:
+class TestScalableReferencePattern:
 
     def setUp(self):
-        # Create an empty diffraction pattern
-        dp = ElectronDiffraction(np.ones((2, 2, 2, 2)))
-        dp.axes_manager.signal_axes[0].scale = 1e-3
-        dp.metadata.Acquisition_instrument.TEM.accelerating_voltage = 200
-        dp.metadata.Acquisition_instrument.TEM.convergence_angle = 15.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_angle = 18.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_frequency = 63
-        dp.metadata.Acquisition_instrument.TEM.Detector.Diffraction.exposure_time = 35
+        ref = ScalableReferencePattern(np.ones((2, 2, 2, 2)))
         self.signal = dp
 
     def test_default_param(self):
