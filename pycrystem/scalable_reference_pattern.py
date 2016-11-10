@@ -19,6 +19,7 @@
 
 from hyperspy.component import Component2D
 from hyperspy.signals import Signal2D
+from pycrystem.tensor_field2d import TensorField2D
 from skimage import transform as tf
 import numpy as np
 
@@ -116,7 +117,7 @@ class ScalableReferencePattern(Component2D):
             The
 
         """
-        D = TensorField(np.ones(np.append(self.d11.map.shape, (3,3))))
+        D = TensorField2D(np.ones(np.append(self.d11.map.shape, (3,3))))
 
         D.data[:,:,0,0] = ref.d11.map['values']
         D.data[:,:,1,0] = ref.d12.map['values']
