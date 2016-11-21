@@ -107,17 +107,13 @@ class ElectronDiffractionCalculator(object):
         intersection_indices = fractional_coordinates[intersection]
         proximity = proximity[intersection]
         intersection_intensities = \
-            self.get_peak_intensities(
-                structure,
-                intersection_indices,
-                proximity
-            )
+            self.get_peak_intensities(structure,
+                                      intersection_indices,
+                                      proximity)
 
-        return DiffractionSimulation(
-            coordinates=intersection_coordinates,
-            indices=intersection_indices,
-            intensities=intersection_intensities
-        )
+        return DiffractionSimulation(coordinates=intersection_coordinates,
+                                     indices=intersection_indices,
+                                     intensities=intersection_intensities)
 
     @staticmethod
     def get_peak_intensities(structure, indices, proximities):

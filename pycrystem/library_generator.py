@@ -113,7 +113,9 @@ class DiffractionLibrary(dict):
         """
         correlations = {}
         for euler_angle, diffraction_pattern in self.items():
-            correlation = correlate(image, diffraction_pattern)
+            correlation = correlate(image,
+                                    diffraction_pattern,
+                                    axes_manager=image.axes_manager)
             correlations[euler_angle] = correlation
         return correlations
 
