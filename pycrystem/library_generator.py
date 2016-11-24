@@ -26,8 +26,7 @@ from pymatgen.transformations.standard_transformations \
 from transforms3d.euler import euler2axangle, axangle2euler
 from tqdm import tqdm
 
-LAUE = ["-1", "2/m", "mmm", "4/m", "4/mmm",
-        "-3", "-3m", "6/m", "6/mmm", "m-3", "m-3m"]
+from .utils import correlate
 
 
 class DiffractionLibraryGenerator(object):
@@ -96,3 +95,57 @@ class DiffractionLibrary(dict):
 
         """
         pass
+
+    def correlate(self, image):
+        """Finds the correlation between an image and the entire library.
+
+        Parameters
+        ----------
+        image : {:class:`ElectronDiffraction`, :class:`ndarray`}
+            Either a single electron diffraction signal (should be appropriately
+            scaled and centered) or a 1D or 2D numpy array.
+
+        Returns
+        -------
+        correlations : dict
+            A mapping of Euler angles to correlation values.
+
+        """
+        correlations = {}
+        for euler_angle, diffraction_pattern in self.items():
+            correlation = correlate(image,
+                                    diffraction_pattern,
+                                    axes_manager=image.axes_manager)
+            correlations[euler_angle] = correlation
+        return correlations
+
+    def set_scale(self, scale):
+        """Sets the scale of every diffraction pattern simulation in the
+        library.
+
+        Parameters
+        ----------
+        scale : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
+            The x- and y-scales of the patterns, with respect to the original
+            reciprocal angstrom coordinates.
+
+        """
+        for diffraction_pattern in self.values():
+            diffraction_pattern.scale = scale
+        return self
+
+    def set_offset(self, offset):
+        """Sets the offset of every diffraction pattern simulation in the
+        library.
+
+        Parameters
+        ----------
+        offset : :obj:`tuple` of :obj:`float`, optional
+            The x-y offset of the patterns in reciprocal angstroms. Defaults to
+            zero in each direction.
+
+        """
+        assert len(offset) == 2
+        for diffraction_pattern in self.values():
+            diffraction_pattern.offset = offset
+        return self
