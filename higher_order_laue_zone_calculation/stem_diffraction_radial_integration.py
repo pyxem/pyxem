@@ -5,7 +5,7 @@ from scipy.ndimage.measurements import center_of_mass
 import h5py
 import copy
 import warnings
-import laue_zone_modelling as lzm
+import higher_order_laue_zone_calculation.laue_zone_modelling as lzm
 
 def _set_metadata_from_hdf5(hdf5_file, signal):
     """Get microscope and scan metadata from fpd HDF5-file reference.

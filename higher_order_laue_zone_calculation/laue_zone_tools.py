@@ -1,6 +1,6 @@
-import stem_diffraction_radial_integration as sdri
-import laue_zone_modelling as lzm
-import laue_zone_plotting as lzp
+import higher_order_laue_zone_calculation.stem_diffraction_radial_integration as sdri
+import higher_order_laue_zone_calculation.laue_zone_modelling as lzm
+import higher_order_laue_zone_calculation.laue_zone_plotting as lzp
 import hyperspy.api as hs
 
 def run_full_process_on_fpd_dataset(
