@@ -140,6 +140,7 @@ def _get_disk_centre_from_signal(
     com_y_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
     
     if detector_slice is None:
+        x0, y0 = 0, 0
         image_data = np.zeros(signal.data.shape[2:], dtype=np.uint16)
     else:
         x0, x1, y0, y1 = detector_slice
@@ -424,6 +425,7 @@ def get_fpd_dataset_as_radial_profile_signal(
         gaussian_range=None,
         calibration_region=None,
         crop_dataset=None,
+        detector_slice=None,
         spatial_scale=None):
     """Make a radially integrated HyperSpy HDF5 spectrum
     file from fpd 4-D diffraction HDF5. Uses center of mass
@@ -463,6 +465,11 @@ def get_fpd_dataset_as_radial_profile_signal(
         given in physical units (um, nm, Å), order (x0,x1,y0,y1). 
         Useful for removing unecessary parts of the dataset,
         like platinum protective layer.
+    detector_slice : (int, int, int, int), optional
+        If given, the diffraction images will be cropped
+        when trying to find the center of the beam.
+        Useful for datasets where the center beam occupies
+        a small section of the diffraction pattern.
     spatial_scale : None, optional
         Scale for the spatial dimensions, in nanometers per
         pixel. If not given, the metadata in the fpd-hdf5 file
@@ -471,12 +478,12 @@ def get_fpd_dataset_as_radial_profile_signal(
     Examples
     --------
     # Setting the scale directly 
-    >>>> save_fpd_dataset_as_radial_profile_signal(
+    >>>> get_fpd_dataset_as_radial_profile_signal(
             "default.hdf5", 
             mrad_per_pixel=0.1)
 
     # Setting the scale by fitting a Gaussian:
-    >>>> save_fpd_dataset_as_radial_profile_signal(
+    >>>> get_fpd_dataset_as_radial_profile_signal(
             "default.hdf5", 
             background_range=(100, 120), 
             gaussian_range=(120,130),
@@ -486,7 +493,9 @@ def get_fpd_dataset_as_radial_profile_signal(
     if not(spatial_scale == None):
         s_fpd.axes_manager[0].scale = spatial_scale
         s_fpd.axes_manager[1].scale = spatial_scale
-    s_radial = _get_radial_profile_signal(s_fpd)
+    s_radial = _get_radial_profile_signal(
+            s_fpd,
+            center_of_mass_detector_slice=detector_slice)
     if mrad_per_pixel == None:
         if background_range == None:
             calibration_dict = _get_sto_index_ranges_for_cameralengths(

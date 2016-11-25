@@ -5,7 +5,8 @@ import hyperspy.api as hs
 
 def run_full_process_on_fpd_dataset(
         filename,
-        crop_dataset=None):
+        crop_dataset=None,
+        detector_slice=None):
     """Fully process Laue zones diffraction circles from a 
     STEM diffraction 4-D dataset. Does radial integration
     of the diffraction pattern, modelling of the LFO and STO
@@ -22,13 +23,19 @@ def run_full_process_on_fpd_dataset(
     crop_dataset : (float, float, float, float), optional
         If given, the dataset will be cropped in the navigation
         dimensions. If in floats, it will be cropped using
-        physical dimensions (nm), if ints in indicies.
+        physical dimensions (nm), if ints in pixels.
         Useful for removing the platinum protective layer.
+    detector_slice : (int, int, int, int), optional
+        If given, the diffraction images will be cropped
+        when trying to find the center of the beam.
+        Useful for datasets where the center beam occupies
+        a small section of the diffraction pattern.
     """
 
     s_radial = sdri.get_fpd_dataset_as_radial_profile_signal(
             filename,
-            crop_dataset=crop_dataset)
+            crop_dataset=crop_dataset,
+            detector_slice=detector_slice)
     radial_filename = filename.replace(".hdf5","_radial.hdf5")
     s_radial.save(radial_filename, overwrite=True)
 
