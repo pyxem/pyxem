@@ -6,6 +6,7 @@ import hyperspy.api as hs
 def run_full_process_on_fpd_dataset(
         filename,
         crop_dataset=None,
+        mrad_per_pixel=None,
         detector_slice=None):
     """Fully process Laue zones diffraction circles from a 
     STEM diffraction 4-D dataset. Does radial integration
@@ -32,12 +33,14 @@ def run_full_process_on_fpd_dataset(
         a small section of the diffraction pattern.
     """
 
+    path = filename.replace(".hdf5","/")
     s_radial = sdri.get_fpd_dataset_as_radial_profile_signal(
             filename,
             crop_dataset=crop_dataset,
+            mrad_per_pixel=mrad_per_pixel,
             detector_slice=detector_slice)
     radial_filename = filename.replace(".hdf5","_radial.hdf5")
-    s_radial.save(radial_filename, overwrite=True)
+    s_radial.save(path + radial_filename, overwrite=True)
 
     s_lfo = s_radial.isig[47.:78.]
     s_sto = s_radial.isig[77.:107.]
@@ -46,9 +49,9 @@ def run_full_process_on_fpd_dataset(
     m_sto = lzm.model_sto(s_sto)
 
     lfo_model_filename = filename.replace(".hdf5","_lfo_model.hdf5")
-    m_lfo.save(lfo_model_filename, overwrite=True)
+    m_lfo.save(path + lfo_model_filename, overwrite=True)
     sto_model_filename = filename.replace(".hdf5","_sto_model.hdf5")
-    m_sto.save(sto_model_filename, overwrite=True)
+    m_sto.save(path + sto_model_filename, overwrite=True)
 
     lzp.plot_lfo_sto_laue_zone_report(m_lfo, m_sto, s_radial)
     lzp.plot_lfo_sto_laue_zone_line_profile_report(m_lfo, m_sto, s_radial)
