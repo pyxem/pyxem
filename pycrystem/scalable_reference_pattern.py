@@ -17,14 +17,14 @@
 # along with  HyperSpy.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from hyperspy.component import Component2D
+from hyperspy.component import Component
 from hyperspy.signals import Signal2D
 from pycrystem.tensor_field2d import TensorField2D
 from skimage import transform as tf
 import numpy as np
 
 
-class ScalableReferencePattern(Component2D):
+class ScalableReferencePattern(Component):
     """Fixed diffraction pattern component which is scaled by a 2D affine
     transformation of the form:
 
