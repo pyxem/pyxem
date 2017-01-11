@@ -23,6 +23,8 @@
 from __future__ import division
 
 import numpy as np
+from pycrystem.diffraction_signal import ElectronDiffraction
+from hyperspy.components2d import Gaussian2D
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
     get_structure_factors
 from pymatgen.util.plotting_utils import get_publication_quality_plot
@@ -217,3 +219,31 @@ class DiffractionSimulation:
         plt.ylabel("Reciprocal Dimension ($A^{-1}$)")
         plt.tight_layout()
         return plt
+
+    def as_signal(self, size, sigma, max_r):
+        """Returns the diffraction data as an ElectronDiffraction signal with
+        Gaussian functions representing each diffracted peak.
+
+        Parameters
+        ----------
+        shape : tuple
+            (x,y) signal_shape for the signal to be simulated.
+        sigma : sigma of the Gaussian function to be plotted.
+
+        """
+        dp_dat = np.zeros(size)
+        l = np.linspace(-max_r, max_r, size)
+        x, y = np.meshgrid(l, l)
+        i=0
+        while i < len(self.intensities):
+            cx = self.coordinates[i][0]
+            cy = self.coordinates[i][1]
+            inten = self.intensities[i]
+            g = Gaussian2D(A=inten, sigma_x=sigma, sigma_y=sigma, centre_x=cx, centre_y=cy)
+            dp_dat = dp_dat + g.function(x, y)
+            i=i+1
+
+        dp = ElectronDiffraction(dp_dat)
+        dp.set_calibration(max_r/size)
+
+        return dp
