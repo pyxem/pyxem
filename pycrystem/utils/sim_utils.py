@@ -101,10 +101,10 @@ def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
     ----------
     theta_range : tuple of float
         (theta_min, theta_max)
-        The range of allowable polar angles.
+        The range of allowable polar angles, in degrees.
     phi_range : tuple of float
         (phi_min, phi_max)
-        The range of allowable azimuthal angles.
+        The range of allowable azimuthal angles, in degrees.
     resolution : float
         The angular resolution of the grid in degrees.
     no_center : bool
@@ -181,7 +181,7 @@ def equispaced_so3_grid(alpha_max, beta_max, gamma_max, resolution=2.5,
     d_gamma = np.arctan2(imaginary_part, real_part)
     ap2 = int(np.round(gamma_max / resolution))
     d_gamma = np.tile(d_gamma, (ap2, 1))
-    gamma = np.arange(ap2) * gamma_max / ap2 - gamma_max / 2
+    gamma = np.arange(ap2) * gamma_max / ap2
     gamma = (d_gamma + np.tile(gamma.T, (len(s2_grid), 1)).T).flatten()
     alpha = np.tile(alpha, (ap2, 1)).flatten()
     beta = np.tile(beta, (ap2, 1)).flatten()

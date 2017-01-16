@@ -73,14 +73,12 @@ class DiffractionLibraryGenerator(object):
         diffractor = self.electron_diffraction_calculator
 
         for orientation in tqdm(orientations):
-            axis = orientation[0]
-            angle = orientation[1]
-            euler = axangle2euler(axis, angle)
+            axis, angle = euler2axangle(orientation[0], orientation[1], orientation[2], 'rzyz')
             rotation = RotationTransformation(axis, angle,
                                               angle_in_radians=True)
             rotated_structure = rotation.apply_transformation(structure)
             data = diffractor.calculate_ed_data(rotated_structure)
-            diffraction_library[euler] = data
+            diffraction_library[tuple(orientation)] = data
 
         return diffraction_library
 
@@ -112,26 +110,26 @@ class DiffractionLibrary(dict):
 
         """
         correlations = {}
-        for euler_angle, diffraction_pattern in self.items():
+        for euler_angle, diffraction_pattern in tqdm(self.items()):
             correlation = correlate(image,
                                     diffraction_pattern,
                                     axes_manager=image.axes_manager)
             correlations[euler_angle] = correlation
         return correlations
 
-    def set_scale(self, scale):
+    def set_calibration(self, calibration):
         """Sets the scale of every diffraction pattern simulation in the
         library.
 
         Parameters
         ----------
-        scale : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
+        calibration : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
             The x- and y-scales of the patterns, with respect to the original
             reciprocal angstrom coordinates.
 
         """
         for diffraction_pattern in self.values():
-            diffraction_pattern.scale = scale
+            diffraction_pattern.calibration = calibration
         return self
 
     def set_offset(self, offset):
