@@ -245,3 +245,31 @@ class DiffractionSimulation:
         ax.set_xlabel("Reciprocal Dimension ($A^{-1}$)")
         ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")
         return ax
+
+    def as_signal(self, size, sigma, max_r):
+        """Returns the diffraction data as an ElectronDiffraction signal with
+        Gaussian functions representing each diffracted peak.
+
+        Parameters
+        ----------
+        shape : tuple
+            (x,y) signal_shape for the signal to be simulated.
+        sigma : sigma of the Gaussian function to be plotted.
+
+        """
+        dp_dat = np.zeros(size)
+        l = np.linspace(-max_r, max_r, size)
+        x, y = np.meshgrid(l, l)
+        i=0
+        while i < len(self.intensities):
+            cx = self.coordinates[i][0]
+            cy = self.coordinates[i][1]
+            inten = self.intensities[i]
+            g = Gaussian2D(A=inten, sigma_x=sigma, sigma_y=sigma, centre_x=cx, centre_y=cy)
+            dp_dat = dp_dat + g.function(x, y)
+            i=i+1
+
+        dp = ElectronDiffraction(dp_dat)
+        dp.set_calibration(max_r/size)
+
+        return dp
