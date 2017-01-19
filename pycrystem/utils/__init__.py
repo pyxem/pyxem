@@ -25,9 +25,10 @@ def correlate(image, pattern, axes_manager, include_direct_beam=False):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
         template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-
-    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[:, :2] + [72, 72]
-    in_bounds = np.product((pixel_coordinates > 0) * (pixel_coordinates < 144), axis=1).astype(bool)
+    shape = axes_manager.signal_shape
+    half_shape = tuple(int(i / 2) for i in axes_manager.signal_shape)
+    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[:, :2] + half_shape
+    in_bounds = np.product((pixel_coordinates > 0) * (pixel_coordinates < shape[0]), axis=1).astype(bool)
     image_intensities = image.data.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
     pattern_intensities = pattern.intensities[in_bounds]
     return np.nan_to_num(_correlate(image_intensities, pattern_intensities))

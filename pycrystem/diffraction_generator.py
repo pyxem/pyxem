@@ -26,6 +26,8 @@ import numpy as np
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
     get_structure_factors
 from pymatgen.util.plotting_utils import get_publication_quality_plot
+from .diffraction_signal import ElectronDiffraction
+from hyperspy.components2d import Gaussian2D
 
 
 class ElectronDiffractionCalculator(object):
