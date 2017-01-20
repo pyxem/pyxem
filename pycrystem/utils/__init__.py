@@ -1,9 +1,40 @@
 # -*- coding: utf-8 -*-
-
 import numpy as np
 
+import pycrystem.utils.strain_utils
 
-def correlate(image, pattern):
+
+def correlate(image, pattern, axes_manager, include_direct_beam=False):
+    """The correlation between a diffraction pattern and a simulation.
+    Calculated using
+        .. math::
+            \frac{\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\sqrt{\sum_{j=1}^m P^2(x_j, y_j)} \sqrt{\sum_{j=1}^m T^2(x_j, y_j)}}
+    Parameters
+    ----------
+    image : :class:`ElectronDiffraction`
+        A single electron diffraction signal. Should be appropriately scaled
+        and centered.
+    pattern : :class:`DiffractionSimulation`
+        The pattern to compare to.
+    Returns
+    -------
+    float
+        The correlation coefficient.
+    References
+    ----------
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
+    """
+    shape = axes_manager.signal_shape
+    half_shape = tuple(int(i / 2) for i in axes_manager.signal_shape)
+    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[:, :2] + half_shape
+    in_bounds = np.product((pixel_coordinates > 0) * (pixel_coordinates < shape[0]), axis=1).astype(bool)
+    image_intensities = image.data.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
+    pattern_intensities = pattern.intensities[in_bounds]
+    return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
+
+
+def correlate_component(image, pattern):
     """The correlation between a diffraction pattern and a simulation.
 
     Calculated using
@@ -29,22 +60,10 @@ def correlate(image, pattern):
         template matching,” vol. 50, no. 1, pp. 87–99, 2005.
 
     """
-    # Fetch the axes
-    x_axis = image.axes_manager.signal_axes[0]
-    y_axis = image.axes_manager.signal_axes[1]
-
-    # Transform the pattern into image pixel space
-    x = (pattern.calibrated_coordinates[:, 0] + x_axis.size/2).astype(int)
-    y = (pattern.calibrated_coordinates[:, 1] + y_axis.size/2).astype(int)
-
-    # Constrain the positions to avoid `IndexError`s
-    x_bounds = np.logical_and(0 <= x, x < x_axis.size)
-    y_bounds = np.logical_and(0 <= y, y < y_axis.size)
-    condition = np.logical_and(x_bounds, y_bounds)
-
-    # Get point-by-point intensities
-    image_intensities = image.data[x[condition], y[condition]]
-    pattern_intensities = pattern.intensities[condition]
+    image_intensities = np.array(
+        [image.isig[c[0], c[1]].data for c in pattern.coordinates]
+    ).flatten()
+    pattern_intensities = pattern.intensities
     return _correlate(image_intensities, pattern_intensities)
 
 

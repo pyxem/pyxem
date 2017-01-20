@@ -20,7 +20,7 @@ from __future__ import division
 from hyperspy.signals import Signal2D, Signal1D
 from hyperspy import roi
 import numpy as np
-
+from scipy.ndimage import variance
 from pycrystem.utils.expt_utils import *
 
 """
@@ -120,9 +120,9 @@ class ElectronDiffraction(Signal2D):
         dy.offset = -offset[1]
         dy.units = '$A^{-1}$'
 
-    def plot_interactive_virtual_image(self, inner_radius, outer_radius):
-        """Plots an interactive virtual image formed with a circular or annular
-        virtual aperture.
+    def plot_interactive_virtual_image(self, roi):
+        """Plots an interactive virtual image formed with a specifed but
+        adjustable roi.
 
         Parameters
         ----------
@@ -134,9 +134,65 @@ class ElectronDiffraction(Signal2D):
             reciprocal Angstroms.
         """
         self.plot()
-        ap = roi.CircleROI(cx=0., cy=0., r_inner=inner_radius, r=outer_radius)
-        ap.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-        ap.interactive(self, navigation_signal='same').plot()
+        roi.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        roi.interactive(self, navigation_signal='same').plot()
+
+    def get_virtual_image(self, roi):
+        """Obtains a virtual image associated with a specified roi.
+
+        Parameters
+        ----------
+        inner_radius: float
+            Inner radius annular virtual aperture (if None a circular aperture
+            is used) in reciprocal Angstroms
+        outer_radius: float
+            Outer radius of the cirucular or annular virtual aperture in
+            reciprocal Angstroms.
+        """
+        self.plot()
+        return roi(self)
+
+    def plot_line_profile(self, x1, y1, x2, y2, width):
+        """Plots an interactive line profile.
+        """
+        self.plot()
+        lin = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2, linewidth=width)
+        lin.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+        lin.interactive(self, navigation_signal='same').plot()
+
+    def get_variance_image(self, roi):
+        """Form a variance image for a specified region of interest in the
+        diffraction signal.
+
+        The variance image plots the variance of values within a specified
+        set of pixels in the diffraction signal as a function of probe position.
+
+        Parameters
+        ----------
+
+        signal : ElectronDiffraction
+
+        roi : roi
+
+        Returns
+        -------
+        var : Signal2D
+            The variance image as a HyperSpy Signal2D.
+        """
+        # Crop the data using the roi
+        annulus = roi(self, axes=self.axes_manager.signal_axes)
+        annulus.change_dtype('float')
+        # Create an empty array to contain the image.
+        arr_shape = (annulus.axes_manager._navigation_shape_in_array
+                     if annulus.axes_manager.navigation_size > 0
+                     else [1, ])
+        var_image = np.zeros(arr_shape)
+        # Calculate the variance within the roi for each DP.
+        for i in annulus.axes_manager:
+            it = (i[1], i[0])
+            var_image[it] = variance(annulus.data[it]) / (np.mean(annulus.data[it]) * np.mean(annulus.data[it]))
+
+        return Signal2D(var_image)
 
     def get_direct_beam_mask(self, radius=None, center=None):
         """Generate a signal mask for the direct beam.
@@ -321,13 +377,14 @@ class ElectronDiffraction(Signal2D):
         -------
 
         """
-        #TODO: Preserve knowledge of basis.
+        #TODO: Preserve knowledge of basis - and eventually remove when the
+        # version in devlopment for HyperSpy is completed.
         a = angle * np.pi/180.0
         t = np.array([[math.cos(a), math.sin(a), 0.],
                       [-math.sin(a), math.cos(a), 0.],
                       [0., 0., 1.]])
 
-        self.map(affine_transformation, matrix=t)
+        self=self.map(affine_transformation, matrix=t)
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
@@ -350,23 +407,23 @@ class ElectronDiffraction(Signal2D):
         radial_average
         get_direct_beam_position
         """
-        #TODO: preserve the navigation dimensions!
         if centers == None:
             c = self.get_direct_beam_position(radius=10)
         else:
             c = centers
-        rp = []
 
-        for z, index in zip(self._iterate_signal(),
-                            np.arange(0, self.axes_manager.navigation_size, 1)):
-            rp.append(radial_average(z, center=c[index]))
+        arr_shape = (self.axes_manager._navigation_shape_in_array
+                     if self.axes_manager.navigation_size > 0
+                     else [1, ])
+        rp = np.zeros(arr_shape, dtype=object)
+        if self.axes_manager.navigation_axes:
+            for i in self.axes_manager:
+                it = (i[1], i[0])
+                rp[it] = radial_average(self.data[it], center=c[it])
+        else:
+            rp = radial_average(self.data, center=c)
 
-        rp = np.array(rp)
-        #rp.resize((self.axes_manager.navigation_shape,
-        #rp.shape[-1]))
-        radial_profile = Signal1D(rp)
-
-        return radial_profile
+        return Signal1D(rp)
 
     def remove_background(self, h):
         """Perform background subtraction.
@@ -385,9 +442,47 @@ class ElectronDiffraction(Signal2D):
         self.map(filters.rank.mean, selem=square(3))
         self.data = self.data / self.data.max()
 
-    def index_reflections(self, peaks, g_vectors):
-        """Index reflections found in the experimental with respect to specified
-        crystal structures.
+    def get_data_movie_frames(self, image, indices, save_path):
+        """
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        import matplotlib.pyplot as plt
+        j=0
+        for i in indices:
+            j=j+1
+            fig, axes = plt.subplots(ncols=2)
+            ax1, ax2 = axes.ravel()
+
+            ax1.imshow(image)
+            ax2.imshow(self.inav[i].data)
+
+            ax1.set_title('Scan Position')
+            ax2.set_title('Diffraction Pattern')
+
+            ax1.plot(i[0],i[1],'.')
+
+            ax1.set_xlim(0, image.shape[1])
+            ax1.set_ylim(image.shape[0],0)
+
+            ax1.set_axis_off()
+            ax2.set_axis_off()
+
+            plt.xlabel('')
+            plt.ylabel('')
+            plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01,
+                                wspace=0.02)
+
+            plt.savefig(save_path +'{}.png'.format(j))
+            plt.close()
+
+    def get_gvector_magnitudes(self, peaks):
+        """Obtain the magnitude of g-vectors in calibrated units
+        from a structured array containing peaks in array units.
 
         Parameters
         ----------
@@ -396,29 +491,83 @@ class ElectronDiffraction(Signal2D):
         -------
 
         """
-        #TODO: Basic idea is to find peaks with their lengths reported in
-        #reciprocal Angstroms. These lengths can then be compared to a list of
-        #g-vector lengths for specified structures to achieve indexation of the
-        #reflections. The deviation from the expected value should be stored for
-        #each reflection and it should be possible to plot the indexed peaks on
-        #top of the signal with their labels.
-        pass
+        # Allocate an empty structured array in which to store the gvector
+        # magnitudes.
+        arr_shape = (self.axes_manager._navigation_shape_in_array
+                     if self.axes_manager.navigation_size > 0
+                     else [1, ])
+        gvectors = np.zeros(arr_shape, dtype=object)
+        #
+        for i in self.axes_manager:
+            it = (i[1], i[0])
+            res = []
+            centered = peaks[it] - [256,256]
+            for j in np.arange(len(centered)):
+                res.append(np.linalg.norm(centered[j]))
+
+            cent = peaks[it][np.where(res == min(res))[0]][0]
+            vectors = peaks[it] - cent
+
+            mags = []
+            for k in np.arange(len(vectors)):
+                mags.append(np.linalg.norm(vectors[k]))
+            maga = np.asarray(mags)
+            gvectors[it] = maga * self.axes_manager.signal_axes[0].scale
+
+        return gvectors
 
     def get_reflection_intensities(self, indexed_reflections):
         """
 
-
         Parameters
         ----------
 
         Returns
         -------
+        """
+        # TODO: For each peak in a structured array of peaks obtain the
+        # intensity of the reflection associated with it. Multiple methods
+        # should be implemented including just summing or fitting a Gaussian.
+        pass
+
+    def get_gvector_indexation(self, glengths, calc_peaks, threshold):
+        """Index the magnitude of g-vectors in calibrated units
+        from a structured array containing gvector magnitudes.
+
+        Parameters
+        ----------
+
+        glengths : A structured array containing the
+
+        calc_peaks : A structured array
+
+        threshold : Float indicating the maximum allowed deviation from the
+            theoretical value.
+
+        Returns
+        -------
+
+        gindex : Structured array containing possible indexation results
+            consistent with the data.
 
         """
-        #TODO:
-        #
-        #
-        pass
+        # TODO: Make it so that the threshold can be specified as a fraction of
+        # the g-vector magnitude.
+        arr_shape = (self.axes_manager._navigation_shape_in_array
+                     if self.axes_manager.navigation_size > 0
+                     else [1, ])
+        gindex = np.zeros(arr_shape, dtype=object)
+
+        for i in self.axes_manager:
+            it = (i[1], i[0])
+            res = []
+            for j in np.arange(len(glengths[it])):
+                peak_diff = (calc_peaks.T[1] - glengths[it][j]) * (calc_peaks.T[1] - glengths[it][j])
+                res.append((calc_peaks[np.where(peak_diff < threshold)],
+                            peak_diff[np.where(peak_diff < threshold)]))
+            gindex[it] = res
+
+        return gindex
 
     def decomposition(self,
                       normalize_poissonian_noise=True,

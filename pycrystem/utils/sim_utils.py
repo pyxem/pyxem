@@ -101,10 +101,10 @@ def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
     ----------
     theta_range : tuple of float
         (theta_min, theta_max)
-        The range of allowable polar angles.
+        The range of allowable polar angles, in degrees.
     phi_range : tuple of float
         (phi_min, phi_max)
-        The range of allowable azimuthal angles.
+        The range of allowable azimuthal angles, in degrees.
     resolution : float
         The angular resolution of the grid in degrees.
     no_center : bool
@@ -169,19 +169,24 @@ def equispaced_so3_grid(alpha_max, beta_max, gamma_max, resolution=2.5,
         else:
             return False
 
-    s2_grid = equispaced_s2_grid((beta_min, beta_max), (alpha_min, alpha_max),
-                                 resolution, no_center=no_center(resolution))
+    s2_grid = equispaced_s2_grid(
+        (beta_min, beta_max),
+        (alpha_min, alpha_max),
+        resolution,
+        no_center=no_center(radians(resolution))
+    )
 
     gamma_min, gamma_max = radians(gamma_min), radians(gamma_max)
+    gamma_max = gamma_max / 2
     resolution = radians(resolution)
 
+    ap2 = int(np.round(2 * gamma_max / resolution))
     beta, alpha = s2_grid[:, 0], s2_grid[:, 1]
     real_part = np.cos(beta) * np.cos(alpha) + np.cos(alpha)
     imaginary_part = -(np.cos(beta) + 1) * np.sin(alpha)
     d_gamma = np.arctan2(imaginary_part, real_part)
-    ap2 = int(np.round(gamma_max / resolution))
     d_gamma = np.tile(d_gamma, (ap2, 1))
-    gamma = np.arange(ap2) * gamma_max / ap2 - gamma_max / 2
+    gamma = -gamma_max + np.arange(ap2) * 2 * gamma_max / ap2
     gamma = (d_gamma + np.tile(gamma.T, (len(s2_grid), 1)).T).flatten()
     alpha = np.tile(alpha, (ap2, 1)).flatten()
     beta = np.tile(beta, (ap2, 1)).flatten()
