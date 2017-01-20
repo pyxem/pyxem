@@ -21,9 +21,11 @@
 
 from __future__ import division
 
+import numpy as np
+
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
-from transforms3d.euler import euler2axangle, axangle2euler
+from transforms3d.euler import euler2axangle
 from tqdm import tqdm
 
 from .utils import correlate
@@ -109,7 +111,7 @@ class DiffractionLibrary(dict):
             A mapping of Euler angles to correlation values.
 
         """
-        correlations = {}
+        correlations = Correlation()
         for euler_angle, diffraction_pattern in tqdm(self.items()):
             correlation = correlate(image,
                                     diffraction_pattern,
@@ -147,3 +149,62 @@ class DiffractionLibrary(dict):
         for diffraction_pattern in self.values():
             diffraction_pattern.offset = offset
         return self
+
+
+class Correlation(dict):
+    """Maps angles to correlation indices.
+
+    Some useful properties and methods are defined.
+
+    """
+
+    @property
+    def angles(self):
+        """Returns the angles (keys) as a list."""
+        return list(self.keys())
+
+    @property
+    def correlations(self):
+        """Returns the correlations (values) as a list."""
+        return list(self.values())
+
+    @property
+    def best_angle(self):
+        """Returns the angle with the highest correlation index."""
+        return max(self, key=self.get)
+
+    @property
+    def best_correlation(self):
+        """Returns the highest correlation index."""
+        return self[self.best_angle]
+
+    @property
+    def best(self):
+        """Returns angle and value of the highest correlation index."""
+        return self.best_angle, self.best_correlation
+
+    def filter_best(self, axes=(-2, -1,)):
+        """Reduces the dimensionality of the angles.
+
+        Returns a `Correlation` with only those angles that are unique in
+        `axes`. Where there are duplicates, only the angle with the highest
+        correlation is retained.
+
+        Parameters
+        ----------
+        axes : tuple
+            The indices of the angles along which to optimise.
+
+        Returns
+        -------
+        Correlation
+
+        """
+        best_correlations = {}
+        for angle in self:
+            correlation = self[angle]
+            angle = tuple(np.array(angle)[axes,])
+            if angle in best_correlations and correlation < best_correlations[angle]:
+                continue
+            best_correlations[angle] = correlation
+        return Correlation(best_correlations)
