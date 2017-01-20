@@ -29,6 +29,7 @@ from transforms3d.euler import euler2axangle
 from tqdm import tqdm
 
 from .utils import correlate
+from .utils.plot import plot_correlation_map
 
 
 class DiffractionLibraryGenerator(object):
@@ -208,3 +209,16 @@ class Correlation(dict):
                 continue
             best_correlations[angle] = correlation
         return Correlation(best_correlations)
+
+    def plot(self, **kwargs):
+        angles = np.array(self.angles)
+        if angles.shape[1] != 2:
+            raise NotImplementedError("Plotting is only available for two-dimensional angles. Try using `filter_best`.")
+        angles = angles[:, (1, 0)]
+        domain = []
+        domain.append((angles[:, 0].min(), angles[:, 0].max()))
+        domain.append((angles[:, 1].min(), angles[:, 1].max()))
+        correlations = np.array(self.correlations)
+        ax = plot_correlation_map(angles, correlations, phi=domain[0], theta=domain[1], **kwargs)
+        ax.scatter(self.best_angle[1], self.best_angle[0], c='r', zorder=2, edgecolor='none')
+        return ax
