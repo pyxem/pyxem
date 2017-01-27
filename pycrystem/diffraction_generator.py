@@ -23,11 +23,11 @@
 from __future__ import division
 
 import numpy as np
-from pycrystem.diffraction_signal import ElectronDiffraction
-from hyperspy.components2d import Gaussian2D
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
     get_structure_factors
 from pymatgen.util.plotting_utils import get_publication_quality_plot
+from .diffraction_signal import ElectronDiffraction
+from hyperspy.components2d import Gaussian2D
 
 
 class ElectronDiffractionCalculator(object):
@@ -150,7 +150,7 @@ class ElectronDiffractionCalculator(object):
 class DiffractionSimulation:
 
     def __init__(self, coordinates=None, indices=None, intensities=None,
-                 scale=1., offset=(0., 0.)):
+                 calibration=1., offset=(0., 0.), with_direct_beam=False):
         """Holds the result of a given diffraction pattern.
 
         coordinates : array-like
@@ -162,45 +162,73 @@ class DiffractionSimulation:
             The distance between the reciprocal lattice points that intersect
             the Ewald sphere and the Ewald sphere itself in reciprocal
             angstroms.
-        scale : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
+        calibration : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
             The x- and y-scales of the pattern, with respect to the original
             reciprocal angstrom coordinates.
         offset : :obj:`tuple` of :obj:`float`, optional
             The x-y offset of the pattern in reciprocal angstroms. Defaults to
             zero in each direction.
         """
+        self._coordinates = None
         self.coordinates = coordinates
         self.indices = indices
+        self._intensities = None
         self.intensities = intensities
-        self._scale = (1., 1.)
-        self.scale = scale
+        self._calibration = (1., 1.)
+        self.calibration = calibration
         self.offset = offset
+        self.with_direct_beam = with_direct_beam
 
     @property
     def calibrated_coordinates(self):
-        """Offset and scaled coordinates."""
+        """Coordinates converted into pixel space."""
         coordinates = np.copy(self.coordinates)
         coordinates[:, 0] += self.offset[0]
         coordinates[:, 1] += self.offset[1]
-        coordinates[:, 0] *= self.scale[0]
-        coordinates[:, 1] *= self.scale[1]
-        return coordinates
+        coordinates[:, 0] /= self.calibration[0]
+        coordinates[:, 1] /= self.calibration[1]
+        return coordinates.astype(int)
 
     @property
-    def scale(self):
-        return self._scale
+    def calibration(self):
+        return self._calibration
 
-    @scale.setter
-    def scale(self, scale):
-        if isinstance(scale, float) or isinstance(scale, int):
-            self._scale = (scale, scale)
-        elif len(scale) == 2:
-            self._scale = scale
+    @calibration.setter
+    def calibration(self, calibration):
+        if isinstance(calibration, float) or isinstance(calibration, int):
+            self._calibration = (calibration, calibration)
+        elif len(calibration) == 2:
+            self._calibration = calibration
         else:
-            raise ValueError("`scale` must be a float, int, or length-2 tuple"
+            raise ValueError("`calibration` must be a float, int, or length-2 tuple"
                              "of floats or ints.")
 
-    def plot(self):
+    @property
+    def direct_beam_mask(self):
+        if self.with_direct_beam:
+            return np.ones_like(self._intensities, dtype=bool)
+        else:
+            return np.sum(self._coordinates == 0., axis=1) != 3
+
+
+    @property
+    def coordinates(self):
+        return self._coordinates[self.direct_beam_mask]
+
+    @coordinates.setter
+    def coordinates(self, coordinates):
+        self._coordinates = coordinates
+
+    @property
+    def intensities(self):
+        return self._intensities[self.direct_beam_mask]
+
+    @intensities.setter
+    def intensities(self, intensities):
+        self._intensities = intensities
+
+
+    def plot(self, ax=None):
         """Returns the diffraction data as a plot.
 
         Notes
@@ -208,17 +236,17 @@ class DiffractionSimulation:
         Run `.show()` on the result of this method to display the plot.
 
         """
-        plt = get_publication_quality_plot(10, 10)
-        plt.scatter(
+        if ax is None:
+            plt = get_publication_quality_plot(10, 10)
+            ax = plt.gca()
+        ax.scatter(
             self.coordinates[:, 0],
             self.coordinates[:, 1],
             s=self.intensities
         )
-        plt.axis('equal')
-        plt.xlabel("Reciprocal Dimension ($A^{-1}$)")
-        plt.ylabel("Reciprocal Dimension ($A^{-1}$)")
-        plt.tight_layout()
-        return plt
+        ax.set_xlabel("Reciprocal Dimension ($A^{-1}$)")
+        ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")
+        return ax
 
     def as_signal(self, size, sigma, max_r):
         """Returns the diffraction data as an ElectronDiffraction signal with
