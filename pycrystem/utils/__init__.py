@@ -4,14 +4,14 @@ import numpy as np
 import pycrystem.utils.strain_utils
 
 
-def correlate(image, pattern, axes_manager, include_direct_beam=False):
+def correlate(image, pattern, include_direct_beam=False):
     """The correlation between a diffraction pattern and a simulation.
     Calculated using
         .. math::
             \frac{\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\sqrt{\sum_{j=1}^m P^2(x_j, y_j)} \sqrt{\sum_{j=1}^m T^2(x_j, y_j)}}
     Parameters
     ----------
-    image : :class:`ElectronDiffraction`
+    image : :class:`np.ndarray`
         A single electron diffraction signal. Should be appropriately scaled
         and centered.
     pattern : :class:`DiffractionSimulation`
@@ -25,11 +25,11 @@ def correlate(image, pattern, axes_manager, include_direct_beam=False):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
         template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    shape = axes_manager.signal_shape
-    half_shape = tuple(int(i / 2) for i in axes_manager.signal_shape)
+    shape = image.shape
+    half_shape = tuple(int(i / 2) for i in shape)
     pixel_coordinates = pattern.calibrated_coordinates.astype(int)[:, :2] + half_shape
     in_bounds = np.product((pixel_coordinates > 0) * (pixel_coordinates < shape[0]), axis=1).astype(bool)
-    image_intensities = image.data.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
+    image_intensities = image.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
     pattern_intensities = pattern.intensities[in_bounds]
     return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
 

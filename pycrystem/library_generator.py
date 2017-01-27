@@ -22,7 +22,9 @@
 from __future__ import division
 
 import numpy as np
+from scipy.interpolate import griddata
 
+from hyperspy.signals import BaseSignal
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from transforms3d.euler import euler2axangle
@@ -97,27 +99,29 @@ class DiffractionLibrary(dict):
         """
         pass
 
-    def correlate(self, image):
+    def correlate(self, image: np.ndarray, show_progressbar=True):
         """Finds the correlation between an image and the entire library.
 
         Parameters
         ----------
-        image : {:class:`ElectronDiffraction`, :class:`ndarray`}
-            Either a single electron diffraction signal (should be appropriately
-            scaled and centered) or a 1D or 2D numpy array.
+        image : :class:`numpy.ndarray`
+            A numpy array of the data to be correlated.
 
         Returns
         -------
-        correlations : dict
+        correlations : Correlation
             A mapping of Euler angles to correlation values.
 
         """
         correlations = Correlation()
-        for euler_angle, diffraction_pattern in tqdm(self.items()):
+        for euler_angle, diffraction_pattern in tqdm(self.items(), disable=not show_progressbar, leave=False):
             correlation = correlate(image,
-                                    diffraction_pattern,
-                                    axes_manager=image.axes_manager)
+                                    diffraction_pattern)
             correlations[euler_angle] = correlation
+        return correlations
+
+    def index(self, image):
+        correlations = self.correlate(image)
         return correlations
 
     def set_calibration(self, calibration):
@@ -193,8 +197,9 @@ class Correlation(dict):
 
         Parameters
         ----------
-        axes : tuple
-            The indices of the angles along which to optimise.
+        axes : tuple, optional
+            The indices of the angles along which to optimise. Default is the
+            last *two* indices.
 
         Returns
         -------
@@ -209,6 +214,34 @@ class Correlation(dict):
                 continue
             best_correlations[angle] = correlation
         return Correlation(best_correlations)
+
+    def as_signal(self, resolution=np.pi/180, interpolation_method='cubic', fill_value=0.):
+        """Returns the correlation as a hyperspy signal.
+
+        Interpolates between angles where necessary to produce a consistent
+        grid.
+
+        Parameters
+        ----------
+        resolution : float, optional
+            Resolution of the interpolation, in radians.
+        interpolation_method : 'nearest' | 'linear' | 'cubic'
+            The method used for interpolation. See
+            :func:`scipy.interpolate.griddata` for more details.
+
+        Returns
+        -------
+        :class:`hyperspy.signals.BaseSignal`
+
+        """
+        indices = np.array(self.angles)
+        if interpolation_method == 'nearest' and indices.shape[1] > 2:
+            raise TypeError("`interpolation_method='nearest'` only works with data of two dimensions or less. Try using `filter_best`.")
+        extremes = [slice(q.min(), q.max(), resolution) for q in indices.T]
+        z = np.array(self.correlations)
+        grid_n = tuple(e for e in np.mgrid[extremes])
+        grid = griddata(indices, z, grid_n, method=interpolation_method, fill_value=fill_value)
+        return BaseSignal(grid)
 
     def plot(self, **kwargs):
         angles = np.array(self.angles)
