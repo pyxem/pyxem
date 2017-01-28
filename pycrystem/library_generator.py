@@ -22,13 +22,12 @@
 from __future__ import division
 
 import numpy as np
-from scipy.interpolate import griddata
-
 from hyperspy.signals import BaseSignal
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
-from transforms3d.euler import euler2axangle
+from scipy.interpolate import griddata
 from tqdm import tqdm
+from transforms3d.euler import euler2axangle
 
 from .utils import correlate
 from .utils.plot import plot_correlation_map

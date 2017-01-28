@@ -17,11 +17,11 @@
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
-from hyperspy.signals import Signal2D, Signal1D
-from hyperspy import roi
 import tqdm
-
+from hyperspy import roi
+from hyperspy.signals import Signal2D, Signal1D
 from scipy.ndimage import variance
+
 from pycrystem.utils.expt_utils import *
 from .library_generator import DiffractionLibrary
 
