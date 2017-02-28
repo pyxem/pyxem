@@ -43,18 +43,11 @@ def correlate_component(image, pattern):
 
     Parameters
     ----------
-    image : {:class:`ElectronDiffraction`, :class:`ndarray`}
-        Either a single electron diffraction signal (should be appropriately scaled
-        and centered) or a 1D or 2D numpy array.
+    image : :class:`ElectronDiffraction`
+        A single electron diffraction signal. Should be appropriately scaled
+        and centered.
     pattern : :class:`DiffractionSimulation`
         The pattern to compare to.
-    scale : float
-        A scale to fine-tune correlation.
-    offset : :obj:tuple of :obj:float
-        A centre offset to fine-tune correlation.
-    axes_manager : :class:`AxesManager`
-        If image is an array, the appropriate AxesManager to get axes, scaling
-        and shape information
 
     Returns
     -------
