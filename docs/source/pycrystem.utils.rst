@@ -20,6 +20,14 @@ pycrystem.utils.sim_utils module
     :undoc-members:
     :show-inheritance:
 
+pycrystem.utils.strain_utils module
+-----------------------------------
+
+.. automodule:: pycrystem.utils.strain_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

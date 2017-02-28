@@ -11,6 +11,14 @@ Subpackages
 Submodules
 ----------
 
+pycrystem.diffraction_component module
+--------------------------------------
+
+.. automodule:: pycrystem.diffraction_component
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pycrystem.diffraction_generator module
 --------------------------------------
 
@@ -31,6 +39,30 @@ pycrystem.library_generator module
 ----------------------------------
 
 .. automodule:: pycrystem.library_generator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pycrystem.scalable_reference_pattern module
+-------------------------------------------
+
+.. automodule:: pycrystem.scalable_reference_pattern
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pycrystem.tensor_field module
+-----------------------------
+
+.. automodule:: pycrystem.tensor_field
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pycrystem.tensor_field2d module
+-------------------------------
+
+.. automodule:: pycrystem.tensor_field2d
     :members:
     :undoc-members:
     :show-inheritance:

@@ -76,13 +76,28 @@ def affine_transformation(z, order=3, **kwargs):
 
     return trans
 
-def regional_filter(self, z, h):
-        seed = np.copy(z)
-        seed = z - h
-        mask = z
-        dilated = morphology.reconstruction(seed, mask, method='dilation')
+def regional_filter(z, h):
+    """Perform a h-dome regional filtering of the an image for background
+    subtraction.
 
-        return z - dilated
+    Parameters
+    ----------
+
+    z : image as numpy array
+
+    h : 
+
+    Returns
+    -------
+
+    h-dome subtracted image.
+    """
+    seed = np.copy(z)
+    seed = z - h
+    mask = z
+    dilated = morphology.reconstruction(seed, mask, method='dilation')
+
+    return z - dilated
 
 def circular_mask(shape, radius, center):
     """

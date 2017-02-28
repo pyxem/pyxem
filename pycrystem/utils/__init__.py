@@ -1,10 +1,40 @@
 # -*- coding: utf-8 -*-
-
 import numpy as np
 
+import pycrystem.utils.strain_utils
 
-def correlate(image, pattern, scale=1., offset=(0., 0.),
-              axes_manager=None):
+
+def correlate(image, pattern, include_direct_beam=False):
+    """The correlation between a diffraction pattern and a simulation.
+    Calculated using
+        .. math::
+            \frac{\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\sqrt{\sum_{j=1}^m P^2(x_j, y_j)} \sqrt{\sum_{j=1}^m T^2(x_j, y_j)}}
+    Parameters
+    ----------
+    image : :class:`np.ndarray`
+        A single electron diffraction signal. Should be appropriately scaled
+        and centered.
+    pattern : :class:`DiffractionSimulation`
+        The pattern to compare to.
+    Returns
+    -------
+    float
+        The correlation coefficient.
+    References
+    ----------
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
+    """
+    shape = image.shape
+    half_shape = tuple(int(i / 2) for i in shape)
+    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[:, :2] + half_shape
+    in_bounds = np.product((pixel_coordinates > 0) * (pixel_coordinates < shape[0]), axis=1).astype(bool)
+    image_intensities = image.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
+    pattern_intensities = pattern.intensities[in_bounds]
+    return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
+
+
+def correlate_component(image, pattern):
     """The correlation between a diffraction pattern and a simulation.
 
     Calculated using
@@ -37,42 +67,10 @@ def correlate(image, pattern, scale=1., offset=(0., 0.),
         template matching,” vol. 50, no. 1, pp. 87–99, 2005.
 
     """
-    # Fetch the axes
-    if axes_manager is None:
-        if isinstance(image, np.ndarray):
-            raise ValueError("No scaling information given")
-        else:
-            axes_manager = image.axes_manager
-            image = image.data
-    x_axis = axes_manager.signal_axes[0]
-    y_axis = axes_manager.signal_axes[1]
-
-    # Ensure correct data shape
-    shape = image.shape
-    if len(shape) not in [1, 2]:
-        raise ValueError("Only support 2D and 1D (i.e. 'raveled 2D') arrays")
-    else:
-        if len(shape) == 1:
-            image = image.reshape(axes_manager.signal_shape[::-1])
-
-    # Transform the pattern into image pixel space
-    x = pattern.coordinates[:, 0]
-    y = pattern.coordinates[:, 1]
-    x = x/x_axis.scale * scale
-    y = y/y_axis.scale * scale
-    x -= x_axis.offset/x_axis.scale + offset[0]
-    y -= y_axis.offset/y_axis.scale + offset[1]
-    x = x.astype(int)
-    y = y.astype(int)
-
-    # Constrain the positions to avoid `IndexError`s
-    x_bounds = np.logical_and(0 <= x, x < x_axis.size)
-    y_bounds = np.logical_and(0 <= y, y < y_axis.size)
-    condition = np.logical_and(x_bounds, y_bounds)
-
-    # Get point-by-point intensities
-    image_intensities = image[x[condition], y[condition]]
-    pattern_intensities = pattern.intensities[condition]
+    image_intensities = np.array(
+        [image.isig[c[0], c[1]].data for c in pattern.coordinates]
+    ).flatten()
+    pattern_intensities = pattern.intensities
     return _correlate(image_intensities, pattern_intensities)
 
 
