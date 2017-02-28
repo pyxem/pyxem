@@ -10,7 +10,7 @@ from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from transforms3d.euler import euler2axangle
 
-from pycrystem import Structure, ElectronDiffractionCalculator
+# from pycrystem import Structure, ElectronDiffractionCalculator
 from pycrystem.utils import correlate
 
 from ipywidgets import interact
@@ -56,9 +56,9 @@ def plot_correlation_map(
 
 
 def manual_orientation(
-        data: np.ndarray,
-        structure: Structure,
-        calculator: ElectronDiffractionCalculator,
+        data, #: np.ndarray,
+        structure, #: Structure,
+        calculator, #: ElectronDiffractionCalculator,
         ax=None,
 ):
     if ax is None:
