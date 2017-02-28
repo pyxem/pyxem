@@ -50,30 +50,30 @@ class ElectronDiffractionForwardModel(Component):
 
     def __init__(self, electron_diffraction_calculator,
                  structure,
-                 D11=1., D12=0., D13=0.,
-                 D21=0., D22=1., D23=0.,
-                 D31=0., D32=0., D33=1.):
-        Component.__init__(self, ['D11',
-                                  'D12',
-                                  'D13',
-                                  'D21',
-                                  'D22',
-                                  'D23',
-                                  'D31',
-                                  'D32',
-                                  'D33',
+                 d11=1., d12=0., d13=0.,
+                 d21=0., d22=1., d23=0.,
+                 d31=0., d32=0., d33=1.):
+        Component.__init__(self, ['d11',
+                                  'd12',
+                                  'd13',
+                                  'd21',
+                                  'd22',
+                                  'd23',
+                                  'd31',
+                                  'd32',
+                                  'd33',
                                   ])
         self.electron_diffraction_calculator = electron_diffraction_calculator
         self.structure = structure
-        self.D11.value = D11
-        self.D12.value = D12
-        self.D13.value = D13
-        self.D21.value = D21
-        self.D22.value = D22
-        self.D23.value = D23
-        self.D31.value = D31
-        self.D32.value = D32
-        self.D33.value = D33
+        self.d11.value = d11
+        self.d12.value = d12
+        self.d13.value = d13
+        self.d21.value = d21
+        self.d22.value = d22
+        self.d23.value = d23
+        self.d31.value = d31
+        self.d32.value = d32
+        self.d33.value = d33
 
     def function(self, *args, **kwargs):
         return 1
@@ -95,18 +95,18 @@ class ElectronDiffractionForwardModel(Component):
         """
         diffractor = self.electron_diffraction_calculator
         structure = self.structure
-        D11 = self.D11.value
-        D12 = self.D12.value
-        D13 = self.D13.value
-        D21 = self.D21.value
-        D22 = self.D22.value
-        D23 = self.D23.value
-        D31 = self.D31.value
-        D32 = self.D32.value
-        D33 = self.D33.value
+        d11 = self.d11.value
+        d12 = self.d12.value
+        d13 = self.d13.value
+        d21 = self.d21.value
+        d22 = self.d22.value
+        d23 = self.d23.value
+        d31 = self.d31.value
+        d32 = self.d32.value
+        d33 = self.d33.value
 
-        deformation = DeformStructureTransformation([[D11, D12, D13],
-                                                     [D21, D22, D23],
-                                                     [D31, D32, D33]])
+        deformation = DeformStructureTransformation([[d11, d12, d13],
+                                                     [d21, d22, d23],
+                                                     [d31, d32, d33]])
         deformed_structure = deformation.apply_transformation(structure)
         return diffractor.calculate_ed_data(deformed_structure)
