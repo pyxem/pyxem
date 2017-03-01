@@ -653,6 +653,6 @@ class ElectronDiffraction(Signal2D):
                 disable=not show_progressbar,
                 total=self.axes_manager.navigation_size):
             output_array[index[::-1]] = library.correlate(z, show_progressbar=False)\
-                .filter_best()
+                .best_angle
         return output_array
 
