@@ -17,11 +17,11 @@
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
-from hyperspy.signals import Signal2D, Signal1D
-from hyperspy import roi
 import tqdm
-
+from hyperspy import roi
+from hyperspy.signals import Signal2D, Signal1D
 from scipy.ndimage import variance
+
 from pycrystem.utils.expt_utils import *
 from .library_generator import DiffractionLibrary
 
@@ -653,6 +653,6 @@ class ElectronDiffraction(Signal2D):
                 disable=not show_progressbar,
                 total=self.axes_manager.navigation_size):
             output_array[index[::-1]] = library.correlate(z, show_progressbar=False)\
-                .filter_best()
+                .best_angle
         return output_array
 
