@@ -17,13 +17,13 @@
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division
 
-from math import radians, sin
-from decimal import Decimal, ROUND_HALF_UP
-
-from scipy.constants import h, m_e, e, c, pi
+import itertools
 import math
+from decimal import Decimal, ROUND_HALF_UP
+from math import radians, sin
+
 import numpy as np
-from transforms3d.euler import euler2axangle
+from scipy.constants import h, m_e, e, c, pi
 
 
 def get_electron_wavelength(accelerating_voltage):
@@ -192,3 +192,16 @@ def equispaced_so3_grid(alpha_max, beta_max, gamma_max, resolution=2.5,
     beta = np.tile(beta, (ap2, 1)).flatten()
     so3_grid = np.vstack((alpha, beta, gamma)).T
     return so3_grid
+
+
+def astar_style_orientations(
+        alpha_range: tuple,
+        beta_range:  tuple,
+        gamma_range: tuple,
+        resolution:  float,
+):
+    grid = equispaced_s2_grid(beta_range, gamma_range, resolution)
+    grid = [tuple(g) for g in grid]
+    gamma = np.radians(np.arange(*alpha_range, resolution))
+    orientations = np.array([(a, b, c) for a, (b, c) in itertools.product(gamma, grid)])
+    return orientations
