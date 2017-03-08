@@ -28,6 +28,7 @@ from pymatgen.transformations.standard_transformations \
 from scipy.interpolate import griddata
 from tqdm import tqdm
 from transforms3d.euler import euler2axangle
+from scipy.constants import pi
 
 
 class DiffractionLibraryGenerator(object):
@@ -47,7 +48,10 @@ class DiffractionLibraryGenerator(object):
 
         self.electron_diffraction_calculator = electron_diffraction_calculator
 
-    def get_diffraction_library(self, structure, orientations):
+    def get_diffraction_library(self,
+                                structure_library,
+                                calibration,
+                                representation='euler'):
         """Calculates a list of diffraction data for a structure.
 
         The structure is rotated to each orientation in `orientations` and the
@@ -63,6 +67,7 @@ class DiffractionLibraryGenerator(object):
         orientations : list of tuple
             tuple[0] is an array specifying the axis of rotation
             tuple[1] is the angle of rotation in radians
+        format :
 
         Returns
         -------
@@ -72,18 +77,27 @@ class DiffractionLibraryGenerator(object):
         """
         #TODO: update this method to include multiple phases and to incorporate
         #crystal symmetry properly
-
         diffraction_library = DiffractionLibrary()
         diffractor = self.electron_diffraction_calculator
 
-        for orientation in tqdm(orientations):
-            axis, angle = euler2axangle(orientation[0], orientation[1], orientation[2], 'rzyz')
-            rotation = RotationTransformation(axis, angle,
-                                              angle_in_radians=True)
-            rotated_structure = rotation.apply_transformation(structure)
-            data = diffractor.calculate_ed_data(rotated_structure)
-            diffraction_library[tuple(orientation)] = data
-
+        for key in structure_library.keys():
+            phase_diffraction_library = dict()
+            structure = structure_library[key][0]
+            orientations = structure_library[key][1]
+            for orientation in orientations:
+                if representation=='axis-angle':
+                    axis = [orientation[0], orientation[1], orientation[2]]
+                    angle = orientation[3] / 180 * pi
+                if representation=='euler':
+                    axis, angle = euler2axangle(orientation[0], orientation[1],
+                                                orientation[2], 'rzyz')
+                rotation = RotationTransformation(axis, angle,
+                                                  angle_in_radians=True)
+                rotated_structure = rotation.apply_transformation(structure)
+                data = diffractor.calculate_ed_data(rotated_structure)
+                data.calibration = calibration
+                phase_diffraction_library[tuple(orientation)] = data
+            diffraction_library[key] = phase_diffraction_library
         return diffraction_library
 
 
