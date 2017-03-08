@@ -57,11 +57,15 @@ class IndexationGenerator():
                 signal.axes_manager._array_indices_generator()),
                 disable=not show_progressbar,
                 total=signal.axes_manager.navigation_size):
-            correlations = Correlation()
-            for euler_angle, diffraction_pattern in library.items():
-                correlation = correlate(image, diffraction_pattern)
-                correlations[euler_angle] = correlation
-            output_array[index[::-1]] = correlations
+            phase_correlations = Correlation()
+            for key in library.keys():
+                diff_lib = library[key]
+                correlations = dict()
+                for orientation, diffraction_pattern in diff_lib.items():
+                    correlation = correlate(image, diffraction_pattern)
+                    correlations[orientation] = correlation
+                phase_correlations[key] = correlations
+            output_array[index[::-1]] = phase_correlations
         return output_array
 
 
