@@ -1,17 +1,19 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from ipywidgets import interact
-from matplotlib.projections import PolarAxes
-from matplotlib.transforms import Affine2D
+import matplotlib.pyplot as plt
+
 from mpl_toolkits.axisartist.floating_axes import GridHelperCurveLinear, \
     FloatingSubplot
+from matplotlib.projections import PolarAxes
+from matplotlib.transforms import Affine2D
+from scipy.interpolate import griddata
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
-from scipy.interpolate import griddata
 from transforms3d.euler import euler2axangle
 
-from pycrystem import Structure
+# from pycrystem import Structure, ElectronDiffractionCalculator
 from pycrystem.utils import correlate
+
+from ipywidgets import interact
 
 
 def symmetry_axes(figure, theta=(0, np.pi / 4), phi=(-np.pi / 4, np.pi / 4)):
@@ -54,9 +56,9 @@ def plot_correlation_map(
 
 
 def manual_orientation(
-        data: np.ndarray,
-        structure: Structure,
-        calculator,
+        data, #: np.ndarray,
+        structure, #: Structure,
+        calculator, #: ElectronDiffractionCalculator,
         ax=None,
 ):
     if ax is None:

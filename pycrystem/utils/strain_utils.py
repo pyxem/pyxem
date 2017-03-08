@@ -31,36 +31,51 @@ This module contains utility functions for manipulating the results of strain
 mapping analysis.
 """
 
-def get_strain_maps(dp, component):
-    """Gets the strain maps from model fitting results.
+def _polar_decomposition(D, side='right'):
+    """Perform polar decomposition on a signal containing matrices in
+
+    D = RU
+
+    where R
 
     Parameters
     ----------
 
+    side : 'right' or 'left'
+
+        The side of the matrix product on which the Hermitian semi-definite
+        part of the polar decomposition appears. i.e. if 'right' D = RU and
+        if 'left' D = UR.
+
     Returns
     -------
+
+    R : TensorField
+
+        The orthogonal matrix describing
+
+    U : TensorField
+
+        The strain tensor field
+
     """
-    #TODO:
-    D = construct_displacement_gradient(component)
-    R, U = polar_decomposition(D)
+    R = BaseSignal(np.ones((D.axes_manager.navigation_shape[1],
+                            D.axes_manager.navigation_shape[0],
+                            3,3)))
+    R.axes_manager.set_signal_dimension(2)
+    U = BaseSignal(np.ones((D.axes_manager.navigation_shape[1],
+                            D.axes_manager.navigation_shape[0],
+                            3,3)))
+    U.axes_manager.set_signal_dimension(2)
 
-    e11 = U.isig[0,0].as_signal2d(image_axes=e11.axes_manager.navigation_axes)
-    e12 = U.isig[0,1].as_signal2d(image_axes=e12.axes_manager.navigation_axes)
-    e21 = U.isig[1,0].as_signal2d(image_axes=e21.axes_manager.navigation_axes)
-    e22 = U.isig[1,1].as_signal2d(image_axes=e22.axes_manager.navigation_axes)
-    theta = get_rotation_angle(R)
+    for z, indices in zip(D._iterate_signal(),
+                          D.axes_manager._array_indices_generator()):
+        R.data[indices] = linalg.polar(D.data[indices], side=side)[0]
+        U.data[indices] = linalg.polar(D.data[indices], side=side)[1]
 
-    strain_results = Signal2D(np.ones((4, dp.axes_manager.navigation_shape[1],
-                                       dp.axes_manager.navigation_shape[0])))
+    return R, U
 
-    strain_results.data[0] = 1. - e11.data
-    strain_results.data[1] = 1. - e22.data
-    strain_results.data[2] = e12.data
-    strain_results.data[3] = theta.data
-
-    return strain_results
-
-def get_rotation_angle(R):
+def _get_rotation_angle(R):
     """Return the
 
     Parameters
@@ -95,3 +110,57 @@ def get_rotation_angle(R):
     X = Signal2D(T.astype(float))
 
     return X
+
+def get_strain_maps(component):
+    """Gets the strain maps from model fitting results.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
+    D = BaseSignal(np.ones((component.model.axes_manager.navigation_shape[1],
+                            component.model.axes_manager.navigation_shape[0],
+                                   3,3)))
+    D.axes_manager.set_signal_dimension(2)
+
+    D.data[:,:,0,0] = component.d11.map['values']
+    D.data[:,:,1,0] = component.d12.map['values']
+    D.data[:,:,2,0] = 0.
+    D.data[:,:,0,1] = component.d21.map['values']
+    D.data[:,:,1,1] = component.d22.map['values']
+    D.data[:,:,2,1] = 0.
+    D.data[:,:,0,2] = 0.
+    D.data[:,:,1,2] = 0.
+    D.data[:,:,2,2] = 1.
+
+    R, U = _polar_decomposition(D)
+
+    theta = _get_rotation_angle(R)
+
+    e11 = U.isig[0,0]
+    e11 = e11.as_signal2D(image_axes=e11.axes_manager.navigation_axes)
+    e11.data = 1. - e11.data
+
+    e12 = U.isig[0,1]
+    e12 = e12.as_signal2D(image_axes=e12.axes_manager.navigation_axes)
+    e12.data = e12.data
+
+    e21 = U.isig[1,0]
+    e21 = e21.as_signal2D(image_axes=e21.axes_manager.navigation_axes)
+    e21.data = e21.data
+
+    e22 = U.isig[1,1]
+    e22 = e22.as_signal2D(image_axes=e22.axes_manager.navigation_axes)
+    e22.data = 1. - e22.data
+
+    strain_results = Signal2D(np.ones((4, component.model.axes_manager.navigation_shape[1],
+                                       component.model.axes_manager.navigation_shape[0])))
+
+    strain_results.data[0] = e11.data
+    strain_results.data[1] = e22.data
+    strain_results.data[2] = e12.data
+    strain_results.data[3] = theta.data
+
+    return strain_results
