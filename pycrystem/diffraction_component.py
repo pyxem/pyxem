@@ -114,4 +114,4 @@ class ElectronDiffractionForwardModel(Component):
         deformed_structure = deformation.apply_transformation(structure)
         sim = diffractor.calculate_ed_data(deformed_structure)
         sim.calibration = calibration
-        return
+        return sim
