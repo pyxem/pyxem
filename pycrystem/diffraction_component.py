@@ -50,6 +50,7 @@ class ElectronDiffractionForwardModel(Component):
 
     def __init__(self, electron_diffraction_calculator,
                  structure,
+                 calibration,
                  d11=1., d12=0., d13=0.,
                  d21=0., d22=1., d23=0.,
                  d31=0., d32=0., d33=1.):
@@ -65,6 +66,7 @@ class ElectronDiffractionForwardModel(Component):
                                   ])
         self.electron_diffraction_calculator = electron_diffraction_calculator
         self.structure = structure
+        self.calibration = calibration
         self.d11.value = d11
         self.d12.value = d12
         self.d13.value = d13
@@ -95,6 +97,7 @@ class ElectronDiffractionForwardModel(Component):
         """
         diffractor = self.electron_diffraction_calculator
         structure = self.structure
+        calibration = self.calibration
         d11 = self.d11.value
         d12 = self.d12.value
         d13 = self.d13.value
@@ -109,4 +112,6 @@ class ElectronDiffractionForwardModel(Component):
                                                      [d21, d22, d23],
                                                      [d31, d32, d33]])
         deformed_structure = deformation.apply_transformation(structure)
-        return diffractor.calculate_ed_data(deformed_structure)
+        sim = diffractor.calculate_ed_data(deformed_structure)
+        sim.calibration = calibration
+        return
