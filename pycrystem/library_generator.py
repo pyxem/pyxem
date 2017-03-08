@@ -29,9 +29,6 @@ from scipy.interpolate import griddata
 from tqdm import tqdm
 from transforms3d.euler import euler2axangle
 
-from .utils import correlate
-from .utils.plot import plot_correlation_map
-
 
 class DiffractionLibraryGenerator(object):
     """
@@ -47,6 +44,7 @@ class DiffractionLibraryGenerator(object):
             The calculator used for the diffraction patterns.
 
         """
+
         self.electron_diffraction_calculator = electron_diffraction_calculator
 
     def get_diffraction_library(self, structure, orientations):
@@ -61,7 +59,7 @@ class DiffractionLibraryGenerator(object):
         Parameters
         ----------
         structure : :class:`Structure`
-            The structure for which to derive the library.
+            List of structures for which to derive the library.
         orientations : list of tuple
             tuple[0] is an array specifying the axis of rotation
             tuple[1] is the angle of rotation in radians
@@ -72,6 +70,8 @@ class DiffractionLibraryGenerator(object):
             Mapping of Euler angles of rotation to diffraction data objects.
 
         """
+        #TODO: update this method to include multiple phases and to incorporate
+        #crystal symmetry properly
 
         diffraction_library = DiffractionLibrary()
         diffractor = self.electron_diffraction_calculator
@@ -88,40 +88,9 @@ class DiffractionLibraryGenerator(object):
 
 
 class DiffractionLibrary(dict):
-
-    def plot(self):
-        """Plots the library interactively.
-
-        .. todo::
-            Implement this method.
-
-        """
-        pass
-
-    def correlate(self, image: np.ndarray, show_progressbar=True):
-        """Finds the correlation between an image and the entire library.
-
-        Parameters
-        ----------
-        image : :class:`numpy.ndarray`
-            A numpy array of the data to be correlated.
-
-        Returns
-        -------
-        correlations : Correlation
-            A mapping of Euler angles to correlation values.
-
-        """
-        correlations = Correlation()
-        for euler_angle, diffraction_pattern in tqdm(self.items(), disable=not show_progressbar, leave=False):
-            correlation = correlate(image,
-                                    diffraction_pattern)
-            correlations[euler_angle] = correlation
-        return correlations
-
-    def index(self, image):
-        correlations = self.correlate(image)
-        return correlations
+    """Maps structure and orientation (Euler angles) to simulated diffraction
+    data.
+    """
 
     def set_calibration(self, calibration):
         """Sets the scale of every diffraction pattern simulation in the
@@ -154,103 +123,9 @@ class DiffractionLibrary(dict):
             diffraction_pattern.offset = offset
         return self
 
-
-class Correlation(dict):
-    """Maps angles to correlation indices.
-
-    Some useful properties and methods are defined.
-
-    """
-
-    @property
-    def angles(self):
-        """Returns the angles (keys) as a list."""
-        return list(self.keys())
-
-    @property
-    def correlations(self):
-        """Returns the correlations (values) as a list."""
-        return list(self.values())
-
-    @property
-    def best_angle(self):
-        """Returns the angle with the highest correlation index."""
-        return max(self, key=self.get)
-
-    @property
-    def best_correlation(self):
-        """Returns the highest correlation index."""
-        return self[self.best_angle]
-
-    @property
-    def best(self):
-        """Returns angle and value of the highest correlation index."""
-        return self.best_angle, self.best_correlation
-
-    def filter_best(self, axes=(-2, -1,)):
-        """Reduces the dimensionality of the angles.
-
-        Returns a `Correlation` with only those angles that are unique in
-        `axes`. Where there are duplicates, only the angle with the highest
-        correlation is retained.
-
-        Parameters
-        ----------
-        axes : tuple, optional
-            The indices of the angles along which to optimise. Default is the
-            last *two* indices.
-
-        Returns
-        -------
-        Correlation
+    def plot(self):
+        """Plots the library interactively.
 
         """
-        best_correlations = {}
-        for angle in self:
-            correlation = self[angle]
-            angle = tuple(np.array(angle)[axes,])
-            if angle in best_correlations and correlation < best_correlations[angle]:
-                continue
-            best_correlations[angle] = correlation
-        return Correlation(best_correlations)
-
-    def as_signal(self, resolution=np.pi/180, interpolation_method='cubic', fill_value=0.):
-        """Returns the correlation as a hyperspy signal.
-
-        Interpolates between angles where necessary to produce a consistent
-        grid.
-
-        Parameters
-        ----------
-        resolution : float, optional
-            Resolution of the interpolation, in radians.
-        interpolation_method : 'nearest' | 'linear' | 'cubic'
-            The method used for interpolation. See
-            :func:`scipy.interpolate.griddata` for more details.
-
-        Returns
-        -------
-        :class:`hyperspy.signals.BaseSignal`
-
-        """
-        indices = np.array(self.angles)
-        if interpolation_method == 'nearest' and indices.shape[1] > 2:
-            raise TypeError("`interpolation_method='nearest'` only works with data of two dimensions or less. Try using `filter_best`.")
-        extremes = [slice(q.min(), q.max(), resolution) for q in indices.T]
-        z = np.array(self.correlations)
-        grid_n = tuple(e for e in np.mgrid[extremes])
-        grid = griddata(indices, z, grid_n, method=interpolation_method, fill_value=fill_value)
-        return BaseSignal(grid)
-
-    def plot(self, **kwargs):
-        angles = np.array(self.angles)
-        if angles.shape[1] != 2:
-            raise NotImplementedError("Plotting is only available for two-dimensional angles. Try using `filter_best`.")
-        angles = angles[:, (1, 0)]
-        domain = []
-        domain.append((angles[:, 0].min(), angles[:, 0].max()))
-        domain.append((angles[:, 1].min(), angles[:, 1].max()))
-        correlations = np.array(self.correlations)
-        ax = plot_correlation_map(angles, correlations, phi=domain[0], theta=domain[1], **kwargs)
-        ax.scatter(self.best_angle[1], self.best_angle[0], c='r', zorder=2, edgecolor='none')
-        return ax
+        #TODO: implement plotting of a diffraction library
+        pass
