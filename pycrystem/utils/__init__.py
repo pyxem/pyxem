@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from scipy.interpolate import RectBivariateSpline
 
 import pycrystem.utils.strain_utils
 
 
-def correlate(image, pattern, include_direct_beam=False):
+def correlate(image, pattern, include_direct_beam=False, sim_threshold=1e-5,
+              **kwargs):
     """The correlation between a diffraction pattern and a simulation.
     Calculated using
         .. math::
@@ -16,6 +18,10 @@ def correlate(image, pattern, include_direct_beam=False):
         and centered.
     pattern : :class:`DiffractionSimulation`
         The pattern to compare to.
+    sim_threshold : float
+        The threshold simulation intensity to consider for correlation
+    **kwargs
+        Arguments to pass to scipy.interpolate.RectBivariateSpline
     Returns
     -------
     float
@@ -26,11 +32,27 @@ def correlate(image, pattern, include_direct_beam=False):
         template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
     shape = image.shape
-    half_shape = tuple(int(i / 2) for i in shape)
-    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[:, :2] + half_shape
-    in_bounds = np.product((pixel_coordinates > 0) * (pixel_coordinates < shape[0]), axis=1).astype(bool)
-    image_intensities = image.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
-    pattern_intensities = pattern.intensities[in_bounds]
+    half_shape = tuple(i // 2 for i in shape)
+    x = np.arange(shape[0], dtype='float') - half_shape[0]
+    y = np.arange(shape[1], dtype='float') - half_shape[1]
+    for ar, i in zip([x, y], shape):
+        if not i % 2:
+            ar += 0.5
+    x = x * pattern.calibration[0]
+    y = y * pattern.calibration[1]
+
+    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[
+        :, :2] + half_shape
+    in_bounds = np.product((pixel_coordinates > 0) *
+                           (pixel_coordinates < shape[0]), axis=1).astype(bool)
+    pattern_intensities = pattern.intensities
+    large_intensities = pattern_intensities > sim_threshold
+    mask = np.logical_and(in_bounds, large_intensities)
+
+    ip = RectBivariateSpline(x, y, image.T, **kwargs)
+    image_intensities = ip.ev(pattern.coordinates[:, 0][mask],
+                              pattern.coordinates[:, 1][mask])
+    pattern_intensities = pattern_intensities[mask]
     return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
 
 
