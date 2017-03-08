@@ -644,15 +644,3 @@ class ElectronDiffraction(Signal2D):
             *args, **kwargs)
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
-
-    def correlate(self, library: DiffractionLibrary, show_progressbar=True):
-        output_array = np.zeros(self.axes_manager.navigation_shape, dtype=object)
-        for z, index in tqdm.tqdm(
-                zip(self._iterate_signal(),
-                    self.axes_manager._array_indices_generator()),
-                disable=not show_progressbar,
-                total=self.axes_manager.navigation_size):
-            output_array[index[::-1]] = library.correlate(z, show_progressbar=False)\
-                .best_angle
-        return output_array
-
