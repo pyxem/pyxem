@@ -23,6 +23,7 @@ from __future__ import division
 
 import numpy as np
 from hyperspy.signals import BaseSignal
+from tqdm import tqdm
 
 from .utils.plot import plot_correlation_map
 
