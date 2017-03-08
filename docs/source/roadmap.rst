@@ -20,3 +20,4 @@ horizons
 Simulations : add multi-slice and Bloch options
 Kikuchi Patterns : add support for Kikuchi pattern based Mapping
 Orientation Mapping : smarter workflows for getting "correct" solution
+Strain Tomography 

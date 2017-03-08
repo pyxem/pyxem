@@ -117,9 +117,10 @@ class DiffractionLibrary(dict):
             reciprocal angstrom coordinates.
 
         """
-        for diffraction_pattern in self.values():
-            diffraction_pattern.calibration = calibration
-        return self
+        for key in self.keys():
+            diff_lib = self[key]
+            for diffraction_pattern in diff_lib.values():
+                diffraction_pattern.calibration = calibration
 
     def set_offset(self, offset):
         """Sets the offset of every diffraction pattern simulation in the
@@ -133,13 +134,21 @@ class DiffractionLibrary(dict):
 
         """
         assert len(offset) == 2
-        for diffraction_pattern in self.values():
-            diffraction_pattern.offset = offset
-        return self
+        for key in self.keys():
+            diff_lib = self[key]
+            for diffraction_pattern in diff_lib.values():
+                diffraction_pattern.offset = offset
 
     def plot(self):
         """Plots the library interactively.
 
         """
-        #TODO: implement plotting of a diffraction library
-        pass
+        #TODO: Update this so not so stupid and therefore faster
+        from pycrystem.diffraction_signal import ElectronDiffraction
+        sim_diff_dat = []
+        for key in self.keys():
+            for ori in self[key].keys():
+                dpi = self[key][ori].as_signal(128, 0.03, 1)
+                sim_diff_dat.append(dpi.data)
+        ppt_test = ElectronDiffraction(sim_diff_dat)
+        ppt_test.plot()
