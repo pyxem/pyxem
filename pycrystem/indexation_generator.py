@@ -25,6 +25,7 @@ import numpy as np
 from hyperspy.signals import BaseSignal
 from tqdm import tqdm
 
+from .utils import correlate
 from .utils.plot import plot_correlation_map
 
 class IndexationGenerator():
@@ -52,12 +53,10 @@ class IndexationGenerator():
 
         output_array = np.zeros(signal.axes_manager.navigation_shape,
                                 dtype=object)
-        for z, index in tqdm.tqdm(
-                zip(signal._iterate_signal(),
-                    signal.axes_manager._array_indices_generator()),
+        for image, index in tqdm(zip(signal._iterate_signal(),
+                signal.axes_manager._array_indices_generator()),
                 disable=not show_progressbar,
                 total=signal.axes_manager.navigation_size):
-
             correlations = Correlation()
             for euler_angle, diffraction_pattern in library.items():
                 correlation = correlate(image, diffraction_pattern)
