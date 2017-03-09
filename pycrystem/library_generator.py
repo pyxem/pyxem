@@ -90,7 +90,7 @@ class DiffractionLibraryGenerator(object):
                     angle = orientation[3] / 180 * pi
                 if representation=='euler':
                     axis, angle = euler2axangle(orientation[0], orientation[1],
-                                                orientation[2], 'rzyz')
+                                                orientation[2], 'rzxz')
                 rotation = RotationTransformation(axis, angle,
                                                   angle_in_radians=True)
                 rotated_structure = rotation.apply_transformation(structure)
