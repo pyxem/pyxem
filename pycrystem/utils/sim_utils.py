@@ -24,6 +24,12 @@ from math import radians, sin
 
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
+import os
+import json
+
+with open(os.path.join(os.path.dirname(__file__),
+                       "atomic_scattering_params.json")) as f:
+ATOMIC_SCATTERING_PARAMS = json.load(f)
 
 
 def get_electron_wavelength(accelerating_voltage):
@@ -99,13 +105,49 @@ def get_kinematical_intensities(structure,
         The intensities of the peaks.
 
     """
-    f_hkl = np.sum([atom.number * np.exp(
-                    2j * pi * np.dot(g_indices, position)) for
-                    position, atom in
-                    zip(structure.frac_coords, structure.species)],
-                    axis=0)
+    # Create a flattened array of zs, coeffs, fcoords and occus. This is
+    # used to perform vectorized computation of atomic scattering factors
+    # later. Note that these are not necessarily the same size as the
+    # structure as each partially occupied specie occupies its own
+    # position in the flattened array.
+    zs = []
+    coeffs = []
+    fcoords = []
+    occus = []
+    dwfactors = []
+
+    for site in structure:
+        for sp, occu in site.species_and_occu.items():
+            zs.append(sp.Z)
+            try:
+                c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
+            except KeyError:
+                raise ValueError("Unable to calculate XRD pattern as "
+                                 "there is no scattering coefficients for"
+                                 " %s." % sp.symbol)
+            coeffs.append(c)
+            dwfactors.append(self.debye_waller_factors.get(sp.symbol, 0))
+            fcoords.append(site.frac_coords)
+            occus.append(occu)
+
+    zs = np.array(zs)
+    coeffs = np.array(coeffs)
+    fcoords = np.array(fcoords)
+    occus = np.array(occus)
+    dwfactors = np.array(dwfactors)
+
+    g_hkl =
+
+    fs = zs - 41.78214 * ((g_hkl / 2) ** 2) * np.sum(
+        coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+
+    dw_correction = np.exp(-dwfactors * ((g_hkl / 2) ** 2))
+
+    f_hkl = np.sum([fs * occus * np.exp(2j * pi * np.dot(g_indices, fcoords))
+                   * dw_correction)
 
     shape_factor = 1 - (excitation_error / maximum_excitation_error)
+    
     peak_intensities = (f_hkl * f_hkl.conjugate()).real * shape_factor
     return peak_intensities
 
