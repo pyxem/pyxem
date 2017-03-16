@@ -203,9 +203,7 @@ def _get_radial_profile_of_simulated_image(signal_simulated, bins=100):
 
     Returns
     -------
-    Tuple of two numpy arrays (hist, xaxis).
-    hist : 1D numpy array, intensity radial profile.
-    xaxis : 1D numpy array, the scattering angle
+    HyperSpy signal with the radially integrated dataset
     """
     image = signal_simulated.data
 
@@ -226,7 +224,12 @@ def _get_radial_profile_of_simulated_image(signal_simulated, bins=100):
 
     hist = hist/number_of_bins
 
-    return(hist, xaxis)
+    signal = hs.signals.Signal1D(hist)
+    signal.axes_manager[0].scale = xaxis[1]-xaxis[0]
+    signal.axes_manager[0].offset = xaxis[0]
+    signal.axes_manager[0].units = signal_simulated.axes_manager[0].units
+
+    return signal
 
 def _get_lowest_index_radial_array(radial_array):
     """Returns the lowest index of in a radial array.

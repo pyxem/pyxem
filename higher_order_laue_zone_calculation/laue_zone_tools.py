@@ -86,13 +86,8 @@ def run_full_process_on_simulated_image(
     s_diff = s_diff.isig[
             float(-crop):float(crop),
             float(-crop):float(crop)]
-    radial_data, xaxis = sdri._get_radial_profile_of_simulated_image(
+    s_radial = sdri._get_radial_profile_of_simulated_image(
             s_diff, bins=radial_bins)
-
-    s_radial = hs.signals.Signal1D(radial_data)
-    s_radial.axes_manager[0].scale = xaxis[1]-xaxis[0]
-    s_radial.axes_manager[0].offset = xaxis[0]
-    s_radial.axes_manager[0].units = s_diff.axes_manager[0].units
 
     s_lfo = s_radial.isig[47.:78.]
     s_sto = s_radial.isig[77.:107.]
