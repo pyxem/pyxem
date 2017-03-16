@@ -27,7 +27,7 @@ from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 from pycrystem.diffraction_signal import ElectronDiffraction
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
-    get_structure_factors
+    get_kinematical_intensities
 
 
 class ElectronDiffractionCalculator(object):
@@ -97,10 +97,10 @@ class ElectronDiffractionCalculator(object):
 
         # Obtain crystallographic reciprocal lattice points within `max_r`.
         recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_pts = reciprocal_lattice.get_points_in_sphere([[0, 0, 0]],
-                                                            [0, 0, 0],
-                                                            reciprocal_radius,
-                                                            zip_results=False)[0]
+        recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]],
+                                                    [0, 0, 0],
+                                                    reciprocal_radius,
+                                                    zip_results=False)[0]
         cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
@@ -122,7 +122,7 @@ class ElectronDiffractionCalculator(object):
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
-                                     intensities=intersection_intensities)
+                                     intensities=intensities)
 
 
 class DiffractionSimulation:
