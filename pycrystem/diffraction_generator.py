@@ -101,6 +101,10 @@ class ElectronDiffractionCalculator(object):
                                                     [0, 0, 0],
                                                     reciprocal_radius,
                                                     zip_results=False)[0]
+        g_hkls = recip_latt.get_points_in_sphere([[0, 0, 0]],
+                                                 [0, 0, 0],
+                                                 reciprocal_radius,
+                                                 zip_results=False)[1]
         cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
@@ -115,10 +119,13 @@ class ElectronDiffractionCalculator(object):
         intersection_coordinates = cartesian_coordinates[intersection]
         intersection_indices = recip_pts[intersection]
         proximity = proximity[intersection]
+        g_hkls = g_hkls[intersection]
         intensities = get_kinematical_intensities(structure,
                                                   intersection_indices,
+                                                  g_hkls,
                                                   proximity,
-                                                  self.excitation_error)
+                                                  self.excitation_error,
+                                                  self.debye_waller_factors)
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,

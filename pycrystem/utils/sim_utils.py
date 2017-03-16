@@ -81,8 +81,10 @@ def get_interaction_constant(accelerating_voltage):
 
 def get_kinematical_intensities(structure,
                                 g_indices,
+                                g_hkls,
                                 excitation_error,
-                                maximum_excitation_error):
+                                maximum_excitation_error,
+                                debye_waller_factors):
     """Calculates peak intensities.
 
     The peak intensity is a combination of the structure factor for a given
@@ -136,19 +138,26 @@ def get_kinematical_intensities(structure,
     occus = np.array(occus)
     dwfactors = np.array(dwfactors)
 
-    g_hkl =
+    s2s = (g_hkls / 2) ** 2
+    fss = []
+    for s2 in s2s:
+        fs = zs - 41.78214 * s2 * np.sum(
+            coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+        fss.append(fs)
+    fss = np.array(fss)
 
-    fs = zs - 41.78214 * ((g_hkl / 2) ** 2) * np.sum(
-        coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+    dw_correction = np.exp(-dwfactors * s2s)
 
-    dw_correction = np.exp(-dwfactors * ((g_hkl / 2) ** 2))
-
-    f_hkl = np.sum([fs * occus * np.exp(2j * pi * np.dot(g_indices, fcoords))
-                   * dw_correction)
+    f_hkls = []
+    for g in intersection_indices:
+        f_hkl = np.sum(fss * occus * np.exp(2j * np.pi * np.dot(g, fcoords.T))
+                       * dw_correction)
+        f_hkls.append(f_hkl)
+    f_hkls = np.array(f_hkls)
 
     shape_factor = 1 - (excitation_error / maximum_excitation_error)
 
-    peak_intensities = (f_hkl * f_hkl.conjugate()).real * shape_factor
+    peak_intensities = (f_hkls * f_hkls.conjugate()).real * shape_factor
     return peak_intensities
 
 
