@@ -27,8 +27,7 @@ from scipy.constants import h, m_e, e, c, pi
 import os
 import json
 
-with open(os.path.join(os.path.dirname(__file__),
-                       "atomic_scattering_params.json")) as f:
+with open("/home/dnj23/pycrystem/pycrystem/utils/atomic_scattering_params.json") as f:
     ATOMIC_SCATTERING_PARAMS = json.load(f)
 
 
@@ -128,7 +127,7 @@ def get_kinematical_intensities(structure,
                                  "there is no scattering coefficients for"
                                  " %s." % sp.symbol)
             coeffs.append(c)
-            dwfactors.append(self.debye_waller_factors.get(sp.symbol, 0))
+            dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
             fcoords.append(site.frac_coords)
             occus.append(occu)
 
@@ -146,12 +145,12 @@ def get_kinematical_intensities(structure,
         fss.append(fs)
     fss = np.array(fss)
 
-    dw_correction = np.exp(-dwfactors * s2s)
+    #dw_correction = np.exp(-dwfactors * s2s)
 
     f_hkls = []
-    for g in intersection_indices:
-        f_hkl = np.sum(fss * occus * np.exp(2j * np.pi * np.dot(g, fcoords.T))
-                       * dw_correction)
+    for g in g_indices:
+        f_hkl = np.sum(fss * occus * np.exp(2j * np.pi * np.dot(g, fcoords.T)))
+                       #* dw_correction)
         f_hkls.append(f_hkl)
     f_hkls = np.array(f_hkls)
 
