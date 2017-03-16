@@ -29,7 +29,7 @@ import json
 
 with open(os.path.join(os.path.dirname(__file__),
                        "atomic_scattering_params.json")) as f:
-ATOMIC_SCATTERING_PARAMS = json.load(f)
+    ATOMIC_SCATTERING_PARAMS = json.load(f)
 
 
 def get_electron_wavelength(accelerating_voltage):
@@ -147,7 +147,7 @@ def get_kinematical_intensities(structure,
                    * dw_correction)
 
     shape_factor = 1 - (excitation_error / maximum_excitation_error)
-    
+
     peak_intensities = (f_hkl * f_hkl.conjugate()).real * shape_factor
     return peak_intensities
 
