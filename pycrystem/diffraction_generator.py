@@ -63,13 +63,21 @@ class ElectronDiffractionCalculator(object):
 
     """
 
-    def __init__(self, accelerating_voltage, reciprocal_radius, excitation_error):
-
+    def __init__(self,
+                 accelerating_voltage,
+                 excitation_error,
+                 debye_waller_factors=None):
+        """
+        Initializes the electron diffraction calculator with a particular
+        accelerating voltage, reciprocal radius and excitation error.
+        """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
-        self.reciprocal_radius = reciprocal_radius
         self.excitation_error = excitation_error
+        self.debye_waller_factors = debye_waller_factors or {}
 
-    def calculate_ed_data(self, structure):
+    def calculate_ed_data(self,
+                          structure,
+                          reciprocal_radius):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -88,63 +96,33 @@ class ElectronDiffractionCalculator(object):
         latt = structure.lattice
 
         # Obtain crystallographic reciprocal lattice points within `max_r`.
-        reciprocal_lattice = latt.reciprocal_lattice_crystallographic
-        fractional_coordinates = \
-            reciprocal_lattice.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
-                                                    self.reciprocal_radius,
-                                                    zip_results=False)[0]
-        cartesian_coordinates = reciprocal_lattice.get_cartesian_coords(
-            fractional_coordinates)
+        recip_latt = latt.reciprocal_lattice_crystallographic
+        recip_pts = reciprocal_lattice.get_points_in_sphere([[0, 0, 0]],
+                                                            [0, 0, 0],
+                                                            reciprocal_radius,
+                                                            zip_results=False)[0]
+        cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
         # excitation error and the magnitude of their excitation error.
-        radius = 1/wavelength
+        radius = 1 / wavelength
         r = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
-        theta = np.arcsin(r/radius)
+        theta = np.arcsin(r / radius)
         z_sphere = radius * (1 - np.cos(theta))
         proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
         intersection = proximity < self.excitation_error
 
         intersection_coordinates = cartesian_coordinates[intersection]
-        intersection_indices = fractional_coordinates[intersection]
+        intersection_indices = recip_pts[intersection]
         proximity = proximity[intersection]
-        intersection_intensities = \
-            self.get_peak_intensities(structure,
-                                      intersection_indices,
-                                      proximity)
+        intensities = get_kinematical_intensities(structure,
+                                                  intersection_indices,
+                                                  proximity,
+                                                  self.excitation_error)
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
                                      intensities=intersection_intensities)
-
-    @staticmethod
-    def get_peak_intensities(structure, indices, proximities):
-        """Calculates peak intensities.
-
-        The peak intensity is a combination of the structure factor for a given
-        peak and the position the Ewald sphere intersects the relrod. In this
-        implementation, the intensity scales linearly with proximity.
-
-        Parameters
-        ----------
-        structure : Structure
-            The structure for which to derive the structure factors.
-        indices : array-like
-            The fractional coordinates of the peaks for which to calculate the
-            structure factor.
-        proximities : array-like
-            The distances between the Ewald sphere and the peak centres.
-
-        Returns
-        -------
-        peak_intensities : array-like
-            The intensities of the peaks.
-
-        """
-        structure_factors = get_structure_factors(indices, structure)
-        peak_relative_proximity = 1 - proximities / np.max(proximities)
-        peak_intensities = np.sqrt(structure_factors * peak_relative_proximity)
-        return peak_intensities
 
 
 class DiffractionSimulation:

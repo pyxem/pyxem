@@ -73,25 +73,41 @@ def get_interaction_constant(accelerating_voltage):
     return sigma
 
 
-def get_structure_factors(fractional_coordinates, structure):
-    """Get structure factors
+def get_kinematical_intensities(structure,
+                                g_indices,
+                                excitation_error,
+                                maximum_excitation_error):
+    """Calculates peak intensities.
 
-    Patterns
-    --------
-    fractional_coordinates :
+    The peak intensity is a combination of the structure factor for a given
+    peak and the position the Ewald sphere intersects the relrod. In this
+    implementation, the intensity scales linearly with proximity.
 
-    structure
+    Parameters
+    ----------
+    structure : Structure
+        The structure for which to derive the structure factors.
+    indices : array-like
+        The fractional coordinates of the peaks for which to calculate the
+        structure factor.
+    proximities : array-like
+        The distances between the Ewald sphere and the peak centres.
 
     Returns
     -------
-    structure_factors :
+    peak_intensities : array-like
+        The intensities of the peaks.
 
     """
-    return np.absolute(np.sum([atom.number * np.exp(
-        2 * 1j * np.pi * np.dot(fractional_coordinates, position)) for
-                               position, atom in
-                               zip(structure.frac_coords, structure.species)],
-                              axis=0)) ** 2
+    f_hkl = np.sum([atom.number * np.exp(
+                    2j * pi * np.dot(g_indices, position)) for
+                    position, atom in
+                    zip(structure.frac_coords, structure.species)],
+                    axis=0)
+
+    shape_factor = 1 - (excitation_error / maximum_excitation_error)
+    peak_intensities = (f_hkl * f_hkl.conjugate()).real * shape_factor
+    return peak_intensities
 
 
 def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
