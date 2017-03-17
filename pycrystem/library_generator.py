@@ -45,7 +45,6 @@ class DiffractionLibraryGenerator(object):
             The calculator used for the diffraction patterns.
 
         """
-
         self.electron_diffraction_calculator = electron_diffraction_calculator
 
     def get_diffraction_library(self,
@@ -53,38 +52,46 @@ class DiffractionLibraryGenerator(object):
                                 calibration,
                                 reciprocal_radius,
                                 representation='euler'):
-        """Calculates a list of diffraction data for a structure.
+        """Calculates a list of diffraction data for a library of crystal
+        structures and orientations.
 
-        The structure is rotated to each orientation in `orientations` and the
-        diffraction pattern is calculated each time.
-
-        .. todo:: convert `RotationTransformation` to general transformation and
-            `orientations` to `deformations`
+        Each structure in the structure library is rotated to each associated
+        orientation and the diffraction pattern is calculated each time.
 
         Parameters
         ----------
-        structure : :class:`Structure`
+        structure_library : Dictionary
             List of structures for which to derive the library.
-        orientations : list of tuple
-            tuple[0] is an array specifying the axis of rotation
-            tuple[1] is the angle of rotation in radians
-        format :
+
+        calibration : float
+            The calibration of experimental data to be correlated with the
+            library, in reciprocal Angstroms per pixel.
+
+        reciprocal_radius : float
+            The maximum g-vector magnitude to be accepted.
+
+        representation : 'euler' or 'axis-angle'
+            The representation in which the orientations are provided.
+            If 'euler' the zxz convention is taken and values are in radians, if
+            'axis-angle' the rotational angle is in degrees.
 
         Returns
         -------
         diffraction_library : dict of :class:`DiffractionSimulation`
-            Mapping of Euler angles of rotation to diffraction data objects.
+            Mapping of crystal structure and orientation to diffraction data
+            objects.
 
         """
-        #TODO: update this method to include multiple phases and to incorporate
-        #crystal symmetry properly
+        # Define DiffractionLibrary object to contain results
         diffraction_library = DiffractionLibrary()
+        # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
-
+        # Iterate through phases in library.
         for key in structure_library.keys():
             phase_diffraction_library = dict()
             structure = structure_library[key][0]
             orientations = structure_library[key][1]
+            # Iterate through orientations of each phase.
             for orientation in orientations:
                 if representation=='axis-angle':
                     axis = [orientation[0], orientation[1], orientation[2]]
@@ -92,20 +99,24 @@ class DiffractionLibraryGenerator(object):
                 if representation=='euler':
                     axis, angle = euler2axangle(orientation[0], orientation[1],
                                                 orientation[2], 'rzxz')
+                # Apply rotation to the structure
                 rotation = RotationTransformation(axis, angle,
                                                   angle_in_radians=True)
                 rotated_structure = rotation.apply_transformation(structure)
+                # Calculate electron diffraction for rotated structure
                 data = diffractor.calculate_ed_data(rotated_structure,
                                                     reciprocal_radius)
+                # Calibrate simulation
                 data.calibration = calibration
+                # Construct diffraction simulation library.
                 phase_diffraction_library[tuple(orientation)] = data
             diffraction_library[key] = phase_diffraction_library
         return diffraction_library
 
 
 class DiffractionLibrary(dict):
-    """Maps structure and orientation (Euler angles) to simulated diffraction
-    data.
+    """Maps crystal structure (phase) and orientation (Euler angles or
+    axis-angle pair) to simulated diffraction data.
     """
 
     def set_calibration(self, calibration):
@@ -143,9 +154,7 @@ class DiffractionLibrary(dict):
 
     def plot(self):
         """Plots the library interactively.
-
         """
-        #TODO: Update this so not so stupid and therefore faster
         from pycrystem.diffraction_signal import ElectronDiffraction
         sim_diff_dat = []
         for key in self.keys():
