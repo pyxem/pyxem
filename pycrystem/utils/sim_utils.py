@@ -145,14 +145,12 @@ def get_kinematical_intensities(structure,
         fss.append(fs)
     fss = np.array(fss)
 
-    #dw_correction = np.exp(-dwfactors * s2s)
-
     f_hkls = []
     for n in np.arange(len(g_indices)):
         g = g_indices[n]
         fs = fss[n]
-        f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * np.dot(fcoords, g)))
-                       #* dw_correction)
+        dw_correction = np.exp(-dwfactors * s2s[n])
+        f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * np.dot(fcoords, g)) * dw_correction)
         f_hkls.append(f_hkl)
     f_hkls = np.array(f_hkls)
 
