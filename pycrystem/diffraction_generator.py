@@ -57,7 +57,7 @@ class ElectronDiffractionCalculator(object):
     reciprocal_radius : float
         The maximum radius of the sphere of reciprocal space to sample, in
         reciprocal angstroms.
-    excitation_error : float
+    max_excitation_error : float
         The maximum extent of the relrods in reciprocal angstroms. Typically
         equal to 1/{specimen thickness}.
 
@@ -65,14 +65,14 @@ class ElectronDiffractionCalculator(object):
 
     def __init__(self,
                  accelerating_voltage,
-                 excitation_error,
+                 max_excitation_error,
                  debye_waller_factors=None):
         """
         Initializes the electron diffraction calculator with a particular
         accelerating voltage, reciprocal radius and excitation error.
         """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
-        self.excitation_error = excitation_error
+        self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
 
     def calculate_ed_data(self,
@@ -92,10 +92,14 @@ class ElectronDiffractionCalculator(object):
             The data associated with this structure and diffraction setup.
 
         """
+        # Specify variables used in calculation
         wavelength = self.wavelength
+        max_excitation_error = self.max_excitation_error
+        debye_waller_factors = self.debye_waller_factors
         latt = structure.lattice
 
-        # Obtain crystallographic reciprocal lattice points within `max_r`.
+        # Obtain crystallographic reciprocal lattice points within `max_r` and
+        # g-vector magnitudes for intensity calculations.
         recip_latt = latt.reciprocal_lattice_crystallographic
         recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]],
                                                     [0, 0, 0],
@@ -108,25 +112,30 @@ class ElectronDiffractionCalculator(object):
         cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
-        # excitation error and the magnitude of their excitation error.
+        # excitation error and store the magnitude of their excitation error.
         radius = 1 / wavelength
         r = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
         theta = np.arcsin(r / radius)
         z_sphere = radius * (1 - np.cos(theta))
         proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
-        intersection = proximity < self.excitation_error
-
+        intersection = proximity < max_excitation_error
+        # Mask parameters corresponding to excited reflections.
         intersection_coordinates = cartesian_coordinates[intersection]
         intersection_indices = recip_pts[intersection]
         proximity = proximity[intersection]
         g_hkls = g_hkls[intersection]
+        # Calculate diffracted intensities based on a kinematical model.
         intensities = get_kinematical_intensities(structure,
                                                   intersection_indices,
                                                   g_hkls,
                                                   proximity,
-                                                  self.excitation_error,
-                                                  self.debye_waller_factors)
-
+                                                  max_excitation_error,
+                                                  debye_waller_factors)
+        # Threshold peaks included in simulation based on minimum intensity.
+        peak_mask = intensities > 1e-20
+        intensities = intensities[peak_mask]
+        intersection_coordinates = intersection_coordinates[peak_mask]
+        intersection_indices = intersection_indices[peak_mask]
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
                                      intensities=intensities)
