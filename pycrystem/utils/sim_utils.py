@@ -138,6 +138,7 @@ def get_kinematical_intensities(structure,
     s2s = (g_hkls / 2) ** 2
 
     # Create array containing atomic scattering factors.
+    # TODO: update this parameterisation to be Doyle-Turner
     fss = []
     for s2 in s2s:
         fs = zs - 41.78214 * s2 * np.sum(

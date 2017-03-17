@@ -138,7 +138,7 @@ class ElectronDiffractionCalculator(object):
         intensities = intensities[peak_mask]
         intersection_coordinates = intersection_coordinates[peak_mask]
         intersection_indices = intersection_indices[peak_mask]
-        
+
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
                                      intensities=intensities)
@@ -256,6 +256,9 @@ class DiffractionSimulation:
         sigma : sigma of the Gaussian function to be plotted.
 
         """
+        # Plot a 2D Gaussian at each peak position.
+        # TODO: Update this method so plots intensity at each position and then
+        # convolves with a Gaussian to make faster - needs interpolation care.
         dp_dat = np.zeros(size)
         l = np.linspace(-max_r, max_r, size)
         x, y = np.meshgrid(l, l)
@@ -264,7 +267,11 @@ class DiffractionSimulation:
             cx = self.coordinates[i][0]
             cy = self.coordinates[i][1]
             inten = self.intensities[i]
-            g = Gaussian2D(A=inten, sigma_x=sigma, sigma_y=sigma, centre_x=cx, centre_y=cy)
+            g = Gaussian2D(A=inten,
+                           sigma_x=sigma,
+                           sigma_y=sigma,
+                           centre_x=cx,
+                           centre_y=cy)
             dp_dat = dp_dat + g.function(x, y)
             i=i+1
 
