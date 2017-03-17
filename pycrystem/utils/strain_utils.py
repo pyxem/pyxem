@@ -70,8 +70,9 @@ def _polar_decomposition(D, side='right'):
 
     for z, indices in zip(D._iterate_signal(),
                           D.axes_manager._array_indices_generator()):
-        R.data[indices] = linalg.polar(D.data[indices], side=side)[0]
-        U.data[indices] = linalg.polar(D.data[indices], side=side)[1]
+        ru = linalg.polar(z, side=side)
+        R.data[indices] = ru[0]
+        U.data[indices] = ru[1]
 
     return R, U
 
@@ -120,47 +121,30 @@ def get_strain_maps(component):
     Returns
     -------
     """
-    D = BaseSignal(np.ones((component.model.axes_manager.navigation_shape[1],
-                            component.model.axes_manager.navigation_shape[0],
-                                   3,3)))
+    D = BaseSignal(np.zeros((component.model.axes_manager.navigation_shape[1],
+                             component.model.axes_manager.navigation_shape[0],
+                             3, 3)))
     D.axes_manager.set_signal_dimension(2)
 
-    D.data[:,:,0,0] = component.d11.map['values']
-    D.data[:,:,1,0] = component.d12.map['values']
-    D.data[:,:,2,0] = 0.
-    D.data[:,:,0,1] = component.d21.map['values']
-    D.data[:,:,1,1] = component.d22.map['values']
-    D.data[:,:,2,1] = 0.
-    D.data[:,:,0,2] = 0.
-    D.data[:,:,1,2] = 0.
-    D.data[:,:,2,2] = 1.
+    D.data[:, :, 0, 0] = component.d11.map['values']
+    D.data[:, :, 1, 0] = component.d12.map['values']
+    D.data[:, :, 0, 1] = component.d21.map['values']
+    D.data[:, :, 1, 1] = component.d22.map['values']
+    D.data[:, :, 2, 2] = 1.
 
     R, U = _polar_decomposition(D)
 
     theta = _get_rotation_angle(R)
 
-    e11 = U.isig[0,0]
-    e11 = e11.as_signal2D(image_axes=e11.axes_manager.navigation_axes)
-    e11.data = 1. - e11.data
+    e11 = -U.isig[0, 0].T + 1
 
-    e12 = U.isig[0,1]
-    e12 = e12.as_signal2D(image_axes=e12.axes_manager.navigation_axes)
-    e12.data = e12.data
+    e12 = U.isig[0, 1].T
 
-    e21 = U.isig[1,0]
-    e21 = e21.as_signal2D(image_axes=e21.axes_manager.navigation_axes)
-    e21.data = e21.data
+    e21 = U.isig[1, 0].T
 
-    e22 = U.isig[1,1]
-    e22 = e22.as_signal2D(image_axes=e22.axes_manager.navigation_axes)
-    e22.data = 1. - e22.data
+    e22 = -U.isig[1, 1].T + 1
 
-    strain_results = Signal2D(np.ones((4, component.model.axes_manager.navigation_shape[1],
-                                       component.model.axes_manager.navigation_shape[0])))
-
-    strain_results.data[0] = e11.data
-    strain_results.data[1] = e22.data
-    strain_results.data[2] = e12.data
-    strain_results.data[3] = theta.data
+    from hyperspy.utils import stack
+    strain_results = stack([e11, e22, e12, theta])
 
     return strain_results

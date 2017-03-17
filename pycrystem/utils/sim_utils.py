@@ -24,6 +24,11 @@ from math import radians, sin
 
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
+import os
+import json
+
+with open("/home/dnj23/pycrystem/pycrystem/utils/atomic_scattering_params.json") as f:
+    ATOMIC_SCATTERING_PARAMS = json.load(f)
 
 
 def get_electron_wavelength(accelerating_voltage):
@@ -73,25 +78,92 @@ def get_interaction_constant(accelerating_voltage):
     return sigma
 
 
-def get_structure_factors(fractional_coordinates, structure):
-    """Get structure factors
+def get_kinematical_intensities(structure,
+                                g_indices,
+                                g_hkls,
+                                excitation_error,
+                                maximum_excitation_error,
+                                debye_waller_factors):
+    """Calculates peak intensities.
 
-    Patterns
-    --------
-    fractional_coordinates :
+    The peak intensity is a combination of the structure factor for a given
+    peak and the position the Ewald sphere intersects the relrod. In this
+    implementation, the intensity scales linearly with proximity.
 
-    structure
+    Parameters
+    ----------
+    structure : Structure
+        The structure for which to derive the structure factors.
+    indices : array-like
+        The fractional coordinates of the peaks for which to calculate the
+        structure factor.
+    proximities : array-like
+        The distances between the Ewald sphere and the peak centres.
 
     Returns
     -------
-    structure_factors :
+    peak_intensities : array-like
+        The intensities of the peaks.
 
     """
-    return np.absolute(np.sum([atom.number * np.exp(
-        2 * 1j * np.pi * np.dot(fractional_coordinates, position)) for
-                               position, atom in
-                               zip(structure.frac_coords, structure.species)],
-                              axis=0)) ** 2
+    # Create a flattened array of zs, coeffs, fcoords and occus for vectorized
+    # computation of atomic scattering factors later. Note that these are not
+    # necessarily the same size as the structure as each partially occupied
+    # specie occupies its own position in the flattened array.
+    zs = []
+    coeffs = []
+    fcoords = []
+    occus = []
+    dwfactors = []
+    for site in structure:
+        for sp, occu in site.species_and_occu.items():
+            zs.append(sp.Z)
+            try:
+                c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
+            except KeyError:
+                raise ValueError("Unable to calculate XRD pattern as "
+                                 "there is no scattering coefficients for"
+                                 " %s." % sp.symbol)
+            coeffs.append(c)
+            dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
+            fcoords.append(site.frac_coords)
+            occus.append(occu)
+    zs = np.array(zs)
+    coeffs = np.array(coeffs)
+    fcoords = np.array(fcoords)
+    occus = np.array(occus)
+    dwfactors = np.array(dwfactors)
+
+    # Store array of s^2 values since used multiple times.
+    s2s = (g_hkls / 2) ** 2
+
+    # Create array containing atomic scattering factors.
+    # TODO: update this parameterisation to be Doyle-Turner
+    fss = []
+    for s2 in s2s:
+        fs = zs - 41.78214 * s2 * np.sum(
+            coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+        fss.append(fs)
+    fss = np.array(fss)
+
+    # Calculate structure factors for all excited g-vectors.
+    f_hkls = []
+    for n in np.arange(len(g_indices)):
+        g = g_indices[n]
+        fs = fss[n]
+        dw_correction = np.exp(-dwfactors * s2s[n])
+        f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * np.dot(fcoords, g)) * dw_correction)
+        f_hkls.append(f_hkl)
+    f_hkls = np.array(f_hkls)
+
+    # Define an intensity scaling that is linear with distance from Ewald sphere
+    # along the beam direction.
+    shape_factor = 1 - (excitation_error / maximum_excitation_error)
+
+    # Calculate the peak intensities from the structure factor and excitation
+    # error.
+    peak_intensities = (f_hkls * f_hkls.conjugate()).real * shape_factor
+    return peak_intensities
 
 
 def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
