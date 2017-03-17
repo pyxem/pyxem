@@ -23,8 +23,6 @@
 from __future__ import division
 
 import numpy as np
-from pycrystem.utils.sim_utils import get_electron_wavelength,\
-    get_structure_factors
 
 from pymatgen.transformations.standard_transformations \
     import DeformStructureTransformation
