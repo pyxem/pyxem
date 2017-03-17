@@ -51,6 +51,7 @@ class DiffractionLibraryGenerator(object):
     def get_diffraction_library(self,
                                 structure_library,
                                 calibration,
+                                reciprocal_radius,
                                 representation='euler'):
         """Calculates a list of diffraction data for a structure.
 
@@ -94,7 +95,8 @@ class DiffractionLibraryGenerator(object):
                 rotation = RotationTransformation(axis, angle,
                                                   angle_in_radians=True)
                 rotated_structure = rotation.apply_transformation(structure)
-                data = diffractor.calculate_ed_data(rotated_structure)
+                data = diffractor.calculate_ed_data(rotated_structure,
+                                                    reciprocal_radius)
                 data.calibration = calibration
                 phase_diffraction_library[tuple(orientation)] = data
             diffraction_library[key] = phase_diffraction_library
