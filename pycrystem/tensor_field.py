@@ -36,44 +36,6 @@ class BaseTensorField(Signal2D):
         # Check that the signal dimensions are (3,3) for it to be a valid
         # TensorField
 
-    def polar_decomposition(self, side='right'):
-        """Perform polar decomposition on a signal containing matrices in
-
-        D = RU
-
-        where R
-
-        Parameters
-        ----------
-
-        side : 'right' or 'left'
-
-            The side of the matrix product on which the Hermitian semi-definite
-            part of the polar decomposition appears. i.e. if 'right' D = RU and
-            if 'left' D = UR.
-
-        Returns
-        -------
-
-        R : TensorField
-
-            The orthogonal matrix describing
-
-        U : TensorField
-
-            The strain tensor field
-
-        """
-        R = Signal2D(np.zeros(self.axes_manager.shape))
-        U = Signal2D(np.zeros(self.axes_manager.shape))
-
-        for z, indices in zip(D._iterate_signal(),
-                              D.axes_manager._array_indices_generator()):
-            R.data[indices] = linalg.polar(D.data[indices], side=side)[0]
-            U.data[indices] = linalg.polar(D.data[indices], side=side)[1]
-
-        return R, U
-
     def _transform_basis(self, R):
         """Method to transform the 2D basis in which a 2nd-order tensor is described.
 

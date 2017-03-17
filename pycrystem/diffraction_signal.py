@@ -22,6 +22,7 @@ from hyperspy import roi
 from hyperspy.signals import Signal2D, Signal1D
 from scipy.ndimage import variance
 
+from scipy.ndimage import variance
 from pycrystem.utils.expt_utils import *
 from .library_generator import DiffractionLibrary
 
@@ -653,6 +654,6 @@ class ElectronDiffraction(Signal2D):
                 disable=not show_progressbar,
                 total=self.axes_manager.navigation_size):
             output_array[index[::-1]] = library.correlate(z, show_progressbar=False)\
-                .best_angle
+                .filter_best()
         return output_array
 
