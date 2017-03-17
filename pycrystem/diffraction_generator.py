@@ -227,7 +227,7 @@ class DiffractionSimulation:
         ax.scatter(
             self.coordinates[:, 0],
             self.coordinates[:, 1],
-            s=self.intensities
+            s=np.log10(self.intensities)
         )
         ax.set_xlabel("Reciprocal Dimension ($A^{-1}$)")
         ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")
