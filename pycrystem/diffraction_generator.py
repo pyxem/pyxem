@@ -124,6 +124,7 @@ class ElectronDiffractionCalculator(object):
         intersection_indices = recip_pts[intersection]
         proximity = proximity[intersection]
         g_hkls = g_hkls[intersection]
+
         # Calculate diffracted intensities based on a kinematical model.
         intensities = get_kinematical_intensities(structure,
                                                   intersection_indices,
@@ -131,11 +132,13 @@ class ElectronDiffractionCalculator(object):
                                                   proximity,
                                                   max_excitation_error,
                                                   debye_waller_factors)
+
         # Threshold peaks included in simulation based on minimum intensity.
         peak_mask = intensities > 1e-20
         intensities = intensities[peak_mask]
         intersection_coordinates = intersection_coordinates[peak_mask]
         intersection_indices = intersection_indices[peak_mask]
+        
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
                                      intensities=intensities)

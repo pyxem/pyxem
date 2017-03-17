@@ -106,17 +106,15 @@ def get_kinematical_intensities(structure,
         The intensities of the peaks.
 
     """
-    # Create a flattened array of zs, coeffs, fcoords and occus. This is
-    # used to perform vectorized computation of atomic scattering factors
-    # later. Note that these are not necessarily the same size as the
-    # structure as each partially occupied specie occupies its own
-    # position in the flattened array.
+    # Create a flattened array of zs, coeffs, fcoords and occus for vectorized
+    # computation of atomic scattering factors later. Note that these are not
+    # necessarily the same size as the structure as each partially occupied
+    # specie occupies its own position in the flattened array.
     zs = []
     coeffs = []
     fcoords = []
     occus = []
     dwfactors = []
-
     for site in structure:
         for sp, occu in site.species_and_occu.items():
             zs.append(sp.Z)
@@ -130,14 +128,16 @@ def get_kinematical_intensities(structure,
             dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
             fcoords.append(site.frac_coords)
             occus.append(occu)
-
     zs = np.array(zs)
     coeffs = np.array(coeffs)
     fcoords = np.array(fcoords)
     occus = np.array(occus)
     dwfactors = np.array(dwfactors)
 
+    # Store array of s^2 values since used multiple times.
     s2s = (g_hkls / 2) ** 2
+
+    # Create array containing atomic scattering factors.
     fss = []
     for s2 in s2s:
         fs = zs - 41.78214 * s2 * np.sum(
@@ -145,6 +145,7 @@ def get_kinematical_intensities(structure,
         fss.append(fs)
     fss = np.array(fss)
 
+    # Calculate structure factors for all excited g-vectors.
     f_hkls = []
     for n in np.arange(len(g_indices)):
         g = g_indices[n]
@@ -154,8 +155,12 @@ def get_kinematical_intensities(structure,
         f_hkls.append(f_hkl)
     f_hkls = np.array(f_hkls)
 
+    # Define an intensity scaling that is linear with distance from Ewald sphere
+    # along the beam direction.
     shape_factor = 1 - (excitation_error / maximum_excitation_error)
 
+    # Calculate the peak intensities from the structure factor and excitation
+    # error.
     peak_intensities = (f_hkls * f_hkls.conjugate()).real * shape_factor
     return peak_intensities
 
