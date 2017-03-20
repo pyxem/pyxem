@@ -60,7 +60,7 @@ class DiffractionLibraryGenerator(object):
 
         Parameters
         ----------
-        structure_library : Dictionary
+        structure_library : dict
             List of structures for which to derive the library.
 
         calibration : float
@@ -92,7 +92,7 @@ class DiffractionLibraryGenerator(object):
             structure = structure_library[key][0]
             orientations = structure_library[key][1]
             # Iterate through orientations of each phase.
-            for orientation in orientations:
+            for orientation in tqdm(orientations, leave=False):
                 if representation=='axis-angle':
                     axis = [orientation[0], orientation[1], orientation[2]]
                     angle = orientation[3] / 180 * pi
