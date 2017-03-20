@@ -21,3 +21,8 @@ Simulations : add multi-slice and Bloch options
 Kikuchi Patterns : add support for Kikuchi pattern based Mapping
 Orientation Mapping : smarter workflows for getting "correct" solution
 Strain Tomography
+
+current bugs
+------------
+
+- Correlation over a single image doesn't work. Possibly an error in HyperSpy?

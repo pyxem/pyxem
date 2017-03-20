@@ -64,8 +64,8 @@ class IndexationGenerator():
                 for orientation, diffraction_pattern in diff_lib.items():
                     correlation = correlate(image, diffraction_pattern)
                     correlations[orientation] = correlation
-                phase_correlations[key] = correlations
-            output_array[index[::-1]] = phase_correlations
+                phase_correlations[key] = Correlation(correlations)
+            output_array[index] = phase_correlations
         return output_array
 
 
