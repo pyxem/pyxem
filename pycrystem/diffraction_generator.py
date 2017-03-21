@@ -19,6 +19,7 @@
 
 """
 
+
 from __future__ import division
 
 import numpy as np
@@ -28,6 +29,8 @@ from pymatgen.util.plotting_utils import get_publication_quality_plot
 from pycrystem.diffraction_signal import ElectronDiffraction
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
+from pymatgen.util.plotting_utils import get_publication_quality_plot
+
 
 
 class ElectronDiffractionCalculator(object):
