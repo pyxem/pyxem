@@ -85,7 +85,7 @@ def manual_orientation(
             facecolors='none',
             edgecolors='r'
         )
-        text.set_text(correlate(data, electron_diffraction))
+        text.set_text('\n'.join([str(correlate(data, electron_diffraction)), str(calibration)]))
         ax.set_xlim(-dimension, dimension)
         ax.set_ylim(-dimension, dimension)
         plt.show()

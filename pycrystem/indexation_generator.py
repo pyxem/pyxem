@@ -61,7 +61,7 @@ class IndexationGenerator():
             for key in library.keys():
                 diff_lib = library[key]
                 correlations = dict()
-                for orientation, diffraction_pattern in diff_lib.items():
+                for orientation, diffraction_pattern in tqdm(diff_lib.items(), disable=not show_progressbar, leave=False):
                     correlation = correlate(image, diffraction_pattern)
                     correlations[orientation] = correlation
                 phase_correlations[key] = correlations
