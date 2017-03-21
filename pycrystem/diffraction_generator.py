@@ -19,6 +19,7 @@
 
 """
 
+
 from __future__ import division
 
 import numpy as np
@@ -27,7 +28,9 @@ from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 from pycrystem.diffraction_signal import ElectronDiffraction
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
-    get_structure_factors
+    get_kinematical_intensities
+from pymatgen.util.plotting_utils import get_publication_quality_plot
+
 
 
 class ElectronDiffractionCalculator(object):
@@ -57,19 +60,27 @@ class ElectronDiffractionCalculator(object):
     reciprocal_radius : float
         The maximum radius of the sphere of reciprocal space to sample, in
         reciprocal angstroms.
-    excitation_error : float
+    max_excitation_error : float
         The maximum extent of the relrods in reciprocal angstroms. Typically
         equal to 1/{specimen thickness}.
 
     """
 
-    def __init__(self, accelerating_voltage, reciprocal_radius, excitation_error):
-
+    def __init__(self,
+                 accelerating_voltage,
+                 max_excitation_error,
+                 debye_waller_factors=None):
+        """
+        Initializes the electron diffraction calculator with a particular
+        accelerating voltage, reciprocal radius and excitation error.
+        """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
-        self.reciprocal_radius = reciprocal_radius
-        self.excitation_error = excitation_error
+        self.max_excitation_error = max_excitation_error
+        self.debye_waller_factors = debye_waller_factors or {}
 
-    def calculate_ed_data(self, structure):
+    def calculate_ed_data(self,
+                          structure,
+                          reciprocal_radius):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -84,67 +95,56 @@ class ElectronDiffractionCalculator(object):
             The data associated with this structure and diffraction setup.
 
         """
+        # Specify variables used in calculation
         wavelength = self.wavelength
+        max_excitation_error = self.max_excitation_error
+        debye_waller_factors = self.debye_waller_factors
         latt = structure.lattice
 
-        # Obtain crystallographic reciprocal lattice points within `max_r`.
-        reciprocal_lattice = latt.reciprocal_lattice_crystallographic
-        fractional_coordinates = \
-            reciprocal_lattice.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
-                                                    self.reciprocal_radius,
+        # Obtain crystallographic reciprocal lattice points within `max_r` and
+        # g-vector magnitudes for intensity calculations.
+        recip_latt = latt.reciprocal_lattice_crystallographic
+        recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]],
+                                                    [0, 0, 0],
+                                                    reciprocal_radius,
                                                     zip_results=False)[0]
-        cartesian_coordinates = reciprocal_lattice.get_cartesian_coords(
-            fractional_coordinates)
+        g_hkls = recip_latt.get_points_in_sphere([[0, 0, 0]],
+                                                 [0, 0, 0],
+                                                 reciprocal_radius,
+                                                 zip_results=False)[1]
+        cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
-        # excitation error and the magnitude of their excitation error.
-        radius = 1/wavelength
+        # excitation error and store the magnitude of their excitation error.
+        radius = 1 / wavelength
         r = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
-        theta = np.arcsin(r/radius)
+        theta = np.arcsin(r / radius)
         z_sphere = radius * (1 - np.cos(theta))
         proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
-        intersection = proximity < self.excitation_error
-
+        intersection = proximity < max_excitation_error
+        # Mask parameters corresponding to excited reflections.
         intersection_coordinates = cartesian_coordinates[intersection]
-        intersection_indices = fractional_coordinates[intersection]
+        intersection_indices = recip_pts[intersection]
         proximity = proximity[intersection]
-        intersection_intensities = \
-            self.get_peak_intensities(structure,
-                                      intersection_indices,
-                                      proximity)
+        g_hkls = g_hkls[intersection]
+
+        # Calculate diffracted intensities based on a kinematical model.
+        intensities = get_kinematical_intensities(structure,
+                                                  intersection_indices,
+                                                  g_hkls,
+                                                  proximity,
+                                                  max_excitation_error,
+                                                  debye_waller_factors)
+
+        # Threshold peaks included in simulation based on minimum intensity.
+        peak_mask = intensities > 1e-20
+        intensities = intensities[peak_mask]
+        intersection_coordinates = intersection_coordinates[peak_mask]
+        intersection_indices = intersection_indices[peak_mask]
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
-                                     intensities=intersection_intensities)
-
-    @staticmethod
-    def get_peak_intensities(structure, indices, proximities):
-        """Calculates peak intensities.
-
-        The peak intensity is a combination of the structure factor for a given
-        peak and the position the Ewald sphere intersects the relrod. In this
-        implementation, the intensity scales linearly with proximity.
-
-        Parameters
-        ----------
-        structure : Structure
-            The structure for which to derive the structure factors.
-        indices : array-like
-            The fractional coordinates of the peaks for which to calculate the
-            structure factor.
-        proximities : array-like
-            The distances between the Ewald sphere and the peak centres.
-
-        Returns
-        -------
-        peak_intensities : array-like
-            The intensities of the peaks.
-
-        """
-        structure_factors = get_structure_factors(indices, structure)
-        peak_relative_proximity = 1 - proximities / np.max(proximities)
-        peak_intensities = np.sqrt(structure_factors * peak_relative_proximity)
-        return peak_intensities
+                                     intensities=intensities)
 
 
 class DiffractionSimulation:
@@ -242,7 +242,7 @@ class DiffractionSimulation:
         ax.scatter(
             self.coordinates[:, 0],
             self.coordinates[:, 1],
-            s=self.intensities
+            s=np.log10(self.intensities)
         )
         ax.set_xlabel("Reciprocal Dimension ($A^{-1}$)")
         ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")
@@ -259,6 +259,9 @@ class DiffractionSimulation:
         sigma : sigma of the Gaussian function to be plotted.
 
         """
+        # Plot a 2D Gaussian at each peak position.
+        # TODO: Update this method so plots intensity at each position and then
+        # convolves with a Gaussian to make faster - needs interpolation care.
         dp_dat = np.zeros(size)
         l = np.linspace(-max_r, max_r, size)
         x, y = np.meshgrid(l, l)
@@ -267,7 +270,11 @@ class DiffractionSimulation:
             cx = self.coordinates[i][0]
             cy = self.coordinates[i][1]
             inten = self.intensities[i]
-            g = Gaussian2D(A=inten, sigma_x=sigma, sigma_y=sigma, centre_x=cx, centre_y=cy)
+            g = Gaussian2D(A=inten,
+                           sigma_x=sigma,
+                           sigma_y=sigma,
+                           centre_x=cx,
+                           centre_y=cy)
             dp_dat = dp_dat + g.function(x, y)
             i=i+1
 

@@ -22,8 +22,10 @@ from hyperspy import roi
 from hyperspy.signals import Signal2D, Signal1D
 from scipy.ndimage import variance
 
+from scipy.ndimage import variance
 from pycrystem.utils.expt_utils import *
 from .library_generator import DiffractionLibrary
+from .indexation_generator import IndexationGenerator
 
 """
 Signal class for Electron Diffraction Data
@@ -644,3 +646,4 @@ class ElectronDiffraction(Signal2D):
             *args, **kwargs)
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
+

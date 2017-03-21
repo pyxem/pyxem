@@ -5,7 +5,7 @@ pycrystem-v0.1
 --------------
 
 Conventions : check axes alignments, Bunge convention etc. write up for docs
-Simulations : correct structure factors, add occupancies, DW factors
+Simulations : update atomic scattering factors to Doyle-Turner
 Documentation : write documentation
 Testing : coverage to >75% using pytest
 Template Matching : cubochoric grid generation, symmetry constraints, alternative
@@ -20,4 +20,9 @@ horizons
 Simulations : add multi-slice and Bloch options
 Kikuchi Patterns : add support for Kikuchi pattern based Mapping
 Orientation Mapping : smarter workflows for getting "correct" solution
-Strain Tomography 
+Strain Tomography
+
+current bugs
+------------
+
+- Correlation over a single image doesn't work. Possibly an error in HyperSpy?

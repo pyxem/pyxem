@@ -56,9 +56,9 @@ def plot_correlation_map(
 
 
 def manual_orientation(
-        data, #: np.ndarray,
-        structure, #: Structure,
-        calculator, #: ElectronDiffractionCalculator,
+        data,  #: np.ndarray,
+        structure,  #: Structure,
+        calculator,  #: ElectronDiffractionCalculator,
         ax=None,
 ):
     if ax is None:
@@ -69,12 +69,13 @@ def manual_orientation(
     text = plt.text(dimension, dimension, "Loading...")
     p = plt.scatter([0, ], [0, ], s=0)
 
-    def plot(alpha=0., beta=0., gamma=0., calibration=0.01):
+    def plot(alpha=0., beta=0., gamma=0., calibration=1., reciprocal_radius=1.0):
+        calibration /= 100
         orientation = euler2axangle(alpha, beta, gamma, 'rzyz')
         rotation = RotationTransformation(orientation[0], orientation[1],
                                           angle_in_radians=True).apply_transformation(
             structure)
-        electron_diffraction = calculator.calculate_ed_data(rotation)
+        electron_diffraction = calculator.calculate_ed_data(rotation, reciprocal_radius)
         electron_diffraction.calibration = calibration
         nonlocal p
         p.remove()
@@ -91,4 +92,5 @@ def manual_orientation(
         plt.show()
 
     interact(plot, alpha=(-np.pi, np.pi, 0.01), beta=(-np.pi, np.pi, 0.01),
-             gamma=(-np.pi, np.pi, 0.01), calibration=(1e-4, 1e-1, 1e-4))
+             gamma=(-np.pi, np.pi, 0.01), calibration=(1e-2, 1e1, 1e-2),
+             reciprocal_radius=(1e-1, 5., 1e-1))
