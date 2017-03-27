@@ -23,7 +23,7 @@
 from __future__ import division
 
 import numpy as np
-from hyperspy.components2d import Gaussian2D
+from hyperspy.components2d import Expression
 from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 from pycrystem.diffraction_signal import ElectronDiffraction
@@ -32,6 +32,8 @@ from pycrystem.utils.sim_utils import get_electron_wavelength,\
 from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 
+_GAUSSIAN2D_EXPR = \
+    "inten * exp(-((x-cx)**2 / (2 * sigma ** 2) + (y-cy)**2 / (2 * sigma ** 2)))"
 
 class ElectronDiffractionCalculator(object):
     """Computes electron diffraction patterns for a crystal structure.
@@ -104,14 +106,10 @@ class ElectronDiffractionCalculator(object):
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
         recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]],
-                                                    [0, 0, 0],
-                                                    reciprocal_radius,
-                                                    zip_results=False)[0]
-        g_hkls = recip_latt.get_points_in_sphere([[0, 0, 0]],
-                                                 [0, 0, 0],
-                                                 reciprocal_radius,
-                                                 zip_results=False)[1]
+        recip_pts, g_hkls = recip_latt.get_points_in_sphere([[0, 0, 0]],
+                                                            [0, 0, 0],
+                                                            reciprocal_radius,
+                                                            zip_results=False)[:2]
         cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
@@ -266,15 +264,15 @@ class DiffractionSimulation:
         l = np.linspace(-max_r, max_r, size)
         x, y = np.meshgrid(l, l)
         i=0
+        g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
         while i < len(self.intensities):
             cx = self.coordinates[i][0]
             cy = self.coordinates[i][1]
             inten = self.intensities[i]
-            g = Gaussian2D(A=inten,
-                           sigma_x=sigma,
-                           sigma_y=sigma,
-                           centre_x=cx,
-                           centre_y=cy)
+            g.intenvalue = inten
+            g.sigma.value = sigma
+            g.cx.value = cx
+            g.cy.value = cy
             dp_dat = dp_dat + g.function(x, y)
             i=i+1
 
