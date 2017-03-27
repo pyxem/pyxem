@@ -23,13 +23,17 @@
 from __future__ import division
 
 import numpy as np
-from hyperspy.components2d import Gaussian2D
+from hyperspy.components2d import Expression
 from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 from pycrystem.diffraction_signal import ElectronDiffraction
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
 from pymatgen.util.plotting_utils import get_publication_quality_plot
+
+
+_GAUSSIAN2D_EXPR = \
+    "inten * exp(-((x-cx)**2 / (2 * sigma ** 2) + (y-cy)**2 / (2 * sigma ** 2)))"
 
 
 
@@ -104,14 +108,10 @@ class ElectronDiffractionCalculator(object):
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
         recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]],
-                                                    [0, 0, 0],
-                                                    reciprocal_radius,
-                                                    zip_results=False)[0]
-        g_hkls = recip_latt.get_points_in_sphere([[0, 0, 0]],
-                                                 [0, 0, 0],
-                                                 reciprocal_radius,
-                                                 zip_results=False)[1]
+        recip_pts, g_hkls = recip_latt.get_points_in_sphere([[0, 0, 0]],
+                                                            [0, 0, 0],
+                                                            reciprocal_radius,
+                                                            zip_results=False)[:2]
         cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
@@ -262,21 +262,17 @@ class DiffractionSimulation:
         # Plot a 2D Gaussian at each peak position.
         # TODO: Update this method so plots intensity at each position and then
         # convolves with a Gaussian to make faster - needs interpolation care.
-        dp_dat = np.zeros(size)
+        dp_dat = 0
         l = np.linspace(-max_r, max_r, size)
         x, y = np.meshgrid(l, l)
-        i=0
-        while i < len(self.intensities):
-            cx = self.coordinates[i][0]
-            cy = self.coordinates[i][1]
-            inten = self.intensities[i]
-            g = Gaussian2D(A=inten,
-                           sigma_x=sigma,
-                           sigma_y=sigma,
-                           centre_x=cx,
-                           centre_y=cy)
-            dp_dat = dp_dat + g.function(x, y)
-            i=i+1
+        coords = self.coordinates[:,:2]
+        g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
+        for (cx, cy), inten in zip(coords, self.intensities):
+            g.inten.value = inten
+            g.sigma.value = sigma
+            g.cx.value = cx
+            g.cy.value = cy
+            dp_dat += g.function(x, y)
 
         dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(max_r/size)
