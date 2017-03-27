@@ -35,6 +35,8 @@ from pymatgen.util.plotting_utils import get_publication_quality_plot
 _GAUSSIAN2D_EXPR = \
     "inten * exp(-((x-cx)**2 / (2 * sigma ** 2) + (y-cy)**2 / (2 * sigma ** 2)))"
 
+
+
 class ElectronDiffractionCalculator(object):
     """Computes electron diffraction patterns for a crystal structure.
 
@@ -260,21 +262,17 @@ class DiffractionSimulation:
         # Plot a 2D Gaussian at each peak position.
         # TODO: Update this method so plots intensity at each position and then
         # convolves with a Gaussian to make faster - needs interpolation care.
-        dp_dat = np.zeros(size)
+        dp_dat = 0
         l = np.linspace(-max_r, max_r, size)
         x, y = np.meshgrid(l, l)
-        i=0
+        coords = self.coordinates[:,:2]
         g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
-        while i < len(self.intensities):
-            cx = self.coordinates[i][0]
-            cy = self.coordinates[i][1]
-            inten = self.intensities[i]
-            g.intenvalue = inten
+        for (cx, cy), inten in zip(coords, self.intensities):
+            g.inten.value = inten
             g.sigma.value = sigma
             g.cx.value = cx
             g.cy.value = cy
-            dp_dat = dp_dat + g.function(x, y)
-            i=i+1
+            dp_dat += g.function(x, y)
 
         dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(max_r/size)
