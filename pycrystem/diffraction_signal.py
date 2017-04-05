@@ -20,6 +20,7 @@ from __future__ import division
 import tqdm
 from hyperspy import roi
 from hyperspy.signals import Signal2D, Signal1D
+from hyperspy._lazy_signals import LazySignal2D
 from scipy.ndimage import variance
 
 from scipy.ndimage import variance
@@ -32,7 +33,7 @@ Signal class for Electron Diffraction Data
 """
 
 
-class ElectronDiffraction(Signal2D):
+class ElectronDiffraction(LazySignal2D, Signal2D):
     _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):
