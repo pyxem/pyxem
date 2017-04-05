@@ -15,5 +15,6 @@ setup(
         'pycrystem',
         'pycrystem.utils',
     ],
+    package_data={'pycrystem' : ['utils/atomic_scattering_params.json']}
 
 )
