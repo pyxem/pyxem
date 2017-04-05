@@ -27,7 +27,10 @@ from scipy.constants import h, m_e, e, c, pi
 import os
 import json
 
-with open("pycrystem/utils/atomic_scattering_params.json") as f:
+ATOMIC_SCATTERING_PATH = os.path.join(os.path.dirname(__file__),
+                                      "atomic_scattering_params.json")
+
+with open(ATOMIC_SCATTERING_PATH) as f:
     ATOMIC_SCATTERING_PARAMS = json.load(f)
 
 
