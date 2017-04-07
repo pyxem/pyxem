@@ -41,4 +41,4 @@ __status__ = "Development"
 
 def load(*args, **kwargs):
     signal = hsload(*args, **kwargs)
-    return ElectronDiffraction(signal)
+    return ElectronDiffraction(**signal._to_dictionary())
