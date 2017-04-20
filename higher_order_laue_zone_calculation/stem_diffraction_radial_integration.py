@@ -161,7 +161,8 @@ def _get_disk_centre_from_signal(
             com_y_array[x,y] = com_y + y0
     return(com_x_array, com_y_array)
 
-def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y):
+def _get_radial_profile_of_diff_image(
+        diff_image, centre_x, centre_y, mask=None):
     """Radially integrates a single diffraction image.
 
     Parameters
@@ -172,6 +173,9 @@ def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y):
         Centre x position of the diffraction image.
     centre_y : number
         Centre y position of the diffraction image.
+    mask : numpy bool array, optional
+        Mask parts of the diffraction image, regions where
+        the mask is True will be included in the radial profile.
 
     Returns
     -------
@@ -182,11 +186,49 @@ def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y):
     y, x = np.indices((diff_image.shape))
     r = np.sqrt((x - centre_x)**2 + (y - centre_y)**2)
     r = r.astype(int)       
-    tbin =  np.bincount(r.ravel(), diff_image.ravel())
-    nr = np.bincount(r.ravel())   
+    if mask is None:
+        r_flat = r.ravel()
+        diff_image_flat = diff_image.ravel()
+    else:
+        r_flat = r[mask].ravel()
+        diff_image_flat = diff_image[mask].ravel()
+    tbin =  np.bincount(r_flat, diff_image_flat)
+    nr = np.bincount(r_flat)
     radialProfile = tbin / nr
-
     return(radialProfile)
+
+def _get_angle_sector_mask(signal, angle0, angle1):
+    """Get a bool array with True values between angle0 and angle1.
+    Will use the (0, 0) point as given by the signal as the centre,
+    giving an "angular" slice. Useful for analysing anisotropy in
+    diffraction patterns. Use with _get_radial_profile_of_diff_image
+    to get radial profiles from different angular slices.
+
+    Parameters
+    ----------
+    signal : HyperSpy 2-D signal
+    angle0, angle1 : numbers
+        Must be between 0 and 2*pi.
+
+    Returns
+    -------
+    Mask : 1-D numpy array
+        The True values will be the region between angle0 and angle1.
+
+    Examples
+    --------
+    >>> mask = _get_angle_sector_mask(signal, 0.5*np.pi, np.pi)
+    """
+    axes_manager = signal.axes_manager
+    x_size = axes_manager[0].size*1j
+    y_size = axes_manager[1].size*1j
+    x, y = np.mgrid[
+            axes_manager[0].low_value:axes_manager[0].high_value:x_size,
+            axes_manager[1].low_value:axes_manager[1].high_value:y_size]
+    r = (x**2+y**2)**0.5
+    t = np.arctan2(x,y)+np.pi
+    bool_array = (t>angle0)*(t<angle1)
+    return bool_array
 
 def _get_radial_profile_of_simulated_image(signal_simulated, bins=100):
     """Radially integrates a single simulated image.
