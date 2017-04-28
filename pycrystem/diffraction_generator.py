@@ -275,6 +275,6 @@ class DiffractionSimulation:
             dp_dat += g.function(x, y)
 
         dp = ElectronDiffraction(dp_dat)
-        dp.set_calibration(max_r/size)
+        dp.set_calibration(2*max_r/size)
 
         return dp

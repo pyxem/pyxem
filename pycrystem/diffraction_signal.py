@@ -33,7 +33,7 @@ Signal class for Electron Diffraction Data
 """
 
 
-class ElectronDiffraction(LazySignal2D, Signal2D):
+class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):
@@ -647,4 +647,3 @@ class ElectronDiffraction(LazySignal2D, Signal2D):
             *args, **kwargs)
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
-
