@@ -273,7 +273,7 @@ class ElectronDiffraction(LazySignal2D, Signal2D):
                                                        border_value=0)
         return mask
 
-    def get_direct_beam_position(self, radius=None):
+    def get_direct_beam_position(self, radius):
         """
         Determine rigid shifts in the SED patterns based on the position of the
         direct beam and return the shifts required to center all patterns.
@@ -312,8 +312,9 @@ class ElectronDiffraction(LazySignal2D, Signal2D):
         for z, index in zip(self._iterate_signal(),
                             np.arange(0, self.axes_manager.navigation_size, 1)):
             c[index] = refine_beam_position(z, start=mref, radius=radius)
-
-        return c
+        # The arange function produces a linear set of centers that has to be
+        # reshaped back to the original signal shape
+        return c.reshape(self.axes_manager.navigation_shape[::-1] + (-1,))
 
     def get_direct_beam_shifts(self, centers=None, radius=None):
         """Determine rigid shifts in the SED patterns based on the position of
@@ -370,7 +371,7 @@ class ElectronDiffraction(LazySignal2D, Signal2D):
         """
         #TODO:Add automatic method based on power spectrum optimisation as
         #presented in Vigouroux et al...
-        self.map(affine_transformation, matrix=D)
+        self.map(affine_transformation, matrix=D, ragged=True)
 
     def rotate_patterns(self, angle):
         """Rotate the diffraction patterns in a clockwise direction.

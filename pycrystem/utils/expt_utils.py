@@ -164,6 +164,8 @@ def refine_beam_position(z, start, radius):
         mask = circular_mask(shape=z.shape, radius=radius, center=c)
         ztmp = z * mask
 
-    c = np.asarray(ndi.measurements.center_of_mass(ztmp))
+    # For some reason the dask array is behaving badly in this function
+    # so convert it to an array before computation
+    c = np.asarray(ndi.measurements.center_of_mass(np.array(ztmp)))
 
     return c
