@@ -99,6 +99,15 @@ def regional_filter(z, h):
 
     return z - dilated
 
+
+def regional_flattener(z, h):
+    """Localised erosion of the image 'z' for features below a value 'h'"""
+    seed = np.copy(z) + h
+    mask = z
+    eroded = morphology.reconstruction(seed, mask, method='erosion')
+    return eroded - h
+
+
 def circular_mask(shape, radius, center):
     """
 
