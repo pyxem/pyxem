@@ -733,4 +733,3 @@ class ElectronDiffraction(Signal2D):
             *args, **kwargs)
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
-
