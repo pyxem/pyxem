@@ -18,8 +18,10 @@
 from __future__ import division
 
 import tqdm
-from hyperspy import roi
-from hyperspy.signals import Signal2D, Signal1D
+from hyperspy.api import interactive
+from hyperspy.api import roi
+from hyperspy.components1d import Voigt, Exponential, Polynomial
+from hyperspy.signals import Signal2D, Signal1D, BaseSignal
 from hyperspy._lazy_signals import LazySignal2D
 from scipy.ndimage import variance
 
@@ -105,10 +107,10 @@ class ElectronDiffraction(Signal2D):
         calibration: float
             Calibration in reciprocal Angstroms per pixel
         offset: tuple
-            Offset of the pattern centre from the
+            Position of the central beam, in pixels
         """
-        #TODO: extend to get calibration from a list of stored calibrations for
-        #the camera length recorded in metadata.
+        # TODO: extend to get calibration from a list of stored calibrations for
+        # the camera length recorded in metadata.
         if offset==None:
             offset = np.array(self.axes_manager.signal_shape)/2 * calibration
 
@@ -126,44 +128,81 @@ class ElectronDiffraction(Signal2D):
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, roi):
-        """Plots an interactive virtual image formed with a specifed but
+        """Plots an interactive virtual image formed with a specified but
         adjustable roi.
 
         Parameters
         ----------
-        inner_radius: float
-            Inner radius annular virtual aperture (if None a circular aperture
-            is used) in reciprocal Angstroms
-        outer_radius: float
-            Outer radius of the cirucular or annular virtual aperture in
-            reciprocal Angstroms.
+        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
+            Any interactive ROI detailed in HyperSpy.
+
+        Examples
+        --------
+        .. code-block:: python
+
+            import hyperspy.api as hs
+            roi = hs.roi.CircleROI(0, 0, 0.2)
+            data.plot_interactive_virtual_image(roi)
+
         """
         self.plot()
-        roi.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-        roi.interactive(self, navigation_signal='same').plot()
+        roi.add_widget(self, axes=self.axes_manager.signal_axes)
+        # Add the ROI to the appropriate signal axes.
+        dark_field = roi.interactive(self, navigation_signal='same')
+        dark_field_placeholder = \
+            BaseSignal(np.zeros(self.axes_manager.navigation_shape))
+        # Create an output signal for the virtual dark-field calculation.
+        dark_field_sum = interactive(
+            # Create an interactive signal
+            dark_field.sum,
+            # Formed from the sum of the pixels in the dark-field signal
+            event=dark_field.axes_manager.events.any_axis_changed,
+            # That updates whenever the widget is moved
+            axis=dark_field.axes_manager.signal_axes,
+            out=dark_field_placeholder,
+            # And outputs into the prepared placeholder.
+        )
+        dark_field_sum.axes_manager.update_axes_attributes_from(
+            self.axes_manager.navigation_axes,
+            ['scale', 'offset', 'units', 'name'])
+        dark_field_sum.metadata.General.title = "Virtual Dark Field"
+        # Set the parameters
+        dark_field_sum.plot()  # Plot the result
 
     def get_virtual_image(self, roi):
         """Obtains a virtual image associated with a specified roi.
 
         Parameters
         ----------
-        inner_radius: float
-            Inner radius annular virtual aperture (if None a circular aperture
-            is used) in reciprocal Angstroms
-        outer_radius: float
-            Outer radius of the cirucular or annular virtual aperture in
-            reciprocal Angstroms.
-        """
-        self.plot()
-        return roi(self)
+        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
+            Any interactive ROI detailed in HyperSpy.
 
-    def plot_line_profile(self, x1, y1, x2, y2, width):
-        """Plots an interactive line profile.
+        Returns
+        -------
+        dark_field_sum: :obj:`hyperspy.signals.BaseSignal`
+            The virtual image signal associated with the specified roi.
+
+        Examples
+        --------
+        .. code-block:: python
+
+            import hyperspy.api as hs
+            roi = hs.roi.CircleROI(0, 0, 0.2)
+            data.get_virtual_image(roi)
+
         """
-        self.plot()
-        lin = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2, linewidth=width)
-        lin.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-        lin.interactive(self, navigation_signal='same').plot()
+        dark_field = roi(self, axes=self.axes_manager.signal_axes)
+        dark_field_sum = dark_field.sum(axis=dark_field.axes_manager.signal_axes)
+        dark_field_sum.metadata.General.title = "Virtual Dark Field"
+        return dark_field_sum
+
+    # TODO: this appears to be broken in HyperSpy
+    # def plot_line_profile(self, x1, y1, x2, y2, width):
+    #     """Plots an interactive line profile."""
+    #     self.plot()
+    #     lin = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2, linewidth=width)
+    #     lin.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
+    #     lin.interactive(self, navigation_signal='same').plot()
 
     def get_variance_image(self, roi):
         """Form a variance image for a specified region of interest in the
@@ -174,14 +213,12 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-
-        signal : ElectronDiffraction
-
-        roi : roi
+        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
+            Any interactive ROI detailed in HyperSpy.
 
         Returns
         -------
-        var : Signal2D
+        :obj:`hyperspy.signals.Signal2D`
             The variance image as a HyperSpy Signal2D.
         """
         # Crop the data using the roi
@@ -199,17 +236,17 @@ class ElectronDiffraction(Signal2D):
 
         return Signal2D(var_image)
 
-    def get_direct_beam_mask(self, radius=None, center=None):
+    def get_direct_beam_mask(self, radius, center=None):
         """Generate a signal mask for the direct beam.
 
         Parameters
         ----------
-        radius : int
-            User specified radius for the circular mask.
-        center : tuple, None
+        radius : float
+            Radius for the circular mask in pixel units.
+        center : tuple, optional
             User specified (x, y) position of the diffraction pattern center.
-            i.e. the direct beam position. If None it is assumed that the direct
-            beam is at the center of the diffraction pattern.
+            i.e. the direct beam position. If None (default) it is assumed that
+            the direct beam is at the center of the diffraction pattern.
 
         Return
         ------
@@ -217,7 +254,7 @@ class ElectronDiffraction(Signal2D):
             The mask of the direct beam
         """
         shape = self.axes_manager.signal_shape
-        if center == None:
+        if center is None:
             center = (shape[1] - 1) / 2, (shape[0] - 1) / 2
 
         signal_mask = Signal2D(circular_mask(shape=shape,
@@ -226,27 +263,29 @@ class ElectronDiffraction(Signal2D):
 
         return signal_mask
 
-    def get_vacuum_mask(self, radius=None, center=None, threshold=None,
+    def get_vacuum_mask(self, radius, threshold, center=None,
                         closing=True, opening=False):
-        """Generate a navigation mask to exlude SED patterns acquired in vacuum.
+        """Generate a navigation mask to exclude SED patterns acquired in vacuum.
 
-        Vacuum regions are identified cruedly based on searching for a peak
+        Vacuum regions are identified crudely based on searching for a peak
         value in each diffraction pattern, having masked the direct beam, above
-        a user defined threshold value. Morpohological opening or closing of the
+        a user defined threshold value. Morphological opening or closing of the
         mask obtained is supported.
 
         Parameters
         ----------
         radius: float
             Radius of circular mask to exclude direct beam.
-        center : tuple, None
-            User specified position of the diffraction pattern center. If None
-            it is assumed that the pattern center is the center of the image.
-        threshold : float
+        threshold: float
             Minimum intensity required to consider a diffracted beam to be
             present.
-        closing : bool
-            Flag to perform morphological closing on
+        center: tuple, optional
+            User specified position of the diffraction pattern center. If None
+            it is assumed that the pattern center is the center of the image.
+        closing: bool, optional
+            Flag to perform morphological closing.
+        opening: bool, optional
+            Flag to perform morphological opening.
 
         Returns
         -------
@@ -273,7 +312,7 @@ class ElectronDiffraction(Signal2D):
                                                        border_value=0)
         return mask
 
-    def get_direct_beam_position(self, radius=None):
+    def get_direct_beam_position(self, radius):
         """
         Determine rigid shifts in the SED patterns based on the position of the
         direct beam and return the shifts required to center all patterns.
@@ -312,8 +351,9 @@ class ElectronDiffraction(Signal2D):
         for z, index in zip(self._iterate_signal(),
                             np.arange(0, self.axes_manager.navigation_size, 1)):
             c[index] = refine_beam_position(z, start=mref, radius=radius)
-
-        return c
+        # The arange function produces a linear set of centers that has to be
+        # reshaped back to the original signal shape
+        return c.reshape(self.axes_manager.navigation_shape[::-1] + (-1,))
 
     def get_direct_beam_shifts(self, centers=None, radius=None):
         """Determine rigid shifts in the SED patterns based on the position of
@@ -370,7 +410,7 @@ class ElectronDiffraction(Signal2D):
         """
         #TODO:Add automatic method based on power spectrum optimisation as
         #presented in Vigouroux et al...
-        self.map(affine_transformation, matrix=D)
+        self.map(affine_transformation, matrix=D, ragged=True)
 
     def rotate_patterns(self, angle):
         """Rotate the diffraction patterns in a clockwise direction.
@@ -389,7 +429,7 @@ class ElectronDiffraction(Signal2D):
                       [-math.sin(a), math.cos(a), 0.],
                       [0., 0., 1.]])
 
-        self=self.map(affine_transformation, matrix=t)
+        self.map(affine_transformation, matrix=t)
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
@@ -397,13 +437,13 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
         centers : array
-            Array of dimensions (navigation_size, 2) containing the
+            Array of dimensions (navigation_shape, 2) containing the
             origin for the radial integration in each diffraction
             pattern.
 
         Returns
         -------
-        radial_profile : Signal1D
+        radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
 
@@ -411,41 +451,87 @@ class ElectronDiffraction(Signal2D):
         --------
         radial_average
         get_direct_beam_position
+
         """
-        if centers == None:
-            c = self.get_direct_beam_position(radius=10)
-        else:
-            c = centers
+        # TODO: make this work without averaging the centers
+        if centers is None:
+            centers = self.get_direct_beam_position(radius=10)
+        center = centers.mean(axis=(0, 1))
+        radial_profiles = self.map(radial_average, center=center, inplace=False)
+        radial_profiles.axes_manager.signal_axes[0].offset = 0
+        signal_axis = radial_profiles.axes_manager.signal_axes[0]
+        return radial_profiles.as_signal1D(signal_axis)
 
-        arr_shape = (self.axes_manager._navigation_shape_in_array
-                     if self.axes_manager.navigation_size > 0
-                     else [1, ])
-        rp = np.zeros(arr_shape, dtype=object)
-        if self.axes_manager.navigation_axes:
-            for i in self.axes_manager:
-                it = (i[1], i[0])
-                rp[it] = radial_average(self.data[it], center=c[it])
-        else:
-            rp = radial_average(self.data, center=c)
-
-        return Signal1D(rp)
-
-    def remove_background(self, h):
+    def remove_background(self, saturation_radius=0):
         """Perform background subtraction.
 
         Parameters
         ----------
+        saturation_radius: int, optional
+            The radius, in pixels, of the saturated data (if any) in the direct
+            beam.
 
         Returns
         -------
+        denoised: `ElectronDiffraction`
+            A copy of the data with the background removed and the noise
+            smoothed.
 
         """
-        #TODO: Add additional methods particularly based on taking radial
-        #profiles and fitting a power law or appropriate curve.
-        self.data = self.data / self.data.max()
-        self.map(regional_filter, h=h)
-        self.map(filters.rank.mean, selem=square(3))
-        self.data = self.data / self.data.max()
+        # TODO: separate into multiple methods
+        # TODO: make an 'averaging' flag
+
+        # Old method:
+        # def mean_filter(h):
+        #     self.data = self.data / self.data.max()
+        #     self.map(regional_filter, h=h)
+        #     self.map(filters.rank.mean, selem=square(3))
+        #     self.data = self.data / self.data.max()
+
+        profile = self.get_radial_profile().mean()
+        model = profile.create_model()
+        e1 = saturation_radius * profile.axes_manager.signal_axes[0].scale
+        model.set_signal_range(e1)
+
+        direct_beam = Voigt()
+        direct_beam.centre.value = 0
+        direct_beam.centre.free = False
+        direct_beam.area.value = 40
+        model.append(direct_beam)
+
+        diffuse_scatter = Exponential()
+        diffuse_scatter.tau.value = 0.5
+        model.append(diffuse_scatter)
+
+        linear_decay = Polynomial(1)
+        model.append(linear_decay)
+
+        model.fit()
+
+        x_axis = self.axes_manager.signal_axes[0].axis
+        y_axis = self.axes_manager.signal_axes[1].axis
+
+        xs, ys = np.meshgrid(x_axis, y_axis)
+        rs = (xs ** 2 + ys ** 2) ** 0.5
+
+        bg = ElectronDiffraction(
+            diffuse_scatter.function(rs) + linear_decay.function(rs))
+
+        for i in (0, 1):
+            bg.axes_manager.signal_axes[i].update_from(
+                self.axes_manager.signal_axes[i])
+
+        bg_removed = np.clip(self - bg, 0, 255)
+
+        denoised = ElectronDiffraction(
+            bg_removed.map(regional_flattener, h=bg.data.min(), inplace=False)
+        )
+        denoised.axes_manager.update_axes_attributes_from(
+            self.axes_manager.navigation_axes)
+        denoised.axes_manager.update_axes_attributes_from(
+            self.axes_manager.signal_axes)
+
+        return denoised
 
     def get_data_movie_frames(self, image, indices, save_path):
         """
