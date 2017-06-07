@@ -52,7 +52,7 @@ class IndexationGenerator():
         library = self.library
 
         output_array = np.zeros(signal.axes_manager.navigation_shape,
-                                dtype=object)
+                                dtype=object).T
         for image, index in tqdm(zip(signal._iterate_signal(),
                 signal.axes_manager._array_indices_generator()),
                 disable=not show_progressbar,
@@ -66,7 +66,7 @@ class IndexationGenerator():
                     correlations[orientation] = correlation
                 phase_correlations[key] = Correlation(correlations)
             output_array[index] = phase_correlations
-        return output_array
+        return output_array.T
 
 
 class Correlation(dict):

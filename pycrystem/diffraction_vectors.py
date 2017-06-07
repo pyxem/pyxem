@@ -18,15 +18,10 @@
 
 from __future__ import division
 
-import tqdm
-from hyperspy.api import interactive
 from hyperspy.api import roi
-from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal2D, Signal1D, BaseSignal
 
 from pycrystem.utils.expt_utils import *
-from .library_generator import DiffractionLibrary
-from .indexation_generator import IndexationGenerator
 
 """
 Signal class for diffraction vectors.
@@ -41,12 +36,22 @@ class DiffractionVectors(BaseSignal):
         BaseSignal.__init__(self, *args, **kwargs)
         self.calibration=calibration
 
-    def get_gvector_magnitudes(self):
+    def get_gvector_magnitudes(self, center):
         """Calculate the magnitude of diffraction vectors.
 
+        Parameters
+        ----------
+
+        center :
+
+        Returns
+        -------
+
+        gmagnitudes : array
+            Array
+
         """
-        # Allocate an empty structured array in which to store the gvector
-        # magnitudes.
+        # Allocate an empty array in which to store the gvector magnitudes.
         arr_shape = (self.axes_manager._navigation_shape_in_array
                      if self.axes_manager.navigation_size > 0
                      else [1, ])
@@ -55,7 +60,7 @@ class DiffractionVectors(BaseSignal):
         for i in self.axes_manager:
             it = (i[1], i[0])
             res = []
-            centered = peaks[it] - [256,256]
+            centered = peaks[it] - center
             for j in np.arange(len(centered)):
                 res.append(np.linalg.norm(centered[j]))
 
@@ -67,7 +72,6 @@ class DiffractionVectors(BaseSignal):
                 mags.append(np.linalg.norm(vectors[k]))
             maga = np.asarray(mags)
             gvectors[it] = maga * self.axes_manager.signal_axes[0].scale
-
         return gvectors
 
     def get_glength_histogram(self, bins):
@@ -88,7 +92,7 @@ class DiffractionVectors(BaseSignal):
     def get_gvector_indexation(self,
                                calculated_peaks,
                                magnitude_threshold,
-                               angular_threshold):
+                               angular_threshold=None):
         """Index diffraction vectors based on the magnitude of individual
         vectors and optionally the angles between pairs of vectors.
 
@@ -96,20 +100,24 @@ class DiffractionVectors(BaseSignal):
         ----------
 
         calculated_peaks : array
-            Structured array
+            Structured array containing the theoretical diffraction vector
+            magnitudes and angles between vectors.
 
-        threshold : Float indicating the maximum allowed deviation from the
-            theoretical value.
+        magnitude_threshold : Float
+            Maximum deviation in diffraction vector magnitude from the
+            theoretical value for an indexation to be considered possible.
 
+        angular_threshold : float
+            Maximum deviation in the measured angle between vector
         Returns
         -------
 
-        gindex : Structured array containing possible indexation results
+        gindex : array
+            Structured array containing possible indexations
             consistent with the data.
 
         """
-        # TODO: Make it so that the threshold can be specified as a fraction of
-        # the g-vector magnitude.
+        #TODO: Specify threshold as a fraction of the g-vector magnitude.
         arr_shape = (self.axes_manager._navigation_shape_in_array
                      if self.axes_manager.navigation_size > 0
                      else [1, ])
@@ -120,11 +128,28 @@ class DiffractionVectors(BaseSignal):
             res = []
             for j in np.arange(len(glengths[it])):
                 peak_diff = (calc_peaks.T[1] - glengths[it][j]) * (calc_peaks.T[1] - glengths[it][j])
-                res.append((calc_peaks[np.where(peak_diff < threshold)],
-                            peak_diff[np.where(peak_diff < threshold)]))
+                res.append((calc_peaks[np.where(peak_diff < magnitude_threshold)],
+                            peak_diff[np.where(peak_diff < magnitude_threshold)]))
             gindex[it] = res
 
+        if angular_threshold==None:
+            pass
+        else:
+
+
         return gindex
+
+    def get_zone_axis_indexation(self):
+        """Determine the zone axis consistent with the majority of indexed
+        diffraction vectors.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
 
     def get_unique_vectors(self):
         """Obtain a unique list of diffraction vectors.
@@ -146,7 +171,6 @@ class DiffractionVectors(BaseSignal):
                     pass
                 else:
                     gv.append(g[j])
-
         return gv
 
     def get_reflection_intensities(self,
