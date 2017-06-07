@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
