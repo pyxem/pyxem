@@ -36,19 +36,13 @@ Signal class for diffraction vectors.
 class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
-    def __init__(self, calibration):
+    def __init__(self,
+                 calibration):
         BaseSignal.__init__(self, *args, **kwargs)
-        # Attributes defaults
+        self.calibration=calibration
 
-    def get_gvector_magnitudes(self, calibration):
-        """Obtain the magnitude of g-vectors in calibrated units
-        from a structured array containing peaks in array units.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
+    def get_gvector_magnitudes(self):
+        """Calculate the magnitude of diffraction vectors.
 
         """
         # Allocate an empty structured array in which to store the gvector
@@ -76,28 +70,33 @@ class DiffractionVectors(BaseSignal):
 
         return gvectors
 
-    def get_reflection_intensities(self, indexed_reflections):
+    def get_glength_histogram(self, bins):
+        """Obtain a histogram of all measured diffraction vector magnitudes.
         """
+        gmags = self.get_gvector_magnitudes()
+
+        glist = []
+        for i in dp.axes_manager:
+            it = (i[1], i[0])
+            g = gmags[it]
+            for j in np.arange(len(g)):
+                glist.append(g[j])
+        gs = np.asarray(glist)
+        gsig = hs.signals.Signal1D(gs)
+        return gsig.get_histogram(bins=bins)
+
+    def get_gvector_indexation(self,
+                               calculated_peaks,
+                               magnitude_threshold,
+                               angular_threshold):
+        """Index diffraction vectors based on the magnitude of individual
+        vectors and optionally the angles between pairs of vectors.
 
         Parameters
         ----------
 
-        Returns
-        -------
-        """
-        #TODO: Implement sum in ROI around peak centers.
-        pass
-
-    def get_gvector_indexation(self, glengths, calc_peaks, threshold):
-        """Index the magnitude of g-vectors in calibrated units
-        from a structured array containing gvector magnitudes.
-
-        Parameters
-        ----------
-
-        glengths : A structured array containing the
-
-        calc_peaks : A structured array
+        calculated_peaks : array
+            Structured array
 
         threshold : Float indicating the maximum allowed deviation from the
             theoretical value.
@@ -126,3 +125,65 @@ class DiffractionVectors(BaseSignal):
             gindex[it] = res
 
         return gindex
+
+    def get_unique_vectors(self):
+        """Obtain a unique list of diffraction vectors.
+
+        Returns
+        -------
+        unique_vectors : list
+            Unique list of all diffraction vectors.
+        """
+        #Create empty list
+        gv = []
+        #Iterate through vectors
+        for i in dp.axes_manager:
+            it = (i[1], i[0])
+            g = peaks[it]
+            for j in np.arange(len(g)):
+                #if vector in list pass else add list
+                if np.asarray(g[j]) in np.asarray(gv):
+                    pass
+                else:
+                    gv.append(g[j])
+
+        return gv
+
+    def get_reflection_intensities(self,
+                                   unique_vectors=None,
+                                   electron_diffraction,
+                                   radius):
+        """Obtain the intensity scattered to each diffraction vector at each
+        navigation position in an ElectronDiffraction Signal by summation in a
+        circular window of specified radius.
+
+        Parameters
+        ----------
+        unique_vectors : list (optional)
+            Unique list of diffracting vectors if pre-calculated. If None the
+            unique vectors in self are determined and used.
+
+        electron_diffraction : ElectronDiffraction
+            ElectronDiffraction signal from which to extract the reflection
+            intensities.
+
+        radius : float
+            Radius of the integration window summed over in reciprocal angstroms.
+
+        Returns
+        -------
+        """
+        if unique_vectors==None:
+            unique_vectors = self.get_unique_vectors()
+
+        cs = np.asarray(unique_vectors)
+        cs = cs * electron_diffraction.axes_manager.signal_axes[0].scale
+        cs = cs + electron_diffraction.axes_manager.signal_axes[0].offset
+
+        vdfs = []
+        for i in np.arange(len(gvuna)):
+            roi = hs.roi.CircleROI(cx=cs[i][1], cy=cs[i][0],
+                                   r=radius, r_inner=0)
+            vdf = roi(electron_diffraction, axes=electron_diffraction.axes_manager.signal_axes)
+            vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
+        return hs.signals.Signal2D(np.asarray(vdfs))
