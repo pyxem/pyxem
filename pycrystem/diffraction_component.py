@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+
 """Forward model component for kinematical electron diffraction.
 
 """

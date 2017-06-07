@@ -18,8 +18,7 @@
 from __future__ import division
 
 import tqdm
-from hyperspy.api import interactive
-from hyperspy.api import roi
+from hyperspy.api import interactive, roi, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal2D, Signal1D, BaseSignal
 
@@ -311,7 +310,8 @@ class ElectronDiffraction(Signal2D):
         get_direct_beam_position
 
         """
-        # TODO: make this work without averaging the centers
+        #TODO: make this work without averaging the centers
+        #TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
         center = centers.mean(axis=(0, 1))
@@ -319,6 +319,21 @@ class ElectronDiffraction(Signal2D):
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
         return radial_profiles.as_signal1D(signal_axis)
+
+    def get_diffraction_variance(self):
+        """Calculates the variance of associated with each diffraction pixel.
+
+        Returns
+        -------
+
+        vardps : Signal2D
+              A two dimensional Signal class object containing the mean DP,
+              mean squared DP, and variance DP.
+        """
+        mean_dp = dp.mean((0,1))
+        meansq_dp = Signal2D(np.square(dp.data)).mean((0,1))
+        var_dp = Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
+        return stack((mean_dp, meansq_dp, var_dp))
 
     def remove_background(self, saturation_radius=0):
         """Perform background subtraction.
