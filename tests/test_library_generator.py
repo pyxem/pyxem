@@ -22,21 +22,18 @@ from pycrystem.diffraction_signal import ElectronDiffraction
 from hyperspy.signals import Signal1D, Signal2D
 
 
-class Test_metadata:
+class TestLibraryGenerator:
 
     def setUp(self):
-        # Create an empty diffraction pattern
-        dp = ElectronDiffraction(np.ones((2, 2, 2, 2)))
-        dp.axes_manager.signal_axes[0].scale = 1e-3
-        dp.metadata.Acquisition_instrument.TEM.accelerating_voltage = 200
-        dp.metadata.Acquisition_instrument.TEM.convergence_angle = 15.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_angle = 18.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_frequency = 63
-        dp.metadata.Acquisition_instrument.TEM.Detector.Diffraction.exposure_time = 35
-        self.signal = dp
+        # Initialize diffraction library generator.
+        pass
 
-    def test_default_param(self):
-        dp = self.signal
-        md = dp.metadata
-        nt.assert_equal(md.Acquisition_instrument.TEM.rocking_angle,
-                        preferences.ElectronDiffraction.ed_precession_angle)
+    def test_get_diffraction_library(self):
+        # Test creation of a diffraction library.
+        pass
+
+
+class TestDiffractionLibrary:
+
+    def setUp(self):
+        
