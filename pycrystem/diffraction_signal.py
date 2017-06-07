@@ -149,7 +149,7 @@ class ElectronDiffraction(Signal2D):
         # Add the ROI to the appropriate signal axes.
         dark_field = roi.interactive(self, navigation_signal='same')
         dark_field_placeholder = \
-            BaseSignal(np.zeros(self.axes_manager.navigation_shape))
+            BaseSignal(np.zeros(self.axes_manager.navigation_shape[::-1]))
         # Create an output signal for the virtual dark-field calculation.
         dark_field_sum = interactive(
             # Create an interactive signal
@@ -193,6 +193,7 @@ class ElectronDiffraction(Signal2D):
         dark_field = roi(self, axes=self.axes_manager.signal_axes)
         dark_field_sum = dark_field.sum(axis=dark_field.axes_manager.signal_axes)
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
+        #TODO:make outputs neat in obvious cases i.e. 2D for normal vdf
         return dark_field_sum
 
     def get_direct_beam_mask(self, radius, center=None):
@@ -270,90 +271,6 @@ class ElectronDiffraction(Signal2D):
             mask.data = ndi.morphology.binary_dilation(mask.data,
                                                        border_value=0)
         return mask
-
-    def get_direct_beam_position(self, radius):
-        """
-        Determine rigid shifts in the SED patterns based on the position of the
-        direct beam and return the shifts required to center all patterns.
-
-        Parameters
-        ----------
-        radius : int
-            Defines the size of the circular region within which the direct beam
-            position is refined.
-
-        subpixel : bool
-            If True the direct beam position is refined to sub-pixel precision
-            via calculation of the intensity center_of_mass.
-
-        Returns
-        -------
-        shifts : array
-            Array containing the shift to be applied to each SED pattern to
-            center it.
-
-        See also
-        --------
-        _get_direct_beam_position
-
-        """
-        # sum images to produce image in which direct beam reinforced and take
-        # the position of maximum intensity as the initial estimate of center.
-        dp_sum = self.sum()
-        maxes = np.asarray(np.where(dp_sum.data == dp_sum.data.max()))
-        mref = np.rint([np.average(maxes[0]), np.average(maxes[1])])
-        mref = mref.astype(int)
-        # specify array of dims (nav_size, 2) in which to store centers and find
-        # the center of each pattern by determining the direct beam position.
-        arr_shape = (self.axes_manager.navigation_size, 2)
-        c = np.zeros(arr_shape, dtype=int)
-        for z, index in zip(self._iterate_signal(),
-                            np.arange(0, self.axes_manager.navigation_size, 1)):
-            c[index] = refine_beam_position(z, start=mref, radius=radius)
-        # The arange function produces a linear set of centers that has to be
-        # reshaped back to the original signal shape
-        return c.reshape(self.axes_manager.navigation_shape[::-1] + (-1,))
-
-    def get_direct_beam_shifts(self, centers=None, radius=None):
-        """Determine rigid shifts in the SED patterns based on the position of
-        the direct beam and return the shifts required to center all patterns.
-
-        Parameters
-        ----------
-        centers : array, None
-            Array of dimension (navigation_size, 2) containing the position of
-            the diffraction pattern
-            If None, an array containing center positions is obtained using the
-            `get_direct_beam_position` method.
-        radius : int
-            Defines the size of the circular region within which the direct beam
-            position is refined.
-        subpixel : bool
-            If True the direct beam position is refined to sub-pixel precision
-            via calculation of the intensity center_of_mass.
-
-        Returns
-        -------
-        shifts : array
-            Array containing the shift to be applied to each SED pattern to
-            center it.
-
-        See also
-        --------
-        get_direct_beam_position
-        """
-        if centers == None:
-            centers = self.get_direct_beam_position(radius=radius)
-        if centers != None:
-            if centers.shape != (self.axes_manager.navigation_size, 2):
-                raise ValueError("The number of center positions provided "
-                                 "must match the navigation_size")
-
-        # calculate shifts to align all patterns to the reference position
-        shifts = centers - [(self.axes_manager.signal_shape[0] - 1) / 2,
-                            (self.axes_manager.signal_shape[1] - 1) / 2]
-
-        return shifts
 
     def apply_affine_transformation(self, D):
         """Correct geometric distortion by applying an affine transformation.
@@ -603,11 +520,11 @@ class ElectronDiffraction(Signal2D):
                                       "See documentation for available "
                                       "implementations.".format(method))
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-
+        #TODO: make return DiffractionVectors(peaks)
         return peaks
 
     def find_peaks2D_interactive(self):
-        from hyperspy.gui import peakfinder2D
+        from pycrystem.utils import peakfinder2D_gui
         """
         Find peaks using an interactive tool.
 
@@ -616,5 +533,5 @@ class ElectronDiffraction(Signal2D):
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
-        peakfinder = peakfinder2D.PeakFinderUIIPYW()
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW()
         peakfinder.interactive(self)
