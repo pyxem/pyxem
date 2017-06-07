@@ -22,11 +22,9 @@ from hyperspy.api import interactive
 from hyperspy.api import roi
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal2D, Signal1D, BaseSignal
-from hyperspy._lazy_signals import LazySignal2D
-from scipy.ndimage import variance
 
-from scipy.ndimage import variance
 from pycrystem.utils.expt_utils import *
+from pycrystem.utils.peakfinders2D import *
 from .library_generator import DiffractionLibrary
 from .indexation_generator import IndexationGenerator
 
@@ -552,3 +550,71 @@ class ElectronDiffraction(Signal2D):
             *args, **kwargs)
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
+
+    def find_peaks2D(self, method='skimage', *args, **kwargs):
+        """Find peaks in a 2D signal/image.
+        Function to locate the positive peaks in an image using various, user
+        specified, methods. Returns a structured array containing the peak
+        positions.
+        Parameters
+        ---------
+        method : str
+                 Select peak finding algorithm to implement. Available methods
+                 are:
+                     'max' - simple local maximum search
+                     'skimage' - call the peak finder implemented in
+                                 scikit-image which uses a maximum filter
+                     'minmax' - finds peaks by comparing maximum filter results
+                                with minimum filter, calculates centers of mass
+                     'zaefferer' - based on gradient thresholding and refinement
+                                   by local region of interest optimisation
+                     'stat' - statistical approach requiring no free params.
+                     'massiel' - finds peaks in each direction and compares the
+                                 positions where these coincide.
+                     'laplacian_of_gaussians' - a blob finder implemented in
+                                                `scikit-image` which uses the
+                                                laplacian of Gaussian matrices
+                                                approach.
+                     'difference_of_gaussians' - a blob finder implemented in
+                                                 `scikit-image` which uses
+                                                 the difference of Gaussian
+                                                 matrices approach.
+        *args : associated with above methods
+        **kwargs : associated with above methods.
+        Returns
+        -------
+        peaks: structured array of shape _navigation_shape_in_array in which
+               each cell contains an array with dimensions (npeaks, 2) that
+               contains the x, y pixel coordinates of peaks found in each image.
+        """
+        method_dict = {
+            'skimage': peak_local_max,
+            'max': find_peaks_max,
+            'minmax': find_peaks_minmax,
+            'zaefferer': find_peaks_zaefferer,
+            'stat': find_peaks_stat,
+            'laplacian_of_gaussians':  find_peaks_log,
+            'difference_of_gaussians': find_peaks_dog,
+        }
+        if method in method_dict:
+            method = method_dict[method]
+        else:
+            raise NotImplementedError("The method `{}` is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.".format(method))
+        peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
+
+        return peaks
+
+    def find_peaks2D_interactive(self):
+        from hyperspy.gui import peakfinder2D
+        """
+        Find peaks using an interactive tool.
+
+        Notes
+        -----
+        Requires `ipywidgets` and `traitlets` to be installed.
+
+        """
+        peakfinder = peakfinder2D.PeakFinderUIIPYW()
+        peakfinder.interactive(self)
