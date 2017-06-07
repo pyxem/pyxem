@@ -53,6 +53,20 @@ def radial_average(z, center):
 
     return radial_average
 
+def gain_normalise(z, dref, bref):
+    """Apply gain normalization to experimentally acquired electron
+    diffraction patterns.
+
+    Parameters
+    ----------
+    dref : ElectronDiffraction
+        Dark reference image.
+
+    bref : ElectronDiffraction
+        Bright reference image.
+    """
+    return ((z- dref) / (bref - dref)) * np.mean((bref - dref))
+
 
 def affine_transformation(z, order=3, **kwargs):
     """Apply an affine transform to a 2-dimensional array.
@@ -85,7 +99,7 @@ def regional_filter(z, h):
 
     z : image as numpy array
 
-    h : 
+    h :
 
     Returns
     -------

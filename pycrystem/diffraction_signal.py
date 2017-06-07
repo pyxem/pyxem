@@ -284,6 +284,21 @@ class ElectronDiffraction(Signal2D):
         #TODO:Make output optional so may or may not overwrite.
         self.map(affine_transformation, matrix=D, ragged=True)
 
+    def gain_normalisation(self, dref, bref):
+        """Apply gain normalization to experimentally acquired electron
+        diffraction patterns.
+
+        Parameters
+        ----------
+        dref : ElectronDiffraction
+            Dark reference image.
+
+        bref : ElectronDiffraction
+            Bright reference image.
+        """
+        #TODO:Make output optional so may or may not overwrite.
+        self.map(gain_normalise, dref=dref, bref=bref)
+
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
 
