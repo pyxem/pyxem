@@ -33,7 +33,8 @@ from scipy.constants import pi
 
 class DiffractionLibraryGenerator(object):
     """
-    Computes a series of electron diffraction patterns using a kinematical model
+    Computes a library of electron diffraction patterns for specified atomic
+    structures and orientations.
     """
 
     def __init__(self, electron_diffraction_calculator):
@@ -61,14 +62,16 @@ class DiffractionLibraryGenerator(object):
         Parameters
         ----------
         structure_library : dict
-            List of structures for which to derive the library.
+            Dictionary of structures and associated orientations (represented as
+            Euler angles or axis-angle pairs) for which electron diffraction is
+            to be simulated.
 
         calibration : float
             The calibration of experimental data to be correlated with the
             library, in reciprocal Angstroms per pixel.
 
         reciprocal_radius : float
-            The maximum g-vector magnitude to be accepted.
+            The maximum g-vector magnitude to be included in the simulations.
 
         representation : 'euler' or 'axis-angle'
             The representation in which the orientations are provided.

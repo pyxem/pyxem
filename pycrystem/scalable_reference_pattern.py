@@ -19,7 +19,6 @@
 
 from hyperspy.component import Component
 from hyperspy.signals import Signal2D
-from pycrystem.tensor_field2d import TensorField2D
 from skimage import transform as tf
 import numpy as np
 

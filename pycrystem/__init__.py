@@ -26,8 +26,6 @@ from .diffraction_generator import ElectronDiffractionCalculator
 from .library_generator import DiffractionLibraryGenerator
 from .diffraction_component import ElectronDiffractionForwardModel
 from .scalable_reference_pattern import ScalableReferencePattern
-from .tensor_field import BaseTensorField
-from .tensor_field2d import TensorField2D
 
 __author__ = "Duncan Johnstone"
 __copyright__ = "Copyright 2016, Python Crystallographic Electron Microscopy"

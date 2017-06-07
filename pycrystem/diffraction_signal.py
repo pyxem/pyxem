@@ -56,7 +56,7 @@ class ElectronDiffraction(Signal2D):
                                     rocking_angle=None,
                                     rocking_frequency=None,
                                     exposure_time=None):
-        """Set the experimental parameters.
+        """Set the experimental parameters in metadata.
 
         Parameters
         ----------
@@ -99,36 +99,37 @@ class ElectronDiffraction(Signal2D):
             md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                         exposure_time)
 
-    def set_calibration(self, calibration, offset=None):
+    def set_calibration(self, calibration, center=None):
         """Set pixel size in reciprocal Angstroms and origin location.
 
         Parameters
         ----------
         calibration: float
             Calibration in reciprocal Angstroms per pixel
-        offset: tuple
-            Position of the central beam, in pixels
+        center: tuple
+            Position of the central beam, in pixels. If None the center of the
+            frame is assumed to be the center of the pattern.
         """
         # TODO: extend to get calibration from a list of stored calibrations for
         # the camera length recorded in metadata.
-        if offset==None:
-            offset = np.array(self.axes_manager.signal_shape)/2 * calibration
+        if center==None:
+            center = np.array(self.axes_manager.signal_shape)/2 * calibration
 
         dx = self.axes_manager.signal_axes[0]
         dy = self.axes_manager.signal_axes[1]
 
         dx.name = 'dx'
         dx.scale = calibration
-        dx.offset = -offset[0]
+        dx.offset = -center[0]
         dx.units = '$A^{-1}$'
 
         dy.name = 'dy'
         dy.scale = calibration
-        dy.offset = -offset[1]
+        dy.offset = -center[1]
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, roi):
-        """Plots an interactive virtual image formed with a specified but
+        """Plots an interactive virtual image formed with a specified and
         adjustable roi.
 
         Parameters
@@ -195,46 +196,6 @@ class ElectronDiffraction(Signal2D):
         dark_field_sum = dark_field.sum(axis=dark_field.axes_manager.signal_axes)
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
         return dark_field_sum
-
-    # TODO: this appears to be broken in HyperSpy
-    # def plot_line_profile(self, x1, y1, x2, y2, width):
-    #     """Plots an interactive line profile."""
-    #     self.plot()
-    #     lin = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2, linewidth=width)
-    #     lin.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-    #     lin.interactive(self, navigation_signal='same').plot()
-
-    def get_variance_image(self, roi):
-        """Form a variance image for a specified region of interest in the
-        diffraction signal.
-
-        The variance image plots the variance of values within a specified
-        set of pixels in the diffraction signal as a function of probe position.
-
-        Parameters
-        ----------
-        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
-            Any interactive ROI detailed in HyperSpy.
-
-        Returns
-        -------
-        :obj:`hyperspy.signals.Signal2D`
-            The variance image as a HyperSpy Signal2D.
-        """
-        # Crop the data using the roi
-        annulus = roi(self, axes=self.axes_manager.signal_axes)
-        annulus.change_dtype('float')
-        # Create an empty array to contain the image.
-        arr_shape = (annulus.axes_manager._navigation_shape_in_array
-                     if annulus.axes_manager.navigation_size > 0
-                     else [1, ])
-        var_image = np.zeros(arr_shape)
-        # Calculate the variance within the roi for each DP.
-        for i in annulus.axes_manager:
-            it = (i[1], i[0])
-            var_image[it] = variance(annulus.data[it]) / (np.mean(annulus.data[it]) * np.mean(annulus.data[it]))
-
-        return Signal2D(var_image)
 
     def get_direct_beam_mask(self, radius, center=None):
         """Generate a signal mask for the direct beam.
@@ -396,40 +357,22 @@ class ElectronDiffraction(Signal2D):
 
         return shifts
 
-    def correct_geometric_distortion(self, D):
+    def apply_affine_transformation(self, D):
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
         ----------
-
+        D : 3x3 numpy array
+            Specifies the affine transform to be applied.
 
         Returns
         -------
 
 
         """
-        #TODO:Add automatic method based on power spectrum optimisation as
-        #presented in Vigouroux et al...
+        #TODO:Make output optional so may or may not overwrite.
+        #TODO:Add automatic method.
         self.map(affine_transformation, matrix=D, ragged=True)
-
-    def rotate_patterns(self, angle):
-        """Rotate the diffraction patterns in a clockwise direction.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        #TODO: Preserve knowledge of basis - and eventually remove when the
-        # version in devlopment for HyperSpy is completed.
-        a = angle * np.pi/180.0
-        t = np.array([[math.cos(a), math.sin(a), 0.],
-                      [-math.sin(a), math.cos(a), 0.],
-                      [0., 0., 1.]])
-
-        self.map(affine_transformation, matrix=t)
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
@@ -470,6 +413,9 @@ class ElectronDiffraction(Signal2D):
         saturation_radius: int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
             beam.
+
+        method : String
+            'h-dome', 'profile_fit'
 
         Returns
         -------
@@ -616,9 +562,7 @@ class ElectronDiffraction(Signal2D):
         Returns
         -------
         """
-        # TODO: For each peak in a structured array of peaks obtain the
-        # intensity of the reflection associated with it. Multiple methods
-        # should be implemented including just summing or fitting a Gaussian.
+        #TODO: Implement sum in ROI around peak centers.
         pass
 
     def get_gvector_indexation(self, glengths, calc_peaks, threshold):

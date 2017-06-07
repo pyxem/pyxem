@@ -15,8 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
-"""Kinematical diffraction pattern calculation.
-
+"""Electron diffraction pattern simulation.
 """
 
 
@@ -52,11 +51,6 @@ class ElectronDiffractionCalculator(object):
            .. math::
                 I_{hkl} = F_{hkl}F_{hkl}^*
 
-    .. todo::
-        Include camera length, when implemented.
-    .. todo::
-        Refactor the excitation error to a structure property.
-
     Parameters
     ----------
     accelerating_voltage : float
@@ -69,13 +63,14 @@ class ElectronDiffractionCalculator(object):
         equal to 1/{specimen thickness}.
 
     """
+    #TODO:Include camera length, when implemented.
+    #TODO:Refactor the excitation error to a structure property.
 
     def __init__(self,
                  accelerating_voltage,
                  max_excitation_error,
                  debye_waller_factors=None):
-        """
-        Initializes the electron diffraction calculator with a particular
+        """Initializes the electron diffraction calculator with a particular
         accelerating voltage, reciprocal radius and excitation error.
         """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
@@ -148,26 +143,32 @@ class ElectronDiffractionCalculator(object):
 
 
 class DiffractionSimulation:
+    """Holds the result of a given diffraction pattern.
+
+    Parameters
+    ----------
+
+    coordinates : array-like
+        The x-y coordinates of points in reciprocal space.
+    indices : array-like
+        The indices of the reciprocal lattice points that intersect the
+        Ewald sphere.
+    proximity : array-like
+        The distance between the reciprocal lattice points that intersect
+        the Ewald sphere and the Ewald sphere itself in reciprocal
+        angstroms.
+    calibration : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
+        The x- and y-scales of the pattern, with respect to the original
+        reciprocal angstrom coordinates.
+    offset : :obj:`tuple` of :obj:`float`, optional
+        The x-y offset of the pattern in reciprocal angstroms. Defaults to
+        zero in each direction.
+    """
 
     def __init__(self, coordinates=None, indices=None, intensities=None,
                  calibration=1., offset=(0., 0.), with_direct_beam=False):
-        """Holds the result of a given diffraction pattern.
-
-        coordinates : array-like
-            The x-y coordinates of points in reciprocal space.
-        indices : array-like
-            The indices of the reciprocal lattice points that intersect the
-            Ewald sphere.
-        proximity : array-like
-            The distance between the reciprocal lattice points that intersect
-            the Ewald sphere and the Ewald sphere itself in reciprocal
-            angstroms.
-        calibration : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
-            The x- and y-scales of the pattern, with respect to the original
-            reciprocal angstrom coordinates.
-        offset : :obj:`tuple` of :obj:`float`, optional
-            The x-y offset of the pattern in reciprocal angstroms. Defaults to
-            zero in each direction.
+        """Initializes the DiffractionSimulation object with data values for
+        the coordinates, indices, intensities, calibration and offset.
         """
         self._coordinates = None
         self.coordinates = coordinates
@@ -200,8 +201,8 @@ class DiffractionSimulation:
         elif len(calibration) == 2:
             self._calibration = calibration
         else:
-            raise ValueError("`calibration` must be a float, int, or length-2 tuple"
-                             "of floats or ints.")
+            raise ValueError("`calibration` must be a float, int, or length-2"
+                             "tuple of floats or ints.")
 
     @property
     def direct_beam_mask(self):
@@ -229,7 +230,8 @@ class DiffractionSimulation:
 
 
     def plot(self, ax=None):
-        """Returns the diffraction data as a plot.
+        """Plots the simulated electron diffraction pattern with a logarithmic
+        intensity scale.
 
         Notes
         -----
@@ -250,7 +252,7 @@ class DiffractionSimulation:
 
     def as_signal(self, size, sigma, max_r):
         """Returns the diffraction data as an ElectronDiffraction signal with
-        Gaussian functions representing each diffracted peak.
+        two-dimensional Gaussians representing each diffracted peak.
 
         Parameters
         ----------
