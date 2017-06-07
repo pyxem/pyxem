@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import division
 
 import tqdm
@@ -279,13 +280,8 @@ class ElectronDiffraction(Signal2D):
         D : 3x3 numpy array
             Specifies the affine transform to be applied.
 
-        Returns
-        -------
-
-
         """
         #TODO:Make output optional so may or may not overwrite.
-        #TODO:Add automatic method.
         self.map(affine_transformation, matrix=D, ragged=True)
 
     def get_radial_profile(self, centers=None):

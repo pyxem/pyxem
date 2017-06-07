@@ -29,18 +29,18 @@ from .library_generator import DiffractionLibrary
 from .indexation_generator import IndexationGenerator
 
 """
-Signal class for diffraction vectors
+Signal class for diffraction vectors.
 """
 
 
 class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, calibration):
         BaseSignal.__init__(self, *args, **kwargs)
         # Attributes defaults
 
-    def get_gvector_magnitudes(self, peaks):
+    def get_gvector_magnitudes(self, calibration):
         """Obtain the magnitude of g-vectors in calibrated units
         from a structured array containing peaks in array units.
 
