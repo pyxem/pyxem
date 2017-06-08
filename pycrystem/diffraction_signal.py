@@ -354,7 +354,6 @@ class ElectronDiffraction(Signal2D):
         saturation_radius: int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
             beam.
-
         method : String
             'h-dome', 'profile_fit'
 
@@ -391,6 +390,27 @@ class ElectronDiffraction(Signal2D):
         return denoised
 
     def get_background_model(self, profile, saturation_radius):
+        """Create a background model from a radial profile.
+
+        The current model contains a Voigt model to fit the direct beam and an
+        Exponential combined with a Linear profile to model the background. The
+        exponential and linear model are used to create a background "image".
+        This might be used for background subtraction.
+
+        Parameters
+        ----------
+        profile : :obj:`hyperspy.signals.Signal1D`
+            A 1-d signal describing the radial profile of the data.
+        saturation_radius : int
+            The approximate radius of the region of saturation of the direct
+            beam.
+
+        Returns
+        -------
+        background : :obj:`ElectronDiffraction`
+            A 2-d signal estimating the background of the signal.
+
+        """
         model = profile.create_model()
         e1 = saturation_radius * profile.axes_manager.signal_axes[0].scale
         model.set_signal_range(e1)
@@ -418,12 +438,12 @@ class ElectronDiffraction(Signal2D):
         y_axis = self.axes_manager.signal_axes[1].axis
         xs, ys = np.meshgrid(x_axis, y_axis)
         rs = (xs ** 2 + ys ** 2) ** 0.5
-        bg = ElectronDiffraction(
+        background = ElectronDiffraction(
             diffuse_scatter.function(rs) + linear_decay.function(rs))
         for i in (0, 1):
-            bg.axes_manager.signal_axes[i].update_from(
+            background.axes_manager.signal_axes[i].update_from(
                 self.axes_manager.signal_axes[i])
-        return bg
+        return background
 
     def decomposition(self,
                       normalize_poissonian_noise=True,
