@@ -105,7 +105,9 @@ class IndexationGenerator():
 
 
 class MatchingResults(np.ndarray):
-    """
+    """Container for pattern matching results as a structured array of
+    correlations at each navigation index of the indexed diffraction signal.
+
     """
 
     def __new__(cls, input_array, info=None):
@@ -121,8 +123,17 @@ class MatchingResults(np.ndarray):
         return np.ndarray.__array_wrap__(self, out_arr, context)
 
     def get_euler_map(self):
-        """Obtain an
+        """Obtain an orientation map specifed by an Euler angle triple at each
+        navigation position.
+
+        Returns
+        -------
+        euler_map : BaseSignal
+            Orientation map specifying an Euler angle triple in the rxzx
+            convention at each navigation position.
+
         """
+        #TODO:Add smoothing optimisation method with flag.
         best_angle = []
         for i in np.arange(self.shape[0]):
             for j in np.arange(self.shape[1]):
@@ -140,7 +151,15 @@ class MatchingResults(np.ndarray):
         return euler_map
 
     def get_angle_map(self):
-        """
+        """Obtain an orientation map specifed by the magnitude of the rotation
+        angle at each navigation position.
+
+        Returns
+        -------
+        angle_map : Signal2D
+            Orientation map specifying the magnitude of the rotation angle at
+            each navigation position.
+
         """
         best_angle = []
         for i in np.arange(self.shape[0]):
