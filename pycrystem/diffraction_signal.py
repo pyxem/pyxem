@@ -410,7 +410,7 @@ class ElectronDiffraction(Signal2D):
         """
         #TODO:Add automatic method based on power spectrum optimisation as
         #presented in Vigouroux et al...
-        self.map(affine_transformation, matrix=D, ragged=True)
+        self.map(affine_transformation, matrix=D)
 
     def rotate_patterns(self, angle):
         """Rotate the diffraction patterns in a clockwise direction.
@@ -489,42 +489,12 @@ class ElectronDiffraction(Signal2D):
         #     self.data = self.data / self.data.max()
 
         profile = self.get_radial_profile().mean()
-        model = profile.create_model()
-        e1 = saturation_radius * profile.axes_manager.signal_axes[0].scale
-        model.set_signal_range(e1)
-
-        direct_beam = Voigt()
-        direct_beam.centre.value = 0
-        direct_beam.centre.free = False
-        direct_beam.area.value = 40
-        model.append(direct_beam)
-
-        diffuse_scatter = Exponential()
-        diffuse_scatter.tau.value = 0.5
-        model.append(diffuse_scatter)
-
-        linear_decay = Polynomial(1)
-        model.append(linear_decay)
-
-        model.fit()
-
-        x_axis = self.axes_manager.signal_axes[0].axis
-        y_axis = self.axes_manager.signal_axes[1].axis
-
-        xs, ys = np.meshgrid(x_axis, y_axis)
-        rs = (xs ** 2 + ys ** 2) ** 0.5
-
-        bg = ElectronDiffraction(
-            diffuse_scatter.function(rs) + linear_decay.function(rs))
-
-        for i in (0, 1):
-            bg.axes_manager.signal_axes[i].update_from(
-                self.axes_manager.signal_axes[i])
+        bg = self.get_background_model(profile, saturation_radius)
 
         bg_removed = np.clip(self - bg, 0, 255)
 
         denoised = ElectronDiffraction(
-            bg_removed.map(regional_flattener, h=bg.data.min(), inplace=False)
+            bg_removed.map(regional_flattener, h=bg.data.min()-1, inplace=False)
         )
         denoised.axes_manager.update_axes_attributes_from(
             self.axes_manager.navigation_axes)
@@ -532,6 +502,41 @@ class ElectronDiffraction(Signal2D):
             self.axes_manager.signal_axes)
 
         return denoised
+
+    def get_background_model(self, profile, saturation_radius):
+        model = profile.create_model()
+        e1 = saturation_radius * profile.axes_manager.signal_axes[0].scale
+        model.set_signal_range(e1)
+
+        direct_beam = Voigt()
+        direct_beam.centre.value = 0
+        direct_beam.centre.free = False
+        direct_beam.FWHM.value = 0.1
+        direct_beam.area.bmin = 0
+        model.append(direct_beam)
+
+        diffuse_scatter = Exponential()
+        diffuse_scatter.A.value = 0
+        diffuse_scatter.A.bmin = 0
+        diffuse_scatter.tau.value = 0
+        diffuse_scatter.tau.bmin = 0
+        model.append(diffuse_scatter)
+
+        linear_decay = Polynomial(1)
+        model.append(linear_decay)
+
+        model.fit(bounded=True)
+
+        x_axis = self.axes_manager.signal_axes[0].axis
+        y_axis = self.axes_manager.signal_axes[1].axis
+        xs, ys = np.meshgrid(x_axis, y_axis)
+        rs = (xs ** 2 + ys ** 2) ** 0.5
+        bg = ElectronDiffraction(
+            diffuse_scatter.function(rs) + linear_decay.function(rs))
+        for i in (0, 1):
+            bg.axes_manager.signal_axes[i].update_from(
+                self.axes_manager.signal_axes[i])
+        return bg
 
     def get_data_movie_frames(self, image, indices, save_path):
         """
