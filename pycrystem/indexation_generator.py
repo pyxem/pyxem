@@ -27,6 +27,8 @@ from hyperspy.signals import BaseSignal
 from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
+from transforms3d.euler import euler2axangle
+from scipy.constants import pi
 
 from .utils import correlate
 from .utils.plot import plot_correlation_map
@@ -94,13 +96,64 @@ class IndexationGenerator():
                     correlation = correlate(image, diffraction_pattern)
                     correlations[orientation] = correlation
                 #return n best correlated orientations for phase
-                #phase_correlations[key] = correlations
                 phase_correlations[key] = Correlation(nlargest(n_largest,
                                                                correlations.items(),
                                                                key=itemgetter(1)))
             #Put correlation results for navigation position in output array.
             output_array[index] = phase_correlations
-        return output_array.T
+        return MatchingResults(output_array.T)
+
+
+class MatchingResults(np.ndarray):
+    """
+    """
+
+    def __new__(cls, input_array, info=None):
+        obj = np.asarray(input_array).view(cls)
+        obj.info = info
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.info = getattr(obj, 'info', None)
+
+    def __array_wrap__(self, out_arr, context=None):
+        return np.ndarray.__array_wrap__(self, out_arr, context)
+
+    def get_euler_map(self):
+        """Obtain an
+        """
+        best_angle = []
+        for i in np.arange(self.shape[0]):
+            for j in np.arange(self.shape[1]):
+                best_angle.append(max(self[i,j]['gr'], key=self[i,j]['gr'].get))
+
+        angle = []
+        for euler in best_angle:
+            angle.append(euler)
+        angles = np.asarray(angle)
+        euler_map = BaseSignal(angles.reshape(self.shape[0],
+                                              self.shape[1],
+                                              3))
+        euler_map.axes_manager.set_signal_dimension(1)
+        euler_map = euler_map.swap_axes(0,1)
+        return euler_map
+
+    def get_angle_map(self):
+        """
+        """
+        best_angle = []
+        for i in np.arange(self.shape[0]):
+            for j in np.arange(self.shape[1]):
+                best_angle.append(max(self[i,j]['gr'], key=self[i,j]['gr'].get))
+        angle = []
+        for euler in best_angle:
+            angle.append(euler2axangle(euler[0], euler[1], euler[2])[1])
+        angles = np.asarray(angle)
+        angle_map = BaseSignal(angles.reshape(self.shape).T)
+        angle_map.axes_manager.set_signal_dimension(0)
+        angle_map.data = angle_map.data/pi * 180
+        return angle_map.as_signal2D((0,1))
 
 
 class Correlation(dict):
