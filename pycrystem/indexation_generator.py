@@ -32,6 +32,7 @@ from scipy.constants import pi
 
 from .utils import correlate
 from .utils.plot import plot_correlation_map
+from pycrystem.orientation_map import OrientationMap
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
@@ -148,7 +149,7 @@ class MatchingResults(np.ndarray):
                                               3))
         euler_map.axes_manager.set_signal_dimension(1)
         euler_map = euler_map.swap_axes(0,1)
-        return euler_map
+        return OrientationMap(euler_map)
 
     def get_angle_map(self):
         """Obtain an orientation map specifed by the magnitude of the rotation
@@ -173,6 +174,19 @@ class MatchingResults(np.ndarray):
         angle_map.axes_manager.set_signal_dimension(0)
         angle_map.data = angle_map.data/pi * 180
         return angle_map.as_signal2D((0,1))
+
+    def get_correlation_map(self):
+        """Obtain an quality map for a pattern matching based indexation by
+        plotting the correlation score at each navigation position.
+
+        Returns
+        -------
+
+        """
+        pass
+
+    def get_reliability_map(self):
+        pass
 
 
 class Correlation(dict):
