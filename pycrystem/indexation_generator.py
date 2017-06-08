@@ -25,6 +25,7 @@ from __future__ import division
 import numpy as np
 from hyperspy.signals import BaseSignal
 from tqdm import tqdm
+import heapq
 
 from .utils import correlate
 from .utils.plot import plot_correlation_map
@@ -48,24 +49,56 @@ class IndexationGenerator():
         self.signal = signal
         self.library = library
 
-    def correlate(self, show_progressbar=True):
+    def correlate(self,
+                  n_largest=5,
+                  show_progressbar=True):
+        """Correlaltes the library of simulated diffraction patterns with the
+        electron diffraction signal.
+
+        Parameters
+        ----------
+        n_largest : integer
+            The n orientations with the highest correlation values are returned.
+
+        show_progressbar : boolean
+            If True a progress bar is shown.
+
+        Returns
+        -------
+        matching_results : array
+            Numpy array with the same shape as the the navigation axes of the
+            electron diffraction signal containing correlation results for each
+            diffraction pattern.
+
+        """
         signal = self.signal
         library = self.library
-
+        #Specify structured array to contain the matching results.
         output_array = np.zeros(signal.axes_manager.navigation_shape,
                                 dtype=object).T
+        #Iterate through the electron diffraction signal.
         for image, index in tqdm(zip(signal._iterate_signal(),
                 signal.axes_manager._array_indices_generator()),
                 disable=not show_progressbar,
                 total=signal.axes_manager.navigation_size):
+            #Specify empty correlation class object to contain correlations.
             phase_correlations = Correlation()
+            #Iterate through the phases in the library.
             for key in library.keys():
                 diff_lib = library[key]
+                #Specify empty dictionary for orientation correlations of phase
                 correlations = dict()
-                for orientation, diffraction_pattern in tqdm(diff_lib.items(), disable=not show_progressbar, leave=False):
+                #Iterate through orientations of the phase.
+                for orientation, diffraction_pattern in tqdm(diff_lib.items(),
+                                                             disable=not show_progressbar,
+                                                             leave=False):
                     correlation = correlate(image, diffraction_pattern)
                     correlations[orientation] = correlation
-                phase_correlations[key] = Correlation(correlations)
+                #return n best correlated orientations for phase
+                phase_correlations[key] = Correlation(heapq.nlargest(n_largest,
+                                                                     correlations,
+                                                                     key=correlations.get)
+            #Put correlation results for navigation position in output array.
             output_array[index] = phase_correlations
         return output_array.T
 
