@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
@@ -15,18 +15,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import division
 
 import tqdm
-from hyperspy.api import interactive
-from hyperspy.api import roi
+from hyperspy.api import interactive, roi, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal2D, Signal1D, BaseSignal
-from hyperspy._lazy_signals import LazySignal2D
-from scipy.ndimage import variance
 
-from scipy.ndimage import variance
 from pycrystem.utils.expt_utils import *
+from pycrystem.utils.peakfinders2D import *
 from .library_generator import DiffractionLibrary
 from .indexation_generator import IndexationGenerator
 
@@ -56,7 +54,7 @@ class ElectronDiffraction(Signal2D):
                                     rocking_angle=None,
                                     rocking_frequency=None,
                                     exposure_time=None):
-        """Set the experimental parameters.
+        """Set the experimental parameters in metadata.
 
         Parameters
         ----------
@@ -99,36 +97,37 @@ class ElectronDiffraction(Signal2D):
             md.set_item("Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                         exposure_time)
 
-    def set_calibration(self, calibration, offset=None):
+    def set_calibration(self, calibration, center=None):
         """Set pixel size in reciprocal Angstroms and origin location.
 
         Parameters
         ----------
         calibration: float
             Calibration in reciprocal Angstroms per pixel
-        offset: tuple
-            Position of the central beam, in pixels
+        center: tuple
+            Position of the central beam, in pixels. If None the center of the
+            frame is assumed to be the center of the pattern.
         """
         # TODO: extend to get calibration from a list of stored calibrations for
         # the camera length recorded in metadata.
-        if offset==None:
-            offset = np.array(self.axes_manager.signal_shape)/2 * calibration
+        if center==None:
+            center = np.array(self.axes_manager.signal_shape)/2 * calibration
 
         dx = self.axes_manager.signal_axes[0]
         dy = self.axes_manager.signal_axes[1]
 
         dx.name = 'dx'
         dx.scale = calibration
-        dx.offset = -offset[0]
+        dx.offset = -center[0]
         dx.units = '$A^{-1}$'
 
         dy.name = 'dy'
         dy.scale = calibration
-        dy.offset = -offset[1]
+        dy.offset = -center[1]
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, roi):
-        """Plots an interactive virtual image formed with a specified but
+        """Plots an interactive virtual image formed with a specified and
         adjustable roi.
 
         Parameters
@@ -150,7 +149,7 @@ class ElectronDiffraction(Signal2D):
         # Add the ROI to the appropriate signal axes.
         dark_field = roi.interactive(self, navigation_signal='same')
         dark_field_placeholder = \
-            BaseSignal(np.zeros(self.axes_manager.navigation_shape))
+            BaseSignal(np.zeros(self.axes_manager.navigation_shape[::-1]))
         # Create an output signal for the virtual dark-field calculation.
         dark_field_sum = interactive(
             # Create an interactive signal
@@ -194,47 +193,8 @@ class ElectronDiffraction(Signal2D):
         dark_field = roi(self, axes=self.axes_manager.signal_axes)
         dark_field_sum = dark_field.sum(axis=dark_field.axes_manager.signal_axes)
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
+        #TODO:make outputs neat in obvious cases i.e. 2D for normal vdf
         return dark_field_sum
-
-    # TODO: this appears to be broken in HyperSpy
-    # def plot_line_profile(self, x1, y1, x2, y2, width):
-    #     """Plots an interactive line profile."""
-    #     self.plot()
-    #     lin = roi.Line2DROI(x1=x1, y1=y1, x2=x2, y2=y2, linewidth=width)
-    #     lin.add_widget(self, axes=self.axes_manager.signal_axes, color='red')
-    #     lin.interactive(self, navigation_signal='same').plot()
-
-    def get_variance_image(self, roi):
-        """Form a variance image for a specified region of interest in the
-        diffraction signal.
-
-        The variance image plots the variance of values within a specified
-        set of pixels in the diffraction signal as a function of probe position.
-
-        Parameters
-        ----------
-        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
-            Any interactive ROI detailed in HyperSpy.
-
-        Returns
-        -------
-        :obj:`hyperspy.signals.Signal2D`
-            The variance image as a HyperSpy Signal2D.
-        """
-        # Crop the data using the roi
-        annulus = roi(self, axes=self.axes_manager.signal_axes)
-        annulus.change_dtype('float')
-        # Create an empty array to contain the image.
-        arr_shape = (annulus.axes_manager._navigation_shape_in_array
-                     if annulus.axes_manager.navigation_size > 0
-                     else [1, ])
-        var_image = np.zeros(arr_shape)
-        # Calculate the variance within the roi for each DP.
-        for i in annulus.axes_manager:
-            it = (i[1], i[0])
-            var_image[it] = variance(annulus.data[it]) / (np.mean(annulus.data[it]) * np.mean(annulus.data[it]))
-
-        return Signal2D(var_image)
 
     def get_direct_beam_mask(self, radius, center=None):
         """Generate a signal mask for the direct beam.
@@ -312,124 +272,32 @@ class ElectronDiffraction(Signal2D):
                                                        border_value=0)
         return mask
 
-    def get_direct_beam_position(self, radius):
-        """
-        Determine rigid shifts in the SED patterns based on the position of the
-        direct beam and return the shifts required to center all patterns.
-
-        Parameters
-        ----------
-        radius : int
-            Defines the size of the circular region within which the direct beam
-            position is refined.
-
-        subpixel : bool
-            If True the direct beam position is refined to sub-pixel precision
-            via calculation of the intensity center_of_mass.
-
-        Returns
-        -------
-        shifts : array
-            Array containing the shift to be applied to each SED pattern to
-            center it.
-
-        See also
-        --------
-        _get_direct_beam_position
-
-        """
-        # sum images to produce image in which direct beam reinforced and take
-        # the position of maximum intensity as the initial estimate of center.
-        dp_sum = self.sum()
-        maxes = np.asarray(np.where(dp_sum.data == dp_sum.data.max()))
-        mref = np.rint([np.average(maxes[0]), np.average(maxes[1])])
-        mref = mref.astype(int)
-        # specify array of dims (nav_size, 2) in which to store centers and find
-        # the center of each pattern by determining the direct beam position.
-        arr_shape = (self.axes_manager.navigation_size, 2)
-        c = np.zeros(arr_shape, dtype=int)
-        for z, index in zip(self._iterate_signal(),
-                            np.arange(0, self.axes_manager.navigation_size, 1)):
-            c[index] = refine_beam_position(z, start=mref, radius=radius)
-        # The arange function produces a linear set of centers that has to be
-        # reshaped back to the original signal shape
-        return c.reshape(self.axes_manager.navigation_shape[::-1] + (-1,))
-
-    def get_direct_beam_shifts(self, centers=None, radius=None):
-        """Determine rigid shifts in the SED patterns based on the position of
-        the direct beam and return the shifts required to center all patterns.
-
-        Parameters
-        ----------
-        centers : array, None
-            Array of dimension (navigation_size, 2) containing the position of
-            the diffraction pattern
-            If None, an array containing center positions is obtained using the
-            `get_direct_beam_position` method.
-        radius : int
-            Defines the size of the circular region within which the direct beam
-            position is refined.
-        subpixel : bool
-            If True the direct beam position is refined to sub-pixel precision
-            via calculation of the intensity center_of_mass.
-
-        Returns
-        -------
-        shifts : array
-            Array containing the shift to be applied to each SED pattern to
-            center it.
-
-        See also
-        --------
-        get_direct_beam_position
-        """
-        if centers == None:
-            centers = self.get_direct_beam_position(radius=radius)
-        if centers != None:
-            if centers.shape != (self.axes_manager.navigation_size, 2):
-                raise ValueError("The number of center positions provided "
-                                 "must match the navigation_size")
-
-        # calculate shifts to align all patterns to the reference position
-        shifts = centers - [(self.axes_manager.signal_shape[0] - 1) / 2,
-                            (self.axes_manager.signal_shape[1] - 1) / 2]
-
-        return shifts
-
-    def correct_geometric_distortion(self, D):
+    def apply_affine_transformation(self, D):
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
         ----------
-
-
-        Returns
-        -------
-
+        D : 3x3 numpy array
+            Specifies the affine transform to be applied.
 
         """
-        #TODO:Add automatic method based on power spectrum optimisation as
-        #presented in Vigouroux et al...
-        self.map(affine_transformation, matrix=D)
+        #TODO:Make output optional so may or may not overwrite.
+        self.map(affine_transformation, matrix=D, ragged=True)
 
-    def rotate_patterns(self, angle):
-        """Rotate the diffraction patterns in a clockwise direction.
+    def gain_normalisation(self, dref, bref):
+        """Apply gain normalization to experimentally acquired electron
+        diffraction patterns.
 
         Parameters
         ----------
+        dref : ElectronDiffraction
+            Dark reference image.
 
-        Returns
-        -------
-
+        bref : ElectronDiffraction
+            Bright reference image.
         """
-        #TODO: Preserve knowledge of basis - and eventually remove when the
-        # version in devlopment for HyperSpy is completed.
-        a = angle * np.pi/180.0
-        t = np.array([[math.cos(a), math.sin(a), 0.],
-                      [-math.sin(a), math.cos(a), 0.],
-                      [0., 0., 1.]])
-
-        self.map(affine_transformation, matrix=t)
+        #TODO:Make output optional so may or may not overwrite.
+        self.map(gain_normalise, dref=dref, bref=bref)
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
@@ -453,7 +321,8 @@ class ElectronDiffraction(Signal2D):
         get_direct_beam_position
 
         """
-        # TODO: make this work without averaging the centers
+        #TODO: make this work without averaging the centers
+        #TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
         center = centers.mean(axis=(0, 1))
@@ -461,6 +330,21 @@ class ElectronDiffraction(Signal2D):
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
         return radial_profiles.as_signal1D(signal_axis)
+
+    def get_diffraction_variance(self):
+        """Calculates the variance of associated with each diffraction pixel.
+
+        Returns
+        -------
+
+        vardps : Signal2D
+              A two dimensional Signal class object containing the mean DP,
+              mean squared DP, and variance DP.
+        """
+        mean_dp = dp.mean((0,1))
+        meansq_dp = Signal2D(np.square(dp.data)).mean((0,1))
+        var_dp = Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
+        return stack((mean_dp, meansq_dp, var_dp))
 
     def remove_background(self, saturation_radius=0):
         """Perform background subtraction.
@@ -470,6 +354,9 @@ class ElectronDiffraction(Signal2D):
         saturation_radius: int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
             beam.
+
+        method : String
+            'h-dome', 'profile_fit'
 
         Returns
         -------
@@ -537,133 +424,6 @@ class ElectronDiffraction(Signal2D):
             bg.axes_manager.signal_axes[i].update_from(
                 self.axes_manager.signal_axes[i])
         return bg
-
-    def get_data_movie_frames(self, image, indices, save_path):
-        """
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
-        import matplotlib.pyplot as plt
-        j=0
-        for i in indices:
-            j=j+1
-            fig, axes = plt.subplots(ncols=2)
-            ax1, ax2 = axes.ravel()
-
-            ax1.imshow(image)
-            ax2.imshow(self.inav[i].data)
-
-            ax1.set_title('Scan Position')
-            ax2.set_title('Diffraction Pattern')
-
-            ax1.plot(i[0],i[1],'.')
-
-            ax1.set_xlim(0, image.shape[1])
-            ax1.set_ylim(image.shape[0],0)
-
-            ax1.set_axis_off()
-            ax2.set_axis_off()
-
-            plt.xlabel('')
-            plt.ylabel('')
-            plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01,
-                                wspace=0.02)
-
-            plt.savefig(save_path +'{}.png'.format(j))
-            plt.close()
-
-    def get_gvector_magnitudes(self, peaks):
-        """Obtain the magnitude of g-vectors in calibrated units
-        from a structured array containing peaks in array units.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        # Allocate an empty structured array in which to store the gvector
-        # magnitudes.
-        arr_shape = (self.axes_manager._navigation_shape_in_array
-                     if self.axes_manager.navigation_size > 0
-                     else [1, ])
-        gvectors = np.zeros(arr_shape, dtype=object)
-        #
-        for i in self.axes_manager:
-            it = (i[1], i[0])
-            res = []
-            centered = peaks[it] - [256,256]
-            for j in np.arange(len(centered)):
-                res.append(np.linalg.norm(centered[j]))
-
-            cent = peaks[it][np.where(res == min(res))[0]][0]
-            vectors = peaks[it] - cent
-
-            mags = []
-            for k in np.arange(len(vectors)):
-                mags.append(np.linalg.norm(vectors[k]))
-            maga = np.asarray(mags)
-            gvectors[it] = maga * self.axes_manager.signal_axes[0].scale
-
-        return gvectors
-
-    def get_reflection_intensities(self, indexed_reflections):
-        """
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
-        # TODO: For each peak in a structured array of peaks obtain the
-        # intensity of the reflection associated with it. Multiple methods
-        # should be implemented including just summing or fitting a Gaussian.
-        pass
-
-    def get_gvector_indexation(self, glengths, calc_peaks, threshold):
-        """Index the magnitude of g-vectors in calibrated units
-        from a structured array containing gvector magnitudes.
-
-        Parameters
-        ----------
-
-        glengths : A structured array containing the
-
-        calc_peaks : A structured array
-
-        threshold : Float indicating the maximum allowed deviation from the
-            theoretical value.
-
-        Returns
-        -------
-
-        gindex : Structured array containing possible indexation results
-            consistent with the data.
-
-        """
-        # TODO: Make it so that the threshold can be specified as a fraction of
-        # the g-vector magnitude.
-        arr_shape = (self.axes_manager._navigation_shape_in_array
-                     if self.axes_manager.navigation_size > 0
-                     else [1, ])
-        gindex = np.zeros(arr_shape, dtype=object)
-
-        for i in self.axes_manager:
-            it = (i[1], i[0])
-            res = []
-            for j in np.arange(len(glengths[it])):
-                peak_diff = (calc_peaks.T[1] - glengths[it][j]) * (calc_peaks.T[1] - glengths[it][j])
-                res.append((calc_peaks[np.where(peak_diff < threshold)],
-                            peak_diff[np.where(peak_diff < threshold)]))
-            gindex[it] = res
-
-        return gindex
 
     def decomposition(self,
                       normalize_poissonian_noise=True,
@@ -738,3 +498,71 @@ class ElectronDiffraction(Signal2D):
             *args, **kwargs)
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
+
+    def find_peaks2D(self, method='skimage', *args, **kwargs):
+        """Find peaks in a 2D signal/image.
+        Function to locate the positive peaks in an image using various, user
+        specified, methods. Returns a structured array containing the peak
+        positions.
+        Parameters
+        ---------
+        method : str
+                 Select peak finding algorithm to implement. Available methods
+                 are:
+                     'max' - simple local maximum search
+                     'skimage' - call the peak finder implemented in
+                                 scikit-image which uses a maximum filter
+                     'minmax' - finds peaks by comparing maximum filter results
+                                with minimum filter, calculates centers of mass
+                     'zaefferer' - based on gradient thresholding and refinement
+                                   by local region of interest optimisation
+                     'stat' - statistical approach requiring no free params.
+                     'massiel' - finds peaks in each direction and compares the
+                                 positions where these coincide.
+                     'laplacian_of_gaussians' - a blob finder implemented in
+                                                `scikit-image` which uses the
+                                                laplacian of Gaussian matrices
+                                                approach.
+                     'difference_of_gaussians' - a blob finder implemented in
+                                                 `scikit-image` which uses
+                                                 the difference of Gaussian
+                                                 matrices approach.
+        *args : associated with above methods
+        **kwargs : associated with above methods.
+        Returns
+        -------
+        peaks: structured array of shape _navigation_shape_in_array in which
+               each cell contains an array with dimensions (npeaks, 2) that
+               contains the x, y pixel coordinates of peaks found in each image.
+        """
+        method_dict = {
+            'skimage': peak_local_max,
+            'max': find_peaks_max,
+            'minmax': find_peaks_minmax,
+            'zaefferer': find_peaks_zaefferer,
+            'stat': find_peaks_stat,
+            'laplacian_of_gaussians':  find_peaks_log,
+            'difference_of_gaussians': find_peaks_dog,
+        }
+        if method in method_dict:
+            method = method_dict[method]
+        else:
+            raise NotImplementedError("The method `{}` is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.".format(method))
+        peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
+        #TODO: make return DiffractionVectors(peaks)
+        return peaks
+
+    def find_peaks2D_interactive(self):
+        from pycrystem.utils import peakfinder2D_gui
+        """
+        Find peaks using an interactive tool.
+
+        Notes
+        -----
+        Requires `ipywidgets` and `traitlets` to be installed.
+
+        """
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW()
+        peakfinder.interactive(self)

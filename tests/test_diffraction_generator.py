@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
@@ -15,15 +15,27 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
-import numpy as np
-import nose.tools as nt
 
-from pycrystem.tensor_field2d import TensorField2D
-
-
-class TestTensorField2D:
+class TestDiffractionCalculator:
 
     def setUp(self):
-        # Create an empty diffraction pattern
-        tf = TensorField2D(np.ones((2, 2, 3, 3)))
-        self.signal = tf
+        # Initialize electron diffraction calculator
+        pass
+
+    def test_calculate_ed_data(self):
+        # Calculate electron diffraction data
+        pass
+
+class TestDiffractionSimulation:
+
+    def setUp(self):
+        # Initialize a diffraction simulation object.
+
+    def test_calibration(self):
+        pass
+
+    def test_coordinates(self):
+        pass
+
+    def test_intensities(self):
+        pass
