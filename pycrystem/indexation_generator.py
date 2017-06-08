@@ -25,7 +25,8 @@ from __future__ import division
 import numpy as np
 from hyperspy.signals import BaseSignal
 from tqdm import tqdm
-import heapq
+from heapq import nlargest
+from operator import itemgetter
 
 from .utils import correlate
 from .utils.plot import plot_correlation_map
@@ -52,7 +53,7 @@ class IndexationGenerator():
     def correlate(self,
                   n_largest=5,
                   show_progressbar=True):
-        """Correlaltes the library of simulated diffraction patterns with the
+        """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
 
         Parameters
@@ -89,15 +90,14 @@ class IndexationGenerator():
                 #Specify empty dictionary for orientation correlations of phase
                 correlations = dict()
                 #Iterate through orientations of the phase.
-                for orientation, diffraction_pattern in tqdm(diff_lib.items(),
-                                                             disable=not show_progressbar,
-                                                             leave=False):
+                for orientation, diffraction_pattern in diff_lib.items():
                     correlation = correlate(image, diffraction_pattern)
                     correlations[orientation] = correlation
                 #return n best correlated orientations for phase
-                phase_correlations[key] = Correlation(heapq.nlargest(n_largest,
-                                                                     correlations,
-                                                                     key=correlations.get)
+                #phase_correlations[key] = correlations
+                phase_correlations[key] = Correlation(nlargest(n_largest,
+                                                               correlations.items(),
+                                                               key=itemgetter(1)))
             #Put correlation results for navigation position in output array.
             output_array[index] = phase_correlations
         return output_array.T
