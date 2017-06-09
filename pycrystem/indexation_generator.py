@@ -86,7 +86,7 @@ class IndexationGenerator():
                 disable=not show_progressbar,
                 total=signal.axes_manager.navigation_size):
             #Specify empty correlation class object to contain correlations.
-            phase_correlations = Correlation()
+            phase_correlations = dict()
             #Iterate through the phases in the library.
             for key in library.keys():
                 diff_lib = library[key]
@@ -97,12 +97,15 @@ class IndexationGenerator():
                     correlation = correlate(image, diffraction_pattern)
                     correlations[orientation] = correlation
                 #return n best correlated orientations for phase
-                phase_correlations[key] = Correlation(nlargest(n_largest,
-                                                               correlations.items(),
-                                                               key=itemgetter(1)))
+                if n_largest:
+                    phase_correlations[key] = Correlation(nlargest(n_largest,
+                                                          correlations.items(),
+                                                          key=itemgetter(1)))
+                else:
+                    phase_correlations[key] = Correlation(correlations)
             #Put correlation results for navigation position in output array.
             output_array[index] = phase_correlations
-        return MatchingResults(output_array.T)
+        return output_array.T
 
 
 class MatchingResults(np.ndarray):
@@ -123,26 +126,24 @@ class MatchingResults(np.ndarray):
     def __array_wrap__(self, out_arr, context=None):
         return np.ndarray.__array_wrap__(self, out_arr, context)
 
-    def get_euler_map(self):
-        """Obtain an orientation map specifed by an Euler angle triple at each
-        navigation position.
+    def get_crystallographic_map(self):
+        """Obtain an crystallographic map of phase and orientation specifed by
+        an Euler angle triple at each navigation position.
 
         Returns
         -------
-        euler_map : BaseSignal
+        crystallographic_map : BaseSignal
             Orientation map specifying an Euler angle triple in the rxzx
             convention at each navigation position.
 
         """
         #TODO:Add smoothing optimisation method with flag.
-        best_angle = []
+        best_angle = dict()
         for i in np.arange(self.shape[0]):
             for j in np.arange(self.shape[1]):
-                best_angle.append(max(self[i,j]['gr'], key=self[i,j]['gr'].get))
-
-        angle = []
-        for euler in best_angle:
-            angle.append(euler)
+                for key in self[i,j].keys():
+                    best_angle[key] = (max(self[i,j][key],
+                                       key=self[i,j][key].get))
         angles = np.asarray(angle)
         euler_map = BaseSignal(angles.reshape(self.shape[0],
                                               self.shape[1],
@@ -150,43 +151,6 @@ class MatchingResults(np.ndarray):
         euler_map.axes_manager.set_signal_dimension(1)
         euler_map = euler_map.swap_axes(0,1)
         return OrientationMap(euler_map)
-
-    def get_angle_map(self):
-        """Obtain an orientation map specifed by the magnitude of the rotation
-        angle at each navigation position.
-
-        Returns
-        -------
-        angle_map : Signal2D
-            Orientation map specifying the magnitude of the rotation angle at
-            each navigation position.
-
-        """
-        best_angle = []
-        for i in np.arange(self.shape[0]):
-            for j in np.arange(self.shape[1]):
-                best_angle.append(max(self[i,j]['gr'], key=self[i,j]['gr'].get))
-        angle = []
-        for euler in best_angle:
-            angle.append(euler2axangle(euler[0], euler[1], euler[2])[1])
-        angles = np.asarray(angle)
-        angle_map = BaseSignal(angles.reshape(self.shape).T)
-        angle_map.axes_manager.set_signal_dimension(0)
-        angle_map.data = angle_map.data/pi * 180
-        return angle_map.as_signal2D((0,1))
-
-    def get_correlation_map(self):
-        """Obtain an quality map for a pattern matching based indexation by
-        plotting the correlation score at each navigation position.
-
-        Returns
-        -------
-
-        """
-        pass
-
-    def get_reliability_map(self):
-        pass
 
 
 class Correlation(dict):
@@ -220,71 +184,3 @@ class Correlation(dict):
     def best(self):
         """Returns angle and value of the highest correlation index."""
         return self.best_angle, self.best_correlation
-
-    def filter_best(self, axes=(-2, -1,)):
-        """Reduces the dimensionality of the angles.
-
-        Returns a `Correlation` with only those angles that are unique in
-        `axes`. Where there are duplicates, only the angle with the highest
-        correlation is retained.
-
-        Parameters
-        ----------
-        axes : tuple, optional
-            The indices of the angles along which to optimise. Default is the
-            last *two* indices.
-
-        Returns
-        -------
-        Correlation
-
-        """
-        best_correlations = {}
-        for angle in self:
-            correlation = self[angle]
-            angle = tuple(np.array(angle)[axes,])
-            if angle in best_correlations and correlation < best_correlations[angle]:
-                continue
-            best_correlations[angle] = correlation
-        return Correlation(best_correlations)
-
-    def as_signal(self, resolution=np.pi/180, interpolation_method='cubic', fill_value=0.):
-        """Returns the correlation as a hyperspy signal.
-
-        Interpolates between angles where necessary to produce a consistent
-        grid.
-
-        Parameters
-        ----------
-        resolution : float, optional
-            Resolution of the interpolation, in radians.
-        interpolation_method : 'nearest' | 'linear' | 'cubic'
-            The method used for interpolation. See
-            :func:`scipy.interpolate.griddata` for more details.
-
-        Returns
-        -------
-        :class:`hyperspy.signals.BaseSignal`
-
-        """
-        indices = np.array(self.angles)
-        if interpolation_method == 'nearest' and indices.shape[1] > 2:
-            raise TypeError("`interpolation_method='nearest'` only works with data of two dimensions or less. Try using `filter_best`.")
-        extremes = [slice(q.min(), q.max(), resolution) for q in indices.T]
-        z = np.array(self.correlations)
-        grid_n = tuple(e for e in np.mgrid[extremes])
-        grid = griddata(indices, z, grid_n, method=interpolation_method, fill_value=fill_value)
-        return BaseSignal(grid)
-
-    def plot(self, **kwargs):
-        angles = np.array(self.angles)
-        if angles.shape[1] != 2:
-            raise NotImplementedError("Plotting is only available for two-dimensional angles. Try using `filter_best`.")
-        angles = angles[:, (1, 0)]
-        domain = []
-        domain.append((angles[:, 0].min(), angles[:, 0].max()))
-        domain.append((angles[:, 1].min(), angles[:, 1].max()))
-        correlations = np.array(self.correlations)
-        ax = plot_correlation_map(angles, correlations, phi=domain[0], theta=domain[1], **kwargs)
-        ax.scatter(self.best_angle[1], self.best_angle[0], c='r', zorder=2, edgecolor='none')
-        return ax
