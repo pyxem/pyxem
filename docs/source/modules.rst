@@ -5,3 +5,4 @@ pycrystem
    :maxdepth: 4
 
    pycrystem
+   setup

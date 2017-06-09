@@ -363,6 +363,6 @@ texinfo_documents = [
 intersphinx_mapping = {
     'https://docs.python.org/': None,
     'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+    'hyperspy': ('http://hyperspy.org/hyperspy-doc/current/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
-    'hyperspy': ('http://hyperspy.org/hyperspy-doc/current/api/', None),
 }

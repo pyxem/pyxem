@@ -27,49 +27,40 @@ from hyperspy.signals import BaseSignal
 from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
-from transforms3d.euler import euler2axangle
-from scipy.constants import pi
 
 from .utils import correlate
-from .utils.plot import plot_correlation_map
 from pycrystem.orientation_map import OrientationMap
+
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction
+        The signal of electron diffraction patterns to be indexed.
+    library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation
+
     """
     def __init__(self, signal, library):
-        """Initialises the indexer with a diffraction signal and library to be
-        correlated in template matching.
-
-        Parameters
-        ----------
-        signal : :class:`ElectronDiffraction`
-            The signal of electron diffraction patterns to be indexed.
-
-        library : :class: `DiffractionLibrary`
-            The library of simulated diffraction patterns for indexation
-
-        """
         self.signal = signal
         self.library = library
 
-    def correlate(self,
-                  n_largest=5,
-                  show_progressbar=True):
+    def correlate(self, n_largest=5, show_progressbar=True):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
 
         Parameters
         ----------
         n_largest : integer
-            The n orientations with the highest correlation values are returned.
-
-        show_progressbar : boolean
-            If True a progress bar is shown.
+            The orientations with the n highest correlation values are returned.
+        show_progressbar : bool
+            If True (default) a progress bar is shown.
 
         Returns
         -------
-        matching_results : array
+        matching_results : ndarray
             Numpy array with the same shape as the the navigation axes of the
             electron diffraction signal containing correlation results for each
             diffraction pattern.
@@ -77,33 +68,34 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
-        #Specify structured array to contain the matching results.
+        # Specify structured array to contain the matching results.
         output_array = np.zeros(signal.axes_manager.navigation_shape,
                                 dtype=object).T
-        #Iterate through the electron diffraction signal.
-        for image, index in tqdm(zip(signal._iterate_signal(),
-                signal.axes_manager._array_indices_generator()),
+        # Iterate through the electron diffraction signal.
+        for image, index in tqdm(
+                zip(signal._iterate_signal(),
+                    signal.axes_manager._array_indices_generator()),
                 disable=not show_progressbar,
                 total=signal.axes_manager.navigation_size):
-            #Specify empty correlation class object to contain correlations.
+            # Specify empty correlation class object to contain correlations.
             phase_correlations = dict()
-            #Iterate through the phases in the library.
+            # Iterate through the phases in the library.
             for key in library.keys():
                 diff_lib = library[key]
-                #Specify empty dictionary for orientation correlations of phase
+                # Specify empty dictionary for orientation correlations of phase
                 correlations = dict()
-                #Iterate through orientations of the phase.
+                # Iterate through orientations of the phase.
                 for orientation, diffraction_pattern in diff_lib.items():
                     correlation = correlate(image, diffraction_pattern)
                     correlations[orientation] = correlation
-                #return n best correlated orientations for phase
+                # return n best correlated orientations for phase
                 if n_largest:
                     phase_correlations[key] = Correlation(nlargest(n_largest,
                                                           correlations.items(),
                                                           key=itemgetter(1)))
                 else:
                     phase_correlations[key] = Correlation(correlations)
-            #Put correlation results for navigation position in output array.
+            # Put correlation results for navigation position in output array.
             output_array[index] = phase_correlations
         return output_array.T
 

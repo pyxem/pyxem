@@ -1,9 +1,9 @@
-.class > dd {
-    margin-left: 2em;
+.section {
+    border-bottom: solid lightgrey thin;
 }
 
-dl.class {
-    border-bottom: solid lightgrey thin;
+.class > dd {
+    margin-left: 2em;
 }
 
 .method dd {
