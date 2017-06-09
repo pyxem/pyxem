@@ -18,6 +18,7 @@ pycrystem.diffraction_component module
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: function
 
 pycrystem.diffraction_generator module
 --------------------------------------

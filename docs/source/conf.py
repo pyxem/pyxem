@@ -28,6 +28,10 @@ from pycrystem import __author__, __version__, __copyright__
 
 # -- General configuration ------------------------------------------------
 
+# Custom CSS
+def setup(app):
+    app.add_stylesheet('css/custom.css')
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
