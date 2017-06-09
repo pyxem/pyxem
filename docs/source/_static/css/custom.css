@@ -2,6 +2,10 @@
     margin-left: 2em;
 }
 
-.field-list {
+dl.class {
+    border-bottom: solid lightgrey thin;
+}
+
+.method dd {
     margin-left: 2em;
 }
