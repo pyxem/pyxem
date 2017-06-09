@@ -31,7 +31,6 @@ from transforms3d.euler import euler2axangle
 from scipy.constants import pi
 
 from .utils import correlate
-from .utils.plot import plot_correlation_map
 from pycrystem.orientation_map import OrientationMap
 
 class IndexationGenerator():
