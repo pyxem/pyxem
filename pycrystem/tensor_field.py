@@ -90,6 +90,7 @@ class DisplacementGradientMap(Signal2D):
         e21 = U.isig[1, 0].T
         e22 = -U.isig[1, 1].T + 1
         theta = R.map(get_rotation_angle, inplace=False)
+        theta.axes_manager.set_signal_dimension(2)
 
         strain_results = stack([e11, e22, e12, theta])
 
