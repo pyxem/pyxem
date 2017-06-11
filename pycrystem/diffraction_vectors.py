@@ -32,9 +32,10 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self,
-                 calibration):
+                 calibration,
+                 *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
-        self.calibration=calibration
+        self.calibration = calibration
 
     def get_gvector_magnitudes(self, center):
         """Calculate the magnitude of diffraction vectors.

@@ -33,6 +33,39 @@ from scipy.constants import pi
 from .utils import correlate
 from pycrystem.orientation_map import OrientationMap
 
+def correlate_library(image, library, n_largest=None):
+    i=0
+    out_arr = np.zeros((n_largest * len(library),5))
+    for key in library.keys():
+        if n_largest:
+            pass
+        else:
+            n_largest=len(library[key])
+        correlations = dict()
+        for orientation, diffraction_pattern in library[key].items():
+            correlation = correlate(image, diffraction_pattern)
+            correlations[orientation] = correlation
+        res = nlargest(n_largest, correlations.items(), key=itemgetter(1))
+        for j in np.arange(n_largest):
+            out_arr[j + i*n_largest][0] = i
+            out_arr[j + i*n_largest][1] = res[j][0][0]
+            out_arr[j + i*n_largest][2] = res[j][0][1]
+            out_arr[j + i*n_largest][3] = res[j][0][2]
+            out_arr[j + i*n_largest][4] = res[j][1]
+        i = i + 1
+    return out_arr
+
+def crystal_from_matching_results(matching_results):
+    res_arr = np.zeros(6)
+    top_index = np.where(matching_results.T[-1]==matching_results.T[-1].max())
+    res_arr[:5] = matching_results[top_index][0]
+    res_arr[5] = res_arr[4] - np.partition(matching_results.T[-1], -2)[-2]
+    return res_arr
+
+def euler2axangle_signal(euler):
+    return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
+
+
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
     """
@@ -54,7 +87,8 @@ class IndexationGenerator():
 
     def correlate(self,
                   n_largest=5,
-                  show_progressbar=True):
+                  show_progressbar=True,
+                  *args, **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
 
@@ -76,110 +110,86 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
-        #Specify structured array to contain the matching results.
-        output_array = np.zeros(signal.axes_manager.navigation_shape,
-                                dtype=object).T
-        #Iterate through the electron diffraction signal.
-        for image, index in tqdm(zip(signal._iterate_signal(),
-                signal.axes_manager._array_indices_generator()),
-                disable=not show_progressbar,
-                total=signal.axes_manager.navigation_size):
-            #Specify empty correlation class object to contain correlations.
-            phase_correlations = dict()
-            #Iterate through the phases in the library.
-            for key in library.keys():
-                diff_lib = library[key]
-                #Specify empty dictionary for orientation correlations of phase
-                correlations = dict()
-                #Iterate through orientations of the phase.
-                for orientation, diffraction_pattern in diff_lib.items():
-                    correlation = correlate(image, diffraction_pattern)
-                    correlations[orientation] = correlation
-                #return n best correlated orientations for phase
-                if n_largest:
-                    phase_correlations[key] = Correlation(nlargest(n_largest,
-                                                          correlations.items(),
-                                                          key=itemgetter(1)))
-                else:
-                    phase_correlations[key] = Correlation(correlations)
-            #Put correlation results for navigation position in output array.
-            output_array[index] = phase_correlations
-        return output_array.T
+        matching_results = signal.map(correlate_library,
+                                      library=library,
+                                      n_largest=n_largest,
+                                      inplace=False,
+                                      *args, **kwargs)
+        return MatchingResults(matching_results)
 
 
-class MatchingResults(np.ndarray):
-    """Container for pattern matching results as a structured array of
-    correlations at each navigation index of the indexed diffraction signal.
+class MatchingResults(BaseSignal):
+    _signal_type = "matching_results"
+    _signal_dimension = 2
 
-    """
+    def __init__(self, *args, **kwargs):
+        BaseSignal.__init__(self, *args, **kwargs)
+        self.axes_manager.set_signal_dimension(2)
 
-    def __new__(cls, input_array, info=None):
-        obj = np.asarray(input_array).view(cls)
-        obj.info = info
-        return obj
+    def get_crystallographic_map(self,
+                                 *args, **kwargs):
+        """Obtain a crystallographic map specifying the best matching
+        phase and orientation at each probe position with corresponding
+        correlation and reliabilty scores.
 
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        self.info = getattr(obj, 'info', None)
+        """
+        #TODO: Add alternative methods beyond highest correlation score at each
+        #navigation position.
+        cryst_map = self.map(crystal_from_matching_results,
+                             inplace=False,
+                             *args, **kwargs)
+        return CrystallographicMap(cryst_map)
 
-    def __array_wrap__(self, out_arr, context=None):
-        return np.ndarray.__array_wrap__(self, out_arr, context)
+    def get_phase_results(self,
+                          phaseid):
+        """Obtain matching results for speicified phase.
 
-    def get_crystallographic_map(self):
-        """Obtain an crystallographic map of phase and orientation specifed by
-        an Euler angle triple at each navigation position.
+        Paramters
+        ---------
+        phaseid = int
+            Identifying integer of phase to obtain results for.
 
         Returns
         -------
-        crystallographic_map : BaseSignal
-            Orientation map specifying an Euler angle triple in the rxzx
-            convention at each navigation position.
+        phase_matching_results: Matcsults
+            Matching results for the specified phase
 
         """
-        #TODO:Add smoothing optimisation method with flag.
-        best_angle = dict()
-        for i in np.arange(self.shape[0]):
-            for j in np.arange(self.shape[1]):
-                for key in self[i,j].keys():
-                    best_angle[key] = (max(self[i,j][key],
-                                       key=self[i,j][key].get))
-        angles = np.asarray(angle)
-        euler_map = BaseSignal(angles.reshape(self.shape[0],
-                                              self.shape[1],
-                                              3))
-        euler_map.axes_manager.set_signal_dimension(1)
-        euler_map = euler_map.swap_axes(0,1)
-        return OrientationMap(euler_map)
+        pass
 
 
-class Correlation(dict):
-    """Maps angles to correlation indices.
+class CrystallographicMap(BaseSignal):
 
-    Some useful properties and methods are defined.
+    def __init__(self, *args, **kwargs):
+        BaseSignal.__init__(self, *args, **kwargs)
+        self.axes_manager.set_signal_dimension(1)
 
-    """
+    def get_phase_map(self):
+        """Obtain a map of the best matching phase at each navigation position.
 
-    @property
-    def angles(self):
-        """Returns the angles (keys) as a list."""
-        return list(self.keys())
+        """
+        return self.isig[0].as_signal2D((0,1))
 
-    @property
-    def correlations(self):
-        """Returns the correlations (values) as a list."""
-        return list(self.values())
+    def get_orientation_image(self):
+        """Obtain an orientation image of the rotational angle associated with
+        the crystal orientation at each navigation position.
 
-    @property
-    def best_angle(self):
-        """Returns the angle with the highest correlation index."""
-        return max(self, key=self.get)
+        """
+        eulers = ori_map.isig[1:4]
+        return eulers.map(euler2axangle_signal, inplace=False)
 
-    @property
-    def best_correlation(self):
-        """Returns the highest correlation index."""
-        return self[self.best_angle]
+    def get_correlation_map(self):
+        """Obtain a correlation map showing the highest correlation score at
+        each navigation position.
 
-    @property
-    def best(self):
-        """Returns angle and value of the highest correlation index."""
-        return self.best_angle, self.best_correlation
+        """
+        return self.isig[4].as_signal2D((0,1))
+
+    def get_reliability_map(self):
+        """Obtain a reliability map showing the difference between the highest
+        correlation scor and the next best score at each navigation position.
+        """
+        return self.isig[5].as_signal2D((0,1))
+
+    def savetxt(self):
+        pass
