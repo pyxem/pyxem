@@ -56,7 +56,7 @@ class ScalableReferencePattern(Component):
                  order=3
                  ):
 
-        Component2D.__init__(self, ['d11', 'd12',
+        Component.__init__(self, ['d11', 'd12',
                                     'd21', 'd22',
                                     't1', 't2'])
 

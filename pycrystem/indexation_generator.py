@@ -33,6 +33,10 @@ from .utils import correlate
 from pycrystem.crystallographic_map import CrystallographicMap
 
 def correlate_library(image, library, n_largest=None):
+    """Correlates all simulated diffraction templates in a DiffractionLibrary
+    with a particular experimental diffraction pattern (image) stored as a
+    numpy array.
+    """
     i=0
     out_arr = np.zeros((n_largest * len(library),5))
     for key in library.keys():
@@ -55,6 +59,10 @@ def correlate_library(image, library, n_largest=None):
     return out_arr
 
 def crystal_from_matching_results(matching_results):
+    """Takes matching results for a single navigation position and returns the
+    best matching phase and orientation with correlation and reliability to
+    define a crystallographic map.
+    """
     res_arr = np.zeros(6)
     top_index = np.where(matching_results.T[-1]==matching_results.T[-1].max())
     res_arr[:5] = matching_results[top_index][0]
@@ -62,6 +70,9 @@ def crystal_from_matching_results(matching_results):
     return res_arr
 
 def phase_specific_results(matching_results, phaseid):
+    """Takes matching results for a single navigation position and returns the
+    matching results for a phase specified by a phase id.
+    """
     return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
 
 
@@ -86,7 +97,6 @@ class IndexationGenerator():
 
     def correlate(self,
                   n_largest=5,
-                  show_progressbar=True,
                   *args, **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
@@ -95,6 +105,10 @@ class IndexationGenerator():
         ----------
         n_largest : integer
             The n orientations with the highest correlation values are returned.
+
+        *args/**kwargs : keyword arguments
+            Keyword arguments passed to the HyperSpy map() function. Important
+            options include...
 
         Returns
         -------
@@ -148,8 +162,8 @@ class MatchingResults(BaseSignal):
 
         Returns
         -------
-        phase_matching_results: Matcsults
-            Matching results for the specified phase
+        phase_matching_results: MatchingResults
+            Matching results for the specified phase.
 
         """
         return self.map(phase_specific_results,
