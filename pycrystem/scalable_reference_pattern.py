@@ -18,7 +18,7 @@
 
 
 from hyperspy.component import Component
-from hyperspy.signals import Signal2D
+from pycrystem.tensor_field import DisplacementGradientMap
 from skimage import transform as tf
 import numpy as np
 
@@ -96,33 +96,27 @@ class ScalableReferencePattern(Component):
 
         return transformed
 
-    def construct_displacement_gradient(self, axes_manager):
-        """Construct TensorField object containing displacement gradient
-        tensor obtained via fitting a two dimensionsal scalable reference
-        pattern.
-
-        Parameters
-        ----------
-
-        ref : component
-
-            The component object describing the
+    def construct_displacement_gradient(self):
+        """Construct a map of the displacement gradient tensor at each
+        navigation position as determined by fitting an affine transformed
+        reference pattern.
 
         Returns
         -------
 
-        D : TensorField
-
-            The
+        D : DisplacementGradientMap
+            Signal containing the displacement gradient tensor at each
+            navigation postion.
 
         """
-        D = TensorField2D(np.ones(np.append(self.d11.map.shape, (3,3))))
+        D = DisplacementGradientMap(np.ones(np.append(self.d11.map.shape,
+                                                      (3,3))))
 
-        D.data[:,:,0,0] = ref.d11.map['values']
-        D.data[:,:,1,0] = ref.d12.map['values']
+        D.data[:,:,0,0] = self.d11.map['values']
+        D.data[:,:,1,0] = self.d12.map['values']
         D.data[:,:,2,0] = 0.
-        D.data[:,:,0,1] = ref.d21.map['values']
-        D.data[:,:,1,1] = ref.d22.map['values']
+        D.data[:,:,0,1] = self.d21.map['values']
+        D.data[:,:,1,1] = self.d22.map['values']
         D.data[:,:,2,1] = 0.
         D.data[:,:,0,2] = 0.
         D.data[:,:,1,2] = 0.
