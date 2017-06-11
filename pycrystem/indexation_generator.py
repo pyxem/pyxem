@@ -27,11 +27,10 @@ from hyperspy.signals import BaseSignal
 from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
-from transforms3d.euler import euler2axangle
 from scipy.constants import pi
 
 from .utils import correlate
-from pycrystem.orientation_map import OrientationMap
+from pycrystem.crystallographic_map import CrystallographicMap
 
 def correlate_library(image, library, n_largest=None):
     i=0
@@ -62,8 +61,8 @@ def crystal_from_matching_results(matching_results):
     res_arr[5] = res_arr[4] - np.partition(matching_results.T[-1], -2)[-2]
     return res_arr
 
-def euler2axangle_signal(euler):
-    return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
+def phase_specific_results(matching_results, phaseid):
+    return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
 
 
 class IndexationGenerator():
@@ -96,9 +95,6 @@ class IndexationGenerator():
         ----------
         n_largest : integer
             The n orientations with the highest correlation values are returned.
-
-        show_progressbar : boolean
-            If True a progress bar is shown.
 
         Returns
         -------
@@ -141,7 +137,8 @@ class MatchingResults(BaseSignal):
         return CrystallographicMap(cryst_map)
 
     def get_phase_results(self,
-                          phaseid):
+                          phaseid,
+                          *args, **kwargs):
         """Obtain matching results for speicified phase.
 
         Paramters
@@ -155,41 +152,7 @@ class MatchingResults(BaseSignal):
             Matching results for the specified phase
 
         """
-        pass
-
-
-class CrystallographicMap(BaseSignal):
-
-    def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
-        self.axes_manager.set_signal_dimension(1)
-
-    def get_phase_map(self):
-        """Obtain a map of the best matching phase at each navigation position.
-
-        """
-        return self.isig[0].as_signal2D((0,1))
-
-    def get_orientation_image(self):
-        """Obtain an orientation image of the rotational angle associated with
-        the crystal orientation at each navigation position.
-
-        """
-        eulers = ori_map.isig[1:4]
-        return eulers.map(euler2axangle_signal, inplace=False)
-
-    def get_correlation_map(self):
-        """Obtain a correlation map showing the highest correlation score at
-        each navigation position.
-
-        """
-        return self.isig[4].as_signal2D((0,1))
-
-    def get_reliability_map(self):
-        """Obtain a reliability map showing the difference between the highest
-        correlation scor and the next best score at each navigation position.
-        """
-        return self.isig[5].as_signal2D((0,1))
-
-    def savetxt(self):
-        pass
+        return self.map(phase_specific_results,
+                        phaseid=phaseid,
+                        inplace=False,
+                        *args, **kwargs)
