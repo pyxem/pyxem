@@ -12,6 +12,30 @@ pycrystem.utils.expt_utils module
     :undoc-members:
     :show-inheritance:
 
+pycrystem.utils.peakfinder2D_gui module
+---------------------------------------
+
+.. automodule:: pycrystem.utils.peakfinder2D_gui
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pycrystem.utils.peakfinders2D module
+------------------------------------
+
+.. automodule:: pycrystem.utils.peakfinders2D
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pycrystem.utils.plot module
+---------------------------
+
+.. automodule:: pycrystem.utils.plot
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pycrystem.utils.sim_utils module
 --------------------------------
 

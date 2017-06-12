@@ -19,7 +19,7 @@
 from __future__ import division
 
 from hyperspy.api import roi
-from hyperspy.signals import Signal2D, Signal1D, BaseSignal
+from hyperspy.signals import BaseSignal
 
 from pycrystem.utils.expt_utils import *
 

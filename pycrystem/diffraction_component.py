@@ -32,20 +32,28 @@ from hyperspy.component import Component
 
 
 class ElectronDiffractionForwardModel(Component):
-    """Computes electron diffraction patterns for a crystal structure.
+    """Fits structure deformation to observed diffraction patterns
+
+    Used in a HyperSpy model, this component will iteratively adjust the nine
+    entries of a deformation matrix, apply the deformation to the crystal
+    structure, and simulate the resultant diffraction pattern, to find the
+    best-fit deformation.
 
     Parameters
     ----------
-    accelerating_voltage : float
-        The accelerating voltage of the microscope in kV
-    reciprocal_radius : float
-        The maximum radius of the sphere of reciprocal space to sample, in
-        reciprocal angstroms.
-    excitation_error : float
-        The maximum extent of the relrods in reciprocal angstroms. Typically
-        equal to 1/{specimen thickness}.
+    electron_diffraction_calculator : ElectronDiffractionCalculator
+        The model used to simulate electron diffraction patterns from
+        structures.
+    structure : Structure
+        The base crystal structure used for the forward model.
+    calibration : float
+        Calibration in reciprocal Angstroms per pixel.
+    dij : float
+        Components of the transformation matrix used to deform the structure.
+        Defaults to the identity matrix.
 
     """
+    # TODO: examples in the docstring
 
     def __init__(self, electron_diffraction_calculator,
                  structure,
@@ -53,16 +61,9 @@ class ElectronDiffractionForwardModel(Component):
                  d11=1., d12=0., d13=0.,
                  d21=0., d22=1., d23=0.,
                  d31=0., d32=0., d33=1.):
-        Component.__init__(self, ['d11',
-                                  'd12',
-                                  'd13',
-                                  'd21',
-                                  'd22',
-                                  'd23',
-                                  'd31',
-                                  'd32',
-                                  'd33',
-                                  ])
+        Component.__init__(self, ['d11', 'd12', 'd13',
+                                  'd21', 'd22', 'd23',
+                                  'd31', 'd32', 'd33',])
         self.electron_diffraction_calculator = electron_diffraction_calculator
         self.structure = structure
         self.calibration = calibration
@@ -80,18 +81,12 @@ class ElectronDiffractionForwardModel(Component):
         return 1
 
     def simulate(self):
-        """Calculates the Electron Diffraction data for a structure.
-
-        Parameters
-        ----------
-        structure : Structure
-            The structure for which to derive the diffraction pattern. Note that
-            the structure must be rotated to the appropriate orientation.
+        """Deforms the structure and simulates the resultant diffraction pattern
 
         Returns
         -------
-        DiffractionSimulation
-            The data associated with this structure and diffraction setup.
+        simulation : DiffractionSimulation
+            Simulated diffraction pattern of the deformed structure
 
         """
         diffractor = self.electron_diffraction_calculator
@@ -111,6 +106,6 @@ class ElectronDiffractionForwardModel(Component):
                                                      [d21, d22, d23],
                                                      [d31, d32, d33]])
         deformed_structure = deformation.apply_transformation(structure)
-        sim = diffractor.calculate_ed_data(deformed_structure)
-        sim.calibration = calibration
-        return sim
+        simulation = diffractor.calculate_ed_data(deformed_structure)
+        simulation.calibration = calibration
+        return simulation
