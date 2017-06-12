@@ -27,40 +27,92 @@ from hyperspy.signals import BaseSignal
 from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
+from scipy.constants import pi
 
 from .utils import correlate
-from pycrystem.orientation_map import OrientationMap
+from pycrystem.crystallographic_map import CrystallographicMap
+
+def correlate_library(image, library, n_largest=None):
+    """Correlates all simulated diffraction templates in a DiffractionLibrary
+    with a particular experimental diffraction pattern (image) stored as a
+    numpy array.
+    """
+    i=0
+    out_arr = np.zeros((n_largest * len(library),5))
+    for key in library.keys():
+        if n_largest:
+            pass
+        else:
+            n_largest=len(library[key])
+        correlations = dict()
+        for orientation, diffraction_pattern in library[key].items():
+            correlation = correlate(image, diffraction_pattern)
+            correlations[orientation] = correlation
+        res = nlargest(n_largest, correlations.items(), key=itemgetter(1))
+        for j in np.arange(n_largest):
+            out_arr[j + i*n_largest][0] = i
+            out_arr[j + i*n_largest][1] = res[j][0][0]
+            out_arr[j + i*n_largest][2] = res[j][0][1]
+            out_arr[j + i*n_largest][3] = res[j][0][2]
+            out_arr[j + i*n_largest][4] = res[j][1]
+        i = i + 1
+    return out_arr
+
+def crystal_from_matching_results(matching_results):
+    """Takes matching results for a single navigation position and returns the
+    best matching phase and orientation with correlation and reliability to
+    define a crystallographic map.
+    """
+    res_arr = np.zeros(6)
+    top_index = np.where(matching_results.T[-1]==matching_results.T[-1].max())
+    res_arr[:5] = matching_results[top_index][0]
+    res_arr[5] = res_arr[4] - np.partition(matching_results.T[-1], -2)[-2]
+    return res_arr
+
+def phase_specific_results(matching_results, phaseid):
+    """Takes matching results for a single navigation position and returns the
+    matching results for a phase specified by a phase id.
+    """
+    return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
 
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
-
-    Parameters
-    ----------
-    signal : ElectronDiffraction
-        The signal of electron diffraction patterns to be indexed.
-    library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation
-
     """
     def __init__(self, signal, library):
+        """Initialises the indexer with a diffraction signal and library to be
+        correlated in template matching.
+
+        Parameters
+        ----------
+        signal : :class:`ElectronDiffraction`
+            The signal of electron diffraction patterns to be indexed.
+
+        library : :class: `DiffractionLibrary`
+            The library of simulated diffraction patterns for indexation
+
+        """
         self.signal = signal
         self.library = library
 
-    def correlate(self, n_largest=5, show_progressbar=True):
+    def correlate(self,
+                  n_largest=5,
+                  *args, **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
 
         Parameters
         ----------
         n_largest : integer
-            The orientations with the n highest correlation values are returned.
-        show_progressbar : bool
-            If True (default) a progress bar is shown.
+            The n orientations with the highest correlation values are returned.
+
+        *args/**kwargs : keyword arguments
+            Keyword arguments passed to the HyperSpy map() function. Important
+            options include...
 
         Returns
         -------
-        matching_results : ndarray
+        matching_results : array
             Numpy array with the same shape as the the navigation axes of the
             electron diffraction signal containing correlation results for each
             diffraction pattern.
@@ -68,111 +120,53 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
-        # Specify structured array to contain the matching results.
-        output_array = np.zeros(signal.axes_manager.navigation_shape,
-                                dtype=object).T
-        # Iterate through the electron diffraction signal.
-        for image, index in tqdm(
-                zip(signal._iterate_signal(),
-                    signal.axes_manager._array_indices_generator()),
-                disable=not show_progressbar,
-                total=signal.axes_manager.navigation_size):
-            # Specify empty correlation class object to contain correlations.
-            phase_correlations = dict()
-            # Iterate through the phases in the library.
-            for key in library.keys():
-                diff_lib = library[key]
-                # Specify empty dictionary for orientation correlations of phase
-                correlations = dict()
-                # Iterate through orientations of the phase.
-                for orientation, diffraction_pattern in diff_lib.items():
-                    correlation = correlate(image, diffraction_pattern)
-                    correlations[orientation] = correlation
-                # return n best correlated orientations for phase
-                if n_largest:
-                    phase_correlations[key] = Correlation(nlargest(n_largest,
-                                                          correlations.items(),
-                                                          key=itemgetter(1)))
-                else:
-                    phase_correlations[key] = Correlation(correlations)
-            # Put correlation results for navigation position in output array.
-            output_array[index] = phase_correlations
-        return output_array.T
+        matching_results = signal.map(correlate_library,
+                                      library=library,
+                                      n_largest=n_largest,
+                                      inplace=False,
+                                      *args, **kwargs)
+        return MatchingResults(matching_results)
 
 
-class MatchingResults(np.ndarray):
-    """Container for pattern matching results as a structured array of
-    correlations at each navigation index of the indexed diffraction signal.
+class MatchingResults(BaseSignal):
+    _signal_type = "matching_results"
+    _signal_dimension = 2
 
-    """
+    def __init__(self, *args, **kwargs):
+        BaseSignal.__init__(self, *args, **kwargs)
+        self.axes_manager.set_signal_dimension(2)
 
-    def __new__(cls, input_array, info=None):
-        obj = np.asarray(input_array).view(cls)
-        obj.info = info
-        return obj
+    def get_crystallographic_map(self,
+                                 *args, **kwargs):
+        """Obtain a crystallographic map specifying the best matching
+        phase and orientation at each probe position with corresponding
+        correlation and reliabilty scores.
 
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        self.info = getattr(obj, 'info', None)
+        """
+        #TODO: Add alternative methods beyond highest correlation score at each
+        #navigation position.
+        cryst_map = self.map(crystal_from_matching_results,
+                             inplace=False,
+                             *args, **kwargs)
+        return CrystallographicMap(cryst_map)
 
-    def __array_wrap__(self, out_arr, context=None):
-        return np.ndarray.__array_wrap__(self, out_arr, context)
+    def get_phase_results(self,
+                          phaseid,
+                          *args, **kwargs):
+        """Obtain matching results for speicified phase.
 
-    def get_crystallographic_map(self):
-        """Obtain an crystallographic map of phase and orientation specifed by
-        an Euler angle triple at each navigation position.
+        Paramters
+        ---------
+        phaseid = int
+            Identifying integer of phase to obtain results for.
 
         Returns
         -------
-        crystallographic_map : BaseSignal
-            Orientation map specifying an Euler angle triple in the rxzx
-            convention at each navigation position.
+        phase_matching_results: MatchingResults
+            Matching results for the specified phase.
 
         """
-        #TODO:Add smoothing optimisation method with flag.
-        best_angle = dict()
-        for i in np.arange(self.shape[0]):
-            for j in np.arange(self.shape[1]):
-                for key in self[i,j].keys():
-                    best_angle[key] = (max(self[i,j][key],
-                                       key=self[i,j][key].get))
-        angles = np.asarray(angle)
-        euler_map = BaseSignal(angles.reshape(self.shape[0],
-                                              self.shape[1],
-                                              3))
-        euler_map.axes_manager.set_signal_dimension(1)
-        euler_map = euler_map.swap_axes(0,1)
-        return OrientationMap(euler_map)
-
-
-class Correlation(dict):
-    """Maps angles to correlation indices.
-
-    Some useful properties and methods are defined.
-
-    """
-
-    @property
-    def angles(self):
-        """Returns the angles (keys) as a list."""
-        return list(self.keys())
-
-    @property
-    def correlations(self):
-        """Returns the correlations (values) as a list."""
-        return list(self.values())
-
-    @property
-    def best_angle(self):
-        """Returns the angle with the highest correlation index."""
-        return max(self, key=self.get)
-
-    @property
-    def best_correlation(self):
-        """Returns the highest correlation index."""
-        return self[self.best_angle]
-
-    @property
-    def best(self):
-        """Returns angle and value of the highest correlation index."""
-        return self.best_angle, self.best_correlation
+        return self.map(phase_specific_results,
+                        phaseid=phaseid,
+                        inplace=False,
+                        *args, **kwargs)
