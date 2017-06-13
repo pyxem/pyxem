@@ -19,16 +19,33 @@
 from __future__ import division
 
 from hyperspy.signals import Signal2D
-from hyperspy import roi
 import numpy as np
-from pycrystem.utils.expt_utils import *
+from scipy.linalg import polar
+from hyperspy.utils import stack
+import math
 
 """
 Signal class for Tensor Fields
 """
 
+def polar_decomposition(image, side):
+    """Perform a polar decomposition of a second rank tensor and return the
+    results as a numpy array.
+    """
+    return np.array(polar(image, side=side))
 
-class TensorField(Signal2D):
+def get_rotation_angle(matrix):
+    """Return the rotation angle corresponding to a
+
+    Returns
+    -------
+
+    angle : float
+
+    """
+    return np.array(-math.asin(matrix[1,0]))
+
+class DisplacementGradientMap(Signal2D):
     _signal_type = "tensor_field"
 
     def __init__(self, *args, **kwargs):
@@ -36,34 +53,45 @@ class TensorField(Signal2D):
         # Check that the signal dimensions are (3,3) for it to be a valid
         # TensorField
 
-    def _transform_basis(self, R):
-        """Method to transform the 2D basis in which a 2nd-order tensor is described.
-
-        Parameters
-        ----------
-
-        R : 3x3 matrix
-
-            Rotation matrix.
+    def polar_decomposition(self):
+        """Perform polar decomposition on the second rank tensors describing
+        the TensorField. The polar decomposition is right handed and given by
+            D = RU
 
         Returns
         -------
 
-        T : TensorField
-            Operates in place, replacing the original tensor field object with a tensor
-            field described in the new basis.
+        R : TensorField
+            The orthogonal matrix describing the rotation field.
+
+        U : TensorField
+            The strain tensor field.
 
         """
+        RU = self.map(polar_decomposition,
+                      side='right',
+                      inplace=False)
+        return RU.isig[:,:,0], RU.isig[:,:,1]
 
-        a=angle*np.pi/180.0
-        r11 = math.cos(a)
-        r12 = math.sin(a)
-        r21 = -math.sin(a)
-        r22 = math.cos(a)
+    def get_strain_maps(self):
+        """Obtain strain maps from the displacement gradient tensor at each
+        navigation position in the small strain approximation.
 
-        R = np.array([[r11, r12, 0.],
-                      [r21, r22, 0.],
-                      [0.,  0.,  1.]])
+        Returns
+        -------
 
-        T = np.dot(np.dot(R, self), R.T)
-        return T
+        strain_results : BaseSignal
+            Signal
+        """
+        R, U = self.polar_decomposition()
+
+        e11 = -U.isig[0, 0].T + 1
+        e12 = U.isig[0, 1].T
+        e21 = U.isig[1, 0].T
+        e22 = -U.isig[1, 1].T + 1
+        theta = R.map(get_rotation_angle, inplace=False)
+        theta.axes_manager.set_signal_dimension(2)
+
+        strain_results = stack([e11, e22, e12, theta])
+
+        return strain_results

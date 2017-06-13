@@ -19,10 +19,11 @@
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
-import pycrystem.utils.strain_utils
 
-
-def correlate(image, pattern, include_direct_beam=False, sim_threshold=1e-5, interpolate=False,
+def correlate(image, pattern,
+              include_direct_beam=False,
+              sim_threshold=1e-5,
+              interpolate=False,
               **kwargs):
     """The correlation between a diffraction pattern and a simulation.
     Calculated using
