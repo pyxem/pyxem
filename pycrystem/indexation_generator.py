@@ -78,20 +78,16 @@ def phase_specific_results(matching_results, phaseid):
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction
+        The signal of electron diffraction patterns to be indexed.
+    library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation
+
     """
     def __init__(self, signal, library):
-        """Initialises the indexer with a diffraction signal and library to be
-        correlated in template matching.
-
-        Parameters
-        ----------
-        signal : :class:`ElectronDiffraction`
-            The signal of electron diffraction patterns to be indexed.
-
-        library : :class: `DiffractionLibrary`
-            The library of simulated diffraction patterns for indexation
-
-        """
         self.signal = signal
         self.library = library
 
@@ -112,7 +108,7 @@ class IndexationGenerator():
 
         Returns
         -------
-        matching_results : array
+        matching_results : ndarray
             Numpy array with the same shape as the the navigation axes of the
             electron diffraction signal containing correlation results for each
             diffraction pattern.
