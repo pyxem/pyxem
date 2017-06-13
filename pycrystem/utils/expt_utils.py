@@ -138,3 +138,51 @@ def circular_mask(shape, radius, center):
     mask = x*x + y*y <= r*r
 
     return mask
+
+def refine_beam_position(z, start, radius):
+    """
+    Refine the position of the direct beam and hence an estimate for the
+    position of the pattern center in each SED pattern.
+    Parameters
+    ----------
+    radius : int
+        Defines the size of the circular region within which the direct beam
+        position is refined.
+    center : bool
+        If True the direct beam position is refined to sub-pixel precision
+        via calculation of the intensity center of mass.
+    Return
+    ------
+    center: array
+        Refined position (x, y) of the direct beam.
+    Notes
+    -----
+    This method is based on work presented by Thomas White in his PhD (2009)
+    which itself built on Zaefferer (2000).
+    """
+    # initialise problem with initial center estimate
+    c_int = z[start[0], start[1]]
+    mask = circular_mask(shape=z.shape, radius=radius, center=start)
+    z_tmp = z * mask
+    # refine center position with shifting ROI
+    if c_int == z_tmp.max():
+        maxes = np.asarray(np.where(z_tmp == z_tmp.max()))
+        c = np.rint([np.average(maxes[0]), np.average(maxes[1])])
+        c = c.astype(int)
+        c_int = z[c[0], c[1]]
+        mask = circular_mask(shape=z.shape, radius=radius, center=c)
+        ztmp = z * mask
+    while c_int < z_tmp.max():
+        maxes = np.asarray(np.where(z_tmp == z_tmp.max()))
+        c = np.rint([np.average(maxes[0]),
+                            np.average(maxes[1])])
+        c = c.astype(int)
+        c_int = z[c[0], c[1]]
+        mask = circular_mask(shape=z.shape, radius=radius, center=c)
+        ztmp = z * mask
+
+    # For some reason the dask array is behaving badly in this function
+    # so convert it to an array before computation
+    c = np.asarray(ndi.measurements.center_of_mass(np.array(ztmp)))
+
+    return c

@@ -32,7 +32,7 @@ from scipy.constants import pi
 from .utils import correlate
 from pycrystem.crystallographic_map import CrystallographicMap
 
-def correlate_library(image, library, n_largest=None):
+def correlate_library(image, library, n_largest):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image) stored as a
     numpy array.

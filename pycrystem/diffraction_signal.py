@@ -287,9 +287,7 @@ class ElectronDiffraction(Signal2D):
             new signal.
 
         """
-        return self.map(
-            affine_transformation, matrix=D, ragged=True, inplace=inplace
-        )
+        return self.map(affine_transformation, matrix=D, inplace=inplace)
 
     def gain_normalisation(self, dark_reference, bright_reference,
                            inplace=True):
