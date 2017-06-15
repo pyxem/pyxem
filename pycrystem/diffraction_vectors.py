@@ -19,7 +19,7 @@
 from __future__ import division
 
 from hyperspy.api import roi
-from hyperspy.signals import BaseSignal, Signal1D
+from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
 from pycrystem.utils.expt_utils import *
 
@@ -41,6 +41,7 @@ class DiffractionVectors(BaseSignal):
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
+    #TODO: Fix plotting
     def plot(self):
         """Plot the diffraction vectors.
         """
@@ -99,23 +100,20 @@ class DiffractionVectors(BaseSignal):
             Unique list of all diffraction vectors.
         """
         #Create empty list
-        gv = []
-        #Iterate through vectors
-        for i in dp.axes_manager:
-            it = (i[1], i[0])
-            g = peaks[it]
-            for j in np.arange(len(g)):
-                #if vector in list pass else add list
-                if np.asarray(g[j]) in np.asarray(gv):
+        gvlist=[]
+        for i in self._iterate_signal():
+            for j in np.arange(len(i[0])):
+                if np.asarray(i[0][j]) in np.asarray(gvlist):
                     pass
                 else:
-                    gv.append(g[j])
-        return gv
+                    gvlist.append(i[0][j])
+        gvs = np.asarray(gvlist)
+        return gvs
 
-    def get_reflection_intensities(self,
-                                   electron_diffraction,
-                                   radius,
-                                   unique_vectors=None):
+    def get_vdf_images(self,
+                       electron_diffraction,
+                       radius,
+                       unique_vectors=None):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction Signal by summation in a
         circular window of specified radius.
@@ -135,21 +133,21 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
+        vdfs : Signal2D
+            Signal containing virtual dark field images for all unique g-vectors.
         """
         if unique_vectors==None:
             unique_vectors = self.get_unique_vectors()
-
-        cs = np.asarray(unique_vectors)
-        cs = cs * electron_diffraction.axes_manager.signal_axes[0].scale
-        cs = cs + electron_diffraction.axes_manager.signal_axes[0].offset
+        else:
+            unique_vectors = unique_vectors
 
         vdfs = []
-        for i in np.arange(len(gvuna)):
-            roi = hs.roi.CircleROI(cx=cs[i][1], cy=cs[i][0],
-                                   r=radius, r_inner=0)
-            vdf = roi(electron_diffraction, axes=electron_diffraction.axes_manager.signal_axes)
+        for v in unique_vectors:
+            disk = roi.CircleROI(cx=v[1], cy=v[0], r=radius, r_inner=0)
+            vdf = disk(electron_diffraction,
+                       axes=electron_diffraction.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
-        return hs.signals.Signal2D(np.asarray(vdfs))
+        return Signal2D(np.asarray(vdfs))
 
     def get_gvector_indexation(self,
                                calculated_peaks,
