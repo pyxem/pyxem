@@ -27,7 +27,11 @@ from hyperspy.signals import Signal2D, BaseSignal
 
 from pycrystem.utils.expt_utils import *
 from pycrystem.utils.peakfinders2D import *
+from pycrystem.diffraction_vectors import DiffractionVectors
 
+def peaks_as_gvectors(z, center, calibration):
+    g = (z - center) * calibration
+    return g[0]
 
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
@@ -567,7 +571,11 @@ class ElectronDiffraction(Signal2D):
                                       "See documentation for available "
                                       "implementations.".format(method))
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-        # TODO: make return DiffractionVectors(peaks)
+        peaks.map(peaks_as_gvectors,
+                  center=np.array(self.axes_manager.signal_shape)/2,
+                  calibration=self.axes_manager.signal_axes[0].scale)
+        peaks = DiffractionVectors(peaks)
+        peaks.axes_manager.set_signal_dimension(0)
         return peaks
 
     def find_peaks_interactive(self):

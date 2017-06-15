@@ -31,19 +31,18 @@ Signal class for diffraction vectors.
 class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
-    def __init__(self,
-                 calibration,
-                 *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
-        self.calibration = calibration
 
-    def get_gvector_magnitudes(self, center):
+    def get_gvector_magnitudes(self,
+                               center,
+                               calibration):
         """Calculate the magnitude of diffraction vectors.
 
         Parameters
         ----------
 
-        center :
+        center : np
 
         Returns
         -------
@@ -52,12 +51,6 @@ class DiffractionVectors(BaseSignal):
             Array
 
         """
-        # Allocate an empty array in which to store the gvector magnitudes.
-        arr_shape = (self.axes_manager._navigation_shape_in_array
-                     if self.axes_manager.navigation_size > 0
-                     else [1, ])
-        gvectors = np.zeros(arr_shape, dtype=object)
-        #
         for i in self.axes_manager:
             it = (i[1], i[0])
             res = []
@@ -136,7 +129,7 @@ class DiffractionVectors(BaseSignal):
         if angular_threshold==None:
             pass
         else:
-
+            pass
 
         return gindex
 
@@ -175,9 +168,9 @@ class DiffractionVectors(BaseSignal):
         return gv
 
     def get_reflection_intensities(self,
-                                   unique_vectors=None,
                                    electron_diffraction,
-                                   radius):
+                                   radius,
+                                   unique_vectors=None):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction Signal by summation in a
         circular window of specified radius.
