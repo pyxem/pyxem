@@ -41,18 +41,14 @@ class DiffractionVectors(BaseSignal):
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
-    #TODO: Fix plotting
     def plot(self):
         """Plot the diffraction vectors.
         """
-        gvlist=[]
-        for i in cali_peaks._iterate_signal():
-            for j in np.arange(len(i[0])):
-                gvlist.append(i[0][j])
-        gvs = np.asarray(gvlist)
-
+        #Find the unique gvectors to plot.
+        unique_vectors = self.get_unique_vectors()
+        #Plot the gvector positions
         import matplotlib.pyplot as plt
-        plt.plot(gvs.T[1], gvs.T[0], 'ro')
+        plt.plot(unique_vectors.T[1], unique_vectors.T[0], 'ro')
         plt.axes().set_aspect('equal')
         plt.show()
 
@@ -62,7 +58,9 @@ class DiffractionVectors(BaseSignal):
         Returns
         -------
         magnitudes : BaseSignal
-            Array
+            A signal with navigation dimensions as the original diffraction
+            vectors containging an array of gvector magnitudes at each
+            navigation position.
 
         """
         magnitudes = self.map(_calculate_norms, inplace=False)
@@ -73,9 +71,13 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
+        bins : numpy array
+            The bins to be used to generate the histogram.
 
-        bins :
-
+        Returns
+        -------
+        ghist : Signal1D
+            Histogram of gvector magnitudes.
 
         """
         gnorms = self.get_magnitudes()
@@ -91,24 +93,35 @@ class DiffractionVectors(BaseSignal):
         ghis.axes_manager.signal_axes[0].units = '$A^{-1}$'
         return ghis
 
-    def get_unique_vectors(self):
+    def get_unique_vectors(self,
+                           distance_threshold=None):
         """Obtain a unique list of diffraction vectors.
+
+        Parameters
+        ----------
+        distance_threshold : float
+            The minimum distance between gvectors for them to be considered as
+            different gvectors.
 
         Returns
         -------
         unique_vectors : list
             Unique list of all diffraction vectors.
+
         """
+        #TODO: Make so that a distance threshold may be set and used to
+        #consider gvectors identical.
         #Create empty list
         gvlist=[]
+        #Iterate through signal
         for i in self._iterate_signal():
             for j in np.arange(len(i[0])):
                 if np.asarray(i[0][j]) in np.asarray(gvlist):
                     pass
                 else:
                     gvlist.append(i[0][j])
-        gvs = np.asarray(gvlist)
-        return gvs
+        unique_vectors = np.asarray(gvlist)
+        return unique_vectors
 
     def get_vdf_images(self,
                        electron_diffraction,
