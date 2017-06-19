@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+
 """Indexation generator and associated tools.
 
 """
@@ -24,147 +25,144 @@ from __future__ import division
 import numpy as np
 from hyperspy.signals import BaseSignal
 from tqdm import tqdm
+from heapq import nlargest
+from operator import itemgetter
+from scipy.constants import pi
 
 from .utils import correlate
-from .utils.plot import plot_correlation_map
+from pycrystem.crystallographic_map import CrystallographicMap
+
+def correlate_library(image, library, n_largest):
+    """Correlates all simulated diffraction templates in a DiffractionLibrary
+    with a particular experimental diffraction pattern (image) stored as a
+    numpy array.
+    """
+    i=0
+    out_arr = np.zeros((n_largest * len(library),5))
+    for key in library.keys():
+        if n_largest:
+            pass
+        else:
+            n_largest=len(library[key])
+        correlations = dict()
+        for orientation, diffraction_pattern in library[key].items():
+            correlation = correlate(image, diffraction_pattern)
+            correlations[orientation] = correlation
+        res = nlargest(n_largest, correlations.items(), key=itemgetter(1))
+        for j in np.arange(n_largest):
+            out_arr[j + i*n_largest][0] = i
+            out_arr[j + i*n_largest][1] = res[j][0][0]
+            out_arr[j + i*n_largest][2] = res[j][0][1]
+            out_arr[j + i*n_largest][3] = res[j][0][2]
+            out_arr[j + i*n_largest][4] = res[j][1]
+        i = i + 1
+    return out_arr
+
+def crystal_from_matching_results(matching_results):
+    """Takes matching results for a single navigation position and returns the
+    best matching phase and orientation with correlation and reliability to
+    define a crystallographic map.
+    """
+    res_arr = np.zeros(6)
+    top_index = np.where(matching_results.T[-1]==matching_results.T[-1].max())
+    res_arr[:5] = matching_results[top_index][0]
+    res_arr[5] = res_arr[4] - np.partition(matching_results.T[-1], -2)[-2]
+    return res_arr
+
+def phase_specific_results(matching_results, phaseid):
+    """Takes matching results for a single navigation position and returns the
+    matching results for a phase specified by a phase id.
+    """
+    return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
+
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction
+        The signal of electron diffraction patterns to be indexed.
+    library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation
+
     """
     def __init__(self, signal, library):
-        """Initialises the indexer with a diffraction signal and library to be
-        correlated in template matching.
-
-        Parameters
-        ----------
-        signal : :class:`ElectronDiffraction`
-            The signal of electron diffraction patterns to be indexed.
-
-        library : :class: `DiffractionLibrary`
-            The library of simulated diffraction patterns for indexation
-
-        """
         self.signal = signal
         self.library = library
 
-    def correlate(self, show_progressbar=True):
+    def correlate(self,
+                  n_largest=5,
+                  *args, **kwargs):
+        """Correlates the library of simulated diffraction patterns with the
+        electron diffraction signal.
+
+        Parameters
+        ----------
+        n_largest : integer
+            The n orientations with the highest correlation values are returned.
+
+        *args/**kwargs : keyword arguments
+            Keyword arguments passed to the HyperSpy map() function. Important
+            options include...
+
+        Returns
+        -------
+        matching_results : ndarray
+            Numpy array with the same shape as the the navigation axes of the
+            electron diffraction signal containing correlation results for each
+            diffraction pattern.
+
+        """
         signal = self.signal
         library = self.library
-
-        output_array = np.zeros(signal.axes_manager.navigation_shape,
-                                dtype=object)
-        for image, index in tqdm(zip(signal._iterate_signal(),
-                signal.axes_manager._array_indices_generator()),
-                disable=not show_progressbar,
-                total=signal.axes_manager.navigation_size):
-            phase_correlations = Correlation()
-            for key in library.keys():
-                diff_lib = library[key]
-                correlations = dict()
-                for orientation, diffraction_pattern in tqdm(diff_lib.items(), disable=not show_progressbar, leave=False):
-                    correlation = correlate(image, diffraction_pattern)
-                    correlations[orientation] = correlation
-                phase_correlations[key] = Correlation(correlations)
-            output_array[index] = phase_correlations
-        return output_array
+        matching_results = signal.map(correlate_library,
+                                      library=library,
+                                      n_largest=n_largest,
+                                      inplace=False,
+                                      *args, **kwargs)
+        return MatchingResults(matching_results)
 
 
-class Correlation(dict):
-    """Maps angles to correlation indices.
+class MatchingResults(BaseSignal):
+    _signal_type = "matching_results"
+    _signal_dimension = 2
 
-    Some useful properties and methods are defined.
+    def __init__(self, *args, **kwargs):
+        BaseSignal.__init__(self, *args, **kwargs)
+        self.axes_manager.set_signal_dimension(2)
 
-    """
+    def get_crystallographic_map(self,
+                                 *args, **kwargs):
+        """Obtain a crystallographic map specifying the best matching
+        phase and orientation at each probe position with corresponding
+        correlation and reliabilty scores.
 
-    @property
-    def angles(self):
-        """Returns the angles (keys) as a list."""
-        return list(self.keys())
+        """
+        #TODO: Add alternative methods beyond highest correlation score at each
+        #navigation position.
+        cryst_map = self.map(crystal_from_matching_results,
+                             inplace=False,
+                             *args, **kwargs)
+        return CrystallographicMap(cryst_map)
 
-    @property
-    def correlations(self):
-        """Returns the correlations (values) as a list."""
-        return list(self.values())
+    def get_phase_results(self,
+                          phaseid,
+                          *args, **kwargs):
+        """Obtain matching results for speicified phase.
 
-    @property
-    def best_angle(self):
-        """Returns the angle with the highest correlation index."""
-        return max(self, key=self.get)
-
-    @property
-    def best_correlation(self):
-        """Returns the highest correlation index."""
-        return self[self.best_angle]
-
-    @property
-    def best(self):
-        """Returns angle and value of the highest correlation index."""
-        return self.best_angle, self.best_correlation
-
-    def filter_best(self, axes=(-2, -1,)):
-        """Reduces the dimensionality of the angles.
-
-        Returns a `Correlation` with only those angles that are unique in
-        `axes`. Where there are duplicates, only the angle with the highest
-        correlation is retained.
-
-        Parameters
-        ----------
-        axes : tuple, optional
-            The indices of the angles along which to optimise. Default is the
-            last *two* indices.
+        Paramters
+        ---------
+        phaseid = int
+            Identifying integer of phase to obtain results for.
 
         Returns
         -------
-        Correlation
+        phase_matching_results: MatchingResults
+            Matching results for the specified phase.
 
         """
-        best_correlations = {}
-        for angle in self:
-            correlation = self[angle]
-            angle = tuple(np.array(angle)[axes,])
-            if angle in best_correlations and correlation < best_correlations[angle]:
-                continue
-            best_correlations[angle] = correlation
-        return Correlation(best_correlations)
-
-    def as_signal(self, resolution=np.pi/180, interpolation_method='cubic', fill_value=0.):
-        """Returns the correlation as a hyperspy signal.
-
-        Interpolates between angles where necessary to produce a consistent
-        grid.
-
-        Parameters
-        ----------
-        resolution : float, optional
-            Resolution of the interpolation, in radians.
-        interpolation_method : 'nearest' | 'linear' | 'cubic'
-            The method used for interpolation. See
-            :func:`scipy.interpolate.griddata` for more details.
-
-        Returns
-        -------
-        :class:`hyperspy.signals.BaseSignal`
-
-        """
-        indices = np.array(self.angles)
-        if interpolation_method == 'nearest' and indices.shape[1] > 2:
-            raise TypeError("`interpolation_method='nearest'` only works with data of two dimensions or less. Try using `filter_best`.")
-        extremes = [slice(q.min(), q.max(), resolution) for q in indices.T]
-        z = np.array(self.correlations)
-        grid_n = tuple(e for e in np.mgrid[extremes])
-        grid = griddata(indices, z, grid_n, method=interpolation_method, fill_value=fill_value)
-        return BaseSignal(grid)
-
-    def plot(self, **kwargs):
-        angles = np.array(self.angles)
-        if angles.shape[1] != 2:
-            raise NotImplementedError("Plotting is only available for two-dimensional angles. Try using `filter_best`.")
-        angles = angles[:, (1, 0)]
-        domain = []
-        domain.append((angles[:, 0].min(), angles[:, 0].max()))
-        domain.append((angles[:, 1].min(), angles[:, 1].max()))
-        correlations = np.array(self.correlations)
-        ax = plot_correlation_map(angles, correlations, phi=domain[0], theta=domain[1], **kwargs)
-        ax.scatter(self.best_angle[1], self.best_angle[0], c='r', zorder=2, edgecolor='none')
-        return ax
+        return self.map(phase_specific_results,
+                        phaseid=phaseid,
+                        inplace=False,
+                        *args, **kwargs)

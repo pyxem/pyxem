@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
@@ -15,19 +15,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import division
-
-from pycrystem.tensor_field import BaseTensorField
-
-"""
-Signal class for Tensor Fields
-"""
-
-
-class TensorField2D(BaseTensorField):
-    _signal_type = "tensor_field"
-
-    def __init__(self, *args, **kwargs):
-        BaseTensorField.__init__(self, *args, **kwargs)
-        # Check that the signal dimensions are (3,3) for it to be a valid
-        # TensorField

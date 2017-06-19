@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+
 """Diffraction pattern library generator and associated tools.
 
 """
@@ -33,7 +34,8 @@ from scipy.constants import pi
 
 class DiffractionLibraryGenerator(object):
     """
-    Computes a series of electron diffraction patterns using a kinematical model
+    Computes a library of electron diffraction patterns for specified atomic
+    structures and orientations.
     """
 
     def __init__(self, electron_diffraction_calculator):
@@ -52,7 +54,7 @@ class DiffractionLibraryGenerator(object):
                                 calibration,
                                 reciprocal_radius,
                                 representation='euler'):
-        """Calculates a list of diffraction data for a library of crystal
+        """Calculates a dictionary of diffraction data for a library of crystal
         structures and orientations.
 
         Each structure in the structure library is rotated to each associated
@@ -61,14 +63,16 @@ class DiffractionLibraryGenerator(object):
         Parameters
         ----------
         structure_library : dict
-            List of structures for which to derive the library.
+            Dictionary of structures and associated orientations (represented as
+            Euler angles or axis-angle pairs) for which electron diffraction is
+            to be simulated.
 
         calibration : float
             The calibration of experimental data to be correlated with the
             library, in reciprocal Angstroms per pixel.
 
         reciprocal_radius : float
-            The maximum g-vector magnitude to be accepted.
+            The maximum g-vector magnitude to be included in the simulations.
 
         representation : 'euler' or 'axis-angle'
             The representation in which the orientations are provided.

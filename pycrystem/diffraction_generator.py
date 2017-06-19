@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
@@ -15,7 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
-"""Kinematical diffraction pattern calculation.
+
+"""Electron diffraction pattern simulation.
 
 """
 
@@ -24,7 +25,6 @@ from __future__ import division
 
 import numpy as np
 from hyperspy.components2d import Expression
-from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 from pycrystem.diffraction_signal import ElectronDiffraction
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
@@ -33,8 +33,10 @@ from pymatgen.util.plotting_utils import get_publication_quality_plot
 
 
 _GAUSSIAN2D_EXPR = \
-    "inten * exp(-((x-cx)**2 / (2 * sigma ** 2) + (y-cy)**2 / (2 * sigma ** 2)))"
-
+    "intensity * exp(" \
+    "-((x-cx)**2 / (2 * sigma ** 2)" \
+    " + (y-cy)**2 / (2 * sigma ** 2))" \
+    ")"
 
 
 class ElectronDiffractionCalculator(object):
@@ -49,42 +51,31 @@ class ElectronDiffractionCalculator(object):
 
     3. The intensity of each reflection is then given in the kinematic
        approximation as the modulus square of the structure factor.
-           .. math::
-                I_{hkl} = F_{hkl}F_{hkl}^*
-
-    .. todo::
-        Include camera length, when implemented.
-    .. todo::
-        Refactor the excitation error to a structure property.
+       :math:`I_{hkl} = F_{hkl}F_{hkl}^*`
 
     Parameters
     ----------
     accelerating_voltage : float
-        The accelerating voltage of the microscope in kV
-    reciprocal_radius : float
-        The maximum radius of the sphere of reciprocal space to sample, in
-        reciprocal angstroms.
+        The accelerating voltage of the microscope in kV.
     max_excitation_error : float
         The maximum extent of the relrods in reciprocal angstroms. Typically
         equal to 1/{specimen thickness}.
+    debye_waller_factors : dict of str : float
+        Maps element names to their temperature-dependent Debye-Waller factors.
 
     """
+    # TODO: Include camera length, when implemented.
+    # TODO: Refactor the excitation error to a structure property.
 
     def __init__(self,
                  accelerating_voltage,
                  max_excitation_error,
                  debye_waller_factors=None):
-        """
-        Initializes the electron diffraction calculator with a particular
-        accelerating voltage, reciprocal radius and excitation error.
-        """
         self.wavelength = get_electron_wavelength(accelerating_voltage)
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
 
-    def calculate_ed_data(self,
-                          structure,
-                          reciprocal_radius):
+    def calculate_ed_data(self, structure, reciprocal_radius):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -92,6 +83,9 @@ class ElectronDiffractionCalculator(object):
         structure : Structure
             The structure for which to derive the diffraction pattern. Note that
             the structure must be rotated to the appropriate orientation.
+        reciprocal_radius : float
+            The maximum radius of the sphere of reciprocal space to sample, in
+            reciprocal angstroms.
 
         Returns
         -------
@@ -108,10 +102,10 @@ class ElectronDiffractionCalculator(object):
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
         recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_pts, g_hkls = recip_latt.get_points_in_sphere([[0, 0, 0]],
-                                                            [0, 0, 0],
-                                                            reciprocal_radius,
-                                                            zip_results=False)[:2]
+        recip_pts, g_hkls = \
+            recip_latt.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
+                                            reciprocal_radius,
+                                            zip_results=False)[:2]
         cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
 
         # Identify points intersecting the Ewald sphere within maximum
@@ -148,26 +142,30 @@ class ElectronDiffractionCalculator(object):
 
 
 class DiffractionSimulation:
+    """Holds the result of a given diffraction pattern.
+
+    Parameters
+    ----------
+
+    coordinates : array-like, shape [n_points, 2]
+        The x-y coordinates of points in reciprocal space.
+    indices : array-like, shape [n_points, 3]
+        The indices of the reciprocal lattice points that intersect the
+        Ewald sphere.
+    intensities : array-like, shape [n_points, ]
+        The intensity of the reciprocal lattice points.
+    calibration : float or tuple of float, optional
+        The x- and y-scales of the pattern, with respect to the original
+        reciprocal angstrom coordinates.
+    offset : tuple of float, optional
+        The x-y offset of the pattern in reciprocal angstroms. Defaults to
+        zero in each direction.
+    """
 
     def __init__(self, coordinates=None, indices=None, intensities=None,
                  calibration=1., offset=(0., 0.), with_direct_beam=False):
-        """Holds the result of a given diffraction pattern.
-
-        coordinates : array-like
-            The x-y coordinates of points in reciprocal space.
-        indices : array-like
-            The indices of the reciprocal lattice points that intersect the
-            Ewald sphere.
-        proximity : array-like
-            The distance between the reciprocal lattice points that intersect
-            the Ewald sphere and the Ewald sphere itself in reciprocal
-            angstroms.
-        calibration : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
-            The x- and y-scales of the pattern, with respect to the original
-            reciprocal angstrom coordinates.
-        offset : :obj:`tuple` of :obj:`float`, optional
-            The x-y offset of the pattern in reciprocal angstroms. Defaults to
-            zero in each direction.
+        """Initializes the DiffractionSimulation object with data values for
+        the coordinates, indices, intensities, calibration and offset.
         """
         self._coordinates = None
         self.coordinates = coordinates
@@ -181,16 +179,18 @@ class DiffractionSimulation:
 
     @property
     def calibrated_coordinates(self):
-        """Coordinates converted into pixel space."""
+        """ndarray : Coordinates converted into pixel space."""
         coordinates = np.copy(self.coordinates)
         coordinates[:, 0] += self.offset[0]
         coordinates[:, 1] += self.offset[1]
         coordinates[:, 0] /= self.calibration[0]
         coordinates[:, 1] /= self.calibration[1]
-        return coordinates.astype(int)
+        return coordinates
 
     @property
     def calibration(self):
+        """tuple of float : The x- and y-scales of the pattern, with respect to
+        the original reciprocal angstrom coordinates."""
         return self._calibration
 
     @calibration.setter
@@ -200,19 +200,22 @@ class DiffractionSimulation:
         elif len(calibration) == 2:
             self._calibration = calibration
         else:
-            raise ValueError("`calibration` must be a float, int, or length-2 tuple"
-                             "of floats or ints.")
+            raise ValueError("`calibration` must be a float or length-2"
+                             "tuple of floats.")
 
     @property
     def direct_beam_mask(self):
+        """ndarray : If `with_direct_beam` is True, returns a True array for all
+        points. If `with_direct_beam is False, returns a True array with False
+        in the position of the direct beam."""
         if self.with_direct_beam:
             return np.ones_like(self._intensities, dtype=bool)
         else:
             return np.sum(self._coordinates == 0., axis=1) != 3
 
-
     @property
     def coordinates(self):
+        """ndarray : The coordinates of all unmasked points."""
         return self._coordinates[self.direct_beam_mask]
 
     @coordinates.setter
@@ -221,19 +224,24 @@ class DiffractionSimulation:
 
     @property
     def intensities(self):
+        """ndarray : The intensities of all unmasked points."""
         return self._intensities[self.direct_beam_mask]
 
     @intensities.setter
     def intensities(self, intensities):
         self._intensities = intensities
 
-
     def plot(self, ax=None):
-        """Returns the diffraction data as a plot.
+        """Plots the simulated electron diffraction pattern with a logarithmic
+        intensity scale.
 
-        Notes
-        -----
         Run `.show()` on the result of this method to display the plot.
+
+        Parameters
+        ----------
+        ax : :obj:`matplotlib.axes.Axes`, optional
+            A `matplotlib` axes instance. Used if the plot needs to be in a
+            figure that has been created elsewhere.
 
         """
         if ax is None:
@@ -250,13 +258,17 @@ class DiffractionSimulation:
 
     def as_signal(self, size, sigma, max_r):
         """Returns the diffraction data as an ElectronDiffraction signal with
-        Gaussian functions representing each diffracted peak.
+        two-dimensional Gaussians representing each diffracted peak.
 
         Parameters
         ----------
-        shape : tuple
-            (x,y) signal_shape for the signal to be simulated.
-        sigma : sigma of the Gaussian function to be plotted.
+        size : int
+            Side length (in pixels) for the signal to be simulated.
+        sigma : float
+            Standard deviation of the Gaussian function to be plotted.
+        max_r : float
+            Half the side length in reciprocal Angstroms. Defines the signal's
+            calibration.
 
         """
         # Plot a 2D Gaussian at each peak position.
@@ -265,10 +277,10 @@ class DiffractionSimulation:
         dp_dat = 0
         l = np.linspace(-max_r, max_r, size)
         x, y = np.meshgrid(l, l)
-        coords = self.coordinates[:,:2]
+        coords = self.coordinates[:, :2]
         g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
-        for (cx, cy), inten in zip(coords, self.intensities):
-            g.inten.value = inten
+        for (cx, cy), intensity in zip(coords, self.intensities):
+            g.intensity.value = intensity
             g.sigma.value = sigma
             g.cx.value = cx
             g.cy.value = cy

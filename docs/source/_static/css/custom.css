@@ -1,0 +1,11 @@
+.section {
+    border-bottom: solid lightgrey thin;
+}
+
+.class > dd {
+    margin-left: 2em;
+}
+
+.method dd {
+    margin-left: 2em;
+}

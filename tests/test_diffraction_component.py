@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The PyCrystEM developers
+# Copyright 2017 The PyCrystEM developers
 #
 # This file is part of PyCrystEM.
 #
@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+
 import numpy as np
 import nose.tools as nt
 
@@ -29,7 +30,7 @@ class TestDiffractionComponent:
         au = Structure()
         #Define electron diffraction calculator
         ed = ElectronDiffractionCalculator(300, 3, 1)
-        #Assign component 
+        #Assign component
         diff = ElectronDiffractionForwardModel(electron_diffraction_calculator=ed,
                                                structure=au,
                                                D11=1., D12=0., D13=0.,

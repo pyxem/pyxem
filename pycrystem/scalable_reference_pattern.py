@@ -1,25 +1,24 @@
 # -*- coding: utf-8 -*-
-# Copyright 2007-2015 The HyperSpy developers
+# Copyright 2017 The PyCrystEM developers
 #
-# This file is part of  HyperSpy.
+# This file is part of PyCrystEM.
 #
-#  HyperSpy is free software: you can redistribute it and/or modify
+# PyCrystEM is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-#  HyperSpy is distributed in the hope that it will be useful,
+# PyCrystEM is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with  HyperSpy.  If not, see <http://www.gnu.org/licenses/>.
+# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from hyperspy.component import Component
-from hyperspy.signals import Signal2D
-from pycrystem.tensor_field2d import TensorField2D
+from pycrystem.tensor_field import DisplacementGradientMap
 from skimage import transform as tf
 import numpy as np
 
@@ -57,7 +56,7 @@ class ScalableReferencePattern(Component):
                  order=3
                  ):
 
-        Component2D.__init__(self, ['d11', 'd12',
+        Component.__init__(self, ['d11', 'd12',
                                     'd21', 'd22',
                                     't1', 't2'])
 
@@ -97,33 +96,27 @@ class ScalableReferencePattern(Component):
 
         return transformed
 
-    def construct_displacement_gradient(self, axes_manager):
-        """Construct TensorField object containing displacement gradient
-        tensor obtained via fitting a two dimensionsal scalable reference
-        pattern.
-
-        Parameters
-        ----------
-
-        ref : component
-
-            The component object describing the
+    def construct_displacement_gradient(self):
+        """Construct a map of the displacement gradient tensor at each
+        navigation position as determined by fitting an affine transformed
+        reference pattern.
 
         Returns
         -------
 
-        D : TensorField
-
-            The
+        D : DisplacementGradientMap
+            Signal containing the displacement gradient tensor at each
+            navigation postion.
 
         """
-        D = TensorField2D(np.ones(np.append(self.d11.map.shape, (3,3))))
+        D = DisplacementGradientMap(np.ones(np.append(self.d11.map.shape,
+                                                      (3,3))))
 
-        D.data[:,:,0,0] = ref.d11.map['values']
-        D.data[:,:,1,0] = ref.d12.map['values']
+        D.data[:,:,0,0] = self.d11.map['values']
+        D.data[:,:,1,0] = self.d12.map['values']
         D.data[:,:,2,0] = 0.
-        D.data[:,:,0,1] = ref.d21.map['values']
-        D.data[:,:,1,1] = ref.d22.map['values']
+        D.data[:,:,0,1] = self.d21.map['values']
+        D.data[:,:,1,1] = self.d22.map['values']
         D.data[:,:,2,1] = 0.
         D.data[:,:,0,2] = 0.
         D.data[:,:,1,2] = 0.
