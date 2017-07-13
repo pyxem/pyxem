@@ -425,7 +425,7 @@ class ElectronDiffraction(Signal2D):
             self.data = self.data / scale
             denoised = self.map(regional_filter, inplace=False, *args, **kwargs)
             denoised.map(filters.rank.mean, selem=square(3))
-            denoised.data = denoised.data / denoised.data.max() * scale
+            denoised.data = denoised.data / denoised.data.max()
 
         if method=='model':
             bg = self.get_background_model(*args, **kwargs)
