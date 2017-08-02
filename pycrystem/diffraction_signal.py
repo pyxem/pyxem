@@ -288,7 +288,7 @@ class ElectronDiffraction(Signal2D):
 
         """
         return self.map(
-            affine_transformation, matrix=D, ragged=True, inplace=inplace
+            affine_transformation, matrix=D, inplace=inplace
         )
 
     def gain_normalisation(self, dark_reference, bright_reference,
@@ -429,15 +429,15 @@ class ElectronDiffraction(Signal2D):
 
         bg_removed = np.clip(self - bg, 0, 255)
 
-        denoised = ElectronDiffraction(
-            bg_removed.map(regional_flattener, h=bg.data.min()-1, inplace=False)
-        )
-        denoised.axes_manager.update_axes_attributes_from(
+        # denoised = ElectronDiffraction(
+        #     bg_removed.map(regional_flattener, h=bg.data.min()-1, inplace=False)
+        # )
+        bg_removed.axes_manager.update_axes_attributes_from(
             self.axes_manager.navigation_axes)
-        denoised.axes_manager.update_axes_attributes_from(
+        bg_removed.axes_manager.update_axes_attributes_from(
             self.axes_manager.signal_axes)
 
-        return denoised
+        return bg_removed
 
     def get_background_model(self, saturation_radius):
         """Creates a model for the background of the signal.

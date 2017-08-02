@@ -100,7 +100,7 @@ def manual_orientation(
         p = plt.scatter(
             electron_diffraction.calibrated_coordinates[:, 0],
             electron_diffraction.calibrated_coordinates[:, 1],
-            s=electron_diffraction.intensities,
+            s=np.sqrt(electron_diffraction.intensities),
             facecolors='none',
             edgecolors='r'
         )
