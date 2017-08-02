@@ -587,3 +587,17 @@ class ElectronDiffraction(Signal2D):
         from pycrystem.utils import peakfinder2D_gui
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW()
         peakfinder.interactive(self)
+
+    @staticmethod
+    def noise_model(x, a, mu):
+        """Calculates the expected variance of a pixel based on its value `x`"""
+        return a * (x / mu) * np.exp(- x / mu)
+
+    def add_parameterized_noise(self, a=75., mu=10.):
+        """Adds noise based on a custom model to the data."""
+        noise = np.random.normal(0., self.noise_model(self.data, a, mu)**0.5)
+        original_dtype = self.data.dtype
+        self.data = (
+            self.data.astype(noise.dtype) + noise
+        ).astype(original_dtype)
+        self.events.data_changed.trigger(obj=self)
