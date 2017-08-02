@@ -27,7 +27,11 @@ from hyperspy.signals import Signal2D, BaseSignal
 
 from pycrystem.utils.expt_utils import *
 from pycrystem.utils.peakfinders2D import *
+from pycrystem.diffraction_vectors import DiffractionVectors
 
+def peaks_as_gvectors(z, center, calibration):
+    g = (z - center) * calibration
+    return g[0]
 
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
@@ -287,9 +291,7 @@ class ElectronDiffraction(Signal2D):
             new signal.
 
         """
-        return self.map(
-            affine_transformation, matrix=D, inplace=inplace
-        )
+        return self.map(affine_transformation, matrix=D, inplace=inplace)
 
     def gain_normalisation(self, dark_reference, bright_reference,
                            inplace=True):
@@ -429,15 +431,15 @@ class ElectronDiffraction(Signal2D):
 
         bg_removed = np.clip(self - bg, 0, 255)
 
-        # denoised = ElectronDiffraction(
-        #     bg_removed.map(regional_flattener, h=bg.data.min()-1, inplace=False)
-        # )
-        bg_removed.axes_manager.update_axes_attributes_from(
+        denoised = ElectronDiffraction(
+            bg_removed.map(regional_flattener, h=bg.data.min()-1, inplace=False)
+        )
+        denoised.axes_manager.update_axes_attributes_from(
             self.axes_manager.navigation_axes)
-        bg_removed.axes_manager.update_axes_attributes_from(
+        denoised.axes_manager.update_axes_attributes_from(
             self.axes_manager.signal_axes)
 
-        return bg_removed
+        return denoised
 
     def get_background_model(self, saturation_radius):
         """Creates a model for the background of the signal.

@@ -68,7 +68,6 @@ def gain_normalise(z, dref, bref):
     """
     return ((z- dref) / (bref - dref)) * np.mean((bref - dref))
 
-
 def affine_transformation(z, order=3, **kwargs):
     """Apply an affine transform to a 2-dimensional array.
 
@@ -114,14 +113,12 @@ def regional_filter(z, h):
 
     return z - dilated
 
-
 def regional_flattener(z, h):
     """Localised erosion of the image 'z' for features below a value 'h'"""
     seed = np.copy(z) + h
     mask = z
     eroded = morphology.reconstruction(seed, mask, method='erosion')
     return eroded - h
-
 
 def circular_mask(shape, radius, center):
     """
@@ -146,22 +143,18 @@ def refine_beam_position(z, start, radius):
     """
     Refine the position of the direct beam and hence an estimate for the
     position of the pattern center in each SED pattern.
-
     Parameters
     ----------
     radius : int
         Defines the size of the circular region within which the direct beam
         position is refined.
-
     center : bool
         If True the direct beam position is refined to sub-pixel precision
         via calculation of the intensity center of mass.
-
     Return
     ------
     center: array
         Refined position (x, y) of the direct beam.
-
     Notes
     -----
     This method is based on work presented by Thomas White in his PhD (2009)
