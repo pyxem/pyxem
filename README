@@ -1,3 +1,6 @@
+THIS README IS CURRENTLY OUT OF DATE
+
+
 Code for analysing laue zones from 4-D pixelated scanning transmission electron microscopy datasets.
 Works by firstly centering all the diffraction patterns, then doing a radial integration as a function of scattering angle.
 Next, the Laue zones are modelled using a powerlaw to remove the background, and a Gaussian for fitting the Laue zone peak itself.
