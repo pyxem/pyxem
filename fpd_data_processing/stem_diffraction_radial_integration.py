@@ -6,6 +6,7 @@ import h5py
 import copy
 import warnings
 import higher_order_laue_zone_calculation.laue_zone_modelling as lzm
+from numba import jit
 
 def _set_metadata_from_hdf5(hdf5_file, signal):
     """Get microscope and scan metadata from fpd HDF5-file reference.
@@ -112,10 +113,79 @@ def _remove_dead_pixels(s_fpd):
         s_fpd.data[:,:,x,y] = (n_pixel0+n_pixel1+n_pixel2+n_pixel3)/4
 
 
+def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
+    """
+    Make a circular mask in a bool array for masking a region in an image.
+
+    Parameters
+    ----------
+    centreX, centreY : float
+        Centre point of the mask.
+    imageSizeX, imageSizeY : int
+        Size of the image to be masked.
+    radius : float
+        Radius of the mask.
+
+    Returns
+    -------
+    Boolean Numpy 2D Array
+        Array with the shape (imageSizeX, imageSizeY) with the mask.
+
+    See also
+    --------
+    _make_mask_from_positions
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from atomap.atom_finding_refining import _make_circular_mask
+    >>> image = np.ones((9, 9))
+    >>> mask = _make_circular_mask(4, 4, 9, 9, 2)
+    >>> image_masked = image*mask
+    >>> import matplotlib.pyplot as plt
+    >>> cax = plt.imshow(image_masked)
+    """
+    y, x = np.ogrid[-centerX:imageSizeX-centerX, -centerY:imageSizeY-centerY]
+    mask = x*x + y*y <= radius*radius
+    return(mask)
+
+
+def _center_of_mass_single_frame(
+        im, threshold=1., mask_centre=None, mask_radius=None):
+    if (initial_centre is not None) and (mask_radius is not None):
+        shape_x, shape_y = im.shape
+        mask = _make_circular_mask(
+                mask_centre[0], mask_centre[1], shape_x, shape_y, mask_radius)
+    mean_value = im.mean()*mask*threshold
+    im[im <= mean_value] = 0
+    im[im > mean_value] = 1
+    data = center_of_mass(im*mask)
+    return(np.array(data))
+
+
+@jit(nogil=True)
+def centroid(im, threshold=1., mask_centre=None, mask_radius=None):
+    n, m = im.shape
+    total_x = 0
+    total_y = 0
+    total = 0
+    for i in range(n):
+        for j in range(m):
+            total += im[i, j]
+            total_x += i * im[i, j]
+            total_y += j * im[i, j]
+
+    if total > 0:
+        total_x /= total
+        total_y /= total
+    return np.array([total_x, total_y])
+
+
 def _get_disk_centre_from_signal(
         signal,
         threshold=1.,
-        detector_slice=None,
+        mask_centre=None,
+        mask_radius=None,
         ):
     """Get the centre of the disk using thresholded center of mass.
     Threshold is set to the mean of individual diffration images.
@@ -136,30 +206,43 @@ def _get_disk_centre_from_signal(
     -------
     tuple with center x and y arrays. (com x, com y)"""
 
-    com_x_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
-    com_y_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
+    if (mask_centre is None) and (mask_radius is not None):
+        dif_sum = signal.sum((0, 1))
+        if signal._lazy:
+            dif_sum.compute()
+        mask_centre[1], mask_centre[0] = center_of_mass(dif_sum.data)
+
+    s_com = signal.map(centroid,
+            threshold=threshold, mask_centre=mask_centre,
+            mask_radius=mask_radius, ragged=False, inplace=False)
+#    if signal._lazy:
+#        s_com.compute()
+    return(s_com)
+
+#    com_x_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
+#    com_y_array = np.zeros(signal.data.shape[0:2], dtype=np.float64)
     
-    if detector_slice is None:
-        x0, y0 = 0, 0
-        image_data = np.zeros(signal.data.shape[2:], dtype=np.uint16)
-    else:
-        x0, x1, y0, y1 = detector_slice
-        image_data = np.zeros((x1-x0, y1-y0), dtype=np.uint16)
+#    if detector_slice is None:
+#        x0, y0 = 0, 0
+#        image_data = np.zeros(signal.data.shape[2:], dtype=np.uint16)
+#    else:
+#        x0, x1, y0, y1 = detector_slice
+#        image_data = np.zeros((x1-x0, y1-y0), dtype=np.uint16)
 
     # Slow, but memory efficient way
-    for x in range(signal.axes_manager[0].size):
-        for y in range(signal.axes_manager[1].size):
-            if detector_slice is None:
-                image_data[:] = signal.data[x,y,:,:]
-            else:
-                image_data[:] = signal.data[x,y,x0:x1,y0:y1]
-            mean_diff = image_data.mean()
-            image_data[image_data<mean_diff] = 0
-            image_data[image_data>mean_diff] = 1
-            com_y, com_x = center_of_mass(image_data)
-            com_x_array[x,y] = com_x + x0
-            com_y_array[x,y] = com_y + y0
-    return(com_x_array, com_y_array)
+#    for x in range(signal.axes_manager[0].size):
+#        for y in range(signal.axes_manager[1].size):
+#            if detector_slice is None:
+#                image_data[:] = signal.data[x,y,:,:]
+#            else:
+#                image_data[:] = signal.data[x,y,x0:x1,y0:y1]
+#            mean_diff = image_data.mean()
+#            image_data[image_data<mean_diff] = 0
+#            image_data[image_data>mean_diff] = 1
+#            com_y, com_x = center_of_mass(image_data)
+#            com_x_array[x,y] = com_x + x0
+#            com_y_array[x,y] = com_y + y0
+#    return(com_x_array, com_y_array)
 
 def _get_radial_profile_of_diff_image(
         diff_image, centre_x, centre_y, mask=None):

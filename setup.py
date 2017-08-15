@@ -1,11 +1,11 @@
 from setuptools import setup
 setup(
-        name = 'higher_order_laue_zone_calculation',
+        name = 'fpd_data_processing',
         packages = [
-            'higher_order_laue_zone_calculation',
+            'fpd_data_processing',
             ],
-        version = '0.1.0',
-        description = 'Library for analysing higher order laue zones from 4D datasets',
+        version = '0.2.0.dev1',
+        description = 'Library for processing scanning transmission electron microscopy data acquired using a fast pixelated detector',
         keywords = [
             'STEM',
             'data analysis',
