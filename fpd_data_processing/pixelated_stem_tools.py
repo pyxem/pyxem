@@ -107,7 +107,8 @@ def _get_rgb_array(signal0, signal1):
     return(rgb_array)
 
 
-def _do_radial_integration(signal, centre_x_array, centre_y_array):
+def _do_radial_integration(
+        signal, centre_x_array, centre_y_array, mask_array=None):
     if centre_x_array is None:
         a_m = signal.axes_manager
         shape = a_m.navigation_shape
@@ -121,16 +122,17 @@ def _do_radial_integration(signal, centre_x_array, centre_y_array):
     for x in range(signal.axes_manager[0].size):
         for y in range(signal.axes_manager[1].size):
             diff_image[:] = signal.data[x,y,:,:]
+            if mask_array is None:
+                mask = None
+            else:
+                mask = mask_array[x, y, :, :]
             centre_x = centre_x_array[x,y]
             centre_y = centre_y_array[x,y]
             radial_profile = _get_radial_profile_of_diff_image(
-                    diff_image, centre_x, centre_y)
+                    diff_image, centre_x, centre_y, mask=mask)
             radial_profile_array[x,y,0:len(radial_profile)] = radial_profile
-
-    lowest_radial_zero_index = _get_lowest_index_radial_array(
-            radial_profile_array)
-    signal_radial = Signal1D(
-            radial_profile_array[:,:,0:lowest_radial_zero_index])
+    
+    signal_radial = Signal1D(radial_profile_array)
     return(signal_radial)
 
 
@@ -188,7 +190,55 @@ def _get_radial_profile_of_diff_image(
         diff_image_flat = diff_image[mask].ravel()
     tbin =  np.bincount(r_flat, diff_image_flat)
     nr = np.bincount(r_flat)
+    nr.clip(1, out=nr) # To avoid NaN in data due to dividing by 0
     radialProfile = tbin / nr
     return(radialProfile)
 
 
+def _get_angle_sector_mask(
+        signal, angle0, angle1,
+        centre_x_array=None, centre_y_array=None):
+    """Get a bool array with True values between angle0 and angle1.
+    Will use the (0, 0) point as given by the signal as the centre,
+    giving an "angular" slice. Useful for analysing anisotropy in
+    diffraction patterns. 
+
+    Parameters
+    ----------
+    signal : HyperSpy 2-D signal
+        Can have several navigation dimensions.
+    angle0, angle1 : numbers
+        Must be between 0 and 2*pi.
+
+    Returns
+    -------
+    Mask : Numpy array
+        The True values will be the region between angle0 and angle1.
+        The array will have the same dimensions as the input signal.
+
+    Examples
+    --------
+    >>> mask = _get_angle_sector_mask(signal, 0.5*np.pi, np.pi)
+    """
+    if signal.axes_manager.navigation_dimension != 2:
+        raise ValueError(
+            "The signal must be 4-D, with 2 navigation dimenions "
+            "and 2 signal dimensions")
+    bool_array = np.zeros_like(signal.data, dtype=np.bool)
+    nX, nY = signal.axes_manager.navigation_shape
+    for i, s in enumerate(signal):
+        iX, iY = int(i/nX), i%nX 
+        signal_axes = s.axes_manager.signal_axes
+        if centre_x_array is not None:
+            signal_axes[0].offset = -centre_x_array[iX, iY]
+        if centre_y_array is not None:
+            signal_axes[1].offset = -centre_y_array[iX, iY]
+        x_size = signal_axes[0].size*1j
+        y_size = signal_axes[1].size*1j
+        x, y = np.mgrid[
+                signal_axes[0].low_value:signal_axes[0].high_value:x_size,
+                signal_axes[1].low_value:signal_axes[1].high_value:y_size]
+        r = (x**2+y**2)**0.5
+        t = np.arctan2(x,y)+np.pi
+        bool_array[iX, iY] = (t>angle0)*(t<angle1)
+    return(bool_array)

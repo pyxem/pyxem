@@ -35,7 +35,8 @@ class PixelatedSTEM(Signal2D):
         s_com = DPCImage(s_com.T.data)
         return(s_com)
 
-    def radial_integration(self, centre_x_array=None, centre_y_array=None):
+    def radial_integration(
+            self, centre_x_array=None, centre_y_array=None, mask_array=None):
         """Radially integrates a 4-D pixelated STEM diffraction signal.
 
         Parameters
@@ -43,6 +44,8 @@ class PixelatedSTEM(Signal2D):
         centre_x_array, centre_y_array : NumPy 2D array, optional
             Has to have the same shape as the navigation axis of
             the signal.
+        mask_array : Boolean numpy array
+            Mask with the same shape as the signal.
 
         Returns
         -------
@@ -52,9 +55,42 @@ class PixelatedSTEM(Signal2D):
         s_radial = pst._do_radial_integration(
                 self,
                 centre_x_array=centre_x_array,
-                centre_y_array=centre_y_array)
+                centre_y_array=centre_y_array,
+                mask_array=mask_array)
         return(s_radial)
+    
+    def angular_mask(
+            self, angle0, angle1,
+            centre_x_array=None, centre_y_array=None):
+        """Get a bool array with True values between angle0 and angle1.
+        Will use the (0, 0) point as given by the signal as the centre,
+        giving an "angular" slice. Useful for analysing anisotropy in
+        diffraction patterns. 
 
+        Parameters
+        ----------
+        angle0, angle1 : numbers
+            Must be between 0 and 2*pi.
+        centre_x_array, centre_y_array : NumPy 2D array, optional
+            Has to have the same shape as the navigation axis of
+            the signal.
+
+        Returns
+        -------
+        mask_array : Numpy array
+            The True values will be the region between angle0 and angle1.
+            The array will have the same dimensions as the signal.
+
+        Examples
+        --------
+        >>> mask_array = s.annular_mask(0.5*np.pi, np.pi)
+        """
+
+        bool_array = pst._get_angle_sector_mask(
+                self, angle0, angle1,
+                centre_x_array=centre_x_array,
+                centre_y_array=centre_y_array)
+        return(bool_array)
 
 class DPCImage(Signal2D):
     """
