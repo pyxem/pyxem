@@ -34,6 +34,38 @@ def _calculate_norms(z):
         norms.append(np.linalg.norm(i))
     return np.asarray(norms)
 
+def get_new_unique_vectors_in_list(vlist,
+                               gvlist,
+                              distance_threshold=0):
+    """Obtain a list of unique diffraction vectors from vlist, that are not found in gvlist.
+    NB This function is used by get_unique_vectors
+
+    Parameters
+    ----------
+    vlist : ndarray
+        List of vectors.
+    distance_threshold : float
+        The minimum distance between gvectors for them to be considered as
+        different gvectors.
+    gvlist : ndarray
+        List of unique vectors to be compared to the diffraction vectors in vlist.
+
+    Returns
+    -------
+    unique_vectors : list
+        List of unique diffraction vectors from vlist, that are not found in gvlist. 
+        None will be returned if there are no such vectors.
+
+    """
+    if sum(map(lambda x: np.allclose(vlist,
+                                      x, 
+                                      rtol=0, 
+                                      atol=distance_threshold, 
+                                      equal_nan=False), 
+               gvlist)):
+        pass
+    else:
+        return np.asarray(vlist)
 
 class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
@@ -94,7 +126,8 @@ class DiffractionVectors(BaseSignal):
         return ghis
 
     def get_unique_vectors(self,
-                           distance_threshold=None):
+                           distance_threshold=None,
+                           x=0,y=0,z=0):
         """Obtain a unique list of diffraction vectors.
 
         Parameters
@@ -102,24 +135,36 @@ class DiffractionVectors(BaseSignal):
         distance_threshold : float
             The minimum distance between gvectors for them to be considered as
             different gvectors.
+        x,y,z : int
+            Integers defining the position of the g-vector to use as the first
+            vector in the list of unique vectors. 
+            Notation: self.inav[x,y].data[z] or self.inav[x].data[z] 
 
         Returns
         -------
         unique_vectors : list
-            Unique list of all diffraction vectors.
-
+            List of all unique diffraction vectors.
         """
-        #TODO: Make so that a distance threshold may be set and used to
-        #consider gvectors identical.
-        #Create empty list
-        gvlist=[]
-        #Iterate through signal
+        #Pick one gvector defined by x,y,z, as staring point for gvlist. 
+        if np.shape(np.shape(self.axes_manager))[0] >= 2:
+            gvlist=np.asarray([self.inav[x,y].data[z]])
+        else:
+            gvlist=np.asarray([self.inav[x].data[z]])
+
+        #Iterate through self, find and append all unique vectors to gvlist.
         for i in self._iterate_signal():
-            for j in np.arange(len(i[0])):
-                if np.asarray(i[0][j]) in np.asarray(gvlist):
-                    pass
-                else:
-                    gvlist.append(i[0][j])
+            gvlist_new=list(map(lambda x: get_new_unique_vectors_in_list(x,
+                                                                     gvlist,
+                                                                     distance_threshold=distance_threshold),
+                            np.asarray(i[0])))
+            #For all vectors in i that are not unique, gvlist_new will include None values. Those are deleted. 
+            gvlist_new= list(filter(lambda x: x is not None, gvlist_new))
+            gvlist_new=np.reshape(gvlist_new, newshape=(-1,2))
+
+            #If gvlist_new contain new unique vectors, add these to gvlist. 
+            if gvlist_new.any():
+                gvlist=np.concatenate((gvlist, gvlist_new),axis=0)
+
         unique_vectors = np.asarray(gvlist)
         return unique_vectors
 
