@@ -1,17 +1,20 @@
 import numpy as np
-from scipy.ndimage.measurements import center_of_mass
+from scipy.ndimage import measurements
 from hyperspy.signals import Signal1D
-
+import copy
+from matplotlib.colors import hsv_to_rgb, to_rgba
 
 def _center_of_mass_single_frame(im, threshold=None, mask=None):
+    if (mask is not None) or (threshold is not None):
+        image = copy.deepcopy(im)
+    else:
+        image = im
     if threshold is not None:
-        mean_value = im.mean()*threshold
-        im[im <= mean_value] = 0
-        im[im > mean_value] = 1
-    if mask is not None:
-        im = im*mask
-    data = center_of_mass(im)
-    return(np.array(data))
+        mean_value = measurements.mean(image, mask)*threshold
+        image[image <= mean_value] = 0
+        image[image > mean_value] = 1
+    data = measurements.center_of_mass(image, labels=mask)
+    return(np.array(data)[::-1])
 
 
 def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
@@ -46,7 +49,7 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     >>> import matplotlib.pyplot as plt
     >>> cax = plt.imshow(image_masked)
     """
-    y, x = np.ogrid[-centerX:imageSizeX-centerX, -centerY:imageSizeY-centerY]
+    x, y = np.ogrid[-centerY:imageSizeY-centerY, -centerX:imageSizeX-centerX]
     mask = x*x + y*y <= radius*radius
     return(mask)
 
@@ -83,28 +86,40 @@ def _get_corner_value(signal, corner_size=0.05):
     return(np.array((corner00,corner01,corner10,corner11)).T)
 
 
-def _get_color_channel(a_array, mu0, si0, mu1, si1, mu2, si2):
-    color_array = np.zeros((a_array.shape[0], a_array.shape[1]))
-    color_array[:] = 1.-(
-            np.exp(-1*((a_array-mu0)**2)/si0)+
-            np.exp(-1*((a_array-mu1)**2)/si1)+
-            np.exp(-1*((a_array-mu2)**2)/si2))
-    return(color_array)
+def normalize_array(np_array, max_number=1.0):
+    np_array = copy.deepcopy(np_array)
+    np_array -= np_array.min()
+    np_array /= np_array.max()
+    return(np_array*max_number)
 
 
-def _get_rgb_array(signal0, signal1):
-    arctan_array = np.arctan2(signal0.data, signal1.data) + np.pi
+def _get_rgb_array(
+        angle, magnitude, rotation=0, angle_lim=None,
+        magnitude_lim=None, max_angle=2*np.pi):
+    if not (rotation == 0):
+        angle = (angle + math.radians(rotation)) % (max_angle)
+    if angle_lim is not None:
+        np.clip(angle, angle_lim[0], angle_lim[1], out=angle)
+    else:
+        angle = normalize_array(angle)
+    if magnitude_lim is not None:
+        np.clip(magnitude, magnitude_lim[0], magnitude_lim[1], out=magnitude)
+    magnitude = normalize_array(magnitude)
+    S = np.ones_like(angle)
+    HSV = np.dstack((angle, S, magnitude))
+    RGB = hsv_to_rgb(HSV)
+    return(RGB)
 
-    color0 = _get_color_channel(arctan_array, 3.7, 0.8, 5.8, 5.0, 0.0, 0.3)
-    color1 = _get_color_channel(arctan_array, 2.9, 0.6, 1.7, 0.3, 2.4, 0.5)
-    color2 = _get_color_channel(arctan_array, 0.0, 1.3, 6.4, 1.0, 1.0, 0.75)
 
-    rgb_array = np.zeros((signal0.data.shape[0], signal0.data.shape[1], 3))
-    rgb_array[:,:,2] = color0
-    rgb_array[:,:,1] = color1 
-    rgb_array[:,:,0] = color2 
-
-    return(rgb_array)
+def _find_longest_distance(
+        imX, imY,
+        centreX_min, centreY_min,
+        centreX_max, centreY_max,
+        ):
+    max_value = max(
+            int(((imX-centreX_min)**2+(imY-centreY_min)**2)**0.5),
+            int((centreX_max**2+centreY_max**2)**0.5))
+    return(max_value+1)
 
 
 def _do_radial_integration(
@@ -117,10 +132,16 @@ def _do_radial_integration(
         a_m = signal.axes_manager
         shape = a_m.navigation_shape
         centre_y_array = np.ones(shape)*a_m.signal_axes[1].value2index(0)
-    radial_profile_array = np.zeros(signal.data.shape[0:-1], dtype=np.float64)
+    radial_array_size = _find_longest_distance(
+            signal.axes_manager[1].size, signal.axes_manager[0].size,
+            centre_x_array.min(), centre_y_array.min(),
+            centre_x_array.max(), centre_y_array.max())
+    radial_array_shape = list(signal.axes_manager.navigation_shape)
+    radial_array_shape.append(radial_array_size)
+    radial_profile_array = np.zeros(radial_array_shape, dtype=np.float64)
     diff_image = np.zeros(signal.data.shape[2:], dtype=np.uint16)
-    for x in range(signal.axes_manager[0].size):
-        for y in range(signal.axes_manager[1].size):
+    for x in range(signal.axes_manager[1].size):
+        for y in range(signal.axes_manager[0].size):
             diff_image[:] = signal.data[x,y,:,:]
             if mask_array is None:
                 mask = None

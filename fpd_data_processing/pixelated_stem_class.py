@@ -26,13 +26,14 @@ class PixelatedSTEM(Signal2D):
         if mask is not None:
             x, y, r = mask
             im_x, im_y = self.axes_manager.signal_shape
-            pst._make_circular_mask(x, y, im_x, im_y, r)
+            mask = pst._make_circular_mask(x, y, im_x, im_y, r)
 
         s_com = self.map(
                 pst._center_of_mass_single_frame,
                 threshold=threshold, mask=mask,
                 ragged=False, inplace=False)
-        s_com = DPCImage(s_com.T.data)
+        if len(s_com.axes_manager.shape) != 1:
+            s_com = DPCImage(s_com.T.data)
         return(s_com)
 
     def radial_integration(
@@ -51,7 +52,6 @@ class PixelatedSTEM(Signal2D):
         -------
         3-D HyperSpy signal, 2 spatial dimensions,
         1 integrated reciprocal dimension."""
-
         s_radial = pst._do_radial_integration(
                 self,
                 centre_x_array=centre_x_array,
@@ -136,7 +136,9 @@ class DPCImage(Signal2D):
             return _f_min(X, params)
 
         if out is None:
-            out = self.deepcopy()
+            output = self.deepcopy()
+        else:
+            output = out
 
         for i, s in enumerate(self):
             corner_values = pst._get_corner_value(s, corner_size=corner_size)
@@ -146,15 +148,19 @@ class DPCImage(Signal2D):
             
             xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
             zz = (-p[0]*xx-p[1]*yy-p[3])/p[2]
-            out.data[i,:,:] -= zz
+            output.data[i,:,:] -= zz
         if out is None:
-            return(out)
+            return(output)
 
     def get_color_signal(self):
-        rgb_array = pst._get_rgb_array(self.inav[0], self.inav[1])
-        signal_rgb = Signal1D(rgb_array*255)
-        signal_rgb.change_dtype("uint8")
-        signal_rgb.change_dtype("rgb8")
+        angle = np.arctan2(self.inav[0].data, self.inav[1].data)
+        magnitude = np.sqrt(
+                np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
+        rgb_array = pst._get_rgb_array(
+                angle=angle, magnitude=magnitude)
+        signal_rgb = Signal1D(rgb_array*(2**16-1))
+        signal_rgb.change_dtype("uint16")
+        signal_rgb.change_dtype("rgb16")
         return(signal_rgb)
 
     def get_bivariate_histogram(
