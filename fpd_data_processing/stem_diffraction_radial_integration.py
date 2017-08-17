@@ -5,7 +5,7 @@ from scipy.ndimage.measurements import center_of_mass
 import h5py
 import copy
 import warnings
-import higher_order_laue_zone_calculation.laue_zone_modelling as lzm
+import fpd_data_processing.laue_zone_modelling as lzm
 from numba import jit
 
 def _set_metadata_from_hdf5(hdf5_file, signal):
