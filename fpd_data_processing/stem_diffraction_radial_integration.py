@@ -6,7 +6,6 @@ import h5py
 import copy
 import warnings
 import fpd_data_processing.laue_zone_modelling as lzm
-from numba import jit
 
 def _set_metadata_from_hdf5(hdf5_file, signal):
     """Get microscope and scan metadata from fpd HDF5-file reference.
@@ -163,7 +162,6 @@ def _center_of_mass_single_frame(
     return(np.array(data))
 
 
-@jit(nogil=True)
 def centroid(im, threshold=1., mask_centre=None, mask_radius=None):
     n, m = im.shape
     total_x = 0
