@@ -3,8 +3,7 @@ matplotlib.use('Agg')
 import unittest
 import numpy as np
 from hyperspy.signals import Signal2D
-
-import higher_order_laue_zone_calculation.stem_diffraction_radial_integration as sdri
+import fpd_data_processing.stem_diffraction_radial_integration as sdri
 
 
 #class testGetDiskCentreFromSignal(unittest.TestCase):
