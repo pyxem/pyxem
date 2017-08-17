@@ -2,7 +2,7 @@ all_tests:
     image: ubuntu:latest
     script:
     - apt-get update -q
-    - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-matplotlib python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-skimage
+    - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-matplotlib python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-skimage python3-numba
     - apt-get install -qy python3-sympy --no-install-recommends
     - pip3 install --upgrade pip
     - pip3 install --user .
