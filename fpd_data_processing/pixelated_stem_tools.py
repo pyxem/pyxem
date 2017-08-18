@@ -118,8 +118,10 @@ def _find_longest_distance(
         ):
     max_value = max(
             int(((imX-centreX_min)**2+(imY-centreY_min)**2)**0.5),
+            int(((centreX_max)**2+(imY-centreY_min)**2)**0.5),
+            int(((imX-centreX_min)**2+(centreY_max)**2)**0.5),
             int((centreX_max**2+centreY_max**2)**0.5))
-    return(max_value+1)
+    return(max_value)
 
 
 def _do_radial_integration(
@@ -133,7 +135,8 @@ def _do_radial_integration(
         shape = a_m.navigation_shape
         centre_y_array = np.ones(shape)*a_m.signal_axes[1].value2index(0)
     radial_array_size = _find_longest_distance(
-            signal.axes_manager[1].size, signal.axes_manager[0].size,
+            signal.axes_manager.signal_axes[1].size,
+            signal.axes_manager.signal_axes[0].size,
             centre_x_array.min(), centre_y_array.min(),
             centre_x_array.max(), centre_y_array.max())
     radial_array_shape = list(signal.axes_manager.navigation_shape)
