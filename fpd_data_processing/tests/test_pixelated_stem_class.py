@@ -23,7 +23,7 @@ class test_pixelated_stem(unittest.TestCase):
     def test_center_of_mass(self):
         x0, y0 = 5, 7
         array0 = np.zeros(shape=(10, 10, 10, 10))
-        array0[:, :, x0, y0] = 1
+        array0[:, :, y0, x0] = 1
         s0 = PixelatedSTEM(array0)
         s_com0 = s0.center_of_mass()
         self.assertTrue((s_com0.inav[0].data == x0).all())
@@ -34,26 +34,27 @@ class test_pixelated_stem(unittest.TestCase):
         y1_array = np.random.randint(0, 10, size=(10, 10))
         for i in range(10):
             for j in range(10):
-                array1[i, j, x1_array[i, j], y1_array[i, j]] = 1
+                array1[i, j, y1_array[i, j], x1_array[i, j]] = 1
         s1 = PixelatedSTEM(array1)
         s_com1 = s1.center_of_mass()
         self.assertTrue((s_com1.data[0] == x1_array).all())
         self.assertTrue((s_com1.data[1] == y1_array).all())
 
-    def radial_integration(self):
-        array0 = np.ones(shape=(10, 10, 10, 10))
+    def test_radial_integration(self):
+        array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
         self.assertTrue((s0_r.data == 1).all())
 
-        data_shape = 11, 11
-        radial_result = np.array([1, 0, 0, 0, 0, 0, 0, 0])
+        data_shape = 2, 2, 11, 11
         array1 = np.zeros(data_shape)
-        array1[5, 5] = 1
-        s1 = PixelatedSTEM(array11)
+        array1[: ,: , 5, 5] = 1
+        s1 = PixelatedSTEM(array1)
+        s1.axes_manager.signal_axes[0].offset = -5
+        s1.axes_manager.signal_axes[1].offset = -5
         s1_r = s1.radial_integration()
-        for s in s1_r:
-            self.assertTrue(np.all(s.data==radial_result))
+        self.assertTrue(np.all(s1_r.data[:,:,0]==1))
+        self.assertTrue(np.all(s1_r.data[:,:,1:]==0))
 
     def test_get_angle_sector_mask_simple(self):
         array = np.zeros((10, 10, 10, 10))
