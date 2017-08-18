@@ -16,7 +16,7 @@ setup(
             'numpy>=1.10',
             'h5py',
             'ipython>=2.0',
-            'matplotlib>=1.2',
+            'matplotlib>=2.0',
             'hyperspy>=1.0.1',
             ],
 )
