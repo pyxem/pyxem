@@ -138,7 +138,7 @@ def _do_radial_integration(
             signal.axes_manager.signal_axes[1].size,
             signal.axes_manager.signal_axes[0].size,
             centre_x_array.min(), centre_y_array.min(),
-            centre_x_array.max(), centre_y_array.max())
+            centre_x_array.max(), centre_y_array.max())+1
     radial_array_shape = list(signal.axes_manager.navigation_shape)
     radial_array_shape.append(radial_array_size)
     radial_profile_array = np.zeros(radial_array_shape, dtype=np.float64)
