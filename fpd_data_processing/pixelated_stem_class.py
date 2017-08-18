@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.optimize import leastsq
 from hyperspy.signals import Signal1D, Signal2D
 import fpd_data_processing.pixelated_stem_tools as pst
 
@@ -121,34 +120,20 @@ class DPCSignal(Signal2D):
             If corner_size is 0.05 (5%), and the image is 500 x 1000,
             the size of the corners will be (500*0.05) x (1000*0.05) = 25 x 50.
             Default 0.05 
-        out : optional, DCPImage signal
+        out : optional, DPCImage signal
 
         Returns
         -------
         corrected_signal : Signal2D
         """
-        def _f_min(X,p):
-            plane_xyz = p[0:3]
-            distance = (plane_xyz*X.T).sum(axis=1) + p[3]
-            return distance / np.linalg.norm(plane_xyz)
-
-        def _residuals(params, signal, X):
-            return _f_min(X, params)
-
         if out is None:
             output = self.deepcopy()
         else:
             output = out
 
         for i, s in enumerate(self):
-            corner_values = pst._get_corner_value(s, corner_size=corner_size)
-            p0 = [0.1, 0.1, 0.1, 0.1]
-
-            p = leastsq(_residuals, p0, args=(None, corner_values))[0]
-            
-            xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
-            zz = (-p[0]*xx-p[1]*yy-p[3])/p[2]
-            output.data[i,:,:] -= zz
+            ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+            output.data[i, :, :] -= ramp
         if out is None:
             return(output)
 

@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.ndimage import measurements
+from scipy.optimize import leastsq
 from hyperspy.signals import Signal1D
 import copy
 from matplotlib.colors import hsv_to_rgb, to_rgba
@@ -54,17 +55,15 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     return(mask)
 
 
-def _get_corner_value(signal, corner_size=0.05):
-    d_axis0_range = (
-            signal.axes_manager[0].high_value - 
-            signal.axes_manager[0].low_value)*corner_size
-    d_axis1_range = (
-            signal.axes_manager[1].high_value - 
-            signal.axes_manager[1].low_value)*corner_size
-    s_corner00 = signal.isig[0:d_axis0_range,0:d_axis1_range]
-    s_corner01 = signal.isig[0:d_axis0_range,-d_axis1_range:-1]
-    s_corner10 = signal.isig[-d_axis0_range:-1,0:d_axis1_range]
-    s_corner11 = signal.isig[-d_axis0_range:-1,-d_axis1_range:-1]
+def _get_corner_value(s, corner_size=0.05):
+    am = s.axes_manager
+    a0_range = (am[0].high_value - am[0].low_value)*corner_size
+    a1_range = (am[1].high_value - am[1].low_value)*corner_size
+
+    s_corner00 = s.isig[:a0_range+1,:a1_range+1]
+    s_corner01 = s.isig[:a0_range+1,am[1].high_value-a1_range:]
+    s_corner10 = s.isig[am[0].high_value-a0_range:,:a1_range+1]
+    s_corner11 = s.isig[am[0].high_value-a0_range:,am[1].high_value-a1_range:]
 
     corner00 = (
             s_corner00.axes_manager[0].axis.mean(),
@@ -82,8 +81,31 @@ def _get_corner_value(signal, corner_size=0.05):
             s_corner11.axes_manager[0].axis.mean(),
             s_corner11.axes_manager[1].axis.mean(),
             s_corner11.data.mean())
-    
+
     return(np.array((corner00,corner01,corner10,corner11)).T)
+
+
+def _f_min(X,p):
+    plane_xyz = p[0:3]
+    distance = (plane_xyz*X.T).sum(axis=1) + p[3]
+    return distance / np.linalg.norm(plane_xyz)
+
+
+def _residuals(params, signal, X):
+    return _f_min(X, params)
+
+
+def _fit_ramp_to_image(signal, corner_size=0.05):
+    corner_values = _get_corner_value(signal, corner_size=corner_size)
+    p0 = [0.1, 0.1, 0.1, 0.1]
+
+    p = leastsq(_residuals, p0, args=(None, corner_values))[0]
+
+    xx, yy = np.meshgrid(
+            signal.axes_manager[0].axis,
+            signal.axes_manager[1].axis)
+    zz = (-p[0]*xx-p[1]*yy-p[3])/p[2]
+    return(zz)
 
 
 def normalize_array(np_array, max_number=1.0):
@@ -155,7 +177,7 @@ def _do_radial_integration(
             radial_profile = _get_radial_profile_of_diff_image(
                     diff_image, centre_x, centre_y, mask=mask)
             radial_profile_array[x,y,0:len(radial_profile)] = radial_profile
-    
+
     signal_radial = Signal1D(radial_profile_array)
     return(signal_radial)
 
