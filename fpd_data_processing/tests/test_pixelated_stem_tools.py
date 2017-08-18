@@ -70,7 +70,16 @@ class test_pixelated_tools(unittest.TestCase):
 class test_dpcsignal_tools(unittest.TestCase):
 
     def test_get_corner_value(self):
-        s = Signal2D(np.ones(shape=(100, 100)))
-        corner_list = pst._get_corner_value(s, corner_size=0.05)
+        corner_size = 0.1
+        image_size = 100
+        s = Signal2D(np.ones(shape=(image_size, image_size)))
+        corner_list = pst._get_corner_value(s, corner_size=0.1)
         corner0, corner1 = corner_list[:, 0], corner_list[:, 1]
         corner2, corner3 = corner_list[:, 2], corner_list[:, 3]
+
+        pos = image_size*corner_size*0.5
+        high_value = s.axes_manager[0].high_value
+        self.assertTrue(((pos, pos, 1) == corner0).all())
+        self.assertTrue(((pos, high_value-pos, 1) == corner1).all())
+        self.assertTrue(((high_value-pos, pos, 1) == corner2).all())
+        self.assertTrue(((high_value-pos, high_value-pos, 1) == corner3).all())
