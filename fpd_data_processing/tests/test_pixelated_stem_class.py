@@ -44,7 +44,7 @@ class test_pixelated_stem(unittest.TestCase):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
-        self.assertTrue((s0_r.data == 1).all())
+        self.assertTrue((s0_r.data[:, :, :-1] == 1).all())
 
         data_shape = 2, 2, 11, 11
         array1 = np.zeros(data_shape)

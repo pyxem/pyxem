@@ -1,6 +1,7 @@
 import unittest
 import fpd_data_processing.pixelated_stem_tools as pst
 import numpy as np
+from hyperspy.signals import Signal2D
 
 
 class test_pixelated_tools(unittest.TestCase):
@@ -64,3 +65,12 @@ class test_pixelated_tools(unittest.TestCase):
             dist = pst._find_longest_distance(
                     imX, imY, x, y, x, y)
             self.assertEqual(dist, distance)
+
+
+class test_dpcsignal_tools(unittest.TestCase):
+
+    def test_get_corner_value(self):
+        s = Signal2D(np.ones(shape=(100, 100)))
+        corner_list = pst._get_corner_value(s, corner_size=0.05)
+        corner0, corner1 = corner_list[:, 0], corner_list[:, 1]
+        corner2, corner3 = corner_list[:, 2], corner_list[:, 3]
