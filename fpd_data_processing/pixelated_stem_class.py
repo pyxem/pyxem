@@ -33,7 +33,7 @@ class PixelatedSTEM(Signal2D):
                 threshold=threshold, mask=mask,
                 ragged=False, inplace=False)
         if len(s_com.axes_manager.shape) != 1:
-            s_com = DPCImage(s_com.T.data)
+            s_com = DPCSignal(s_com.T.data)
         return(s_com)
 
     def radial_integration(
@@ -92,7 +92,7 @@ class PixelatedSTEM(Signal2D):
                 centre_y_array=centre_y_array)
         return(bool_array)
 
-class DPCImage(Signal2D):
+class DPCSignal(Signal2D):
     """
     Signal for processing differential phase contrast (DPC) acquired using
     scanning transmission electron microscopy (STEM).
