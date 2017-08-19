@@ -427,7 +427,7 @@ class ElectronDiffraction(Signal2D):
             denoised.map(filters.rank.mean, selem=square(3))
             denoised.data = denoised.data / denoised.data.max()
 
-        if method=='model':
+        elif method == 'model':
             bg = self.get_background_model(*args, **kwargs)
 
             bg_removed = np.clip(self - bg, 0, 255)
