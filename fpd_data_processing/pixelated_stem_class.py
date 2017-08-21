@@ -2,6 +2,7 @@ import numpy as np
 from hyperspy.signals import Signal1D, Signal2D
 import fpd_data_processing.pixelated_stem_tools as pst
 
+
 class PixelatedSTEM(Signal2D):
 
     def center_of_mass(self, threshold=None, mask=None):
@@ -13,7 +14,7 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         threshold : number, optional
-            The thresholding will be done at mean times 
+            The thresholding will be done at mean times
             this threshold value.
         mask : tuple (x, y, r)
             Round mask centered on x and y, with radius r.
@@ -57,14 +58,14 @@ class PixelatedSTEM(Signal2D):
                 centre_y_array=centre_y_array,
                 mask_array=mask_array)
         return(s_radial)
-    
+
     def angular_mask(
             self, angle0, angle1,
             centre_x_array=None, centre_y_array=None):
         """Get a bool array with True values between angle0 and angle1.
         Will use the (0, 0) point as given by the signal as the centre,
         giving an "angular" slice. Useful for analysing anisotropy in
-        diffraction patterns. 
+        diffraction patterns.
 
         Parameters
         ----------
@@ -91,6 +92,7 @@ class PixelatedSTEM(Signal2D):
                 centre_y_array=centre_y_array)
         return(bool_array)
 
+
 class DPCSignal(Signal2D):
     """
     Signal for processing differential phase contrast (DPC) acquired using
@@ -106,9 +108,9 @@ class DPCSignal(Signal2D):
 
     def correct_ramp(self, corner_size=0.05, out=None):
         """
-        Subtracts a plane from the signal, useful for removing 
+        Subtracts a plane from the signal, useful for removing
         the effects of d-scan in a STEM beam shift dataset.
-        
+
         The plane is calculated by fitting a plane to the corner values
         of the signal. This will only work well when the property one
         wants to measure is zero in these corners.
@@ -119,7 +121,7 @@ class DPCSignal(Signal2D):
             The size of the corners, as a percentage of the image's axis.
             If corner_size is 0.05 (5%), and the image is 500 x 1000,
             the size of the corners will be (500*0.05) x (1000*0.05) = 25 x 50.
-            Default 0.05 
+            Default 0.05
         out : optional, DPCImage signal
 
         Returns
@@ -150,8 +152,8 @@ class DPCSignal(Signal2D):
 
     def get_bivariate_histogram(
             self,
-            histogram_range=None, 
-            masked=None, 
+            histogram_range=None,
+            masked=None,
             bins=200,
             spatial_std=3):
         """
@@ -179,11 +181,12 @@ class DPCSignal(Signal2D):
         """
         s0_flat = self.inav[0].data.flatten()
         s1_flat = self.inav[1].data.flatten()
-            
+
         if masked is not None:
             temp_s0_flat = []
             temp_s1_flat = []
-            for data0, data1, masked_value in zip(s0_flat, s1_flat, masked.flatten()):
+            for data0, data1, masked_value in zip(
+                    s0_flat, s1_flat, masked.flatten()):
                 if not (masked_value == True):
                     temp_s0_flat.append(data0)
                     temp_s1_flat.append(data1)
@@ -214,8 +217,8 @@ class DPCSignal(Signal2D):
                 s1_flat,
                 bins=bins,
                 range=[
-                    [s0_range[0],s0_range[1]],
-                    [s1_range[0],s1_range[1]]])
+                    [s0_range[0], s0_range[1]],
+                    [s1_range[0], s1_range[1]]])
 
         s_hist = Signal2D(hist2d)
         s_hist.axes_manager[0].offset = xedges[0]
