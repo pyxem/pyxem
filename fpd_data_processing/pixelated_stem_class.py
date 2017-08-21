@@ -1,6 +1,7 @@
 import numpy as np
 from hyperspy.signals import Signal1D, Signal2D
 import fpd_data_processing.pixelated_stem_tools as pst
+from tqdm import tqdm
 
 
 class PixelatedSTEM(Signal2D):
@@ -100,9 +101,9 @@ class PixelatedSTEM(Signal2D):
         for i in range(angleN):
             angle_list.append((2*np.pi*i/angleN, 2*np.pi*(i+1)/angleN))
         if (centre_x_array is None) or (centre_y_array is None):
-            centre_x_array, centre_y_array = _make_centre_array_from_signal(
-                    signal)
-        for angle in angle_list:
+            centre_x_array, centre_y_array = pst._make_centre_array_from_signal(
+                    self)
+        for angle in tqdm(angle_list):
             mask_array = self.angular_mask(
                     angle[0], angle[1],
                     centre_x_array=centre_x_array,
