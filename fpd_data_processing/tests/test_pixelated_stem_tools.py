@@ -66,6 +66,23 @@ class test_pixelated_tools(unittest.TestCase):
                     imX, imY, x, y, x, y)
             self.assertEqual(dist, distance)
 
+    def test_make_centre_array_from_signal(self):
+        s = Signal2D(np.ones((5, 10, 20, 7)))
+        sa = s.axes_manager.signal_axes
+        offset_x = sa[0].offset
+        offset_y = sa[1].offset
+        mask = pst._make_centre_array_from_signal(s)
+        self.assertEqual(mask[0].shape, s.axes_manager.navigation_shape)
+        self.assertEqual(mask[1].shape, s.axes_manager.navigation_shape)
+        self.assertTrue((offset_x==mask[0]).all())
+        self.assertTrue((offset_y==mask[1]).all())
+
+        offset0_x, offset0_y = -3, -2
+        sa[0].offset, sa[1].offset = offset0_x, offset0_y
+        mask = pst._make_centre_array_from_signal(s)
+        self.assertTrue((-offset0_x==mask[0]).all())
+        self.assertTrue((-offset0_y==mask[1]).all())
+
 
 class test_dpcsignal_tools(unittest.TestCase):
 
