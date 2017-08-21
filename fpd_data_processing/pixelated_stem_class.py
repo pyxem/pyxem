@@ -92,6 +92,28 @@ class PixelatedSTEM(Signal2D):
                 centre_y_array=centre_y_array)
         return(bool_array)
 
+    def angular_slice_radial_integration(
+            self, angleN=20,
+            centre_x_array=None, centre_y_array=None):
+        signal_list = []
+        angle_list = []
+        for i in range(angleN):
+            angle_list.append((2*np.pi*i/angleN, 2*np.pi*(i+1)/angleN))
+        if (centre_x_array is None) or (centre_y_array is None):
+            centre_x_array, centre_y_array = _make_centre_array_from_signal(
+                    signal)
+        for angle in angle_list:
+            mask_array = self.angular_mask(
+                    angle[0], angle[1],
+                    centre_x_array=centre_x_array,
+                    centre_y_array=centre_y_array)
+            s_r = self.radial_integration(
+                    centre_x_array=centre_x_array,
+                    centre_y_array=centre_y_array,
+                    mask_array=mask_array)
+            signal_list.append(s_r)
+        return(signal_list)
+
 
 class DPCSignal(Signal2D):
     """
