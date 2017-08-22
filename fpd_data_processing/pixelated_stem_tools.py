@@ -166,19 +166,21 @@ def _do_radial_integration(
     radial_array_shape = list(signal.axes_manager.navigation_shape)
     radial_array_shape.append(radial_array_size)
     radial_profile_array = np.zeros(radial_array_shape, dtype=np.float64)
-    diff_image = np.zeros(signal.data.shape[2:], dtype=np.uint16)
-    for x in range(signal.axes_manager[1].size):
-        for y in range(signal.axes_manager[0].size):
-            diff_image[:] = signal.data[x,y,:,:]
-            if mask_array is None:
-                mask = None
-            else:
-                mask = mask_array[x, y, :, :]
-            centre_x = centre_x_array[x,y]
-            centre_y = centre_y_array[x,y]
-            radial_profile = _get_radial_profile_of_diff_image(
-                    diff_image, centre_x, centre_y, mask=mask)
-            radial_profile_array[x,y,0:len(radial_profile)] = radial_profile
+    for temp_s in signal:
+        indicies = signal.axes_manager.indices[::-1]
+        diff_image = temp_s.data
+        if mask_array is None:
+            mask = None
+        else:
+            mask = mask_array[indicies]
+        centre_x = centre_x_array[indicies]
+        centre_y = centre_y_array[indicies]
+        radial_profile = _get_radial_profile_of_diff_image(
+                diff_image, centre_x, centre_y, mask=mask)
+        indicies_list = list(indicies)
+        indicies_list.append(slice(0, len(radial_profile)))
+        indicies_radial = tuple(indicies_list)
+        radial_profile_array[indicies_radial] = radial_profile
 
     signal_radial = Signal1D(radial_profile_array)
     return(signal_radial)
