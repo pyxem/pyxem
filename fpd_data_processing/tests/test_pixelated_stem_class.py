@@ -56,6 +56,32 @@ class test_pixelated_stem(unittest.TestCase):
         self.assertTrue(np.all(s1_r.data[:,:,0]==1))
         self.assertTrue(np.all(s1_r.data[:,:,1:]==0))
 
+    def test_radial_integration_nav_0(self):
+        data_shape = (40, 40)
+        array0 = np.ones(shape=data_shape)
+        s0 = PixelatedSTEM(array0)
+        s0_r = s0.radial_integration()
+        self.assertEqual(s0_r.axes_manager.navigation_dimension, 0)
+        self.assertTrue((s0_r.data[:-1] == 1).all())
+
+    def test_radial_integration_nav_1(self):
+        data_shape = (5, 40, 40)
+        array0 = np.ones(shape=data_shape)
+        s0 = PixelatedSTEM(array0)
+        s0_r = s0.radial_integration()
+        self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
+        self.assertTrue((s0_r.data[:,:-1] == 1).all())
+
+    def test_radial_integration_big_value(self):
+        data_shape = (5, 40, 40)
+        big_value = 50000000
+        array0 = np.ones(shape=data_shape)*big_value
+        s0 = PixelatedSTEM(array0)
+        s0_r = s0.radial_integration()
+        self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
+        self.assertTrue((s0_r.data[:,:-1] == big_value).all())
+
+
     def test_get_angle_sector_mask_simple(self):
         array = np.zeros((10, 10, 10, 10))
         array[:, :, 0:5, 0:5] = 1
