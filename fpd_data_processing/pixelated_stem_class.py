@@ -1,5 +1,6 @@
 import numpy as np
-from hyperspy.signals import Signal1D, Signal2D
+import hyperspy.api as hs
+from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 import fpd_data_processing.pixelated_stem_tools as pst
 from tqdm import tqdm
 
@@ -113,7 +114,10 @@ class PixelatedSTEM(Signal2D):
                     centre_y_array=centre_y_array,
                     mask_array=mask_array)
             signal_list.append(s_r)
-        return(signal_list)
+        angle_scale = angle_list[1][1] - angle_list[0][1]
+        signal = hs.stack(signal_list, new_axis_name='Angle slice')
+        signal.axes_manager['Angle slice'].scale = angle_scale
+        return(signal)
 
 
 class DPCSignal(Signal2D):
