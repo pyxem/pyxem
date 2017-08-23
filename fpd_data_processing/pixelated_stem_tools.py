@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage import measurements
 from scipy.optimize import leastsq
-from hyperspy.signals import Signal1D
+from hyperspy.signals import Signal1D, Signal2D
 import copy
 from matplotlib.colors import hsv_to_rgb, to_rgba
 
@@ -289,7 +289,7 @@ def _get_angle_sector_mask(
     return(bool_array)
 
 
-def _get_bivariate_histogram(
+def _make_bivariate_histogram(
             x_position, y_position,
             histogram_range=None,
             masked=None,
