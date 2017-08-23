@@ -270,25 +270,20 @@ def _get_angle_sector_mask(
     --------
     >>> mask = _get_angle_sector_mask(signal, 0.5*np.pi, np.pi)
     """
-    if signal.axes_manager.navigation_dimension != 2:
-        raise ValueError(
-            "The signal must be 4-D, with 2 navigation dimenions "
-            "and 2 signal dimensions")
     bool_array = np.zeros_like(signal.data, dtype=np.bool)
-    nX, nY = signal.axes_manager.navigation_shape
-    for i, s in enumerate(signal):
-        iX, iY = int(i/nX), i%nX 
+    for s in signal:
+        indices = signal.axes_manager.indices[::-1]
         signal_axes = s.axes_manager.signal_axes
         if centre_x_array is not None:
-            signal_axes[0].offset = -centre_x_array[iX, iY]
+            signal_axes[0].offset = -centre_x_array[indices]
         if centre_y_array is not None:
-            signal_axes[1].offset = -centre_y_array[iX, iY]
-        x_size = signal_axes[0].size*1j
-        y_size = signal_axes[1].size*1j
+            signal_axes[1].offset = -centre_y_array[indices]
+        x_size = signal_axes[1].size*1j
+        y_size = signal_axes[0].size*1j
         x, y = np.mgrid[
-                signal_axes[0].low_value:signal_axes[0].high_value:x_size,
-                signal_axes[1].low_value:signal_axes[1].high_value:y_size]
+                signal_axes[1].low_value:signal_axes[1].high_value:x_size,
+                signal_axes[0].low_value:signal_axes[0].high_value:y_size]
         r = (x**2+y**2)**0.5
         t = np.arctan2(x,y)+np.pi
-        bool_array[iX, iY] = (t>angle0)*(t<angle1)
+        bool_array[indices] = (t>angle0)*(t<angle1)
     return(bool_array)
