@@ -125,3 +125,14 @@ class test_pixelated_stem(unittest.TestCase):
                 centre_x_array=centre_x_array, centre_y_array=centre_y_array,
                 mask_array=mask3)
         self.assertTrue(np.all(s_r3.data==0.0))
+
+    def test_com_angle_sector_mask(self):
+        x, y = 4, 7
+        array = np.zeros((5, 4, 10, 20))
+        array[:, :, y, x] = 1
+        s = PixelatedSTEM(array)
+        s_com = s.center_of_mass()
+        mask0 = s.angular_mask(
+                0.0, 0.5*np.pi,
+                centre_x_array=s_com.inav[0].data,
+                centre_y_array=s_com.inav[1].data)
