@@ -120,7 +120,7 @@ class PixelatedSTEM(Signal2D):
         return(signal)
 
 
-class DPCSignal(Signal2D):
+class DPCBaseSignal(BaseSignal):
     """
     Signal for processing differential phase contrast (DPC) acquired using
     scanning transmission electron microscopy (STEM).
@@ -132,50 +132,24 @@ class DPCSignal(Signal2D):
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
 
-    def correct_ramp(self, corner_size=0.05, out=None):
-        """
-        Subtracts a plane from the signal, useful for removing
-        the effects of d-scan in a STEM beam shift dataset.
 
-        The plane is calculated by fitting a plane to the corner values
-        of the signal. This will only work well when the property one
-        wants to measure is zero in these corners.
+class DPCSignal1D(Signal1D):
+    """
+    Signal for processing differential phase contrast (DPC) acquired using
+    scanning transmission electron microscopy (STEM).
 
-        Parameters
-        ----------
-        corner_size : number, optional
-            The size of the corners, as a percentage of the image's axis.
-            If corner_size is 0.05 (5%), and the image is 500 x 1000,
-            the size of the corners will be (500*0.05) x (1000*0.05) = 25 x 50.
-            Default 0.05
-        out : optional, DPCImage signal
+    The signal assumes the data is 2 dimensions, where the
+    signal dimension is the probe position, and the navigation
+    dimension is the x and y disk shifts.
 
-        Returns
-        -------
-        corrected_signal : Signal2D
-        """
-        if out is None:
-            output = self.deepcopy()
-        else:
-            output = out
-
-        for i, s in enumerate(self):
-            ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
-            output.data[i, :, :] -= ramp
-        if out is None:
-            return(output)
-
-    def get_color_signal(self):
-        angle = np.arctan2(self.inav[0].data, self.inav[1].data)
-        magnitude = np.sqrt(
-                np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
-        rgb_array = pst._get_rgb_array(
-                angle=angle, magnitude=magnitude)
-        signal_rgb = Signal1D(rgb_array*(2**16-1))
-        signal_rgb.change_dtype("uint16")
-        signal_rgb.change_dtype("rgb16")
-        return(signal_rgb)
+    The first navigation index (s.inav[0]) is assumed to the be x-shift
+    and the second navigation is the y-shift (s.inav[1]).
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
 
     def get_bivariate_histogram(
             self,
@@ -191,7 +165,7 @@ class DPCSignal(Signal2D):
         histogram_range : tuple, optional
             Set the minimum and maximum of the histogram range.
             Default is setting it automatically.
-        masked : 2-D numpy bool array, optional
+        masked : 1-D numpy bool array, optional
             Mask parts of the data. The array must be the same
             size as the signal. The True values are masked.
             Default is not masking anything.
@@ -204,52 +178,14 @@ class DPCSignal(Signal2D):
 
         Returns
         -------
-        s_hist : Signal2D
+        s_hist : Signal1D
         """
-        s0_flat = self.inav[0].data.flatten()
-        s1_flat = self.inav[1].data.flatten()
-
-        if masked is not None:
-            temp_s0_flat = []
-            temp_s1_flat = []
-            for data0, data1, masked_value in zip(
-                    s0_flat, s1_flat, masked.flatten()):
-                if not (masked_value == True):
-                    temp_s0_flat.append(data0)
-                    temp_s1_flat.append(data1)
-            s0_flat = np.array(temp_s0_flat)
-            s1_flat = np.array(temp_s1_flat)
-
-        if histogram_range is None:
-            if (s0_flat.std() > s1_flat.std()):
-                s0_range = (
-                    s0_flat.mean()-s0_flat.std()*spatial_std,
-                    s0_flat.mean()+s0_flat.std()*spatial_std)
-                s1_range = (
-                    s1_flat.mean()-s0_flat.std()*spatial_std,
-                    s1_flat.mean()+s0_flat.std()*spatial_std)
-            else:
-                s0_range = (
-                    s0_flat.mean()-s1_flat.std()*spatial_std,
-                    s0_flat.mean()+s1_flat.std()*spatial_std)
-                s1_range = (
-                    s1_flat.mean()-s1_flat.std()*spatial_std,
-                    s1_flat.mean()+s1_flat.std()*spatial_std)
-        else:
-            s0_range = histogram_range
-            s1_range = histogram_range
-
-        hist2d, xedges, yedges = np.histogram2d(
-                s0_flat,
-                s1_flat,
-                bins=bins,
-                range=[
-                    [s0_range[0], s0_range[1]],
-                    [s1_range[0], s1_range[1]]])
-
-        s_hist = Signal2D(hist2d)
-        s_hist.axes_manager[0].offset = xedges[0]
-        s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
-        s_hist.axes_manager[1].offset = yedges[0]
-        s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
+        x_position = self.inav[0].data
+        y_position = self.inav[1].data
+        s_hist = _get_bivariate_histogram(
+                    x_position, y_position,
+                    histogram_range=histogram_range,
+                    masked=masked,
+                    bins=bins,
+                    spatial_std=spatial_std)
         return(s_hist)
