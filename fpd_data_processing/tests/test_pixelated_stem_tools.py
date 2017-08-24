@@ -1,4 +1,5 @@
 import unittest
+from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 import fpd_data_processing.pixelated_stem_tools as pst
 import numpy as np
 from hyperspy.signals import Signal2D
@@ -144,8 +145,20 @@ class test_pixelated_tools(unittest.TestCase):
 
         s.axes_manager.signal_axes[0].offset = -15
         s.axes_manager.signal_axes[1].offset = -15
-        mask2 = pst._get_angle_sector_mask(s, angle0=np.pi*3/2, angle1=np.pi*2)
-        self.assertFalse(mask2.any())
+        mask3 = pst._get_angle_sector_mask(s, angle0=np.pi*3/2, angle1=np.pi*2)
+        self.assertFalse(mask3.any())
+
+    def test_get_angle_sector_mask_0d_com(self):
+        data_shape = (10, 8)
+        data = np.zeros(data_shape)
+        s = PixelatedSTEM(data)
+        s.data[4, 5] = 5.
+        s_com = s.center_of_mass()
+        mask = pst._get_angle_sector_mask(s,
+                centre_x_array=s_com.inav[0].data,
+                centre_y_array=s_com.inav[1].data,
+                angle0=np.pi*3/2, angle1=np.pi*2)
+
 
     def test_get_angle_sector_mask_1d(self):
         data_shape = (5, 7, 10)
@@ -175,6 +188,19 @@ class test_pixelated_tools(unittest.TestCase):
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
         self.assertEqual(mask0.shape, data_shape)
+
+    def test_get_angle_sector_mask_centre_xy(self):
+        data_shape = (3, 5, 7, 10)
+        data = np.ones(data_shape)*100.
+        s = Signal2D(data)
+        nav_shape = s.axes_manager.navigation_shape
+        centre_x, centre_y = np.ones(
+                nav_shape[::-1])*5, np.ones(nav_shape[::-1])*9
+        mask0 = pst._get_angle_sector_mask(
+            s, angle0=np.pi, angle1=2*np.pi,
+            centre_x_array=centre_x, centre_y_array=centre_y)
+        self.assertEqual(mask0.shape, data_shape)
+
 
     def test_get_angle_sector_mask_centre_xy(self):
         data_shape = (3, 5, 7, 10)

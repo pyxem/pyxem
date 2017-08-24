@@ -275,9 +275,15 @@ def _get_angle_sector_mask(
         indices = signal.axes_manager.indices[::-1]
         signal_axes = s.axes_manager.signal_axes
         if centre_x_array is not None:
-            signal_axes[0].offset = -centre_x_array[indices]
+            if indices == ():
+                signal_axes[0].offset = -centre_x_array[0]
+            else:
+                signal_axes[0].offset = -centre_x_array[indices]
         if centre_y_array is not None:
-            signal_axes[1].offset = -centre_y_array[indices]
+            if indices == ():
+                signal_axes[1].offset = -centre_y_array[0]
+            else:
+                signal_axes[1].offset = -centre_y_array[indices]
         x_size = signal_axes[1].size*1j
         y_size = signal_axes[0].size*1j
         x, y = np.mgrid[
