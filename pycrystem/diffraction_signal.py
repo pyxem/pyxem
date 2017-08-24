@@ -294,8 +294,10 @@ class ElectronDiffraction(Signal2D):
         """
         return self.map(affine_transformation, matrix=D, inplace=inplace)
 
-    def gain_normalisation(self, dark_reference, bright_reference,
-                           inplace=True):
+    def apply_gain_normalisation(self,
+                                 dark_reference,
+                                 bright_reference,
+                                 inplace=True):
         """Apply gain normalization to experimentally acquired electron
         diffraction patterns.
 
@@ -310,8 +312,34 @@ class ElectronDiffraction(Signal2D):
             new signal.
 
         """
-        return self.map(gain_normalise, dref=dark_reference,
-                        bref=bright_reference, inplace=inplace)
+        return self.map(gain_normalise,
+                        dref=dark_reference,
+                        bref=bright_reference,
+                        inplace=inplace)
+
+    def remove_deadpixels(self,
+                          deadpixels,
+                          deadvalue='average',
+                          inplace=True):
+        """Remove deadpixels from experimentally acquired diffraction patterns.
+
+        Parameters
+        ----------
+        deadpixels : ElectronDiffraction
+            List
+        deadvalue : string
+            Specify how deadpixels should be treated. 'average' sets the dead
+            pixel value to the average of adjacent pixels. 'nan' sets the dead
+            pixel to nan
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+
+        """
+        return self.map(remove_dead,
+                        deadpixels=deadpixels,
+                        deadvalue=deadvalue,
+                        inplace=inplace)
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.

@@ -56,7 +56,7 @@ def radial_average(z, center):
 
 def gain_normalise(z, dref, bref):
     """Apply gain normalization to experimentally acquired electron
-    diffraction patterns.
+    diffraction pattern.
 
     Parameters
     ----------
@@ -67,6 +67,35 @@ def gain_normalise(z, dref, bref):
         Bright reference image.
     """
     return ((z- dref) / (bref - dref)) * np.mean((bref - dref))
+
+def remove_dead(z, deadpixels, deadvalue):
+    """Remove dead pixels from experimental electron diffraction patterns.
+
+    Parameters
+    ----------
+    deadpixels : ElectronDiffraction
+        List
+    deadvalue : string
+        Specify how deadpixels should be treated. 'average' sets the dead
+        pixel value to the average of adjacent pixels. 'nan' sets the dead
+        pixel to nan
+
+    """
+    img = z
+    if deadvalue=='average':
+        for (i,j) in deadpixels:
+            neighbours = z[i-d:i+d+1, j-d:j+d+1].flatten()
+            img[i,j] = np.mean(neighbours)
+
+    elif deadvalue=='nan':
+        for (i,j) in deadpixels:
+            img[i,j] = nan
+    else:
+        raise NotImplementedError("The method specified is not implemented. "
+                                  "See documentation for available "
+                                  "implementations.")
+
+    return img
 
 def affine_transformation(z, order=3, **kwargs):
     """Apply an affine transform to a 2-dimensional array.
