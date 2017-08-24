@@ -40,6 +40,18 @@ class test_pixelated_stem(unittest.TestCase):
         self.assertTrue((s_com1.data[0] == x1_array).all())
         self.assertTrue((s_com1.data[1] == y1_array).all())
 
+    def test_center_of_mass_different_shapes(self):
+        array1 = np.zeros(shape=(5, 10, 15, 8))
+        x1_array = np.random.randint(1, 7, size=(5, 10))
+        y1_array = np.random.randint(1, 14, size=(5, 10))
+        for i in range(5):
+            for j in range(10):
+                array1[i, j, y1_array[i, j], x1_array[i, j]] = 1
+        s1 = PixelatedSTEM(array1)
+        s_com1 = s1.center_of_mass()
+        self.assertTrue((s_com1.inav[0].data == x1_array).all())
+        self.assertTrue((s_com1.inav[1].data == y1_array).all())
+
     def test_radial_integration(self):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
@@ -80,7 +92,6 @@ class test_pixelated_stem(unittest.TestCase):
         s0_r = s0.radial_integration()
         self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
         self.assertTrue((s0_r.data[:,:-1] == big_value).all())
-
 
     def test_get_angle_sector_mask_simple(self):
         array = np.zeros((10, 10, 10, 10))
