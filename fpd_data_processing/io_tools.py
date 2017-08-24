@@ -3,7 +3,8 @@ import logging
 from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
-from fpd_data_processing.pixelated_stem_class import PixelatedSTEM, DPCSignal
+from fpd_data_processing.pixelated_stem_class import (
+        PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D)
 
 
 def _fpd_checker(filename, attr_substring='fpd_version'):
@@ -49,19 +50,19 @@ def load_fpd_dataset(filename):
     return PixelatedSTEM(s.data)
 
 
-def _dpc_checker(filename):
-    s = load(filename)
-    if s.axes_manager.signal_dimension != 2:
-        return(False)
-    if s.axes_manager.navigation_shape != (2,):
-        return(False)
-    return(True)
-
-
 def load_dpc_signal(filename):
-    if not _dpc_checker(filename):
+    s = load(filename)
+    if s.axes_manager.navigation_shape != (2,):
         raise Exception(
-                "DPC signal needs to have 2 signal dimensions "
-                "and 1 navigation dimension with a size of 2.")
-    s = DPCSignal(load(filename))
+                "DPC signal needs to have 1 navigation "
+                "dimension with a size of 2.")
+    if s.axes_manager.signal_dimension == 0:
+        s = DPCBaseSignal(load(filename)).T
+    elif s.axes_manager.signal_dimension == 1:
+        s = DPCSignal1D(load(filename))
+    elif s.axes_manager.signal_dimension == 2:
+        s = DPCSignal2D(load(filename))
+    else:
+        raise NotImplementedError(
+                "DPC signals only support 0, 1 and 2 signal dimensions")
     return(s)
