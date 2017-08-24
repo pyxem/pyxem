@@ -148,7 +148,7 @@ def _find_longest_distance(
 
 def _make_centre_array_from_signal(signal):
     a_m = signal.axes_manager
-    shape = a_m.navigation_shape
+    shape = a_m.navigation_shape[::-1]
     centre_x_array = np.ones(shape)*a_m.signal_axes[0].value2index(0)
     centre_y_array = np.ones(shape)*a_m.signal_axes[1].value2index(0)
     return(centre_x_array, centre_y_array)
@@ -163,24 +163,24 @@ def _do_radial_integration(
             signal.axes_manager.signal_axes[0].size,
             centre_x_array.min(), centre_y_array.min(),
             centre_x_array.max(), centre_y_array.max())+1
-    radial_array_shape = list(signal.axes_manager.navigation_shape)
+    radial_array_shape = list(signal.axes_manager.navigation_shape[::-1])
     radial_array_shape.append(radial_array_size)
     radial_profile_array = np.zeros(radial_array_shape, dtype=np.float64)
     for temp_s in signal:
-        indicies = signal.axes_manager.indices[::-1]
+        indices = signal.axes_manager.indices[::-1]
         diff_image = temp_s.data
         if mask_array is None:
             mask = None
         else:
-            mask = mask_array[indicies]
-        centre_x = centre_x_array[indicies]
-        centre_y = centre_y_array[indicies]
+            mask = mask_array[indices]
+        centre_x = centre_x_array[indices]
+        centre_y = centre_y_array[indices]
         radial_profile = _get_radial_profile_of_diff_image(
                 diff_image, centre_x, centre_y, mask=mask)
-        indicies_list = list(indicies)
-        indicies_list.append(slice(0, len(radial_profile)))
-        indicies_radial = tuple(indicies_list)
-        radial_profile_array[indicies_radial] = radial_profile
+        indices_list = list(indices)
+        indices_list.append(slice(0, len(radial_profile)))
+        indices_radial = tuple(indices_list)
+        radial_profile_array[indices_radial] = radial_profile
 
     signal_radial = Signal1D(radial_profile_array)
     return(signal_radial)

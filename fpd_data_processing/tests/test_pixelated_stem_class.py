@@ -90,6 +90,12 @@ class test_pixelated_stem(unittest.TestCase):
         self.assertTrue(np.all(s1_r.data[:,:,0]==1))
         self.assertTrue(np.all(s1_r.data[:,:,1:]==0))
 
+    def test_radial_integration_different_shape(self):
+        array = np.ones(shape=(7, 9, 30, 40))
+        s = PixelatedSTEM(array)
+        s_r = s.radial_integration()
+        self.assertTrue((s_r.data[:, :, :-2] == 1).all())
+
     def test_radial_integration_nav_0(self):
         data_shape = (40, 40)
         array0 = np.ones(shape=data_shape)

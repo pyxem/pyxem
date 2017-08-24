@@ -6,6 +6,45 @@ from hyperspy.signals import Signal2D
 
 class test_pixelated_tools(unittest.TestCase):
 
+    def test_do_radial_integration_2d(self):
+        s0 = Signal2D(np.ones((10, 10)))
+        s0_r = pst._do_radial_integration(s0)
+        self.assertEqual(
+                s0.axes_manager.navigation_shape,
+                s0_r.axes_manager.navigation_shape)
+
+        s1 = Signal2D(np.ones((10, 17)))
+        s1_r = pst._do_radial_integration(s1)
+        self.assertEqual(
+                s1.axes_manager.navigation_shape,
+                s1_r.axes_manager.navigation_shape)
+
+    def test_do_radial_integration_3d(self):
+        s0 = Signal2D(np.ones((10, 10, 10)))
+        s0_r = pst._do_radial_integration(s0)
+        self.assertEqual(
+                s0.axes_manager.navigation_shape,
+                s0_r.axes_manager.navigation_shape)
+
+        s1 = Signal2D(np.ones((5, 10, 17)))
+        s1_r = pst._do_radial_integration(s1)
+        self.assertEqual(
+                s1.axes_manager.navigation_shape,
+                s1_r.axes_manager.navigation_shape)
+
+    def test_do_radial_integration_4d(self):
+        s0 = Signal2D(np.ones((10, 10, 10, 10)))
+        s0_r = pst._do_radial_integration(s0)
+        self.assertEqual(
+                s0.axes_manager.navigation_shape,
+                s0_r.axes_manager.navigation_shape)
+
+        s1 = Signal2D(np.ones((14, 21, 11, 16)))
+        s1_r = pst._do_radial_integration(s1)
+        self.assertEqual(
+                s1.axes_manager.navigation_shape,
+                s1_r.axes_manager.navigation_shape)
+
     def test_find_longest_distance_manual(self):
         # These values are tested manually, against knowns results,
         # to make sure everything works fine.
@@ -72,8 +111,8 @@ class test_pixelated_tools(unittest.TestCase):
         offset_x = sa[0].offset
         offset_y = sa[1].offset
         mask = pst._make_centre_array_from_signal(s)
-        self.assertEqual(mask[0].shape, s.axes_manager.navigation_shape)
-        self.assertEqual(mask[1].shape, s.axes_manager.navigation_shape)
+        self.assertEqual(mask[0].shape[::-1], s.axes_manager.navigation_shape)
+        self.assertEqual(mask[1].shape[::-1], s.axes_manager.navigation_shape)
         self.assertTrue((offset_x==mask[0]).all())
         self.assertTrue((offset_y==mask[1]).all())
 
