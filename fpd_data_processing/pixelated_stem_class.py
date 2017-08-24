@@ -36,13 +36,14 @@ class PixelatedSTEM(Signal2D):
         s_com = self.map(
                 pst._center_of_mass_single_frame,
                 threshold=threshold, mask=mask,
-                ragged=False, inplace=False).T
-        if len(s_com.axes_manager.shape) == 0:
-            s_com = DPCBaseSignal(s_com.data)
-        elif len(s_com.axes_manager.shape) == 1:
-            s_com = DPCSignal1D(s_com.data)
-        elif len(s_com.axes_manager.shape) == 2:
-            s_com = DPCSignal2D(s_com.data)
+                ragged=False, inplace=False)
+        if self.axes_manager.navigation_dimension == 0:
+            s_com = DPCBaseSignal(s_com.data).T
+        elif self.axes_manager.navigation_dimension == 1:
+            s_com = DPCSignal1D(s_com.T.data)
+        elif self.axes_manager.navigation_dimension == 2:
+            s_com = DPCSignal2D(s_com.T.data)
+        s_com.axes_manager.navigation_axes[0].name = "Beam position"
         return(s_com)
 
     def radial_integration(

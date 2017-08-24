@@ -20,6 +20,28 @@ class test_pixelated_stem(unittest.TestCase):
         s1 = PixelatedSTEM(array1)
         self.assertEqual(array1.shape, s1.axes_manager.shape)
 
+    def test_center_of_mass_0d(self):
+        x0, y0 = 2, 3
+        array0 = np.zeros(shape=(7, 9))
+        array0[y0, x0] = 1
+        s0 = PixelatedSTEM(array0)
+        s_com0 = s0.center_of_mass()
+        self.assertTrue((s_com0.inav[0].data == x0).all())
+        self.assertTrue((s_com0.inav[1].data == y0).all())
+        self.assertEqual(s_com0.axes_manager.navigation_shape, (2, ))
+        self.assertEqual(s_com0.axes_manager.signal_shape, ())
+
+    def test_center_of_mass_1d(self):
+        x0, y0 = 2, 3
+        array0 = np.zeros(shape=(5, 6, 4))
+        array0[:, y0, x0] = 1
+        s0 = PixelatedSTEM(array0)
+        s_com0 = s0.center_of_mass()
+        self.assertTrue((s_com0.inav[0].data == x0).all())
+        self.assertTrue((s_com0.inav[1].data == y0).all())
+        self.assertEqual(s_com0.axes_manager.navigation_shape, (2, ))
+        self.assertEqual(s_com0.axes_manager.signal_shape, (5, ))
+
     def test_center_of_mass(self):
         x0, y0 = 5, 7
         array0 = np.zeros(shape=(10, 10, 10, 10))

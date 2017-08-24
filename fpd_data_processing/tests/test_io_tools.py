@@ -35,3 +35,16 @@ class test_dpcsignal_io(unittest.TestCase):
                 "dpcbasesignal_test_too_many_signal_dims.hdf5")
         with self.assertRaises(NotImplementedError):
             s = fdp.load_dpc_signal(filename)
+
+
+class test_pixelatedstem_signal_io(unittest.TestCase):
+
+    def test_load_hspy_signal(self):
+        filename = os.path.join(
+                my_path, "test_data", "pixelated_stem_test.hdf5")
+        s = fdp.load_fpd_signal(filename)
+
+    def test_load_fpd_signal(self):
+        filename = os.path.join(
+                my_path, "test_data", "fpd_file_test.hdf5")
+        s = fdp.load_fpd_signal(filename)

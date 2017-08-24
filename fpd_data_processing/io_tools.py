@@ -14,10 +14,15 @@ def _fpd_checker(filename, attr_substring='fpd_version'):
             return(True)
     return(False)
 
+def _hspy_checker(filename, attr_substring='fpd_version'):
+    hdf5_file = h5py.File(filename)
+    for attr in hdf5_file.attrs:
+        if 'file_format' in attr:
+            if hdf5_file.attrs['file_format'] == 'HyperSpy':
+                return(True)
+    return(False)
 
-def load_fpd_dataset(filename):
-    if not _fpd_checker(filename):
-        raise Exception("fpd_version header not found")
+def _load_fpd_emd_file(filename):
     logging.basicConfig(level=logging.ERROR)
     s_list = load_with_reader(filename, reader=emd)
     logging.basicConfig(level=logging.WARNING)
@@ -39,13 +44,22 @@ def load_fpd_dataset(filename):
     else:
         raise Exception(
                 "Pixelated dataset not found")
+    return(s)
+
+
+def load_fpd_signal(filename):
+    if _fpd_checker(filename, attr_substring='fpd_version'):
+        s = _load_fpd_emd_file(filename)
+    elif _hspy_checker(filename, attr_substring='HyperSpy'):
+        s = load(filename)
+    else:
+        raise IOError("File " + str(filename) + " not recognised")
     s_new = PixelatedSTEM(s.data)
     for i in range(len(s.axes_manager.shape)):
         s_new.axes_manager[i].offset = s.axes_manager[i].offset
         s_new.axes_manager[i].scale = s.axes_manager[i].scale
         s_new.axes_manager[i].name = s.axes_manager[i].name
         s_new.axes_manager[i].units = s.axes_manager[i].units
-
     s_new.metadata = s.metadata.deepcopy()
     return PixelatedSTEM(s.data)
 
