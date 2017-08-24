@@ -168,6 +168,9 @@ def circular_mask(shape, radius, center):
 
     return mask
 
+def blur_center(z, sigma):
+    
+
 def refine_beam_position(z, start, radius):
     """
     Refine the position of the direct beam and hence an estimate for the

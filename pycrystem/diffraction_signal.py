@@ -389,39 +389,46 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
-    def get_direct_beam_position(self, radius):
-        """Determine rigid shifts in the SED patterns based on the position of
-        the direct beam and return the shifts required to center all patterns.
+    def get_direct_beam_position(self,
+                                 method='blur',
+                                 calibrated_units=False,
+                                 *args, **kwargs):
+        """Estimate the direct beam position in each experimentally acquired
+        electron diffraction pattern.
 
         Parameters
         ----------
-        radius : int
-            Defines the size of the circular region, in pixels, within which the
-            direct beam position is refined.
+        method : string
+            Specify the method used to determine the direct beam position.
+
+        calibrated_units : boolean
+            If False the direct beam position
 
         Returns
         -------
-        shifts : ndarray
+        centers : ndarray
             Array containing the shift to be applied to each SED pattern to
             center it.
 
         """
-        # sum images to produce image in which direct beam reinforced and take
-        # the position of maximum intensity as the initial estimate of center.
-        dp_sum = self.sum()
-        maxes = np.asarray(np.where(dp_sum.data == dp_sum.data.max()))
-        mref = np.rint([np.average(maxes[0]), np.average(maxes[1])])
-        mref = mref.astype(int)
-        # specify array of dims (nav_size, 2) in which to store centers and find
-        # the center of each pattern by determining the direct beam position.
-        arr_shape = (self.axes_manager.navigation_size, 2)
-        c = np.zeros(arr_shape, dtype=int)
-        for z, index in zip(self._iterate_signal(),
-                            np.arange(0, self.axes_manager.navigation_size, 1)):
-            c[index] = refine_beam_position(z, start=mref, radius=radius)
-        # The arange function produces a linear set of centers that has to be
-        # reshaped back to the original signal shape
-        return c.reshape(self.axes_manager.navigation_shape[::-1] + (-1,))
+        #TODO: add sub-pixel capabilities.
+        if method=='blur'
+            centers = self.map(blur_center, sigma=sigma inplace=False)
+
+        elif method == 'refine_local'
+            if initial_center==None:
+                initial_center = np.int(self.signal_axes.shape / 2)
+
+            centers = map(refine_beam_position,
+                          initial_center=initial_center,
+                          radius=radius)
+
+        else:
+            raise NotImplementedError("The method specified is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.")
+
+        return centers
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.
@@ -448,6 +455,7 @@ class ElectronDiffraction(Signal2D):
         :meth:`get_background_model`
 
         """
+        #TODO: Consider adding difference of gaussians method from Stef.
         if method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
