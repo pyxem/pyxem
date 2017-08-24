@@ -24,6 +24,7 @@ from __future__ import division
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal2D, BaseSignal
+from skimage.morphology import square
 
 from pycrystem.utils.expt_utils import *
 from pycrystem.utils.peakfinders2D import *
@@ -394,18 +395,19 @@ class ElectronDiffraction(Signal2D):
         # reshaped back to the original signal shape
         return c.reshape(self.axes_manager.navigation_shape[::-1] + (-1,))
 
-    def remove_background(self, saturation_radius=0):
-        """Perform background subtraction.
-
-        The average radial profile of the data is used to model the background
-        which is then subtracted from the data. The remaining noise is smoothed
-        using an h-dome.
+    def remove_background(self, method='model', *args, **kwargs):
+        """Perform background subtraction via multiple methods.
 
         Parameters
         ----------
+        method : string
+            Method is either 'h-dome' or 'model'. The latter fit a model to the
+            radial profile of the average diffraction pattern and then smooths
+            remaining noise using a h-dome method.
+
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
-            beam.
+            beam if the model method is used.
 
         Returns
         -------
@@ -418,26 +420,31 @@ class ElectronDiffraction(Signal2D):
         :meth:`get_background_model`
 
         """
-        # TODO: separate into multiple methods
-        # TODO: make an 'averaging' flag
+        if method == 'h-dome':
+            scale = self.data.max()
+            self.data = self.data / scale
+            denoised = self.map(regional_filter, inplace=False, *args, **kwargs)
+            denoised.map(filters.rank.mean, selem=square(3))
+            denoised.data = denoised.data / denoised.data.max()
 
-        # Old method:
-        # def mean_filter(h):
-        #     self.data = self.data / self.data.max()
-        #     self.map(regional_filter, h=h)
-        #     self.map(filters.rank.mean, selem=square(3))
-        #     self.data = self.data / self.data.max()
-        bg = self.get_background_model(saturation_radius)
+        elif method == 'model':
+            bg = self.get_background_model(*args, **kwargs)
 
-        bg_removed = np.clip(self - bg, 0, 255)
+            bg_removed = np.clip(self - bg, 0, 255)
 
-        denoised = ElectronDiffraction(
-            bg_removed.map(regional_flattener, h=bg.data.min()-1, inplace=False)
-        )
-        denoised.axes_manager.update_axes_attributes_from(
-            self.axes_manager.navigation_axes)
-        denoised.axes_manager.update_axes_attributes_from(
-            self.axes_manager.signal_axes)
+            denoised = ElectronDiffraction(
+                bg_removed.map(regional_flattener,
+                               h=bg.data.min()-1,
+                               inplace=False))
+            denoised.axes_manager.update_axes_attributes_from(
+                self.axes_manager.navigation_axes)
+            denoised.axes_manager.update_axes_attributes_from(
+                self.axes_manager.signal_axes)
+
+        else:
+            raise NotImplementedError("The method specified is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.")
 
         return denoised
 
