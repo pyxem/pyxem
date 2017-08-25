@@ -411,7 +411,7 @@ class ElectronDiffraction(Signal2D):
             center it.
 
         """
-        #TODO: add sub-pixel capabilities.
+        #TODO: add sub-pixel capabilities and model fitting methods.
         if method=='blur'
             centers = self.map(blur_center, sigma=sigma inplace=False)
 
@@ -547,6 +547,35 @@ class ElectronDiffraction(Signal2D):
             bg.axes_manager.signal_axes[i].update_from(
                 self.axes_manager.signal_axes[i])
         return bg
+
+    def get_no_diffraction_mask(self, *args, **kwargs):
+        """Identify electron diffraction patterns containing no diffraction
+        peaks for removal in further processing steps.
+
+        Parameters
+        ----------
+        method : string
+            Choice of method
+
+        Returns
+        -------
+        mask : Signal
+            Signal object containing the mask.
+        """
+        #TODO: Make this actually work.
+        if method == 'shapiro-wilk':(
+            shapiro_values = self.map(stats.shapiro)
+            mask = shapiro_values > threshold
+
+        elif method == 'threshold':
+            mask = self.sum((2,3)) > threshold
+
+        else:
+            raise NotImplementedError("The method specified is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.")
+
+        return mask
 
     def decomposition(self, *args, **kwargs):
         """Decomposition with a choice of algorithms.
