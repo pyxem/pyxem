@@ -168,8 +168,17 @@ def circular_mask(shape, radius, center):
 
     return mask
 
+def gaussian_difference_bkg(z, sigma_min, sigma_max):
+    """
+    """
+    blur_max = ndimage.gaussian_filter(z, sigma_max)
+    blur_min = ndimage.gaussian_filter(z, sigma_min)
+
+    return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
+
 def blur_center(z, sigma):
-    
+    """
+    """
 
 def refine_beam_position(z, start, radius):
     """

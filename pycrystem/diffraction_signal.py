@@ -455,7 +455,6 @@ class ElectronDiffraction(Signal2D):
         :meth:`get_background_model`
 
         """
-        #TODO: Consider adding difference of gaussians method from Stef.
         if method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
@@ -476,6 +475,9 @@ class ElectronDiffraction(Signal2D):
                 self.axes_manager.navigation_axes)
             denoised.axes_manager.update_axes_attributes_from(
                 self.axes_manager.signal_axes)
+
+        elif method == 'gaussian_difference':
+            denoised = self.map(gaussian_difference_bkg, sigma_min, sigma_max)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "
