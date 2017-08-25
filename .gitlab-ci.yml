@@ -9,7 +9,7 @@ all_tests_debian_unstable:
     - python3 -m unittest discover
 
 all_tests_debian_stable:
-    image: debian:scratch
+    image: debian:stretch
     script:
     - apt-get update -q
     - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-skimage python3-matplotlib
