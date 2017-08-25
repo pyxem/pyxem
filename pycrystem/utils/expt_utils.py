@@ -191,6 +191,18 @@ def gaussian_difference_bkg(z, sigma_min, sigma_max):
 def blur_center(z, sigma):
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
+
+    Parameters
+    ----------
+
+    sigma : float
+        Sigma value for Gaussian blurring kernel.
+
+    Returns
+    -------
+
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
     """
     blurred = ndi.gaussian_filter(z, sigma)
     center = np.unravel_index(blurred.argmax(), blurred.shape)
