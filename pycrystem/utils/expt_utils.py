@@ -183,14 +183,19 @@ def gaussian_difference_bkg(z, sigma_min, sigma_max):
     -------
     Denoised diffraction pattern.
     """
-    blur_max = ndimage.gaussian_filter(z, sigma_max)
-    blur_min = ndimage.gaussian_filter(z, sigma_min)
+    blur_max = ndi.gaussian_filter(z, sigma_max)
+    blur_min = ndi.gaussian_filter(z, sigma_min)
 
     return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
 
 def blur_center(z, sigma):
+    """Estimate direct beam position by blurring the image with a large
+    Gaussian kernel and finding the maximum.
     """
-    """
+    blurred = ndi.gaussian_filter(z, sigma)
+    center = np.unravel_index(blurred.argmax(), blurred.shape)
+
+    return np.array(center)
 
 def refine_beam_position(z, start, radius):
     """Refine the position of the direct beam and hence an estimate for the
