@@ -26,24 +26,26 @@ from skimage import morphology, filters
 from skimage.morphology import square
 
 """
-This module contains utility functions for treating experimental (scanning)
-electron diffraction data.
+This module contains utility functions for processing electron diffraction
+patterns.
 """
 
 def radial_average(z, center):
-    """Calculate the radial average profile about a defined center.
+    """Calculate the radial profile by azimuthal averaging about a specified
+    center.
 
     Parameters
     ----------
-    center : array_like
-        The center about which the radial integration is performed.
+    center : array
+        The array indices of the diffraction pattern center about which the
+        radial integration is performed.
 
     Returns
     -------
-
-    radial_profile :
-
+    radial_profile : array
+        Radial profile of the diffraction pattern.
     """
+    #TODO: Add Instamatic cython based implementation
     y, x = np.indices(z.shape)
     r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
     r = r.astype(np.int)
@@ -64,7 +66,11 @@ def gain_normalise(z, dref, bref):
         Dark reference image.
 
     bref : ElectronDiffraction
-        Bright reference image.
+        Flat-field bright reference image.
+
+    Returns
+    -------
+        Gain normalized diffraction pattern
     """
     return ((z- dref) / (bref - dref)) * np.mean((bref - dref))
 
@@ -73,13 +79,19 @@ def remove_dead(z, deadpixels, deadvalue):
 
     Parameters
     ----------
-    deadpixels : ElectronDiffraction
-        List
-    deadvalue : string
-        Specify how deadpixels should be treated. 'average' sets the dead
-        pixel value to the average of adjacent pixels. 'nan' sets the dead
-        pixel to nan
+    deadpixels : array
+        Array containing the array indices of dead pixels in the diffraction
+        pattern.
 
+    deadvalue : string
+        Specify how deadpixels should be treated, options are;
+            'average': takes the average of adjacent pixels
+            'nan':  sets the dead pixel to nan
+
+    Returns
+    -------
+    img : array
+        Array containing the diffraction pattern with dead pixels removed.
     """
     img = z
     if deadvalue=='average':
@@ -97,17 +109,21 @@ def remove_dead(z, deadpixels, deadvalue):
 
     return img
 
-def affine_transformation(z, order=3, **kwargs):
-    """Apply an affine transform to a 2-dimensional array.
+def affine_transformation(z, order, **kwargs):
+    """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
     ----------
-    matrix : 3 x 3
+    matrix : np.array
+        3x3 numpy array specifying the affine transformation to be applied.
+
+    order : int
+        Interpolation order.
 
     Returns
     -------
     trans : array
-        Transformed 2-dimensional array
+        Affine transformed diffraction pattern.
     """
     shift_y, shift_x = np.array(z.shape[:2]) / 2.
     tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
@@ -125,15 +141,12 @@ def regional_filter(z, h):
 
     Parameters
     ----------
-
-    z : image as numpy array
-
-    h :
+    h : float
+        h-dome cutoff value.
 
     Returns
     -------
-
-    h-dome subtracted image.
+        h-dome subtracted image as np.array
     """
     seed = np.copy(z)
     seed = z - h
@@ -149,25 +162,6 @@ def regional_flattener(z, h):
     eroded = morphology.reconstruction(seed, mask, method='erosion')
     return eroded - h
 
-def circular_mask(shape, radius, center):
-    """
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
-    r = radius
-    nx, ny = shape[0], shape[1]
-    a, b = center
-
-    y, x = np.ogrid[-b:ny-b, -a:nx-a]
-    mask = x*x + y*y <= r*r
-
-    return mask
-
 def gaussian_difference_bkg(z, sigma_min, sigma_max):
     """Difference of gaussians method for background removal.
 
@@ -181,7 +175,7 @@ def gaussian_difference_bkg(z, sigma_min, sigma_max):
 
     Returns
     -------
-    Denoised diffraction pattern.
+        Denoised diffraction pattern as np.array
     """
     blur_max = ndi.gaussian_filter(z, sigma_max)
     blur_min = ndi.gaussian_filter(z, sigma_min)
@@ -194,13 +188,11 @@ def blur_center(z, sigma):
 
     Parameters
     ----------
-
     sigma : float
         Sigma value for Gaussian blurring kernel.
 
     Returns
     -------
-
     center : np.array
         np.array containing indices of estimated direct beam positon.
     """
@@ -226,6 +218,7 @@ def refine_beam_position(z, start, radius):
     ------
     center: array
         Refined position (x, y) of the direct beam.
+        
     Notes
     -----
     This method is based on work presented by Thomas White in his PhD (2009)
