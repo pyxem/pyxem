@@ -169,7 +169,19 @@ def circular_mask(shape, radius, center):
     return mask
 
 def gaussian_difference_bkg(z, sigma_min, sigma_max):
-    """
+    """Difference of gaussians method for background removal.
+
+    Parameters
+    ----------
+    sigma_max : float
+        Large gaussian blur sigma.
+
+    sigma_min : float
+        Small gaussian blur sigma.
+
+    Returns
+    -------
+    Denoised diffraction pattern.
     """
     blur_max = ndimage.gaussian_filter(z, sigma_max)
     blur_min = ndimage.gaussian_filter(z, sigma_min)
@@ -181,9 +193,9 @@ def blur_center(z, sigma):
     """
 
 def refine_beam_position(z, start, radius):
-    """
-    Refine the position of the direct beam and hence an estimate for the
+    """Refine the position of the direct beam and hence an estimate for the
     position of the pattern center in each SED pattern.
+
     Parameters
     ----------
     radius : int
@@ -192,6 +204,7 @@ def refine_beam_position(z, start, radius):
     center : bool
         If True the direct beam position is refined to sub-pixel precision
         via calculation of the intensity center of mass.
+
     Return
     ------
     center: array
