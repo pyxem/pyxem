@@ -14,6 +14,7 @@ def _fpd_checker(filename, attr_substring='fpd_version'):
             return(True)
     return(False)
 
+
 def _hspy_checker(filename, attr_substring='fpd_version'):
     hdf5_file = h5py.File(filename)
     for attr in hdf5_file.attrs:
@@ -21,6 +22,7 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
             if hdf5_file.attrs['file_format'] == 'HyperSpy':
                 return(True)
     return(False)
+
 
 def _load_fpd_emd_file(filename):
     logging.basicConfig(level=logging.ERROR)
