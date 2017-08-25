@@ -64,7 +64,6 @@ def gain_normalise(z, dref, bref):
     ----------
     dref : ElectronDiffraction
         Dark reference image.
-
     bref : ElectronDiffraction
         Flat-field bright reference image.
 
@@ -82,7 +81,6 @@ def remove_dead(z, deadpixels, deadvalue):
     deadpixels : array
         Array containing the array indices of dead pixels in the diffraction
         pattern.
-
     deadvalue : string
         Specify how deadpixels should be treated, options are;
             'average': takes the average of adjacent pixels
@@ -116,7 +114,6 @@ def affine_transformation(z, order, **kwargs):
     ----------
     matrix : np.array
         3x3 numpy array specifying the affine transformation to be applied.
-
     order : int
         Interpolation order.
 
@@ -169,7 +166,6 @@ def gaussian_difference_bkg(z, sigma_min, sigma_max):
     ----------
     sigma_max : float
         Large gaussian blur sigma.
-
     sigma_min : float
         Small gaussian blur sigma.
 
@@ -218,7 +214,7 @@ def refine_beam_position(z, start, radius):
     ------
     center: array
         Refined position (x, y) of the direct beam.
-        
+
     Notes
     -----
     This method is based on work presented by Thomas White in his PhD (2009)

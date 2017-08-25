@@ -280,19 +280,31 @@ class ElectronDiffraction(Signal2D):
                                                        border_value=0)
         return mask
 
-    def apply_affine_transformation(self, D, inplace=True):
+    def apply_affine_transformation(self,
+                                    D,
+                                    order=3,
+                                    inplace=True,
+                                    *args, **kwargs):
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
         ----------
-        D : 3x3 numpy array
-            Specifies the affine transform to be applied.
+        D : array
+            3x3 np.array specifying the affine transform to be applied.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
 
+        Returns
+        -------
+            ElectronDiffraction Signal containing the affine Transformed
+            diffraction patterns.
+
         """
-        return self.map(affine_transformation, matrix=D, inplace=inplace)
+        return self.map(affine_transformation,
+                        matrix=D,
+                        order=order,
+                        inplace=inplace)
 
     def apply_gain_normalisation(self,
                                  dark_reference,
@@ -400,7 +412,6 @@ class ElectronDiffraction(Signal2D):
         ----------
         method : string
             Specify the method used to determine the direct beam position.
-
         calibrated_units : boolean
             If False the direct beam position
 
@@ -439,7 +450,6 @@ class ElectronDiffraction(Signal2D):
             Method is either 'h-dome' or 'model'. The latter fit a model to the
             radial profile of the average diffraction pattern and then smooths
             remaining noise using a h-dome method.
-
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
             beam if the model method is used.
