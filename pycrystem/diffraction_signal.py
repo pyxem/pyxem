@@ -386,6 +386,39 @@ class ElectronDiffraction(Signal2D):
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
         return radial_profiles.as_signal1D(signal_axis)
 
+    def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
+        """Reproject the diffraction data into polar coordinates.
+
+        Parameters
+        ----------
+        origin : tuple
+            The coordinate (x0, y0) of the image center, relative to bottom-left.
+            If 'None'defaults to the center of the pattern.
+        Jacobian : boolean
+            Include ``r`` intensity scaling in the coordinate transform.
+            This should be included to account for the changing pixel size that
+            occurs during the transform.
+        dr : float
+            Radial coordinate spacing for the grid interpolation
+            tests show that there is not much point in going below 0.5
+        dt : float
+            Angular coordinate spacing (in radians)
+            if ``dt=None``, dt will be set such that the number of theta values
+            is equal to the maximum value between the height or the width of
+            the image.
+
+        Returns
+        -------
+        output : ElectronDiffraction
+            The electron diffraction data in polar coordinates.
+
+        """
+        return map(self,
+                   reproject_polar,
+                   origin=origin,
+                   jacobian=jacobian,
+                   dr=dr, dt=dt)
+
     def get_diffraction_variance(self):
         """Calculates the variance of associated with each diffraction pixel.
 
