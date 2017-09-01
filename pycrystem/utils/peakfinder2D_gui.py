@@ -21,7 +21,7 @@ from collections import OrderedDict
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import display
-from pycrystem.utils.peakfinders2D import *
+from .peakfinders2D import *
 
 METHODS = [find_peaks_max, find_peaks_minmax, find_peaks_zaefferer,
            find_peaks_stat, find_peaks_dog, find_peaks_log]

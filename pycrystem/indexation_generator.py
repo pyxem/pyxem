@@ -30,7 +30,7 @@ from operator import itemgetter
 from scipy.constants import pi
 
 from .utils import correlate
-from pycrystem.crystallographic_map import CrystallographicMap
+from .crystallographic_map import CrystallographicMap
 
 def correlate_library(image, library, n_largest):
     """Correlates all simulated diffraction templates in a DiffractionLibrary

@@ -21,7 +21,7 @@ from __future__ import division
 from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
-from pycrystem.utils.expt_utils import *
+from .utils.expt_utils import *
 
 """
 Signal class for diffraction vectors.
