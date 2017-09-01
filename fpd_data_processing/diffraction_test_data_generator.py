@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from hyperspy.signals import Signal2D
 from scipy.ndimage.filters import gaussian_filter
+from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 
 class Circle:
     def __init__(self,xx,yy,x0,y0,r,I):
@@ -13,8 +14,8 @@ class Circle:
         self.mask_outside_r()
 
     def mask_outside_r(self):
-        lw = 0.5
-        indices = self.circle > np.sqrt(self.r+lw)
+        lw = 0
+        indices = self.circle > (self.r+lw)**2
         self.circle[indices] = 0
 
     def set_uniform_intensity(self):
@@ -41,7 +42,6 @@ class Disk(object):
             self.z.I,
             )
 
-
     def get_signal(self):
         return(self.z.circle)
 
@@ -53,7 +53,8 @@ class Disk(object):
 
 
 class Ring(object):
-    def __init__(self,xx,yy,x0,y0,r,I):
+    def __init__(self,xx,yy,x0,y0,r,I,lw=1):
+        self.lw = lw
         self.z = Circle(xx,yy,x0,y0,r,I)
         self.mask_inside_r()
         self.z.set_uniform_intensity()
@@ -68,8 +69,7 @@ class Ring(object):
             )
 
     def mask_inside_r(self):
-        lw = 1
-        indices = self.z.circle < np.sqrt(self.z.r-lw)
+        indices = self.z.circle < (self.z.r-self.lw)**2
         self.z.circle[indices] = 0
         
     def get_signal(self):
@@ -123,7 +123,9 @@ class TestData:
         self.z_list = []
         if default:
             self.add_disk()
-            self.add_ring()
+            self.add_ring(lw=5*self.scale)
+        else:
+            self.update_signal()
 
     def update_signal(self):
         self.make_signal()
@@ -139,14 +141,14 @@ class TestData:
         self.z_list.append(Disk(self.xx,self.yy,x0,y0,r,I))
         self.update_signal()
 
-    def add_ring(self,x0=5,y0=5,r=20,I=10):
-        self.z_list.append(Ring(self.xx,self.yy,x0,y0,r,I))        
+    def add_ring(self,x0=5,y0=5,r=20,I=10,lw=5):
+        self.lw = lw*self.scale
+        self.z_list.append(Ring(self.xx,self.yy,x0,y0,r,I,lw=self.lw))        
         self.update_signal()
 
     def make_signal(self):
         if len(self.z_list) == 0:
-            print('Empty test data')
-            self.z = None
+            self.z = self.xx*0 + self.yy*0
         elif len(self.z_list) == 1:
             self.z = self.z_list[0].get_signal()
         elif len(self.z_list) > 1:
@@ -161,7 +163,7 @@ class TestData:
         self.z_downscaled = self.z.reshape(sh).mean(-1).mean(1)
 
     def blur(self):
-        self.signal = Signal2D(gaussian_filter(self.z_downscaled, sigma=2))
+        self.signal = PixelatedSTEM(gaussian_filter(self.z_downscaled, sigma=2))
         self.signal.axes_manager[0].scale = self.scale
         self.signal.axes_manager[1].scale = self.scale
         
@@ -171,3 +173,7 @@ class TestData:
             for i in self.z_list:
                 i.update_axis(self.xx,self.yy)
             self.update_signal()
+            
+    def set_signal_zero(self):
+        self.z_list = []
+        self.update_signal()
