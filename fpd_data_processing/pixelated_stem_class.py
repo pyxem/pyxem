@@ -242,12 +242,18 @@ class DPCSignal2D(Signal2D):
         if out is None:
             return(output)
 
-    def get_color_signal(self):
+    def get_color_signal(self, autolim=True, autolim_sigma=4):
         angle = np.arctan2(self.inav[0].data, self.inav[1].data)
         magnitude = np.sqrt(
                 np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
+        
+        magnitude_limits = None
+        if autolim:
+            magnitude_limits = pst._get_limits_from_array(
+                    magnitude, sigma=autolim_sigma)
         rgb_array = pst._get_rgb_array(
-                angle=angle, magnitude=magnitude)
+                angle=angle, magnitude=magnitude,
+                magnitude_limits=magnitude_limits)
         signal_rgb = Signal1D(rgb_array*(2**16-1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")

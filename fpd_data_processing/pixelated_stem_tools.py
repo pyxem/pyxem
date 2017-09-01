@@ -1,9 +1,10 @@
+import copy
 import numpy as np
 from scipy.ndimage import measurements
 from scipy.optimize import leastsq
 from hyperspy.signals import Signal1D, Signal2D
-import copy
 from matplotlib.colors import hsv_to_rgb, to_rgba
+
 
 def _center_of_mass_single_frame(im, threshold=None, mask=None):
     if (mask is not None) or (threshold is not None):
@@ -115,17 +116,45 @@ def normalize_array(np_array, max_number=1.0):
     return(np_array*max_number)
 
 
+def _get_limits_from_array(
+        data,
+        sigma=4,
+        ignore_zeros=False,
+        ignore_edges=False):
+    if ignore_edges:
+        x_lim = int(data.shape[0]*0.05)
+        y_lim = int(data.shape[1]*0.05)
+        data_array = copy.deepcopy(data[x_lim:-x_lim, y_lim:-y_lim])
+    else:
+        data_array = copy.deepcopy(data)
+    if ignore_zeros:
+        data_array = np.ma.masked_values(data_array, 0.0)
+    mean = data_array.mean()
+    data_variance = data_array.std()*sigma
+    clim = (mean-data_variance, mean+data_variance)
+    if data_array.min() > clim[0]:
+        clim = list(clim)
+        clim[0] = data_array.min()
+        clim = tuple(clim)
+    if data_array.max() < clim[1]:
+        clim = list(clim)
+        clim[1] = data_array.max()
+        clim = tuple(clim)
+    return(clim)
+
+
 def _get_rgb_array(
         angle, magnitude, rotation=0, angle_lim=None,
-        magnitude_lim=None, max_angle=2*np.pi):
+        magnitude_limits=None, max_angle=2*np.pi):
     if not (rotation == 0):
         angle = (angle + math.radians(rotation)) % (max_angle)
     if angle_lim is not None:
         np.clip(angle, angle_lim[0], angle_lim[1], out=angle)
     else:
         angle = normalize_array(angle)
-    if magnitude_lim is not None:
-        np.clip(magnitude, magnitude_lim[0], magnitude_lim[1], out=magnitude)
+    if magnitude_limits is not None:
+        np.clip(magnitude, magnitude_limits[0],
+                magnitude_limits[1], out=magnitude)
     magnitude = normalize_array(magnitude)
     S = np.ones_like(angle)
     HSV = np.dstack((angle, S, magnitude))
