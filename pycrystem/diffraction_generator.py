@@ -29,7 +29,7 @@ from hyperspy.components2d import Expression
 from pycrystem.diffraction_signal import ElectronDiffraction
 from pycrystem.utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
-from pymatgen.util.plotting_utils import get_publication_quality_plot
+from pymatgen.util.plotting import get_publication_quality_plot
 
 
 _GAUSSIAN2D_EXPR = \
