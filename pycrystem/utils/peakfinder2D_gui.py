@@ -67,12 +67,13 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
     Find peaks using a Jupyter notebook-based user interface
     """
 
-    def __init__(self):
+    def __init__(self, imshow_kwargs={}):
         super(PeakFinderUIIPYW, self).__init__()
         self.ax = None
         self.image = None
         self.pts = None
         self.param_container = None
+        self.imshow_kwargs = imshow_kwargs
 
     def init_ui(self):
         self.create_choices_widget()
@@ -242,7 +243,7 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
             a = IntText(value=2 * value,
                         layout=Layout(flex='0 1 auto', width='10%'))
             f = IntSlider(value=value, min=b.value, max=a.value,
-                          step=np.abs(a.value - b.value) * 0.01,
+                          step=1,
                           layout=Layout(flex='1 1 auto', width='60%'))
             l = IntText(value=f.value,
                         layout=Layout(flex='0 1 auto', width='10%'),
@@ -252,12 +253,12 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
             def on_min_change(change):
                 if f.max > change['new']:
                     f.min = change['new']
-                    f.step = np.abs(f.max - f.min) * 0.01
+                    f.step = 1
 
             def on_max_change(change):
                 if f.min < change['new']:
                     f.max = change['new']
-                    f.step = np.abs(f.max - f.min) * 0.01
+                    f.step = 1
 
             def on_param_change(change):
                 self.params[self._method][param] = change['new']
@@ -279,7 +280,7 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
         if self.ax is None:
             self.ax = plt.figure().add_subplot(111)
         z = self.get_data()
-        self.image = self.ax.imshow(np.rot90(np.fliplr(z)))
+        self.image = self.ax.imshow(z, **self.imshow_kwargs)
         self.ax.set_xlim(0, z.shape[0])
         self.ax.set_ylim(0, z.shape[1])
         plt.show()
@@ -288,19 +289,19 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
         if not plt.get_fignums():
             self.plot()
         z = self.get_data()
-        self.image.set_data(np.rot90(np.fliplr(z)))
+        self.image.set_data(z)
         self.replot_peaks()
         plt.draw()
 
     def plot_peaks(self):
         peaks = self.get_peaks()
-        self.pts, = self.ax.plot(peaks[:, 0], peaks[:, 1], 'o')
+        self.pts, = self.ax.plot(peaks[:, 1], peaks[:, 0], 'r+')
         plt.show()
 
     def replot_peaks(self):
         if not plt.get_fignums():
             self.plot()
         peaks = self.get_peaks()
-        self.pts.set_xdata(peaks[:, 0])
-        self.pts.set_ydata(peaks[:, 1])
+        self.pts.set_xdata(peaks[:, 1])
+        self.pts.set_ydata(peaks[:, 0])
         plt.draw()

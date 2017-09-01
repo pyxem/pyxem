@@ -585,7 +585,7 @@ class ElectronDiffraction(Signal2D):
         peaks.axes_manager.set_signal_dimension(0)
         return peaks
 
-    def find_peaks_interactive(self):
+    def find_peaks_interactive(self, imshow_kwargs={}):
         """Find peaks using an interactive tool.
 
         Requires `ipywidgets` and `traitlets` to be installed.
