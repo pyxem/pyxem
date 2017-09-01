@@ -28,8 +28,8 @@ from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from transforms3d.euler import euler2axangle
 
-# from pycrystem import Structure, ElectronDiffractionCalculator
-from pycrystem.utils import correlate
+# from . import Structure, ElectronDiffractionCalculator
+from .utils import correlate
 
 from ipywidgets import interact
 

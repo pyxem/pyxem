@@ -159,7 +159,7 @@ class DiffractionLibrary(dict):
     def plot(self):
         """Plots the library interactively.
         """
-        from pycrystem.diffraction_signal import ElectronDiffraction
+        from .diffraction_signal import ElectronDiffraction
         sim_diff_dat = []
         for key in self.keys():
             for ori in self[key].keys():

@@ -26,9 +26,9 @@ from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal2D, BaseSignal
 from skimage.morphology import square
 
-from pycrystem.utils.expt_utils import *
-from pycrystem.utils.peakfinders2D import *
-from pycrystem.diffraction_vectors import DiffractionVectors
+from .utils.expt_utils import *
+from .utils.peakfinders2D import *
+from .diffraction_vectors import DiffractionVectors
 
 def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
@@ -591,6 +591,6 @@ class ElectronDiffraction(Signal2D):
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
-        from pycrystem.utils import peakfinder2D_gui
+        from .utils import peakfinder2D_gui
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW()
         peakfinder.interactive(self)

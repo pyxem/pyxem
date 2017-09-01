@@ -18,7 +18,7 @@
 
 
 from hyperspy.component import Component
-from pycrystem.tensor_field import DisplacementGradientMap
+from .tensor_field import DisplacementGradientMap
 from skimage import transform as tf
 import numpy as np
 
