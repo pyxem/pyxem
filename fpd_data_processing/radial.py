@@ -3,7 +3,7 @@ from hyperspy._components.gaussian import Gaussian
 from hyperspy.signals import Signal2D
 
 
-def centre_comparison(
+def _centre_comparison(
         s, steps, step_size,
         crop_radial_signal=None, angleN=8):
     """
@@ -63,11 +63,11 @@ def get_optimal_centre_position(
     """
     Takes signal s , list of centre x and centre y positions, radial span of
     feature used to determine the centre position. Radially integrates the
-    feature in segments of angleN, for each possible centre position. 
+    feature in angleN segments, for each possible centre position. 
     Models this integrated signal as a gaussian and returns array of with
     the standard deviatoins of these gaussians.  
     """
-    s_list = centre_comparison(s, steps, step_size,
+    s_list = _centre_comparison(s, steps, step_size,
             crop_radial_signal=radial_signal_span, angleN=angleN)
 
     m_list = []
