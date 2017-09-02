@@ -5,17 +5,16 @@ from scipy.ndimage.filters import gaussian_filter
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 
 class Circle:
-    def __init__(self,xx,yy,x0,y0,r,I):
+    def __init__(self,xx,yy,x0,y0,r,I,scale):
         self.x0 = x0
         self.y0 = y0
         self.r = r
         self.I = I
         self.circle = (xx - self.x0) ** 2 + (yy - self.y0) ** 2
-        self.mask_outside_r()
+        self.mask_outside_r(scale)
 
-    def mask_outside_r(self):
-        lw = 0
-        indices = self.circle > (self.r+lw)**2
+    def mask_outside_r(self,scale):
+        indices = self.circle >= (self.r+scale)**2
         self.circle[indices] = 0
 
     def set_uniform_intensity(self):
@@ -27,8 +26,11 @@ class Circle:
         self.mask_outside_r()
 
 class Disk(object):
-    def __init__(self,xx,yy,x0,y0,r,I):
-        self.z = Circle(xx,yy,x0,y0,r,I)
+    """
+    Disk object, with outer edge of the ring at r
+    """
+    def __init__(self,xx,yy,scale,x0,y0,r,I):
+        self.z = Circle(xx,yy,x0,y0,r,I,scale)
         self.center_x, self.center_y = np.argmin(self.z.circle,axis=0)[0], np.argmin(self.z.circle,axis=1)[0]
         self.z.set_uniform_intensity()
         self.z.circle[self.center_x,self.center_y] = I
@@ -53,9 +55,12 @@ class Disk(object):
 
 
 class Ring(object):
-    def __init__(self,xx,yy,x0,y0,r,I,lw=1):
-        self.lw = lw
-        self.z = Circle(xx,yy,x0,y0,r,I)
+    """
+    Ring object, with outer edge of the ring at r, and inner r-lw
+    """
+    def __init__(self,xx,yy,scale,x0,y0,r,I,lw=1):
+        self.lw = lw #in coordinates
+        self.z = Circle(xx,yy,x0,y0,r,I,scale)
         self.mask_inside_r()
         self.z.set_uniform_intensity()
         
@@ -115,15 +120,20 @@ class TestData:
         quality of Circle
 
     """
-    def __init__(self,size_x=10,size_y=10,scale=0.05,default=True):
+    def __init__(self,size_x=100,size_y=100,scale=1,default=True,blur=True,sigma_blur=2,downscale=True):
         self.scale = scale
-        self.size_x, self.size_y = size_x, size_y
+        self.blur_on = blur
+        self.sigma_blur = sigma_blur
+        self.downscale_on = downscale
         self.downscale_factor = 5
+        if not self.downscale_on:
+            self.downscale_factor = 1            
+        self.size_x, self.size_y = size_x, size_y
         self.generate_mesh()
         self.z_list = []
         if default:
             self.add_disk()
-            self.add_ring(lw=5*self.scale)
+            self.add_ring(lw_pix=5)
         else:
             self.update_signal()
 
@@ -131,19 +141,20 @@ class TestData:
         self.make_signal()
         self.downscale()
         self.blur()
+        self.to_signal()
 
     def generate_mesh(self):
         self.X = np.arange(0, self.size_x, self.scale/self.downscale_factor)
         self.Y = np.arange(0, self.size_y, self.scale/self.downscale_factor)
         self.xx, self.yy = np.meshgrid(self.X, self.Y, sparse=True)
         
-    def add_disk(self,x0=5,y0=5,r=1,I=10):
-        self.z_list.append(Disk(self.xx,self.yy,x0,y0,r,I))
+    def add_disk(self,x0=50,y0=50,r=1,I=10):
+        self.z_list.append(Disk(self.xx,self.yy,self.scale,x0,y0,r,I))
         self.update_signal()
 
-    def add_ring(self,x0=5,y0=5,r=20,I=10,lw=5):
-        self.lw = lw*self.scale
-        self.z_list.append(Ring(self.xx,self.yy,x0,y0,r,I,lw=self.lw))        
+    def add_ring(self,x0=5,y0=5,r=20,I=10,lw_pix=5):
+        lw = lw_pix*self.scale
+        self.z_list.append(Ring(self.xx,self.yy,self.scale,x0,y0,r,I,lw=lw))        
         self.update_signal()
 
     def make_signal(self):
@@ -158,15 +169,24 @@ class TestData:
             self.z = z_temp
             
     def downscale(self):
-        shape = (int(self.z.shape[0]/self.downscale_factor),int(self.z.shape[1]/self.downscale_factor))
-        sh = shape[0],self.z.shape[0]//shape[0],shape[1],self.z.shape[1]//shape[1]
-        self.z_downscaled = self.z.reshape(sh).mean(-1).mean(1)
+        if self.downscale_on:
+            shape = (int(self.z.shape[0]/self.downscale_factor),int(self.z.shape[1]/self.downscale_factor))
+            sh = shape[0],self.z.shape[0]//shape[0],shape[1],self.z.shape[1]//shape[1]
+            self.z_downscaled = self.z.reshape(sh).mean(-1).mean(1)
+        else:
+            self.z_downscaled = self.z
 
     def blur(self):
-        self.signal = PixelatedSTEM(gaussian_filter(self.z_downscaled, sigma=2))
+        if self.blur_on:
+            self.z_blurred = gaussian_filter(self.z_downscaled, sigma=self.sigma_blur)
+        else:
+            self.z_blurred = self.z_downscaled
+
+    def to_signal(self):
+        self.signal = PixelatedSTEM(self.z_blurred)
         self.signal.axes_manager[0].scale = self.scale
         self.signal.axes_manager[1].scale = self.scale
-        
+            
     def set_downscale_factor(self,factor):
             self.downscale_factor = factor
             self.generate_mesh()
