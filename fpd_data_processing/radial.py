@@ -4,12 +4,14 @@ from hyperspy.signals import Signal2D
 
 
 def centre_comparison(
-        s, centre_x_list, centre_y_list,
+        s, steps, step_size,
         crop_radial_signal=None, angleN=8):
     """
     Compare how the centre position affects the radial integration.
     Useful for finding on optimal centre position if one has some
-    round feature.
+    round feature. Returns a list of image stacks, one image stack
+    for each centre position, and the image stack consists of radially
+    integrated segments of an image.
 
     Currently only works with signals with 0 navigation dimensions.
 
@@ -20,7 +22,8 @@ def centre_comparison(
                 "centre_comparison only works for pixelatedSTEM "
                 "signals with 0 navigation dimensions")
     s_list = []
-    for centre_x, centre_y in zip(centre_x_list, centre_y_list):
+    centre_list = get_centre_position_list(s, steps, step_size)
+    for centre_x, centre_y in centre_list:
         s_angle = s.angular_slice_radial_integration(
                 angleN=angleN,
                 centre_x_array=np.array([centre_x]),
@@ -33,12 +36,38 @@ def centre_comparison(
         s_list.append(s_angle)
     return(s_list)
 
+def get_centre_position_list(s, steps, step_size):
+    """
+    Returns a zip of x and y coordinates based on the offset of the center-
+    point, and number of steps in each direction and a step-size given in
+    pixels. Scale and offset taken from axes_manager.
+    """
+    scale = s.axes_manager[0].scale
+    x0 = -s.axes_manager[0].offset
+    d1 = scale*steps*step_size
+    d2 = scale*(steps+1)*step_size
+    y0 = -s.axes_manager[1].offset
+    centre_x_list, centre_y_list  = [], []
+    range_x = np.arange(x0-d1,x0+d2,step_size*scale) 
+    range_y = np.arange(y0-d1,y0+d2,step_size*scale)
+    for x in range_x:
+        for y in range_y:
+            centre_x_list.append(x)
+            centre_y_list.append(y)
+    centre_list = zip(centre_x_list, centre_y_list)
+    return(centre_list)
 
 def get_optimal_centre_position(
-        s, centre_x_list, centre_y_list,
-        radial_signal_span, angleN=8):
-
-    s_list = centre_comparison(s, centre_x_list, centre_y_list,
+        s, radial_signal_span,
+        steps=5, step_size=1, angleN=8):
+    """
+    Takes signal s , list of centre x and centre y positions, radial span of
+    feature used to determine the centre position. Radially integrates the
+    feature in segments of angleN, for each possible centre position. 
+    Models this integrated signal as a gaussian and returns array of with
+    the standard deviatoins of these gaussians.  
+    """
+    s_list = centre_comparison(s, steps, step_size,
             crop_radial_signal=radial_signal_span, angleN=angleN)
 
     m_list = []
@@ -59,23 +88,35 @@ def get_optimal_centre_position(
         m.append(g)
         m.multifit()
         m_list.append(m)
-    s_centre_std_array = _get_offset_image(m_list)
+    s_centre_std_array = _get_offset_image(m_list, s, steps, step_size)
     return(s_centre_std_array)
 
 
-def _get_offset_image(model_list):
+def _get_offset_image(model_list, s, steps, step_size):
+    """
+    Creates a Signal2D object of the standard deviation of of the
+    gaussians fitted to the radially integrated featrures, as a
+    function of center coordinate.
+    """
     cX_list, cY_list = [], []
     for model in model_list:
         cX_list.append(model.signal.metadata.Angle_slice_processing.centre_x)
         cY_list.append(model.signal.metadata.Angle_slice_processing.centre_y)
     cX_list, cY_list = np.array(cX_list), np.array(cY_list)
-    centre_std_array = np.zeros((cY_list.max()-cY_list.min()+1, cX_list.max()-cX_list.min()+1))
+    n = int(np.sqrt(cX_list.size))
+    centre_std_array = np.zeros((n,n))
+    arr_x = np.reshape(cX_list,(n,n))
+    arr_y = np.reshape(cY_list,(n,n))
+    idx = 0
     for model in model_list:
         md = model.signal.metadata
-        x = md.Angle_slice_processing.centre_x-cX_list.min()
-        y = md.Angle_slice_processing.centre_y-cY_list.min()
-        centre_std_array[x, y] = model.components.Gaussian.centre.as_signal().data.std()
+        x_idx = np.where(arr_x==cX_list[idx])[0][0]
+        y_idx = np.where(arr_y==cY_list[idx])[1][0]
+        centre_std_array[x_idx, y_idx] = model.components.Gaussian.centre.as_signal().data.std()
+        idx +=1   
     s = Signal2D(centre_std_array)
-    s.axes_manager[0].offset = cX_list.min()
-    s.axes_manager[1].offset = cY_list.min()
+    s.axes_manager[0].offset = arr_x[0,0]
+    s.axes_manager[1].offset = arr_y[0,0]
+    s.axes_manager[0].scale = float(arr_x[1,0] - arr_x[0,0])
+    s.axes_manager[1].scale = float(arr_y[0,1] - arr_y[0,0])
     return(s)
