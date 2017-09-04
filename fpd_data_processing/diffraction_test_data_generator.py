@@ -120,7 +120,7 @@ class TestData:
         quality of Circle
 
     """
-    def __init__(self,size_x=100,size_y=100,scale=1,default=True,blur=True,sigma_blur=2,downscale=True):
+    def __init__(self,size_x=100,size_y=100,scale=1,default=True,blur=True,sigma_blur=1,downscale=True):
         self.scale = scale
         self.blur_on = blur
         self.sigma_blur = sigma_blur
@@ -133,7 +133,7 @@ class TestData:
         self.z_list = []
         if default:
             self.add_disk()
-            self.add_ring(lw_pix=5)
+            self.add_ring(lw_pix=1)
         else:
             self.update_signal()
 
@@ -148,11 +148,11 @@ class TestData:
         self.Y = np.arange(0, self.size_y, self.scale/self.downscale_factor)
         self.xx, self.yy = np.meshgrid(self.X, self.Y, sparse=True)
         
-    def add_disk(self,x0=50,y0=50,r=1,I=10):
+    def add_disk(self,x0=50,y0=50,r=5,I=10):
         self.z_list.append(Disk(self.xx,self.yy,self.scale,x0,y0,r,I))
         self.update_signal()
 
-    def add_ring(self,x0=5,y0=5,r=20,I=10,lw_pix=5):
+    def add_ring(self,x0=50,y0=50,r=20,I=10,lw_pix=1):
         lw = lw_pix*self.scale
         self.z_list.append(Ring(self.xx,self.yy,self.scale,x0,y0,r,I,lw=lw))        
         self.update_signal()

@@ -36,6 +36,17 @@ def _centre_comparison(
         s_list.append(s_angle)
     return(s_list)
 
+def get_coordinate_of_min(s):
+    """
+    Returns the x and y values of the minimum in a signal.
+    """
+    z = s.data
+    idx = np.argwhere(z == np.min(z))
+    idx_min = idx[0]
+    x = s.axes_manager[0].offset + idx_min[0]*s.axes_manager[0].scale
+    y = s.axes_manager[1].offset + idx_min[1]*s.axes_manager[1].scale
+    return(x,y)
+
 def get_centre_position_list(s, steps, step_size):
     """
     Returns a zip of x and y coordinates based on the offset of the center-
@@ -61,7 +72,7 @@ def get_optimal_centre_position(
         s, radial_signal_span,
         steps=5, step_size=1, angleN=8):
     """
-    Takes signal s , list of centre x and centre y positions, radial span of
+    Takes signal s , radial span of
     feature used to determine the centre position. Radially integrates the
     feature in angleN segments, for each possible centre position. 
     Models this integrated signal as a gaussian and returns array of with
