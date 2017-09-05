@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
+import os, sys
 from setuptools import setup
-from pycrystem import __version__, __author__, __email__
 
+exec(open('pycrystem/version.py').read())  # grab version info 
 
 setup(
     name='pycrystem',
@@ -11,10 +12,20 @@ setup(
                 'microscopy.',
     author=__author__,
     author_email=__email__,
+    license="GPLv3",
+    url="https://github.com/pycrystem/pycrystem",
+
+    classifiers=[
+        'Programming Language :: Python :: 3.6',
+    ],
+
     packages=[
         'pycrystem',
         'pycrystem.utils',
     ],
-    package_data={'pycrystem' : ['utils/atomic_scattering_params.json']}
 
+    package_data={
+        "": ["LICENSE", "readme.rst", "requirements.txt"],
+        "pycrystem": ["*.py", "utils/atomic_scattering_params.json"],
+    },
 )
