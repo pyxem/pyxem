@@ -436,7 +436,7 @@ class ElectronDiffraction(Signal2D):
 
     def get_direct_beam_position(self,
                                  method='blur',
-                                 calibrated_units=False,
+                                 sigma=30,
                                  *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
@@ -445,8 +445,16 @@ class ElectronDiffraction(Signal2D):
         ----------
         method : string
             Specify the method used to determine the direct beam position.
-        calibrated_units : boolean
-            If False the direct beam position
+
+            * 'blur' - Use gaussian filter to blur the image and take the 
+                pixel with the maximum intensity value as the center
+            * 'refine_local' - Refine the position of the direct beam and 
+                hence an estimate for the position of the pattern center in
+                each SED pattern.
+
+        sigma : int
+            Standard deviation for the gaussian convolution (only for 
+            'blur' method).
 
         Returns
         -------
@@ -456,10 +464,10 @@ class ElectronDiffraction(Signal2D):
 
         """
         #TODO: add sub-pixel capabilities and model fitting methods.
-        if method=='blur'
-            centers = self.map(blur_center, sigma=sigma inplace=False)
+        if method == 'blur':
+            centers = self.map(find_beam_position_blur, sigma=sigma, inplace=False)
 
-        elif method == 'refine_local'
+        elif method == 'refine_local':
             if initial_center==None:
                 initial_center = np.int(self.signal_axes.shape / 2)
 
@@ -606,7 +614,7 @@ class ElectronDiffraction(Signal2D):
             Signal object containing the mask.
         """
         #TODO: Make this actually work.
-        if method == 'shapiro-wilk':(
+        if method == 'shapiro-wilk':
             shapiro_values = self.map(stats.shapiro)
             mask = shapiro_values > threshold
 

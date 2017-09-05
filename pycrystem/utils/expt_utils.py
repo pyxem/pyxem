@@ -317,7 +317,7 @@ def gaussian_difference_bkg(z, sigma_min, sigma_max):
 
     return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
 
-def blur_center(z, sigma):
+def find_beam_position_blur(z, sigma=30):
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 
