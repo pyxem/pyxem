@@ -489,12 +489,30 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
         method : string
-            Method is either 'h-dome' or 'model'. The latter fit a model to the
-            radial profile of the average diffraction pattern and then smooths
-            remaining noise using a h-dome method.
+            Specify the method used to determine the direct beam position.
+
+            * 'h-dome' - 
+            * 'model' - fit a model to the radial profile of the average 
+                diffraction pattern and then smooth remaining noise using 
+                an h-dome method.
+            * 'gaussian_difference' - Uses a difference between two gaussian
+				convolutions to determine where the peaks are, and sets
+				all other pixels to 0.
+            * 'median' - Use a median filter for background removal
+
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
-            beam if the model method is used.
+            beam if the model method is used (h-dome / model only).
+        min_sigma : int, float
+            Standard deviation for the minimum gaussian convolution 
+            (gaussian_difference only)
+        max_sigma : int, float
+            Standard deviation for the maximum gaussian convolution 
+            (gaussian_difference only)
+        footprint : int 
+            Size of the window that is convoluted with the array to determine
+            the median. Should be large enough that it is about 3x as big as the
+            size of the peaks (median only).
 
         Returns
         -------
@@ -529,7 +547,11 @@ class ElectronDiffraction(Signal2D):
                 self.axes_manager.signal_axes)
 
         elif method == 'gaussian_difference':
-            denoised = self.map(gaussian_difference_bkg, sigma_min, sigma_max)
+            denoised = self.map(subtract_background_dog, *args, **kwargs)
+
+        elif method == 'median':
+			# no denoising applied here
+            denoised = self.map(subtract_background_median, *args, **kwargs)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "

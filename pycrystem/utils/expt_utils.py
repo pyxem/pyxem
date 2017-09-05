@@ -298,7 +298,7 @@ def regional_flattener(z, h):
     eroded = morphology.reconstruction(seed, mask, method='erosion')
     return eroded - h
 
-def gaussian_difference_bkg(z, sigma_min, sigma_max):
+def subtract_background_dog(z, sigma_min, sigma_max):
     """Difference of gaussians method for background removal.
 
     Parameters
@@ -316,6 +316,35 @@ def gaussian_difference_bkg(z, sigma_min, sigma_max):
     blur_min = ndi.gaussian_filter(z, sigma_min)
 
     return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
+
+def subtract_background_median(z, footprint=19, implementation='scipy'):
+    """Remove background using a median filter.
+
+    Parameters
+    ----------
+    footprint : int
+        size of the window that is convoluted with the array to determine
+        the median. Should be large enough that it is about 3x as big as the
+        size of the peaks.
+    implementation: str
+        One of 'scipy', 'skimage'. Skimage is much faster, but it messes with
+        the data format. The scipy implementation is safer, but slower.
+
+    Returns
+    -------
+        Pattern with background subtracted as np.array
+    """   
+
+    if implementation == 'scipy':
+        bg_subtracted = z - ndi.median_filter(z, size=footprint)
+    elif implementation == 'skimage':
+        selem = morphology.square(footprint)
+        # skimage only accepts input image as uint16
+        bg_subtracted = filters.median(z.astype(np.uint16), selem).astype(z.dtype)
+    else:
+        raise ValueError("Unknown implementation `{}`".format(implementation))
+
+    return np.maximum(bg_subtracted, 0)
 
 def find_beam_position_blur(z, sigma=30):
     """Estimate direct beam position by blurring the image with a large
