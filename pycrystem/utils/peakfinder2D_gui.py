@@ -24,7 +24,7 @@ from IPython.display import display
 from .peakfinders2D import *
 
 METHODS = [find_peaks_max, find_peaks_minmax, find_peaks_zaefferer,
-           find_peaks_stat, find_peaks_dog, find_peaks_log]
+           find_peaks_stat, find_peaks_dog, find_peaks_log, find_peaks_regionprops]
 
 
 class PeakFinderUIBase:
