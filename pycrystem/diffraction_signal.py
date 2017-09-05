@@ -23,7 +23,7 @@ from __future__ import division
 
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from skimage.morphology import square
 
 from .utils.expt_utils import *
@@ -375,16 +375,30 @@ class ElectronDiffraction(Signal2D):
         :func:`~pycrystem.utils.expt_utils.radial_average`
         :meth:`get_direct_beam_position`
 
+        Examples
+        --------
+        .. code-block:: python
+            
+            centers = ed.get_direct_beam_position(method="blur")
+            profiles = ed.get_radial_profile(centers)
+            profiles.plot()
         """
-        # TODO: make this work without averaging the centers
         # TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
-        center = centers.mean(axis=(0, 1))
-        radial_profiles = self.map(radial_average, center=center, inplace=False)
-        radial_profiles.axes_manager.signal_axes[0].offset = 0
-        signal_axis = radial_profiles.axes_manager.signal_axes[0]
-        return radial_profiles.as_signal1D(signal_axis)
+
+        radial_profiles = self.map(radial_average, center=centers, inplace=False)
+        ragged = len(radial_profiles.data.shape) == 1
+        if ragged:
+            max_len = max(map(len, radial_profiles.data))
+            radial_profiles = Signal1D([
+                np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
+                for row in radial_profiles.data])
+            return radial_profiles
+        else:
+            radial_profiles.axes_manager.signal_axes[0].offset = 0
+            signal_axis = radial_profiles.axes_manager.signal_axes[0]
+            return radial_profiles.as_signal1D(signal_axis)
 
     def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
         """Reproject the diffraction data into polar coordinates.

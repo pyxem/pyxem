@@ -27,6 +27,13 @@ from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square
 
+try:
+    from .radialprofile import radialprofile as radialprofile_cy
+except ImportError:
+    _USE_CY_RADIAL_PROFILE = False
+else:
+    _USE_CY_RADIAL_PROFILE = True
+
 """
 This module contains utility functions for processing electron diffraction
 patterns.
@@ -112,16 +119,18 @@ def radial_average(z, center):
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
-    #TODO: Add Instamatic cython based implementation
-    y, x = np.indices(z.shape)
-    r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-    r = r.astype(np.int)
+    if _USE_CY_RADIAL_PROFILE:
+        averaged = radialprofile_cy(z, center)
+    else:
+        y, x = np.indices(z.shape)
+        r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
+        r = r.astype(np.int)
 
-    tbin = np.bincount(r.ravel(), z.ravel())
-    nr = np.bincount(r.ravel())
-    radial_average = tbin / nr
+        tbin = np.bincount(r.ravel(), z.ravel())
+        nr = np.bincount(r.ravel())
+        averaged = tbin / nr
 
-    return radial_average
+    return averaged
 
 def reproject_polar(z, origin=None, jacobian=False, dr=1, dt=None):
     """
