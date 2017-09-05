@@ -21,29 +21,98 @@ from __future__ import division
 import math
 import numpy as np
 import scipy.ndimage as ndi
+from scipy.ndimage.interpolation import shift
+from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square
 
 """
-This module contains utility functions for treating experimental (scanning)
-electron diffraction data.
+This module contains utility functions for processing electron diffraction
+patterns.
 """
 
-def radial_average(z, center):
-    """Calculate the radial average profile about a defined center.
+def _index_coords(z, origin=None):
+    """
+    Creates x & y coords for the indicies in a numpy array
 
     Parameters
     ----------
-    center : array_like
-        The center about which the radial integration is performed.
+    data : numpy array
+        2D data
+    origin : (x,y) tuple
+        defaults to the center of the image. Specify origin=(0,0)
+        to set the origin to the *bottom-left* corner of the image.
 
     Returns
     -------
+        x, y : arrays
+    """
+    ny, nx = data.shape[:2]
+    if origin is None:
+        origin_x, origin_y = nx//2, ny//2
+    else:
+        origin_x, origin_y = origin
 
-    radial_profile :
+    x, y = np.meshgrid(np.arange(float(nx)), np.arange(float(ny)))
+
+    x -= origin_x
+    y -= origin_y
+    return x, y
+
+def _cart2polar(x, y):
+    """
+    Transform Cartesian coordinates to polar
+
+    Parameters
+    ----------
+    x, y : floats or arrays
+        Cartesian coordinates
+
+    Returns
+    -------
+    r, theta : floats or arrays
+        Polar coordinates
 
     """
+    r = np.sqrt(x**2 + y**2)
+    theta = np.arctan2(x, y)  # θ referenced to vertical
+    return r, theta
+
+def _polar2cart(r, theta):
+    """
+    Transform polar coordinates to Cartesian
+
+    Parameters
+    -------
+    r, theta : floats or arrays
+        Polar coordinates
+
+    Returns
+    ----------
+    x, y : floats or arrays
+        Cartesian coordinates
+    """
+    y = r * np.cos(theta)   # θ referenced to vertical
+    x = r * np.sin(theta)
+    return x, y
+
+def radial_average(z, center):
+    """Calculate the radial profile by azimuthal averaging about a specified
+    center.
+
+    Parameters
+    ----------
+    center : array
+        The array indices of the diffraction pattern center about which the
+        radial integration is performed.
+
+    Returns
+    -------
+    radial_profile : array
+        Radial profile of the diffraction pattern.
+    """
+    #TODO: Add Instamatic cython based implementation
     y, x = np.indices(z.shape)
     r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
     r = r.astype(np.int)
@@ -54,31 +123,143 @@ def radial_average(z, center):
 
     return radial_average
 
+def reproject_polar(z, origin=None, jacobian=False, dr=1, dt=None):
+    """
+    Reprojects a 2D diffraction pattern into a polar coordinate system.
+
+    Parameters
+    ----------
+    origin : tuple
+        The coordinate (x0, y0) of the image center, relative to bottom-left. If
+        'None'defaults to
+    Jacobian : boolean
+        Include ``r`` intensity scaling in the coordinate transform.
+        This should be included to account for the changing pixel size that
+        occurs during the transform.
+    dr : float
+        Radial coordinate spacing for the grid interpolation
+        tests show that there is not much point in going below 0.5
+    dt : float
+        Angular coordinate spacing (in radians)
+        if ``dt=None``, dt will be set such that the number of theta values
+        is equal to the maximum value between the height or the width of
+        the image.
+
+    Returns
+    -------
+    output : 2D np.array
+        The polar image (r, theta)
+
+    Notes
+    -----
+    Adapted from: PyAbel, www.github.com/PyAbel/PyAbel
+
+    """
+    # bottom-left coordinate system requires numpy image to be np.flipud
+    data = np.flipud(data)
+
+    ny, nx = data.shape[:2]
+    if origin is None:
+        origin = (nx//2, ny//2)
+
+    # Determine that the min and max r and theta coords will be...
+    x, y = _index_coords(z, origin=origin)  # (x,y) coordinates of each pixel
+    r, theta = _cart2polar(x, y)  # convert (x,y) -> (r,θ), note θ=0 is vertical
+
+    nr = np.int(np.ceil((r.max()-r.min())/dr))
+
+    if dt is None:
+        nt = max(nx, ny)
+    else:
+        # dt in radians
+        nt = np.int(np.ceil((theta.max()-theta.min())/dt))
+
+    # Make a regular (in polar space) grid based on the min and max r & theta
+    r_i = np.linspace(r.min(), r.max(), nr, endpoint=False)
+    theta_i = np.linspace(theta.min(), theta.max(), nt, endpoint=False)
+    theta_grid, r_grid = np.meshgrid(theta_i, r_i)
+
+    # Project the r and theta grid back into pixel coordinates
+    X, Y = _polar2cart(r_grid, theta_grid)
+
+    X += origin[0]  # We need to shift the origin
+    Y += origin[1]  # back to the bottom-left corner...
+    xi, yi = X.flatten(), Y.flatten()
+    coords = np.vstack((yi, xi))  # (map_coordinates requires a 2xn array)
+
+    zi = ndi.map_coordinates(z, coords)
+    output = zi.reshape((nr, nt))
+
+    if jacobian:
+        output = output*r_i[:, np.newaxis]
+
+    return output
+
 def gain_normalise(z, dref, bref):
     """Apply gain normalization to experimentally acquired electron
-    diffraction patterns.
+    diffraction pattern.
 
     Parameters
     ----------
     dref : ElectronDiffraction
         Dark reference image.
-
     bref : ElectronDiffraction
-        Bright reference image.
+        Flat-field bright reference image.
+
+    Returns
+    -------
+        Gain normalized diffraction pattern
     """
     return ((z- dref) / (bref - dref)) * np.mean((bref - dref))
 
-def affine_transformation(z, order=3, **kwargs):
-    """Apply an affine transform to a 2-dimensional array.
+def remove_dead(z, deadpixels, deadvalue):
+    """Remove dead pixels from experimental electron diffraction patterns.
 
     Parameters
     ----------
-    matrix : 3 x 3
+    deadpixels : array
+        Array containing the array indices of dead pixels in the diffraction
+        pattern.
+    deadvalue : string
+        Specify how deadpixels should be treated, options are;
+            'average': takes the average of adjacent pixels
+            'nan':  sets the dead pixel to nan
+
+    Returns
+    -------
+    img : array
+        Array containing the diffraction pattern with dead pixels removed.
+    """
+    img = z
+    if deadvalue=='average':
+        for (i,j) in deadpixels:
+            neighbours = z[i-d:i+d+1, j-d:j+d+1].flatten()
+            img[i,j] = np.mean(neighbours)
+
+    elif deadvalue=='nan':
+        for (i,j) in deadpixels:
+            img[i,j] = nan
+    else:
+        raise NotImplementedError("The method specified is not implemented. "
+                                  "See documentation for available "
+                                  "implementations.")
+
+    return img
+
+def affine_transformation(z, order, **kwargs):
+    """Apply an affine transformation to a 2-dimensional array.
+
+    Parameters
+    ----------
+    matrix : np.array
+        3x3 numpy array specifying the affine transformation to be applied.
+    order : int
+        Interpolation order.
 
     Returns
     -------
     trans : array
-        Transformed 2-dimensional array
+        Affine transformed diffraction pattern.
     """
     shift_y, shift_x = np.array(z.shape[:2]) / 2.
     tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
@@ -96,15 +277,12 @@ def regional_filter(z, h):
 
     Parameters
     ----------
-
-    z : image as numpy array
-
-    h :
+    h : float
+        h-dome cutoff value.
 
     Returns
     -------
-
-    h-dome subtracted image.
+        h-dome subtracted image as np.array
     """
     seed = np.copy(z)
     seed = z - h
@@ -120,29 +298,48 @@ def regional_flattener(z, h):
     eroded = morphology.reconstruction(seed, mask, method='erosion')
     return eroded - h
 
-def circular_mask(shape, radius, center):
-    """
+def gaussian_difference_bkg(z, sigma_min, sigma_max):
+    """Difference of gaussians method for background removal.
 
     Parameters
     ----------
+    sigma_max : float
+        Large gaussian blur sigma.
+    sigma_min : float
+        Small gaussian blur sigma.
 
     Returns
     -------
-
+        Denoised diffraction pattern as np.array
     """
-    r = radius
-    nx, ny = shape[0], shape[1]
-    a, b = center
+    blur_max = ndi.gaussian_filter(z, sigma_max)
+    blur_min = ndi.gaussian_filter(z, sigma_min)
 
-    y, x = np.ogrid[-b:ny-b, -a:nx-a]
-    mask = x*x + y*y <= r*r
+    return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
 
-    return mask
+def blur_center(z, sigma):
+    """Estimate direct beam position by blurring the image with a large
+    Gaussian kernel and finding the maximum.
+
+    Parameters
+    ----------
+    sigma : float
+        Sigma value for Gaussian blurring kernel.
+
+    Returns
+    -------
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
+    """
+    blurred = ndi.gaussian_filter(z, sigma)
+    center = np.unravel_index(blurred.argmax(), blurred.shape)
+
+    return np.array(center)
 
 def refine_beam_position(z, start, radius):
-    """
-    Refine the position of the direct beam and hence an estimate for the
+    """Refine the position of the direct beam and hence an estimate for the
     position of the pattern center in each SED pattern.
+
     Parameters
     ----------
     radius : int
@@ -151,10 +348,12 @@ def refine_beam_position(z, start, radius):
     center : bool
         If True the direct beam position is refined to sub-pixel precision
         via calculation of the intensity center of mass.
+
     Return
     ------
     center: array
         Refined position (x, y) of the direct beam.
+
     Notes
     -----
     This method is based on work presented by Thomas White in his PhD (2009)
