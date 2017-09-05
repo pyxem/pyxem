@@ -471,9 +471,10 @@ class ElectronDiffraction(Signal2D):
             if initial_center==None:
                 initial_center = np.int(self.signal_axes.shape / 2)
 
-            centers = map(refine_beam_position,
+            centers = self.map(refine_beam_position,
                           initial_center=initial_center,
-                          radius=radius)
+                          radius=radius,
+                          inplace=False)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "
