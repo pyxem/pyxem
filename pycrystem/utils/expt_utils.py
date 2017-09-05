@@ -18,7 +18,6 @@
 
 from __future__ import division
 
-import math
 import numpy as np
 import scipy.ndimage as ndi
 from scipy.ndimage.interpolation import shift
@@ -55,7 +54,7 @@ def _index_coords(z, origin=None):
     -------
         x, y : arrays
     """
-    ny, nx = data.shape[:2]
+    ny, nx = z.shape[:2]
     if origin is None:
         origin_x, origin_y = nx//2, ny//2
     else:
@@ -165,7 +164,7 @@ def reproject_polar(z, origin=None, jacobian=False, dr=1, dt=None):
 
     """
     # bottom-left coordinate system requires numpy image to be np.flipud
-    data = np.flipud(data)
+    data = np.flipud(z)
 
     ny, nx = data.shape[:2]
     if origin is None:
@@ -221,7 +220,7 @@ def gain_normalise(z, dref, bref):
     """
     return ((z- dref) / (bref - dref)) * np.mean((bref - dref))
 
-def remove_dead(z, deadpixels, deadvalue):
+def remove_dead(z, deadpixels, deadvalue="average", d=1):
     """Remove dead pixels from experimental electron diffraction patterns.
 
     Parameters
@@ -239,21 +238,20 @@ def remove_dead(z, deadpixels, deadvalue):
     img : array
         Array containing the diffraction pattern with dead pixels removed.
     """
-    img = z
-    if deadvalue=='average':
+    if deadvalue == 'average':
         for (i,j) in deadpixels:
             neighbours = z[i-d:i+d+1, j-d:j+d+1].flatten()
-            img[i,j] = np.mean(neighbours)
+            z[i,j] = np.mean(neighbours)
 
-    elif deadvalue=='nan':
+    elif deadvalue == 'nan':
         for (i,j) in deadpixels:
-            img[i,j] = nan
+            z[i,j] = np.nan
     else:
         raise NotImplementedError("The method specified is not implemented. "
                                   "See documentation for available "
                                   "implementations.")
 
-    return img
+    return z
 
 def affine_transformation(z, order, **kwargs):
     """Apply an affine transformation to a 2-dimensional array.
