@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import division
-
 from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 

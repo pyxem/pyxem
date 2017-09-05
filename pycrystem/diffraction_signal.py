@@ -19,8 +19,6 @@
 
 """
 
-from __future__ import division
-
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
