@@ -275,7 +275,7 @@ class ElectronDiffraction(Signal2D):
                                                        border_value=0)
         return mask
 
-    def apply_affine_transformation(self, D, inplace=True):
+    def apply_affine_transformation(self, D, inplace=True, **kwargs):
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
@@ -288,7 +288,7 @@ class ElectronDiffraction(Signal2D):
 
         """
         return self.map(
-            affine_transformation, matrix=D, ragged=True, inplace=inplace
+            affine_transformation, matrix=D, inplace=inplace, **kwargs
         )
 
     def gain_normalisation(self, dark_reference, bright_reference,

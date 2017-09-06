@@ -32,31 +32,33 @@ from scipy.constants import pi
 from .utils import correlate
 from pycrystem.crystallographic_map import CrystallographicMap
 
+
 def correlate_library(image, library, n_largest=None):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image) stored as a
     numpy array.
     """
-    i=0
-    out_arr = np.zeros((n_largest * len(library),5))
+    i=0  # i is Current phase id
+    out_arr = np.zeros((n_largest * len(library), 5))
     for key in library.keys():
         if n_largest:
             pass
         else:
-            n_largest=len(library[key])
+            n_largest = len(library[key])
         correlations = dict()
         for orientation, diffraction_pattern in library[key].items():
             correlation = correlate(image, diffraction_pattern)
             correlations[orientation] = correlation
         res = nlargest(n_largest, correlations.items(), key=itemgetter(1))
-        for j in np.arange(n_largest):
+        for j in np.arange(n_largest):  # j is current n-th highest correlation
             out_arr[j + i*n_largest][0] = i
             out_arr[j + i*n_largest][1] = res[j][0][0]
             out_arr[j + i*n_largest][2] = res[j][0][1]
             out_arr[j + i*n_largest][3] = res[j][0][2]
             out_arr[j + i*n_largest][4] = res[j][1]
-        i = i + 1
+        i += 1
     return out_arr
+
 
 def crystal_from_matching_results(matching_results):
     """Takes matching results for a single navigation position and returns the
