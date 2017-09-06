@@ -345,7 +345,7 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
     elif implementation == 'skimage':
         selem = morphology.square(footprint)
         # skimage only accepts input image as uint16
-        bg_subtracted = filters.median(z.astype(np.uint16), selem).astype(z.dtype)
+        bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
     else:
         raise ValueError("Unknown implementation `{}`".format(implementation))
 
