@@ -32,14 +32,13 @@ from scipy.constants import pi
 from .utils import correlate
 from pycrystem.crystallographic_map import CrystallographicMap
 
-
-def correlate_library(image, library, n_largest=None):
+def correlate_library(image, library, n_largest):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image) stored as a
     numpy array.
     """
-    i=0  # i is Current phase id
-    out_arr = np.zeros((n_largest * len(library), 5))
+    i=0
+    out_arr = np.zeros((n_largest * len(library),5))
     for key in library.keys():
         if n_largest:
             pass
@@ -80,20 +79,16 @@ def phase_specific_results(matching_results, phaseid):
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction
+        The signal of electron diffraction patterns to be indexed.
+    library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation
+
     """
     def __init__(self, signal, library):
-        """Initialises the indexer with a diffraction signal and library to be
-        correlated in template matching.
-
-        Parameters
-        ----------
-        signal : :class:`ElectronDiffraction`
-            The signal of electron diffraction patterns to be indexed.
-
-        library : :class: `DiffractionLibrary`
-            The library of simulated diffraction patterns for indexation
-
-        """
         self.signal = signal
         self.library = library
 
@@ -114,7 +109,7 @@ class IndexationGenerator():
 
         Returns
         -------
-        matching_results : array
+        matching_results : ndarray
             Numpy array with the same shape as the the navigation axes of the
             electron diffraction signal containing correlation results for each
             diffraction pattern.

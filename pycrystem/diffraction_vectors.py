@@ -19,7 +19,7 @@
 from __future__ import division
 
 from hyperspy.api import roi
-from hyperspy.signals import BaseSignal
+from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
 from pycrystem.utils.expt_utils import *
 
@@ -27,68 +27,140 @@ from pycrystem.utils.expt_utils import *
 Signal class for diffraction vectors.
 """
 
+def _calculate_norms(z):
+    norms = []
+    #print(z)
+    for i in z[0]:
+        norms.append(np.linalg.norm(i))
+    return np.asarray(norms)
+
 
 class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
-    def __init__(self,
-                 calibration,
-                 *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
-        self.calibration = calibration
 
-    def get_gvector_magnitudes(self, center):
+    def plot(self):
+        """Plot the diffraction vectors.
+        """
+        #Find the unique gvectors to plot.
+        unique_vectors = self.get_unique_vectors()
+        #Plot the gvector positions
+        import matplotlib.pyplot as plt
+        plt.plot(unique_vectors.T[1], unique_vectors.T[0], 'ro')
+        plt.axes().set_aspect('equal')
+        plt.show()
+
+    def get_magnitudes(self):
         """Calculate the magnitude of diffraction vectors.
-
-        Parameters
-        ----------
-
-        center :
 
         Returns
         -------
-
-        gmagnitudes : array
-            Array
+        magnitudes : BaseSignal
+            A signal with navigation dimensions as the original diffraction
+            vectors containging an array of gvector magnitudes at each
+            navigation position.
 
         """
-        # Allocate an empty array in which to store the gvector magnitudes.
-        arr_shape = (self.axes_manager._navigation_shape_in_array
-                     if self.axes_manager.navigation_size > 0
-                     else [1, ])
-        gvectors = np.zeros(arr_shape, dtype=object)
-        #
-        for i in self.axes_manager:
-            it = (i[1], i[0])
-            res = []
-            centered = peaks[it] - center
-            for j in np.arange(len(centered)):
-                res.append(np.linalg.norm(centered[j]))
+        magnitudes = self.map(_calculate_norms, inplace=False)
+        return magnitudes
 
-            cent = peaks[it][np.where(res == min(res))[0]][0]
-            vectors = peaks[it] - cent
+    def get_magnitude_histogram(self, bins):
+        """Obtain a histogram of gvector magnitudes.
 
-            mags = []
-            for k in np.arange(len(vectors)):
-                mags.append(np.linalg.norm(vectors[k]))
-            maga = np.asarray(mags)
-            gvectors[it] = maga * self.axes_manager.signal_axes[0].scale
-        return gvectors
+        Parameters
+        ----------
+        bins : numpy array
+            The bins to be used to generate the histogram.
 
-    def get_glength_histogram(self, bins):
-        """Obtain a histogram of all measured diffraction vector magnitudes.
+        Returns
+        -------
+        ghist : Signal1D
+            Histogram of gvector magnitudes.
+
         """
-        gmags = self.get_gvector_magnitudes()
+        gnorms = self.get_magnitudes()
 
-        glist = []
-        for i in dp.axes_manager:
-            it = (i[1], i[0])
-            g = gmags[it]
-            for j in np.arange(len(g)):
-                glist.append(g[j])
+        glist=[]
+        for i in gnorms._iterate_signal():
+            for j in np.arange(len(i[0])):
+                glist.append(i[0][j])
         gs = np.asarray(glist)
-        gsig = hs.signals.Signal1D(gs)
-        return gsig.get_histogram(bins=bins)
+        gsig = Signal1D(gs)
+        ghis = gsig.get_histogram(bins=bins)
+        ghis.axes_manager.signal_axes[0].name = 'g-vector magnitude'
+        ghis.axes_manager.signal_axes[0].units = '$A^{-1}$'
+        return ghis
+
+    def get_unique_vectors(self,
+                           distance_threshold=None):
+        """Obtain a unique list of diffraction vectors.
+
+        Parameters
+        ----------
+        distance_threshold : float
+            The minimum distance between gvectors for them to be considered as
+            different gvectors.
+
+        Returns
+        -------
+        unique_vectors : list
+            Unique list of all diffraction vectors.
+
+        """
+        #TODO: Make so that a distance threshold may be set and used to
+        #consider gvectors identical.
+        #Create empty list
+        gvlist=[]
+        #Iterate through signal
+        for i in self._iterate_signal():
+            for j in np.arange(len(i[0])):
+                if np.asarray(i[0][j]) in np.asarray(gvlist):
+                    pass
+                else:
+                    gvlist.append(i[0][j])
+        unique_vectors = np.asarray(gvlist)
+        return unique_vectors
+
+    def get_vdf_images(self,
+                       electron_diffraction,
+                       radius,
+                       unique_vectors=None):
+        """Obtain the intensity scattered to each diffraction vector at each
+        navigation position in an ElectronDiffraction Signal by summation in a
+        circular window of specified radius.
+
+        Parameters
+        ----------
+        unique_vectors : list (optional)
+            Unique list of diffracting vectors if pre-calculated. If None the
+            unique vectors in self are determined and used.
+
+        electron_diffraction : ElectronDiffraction
+            ElectronDiffraction signal from which to extract the reflection
+            intensities.
+
+        radius : float
+            Radius of the integration window summed over in reciprocal angstroms.
+
+        Returns
+        -------
+        vdfs : Signal2D
+            Signal containing virtual dark field images for all unique g-vectors.
+        """
+        if unique_vectors==None:
+            unique_vectors = self.get_unique_vectors()
+        else:
+            unique_vectors = unique_vectors
+
+        vdfs = []
+        for v in unique_vectors:
+            disk = roi.CircleROI(cx=v[1], cy=v[0], r=radius, r_inner=0)
+            vdf = disk(electron_diffraction,
+                       axes=electron_diffraction.axes_manager.signal_axes)
+            vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
+        return Signal2D(np.asarray(vdfs))
 
     def get_gvector_indexation(self,
                                calculated_peaks,
@@ -136,7 +208,7 @@ class DiffractionVectors(BaseSignal):
         if angular_threshold==None:
             pass
         else:
-
+            pass
 
         return gindex
 
@@ -151,64 +223,3 @@ class DiffractionVectors(BaseSignal):
         -------
 
         """
-
-    def get_unique_vectors(self):
-        """Obtain a unique list of diffraction vectors.
-
-        Returns
-        -------
-        unique_vectors : list
-            Unique list of all diffraction vectors.
-        """
-        #Create empty list
-        gv = []
-        #Iterate through vectors
-        for i in dp.axes_manager:
-            it = (i[1], i[0])
-            g = peaks[it]
-            for j in np.arange(len(g)):
-                #if vector in list pass else add list
-                if np.asarray(g[j]) in np.asarray(gv):
-                    pass
-                else:
-                    gv.append(g[j])
-        return gv
-
-    def get_reflection_intensities(self,
-                                   unique_vectors=None,
-                                   electron_diffraction,
-                                   radius):
-        """Obtain the intensity scattered to each diffraction vector at each
-        navigation position in an ElectronDiffraction Signal by summation in a
-        circular window of specified radius.
-
-        Parameters
-        ----------
-        unique_vectors : list (optional)
-            Unique list of diffracting vectors if pre-calculated. If None the
-            unique vectors in self are determined and used.
-
-        electron_diffraction : ElectronDiffraction
-            ElectronDiffraction signal from which to extract the reflection
-            intensities.
-
-        radius : float
-            Radius of the integration window summed over in reciprocal angstroms.
-
-        Returns
-        -------
-        """
-        if unique_vectors==None:
-            unique_vectors = self.get_unique_vectors()
-
-        cs = np.asarray(unique_vectors)
-        cs = cs * electron_diffraction.axes_manager.signal_axes[0].scale
-        cs = cs + electron_diffraction.axes_manager.signal_axes[0].offset
-
-        vdfs = []
-        for i in np.arange(len(gvuna)):
-            roi = hs.roi.CircleROI(cx=cs[i][1], cy=cs[i][0],
-                                   r=radius, r_inner=0)
-            vdf = roi(electron_diffraction, axes=electron_diffraction.axes_manager.signal_axes)
-            vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
-        return hs.signals.Signal2D(np.asarray(vdfs))

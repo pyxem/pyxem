@@ -27,7 +27,11 @@ from hyperspy.signals import Signal2D, BaseSignal
 
 from pycrystem.utils.expt_utils import *
 from pycrystem.utils.peakfinders2D import *
+from pycrystem.diffraction_vectors import DiffractionVectors
 
+def peaks_as_gvectors(z, center, calibration):
+    g = (z - center) * calibration
+    return g[0]
 
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
