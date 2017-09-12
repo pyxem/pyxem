@@ -19,11 +19,9 @@
 
 """
 
-from __future__ import division
-
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from skimage.morphology import square
 
 from .utils.expt_utils import *
@@ -280,22 +278,36 @@ class ElectronDiffraction(Signal2D):
                                                        border_value=0)
         return mask
 
-    def apply_affine_transformation(self, D, inplace=True):
+    def apply_affine_transformation(self,
+                                    D,
+                                    order=3,
+                                    inplace=True,
+                                    *args, **kwargs):
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
         ----------
-        D : 3x3 numpy array
-            Specifies the affine transform to be applied.
+        D : array
+            3x3 np.array specifying the affine transform to be applied.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
 
-        """
-        return self.map(affine_transformation, matrix=D, inplace=inplace)
+        Returns
+        -------
+            ElectronDiffraction Signal containing the affine Transformed
+            diffraction patterns.
 
-    def gain_normalisation(self, dark_reference, bright_reference,
-                           inplace=True):
+        """
+        return self.map(affine_transformation,
+                        matrix=D,
+                        order=order,
+                        inplace=inplace)
+
+    def apply_gain_normalisation(self,
+                                 dark_reference,
+                                 bright_reference,
+                                 inplace=True):
         """Apply gain normalization to experimentally acquired electron
         diffraction patterns.
 
@@ -310,8 +322,34 @@ class ElectronDiffraction(Signal2D):
             new signal.
 
         """
-        return self.map(gain_normalise, dref=dark_reference,
-                        bref=bright_reference, inplace=inplace)
+        return self.map(gain_normalise,
+                        dref=dark_reference,
+                        bref=bright_reference,
+                        inplace=inplace)
+
+    def remove_deadpixels(self,
+                          deadpixels,
+                          deadvalue='average',
+                          inplace=True):
+        """Remove deadpixels from experimentally acquired diffraction patterns.
+
+        Parameters
+        ----------
+        deadpixels : ElectronDiffraction
+            List
+        deadvalue : string
+            Specify how deadpixels should be treated. 'average' sets the dead
+            pixel value to the average of adjacent pixels. 'nan' sets the dead
+            pixel to nan
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+
+        """
+        return self.map(remove_dead,
+                        deadpixels=deadpixels,
+                        deadvalue=deadvalue,
+                        inplace=inplace)
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
@@ -335,16 +373,63 @@ class ElectronDiffraction(Signal2D):
         :func:`~pycrystem.utils.expt_utils.radial_average`
         :meth:`get_direct_beam_position`
 
+        Examples
+        --------
+        .. code-block:: python
+            
+            centers = ed.get_direct_beam_position(method="blur")
+            profiles = ed.get_radial_profile(centers)
+            profiles.plot()
         """
-        # TODO: make this work without averaging the centers
         # TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
-        center = centers.mean(axis=(0, 1))
-        radial_profiles = self.map(radial_average, center=center, inplace=False)
-        radial_profiles.axes_manager.signal_axes[0].offset = 0
-        signal_axis = radial_profiles.axes_manager.signal_axes[0]
-        return radial_profiles.as_signal1D(signal_axis)
+
+        radial_profiles = self.map(radial_average, center=centers, inplace=False)
+        ragged = len(radial_profiles.data.shape) == 1
+        if ragged:
+            max_len = max(map(len, radial_profiles.data))
+            radial_profiles = Signal1D([
+                np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
+                for row in radial_profiles.data])
+            return radial_profiles
+        else:
+            radial_profiles.axes_manager.signal_axes[0].offset = 0
+            signal_axis = radial_profiles.axes_manager.signal_axes[0]
+            return radial_profiles.as_signal1D(signal_axis)
+
+    def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
+        """Reproject the diffraction data into polar coordinates.
+
+        Parameters
+        ----------
+        origin : tuple
+            The coordinate (x0, y0) of the image center, relative to bottom-left.
+            If 'None'defaults to the center of the pattern.
+        Jacobian : boolean
+            Include ``r`` intensity scaling in the coordinate transform.
+            This should be included to account for the changing pixel size that
+            occurs during the transform.
+        dr : float
+            Radial coordinate spacing for the grid interpolation
+            tests show that there is not much point in going below 0.5
+        dt : float
+            Angular coordinate spacing (in radians)
+            if ``dt=None``, dt will be set such that the number of theta values
+            is equal to the maximum value between the height or the width of
+            the image.
+
+        Returns
+        -------
+        output : ElectronDiffraction
+            The electron diffraction data in polar coordinates.
+
+        """
+        return map(self,
+                   reproject_polar,
+                   origin=origin,
+                   jacobian=jacobian,
+                   dr=dr, dt=dt)
 
     def get_diffraction_variance(self):
         """Calculates the variance of associated with each diffraction pixel.
@@ -361,39 +446,54 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
-    def get_direct_beam_position(self, radius):
-        """Determine rigid shifts in the SED patterns based on the position of
-        the direct beam and return the shifts required to center all patterns.
+    def get_direct_beam_position(self,
+                                 method='blur',
+                                 sigma=30,
+                                 *args, **kwargs):
+        """Estimate the direct beam position in each experimentally acquired
+        electron diffraction pattern.
 
         Parameters
         ----------
-        radius : int
-            Defines the size of the circular region, in pixels, within which the
-            direct beam position is refined.
+        method : string
+            Specify the method used to determine the direct beam position.
+
+            * 'blur' - Use gaussian filter to blur the image and take the 
+                pixel with the maximum intensity value as the center
+            * 'refine_local' - Refine the position of the direct beam and 
+                hence an estimate for the position of the pattern center in
+                each SED pattern.
+
+        sigma : int
+            Standard deviation for the gaussian convolution (only for 
+            'blur' method).
 
         Returns
         -------
-        shifts : ndarray
+        centers : ndarray
             Array containing the shift to be applied to each SED pattern to
             center it.
 
         """
-        # sum images to produce image in which direct beam reinforced and take
-        # the position of maximum intensity as the initial estimate of center.
-        dp_sum = self.sum()
-        maxes = np.asarray(np.where(dp_sum.data == dp_sum.data.max()))
-        mref = np.rint([np.average(maxes[0]), np.average(maxes[1])])
-        mref = mref.astype(int)
-        # specify array of dims (nav_size, 2) in which to store centers and find
-        # the center of each pattern by determining the direct beam position.
-        arr_shape = (self.axes_manager.navigation_size, 2)
-        c = np.zeros(arr_shape, dtype=int)
-        for z, index in zip(self._iterate_signal(),
-                            np.arange(0, self.axes_manager.navigation_size, 1)):
-            c[index] = refine_beam_position(z, start=mref, radius=radius)
-        # The arange function produces a linear set of centers that has to be
-        # reshaped back to the original signal shape
-        return c.reshape(self.axes_manager.navigation_shape[::-1] + (-1,))
+        #TODO: add sub-pixel capabilities and model fitting methods.
+        if method == 'blur':
+            centers = self.map(find_beam_position_blur, sigma=sigma, inplace=False)
+
+        elif method == 'refine_local':
+            if initial_center==None:
+                initial_center = np.int(self.signal_axes.shape / 2)
+
+            centers = self.map(refine_beam_position,
+                          initial_center=initial_center,
+                          radius=radius,
+                          inplace=False)
+
+        else:
+            raise NotImplementedError("The method specified is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.")
+
+        return centers
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.
@@ -401,13 +501,30 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
         method : string
-            Method is either 'h-dome' or 'model'. The latter fit a model to the
-            radial profile of the average diffraction pattern and then smooths
-            remaining noise using a h-dome method.
+            Specify the method used to determine the direct beam position.
+
+            * 'h-dome' - 
+            * 'model' - fit a model to the radial profile of the average 
+                diffraction pattern and then smooth remaining noise using 
+                an h-dome method.
+            * 'gaussian_difference' - Uses a difference between two gaussian
+				convolutions to determine where the peaks are, and sets
+				all other pixels to 0.
+            * 'median' - Use a median filter for background removal
 
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
-            beam if the model method is used.
+            beam if the model method is used (h-dome / model only).
+        min_sigma : int, float
+            Standard deviation for the minimum gaussian convolution 
+            (gaussian_difference only)
+        max_sigma : int, float
+            Standard deviation for the maximum gaussian convolution 
+            (gaussian_difference only)
+        footprint : int 
+            Size of the window that is convoluted with the array to determine
+            the median. Should be large enough that it is about 3x as big as the
+            size of the peaks (median only).
 
         Returns
         -------
@@ -440,6 +557,13 @@ class ElectronDiffraction(Signal2D):
                 self.axes_manager.navigation_axes)
             denoised.axes_manager.update_axes_attributes_from(
                 self.axes_manager.signal_axes)
+
+        elif method == 'gaussian_difference':
+            denoised = self.map(subtract_background_dog, *args, **kwargs)
+
+        elif method == 'median':
+			# no denoising applied here
+            denoised = self.map(subtract_background_median, *args, **kwargs)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "
@@ -509,6 +633,35 @@ class ElectronDiffraction(Signal2D):
             bg.axes_manager.signal_axes[i].update_from(
                 self.axes_manager.signal_axes[i])
         return bg
+
+    def get_no_diffraction_mask(self, *args, **kwargs):
+        """Identify electron diffraction patterns containing no diffraction
+        peaks for removal in further processing steps.
+
+        Parameters
+        ----------
+        method : string
+            Choice of method
+
+        Returns
+        -------
+        mask : Signal
+            Signal object containing the mask.
+        """
+        #TODO: Make this actually work.
+        if method == 'shapiro-wilk':
+            shapiro_values = self.map(stats.shapiro)
+            mask = shapiro_values > threshold
+
+        elif method == 'threshold':
+            mask = self.sum((2,3)) > threshold
+
+        else:
+            raise NotImplementedError("The method specified is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.")
+
+        return mask
 
     def decomposition(self, *args, **kwargs):
         """Decomposition with a choice of algorithms.
@@ -595,5 +748,5 @@ class ElectronDiffraction(Signal2D):
 
         """
         from .utils import peakfinder2D_gui
-        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW()
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(**imshow_kwargs)
         peakfinder.interactive(self)

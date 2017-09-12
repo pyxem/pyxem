@@ -20,9 +20,6 @@
 
 """
 
-
-from __future__ import division
-
 import numpy as np
 
 from pymatgen.transformations.standard_transformations \

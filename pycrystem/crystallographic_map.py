@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import division
-
 from hyperspy.signals import BaseSignal
 from transforms3d.euler import euler2axangle
 import numpy as np

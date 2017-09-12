@@ -20,9 +20,6 @@
 
 """
 
-
-from __future__ import division
-
 import numpy as np
 from hyperspy.components2d import Expression
 

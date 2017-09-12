@@ -20,8 +20,6 @@
 
 """
 
-from __future__ import division
-
 import numpy as np
 from hyperspy.signals import BaseSignal
 from pymatgen.transformations.standard_transformations \
