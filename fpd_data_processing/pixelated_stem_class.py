@@ -23,7 +23,17 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        tuple with center x and y arrays. (com x, com y)"""
+        tuple with center x and y arrays. (com x, com y)
+        
+        Examples
+        --------
+        With mask centered at x=105, y=120 and 30 pixel radius
+        >>> mask = (105, 120, 30)
+        >>> s_com = s.center_of_mass(mask=mask)
+        
+        Also threshold
+        >>> s_com = s.center_of_mass(threshold=1.5)
+        """
 
         if mask is not None:
             x, y, r = mask
