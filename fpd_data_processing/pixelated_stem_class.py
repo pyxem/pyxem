@@ -48,7 +48,7 @@ class PixelatedSTEM(Signal2D):
 
     def radial_integration(
             self, centre_x_array=None, centre_y_array=None, mask_array=None):
-        """Radially integrates a 4-D pixelated STEM diffraction signal.
+        """Radially integrates a pixelated STEM diffraction signal.
 
         Parameters
         ----------
@@ -60,8 +60,7 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        3-D HyperSpy signal, 2 spatial dimensions,
-        1 integrated reciprocal dimension."""
+        HyperSpy signal, one less signal dimension than the input signal."""
         s_radial = pst._do_radial_integration(
                 self,
                 centre_x_array=centre_x_array,
