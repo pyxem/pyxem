@@ -24,9 +24,9 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
     return(False)
 
 
-def _load_fpd_emd_file(filename):
+def _load_fpd_emd_file(filename, lazy=False):
     logging.basicConfig(level=logging.ERROR)
-    s_list = load_with_reader(filename, reader=emd)
+    s_list = load_with_reader(filename, reader=emd, lazy=lazy)
     logging.basicConfig(level=logging.WARNING)
     temp_s = None
     longest_dims = 0
@@ -49,21 +49,22 @@ def _load_fpd_emd_file(filename):
     return(s)
 
 
-def load_fpd_signal(filename):
+def load_fpd_signal(filename, lazy=False):
     if _fpd_checker(filename, attr_substring='fpd_version'):
-        s = _load_fpd_emd_file(filename)
+        s = _load_fpd_emd_file(filename, lazy=lazy)
     elif _hspy_checker(filename, attr_substring='HyperSpy'):
-        s = load(filename)
+        s = load(filename, lazy=lazy)
     else:
         raise IOError("File " + str(filename) + " not recognised")
     s_new = PixelatedSTEM(s.data)
+    s_new._lazy = lazy
     for i in range(len(s.axes_manager.shape)):
         s_new.axes_manager[i].offset = s.axes_manager[i].offset
         s_new.axes_manager[i].scale = s.axes_manager[i].scale
         s_new.axes_manager[i].name = s.axes_manager[i].name
         s_new.axes_manager[i].units = s.axes_manager[i].units
     s_new.metadata = s.metadata.deepcopy()
-    return PixelatedSTEM(s.data)
+    return s_new
 
 
 def load_dpc_signal(filename):
