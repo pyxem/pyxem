@@ -185,8 +185,6 @@ def _make_centre_array_from_signal(signal):
 
 def _do_radial_integration(
         signal, centre_x_array=None, centre_y_array=None, mask_array=None):
-    if (centre_x_array is None) or (centre_y_array is None):
-        centre_x_array, centre_y_array = _make_centre_array_from_signal(signal)
     radial_array_size = _find_longest_distance(
             signal.axes_manager.signal_axes[1].size,
             signal.axes_manager.signal_axes[0].size,

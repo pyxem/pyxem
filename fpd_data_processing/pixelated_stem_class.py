@@ -71,11 +71,16 @@ class PixelatedSTEM(Signal2D):
         Returns
         -------
         HyperSpy signal, one less signal dimension than the input signal."""
-        s_radial = pst._do_radial_integration(
-                self,
-                centre_x_array=centre_x_array,
-                centre_y_array=centre_y_array,
-                mask_array=mask_array)
+        if (centre_x_array is None) or (centre_y_array is None):
+            centre_x_array, centre_y_array = pst._make_centre_array_from_signal(self)
+
+        centre_x_array = centre_x_array.flatten()
+        centre_y_array = centre_y_array.flatten()
+        iterating_kwargs = (('centre_x', centre_x_array), ('centre_y', centre_x_array))
+        s_radial = self._map_iterate(
+                pst._get_radial_profile_of_diff_image,
+                iterating_kwargs=iterating_kwargs,
+                parallel=False, inplace=False)
         return(s_radial)
 
     def angular_mask(
