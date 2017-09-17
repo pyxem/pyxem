@@ -74,13 +74,23 @@ class PixelatedSTEM(Signal2D):
         if (centre_x_array is None) or (centre_y_array is None):
             centre_x_array, centre_y_array = pst._make_centre_array_from_signal(self)
 
+        radial_array_size = pst._find_longest_distance(
+                self.axes_manager.signal_axes[1].size,
+                self.axes_manager.signal_axes[0].size,
+                centre_x_array.min(), centre_y_array.min(),
+                centre_x_array.max(), centre_y_array.max())+1
         centre_x_array = centre_x_array.flatten()
         centre_y_array = centre_y_array.flatten()
-        iterating_kwargs = (('centre_x', centre_x_array), ('centre_y', centre_x_array))
-        s_radial = self._map_iterate(
+        iterating_kwargs = (
+                ('centre_x', centre_x_array),
+                ('centre_y', centre_x_array))
+        s_radial_temp = self._map_iterate(
                 pst._get_radial_profile_of_diff_image,
                 iterating_kwargs=iterating_kwargs,
-                parallel=False, inplace=False)
+                inplace=False, ragged=False,
+                radial_array_size=radial_array_size)
+        s_radial = s_radial_temp.as_signal1D(-1)
+
         return(s_radial)
 
     def angular_mask(
