@@ -6,6 +6,19 @@ from hyperspy.signals import Signal1D, Signal2D
 from matplotlib.colors import hsv_to_rgb, to_rgba
 
 
+def _threshold_com(
+        im, threshold_factor=1,
+        slice_x0=None, slice_x1=None,
+        slice_y0=None, slice_y1=None,
+        ):
+    im = im[slice_x0:slice_x1, slice_y0:slice_y1]
+    threshold = im.mean()*threshold_factor
+    im[im < threshold] = 0
+    im[im > threshold] = 1
+    com = np.array(center_of_mass(im))
+    return(com)
+
+
 def _center_of_mass_single_frame(im, threshold=None, mask=None):
     if (mask is not None) or (threshold is not None):
         image = copy.deepcopy(im)

@@ -1,6 +1,7 @@
 import numpy as np
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
+from hyperspy._signals.lazy import LazySignal
 import fpd_data_processing.pixelated_stem_tools as pst
 from tqdm import tqdm
 
@@ -43,16 +44,35 @@ class PixelatedSTEM(Signal2D):
         # Signal is transposed, due to the DPC signals having the
         # x and y deflections as navigation dimension, and probe
         # positions as signal dimensions
+
+        print("test")
         s_com = self.map(
-                pst._center_of_mass_single_frame,
-                threshold=threshold, mask=mask,
-                ragged=False, inplace=False)
+                function=pst._threshold_com,
+                ragged=False, inplace=False, parallel=True,
+                show_progressbar=True)
+        return(s_com)
+
+        s_com = self.map(
+                function=pst._center_of_mass_single_frame,
+                ragged=False, inplace=False, parallel=True,
+                show_progressbar=True,
+                threshold=threshold, mask=mask)
+        return(s_com)
         if self.axes_manager.navigation_dimension == 0:
-            s_com = DPCBaseSignal(s_com.data).T
+            if self._lazy:
+                s_com = LazyDPCBaseSignal(s_com.data).T
+            else:
+                s_com = DPCBaseSignal(s_com.data).T
         elif self.axes_manager.navigation_dimension == 1:
-            s_com = DPCSignal1D(s_com.T.data)
+            if self._lazy:
+                s_com = LazyDPCSignal1D(s_com.data).T
+            else:
+                s_com = DPCSignal1D(s_com.T.data)
         elif self.axes_manager.navigation_dimension == 2:
-            s_com = DPCSignal2D(s_com.T.data)
+            if self._lazy:
+                s_com = LazyDPCSignal2D(s_com.data).T
+            else:
+                s_com = DPCSignal2D(s_com.T.data)
         s_com.axes_manager.navigation_axes[0].name = "Beam position"
         return(s_com)
 
@@ -88,10 +108,11 @@ class PixelatedSTEM(Signal2D):
                 pst._get_radial_profile_of_diff_image,
                 iterating_kwargs=iterating_kwargs,
                 inplace=False, ragged=False,
+                parallel=True,
                 radial_array_size=radial_array_size)
-        s_radial = s_radial_temp.as_signal1D(-1)
+#        s_radial = s_radial_temp.as_signal1D(-1)
 
-        return(s_radial)
+        return(s_radial_temp)
 
     def angular_mask(
             self, angle0, angle1,
@@ -359,3 +380,35 @@ class DPCSignal2D(Signal2D):
         s_hist.axes_manager[1].offset = yedges[0]
         s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
         return(s_hist)
+
+
+class LazyDPCBaseSignal(LazySignal, DPCBaseSignal):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class LazyDPCSignal1D(LazySignal, DPCSignal1D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class LazyDPCSignal2D(LazySignal, DPCSignal2D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class LazyPixelatedSTEM(LazySignal, PixelatedSTEM):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

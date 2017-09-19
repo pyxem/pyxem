@@ -1,10 +1,12 @@
 import h5py
 import logging
+import dask.array as da
 from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
 from fpd_data_processing.pixelated_stem_class import (
-        PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D)
+        PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D,
+        LazyPixelatedSTEM)
 
 
 def _fpd_checker(filename, attr_substring='fpd_version'):
@@ -24,9 +26,29 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
     return(False)
 
 
-def _load_fpd_emd_file(filename, lazy=False):
+def _load_lazy_fpd_file(filename):
+    f = h5py.File(filename)
+    if 'fpd_expt' in f:
+        data = f['/fpd_expt/fpd_data/data']
+        if len(data.shape) == 5:
+            chunks = (1, 1, 1, data.shape[-2], data.shape[-1])
+            data_lazy = da.from_array(data, chunks=chunks)[:,:,0,:,:]
+        elif len(data.shape) == 4:
+            chunks = (1, 1, data.shape[-2], data.shape[-1])
+            data_lazy = da.from_array(data, chunks=chunks)[:,:,:,:]
+        else:
+            raise IOError(
+                "Pixelated dataset does not have correct dimensionsnot found")
+
+        s = LazyPixelatedSTEM(data_lazy)
+        return(s)
+    else:
+        raise IOError("Pixelated dataset not found")
+
+
+def _load_fpd_emd_file(filename):
     logging.basicConfig(level=logging.ERROR)
-    s_list = load_with_reader(filename, reader=emd, lazy=lazy)
+    s_list = load_with_reader(filename, reader=emd)
     logging.basicConfig(level=logging.WARNING)
     temp_s = None
     longest_dims = 0
@@ -51,19 +73,22 @@ def _load_fpd_emd_file(filename, lazy=False):
 
 def load_fpd_signal(filename, lazy=False):
     if _fpd_checker(filename, attr_substring='fpd_version'):
-        s = _load_fpd_emd_file(filename, lazy=lazy)
+        if lazy:
+            s_new = _load_lazy_fpd_file(filename)
+        else:
+            s = _load_fpd_emd_file(filename)
     elif _hspy_checker(filename, attr_substring='HyperSpy'):
         s = load(filename, lazy=lazy)
     else:
         raise IOError("File " + str(filename) + " not recognised")
-    s_new = PixelatedSTEM(s.data)
-    s_new._lazy = lazy
-    for i in range(len(s.axes_manager.shape)):
-        s_new.axes_manager[i].offset = s.axes_manager[i].offset
-        s_new.axes_manager[i].scale = s.axes_manager[i].scale
-        s_new.axes_manager[i].name = s.axes_manager[i].name
-        s_new.axes_manager[i].units = s.axes_manager[i].units
-    s_new.metadata = s.metadata.deepcopy()
+    if not lazy:
+        s_new = PixelatedSTEM(s.data)
+        for i in range(len(s.axes_manager.shape)):
+            s_new.axes_manager[i].offset = s.axes_manager[i].offset
+            s_new.axes_manager[i].scale = s.axes_manager[i].scale
+            s_new.axes_manager[i].name = s.axes_manager[i].name
+            s_new.axes_manager[i].units = s.axes_manager[i].units
+        s_new.metadata = s.metadata.deepcopy()
     return s_new
 
 
