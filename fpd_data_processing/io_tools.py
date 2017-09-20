@@ -38,7 +38,7 @@ def _load_lazy_fpd_file(filename):
             data_lazy = da.from_array(data, chunks=chunks)[:,:,:,:]
         else:
             raise IOError(
-                "Pixelated dataset does not have correct dimensionsnot found")
+                "Pixelated dataset does not have correct dimensions")
 
         s = LazyPixelatedSTEM(data_lazy)
         return(s)
