@@ -44,37 +44,22 @@ class PixelatedSTEM(Signal2D):
         # Signal is transposed, due to the DPC signals having the
         # x and y deflections as navigation dimension, and probe
         # positions as signal dimensions
-
-        print("test")
-        s_com = self.map(
-                function=pst._threshold_com,
-                ragged=False, inplace=False, parallel=True,
-                show_progressbar=True)
-        return(s_com)
-
         s_com = self.map(
                 function=pst._center_of_mass_single_frame,
                 ragged=False, inplace=False, parallel=True,
                 show_progressbar=True,
                 threshold=threshold, mask=mask)
-        return(s_com)
+        if self._lazy:
+            s_com.compute()
         if self.axes_manager.navigation_dimension == 0:
-            if self._lazy:
-                s_com = LazyDPCBaseSignal(s_com.data).T
-            else:
-                s_com = DPCBaseSignal(s_com.data).T
+            s_com = DPCBaseSignal(s_com.data).T
         elif self.axes_manager.navigation_dimension == 1:
-            if self._lazy:
-                s_com = LazyDPCSignal1D(s_com.data).T
-            else:
-                s_com = DPCSignal1D(s_com.T.data)
+            s_com = DPCSignal1D(s_com.T.data)
         elif self.axes_manager.navigation_dimension == 2:
-            if self._lazy:
-                s_com = LazyDPCSignal2D(s_com.data).T
-            else:
-                s_com = DPCSignal2D(s_com.T.data)
+            s_com = DPCSignal2D(s_com.T.data)
         s_com.axes_manager.navigation_axes[0].name = "Beam position"
         return(s_com)
+
 
     def radial_integration(
             self, centre_x_array=None, centre_y_array=None, mask_array=None):
@@ -110,6 +95,8 @@ class PixelatedSTEM(Signal2D):
                 inplace=False, ragged=False,
                 parallel=True,
                 radial_array_size=radial_array_size)
+        if self._lazy:
+            s_radial_temp.compute()
 #        s_radial = s_radial_temp.as_signal1D(-1)
 
         return(s_radial_temp)
