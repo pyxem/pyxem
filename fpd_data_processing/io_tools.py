@@ -26,15 +26,19 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
     return(False)
 
 
-def _load_lazy_fpd_file(filename):
+def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
     f = h5py.File(filename)
     if 'fpd_expt' in f:
         data = f['/fpd_expt/fpd_data/data']
         if len(data.shape) == 5:
-            chunks = (1, 1, 1, data.shape[-2], data.shape[-1])
+            chunks = (
+                    chunk_size[0], chunk_size[1],
+                    1, data.shape[-2], data.shape[-1])
             data_lazy = da.from_array(data, chunks=chunks)[:,:,0,:,:]
         elif len(data.shape) == 4:
-            chunks = (1, 1, data.shape[-2], data.shape[-1])
+            chunks = (
+                    chunk_size[0], chunk_size[1],
+                    data.shape[-2], data.shape[-1])
             data_lazy = da.from_array(data, chunks=chunks)[:,:,:,:]
         else:
             raise IOError(
@@ -71,10 +75,20 @@ def _load_fpd_emd_file(filename):
     return(s)
 
 
-def load_fpd_signal(filename, lazy=False):
+def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
+    """
+    Parameters
+    ----------
+    filename : string
+    lazy : bool, default False
+    chunk_size : tuple, default (16, 16)
+        Used if Lazy is True. Sets the chunk size of the signal in the
+        navigation dimension. Higher number will potentially make the
+        calculations be faster, but use more memory.
+    """
     if _fpd_checker(filename, attr_substring='fpd_version'):
         if lazy:
-            s_new = _load_lazy_fpd_file(filename)
+            s_new = _load_lazy_fpd_file(filename, chunk_size=chunk_size)
         else:
             s = _load_fpd_emd_file(filename)
     elif _hspy_checker(filename, attr_substring='HyperSpy'):
