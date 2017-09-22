@@ -16,7 +16,7 @@ Simple examples
 
 Generating a default image
 ##############################
-The default settings creates test data consisting of a bright-field disk and a consentrinc diffraction ring.
+The default settings creates test data consisting of a bright-field disk and a concentric diffraction ring.
 No input parameters are needed to generate this object.
 The test data contains a **PixelatedSTEM object**, which can be be plotted.
 
@@ -39,7 +39,7 @@ The test data contains a **PixelatedSTEM object**, which can be be plotted.
 
 Generating a bright-field disk
 ##############################
-To generate other datasets that the default set the arugment default to false, and add rings and disk manually.
+To generate other datasets that the default set the argument default to false, and add rings and disk manually.
 The below example generates a test data image with 1000x1000 pixels, and scale 0.1.
 The centre point of the disk is (45,55), and radius 5. 
 
@@ -61,7 +61,7 @@ Generating a diffraction ring
 A diffraction ring can be added to a TestData object.
 In addition to centre point radius (and intensity, as show later), the line width of the ring can be set.
 The radius is defined as the distance from the centre to the centre point of the pixel at outer edge of the ring (i.e radius + half of the scale).
-The linewidth of the ring in pixels, before it is blurred and rescaled in order to create a more smooth ring.
+The line width of the ring in pixels, before it is blurred and rescaled in order to create a more smooth ring.
 
 .. code-block:: python
 
@@ -78,12 +78,12 @@ Advanced diffraction images
 
 Smoothing and intensity
 #######################
-Below are three examples with a diffraction ring and brightfield disk with slightly offset centre points.
-To mimic relistic patterns, the **intensity** of the ring will be set lower than the intensity of the disk.
+Below are three examples with a diffraction ring and bright field disk with slightly offset centre points.
+To mimic realistic patterns, the **intensity** of the ring will be set lower than the intensity of the disk.
 **Blurring** and **rescaling** is used to get a smoother features, and is on by default..
 The two first examples, are blurred and rescaled to make the features more smooth.
-The sigma for the gaussian blurring is different for the two to.
-Rescaling is done by down and upscaling the image back to its original dimentions.
+The sigma for the Gaussian blurring is different for the two to.
+Rescaling is done by down and upscaling the image back to its original dimensions.
 Perform rescaling by setting downscale to True.
 The last image is without blurring and rescaling.
 
@@ -122,7 +122,7 @@ The last image is without blurring and rescaling.
 
 Image offset
 ############
-The offset of the image can be set through axessing the **axes_manager** of the **PixelatedSTEM object**.
+The offset of the image can be set through accessing the **axes_manager** of the **PixelatedSTEM object**.
 This is useful for radial integration.
 By setting the offset of the axes_manager as below, the coordinates of the centre point of the disks and ring is changed x=0 and y=0.
 
@@ -140,5 +140,3 @@ By setting the offset of the axes_manager as below, the coordinates of the centr
 .. image:: images/doc/TestData_offset.png
     :scale: 50 %
     :align: center
-
-
