@@ -46,6 +46,7 @@ The centre point of the disk is (45,55), and radius 5.
 .. code-block:: python
 
     >>> a = TestData.TestData(size_x=100, size_y=100, scale=0.1, default=False)
+    >>> a.signal
     <PixelatedSTEM, title: , dimensions: (|1000, 1000)>
     >>> a.signal.axes_manager[0].scale
     0.1

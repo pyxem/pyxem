@@ -7,3 +7,4 @@ all_tests_debian_unstable:
     - pip3 install --upgrade pip
     - pip3 install --user .
     - python3 -m unittest discover
+    - python3 -m doctest doc/generate_test_data.rst
