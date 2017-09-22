@@ -60,7 +60,6 @@ class PixelatedSTEM(Signal2D):
         s_com.axes_manager.navigation_axes[0].name = "Beam position"
         return(s_com)
 
-
     def radial_integration(
             self, centre_x_array=None, centre_y_array=None, mask_array=None):
         """Radially integrates a pixelated STEM diffraction signal.
@@ -89,17 +88,18 @@ class PixelatedSTEM(Signal2D):
         iterating_kwargs = (
                 ('centre_x', centre_x_array),
                 ('centre_y', centre_x_array))
-        s_radial_temp = self._map_iterate(
+        s_radial = self._map_iterate(
                 pst._get_radial_profile_of_diff_image,
                 iterating_kwargs=iterating_kwargs,
                 inplace=False, ragged=False,
                 parallel=True,
                 radial_array_size=radial_array_size)
         if self._lazy:
-            s_radial_temp.compute()
-#        s_radial = s_radial_temp.as_signal1D(-1)
+            s_radial.compute()
+        else:
+            s_radial = hs.signals.Signal1D(s_radial.data)
 
-        return(s_radial_temp)
+        return(s_radial)
 
     def angular_mask(
             self, angle0, angle1,
