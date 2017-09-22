@@ -12,11 +12,27 @@ class Circle:
         self.I = I
         self.circle = (xx - self.x0) ** 2 + (yy - self.y0) ** 2
         self.mask_outside_r(scale)
+        self.get_centre_pixel(xx,yy,scale)
 
     def mask_outside_r(self,scale):
         indices = self.circle >= (self.r+scale)**2
         self.circle[indices] = 0
 
+    def get_centre_pixel(self,xx,yy,scale):
+        """
+        This function sets the indices for the pixels on which the centre
+        point is. Because the centrepoint can sometimes be exactly on the
+        boundary of two pixels, the pixles are held in a list. One
+        list for x (self.centre_x_pixels) and one for y
+        (self.centre_x_pixels).
+        """
+        x1 = np.where(xx > (self.x0-0.5*scale))[1][0]
+        x2 = np.where(xx < (self.x0+0.5*scale))[1][-1]
+        self.centre_x_pixels= [x1,x2]
+        y1 = np.where(yy > (self.y0-0.5*scale))[0][0]
+        y2 = np.where(yy < (self.y0+0.5*scale))[0][-1]
+        self.centre_y_pixels= [y1,y2]
+                
     def set_uniform_intensity(self):
         circle_ring_indices = self.circle > 0
         self.circle[circle_ring_indices] = self.I
@@ -31,9 +47,8 @@ class Disk(object):
     """
     def __init__(self,xx,yy,scale,x0,y0,r,I):
         self.z = Circle(xx,yy,x0,y0,r,I,scale)
-        self.center_x, self.center_y = np.argmin(self.z.circle,axis=0)[0], np.argmin(self.z.circle,axis=1)[0]
         self.z.set_uniform_intensity()
-        self.z.circle[self.center_x,self.center_y] = I
+        self.set_centre_intensity()
 
     def __repr__(self):
         return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
@@ -44,14 +59,18 @@ class Disk(object):
             self.z.I,
             )
 
+    def set_centre_intensity(self):
+        for x in self.z.centre_x_pixels:
+            for y in self.z.centre_y_pixels:
+                self.z.circle[x,y] = self.z.I
+
     def get_signal(self):
         return(self.z.circle)
 
     def update_axis(self,xx,yy):
         self.z.update_axis(xx,yy)
-        self.center_x, self.center_y = np.argmin(self.z.circle,axis=0)[0], np.argmin(self.z.circle,axis=1)[0]
         self.z.set_uniform_intensity()
-        self.z.circle[self.center_x,self.center_y] = self.z.I
+        self.set_centre_intensity()
 
 
 class Ring(object):
@@ -61,7 +80,7 @@ class Ring(object):
     def __init__(self,xx,yy,scale,x0,y0,r,I,lw=1):
         self.lw = lw #in coordinates
         self.z = Circle(xx,yy,x0,y0,r,I,scale)
-        self.mask_inside_r()
+        self.mask_inside_r(scale)
         self.z.set_uniform_intensity()
         
     def __repr__(self):
@@ -73,8 +92,8 @@ class Ring(object):
             self.z.I,
             )
 
-    def mask_inside_r(self):
-        indices = self.z.circle < (self.z.r-self.lw)**2
+    def mask_inside_r(self,scale):
+        indices = self.z.circle < (self.z.r-self.lw+scale)**2
         self.z.circle[indices] = 0
         
     def get_signal(self):
