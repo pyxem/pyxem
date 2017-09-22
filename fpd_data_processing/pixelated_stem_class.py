@@ -1,6 +1,7 @@
 import numpy as np
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
+from hyperspy._signals.lazy import LazySignal
 import fpd_data_processing.pixelated_stem_tools as pst
 from tqdm import tqdm
 
@@ -44,9 +45,12 @@ class PixelatedSTEM(Signal2D):
         # x and y deflections as navigation dimension, and probe
         # positions as signal dimensions
         s_com = self.map(
-                pst._center_of_mass_single_frame,
-                threshold=threshold, mask=mask,
-                ragged=False, inplace=False)
+                function=pst._center_of_mass_single_frame,
+                ragged=False, inplace=False, parallel=True,
+                show_progressbar=True,
+                threshold=threshold, mask=mask)
+        if self._lazy:
+            s_com.compute()
         if self.axes_manager.navigation_dimension == 0:
             s_com = DPCBaseSignal(s_com.data).T
         elif self.axes_manager.navigation_dimension == 1:
@@ -55,6 +59,7 @@ class PixelatedSTEM(Signal2D):
             s_com = DPCSignal2D(s_com.T.data)
         s_com.axes_manager.navigation_axes[0].name = "Beam position"
         return(s_com)
+
 
     def radial_integration(
             self, centre_x_array=None, centre_y_array=None, mask_array=None):
@@ -71,12 +76,30 @@ class PixelatedSTEM(Signal2D):
         Returns
         -------
         HyperSpy signal, one less signal dimension than the input signal."""
-        s_radial = pst._do_radial_integration(
-                self,
-                centre_x_array=centre_x_array,
-                centre_y_array=centre_y_array,
-                mask_array=mask_array)
-        return(s_radial)
+        if (centre_x_array is None) or (centre_y_array is None):
+            centre_x_array, centre_y_array = pst._make_centre_array_from_signal(self)
+
+        radial_array_size = pst._find_longest_distance(
+                self.axes_manager.signal_axes[1].size,
+                self.axes_manager.signal_axes[0].size,
+                centre_x_array.min(), centre_y_array.min(),
+                centre_x_array.max(), centre_y_array.max())+1
+        centre_x_array = centre_x_array.flatten()
+        centre_y_array = centre_y_array.flatten()
+        iterating_kwargs = (
+                ('centre_x', centre_x_array),
+                ('centre_y', centre_x_array))
+        s_radial_temp = self._map_iterate(
+                pst._get_radial_profile_of_diff_image,
+                iterating_kwargs=iterating_kwargs,
+                inplace=False, ragged=False,
+                parallel=True,
+                radial_array_size=radial_array_size)
+        if self._lazy:
+            s_radial_temp.compute()
+#        s_radial = s_radial_temp.as_signal1D(-1)
+
+        return(s_radial_temp)
 
     def angular_mask(
             self, angle0, angle1,
@@ -344,3 +367,35 @@ class DPCSignal2D(Signal2D):
         s_hist.axes_manager[1].offset = yedges[0]
         s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
         return(s_hist)
+
+
+class LazyDPCBaseSignal(LazySignal, DPCBaseSignal):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class LazyDPCSignal1D(LazySignal, DPCSignal1D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class LazyDPCSignal2D(LazySignal, DPCSignal2D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class LazyPixelatedSTEM(LazySignal, PixelatedSTEM):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
