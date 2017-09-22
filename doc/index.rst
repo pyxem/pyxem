@@ -2,6 +2,7 @@ Welcome to fpd_data_processing's documentation!
 ===============================================
 
 .. toctree::
+   install
    generate_test_data
    :maxdepth: 2
    :caption: Contents:
