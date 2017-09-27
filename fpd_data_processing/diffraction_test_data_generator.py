@@ -199,13 +199,15 @@ class TestData:
         self.xx, self.yy = np.meshgrid(self.X, self.Y, sparse=True)
 
     def add_disk(self, x0=50, y0=50, r=5, I=10):
-        self.z_list.append(Disk(self.xx, self.yy, self.scale, x0, y0, r, I))
+        scale = self.scale/self.downscale_factor
+        self.z_list.append(Disk(self.xx, self.yy, scale, x0, y0, r, I))
         self.update_signal()
 
     def add_ring(self, x0=50, y0=50, r=20, I=10, lw_pix=1):
         lw = lw_pix*self.scale
+        scale = self.scale/self.downscale_factor
         self.z_list.append(
-                Ring(self.xx, self.yy, self.scale, x0, y0, r, I, lw=lw))
+                Ring(self.xx, self.yy, scale, x0, y0, r, I, lw=lw))
         self.update_signal()
 
     def make_signal(self):

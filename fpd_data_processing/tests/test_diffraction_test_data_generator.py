@@ -69,7 +69,8 @@ class test_diffraction_test_data_generator(unittest.TestCase):
                 size_x=100, size_y=200,
                 default=False, blur=True, downscale=False)
         test6.add_disk(50, 30, 500, 10)
-        self.assertTrue((test6.signal.data==10).all())
+        test6_ref = np.full_like(test6.signal.data, 10.)
+        np.testing.assert_allclose(test6.signal.data, test6_ref, rtol=1e-05)
 
     def test_large_disk(self):
         test_data_1 = TestData.TestData(
