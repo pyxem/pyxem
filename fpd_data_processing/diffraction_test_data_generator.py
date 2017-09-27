@@ -9,7 +9,7 @@ class Circle(object):
         self.y0 = y0
         self.r = r
         self.I = I
-        self.circle = (xx - self.x0) ** 2 + (yy - self.y0) ** 2
+        self.circle = (yy - self.y0) ** 2 + (xx - self.x0) ** 2 
         self.mask_outside_r(scale)
         self.get_centre_pixel(xx, yy, scale)
 
@@ -23,20 +23,33 @@ class Circle(object):
         indices = self.circle >= (self.r + scale)**2
         self.circle[indices] = 0
 
+    def centre_on_image(self,xx,yy):
+        if self.x0 < xx[0][0] or self.x0 > xx[0][-1]:
+            return(False)
+        elif self.y0 < yy[0][0] or self.y0 > yy[-1][-1]:
+            return(False)
+        else:
+            return(True)
+
     def get_centre_pixel(self, xx, yy, scale):
         """
         This function sets the indices for the pixels on which the centre
         point is. Because the centrepoint can sometimes be exactly on the
         boundary of two pixels, the pixles are held in a list. One
         list for x (self.centre_x_pixels) and one for y
-        (self.centre_x_pixels).
+        (self.centre_x_pixels). If the centre is outside the image, the
+        lists will be empty.
         """
-        x1 = np.where(xx > (self.x0 - 0.5 * scale))[1][0]
-        x2 = np.where(xx < (self.x0 + 0.5 * scale))[1][-1]
-        self.centre_x_pixels = [x1, x2]
-        y1 = np.where(yy > (self.y0 - 0.5 * scale))[0][0]
-        y2 = np.where(yy < (self.y0 + 0.5 * scale))[0][-1]
-        self.centre_y_pixels = [y1, y2]
+        if self.centre_on_image(xx,yy):
+            x1 = np.where(xx > (self.x0 - 0.5 * scale))[1][0]
+            x2 = np.where(xx < (self.x0 + 0.5 * scale))[1][-1]
+            self.centre_x_pixels = [x1, x2]
+            y1 = np.where(yy > (self.y0 - 0.5 * scale))[0][0]
+            y2 = np.where(yy < (self.y0 + 0.5 * scale))[0][-1]
+            self.centre_y_pixels = [y1, y2]
+        else:
+            self.centre_x_pixels = []
+            self.centre_y_pixels = []
 
     def set_uniform_intensity(self):
         circle_ring_indices = self.circle > 0
@@ -66,9 +79,13 @@ class Disk(object):
             )
 
     def set_centre_intensity(self):
+        """
+        Sets the intensity of the centre pixles to I. Coordinates are
+        self.z.circle[y, x], due to how numpy works.
+        """
         for x in self.z.centre_x_pixels:
             for y in self.z.centre_y_pixels:
-                self.z.circle[x, y] = self.z.I
+                self.z.circle[y, x] = self.z.I #This is correct
 
     def get_signal(self):
         return(self.z.circle)
