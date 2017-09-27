@@ -1,10 +1,12 @@
 import h5py
 import logging
+import dask.array as da
 from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
 from fpd_data_processing.pixelated_stem_class import (
-        PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D)
+        PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D,
+        LazyPixelatedSTEM)
 
 
 def _fpd_checker(filename, attr_substring='fpd_version'):
@@ -22,6 +24,30 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
             if hdf5_file.attrs['file_format'] == 'HyperSpy':
                 return(True)
     return(False)
+
+
+def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
+    f = h5py.File(filename)
+    if 'fpd_expt' in f:
+        data = f['/fpd_expt/fpd_data/data']
+        if len(data.shape) == 5:
+            chunks = (
+                    chunk_size[0], chunk_size[1],
+                    1, data.shape[-2], data.shape[-1])
+            data_lazy = da.from_array(data, chunks=chunks)[:,:,0,:,:]
+        elif len(data.shape) == 4:
+            chunks = (
+                    chunk_size[0], chunk_size[1],
+                    data.shape[-2], data.shape[-1])
+            data_lazy = da.from_array(data, chunks=chunks)[:,:,:,:]
+        else:
+            raise IOError(
+                "Pixelated dataset does not have correct dimensions")
+
+        s = LazyPixelatedSTEM(data_lazy)
+        return(s)
+    else:
+        raise IOError("Pixelated dataset not found")
 
 
 def _load_fpd_emd_file(filename):
@@ -49,21 +75,35 @@ def _load_fpd_emd_file(filename):
     return(s)
 
 
-def load_fpd_signal(filename):
+def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
+    """
+    Parameters
+    ----------
+    filename : string
+    lazy : bool, default False
+    chunk_size : tuple, default (16, 16)
+        Used if Lazy is True. Sets the chunk size of the signal in the
+        navigation dimension. Higher number will potentially make the
+        calculations be faster, but use more memory.
+    """
     if _fpd_checker(filename, attr_substring='fpd_version'):
-        s = _load_fpd_emd_file(filename)
+        if lazy:
+            s_new = _load_lazy_fpd_file(filename, chunk_size=chunk_size)
+        else:
+            s = _load_fpd_emd_file(filename)
     elif _hspy_checker(filename, attr_substring='HyperSpy'):
-        s = load(filename)
+        s = load(filename, lazy=lazy)
     else:
         raise IOError("File " + str(filename) + " not recognised")
-    s_new = PixelatedSTEM(s.data)
-    for i in range(len(s.axes_manager.shape)):
-        s_new.axes_manager[i].offset = s.axes_manager[i].offset
-        s_new.axes_manager[i].scale = s.axes_manager[i].scale
-        s_new.axes_manager[i].name = s.axes_manager[i].name
-        s_new.axes_manager[i].units = s.axes_manager[i].units
-    s_new.metadata = s.metadata.deepcopy()
-    return PixelatedSTEM(s.data)
+    if not lazy:
+        s_new = PixelatedSTEM(s.data)
+        for i in range(len(s.axes_manager.shape)):
+            s_new.axes_manager[i].offset = s.axes_manager[i].offset
+            s_new.axes_manager[i].scale = s.axes_manager[i].scale
+            s_new.axes_manager[i].name = s.axes_manager[i].name
+            s_new.axes_manager[i].units = s.axes_manager[i].units
+        s_new.metadata = s.metadata.deepcopy()
+    return s_new
 
 
 def load_dpc_signal(filename):

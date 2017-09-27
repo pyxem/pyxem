@@ -183,38 +183,6 @@ def _make_centre_array_from_signal(signal):
     return(centre_x_array, centre_y_array)
 
 
-def _do_radial_integration(
-        signal, centre_x_array=None, centre_y_array=None, mask_array=None):
-    if (centre_x_array is None) or (centre_y_array is None):
-        centre_x_array, centre_y_array = _make_centre_array_from_signal(signal)
-    radial_array_size = _find_longest_distance(
-            signal.axes_manager.signal_axes[1].size,
-            signal.axes_manager.signal_axes[0].size,
-            centre_x_array.min(), centre_y_array.min(),
-            centre_x_array.max(), centre_y_array.max())+1
-    radial_array_shape = list(signal.axes_manager.navigation_shape[::-1])
-    radial_array_shape.append(radial_array_size)
-    radial_profile_array = np.zeros(radial_array_shape, dtype=np.float64)
-    for temp_s in signal:
-        indices = signal.axes_manager.indices[::-1]
-        diff_image = temp_s.data
-        if mask_array is None:
-            mask = None
-        else:
-            mask = mask_array[indices]
-        centre_x = centre_x_array[indices]
-        centre_y = centre_y_array[indices]
-        radial_profile = _get_radial_profile_of_diff_image(
-                diff_image, centre_x, centre_y, mask=mask)
-        indices_list = list(indices)
-        indices_list.append(slice(0, len(radial_profile)))
-        indices_radial = tuple(indices_list)
-        radial_profile_array[indices_radial] = radial_profile
-
-    signal_radial = Signal1D(radial_profile_array)
-    return(signal_radial)
-
-
 def _get_lowest_index_radial_array(radial_array):
     """Returns the lowest index of in a radial array.
 
@@ -237,7 +205,7 @@ def _get_lowest_index_radial_array(radial_array):
 
 
 def _get_radial_profile_of_diff_image(
-        diff_image, centre_x, centre_y, mask=None):
+        diff_image, centre_x, centre_y, radial_array_size, mask=None):
     """Radially integrates a single diffraction image.
 
     Parameters
@@ -258,6 +226,7 @@ def _get_radial_profile_of_diff_image(
 #   Radially profiles the data, integrating the intensity in rings out from the centre. 
 #   Unreliable as we approach the edges of the image as it just profiles the corners.
 #   Less pixels there so become effectively zero after a certain point
+    radial_array = np.zeros(shape=radial_array_size, dtype=np.float64)
     y, x = np.indices((diff_image.shape))
     r = np.sqrt((x - centre_x)**2 + (y - centre_y)**2)
     r = r.astype(int)       
@@ -270,8 +239,9 @@ def _get_radial_profile_of_diff_image(
     tbin =  np.bincount(r_flat, diff_image_flat)
     nr = np.bincount(r_flat)
     nr.clip(1, out=nr) # To avoid NaN in data due to dividing by 0
-    radialProfile = tbin / nr
-    return(radialProfile)
+    radial_profile = tbin / nr
+    radial_array[0:len(radial_profile)] = radial_profile
+    return(radial_array)
 
 
 def _get_angle_sector_mask(

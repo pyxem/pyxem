@@ -1,7 +1,10 @@
 Welcome to fpd_data_processing's documentation!
 ===============================================
 
+Library for processing data acquired on a fast pixelated electron detector, acquired using a scanning transmission electron microscopy.
+
 .. toctree::
+   install
    generate_test_data
    :maxdepth: 2
    :caption: Contents:
