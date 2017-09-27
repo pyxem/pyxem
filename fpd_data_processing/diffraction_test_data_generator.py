@@ -140,9 +140,11 @@ class TestData:
     scale : float, int
         The step size of the x and y axis
 
-    default : bool
+    default : bool, default True
         If true, the default object should be generated. If false, Ring and
         Disk must be added separately by self.add_ring(), self.add_disk()
+
+    downscale : bool, default True
 
     Attributes
     ----------
