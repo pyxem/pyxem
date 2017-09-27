@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from fpd_data_processing.make_diffraction_test_data import (
-        TestData, generate_4d_disk_data)
+        TestData, generate_4d_disk_data, generate_4d_holz_data)
 
 
 class test_make_diffraction_test_data(unittest.TestCase):
@@ -118,7 +118,8 @@ class test_generate_4d_disk_data(unittest.TestCase):
                 image_size_x=50, image_size_y=50,
                 disk_x=20, disk_y=20, disk_r=5, I=30,
                 blur=True, blur_sigma=1,
-                downscale=True)
+                downscale=True, add_noise=True,
+                noise_amplitude=2)
 
     def test_different_size(self):
         s = generate_4d_disk_data(
@@ -170,3 +171,17 @@ class test_generate_4d_disk_data(unittest.TestCase):
                 self.assertTrue((im[sl] == I).all())
                 im[sl] = 0
                 self.assertFalse(im.any())
+
+
+class test_generate_4d_holz_data(unittest.TestCase):
+
+    def test_simple0(self):
+        generate_4d_holz_data()
+
+    def test_disk_ring_outside_image(self):
+        s = generate_4d_holz_data(
+                probe_size_x=6, probe_size_y=4,
+                image_size_x=40, image_size_y=40,
+                disk_x=1000, disk_y=1000, disk_r=5,
+                ring_x=1000, ring_y=1000, ring_r=10)
+        self.assertTrue((s.data == 0).all())

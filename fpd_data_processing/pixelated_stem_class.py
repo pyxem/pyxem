@@ -29,8 +29,11 @@ class PixelatedSTEM(Signal2D):
         Examples
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
-        >>> mask = (105, 120, 30)
+        >>> import fpd_data_processing.make_diffraction_test_data as md
+        >>> s = md.get_disk_shift_simple_test_signal()
+        >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask)
+        >>> s_color = s_com.get_color_signal()
         
         Also threshold
         >>> s_com = s.center_of_mass(threshold=1.5)
@@ -125,7 +128,11 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> mask_array = s.annular_mask(0.5*np.pi, np.pi)
+        >>> import fpd_data_processing.make_diffraction_test_data as md
+        >>> s = md.get_holz_simple_test_signal()
+        >>> s.axes_manager.signal_axes[0].offset = -25
+        >>> s.axes_manager.signal_axes[1].offset = -25
+        >>> mask_array = s.angular_mask(0.5*np.pi, np.pi)
         """
 
         bool_array = pst._get_angle_sector_mask(

@@ -269,7 +269,7 @@ class TestData:
 def generate_4d_disk_data(
         probe_size_x=10, probe_size_y=10, image_size_x=50, image_size_y=50,
         disk_x=20, disk_y=20, disk_r=5, I=20, blur=True, blur_sigma=1,
-        downscale=True,
+        downscale=True, add_noise=False, noise_amplitude=1,
         ):
     """
     Generate a test dataset containing a single disk.
@@ -301,6 +301,10 @@ def generate_4d_disk_data(
         Sigma of the Gaussian blurring, if blur is True.
     downscale : bool, default True
         If True, use upscaling (then downscaling) to anti-alise the disk.
+    add_noise : bool, default False
+        Add Gaussian random noise.
+    noise_amplitude : float, default 1
+        The amplitude of the noise, if add_noise is True.
 
     Returns
     -------
@@ -309,20 +313,24 @@ def generate_4d_disk_data(
 
     Examples
     --------
-    >>> s = generate_4d_disk()
+    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> s = mdtd.generate_4d_disk_data()
     >>> s.plot()
 
     Using more arguments
-    >>> s = generate_4d_disk_data(probe_size_x=20, probe_size_y=30,
+    >>> s = mdtd.generate_4d_disk_data(probe_size_x=20, probe_size_y=30,
     ...         image_size_x=50, image_size_y=90, disk_x=30, disk_y=70,
     ...         disk_r=9, I=30, blur=False, downscale=False)
+
+    Adding some Gaussian random noise
+    >>> s = mdtd.generate_4d_disk_data(add_noise=True, noise_amplitude=3)
 
     Different centre positions for each probe position.
     Note the size=(20, 10), and probe_x=10, probe_y=20: size=(y, x).
     >>> import numpy as np
     >>> disk_x = np.random.randint(5, 35, size=(20, 10))
     >>> disk_y = np.random.randint(5, 45, size=(20, 10))
-    >>> s = generate_4d_disk_data(probe_size_x=10, probe_size_y=20,
+    >>> s = mdtd.generate_4d_disk_data(probe_size_x=10, probe_size_y=20,
     ...         image_size_x=40, image_size_y=50, disk_x=disk_x, disk_y=disk_y)
     """
 
@@ -344,4 +352,148 @@ def generate_4d_disk_data(
         dx, dy, dr = disk_x[index], disk_y[index], disk_r[index]
         test_data.add_disk(dx, dy, dr, I=I)
         s.data[index][:] = test_data.signal.data[:]
+        if add_noise:
+            s.data[index][:] += np.random.random(
+                    size=(image_size_y, image_size_x)) * noise_amplitude
     return s
+
+
+def generate_4d_holz_data(
+        probe_size_x=10, probe_size_y=10, image_size_x=50, image_size_y=50,
+        disk_x=25, disk_y=25, disk_r=5, disk_I=20,
+        ring_x=25, ring_y=25, ring_r=20, ring_I=6, ring_lw=1,
+        blur=True, blur_sigma=1, downscale=True, add_noise=False,
+        noise_amplitude=1,
+        ):
+    """
+    Generate a test dataset containing a disk and diffraction ring.
+    Useful for checking that radial integration
+    algorithms are working properly.
+
+    The centre and radius position of the disk can vary as a function
+    of probe position, through the disk_x, disk_y and disk_r arguments.
+
+    Parameters
+    ----------
+    probe_size_x, probe_size_y : int, default 10
+        Size of the navigation dimension.
+    image_size_x, image_size_y : int, default 50
+        Size of the signal dimension.
+    disk_x, disk_y : int or NumPy 2D-array, default 20
+        Centre position of the disk. Either integer or Numpy 2-D array.
+        See examples on how to make them the correct size.
+    disk_r : int or NumPy 2D-array, default 5
+        Radius of the disk. Either integer or NumPy 2-D array.
+        See examples on how to make it the correct size.
+    disk_I : int, default 20
+        Intensity of the disk, for each of the pixels.
+        So if I=30, the each pixel in the disk will have a value of 30.
+        Note, this value will change if blur=True or downscale=True.
+    ring_x, ring_y : int or NumPy 2D-array, default 20
+        Centre position of the ring. Either integer or NumPy 2-D array.
+        See examples on how to make them the correct size.
+    ring_r : int or NumPy 2D-array, default 5
+        Radius of the ring. Either integer or NumPy 2-D array.
+        See examples on how to make it the correct size.
+    ring_I : int, default 6
+        Intensity of the ring, for each of the pixels.
+        So if I=5, each pixel in the ring will have a value of 5.
+        Note, this value will change if blur=True or downscale=True.
+    ring_lw : int, default 1
+        Line width of the ring
+    blur : bool, default True
+        If True, do a Gaussian blur of the disk.
+    blur_sigma : int, default 1
+        Sigma of the Gaussian blurring, if blur is True.
+    downscale : bool, default True
+        If True, use upscaling (then downscaling) to anti-alise the disk.
+    add_noise : bool, default False
+        Add Gaussian random noise.
+    noise_amplitude : float, default 1
+        The amplitude of the noise, if add_noise is True.
+
+    Returns
+    -------
+    signal : HyperSpy Signal2D
+        Signal with 2 navigation dimensions and 2 signal dimensions.
+
+    Examples
+    --------
+    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> s = mdtd.generate_4d_holz_data()
+    >>> s.plot()
+
+    Using more arguments
+    >>> s = mdtd.generate_4d_holz_data(probe_size_x=20, probe_size_y=30,
+    ...         image_size_x=50, image_size_y=90,
+    ...         disk_x=30, disk_y=70, disk_r=9, disk_I=30,
+    ...         ring_x=35, ring_y=65, ring_r=20, ring_I=10,
+    ...         blur=False, downscale=False)
+
+    Adding some Gaussian random noise
+    >>> s = mdtd.generate_4d_holz_data(add_noise=True, noise_amplitude=3)
+
+    Different centre positions for each probe position.
+    Note the size=(20, 10), and probe_x=10, probe_y=20: size=(y, x).
+    >>> import numpy as np
+    >>> disk_x = np.random.randint(5, 35, size=(20, 10))
+    >>> disk_y = np.random.randint(5, 45, size=(20, 10))
+    >>> ring_x = np.random.randint(5, 35, size=(20, 10))
+    >>> ring_y = np.random.randint(5, 45, size=(20, 10))
+    >>> ring_r = np.random.randint(10, 15, size=(20, 10))
+    >>> s = mdtd.generate_4d_holz_data(probe_size_x=10, probe_size_y=20,
+    ...         image_size_x=40, image_size_y=50, disk_x=disk_x, disk_y=disk_y,
+    ...         ring_x=ring_x, ring_y=ring_y, ring_r=ring_r)
+    """
+
+    if not isiterable(disk_x):
+        disk_x = np.ones((probe_size_y, probe_size_x))*disk_x
+    if not isiterable(disk_y):
+        disk_y = np.ones((probe_size_y, probe_size_x))*disk_y
+    if not isiterable(disk_r):
+        disk_r = np.ones((probe_size_y, probe_size_x))*disk_r
+    if not isiterable(ring_x):
+        ring_x = np.ones((probe_size_y, probe_size_x))*ring_x
+    if not isiterable(ring_y):
+        ring_y = np.ones((probe_size_y, probe_size_x))*ring_y
+    if not isiterable(ring_r):
+        ring_r = np.ones((probe_size_y, probe_size_x))*ring_r
+
+    signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
+    s = PixelatedSTEM(np.zeros(shape=signal_shape))
+    for i in s:
+        index = s.axes_manager.indices[::-1]
+        test_data = TestData(
+                size_x=image_size_x, size_y=image_size_y,
+                default=False, blur=blur, blur_sigma=blur_sigma,
+                downscale=downscale)
+        dx, dy, dr = disk_x[index], disk_y[index], disk_r[index]
+        rx, ry, rr = ring_x[index], ring_y[index], ring_r[index]
+        test_data.add_disk(dx, dy, dr, I=disk_I)
+        test_data.add_ring(rx, ry, rr, I=ring_I, lw_pix=ring_lw)
+        s.data[index][:] = test_data.signal.data[:]
+        if add_noise:
+            s.data[index][:] += np.random.random(
+                    size=(image_size_y, image_size_x)) * noise_amplitude
+    return s
+
+
+def get_disk_shift_simple_test_signal():
+    disk_x, disk_y = np.mgrid[22:28:20j, 22:28:20j]
+    s = generate_4d_disk_data(
+            probe_size_x=20, probe_size_y=20,
+            image_size_x=50, image_size_y=50,
+            disk_x=disk_x, disk_y=disk_y, disk_r=2,
+            add_noise=True)
+    return(s)
+
+
+def get_holz_simple_test_signal():
+    ring_x, ring_y = np.mgrid[24:26:20j, 24:26:20j]
+    s = generate_4d_holz_data(
+            probe_size_x=20, probe_size_y=20,
+            image_size_x=50, image_size_y=50,
+            disk_x=25, disk_y=25, disk_r=2, disk_I=20,
+            ring_x=ring_x, ring_y=ring_y, ring_r=15, ring_I=10,
+            add_noise=True)
+    return(s)
