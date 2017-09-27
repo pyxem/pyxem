@@ -3,7 +3,7 @@ from scipy.ndimage.filters import gaussian_filter
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 
 
-class Circle:
+class Circle(object):
     def __init__(self, xx, yy, x0, y0, r, I, scale):
         self.x0 = x0
         self.y0 = y0
@@ -12,6 +12,12 @@ class Circle:
         self.circle = (xx - self.x0) ** 2 + (yy - self.y0) ** 2
         self.mask_outside_r(scale)
         self.get_centre_pixel(xx, yy, scale)
+
+    def __repr__(self):
+        return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
+            self.__class__.__name__,
+            self.r, self.x0, self.y0, self.I,
+            )
 
     def mask_outside_r(self, scale):
         indices = self.circle >= (self.r + scale)**2
@@ -85,11 +91,7 @@ class Ring(object):
 
     def __repr__(self):
         return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
-            self.__class__.__name__,
-            self.z.r,
-            self.z.x0,
-            self.z.y0,
-            self.z.I,
+            self.__class__.__name__, self.z.r, self.z.x0, self.z.y0, self.z.I,
             )
 
     def mask_inside_r(self, scale):
@@ -158,6 +160,13 @@ class TestData:
             self.add_ring(lw_pix=1)
         else:
             self.update_signal()
+
+    def __repr__(self):
+        return '<%s, ((x, y): (%s, %s), s: %s, z: %s)>' % (
+            self.__class__.__name__,
+            self.size_x, self.size_y,
+            self.scale, len(self.z_list),
+            )
 
     def update_signal(self):
         self.make_signal()
