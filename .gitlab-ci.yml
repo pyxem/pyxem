@@ -8,3 +8,18 @@ all_tests_debian_unstable:
     - pip3 install --user .
     - python3 -m unittest discover
     - python3 -m doctest doc/generate_test_data.rst
+
+make_documentation:
+    image: debian:unstable
+    stage: deploy
+    script:
+    - apt-get update -q
+    - apt-get install -qy python3-pip python3-sphinx python3-sphinx-rtd-theme build-essential
+    - pip3 install .
+    - cd doc
+    - make html
+    - cd ..
+    - mv doc/_build/html documentation
+    artifacts:
+        paths:
+        - documentation
