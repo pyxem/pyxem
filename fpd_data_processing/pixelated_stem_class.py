@@ -2,6 +2,7 @@ import numpy as np
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
+from hyperspy.misc.utils import isiterable
 import fpd_data_processing.pixelated_stem_tools as pst
 from tqdm import tqdm
 
@@ -64,38 +65,54 @@ class PixelatedSTEM(Signal2D):
         return(s_com)
 
     def radial_integration(
-            self, centre_x_array=None, centre_y_array=None, mask_array=None):
+            self, centre_x=None, centre_y=None, mask_array=None):
         """Radially integrates a pixelated STEM diffraction signal.
 
         Parameters
         ----------
-        centre_x_array, centre_y_array : NumPy 2D array, optional
-            Has to have the same shape as the navigation axis of
-            the signal.
+        centre_x, centre_y : int or NumPy array, optional
+            If given as int, all the diffraction patterns will have the same
+            centre position. Each diffraction pattern can also have different
+            centre position, by passing a NumPy array with the same dimensions
+            as the navigation axes.
+            Note: in either case both x and y values must be given. If one is
+            missing, both will be set from the signal (0., 0.) positions.
+            If no values are given, the (0., 0.) positions in the signal will
+            be used.
         mask_array : Boolean numpy array
             Mask with the same shape as the signal.
 
         Returns
         -------
         HyperSpy signal, one less signal dimension than the input signal."""
-        if (centre_x_array is None) or (centre_y_array is None):
-            centre_x_array, centre_y_array = pst._make_centre_array_from_signal(self)
 
+        if (centre_x is None) or (centre_y is None):
+            centre_x, centre_y = pst._make_centre_array_from_signal(self)
+        elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
+            centre_x, centre_y = pst._make_centre_array_from_signal(
+                    self, x=centre_x, y=centre_y)
         radial_array_size = pst._find_longest_distance(
                 self.axes_manager.signal_axes[1].size,
                 self.axes_manager.signal_axes[0].size,
-                centre_x_array.min(), centre_y_array.min(),
-                centre_x_array.max(), centre_y_array.max())+1
-        centre_x_array = centre_x_array.flatten()
-        centre_y_array = centre_y_array.flatten()
-        iterating_kwargs = (
-                ('centre_x', centre_x_array),
-                ('centre_y', centre_x_array))
+                centre_x.min(), centre_y.min(),
+                centre_x.max(), centre_y.max())+1
+        centre_x = centre_x.flatten()
+        centre_y = centre_y.flatten()
+        iterating_kwargs = [
+                ('centre_x', centre_x),
+                ('centre_y', centre_y)]
+        if mask_array is not None:
+            #  This line flattens the mask array, except for the two
+            #  last dimensions. This to make the mask array work for the
+            #  _map_iterate function.
+            mask_flat = mask_array.reshape(-1, *mask_array.shape[-2:])
+            iterating_kwargs.append(('mask', mask_flat))
+
         s_radial = self._map_iterate(
                 pst._get_radial_profile_of_diff_image,
                 iterating_kwargs=iterating_kwargs,
                 inplace=False, ragged=False,
-                parallel=True,
+                parallel=True, 
                 radial_array_size=radial_array_size)
         if self._lazy:
             s_radial.compute()
@@ -157,8 +174,8 @@ class PixelatedSTEM(Signal2D):
                     centre_x_array=centre_x_array,
                     centre_y_array=centre_y_array)
             s_r = self.radial_integration(
-                    centre_x_array=centre_x_array,
-                    centre_y_array=centre_y_array,
+                    centre_x=centre_x_array,
+                    centre_y=centre_y_array,
                     mask_array=mask_array)
             signal_list.append(s_r)
         angle_scale = angle_list[1][1] - angle_list[0][1]

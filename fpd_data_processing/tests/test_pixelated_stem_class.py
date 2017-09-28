@@ -143,25 +143,25 @@ class test_pixelated_stem(unittest.TestCase):
         s.axes_manager.signal_axes[1].offset = -y
         mask0 = s.angular_mask(0.0, 0.5*np.pi)
         s_r0 = s.radial_integration(
-                centre_x_array=centre_x_array, centre_y_array=centre_y_array,
+                centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask0)
         self.assertTrue(np.all(s_r0.isig[0:6].data==1.))
 
         mask1 = s.angular_mask(0, np.pi)
         s_r1 = s.radial_integration(
-                centre_x_array=centre_x_array, centre_y_array=centre_y_array,
+                centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask1)
         self.assertTrue(np.all(s_r1.isig[0:6].data==0.5))
 
         mask2 = s.angular_mask(0.0, 2*np.pi)
         s_r2 = s.radial_integration(
-                centre_x_array=centre_x_array, centre_y_array=centre_y_array,
+                centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask2)
         self.assertTrue(np.all(s_r2.isig[0:6].data==0.25))
 
         mask3 = s.angular_mask(np.pi, 2*np.pi)
         s_r3 = s.radial_integration(
-                centre_x_array=centre_x_array, centre_y_array=centre_y_array,
+                centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask3)
         self.assertTrue(np.all(s_r3.data==0.0))
 

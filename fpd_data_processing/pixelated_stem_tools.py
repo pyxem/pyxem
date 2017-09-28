@@ -175,11 +175,17 @@ def _find_longest_distance(
     return(max_value)
 
 
-def _make_centre_array_from_signal(signal):
+def _make_centre_array_from_signal(signal, x=None, y=None):
     a_m = signal.axes_manager
     shape = a_m.navigation_shape[::-1]
-    centre_x_array = np.ones(shape)*a_m.signal_axes[0].value2index(0)
-    centre_y_array = np.ones(shape)*a_m.signal_axes[1].value2index(0)
+    if x is None:
+        centre_x_array = np.ones(shape)*a_m.signal_axes[0].value2index(0)
+    else:
+        centre_x_array = np.ones(shape)*x
+    if y is None:
+        centre_y_array = np.ones(shape)*a_m.signal_axes[1].value2index(0)
+    else:
+        centre_y_array = np.ones(shape)*y
     return(centre_x_array, centre_y_array)
 
 
