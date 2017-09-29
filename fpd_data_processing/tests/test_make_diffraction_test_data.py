@@ -106,6 +106,166 @@ class test_make_diffraction_test_data(unittest.TestCase):
         self.assertTrue(r_x_idx_2 == (100 - r))
         self.assertTrue(r_y_idx_2 == (100 - r))
 
+    def test_ring_radius1(self):
+        I = 20
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=50, y0=50, r=1, I=I, lw_pix=1)
+
+        self.assertTrue((test.signal.isig[50, 50].data == 0.).all())
+        test.signal.data[50, 50] = I
+        self.assertTrue((test.signal.isig[49:52, 49:52].data == I).all())
+        test.signal.data[49:52, 49:52] = 0.
+        self.assertFalse(test.signal.data.any())
+
+    def test_ring_radius2(self):
+        I = 10
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=50, y0=50, r=2, I=I, lw_pix=1)
+
+        self.assertTrue((test.signal.isig[49:52, 49:52].data == 0.).all())
+        test.signal.data[49:52, 49:52] = I
+        self.assertTrue((test.signal.isig[48:53, 48:53].data == I).all())
+        test.signal.data[48:53, 48:53] = 0.
+        self.assertFalse(test.signal.data.any())
+
+    def test_ring_radius_outside_image(self):
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=50, y0=50, r=300, I=19, lw_pix=1)
+        self.assertFalse(test.signal.data.any())
+
+    def test_ring_rectangle_image(self):
+        I = 10
+        test = TestData(
+                size_x=100, size_y=50,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=50, y0=25, r=1, I=I, lw_pix=1)
+
+        self.assertTrue((test.signal.isig[50, 25].data == 0.).all())
+        test.signal.data[25, 50] = I
+        self.assertTrue((test.signal.isig[49:52, 24:27].data == I).all())
+        test.signal.data[24:27, 49:52] = 0.
+        self.assertFalse(test.signal.data.any())
+
+    def test_ring_rectangle_image(self):
+        I = 10
+        test = TestData(
+                size_x=100, size_y=50,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=50, y0=25, r=1, I=I, lw_pix=1)
+
+        self.assertTrue((test.signal.isig[50, 25].data == 0.).all())
+        test.signal.data[25, 50] = I
+        self.assertTrue((test.signal.isig[49:52, 24:27].data == I).all())
+        test.signal.data[24:27, 49:52] = 0.
+        self.assertFalse(test.signal.data.any())
+
+    def test_ring_rectangle_image_linewidth(self):
+        I = 9
+        test = TestData(
+                size_x=100, size_y=50,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=50, y0=10, r=2, I=I, lw_pix=2)
+
+        self.assertTrue((test.signal.isig[50, 10].data == 0.).all())
+        test.signal.data[10, 50] = I
+        self.assertTrue((test.signal.isig[48:53, 8:13].data == I).all())
+        test.signal.data[8:13, 48:53] = 0.
+        self.assertFalse(test.signal.data.any())
+
+    def test_ring_cover_whole_image(self):
+        I = 10.
+        test = TestData(
+                size_x=50, size_y=100,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=25, y0=200, r=250, I=I, lw_pix=150)
+        self.assertTrue((test.signal.data == I).all())
+
+    def test_ring_position(self):
+        x0, y0, r = 40, 60, 20
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=False, downscale=False)
+        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        s_h0 = test.signal.isig[x0, 0:y0]
+        max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
+        self.assertEqual(max_h0, y0-r)
+        s_h1 = test.signal.isig[x0, y0:]
+        max_h1 = s_h1.axes_manager[0].index2value(s_h1.data.argmax())
+        self.assertEqual(max_h1, y0+r)
+
+        s_v0 = test.signal.isig[0:x0, y0]
+        max_v0 = s_v0.axes_manager[0].index2value(s_v0.data.argmax())
+        self.assertEqual(max_v0, x0-r)
+        s_v1 = test.signal.isig[x0:, y0]
+        max_v1 = s_v1.axes_manager[0].index2value(s_v1.data.argmax())
+        self.assertEqual(max_v1, x0+r)
+
+    def test_ring_position_blur(self):
+        x0, y0, r = 50, 50, 15
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=True, downscale=False)
+        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        s_h0 = test.signal.isig[x0, 0:y0]
+        max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
+        self.assertEqual(max_h0, y0-r)
+        s_h1 = test.signal.isig[x0, y0:]
+        max_h1 = s_h1.axes_manager[0].index2value(s_h1.data.argmax())
+        self.assertEqual(max_h1, y0+r)
+
+        s_v0 = test.signal.isig[0:x0, y0]
+        max_v0 = s_v0.axes_manager[0].index2value(s_v0.data.argmax())
+        self.assertEqual(max_v0, x0-r)
+        s_v1 = test.signal.isig[x0:, y0]
+        max_v1 = s_v1.axes_manager[0].index2value(s_v1.data.argmax())
+        self.assertEqual(max_v1, x0+r)
+
+    def test_ring_position_downscale(self):
+        x0, y0, r = 50, 50, 15
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=False, downscale=True)
+        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        s_h0 = test.signal.isig[x0, 0:y0]
+        max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
+        self.assertEqual(max_h0, y0-r)
+        s_h1 = test.signal.isig[x0, y0:]
+        max_h1 = s_h1.axes_manager[0].index2value(s_h1.data.argmax())
+        self.assertEqual(max_h1, y0+r)
+
+        s_v0 = test.signal.isig[0:x0, y0]
+        max_v0 = s_v0.axes_manager[0].index2value(s_v0.data.argmax())
+        self.assertEqual(max_v0, x0-r)
+        s_v1 = test.signal.isig[x0:, y0]
+        max_v1 = s_v1.axes_manager[0].index2value(s_v1.data.argmax())
+        self.assertEqual(max_v1, x0+r)
+
+    def test_ring_position_downscale_and_blur(self):
+        x0, y0, r = 50, 50, 18
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=True, downscale=True)
+        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        s_h0 = test.signal.isig[x0, 0:y0]
+        max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
+        self.assertEqual(max_h0, y0-r)
+        s_h1 = test.signal.isig[x0, y0:]
+        max_h1 = s_h1.axes_manager[0].index2value(s_h1.data.argmax())
+        self.assertEqual(max_h1, y0+r)
+
+        s_v0 = test.signal.isig[0:x0, y0]
+        max_v0 = s_v0.axes_manager[0].index2value(s_v0.data.argmax())
+        self.assertEqual(max_v0, x0-r)
+        s_v1 = test.signal.isig[x0:, y0]
+        max_v1 = s_v1.axes_manager[0].index2value(s_v1.data.argmax())
+        self.assertEqual(max_v1, x0+r)
+
 
 class test_generate_4d_disk_data(unittest.TestCase):
 
