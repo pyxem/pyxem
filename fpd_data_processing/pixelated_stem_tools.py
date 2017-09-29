@@ -37,14 +37,10 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     Boolean Numpy 2D Array
         Array with the shape (imageSizeX, imageSizeY) with the mask.
 
-    See also
-    --------
-    _make_mask_from_positions
-
     Examples
     --------
     >>> import numpy as np
-    >>> from atomap.atom_finding_refining import _make_circular_mask
+    >>> from fpd_data_processing.pixelated_stem_tools import _make_circular_mask
     >>> image = np.ones((9, 9))
     >>> mask = _make_circular_mask(4, 4, 9, 9, 2)
     >>> image_masked = image*mask
@@ -273,7 +269,12 @@ def _get_angle_sector_mask(
 
     Examples
     --------
-    >>> mask = _get_angle_sector_mask(signal, 0.5*np.pi, np.pi)
+    >>> import fpd_data_processing.api as fp
+    >>> import numpy as np
+    >>> s = fp.PixelatedSTEM(np.arange(100).reshape(10, 10))
+    >>> s.axes_manager.signal_axes[0].offset = -5
+    >>> s.axes_manager.signal_axes[1].offset = -5
+    >>> mask = _get_angle_sector_mask(s, 0.5*np.pi, np.pi)
     """
     bool_array = np.zeros_like(signal.data, dtype=np.bool)
     for s in signal:
