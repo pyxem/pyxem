@@ -168,6 +168,21 @@ class TestData:
         downscaled to return to given dimensions. This improves the
         quality of Circle
 
+    Examples
+    --------
+
+    Default settings
+
+    >>> from fpd_data_processing.make_diffraction_test_data import TestData
+    >>> test_data = TestData()
+    >>> test_data.signal.plot()
+
+    More control
+
+    >>> test_data = TestData(default=False)
+    >>> test_data.add_disk(x0=50, y0=50, r=10, I=30)
+    >>> test_data.add_ring(x0=45, y0=52, r=25, I=10)
+    >>> test_data.signal.plot()
     """
     def __init__(
             self, size_x=100, size_y=100, scale=1,
@@ -212,6 +227,25 @@ class TestData:
         self.update_signal()
 
     def add_ring(self, x0=50, y0=50, r=20, I=10, lw_pix=1):
+        """
+        Add a ring to the test data.
+
+        Parameters
+        ----------
+        x0, y0 : number, default 50
+            Centre position of the ring
+        r : number, default 20
+            Radius of the ring
+        I : number, default 10
+            Pixel value of the ring. Note, this value will be lowered
+            if blur or downscale is True
+        lw_pix : number, default 1
+            Linewidth of the ring, effectively sets the inner radius.
+            The inner radius is r - lw_pix. So if r = 20, and lw = 5,
+            the ring will have an outer radius of 20, and inner radius
+            of 15.
+
+        """
         lw = lw_pix*self.scale
         scale = self.scale/self.downscale_factor
         self.z_list.append(
@@ -400,7 +434,10 @@ def generate_4d_holz_data(
         So if I=5, each pixel in the ring will have a value of 5.
         Note, this value will change if blur=True or downscale=True.
     ring_lw : int, default 1
-        Line width of the ring
+        Line width of the ring, effectively sets the inner radius.
+        The inner radius is ring_r - ring_lw. So if ring_r = 20,
+        and ring_lw = 5, the ring will have an outer radius of 20, and inner
+        radius of 15.
     blur : bool, default True
         If True, do a Gaussian blur of the disk.
     blur_sigma : int, default 1
