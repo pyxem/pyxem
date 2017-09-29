@@ -2,12 +2,12 @@ all_tests_debian_unstable:
     image: debian:sid
     script:
     - apt-get update -q
-    - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-matplotlib
+    - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-matplotlib python3-pytest
     - apt-get install -qy python3-sympy --no-install-recommends
     - pip3 install --upgrade pip
     - pip3 install --user .
-    - python3 -m unittest discover
-    - python3 -m doctest doc/generate_test_data.rst
+    - python3 -m pytest --doctest-modules fpd_data_processing
+    - python3 -m pytest --doctest-glob="*.rst" doc/
 
 make_documentation:
     image: debian:unstable
