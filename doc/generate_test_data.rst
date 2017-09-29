@@ -9,7 +9,7 @@ Test data can be used as a dummy dataset to test processing methods.
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.diffraction_test_data_generator as TestData
+    >>> import fpd_data_processing.make_diffraction_test_data as TestData
     
 Simple examples
 ---------------
@@ -22,7 +22,7 @@ The test data contains a **PixelatedSTEM object**, which can be be plotted.
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.diffraction_test_data_generator as TestData
+    >>> import fpd_data_processing.make_diffraction_test_data as TestData
     >>> import hyperspy.api as hs
     >>> a = TestData.TestData()
     >>> a.signal
@@ -90,9 +90,9 @@ The last image is without blurring and rescaling.
 .. code-block:: python
 
     >>> a = TestData.TestData(size_x=100, size_y=100, scale=0.1, default=False,
-    ... sigma_blur=2)
-    >>> a.add_ring(x0=50,y0=50,r=20,lw_pix=2,I=2)
-    >>> a.add_disk(x0=50.05,y0=50.02,r=5,I=10)
+    ... blur_sigma=2)
+    >>> a.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=2)
+    >>> a.add_disk(x0=50.05, y0=50.02, r=5, I=10)
 
 .. image:: images/doc/TestData_advanced_smooth_2.png
     :width: 50 %
@@ -101,9 +101,9 @@ The last image is without blurring and rescaling.
 .. code-block:: python
 
     >>> b = TestData.TestData(size_x=100, size_y=100, scale=0.1, default=False,
-    ... sigma_blur=1)
-    >>> b.add_ring(x0=50,y0=50,r=20,lw_pix=2,I=2)
-    >>> b.add_disk(x0=50.05,y0=50.02,r=5,I=10)
+    ... blur_sigma=1)
+    >>> b.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=2)
+    >>> b.add_disk(x0=50.05, y0=50.02, r=5, I=10)
 
 .. image:: images/doc/TestData_advanced_smooth.png
     :width: 50 %
@@ -113,8 +113,8 @@ The last image is without blurring and rescaling.
 
     >>> c = TestData.TestData(size_x=100, size_y=100, scale=0.1, default=False,
     ... blur=False, downscale=False)
-    >>> c.add_ring(x0=50,y0=50,r=20,lw_pix=2,I=2)
-    >>> c.add_disk(x0=50.05,y0=50.02,r=5,I=10)
+    >>> c.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=2)
+    >>> c.add_disk(x0=50.05, y0=50.02, r=5, I=10)
 
 .. image:: images/doc/TestData_advanced_non_smooth.png
     :width: 50 %
@@ -129,7 +129,7 @@ By setting the offset of the axes_manager as below, the coordinates of the centr
 .. code-block:: python
 
     >>> a = TestData.TestData(size_x=100, size_y=100, scale=0.1,
-    ... default=False, sigma_blur=2)
+    ... default=False, blur_sigma=2)
     >>> a.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=5)
     >>> a.add_ring(x0=50, y0=50, r=30, lw_pix=2, I=2)
     >>> a.add_ring(x0=50, y0=50, r=10, lw_pix=2, I=2)
