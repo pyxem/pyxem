@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 class PixelatedSTEM(Signal2D):
 
-    def center_of_mass(self, threshold=None, mask=None):
+    def center_of_mass(self, threshold=None, mask=None, show_progressbar=True):
         """Get the centre of the STEM diffraction pattern using
         center of mass. Threshold can be set to only use the most
         intense parts of the pattern. A mask can be used to exclude
@@ -33,11 +33,11 @@ class PixelatedSTEM(Signal2D):
         >>> import fpd_data_processing.make_diffraction_test_data as md
         >>> s = md.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
-        >>> s_com = s.center_of_mass(mask=mask)
+        >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
         >>> s_color = s_com.get_color_signal()
         
         Also threshold
-        >>> s_com = s.center_of_mass(threshold=1.5)
+        >>> s_com = s.center_of_mass(threshold=1.5, show_progressbar=False)
         """
 
         if mask is not None:
@@ -51,7 +51,7 @@ class PixelatedSTEM(Signal2D):
         s_com = self.map(
                 function=pst._center_of_mass_single_frame,
                 ragged=False, inplace=False, parallel=True,
-                show_progressbar=True,
+                show_progressbar=show_progressbar,
                 threshold=threshold, mask=mask)
         if self._lazy:
             s_com.compute()
