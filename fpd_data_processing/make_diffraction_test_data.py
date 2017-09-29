@@ -6,12 +6,13 @@ from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 
 
 class Circle(object):
-    def __init__(self, xx, yy, x0, y0, r, I, scale):
+    def __init__(self, xx, yy, x0, y0, r, I, scale, lw=None):
         self.x0 = x0
         self.y0 = y0
         self.r = r
         self.I = I
-        self.circle = (yy - self.y0) ** 2 + (xx - self.x0) ** 2 
+        self.lw = lw
+        self.circle = (yy - self.y0) ** 2 + (xx - self.x0) ** 2
         self.mask_outside_r(scale)
         self.get_centre_pixel(xx, yy, scale)
 
@@ -22,10 +23,13 @@ class Circle(object):
             )
 
     def mask_outside_r(self, scale):
-        indices = self.circle >= (self.r + scale)**2
+        if self.lw is None:
+            indices = self.circle >= (self.r + scale)**2
+        else:
+            indices = self.circle >= (self.r + self.lw + scale)**2
         self.circle[indices] = 0
 
-    def centre_on_image(self,xx,yy):
+    def centre_on_image(self, xx, yy):
         if self.x0 < xx[0][0] or self.x0 > xx[0][-1]:
             return(False)
         elif self.y0 < yy[0][0] or self.y0 > yy[-1][-1]:
@@ -36,13 +40,13 @@ class Circle(object):
     def get_centre_pixel(self, xx, yy, scale):
         """
         This function sets the indices for the pixels on which the centre
-        point is. Because the centrepoint can sometimes be exactly on the
-        boundary of two pixels, the pixles are held in a list. One
+        point is. Because the centre point can sometimes be exactly on the
+        boundary of two pixels, the pixels are held in a list. One
         list for x (self.centre_x_pixels) and one for y
         (self.centre_x_pixels). If the centre is outside the image, the
         lists will be empty.
         """
-        if self.centre_on_image(xx,yy):
+        if self.centre_on_image(xx, yy):
             x1 = np.where(xx > (self.x0 - 0.5 * scale))[1][0]
             x2 = np.where(xx < (self.x0 + 0.5 * scale))[1][-1]
             self.centre_x_pixels = [x1, x2]
@@ -82,12 +86,12 @@ class Disk(object):
 
     def set_centre_intensity(self):
         """
-        Sets the intensity of the centre pixles to I. Coordinates are
+        Sets the intensity of the centre pixels to I. Coordinates are
         self.z.circle[y, x], due to how numpy works.
         """
         for x in self.z.centre_x_pixels:
             for y in self.z.centre_y_pixels:
-                self.z.circle[y, x] = self.z.I #This is correct
+                self.z.circle[y, x] = self.z.I  # This is correct
 
     def get_signal(self):
         return(self.z.circle)
@@ -100,11 +104,16 @@ class Disk(object):
 
 class Ring(object):
     """
-    Ring object, with outer edge of the ring at r, and inner r-lw
+    Ring object, with outer edge of the ring at r+lr, and inner r-lr.
+    The radius of the ring is defined as in the middle of the line making
+    up the ring.
     """
-    def __init__(self, xx, yy, scale, x0, y0, r, I, lw=1):
-        self.lw = lw  # in coordinates
-        self.z = Circle(xx, yy, x0, y0, r, I, scale)
+    def __init__(self, xx, yy, scale, x0, y0, r, I, lr):
+        if lr > r:
+            raise ValueError('Ring line width too big'.format(lr, r))
+        self.lr = lr
+        self.lw = 1 + 2*lr  # scalar line width of the ring
+        self.z = Circle(xx, yy, x0, y0, r, I, scale, lw=lr)
         self.mask_inside_r(scale)
         self.z.set_uniform_intensity()
 
@@ -114,7 +123,7 @@ class Ring(object):
             )
 
     def mask_inside_r(self, scale):
-        indices = self.z.circle < (self.z.r - self.lw+scale)**2
+        indices = self.z.circle < (self.z.r - self.lr)**2
         self.z.circle[indices] = 0
 
     def get_signal(self):
@@ -130,8 +139,8 @@ class TestData:
     """
     TestData is an object containing a generated test signal. The default
     signal is consisting of a Disk and concentric Ring, with the Ring being
-    less intensive than the center Disk. Unlimited number of Ring and Disk can
-    be added separately.
+    less intensive than the centre Disk. Unlimited number of Rings and Disks
+    can be added separately.
 
     Parameters
     ----------
@@ -142,8 +151,8 @@ class TestData:
     scale : float, int
         The step size of the x and y axis
 
-    default : bool, default True
-        If true, the default object should be generated. If false, Ring and
+    default : bool, default False
+        If True, the default object should be generated. If false, Ring and
         Disk must be added separately by self.add_ring(), self.add_disk()
 
     blur : bool, default True
@@ -164,7 +173,7 @@ class TestData:
         List containing Ring and Disk objects added to the signal
 
     downscale_factor : int
-        The data is upscaled before Circle is added, and similaraly
+        The data is upscaled before Circle is added, and similarly
         downscaled to return to given dimensions. This improves the
         quality of Circle
 
@@ -186,7 +195,7 @@ class TestData:
     """
     def __init__(
             self, size_x=100, size_y=100, scale=1,
-            default=True, blur=True, blur_sigma=1, downscale=True):
+            default=False, blur=True, blur_sigma=1, downscale=True):
         self.scale = scale
         self.blur_on = blur
         self.blur_sigma = blur_sigma
@@ -226,7 +235,7 @@ class TestData:
         self.z_list.append(Disk(self.xx, self.yy, scale, x0, y0, r, I))
         self.update_signal()
 
-    def add_ring(self, x0=50, y0=50, r=20, I=10, lw_pix=1):
+    def add_ring(self, x0=50, y0=50, r=20, I=10, lw_pix=0):
         """
         Add a ring to the test data.
 
@@ -235,21 +244,22 @@ class TestData:
         x0, y0 : number, default 50
             Centre position of the ring
         r : number, default 20
-            Radius of the ring
+            Radius of the ring, defined as the distance from the centre to the
+            middle of the line of the ring, which will be most intense after
+            blurring.
         I : number, default 10
             Pixel value of the ring. Note, this value will be lowered
             if blur or downscale is True
-        lw_pix : number, default 1
-            Linewidth of the ring, effectively sets the inner radius.
-            The inner radius is r - lw_pix. So if r = 20, and lw = 5,
-            the ring will have an outer radius of 20, and inner radius
-            of 15.
+        lw_pix : number, default 0
+            Distance in pixels from radius to the outer and inner edge of the
+            ring. Inner radius: r-lw, outer radius: r+lw. In total this gives
+            a ring line width in pixels of 2*lw+1.
 
         """
-        lw = lw_pix*self.scale
         scale = self.scale/self.downscale_factor
+        lr = lw_pix*self.scale  # scalar
         self.z_list.append(
-                Ring(self.xx, self.yy, scale, x0, y0, r, I, lw=lw))
+                Ring(self.xx, self.yy, scale, x0, y0, r, I, lr))
         self.update_signal()
 
     def make_signal(self):

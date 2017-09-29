@@ -7,7 +7,7 @@ from fpd_data_processing.make_diffraction_test_data import (
 class test_make_diffraction_test_data(unittest.TestCase):
 
     def test_init(self):
-        TestData()
+        TestData(default=True)
         TestData(size_x=1, size_y=10, scale=0.05)
         TestData(
                 size_x=200, size_y=100, scale=2, default=False, blur=False,
@@ -17,7 +17,7 @@ class test_make_diffraction_test_data(unittest.TestCase):
         test_data_1 = TestData(default=False)
         self.assertTrue((test_data_1.signal.data == 0.).all())
 
-        test_data_2 = TestData()
+        test_data_2 = TestData(default=True)
         test_data_2.set_signal_zero()
         self.assertTrue((test_data_2.signal.data == 0.).all())
 
@@ -51,20 +51,20 @@ class test_make_diffraction_test_data(unittest.TestCase):
         self.assertFalse(test2.signal.data.any())
 
         test3 = TestData(size_x=150, size_y=50,
-                default=False, blur=False, downscale=False)
+                         default=False, blur=False, downscale=False)
         test3.add_disk(200, 400, 2, 30)
         self.assertFalse(test3.signal.data.any())
 
         test4 = TestData(size_x=150, size_y=50,
-                default=False, blur=False, downscale=False)
+                         default=False, blur=False, downscale=False)
         test4.add_disk(50, 50, 500, 500)
-        self.assertTrue((test4.signal.data==500).all())
+        self.assertTrue((test4.signal.data == 500).all())
 
         test5 = TestData(
                 size_x=100, size_y=200,
                 default=False, blur=False, downscale=True)
         test5.add_disk(50, 50, 500, 10)
-        self.assertTrue((test5.signal.data==10).all())
+        self.assertTrue((test5.signal.data == 10).all())
 
         test6 = TestData(
                 size_x=100, size_y=200,
@@ -80,38 +80,71 @@ class test_make_diffraction_test_data(unittest.TestCase):
         test_data_1.add_disk(x0=5, y0=5, r=20, I=100)
         self.assertTrue((test_data_1.signal.data > 0.).all())
 
-    def test_radius(self):
-        r = 20
-        x0, y0 = 0, 0
-        ring_1 = TestData(
-                size_x=100, size_y=100,
-                default=False, blur=False, downscale=False)
-        ring_1.add_ring(x0=x0, y0=y0, r=r, I=10)
-        slice_y = ring_1.signal.data[:, 0]
-        slice_x = ring_1.signal.data[0, :]
-        r_x_idx = np.where(slice_x > 0)[0][-1]
-        r_y_idx = np.where(slice_y > 0)[0][-1]
-        self.assertTrue(r_x_idx == r)
-        self.assertTrue(r_y_idx == r)
+    def test_inner_radius(self):
+        r, lw = 20, 2
+        x0, y0, scale = 50, 50, 1
+        test_data = TestData(size_x=100, size_y=100, default=False,
+                             blur=False, downscale=False)
+        test_data.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
+        r_inner = 20 - 2.5*scale
 
-        x0, y0 = 100, 100
-        ring_2 = TestData(
-                size_x=100, size_y=100,
-                default=False, blur=False, downscale=False)
-        ring_2.add_ring(x0=x0, y0=y0, r=r, I=10)
-        slice_y_2 = ring_2.signal.data[:, -1]
-        slice_x_2 = ring_2.signal.data[-1, :]
-        r_x_idx_2 = np.where(slice_x_2 > 0)[0][0]
-        r_y_idx_2 = np.where(slice_y_2 > 0)[0][0]
-        self.assertTrue(r_x_idx_2 == (100 - r))
-        self.assertTrue(r_y_idx_2 == (100 - r))
+        s_h0 = test_data.signal.isig[x0, :y0+1]
+        s_h0_edge = s_h0.axes_manager[0].index2value(s_h0.data[::-1].argmax())
+        r_h0 = s_h0_edge - 0.5*scale
+        self.assertTrue(r_h0 == r_inner)
+
+        s_h1 = test_data.signal.isig[x0, y0:]
+        s_h1_edge = s_h1.axes_manager[0].index2value(s_h1.data.argmax())
+        r_h1 = s_h1_edge - 0.5*scale - 50
+        self.assertTrue(r_h1 == r_inner)
+
+        s_h2 = test_data.signal.isig[:x0+1, y0]
+        s_h2_edge = s_h2.axes_manager[0].index2value(s_h2.data[::-1].argmax())
+        r_h2 = s_h2_edge - 0.5*scale
+        self.assertTrue(r_h2 == r_inner)
+
+        s_h3 = test_data.signal.isig[x0:, y0]
+        s_h3_edge = s_h3.axes_manager[0].index2value(s_h3.data.argmax())
+        r_h3 = s_h3_edge - 0.5*scale - 50
+        self.assertTrue(r_h3 == r_inner)
+
+    def test_outer_radius(self):
+        r, lw = 20, 1
+        x0, y0, scale = 0, 0, 1
+        ring_1 = TestData(size_x=100, size_y=100, default=False,
+                          blur=False, downscale=False)
+        ring_1.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
+        s_h0 = ring_1.signal.isig[x0, :]
+        s_h0_edge = s_h0.axes_manager[0].index2value(s_h0.data[::-1].argmax())
+        r_h0 = s_h0.data.size - s_h0_edge - 0.5*scale
+        r_out = r + lw + 0.5*scale
+        self.assertTrue(r_h0 == r_out)
+        s_h1 = ring_1.signal.isig[:, y0]
+        s_h1_edge = s_h1.axes_manager[0].index2value(s_h1.data[::-1].argmax())
+        r_h1 = s_h1.data.size - s_h1_edge - 0.5*scale
+        self.assertTrue(r_h1 == r_out)
+
+        r, lw = 20, 1
+        x0, y0, scale = 100, 100, 1
+        ring_2 = TestData(size_x=100, size_y=100, default=False,
+                          blur=False, downscale=False)
+        ring_2.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
+        s_h2 = ring_2.signal.isig[-1, :]
+        s_h2_edge = s_h2.axes_manager[0].index2value(s_h2.data.argmax())
+        r_h2 = 100 - (s_h2_edge - 0.5*scale)
+        r_out = r + lw + 0.5*scale
+        self.assertTrue(r_h2 == r_out)
+        s_h3 = ring_2.signal.isig[:, -1]
+        s_h3_edge = s_h3.axes_manager[0].index2value(s_h3.data.argmax())
+        r_h3 = 100 - (s_h3_edge - 0.5*scale)
+        self.assertTrue(r_h3 == r_out)
 
     def test_ring_radius1(self):
         I = 20
         test = TestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=50, r=1, I=I, lw_pix=1)
+        test.add_ring(x0=50, y0=50, r=1, I=I, lw_pix=0)
 
         self.assertTrue((test.signal.isig[50, 50].data == 0.).all())
         test.signal.data[50, 50] = I
@@ -124,7 +157,7 @@ class test_make_diffraction_test_data(unittest.TestCase):
         test = TestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=50, r=2, I=I, lw_pix=1)
+        test.add_ring(x0=50, y0=50, r=2, I=I, lw_pix=0)
 
         self.assertTrue((test.signal.isig[49:52, 49:52].data == 0.).all())
         test.signal.data[49:52, 49:52] = I
@@ -144,38 +177,12 @@ class test_make_diffraction_test_data(unittest.TestCase):
         test = TestData(
                 size_x=100, size_y=50,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=25, r=1, I=I, lw_pix=1)
+        test.add_ring(x0=50, y0=25, r=1, I=I, lw_pix=0)
 
         self.assertTrue((test.signal.isig[50, 25].data == 0.).all())
         test.signal.data[25, 50] = I
         self.assertTrue((test.signal.isig[49:52, 24:27].data == I).all())
         test.signal.data[24:27, 49:52] = 0.
-        self.assertFalse(test.signal.data.any())
-
-    def test_ring_rectangle_image(self):
-        I = 10
-        test = TestData(
-                size_x=100, size_y=50,
-                default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=25, r=1, I=I, lw_pix=1)
-
-        self.assertTrue((test.signal.isig[50, 25].data == 0.).all())
-        test.signal.data[25, 50] = I
-        self.assertTrue((test.signal.isig[49:52, 24:27].data == I).all())
-        test.signal.data[24:27, 49:52] = 0.
-        self.assertFalse(test.signal.data.any())
-
-    def test_ring_rectangle_image_linewidth(self):
-        I = 9
-        test = TestData(
-                size_x=100, size_y=50,
-                default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=10, r=2, I=I, lw_pix=2)
-
-        self.assertTrue((test.signal.isig[50, 10].data == 0.).all())
-        test.signal.data[10, 50] = I
-        self.assertTrue((test.signal.isig[48:53, 8:13].data == I).all())
-        test.signal.data[8:13, 48:53] = 0.
         self.assertFalse(test.signal.data.any())
 
     def test_ring_cover_whole_image(self):
@@ -183,16 +190,16 @@ class test_make_diffraction_test_data(unittest.TestCase):
         test = TestData(
                 size_x=50, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=25, y0=200, r=250, I=I, lw_pix=150)
+        test.add_ring(x0=25, y0=200, r=150, I=I, lw_pix=100)
         self.assertTrue((test.signal.data == I).all())
 
     def test_ring_position(self):
-        x0, y0, r = 40, 60, 20
+        x0, y0, r = 40., 60., 20
         test = TestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
-        s_h0 = test.signal.isig[x0, 0:y0]
+        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=0)
+        s_h0 = test.signal.isig[x0, 0.:y0]
         max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
         self.assertEqual(max_h0, y0-r)
         s_h1 = test.signal.isig[x0, y0:]
@@ -226,12 +233,32 @@ class test_make_diffraction_test_data(unittest.TestCase):
         max_v1 = s_v1.axes_manager[0].index2value(s_v1.data.argmax())
         self.assertEqual(max_v1, x0+r)
 
+    def test_ring_position_blur_lw(self):
+        x0, y0, r = 50, 50, 15
+        test = TestData(
+                size_x=100, size_y=100,
+                default=False, blur=True, downscale=False)
+        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        s_h0 = test.signal.isig[x0, 0:y0]
+        max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
+        self.assertEqual(max_h0, y0-r)
+        s_h1 = test.signal.isig[x0, y0:]
+        max_h1 = s_h1.axes_manager[0].index2value(s_h1.data.argmax())
+        self.assertEqual(max_h1, y0+r)
+
+        s_v0 = test.signal.isig[0:x0, y0]
+        max_v0 = s_v0.axes_manager[0].index2value(s_v0.data.argmax())
+        self.assertEqual(max_v0, x0-r)
+        s_v1 = test.signal.isig[x0:, y0]
+        max_v1 = s_v1.axes_manager[0].index2value(s_v1.data.argmax())
+        self.assertEqual(max_v1, x0+r)
+
     def test_ring_position_downscale(self):
         x0, y0, r = 50, 50, 15
         test = TestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=True)
-        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=0)
         s_h0 = test.signal.isig[x0, 0:y0]
         max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
         self.assertEqual(max_h0, y0-r)
@@ -306,14 +333,6 @@ class test_generate_4d_disk_data(unittest.TestCase):
                 blur=False, downscale=False)
         self.assertTrue((s.data == 50).all())
 
-    def test_disk_cover_whole_image(self):
-        s = generate_4d_disk_data(
-                probe_size_x=6, probe_size_y=4,
-                image_size_x=20, image_size_y=20,
-                disk_x=10, disk_y=10, disk_r=40, I=50,
-                blur=False, downscale=False)
-        self.assertTrue((s.data == 50).all())
-
     def test_disk_position_array(self):
         ps_x, ps_y, I = 4, 7, 30
         disk_x = np.random.randint(5, 35, size=(ps_y, ps_x))
@@ -321,7 +340,7 @@ class test_generate_4d_disk_data(unittest.TestCase):
         s = generate_4d_disk_data(
                 probe_size_x=ps_x, probe_size_y=ps_y,
                 image_size_x=40, image_size_y=50,
-                disk_x=disk_x, disk_y=disk_y, disk_r = 1, I=I,
+                disk_x=disk_x, disk_y=disk_y, disk_r=1, I=I,
                 blur=False, downscale=False)
         for x in range(ps_x):
             for y in range(ps_y):
