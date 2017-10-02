@@ -1,6 +1,7 @@
 import unittest
-from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 import numpy as np
+from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
+import fpd_data_processing.make_diffraction_test_data as mdtd
 
 
 class test_pixelated_stem(unittest.TestCase):
@@ -19,6 +20,9 @@ class test_pixelated_stem(unittest.TestCase):
         array1 = np.zeros(shape=(10, 10))
         s1 = PixelatedSTEM(array1)
         self.assertEqual(array1.shape, s1.axes_manager.shape)
+
+
+class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
     def test_center_of_mass_0d(self):
         x0, y0 = 2, 3
@@ -74,6 +78,97 @@ class test_pixelated_stem(unittest.TestCase):
         self.assertTrue((s_com1.inav[0].data == x1_array).all())
         self.assertTrue((s_com1.inav[1].data == y1_array).all())
 
+    def test_center_of_mass_different_shapes2(self):
+        psX, psY = 11, 9
+        s = mdtd.generate_4d_disk_data(probe_size_x=psX, probe_size_y=psY)
+        s_com = s.center_of_mass()
+        self.assertEqual(s_com.axes_manager.shape, (2, psX, psY))
+
+    def test_different_shape_no_blur_no_downscale(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=11, probe_size_y=9,
+                image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
+                disk_r=40, I=20, blur=False, blur_sigma=1, downscale=False)
+        s_com = s.center_of_mass()
+        self.assertTrue((s_com.inav[0].data == x).all())
+        self.assertTrue((s_com.inav[1].data == y).all())
+
+    def test_different_shape_no_downscale(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=11, probe_size_y=9,
+                image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
+                disk_r=40, I=20, blur=True, blur_sigma=1, downscale=False)
+        s_com = s.center_of_mass()
+        np.testing.assert_allclose(s_com.inav[0].data, x)
+        np.testing.assert_allclose(s_com.inav[1].data, y)
+
+    def test_mask(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=11, probe_size_y=9,
+                image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
+                disk_r=40, I=20, blur=False, blur_sigma=1, downscale=False)
+        s.data[:, :, 15, 10] = 1000000
+        s_com0 = s.center_of_mass()
+        s_com1 = s.center_of_mass(mask=(90, 79, 60))
+        self.assertFalse((s_com0.inav[0].data == x).all())
+        self.assertFalse((s_com0.inav[1].data == y).all())
+        self.assertTrue((s_com1.inav[0].data == x).all())
+        self.assertTrue((s_com1.inav[1].data == y).all())
+
+    def test_mask_2(self):
+        x, y = 60, 50
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=5, probe_size_y=5,
+                image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
+                disk_r=20, I=20, blur=False, downscale=False)
+        # Add one large value
+        s.data[:, :, 50, 30] = 200000  # Large value to the left of the disk
+
+        # Center of mass should not be in center of the disk, due to the
+        # large value.
+        s_com0 = s.center_of_mass()
+        self.assertFalse((s_com0.inav[0].data == x).all())
+        self.assertTrue((s_com0.inav[1].data == y).all())
+
+        # Here, the large value is masked
+        s_com1 = s.center_of_mass(mask=(60, 50, 25))
+        self.assertTrue((s_com1.inav[0].data == x).all())
+        self.assertTrue((s_com1.inav[1].data == y).all())
+
+        # Here, the large value is right inside the edge of the mask
+        s_com3 = s.center_of_mass(mask=(60, 50, 31))
+        self.assertFalse((s_com3.inav[0].data == x).all())
+        self.assertTrue((s_com3.inav[1].data == y).all())
+
+        # Here, the large value is right inside the edge of the mask
+        s_com4 = s.center_of_mass(mask=(59, 50, 30))
+        self.assertFalse((s_com4.inav[0].data == x).all())
+        self.assertTrue((s_com4.inav[1].data == y).all())
+
+        s.data[:, :, 50, 30] = 0
+        s.data[:, :, 80, 60] = 200000  # Large value under the disk
+
+        # The large value is masked
+        s_com5 = s.center_of_mass(mask=(60, 50, 25))
+        self.assertTrue((s_com5.inav[0].data == x).all())
+        self.assertTrue((s_com5.inav[1].data == y).all())
+
+        # The large value just not masked
+        s_com6 = s.center_of_mass(mask=(60, 50, 31))
+        self.assertTrue((s_com6.inav[0].data == x).all())
+        self.assertFalse((s_com6.inav[1].data == y).all())
+
+        # The large value just not masked
+        s_com7 = s.center_of_mass(mask=(60, 55, 25))
+        self.assertTrue((s_com7.inav[0].data == x).all())
+        self.assertFalse((s_com7.inav[1].data == y).all())
+
+
+class test_pixelated_stem_radial_integration(unittest.TestCase):
+
     def test_radial_integration(self):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
@@ -120,6 +215,9 @@ class test_pixelated_stem(unittest.TestCase):
         s0_r = s0.radial_integration()
         self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
         self.assertTrue((s0_r.data[:,:-1] == big_value).all())
+
+
+class test_pixelated_stem_angle_sector(unittest.TestCase):
 
     def test_get_angle_sector_mask_simple(self):
         array = np.zeros((10, 10, 10, 10))

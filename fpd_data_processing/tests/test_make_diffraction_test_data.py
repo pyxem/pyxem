@@ -21,6 +21,9 @@ class test_make_diffraction_test_data(unittest.TestCase):
         test_data_2.set_signal_zero()
         self.assertTrue((test_data_2.signal.data == 0.).all())
 
+
+class test_make_diffraction_test_data_disks(unittest.TestCase):
+
     def test_simple_disks(self):
         test0 = TestData(
                 size_x=100, size_y=100,
@@ -80,7 +83,10 @@ class test_make_diffraction_test_data(unittest.TestCase):
         test_data_1.add_disk(x0=5, y0=5, r=20, I=100)
         self.assertTrue((test_data_1.signal.data > 0.).all())
 
-    def test_inner_radius(self):
+
+class test_make_diffraction_test_data_ring(unittest.TestCase):
+
+    def test_ring_inner_radius(self):
         r, lw = 20, 2
         x0, y0, scale = 50, 50, 1
         test_data = TestData(size_x=100, size_y=100, default=False,
@@ -108,7 +114,7 @@ class test_make_diffraction_test_data(unittest.TestCase):
         r_h3 = s_h3_edge - 0.5*scale - 50
         self.assertTrue(r_h3 == r_inner)
 
-    def test_outer_radius(self):
+    def test_ring_outer_radius(self):
         r, lw = 20, 1
         x0, y0, scale = 0, 0, 1
         ring_1 = TestData(size_x=100, size_y=100, default=False,
