@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
+import dask.array as da
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
+from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 import fpd_data_processing.make_diffraction_test_data as mdtd
 
 
@@ -217,6 +219,39 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         s_com4 = s.center_of_mass()
         self.assertFalse((s_com4.inav[0].data == x).all())
         self.assertFalse((s_com4.inav[1].data == y).all())
+
+    def test_1d_signal(self):
+        x, y = [np.arange(45, 45+9).tolist()], [np.arange(55, 55+9).tolist()]
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=9, probe_size_y=1,
+                image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
+                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+        s_com = s.inav[:, 0].center_of_mass()
+        self.assertTrue((s_com.inav[0].data == x).all())
+        self.assertTrue((s_com.inav[1].data == y).all())
+
+    def test_0d_signal(self):
+        x, y = 40, 51
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=1, probe_size_y=1,
+                image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
+                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+        s_com = s.inav[0, 0].center_of_mass()
+        self.assertTrue((s_com.inav[0].data == x).all())
+        self.assertTrue((s_com.inav[1].data == y).all())
+
+    def test_lazy(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=11, probe_size_y=9,
+                image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
+                disk_r=40, I=20, blur=True, blur_sigma=1, downscale=False)
+        s_lazy = LazyPixelatedSTEM(
+                da.from_array(s.data, chunks=(1, 1, 140, 160)))
+        s_com = s_lazy.center_of_mass()
+        np.testing.assert_allclose(s_com.inav[0].data, x)
+        np.testing.assert_allclose(s_com.inav[1].data, y)
+
 
 
 class test_pixelated_stem_radial_integration(unittest.TestCase):
