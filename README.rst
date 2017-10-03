@@ -9,6 +9,7 @@ HEALTH WARNING
 
 PyCrystEM is in the relatively early stages of development and may contain a number of bugs as a result. The code has been released at this stage in good faith and to speed up this refinement process. We hope that you will find the tools useful and if you find bugs we would appreciate knowing about them.
 
+Furthermore PyCrystEM only supports Python 3
 
 Install
 -------
@@ -21,7 +22,7 @@ python setup.py install
 New to Python?
 --------------
 
-If you are new to python the simplest way to install everything you need is using Anaconda, which can be downloaded from www.continuum.io/downloads
+If you are new to python the simplest way to install everything you need is using Anaconda, which can be downloaded from www.continuum.io/downloads (again be aware that you will need Python 3)
 
 From a clean install the following commands to install everything you need should be entered into the terminal, or anaconda prompt terminal in Windows:
 
