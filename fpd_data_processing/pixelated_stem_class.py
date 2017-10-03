@@ -170,17 +170,20 @@ class PixelatedSTEM(Signal2D):
         angle_list = []
         for i in range(angleN):
             angle_list.append((2*np.pi*i/angleN, 2*np.pi*(i+1)/angleN))
-        if (centre_x_array is None) or (centre_y_array is None):
-            centre_x_array, centre_y_array = pst._make_centre_array_from_signal(
-                    self)
+        if (centre_x is None) or (centre_y is None):
+            centre_x, centre_y = pst._make_centre_array_from_signal(self)
+        elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
+            centre_x, centre_y = pst._make_centre_array_from_signal(
+                    self, x=centre_x, y=centre_y)
+
         for angle in tqdm(angle_list):
             mask_array = self.angular_mask(
                     angle[0], angle[1],
-                    centre_x_array=centre_x_array,
-                    centre_y_array=centre_y_array)
+                    centre_x_array=centre_x,
+                    centre_y_array=centre_y)
             s_r = self.radial_integration(
-                    centre_x=centre_x_array,
-                    centre_y=centre_y_array,
+                    centre_x=centre_x,
+                    centre_y=centre_y,
                     mask_array=mask_array)
             signal_list.append(s_r)
         angle_scale = angle_list[1][1] - angle_list[0][1]
