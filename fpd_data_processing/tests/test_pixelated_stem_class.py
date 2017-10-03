@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from numpy.random import randint
 import dask.array as da
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
@@ -256,7 +257,7 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
 class test_pixelated_stem_radial_integration(unittest.TestCase):
 
-    def test_radial_integration(self):
+    def test_simple(self):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
@@ -272,13 +273,13 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         self.assertTrue(np.all(s1_r.data[:,:,0]==1))
         self.assertTrue(np.all(s1_r.data[:,:,1:]==0))
 
-    def test_radial_integration_different_shape(self):
+    def test_different_shape(self):
         array = np.ones(shape=(7, 9, 30, 40))
         s = PixelatedSTEM(array)
         s_r = s.radial_integration()
         self.assertTrue((s_r.data[:, :, :-2] == 1).all())
 
-    def test_radial_integration_nav_0(self):
+    def test_nav_0(self):
         data_shape = (40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
@@ -286,7 +287,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         self.assertEqual(s0_r.axes_manager.navigation_dimension, 0)
         self.assertTrue((s0_r.data[:-1] == 1).all())
 
-    def test_radial_integration_nav_1(self):
+    def test_nav_1(self):
         data_shape = (5, 40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
@@ -294,7 +295,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
         self.assertTrue((s0_r.data[:,:-1] == 1).all())
 
-    def test_radial_integration_big_value(self):
+    def test_big_value(self):
         data_shape = (5, 40, 40)
         big_value = 50000000
         array0 = np.ones(shape=data_shape)*big_value
@@ -302,6 +303,49 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         s0_r = s0.radial_integration()
         self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
         self.assertTrue((s0_r.data[:,:-1] == big_value).all())
+
+    def test_correct_radius_simple(self):
+        x, y, r, px, py = 40, 51, 30, 4, 5
+        s = mdtd.generate_4d_holz_data(
+                probe_size_x=px, probe_size_y=py,
+                image_size_x=120, image_size_y=100,
+                disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
+                blur=True, downscale=False)
+        s.axes_manager.signal_axes[0].offset = -x
+        s.axes_manager.signal_axes[1].offset = -y
+        s_r = s.radial_integration()
+        self.assertEqual(s_r.axes_manager.navigation_shape, (px, py))
+        self.assertTrue((s_r.data.argmax(axis=-1) == 30).all())
+
+    def test_correct_radius_random(self):
+        x, y, px, py = 56, 48, 4, 5
+        r = np.random.randint(20, 40, size=(py, px))
+        s = mdtd.generate_4d_holz_data(
+                    probe_size_x=px, probe_size_y=py,
+                image_size_x=120, image_size_y=100,
+                disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
+                blur=True, downscale=False)
+        s.axes_manager.signal_axes[0].offset = -x
+        s.axes_manager.signal_axes[1].offset = -y
+        s_r = s.radial_integration()
+        self.assertTrue((s_r.data.argmax(axis=-1) == r).all())
+
+    def test_correct_disk_x_y_and_radius_random(self):
+        x, y, px, py = 56, 48, 4, 5
+        x, y = randint(45, 55, size=(py, px)), randint(45, 55, size=(py, px))
+        r = randint(20, 40, size=(py, px))
+        s = mdtd.generate_4d_holz_data(
+                probe_size_x=px, probe_size_y=py,
+                image_size_x=120, image_size_y=100,
+                disk_x=x, disk_y=y, disk_r=5, disk_I=20,
+                ring_x=x, ring_y=y, ring_r=r, ring_I=5,
+                blur=True, downscale=False)
+        s_com = s.center_of_mass()
+        s_r = s.radial_integration(
+                centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
+        s_r = s_r.isig[15:]  # Do not include the disk
+        r -= 15  # Need to shift the radius, due to not including the disk
+        self.assertTrue((s_r.data.argmax(axis=-1) == r).all())
 
 
 class test_pixelated_stem_angle_sector(unittest.TestCase):
