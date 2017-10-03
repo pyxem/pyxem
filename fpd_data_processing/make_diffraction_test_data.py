@@ -162,6 +162,9 @@ class TestData:
         Sigma of the Gaussian blurring, if blur is True.
 
     downscale : bool, default True
+        Note: currently using downscale and adding a disk, will lead to the
+        center of the disk being shifted. Ergo: the disk_x and disk_y will not
+        be correct when downscale is True.
 
     Attributes
     ----------
