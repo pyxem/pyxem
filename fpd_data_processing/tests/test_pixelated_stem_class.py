@@ -404,3 +404,72 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
                 0.0, 0.5*np.pi,
                 centre_x_array=s_com.inav[0].data,
                 centre_y_array=s_com.inav[1].data)
+
+
+class test_angular_slice_radial_integration(unittest.TestCase):
+
+    def test_same_radius(self):
+        x, y, r, px, py, angleN = 56, 48, 20, 4, 5, 20
+        s = mdtd.generate_4d_holz_data(
+                probe_size_x=px, probe_size_y=py,
+                image_size_x=120, image_size_y=100,
+                disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
+                blur=True, downscale=False)
+        s_ar = s.angular_slice_radial_integration(
+                centre_x=x, centre_y=y, angleN=20)
+        self.assertTrue(s_ar.axes_manager.navigation_shape, (x, y, angleN))
+        self.assertTrue((s_ar.data.argmax(-1) == r).all())
+
+    def test_different_radius(self):
+        x, y, r, px, py, iX, iY = 50, 50, 20, 6, 5, 100, 100
+        kwrds = {
+                'probe_size_x': px, 'probe_size_y': py,
+                'image_size_x': iX, 'image_size_y': iY, 'disk_I': 0, 
+                'ring_x': x, 'ring_y': y, 'ring_r': r, 'ring_I': 5,
+                'blur': True, 'downscale': False}
+        r0, r1, r2, r3 = 20, 25, 30, 27
+        kwrds['ring_r'] = r0
+        s = mdtd.generate_4d_holz_data(**kwrds)
+        kwrds['ring_r'] = r1
+        s1 = mdtd.generate_4d_holz_data(**kwrds)
+        kwrds['ring_r'] = r2
+        s2 = mdtd.generate_4d_holz_data(**kwrds)
+        kwrds['ring_r'] = r3
+        s3 = mdtd.generate_4d_holz_data(**kwrds)
+
+        s.data[:, :, :y, x:] = s1.data[:, :, :y, x:]
+        s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
+        s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
+
+        s_ar = s.angular_slice_radial_integration(centre_x=x, centre_y=y, angleN=4)
+        self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
+        self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
+        self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())
+        self.assertTrue((s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all())
+
+    def test_different_radius_not_square_image(self):
+        x, y, r, px, py, iX, iY = 40, 55, 20, 6, 5, 120, 100
+        kwrds = {
+                'probe_size_x': px, 'probe_size_y': py,
+                'image_size_x': iX, 'image_size_y': iY, 'disk_I': 0, 
+                'ring_x': x, 'ring_y': y, 'ring_r': r, 'ring_I': 5,
+                'blur': True, 'downscale': False}
+        r0, r1, r2, r3 = 20, 25, 30, 27
+        kwrds['ring_r'] = r0
+        s = mdtd.generate_4d_holz_data(**kwrds)
+        kwrds['ring_r'] = r1
+        s1 = mdtd.generate_4d_holz_data(**kwrds)
+        kwrds['ring_r'] = r2
+        s2 = mdtd.generate_4d_holz_data(**kwrds)
+        kwrds['ring_r'] = r3
+        s3 = mdtd.generate_4d_holz_data(**kwrds)
+
+        s.data[:, :, :y, x:] = s1.data[:, :, :y, x:]
+        s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
+        s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
+
+        s_ar = s.angular_slice_radial_integration(centre_x=x, centre_y=y, angleN=4)
+        self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
+        self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
+        self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())
+        self.assertTrue((s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all())
