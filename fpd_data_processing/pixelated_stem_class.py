@@ -65,7 +65,8 @@ class PixelatedSTEM(Signal2D):
         return(s_com)
 
     def radial_integration(
-            self, centre_x=None, centre_y=None, mask_array=None):
+            self, centre_x=None, centre_y=None, mask_array=None,
+            parallel=True):
         """Radially integrates a pixelated STEM diffraction signal.
 
         Parameters
@@ -79,8 +80,12 @@ class PixelatedSTEM(Signal2D):
             missing, both will be set from the signal (0., 0.) positions.
             If no values are given, the (0., 0.) positions in the signal will
             be used.
-        mask_array : Boolean numpy array
+        mask_array : Boolean numpy array, optional
             Mask with the same shape as the signal.
+        parallel : bool, default True
+            If True, run the processing on several cores.
+            In most cases this should be True, but for debugging False can be
+            useful.
 
         Returns
         -------
@@ -112,7 +117,7 @@ class PixelatedSTEM(Signal2D):
                 pst._get_radial_profile_of_diff_image,
                 iterating_kwargs=iterating_kwargs,
                 inplace=False, ragged=False,
-                parallel=True, 
+                parallel=parallel,
                 radial_array_size=radial_array_size)
         if self._lazy:
             s_radial.compute()
