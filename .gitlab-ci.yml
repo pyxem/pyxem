@@ -9,6 +9,15 @@ all_tests_debian_unstable:
     - xvfb-run -a python3 -m pytest --doctest-modules fpd_data_processing/
     - xvfb-run -a python3 -m pytest --doctest-glob="*.rst" doc/
 
+style_checks:
+    image: debian:sid
+    script:
+    - apt-get update -q
+    - apt-get install -qy python3-flake8 python3-pydocstyle
+    - python3 -m flake8 fpd_data_processing/
+    - python3 -m pydocstyle fpd_data_processing/
+    allow_failure: true
+
 make_documentation:
     image: debian:unstable
     stage: deploy
