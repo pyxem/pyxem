@@ -28,8 +28,8 @@ def _centre_comparison(
     for centre_x, centre_y in centre_list:
         s_angle = s.angular_slice_radial_integration(
                 angleN=angleN,
-                centre_x_array=np.array([centre_x]),
-                centre_y_array=np.array([centre_y]))
+                centre_x=np.array([centre_x]),
+                centre_y=np.array([centre_y]))
         if crop_radial_signal is not None:
             s_angle = s_angle.isig[crop_radial_signal[0]:crop_radial_signal[1]]
         s_angle.metadata.add_node("Angle_slice_processing")
@@ -45,9 +45,9 @@ def get_coordinate_of_min(s):
     z = s.data
     idx = np.argwhere(z == np.min(z))
     idx_min = idx[0]
-    x = s.axes_manager[0].offset + idx_min[0]*s.axes_manager[0].scale
-    y = s.axes_manager[1].offset + idx_min[1]*s.axes_manager[1].scale
-    return(x,y)
+    x = s.axes_manager[0].index2value(idx[0][1])
+    y = s.axes_manager[0].index2value(idx[0][0])
+    return(x, y)
 
 def get_centre_position_list(s, steps, step_size):
     """
@@ -71,8 +71,7 @@ def get_centre_position_list(s, steps, step_size):
     return(centre_list)
 
 def get_optimal_centre_position(
-        s, radial_signal_span,
-        steps=5, step_size=1, angleN=8):
+        s, radial_signal_span, steps=5, step_size=1, angleN=8):
     """
     Takes signal s, radial span of feature used to determine the centre
     position. Radially integrates the
