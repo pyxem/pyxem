@@ -387,6 +387,8 @@ def generate_4d_disk_data(
         disk_y = np.ones((probe_size_y, probe_size_x))*disk_y
     if not isiterable(disk_r):
         disk_r = np.ones((probe_size_y, probe_size_x))*disk_r
+    disk_x, disk_y = np.array(disk_x), np.array(disk_y)
+    disk_r = np.array(disk_r)
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
