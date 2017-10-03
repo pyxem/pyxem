@@ -370,3 +370,14 @@ class test_generate_4d_holz_data(unittest.TestCase):
                 disk_x=1000, disk_y=1000, disk_r=5,
                 ring_x=1000, ring_y=1000, ring_r=10)
         self.assertTrue((s.data == 0).all())
+
+    def test_ring_center(self):
+        x, y = 40, 51
+        s = generate_4d_holz_data(
+                probe_size_x=4, probe_size_y=5, image_size_x=120, image_size_y=100,
+                disk_x=x, disk_y=y, disk_r=10, disk_I=0,
+                ring_x=x, ring_y=y, ring_r=30, ring_I=5,
+                blur=False, downscale=False)
+        s_com = s.center_of_mass()
+        self.assertTrue((s_com.inav[0].data == x).all())
+        self.assertTrue((s_com.inav[1].data == y).all())
