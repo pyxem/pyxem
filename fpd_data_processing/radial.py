@@ -15,6 +15,8 @@ def _centre_comparison(
 
     Currently only works with signals with 0 navigation dimensions.
 
+    Parameters
+    ----------
     crop_radial_signal : tuple, optional
     """
     if s.axes_manager.navigation_dimension != 0:
@@ -72,11 +74,35 @@ def get_optimal_centre_position(
         s, radial_signal_span,
         steps=5, step_size=1, angleN=8):
     """
-    Takes signal s , radial span of
-    feature used to determine the centre position. Radially integrates the
+    Takes signal s, radial span of feature used to determine the centre
+    position. Radially integrates the
     feature in angleN segments, for each possible centre position. 
-    Models this integrated signal as a gaussian and returns array of with
-    the standard deviatoins of these gaussians.  
+    Models this integrated signal as a Gaussian and returns array of with
+    the standard deviations of these Gaussians.  
+
+    Note, the approximate centre position must be set using the offset
+    parameter in the signal. The offset parameter is the negative of the
+    position shown with s.plot(). So if the centre position in the image is
+    x=52 and y=55: 
+    s.axes_manager.signal_axes[0].offset = -52
+    s.axes_manager.signal_axes[1].offset = -55
+    This can be checked by replotting the signal, to see if the centre
+    position has the values x=0 and y=0.
+
+    Parameters
+    ----------
+    s : HyperSpy 2D signal
+        Only supports signals with no navigation dimensions.
+    radial_signal_span : tuple
+        Range for finding the circular feature.
+    steps : int, default 5
+        Number of steps in x/y direction to look for the optimal
+        centre position. If the offset is (50, 55), and step_size 1:
+        the positions x=(45, 46, 47, 48, ..., 55) and y=(50, 51, 52, ..., 60),
+        will be checked.
+    step_size : int, default 1
+    angleN : int, default 8
+        See angular_slice_radial_integration for information about angleN.
     """
     s_list = _centre_comparison(s, steps, step_size,
             crop_radial_signal=radial_signal_span, angleN=angleN)
