@@ -92,8 +92,8 @@ class PixelatedSTEM(Signal2D):
             centre_x, centre_y = pst._make_centre_array_from_signal(
                     self, x=centre_x, y=centre_y)
         radial_array_size = pst._find_longest_distance(
-                self.axes_manager.signal_axes[1].size,
                 self.axes_manager.signal_axes[0].size,
+                self.axes_manager.signal_axes[1].size,
                 centre_x.min(), centre_y.min(),
                 centre_x.max(), centre_y.max())+1
         centre_x = centre_x.flatten()
