@@ -89,7 +89,15 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        HyperSpy signal, one less signal dimension than the input signal."""
+        HyperSpy signal, one less signal dimension than the input signal.
+
+        Examples
+        --------
+        >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+        >>> s = mdtd.get_holz_simple_test_signal()
+        >>> s_r = s.radial_integration(centre_x=25, centre_y=25)
+        >>> s_r.plot()
+        """
 
         if (centre_x is None) or (centre_y is None):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
@@ -164,8 +172,43 @@ class PixelatedSTEM(Signal2D):
         return(bool_array)
 
     def angular_slice_radial_integration(
-            self, angleN=20,
-            centre_x_array=None, centre_y_array=None):
+            self, angleN=20, centre_x=None, centre_y=None):
+        """Do radial integration of different angular slices.
+        Useful for analysing anisotropy in round diffraction features,
+        such as diffraction rings from polycrystalline materials or
+        higher order laue zone rings.
+
+        Parameters
+        ----------
+        angleN : int, default 20
+            Number of angular slices. If angleN=2, each slice
+            will be 90 degrees. The integration will start in the top left
+            corner (0, 0) when plotting using s.plot(), and go clockwise.
+        centre_x, centre_y : int or NumPy array, optional
+            If given as int, all the diffraction patterns will have the same
+            centre position. Each diffraction pattern can also have different
+            centre position, by passing a NumPy array with the same dimensions
+            as the navigation axes.
+            Note: in either case both x and y values must be given. If one is
+            missing, both will be set from the signal (0., 0.) positions.
+            If no values are given, the (0., 0.) positions in the signal will
+            be used.
+
+        Returns
+        -------
+        signal : HyperSpy 1D signal
+            With one more navigation dimensions (the angular slices) compared
+            to the input signal.
+
+        Examples
+        --------
+        >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+        >>> s = mdtd.get_holz_simple_test_signal()
+        >>> s_com = s.center_of_mass()
+        >>> s_ar = s.angular_slice_radial_integration(
+        ...     angleN=10, centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
+        >>> s_ar.plot()
+        """
         signal_list = []
         angle_list = []
         for i in range(angleN):
