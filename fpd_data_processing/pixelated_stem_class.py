@@ -66,7 +66,7 @@ class PixelatedSTEM(Signal2D):
 
     def radial_integration(
             self, centre_x=None, centre_y=None, mask_array=None,
-            parallel=True):
+            parallel=True, show_progressbar=True):
         """Radially integrates a pixelated STEM diffraction signal.
 
         Parameters
@@ -95,7 +95,8 @@ class PixelatedSTEM(Signal2D):
         --------
         >>> import fpd_data_processing.make_diffraction_test_data as mdtd
         >>> s = mdtd.get_holz_simple_test_signal()
-        >>> s_r = s.radial_integration(centre_x=25, centre_y=25)
+        >>> s_r = s.radial_integration(centre_x=25, centre_y=25,
+        ...     show_progressbar=False)
         >>> s_r.plot()
         """
 
@@ -126,7 +127,8 @@ class PixelatedSTEM(Signal2D):
                 iterating_kwargs=iterating_kwargs,
                 inplace=False, ragged=False,
                 parallel=parallel,
-                radial_array_size=radial_array_size)
+                radial_array_size=radial_array_size,
+                show_progressbar=show_progressbar)
         if self._lazy:
             s_radial.compute()
         else:
@@ -172,7 +174,8 @@ class PixelatedSTEM(Signal2D):
         return(bool_array)
 
     def angular_slice_radial_integration(
-            self, angleN=20, centre_x=None, centre_y=None):
+            self, angleN=20, centre_x=None, centre_y=None,
+            show_progressbar=True):
         """Do radial integration of different angular slices.
         Useful for analysing anisotropy in round diffraction features,
         such as diffraction rings from polycrystalline materials or
@@ -204,9 +207,10 @@ class PixelatedSTEM(Signal2D):
         --------
         >>> import fpd_data_processing.make_diffraction_test_data as mdtd
         >>> s = mdtd.get_holz_simple_test_signal()
-        >>> s_com = s.center_of_mass()
+        >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_integration(
-        ...     angleN=10, centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
+        ...     angleN=10, centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data,
+        ...     show_progressbar=False)
         >>> s_ar.plot()
         """
         signal_list = []
@@ -219,7 +223,7 @@ class PixelatedSTEM(Signal2D):
             centre_x, centre_y = pst._make_centre_array_from_signal(
                     self, x=centre_x, y=centre_y)
 
-        for angle in tqdm(angle_list):
+        for angle in tqdm(angle_list, disable=show_progressbar):
             mask_array = self.angular_mask(
                     angle[0], angle[1],
                     centre_x_array=centre_x,
@@ -227,7 +231,8 @@ class PixelatedSTEM(Signal2D):
             s_r = self.radial_integration(
                     centre_x=centre_x,
                     centre_y=centre_y,
-                    mask_array=mask_array)
+                    mask_array=mask_array,
+                    show_progressbar=show_progressbar)
             signal_list.append(s_r)
         angle_scale = angle_list[1][1] - angle_list[0][1]
         signal = hs.stack(signal_list, new_axis_name='Angle slice')
