@@ -166,6 +166,58 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         self.assertTrue((s_com7.inav[0].data == x).all())
         self.assertFalse((s_com7.inav[1].data == y).all())
 
+    def test_threshold(self):
+        x, y = 60, 50
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=4, probe_size_y=3,
+                image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
+                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+        s.data[:, :, 0:30, 0:30] = 5
+
+        # The extra values are ignored due to thresholding
+        s_com0 = s.center_of_mass(threshold=2)
+        self.assertTrue((s_com0.inav[0].data == x).all())
+        self.assertTrue((s_com0.inav[1].data == y).all())
+
+        # The extra values are not ignored
+        s_com1 = s.center_of_mass(threshold=1)
+        self.assertFalse((s_com1.inav[0].data == x).all())
+        self.assertFalse((s_com1.inav[1].data == y).all())
+
+        # The extra values are not ignored
+        s_com2 = s.center_of_mass()
+        self.assertFalse((s_com2.inav[0].data == x).all())
+        self.assertFalse((s_com2.inav[1].data == y).all())
+
+    def test_threshold_and_mask(self):
+        x, y = 60, 50
+        s = mdtd.generate_4d_disk_data(
+                probe_size_x=4, probe_size_y=3,
+                image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
+                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+        s.data[:, :, 0:30, 0:30] = 5
+        s.data[:, :, 1, -2] = 60
+
+        # The extra values are ignored due to thresholding and mask
+        s_com0 = s.center_of_mass(threshold=2, mask=(60, 50, 50))
+        self.assertTrue((s_com0.inav[0].data == x).all())
+        self.assertTrue((s_com0.inav[1].data == y).all())
+
+        # The extra values are not ignored
+        s_com1 = s.center_of_mass(mask=(60, 50, 50))
+        self.assertFalse((s_com1.inav[0].data == x).all())
+        self.assertFalse((s_com1.inav[1].data == y).all())
+
+        # The extra values are not ignored
+        s_com3 = s.center_of_mass(threshold=2)
+        self.assertFalse((s_com3.inav[0].data == x).all())
+        self.assertFalse((s_com3.inav[1].data == y).all())
+
+        # The extra values are not ignored
+        s_com4 = s.center_of_mass()
+        self.assertFalse((s_com4.inav[0].data == x).all())
+        self.assertFalse((s_com4.inav[1].data == y).all())
+
 
 class test_pixelated_stem_radial_integration(unittest.TestCase):
 
