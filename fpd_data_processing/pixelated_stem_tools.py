@@ -218,6 +218,7 @@ def _get_radial_profile_of_diff_image(
         Centre x position of the diffraction image.
     centre_y : number
         Centre y position of the diffraction image.
+    radial_array_size : number
     mask : numpy bool array, optional
         Mask parts of the diffraction image, regions where
         the mask is True will be included in the radial profile.
