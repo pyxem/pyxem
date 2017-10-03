@@ -539,6 +539,9 @@ def get_disk_shift_simple_test_signal():
 
 
 def get_holz_simple_test_signal():
+    """Get a HyperSpy 2D signal with 2D navigation dimensions.
+    Probe size x/y (20, 20), and image size x/y (50, 50).
+    """
     ring_x, ring_y = np.mgrid[24:26:20j, 24:26:20j]
     s = generate_4d_holz_data(
             probe_size_x=20, probe_size_y=20,
@@ -546,4 +549,15 @@ def get_holz_simple_test_signal():
             disk_x=25, disk_y=25, disk_r=2, disk_I=20,
             ring_x=ring_x, ring_y=ring_y, ring_r=15, ring_I=10,
             add_noise=True)
+    return(s)
+
+
+def get_single_ring_diffraction_signal():
+    """Get HyperSpy 2D signal with a single ring with centre position
+    x=105 and y=67, radius=40."""
+    data = TestData(size_x=200, size_y=150, default=False, blur=True)
+    x, y = 105, 67
+    data.add_ring(x, y, r=40)
+    s = data.signal
+    s.axes_manager[0].offset, s.axes_manager[1].offset = -x, -y
     return(s)
