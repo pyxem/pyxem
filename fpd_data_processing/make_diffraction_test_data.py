@@ -410,7 +410,7 @@ def generate_4d_disk_data(
 def generate_4d_holz_data(
         probe_size_x=10, probe_size_y=10, image_size_x=50, image_size_y=50,
         disk_x=25, disk_y=25, disk_r=5, disk_I=20,
-        ring_x=25, ring_y=25, ring_r=20, ring_I=6, ring_lw=1,
+        ring_x=25, ring_y=25, ring_r=20, ring_I=6, ring_lw=0,
         blur=True, blur_sigma=1, downscale=True, add_noise=False,
         noise_amplitude=1,
         ):
@@ -419,7 +419,7 @@ def generate_4d_holz_data(
     Useful for checking that radial integration
     algorithms are working properly.
 
-    The centre and radius position of the disk can vary as a function
+    The centre and radius position of the ring and  disk can vary as a function
     of probe position, through the disk_x, disk_y and disk_r arguments.
 
     Parameters
@@ -448,11 +448,9 @@ def generate_4d_holz_data(
         Intensity of the ring, for each of the pixels.
         So if I=5, each pixel in the ring will have a value of 5.
         Note, this value will change if blur=True or downscale=True.
-    ring_lw : int, default 1
-        Line width of the ring, effectively sets the inner radius.
-        The inner radius is ring_r - ring_lw. So if ring_r = 20,
-        and ring_lw = 5, the ring will have an outer radius of 20, and inner
-        radius of 15.
+    ring_lw : int, default 0
+        Line width of the ring. If ring_lw=1, the line will be 3 pixels wide.
+        If ring_lw=2, the line will be 5 pixels wide.
     blur : bool, default True
         If True, do a Gaussian blur of the disk.
     blur_sigma : int, default 1
@@ -495,7 +493,7 @@ def generate_4d_holz_data(
     >>> ring_r = np.random.randint(10, 15, size=(20, 10))
     >>> s = mdtd.generate_4d_holz_data(probe_size_x=10, probe_size_y=20,
     ...         image_size_x=40, image_size_y=50, disk_x=disk_x, disk_y=disk_y,
-    ...         ring_x=ring_x, ring_y=ring_y, ring_r=ring_r)
+    ...         ring_x=ring_x, ring_y=ring_y, ring_r=ring_r, ring_lw=1)
     """
 
     if not isiterable(disk_x):
