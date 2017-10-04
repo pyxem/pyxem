@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 from hyperspy._components.gaussian import Gaussian
 from hyperspy.signals import Signal2D
 
@@ -17,7 +18,11 @@ def _centre_comparison(
 
     Parameters
     ----------
+    s : HyperSpy 2D signal
+    steps : int
+    step_size : int
     crop_radial_signal : tuple, optional
+    angleN : int, default 8
     """
     if s.axes_manager.navigation_dimension != 0:
         raise ValueError(
@@ -29,7 +34,8 @@ def _centre_comparison(
         s_angle = s.angular_slice_radial_integration(
                 angleN=angleN,
                 centre_x=np.array([centre_x]),
-                centre_y=np.array([centre_y]))
+                centre_y=np.array([centre_y]),
+                show_progressbar=False)
         if crop_radial_signal is not None:
             s_angle = s_angle.isig[crop_radial_signal[0]:crop_radial_signal[1]]
         s_angle.metadata.add_node("Angle_slice_processing")
@@ -73,7 +79,8 @@ def get_centre_position_list(s, steps, step_size):
 
 
 def get_optimal_centre_position(
-        s, radial_signal_span, steps=5, step_size=1, angleN=8):
+        s, radial_signal_span, steps=5, step_size=1, angleN=8,
+        show_progressbar=True):
     """
     Find centre position of a ring by using angle sliced radial integration.
 
@@ -107,13 +114,27 @@ def get_optimal_centre_position(
     angleN : int, default 8
         See angular_slice_radial_integration for information about angleN.
 
+    Returns
+    -------
+    Optimal centre position : HyperSpy 2D signal
+
+    Examples
+    --------
+    >>> import fpd_data_processing.dummy_data as dd
+    >>> s = dd.get_single_ring_diffraction_signal()
+    >>> s.axes_manager.signal_axes[0].offset = -105
+    >>> s.axes_manager.signal_axes[1].offset = -67
+    >>> import fpd_data_processing.radial as ra
+    >>> s_ocp = ra.get_optimal_centre_position(s, (35, 45), steps=2)
+    >>> centre_pos = ra.get_coordinate_of_min(s_ocp)
+
     """
     s_list = _centre_comparison(
             s, steps, step_size, crop_radial_signal=radial_signal_span,
             angleN=angleN)
 
     m_list = []
-    for temp_s in s_list:
+    for temp_s in tqdm(s_list, disable=(not show_progressbar)):
         temp_s.change_dtype('float64')
         temp_s = temp_s - temp_s.data.min()
         temp_s = temp_s/temp_s.data.max()
@@ -128,7 +149,7 @@ def get_optimal_centre_position(
                 centre=g_centre,
                 sigma=g_sigma)
         m.append(g)
-        m.multifit()
+        m.multifit(show_progressbar=False)
         m_list.append(m)
     s_centre_std_array = _get_offset_image(m_list, s, steps, step_size)
     return(s_centre_std_array)
@@ -137,7 +158,7 @@ def get_optimal_centre_position(
 def _get_offset_image(model_list, s, steps, step_size):
     """
     Creates a Signal2D object of the standard deviation of of the
-    gaussians fitted to the radially integrated featrures, as a
+    Gaussians fitted to the radially integrated features, as a
     function of center coordinate.
     """
     cX_list, cY_list = [], []

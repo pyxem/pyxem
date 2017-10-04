@@ -31,8 +31,8 @@ class PixelatedSTEM(Signal2D):
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
 
-        >>> import fpd_data_processing.make_diffraction_test_data as md
-        >>> s = md.get_disk_shift_simple_test_signal()
+        >>> import fpd_data_processing.dummy_data as dd
+        >>> s = dd.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
         >>> s_color = s_com.get_color_signal()
@@ -96,8 +96,8 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.make_diffraction_test_data as mdtd
-        >>> s = mdtd.get_holz_simple_test_signal()
+        >>> import fpd_data_processing.dummy_data as dd
+        >>> s = dd.get_holz_simple_test_signal()
         >>> s_r = s.radial_integration(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
         >>> s_r.plot()
@@ -163,8 +163,8 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.make_diffraction_test_data as md
-        >>> s = md.get_holz_simple_test_signal()
+        >>> import fpd_data_processing.dummy_data as dd
+        >>> s = dd.get_holz_simple_test_signal()
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
         >>> mask_array = s.angular_mask(0.5*np.pi, np.pi)
@@ -208,8 +208,8 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.make_diffraction_test_data as mdtd
-        >>> s = mdtd.get_holz_simple_test_signal()
+        >>> import fpd_data_processing.dummy_data as dd
+        >>> s = dd.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_integration(
         ...     angleN=10, centre_x=s_com.inav[0].data,
@@ -226,7 +226,7 @@ class PixelatedSTEM(Signal2D):
             centre_x, centre_y = pst._make_centre_array_from_signal(
                     self, x=centre_x, y=centre_y)
 
-        for angle in tqdm(angle_list, disable=show_progressbar):
+        for angle in tqdm(angle_list, disable=(not show_progressbar)):
             mask_array = self.angular_mask(
                     angle[0], angle[1],
                     centre_x_array=centre_x,
