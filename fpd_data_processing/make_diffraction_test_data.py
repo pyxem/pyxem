@@ -134,9 +134,9 @@ class Ring(object):
         self.z.set_uniform_intensity()
 
 
-class TestData:
+class MakeTestData:
     """
-    TestData is an object containing a generated test signal. The default
+    MakeTestData is an object containing a generated test signal. The default
     signal is consisting of a Disk and concentric Ring, with the Ring being
     less intensive than the centre Disk. Unlimited number of Rings and Disks
     can be added separately.
@@ -184,13 +184,13 @@ class TestData:
 
     Default settings
 
-    >>> from fpd_data_processing.make_diffraction_test_data import TestData
-    >>> test_data = TestData()
+    >>> from fpd_data_processing.make_diffraction_test_data import MakeTestData
+    >>> test_data = MakeTestData()
     >>> test_data.signal.plot()
 
     More control
 
-    >>> test_data = TestData(default=False)
+    >>> test_data = MakeTestData(default=False)
     >>> test_data.add_disk(x0=50, y0=50, r=10, I=30)
     >>> test_data.add_ring(x0=45, y0=52, r=25, I=10)
     >>> test_data.signal.plot()
@@ -393,7 +393,7 @@ def generate_4d_disk_data(
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
     for i in s:
         index = s.axes_manager.indices[::-1]
-        test_data = TestData(
+        test_data = MakeTestData(
                 size_x=image_size_x, size_y=image_size_y,
                 default=False, blur=blur, blur_sigma=blur_sigma,
                 downscale=downscale)
@@ -512,7 +512,7 @@ def generate_4d_holz_data(
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
     for i in s:
         index = s.axes_manager.indices[::-1]
-        test_data = TestData(
+        test_data = MakeTestData(
                 size_x=image_size_x, size_y=image_size_y,
                 default=False, blur=blur, blur_sigma=blur_sigma,
                 downscale=downscale)
@@ -554,7 +554,7 @@ def get_holz_simple_test_signal():
 def get_single_ring_diffraction_signal():
     """Get HyperSpy 2D signal with a single ring with centre position
     x=105 and y=67, radius=40."""
-    data = TestData(size_x=200, size_y=150, default=False, blur=True)
+    data = MakeTestData(size_x=200, size_y=150, default=False, blur=True)
     x, y = 105, 67
     data.add_ring(x, y, r=40)
     s = data.signal

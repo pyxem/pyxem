@@ -1,23 +1,23 @@
 import unittest
 import numpy as np
 from fpd_data_processing.make_diffraction_test_data import (
-        TestData, generate_4d_disk_data, generate_4d_holz_data)
+        MakeTestData, generate_4d_disk_data, generate_4d_holz_data)
 
 
 class test_make_diffraction_test_data(unittest.TestCase):
 
     def test_init(self):
-        TestData(default=True)
-        TestData(size_x=1, size_y=10, scale=0.05)
-        TestData(
+        MakeTestData(default=True)
+        MakeTestData(size_x=1, size_y=10, scale=0.05)
+        MakeTestData(
                 size_x=200, size_y=100, scale=2, default=False, blur=False,
                 blur_sigma=3., downscale=False)
 
     def test_zero_signal(self):
-        test_data_1 = TestData(default=False)
+        test_data_1 = MakeTestData(default=False)
         self.assertTrue((test_data_1.signal.data == 0.).all())
 
-        test_data_2 = TestData(default=True)
+        test_data_2 = MakeTestData(default=True)
         test_data_2.set_signal_zero()
         self.assertTrue((test_data_2.signal.data == 0.).all())
 
@@ -25,7 +25,7 @@ class test_make_diffraction_test_data(unittest.TestCase):
 class test_make_diffraction_test_data_disks(unittest.TestCase):
 
     def test_simple_disks(self):
-        test0 = TestData(
+        test0 = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
         test0.add_disk(50, 50, 1, 20)
@@ -34,7 +34,7 @@ class test_make_diffraction_test_data_disks(unittest.TestCase):
         test0.signal.data[49:52, 49:52] = 0
         self.assertFalse(test0.signal.data.any())
 
-        test1 = TestData(
+        test1 = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
         test1.add_disk(20, 40, 2, 30)
@@ -42,7 +42,7 @@ class test_make_diffraction_test_data_disks(unittest.TestCase):
         test1.signal.data[38:43, 18:23] = 0
         self.assertFalse(test1.signal.data.any())
 
-        test2 = TestData(
+        test2 = MakeTestData(
                 size_x=80, size_y=120,
                 default=False, blur=False, downscale=False)
         test2.add_disk(50, 40, 1, 10)
@@ -53,23 +53,23 @@ class test_make_diffraction_test_data_disks(unittest.TestCase):
         test2.signal.data[28:33, 18:23] = 0
         self.assertFalse(test2.signal.data.any())
 
-        test3 = TestData(size_x=150, size_y=50,
+        test3 = MakeTestData(size_x=150, size_y=50,
                          default=False, blur=False, downscale=False)
         test3.add_disk(200, 400, 2, 30)
         self.assertFalse(test3.signal.data.any())
 
-        test4 = TestData(size_x=150, size_y=50,
+        test4 = MakeTestData(size_x=150, size_y=50,
                          default=False, blur=False, downscale=False)
         test4.add_disk(50, 50, 500, 500)
         self.assertTrue((test4.signal.data == 500).all())
 
-        test5 = TestData(
+        test5 = MakeTestData(
                 size_x=100, size_y=200,
                 default=False, blur=False, downscale=True)
         test5.add_disk(50, 50, 500, 10)
         self.assertTrue((test5.signal.data == 10).all())
 
-        test6 = TestData(
+        test6 = MakeTestData(
                 size_x=100, size_y=200,
                 default=False, blur=True, downscale=False)
         test6.add_disk(50, 30, 500, 10)
@@ -77,7 +77,7 @@ class test_make_diffraction_test_data_disks(unittest.TestCase):
         np.testing.assert_allclose(test6.signal.data, test6_ref, rtol=1e-05)
 
     def test_large_disk(self):
-        test_data_1 = TestData(
+        test_data_1 = MakeTestData(
                 size_x=10, size_y=10,
                 scale=0.01, default=False)
         test_data_1.add_disk(x0=5, y0=5, r=20, I=100)
@@ -89,7 +89,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
     def test_ring_inner_radius(self):
         r, lw = 20, 2
         x0, y0, scale = 50, 50, 1
-        test_data = TestData(size_x=100, size_y=100, default=False,
+        test_data = MakeTestData(size_x=100, size_y=100, default=False,
                              blur=False, downscale=False)
         test_data.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
         r_inner = 20 - 2.5*scale
@@ -117,7 +117,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
     def test_ring_outer_radius(self):
         r, lw = 20, 1
         x0, y0, scale = 0, 0, 1
-        ring_1 = TestData(size_x=100, size_y=100, default=False,
+        ring_1 = MakeTestData(size_x=100, size_y=100, default=False,
                           blur=False, downscale=False)
         ring_1.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
         s_h0 = ring_1.signal.isig[x0, :]
@@ -132,7 +132,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
         r, lw = 20, 1
         x0, y0, scale = 100, 100, 1
-        ring_2 = TestData(size_x=100, size_y=100, default=False,
+        ring_2 = MakeTestData(size_x=100, size_y=100, default=False,
                           blur=False, downscale=False)
         ring_2.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
         s_h2 = ring_2.signal.isig[-1, :]
@@ -147,7 +147,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_radius1(self):
         I = 20
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
         test.add_ring(x0=50, y0=50, r=1, I=I, lw_pix=0)
@@ -160,7 +160,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_radius2(self):
         I = 10
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
         test.add_ring(x0=50, y0=50, r=2, I=I, lw_pix=0)
@@ -172,7 +172,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         self.assertFalse(test.signal.data.any())
 
     def test_ring_radius_outside_image(self):
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
         test.add_ring(x0=50, y0=50, r=300, I=19, lw_pix=1)
@@ -180,7 +180,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_rectangle_image(self):
         I = 10
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=50,
                 default=False, blur=False, downscale=False)
         test.add_ring(x0=50, y0=25, r=1, I=I, lw_pix=0)
@@ -193,7 +193,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_cover_whole_image(self):
         I = 10.
-        test = TestData(
+        test = MakeTestData(
                 size_x=50, size_y=100,
                 default=False, blur=False, downscale=False)
         test.add_ring(x0=25, y0=200, r=150, I=I, lw_pix=100)
@@ -201,7 +201,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_position(self):
         x0, y0, r = 40., 60., 20
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
         test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=0)
@@ -221,7 +221,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_position_blur(self):
         x0, y0, r = 50, 50, 15
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=True, downscale=False)
         test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
@@ -241,7 +241,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_position_blur_lw(self):
         x0, y0, r = 50, 50, 15
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=True, downscale=False)
         test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
@@ -261,7 +261,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_position_downscale(self):
         x0, y0, r = 50, 50, 15
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=True)
         test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=0)
@@ -281,7 +281,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
 
     def test_ring_position_downscale_and_blur(self):
         x0, y0, r = 50, 50, 18
-        test = TestData(
+        test = MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=True, downscale=True)
         test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
