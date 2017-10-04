@@ -32,24 +32,43 @@ class test_radial_module(unittest.TestCase):
 
     def test_get_coordinate_of_min(self):
         array = np.ones((10, 10))*10
-        array[5, 7] = 1
+        x, y = 7, 5
+        array[y, x] = 1  # In NumPy the order is [y, x]
         s = fp.PixelatedSTEM(array)
         s.axes_manager[0].offset = 55
         s.axes_manager[1].offset = 50
         s.axes_manager[0].scale = 0.5
         s.axes_manager[1].scale = 0.4
         min_pos = ra.get_coordinate_of_min(s)
-        self.assertEqual(min_pos, (58.5, 57.5))
+        # min_pos[0] (x) should be at (7*0.5) + 55 = 58.5
+        # min_pos[1] (y) should be at (5*0.4) + 50 = 52.
+        self.assertEqual(min_pos, (58.5, 52.0))
 
-    def test_find_centre(self):
+    def test_get_optimal_centre_position(self):
         x0, y0 = 300., 300.
         test_data = mdtd.MakeTestData(size_x=600, size_y=600, default=False)
         test_data.add_ring(x0=x0, y0=y0, r=200, I=10, lw_pix=2)
         s = test_data.signal
         s.axes_manager[0].offset = -301.
         s.axes_manager[1].offset = -301.
-        s_centre_position = fp.radial.get_optimal_centre_position(
+        s_centre_position = ra.get_optimal_centre_position(
                 s, radial_signal_span=(180, 210), steps=2, step_size=1)
         x,y = fp.radial.get_coordinate_of_min(s_centre_position)
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
+
+    def test_get_optimal_centre_position(self):
+        test_data = mdtd.MakeTestData(
+                size_x=300, size_y=400,
+                default=False, blur=True, downscale=False)
+        x0, y0 = 150, 170
+        test_data.add_ring(x0=x0, y0=y0, r=100, I=10, lw_pix=1)
+        s = test_data.signal
+        s.axes_manager[0].offset = -x0
+        s.axes_manager[1].offset = -y0
+        s_c = ra.get_optimal_centre_position(
+                test_data.signal, radial_signal_span=(90, 110),
+                steps=3, step_size=0.5, angleN=8)
+        min_pos = ra.get_coordinate_of_min(s_c)
+        self.assertAlmostEqual(min_pos[0], x0)
+        self.assertAlmostEqual(min_pos[1], y0)
