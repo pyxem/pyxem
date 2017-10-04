@@ -25,19 +25,22 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        tuple with center x and y arrays. (com x, com y)
-        
+        center x and y array (com x, com y) : tuple
+
         Examples
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
+
         >>> import fpd_data_processing.make_diffraction_test_data as md
         >>> s = md.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
         >>> s_color = s_com.get_color_signal()
-        
+
         Also threshold
+
         >>> s_com = s.center_of_mass(threshold=1.5, show_progressbar=False)
+
         """
 
         if mask is not None:
@@ -268,6 +271,7 @@ class DPCSignal1D(Signal1D):
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
     """
+
     def get_bivariate_histogram(
             self,
             histogram_range=None,
@@ -277,8 +281,8 @@ class DPCSignal1D(Signal1D):
         """
         Useful for finding the distribution of magnetic vectors(?).
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         histogram_range : tuple, optional
             Set the minimum and maximum of the histogram range.
             Default is setting it automatically.
@@ -358,7 +362,7 @@ class DPCSignal2D(Signal2D):
         angle = np.arctan2(self.inav[0].data, self.inav[1].data)
         magnitude = np.sqrt(
                 np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
-        
+
         magnitude_limits = None
         if autolim:
             magnitude_limits = pst._get_limits_from_array(
@@ -380,8 +384,8 @@ class DPCSignal2D(Signal2D):
         """
         Useful for finding the distribution of magnetic vectors(?).
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         histogram_range : tuple, optional
             Set the minimum and maximum of the histogram range.
             Default is setting it automatically.
@@ -398,7 +402,7 @@ class DPCSignal2D(Signal2D):
 
         Returns
         -------
-        s_hist : Signal2D
+        s_hist : HyperSpy Signal2D
         """
         s0_flat = self.inav[0].data.flatten()
         s1_flat = self.inav[1].data.flatten()
