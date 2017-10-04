@@ -139,7 +139,7 @@ def get_optimal_centre_position(
         temp_s = temp_s - temp_s.data.min()
         temp_s = temp_s/temp_s.data.max()
         am = temp_s.axes_manager
-        g_centre = temp_s.inav[0].data.argmax()*am[-1].scale+am[-1].offset
+        g_centre = temp_s.inav[0].data.argmax()*am[-1].scale + am[-1].offset
         g_sigma = 3
         g_A = temp_s.data.max()*2*g_sigma
 
