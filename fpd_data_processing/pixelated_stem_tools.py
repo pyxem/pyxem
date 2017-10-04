@@ -4,6 +4,7 @@ import numpy as np
 from scipy.ndimage import measurements
 from scipy.optimize import leastsq
 from hyperspy.signals import Signal2D
+from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
 
 
@@ -183,6 +184,10 @@ def _make_centre_array_from_signal(signal, x=None, y=None):
         centre_y_array = np.ones(shape)*a_m.signal_axes[1].value2index(0)
     else:
         centre_y_array = np.ones(shape)*y
+    if not isiterable(centre_x_array):
+        centre_x_array = np.array([centre_x_array])
+    if not isiterable(centre_y_array):
+        centre_y_array = np.array([centre_y_array])
     return(centre_x_array, centre_y_array)
 
 
