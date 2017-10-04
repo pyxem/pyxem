@@ -57,7 +57,7 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         s_com0 = s0.center_of_mass()
         self.assertTrue((s_com0.inav[0].data == x0).all())
         self.assertTrue((s_com0.inav[1].data == y0).all())
-        
+
         array1 = np.zeros(shape=(10, 10, 10, 10))
         x1_array = np.random.randint(0, 10, size=(10, 10))
         y1_array = np.random.randint(0, 10, size=(10, 10))
@@ -254,7 +254,6 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         np.testing.assert_allclose(s_com.inav[1].data, y)
 
 
-
 class test_pixelated_stem_radial_integration(unittest.TestCase):
 
     def test_simple(self):
@@ -265,13 +264,13 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
 
         data_shape = 2, 2, 11, 11
         array1 = np.zeros(data_shape)
-        array1[: ,: , 5, 5] = 1
+        array1[:, :, 5, 5] = 1
         s1 = PixelatedSTEM(array1)
         s1.axes_manager.signal_axes[0].offset = -5
         s1.axes_manager.signal_axes[1].offset = -5
         s1_r = s1.radial_integration()
-        self.assertTrue(np.all(s1_r.data[:,:,0]==1))
-        self.assertTrue(np.all(s1_r.data[:,:,1:]==0))
+        self.assertTrue(np.all(s1_r.data[:, :, 0] == 1))
+        self.assertTrue(np.all(s1_r.data[:, :, 1:] == 0))
 
     def test_different_shape(self):
         array = np.ones(shape=(7, 9, 30, 40))
@@ -293,7 +292,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
         self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
-        self.assertTrue((s0_r.data[:,:-1] == 1).all())
+        self.assertTrue((s0_r.data[:, :-1] == 1).all())
 
     def test_big_value(self):
         data_shape = (5, 40, 40)
@@ -302,7 +301,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
         self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
-        self.assertTrue((s0_r.data[:,:-1] == big_value).all())
+        self.assertTrue((s0_r.data[:, :-1] == big_value).all())
 
     def test_correct_radius_simple(self):
         x, y, r, px, py = 40, 51, 30, 4, 5
@@ -321,7 +320,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         x, y, px, py = 56, 48, 4, 5
         r = np.random.randint(20, 40, size=(py, px))
         s = mdtd.generate_4d_holz_data(
-                    probe_size_x=px, probe_size_y=py,
+                probe_size_x=px, probe_size_y=py,
                 image_size_x=120, image_size_y=100,
                 disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
                 blur=True, downscale=False)
@@ -358,8 +357,8 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
         s.axes_manager.signal_axes[1].offset = -4.5
         mask = s.angular_mask(0.0, 0.5*np.pi)
         self.assertTrue(mask[:, :, 0:5, 0:5].all())
-        self.assertFalse(mask[:, :, 5:,:].any())
-        self.assertFalse(mask[:, :, :,5:].any())
+        self.assertFalse(mask[:, :, 5:, :].any())
+        self.assertFalse(mask[:, :, :, 5:].any())
 
     def test_get_angle_sector_mask_radial_integration1(self):
         x, y = 4.5, 4.5
@@ -374,25 +373,25 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
         s_r0 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask0)
-        self.assertTrue(np.all(s_r0.isig[0:6].data==1.))
+        self.assertTrue(np.all(s_r0.isig[0:6].data == 1.))
 
         mask1 = s.angular_mask(0, np.pi)
         s_r1 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask1)
-        self.assertTrue(np.all(s_r1.isig[0:6].data==0.5))
+        self.assertTrue(np.all(s_r1.isig[0:6].data == 0.5))
 
         mask2 = s.angular_mask(0.0, 2*np.pi)
         s_r2 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask2)
-        self.assertTrue(np.all(s_r2.isig[0:6].data==0.25))
+        self.assertTrue(np.all(s_r2.isig[0:6].data == 0.25))
 
         mask3 = s.angular_mask(np.pi, 2*np.pi)
         s_r3 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask3)
-        self.assertTrue(np.all(s_r3.data==0.0))
+        self.assertTrue(np.all(s_r3.data == 0.0))
 
     def test_com_angle_sector_mask(self):
         x, y = 4, 7
@@ -400,7 +399,7 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
         array[:, :, y, x] = 1
         s = PixelatedSTEM(array)
         s_com = s.center_of_mass()
-        mask0 = s.angular_mask(
+        s.angular_mask(
                 0.0, 0.5*np.pi,
                 centre_x_array=s_com.inav[0].data,
                 centre_y_array=s_com.inav[1].data)
@@ -424,7 +423,7 @@ class test_angular_slice_radial_integration(unittest.TestCase):
         x, y, r, px, py, iX, iY = 50, 50, 20, 6, 5, 100, 100
         kwrds = {
                 'probe_size_x': px, 'probe_size_y': py,
-                'image_size_x': iX, 'image_size_y': iY, 'disk_I': 0, 
+                'image_size_x': iX, 'image_size_y': iY, 'disk_I': 0,
                 'ring_x': x, 'ring_y': y, 'ring_r': r, 'ring_I': 5,
                 'blur': True, 'downscale': False}
         r0, r1, r2, r3 = 20, 25, 30, 27
@@ -441,7 +440,8 @@ class test_angular_slice_radial_integration(unittest.TestCase):
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
         s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
 
-        s_ar = s.angular_slice_radial_integration(centre_x=x, centre_y=y, angleN=4)
+        s_ar = s.angular_slice_radial_integration(
+                centre_x=x, centre_y=y, angleN=4)
         self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
         self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
         self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())
@@ -451,7 +451,7 @@ class test_angular_slice_radial_integration(unittest.TestCase):
         x, y, r, px, py, iX, iY = 40, 55, 20, 6, 5, 120, 100
         kwrds = {
                 'probe_size_x': px, 'probe_size_y': py,
-                'image_size_x': iX, 'image_size_y': iY, 'disk_I': 0, 
+                'image_size_x': iX, 'image_size_y': iY, 'disk_I': 0,
                 'ring_x': x, 'ring_y': y, 'ring_r': r, 'ring_I': 5,
                 'blur': True, 'downscale': False}
         r0, r1, r2, r3 = 20, 25, 30, 27
@@ -468,7 +468,8 @@ class test_angular_slice_radial_integration(unittest.TestCase):
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
         s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
 
-        s_ar = s.angular_slice_radial_integration(centre_x=x, centre_y=y, angleN=4)
+        s_ar = s.angular_slice_radial_integration(
+                centre_x=x, centre_y=y, angleN=4)
         self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
         self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
         self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())

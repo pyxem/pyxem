@@ -34,12 +34,12 @@ def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
             chunks = (
                     chunk_size[0], chunk_size[1],
                     1, data.shape[-2], data.shape[-1])
-            data_lazy = da.from_array(data, chunks=chunks)[:,:,0,:,:]
+            data_lazy = da.from_array(data, chunks=chunks)[:, :, 0, :, :]
         elif len(data.shape) == 4:
             chunks = (
                     chunk_size[0], chunk_size[1],
                     data.shape[-2], data.shape[-1])
-            data_lazy = da.from_array(data, chunks=chunks)[:,:,:,:]
+            data_lazy = da.from_array(data, chunks=chunks)[:, :, :, :]
         else:
             raise IOError(
                 "Pixelated dataset does not have correct dimensions")
@@ -68,7 +68,7 @@ def _load_fpd_emd_file(filename):
     if longest_dims == 4:
         s = temp_s.transpose(signal_axes=(0, 1))
     elif longest_dims == 5:
-        s = temp_s.isig[:,:,0,:,:].transpose(signal_axes=(0, 1))
+        s = temp_s.isig[:, :, 0, :, :].transpose(signal_axes=(0, 1))
     else:
         raise Exception(
                 "Pixelated dataset not found")

@@ -212,8 +212,8 @@ class PixelatedSTEM(Signal2D):
         >>> s = mdtd.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_integration(
-        ...     angleN=10, centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data,
-        ...     show_progressbar=False)
+        ...     angleN=10, centre_x=s_com.inav[0].data,
+        ...     centre_y=s_com.inav[1].data, show_progressbar=False)
         >>> s_ar.plot()
         """
         signal_list = []
@@ -412,7 +412,7 @@ class DPCSignal2D(Signal2D):
             temp_s1_flat = []
             for data0, data1, masked_value in zip(
                     s0_flat, s1_flat, masked.flatten()):
-                if not (masked_value == True):
+                if not masked_value:
                     temp_s0_flat.append(data0)
                     temp_s1_flat.append(data1)
             s0_flat = np.array(temp_s0_flat)
