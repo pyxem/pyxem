@@ -42,6 +42,6 @@ setup(
 
     package_data={
         "": ["LICENSE", "readme.rst", "requirements.txt"],
-        "pycrystem": ["*.py", "utils/atomic_scattering_params.json"],
+        "pycrystem": ["*.py"],
     },
 )

@@ -24,13 +24,8 @@ from math import radians, sin
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
 import os
-import json
 
-ATOMIC_SCATTERING_PATH = os.path.join(os.path.dirname(__file__),
-                                      "atomic_scattering_params.json")
-
-with open(ATOMIC_SCATTERING_PATH) as f:
-    ATOMIC_SCATTERING_PARAMS = json.load(f)
+from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 
 
 def get_electron_wavelength(accelerating_voltage):
@@ -123,7 +118,7 @@ def get_kinematical_intensities(structure,
             try:
                 c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
             except KeyError:
-                raise ValueError("Unable to calculate XRD pattern as "
+                raise ValueError("Unable to calculate ED pattern as "
                                  "there is no scattering coefficients for"
                                  " %s." % sp.symbol)
             coeffs.append(c)
@@ -140,11 +135,9 @@ def get_kinematical_intensities(structure,
     s2s = (g_hkls / 2) ** 2
 
     # Create array containing atomic scattering factors.
-    # TODO: update this parameterisation to be Doyle-Turner
     fss = []
     for s2 in s2s:
-        fs = zs - 41.78214 * s2 * np.sum(
-            coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+        fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
         fss.append(fs)
     fss = np.array(fss)
 
