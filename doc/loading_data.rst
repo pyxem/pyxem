@@ -22,8 +22,8 @@ To generate a test pixelated STEM dataset:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
-    >>> s = mdtd.get_holz_simple_test_signal()
+    >>> import fpd_data_processing.dummy_data as dd
+    >>> s = dd.get_holz_simple_test_signal()
     >>> s.save("test_data.hdf5")
 
 Load the data using :py:func:`~fpd_data_processing.io_tools.load_fpd_signal`:
