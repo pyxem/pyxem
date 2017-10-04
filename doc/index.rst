@@ -5,6 +5,7 @@ Library for processing data acquired on a fast pixelated electron detector, acqu
 
 .. toctree::
    install
+   loading_data
    generate_test_data
    :maxdepth: 2
    :caption: Contents:

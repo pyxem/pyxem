@@ -72,7 +72,15 @@ def _load_fpd_emd_file(filename):
     else:
         raise Exception(
                 "Pixelated dataset not found")
-    return(s)
+
+    s_new = PixelatedSTEM(s.data)
+    for i in range(len(s.axes_manager.shape)):
+        s_new.axes_manager[i].offset = s.axes_manager[i].offset
+        s_new.axes_manager[i].scale = s.axes_manager[i].scale
+        s_new.axes_manager[i].name = s.axes_manager[i].name
+        s_new.axes_manager[i].units = s.axes_manager[i].units
+    s_new.metadata = s.metadata.deepcopy()
+    return(s_new)
 
 
 def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
@@ -88,22 +96,14 @@ def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
     """
     if _fpd_checker(filename, attr_substring='fpd_version'):
         if lazy:
-            s_new = _load_lazy_fpd_file(filename, chunk_size=chunk_size)
+            s = _load_lazy_fpd_file(filename, chunk_size=chunk_size)
         else:
             s = _load_fpd_emd_file(filename)
     elif _hspy_checker(filename, attr_substring='HyperSpy'):
         s = load(filename, lazy=lazy)
     else:
         raise IOError("File " + str(filename) + " not recognised")
-    if not lazy:
-        s_new = PixelatedSTEM(s.data)
-        for i in range(len(s.axes_manager.shape)):
-            s_new.axes_manager[i].offset = s.axes_manager[i].offset
-            s_new.axes_manager[i].scale = s.axes_manager[i].scale
-            s_new.axes_manager[i].name = s.axes_manager[i].name
-            s_new.axes_manager[i].units = s.axes_manager[i].units
-        s_new.metadata = s.metadata.deepcopy()
-    return s_new
+    return s
 
 
 def load_dpc_signal(filename):
