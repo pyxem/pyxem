@@ -1,5 +1,4 @@
 import numpy as np
-from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from scipy.ndimage.filters import gaussian_filter
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
