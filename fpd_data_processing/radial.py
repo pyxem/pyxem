@@ -46,7 +46,7 @@ def get_coordinate_of_min(s):
     z = s.data
     idx = np.argwhere(z == np.min(z))
     x = s.axes_manager[0].index2value(idx[0][1])
-    y = s.axes_manager[0].index2value(idx[0][0])
+    y = s.axes_manager[1].index2value(idx[0][0])
     return(x, y)
 
 
