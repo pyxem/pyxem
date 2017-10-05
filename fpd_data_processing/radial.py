@@ -62,14 +62,18 @@ def get_centre_position_list(s, steps, step_size):
     point, and number of steps in each direction and a step-size given in
     pixels. Scale and offset taken from axes_manager.
     """
-    scale = s.axes_manager[0].scale
+    scale_x = s.axes_manager.signal_axes[0].scale
+    scale_y = s.axes_manager.signal_axes[1].scale
+    d1_x = scale_x*steps*step_size
+    d2_x = scale_x*(steps + 1)*step_size
+    d1_y = scale_y*steps*step_size
+    d2_y = scale_y*(steps + 1)*step_size
+
     x0 = -s.axes_manager[0].offset
-    d1 = scale*steps*step_size
-    d2 = scale*(steps + 1)*step_size
     y0 = -s.axes_manager[1].offset
     centre_x_list, centre_y_list = [], []
-    range_x = np.arange(x0 - d1, x0 + d2, step_size*scale)
-    range_y = np.arange(y0 - d1, y0 + d2, step_size*scale)
+    range_x = np.arange(x0 - d1_x, x0 + d2_x, step_size*scale_x)
+    range_y = np.arange(y0 - d1_y, y0 + d2_y, step_size*scale_y)
     for x in range_x:
         for y in range_y:
             centre_x_list.append(x)
@@ -157,29 +161,38 @@ def get_optimal_centre_position(
 
 def _get_offset_image(model_list, s, steps, step_size):
     """
-    Creates a Signal2D object of the standard deviation of of the
+    Make offset image signal based on difference in Gaussian centre position.
+
+    Creates a Signal2D object of the standard deviation of the
     Gaussians fitted to the radially integrated features, as a
     function of center coordinate.
+
+    Parameters
+    ----------
+    model_list : list of HyperSpy model objects
+    s : HyperSpy 2D signal
+    steps : int
+    step_size : int
+
+    Returns
+    -------
+    offset_signal : HyperSpy 2D signal
+
     """
-    cX_list, cY_list = [], []
+    s_offset = Signal2D(np.zeros(shape=((steps*2)+1, (steps*2)+1)))
+    am = s.axes_manager.signal_axes
+
+    offset_x0 = -am[0].offset - (steps * step_size)
+    offset_y0 = -am[1].offset - (steps * step_size)
+    s_offset.axes_manager.signal_axes[0].offset = offset_x0
+    s_offset.axes_manager.signal_axes[1].offset = offset_y0
+    s_offset.axes_manager.signal_axes[0].scale = step_size
+    s_offset.axes_manager.signal_axes[1].scale = step_size
+    am_o = s_offset.axes_manager.signal_axes
     for model in model_list:
-        cX_list.append(model.signal.metadata.Angle_slice_processing.centre_x)
-        cY_list.append(model.signal.metadata.Angle_slice_processing.centre_y)
-    cX_list, cY_list = np.array(cX_list), np.array(cY_list)
-    n = int(np.sqrt(cX_list.size))
-    centre_std_array = np.zeros((n, n))
-    arr_x = np.reshape(cX_list, (n, n))
-    arr_y = np.reshape(cY_list, (n, n))
-    idx = 0
-    for model in model_list:
-        x_idx = np.where(arr_x == cX_list[idx])[0][0]
-        y_idx = np.where(arr_y == cY_list[idx])[1][0]
-        gaussian = model.components.Gaussian
-        centre_std_array[x_idx, y_idx] = gaussian.centre.as_signal().data.std()
-        idx += 1
-    s = Signal2D(centre_std_array)
-    s.axes_manager[0].offset = arr_x[0, 0]
-    s.axes_manager[1].offset = arr_y[0, 0]
-    s.axes_manager[0].scale = float(arr_x[1, 0] - arr_x[0, 0])
-    s.axes_manager[1].scale = float(arr_y[0, 1] - arr_y[0, 0])
-    return(s)
+        x = model.signal.metadata.Angle_slice_processing.centre_x
+        y = model.signal.metadata.Angle_slice_processing.centre_y
+        std = model.components.Gaussian.centre.as_signal().data.std()
+        iX, iY = am_o[0].value2index(x), am_o[1].value2index(y)
+        s_offset.data[iY, iX] = std
+    return s_offset

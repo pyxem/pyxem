@@ -57,18 +57,38 @@ class test_radial_module(unittest.TestCase):
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
 
-    def test_get_optimal_centre_position(self):
+    def test_get_optimal_centre_position_off_centre_non_square(self):
         test_data = mdtd.MakeTestData(
                 size_x=300, size_y=400,
                 default=False, blur=True, downscale=False)
         x0, y0 = 150, 170
         test_data.add_ring(x0=x0, y0=y0, r=100, I=10, lw_pix=1)
         s = test_data.signal
-        s.axes_manager[0].offset = -x0
-        s.axes_manager[1].offset = -y0
+        s.axes_manager[0].offset = -x0-2
+        s.axes_manager[1].offset = -y0-3
         s_c = ra.get_optimal_centre_position(
                 test_data.signal, radial_signal_span=(90, 110),
-                steps=3, step_size=0.5, angleN=8)
-        min_pos = ra.get_coordinate_of_min(s_c)
-        self.assertAlmostEqual(min_pos[0], x0)
-        self.assertAlmostEqual(min_pos[1], y0)
+                steps=3, step_size=1.0, angleN=8)
+        min_pos0 = ra.get_coordinate_of_min(s_c)
+        s.axes_manager[0].offset = -x0+2
+        s.axes_manager[1].offset = -y0-3
+        s_c = ra.get_optimal_centre_position(
+                test_data.signal, radial_signal_span=(90, 110),
+                steps=3, step_size=1.0, angleN=8)
+        min_pos1 = ra.get_coordinate_of_min(s_c)
+        s.axes_manager[0].offset = -x0-2
+        s.axes_manager[1].offset = -y0+3
+        s_c = ra.get_optimal_centre_position(
+                test_data.signal, radial_signal_span=(90, 110),
+                steps=3, step_size=1.0, angleN=8)
+        min_pos2 = ra.get_coordinate_of_min(s_c)
+        s.axes_manager[0].offset = -x0+2
+        s.axes_manager[1].offset = -y0+3
+        s_c = ra.get_optimal_centre_position(
+                test_data.signal, radial_signal_span=(90, 110),
+                steps=3, step_size=1.0, angleN=8)
+        min_pos3 = ra.get_coordinate_of_min(s_c)
+
+        for min_pos in [min_pos0, min_pos1, min_pos2, min_pos3]:
+            self.assertAlmostEqual(min_pos[0], x0)
+            self.assertAlmostEqual(min_pos[1], y0)
