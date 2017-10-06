@@ -1,5 +1,6 @@
 import numpy as np
 import hyperspy.api as hs
+from hyperspy.components1d import Gaussian
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.misc.utils import isiterable
@@ -240,6 +241,8 @@ class PixelatedSTEM(Signal2D):
         angle_scale = angle_list[1][1] - angle_list[0][1]
         signal = hs.stack(signal_list, new_axis_name='Angle slice')
         signal.axes_manager['Angle slice'].scale = angle_scale
+        signal.axes_manager['Angle slice'].units = 'Radians'
+        signal.axes_manager[-1].name = 'Scattering angle'
         return(signal)
 
 

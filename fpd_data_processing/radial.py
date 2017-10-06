@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import tqdm
-from hyperspy._components.gaussian import Gaussian
+from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
 
 
@@ -196,3 +196,76 @@ def _get_offset_image(model_list, s, steps, step_size):
         iX, iY = am_o[0].value2index(x), am_o[1].value2index(y)
         s_offset.data[iY, iX] = std
     return s_offset
+
+
+def get_radius_vs_angle(
+        signal, radial_signal_span, angleN=15, show_progressbar=True):
+    """
+    Get radius of a ring as a function of angle.
+
+    This is done by radially integrating angular slices of the image,
+    followed by firstly fitting the background around the specified ring,
+    then fitting a Gaussian to the remaining intensity in the ring (which
+    gets reduced to a peak due to the radial integration).
+
+    Useful for finding if a ring is circular or elliptical.
+    The centre position has be to set using the offset parameter in
+    signal.axes_manager.
+
+    Parameters
+    ----------
+    signal : HyperSpy 2D signal
+        Diffraction image with calibrated centre point.
+        This can be set manually, by looking at the diffraction pattern,
+        or use a function like radial.get_optimal_centre_position
+    radial_signal_span : tuple
+    angleN : default 15
+    show_progressbar : default True
+
+    Returns
+    -------
+    s_centre : HyperSpy 1D signal
+
+    Examples
+    --------
+    >>> import fpd_data_processing.dummy_data as dd
+    >>> s = dd.get_single_ring_diffraction_signal()
+    >>> s.axes_manager.signal_axes[0].offset = -105
+    >>> s.axes_manager.signal_axes[1].offset = -67
+    >>> import fpd_data_processing.radial as ra
+    >>> s_centre = ra.get_radius_vs_angle(s, (35, 45), show_progressbar=False)
+    <BLANKLINE>
+
+    """
+    s_ra = signal.angular_slice_radial_integration(
+            angleN=angleN, show_progressbar=show_progressbar)
+    s_ra = s_ra.isig[radial_signal_span[0]:radial_signal_span[1]]
+
+    m_ra = s_ra.create_model()
+
+    # Fit 1 order polynomial to edges of data to account for the background
+    sa = m_ra.axes_manager[-1]
+    m_ra.set_signal_range(sa.low_value, sa.index2value(4))
+    m_ra.add_signal_range(sa.index2value(-3), sa.high_value)
+
+    polynomial = Polynomial(1)
+    m_ra.append(polynomial)
+    m_ra.multifit()
+    polynomial.set_parameters_not_free()
+
+    m_ra.reset_signal_range()
+
+    # Fit Gaussian to diffraction ring
+    argmax = s_ra.mean(0).data.argmax()
+    centre_initial = s_ra.axes_manager.signal_axes[0].index2value(argmax)
+    sigma = 3
+    A = (s_ra - s_ra.min(axis=1)).data.max() * 2 * sigma
+
+    gaussian = Gaussian(A=A, sigma=sigma, centre=centre_initial)
+    gaussian.centre.bmin = s_ra.axes_manager[1].low_value
+    gaussian.centre.bmax = s_ra.axes_manager[1].high_value
+    m_ra.append(gaussian)
+    m_ra.multifit(fitter='mpfit', bounded=True, show_progressbar=False)
+
+    s_centre = m_ra.components.Gaussian.centre.as_signal()
+    return s_centre

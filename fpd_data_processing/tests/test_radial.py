@@ -92,3 +92,19 @@ class test_radial_module(unittest.TestCase):
         for min_pos in [min_pos0, min_pos1, min_pos2, min_pos3]:
             self.assertAlmostEqual(min_pos[0], x0)
             self.assertAlmostEqual(min_pos[1], y0)
+
+    def test_get_radius_vs_angle(self):
+        test_data = mdtd.MakeTestData(
+                101, 121, blur=False, downscale=False, default=False)
+        x, y, r0, r1 = 51, 55, 21, 35
+        test_data.add_ring(x, y, r0)
+        test_data.add_ring(x, y, r1)
+        s = test_data.signal
+        s.axes_manager.signal_axes[0].offset = -x
+        s.axes_manager.signal_axes[1].offset = -y
+        s_ar0 = ra.get_radius_vs_angle(
+                s, radial_signal_span=(15, 25), show_progressbar=False)
+        s_ar1 = ra.get_radius_vs_angle(
+                s, radial_signal_span=(28, 40), show_progressbar=False)
+        np.testing.assert_allclose(s_ar0.data, r0, 3)
+        np.testing.assert_allclose(s_ar1.data, r1, 3)
