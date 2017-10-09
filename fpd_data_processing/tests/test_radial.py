@@ -108,3 +108,40 @@ class test_radial_module(unittest.TestCase):
                 s, radial_signal_span=(28, 40), show_progressbar=False)
         np.testing.assert_allclose(s_ar0.data, r0, 3)
         np.testing.assert_allclose(s_ar1.data, r1, 3)
+
+
+class test_get_angle_image_comparison(unittest.TestCase):
+
+    def setUp(self):
+        self.r0, self.r1 = 20, 40
+        test_data0 = mdtd.MakeTestData(100, 100)
+        test_data0.add_ring(50, 50, self.r0)
+        test_data1 = mdtd.MakeTestData(100, 100)
+        test_data1.add_ring(50, 50, self.r1)
+        s0, s1 = test_data0.signal, test_data1.signal
+        s0.axes_manager[0].offset, s0.axes_manager[1].offset = -50, -50
+        s1.axes_manager[0].offset, s1.axes_manager[1].offset = -50, -50
+        self.s0, self.s1 = s0, s1
+
+    def test_different_angleN(self):
+        s0, s1 = self.s0, self.s1
+        for i in range(1, 10):
+            ra.get_angle_image_comparison(s0, s1, angleN=i)
+
+    def test_correct_radius(self):
+        s0, s1, r0, r1 = self.s0, self.s1, self.r0, self.r1
+        s = ra.get_angle_image_comparison(s0, s1, angleN=2)
+        self.assertEqual(s.axes_manager.signal_shape, (100, 100))
+        # Check that radius is correct by getting a line profile
+        s_top = s.isig[0., :0.]
+        s_bot = s.isig[0., 0.:]
+        argmax0 = s_top.data.argmax()
+        argmax1 = s_bot.data.argmax()
+        self.assertEqual(abs(s_top.axes_manager[0].index2value(argmax0)), r0)
+        self.assertEqual(abs(s_bot.axes_manager[0].index2value(argmax1)), r1)
+
+    def test_different_angleN(self):
+        s0 = mdtd.MakeTestData(100, 100).signal
+        s1 = mdtd.MakeTestData(100, 150).signal
+        with self.assertRaises(ValueError):
+            ra.get_angle_image_comparison(s0, s1)

@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
+import fpd_data_processing.pixelated_stem_tools as pst
 
 
 def _centre_comparison(
@@ -269,3 +270,57 @@ def get_radius_vs_angle(
 
     s_centre = m_ra.components.Gaussian.centre.as_signal()
     return s_centre
+
+
+def get_angle_image_comparison(s0, s1, angleN=12):
+    """Compare two images by overlaying one on the other in slices.
+
+    This function takes two images, extracts different angular slices
+    and combines them into one image.
+
+    Useful for comparing two diffraction images, to see if the rings
+    have the same radius.
+
+    Parameters
+    ----------
+    s0, s1 : HyperSpy 2D Signal
+        Both signals need to have the same shape, and no navigation
+        dimensions.
+    angleN : int, default 12
+        Number of angular slices.
+
+    Returns
+    -------
+    comparison_signal : HyperSpy 2D
+
+    Examples
+    --------
+    >>> from fpd_data_processing.make_diffraction_test_data import MakeTestData
+    >>> test_data0 = MakeTestData(300, 300)
+    >>> test_data0.add_ring(150, 150, 40)
+    >>> test_data1 = MakeTestData(300, 300)
+    >>> test_data1.add_ring(150, 150, 60)
+    >>> s0 = test_data0.signal
+    >>> s1 = test_data1.signal
+    >>> s0.axes_manager[0].offset, s0.axes_manager[1].offset = -150, -150
+    >>> s1.axes_manager[0].offset, s1.axes_manager[1].offset = -150, -150
+    >>> import fpd_data_processing.radial as ra
+    >>> s = ra.get_angle_image_comparison(s0, s1)
+    >>> s.plot()
+
+    """
+    if s0.axes_manager.shape != s1.axes_manager.shape:
+        raise ValueError("s0 and s1 need to have the same shape")
+    am0 = s0.axes_manager.signal_axes
+    am1 = s1.axes_manager.signal_axes
+    x0, y0 = am0[0].value2index(0), am0[1].value2index(0)
+    x1, y1 = am1[0].value2index(0), am1[1].value2index(0)
+    s = s0.deepcopy()
+    angle_array = np.ogrid[0:2*np.pi:(1+angleN)*1j]
+    bool_array_list = []
+    for i in range(len(angle_array[:-1])):
+        if i % 2:
+            angle0, angle1 = angle_array[i:i+2]
+            bool_array = pst._get_angle_sector_mask(s, angle0, angle1)
+            s.data[bool_array] = s1.data[bool_array]
+    return s
