@@ -272,7 +272,7 @@ def get_radius_vs_angle(
     return s_centre
 
 
-def get_angle_image_comparison(s0, s1, angleN=12):
+def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     """Compare two images by overlaying one on the other in slices.
 
     This function takes two images, extracts different angular slices
@@ -288,6 +288,10 @@ def get_angle_image_comparison(s0, s1, angleN=12):
         dimensions.
     angleN : int, default 12
         Number of angular slices.
+    mask_radius : int, optional
+        Mask the centre of the image. The default is not to mask anything.
+        Useful to mask the most intense parts of the diffraction pattern,
+        so the less intense parts can be visualized.
 
     Returns
     -------
@@ -307,6 +311,10 @@ def get_angle_image_comparison(s0, s1, angleN=12):
     >>> import fpd_data_processing.radial as ra
     >>> s = ra.get_angle_image_comparison(s0, s1)
     >>> s.plot()
+    
+    Mask the inner parts
+
+    >>> s = ra.get_angle_image_comparison(s0, s1, mask_radius=10)
 
     """
     if s0.axes_manager.shape != s1.axes_manager.shape:
@@ -323,4 +331,12 @@ def get_angle_image_comparison(s0, s1, angleN=12):
             angle0, angle1 = angle_array[i:i+2]
             bool_array = pst._get_angle_sector_mask(s, angle0, angle1)
             s.data[bool_array] = s1.data[bool_array]
+
+    if mask_radius is not None:
+        am = s.axes_manager
+        mask = pst._make_circular_mask(
+                am[0].value2index(0.0),  am[1].value2index(0.0),
+                am[0].size, am[1].size, mask_radius)
+        mask = np.invert(mask)
+        s.data *= mask
     return s

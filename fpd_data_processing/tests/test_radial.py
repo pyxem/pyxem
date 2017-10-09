@@ -113,7 +113,7 @@ class test_radial_module(unittest.TestCase):
 class test_get_angle_image_comparison(unittest.TestCase):
 
     def setUp(self):
-        self.r0, self.r1 = 20, 40
+        self.r0, self.r1 = 10, 20
         test_data0 = mdtd.MakeTestData(100, 100)
         test_data0.add_ring(50, 50, self.r0)
         test_data1 = mdtd.MakeTestData(100, 100)
@@ -145,3 +145,10 @@ class test_get_angle_image_comparison(unittest.TestCase):
         s1 = mdtd.MakeTestData(100, 150).signal
         with self.assertRaises(ValueError):
             ra.get_angle_image_comparison(s0, s1)
+
+    def test_mask(self):
+        s0, s1 = self.s0, self.s1
+        s_no_mask = ra.get_angle_image_comparison(s0, s1)
+        s_mask = ra.get_angle_image_comparison(s0, s1, mask_radius=40)
+        self.assertNotEqual(s_no_mask.data.sum(), 0.0)
+        self.assertEqual(s_mask.data.sum(), 0.0)
