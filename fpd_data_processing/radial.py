@@ -84,7 +84,7 @@ def get_centre_position_list(s, steps, step_size):
 
 
 def get_optimal_centre_position(
-        s, radial_signal_span, steps=5, step_size=1, angleN=8,
+        s, radial_signal_span, steps=3, step_size=1, angleN=8,
         show_progressbar=True):
     """
     Find centre position of a ring by using angle sliced radial integration.
@@ -110,7 +110,7 @@ def get_optimal_centre_position(
         Only supports signals with no navigation dimensions.
     radial_signal_span : tuple
         Range for finding the circular feature.
-    steps : int, default 5
+    steps : int, default 3
         Number of steps in x/y direction to look for the optimal
         centre position. If the offset is (50, 55), and step_size 1:
         the positions x=(45, 46, 47, 48, ..., 55) and y=(50, 51, 52, ..., 60),
@@ -158,6 +158,50 @@ def get_optimal_centre_position(
         m_list.append(m)
     s_centre_std_array = _get_offset_image(m_list, s, steps, step_size)
     return(s_centre_std_array)
+
+
+def refine_signal_centre_position(
+        s, radial_signal_span, refine_step_size=None, **kwargs):
+    """Refine centre position of a diffraction signal by using round feature.
+
+    This function simply calls get_optimal_centre_position with a
+    smaller and smaller step_size, giving a more accurate centre position.
+
+    The calculated centre position is stored in the offset value in the
+    input signal.
+
+    Parameters
+    ----------
+    s : HyperSpy 2D signal
+        Approximate centre position must be set beforehand, see
+        get_optimal_centre_position for more information.
+    radial_signal_span : tuple
+    refine_step_size : list, default [1, 0.5, 0.25]
+    **kwargs
+        Passed to get_optimal_centre_position
+
+    See also
+    --------
+    get_optimal_centre_position : finds the centre positions for a step_size
+
+    Example
+    -------
+    >>> import fpd_data_processing.dummy_data as dd
+    >>> import fpd_data_processing.radial as ra
+    >>> s = dd.get_single_ring_diffraction_signal()
+    >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -103, -69
+    >>> ra.refine_signal_centre_position(s, (32., 48.), angleN=4)
+    >>> x, y = s.axes_manager[0].offset, s.axes_manager[1].offset
+
+    """
+    if refine_step_size is None:
+        refine_step_size = [1., 0.5, 0.25]
+    for step_size in refine_step_size:
+        s_centre = get_optimal_centre_position(
+                s=s, radial_signal_span=radial_signal_span,
+                step_size=step_size, **kwargs)
+        x, y = get_coordinate_of_min(s_centre)
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -x, -y
 
 
 def _get_offset_image(model_list, s, steps, step_size):

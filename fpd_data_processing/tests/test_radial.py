@@ -109,6 +109,18 @@ class test_radial_module(unittest.TestCase):
         np.testing.assert_allclose(s_ar0.data, r0, 3)
         np.testing.assert_allclose(s_ar1.data, r1, 3)
 
+    def test_refine_signal_centre_position(self):
+        test_data = mdtd.MakeTestData(
+                70, 70, blur=False, downscale=False, default=False)
+        x, y, r = 35, 35, 15
+        test_data.add_ring(x, y, r)
+        s = test_data.signal
+        s.axes_manager.signal_axes[0].offset = -x+1
+        s.axes_manager.signal_axes[1].offset = -y-1
+        ra.refine_signal_centre_position(s, (10., 20.), angleN=6)
+        self.assertEqual(s.axes_manager.signal_axes[0].offset, -x)
+        self.assertEqual(s.axes_manager.signal_axes[1].offset, -y)
+
 
 class test_get_angle_image_comparison(unittest.TestCase):
 
