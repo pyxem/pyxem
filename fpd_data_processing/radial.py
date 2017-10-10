@@ -235,7 +235,6 @@ def get_radius_vs_angle(
     >>> s.axes_manager.signal_axes[1].offset = -67
     >>> import fpd_data_processing.radial as ra
     >>> s_centre = ra.get_radius_vs_angle(s, (35, 45), show_progressbar=False)
-    <BLANKLINE>
 
     """
     s_ra = signal.angular_slice_radial_integration(
