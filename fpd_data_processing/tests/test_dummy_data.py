@@ -13,3 +13,6 @@ class test_dummy_data_module(unittest.TestCase):
 
     def test_single_ring_diffraction_signal(self):
         dd.get_single_ring_diffraction_signal()
+
+    def test_get_simple_dpc_signal(self):
+        dd.get_simple_dpc_signal()
