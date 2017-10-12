@@ -1,5 +1,6 @@
 import numpy as np
 import fpd_data_processing.make_diffraction_test_data as mdtd
+from fpd_data_processing.pixelated_stem_class import DPCSignal2D
 
 
 def get_disk_shift_simple_test_signal():
@@ -45,3 +46,10 @@ def get_single_ring_diffraction_signal():
     s = data.signal
     s.axes_manager[0].offset, s.axes_manager[1].offset = -x, -y
     return(s)
+
+
+def get_simple_dpc_signal():
+    """Get a simple DPCSignal2D with a ramp."""
+    data = np.mgrid[-5:5:100j, -5:5:100j]
+    s = DPCSignal2D(data)
+    return s
