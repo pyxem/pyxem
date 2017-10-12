@@ -141,21 +141,34 @@ def _get_limits_from_array(
     return(clim)
 
 
-def _get_rgb_array(
-        angle, magnitude, rotation=0, angle_lim=None,
-        magnitude_limits=None, max_angle=2*np.pi):
-    if not (rotation == 0):
-        angle = (angle + math.radians(rotation)) % (max_angle)
-    if angle_lim is not None:
-        np.clip(angle, angle_lim[0], angle_lim[1], out=angle)
-    else:
-        angle = normalize_array(angle)
+def _get_rgb_phase_array(
+        phase, rotation=None, max_phase=2*np.pi, phase_lim=None):
+    phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
+    S = np.ones_like(phase)
+    HSV = np.dstack((phase, S, S))
+    RGB = hsv_to_rgb(HSV)
+    return(RGB)
+
+
+def _find_phase(phase, rotation=None, max_phase=2*np.pi):
+    if rotation is not None:
+        phase = (phase + math.radians(rotation))
+    phase = phase % max_phase
+    phase = phase/(2*np.pi)
+    return phase
+
+
+def _get_rgb_phase_magnitude_array(
+        phase, magnitude, rotation=None,
+        magnitude_limits=None, max_phase=2*np.pi):
+    phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
+
     if magnitude_limits is not None:
-        np.clip(magnitude, magnitude_limits[0],
-                magnitude_limits[1], out=magnitude)
-    magnitude = normalize_array(magnitude)
-    S = np.ones_like(angle)
-    HSV = np.dstack((angle, S, magnitude))
+        np.clip(magnitude, magnitude_limits[0], magnitude_limits[1],
+                out=magnitude)
+    magnitude = magnitude/magnitude.max()
+    S = np.ones_like(phase)
+    HSV = np.dstack((phase, S, magnitude))
     RGB = hsv_to_rgb(HSV)
     return(RGB)
 

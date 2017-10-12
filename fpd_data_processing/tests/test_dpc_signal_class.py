@@ -112,6 +112,24 @@ class test_dpc_signal_2d_color_signal(unittest.TestCase):
         data_random = data_tilt + np.random.random(size=(2, 64, 64))*10
         s_random = DPCSignal2D(data_random)
         s_random.get_color_signal()
+        s_random.get_color_signal(rotation=45)
+
+    def test_get_color_signal_zeros(self):
+        s = DPCSignal2D(np.zeros((2, 100, 100)))
+        s_color = s.get_color_signal()
+        self.assertTrue((s_color.data['R'] == 0).all())
+        self.assertTrue((s_color.data['G'] == 0).all())
+        self.assertTrue((s_color.data['B'] == 0).all())
+
+    def test_get_magnitude_signal_zeros(self):
+        s = DPCSignal2D(np.zeros((2, 100, 100)))
+        s_magnitude = s.get_magnitude_signal()
+        self.assertTrue((s_magnitude.data == 0).all())
+
+    def test_get_phase_signal(self):
+        s = DPCSignal2D(np.zeros((2, 100, 100)))
+        s.get_phase_signal()
+        s.get_phase_signal(rotation=45)
 
 
 class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):

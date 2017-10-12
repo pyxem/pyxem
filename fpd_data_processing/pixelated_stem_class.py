@@ -361,8 +361,126 @@ class DPCSignal2D(Signal2D):
         if out is None:
             return(output)
 
-    def get_color_signal(self, autolim=True, autolim_sigma=4):
-        angle = np.arctan2(self.inav[0].data, self.inav[1].data)
+    def get_magnitude_signal(self, autolim=True, autolim_sigma=4):
+        """Get DPC magnitude image visualized as greyscale.
+
+        Converts the x and y beam shifts into a magnitude map, showing the
+        magnitude of the beam shifts.
+
+        Useful for visualizing magnetic domain structures.
+
+        Parameters
+        ----------
+        autolim : bool, default True
+        autolim_sigma : float, default 4
+
+        Returns
+        -------
+        magnitude_signal : HyperSpy 2D signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> s_magnitude = s.get_magnitude_signal()
+        >>> s_magnitude.plot()
+
+        See also
+        --------
+        get_color_signal : Signal showing both phase and magnitude
+        get_phase_signal : Signal showing the phase
+
+        """
+        magnitude = np.sqrt(
+                np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
+        magnitude_limits = None
+        if autolim:
+            magnitude_limits = pst._get_limits_from_array(
+                    magnitude, sigma=autolim_sigma)
+        signal = Signal2D(magnitude)
+        return(signal)
+
+
+    def get_phase_signal(
+            self, rotation=None):
+        """Get DPC phase image visualized using continuous color scale.
+
+        Converts the x and y beam shifts into an RGB array, showing the
+        direction of the beam shifts.
+
+        Useful for visualizing magnetic domain structures.
+
+        Parameters
+        ----------
+        rotation : float, optional
+            In degrees. Useful for correcting the mismatch between
+            scan direction and diffraction pattern rotation.
+        autolim : bool, default True
+        autolim_sigma : float, default 4
+
+        Returns
+        -------
+        phase_signal : HyperSpy 2D RGB signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> s_color = s.get_phase_signal(rotation=20)
+        >>> s_color.plot()
+
+        See also
+        --------
+        get_color_signal : Signal showing both phase and magnitude
+        get_magnitude_signal : Signal showing the magnitude
+
+        """
+        phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2*np.pi)
+        rgb_array = pst._get_rgb_phase_array(phase=phase, rotation=rotation)
+        signal_rgb = Signal1D(rgb_array*(2**16-1))
+        signal_rgb.change_dtype("uint16")
+        signal_rgb.change_dtype("rgb16")
+        return(signal_rgb)
+
+    def get_color_signal(
+            self, rotation=None, autolim=True, autolim_sigma=4):
+        """Get DPC image visualized using continuous color scale.
+
+        Converts the x and y beam shifts into an RGB array, showing the
+        magnitude and direction of the beam shifts.
+
+        Useful for visualizing magnetic domain structures.
+
+        Parameters
+        ----------
+        rotation : float, optional
+            In degrees. Useful for correcting the mismatch between
+            scan direction and diffraction pattern rotation.
+        autolim : bool, default True
+        autolim_sigma : float, default 4
+
+        Returns
+        -------
+        color_signal : HyperSpy 2D RGB signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> s_color = s.get_color_signal()
+        >>> s_color.plot()
+
+        Rotate the beam shift by 30 degrees
+
+        >>> s_color = s.get_color_signal(rotation=30)
+
+        See also
+        --------
+        get_color_signal : Signal showing both phase and magnitude
+        get_phase_signal : Signal showing the phase
+
+        """
+        phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2*np.pi)
         magnitude = np.sqrt(
                 np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
 
@@ -370,8 +488,8 @@ class DPCSignal2D(Signal2D):
         if autolim:
             magnitude_limits = pst._get_limits_from_array(
                     magnitude, sigma=autolim_sigma)
-        rgb_array = pst._get_rgb_array(
-                angle=angle, magnitude=magnitude,
+        rgb_array = pst._get_rgb_phase_magnitude_array(
+                phase=phase, magnitude=magnitude, rotation=rotation,
                 magnitude_limits=magnitude_limits)
         signal_rgb = Signal1D(rgb_array*(2**16-1))
         signal_rgb.change_dtype("uint16")
