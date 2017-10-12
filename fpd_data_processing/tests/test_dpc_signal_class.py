@@ -102,7 +102,7 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
                 s_corr.data, np.zeros_like(data), atol=1e-8)
 
 
-class test_dpc_signal_2d_color_signal(unittest.TestCase):
+class test_get_dpc_signal(unittest.TestCase):
 
     def test_get_color_signal(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
@@ -130,6 +130,13 @@ class test_dpc_signal_2d_color_signal(unittest.TestCase):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
         s.get_phase_signal()
         s.get_phase_signal(rotation=45)
+
+    def test_get_color_image_with_indicator(self):
+        s = DPCSignal2D(np.random.random(size=(2, 100, 100)))
+        s.get_color_image_with_indicator()
+        s.get_color_image_with_indicator(
+                phase_rotation=45, indicator_rotation=10,
+                autolim=True, autolim_sigma=1)
 
 
 class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):

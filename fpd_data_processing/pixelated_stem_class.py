@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import hyperspy.api as hs
 from hyperspy.components1d import Gaussian
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
@@ -398,6 +399,7 @@ class DPCSignal2D(Signal2D):
             magnitude_limits = pst._get_limits_from_array(
                     magnitude, sigma=autolim_sigma)
         signal = Signal2D(magnitude)
+        pst._copy_signal2d_axes_manager_metadata(self, signal)
         return(signal)
 
 
@@ -440,6 +442,7 @@ class DPCSignal2D(Signal2D):
         signal_rgb = Signal1D(rgb_array*(2**16-1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")
+        pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)
         return(signal_rgb)
 
     def get_color_signal(
@@ -494,7 +497,44 @@ class DPCSignal2D(Signal2D):
         signal_rgb = Signal1D(rgb_array*(2**16-1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")
+        pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)
         return(signal_rgb)
+
+    def get_color_image_with_indicator(
+            self, phase_rotation=0, indicator_rotation=0,
+            autolim=True, autolim_sigma=4):
+        """Make a matplotlib figure showing DPC contrast.
+    
+        Parameters
+        ----------
+        phase_rotation : float, defaut 0
+            Changes the phase of the plotted data.
+            Useful for correcting scan rotation.
+        indicator_rotation : float, defaut 0
+            Changes the color wheel rotation.
+        autolim : bool, default True
+        autolim_sigma : float, default 4
+
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> fig = s.get_color_image_with_indicator()
+        >>> fig.savefig("simple_dpc_test_signal.png")
+
+        """
+        fig, ax = plt.subplots(1, 1, figsize=(7, 7))
+        ax_indicator = fig.add_subplot(331)
+        s = self.get_color_signal(
+                rotation=phase_rotation, autolim=autolim,
+                autolim_sigma=autolim_sigma)
+        s.change_dtype('uint16')
+        s.change_dtype('float64')
+        ax.imshow(s.data/65536., extent=self.axes_manager.signal_extent)
+        pst._make_color_wheel(
+                ax_indicator,
+                rotation=indicator_rotation + phase_rotation)
+        ax.set_axis_off()
+        fig.subplots_adjust(0, 0, 1, 1)
+        return fig
 
     def get_bivariate_histogram(
             self,
