@@ -192,3 +192,31 @@ class test_dpcsignal_tools(unittest.TestCase):
         self.assertTrue(((pos, high_value-pos, 1) == corner1).all())
         self.assertTrue(((high_value-pos, pos, 1) == corner2).all())
         self.assertTrue(((high_value-pos, high_value-pos, 1) == corner3).all())
+
+
+class test_copy_signal2d_axes_manager_metadata(unittest.TestCase):
+
+    def setUp(self):
+        s = Signal2D(np.zeros((50, 50)))
+        s.axes_manager.signal_axes[0].offset = 10
+        s.axes_manager.signal_axes[1].offset = 20
+        s.axes_manager.signal_axes[0].scale = 0.5
+        s.axes_manager.signal_axes[1].scale = 0.3
+        self.s = s
+
+    def test_simple(self):
+        s = self.s
+        s_new = Signal2D(np.zeros((50, 50)))
+        pst._copy_signal2d_axes_manager_metadata(s, s_new)
+        self.assertEqual(
+                s.axes_manager.signal_axes[0].offset,
+                s_new.axes_manager.signal_axes[0].offset)
+        self.assertEqual(
+                s.axes_manager.signal_axes[1].offset,
+                s_new.axes_manager.signal_axes[1].offset)
+        self.assertEqual(
+                s.axes_manager.signal_axes[0].scale,
+                s_new.axes_manager.signal_axes[0].scale)
+        self.assertEqual(
+                s.axes_manager.signal_axes[1].scale,
+                s_new.axes_manager.signal_axes[1].scale)
