@@ -5,18 +5,25 @@ import fpd_data_processing.pixelated_stem_tools as pst
 import numpy as np
 
 
+class test_dpc_basesignal_create(unittest.TestCase):
+
+    def test_create(self):
+        data = np.ones(shape=(2))
+        DPCBaseSignal(data)
+
+
 class test_dpc_signal_1d_create(unittest.TestCase):
 
     def test_create(self):
         data = np.ones(shape=(2, 10))
-        s = DPCSignal1D(data)
+        DPCSignal1D(data)
 
 
 class test_dpc_signal_2d_create(unittest.TestCase):
 
     def test_create(self):
         data = np.ones(shape=(2, 10, 10))
-        s = DPCSignal2D(data)
+        DPCSignal2D(data)
         with self.assertRaises(ValueError):
             DPCSignal2D(np.zeros(10))
 
@@ -27,7 +34,7 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
         data0 = np.ones(shape=(2, 64, 64))
         s0 = DPCSignal2D(data0)
         s0_corr = s0.correct_ramp(corner_size=0.05)
-        self.assertTrue((s0.data==data0).all())
+        self.assertTrue((s0.data == data0).all())
         np.testing.assert_allclose(
                 s0_corr.data, np.zeros_like(data0), atol=1e-8)
 
@@ -149,7 +156,6 @@ class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
         data_random = data_tilt + np.random.random(size=(2, 64, 64))*10
         s_random = DPCSignal2D(data_random)
         s_random.get_bivariate_histogram()
-
 
     def test_make_bivariate_histogram(self):
         x, y = np.ones((100, 100)), np.ones((100, 100))

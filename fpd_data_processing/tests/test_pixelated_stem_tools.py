@@ -75,21 +75,22 @@ class test_pixelated_tools(unittest.TestCase):
         mask = pst._make_centre_array_from_signal(s)
         self.assertEqual(mask[0].shape[::-1], s.axes_manager.navigation_shape)
         self.assertEqual(mask[1].shape[::-1], s.axes_manager.navigation_shape)
-        self.assertTrue((offset_x==mask[0]).all())
-        self.assertTrue((offset_y==mask[1]).all())
+        self.assertTrue((offset_x == mask[0]).all())
+        self.assertTrue((offset_y == mask[1]).all())
 
         offset0_x, offset0_y = -3, -2
         sa[0].offset, sa[1].offset = offset0_x, offset0_y
         mask = pst._make_centre_array_from_signal(s)
-        self.assertTrue((-offset0_x==mask[0]).all())
-        self.assertTrue((-offset0_y==mask[1]).all())
+        self.assertTrue((-offset0_x == mask[0]).all())
+        self.assertTrue((-offset0_y == mask[1]).all())
 
     def test_get_angle_sector_mask_0d(self):
         data_shape = (10, 8)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
-        self.assertTrue((mask0==False).all)
+        np.testing.assert_array_equal(
+                mask0, np.zeros_like(mask0, dtype=np.bool))
         self.assertEqual(mask0.shape, data_shape)
 
         s.axes_manager.signal_axes[0].offset = -5
@@ -97,7 +98,8 @@ class test_pixelated_tools(unittest.TestCase):
         mask1 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
         self.assertTrue(mask1[:5, :5].all())
         mask1[:5, :5] = False
-        self.assertTrue((mask0==False).all)
+        np.testing.assert_array_equal(
+                mask1, np.zeros_like(mask1, dtype=np.bool))
 
         s.axes_manager.signal_axes[0].offset = -15
         s.axes_manager.signal_axes[1].offset = -15
@@ -115,18 +117,19 @@ class test_pixelated_tools(unittest.TestCase):
         s = PixelatedSTEM(data)
         s.data[4, 5] = 5.
         s_com = s.center_of_mass()
-        mask = pst._get_angle_sector_mask(s,
+        pst._get_angle_sector_mask(
+                s,
                 centre_x_array=s_com.inav[0].data,
                 centre_y_array=s_com.inav[1].data,
                 angle0=np.pi*3/2, angle1=np.pi*2)
-
 
     def test_get_angle_sector_mask_1d(self):
         data_shape = (5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
-        self.assertTrue((mask0==False).all)
+        np.testing.assert_array_equal(
+                mask0, np.zeros_like(mask0, dtype=np.bool))
         self.assertEqual(mask0.shape, data_shape)
 
         s.axes_manager.signal_axes[0].offset = -5
@@ -134,7 +137,8 @@ class test_pixelated_tools(unittest.TestCase):
         mask1 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
         self.assertTrue(mask1[:, :4, :5].all())
         mask1[:, :4, :5] = False
-        self.assertTrue((mask0==False).all)
+        np.testing.assert_array_equal(
+                mask1, np.zeros_like(mask1, dtype=np.bool))
 
     def test_get_angle_sector_mask_2d(self):
         data_shape = (3, 5, 7, 10)
@@ -149,19 +153,6 @@ class test_pixelated_tools(unittest.TestCase):
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
         self.assertEqual(mask0.shape, data_shape)
-
-    def test_get_angle_sector_mask_centre_xy(self):
-        data_shape = (3, 5, 7, 10)
-        data = np.ones(data_shape)*100.
-        s = Signal2D(data)
-        nav_shape = s.axes_manager.navigation_shape
-        centre_x, centre_y = np.ones(
-                nav_shape[::-1])*5, np.ones(nav_shape[::-1])*9
-        mask0 = pst._get_angle_sector_mask(
-            s, angle0=np.pi, angle1=2*np.pi,
-            centre_x_array=centre_x, centre_y_array=centre_y)
-        self.assertEqual(mask0.shape, data_shape)
-
 
     def test_get_angle_sector_mask_centre_xy(self):
         data_shape = (3, 5, 7, 10)

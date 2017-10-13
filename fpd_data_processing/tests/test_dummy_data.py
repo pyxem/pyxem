@@ -1,5 +1,4 @@
 import unittest
-import numpy as np
 import fpd_data_processing.dummy_data as dd
 
 

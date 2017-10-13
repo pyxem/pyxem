@@ -43,7 +43,7 @@ class test_find_phase(unittest.TestCase):
         phase = np.zeros((50, 50))
         phase0 = pst._find_phase(phase)
         self.assertTrue((phase0 == 0.).all())
-    
+
     def test_rotation(self):
         phase = np.zeros((50, 50))
         phase0 = pst._find_phase(phase, rotation=90)

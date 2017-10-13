@@ -4,6 +4,7 @@ import numpy as np
 from tempfile import TemporaryDirectory
 import fpd_data_processing.api as fp
 
+
 my_path = os.path.dirname(__file__)
 
 
@@ -12,23 +13,23 @@ class test_dpcsignal_io(unittest.TestCase):
     def test_load_basesignal(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcbasesignal_test.hdf5")
-        s = fp.load_dpc_signal(filename)
+        fp.load_dpc_signal(filename)
 
     def test_load_signal1d(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcsignal1d_test.hdf5")
-        s = fp.load_dpc_signal(filename)
+        fp.load_dpc_signal(filename)
 
     def test_load_signal2d(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcsignal1d_test.hdf5")
-        s = fp.load_dpc_signal(filename)
+        fp.load_dpc_signal(filename)
 
     def test_load_signal2d_too_many_nav_dim(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcsignal2d_test_too_many_nav_dim.hdf5")
         with self.assertRaises(Exception):
-            s = fp.load_dpc_signal(filename)
+            fp.load_dpc_signal(filename)
 
     def test_load_basesignal_too_many_signal_dim(self):
         filename = os.path.join(
@@ -36,7 +37,7 @@ class test_dpcsignal_io(unittest.TestCase):
                 "test_data",
                 "dpcbasesignal_test_too_many_signal_dims.hdf5")
         with self.assertRaises(NotImplementedError):
-            s = fp.load_dpc_signal(filename)
+            fp.load_dpc_signal(filename)
 
 
 class test_pixelatedstem_signal_io(unittest.TestCase):
@@ -58,7 +59,7 @@ class test_pixelatedstem_signal_io(unittest.TestCase):
 
         sl = fp.load_fpd_signal(filename, lazy=False)
         self.assertEqual(
-                s.axes_manager.shape,
+                sl.axes_manager.shape,
                 (shape[1], shape[0], shape[3], shape[2]))
         tmpdir.cleanup()
 
@@ -72,7 +73,7 @@ class test_pixelatedstem_signal_io(unittest.TestCase):
 
         sl = fp.load_fpd_signal(filename, lazy=True)
         self.assertEqual(
-                s.axes_manager.shape,
+                sl.axes_manager.shape,
                 (shape[1], shape[0], shape[3], shape[2]))
         tmpdir.cleanup()
 

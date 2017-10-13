@@ -1,4 +1,3 @@
-import os
 import unittest
 import numpy as np
 import fpd_data_processing.api as fp
@@ -53,7 +52,7 @@ class test_radial_module(unittest.TestCase):
         s.axes_manager[1].offset = -301.
         s_centre_position = ra.get_optimal_centre_position(
                 s, radial_signal_span=(180, 210), steps=2, step_size=1)
-        x,y = fp.radial.get_coordinate_of_min(s_centre_position)
+        x, y = fp.radial.get_coordinate_of_min(s_centre_position)
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
 
@@ -152,7 +151,7 @@ class test_get_angle_image_comparison(unittest.TestCase):
         self.assertEqual(abs(s_top.axes_manager[0].index2value(argmax0)), r0)
         self.assertEqual(abs(s_bot.axes_manager[0].index2value(argmax1)), r1)
 
-    def test_different_angleN(self):
+    def test_different_signal_size(self):
         s0 = mdtd.MakeTestData(100, 100).signal
         s1 = mdtd.MakeTestData(100, 150).signal
         with self.assertRaises(ValueError):

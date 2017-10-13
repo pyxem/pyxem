@@ -354,7 +354,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     >>> import fpd_data_processing.radial as ra
     >>> s = ra.get_angle_image_comparison(s0, s1)
     >>> s.plot()
-    
+
     Mask the inner parts
 
     >>> s = ra.get_angle_image_comparison(s0, s1, mask_radius=10)
@@ -362,13 +362,8 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     """
     if s0.axes_manager.shape != s1.axes_manager.shape:
         raise ValueError("s0 and s1 need to have the same shape")
-    am0 = s0.axes_manager.signal_axes
-    am1 = s1.axes_manager.signal_axes
-    x0, y0 = am0[0].value2index(0), am0[1].value2index(0)
-    x1, y1 = am1[0].value2index(0), am1[1].value2index(0)
     s = s0.deepcopy()
     angle_array = np.ogrid[0:2*np.pi:(1+angleN)*1j]
-    bool_array_list = []
     for i in range(len(angle_array[:-1])):
         if i % 2:
             angle0, angle1 = angle_array[i:i+2]
