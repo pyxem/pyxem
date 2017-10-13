@@ -168,6 +168,7 @@ def _make_color_wheel(ax, rotation=None):
 def _get_rgb_phase_array(
         phase, rotation=None, max_phase=2*np.pi, phase_lim=None):
     phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
+    phase = phase/(2*np.pi)
     S = np.ones_like(phase)
     HSV = np.dstack((phase, S, S))
     RGB = hsv_to_rgb(HSV)
@@ -178,7 +179,6 @@ def _find_phase(phase, rotation=None, max_phase=2*np.pi):
     if rotation is not None:
         phase = (phase + math.radians(rotation))
     phase = phase % max_phase
-    phase = phase/(2*np.pi)
     return phase
 
 
@@ -186,11 +186,15 @@ def _get_rgb_phase_magnitude_array(
         phase, magnitude, rotation=None,
         magnitude_limits=None, max_phase=2*np.pi):
     phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
+    phase = phase/(2*np.pi)
 
     if magnitude_limits is not None:
         np.clip(magnitude, magnitude_limits[0], magnitude_limits[1],
                 out=magnitude)
-    magnitude = magnitude/magnitude.max()
+    magnitude_max = magnitude.max()
+    if magnitude_max == 0:
+        magnitude_max = 1
+    magnitude = magnitude/magnitude_max
     S = np.ones_like(phase)
     HSV = np.dstack((phase, S, magnitude))
     RGB = hsv_to_rgb(HSV)
