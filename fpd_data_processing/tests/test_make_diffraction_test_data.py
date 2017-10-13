@@ -318,7 +318,7 @@ class test_generate_4d_disk_data(unittest.TestCase):
                 blur=True, blur_sigma=1,
                 downscale=True, add_noise=True,
                 noise_amplitude=2)
-        self.asserEqual(s.axes_manager.shape, (10, 10, 50, 50))
+        self.assertEqual(s.axes_manager.shape, (10, 10, 50, 50))
 
     def test_different_size(self):
         s = generate_4d_disk_data(
