@@ -9,12 +9,18 @@ all_tests_debian_unstable:
     - xvfb-run -a python3 -m pytest --doctest-modules --cov=fpd_data_processing fpd_data_processing/
     - xvfb-run -a python3 -m pytest --doctest-glob="*.rst" doc/
 
-style_checks:
+flake8_checks:
     image: debian:sid
     script:
     - apt-get update -q
-    - apt-get install -qy python3-flake8 python3-pydocstyle
-    - python3 -m flake8 fpd_data_processing/
+    - apt-get install -qy python3-flake8
+    - python3 -m flake8 --exclude fpd_data_processing/api.py fpd_data_processing/
+
+pydocstyle_checks:
+    image: debian:sid
+    script:
+    - apt-get update -q
+    - apt-get install -qy python3-pydocstyle
     - python3 -m pydocstyle fpd_data_processing/
     allow_failure: true
 
