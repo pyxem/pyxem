@@ -6,7 +6,6 @@ from scipy.optimize import leastsq
 from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
-from matplotlib import cm
 
 
 def _center_of_mass_single_frame(im, threshold=None, mask=None):
@@ -143,13 +142,13 @@ def _get_limits_from_array(
 
 
 def _make_color_wheel(ax, rotation=None):
-    x, y = np.mgrid[-2.0:2.0:500j,-2.0:2.0:500j]
-    r = (x**2+y**2)**0.5
-    t = np.arctan2(x,y)
+    x, y = np.mgrid[-2.0:2.0:500j, -2.0:2.0:500j]
+    r = (x**2 + y**2)**0.5
+    t = np.arctan2(x, y)
     del x, y
     if rotation is not None:
         t += math.radians(rotation)
-        t = (t+ np.pi) % (2 * np.pi) - np.pi
+        t = (t + np.pi) % (2 * np.pi) - np.pi
 
     r_masked = np.ma.masked_where(
             (2.0 < r) | (r < 1.0), r)
@@ -160,7 +159,6 @@ def _make_color_wheel(ax, rotation=None):
     rgb_array = _get_rgb_phase_magnitude_array(t, r_masked.data)
     rgb_array = np.dstack((rgb_array, np.invert(mask)))
 
-    cmap = cm.get_cmap('hsv')
     ax.imshow(rgb_array, interpolation='quadric', origin='lower')
     ax.set_axis_off()
 

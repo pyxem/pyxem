@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import hyperspy.api as hs
-from hyperspy.components1d import Gaussian
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.misc.utils import isiterable
@@ -398,10 +397,13 @@ class DPCSignal2D(Signal2D):
         if autolim:
             magnitude_limits = pst._get_limits_from_array(
                     magnitude, sigma=autolim_sigma)
+            np.clip(
+                    magnitude, magnitude_limits[0],
+                    magnitude_limits[1], out=magnitude)
+
         signal = Signal2D(magnitude)
         pst._copy_signal2d_axes_manager_metadata(self, signal)
         return(signal)
-
 
     def get_phase_signal(
             self, rotation=None):
@@ -504,7 +506,7 @@ class DPCSignal2D(Signal2D):
             self, phase_rotation=0, indicator_rotation=0,
             autolim=True, autolim_sigma=4):
         """Make a matplotlib figure showing DPC contrast.
-    
+
         Parameters
         ----------
         phase_rotation : float, defaut 0
