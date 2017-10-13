@@ -49,7 +49,14 @@ def get_single_ring_diffraction_signal():
 
 
 def get_simple_dpc_signal():
-    """Get a simple DPCSignal2D with a ramp."""
+    """Get a simple DPCSignal2D with a zero point in the centre.
+
+    Example
+    -------
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_simple_dpc_signal()
+
+    """
     data = np.mgrid[-5:5:100j, -5:5:100j]
     s = DPCSignal2D(data)
     return s
