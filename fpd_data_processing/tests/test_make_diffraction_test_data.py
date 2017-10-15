@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from fpd_data_processing.make_diffraction_test_data import (
-        MakeTestData, generate_4d_disk_data, generate_4d_holz_data)
+        MakeTestData, generate_4d_data)
 
 
 class test_make_diffraction_test_data(unittest.TestCase):
@@ -305,24 +305,24 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         self.assertEqual(max_v1, x0+r)
 
 
-class test_generate_4d_disk_data(unittest.TestCase):
+class test_generate_4d_data(unittest.TestCase):
 
     def test_simple0(self):
-        generate_4d_disk_data()
+        generate_4d_data()
 
     def test_all_arguments(self):
-        s = generate_4d_disk_data(
+        s = generate_4d_data(
                 probe_size_x=10, probe_size_y=10,
                 image_size_x=50, image_size_y=50,
-                disk_x=20, disk_y=20, disk_r=5, I=30,
-                blur=True, blur_sigma=1,
+                disk_x=20, disk_y=20, disk_r=5, disk_I=30,
+                ring_x=None, blur=True, blur_sigma=1,
                 downscale=True, add_noise=True,
                 noise_amplitude=2)
         self.assertEqual(s.axes_manager.shape, (10, 10, 50, 50))
 
     def test_different_size(self):
-        s = generate_4d_disk_data(
-                probe_size_x=5, probe_size_y=7,
+        s = generate_4d_data(
+                probe_size_x=5, probe_size_y=7, ring_x=None,
                 image_size_x=30, image_size_y=50)
         ax = s.axes_manager
         self.assertEqual(ax.navigation_dimension, 2)
@@ -331,17 +331,17 @@ class test_generate_4d_disk_data(unittest.TestCase):
         self.assertEqual(ax.signal_shape, (30, 50))
 
     def test_disk_outside_image(self):
-        s = generate_4d_disk_data(
+        s = generate_4d_data(
                 probe_size_x=6, probe_size_y=4,
                 image_size_x=40, image_size_y=40,
-                disk_x=1000, disk_y=1000, disk_r=5)
+                ring_x=None, disk_x=1000, disk_y=1000, disk_r=5)
         self.assertTrue((s.data == 0).all())
 
     def test_disk_cover_whole_image(self):
-        s = generate_4d_disk_data(
+        s = generate_4d_data(
                 probe_size_x=6, probe_size_y=4,
                 image_size_x=20, image_size_y=20,
-                disk_x=10, disk_y=10, disk_r=40, I=50,
+                ring_x=None, disk_x=10, disk_y=10, disk_r=40, disk_I=50,
                 blur=False, downscale=False)
         self.assertTrue((s.data == 50).all())
 
@@ -349,10 +349,10 @@ class test_generate_4d_disk_data(unittest.TestCase):
         ps_x, ps_y, I = 4, 7, 30
         disk_x = np.random.randint(5, 35, size=(ps_y, ps_x))
         disk_y = np.random.randint(5, 45, size=(ps_y, ps_x))
-        s = generate_4d_disk_data(
+        s = generate_4d_data(
                 probe_size_x=ps_x, probe_size_y=ps_y,
                 image_size_x=40, image_size_y=50,
-                disk_x=disk_x, disk_y=disk_y, disk_r=1, I=I,
+                ring_x=None, disk_x=disk_x, disk_y=disk_y, disk_r=1, disk_I=I,
                 blur=False, downscale=False)
         for x in range(ps_x):
             for y in range(ps_y):
@@ -363,14 +363,8 @@ class test_generate_4d_disk_data(unittest.TestCase):
                 im[sl] = 0
                 self.assertFalse(im.any())
 
-
-class test_generate_4d_holz_data(unittest.TestCase):
-
-    def test_simple0(self):
-        generate_4d_holz_data()
-
     def test_disk_ring_outside_image(self):
-        s = generate_4d_holz_data(
+        s = generate_4d_data(
                 probe_size_x=6, probe_size_y=4,
                 image_size_x=40, image_size_y=40,
                 disk_x=1000, disk_y=1000, disk_r=5,
@@ -379,7 +373,7 @@ class test_generate_4d_holz_data(unittest.TestCase):
 
     def test_ring_center(self):
         x, y = 40, 51
-        s = generate_4d_holz_data(
+        s = generate_4d_data(
                 probe_size_x=4, probe_size_y=5,
                 image_size_x=120, image_size_y=100,
                 disk_x=x, disk_y=y, disk_r=10, disk_I=0,

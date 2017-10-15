@@ -10,11 +10,11 @@ def get_disk_shift_simple_test_signal():
     Disk moves from 22-28 x/y.
     """
     disk_x, disk_y = np.mgrid[22:28:20j, 22:28:20j]
-    s = mdtd.generate_4d_disk_data(
+    s = mdtd.generate_4d_data(
             probe_size_x=20, probe_size_y=20,
             image_size_x=50, image_size_y=50,
             disk_x=disk_x, disk_y=disk_y, disk_r=2,
-            add_noise=True)
+            ring_x=None, add_noise=True)
     return(s)
 
 
@@ -26,7 +26,7 @@ def get_holz_simple_test_signal():
     The ring has a radius of 20, and moves from x, y = 24-26, 24-26.
     """
     ring_x, ring_y = np.mgrid[24:26:20j, 24:26:20j]
-    s = mdtd.generate_4d_holz_data(
+    s = mdtd.generate_4d_data(
             probe_size_x=20, probe_size_y=20,
             image_size_x=50, image_size_y=50,
             disk_x=25, disk_y=25, disk_r=2, disk_I=20,

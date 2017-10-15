@@ -83,36 +83,40 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
     def test_center_of_mass_different_shapes2(self):
         psX, psY = 11, 9
-        s = mdtd.generate_4d_disk_data(probe_size_x=psX, probe_size_y=psY)
+        s = mdtd.generate_4d_data(
+                probe_size_x=psX, probe_size_y=psY, ring_x=None)
         s_com = s.center_of_mass()
         self.assertEqual(s_com.axes_manager.shape, (2, psX, psY))
 
     def test_different_shape_no_blur_no_downscale(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=11, probe_size_y=9,
+        s = mdtd.generate_4d_data(
+                probe_size_x=11, probe_size_y=9, ring_x=None,
                 image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
-                disk_r=40, I=20, blur=False, blur_sigma=1, downscale=False)
+                disk_r=40, disk_I=20, blur=False, blur_sigma=1,
+                downscale=False)
         s_com = s.center_of_mass()
         self.assertTrue((s_com.inav[0].data == x).all())
         self.assertTrue((s_com.inav[1].data == y).all())
 
     def test_different_shape_no_downscale(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=11, probe_size_y=9,
+        s = mdtd.generate_4d_data(
+                probe_size_x=11, probe_size_y=9, ring_x=None,
                 image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
-                disk_r=40, I=20, blur=True, blur_sigma=1, downscale=False)
+                disk_r=40, disk_I=20, blur=True, blur_sigma=1,
+                downscale=False)
         s_com = s.center_of_mass()
         np.testing.assert_allclose(s_com.inav[0].data, x)
         np.testing.assert_allclose(s_com.inav[1].data, y)
 
     def test_mask(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=11, probe_size_y=9,
+        s = mdtd.generate_4d_data(
+                probe_size_x=11, probe_size_y=9, ring_x=None,
                 image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
-                disk_r=40, I=20, blur=False, blur_sigma=1, downscale=False)
+                disk_r=40, disk_I=20, blur=False, blur_sigma=1,
+                downscale=False)
         s.data[:, :, 15, 10] = 1000000
         s_com0 = s.center_of_mass()
         s_com1 = s.center_of_mass(mask=(90, 79, 60))
@@ -123,10 +127,10 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
     def test_mask_2(self):
         x, y = 60, 50
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=5, probe_size_y=5,
+        s = mdtd.generate_4d_data(
+                probe_size_x=5, probe_size_y=5, ring_x=None,
                 image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
-                disk_r=20, I=20, blur=False, downscale=False)
+                disk_r=20, disk_I=20, blur=False, downscale=False)
         # Add one large value
         s.data[:, :, 50, 30] = 200000  # Large value to the left of the disk
 
@@ -171,10 +175,11 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
     def test_threshold(self):
         x, y = 60, 50
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=4, probe_size_y=3,
+        s = mdtd.generate_4d_data(
+                probe_size_x=4, probe_size_y=3, ring_x=None,
                 image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
-                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+                disk_r=20, disk_I=20, blur=False, blur_sigma=1,
+                downscale=False)
         s.data[:, :, 0:30, 0:30] = 5
 
         # The extra values are ignored due to thresholding
@@ -194,10 +199,11 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
     def test_threshold_and_mask(self):
         x, y = 60, 50
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=4, probe_size_y=3,
+        s = mdtd.generate_4d_data(
+                probe_size_x=4, probe_size_y=3, ring_x=None,
                 image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
-                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+                disk_r=20, disk_I=20, blur=False, blur_sigma=1,
+                downscale=False)
         s.data[:, :, 0:30, 0:30] = 5
         s.data[:, :, 1, -2] = 60
 
@@ -222,31 +228,35 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         self.assertFalse((s_com4.inav[1].data == y).all())
 
     def test_1d_signal(self):
-        x, y = [np.arange(45, 45+9).tolist()], [np.arange(55, 55+9).tolist()]
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=9, probe_size_y=1,
+        x = np.arange(45, 45+9).reshape((1, 9))
+        y = np.arange(55, 55+9).reshape((1, 9))
+        s = mdtd.generate_4d_data(
+                probe_size_x=9, probe_size_y=1, ring_x=None,
                 image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
-                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+                disk_r=20, disk_I=20, blur=False, blur_sigma=1,
+                downscale=False)
         s_com = s.inav[:, 0].center_of_mass()
         self.assertTrue((s_com.inav[0].data == x).all())
         self.assertTrue((s_com.inav[1].data == y).all())
 
     def test_0d_signal(self):
         x, y = 40, 51
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=1, probe_size_y=1,
+        s = mdtd.generate_4d_data(
+                probe_size_x=1, probe_size_y=1, ring_x=None,
                 image_size_x=120, image_size_y=100, disk_x=x, disk_y=y,
-                disk_r=20, I=20, blur=False, blur_sigma=1, downscale=False)
+                disk_r=20, disk_I=20, blur=False, blur_sigma=1,
+                downscale=False)
         s_com = s.inav[0, 0].center_of_mass()
         self.assertTrue((s_com.inav[0].data == x).all())
         self.assertTrue((s_com.inav[1].data == y).all())
 
     def test_lazy(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
-        s = mdtd.generate_4d_disk_data(
-                probe_size_x=11, probe_size_y=9,
+        s = mdtd.generate_4d_data(
+                probe_size_x=11, probe_size_y=9, ring_x=None,
                 image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
-                disk_r=40, I=20, blur=True, blur_sigma=1, downscale=False)
+                disk_r=40, disk_I=20, blur=True, blur_sigma=1,
+                downscale=False)
         s_lazy = LazyPixelatedSTEM(
                 da.from_array(s.data, chunks=(1, 1, 140, 160)))
         s_com = s_lazy.center_of_mass()
@@ -305,7 +315,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
 
     def test_correct_radius_simple(self):
         x, y, r, px, py = 40, 51, 30, 4, 5
-        s = mdtd.generate_4d_holz_data(
+        s = mdtd.generate_4d_data(
                 probe_size_x=px, probe_size_y=py,
                 image_size_x=120, image_size_y=100,
                 disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
@@ -319,7 +329,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
     def test_correct_radius_random(self):
         x, y, px, py = 56, 48, 4, 5
         r = np.random.randint(20, 40, size=(py, px))
-        s = mdtd.generate_4d_holz_data(
+        s = mdtd.generate_4d_data(
                 probe_size_x=px, probe_size_y=py,
                 image_size_x=120, image_size_y=100,
                 disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
@@ -333,7 +343,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         x, y, px, py = 56, 48, 4, 5
         x, y = randint(45, 55, size=(py, px)), randint(45, 55, size=(py, px))
         r = randint(20, 40, size=(py, px))
-        s = mdtd.generate_4d_holz_data(
+        s = mdtd.generate_4d_data(
                 probe_size_x=px, probe_size_y=py,
                 image_size_x=120, image_size_y=100,
                 disk_x=x, disk_y=y, disk_r=5, disk_I=20,
@@ -409,7 +419,7 @@ class test_angular_slice_radial_integration(unittest.TestCase):
 
     def test_same_radius(self):
         x, y, r, px, py, angleN = 56, 48, 20, 4, 5, 20
-        s = mdtd.generate_4d_holz_data(
+        s = mdtd.generate_4d_data(
                 probe_size_x=px, probe_size_y=py,
                 image_size_x=120, image_size_y=100,
                 disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
@@ -428,13 +438,13 @@ class test_angular_slice_radial_integration(unittest.TestCase):
                 'blur': True, 'downscale': False}
         r0, r1, r2, r3 = 20, 25, 30, 27
         kwrds['ring_r'] = r0
-        s = mdtd.generate_4d_holz_data(**kwrds)
+        s = mdtd.generate_4d_data(**kwrds)
         kwrds['ring_r'] = r1
-        s1 = mdtd.generate_4d_holz_data(**kwrds)
+        s1 = mdtd.generate_4d_data(**kwrds)
         kwrds['ring_r'] = r2
-        s2 = mdtd.generate_4d_holz_data(**kwrds)
+        s2 = mdtd.generate_4d_data(**kwrds)
         kwrds['ring_r'] = r3
-        s3 = mdtd.generate_4d_holz_data(**kwrds)
+        s3 = mdtd.generate_4d_data(**kwrds)
 
         s.data[:, :, :y, x:] = s1.data[:, :, :y, x:]
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
@@ -456,13 +466,13 @@ class test_angular_slice_radial_integration(unittest.TestCase):
                 'blur': True, 'downscale': False}
         r0, r1, r2, r3 = 20, 25, 30, 27
         kwrds['ring_r'] = r0
-        s = mdtd.generate_4d_holz_data(**kwrds)
+        s = mdtd.generate_4d_data(**kwrds)
         kwrds['ring_r'] = r1
-        s1 = mdtd.generate_4d_holz_data(**kwrds)
+        s1 = mdtd.generate_4d_data(**kwrds)
         kwrds['ring_r'] = r2
-        s2 = mdtd.generate_4d_holz_data(**kwrds)
+        s2 = mdtd.generate_4d_data(**kwrds)
         kwrds['ring_r'] = r3
-        s3 = mdtd.generate_4d_holz_data(**kwrds)
+        s3 = mdtd.generate_4d_data(**kwrds)
 
         s.data[:, :, :y, x:] = s1.data[:, :, :y, x:]
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
