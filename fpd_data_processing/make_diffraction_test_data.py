@@ -44,6 +44,7 @@ class Circle(object):
         list for x (self.centre_x_pixels) and one for y
         (self.centre_x_pixels). If the centre is outside the image, the
         lists will be empty.
+
         """
         if self.centre_on_image(xx, yy):
             x1 = np.where(xx > (self.x0 - 0.5 * scale))[1][0]
@@ -194,6 +195,7 @@ class MakeTestData:
     >>> test_data.add_disk(x0=50, y0=50, r=10, I=30)
     >>> test_data.add_ring(x0=45, y0=52, r=25, I=10)
     >>> test_data.signal.plot()
+
     """
     def __init__(
             self, size_x=100, size_y=100, scale=1,
@@ -385,6 +387,7 @@ def generate_4d_data(
     >>> s.plot()
 
     Using more arguments
+
     >>> s = mdtd.generate_4d_data(probe_size_x=20, probe_size_y=30,
     ...         image_size_x=50, image_size_y=90,
     ...         disk_x=30, disk_y=70, disk_r=9, disk_I=30,
@@ -392,10 +395,12 @@ def generate_4d_data(
     ...         blur=False, downscale=False)
 
     Adding some Gaussian random noise
+
     >>> s = mdtd.generate_4d_data(add_noise=True, noise_amplitude=3)
 
     Different centre positions for each probe position.
     Note the size=(20, 10), and probe_x=10, probe_y=20: size=(y, x).
+
     >>> import numpy as np
     >>> disk_x = np.random.randint(5, 35, size=(20, 10))
     >>> disk_y = np.random.randint(5, 45, size=(20, 10))
