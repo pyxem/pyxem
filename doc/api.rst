@@ -39,3 +39,16 @@ IO tools
 .. automodule:: fpd_data_processing.io_tools
     :members:
     :undoc-members:
+
+Dummy data
+==========
+.. automodule:: fpd_data_processing.dummy_data
+    :members:
+    :undoc-members:
+
+Make diffraction test data
+==========================
+.. automodule:: fpd_data_processing.make_diffraction_test_data
+    :members:
+    :undoc-members:
+

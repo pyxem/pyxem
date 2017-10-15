@@ -11,8 +11,8 @@ Test data can be used as a dummy dataset to test processing methods.
 
     >>> import fpd_data_processing.make_diffraction_test_data as mdtd
 
-Simple examples
----------------
+Single image
+------------
 
 Generating a default image
 ##############################
@@ -25,7 +25,7 @@ The test data contains a **PixelatedSTEM object**, which can be be plotted.
 
     >>> import fpd_data_processing.make_diffraction_test_data as mdtd
     >>> import hyperspy.api as hs
-    >>> a = mdtd.MakeTestData()
+    >>> a = mdtd.MakeTestData(default=True)
     >>> a.signal
     <PixelatedSTEM, title: , dimensions: (|100, 100)>
     >>> a.signal.axes_manager[0].scale
@@ -145,3 +145,51 @@ By setting the offset of the axes_manager as below, the coordinates of the centr
 .. image:: images/doc/TestData_offset.png
     :scale: 50 %
     :align: center
+
+
+Generate 4D dataset
+-------------------
+
+It is also possible to make 4 dimensional test datasets using :py:func:`~fpd_data_processing.make_diffraction_test_data.generate_4d_data`.
+This function uses the :py:class:`~fpd_data_processing.make_diffraction_test_data.MakeTestData` class to generate the individual images, then this function stacks the images into a 4D stack.
+
+.. code-block:: python
+
+    >>> s = mdtd.generate_4d_data()
+    >>> s.plot()
+
+The signal can be highly customized, a full argument list can be found in the API documentation about the function: :py:func:`~fpd_data_processing.make_diffraction_test_data.generate_4d_data`.
+
+Some of the parameters can vary as a function of probe position, by sending the argument as a NumPy array.
+This NumPy array must have the size as the probe dimension.
+
+.. code-block:: python
+
+    >>> import numpy as np
+    >>> disk_x = np.random.randint(5, 35, size=(20, 10))
+    >>> disk_y = np.random.randint(5, 45, size=(20, 10))
+    >>> s = mdtd.generate_4d_data(probe_size_x=10, probe_size_y=20,
+    ...         image_size_x=40, image_size_y=50, disk_x=disk_x, disk_y=disk_y)
+    >>> s.plot()
+
+The ring can be deactivated by setting ring_x=None, and the disk by setting disk_x=None:
+
+.. code-block:: python
+
+    >>> s_no_disk = mdtd.generate_4d_data(disk_x=None)
+    >>> s_no_ring = mdtd.generate_4d_data(ring_x=None)
+
+
+Dummy data
+----------
+
+There are several predefined test signal in :py:mod:`fpd_data_processing.dummy_data`.
+
+These are useful for testing the various data processing functions in this library.
+
+.. code-block:: python
+
+    >>> import fpd_data_processing.dummy_data as dd
+    >>> s = dd.get_disk_shift_simple_test_signal()
+    >>> s_com = s.center_of_mass(show_progressbar=False)
+    >>> s_com.plot()
