@@ -16,7 +16,8 @@ Install
 
 PyCrystEM can be installed by navigating to the directory containing the package and using pip or running the following command:
 
-python setup.py install
+::
+	$python setup.py install
 
 This will not install any of the dependancies, to do so you should add the -r requirements.txt flag. If you do this you will have an environment with a battle-worn set of dependancies. 
 
@@ -27,12 +28,13 @@ If you are new to python the simplest way to install everything you need is usin
 
 From a clean install the following commands to install everything you need should be entered into the terminal, or anaconda prompt terminal in Windows:
 
-conda install hyperspy -c conda-forge
+::
+	$conda install hyperspy -c conda-forge
 
-conda install --channel matsci pymatgen
+	$conda install --channel matsci pymatgen
 
-pip install transforms3d
+	$pip install transforms3d
 
-python setup.py install
+	$python setup.py install
 
 (Note that conda cannot install pymatgen on a 32-bit machine, use pip)
