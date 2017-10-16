@@ -326,9 +326,10 @@ def generate_4d_data(
     Useful for checking that radial integration
     algorithms are working properly.
 
-    The centre and radius position of the ring and disk can vary as a function
-    of probe position, through the disk_x, disk_y, disk_r, ring_x, ring_y
-    and ring_r arguments.
+    The centre, intensity and radius position of the ring and disk can vary as a function
+    of probe position, through the disk_x, disk_y, disk_r, disk_I, ring_x,
+    ring_y, ring_r and ring_I arguments.
+    In addition, the line width of the ring can be varied with ring_lw.
 
     The ring can be deactivated by setting ring_x=None.
     The disk can be deactivated by setting disk_x=None.
@@ -346,7 +347,7 @@ def generate_4d_data(
     disk_r : int or NumPy 2D-array, default 5
         Radius of the disk. Either integer or NumPy 2-D array.
         See examples on how to make it the correct size.
-    disk_I : int, default 20
+    disk_I : int or Numpy 2D-array, default 20
         Intensity of the disk, for each of the pixels.
         So if I=30, the each pixel in the disk will have a value of 30.
         Note, this value will change if blur=True or downscale=True.
@@ -357,11 +358,11 @@ def generate_4d_data(
     ring_r : int or NumPy 2D-array, default 5
         Radius of the ring. Either integer or NumPy 2-D array.
         See examples on how to make it the correct size.
-    ring_I : int, default 6
+    ring_I : int or Numpy 2D-array, default 6
         Intensity of the ring, for each of the pixels.
         So if I=5, each pixel in the ring will have a value of 5.
         Note, this value will change if blur=True or downscale=True.
-    ring_lw : int, default 0
+    ring_lw : int or Numpy 2D-array, default 0
         Line width of the ring. If ring_lw=1, the line will be 3 pixels wide.
         If ring_lw=2, the line will be 5 pixels wide.
     blur : bool, default True
@@ -404,12 +405,16 @@ def generate_4d_data(
     >>> import numpy as np
     >>> disk_x = np.random.randint(5, 35, size=(20, 10))
     >>> disk_y = np.random.randint(5, 45, size=(20, 10))
+    >>> disk_I = np.random.randint(50, 100, size=(20, 10))
     >>> ring_x = np.random.randint(5, 35, size=(20, 10))
     >>> ring_y = np.random.randint(5, 45, size=(20, 10))
     >>> ring_r = np.random.randint(10, 15, size=(20, 10))
+    >>> ring_I = np.random.randint(1, 30, size=(20, 10))
+    >>> ring_lw = np.random.randint(1, 5, size=(20, 10))
     >>> s = mdtd.generate_4d_data(probe_size_x=10, probe_size_y=20,
     ...         image_size_x=40, image_size_y=50, disk_x=disk_x, disk_y=disk_y,
-    ...         ring_x=ring_x, ring_y=ring_y, ring_r=ring_r, ring_lw=1)
+    ...         disk_I=disk_I, ring_x=ring_x, ring_y=ring_y, ring_r=ring_r,
+    ...         ring_I=ring_I, ring_lw=ring_lw)
 
     Do not plot the disk
 
@@ -437,10 +442,17 @@ def generate_4d_data(
         disk_y = np.ones((probe_size_y, probe_size_x))*disk_y
     if not isiterable(disk_r):
         disk_r = np.ones((probe_size_y, probe_size_x))*disk_r
+    if not isiterable(disk_I):
+        disk_I = np.ones((probe_size_y, probe_size_x))*disk_I
+
     if not isiterable(ring_y):
         ring_y = np.ones((probe_size_y, probe_size_x))*ring_y
     if not isiterable(ring_r):
         ring_r = np.ones((probe_size_y, probe_size_x))*ring_r
+    if not isiterable(ring_I):
+        ring_I = np.ones((probe_size_y, probe_size_x))*ring_I
+    if not isiterable(ring_lw):
+        ring_lw = np.ones((probe_size_y, probe_size_x))*ring_lw
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
@@ -452,10 +464,12 @@ def generate_4d_data(
                 downscale=downscale)
         if plot_disk:
             dx, dy, dr = disk_x[index], disk_y[index], disk_r[index]
-            test_data.add_disk(dx, dy, dr, I=disk_I)
+            dI = disk_I[index]
+            test_data.add_disk(dx, dy, dr, I=dI)
         if plot_ring:
             rx, ry, rr = ring_x[index], ring_y[index], ring_r[index]
-            test_data.add_ring(rx, ry, rr, I=ring_I, lw_pix=ring_lw)
+            rI, rLW = ring_I[index], ring_lw[index]
+            test_data.add_ring(rx, ry, rr, I=rI, lw_pix=rLW)
         s.data[index][:] = test_data.signal.data[:]
         if add_noise:
             s.data[index][:] += np.random.random(

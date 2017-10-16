@@ -382,3 +382,21 @@ class test_generate_4d_data(unittest.TestCase):
         s_com = s.center_of_mass()
         self.assertTrue((s_com.inav[0].data == x).all())
         self.assertTrue((s_com.inav[1].data == y).all())
+
+
+    def test_input_numpy_array(self):
+        disk_x = np.random.randint(5, 35, size=(20, 10))
+        disk_y = np.random.randint(5, 45, size=(20, 10))
+        disk_r = np.random.randint(5, 9, size=(20, 10))
+        disk_I = np.random.randint(50, 100, size=(20, 10))
+        ring_x = np.random.randint(5, 35, size=(20, 10))
+        ring_y = np.random.randint(5, 45, size=(20, 10))
+        ring_r = np.random.randint(10, 15, size=(20, 10))
+        ring_I = np.random.randint(1, 30, size=(20, 10))
+        ring_lw = np.random.randint(1, 5, size=(20, 10))
+        generate_4d_data(
+                probe_size_x=10, probe_size_y=20,
+                image_size_x=40, image_size_y=50,
+                disk_x=disk_x, disk_y=disk_y, disk_I=disk_I, disk_r=disk_r,
+                ring_x=ring_x, ring_y=ring_y, ring_r=ring_r, 
+                ring_I=ring_I, ring_lw=ring_lw)
