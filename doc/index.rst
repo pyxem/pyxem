@@ -7,6 +7,7 @@ Library for processing data acquired on a fast pixelated electron detector, acqu
    install
    loading_data
    generate_test_data
+   analysing_holz_datasets
    api
    :maxdepth: 2
    :caption: Contents:
