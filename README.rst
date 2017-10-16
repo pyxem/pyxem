@@ -9,7 +9,7 @@ HEALTH WARNING
 
 PyCrystEM is in the relatively early stages of development and may contain a number of bugs as a result. The code has been released at this stage in good faith and to speed up this refinement process. We hope that you will find the tools useful and if you find bugs we would appreciate knowing about them.
 
-Furthermore PyCrystEM only supports Python 3
+PyCrystEM only supports Python 3
 
 Install
 -------
@@ -18,6 +18,7 @@ PyCrystEM can be installed by navigating to the directory containing the package
 
 python setup.py install
 
+This will not install any of the dependancies, to do so you should add the -r requirements.txt flag. If you do this you will have an environment with a battle-worn set of dependancies. 
 
 New to Python?
 --------------
@@ -33,3 +34,5 @@ conda install --channel matsci pymatgen
 pip install transforms3d
 
 python setup.py install
+
+(Note that conda cannot install pymatgen on a 32-bit machine, use pip)
