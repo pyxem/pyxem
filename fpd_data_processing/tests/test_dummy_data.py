@@ -15,3 +15,6 @@ class test_dummy_data_module(unittest.TestCase):
 
     def test_get_simple_dpc_signal(self):
         dd.get_simple_dpc_signal()
+
+    def test_get_holz_heterostructure_test_signal(self):
+        dd.get_holz_heterostructure_test_signal()
