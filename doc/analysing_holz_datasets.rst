@@ -154,15 +154,15 @@ For real datasets, a PowerLaw component should be used (instead of the Offset co
 .. image:: images/analysing_holz_datasets/testdata_offset_model_signal.png
     :scale: 49 %
 
-Then add a Gaussian function to this model
+Then add a Gaussian function to this model.
 
 .. code-block:: python
 
     >>> from hyperspy.components1d import Gaussian
-    >>> g = Gaussian()
+    >>> g = Gaussian(A=10, centre=30, sigma=4)
     >>> m_r.append(g)
-    >>> m_r.fit_component(g, signal_range=(25, 35), only_current=False, show_progressbar=False)
-    >>> m_r.multifit(show_progressbar=False)
+    >>> g.centre.bmin, g.centre.bmax = 25, 35
+    >>> m_r.multifit(fitter='mpfit', bounded=True, show_progressbar=False)
     >>> m_r.plot()
 
 .. image:: images/analysing_holz_datasets/testdata_gaussian_model_navigator.png

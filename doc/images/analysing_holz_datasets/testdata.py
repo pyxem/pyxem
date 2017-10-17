@@ -63,10 +63,10 @@ fig_navigator.savefig("testdata_offset_model_navigator.png")
 
 # Fitting offset to background model
 from hyperspy.components1d import Gaussian
-g = Gaussian()
+g = Gaussian(A=10, centre=30, sigma=4)
 m_r.append(g)
-m_r.fit_component(g, signal_range=(25, 35), only_current=False)
-m_r.multifit()
+g.centre.bmin, g.centre.bmax = 25, 35
+m_r.multifit(fitter='mpfit', bounded=True, show_progressbar=False)
 m_r.plot()
 
 fig_signal = m_r._plot.signal_plot.figure

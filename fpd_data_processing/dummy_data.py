@@ -56,7 +56,8 @@ def get_holz_heterostructure_test_signal():
     probe_size_x, probe_size_y = 40, 40
     px, py = np.mgrid[0:probe_size_x:1, 0:probe_size_y:1]
     x, y = np.mgrid[36:38:40j, 41:43:40j]
-    disk_r, disk_I = 10, 100
+    disk_r = 10
+    disk_I = np.ones_like(x)*100 + np.random.random()*20
     g_r = Gaussian(A=20, centre=25, sigma=5)
     ring_r = np.ones_like(x)*30 + g_r.function(py)
     g_I = Gaussian(A=30, centre=25, sigma=3)
