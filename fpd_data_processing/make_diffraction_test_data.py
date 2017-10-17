@@ -326,9 +326,9 @@ def generate_4d_data(
     Useful for checking that radial integration
     algorithms are working properly.
 
-    The centre, intensity and radius position of the ring and disk can vary as a function
-    of probe position, through the disk_x, disk_y, disk_r, disk_I, ring_x,
-    ring_y, ring_r and ring_I arguments.
+    The centre, intensity and radius position of the ring and disk can vary
+    as a function of probe position, through the disk_x, disk_y, disk_r,
+    disk_I, ring_x, ring_y, ring_r and ring_I arguments.
     In addition, the line width of the ring can be varied with ring_lw.
 
     The ring can be deactivated by setting ring_x=None.
@@ -341,13 +341,13 @@ def generate_4d_data(
     image_size_x, image_size_y : int, default 50
         Size of the signal dimension.
     disk_x, disk_y : int or NumPy 2D-array, default 20
-        Centre position of the disk. Either integer or Numpy 2-D array.
+        Centre position of the disk. Either integer or NumPy 2-D array.
         See examples on how to make them the correct size.
         To deactivate the ring, set disk_x=None.
     disk_r : int or NumPy 2D-array, default 5
         Radius of the disk. Either integer or NumPy 2-D array.
         See examples on how to make it the correct size.
-    disk_I : int or Numpy 2D-array, default 20
+    disk_I : int or NumPy 2D-array, default 20
         Intensity of the disk, for each of the pixels.
         So if I=30, the each pixel in the disk will have a value of 30.
         Note, this value will change if blur=True or downscale=True.
@@ -358,11 +358,11 @@ def generate_4d_data(
     ring_r : int or NumPy 2D-array, default 5
         Radius of the ring. Either integer or NumPy 2-D array.
         See examples on how to make it the correct size.
-    ring_I : int or Numpy 2D-array, default 6
+    ring_I : int or NumPy 2D-array, default 6
         Intensity of the ring, for each of the pixels.
         So if I=5, each pixel in the ring will have a value of 5.
         Note, this value will change if blur=True or downscale=True.
-    ring_lw : int or Numpy 2D-array, default 0
+    ring_lw : int or NumPy 2D-array, default 0
         Line width of the ring. If ring_lw=1, the line will be 3 pixels wide.
         If ring_lw=2, the line will be 5 pixels wide.
     blur : bool, default True

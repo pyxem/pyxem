@@ -383,7 +383,6 @@ class test_generate_4d_data(unittest.TestCase):
         self.assertTrue((s_com.inav[0].data == x).all())
         self.assertTrue((s_com.inav[1].data == y).all())
 
-
     def test_input_numpy_array(self):
         disk_x = np.random.randint(5, 35, size=(20, 10))
         disk_y = np.random.randint(5, 45, size=(20, 10))
@@ -398,5 +397,5 @@ class test_generate_4d_data(unittest.TestCase):
                 probe_size_x=10, probe_size_y=20,
                 image_size_x=40, image_size_y=50,
                 disk_x=disk_x, disk_y=disk_y, disk_I=disk_I, disk_r=disk_r,
-                ring_x=ring_x, ring_y=ring_y, ring_r=ring_r, 
+                ring_x=ring_x, ring_y=ring_y, ring_r=ring_r,
                 ring_I=ring_I, ring_lw=ring_lw)
