@@ -33,7 +33,7 @@ make_documentation:
     - pip3 install .
     - cd doc
     - cd images/analysing_holz_datasets/
-    - python3 testdata.py
+    - xvfb-run -a python3 testdata.py
     - cd ../../
     - make html
     - cd ..
