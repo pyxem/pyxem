@@ -37,3 +37,24 @@ From a clean install the following commands to install everything you need shoul
 	$ python setup.py install
 
 (Note that conda cannot install pymatgen on a 32-bit machine, use pip)
+
+PyPrismatic
+------
+
+This set of installs allows the user to create both conventional multislice and the 'PRISM' algoritm. For details we refer you to http://prism-em.com/
+
+Due to mixed of compiled and non-compiled code some care is required in the install, and we suggest you follow the instructions offered on the website careful. The developers of PyCrystEM note that::
+
+	$ echo $LIBRARY_PATH
+
+Proves very useful in determining whether::
+
+	$ export $LIBRARY_PATH=~/lib/boost_1_65_1
+
+Or similar has been succesful.
+
+Having installed the dependancies (see http://prism-em.com/installation/) one should be able to run::
+
+	$ pip install pyprismatic
+
+without incident. 
