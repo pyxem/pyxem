@@ -27,6 +27,8 @@ from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
 from pymatgen.util.plotting import get_publication_quality_plot
+from pycrystem.utils.pyprismatic_io_utils import generate_pyprismatic_input
+import pyprismatic as prism
 
 
 _GAUSSIAN2D_EXPR = \
@@ -39,17 +41,7 @@ _GAUSSIAN2D_EXPR = \
 class ElectronDiffractionCalculator(object):
     """Computes electron diffraction patterns for a crystal structure.
 
-    1. Calculate reciprocal lattice of structure. Find all reciprocal points
-       within the limiting sphere given by :math:`\\frac{2}{\\lambda}`.
-
-    2. For each reciprocal point :math:`\\mathbf{g_{hkl}}` corresponding to
-       lattice plane :math:`(hkl)`, compute the Bragg condition
-       :math:`\\sin(\\theta) = \\frac{\\lambda}{2d_{hkl}}`
-
-    3. The intensity of each reflection is then given in the kinematic
-       approximation as the modulus square of the structure factor.
-       :math:`I_{hkl} = F_{hkl}F_{hkl}^*`
-
+   
     Parameters
     ----------
     accelerating_voltage : float
@@ -71,9 +63,52 @@ class ElectronDiffractionCalculator(object):
         self.wavelength = get_electron_wavelength(accelerating_voltage)
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
+    
+    def calculate_ed_data(self,**kwargs):
+        raise ValueError("This function has been split up, please use one of those functions")
+        
+    def calculate_ed_data_dynamic(self,structure,scaling=[1,1,1],algorithm='prism'):
+        """ Calculates the Electron Diffraction data for a structure using a dynamic model
+        
+        Parameters
+        ----------
+        structure: Structure
+            The unit cell of the structure from which to derive the diffraction pattern
+            
+        scaling: 
+            The scaling of afformentioned unit cell as [x,y,z] fractionals
+        
+        Returns
+        -------
+        DiffractionSimulation
+            The data associated with this structure and diffraction set up
+        
+        """
+        ## This is clearly under development
+        # Two potential places to do our scaling, need to run tests on both, + Physics discussion
+        generate_pyprismatic_input(structure,scaling_for_supercell=scaling) 
+        #TODO save to a filename ^ and put that in below + new filename for 
+        meta = prism.Metadata(filenameAtoms='demo.XYZ',E0=acclerating_voltage)
+        meta.tileX = 1
+        meta.tileY = 1
+        meta.tileZ = 1
+        meta.go() #saves as output_demo.mrc
+        output = prism.fileio.readMRC(fileoutput2)
+        diffracted_intensity = np.squeeze(np.sum(output,axis=2))
+        
+    def calculate_ed_data_kinematic(self, structure, reciprocal_radius):
+        """Calculates the Electron Diffraction data for a structure using a kinematic model:
+            
+             1. Calculate reciprocal lattice of structure. Find all reciprocal points
+             within the limiting sphere given by :math:`\\frac{2}{\\lambda}`.
 
-    def calculate_ed_data(self, structure, reciprocal_radius):
-        """Calculates the Electron Diffraction data for a structure.
+        2. For each reciprocal point :math:`\\mathbf{g_{hkl}}` corresponding to
+            lattice plane :math:`(hkl)`, compute the Bragg condition
+            :math:`\\sin(\\theta) = \\frac{\\lambda}{2d_{hkl}}`
+
+        3. The intensity of each reflection is then given in the kinematic
+            approximation as the modulus square of the structure factor.
+            :math:`I_{hkl} = F_{hkl}F_{hkl}^*`
 
         Parameters
         ----------
