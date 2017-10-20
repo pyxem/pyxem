@@ -629,7 +629,7 @@ class DPCSignal2D(Signal2D):
         Parameters
         ----------
         angle : float
-            Counter clockwise rotation in degrees
+            Clockwise rotation in degrees
 
         Returns
         -------
@@ -638,7 +638,7 @@ class DPCSignal2D(Signal2D):
         Example
         -------
 
-        Rotate data by 10 degrees counterclockwise
+        Rotate data by 10 degrees clockwise
 
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_simple_dpc_signal()
@@ -649,7 +649,37 @@ class DPCSignal2D(Signal2D):
         s_new = self.map(
                 rotate, show_progressbar=False,
                 inplace=False, reshape=False,
-                angle=angle)
+                angle=-angle)
+        return(s_new)
+
+    def rotate_beam_shifts(self, angle):
+        """Rotate the beam shift vector.
+
+        Parameters
+        ----------
+        angle : float
+            Clockwise rotation in degrees
+
+        Returns
+        -------
+        shift_rotated_signal : DPCSignal2D
+
+        Example
+        -------
+
+        Rotate beam shifts by 10 degrees clockwise
+
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> s_new = s.rotate_beam_shifts(10)
+        >>> s_new.plot()
+
+        """
+        s_new = self.deepcopy()
+        angle_rad = np.deg2rad(angle)
+        x, y = self.inav[0].data, self.inav[1].data
+        s_new.data[0] = x * np.cos(angle_rad) - y * np.sin(angle_rad)
+        s_new.data[1] = x * np.sin(angle_rad) + y * np.cos(angle_rad)
         return(s_new)
 
 

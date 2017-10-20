@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from numpy.testing import assert_almost_equal
 from fpd_data_processing.pixelated_stem_class import (
         DPCBaseSignal, DPCSignal1D, DPCSignal2D)
 import fpd_data_processing.dummy_data as dd
@@ -170,19 +171,58 @@ class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
 
 class test_rotate_data(unittest.TestCase):
 
-    def test_counterclockwise(self):
+    def test_clockwise(self):
         s = dd.get_simple_dpc_signal()
         s_rot = s.rotate_data(1)
+        self.assertFalse((s_rot.data[0, 0, 0:10] == 0).all())
+        self.assertTrue((s_rot.data[0, 0, -10:] == 0).all())
+        self.assertFalse((s_rot.data[0, -10:, 0] == 0).all())
+        self.assertTrue((s_rot.data[0, 0:10, 0] == 0).all())
+
+    def test_counterclockwise(self):
+        s = dd.get_simple_dpc_signal()
+        s_rot = s.rotate_data(-1)
         self.assertTrue((s_rot.data[0, 0, 0:10] == 0).all())
         self.assertFalse((s_rot.data[0, 0, -10:] == 0).all())
         self.assertTrue((s_rot.data[0, -10:, 0] == 0).all())
         self.assertFalse((s_rot.data[0, 0:10, 0] == 0).all())
 
-    def test_clockwise(self):
-        s = dd.get_simple_dpc_signal()
-        s_rot = s.rotate_data(-1)
-        self.assertFalse((s_rot.data[0, 0, 0:10] == 0).all())
-        self.assertTrue((s_rot.data[0, 0, -10:] == 0).all())
-        self.assertFalse((s_rot.data[0, -10:, 0] == 0).all())
-        self.assertTrue((s_rot.data[0, 0:10, 0] == 0).all())
-        
+
+class test_rotate_beam_shifts(unittest.TestCase):
+
+    def test_clockwise_90_degrees(self):
+        s = DPCSignal2D((np.ones((90, 70)), np.zeros((90, 70))))
+        s_rot = s.rotate_beam_shifts(90)
+        data_x, data_y = s_rot.inav[0].data, s_rot.inav[1].data
+        assert_almost_equal(data_x, np.zeros_like(data_x))
+        assert_almost_equal(data_y, np.ones_like(data_y))
+
+    def test_counterclockwise_90_degrees(self):
+        s = DPCSignal2D((np.ones((90, 70)), np.zeros((90, 70))))
+        s_rot = s.rotate_beam_shifts(-90)
+        data_x, data_y = s_rot.inav[0].data, s_rot.inav[1].data
+        assert_almost_equal(data_x, np.zeros_like(data_x))
+        assert_almost_equal(data_y, -np.ones_like(data_y))
+
+    def test_180_degrees(self):
+        s = DPCSignal2D((np.ones((90, 70)), np.zeros((90, 70))))
+        s_rot = s.rotate_beam_shifts(180)
+        data_x, data_y = s_rot.inav[0].data, s_rot.inav[1].data
+        assert_almost_equal(data_x, -np.ones_like(data_x))
+        assert_almost_equal(data_y, np.zeros_like(data_y))
+
+    def test_clockwise_45_degrees(self):
+        s = DPCSignal2D((np.ones((90, 70)), np.zeros((90, 70))))
+        sin_rad = np.sin(np.deg2rad(45))
+        s_rot = s.rotate_beam_shifts(45)
+        data_x, data_y = s_rot.inav[0].data, s_rot.inav[1].data
+        assert_almost_equal(data_x, np.ones_like(data_x)*sin_rad)
+        assert_almost_equal(data_y, np.ones_like(data_y)*sin_rad)
+
+    def test_counterclockwise_45_degrees(self):
+        s = DPCSignal2D((np.ones((90, 70)), np.zeros((90, 70))))
+        sin_rad = np.sin(np.deg2rad(45))
+        s_rot = s.rotate_beam_shifts(-45)
+        data_x, data_y = s_rot.inav[0].data, s_rot.inav[1].data
+        assert_almost_equal(data_x, np.ones_like(data_x)*sin_rad)
+        assert_almost_equal(data_y, -np.ones_like(data_y)*sin_rad)
