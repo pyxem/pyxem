@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+from scipy.ndimage import rotate
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
@@ -504,7 +506,7 @@ class DPCSignal2D(Signal2D):
 
     def get_color_image_with_indicator(
             self, phase_rotation=0, indicator_rotation=0,
-            autolim=True, autolim_sigma=4):
+            autolim=True, autolim_sigma=4, scalebar_size=None):
         """Make a matplotlib figure showing DPC contrast.
 
         Parameters
@@ -535,6 +537,12 @@ class DPCSignal2D(Signal2D):
                 ax_indicator,
                 rotation=indicator_rotation + phase_rotation)
         ax.set_axis_off()
+        if scalebar_size is not None:
+            scalebar_label = '{0} {1}'.format(
+                    scalebar_size, s.axes_manager[0].units)
+            sb = AnchoredSizeBar(
+                    ax.transData, scalebar_size, scalebar_label, loc=4)
+            ax.add_artist(sb)
         fig.subplots_adjust(0, 0, 1, 1)
         return fig
 
@@ -614,6 +622,35 @@ class DPCSignal2D(Signal2D):
         s_hist.axes_manager[1].offset = yedges[0]
         s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
         return(s_hist)
+
+    def rotate_data(self, angle):
+        """Rotate the scan dimensions by angle.
+
+        Parameters
+        ----------
+        angle : float
+            Counter clockwise rotation in degrees
+
+        Returns
+        -------
+        rotated_signal : DPCSignal2D
+
+        Example
+        -------
+
+        Rotate data by 10 degrees counterclockwise
+
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> s_rot = s.rotate_data(10)
+        >>> s_rot.plot()
+
+        """
+        s_new = self.map(
+                rotate, show_progressbar=False,
+                inplace=False, reshape=False,
+                angle=angle)
+        return(s_new)
 
 
 class LazyDPCBaseSignal(LazySignal, DPCBaseSignal):

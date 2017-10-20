@@ -1,8 +1,9 @@
 import unittest
+import numpy as np
 from fpd_data_processing.pixelated_stem_class import (
         DPCBaseSignal, DPCSignal1D, DPCSignal2D)
+import fpd_data_processing.dummy_data as dd
 import fpd_data_processing.pixelated_stem_tools as pst
-import numpy as np
 
 
 class test_dpc_basesignal_create(unittest.TestCase):
@@ -143,7 +144,7 @@ class test_get_dpc_signal(unittest.TestCase):
         s.get_color_image_with_indicator()
         s.get_color_image_with_indicator(
                 phase_rotation=45, indicator_rotation=10,
-                autolim=True, autolim_sigma=1)
+                autolim=True, autolim_sigma=1, scalebar_size=10)
 
 
 class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
@@ -165,3 +166,23 @@ class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
                 masked=None,
                 bins=200,
                 spatial_std=3)
+
+
+class test_rotate_data(unittest.TestCase):
+
+    def test_counterclockwise(self):
+        s = dd.get_simple_dpc_signal()
+        s_rot = s.rotate_data(1)
+        self.assertTrue((s_rot.data[0, 0, 0:10] == 0).all())
+        self.assertFalse((s_rot.data[0, 0, -10:] == 0).all())
+        self.assertTrue((s_rot.data[0, -10:, 0] == 0).all())
+        self.assertFalse((s_rot.data[0, 0:10, 0] == 0).all())
+
+    def test_clockwise(self):
+        s = dd.get_simple_dpc_signal()
+        s_rot = s.rotate_data(-1)
+        self.assertFalse((s_rot.data[0, 0, 0:10] == 0).all())
+        self.assertTrue((s_rot.data[0, 0, -10:] == 0).all())
+        self.assertFalse((s_rot.data[0, -10:, 0] == 0).all())
+        self.assertTrue((s_rot.data[0, 0:10, 0] == 0).all())
+        
