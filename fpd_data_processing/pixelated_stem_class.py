@@ -441,6 +441,12 @@ class DPCSignal2D(Signal2D):
         get_magnitude_signal : Signal showing the magnitude
 
         """
+        # Rotate the phase by -30 degrees in the color "wheel", to get better
+        # visualization in the vertical and horizontal direction.
+        if rotation is None:
+            rotation = -30
+        else:
+            rotation = rotation - 30
         phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2*np.pi)
         rgb_array = pst._get_rgb_phase_array(phase=phase, rotation=rotation)
         signal_rgb = Signal1D(rgb_array*(2**16-1))
@@ -487,6 +493,12 @@ class DPCSignal2D(Signal2D):
         get_phase_signal : Signal showing the phase
 
         """
+        # Rotate the phase by -30 degrees in the color "wheel", to get better
+        # visualization in the vertical and horizontal direction.
+        if rotation is None:
+            rotation = -30
+        else:
+            rotation = rotation - 30
         phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2*np.pi)
         magnitude = np.sqrt(
                 np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
@@ -511,10 +523,10 @@ class DPCSignal2D(Signal2D):
 
         Parameters
         ----------
-        phase_rotation : float, defaut 0
+        phase_rotation : float, default 0
             Changes the phase of the plotted data.
             Useful for correcting scan rotation.
-        indicator_rotation : float, defaut 0
+        indicator_rotation : float, default 0
             Changes the color wheel rotation.
         autolim : bool, default True
         autolim_sigma : float, default 4
@@ -525,6 +537,7 @@ class DPCSignal2D(Signal2D):
         >>> fig.savefig("simple_dpc_test_signal.png")
 
         """
+        indicator_rotation = indicator_rotation - 120
         fig, ax = plt.subplots(1, 1, figsize=(7, 7))
         ax_indicator = fig.add_subplot(331)
         s = self.get_color_signal(
