@@ -24,15 +24,18 @@ def generate_pyprismatic_input(structure,destination_path,comment="Default Comme
             raise IOError('The file you have specified already exists')
         
         line_1 = comment
-        line_2 = structure.lattice.abc  #This need a little bit of thoughts
-        
+   
         Z_list = []
         for element in structure.species:
                 Z_list.append(int(element.Z))
 
         atomic_numbers = np.asarray(Z_list).reshape(len(structure.species),1)
-        cart_coords = structure.cart_coords
         percent_occupied  = np.ones_like(atomic_numbers)
+        cart_coords = structure.cart_coords
+        
+        # TODO Raise an error if (0,0,0) isn't a co-ord
+        line_2 = [np.max(cart_coords[:,0]),np.max(cart_coords[:,1]),np.max(cart_coords[:,2])]
+        ## This line comes from the concept illustrated by the sample used in Ophus's 2017 paper
         
         # TODO Get dw from Element's names
         if True:
