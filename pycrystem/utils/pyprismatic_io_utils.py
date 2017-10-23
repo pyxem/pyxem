@@ -2,29 +2,23 @@ import numpy as np
 import pymatgen as pmg
 import os
 
-def generate_pyprismatic_input(structure,destination_path,comment="Default Comment"):
-        """ Generates a .xyz file on which Pyprismatic can run
+def generate_pyprismatic_input(structure):
+        """ Generates a .XYZ file on which Pyprismatic can run
 
         Args:
 
         structure: pymatgen.Structure object 
         The entire structure
         
-        destination_path: str
-        File to be created, must have .XYZ as the suffix
-            
-        comment: str
+        Returns:
+            None
+            + file 'PP_input.XYZ'
         
         """
         
-        if destination_path[-4:] != '.xyz' and destination_path[-4:] != '.XYZ':
-            raise IOError('File suffix is not .xyz')
-        
-        if os.path.exists(destination_path):
-            raise IOError('The file you have specified already exists')
-        
-        line_1 = comment
-   
+        if os.path.exists('PP_input.XYZ'):
+            raise IOError('The file the program is attempting to write to already exists, please remove it.')
+         
         Z_list = []
         for element in structure.species:
                 Z_list.append(int(element.Z))
@@ -35,7 +29,7 @@ def generate_pyprismatic_input(structure,destination_path,comment="Default Comme
         
         # TODO Raise an error if (0,0,0) isn't a co-ord
         line_2 = [np.max(cart_coords[:,0]),np.max(cart_coords[:,1]),np.max(cart_coords[:,2])]
-        ## This line comes from the concept illustrated by the sample used in Ophus's 2017 paper
+        ## This idea comes from the concept illustrated by the sample used in Ophus's 2017 paper
         
         # TODO Get dw from Element's names
         if True:
@@ -45,8 +39,8 @@ def generate_pyprismatic_input(structure,destination_path,comment="Default Comme
         
         printing_array = np.hstack([atomic_numbers,cart_coords,percent_occupied,debeye_waller])
         
-        with open(destination_path, 'a') as f:
-            print(line_1,file=f)
+        with open('PP_input.XYZ', 'a') as f:
+            print("Default Comment",file=f)
             print('    {0:.3g}   {1:.3g}   {2:.3g}'.format(line_2[0],line_2[1],line_2[2]),file=f)
             for row in printing_array:
                     print('{0:.3g} {1:.4f} {2:.4f} {3:.4f} {4:.3f} {5:.3f}'.format(
