@@ -64,10 +64,10 @@ class ElectronDiffractionCalculator(object):
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
     
-    def calculate_ed_data(self,**kwargs):
+    def calculate_ed_data(self,*args,**kwargs):
         raise ValueError("This function has been split up, please use one of those functions")
         
-    def calculate_ed_data_dynamic(self,structure,scaling=[1,1,1],algorithm='prism'):
+    def calculate_ed_data_dynamic(self,structure,**kwargs):
         """ Calculates the Electron Diffraction data for a structure using a dynamic model
         
         Parameters
