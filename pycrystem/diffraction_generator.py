@@ -27,8 +27,8 @@ from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
 from pymatgen.util.plotting import get_publication_quality_plot
-from pycrystem.utils.pyprismatic_io_utils import generate_pyprismatic_input
-import pyprismatic as prism
+from pycrystem.utils.pyprismatic_io_utils import generate_pyprismatic_input, \
+    run_pyprismatic_simulation, import_pyprismatic_data
 
 
 _GAUSSIAN2D_EXPR = \
@@ -75,8 +75,7 @@ class ElectronDiffractionCalculator(object):
         structure: Structure
             The unit cell of the structure from which to derive the diffraction pattern
             
-        scaling: 
-            The scaling of afformentioned unit cell as [x,y,z] fractionals
+        kwargs: **
         
         Returns
         -------
@@ -86,15 +85,12 @@ class ElectronDiffractionCalculator(object):
         """
         ## This is clearly under development
         # Two potential places to do our scaling, need to run tests on both, + Physics discussion
-        generate_pyprismatic_input(structure,scaling_for_supercell=scaling) 
-        #TODO save to a filename ^ and put that in below + new filename for 
-        meta = prism.Metadata(filenameAtoms='demo.XYZ',E0=acclerating_voltage)
-        meta.tileX = 1
-        meta.tileY = 1
-        meta.tileZ = 1
-        meta.go() #saves as output_demo.mrc
-        output = prism.fileio.readMRC(fileoutput2)
+        generate_pyprismatic_input(structure) 
+        run_pyprismatic_simulation()
+        output = import_pyprismatic_data()
         diffracted_intensity = np.squeeze(np.sum(output,axis=2))
+        
+        return diffracted_intensity
         
     def calculate_ed_data_kinematic(self, structure, reciprocal_radius):
         """Calculates the Electron Diffraction data for a structure using a kinematic model:
