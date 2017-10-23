@@ -1,6 +1,7 @@
 import numpy as np
 import pymatgen as pmg
 import os
+import pyprismatic as pr
 
 def generate_pyprismatic_input(structure):
         """ Generates a .XYZ file on which Pyprismatic can run
@@ -48,3 +49,14 @@ def generate_pyprismatic_input(structure):
                         file=f)
             print("-1",file=f)
         return None
+    
+def run_pyprismatic_simulation(**kwargs):
+    meta = pr.Metadata(filenameAtoms="PP_input.XYZ",filenameOutput="PP_output.mrc") ##Sticks to defaults
+    ## Delete input
+    meta.go()
+    return None
+
+def import_pyprismatic_data():
+    output = pr.fileio.readMRC("PP_output.mrc")
+    ## Delete output
+    return output
