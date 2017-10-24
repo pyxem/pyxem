@@ -636,7 +636,46 @@ class DPCSignal2D(Signal2D):
         s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
         return(s_hist)
 
-    def rotate_data(self, angle):
+    def flip_axis_90_degrees(self, flips=1):
+        """Flip both the spatial and beam deflection axis
+
+        Will rotate both the image and the beam deflections
+        by 90 degrees.
+
+        Parameters
+        ----------
+        flips : int, default 1
+            Number of flips. The default (1) gives 90 degrees rotation.
+            2 gives 180, 3 gives 270, ...
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_stripe_pattern_dpc_signal()
+        >>> s
+        <DPCSignal2D, title: , dimensions: (2|50, 100)>
+        >>> s_rot = s.flip_axis_90_degrees()
+        >>> s_rot
+        <DPCSignal2D, title: , dimensions: (2|100, 50)>
+
+        Do several flips
+
+        >>> s_rot = s.flip_axis_90_degrees(2)
+        >>> s_rot
+        <DPCSignal2D, title: , dimensions: (2|50, 100)>
+        >>> s_rot = s.flip_axis_90_degrees(3)
+        >>> s_rot
+        <DPCSignal2D, title: , dimensions: (2|100, 50)>
+
+        """
+        s_out = self.deepcopy()
+        for i in range(flips):
+            s_out = s_out.swap_axes(1, 2)
+            s_out = s_out.rotate_beam_shifts(90)
+            s_out.data[1] = np.fliplr(s_out.data[1])
+        return s_out
+
+    def rotate_data(self, angle, reshape=False):
         """Rotate the scan dimensions by angle.
 
         Parameters
@@ -661,7 +700,7 @@ class DPCSignal2D(Signal2D):
         """
         s_new = self.map(
                 rotate, show_progressbar=False,
-                inplace=False, reshape=False,
+                inplace=False, reshape=reshape,
                 angle=-angle)
         return(s_new)
 

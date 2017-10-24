@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_allclose
 from fpd_data_processing.pixelated_stem_class import (
         DPCBaseSignal, DPCSignal1D, DPCSignal2D)
 import fpd_data_processing.dummy_data as dd
@@ -37,12 +37,10 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
         s0 = DPCSignal2D(data0)
         s0_corr = s0.correct_ramp(corner_size=0.05)
         self.assertTrue((s0.data == data0).all())
-        np.testing.assert_allclose(
-                s0_corr.data, np.zeros_like(data0), atol=1e-8)
+        assert_allclose(s0_corr.data, np.zeros_like(data0), atol=1e-8)
 
         s0.correct_ramp(corner_size=0.05, out=s0)
-        np.testing.assert_allclose(
-                s0.data, np.zeros_like(data0), atol=1e-8)
+        assert_allclose(s0.data, np.zeros_like(data0), atol=1e-8)
 
     def test_correct_ramp_x_y(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
@@ -54,10 +52,8 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
         s_y = DPCSignal2D(data_y)
         s_x_corr = s_x.correct_ramp(corner_size=0.05)
         s_y_corr = s_y.correct_ramp(corner_size=0.05)
-        np.testing.assert_allclose(
-                s_x_corr.data, np.zeros_like(data_x), atol=1e-8)
-        np.testing.assert_allclose(
-                s_y_corr.data, np.zeros_like(data_y), atol=1e-8)
+        assert_allclose(s_x_corr.data, np.zeros_like(data_x), atol=1e-8)
+        assert_allclose(s_y_corr.data, np.zeros_like(data_y), atol=1e-8)
 
         data_xy = np.swapaxes(
                 np.dstack((array_x, array_y)), 0, 2).astype('float64')
@@ -67,21 +63,17 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
         s_yx = DPCSignal2D(data_yx)
         s_xy_corr = s_xy.correct_ramp(corner_size=0.05)
         s_yx_corr = s_yx.correct_ramp(corner_size=0.05)
-        np.testing.assert_allclose(
-                s_xy_corr.data, np.zeros_like(data_xy), atol=1e-8)
-        np.testing.assert_allclose(
-                s_yx_corr.data, np.zeros_like(data_yx), atol=1e-8)
+        assert_allclose(s_xy_corr.data, np.zeros_like(data_xy), atol=1e-8)
+        assert_allclose(s_yx_corr.data, np.zeros_like(data_yx), atol=1e-8)
 
         data_tilt = np.swapaxes(np.dstack((
             array_x+array_y,
             np.fliplr(array_x)+array_y)), 0, 2).astype('float64')
         s_tilt = DPCSignal2D(data_tilt)
         s_tilt_corr = s_tilt.correct_ramp()
-        np.testing.assert_allclose(
-                s_tilt_corr.data, np.zeros_like(data_tilt), atol=1e-8)
+        assert_allclose(s_tilt_corr.data, np.zeros_like(data_tilt), atol=1e-8)
         s_tilt.correct_ramp(out=s_tilt)
-        np.testing.assert_allclose(
-                s_tilt.data, np.zeros_like(data_tilt), atol=1e-8)
+        assert_allclose(s_tilt.data, np.zeros_like(data_tilt), atol=1e-8)
 
     def test_correct_ramp_random(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
@@ -91,11 +83,10 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
         data_random = data_tilt + np.random.random(size=(2, 64, 64))*10
         s_random = DPCSignal2D(data_random)
         s_random_corr = s_random.correct_ramp()
-        np.testing.assert_allclose(
+        assert_allclose(
                 s_random_corr.data, np.zeros_like(data_random), atol=10)
         s_random.correct_ramp(out=s_random)
-        np.testing.assert_allclose(
-                s_random.data, np.zeros_like(data_random), atol=10)
+        assert_allclose(s_random.data, np.zeros_like(data_random), atol=10)
 
     def test_correct_ramp_one_large_value(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
@@ -107,8 +98,7 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
         s_corr = s.correct_ramp()
         s_corr.data[:, 20:30, 30:40] -= 1000
         print(s_corr.data.max())
-        np.testing.assert_allclose(
-                s_corr.data, np.zeros_like(data), atol=1e-8)
+        assert_allclose(s_corr.data, np.zeros_like(data), atol=1e-8)
 
 
 class test_get_dpc_signal(unittest.TestCase):
@@ -226,3 +216,49 @@ class test_rotate_beam_shifts(unittest.TestCase):
         data_x, data_y = s_rot.inav[0].data, s_rot.inav[1].data
         assert_almost_equal(data_x, np.ones_like(data_x)*sin_rad)
         assert_almost_equal(data_y, -np.ones_like(data_y)*sin_rad)
+
+
+class test_flip_axis_90_degrees(unittest.TestCase):
+
+    def setUp(self):
+        data = np.zeros((2, 100, 50))
+        for i in range(10, 90, 20):
+            data[0, i:i+10, 10:40] = 1.1
+            data[0, i+10:i+20, 10:40] = -1
+        self.s = DPCSignal2D(data)
+        self.s_shape = self.s.axes_manager.signal_shape
+
+    def test_flip_once(self):
+        s, s_shape = self.s, self.s_shape
+        assert_allclose(s.inav[0].data.mean(), 0.024, atol=1e-7)
+        assert_allclose(s.inav[1].data.mean(), 0., atol=1e-7)
+
+        s_r = s.flip_axis_90_degrees()
+        assert_allclose(s_r.inav[0].data.mean(), 0., atol=1e-7)
+        assert_allclose(s_r.inav[1].data.mean(), 0.024, atol=1e-7)
+        assert_allclose(s_r.axes_manager.signal_shape, s_shape[::-1])
+        assert_allclose(s_r.axes_manager.navigation_shape, (2, ))
+
+    def test_flip_twice(self):
+        s, s_shape = self.s, self.s_shape
+        s_r = s.flip_axis_90_degrees(2)
+        assert_allclose(s_r.inav[0].data.mean(), -0.024, atol=1e-7)
+        assert_allclose(s_r.inav[1].data.mean(), 0., atol=1e-7)
+        assert_allclose(s_r.axes_manager.signal_shape, s_shape)
+        assert_allclose(s_r.axes_manager.navigation_shape, (2, ))
+
+    def test_flip_thrice(self):
+        s, s_shape = self.s, self.s_shape
+        s_r = s.flip_axis_90_degrees(3)
+        assert_allclose(s_r.inav[0].data.mean(), 0., atol=1e-7)
+        assert_allclose(s_r.inav[1].data.mean(), -0.024, atol=1e-7)
+        assert_allclose(s_r.axes_manager.signal_shape, s_shape[::-1])
+        assert_allclose(s_r.axes_manager.navigation_shape, (2, ))
+
+    def test_flip_four_times(self):
+        s, s_shape = self.s, self.s_shape
+        s_r = s.flip_axis_90_degrees(4)
+        assert_allclose(s_r.inav[0].data.mean(), 0.024, atol=1e-7)
+        assert_allclose(s_r.inav[1].data.mean(), 0., atol=1e-7)
+        assert_allclose(s_r.axes_manager.signal_shape, s_shape)
+        assert_allclose(s_r.axes_manager.navigation_shape, (2, ))
