@@ -96,3 +96,28 @@ def get_simple_dpc_signal():
     data = np.mgrid[-5:5:100j, -5:5:100j]
     s = DPCSignal2D(data)
     return s
+
+
+def get_stripe_pattern_dpc_signal():
+    """Get a 2D DPC signal with a stripe pattern.
+
+    The stripe pattern only has an x-component, with alternating left/right
+    directions. There is a small a net moment in the positive x-direction
+    (leftwards).
+
+    Returns
+    -------
+    stripe_dpc_signal : DPCSignal2D
+
+    Example
+    -------
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_stripe_pattern_dpc_signal()
+
+    """
+    data = np.zeros((2, 100, 50))
+    for i in range(10, 90, 20):
+        data[0, i:i+10, 10:40] = 1.1
+        data[0, i+10:i+20, 10:40] = -1
+    s = DPCSignal2D(data)
+    return s
