@@ -121,18 +121,66 @@ def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
 
 
 def load_dpc_signal(filename):
+    """Load a differential phase contrast style signal.
+
+    This function can both files saved directly using HyperSpy,
+    and saved using this library. The only requirement is that
+    the signal has one navigation dimension, with this one dimension
+    having a size of two. The first navigation index is the x-shift,
+    while the second is the y-shift.
+    The signal dimension contains the spatial dimension(s), i.e. the
+    probe positions.
+
+    The return signal depends on the dimensions of the input file:
+    - If two signal dimensions: DPCSignal2D
+    - If one signal dimension: DPCSignal1D
+    - If zero signal dimension: DPCBaseSignal
+
+    Parameters
+    ----------
+    filename : string
+
+    Returns
+    -------
+    dpc_signal : DPCBaseSignal, DPCSignal1D, DPCSignal2D
+        The type of return signal depends on the signal dimensions of the
+        input file.
+
+    Examples
+    --------
+    >>> import fpd_data_processing.api as fp
+    >>> import numpy as np
+    >>> s = fp.DPCSignal2D(np.random.random((2, 90, 50)))
+    >>> s.save("test_dpc_signal2d.hspy")
+    >>> s_dpc = fp.load_dpc_signal("test_dpc_signal2d.hspy")
+    >>> s_dpc
+    <DPCSignal2D, title: , dimensions: (2|50, 90)>
+    >>> s_dpc.plot()
+
+    Saving a HyperSpy signal
+
+    >>> import hyperspy.api as hs
+    >>> s = hs.signals.Signal1D(np.random.random((2, 10)))
+    >>> s.save("test_dpc_signal1d.hspy")
+    >>> s_dpc_1d = fp.load_dpc_signal("test_dpc_signal1d.hspy")
+    >>> s_dpc_1d
+    <DPCSignal1D, title: , dimensions: (2|10)>
+
+    """
     s = load(filename)
     if s.axes_manager.navigation_shape != (2,):
         raise Exception(
                 "DPC signal needs to have 1 navigation "
                 "dimension with a size of 2.")
     if s.axes_manager.signal_dimension == 0:
-        s = DPCBaseSignal(load(filename)).T
+        s_out = DPCBaseSignal(s).T
     elif s.axes_manager.signal_dimension == 1:
-        s = DPCSignal1D(load(filename))
+        s_out = DPCSignal1D(s)
     elif s.axes_manager.signal_dimension == 2:
-        s = DPCSignal2D(load(filename))
+        s_out = DPCSignal2D(s)
     else:
         raise NotImplementedError(
                 "DPC signals only support 0, 1 and 2 signal dimensions")
-    return(s)
+    s_out.metadata = s.metadata.deepcopy()
+    s_out.axes_manager = s.axes_manager.deepcopy()
+    return s_out
