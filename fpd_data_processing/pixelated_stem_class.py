@@ -519,7 +519,8 @@ class DPCSignal2D(Signal2D):
 
     def get_color_image_with_indicator(
             self, phase_rotation=0, indicator_rotation=0,
-            autolim=True, autolim_sigma=4, scalebar_size=None):
+            autolim=True, autolim_sigma=4, scalebar_size=None, ax=None,
+            ax_indicator=None):
         """Make a matplotlib figure showing DPC contrast.
 
         Parameters
@@ -531,25 +532,45 @@ class DPCSignal2D(Signal2D):
             Changes the color wheel rotation.
         autolim : bool, default True
         autolim_sigma : float, default 4
+        scalebar_size : int, optional
+        ax : Matplotlib subplot, optional
+        ax_indicator : Matplotlib subplot, optional
+            If None, generate a new subplot for the indicator.
+            If False, do not include an indicator
 
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_simple_dpc_signal()
         >>> fig = s.get_color_image_with_indicator()
         >>> fig.savefig("simple_dpc_test_signal.png")
 
+        Matplotlib subplot as input
+
+        >>> import matplotlib.pyplot as plt
+        >>> fig, ax = plt.subplots()
+        >>> ax_indicator = fig.add_subplot(331)
+        >>> fig_return = s.get_color_image_with_indicator(
+                scalebar_size=10, ax=ax, ax_indicator=ax_indicator)
+
         """
         indicator_rotation = indicator_rotation - 120
-        fig, ax = plt.subplots(1, 1, figsize=(7, 7))
-        ax_indicator = fig.add_subplot(331)
+        if ax is None:
+            set_fig = True
+            fig, ax = plt.subplots(1, 1, figsize=(7, 7))
+        else:
+            fig = ax.figure
+            set_fig = False
         s = self.get_color_signal(
                 rotation=phase_rotation, autolim=autolim,
                 autolim_sigma=autolim_sigma)
         s.change_dtype('uint16')
         s.change_dtype('float64')
         ax.imshow(s.data/65536., extent=self.axes_manager.signal_extent)
-        pst._make_color_wheel(
-                ax_indicator,
-                rotation=indicator_rotation + phase_rotation)
+        if ax_indicator is not False:
+            if ax_indicator is None:
+                ax_indicator = fig.add_subplot(331)
+            pst._make_color_wheel(
+                    ax_indicator,
+                    rotation=indicator_rotation + phase_rotation)
         ax.set_axis_off()
         if scalebar_size is not None:
             scalebar_label = '{0} {1}'.format(
@@ -557,7 +578,8 @@ class DPCSignal2D(Signal2D):
             sb = AnchoredSizeBar(
                     ax.transData, scalebar_size, scalebar_label, loc=4)
             ax.add_artist(sb)
-        fig.subplots_adjust(0, 0, 1, 1)
+        if set_fig:
+            fig.subplots_adjust(0, 0, 1, 1)
         return fig
 
     def get_bivariate_histogram(
