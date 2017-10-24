@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
@@ -670,9 +671,12 @@ class DPCSignal2D(Signal2D):
         """
         s_out = self.deepcopy()
         for i in range(flips):
+            data0 = copy.deepcopy(s_out.data[0])
+            data1 = copy.deepcopy(s_out.data[1])
             s_out = s_out.swap_axes(1, 2)
+            s_out.data[0] = np.rot90(data0, -1)
+            s_out.data[1] = np.rot90(data1, -1)
             s_out = s_out.rotate_beam_shifts(90)
-            s_out.data[1] = np.fliplr(s_out.data[1])
         return s_out
 
     def rotate_data(self, angle, reshape=False):
