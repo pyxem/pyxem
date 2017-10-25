@@ -86,11 +86,11 @@ class ElectronDiffractionCalculator(object):
         ## This is clearly under development
         # Two potential places to do our scaling, need to run tests on both, + Physics discussion
         generate_pyprismatic_input(structure) 
-        run_pyprismatic_simulation()
-        output = import_pyprismatic_data()
+        meta = run_pyprismatic_simulation()
+        output = import_pyprismatic_data(meta)
         diffracted_intensity = np.squeeze(np.sum(output,axis=2))
         
-        return diffracted_intensity
+        return diffracted_intensity,meta
         
     def calculate_ed_data_kinematic(self, structure, reciprocal_radius):
         """Calculates the Electron Diffraction data for a structure using a kinematic model:
