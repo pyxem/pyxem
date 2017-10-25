@@ -50,9 +50,17 @@ def generate_pyprismatic_input(structure):
             print("-1",file=f)
         return None
     
-def run_pyprismatic_simulation(**kwargs):
-    meta = pr.Metadata(filenameAtoms="PP_input.XYZ",filenameOutput="PP_output.mrc") ##Sticks to defaults
+def run_pyprismatic_simulation(prismatic_kwargs=None):
+    if prismatic_kwargs = None:
+	prismatic_kwargs = {}
+    if filenameAtoms not in prismatic_kwargs.keys:
+	kwargs['filenameAtoms'] = "PP_input.XYZ"
+    if filenameOutput not in prismatic_kwargs.keys:
+	kwargs['filenameOutput']="PP_output.mrc"
+    
+    meta = pr.Metadata(*prismatic_kwargs) ##Sticks to defaults apart from the unpacked list
     ## Delete input
+    ## Print the meta to a file
     meta.go()
     return meta
 
