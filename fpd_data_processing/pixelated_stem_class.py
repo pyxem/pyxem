@@ -549,7 +549,7 @@ class DPCSignal2D(Signal2D):
         >>> fig, ax = plt.subplots()
         >>> ax_indicator = fig.add_subplot(331)
         >>> fig_return = s.get_color_image_with_indicator(
-                scalebar_size=10, ax=ax, ax_indicator=ax_indicator)
+        ...     scalebar_size=10, ax=ax, ax_indicator=ax_indicator)
 
         """
         indicator_rotation = indicator_rotation - 120
