@@ -79,16 +79,16 @@ class ElectronDiffractionCalculator(object):
         
         Returns
         -------
-        DiffractionSimulation
-            The data associated with this structure and diffraction set up
+        None
+            The best return choice remains under consideration
         
         """
         generate_pyprismatic_input(structure)
         meta = run_pyprismatic_simulation(prismatic_kwargs)
         output = import_pyprismatic_data(meta)
-        diffracted_intensity = np.squeeze(np.sum(output,axis=2))
+        diffracted_intensity = np.squeeze(np.sum(output,axis=2)) #see prismatic-em examples for what this is
         
-        return diffracted_intensity,meta
+        return None
         
     def calculate_ed_data_kinematic(self, structure, reciprocal_radius):
         """Calculates the Electron Diffraction data for a structure using a kinematic model:
