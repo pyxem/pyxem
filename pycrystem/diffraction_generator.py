@@ -67,7 +67,7 @@ class ElectronDiffractionCalculator(object):
     def calculate_ed_data(self,*args,**kwargs):
         raise ValueError("This function has been split up, please use one of those functions")
         
-    def calculate_ed_data_dynamic(self,structure,**kwargs):
+    def calculate_ed_data_dynamic(self,structure,prismatic_kwargs=None):
         """ Calculates the Electron Diffraction data for a structure using a dynamic model
         
         Parameters
@@ -75,7 +75,7 @@ class ElectronDiffractionCalculator(object):
         structure: Structure
             The unit cell of the structure from which to derive the diffraction pattern
             
-        kwargs: **
+        prismatic_kwargs: Arguments to be passed to Pyprismatic as a dict 
         
         Returns
         -------
@@ -83,10 +83,8 @@ class ElectronDiffractionCalculator(object):
             The data associated with this structure and diffraction set up
         
         """
-        ## This is clearly under development
-        # Two potential places to do our scaling, need to run tests on both, + Physics discussion
-        generate_pyprismatic_input(structure) 
-        meta = run_pyprismatic_simulation()
+        generate_pyprismatic_input(structure)
+        meta = run_pyprismatic_simulation(prismatic_kwargs)
         output = import_pyprismatic_data(meta)
         diffracted_intensity = np.squeeze(np.sum(output,axis=2))
         
