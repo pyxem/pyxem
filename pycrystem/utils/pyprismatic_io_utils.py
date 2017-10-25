@@ -54,9 +54,10 @@ def run_pyprismatic_simulation(**kwargs):
     meta = pr.Metadata(filenameAtoms="PP_input.XYZ",filenameOutput="PP_output.mrc") ##Sticks to defaults
     ## Delete input
     meta.go()
-    return None
+    return meta
 
-def import_pyprismatic_data():
-    output = pr.fileio.readMRC("PP_output.mrc")
+def import_pyprismatic_data(meta):
+    read_file = meta.filenameOutput
+    output = pr.fileio.readMRC(read_file)
     ## Delete output
     return output
