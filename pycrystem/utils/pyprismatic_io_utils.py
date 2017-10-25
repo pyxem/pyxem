@@ -18,8 +18,9 @@ def generate_pyprismatic_input(structure):
         """
         
         if os.path.exists('PP_input.XYZ'):
-            raise IOError('The file the program is attempting to write to already exists, please remove it.')
-         
+            #raise IOError('The file the program is attempting to write to already exists, please remove it.')
+            pass
+        
         Z_list = []
         for element in structure.species:
                 Z_list.append(int(element.Z))
@@ -51,14 +52,15 @@ def generate_pyprismatic_input(structure):
         return None
     
 def run_pyprismatic_simulation(prismatic_kwargs=None):
-    if prismatic_kwargs = None:
-	prismatic_kwargs = {}
-    if filenameAtoms not in prismatic_kwargs.keys:
-	kwargs['filenameAtoms'] = "PP_input.XYZ"
-    if filenameOutput not in prismatic_kwargs.keys:
-	kwargs['filenameOutput']="PP_output.mrc"
-    
-    meta = pr.Metadata(*prismatic_kwargs) ##Sticks to defaults apart from the unpacked list
+    if prismatic_kwargs == None:
+        prismatic_kwargs = {}
+    print(prismatic_kwargs)
+    if 'filenameAtoms' not in prismatic_kwargs.keys():
+        prismatic_kwargs.update({'filenameAtoms':"PP_input.XYZ"})
+    if 'filenameOutput' not in prismatic_kwargs.keys():
+        prismatic_kwargs.update({'filenameOutput':"PP_output.mrc"})
+    print(prismatic_kwargs)
+    meta = pr.Metadata(**prismatic_kwargs) ##Sticks to defaults apart from the unpacked dict
     ## Delete input
     ## Print the meta to a file
     meta.go()
