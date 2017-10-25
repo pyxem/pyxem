@@ -49,7 +49,7 @@ Due to mixed of compiled and non-compiled code some care is required in the inst
 
 Proves very useful in determining whether::
 
-	$ export $LIBRARY_PATH=~/lib/boost_1_65_1
+	$ export LIBRARY_PATH=~/lib/boost_1_65_1
 
 Or similar has been succesful.
 
