@@ -31,3 +31,5 @@ class test_dummy_data_module(unittest.TestCase):
     def test_get_square_dpc_signal(self):
         s = dd.get_square_dpc_signal()
         s.plot()
+        s_ramp = dd.get_square_dpc_signal(add_ramp=True)
+        s_ramp.plot()

@@ -123,17 +123,29 @@ def get_stripe_pattern_dpc_signal():
     return s
 
 
-def get_square_dpc_signal():
+def get_square_dpc_signal(add_ramp=False):
     """Get a 2D DPC signal resembling a Landau domain.
+
+    Parameters
+    ----------
+    add_ramp : bool, default False
+        If True, will add a ramp in the beam shift across the image
+        to emulate the effects of d-scan.
 
     Returns
     -------
     square_dpc_signal : DPCSignal2D
 
-    Example
-    -------
+    Examples
+    --------
     >>> import fpd_data_processing.api as fp
     >>> s = fp.dummy_data.get_square_dpc_signal()
+    >>> s.plot()
+
+    Adding a ramp
+
+    >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=True)
+    >>> s.plot()
 
     """
     imX, imY = 300, 300
@@ -150,5 +162,9 @@ def get_square_dpc_signal():
     data_x[mask1] += -1
     data_y[mask2] += 1
     data_x[mask3] += 1
+    if add_ramp:
+        ramp_y, ramp_x = np.mgrid[18:28:imY*1j, -5.3:1.2:imX*1j]
+        data_x += ramp_x
+        data_y += ramp_y
     s = DPCSignal2D((data_y, data_x))
     return s
