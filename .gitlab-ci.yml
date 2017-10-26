@@ -34,6 +34,10 @@ make_documentation:
     - cd doc
     - cd images/analysing_holz_datasets/
     - xvfb-run -a python3 testdata.py
+    - cd ../analysing_holz_datasets/
+    - xvfb-run -a python3 make_dpc_analysis_images.py
+    - cd ../frontpage/
+    - xvfb-run -a python3 make_frontpage_images.py
     - cd ../../
     - make html
     - cd ..

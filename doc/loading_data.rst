@@ -110,6 +110,8 @@ To retain the axes manager and metadata, use the :py:func:`fpd_data_processing.i
     >>> s_new = it.signal_to_pixelated_stem(s)
 
 
+.. _load_dpc_data:
+
 Differential phase contrast (beam shift) data
 ---------------------------------------------
 
