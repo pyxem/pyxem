@@ -151,3 +151,4 @@ def get_square_dpc_signal():
     data_y[mask2] += 1
     data_x[mask3] += 1
     s = DPCSignal2D((data_y, data_x))
+    return s
