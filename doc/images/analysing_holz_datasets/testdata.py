@@ -1,3 +1,4 @@
+import matplotlib
 import fpd_data_processing.api as fp
 
 s = fp.dummy_data.get_holz_heterostructure_test_signal()
@@ -91,3 +92,6 @@ fig_signal = g_centre._plot.signal_plot.figure
 
 fig_signal.savefig("testdata_gaussian_centre.png")
 
+
+# Closing all the matplotlib figures
+matplotlib.pyplot.close("all")

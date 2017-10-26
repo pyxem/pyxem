@@ -1,3 +1,4 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import hyperspy.api as hs
 import fpd_data_processing.api as fp
@@ -17,3 +18,6 @@ s.metadata.General.title = "Magnetic DPC example data"
 s.plot()
 fig_sig_x = s._plot.signal_plot.figure
 fig_sig_x.savefig("dpc_dummy_data.jpg")
+
+# Closing all the matplotlib figures
+matplotlib.pyplot.close("all")

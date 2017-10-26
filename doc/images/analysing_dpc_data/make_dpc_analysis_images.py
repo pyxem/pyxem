@@ -1,3 +1,4 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import fpd_data_processing.api as fp
 
@@ -70,3 +71,6 @@ s2_rot_flip_color = s2_rot_flip.get_color_signal()
 s2_rot_flip_color.plot()
 fig_sig = s2_rot_flip_color._plot.signal_plot.figure
 fig_sig.savefig("dpc_rotate_flip_color2.jpg")
+
+# Closing all the matplotlib figures
+matplotlib.pyplot.close("all")
