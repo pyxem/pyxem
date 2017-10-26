@@ -149,7 +149,7 @@ def get_square_dpc_signal(add_ramp=False):
 
     """
     imX, imY = 300, 300
-    data_y, data_x = np.random.random((2, imY, imX)) - 0.5
+    data_y, data_x = np.random.normal(loc=0.1, size=(2, imY, imX))
     x, y = np.mgrid[-150:150:imY*1j, -150:150:imX*1j]
     t = np.arctan2(x, y) % (2*np.pi)
     mask_xy = (x < 100)*(x > -100)*(y < 100)*(y > -100)
@@ -157,13 +157,17 @@ def get_square_dpc_signal(add_ramp=False):
     mask1 = (t > 3*np.pi/4) * (t < 5*np.pi/4) * mask_xy
     mask2 = (t > 5*np.pi/4) * (t < 7*np.pi/4) * mask_xy
     mask3 = ((t > 7*np.pi/4) + (t < np.pi/4)) * mask_xy
-    data_y[mask0] += -1
-    data_x[mask1] += -1
-    data_y[mask2] += 1
-    data_x[mask3] += 1
+    data_y[mask0] -= np.random.normal(loc=3, scale=0.1, size=(imY, imX))[mask0]
+    data_x[mask1] -= np.random.normal(loc=3, scale=0.1, size=(imY, imX))[mask1]
+    data_y[mask2] += np.random.normal(loc=3, scale=0.1, size=(imY, imX))[mask2]
+    data_x[mask3] += np.random.normal(loc=3, scale=0.1, size=(imY, imX))[mask3]
     if add_ramp:
         ramp_y, ramp_x = np.mgrid[18:28:imY*1j, -5.3:1.2:imX*1j]
         data_x += ramp_x
         data_y += ramp_y
     s = DPCSignal2D((data_y, data_x))
+    s.axes_manager.signal_axes[0].name = "Probe position x"
+    s.axes_manager.signal_axes[1].name = "Probe position y"
+    s.axes_manager.signal_axes[0].units = "nm"
+    s.axes_manager.signal_axes[1].units = "nm"
     return s
