@@ -40,6 +40,12 @@ IO tools
     :members:
     :undoc-members:
 
+Radial
+======
+.. automodule:: fpd_data_processing.radial
+    :members:
+    :undoc-members:
+
 Dummy data
 ==========
 .. automodule:: fpd_data_processing.dummy_data

@@ -6,8 +6,8 @@ Library for processing data acquired on a fast pixelated electron detector, acqu
 .. toctree::
    install
    loading_data
-   generate_test_data
    analysing_holz_datasets
+   generate_test_data
    api
    :maxdepth: 2
    :caption: Contents:
