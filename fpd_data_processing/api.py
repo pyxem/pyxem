@@ -1,3 +1,4 @@
+from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import (
         DPCBaseSignal, DPCSignal1D, DPCSignal2D)
