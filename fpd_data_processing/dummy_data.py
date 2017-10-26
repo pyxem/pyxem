@@ -121,3 +121,33 @@ def get_stripe_pattern_dpc_signal():
         data[0, i+10:i+20, 10:40] = -1
     s = DPCSignal2D(data)
     return s
+
+
+def get_square_dpc_signal():
+    """Get a 2D DPC signal resembling a Landau domain.
+
+    Returns
+    -------
+    square_dpc_signal : DPCSignal2D
+
+    Example
+    -------
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_square_dpc_signal()
+
+    """
+    imX, imY = 300, 300
+    data_y, data_x = np.random.random((2, imY, imX)) - 0.5
+    x, y = np.mgrid[-150:150:imY*1j, -150:150:imX*1j]
+    r = (x**2 + y**2)**0.5
+    t = np.arctan2(x, y) % (2*np.pi)
+    mask_xy = (x < 100)*(x > -100)*(y < 100)*(y > -100)
+    mask0 = (t > np.pi/4)    * (t < 3*np.pi/4) * mask_xy
+    mask1 = (t > 3*np.pi/4)  * (t < 5*np.pi/4) * mask_xy
+    mask2 = (t > 5*np.pi/4)  * (t < 7*np.pi/4) * mask_xy
+    mask3 = ((t > 7*np.pi/4) + (t < np.pi/4))  * mask_xy
+    data_y[mask0] += -1
+    data_x[mask1] += -1
+    data_y[mask2] += 1
+    data_x[mask3] += 1
+    s = DPCSignal2D((data_y, data_x))

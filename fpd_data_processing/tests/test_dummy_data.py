@@ -21,3 +21,6 @@ class test_dummy_data_module(unittest.TestCase):
 
     def test_get_stripe_pattern_dpc_signal(self):
         dd.get_stripe_pattern_dpc_signal()
+
+    def test_get_square_dpc_signal(self):
+        dd.get_square_dpc_signal()
