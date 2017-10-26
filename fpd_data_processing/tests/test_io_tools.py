@@ -2,7 +2,9 @@ import os
 import unittest
 import numpy as np
 from tempfile import TemporaryDirectory
+import hyperspy.api as hs
 import fpd_data_processing.api as fp
+import fpd_data_processing.io_tools as it
 
 
 my_path = os.path.dirname(__file__)
@@ -118,3 +120,52 @@ class test_pixelatedstem_signal_io(unittest.TestCase):
 
         s = fp.load_fpd_signal(filename, lazy=True)
         self.assertEqual(s.axes_manager.shape, (2, 2, 256, 256))
+
+
+class test_signal_to_pixelated_stem(unittest.TestCase):
+
+    def test_conserve_signal_axes_metadata(self):
+        x_nav, y_nav, x_sig, y_sig = 9, 8, 5, 7
+        x_nav_scale, y_nav_scale, x_sig_scale, y_sig_scale = 0.5, 0.2, 1.2, 3.2
+        x_nav_off, y_nav_off, x_sig_off, y_sig_off = 30, 12, 76, 32
+        x_nav_name, y_nav_name, x_sig_name, y_sig_name = "nX", "nY", "sX", "sY"
+        x_nav_unit, y_nav_unit, x_sig_unit, y_sig_unit = "u1", "u2", "u3", "u4"
+        title = "test_title"
+        data = np.random.random((y_nav, x_nav, y_sig, x_sig))
+
+        s = hs.signals.Signal2D(data)
+        s.metadata.General.title = title
+        am = s.axes_manager
+        am[0].scale, am[0].offset = x_nav_scale, x_nav_off
+        am[1].scale, am[1].offset = y_nav_scale, y_nav_off
+        am[2].scale, am[2].offset = x_sig_scale, x_sig_off
+        am[3].scale, am[3].offset = y_sig_scale, y_sig_off
+        am[0].name, am[0].units = x_nav_name, x_nav_unit
+        am[1].name, am[1].units = y_nav_name, y_nav_unit
+        am[2].name, am[2].units = x_sig_name, x_sig_unit
+        am[3].name, am[3].units = y_sig_name, y_sig_unit
+
+        s1 = it.signal_to_pixelated_stem(s)
+
+        self.assertTrue((data == s1.data).all())
+        self.assertEqual(s1.metadata.General.title, title)
+        self.assertEqual(s1.axes_manager.shape, (x_nav, y_nav, x_sig, y_sig))
+        self.assertEqual(s1.axes_manager[0].scale, x_nav_scale)
+        self.assertEqual(s1.axes_manager[1].scale, y_nav_scale)
+        self.assertEqual(s1.axes_manager[2].scale, x_sig_scale)
+        self.assertEqual(s1.axes_manager[3].scale, y_sig_scale)
+
+        self.assertEqual(s1.axes_manager[0].offset, x_nav_off)
+        self.assertEqual(s1.axes_manager[1].offset, y_nav_off)
+        self.assertEqual(s1.axes_manager[2].offset, x_sig_off)
+        self.assertEqual(s1.axes_manager[3].offset, y_sig_off)
+
+        self.assertEqual(s1.axes_manager[0].name, x_nav_name)
+        self.assertEqual(s1.axes_manager[1].name, y_nav_name)
+        self.assertEqual(s1.axes_manager[2].name, x_sig_name)
+        self.assertEqual(s1.axes_manager[3].name, y_sig_name)
+
+        self.assertEqual(s1.axes_manager[0].units, x_nav_unit)
+        self.assertEqual(s1.axes_manager[1].units, y_nav_unit)
+        self.assertEqual(s1.axes_manager[2].units, x_sig_unit)
+        self.assertEqual(s1.axes_manager[3].units, y_sig_unit)

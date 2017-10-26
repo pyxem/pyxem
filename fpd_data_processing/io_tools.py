@@ -75,24 +75,53 @@ def _load_fpd_emd_file(filename):
         raise Exception(
                 "Pixelated dataset not found")
 
-    s_new = _signal2d_to_pixelated_stem(s)
+    s_new = signal_to_pixelated_stem(s)
     return(s_new)
 
 
 def _load_other_file(filename, lazy=False):
     s = load(filename, lazy=lazy)
-    s_new = _signal2d_to_pixelated_stem(s)
+    s_new = signal_to_pixelated_stem(s)
     return s_new
 
 
-def _signal2d_to_pixelated_stem(s):
-    s_new = PixelatedSTEM(s.data)
-    for i in range(len(s.axes_manager.shape)):
-        s_new.axes_manager[i].offset = s.axes_manager[i].offset
-        s_new.axes_manager[i].scale = s.axes_manager[i].scale
-        s_new.axes_manager[i].name = s.axes_manager[i].name
-        s_new.axes_manager[i].units = s.axes_manager[i].units
-    s_new.metadata = s.metadata.deepcopy()
+def signal_to_pixelated_stem(s):
+    """Make a PixelatedSTEM object from a HyperSpy signal.
+
+    This will retain both the axes information and the metadata.
+    If the signal is lazy, the function will return LazyPixelatedSTEM.
+
+    Parameters
+    ----------
+    s : HyperSpy signal
+        Should work for any HyperSpy signal.
+
+    Returns
+    -------
+    pixelated_stem_signal : PixelatedSTEM or LazyPixelatedSTEM object
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import hyperspy.api as hs
+    >>> import fpd_data_processing.api as fp
+    >>> s = hs.signals.Signal2D(np.random.random((8, 11, 21, 13)))
+    >>> s.metadata.General.title = "test dataset"
+    >>> s
+    <Signal2D, title: test dataset, dimensions: (11, 8|13, 21)>
+    >>> from fpd_data_processing.io_tools import signal_to_pixelated_stem
+    >>> s_new = signal_to_pixelated_stem(s)
+    >>> s_new
+    <PixelatedSTEM, title: test dataset, dimensions: (11, 8|13, 21)>
+
+    """
+    # Sorting axes as a function of its index
+    axes_list = [x for _, x in sorted(s.axes_manager.as_dictionary().items())]
+    metadata = s.metadata.as_dictionary()
+    if s._lazy:
+        s_new = LazyPixelatedSTEM(s.data, axes=axes_list, metadata=metadata)
+    else:
+        s_new = PixelatedSTEM(s.data, axes=axes_list, metadata=metadata)
     return s_new
 
 
