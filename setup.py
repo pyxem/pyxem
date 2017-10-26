@@ -4,7 +4,7 @@ setup(
         packages = [
             'fpd_data_processing',
             ],
-        version = '0.2.0.dev1',
+        version = '0.2.0.dev2',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a fast pixelated detector',
         keywords = [
             'STEM',
