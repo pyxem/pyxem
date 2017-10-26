@@ -7,3 +7,7 @@
 *.swp
 *.swo
 .cache
+*.jpg
+*.png
+*.hdf5
+*.hspy
