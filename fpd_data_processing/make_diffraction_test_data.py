@@ -1,7 +1,9 @@
 import numpy as np
-from hyperspy.misc.utils import isiterable
 from scipy.ndimage.filters import gaussian_filter
+import dask.array as da
+from hyperspy.misc.utils import isiterable
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
+from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 
 
 class Circle(object):
@@ -319,8 +321,7 @@ def generate_4d_data(
         disk_x=25, disk_y=25, disk_r=5, disk_I=20,
         ring_x=25, ring_y=25, ring_r=20, ring_I=6, ring_lw=0,
         blur=True, blur_sigma=1, downscale=True, add_noise=False,
-        noise_amplitude=1,
-        ):
+        noise_amplitude=1, lazy=False, lazy_chunks=None):
     """
     Generate a test dataset containing a disk and diffraction ring.
     Useful for checking that radial integration
@@ -375,6 +376,10 @@ def generate_4d_data(
         Add Gaussian random noise.
     noise_amplitude : float, default 1
         The amplitude of the noise, if add_noise is True.
+    lazy : bool, default False
+        If True, the signal will be lazy
+    lazy_chunks : tuple, optional
+        Used if lazy is True, default (10, 10, 10, 10).
 
     Returns
     -------
@@ -474,4 +479,9 @@ def generate_4d_data(
         if add_noise:
             s.data[index][:] += np.random.random(
                     size=(image_size_y, image_size_x)) * noise_amplitude
+    if lazy:
+        if lazy_chunks is None:
+            lazy_chunks = 10, 10, 10, 10
+        data_lazy = da.from_array(s.data, lazy_chunks)
+        s = LazyPixelatedSTEM(data_lazy)
     return s
