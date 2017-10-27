@@ -71,6 +71,85 @@ class PixelatedSTEM(Signal2D):
         s_com.axes_manager.navigation_axes[0].name = "Beam position"
         return(s_com)
 
+    def _virtual_detector(self, cx, cy, r, r_inner=None):
+        roi = hs.roi.CircleROI(cx=cx, cy=cy, r=r, r_inner=r_inner)
+        s = roi(self, axes=(2, 3)).nansum((2, 3)).T
+        return s
+
+    def virtual_bright_field(self, cx=None, cy=None, r=None):
+        """Get a virtual bright field signal.
+
+        Can be sum the whole diffraction plane, or a circle subset.
+        If any of the parameters are None, it will sum the whole diffraction
+        plane.
+
+        Parameters
+        ----------
+        cx, cy : floats, optional
+            x- and y-centre positions.
+        r : float, optional
+            Outer radius.
+
+        Returns
+        -------
+        virtual_bf_signal : HyperSpy 2D signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
+        >>> s_bf = s.virtual_bright_field()
+        >>> s_bf.plot()
+
+        Sum a subset of the diffraction pattern
+
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
+        >>> s_bf = s.virtual_bright_field(40, 40, 10)
+        >>> s_bf.plot()
+
+        """
+        if (cx is None) or (cy is None) or (r is None):
+            s_bf = self.sum(self.axes_manager.signal_axes).T
+        else:
+            s_bf = self._virtual_detector(cx=cx, cy=cy, r=r, r_inner=None)
+        if self._lazy:
+            s_bf.compute()
+        return s_bf
+
+    def virtual_annular_dark_field(self, cx, cy, r_inner, r):
+        """Get a virtual annular dark field signal.
+
+        Parameters
+        ----------
+        cx, cy : floats
+            x- and y-centre positions.
+        r_inner : float
+            Inner radius.
+        r : float
+            Outer radius.
+
+        Returns
+        -------
+        virtual_adf_signal : HyperSpy 2D signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
+        >>> s_adf = s.virtual_annular_dark_field(40, 40, 20, 40)
+        >>> s_adf.plot()
+
+        """
+        if r_inner > r:
+            raise ValueError(
+                    "r_inner must be higher than r. The argument order is " +
+                    "(cx, cy, r_inner, r)")
+        s_adf = self._virtual_detector(cx=cx, cy=cy, r=r, r_inner=r_inner)
+        if self._lazy:
+            s_adf.compute()
+        return s_adf
+
     def radial_integration(
             self, centre_x=None, centre_y=None, mask_array=None,
             parallel=True, show_progressbar=True):
