@@ -635,7 +635,7 @@ class DPCSignal2D(Signal2D):
         ...     scalebar_size=10, ax=ax, ax_indicator=ax_indicator)
 
         """
-        indicator_rotation = indicator_rotation - 120
+        indicator_rotation = indicator_rotation + 60
         if ax is None:
             set_fig = True
             fig, ax = plt.subplots(1, 1, figsize=(7, 7))
