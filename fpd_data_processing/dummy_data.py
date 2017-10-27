@@ -70,7 +70,7 @@ def get_holz_simple_test_signal(lazy=False):
             image_size_x=50, image_size_y=50,
             disk_x=25, disk_y=25, disk_r=2, disk_I=20,
             ring_x=ring_x, ring_y=ring_y, ring_r=15, ring_I=10,
-            add_noise=True, lazy=True)
+            add_noise=True, lazy=lazy)
     return(s)
 
 
@@ -113,7 +113,7 @@ def get_holz_heterostructure_test_signal(lazy=False):
             image_size_x=80, image_size_y=80,
             disk_x=x, disk_y=y, disk_r=disk_r, disk_I=disk_I,
             ring_x=x, ring_y=y, ring_r=ring_r, ring_I=ring_I,
-            add_noise=True)
+            add_noise=True, lazy=lazy)
     return(s)
 
 
