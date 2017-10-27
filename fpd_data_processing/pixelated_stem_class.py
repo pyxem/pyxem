@@ -61,7 +61,7 @@ class PixelatedSTEM(Signal2D):
                 show_progressbar=show_progressbar,
                 threshold=threshold, mask=mask)
         if self._lazy:
-            s_com.compute()
+            s_com.compute(progressbar=show_progressbar)
         if self.axes_manager.navigation_dimension == 0:
             s_com = DPCBaseSignal(s_com.data).T
         elif self.axes_manager.navigation_dimension == 1:
@@ -76,7 +76,8 @@ class PixelatedSTEM(Signal2D):
         s = roi(self, axes=(2, 3)).nansum((2, 3)).T
         return s
 
-    def virtual_bright_field(self, cx=None, cy=None, r=None):
+    def virtual_bright_field(
+            self, cx=None, cy=None, r=None, show_progressbar=True):
         """Get a virtual bright field signal.
 
         Can be sum the whole diffraction plane, or a circle subset.
@@ -105,7 +106,7 @@ class PixelatedSTEM(Signal2D):
 
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
-        >>> s_bf = s.virtual_bright_field(40, 40, 10)
+        >>> s_bf = s.virtual_bright_field(40, 40, 10, show_progressbar=False)
         >>> s_bf.plot()
 
         """
@@ -114,10 +115,11 @@ class PixelatedSTEM(Signal2D):
         else:
             s_bf = self._virtual_detector(cx=cx, cy=cy, r=r, r_inner=None)
         if self._lazy:
-            s_bf.compute()
+            s_bf.compute(progressbar=show_progressbar)
         return s_bf
 
-    def virtual_annular_dark_field(self, cx, cy, r_inner, r):
+    def virtual_annular_dark_field(
+            self, cx, cy, r_inner, r, show_progressbar=True):
         """Get a virtual annular dark field signal.
 
         Parameters
@@ -128,6 +130,7 @@ class PixelatedSTEM(Signal2D):
             Inner radius.
         r : float
             Outer radius.
+        show_progressbar : bool, default True
 
         Returns
         -------
@@ -137,7 +140,8 @@ class PixelatedSTEM(Signal2D):
         --------
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
-        >>> s_adf = s.virtual_annular_dark_field(40, 40, 20, 40)
+        >>> s_adf = s.virtual_annular_dark_field(
+        ...     40, 40, 20, 40, show_progressbar=False)
         >>> s_adf.plot()
 
         """
@@ -147,7 +151,7 @@ class PixelatedSTEM(Signal2D):
                     "(cx, cy, r_inner, r)")
         s_adf = self._virtual_detector(cx=cx, cy=cy, r=r, r_inner=r_inner)
         if self._lazy:
-            s_adf.compute()
+            s_adf.compute(progressbar=show_progressbar)
         return s_adf
 
     def radial_integration(
@@ -216,7 +220,7 @@ class PixelatedSTEM(Signal2D):
                 radial_array_size=radial_array_size,
                 show_progressbar=show_progressbar)
         if self._lazy:
-            s_radial.compute()
+            s_radial.compute(progressbar=show_progressbar)
         else:
             s_radial = hs.signals.Signal1D(s_radial.data)
 
