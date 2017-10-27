@@ -4,27 +4,65 @@ import fpd_data_processing.make_diffraction_test_data as mdtd
 from fpd_data_processing.pixelated_stem_class import DPCSignal2D
 
 
-def get_disk_shift_simple_test_signal():
+def get_disk_shift_simple_test_signal(lazy=False):
     """Get HyperSpy 2D signal with 2D navigation dimensions for DPC testing.
 
     Probe size x/y (20, 20), and image size x/y (50, 50).
     Disk moves from 22-28 x/y.
+
+    Parameters
+    ----------
+    lazy : bool, default False
+
+    Returns
+    -------
+    disk_shift_signal : PixelatedSTEM signal
+
+    Examples
+    --------
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
+    >>> s.plot()
+
+    Load as lazy
+
+    >>> s = fp.dummy_data.get_disk_shift_simple_test_signal(lazy=True)
+
     """
     disk_x, disk_y = np.mgrid[22:28:20j, 22:28:20j]
     s = mdtd.generate_4d_data(
             probe_size_x=20, probe_size_y=20,
             image_size_x=50, image_size_y=50,
             disk_x=disk_x, disk_y=disk_y, disk_r=2,
-            ring_x=None, add_noise=True)
-    return(s)
+            ring_x=None, add_noise=True, lazy=lazy)
+    return s
 
 
-def get_holz_simple_test_signal():
+def get_holz_simple_test_signal(lazy=False):
     """Get HyperSpy 2D signal with 2D navigation dimensions for HOLZ testing.
 
     Probe size x/y (20, 20), and image size x/y (50, 50).
     Contains a disk and a ring. The disk stays at x, y = 25, 25, with radius 2.
     The ring has a radius of 20, and moves from x, y = 24-26, 24-26.
+
+    Parameters
+    ----------
+    lazy : bool, default False
+
+    Returns
+    -------
+    holz_signal : PixelatedSTEM signal
+
+    Examples
+    --------
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_holz_simple_test_signal()
+    >>> s.plot()
+
+    Load as lazy
+
+    >>> s = fp.dummy_data.get_holz_simple_test_signal(lazy=True)
+
     """
     ring_x, ring_y = np.mgrid[24:26:20j, 24:26:20j]
     s = mdtd.generate_4d_data(
@@ -32,15 +70,19 @@ def get_holz_simple_test_signal():
             image_size_x=50, image_size_y=50,
             disk_x=25, disk_y=25, disk_r=2, disk_I=20,
             ring_x=ring_x, ring_y=ring_y, ring_r=15, ring_I=10,
-            add_noise=True)
+            add_noise=True, lazy=True)
     return(s)
 
 
-def get_holz_heterostructure_test_signal():
+def get_holz_heterostructure_test_signal(lazy=False):
     """Get HyperSpy 2D signal with 2D navigation dimensions for HOLZ testing.
 
     The centre, radius and intensity of the ring varies as a function of probe
     position. The disk centre position varies as a function of probe position.
+
+    Parameters
+    ----------
+    lazy : bool, default False
 
     Returns
     -------
@@ -51,6 +93,10 @@ def get_holz_heterostructure_test_signal():
     >>> import fpd_data_processing.api as fp
     >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
     >>> s.plot()
+
+    Load as lazy
+
+    >>> s = fp.dummy_data.get_holz_heterostructure_test_signal(lazy=True)
 
     """
     probe_size_x, probe_size_y = 40, 40
