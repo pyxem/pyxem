@@ -484,3 +484,57 @@ class test_angular_slice_radial_integration(unittest.TestCase):
         self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
         self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())
         self.assertTrue((s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all())
+
+
+class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
+
+    def test_simple(self):
+        shape = (5, 9, 12, 14)
+        s = PixelatedSTEM(np.zeros(shape))
+        s1 = s.virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
+        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+        self.assertEqual(s1.data.sum(), 0.)
+
+    def test_one_value(self):
+        shape = (5, 9, 12, 14)
+        s = PixelatedSTEM(np.zeros(shape))
+        s.data[:, :, 9, 9] = 1
+        s1 = s.virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
+        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+        self.assertTrue((s1.data == 1.).all())
+
+    def test_lazy(self):
+        shape = (5, 9, 12, 14)
+        data = da.zeros((5, 9, 12, 14), chunks=(10, 10, 10, 10))
+        s = LazyPixelatedSTEM(data)
+        s1 = s.virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
+        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+
+
+class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
+
+    def test_simple(self):
+        shape = (5, 9, 12, 14)
+        s = PixelatedSTEM(np.zeros(shape))
+        s1 = s.virtual_bright_field()
+        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+        self.assertEqual(s1.data.sum(), 0.)
+
+    def test_one_value(self):
+        shape = (5, 9, 12, 14)
+        s = PixelatedSTEM(np.zeros(shape))
+        s.data[:, :, 10, 13] = 1
+        s1 = s.virtual_bright_field()
+        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+        self.assertTrue((s1.data == 1.).all())
+
+        s2 = s.virtual_bright_field(6, 6, 2)
+        self.assertEqual(s2.axes_manager.signal_shape, (shape[1], shape[0]))
+        self.assertEqual(s2.data.sum(), 0)
+
+    def test_lazy(self):
+        shape = (5, 9, 12, 14)
+        data = da.zeros((5, 9, 12, 14), chunks=(10, 10, 10, 10))
+        s = LazyPixelatedSTEM(data)
+        s1 = s.virtual_bright_field(cx=6, cy=6, r=5)
+        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
