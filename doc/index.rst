@@ -13,6 +13,7 @@ Library for processing data acquired on a fast pixelated electron detector, acqu
 .. toctree::
    install
    loading_data
+   using_pixelated_stem_class
    analysing_holz_datasets
    analysing_dpc_datasets
    generate_test_data
