@@ -136,6 +136,7 @@ class test_get_dpc_signal(unittest.TestCase):
         s.get_color_image_with_indicator(
                 phase_rotation=45, indicator_rotation=10,
                 autolim=True, autolim_sigma=1, scalebar_size=10)
+        s.get_color_image_with_indicator(only_phase=True)
 
 
 class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
@@ -157,6 +158,11 @@ class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
                 masked=None,
                 bins=200,
                 spatial_std=3)
+
+    def test_get_bivariate_histogram(self):
+        data = np.zeros((2, 50, 50))
+        s_random = DPCSignal2D(data_random)
+        s_random.get_bivariate_histogram()
 
 
 class test_rotate_data(unittest.TestCase):

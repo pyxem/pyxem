@@ -601,7 +601,7 @@ class DPCSignal2D(Signal2D):
         return(signal_rgb)
 
     def get_color_image_with_indicator(
-            self, phase_rotation=0, indicator_rotation=0,
+            self, phase_rotation=0, indicator_rotation=0, only_phase=False,
             autolim=True, autolim_sigma=4, scalebar_size=None, ax=None,
             ax_indicator=None):
         """Make a matplotlib figure showing DPC contrast.
@@ -613,6 +613,9 @@ class DPCSignal2D(Signal2D):
             Useful for correcting scan rotation.
         indicator_rotation : float, default 0
             Changes the color wheel rotation.
+        only_phase : bool, default False
+            If False, will plot both the magnitude and phase.
+            If True, will only plot the phase.
         autolim : bool, default True
         autolim_sigma : float, default 4
         scalebar_size : int, optional
@@ -624,6 +627,11 @@ class DPCSignal2D(Signal2D):
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_simple_dpc_signal()
         >>> fig = s.get_color_image_with_indicator()
+        >>> fig.savefig("simple_dpc_test_signal.png")
+
+        Only plotting the phase
+
+        >>> fig = s.get_color_image_with_indicator(only_phase=True)
         >>> fig.savefig("simple_dpc_test_signal.png")
 
         Matplotlib subplot as input
@@ -642,9 +650,12 @@ class DPCSignal2D(Signal2D):
         else:
             fig = ax.figure
             set_fig = False
-        s = self.get_color_signal(
-                rotation=phase_rotation, autolim=autolim,
-                autolim_sigma=autolim_sigma)
+        if only_phase:
+            s = self.get_phase_signal(rotation=phase_rotation)
+        else:
+            s = self.get_color_signal(
+                    rotation=phase_rotation, autolim=autolim,
+                    autolim_sigma=autolim_sigma)
         s.change_dtype('uint16')
         s.change_dtype('float64')
         ax.imshow(s.data/65536., extent=self.axes_manager.signal_extent)
