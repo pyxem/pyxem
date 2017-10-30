@@ -395,11 +395,12 @@ def _make_bivariate_histogram(
                     [s0_range[0], s0_range[1]],
                     [s1_range[0], s1_range[1]]])
 
-        s_hist = Signal2D(hist2d)
+        s_hist = Signal2D(hist2d).swap_axes(0, 1)
         s_hist.axes_manager[0].offset = xedges[0]
         s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
         s_hist.axes_manager[1].offset = yedges[0]
         s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
+        return(s_hist)
 
 
 def _copy_signal2d_axes_manager_metadata(signal_original, signal_new):

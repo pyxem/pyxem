@@ -159,11 +159,6 @@ class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
                 bins=200,
                 spatial_std=3)
 
-    def test_get_bivariate_histogram(self):
-        data = np.zeros((2, 50, 50))
-        s_random = DPCSignal2D(data_random)
-        s_random.get_bivariate_histogram()
-
 
 class test_rotate_data(unittest.TestCase):
 

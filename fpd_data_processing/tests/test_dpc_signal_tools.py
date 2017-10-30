@@ -61,3 +61,36 @@ class test_find_phase(unittest.TestCase):
         phase = (np.ones((50, 50))*np.pi*0.5) + np.pi
         phase0 = pst._find_phase(phase, max_phase=np.pi)
         self.assertTrue((phase0 == np.pi/2).all())
+
+
+class test_make_bivariate_histogram(unittest.TestCase):
+
+    def test_single_x(self):
+        size = 100
+        x, y = np.ones(size), np.zeros(size)
+        s = pst._make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(1.)
+        hist_iY = s.axes_manager[1].value2index(0.)
+        self.assertEqual(s.data[hist_iY, hist_iX], size)
+        s.data[hist_iY, hist_iX] = 0
+        self.assertFalse(s.data.any())
+
+    def test_single_negative_x(self):
+        size = 100
+        x, y = -np.ones(size), np.zeros(size)
+        s = pst._make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(0)
+        self.assertEqual(s.data[hist_iY, hist_iX], size)
+        s.data[hist_iY, hist_iX] = 0
+        self.assertFalse(s.data.any())
+
+    def test_single_negative_x_y(self):
+        size = 100
+        x, y = -np.ones(size), np.ones(size)
+        s = pst._make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(1)
+        self.assertEqual(s.data[hist_iY, hist_iX], size)
+        s.data[hist_iY, hist_iX] = 0
+        self.assertFalse(s.data.any())

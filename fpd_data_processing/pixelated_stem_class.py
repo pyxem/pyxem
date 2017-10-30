@@ -379,7 +379,7 @@ class DPCSignal1D(Signal1D):
             Mask parts of the data. The array must be the same
             size as the signal. The True values are masked.
             Default is not masking anything.
-        bins : integer, optional
+        bins : integer, default 200
             Number of bins in the histogram
         spatial_std : number, optional
             If histogram_range is not given, this value will be
@@ -388,7 +388,8 @@ class DPCSignal1D(Signal1D):
 
         Returns
         -------
-        s_hist : Signal1D
+        s_hist : Signal2D
+
         """
         x_position = self.inav[0].data
         y_position = self.inav[1].data
@@ -694,7 +695,7 @@ class DPCSignal2D(Signal2D):
             Mask parts of the data. The array must be the same
             size as the signal. The True values are masked.
             Default is not masking anything.
-        bins : integer, optional
+        bins : integer, default 200
             Number of bins in the histogram
         spatial_std : number, optional
             If histogram_range is not given, this value will be
@@ -704,53 +705,23 @@ class DPCSignal2D(Signal2D):
         Returns
         -------
         s_hist : HyperSpy Signal2D
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_stripe_pattern_dpc_signal()
+        >>> s_hist = s.get_bivariate_histogram()
+        >>> s_hist.plot()
+
         """
-        s0_flat = self.inav[0].data.flatten()
-        s1_flat = self.inav[1].data.flatten()
-
-        if masked is not None:
-            temp_s0_flat = []
-            temp_s1_flat = []
-            for data0, data1, masked_value in zip(
-                    s0_flat, s1_flat, masked.flatten()):
-                if not masked_value:
-                    temp_s0_flat.append(data0)
-                    temp_s1_flat.append(data1)
-            s0_flat = np.array(temp_s0_flat)
-            s1_flat = np.array(temp_s1_flat)
-
-        if histogram_range is None:
-            if (s0_flat.std() > s1_flat.std()):
-                s0_range = (
-                    s0_flat.mean()-s0_flat.std()*spatial_std,
-                    s0_flat.mean()+s0_flat.std()*spatial_std)
-                s1_range = (
-                    s1_flat.mean()-s0_flat.std()*spatial_std,
-                    s1_flat.mean()+s0_flat.std()*spatial_std)
-            else:
-                s0_range = (
-                    s0_flat.mean()-s1_flat.std()*spatial_std,
-                    s0_flat.mean()+s1_flat.std()*spatial_std)
-                s1_range = (
-                    s1_flat.mean()-s1_flat.std()*spatial_std,
-                    s1_flat.mean()+s1_flat.std()*spatial_std)
-        else:
-            s0_range = histogram_range
-            s1_range = histogram_range
-
-        hist2d, xedges, yedges = np.histogram2d(
-                s0_flat,
-                s1_flat,
-                bins=bins,
-                range=[
-                    [s0_range[0], s0_range[1]],
-                    [s1_range[0], s1_range[1]]])
-
-        s_hist = Signal2D(hist2d)
-        s_hist.axes_manager[0].offset = xedges[0]
-        s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
-        s_hist.axes_manager[1].offset = yedges[0]
-        s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
+        x_position = self.inav[0].data
+        y_position = self.inav[1].data
+        s_hist = pst._make_bivariate_histogram(
+                    x_position, y_position,
+                    histogram_range=histogram_range,
+                    masked=masked,
+                    bins=bins,
+                    spatial_std=spatial_std)
         return(s_hist)
 
     def flip_axis_90_degrees(self, flips=1):
