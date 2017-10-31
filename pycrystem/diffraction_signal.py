@@ -748,5 +748,5 @@ class ElectronDiffraction(Signal2D):
 
         """
         from .utils import peakfinder2D_gui
-        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(**imshow_kwargs)
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
