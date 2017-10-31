@@ -162,6 +162,75 @@ def get_kinematical_intensities(structure,
     return peak_intensities
 
 
+def simulate_kinematic_scattering(atomic_coordinates,
+                                  element,
+                                  accelerating_voltage,
+                                  simulation_size=256,
+                                  max_k = 1.5,
+                                  illumination = 'plane_wave',
+                                  sigma = 20):
+    """Simulate electron scattering from an arrangement of atoms
+
+
+    Parameters
+    ----------
+    atomic_coordinates : array
+        Array specifying atomic coordinates in structure.
+    element : string
+        Element symbol, e.g. "C".
+    accelerating_voltage : float
+        Accelerating voltage in keV.
+    simulation_size : int
+        Simulation size, n, specifies the n x n array size for
+        the simulation calculation.
+    max_k : float
+        Maximum scattering vector magnitude in reciprocal angstroms.
+    illumination = string
+        Either 'plane_wave' or 'gaussian_probe' illumination
+
+    Returns
+    -------
+    simulation : ElectronDiffraction
+        ElectronDiffraction simulation.
+    """
+    #Get atomic scattering parameters for specified element.
+    c = np.array(ATOMIC_SCATTERING_PARAMS[element])
+    #Calculate electron wavelength for given keV.
+    wavelength = get_electron_wavelength(accelerating_voltage)
+
+    #Define a 2D array of k-vectors at which to evaluate scattering.
+    l = np.linspace(-max_k, max_k, simulation_size)
+    kx, ky = np.meshgrid(l, l)
+
+    #Convert 2D k-vectors into 3D k-vectors accounting for Ewald sphere.
+    k = np.array((kx, ky, (wavelength / 2) * (kx ** 2 + ky **2)))
+
+    #Calculate scatering angle squared for each k-vector.
+    s2s = (np.linalg.norm(k, axis=0) / 2) ** 2
+
+    #Evaluate atomic scattering factor.
+    fs = np.zeros_like(s2s)
+    for i in np.arange(4):
+        fs = fs + (c[i][0] * np.exp(-c[i][1] * s2s))
+
+    #Evaluate scattering from all atoms
+    scattering = np.zeros_like(s2s)
+    if illumination == 'plane_wave':
+        for r in atomic_coordinates:
+            scattering = scattering + (fs * np.exp(np.dot(k.T, r) * np.pi * 2j))
+    if illumination == 'gaussian_probe':
+        for r in atomic_coordinates:
+            probe = (1 / (np.sqrt(2*np.pi)*sigma))*np.exp((-np.abs(((r[0]**2) - (r[1]**2))))/(4*sigma**2))
+            scattering = scattering + (probe * fs * np.exp(np.dot(k.T, r) * np.pi * 2j))
+    else:
+        raise ValueError("User specified illumination not defined.")
+
+    #Calculate intensity
+    intensity  = (scattering * scattering.conjugate()).real
+
+    return pc.ElectronDiffraction(intensity)
+
+
 def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
     """Creates rotations approximately equispaced on a sphere.
 
