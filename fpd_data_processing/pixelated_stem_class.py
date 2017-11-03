@@ -326,6 +326,7 @@ class PixelatedSTEM(Signal2D):
             signal_list.append(s_r)
         angle_scale = angle_list[1][1] - angle_list[0][1]
         signal = hs.stack(signal_list, new_axis_name='Angle slice')
+        signal.axes_manager['Angle slice'].offset = angle_scale/2
         signal.axes_manager['Angle slice'].scale = angle_scale
         signal.axes_manager['Angle slice'].units = 'Radians'
         signal.axes_manager[-1].name = 'Scattering angle'
