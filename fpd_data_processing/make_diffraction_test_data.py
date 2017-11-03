@@ -6,6 +6,78 @@ from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 
 
+def _get_elliptical_mask(s, x, y, semi_len0, semi_len1, rotation):
+    """
+    Parameters
+    ----------
+    s : HyperSpy Signal2D
+    x, y : float
+    semi_len0, semi_len1 : float
+    rotation : float
+        In radians
+
+    Returns
+    -------
+    ellipse_array : 2D NumPy array
+
+    Examples
+    --------
+    >>> from hyperspy.signals import Signal2D
+    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> s = Signal2D(np.zeros((110, 130)))
+    >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
+    >>> ellipse_data = mdtd._get_elliptical_mask(s, 10, -10, 12, 18, 1.5)
+    >>> s.data += ellipse_data
+    >>> s.plot()
+
+    """
+    xx, yy = np.meshgrid(
+            s.axes_manager.signal_axes[0].axis,
+            s.axes_manager.signal_axes[1].axis)
+    xx -= x
+    yy -= y
+    z0 = ((xx*np.cos(rotation) + yy*np.sin(rotation))**2)/(semi_len0*semi_len0)
+    z1 = ((xx*np.sin(rotation) - yy*np.cos(rotation))**2)/(semi_len1*semi_len1)
+    zz = z0 + z1
+    elli_mask = zz <= 1.
+    return elli_mask
+
+
+def _get_elliptical_ring(s, x, y, semi_len0, semi_len1, rotation, lw_r=1):
+    """
+    Parameters
+    ----------
+    s : HyperSpy Signal2D
+    x, y : float
+    semi_len0, semi_len1 : float
+    rotation : float
+        In radians
+    lw_r : optional, default 1
+
+    Returns
+    -------
+    ellipse_array : 2D NumPy array
+
+    Examples
+    --------
+    >>> from hyperspy.signals import Signal2D
+    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> s = Signal2D(np.zeros((110, 130)))
+    >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
+    >>> ellipse_data = mdtd._get_elliptical_ring(s, 10, -10, 12, 18, 1.5, 2)
+    >>> s.data += ellipse_data
+    >>> s.plot()
+
+    """
+    mask_outer = _get_elliptical_mask(
+            s, x, y, semi_len0 + lw_r, semi_len1 + lw_r, rotation)
+    mask_inner = _get_elliptical_mask(
+            s, x, y, semi_len0 - lw_r, semi_len1 - lw_r, rotation)
+    ellipse = np.logical_xor(mask_outer, mask_inner)
+    ellipse = ellipse.astype('uint32')
+    return ellipse
+
+
 class Circle(object):
     def __init__(self, xx, yy, x0, y0, r, I, scale, lw=None):
         self.x0 = x0
