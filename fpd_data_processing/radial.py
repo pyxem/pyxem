@@ -1,7 +1,10 @@
+import math
 import numpy as np
+import numpy.linalg as la
 from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
+from hyperspy.utils.markers import point, line_segment
 import fpd_data_processing.pixelated_stem_tools as pst
 
 
@@ -378,3 +381,136 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
         mask = np.invert(mask)
         s.data *= mask
     return s
+
+
+def get_xy_points_from_radius_angle_plot(s_ra):
+    x_list = []
+    y_list = []
+    for angle, radius in zip(s_ra.axes_manager[0].axis, s_ra.data):
+        dx = -math.cos(angle)*radius
+        dy = -math.sin(angle)*radius
+        x_list.append(dx)
+        y_list.append(dy)
+    x_list = np.array(x_list)
+    y_list = np.array(y_list)
+    return(x_list, y_list)
+
+
+def fit_ellipse_to_xy_points(x, y):
+    """Fit an ellipse to a list of x and y points.
+
+    Parameters
+    ----------
+    x, y : NumPy 2D array
+
+    Returns
+    -------
+    ellipse_parameters : NumPy array
+
+    """
+    xx = x*x
+    yy = y*y
+    xy = x*y
+    ones = np.ones_like(x)
+    D = np.vstack((xx, xy, yy, x, y, ones))
+    S = np.dot(D, D.T)
+    C = np.zeros((6, 6))
+    C[0, 2], C[2, 0] = 2, 2
+    C[1, 1] = -1
+    A, B = la.eig(np.dot(la.inv(S), C))
+    i = np.argmax(np.abs(A))
+    g = B[:, i]
+    return(g)
+
+
+def get_ellipse_parameters(g):
+    """
+    Parameters
+    ----------
+    g : NumPy array
+
+    Returns
+    -------
+    xC, yC, semi_len0, semi_len1, rot, eccen
+
+    http://mathworld.wolfram.com/Ellipse.html
+
+    """
+    a, b, c, d, f, g = g[0], g[1]/2, g[2], g[3]/2, g[4]/2, g[5]
+    b2ac = b*b - a*c
+    xC = (c*d - b*f)/b2ac
+    yC = (a*f - b*d)/b2ac
+    frac_top = 2*(a*f*f + c*d*d + g*b*b - 2*b*d*f - a*c*g)
+    frac_square_bot = (a - c)*(a - c) + 4*b*b
+    semi_len0 = math.sqrt(
+            frac_top/(b2ac*(math.sqrt(frac_square_bot) - (a + c))))
+    semi_len1 = math.sqrt(
+            frac_top/(b2ac*(-math.sqrt(frac_square_bot) - (a + c))))
+    if b == 0:
+        if a < c:
+            rot = 0
+        else:
+            rot = math.pi*0.5
+    else:
+        if a < c:
+            rot = math.atan((2*b)/(a - c))/2
+        else:
+            rot = math.pi/2 + (math.atan((2*b)/(a - c))/2)
+    eccen = math.sqrt(1-((b*b)/(a*a)))
+    return(xC, yC, semi_len0, semi_len1, rot, eccen)
+
+
+def get_signal_with_markers(
+        signal, ellipse_parameters, x_list=None, y_list=None, r_scale=0.05):
+    xC, yC, semi_len0, semi_len1, rot, ecce = get_ellipse_parameters(
+            ellipse_parameters)
+    R = np.arange(0, 2*np.pi, 0.1)
+    xx = xC + semi_len0*np.cos(R)*np.cos(rot) - semi_len1*np.sin(R)*np.sin(rot)
+    yy = yC + semi_len0*np.cos(R)*np.sin(rot) + semi_len1*np.sin(R)*np.cos(rot)
+    marker_list = []
+    if x_list is not None:
+        for x, y in zip(x_list, y_list):
+            marker_list.append(point(x, y, color='red'))
+    for i in range(len(xx)-1):
+        line = line_segment(xx[i], yy[i], xx[i+1], yy[i+1], color='green')
+        marker_list.append(line)
+    signal.add_marker(marker_list, permanent=True)
+    return signal
+
+
+def fit_ellipse_to_signal(
+        s, radial_signal_span, angleN=20, show_progressbar=True):
+    """
+    Parameters
+    ----------
+    s : HyperSpy Signal2D
+    radial_signal_span : tuple
+    angleN : int, default 20
+
+    Returns
+    -------
+    signal, xC, yC, semi0, semi1, rot, ecc
+
+    Examples
+    --------
+    >>> import fpd_data_processing.api as fp
+    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> s = fp.PixelatedSTEM(np.zeros((200, 220)))
+    >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
+    >>> ellipse_ring = mdtd._get_elliptical_ring(s, 0, 0, 50, 70, 0.8)
+    >>> s.data += ellipse_ring
+    >>> from fpd_data_processing.radial import fit_ellipse_to_signal
+    >>> s_markers, xC, yC, semi0, semi1, rot, ecc = fit_ellipse_to_signal(
+    ...     s, (40, 80), angleN=30, show_progressbar=False)
+
+    """
+    s_ra = get_radius_vs_angle(
+            s, radial_signal_span, angleN=angleN,
+            show_progressbar=show_progressbar)
+    x, y = get_xy_points_from_radius_angle_plot(s_ra)
+    ellipse_parameters = fit_ellipse_to_xy_points(x, y)
+    xC, yC, semi0, semi1, rot, ecc = get_ellipse_parameters(
+            ellipse_parameters)
+    s_markers = get_signal_with_markers(
+            s, ellipse_parameters, x_list=x, y_list=y)
+    return s_markers, xC, yC, semi0, semi1, rot, ecc

@@ -163,3 +163,52 @@ class test_get_angle_image_comparison(unittest.TestCase):
         s_mask = ra.get_angle_image_comparison(s0, s1, mask_radius=40)
         self.assertNotEqual(s_no_mask.data.sum(), 0.0)
         self.assertEqual(s_mask.data.sum(), 0.0)
+
+
+class test_fit_ellipse(unittest.TestCase):
+
+    def setUp(self):
+        axis1, axis2 = 40, 70
+        s = fp.PixelatedSTEM(np.zeros((200, 220)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
+        ellipse_ring = mdtd._get_elliptical_ring(
+                s, 0, 0, axis1, axis2, 0.8, lw_r=1)
+        s.data += ellipse_ring
+        self.s = s
+        self.axis1, self.axis2 = axis1, axis2
+
+    def test_find_parameters(self):
+        axis1, axis2 = self.axis1, self.axis2
+        s = self.s
+        s_ra = ra.get_radius_vs_angle(s, (30., 80.), angleN=20)
+        x, y = ra.get_xy_points_from_radius_angle_plot(s_ra)
+        ellipse_parameters = ra.fit_ellipse_to_xy_points(x, y)
+        xC, yC, semi_len0, semi_len1, rot, eccen = ra.get_ellipse_parameters(
+                ellipse_parameters)
+        self.assertAlmostEqual(xC, 0.)
+        self.assertAlmostEqual(yC, 0.)
+        self.assertAlmostEqual(semi_len0, axis2, places=-1)
+        self.assertAlmostEqual(semi_len1, axis1, places=-1)
+
+    def test_get_signal_with_markers(self):
+        s = self.s
+        s_ra = ra.get_radius_vs_angle(s, (30., 80.), angleN=20)
+        x, y = ra.get_xy_points_from_radius_angle_plot(s_ra)
+        ellipse_parameters = ra.fit_ellipse_to_xy_points(x, y)
+        s1 = ra.get_signal_with_markers(
+                s, ellipse_parameters, x_list=x, y_list=y)
+        s1.plot()
+
+    def test_fit_ellipse_to_signal(self):
+        s = fp.PixelatedSTEM(np.zeros((200, 220)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
+        ellipse_ring = mdtd._get_elliptical_ring(
+                s, 0, 0, 60, 60, 0.8, lw_r=1)
+        s.data += ellipse_ring
+        output = ra.fit_ellipse_to_signal(s, (50, 70), angleN=10)
+        output[0].plot()
+        self.assertAlmostEqual(output[1], 0.)
+        self.assertAlmostEqual(output[2], 0.)
+        self.assertAlmostEqual(output[3], 60, places=-1)
+        self.assertAlmostEqual(output[4], 60, places=-1)
+        self.assertAlmostEqual(output[6], 1., places=5)
