@@ -19,23 +19,23 @@ def generate_pyprismatic_input(structure):
             pass
         
         atomic_numbers = np.asarray([S.Z for S in structure.species]).reshape(len(structure.species),1)
-        percent_occupied  = np.ones_like(atomic_numbers)
         cart_coords = structure.cart_coords
+        percent_occupied  = np.ones_like(atomic_numbers)
+        debeye_waller = np.zeros_like(atomic_numbers)
+        # TODO Get dw from Element's name
         
-        # TODO Raise an error if (0,0,0) isn't a co-ord
-        line_2 = [np.max(cart_coords[:,0]),np.max(cart_coords[:,1]),np.max(cart_coords[:,2])]
-        ## This idea comes from the concept illustrated by the sample used in Ophus's 2017 paper
-        
-        # TODO Get dw from Element's names
-        if True:
-            dw = 0
-    
-        debeye_waller = dw*np.ones_like(atomic_numbers)
-        
-        #TODO The fact that this works is a bit of a surprise, given how much a similar method struggled
         printing_array = np.hstack([atomic_numbers,cart_coords,percent_occupied,debeye_waller])
         
-        """
+        # TODO introduce logic to allow actual unit cells to be introduced
+        
+        line_2 = [np.max(cart_coords[:,0]),np.max(cart_coords[:,1]),np.max(cart_coords[:,2])]
+        
+        # TODO consider if these violations are prevented by the use of pymatgen.Structure
+        if [0,0,0] not in structure.cart_coords:
+            raise ValueError('To use the whole sample as a unit cell we require [0,0,0] as a co-ordinate')
+        if np.max(line_2) <= 1:
+            raise ValueError('Inputs should not be in fractional form')
+        
         with open('PP_input.XYZ', 'a') as f:
             print("Default Comment",file=f)
             print('    {0:.3g}   {1:.3g}   {2:.3g}'.format(line_2[0],line_2[1],line_2[2]),file=f)
@@ -45,8 +45,7 @@ def generate_pyprismatic_input(structure):
                         file=f)
             print("-1",file=f)
         return None
-        """
-        return printing_array
+        
 def run_pyprismatic_simulation(prismatic_kwargs=None):
     if prismatic_kwargs == None:
         prismatic_kwargs = {}
