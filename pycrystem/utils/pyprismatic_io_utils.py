@@ -4,28 +4,21 @@ import os
 import pyprismatic as pr
 
 def generate_pyprismatic_input(structure):
-        """ Generates a .XYZ file on which Pyprismatic can run
-
+        """     Generates a .XYZ file on which Pyprismatic can run
         Args:
-
-        structure: pymatgen.Structure object 
-        The entire structure
-        
+            structure: pymatgen.Structure object 
+                The entire structure
         Returns:
-            None
-            + file 'PP_input.XYZ'
+            None + file 'PP_input.XYZ'
         
         """
         
         if os.path.exists('PP_input.XYZ'):
-            #raise IOError('The file the program is attempting to write to already exists, please remove it.')
+            raise IOError('The file the program is attempting to write to already exists, please remove it.')
+            #It would be addition (ie not overwrite) here
             pass
         
-        Z_list = []
-        for element in structure.species:
-                Z_list.append(int(element.Z))
-
-        atomic_numbers = np.asarray(Z_list).reshape(len(structure.species),1)
+        atomic_numbers = np.asarray([S.Z for S in structure.species]).reshape(len(structure.species),1)
         percent_occupied  = np.ones_like(atomic_numbers)
         cart_coords = structure.cart_coords
         
@@ -39,8 +32,10 @@ def generate_pyprismatic_input(structure):
     
         debeye_waller = dw*np.ones_like(atomic_numbers)
         
+        #TODO The fact that this works is a bit of a surprise, given how much a similar method struggled
         printing_array = np.hstack([atomic_numbers,cart_coords,percent_occupied,debeye_waller])
         
+        """
         with open('PP_input.XYZ', 'a') as f:
             print("Default Comment",file=f)
             print('    {0:.3g}   {1:.3g}   {2:.3g}'.format(line_2[0],line_2[1],line_2[2]),file=f)
@@ -50,7 +45,8 @@ def generate_pyprismatic_input(structure):
                         file=f)
             print("-1",file=f)
         return None
-    
+        """
+        return printing_array
 def run_pyprismatic_simulation(prismatic_kwargs=None):
     if prismatic_kwargs == None:
         prismatic_kwargs = {}
