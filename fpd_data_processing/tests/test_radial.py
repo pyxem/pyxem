@@ -181,9 +181,9 @@ class test_fit_ellipse(unittest.TestCase):
         axis1, axis2 = self.axis1, self.axis2
         s = self.s
         s_ra = ra.get_radius_vs_angle(s, (30., 80.), angleN=20)
-        x, y = ra.get_xy_points_from_radius_angle_plot(s_ra)
-        ellipse_parameters = ra.fit_ellipse_to_xy_points(x, y)
-        xC, yC, semi_len0, semi_len1, rot, eccen = ra.get_ellipse_parameters(
+        x, y = ra._get_xy_points_from_radius_angle_plot(s_ra)
+        ellipse_parameters = ra._fit_ellipse_to_xy_points(x, y)
+        xC, yC, semi_len0, semi_len1, rot, eccen = ra._get_ellipse_parameters(
                 ellipse_parameters)
         self.assertAlmostEqual(xC, 0.)
         self.assertAlmostEqual(yC, 0.)
@@ -193,22 +193,40 @@ class test_fit_ellipse(unittest.TestCase):
     def test_get_signal_with_markers(self):
         s = self.s
         s_ra = ra.get_radius_vs_angle(s, (30., 80.), angleN=20)
-        x, y = ra.get_xy_points_from_radius_angle_plot(s_ra)
-        ellipse_parameters = ra.fit_ellipse_to_xy_points(x, y)
-        s1 = ra.get_signal_with_markers(
-                s, ellipse_parameters, x_list=x, y_list=y)
-        s1.plot()
+        x, y = ra._get_xy_points_from_radius_angle_plot(s_ra)
+        ellipse_parameters = ra._fit_ellipse_to_xy_points(x, y)
+        ra._get_marker_list(s, ellipse_parameters, x_list=x, y_list=y)
 
-    def test_fit_ellipse_to_signal(self):
+    def test_fit_single_ellipse_to_signal(self):
         s = fp.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
         ellipse_ring = mdtd._get_elliptical_ring(
                 s, 0, 0, 60, 60, 0.8, lw_r=1)
         s.data += ellipse_ring
-        output = ra.fit_ellipse_to_signal(s, (50, 70), angleN=10)
+        output = ra.fit_single_ellipse_to_signal(
+                s, (50, 70), angleN=10, show_progressbar=False)
         output[0].plot()
         self.assertAlmostEqual(output[1], 0.)
         self.assertAlmostEqual(output[2], 0.)
         self.assertAlmostEqual(output[3], 60, places=-1)
         self.assertAlmostEqual(output[4], 60, places=-1)
         self.assertAlmostEqual(output[6], 1., places=5)
+
+    def test_fit_ellipses_to_signal(self):
+        s = fp.PixelatedSTEM(np.zeros((200, 220)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
+        ellipse_ring0 = mdtd._get_elliptical_ring(s, 2, -1, 60, 60, 0.8)
+        ellipse_ring1 = mdtd._get_elliptical_ring(s, 1, -2, 80, 80, 0.8)
+        s.data += ellipse_ring0
+        s.data += ellipse_ring1
+        output0 = ra.fit_ellipses_to_signal(
+                s, [(50, 70), (70, 95)], angleN=20, show_progressbar=False)
+        output0[0].plot()
+        output1 = ra.fit_ellipses_to_signal(
+                s, [(50, 70), (70, 95)], angleN=[20, 30],
+                show_progressbar=False)
+        output1[0].plot()
+        with self.assertRaises(ValueError):
+            ra.fit_ellipses_to_signal(
+                    s, [(50, 70), (70, 95), (80, 105)],
+                    angleN=[20, 30], show_progressbar=False)

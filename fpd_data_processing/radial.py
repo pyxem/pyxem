@@ -5,6 +5,7 @@ from tqdm import tqdm
 from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
 from hyperspy.utils.markers import point, line_segment
+from hyperspy.misc.utils import isiterable
 import fpd_data_processing.pixelated_stem_tools as pst
 
 
@@ -383,7 +384,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     return s
 
 
-def get_xy_points_from_radius_angle_plot(s_ra):
+def _get_xy_points_from_radius_angle_plot(s_ra):
     x_list = []
     y_list = []
     for angle, radius in zip(s_ra.axes_manager[0].axis, s_ra.data):
@@ -396,7 +397,7 @@ def get_xy_points_from_radius_angle_plot(s_ra):
     return(x_list, y_list)
 
 
-def fit_ellipse_to_xy_points(x, y):
+def _fit_ellipse_to_xy_points(x, y):
     """Fit an ellipse to a list of x and y points.
 
     Parameters
@@ -423,7 +424,7 @@ def fit_ellipse_to_xy_points(x, y):
     return(g)
 
 
-def get_ellipse_parameters(g):
+def _get_ellipse_parameters(g):
     """
     Parameters
     ----------
@@ -460,9 +461,9 @@ def get_ellipse_parameters(g):
     return(xC, yC, semi_len0, semi_len1, rot, eccen)
 
 
-def get_signal_with_markers(
+def _get_marker_list(
         signal, ellipse_parameters, x_list=None, y_list=None, r_scale=0.05):
-    xC, yC, semi_len0, semi_len1, rot, ecce = get_ellipse_parameters(
+    xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
             ellipse_parameters)
     R = np.arange(0, 2*np.pi, 0.1)
     xx = xC + semi_len0*np.cos(R)*np.cos(rot) - semi_len1*np.sin(R)*np.sin(rot)
@@ -471,14 +472,16 @@ def get_signal_with_markers(
     if x_list is not None:
         for x, y in zip(x_list, y_list):
             marker_list.append(point(x, y, color='red'))
-    for i in range(len(xx)-1):
-        line = line_segment(xx[i], yy[i], xx[i+1], yy[i+1], color='green')
+    for i in range(len(xx)):
+        if i == (len(xx) - 1):
+            line = line_segment(xx[i], yy[i], xx[0], yy[0], color='green')
+        else:
+            line = line_segment(xx[i], yy[i], xx[i+1], yy[i+1], color='green')
         marker_list.append(line)
-    signal.add_marker(marker_list, permanent=True)
-    return signal
+    return marker_list
 
 
-def fit_ellipse_to_signal(
+def fit_single_ellipse_to_signal(
         s, radial_signal_span, angleN=20, show_progressbar=True):
     """
     Parameters
@@ -486,6 +489,7 @@ def fit_ellipse_to_signal(
     s : HyperSpy Signal2D
     radial_signal_span : tuple
     angleN : int, default 20
+    show_progressbar : bool, default True
 
     Returns
     -------
@@ -499,18 +503,72 @@ def fit_ellipse_to_signal(
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> ellipse_ring = mdtd._get_elliptical_ring(s, 0, 0, 50, 70, 0.8)
     >>> s.data += ellipse_ring
-    >>> from fpd_data_processing.radial import fit_ellipse_to_signal
-    >>> s_markers, xC, yC, semi0, semi1, rot, ecc = fit_ellipse_to_signal(
+    >>> from fpd_data_processing.radial import fit_single_ellipse_to_signal
+    >>> output = fit_single_ellipse_to_signal(
     ...     s, (40, 80), angleN=30, show_progressbar=False)
 
     """
     s_ra = get_radius_vs_angle(
             s, radial_signal_span, angleN=angleN,
             show_progressbar=show_progressbar)
-    x, y = get_xy_points_from_radius_angle_plot(s_ra)
-    ellipse_parameters = fit_ellipse_to_xy_points(x, y)
-    xC, yC, semi0, semi1, rot, ecc = get_ellipse_parameters(
+    x, y = _get_xy_points_from_radius_angle_plot(s_ra)
+    ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
+    xC, yC, semi0, semi1, rot, ecc = _get_ellipse_parameters(
             ellipse_parameters)
-    s_markers = get_signal_with_markers(
+    marker_list = _get_marker_list(
             s, ellipse_parameters, x_list=x, y_list=y)
-    return s_markers, xC, yC, semi0, semi1, rot, ecc
+    s_m = s.deepcopy()
+    s_m.add_marker(marker_list, permanent=True)
+    return s_m, xC, yC, semi0, semi1, rot, ecc
+
+
+def fit_ellipses_to_signal(
+        s, radial_signal_span_list,
+        angleN=20, show_progressbar=True):
+    """
+    Parameters
+    ----------
+    s : HyperSpy Signal2D
+    radial_signal_span_list : tuple
+    angleN : list or int, default 20
+    show_progressbar : bool, default True
+
+    Returns
+    -------
+    signal, xC, yC, semi0, semi1, rot, ecc
+
+    Examples
+    --------
+    >>> import fpd_data_processing.api as fp
+    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> s = fp.PixelatedSTEM(np.zeros((200, 220)))
+    >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
+    >>> ellipse_ring = mdtd._get_elliptical_ring(s, 0, 0, 50, 70, 0.8)
+    >>> s.data += ellipse_ring
+    >>> from fpd_data_processing.radial import fit_ellipses_to_signal
+    >>> output = fit_ellipses_to_signal(
+    ...     s, [(40, 80)], angleN=30, show_progressbar=False)
+
+    """
+    if not isiterable(angleN):
+        angleN = [angleN]*len(radial_signal_span_list)
+    else:
+        if len(angleN) != len(radial_signal_span_list):
+            raise ValueError(
+                    "angleN and radial_signal_span_list needs to have "
+                    "the same length")
+    marker_list = []
+    ellipse_list = []
+    for radial_signal_span, aN in zip(radial_signal_span_list, angleN):
+        s_ra = get_radius_vs_angle(
+                s, radial_signal_span, angleN=aN,
+                show_progressbar=show_progressbar)
+        x, y = _get_xy_points_from_radius_angle_plot(s_ra)
+        ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
+        output = _get_ellipse_parameters(ellipse_parameters)
+        ellipse_list.append(output)
+        marker_list.extend(_get_marker_list(
+                s, ellipse_parameters, x_list=x, y_list=y))
+    s_m = s.deepcopy()
+    s_m.add_marker(marker_list, permanent=True)
+    return s_m, ellipse_list
