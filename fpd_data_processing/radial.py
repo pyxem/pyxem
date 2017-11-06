@@ -462,7 +462,8 @@ def _get_ellipse_parameters(g):
 
 
 def _get_marker_list(
-        signal, ellipse_parameters, x_list=None, y_list=None, r_scale=0.05):
+        signal, ellipse_parameters, x_list=None, y_list=None,
+        name=None, r_scale=0.05):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
             ellipse_parameters)
     R = np.arange(0, 2*np.pi, 0.1)
@@ -471,12 +472,17 @@ def _get_marker_list(
     marker_list = []
     if x_list is not None:
         for x, y in zip(x_list, y_list):
-            marker_list.append(point(x, y, color='red'))
+            point_marker = point(x, y, color='red')
+            if name is not None:
+                point_marker.name = name + "_" + point_marker.name
+            marker_list.append(point_marker)
     for i in range(len(xx)):
         if i == (len(xx) - 1):
             line = line_segment(xx[i], yy[i], xx[0], yy[0], color='green')
         else:
             line = line_segment(xx[i], yy[i], xx[i+1], yy[i+1], color='green')
+        if name is not None:
+            line.name = name + "_" + line.name
         marker_list.append(line)
     return marker_list
 
@@ -559,7 +565,8 @@ def fit_ellipses_to_signal(
                     "the same length")
     marker_list = []
     ellipse_list = []
-    for radial_signal_span, aN in zip(radial_signal_span_list, angleN):
+    for i, (radial_signal_span, aN) in enumerate(zip(
+            radial_signal_span_list, angleN)):
         s_ra = get_radius_vs_angle(
                 s, radial_signal_span, angleN=aN,
                 show_progressbar=show_progressbar)
@@ -568,7 +575,8 @@ def fit_ellipses_to_signal(
         output = _get_ellipse_parameters(ellipse_parameters)
         ellipse_list.append(output)
         marker_list.extend(_get_marker_list(
-                s, ellipse_parameters, x_list=x, y_list=y))
+                s, ellipse_parameters, x_list=x, y_list=y,
+                name='circle' + str(i)))
     s_m = s.deepcopy()
     s_m.add_marker(marker_list, permanent=True)
     return s_m, ellipse_list
