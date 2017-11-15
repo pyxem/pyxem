@@ -248,7 +248,10 @@ def _get_offset_image(model_list, s, steps, step_size):
 
 
 def get_radius_vs_angle(
-        signal, radial_signal_span, angleN=15, show_progressbar=True):
+        signal, radial_signal_span, angleN=15,
+        centre_x=None, centre_y=None,
+        prepeak_range=None,
+        show_progressbar=True):
     """
     Get radius of a ring as a function of angle.
 
@@ -269,6 +272,8 @@ def get_radius_vs_angle(
         or use a function like radial.get_optimal_centre_position
     radial_signal_span : tuple
     angleN : default 15
+    centre_x, centre_y : NumPy arrays
+    prepeak_range : tuple, optional
     show_progressbar : default True
 
     Returns
@@ -286,14 +291,17 @@ def get_radius_vs_angle(
 
     """
     s_ra = signal.angular_slice_radial_integration(
-            angleN=angleN, show_progressbar=show_progressbar)
+            angleN=angleN, centre_x=centre_x, centre_y=centre_y,
+            show_progressbar=show_progressbar)
     s_ra = s_ra.isig[radial_signal_span[0]:radial_signal_span[1]]
 
     m_ra = s_ra.create_model()
 
     # Fit 1 order polynomial to edges of data to account for the background
-    sa = m_ra.axes_manager[-1]
-    m_ra.set_signal_range(sa.low_value, sa.index2value(4))
+    sa = m_ra.axes_manager.signal_axes[0]
+    if prepeak_range is None:
+        prepeak_range = (sa.low_value, sa.index2value(4))
+    m_ra.set_signal_range(prepeak_range[0], prepeak_range[1])
     m_ra.add_signal_range(sa.index2value(-3), sa.high_value)
 
     polynomial = Polynomial(1)
@@ -304,14 +312,13 @@ def get_radius_vs_angle(
     m_ra.reset_signal_range()
 
     # Fit Gaussian to diffraction ring
-    argmax = s_ra.mean(0).data.argmax()
-    centre_initial = s_ra.axes_manager.signal_axes[0].index2value(argmax)
+    centre_initial = (sa.high_value + sa.low_value)*0.5
     sigma = 3
     A = (s_ra - s_ra.min(axis=1)).data.max() * 2 * sigma
 
     gaussian = Gaussian(A=A, sigma=sigma, centre=centre_initial)
-    gaussian.centre.bmin = s_ra.axes_manager[1].low_value
-    gaussian.centre.bmax = s_ra.axes_manager[1].high_value
+    gaussian.centre.bmin = sa.low_value
+    gaussian.centre.bmax = sa.high_value
     m_ra.append(gaussian)
     m_ra.multifit(fitter='mpfit', bounded=True, show_progressbar=False)
 
@@ -488,12 +495,14 @@ def _get_marker_list(
 
 
 def fit_single_ellipse_to_signal(
-        s, radial_signal_span, angleN=20, show_progressbar=True):
+        s, radial_signal_span, prepeak_range=None,
+        angleN=20, show_progressbar=True):
     """
     Parameters
     ----------
     s : HyperSpy Signal2D
     radial_signal_span : tuple
+    prepeak_range : tuple, optional
     angleN : int, default 20
     show_progressbar : bool, default True
 
@@ -516,6 +525,7 @@ def fit_single_ellipse_to_signal(
     """
     s_ra = get_radius_vs_angle(
             s, radial_signal_span, angleN=angleN,
+            prepeak_range=prepeak_range,
             show_progressbar=show_progressbar)
     x, y = _get_xy_points_from_radius_angle_plot(s_ra)
     ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
@@ -530,12 +540,14 @@ def fit_single_ellipse_to_signal(
 
 def fit_ellipses_to_signal(
         s, radial_signal_span_list,
+        prepeak_range=None,
         angleN=20, show_progressbar=True):
     """
     Parameters
     ----------
     s : HyperSpy Signal2D
     radial_signal_span_list : tuple
+    prepeak_range : tuple, optional
     angleN : list or int, default 20
     show_progressbar : bool, default True
 
@@ -569,6 +581,7 @@ def fit_ellipses_to_signal(
             radial_signal_span_list, angleN)):
         s_ra = get_radius_vs_angle(
                 s, radial_signal_span, angleN=aN,
+                prepeak_range=prepeak_range,
                 show_progressbar=show_progressbar)
         x, y = _get_xy_points_from_radius_angle_plot(s_ra)
         ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
