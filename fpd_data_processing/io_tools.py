@@ -4,6 +4,7 @@ import dask.array as da
 from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
+from hyperspy.signals import Signal2D
 from fpd_data_processing.pixelated_stem_class import (
         PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D,
         LazyPixelatedSTEM)
@@ -47,6 +48,28 @@ def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
                 "Pixelated dataset does not have correct dimensions")
 
         s = LazyPixelatedSTEM(data_lazy)
+        return(s)
+    else:
+        raise IOError("Pixelated dataset not found")
+
+
+def _load_fpd_sum_im(filename):
+    f = h5py.File(filename)
+    if 'fpd_expt' in f:
+        data = f['/fpd_expt/fpd_sum_im/data'][:, :, 0]
+        s = Signal2D(data)
+        f.close()
+        return(s)
+    else:
+        raise IOError("Pixelated dataset not found")
+
+
+def _load_fpd_sum_dif(filename):
+    f = h5py.File(filename)
+    if 'fpd_expt' in f:
+        data = f['fpd_expt/fpd_sum_dif/data'][0, :, :]
+        s = Signal2D(data)
+        f.close()
         return(s)
     else:
         raise IOError("Pixelated dataset not found")
