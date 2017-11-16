@@ -37,10 +37,12 @@ class DiffractionVectors(BaseSignal):
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
+
+
 """ # This overwrites a method in base signal and should be renamed
     def plot(self):
-        """Plot the diffraction vectors.
-        """
+        #Plot the diffraction vectors.
+        
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
