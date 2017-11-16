@@ -20,6 +20,7 @@ from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
 from .utils.expt_utils import *
+from tqdm import tqdm
 
 """
 Signal class for diffraction vectors.
