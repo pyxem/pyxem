@@ -85,8 +85,9 @@ class ElectronDiffractionCalculator(object):
         """
         generate_pyprismatic_input(structure)
         meta = run_pyprismatic_simulation(prismatic_kwargs)
-        output = import_pyprismatic_data(meta)
-        diffracted_intensity = np.squeeze(np.sum(output,axis=2)) #see prismatic-em examples for what this is
+        #below is designed for 3D data, we now work in 4
+	#output = import_pyprismatic_data(meta)
+        #diffracted_intensity = np.squeeze(np.sum(output,axis=2)) #see prismatic-em examples for what this is
         
         return None
         
