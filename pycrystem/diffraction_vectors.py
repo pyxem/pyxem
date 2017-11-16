@@ -39,8 +39,8 @@ class DiffractionVectors(BaseSignal):
         BaseSignal.__init__(self, *args, **kwargs)
 
 
-""" # This overwrites a method in base signal and should be renamed
-    def plot(self):
+# This overwrited a method in base signal and has been renamed
+    def plot_diff_vects(self):
         #Plot the diffraction vectors.
         
         #Find the unique gvectors to plot.
@@ -50,7 +50,7 @@ class DiffractionVectors(BaseSignal):
         plt.plot(unique_vectors.T[1], unique_vectors.T[0], 'ro')
         plt.axes().set_aspect('equal')
         plt.show()
-"""
+
     def get_magnitudes(self):
         """Calculate the magnitude of diffraction vectors.
 
