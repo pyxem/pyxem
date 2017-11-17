@@ -2,7 +2,7 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from scipy.ndimage import rotate
+from scipy.ndimage import rotate, gaussian_filter
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
@@ -825,6 +825,45 @@ class DPCSignal2D(Signal2D):
         s_new.data[0] = x * np.cos(angle_rad) - y * np.sin(angle_rad)
         s_new.data[1] = x * np.sin(angle_rad) + y * np.cos(angle_rad)
         return(s_new)
+    
+    def gaussian_blur(self, sigma=2, output=None):
+        """Blur the x- and y-beam shifts.
+
+        Useful for reducing the effects of structural diffraction effects.
+
+        Parameters
+        ----------
+        sigma : scalar, default 5
+        output : HyperSpy signal
+
+        Returns
+        -------
+        blurred_signal : HyperSpy 2D Signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=False)
+        >>> s_blur = s.gaussian_blur()
+
+        Different sigma
+
+        >>> s_blur = s.gaussian_blur(sigma=1.2)
+
+        Using the signal itself as output
+
+        >>> s.gaussian_blur(output=s)
+        >>> s.plot()
+
+        """
+        if output is None:
+            s_out = self.deepcopy()
+        else:
+            s_out = output
+        gaussian_filter(self.data[0], sigma=sigma, output=s_out.data[0])
+        gaussian_filter(self.data[1], sigma=sigma, output=s_out.data[1])
+        if output is None:
+            return s_out
 
 
 class LazyDPCBaseSignal(LazySignal, DPCBaseSignal):

@@ -263,3 +263,43 @@ class test_flip_axis_90_degrees(unittest.TestCase):
         assert_allclose(s_r.inav[1].data.mean(), 0., atol=1e-7)
         assert_allclose(s_r.axes_manager.signal_shape, s_shape)
         assert_allclose(s_r.axes_manager.navigation_shape, (2, ))
+
+
+class test_gaussian_blur(unittest.TestCase):
+
+    def setUp(self):
+        data = np.zeros((2, 25, 50))
+        data[0, 10, 5] = 10
+        data[1, 20, 15] = -10
+        self.s = DPCSignal2D(data)
+
+    def test_output1(self):
+        s = self.s
+        s_out = s.gaussian_blur(sigma=1.2)
+        assert s.axes_manager.shape == s_out.axes_manager.shape
+        assert s.data[0, 10, 5] == 10
+        assert s.data[1, 20, 15] == -10
+        s.data[0, 10, 5] = 0
+        s.data[1, 20, 15] = 0
+        assert s.data.any() == False
+
+        assert s_out.data[0, 10, 5] < 10
+        assert s_out.data[0, 10, 5] > 0
+        assert s_out.data[1, 20, 15] > -10
+        assert s_out.data[1, 20, 15] < 0
+        assert_almost_equal(10, s_out.data[0].sum())
+        assert_almost_equal(-10, s_out.data[1].sum())
+
+    def test_output2(self):
+        s = self.s
+        s_copy = s.deepcopy()
+        s.gaussian_blur(output=s, sigma=1.2)
+        assert s.axes_manager.shape == s_copy.axes_manager.shape
+        assert s.data[0, 10, 5] != 10
+        assert s.data[1, 20, 15] != -10
+        assert s.data[0, 10, 5] < 10
+        assert s.data[0, 10, 5] > 0
+        assert s.data[1, 20, 15] > -10
+        assert s.data[1, 20, 15] < 0
+        assert_almost_equal(10, s.data[0].sum())
+        assert_almost_equal(-10, s.data[1].sum())
