@@ -136,3 +136,24 @@ So we slightly alter the dataset.
 
 .. image:: images/analysing_dpc_data/dpc_rotate_flip_color2.jpg
     :scale: 49 %
+
+
+Blurring the data
+-----------------
+
+The beam shifts can be blurred using :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.gaussian_blur`.
+
+This is useful for suppressing the effects of variations in the crystal structure.
+
+.. code-block:: python
+
+    >>> s = fp.dummy_data.get_square_dpc_signal()
+    >>> s_blur = s.gaussian_blur()
+    >>> s.get_color_signal().plot()
+    >>> s_blur.get_color_signal().plot()
+
+.. image:: images/analysing_dpc_data/dpc_gaussian_nonblur.jpg
+    :scale: 49 %
+
+.. image:: images/analysing_dpc_data/dpc_gaussian_blur.jpg
+    :scale: 49 %

@@ -72,5 +72,17 @@ s2_rot_flip_color.plot()
 fig_sig = s2_rot_flip_color._plot.signal_plot.figure
 fig_sig.savefig("dpc_rotate_flip_color2.jpg")
 
+# Blurring the data
+s = fp.dummy_data.get_square_dpc_signal()
+s_color = s.get_color_signal()
+s_color.plot()
+fig_color = s_color._plot.signal_plot.figure
+fig_color.savefig("dpc_gaussian_nonblur.jpg")
+
+s_color_blur = s.gaussian_blur().get_color_signal()
+s_color_blur.plot()
+fig_color_blur = s_color_blur._plot.signal_plot.figure
+fig_color_blur.savefig("dpc_gaussian_blur.jpg")
+
 # Closing all the matplotlib figures
 matplotlib.pyplot.close("all")
