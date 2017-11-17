@@ -38,17 +38,13 @@ def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
                     chunk_size[0], chunk_size[1],
                     1, data.shape[-2], data.shape[-1])
             data_lazy = da.from_array(data, chunks=chunks)[:, :, 0, :, :]
+            s_out = LazyPixelatedSTEM(data_lazy)
         elif len(data.shape) == 4:
-            chunks = (
-                    chunk_size[0], chunk_size[1],
-                    data.shape[-2], data.shape[-1])
-            data_lazy = da.from_array(data, chunks=chunks)[:, :, :, :]
+            s_out = _load_fpd_emd_file(filename, lazy=True)
         else:
             raise IOError(
                 "Pixelated dataset does not have correct dimensions")
-
-        s = LazyPixelatedSTEM(data_lazy)
-        return(s)
+        return(s_out)
     else:
         raise IOError("Pixelated dataset not found")
 
@@ -56,7 +52,12 @@ def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
 def _load_fpd_sum_im(filename):
     f = h5py.File(filename)
     if 'fpd_expt' in f:
-        data = f['/fpd_expt/fpd_sum_im/data'][:, :, 0]
+        if len(f['/fpd_expt/fpd_sum_im/data'].shape) == 3:
+            data = f['/fpd_expt/fpd_sum_im/data'][:, :, 0]
+        elif len(f['/fpd_expt/fpd_sum_im/data'].shape) == 2:
+            data = f['/fpd_expt/fpd_sum_im/data'][:, :]
+        else:
+            Exception("fpd_sum_im does not have the correct dimensions")
         s = Signal2D(data)
         f.close()
         return(s)
@@ -67,7 +68,12 @@ def _load_fpd_sum_im(filename):
 def _load_fpd_sum_dif(filename):
     f = h5py.File(filename)
     if 'fpd_expt' in f:
-        data = f['fpd_expt/fpd_sum_dif/data'][0, :, :]
+        if len(f['/fpd_expt/fpd_sum_dif/data'].shape) == 3:
+            data = f['fpd_expt/fpd_sum_dif/data'][0, :, :]
+        elif len(f['/fpd_expt/fpd_sum_dif/data'].shape) == 2:
+            data = f['fpd_expt/fpd_sum_dif/data'][:, :]
+        else:
+            Exception("fpd_sum_dif does not have the correct dimensions")
         s = Signal2D(data)
         f.close()
         return(s)
@@ -75,9 +81,9 @@ def _load_fpd_sum_dif(filename):
         raise IOError("Pixelated dataset not found")
 
 
-def _load_fpd_emd_file(filename):
+def _load_fpd_emd_file(filename, lazy=False):
     logging.basicConfig(level=logging.ERROR)
-    s_list = load_with_reader(filename, reader=emd)
+    s_list = load_with_reader(filename, reader=emd, lazy=lazy)
     logging.basicConfig(level=logging.WARNING)
     temp_s = None
     longest_dims = 0
