@@ -5,6 +5,7 @@ import dask.array as da
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 import fpd_data_processing.make_diffraction_test_data as mdtd
+from numpy.testing import assert_almost_equal, assert_allclose
 
 
 class test_pixelated_stem(unittest.TestCase):
@@ -538,3 +539,29 @@ class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
         s = LazyPixelatedSTEM(data)
         s1 = s.virtual_bright_field(cx=6, cy=6, r=5)
         self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+
+
+class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
+
+    def test_rotate_diffraction_keep_shape(self):
+        shape = (7, 5, 4, 15)
+        s = PixelatedSTEM(np.zeros(shape))
+        s_rot = s.rotate_diffraction(angle=45)
+        assert s.axes_manager.shape == s_rot.axes_manager.shape
+
+        s_lazy = LazyPixelatedSTEM(da.zeros(shape, chunks=(1, 1, 1, 1)))
+        s_rot_lazy = s_lazy.rotate_diffraction(angle=45)
+        assert s_lazy.axes_manager.shape == s_rot_lazy.axes_manager.shape
+
+    def test_rotate_diffraction_values(self):
+        data = np.zeros((10, 5, 12, 14))
+        data[:, :, 6:, 7:] = 1
+        s = PixelatedSTEM(data)
+        s_rot = s.rotate_diffraction(angle=180)
+        assert_almost_equal(
+                s.data[0, 0, :6, :7], np.zeros_like(s.data[0, 0, :6, :7]))
+        assert_almost_equal(
+                s_rot.data[0, 0, :6, :7],
+                np.ones_like(s_rot.data[0, 0, :6, :7]))
+        s_rot.data[:, :, :6, :7] = 0
+        assert_almost_equal(s_rot.data, np.zeros_like(s.data))

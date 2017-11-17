@@ -13,6 +13,36 @@ from tqdm import tqdm
 
 class PixelatedSTEM(Signal2D):
 
+    def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
+        """
+        Rotate the diffraction dimensions.
+
+        Parameters
+        ----------
+        angle : scalar
+            Clickwise rotation in degrees.
+        parallel : bool, default True
+        show_progressbar : bool, default True
+
+        Returns
+        -------
+        rotated_signal : PixelatedSTEM class
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_holz_simple_test_signal()
+        >>> s_rot = s.rotate_diffraction(30)
+
+        """
+        s_rotated = self.map(
+                rotate, ragged=False, angle=-angle, reshape=False,
+                parallel=parallel, inplace=False,
+                show_progressbar=show_progressbar)
+        if self._lazy:
+            s_rotated.compute(progressbar=show_progressbar)
+        return s_rotated
+
     def center_of_mass(self, threshold=None, mask=None, show_progressbar=True):
         """Get the centre of the STEM diffraction pattern using
         center of mass. Threshold can be set to only use the most

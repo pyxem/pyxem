@@ -66,3 +66,14 @@ Radial integration
     >>> s.axes_manager.signal_axes[1].offset = -25
     >>> s_r = s.radial_integration(show_progressbar=False)
     >>> s_r.plot()
+
+Rotating the diffraction pattern
+--------------------------------
+
+:py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.rotate_diffraction`
+
+.. code-block:: python
+
+    >>> s = fp.dummy_data.get_holz_simple_test_signal()
+    >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
+    >>> s_rot.plot()
