@@ -5,7 +5,6 @@ import dask.array as da
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 import fpd_data_processing.make_diffraction_test_data as mdtd
-from numpy.testing import assert_almost_equal, assert_allclose
 
 
 class test_pixelated_stem(unittest.TestCase):
@@ -558,10 +557,10 @@ class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
         data[:, :, 6:, 7:] = 1
         s = PixelatedSTEM(data)
         s_rot = s.rotate_diffraction(angle=180)
-        assert_almost_equal(
+        np.testing.assert_almost_equal(
                 s.data[0, 0, :6, :7], np.zeros_like(s.data[0, 0, :6, :7]))
-        assert_almost_equal(
+        np.testing.assert_almost_equal(
                 s_rot.data[0, 0, :6, :7],
                 np.ones_like(s_rot.data[0, 0, :6, :7]))
         s_rot.data[:, :, :6, :7] = 0
-        assert_almost_equal(s_rot.data, np.zeros_like(s.data))
+        np.testing.assert_almost_equal(s_rot.data, np.zeros_like(s.data))
