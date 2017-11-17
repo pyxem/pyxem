@@ -281,7 +281,7 @@ class test_gaussian_blur(unittest.TestCase):
         assert s.data[1, 20, 15] == -10
         s.data[0, 10, 5] = 0
         s.data[1, 20, 15] = 0
-        assert s.data.any() == False
+        self.assertFalse(s.data.any())
 
         assert s_out.data[0, 10, 5] < 10
         assert s_out.data[0, 10, 5] > 0

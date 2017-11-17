@@ -825,7 +825,7 @@ class DPCSignal2D(Signal2D):
         s_new.data[0] = x * np.cos(angle_rad) - y * np.sin(angle_rad)
         s_new.data[1] = x * np.sin(angle_rad) + y * np.cos(angle_rad)
         return(s_new)
-    
+
     def gaussian_blur(self, sigma=2, output=None):
         """Blur the x- and y-beam shifts.
 
