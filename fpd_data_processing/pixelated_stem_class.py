@@ -43,6 +43,54 @@ class PixelatedSTEM(Signal2D):
             s_rotated.compute(progressbar=show_progressbar)
         return s_rotated
 
+    def flip_diffraction_x(self):
+        """Flip the dataset along the diffraction x-axis.
+
+        The function returns a new signal, but the data itself
+        is a view of the original signal. So changing the returned signal
+        will also change the original signal (and visa versa).
+
+        Returns
+        -------
+        flipped_signal : PixelatedSTEM signal
+
+        Example
+        -------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_holz_simple_test_signal()
+        >>> s_flip = s.flip_diffraction_x()
+
+        """
+        s_out = self.copy()
+        s_out.axes_manager = self.axes_manager.deepcopy()
+        s_out.metadata = self.metadata.deepcopy()
+        s_out.data = np.flip(self.data, axis=-1)
+        return s_out
+
+    def flip_diffraction_y(self):
+        """Flip the dataset along the diffraction y-axis.
+
+        The function returns a new signal, but the data itself
+        is a view of the original signal. So changing the returned signal
+        will also change the original signal (and visa versa). To avoid
+
+        Returns
+        -------
+        flipped_signal : PixelatedSTEM signal
+
+        Example
+        -------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_holz_simple_test_signal()
+        >>> s_flip = s.flip_diffraction_y()
+
+        """
+        s_out = self.copy()
+        s_out.axes_manager = self.axes_manager.deepcopy()
+        s_out.metadata = self.metadata.deepcopy()
+        s_out.data = np.flip(self.data, axis=-2)
+        return s_out
+
     def center_of_mass(self, threshold=None, mask=None, show_progressbar=True):
         """Get the centre of the STEM diffraction pattern using
         center of mass. Threshold can be set to only use the most

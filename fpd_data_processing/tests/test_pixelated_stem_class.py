@@ -25,6 +25,27 @@ class test_pixelated_stem(unittest.TestCase):
         self.assertEqual(array1.shape, s1.axes_manager.shape)
 
 
+class test_pixelated_stem_flip_diffraction(unittest.TestCase):
+
+    def test_flip_x(self):
+        array = np.zeros(shape=(3, 4, 6, 10))
+        array[:, :, :, 5:] = 1
+        s = PixelatedSTEM(array)
+        self.assertTrue((s.data[:, :, :, 5:] == 1).all())
+        s_flip = s.flip_diffraction_x()
+        self.assertTrue((s_flip.data[:, :, :, 5:] == 0).all())
+        self.assertTrue((s_flip.data[:, :, :, :5] == 1).all())
+
+    def test_flip_y(self):
+        array = np.zeros(shape=(3, 4, 6, 10))
+        array[:, :, 3:, :] = 1
+        s = PixelatedSTEM(array)
+        self.assertTrue((s.data[:, :, 3:, :] == 1).all())
+        s_flip = s.flip_diffraction_y()
+        self.assertTrue((s_flip.data[:, :, 3:, :] == 0).all())
+        self.assertTrue((s_flip.data[:, :, :3, :] == 1).all())
+
+
 class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
     def test_center_of_mass_0d(self):
