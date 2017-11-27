@@ -48,7 +48,10 @@ class PixelatedSTEM(Signal2D):
 
         The function returns a new signal, but the data itself
         is a view of the original signal. So changing the returned signal
-        will also change the original signal (and visa versa).
+        will also change the original signal (and visa versa). To avoid
+        changing the orignal signal, use the deepcopy method afterwards,
+        but note that this requires double the amount of memory.
+        See below for an example of this.
 
         Returns
         -------
@@ -59,6 +62,10 @@ class PixelatedSTEM(Signal2D):
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_x()
+
+        To avoid changing the original object afterwards
+
+        >>> s_flip = s.flip_diffraction_x().deepcopy()
 
         """
         s_out = self.copy()
@@ -73,6 +80,10 @@ class PixelatedSTEM(Signal2D):
         The function returns a new signal, but the data itself
         is a view of the original signal. So changing the returned signal
         will also change the original signal (and visa versa). To avoid
+        changing the orignal signal, use the deepcopy method afterwards,
+        but note that this requires double the amount of memory.
+        See below for an example of this.
+
 
         Returns
         -------
@@ -83,6 +94,10 @@ class PixelatedSTEM(Signal2D):
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_y()
+
+        To avoid changing the original object afterwards
+
+        >>> s_flip = s.flip_diffraction_y().deepcopy()
 
         """
         s_out = self.copy()
