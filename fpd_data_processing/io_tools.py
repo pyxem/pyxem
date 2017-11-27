@@ -103,7 +103,7 @@ def _load_fpd_emd_file(filename, lazy=False):
     else:
         raise Exception(
                 "Pixelated dataset not found")
-
+    s._lazy = lazy
     s_new = signal_to_pixelated_stem(s)
     return(s_new)
 
