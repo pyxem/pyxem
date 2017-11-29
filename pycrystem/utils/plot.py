@@ -30,7 +30,9 @@ from pymatgen.transformations.standard_transformations \
 from transforms3d.euler import euler2axangle
 
 # from . import Structure, ElectronDiffractionCalculator
-from .utils import correlate
+
+#FIXME #HACK
+#from .utils import correlate
 
 from ipywidgets import interact
 
