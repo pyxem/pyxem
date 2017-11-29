@@ -22,7 +22,6 @@
 
 import numpy as np
 from hyperspy.signals import BaseSignal
-from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
 from scipy.constants import pi
