@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 
+import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -74,3 +75,28 @@ def manual_orientation(data,  #: np.ndarray,
     interact(plot, alpha=(-np.pi, np.pi, 0.01), beta=(-np.pi, np.pi, 0.01),
              gamma=(-np.pi, np.pi, 0.01), calibration=(1e-2, 1e1, 1e-2),
              reciprocal_radius=(1e-1, 5., 1e-1))
+
+#HACK
+def find_max_length_peaks(peaks):
+    x_size,y_size = peaks.axes_manager.navigation_shape[0],peaks.axes_manager.navigation_shape[1]
+    length_of_longest_peaks_list = 0
+    for x in np.arange(0,x_size):
+            for y in np.arange(0,y_size):
+                if peaks.data[x,y].shape[0] > length_of_longest_peaks_list:
+                    length_of_longest_peaks_list = peaks.data[x,y].shape[0]
+    return length_of_longest_peaks_list  
+
+
+def generate_marker_inputs_from_peaks(peaks):
+   
+    max_peak_len = find_max_length_peaks(peaks)
+    #Hardcoded into 2D
+    pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data),fillvalue=[np.nan,np.nan])))
+    # Not tested for non-square signal, return flat to square
+    pad = pad.reshape((max_peak_len),peaks.data.shape[0],peaks.data.shape[1],2)
+    xy_cords = np.transpose(pad,[3,0,1,2]) #move the x,y pairs to the front 
+    #taking care with x,y ordering
+    x = xy_cords[1] 
+    y = xy_cords[0]
+    
+    return x,y 
