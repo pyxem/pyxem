@@ -694,8 +694,6 @@ class ElectronDiffraction(Signal2D):
             * 'zaefferer' - based on gradient thresholding and refinement
               by local region of interest optimisation
             * 'stat' - statistical approach requiring no free params.
-            * 'massiel' - finds peaks in each direction and compares the
-              positions where these coincide.
             * 'laplacian_of_gaussians' - a blob finder implemented in
               `scikit-image` which uses the laplacian of Gaussian matrices
               approach.
