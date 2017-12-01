@@ -80,7 +80,8 @@ def manual_orientation(data,  #: np.ndarray,
 
 #HACK
 def find_max_length_peaks(peaks):
-    x_size,y_size = peaks.axes_manager.navigation_shape[0],peaks.axes_manager.navigation_shape[1]
+    #FIX ME - needs to work for 1D signals as well
+    x_size,y_size = peaks.axes_manager.navigation_shape[0],peaks.axes_manager.navigation_shape[1]    
     length_of_longest_peaks_list = 0
     for x in np.arange(0,x_size):
             for y in np.arange(0,y_size):
@@ -90,9 +91,9 @@ def find_max_length_peaks(peaks):
 
 
 def generate_marker_inputs_from_peaks(peaks):
-   
     max_peak_len = find_max_length_peaks(peaks)
-    #Hardcoded into 2D
+    #Hardcoded into 2D signal and multiple images
+    #TODO - Fix for a single image
     pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data),fillvalue=[np.nan,np.nan])))
     # Not tested for non-square signal, return flat to square
     pad = pad.reshape((max_peak_len),peaks.data.shape[0],peaks.data.shape[1],2)
