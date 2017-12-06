@@ -410,3 +410,40 @@ def _copy_signal2d_axes_manager_metadata(signal_original, signal_new):
     ax_n[0].offset, ax_n[1].offset = ax_o[0].offset, ax_o[1].offset
     ax_n[0].name, ax_n[1].name = ax_o[0].name, ax_o[1].name
     ax_n[0].units, ax_n[1].units = ax_o[0].units, ax_o[1].units
+
+
+def remove_dead_pixels(data, dead_pixel_list):
+    """
+    Parameters
+    ----------
+    data : 2-D numpy array
+    dead_pixel_list : list of x,y coordinates
+        Form [[x0, y0], [x1, y1]]
+
+    Example
+    -------
+    >>> import numpy as np
+    >>> import fpd_data_processing.pixelated_stem_tools as pst
+    >>> data = np.random.random((256, 256))
+    >>> dead_pixel_list = [[10, 50], [76, 251]]
+    >>> pst.remove_dead_pixels(data, dead_pixel_list)
+
+    """
+    for dead_pixel in dead_pixel_list:
+        x_pixel = dead_pixel[0]
+        y_pixel = dead_pixel[1]
+        if x_pixel == 0:
+            pass
+        elif x_pixel == 255:
+            pass
+        elif y_pixel == 0:
+            pass
+        elif y_pixel == 255:
+            pass
+        else:
+            neighbor0 = data[x_pixel + 1, y_pixel]
+            neighbor1 = data[x_pixel - 1, y_pixel]
+            neighbor2 = data[x_pixel, y_pixel + 1]
+            neighbor3 = data[x_pixel, y_pixel - 1]
+            new_value = (neighbor0 + neighbor1 + neighbor2 + neighbor3)/4
+            data[x_pixel, y_pixel] = new_value
