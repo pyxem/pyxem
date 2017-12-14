@@ -26,7 +26,7 @@ from hyperspy.components2d import Expression
 from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
-from pymatgen.util.plotting import get_publication_quality_plot
+from pymatgen.util.plotting import pretty_plot
 
 
 _GAUSSIAN2D_EXPR = \
@@ -242,7 +242,7 @@ class DiffractionSimulation:
 
         """
         if ax is None:
-            plt = get_publication_quality_plot(10, 10)
+            plt = pretty_plot(10, 10)
             ax = plt.gca()
         ax.scatter(
             self.coordinates[:, 0],
