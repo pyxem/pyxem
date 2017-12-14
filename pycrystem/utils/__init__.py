@@ -74,7 +74,7 @@ def correlate(image, pattern,
         image_intensities = ip.ev(pattern.coordinates[:, 0][mask],
                                   pattern.coordinates[:, 1][mask])
     else:
-        image_intensities = image.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
+        image_intensities = image.T[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
     pattern_intensities = pattern_intensities[mask]
     return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
 
