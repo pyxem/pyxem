@@ -228,7 +228,7 @@ class DiffractionSimulation:
     def intensities(self, intensities):
         self._intensities = intensities
 
-    def plot(self, ax=None):
+    def plot_simulated_pattern(self, ax=None):
         """Plots the simulated electron diffraction pattern with a logarithmic
         intensity scale.
 
