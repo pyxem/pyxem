@@ -291,7 +291,7 @@ class DiffractionSimulation:
                 signal = np.zeros([size,size])
                 for i in np.arange(coords.shape[0]):
                     x,y = coords[i,0]-(delta_l/2),coords[i,1]-(delta_l/2)
-                    x_num,y_num = np.sum(l < x),np.sum(l < y)   
+                    x_num,y_num = np.sum(l < x)-1,np.sum(l < y)-1    
                     signal[x_num,y_num] += self.intensities[i]
                 dp = ElectronDiffraction(signal)
     
