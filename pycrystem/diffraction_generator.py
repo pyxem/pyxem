@@ -26,7 +26,7 @@ from hyperspy.components2d import Expression
 from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
-from pymatgen.util.plotting import get_publication_quality_plot
+from pymatgen.util.plotting import pretty_plot
 
 
 _GAUSSIAN2D_EXPR = \
@@ -228,7 +228,7 @@ class DiffractionSimulation:
     def intensities(self, intensities):
         self._intensities = intensities
 
-    def plot(self, ax=None):
+    def plot_simulated_pattern(self, ax=None):
         """Plots the simulated electron diffraction pattern with a logarithmic
         intensity scale.
 
@@ -242,7 +242,7 @@ class DiffractionSimulation:
 
         """
         if ax is None:
-            plt = get_publication_quality_plot(10, 10)
+            plt = pretty_plot(10, 10)
             ax = plt.gca()
         ax.scatter(
             self.coordinates[:, 0],
@@ -255,35 +255,47 @@ class DiffractionSimulation:
 
     def as_signal(self, size, sigma, max_r):
         """Returns the diffraction data as an ElectronDiffraction signal with
-        two-dimensional Gaussians representing each diffracted peak.
+        two-dimensional Gaussians representing each diffracted peak. Setting 
+        sigma=0 runs a faster, 'no spread' implementation
 
         Parameters
         ----------
         size : int
             Side length (in pixels) for the signal to be simulated.
         sigma : float
-            Standard deviation of the Gaussian function to be plotted.
+            Standard deviation of the Gaussian function to be plotted. Set to 
+            0 for a quicker implementation with no spreading
         max_r : float
             Half the side length in reciprocal Angstroms. Defines the signal's
             calibration.
 
         """
-        # Plot a 2D Gaussian at each peak position.
-        # TODO: Update this method so plots intensity at each position and then
-        # convolves with a Gaussian to make faster - needs interpolation care.
-        dp_dat = 0
-        l = np.linspace(-max_r, max_r, size)
-        x, y = np.meshgrid(l, l)
+        
+        l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
         coords = self.coordinates[:, :2]
-        g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
-        for (cx, cy), intensity in zip(coords, self.intensities):
-            g.intensity.value = intensity
-            g.sigma.value = sigma
-            g.cx.value = cx
-            g.cy.value = cy
-            dp_dat += g.function(x, y)
-
-        dp = ElectronDiffraction(dp_dat)
+        
+        if sigma != 0:
+            # TODO: Update this method so plots intensity at each position and then
+            # convolves with a Gaussian to make faster - needs interpolation care.
+            x, y = np.meshgrid(l, l)
+            dp_dat = 0
+            g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
+            for (cx, cy), intensity in zip(coords, self.intensities):
+                g.intensity.value = intensity
+                g.sigma.value = sigma
+                g.cx.value = cx
+                g.cy.value = cy
+                dp_dat += g.function(x, y)
+                dp = ElectronDiffraction(dp_dat)
+        else:
+                signal = np.zeros([size,size])
+                for i in np.arange(coords.shape[0]):
+                    x,y = coords[i,0]-(delta_l/2),coords[i,1]-(delta_l/2)
+                    x_num,y_num = np.sum(l < x)-1,np.sum(l < y)-1    
+                    signal[x_num,y_num] += self.intensities[i]
+                dp = ElectronDiffraction(signal)
+    
+        
         dp.set_calibration(2*max_r/size)
 
         return dp
