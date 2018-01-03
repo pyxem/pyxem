@@ -22,11 +22,12 @@
 
 import numpy as np
 from hyperspy.signals import BaseSignal
+from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
 from scipy.constants import pi
 
-from .utils import correlate,_correlate
+from .utils import correlate
 from .crystallographic_map import CrystallographicMap
 
 def correlate_library(image, library, n_largest):
@@ -72,27 +73,6 @@ def phase_specific_results(matching_results, phaseid):
     """
     return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
 
-#XXX
-def mapable_radial_matcher(dp_radial,dict_of_radial_patterns,n_scorer=5):
-    """
-    Usage:    
-    Designed to be applied to ElectronDiffraction Object containing radial patterns 
-    
-    eg)
-    dp.map(mapable_radial_matcher,dict_of_radial_patterns)
-    """
-    
-    best_corr = [0]*n_scorer 
-    best_corr_key = [None]*n_scorer
-    for key in dict_of_radial_patterns:
-        radial_pattern_rotate = dict_of_radial_patterns[key]
-        correlation = _correlate(dp_radial,radial_pattern_rotate)
-        if correlation > np.min(best_corr):
-            best_corr[np.argmin(best_corr)] = correlation
-            best_corr_key[np.argmin(best_corr)] = key      
-    return best_corr,best_corr_key
-
-
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
@@ -126,10 +106,10 @@ class IndexationGenerator():
 
         Returns
         -------
-        matching_results : MatchingResults
-            Navigation axes of the electron diffraction signal containing correlation 
-            results for each diffraction pattern. As an example, the signal in
-            Euler reads ( Library Key , X , Z , X , Correlation Score )
+        matching_results : ndarray
+            Numpy array with the same shape as the the navigation axes of the
+            electron diffraction signal containing correlation results for each
+            diffraction pattern.
 
         """
         signal = self.signal
