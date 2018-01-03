@@ -94,7 +94,17 @@ def _find_max_length_peaks(peaks):
 
 def generate_marker_inputs_from_peaks(peaks):
     """
-    Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan and returns markers
+    Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan and returns markers.
+    The example illustrates how to get these onto images.
+        
+    Example:
+        
+    mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
+    dp.plot(cmap='viridis') 
+    for mx,my in zip(mmx,mmy):
+        m = hs.markers.point(x=mx,y=my,color='red',marker='x')
+        dp.add_marker(m,plot_marker=True,permanent=False)
+
     """
     max_peak_len = _find_max_length_peaks(peaks)
     #TODO - Fix for a single image
