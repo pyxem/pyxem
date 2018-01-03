@@ -22,6 +22,7 @@
 
 import numpy as np
 from hyperspy.signals import BaseSignal
+from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
 from scipy.constants import pi
@@ -105,10 +106,10 @@ class IndexationGenerator():
 
         Returns
         -------
-        matching_results : MatchingResults
-            Navigation axes of the electron diffraction signal containing correlation 
-            results for each diffraction pattern. As an example, the signal in
-            Euler reads ( Library Key , X , Z , X , Correlation Score )
+        matching_results : ndarray
+            Numpy array with the same shape as the the navigation axes of the
+            electron diffraction signal containing correlation results for each
+            diffraction pattern.
 
         """
         signal = self.signal

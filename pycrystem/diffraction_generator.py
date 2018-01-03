@@ -26,7 +26,7 @@ from hyperspy.components2d import Expression
 from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
-from pymatgen.util.plotting import pretty_plot
+from pymatgen.util.plotting import get_publication_quality_plot
 
 
 _GAUSSIAN2D_EXPR = \
@@ -228,7 +228,7 @@ class DiffractionSimulation:
     def intensities(self, intensities):
         self._intensities = intensities
 
-    def plot_simulated_pattern(self, ax=None):
+    def plot(self, ax=None):
         """Plots the simulated electron diffraction pattern with a logarithmic
         intensity scale.
 
@@ -242,7 +242,7 @@ class DiffractionSimulation:
 
         """
         if ax is None:
-            plt = pretty_plot(10, 10)
+            plt = get_publication_quality_plot(10, 10)
             ax = plt.gca()
         ax.scatter(
             self.coordinates[:, 0],

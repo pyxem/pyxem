@@ -18,6 +18,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools
 
 from mpl_toolkits.axisartist.floating_axes import GridHelperCurveLinear, \
     FloatingSubplot
@@ -27,11 +28,13 @@ from scipy.interpolate import griddata
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from transforms3d.euler import euler2axangle
+from pycrystem.utils import correlate
+from ipywidgets import interact
 
 # from . import Structure, ElectronDiffractionCalculator
-from .utils import correlate
 
-from ipywidgets import interact
+
+
 
 
 def manual_orientation(data,  #: np.ndarray,
@@ -74,3 +77,42 @@ def manual_orientation(data,  #: np.ndarray,
     interact(plot, alpha=(-np.pi, np.pi, 0.01), beta=(-np.pi, np.pi, 0.01),
              gamma=(-np.pi, np.pi, 0.01), calibration=(1e-2, 1e1, 1e-2),
              reciprocal_radius=(1e-1, 5., 1e-1))
+
+def _find_max_length_peaks(peaks):
+    """
+    Worker function for generate_marker_inputs_from_peaks
+    """
+    #FIX ME
+    x_size,y_size = peaks.axes_manager.navigation_shape[0],peaks.axes_manager.navigation_shape[1]    
+    length_of_longest_peaks_list = 0
+    for x in np.arange(0,x_size):
+            for y in np.arange(0,y_size):
+                if peaks.data[y,x].shape[0] > length_of_longest_peaks_list:
+                    length_of_longest_peaks_list = peaks.data[y,x].shape[0]
+    return length_of_longest_peaks_list  
+
+
+def generate_marker_inputs_from_peaks(peaks):
+    """
+    Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan and returns markers.
+    The example illustrates how to get these onto images.
+        
+    Example:
+        
+    mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
+    dp.plot(cmap='viridis') 
+    for mx,my in zip(mmx,mmy):
+        m = hs.markers.point(x=mx,y=my,color='red',marker='x')
+        dp.add_marker(m,plot_marker=True,permanent=False)
+
+    """
+    max_peak_len = _find_max_length_peaks(peaks)
+    #TODO - Fix for a single image
+    pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data),fillvalue=[np.nan,np.nan])))
+    # Not tested for non-square signal, return flat to square
+    pad = pad.reshape((max_peak_len),peaks.data.shape[0],peaks.data.shape[1],2)
+    xy_cords = np.transpose(pad,[3,0,2,1]) #move the x,y pairs to the front 
+    x = xy_cords[1] 
+    y = xy_cords[0]
+    
+    return x,y 
