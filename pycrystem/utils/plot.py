@@ -87,14 +87,14 @@ def _find_max_length_peaks(peaks):
     length_of_longest_peaks_list = 0
     for x in np.arange(0,x_size):
             for y in np.arange(0,y_size):
-                if peaks.data[x,y].shape[0] > length_of_longest_peaks_list:
-                    length_of_longest_peaks_list = peaks.data[x,y].shape[0]
+                if peaks.data[y,x].shape[0] > length_of_longest_peaks_list:
+                    length_of_longest_peaks_list = peaks.data[y,x].shape[0]
     return length_of_longest_peaks_list  
 
 
 def generate_marker_inputs_from_peaks(peaks):
     """
-    Takes a peaks (defnied in 2D) object from a STEM (more than 1 image) scan and returns markers
+    Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan and returns markers
     """
     max_peak_len = _find_max_length_peaks(peaks)
     #TODO - Fix for a single image
