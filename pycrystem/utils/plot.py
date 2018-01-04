@@ -111,8 +111,8 @@ def generate_marker_inputs_from_peaks(peaks):
     pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data),fillvalue=[np.nan,np.nan])))
     # Not tested for non-square signal, return flat to square
     pad = pad.reshape((max_peak_len),peaks.data.shape[0],peaks.data.shape[1],2)
-    xy_cords = np.transpose(pad,[3,0,2,1]) #move the x,y pairs to the front 
-    x = xy_cords[1] 
-    y = xy_cords[0]
+    xy_cords = np.transpose(pad,[3,0,1,2]) #move the x,y pairs to the front 
+    x = xy_cords[0] 
+    y = xy_cords[1]
     
     return x,y 
