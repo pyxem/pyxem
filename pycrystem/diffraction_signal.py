@@ -22,7 +22,6 @@
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from skimage.morphology import square
 
 from .utils.expt_utils import *
 from .utils.peakfinders2D import *
@@ -492,8 +491,8 @@ class ElectronDiffraction(Signal2D):
             raise NotImplementedError("The method specified is not implemented. "
                                       "See documentation for available "
                                       "implementations.")
-
-        return centers
+        print(centers.data)
+        return centers.data
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.

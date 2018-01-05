@@ -16,35 +16,32 @@
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 
+import pytest
 import numpy as np
-import nose.tools as nt
 
 from pycrystem.diffraction_signal import ElectronDiffraction
 from hyperspy.signals import Signal1D, Signal2D
 
 
-class Test_metadata:
+@pytest.fixture
+def electron_diffraction(request):
+    return ElectronDiffraction(request.param)
 
-    def setUp(self):
-        # Create an empty diffraction pattern
-        dp = ElectronDiffraction(np.ones((2, 2, 2, 2)))
-        dp.axes_manager.signal_axes[0].scale = 1e-3
-        dp.metadata.Acquisition_instrument.TEM.accelerating_voltage = 200
-        dp.metadata.Acquisition_instrument.TEM.convergence_angle = 15.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_angle = 18.0
-        dp.metadata.Acquisition_instrument.TEM.rocking_frequency = 63
-        dp.metadata.Acquisition_instrument.TEM.Detector.Diffraction.exposure_time = 35
-        self.signal = dp
 
-    def test_default_param(self):
-        dp = self.signal
-        md = dp.metadata
-        nt.assert_equal(md.Acquisition_instrument.TEM.rocking_angle,
-                        preferences.ElectronDiffraction.ed_precession_angle)
+@pytest.mark.parametrize('electron_diffraction', [
+    (np.ones((2, 2, 2, 2)),),
+], indirect=['electron_diffraction'])
+def test_default_params(electron_diffraction):
+    # TODO: preferences in pycrystem
+    a = electron_diffraction.metadata.Acquisition_instrument.TEM.rocking_angle
+    pass
 
-class Test_direct_beam_methods:
 
-    def setUp(self):
+@pytest.mark.incremental
+class TestDirectBeamMethods:
+
+    @pytest.fixture
+    def diffraction_pattern(self):
         dp = ElectronDiffraction(np.zeros((4, 8, 8)))
         dp.data[0]= np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
                               [0., 0., 0., 0., 0., 0., 0., 0.],
@@ -81,83 +78,64 @@ class Test_direct_beam_methods:
                               [0., 0., 0., 0., 2., 0., 0., 0.],
                               [0., 0., 0., 0., 0., 0., 0., 0.],
                               [0., 0., 0., 0., 0., 0., 0., 0.]])
-        self.signal = dp
+        return dp
 
-    def test_get_direct_beam_position(self):
-        dp = self.signal
-        c = dp.get_direct_beam_position(radius=2)
-        np.testing.assert_equal(c, np.array([[3, 3], [4, 4], [3, 3], [4, 4]]))
+    def test_get_direct_beam_position(self, diffraction_pattern):
+        c = diffraction_pattern.get_direct_beam_position(radius=2)
+        positions = np.array([[3, 3], [4, 4], [3, 3], [4, 4]])
+        assert np.allclose(c, positions)
 
-    def test_get_direct_beam_shifts_no_centers(self):
-        dp = self.signal
-        s = dp.get_direct_beam_shifts(radius=2)
-        np.testing.assert_equal(s, np.array([[-0.5, -0.5],
-                                             [ 0.5,  0.5],
-                                             [-0.5, -0.5],
-                                             [ 0.5,  0.5]]))
+    @pytest.mark.skip(reason="`get_direct_beam_shifts` not implemented")
+    @pytest.mark.parametrize('centers, shifts_expected', [
+        (None, np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),),
+        (
+                np.array([[3, 3], [4, 4], [3, 3], [4, 4]]),
+                np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),
+        ),
+        pytest.param(
+            np.array([[3, 3], [4, 4], [3, 3]]),
+            np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),
+            marks=pytest.mark.xfail(raises=ValueError)
+        )
+    ])
+    def test_get_direct_beam_shifts(self, diffraction_pattern, centers, shifts_expected):
+        shifts_calculated = diffraction_pattern.get_direct_beam_shifts(radius=2, centers=centers)
+        assert np.allclose(shifts_calculated, shifts_expected)
 
-    def test_get_direct_beam_shifts_with_centers(self):
-        dp = self.signal
-        c = np.array([[3, 3], [4, 4], [3, 3], [4, 4]])
-        s = dp.get_direct_beam_shifts(radius=2)
-        np.testing.assert_equal(s, np.array([[-0.5, -0.5],
-                                             [ 0.5,  0.5],
-                                             [-0.5, -0.5],
-                                             [ 0.5,  0.5]]))
+    @pytest.mark.parametrize('center, mask_expected', [
+        (None, np.array([
+            [False, False, False, False, False, False, False, False],
+            [False, False, False, False, False, False, False, False],
+            [False, False, False,  True,  True, False, False, False],
+            [False, False,  True,  True,  True,  True, False, False],
+            [False, False,  True,  True,  True,  True, False, False],
+            [False, False, False,  True,  True, False, False, False],
+            [False, False, False, False, False, False, False, False],
+            [False, False, False, False, False, False, False, False]]),),
+        ((4.5, 3.5), np.array([
+            [False, False, False, False, False, False, False, False],
+            [False, False, False, False, False, False, False, False],
+            [False, False, False, False,  True,  True, False, False],
+            [False, False, False,  True,  True,  True,  True, False],
+            [False, False, False,  True,  True,  True,  True, False],
+            [False, False, False, False,  True,  True, False, False],
+            [False, False, False, False, False, False, False, False],
+            [False, False, False, False, False, False, False, False]]),)
+    ])
+    def test_get_direct_beam_mask(self, diffraction_pattern, center, mask_expected):
+        mask_calculated = diffraction_pattern.get_direct_beam_mask(2, center=center)
+        assert isinstance(mask_calculated, Signal2D)
+        assert np.equal(mask_calculated, mask_expected)
 
-    def test_get_direct_beam_shifts_with_wrong_centers(self):
-        dp = self.signal
-        c = np.array([[3, 3], [4, 4], [3, 3]])
-        nt.assert_raises(ValueError, dp.get_direct_beam_shifts, centers=c)
-
-    def test_get_direct_beam_mask_signal_type(self):
-        dp = self.signal
-        mask = dp.get_direct_beam_mask(2)
-        nt.assert_true(isinstance(mask, Signal2D))
-
-    def test_get_direct_beam_mask(self):
-        dp = self.signal
-        a = np.array([[False, False, False, False, False, False, False, False],
-                      [False, False, False, False, False, False, False, False],
-                      [False, False, False,  True,  True, False, False, False],
-                      [False, False,  True,  True,  True,  True, False, False],
-                      [False, False,  True,  True,  True,  True, False, False],
-                      [False, False, False,  True,  True, False, False, False],
-                      [False, False, False, False, False, False, False, False],
-                      [False, False, False, False, False, False, False, False]])
-        mask = dp.get_direct_beam_mask(2)
-        np.testing.assert_equal(mask, a)
-
-    def test_get_direct_beam_mask_with_center(self):
-        dp = self.signal
-        a = np.array([[False, False, False, False, False, False, False, False],
-                      [False, False, False, False, False, False, False, False],
-                      [False, False, False, False,  True,  True, False, False],
-                      [False, False, False,  True,  True,  True,  True, False],
-                      [False, False, False,  True,  True,  True,  True, False],
-                      [False, False, False, False,  True,  True, False, False],
-                      [False, False, False, False, False, False, False, False],
-                      [False, False, False, False, False, False, False, False]])
-        mask = dp.get_direct_beam_mask(2, center=(4.5, 3.5))
-        np.testing.assert_equal(mask, a)
-
-    def test_get_vacuum_mask(self):
-        dp = self.signal
-        vm = dp.get_vacuum_mask(radius=3, threshold=1,
-                                closing=False, opening=False)
-        np.testing.assert_equal(vm, np.array([True, True, False, True]))
-
-    def test_vacuum_mask_with_closing(self):
-        dp = self.signal
-        vm = dp.get_vacuum_mask(radius=3, threshold=1,
-                                closing=True, opening=False)
-        np.testing.assert_equal(vm, np.array([True, True, True, True]))
-
-    def test_vacuum_mask_with_opening(self):
-        dp = self.signal
-        vm = dp.get_vacuum_mask(radius=3, threshold=1,
-                                closing=False, opening=True)
-        np.testing.assert_equal(vm, np.array([True, True, False, False]))
+    @pytest.mark.parametrize('closing, opening, mask_expected', [
+        (False, False, np.array([True, True, False, True])),
+        (True, False, np.array([True, True, True, True])),
+        (False, True, np.array([True, True, False, False])),
+    ])
+    def test_get_vacuum_mask(self, diffraction_pattern, closing, opening, mask_expected):
+        mask_calculated = diffraction_pattern.get_vacuum_mask(
+            radius=3, threshold=1, closing=closing, opening=opening)
+        assert np.allclose(mask_calculated, mask_expected)
 
 
 class Test_radial_profile:
