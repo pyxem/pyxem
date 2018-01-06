@@ -29,17 +29,16 @@ from scipy.constants import pi
 from .utils import correlate
 from .crystallographic_map import CrystallographicMap
 
-def correlate_library(image, library, n_largest):
+def correlate_library(image, library, n_largest='all'):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image) stored as a
     numpy array.
+    
     """
     i=0
     out_arr = np.zeros((n_largest * len(library),5))
     for key in library.keys():
-        if n_largest:
-            pass
-        else:
+        if n_largest == 'all':
             n_largest=len(library[key])
         correlations = dict()
         for orientation, diffraction_pattern in library[key].items():
