@@ -112,7 +112,4 @@ def correlate_component(image, pattern):
 
 
 def _correlate(intensities_1, intensities_2):
-    return np.dot(intensities_1, intensities_2) / (
-        np.sqrt(np.dot(intensities_1, intensities_1)) *
-        np.sqrt(np.dot(intensities_2, intensities_2))
-    )
+    return np.dot(intensities_1, intensities_2) / (np.sqrt(np.dot(intensities_1, intensities_1) * np.dot(intensities_2, intensities_2)))
