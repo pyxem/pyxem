@@ -54,10 +54,9 @@ def correlate(image, pattern,
     shape = image.shape
     half_shape = tuple(i // 2 for i in shape)
 
-    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[
-        :, :2] + half_shape
-    in_bounds = np.product((pixel_coordinates > 0) *
-                           (pixel_coordinates < shape[0]), axis=1).astype(bool)
+    pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
+    in_bounds = np.product((pixel_coordinates > 0) *(pixel_coordinates < shape[0]), axis=1)
+    
     pattern_intensities = pattern.intensities
     large_intensities = pattern_intensities > sim_threshold
     mask = np.logical_and(in_bounds, large_intensities)
@@ -113,7 +112,4 @@ def correlate_component(image, pattern):
 
 
 def _correlate(intensities_1, intensities_2):
-    return np.dot(intensities_1, intensities_2) / (
-        np.sqrt(np.dot(intensities_1, intensities_1)) *
-        np.sqrt(np.dot(intensities_2, intensities_2))
-    )
+    return np.dot(intensities_1, intensities_2) / (np.sqrt(np.dot(intensities_1, intensities_1) * np.dot(intensities_2, intensities_2)))
