@@ -6,14 +6,11 @@ python:
 sudo: false
 
 before_install:
-  - "pip install sphinx"
-  - "pip install hyperspy"
-  - "pip install pymatgen"
-  - "pip install Cython"
-  - "pip install transforms3d"
+  - "pip install sphinx hyperspy pymatgen Cython transforms3d"
 
 install:
   - "python setup.py install"
+
 script:
   - pytest tests/test_diffraction_signal.py  # until more tests implemented
   - sphinx-build -b html docs/source docs/build
@@ -22,6 +19,6 @@ deploy:
   provider: pages
   skip_cleaup: true
   github_token: $GITHUB_TOKEN
-  local_dir: docs/build
+  local_dir: ${TRAVIS_BUILD_DIR}/docs/build
   on:
     branch: continuous-integration
