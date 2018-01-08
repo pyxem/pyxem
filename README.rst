@@ -1,20 +1,20 @@
-PyCrystEM (Python Crystallographic Electron Microscopy) is an open-source Python library for crystallographic electron microscopy.
+pyXem (Python Crystallographic Electron Microscopy, formerly pyxem) is an open-source Python library for crystallographic electron microscopy.
 
-PyCrystEM builds on the tools for multi-dimensional data analysis provided by the HyperSpy library for treatment of experimental electron diffraction data and tools for atomic structure manipulation provided by the PyMatGen library.
+pyXem builds on the tools for multi-dimensional data analysis provided by the HyperSpy library for treatment of experimental electron diffraction data and tools for atomic structure manipulation provided by the PyMatGen library.
 
-PyCrystEM is released under the GPL v3 license.
+pyXem is released under the GPL v3 license.
 
 HEALTH WARNING
 --------------
 
-PyCrystEM is in the relatively early stages of development and may contain a number of bugs as a result. The code has been released at this stage in good faith and to speed up this refinement process. We hope that you will find the tools useful and if you find bugs we would appreciate knowing about them.
+pyXem is in the relatively early stages of development and may contain a number of bugs as a result. The code has been released at this stage in good faith and to speed up this refinement process. We hope that you will find the tools useful and if you find bugs we would appreciate knowing about them.
 
-PyCrystEM only supports Python 3
+pyXem only supports Python 3
 
 Install
 -------
 
-PyCrystEM can be installed by navigating to the directory containing the package and using pip or running the following command::
+pyXem can be installed by navigating to the directory containing the package and using pip or running the following command::
 
 	$ python setup.py install
 
