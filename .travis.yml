@@ -22,6 +22,6 @@ deploy:
   provider: pages
   skip_cleaup: true
   github_token: $GITHUB_TOKEN
-  local_dir: ${TRAVIS_BUILD_DIR}/docs/build/html
+  local_dir: docs/build/html
   on:
     branch: continuous-integration
