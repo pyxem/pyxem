@@ -22,7 +22,6 @@
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from skimage.morphology import square
 
 from .utils.expt_utils import *
 from .utils.peakfinders2D import *
@@ -122,12 +121,12 @@ class ElectronDiffraction(Signal2D):
 
         dx.name = 'dx'
         dx.scale = calibration
-        dx.offset = -center[0]
+        dx.offset = -center[0] * calibration
         dx.units = '$A^{-1}$'
 
         dy.name = 'dy'
         dy.scale = calibration
-        dy.offset = -center[1]
+        dy.offset = -center[1] * calibration
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, roi):
@@ -384,8 +383,10 @@ class ElectronDiffraction(Signal2D):
         # TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
+        centers = Signal1D(centers)
 
-        radial_profiles = self.map(radial_average, center=centers, inplace=False)
+        # TODO: the cython implementation is throwing dtype errors
+        radial_profiles = self.map(radial_average, center=centers, inplace=False, cython=False)
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
             max_len = max(map(len, radial_profiles.data))
@@ -425,7 +426,7 @@ class ElectronDiffraction(Signal2D):
             The electron diffraction data in polar coordinates.
 
         """
-        return map(self,
+        return self.map(
                    reproject_polar,
                    origin=origin,
                    jacobian=jacobian,
@@ -492,7 +493,6 @@ class ElectronDiffraction(Signal2D):
             raise NotImplementedError("The method specified is not implemented. "
                                       "See documentation for available "
                                       "implementations.")
-
         return centers
 
     def remove_background(self, method='model', *args, **kwargs):
@@ -515,10 +515,10 @@ class ElectronDiffraction(Signal2D):
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
             beam if the model method is used (h-dome / model only).
-        min_sigma : int, float
+        sigma_min : int, float
             Standard deviation for the minimum gaussian convolution 
             (gaussian_difference only)
-        max_sigma : int, float
+        sigma_max : int, float
             Standard deviation for the maximum gaussian convolution 
             (gaussian_difference only)
         footprint : int 
@@ -547,28 +547,27 @@ class ElectronDiffraction(Signal2D):
         elif method == 'model':
             bg = self.get_background_model(*args, **kwargs)
 
-            bg_removed = np.clip(self - bg, 0, 255)
+            bg_removed = np.clip(self - bg, self.min(), self.max())
 
+            h = max(bg.data.min(), 1e-6)
             denoised = ElectronDiffraction(
-                bg_removed.map(regional_flattener,
-                               h=bg.data.min()-1,
-                               inplace=False))
+                bg_removed.map(
+                    regional_flattener, h=h, inplace=False))
             denoised.axes_manager.update_axes_attributes_from(
                 self.axes_manager.navigation_axes)
             denoised.axes_manager.update_axes_attributes_from(
                 self.axes_manager.signal_axes)
 
         elif method == 'gaussian_difference':
-            denoised = self.map(subtract_background_dog, *args, **kwargs)
+            denoised = self.map(subtract_background_dog, inplace=False, *args, **kwargs)
 
         elif method == 'median':
-			# no denoising applied here
-            denoised = self.map(subtract_background_median, *args, **kwargs)
-
+            # no denoising applied here
+            denoised = self.map(subtract_background_median, inplace=False, *args, **kwargs)
         else:
-            raise NotImplementedError("The method specified is not implemented. "
-                                      "See documentation for available "
-                                      "implementations.")
+            raise NotImplementedError(
+                "The method specified, '{}', is not implemented. See"
+                "documentation for available implementations.".format(method))
 
         return denoised
 

@@ -354,6 +354,28 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
 
     return np.maximum(bg_subtracted, 0)
 
+
+def circular_mask(shape, radius, center=None):
+    """Produces a mask of radius 'r' centered on 'center' of shape 'shape'.
+
+    Parameters
+    ----------
+    shape : tuple
+    radius : int
+    center : tuple (optional)
+        Default: (0, 0)
+
+    Returns
+    -------
+    np.ndarray
+
+    """
+    l_x, l_y = shape
+    x, y = center if center else (l_x / 2, l_y / 2)
+    X, Y = np.ogrid[:l_x, :l_y]
+    mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
+    return mask
+
 def find_beam_position_blur(z, sigma=30):
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
@@ -368,9 +390,8 @@ def find_beam_position_blur(z, sigma=30):
     center : np.array
         np.array containing indices of estimated direct beam positon.
     """
-    blurred = ndi.gaussian_filter(z, sigma)
+    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
     center = np.unravel_index(blurred.argmax(), blurred.shape)
-
     return np.array(center)
 
 def refine_beam_position(z, start, radius):
