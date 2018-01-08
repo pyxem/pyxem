@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import pyxem as pc
+import pyxem as pxm
 
 DISTORTION = np.array(
     [
@@ -27,7 +27,7 @@ DISTORTION = np.array(
     ]
 )
 
-cubic = pc.Lattice.cubic(5.65)
+cubic = pxm.Lattice.cubic(5.65)
 coords = [
     [0.0,  0.0,  0.0 ],
     [0.5,  0.5,  0.0 ],
@@ -48,9 +48,9 @@ atoms = [
     "As",
     "As",
 ]
-GAAS = pc.Structure(cubic, atoms, coords)
+GAAS = pxm.Structure(cubic, atoms, coords)
 
-cubic = pc.Lattice.cubic(3.52)
+cubic = pxm.Lattice.cubic(3.52)
 coords = [
     [0.0, 0.0, 0.0],
     [0.5, 0.5, 0.0],
@@ -63,4 +63,4 @@ atoms = [
     "Ni",
     "Ni",
 ]
-NICKEL = pc.Structure(cubic, atoms, coords)
+NICKEL = pxm.Structure(cubic, atoms, coords)

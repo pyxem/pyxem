@@ -228,7 +228,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
     #Calculate intensity
     intensity  = (scattering * scattering.conjugate()).real
 
-    return pc.ElectronDiffraction(intensity)
+    return pxm.ElectronDiffraction(intensity)
 
 
 def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
