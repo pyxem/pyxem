@@ -1,14 +1,18 @@
 language: python
 python:
+  - "3.5"
   - "3.6"
 
 sudo: false
 
-install:
+before_install:
   - "pip install sphinx"
   - "pip install hyperspy"
   - "pip install pymatgen"
   - "pip install Cython"
+  - "pip install transforms3d"
+
+install:
   - "python setup.py install"
 script:
   - pytest tests/test_diffraction_signal.py  # until more tests implemented
