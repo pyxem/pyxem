@@ -342,3 +342,21 @@ def astar_style_orientations(
     gamma = np.radians(np.arange(*alpha_range, resolution))
     orientations = np.array([(a, b, c) for a, (b, c) in itertools.product(gamma, grid)])
     return orientations
+
+def peaks_from_best_template(single_match_result,phase,library):
+    """ Takes a match_result object and return the associated peaks, to be used with
+    in combination with map.
+    
+    Example : peaks= match_results.map(peaks_from_best_template,phase=phase,library=library)
+    
+    phase : list
+        of keys to library, should be the same as passed to IndexationGenerator.correlate()
+        
+    library : nested dictionary containing keys of [phase][rotation]
+    """
+    
+    best_fit = single_match_result[np.argmax(single_match_result[:,4])]
+    _phase = phase[int(best_fit[0])]
+    pattern = library[_phase][best_fit[1],best_fit[2],best_fit[3]]
+    peaks = pattern.coordinates[:,:2] #cut z
+    return peaks
