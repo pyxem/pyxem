@@ -82,7 +82,7 @@ def find_peaks_max(z, alpha=3., size=10):
     # preallocate lots of peak storage
     k_arr = []
     # copy image
-    image_temp = copy.deepxmopy(z)
+    image_temp = copy.deepcopy(z)
     peak_ct = 0
     # calculate standard deviation of image for thresholding
     sigma = np.std(z)
