@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import pycrystem as pc
+import pyxem as pc
 
 DISTORTION = np.array(
     [

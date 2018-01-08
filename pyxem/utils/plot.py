@@ -28,7 +28,7 @@ from scipy.interpolate import griddata
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from transforms3d.euler import euler2axangle
-from pycrystem.utils import correlate
+from pyxem.utils import correlate
 from ipywidgets import interact
 
 # from . import Structure, ElectronDiffractionCalculator

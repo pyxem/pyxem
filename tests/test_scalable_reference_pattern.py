@@ -19,8 +19,8 @@
 import numpy as np
 import nose.tools as nt
 
-from pycrystem.scalable_reference_pattern import ScalableReferencePattern
-from pycrystem.tensor_field2d import TensorField2D
+from pyxem.scalable_reference_pattern import ScalableReferencePattern
+from pyxem.tensor_field2d import TensorField2D
 
 class TestScalableReferencePattern:
 

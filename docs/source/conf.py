@@ -24,7 +24,7 @@ import sphinx_bootstrap_theme
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
 
-from pycrystem import __author__, __version__, __copyright__
+from pyxem import __author__, __version__, __copyright__
 
 # -- General configuration ------------------------------------------------
 
@@ -322,7 +322,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pycrystem', 'pyXem Documentation',
+    (master_doc, 'pyxem', 'pyXem Documentation',
      [author], 1)
 ]
 

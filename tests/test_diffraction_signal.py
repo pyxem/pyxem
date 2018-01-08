@@ -19,7 +19,7 @@
 import numpy as np
 import nose.tools as nt
 
-from pycrystem.diffraction_signal import ElectronDiffraction
+from pyxem.diffraction_signal import ElectronDiffraction
 from hyperspy.signals import Signal1D, Signal2D
 
 

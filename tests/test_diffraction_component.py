@@ -19,8 +19,8 @@
 import numpy as np
 import nose.tools as nt
 
-from pycrystem.diffraction_component import ElectronDiffractionForwardModel
-from pycrystem.electron_diffraction_calculator import ElectronDiffractionCalculator
+from pyxem.diffraction_component import ElectronDiffractionForwardModel
+from pyxem.electron_diffraction_calculator import ElectronDiffractionCalculator
 from pymatgen import Structure
 
 class TestDiffractionComponent:
