@@ -1,0 +1,18 @@
+language: python
+python:
+  - "3.6"
+
+sudo: false
+
+install: "pip install sphinx"
+script:
+  - pytest tests/test_diffraction_signal.py  # until more tests implemented
+  - sphinx-build -b html docs/source docs/build
+
+deploy:
+  provider: pages
+  skip_cleaup: true
+  github_otke: $GITHUB_TOKEN
+  local_dir: ${TRAVIS_BUILD_DIR}/docs/build/html
+  on:
+    branch: continuous-integration
