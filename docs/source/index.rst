@@ -3,17 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyCrystEM's documentation!
+Welcome to pyXem's documentation!
 =====================================
 
-PyCrystEM (Python Crystallographic Electron Microscopy) is an open-source Python
+pyXem (Python Crystallographic Electron Microscopy) is an open-source Python
 library for crystallographic electron microscopy.
 
-PyCrystEM builds on the tools for multi-dimensional data analysis provided by
+pyXem builds on the tools for multi-dimensional data analysis provided by
 the HyperSpy library for treatment of experimental electron diffraction data and
 tools for atomic structure manipulation provided by the PyMatGen library.
 
-PyCrystEM is released under the GPL v3 license.
+pyXem is released under the GPL v3 license.
 
 This version is currently under construction.
 
