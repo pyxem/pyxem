@@ -24,7 +24,7 @@ import sphinx_bootstrap_theme
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
 
-from pyxem import __author__, __version__, __copyright__
+from pyxem.version import __author__, __version__, __copyright__
 
 # -- General configuration ------------------------------------------------
 
