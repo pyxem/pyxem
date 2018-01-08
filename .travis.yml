@@ -7,6 +7,8 @@ sudo: false
 install:
   - "pip install sphinx"
   - "pip install hyperspy"
+  - "pip install pymatgen"
+  - "pip install Cython"
 script:
   - pytest tests/test_diffraction_signal.py  # until more tests implemented
   - sphinx-build -b html docs/source docs/build
