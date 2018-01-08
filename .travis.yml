@@ -4,7 +4,9 @@ python:
 
 sudo: false
 
-install: "pip install sphinx"
+install:
+  - "pip install sphinx"
+  - "pip install hyperspy"
 script:
   - pytest tests/test_diffraction_signal.py  # until more tests implemented
   - sphinx-build -b html docs/source docs/build
