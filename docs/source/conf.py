@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# PyCrystEM documentation build configuration file, created by
+# pyXem documentation build configuration file, created by
 # sphinx-quickstart on Fri Sep 16 14:55:40 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -24,7 +24,7 @@ import sphinx_bootstrap_theme
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
 
-from pycrystem import __author__, __version__, __copyright__
+from pyxem import __author__, __version__, __copyright__
 
 # -- General configuration ------------------------------------------------
 
@@ -69,7 +69,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'PyCrystEM'
+project = 'pyXem'
 copyright = __copyright__
 author = __author__
 
@@ -154,7 +154,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = 'PyCrystEM v0.1'
+# html_title = 'pyXem v0.1'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -254,7 +254,7 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PyCrystEMdoc'
+htmlhelp_basename = 'pyXemdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -280,7 +280,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'PyCrystEM.tex', 'PyCrystEM Documentation',
+    (master_doc, 'pyXem.tex', 'pyXem Documentation',
      'Duncan Johnstone', 'manual'),
 ]
 
@@ -322,7 +322,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pycrystem', 'PyCrystEM Documentation',
+    (master_doc, 'pyxem', 'pyXem Documentation',
      [author], 1)
 ]
 
@@ -337,8 +337,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'PyCrystEM', 'PyCrystEM Documentation',
-     author, 'PyCrystEM', 'One line description of project.',
+    (master_doc, 'pyXem', 'pyXem Documentation',
+     author, 'pyXem', 'One line description of project.',
      'Miscellaneous'),
 ]
 

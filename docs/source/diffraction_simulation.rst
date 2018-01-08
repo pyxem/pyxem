@@ -1,7 +1,7 @@
 Simulating electron diffraction
 ===============================
 
-Electron diffraction simulations are made available through PyCrystEM.
+Electron diffraction simulations are made available through pyXem.
 
 Ultimately multiple simulation tools will be made available covering various
 applications but at present only the simplest methods are implemented. All
