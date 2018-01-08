@@ -7,6 +7,7 @@ sudo: false
 
 before_install:
   - "pip install sphinx hyperspy pymatgen Cython transforms3d"
+  - "pip install sphinx_bootstrap_theme"
 
 install:
   - "python setup.py install"
