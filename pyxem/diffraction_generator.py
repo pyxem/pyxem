@@ -135,7 +135,8 @@ class ElectronDiffractionCalculator(object):
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
-                                     intensities=intensities)
+                                     intensities=intensities,
+                                     with_direct_beam=True)
 
 
 class DiffractionSimulation:

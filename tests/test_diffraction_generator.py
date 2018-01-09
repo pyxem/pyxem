@@ -55,6 +55,11 @@ class TestDiffractionCalculator:
     def test_init(self, diffraction_calculator: ElectronDiffractionCalculator):
         assert diffraction_calculator.debye_waller_factors == {}
 
+    def test_matching_results(self, diffraction_calculator, structure):
+        diffraction = diffraction_calculator.calculate_ed_data(structure, reciprocal_radius=5.)
+        assert len(diffraction.indices) == len(diffraction.coordinates)
+        assert len(diffraction.coordinates) == len(diffraction.intensities)
+
     def test_appropriate_scaling(self, diffraction_calculator: ElectronDiffractionCalculator):
         """Tests that doubling the unit cell halves the pattern spacing."""
         si = pmg.Element("Si")
@@ -72,17 +77,38 @@ class TestDiffractionCalculator:
         big_coordinates = big_diffraction.coordinates[big_indices.index((2, 2, 0))]
         assert np.allclose(coordinates, big_coordinates * 2)
 
-    @pytest.mark.parametrize('structure, expected, expected_extinction', [
-        ('Fd-3m', (2, 2, 0), (2, 1, 0)),
-        ('Im-3m', (1, 1, 0), (2, 1, 0))
+    @pytest.mark.parametrize('structure, expected', [
+        ('Fd-3m', (2, 2, 0)),
+        ('Im-3m', (1, 1, 0)),
+        ('Pm-3m', (1, 0, 0)),
+        ('Pm-3m', (1, 1, 0)),
+        ('Pm-3m', (2, 1, 0)),
     ], indirect=['structure'])
-    def test_correct_extinction(self, diffraction_calculator, structure, expected, expected_extinction):
+    def test_correct_peaks(self, diffraction_calculator, structure, expected):
+        "Tests appropriate reflections are produced for space groups."
         diffraction = diffraction_calculator.calculate_ed_data(structure=structure, reciprocal_radius=5.)
         indices = [tuple(i) for i in diffraction.indices]
         assert expected in indices
+
+    @pytest.mark.parametrize('structure, expected_extinction', [
+        ('Fd-3m', (2, 1, 0)),
+        ('Im-3m', (2, 1, 0)),
+        ('Fd-3m', (1, 1, 0)),
+        ('Im-3m', (1, 0, 0))
+    ], indirect=['structure'])
+    def test_correct_extinction(self, diffraction_calculator, structure, expected_extinction):
+        """Tests appropriate extinctions are produced for space groups."""
+        diffraction = diffraction_calculator.calculate_ed_data(structure=structure, reciprocal_radius=5.)
+        indices = [tuple(i) for i in diffraction.indices]
         assert expected_extinction not in indices
 
-
+    def test_appropriate_intensities(self, diffraction_calculator, structure):
+        """Tests the central beam is strongest."""
+        diffraction = diffraction_calculator.calculate_ed_data(structure=structure, reciprocal_radius=5.)
+        indices = [tuple(i) for i in diffraction.indices]
+        central_beam = indices.index((0, 0, 0))
+        smaller = np.greater_equal(diffraction.intensities[central_beam], diffraction.intensities)
+        assert np.all(smaller)
 
 
 class TestDiffractionSimulation:
