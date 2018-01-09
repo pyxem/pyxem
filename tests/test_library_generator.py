@@ -18,12 +18,26 @@
 
 import pytest
 
-from pyxem.diffraction_signal import ElectronDiffraction
-from pyxem.library_generator import DiffractionLibraryGenerator
+from pyxem.diffraction_generator import ElectronDiffractionCalculator
+from pyxem.library_generator import DiffractionLibraryGenerator, DiffractionLibrary
 from hyperspy.signals import Signal1D, Signal2D
 
+@pytest.fixture
+def diffraction_calculator():
+    return ElectronDiffractionCalculator(300., 0.02)
 
 @pytest.fixture
-def generator():
-    return DiffractionLibraryGenerator()
+def library_generator(diffraction_calculator):
+    return DiffractionLibraryGenerator(diffraction_calculator)
 
+
+class TestDiffractionLibraryGenerator:
+
+    def test_get_diffraction_library(
+            self,
+            library_generator: DiffractionLibraryGenerator,
+            structure_library, calibration, reciprocal_radius, representation
+    ):
+        library = library_generator.get_diffraction_library(
+            structure_library, calibration, reciprocal_radius, representation)
+        assert isinstance(library, DiffractionLibrary)
