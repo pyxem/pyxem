@@ -99,8 +99,6 @@ class DiffractionProfile(Signal1D):
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
 
-        #TODO: This is for one DP - use map!
-
     def get_rpdf(self, elements, fracs, s, cut_off, damp=1):
         """Calculate the reduced pair distribution function (rpdf) from a given
         diffracted intensity profile via the reduced intensity.
