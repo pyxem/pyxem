@@ -26,6 +26,73 @@ from .atomic_scattering_component import AtomicScatteringFunction
 
 import numpy as np
 
+
+def reduced_intensity(rp, elements, fracs, s, cut_off, damp=1):
+    """Calculate the reduced pair distribution function (rpdf) from a given
+    diffracted intensity profile via the reduced intensity.
+
+    Parameters
+    ----------
+    elements : list
+        List of the elements present in the specimen.
+
+    fracs : list
+        List of atomic fraction of each element present in the specimen. Must be
+        specified in the same order as the elements.
+
+    s : array
+        The scattering vector s axis in Angstroms
+
+    cut_off : int
+        The direct beam cut off position in pixels.
+
+    damp : int
+        Damping exponent. Defaults to 1, which corresponds to no damping.
+
+    Returns
+    -------
+    phidamp : array
+        The reduced (and damped) intensity profile
+
+    """
+    m = self.create_model()
+    Nf2 = AtomicScatteringFunction(elements, fracs)
+    m.append(Nf2)
+    m.set_signal_range(s[cut_off], np.amax(s))
+    m.fit()
+    bkg = m.as_signal()
+
+    phi = 4 * (np.pi) * s[cut_off:] * (self.data[cut_off:] - bkg.data[cut_off:]) / (Nf2.N.value * Nf2.fq[cut_off:])
+
+    return phi * np.exp(-damp * (s[cut_off:]**2))
+
+def calc_rpdf(phidamp, s, cut_off):
+    """Calculate the reduced pair distribution function (rpdf) from a given
+    diffracted intensity profile via the reduced intensity.
+
+    Parameters
+    ----------
+    s : array
+        The scattering vector s axis in Angstroms
+
+    cut_off : int
+        The direct beam cut off position in pixels.
+
+    Returns
+    -------
+    rpdf : array
+        The reduced pair distribution function.
+
+    """
+    #TODO: This is stupid!
+    r = np.linspace(0, 20, 10000)
+    r1 = r[cut_off:]
+    rvec = r1.reshape(1, r1.size)
+    sin = np.sin(np.vstack(s[cut_off:] * 4 * np.pi)@rvec)
+
+    return 4*(phidamp[cen:]@sin)
+
+
 class DiffractionProfile(Signal1D):
     _signal_type = "diffraction_profile"
 
@@ -58,24 +125,24 @@ class DiffractionProfile(Signal1D):
 
         Returns
         -------
-        rpdf : array
+        phid : signal1D
+            The reduced intensity.
+
+        rpdf : signal1D
             The reduced pair distribution function.
-            
+
         """
-        m = self.create_model()
-        Nf2 = AtomicScatteringFunction(elements, fracs)
-        m.append(Nf2)
-        m.set_signal_range(s[cut_off], np.amax(s))
-        m.fit()
-        bkg = m.as_signal()
+        phid = self.map(reduced_intensity,
+                        elements=elements,
+                        fracs=fracs,
+                        s=s,
+                        cut_off=cut_off,
+                        damp=damp,
+                        inplace=False)
 
-        phi = 4 * (np.pi) * s[cut_off:] * (self.data[cut_off:] - bkg.data[cut_off:]) / (Nf2.N.value * Nf2.fq[cut_off:])
+        rpdf = phid.map(calc_rpdf,
+                        s=s,
+                        cut_off=cut_off,
+                        inplace=False)
 
-        reduced_intensity = Signal1D(phi * np.exp(-damp * (s[cut_off:]**2)))
-        #TODO: This is stupid!
-        r = np.linspace(0, 20, 10000)
-        r1 = r[cut_off:]
-        rvec = r1.reshape(1, r1.size)
-        sin = np.sin(np.vstack(s[cut_off:] * 4 * np.pi)@rvec)
-
-        return Signal1D(4*(reduced_intensity[cen:]@sin))
+        return phid, rpdf
