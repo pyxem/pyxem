@@ -193,6 +193,8 @@ class DiffractionSimulation:
 
     @calibration.setter
     def calibration(self, calibration):
+        if np.all(np.equal(calibration, 0)):
+            raise ValueError("`calibration` cannot be zero.")
         if isinstance(calibration, float) or isinstance(calibration, int):
             self._calibration = (calibration, calibration)
         elif len(calibration) == 2:
@@ -204,16 +206,18 @@ class DiffractionSimulation:
     @property
     def direct_beam_mask(self):
         """ndarray : If `with_direct_beam` is True, returns a True array for all
-        points. If `with_direct_beam is False, returns a True array with False
+        points. If `with_direct_beam` is False, returns a True array with False
         in the position of the direct beam."""
         if self.with_direct_beam:
             return np.ones_like(self._intensities, dtype=bool)
         else:
-            return np.sum(self._coordinates == 0., axis=1) != 3
+            return np.any(self._coordinates, axis=1)
 
     @property
     def coordinates(self):
         """ndarray : The coordinates of all unmasked points."""
+        if self._coordinates is None:
+            return None
         return self._coordinates[self.direct_beam_mask]
 
     @coordinates.setter
@@ -223,6 +227,8 @@ class DiffractionSimulation:
     @property
     def intensities(self):
         """ndarray : The intensities of all unmasked points."""
+        if self._intensities is None:
+            return None
         return self._intensities[self.direct_beam_mask]
 
     @intensities.setter
@@ -248,7 +254,7 @@ class DiffractionSimulation:
         ax.scatter(
             self.coordinates[:, 0],
             self.coordinates[:, 1],
-            s=np.log10(self.intensities)
+            s=np.log2(self.intensities)
         )
         ax.set_xlabel("Reciprocal Dimension ($A^{-1}$)")
         ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")

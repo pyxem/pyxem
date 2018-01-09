@@ -19,8 +19,12 @@
 import pytest
 import numpy as np
 import pymatgen as pmg
+from matplotlib.testing.decorators import image_comparison
 
-from pyxem.diffraction_generator import ElectronDiffractionCalculator
+from pyxem.diffraction_generator import (
+    ElectronDiffractionCalculator,
+    DiffractionSimulation
+)
 
 
 @pytest.fixture(params=[
@@ -48,6 +52,11 @@ def lattice(request):
 ])
 def structure(request, lattice, element):
     return pmg.Structure.from_spacegroup(request.param, lattice, [element], [[0, 0, 0]])
+
+
+@pytest.fixture(params=[{}])
+def diffraction_simulation(request):
+    return DiffractionSimulation(**request.param)
 
 
 class TestDiffractionCalculator:
@@ -113,11 +122,105 @@ class TestDiffractionCalculator:
 
 class TestDiffractionSimulation:
 
-    def test_calibration(self):
-        pass
+    def test_init(self):
+        diffraction_simulation = DiffractionSimulation()
+        assert diffraction_simulation.coordinates is None
+        assert diffraction_simulation.indices is None
+        assert diffraction_simulation.intensities is None
+        assert diffraction_simulation.calibration == (1., 1.)
 
-    def test_coordinates(self):
-        pass
+    @pytest.mark.parametrize('calibration, expected', [
+        (5., (5., 5.)),
+        (2, (2., 2.)),
+        pytest.param(0, (0, 0), marks=pytest.mark.xfail(raises=ValueError)),
+        pytest.param((0, 0), (0, 0), marks=pytest.mark.xfail(raises=ValueError)),
+        ((1.5, 1.5), (1.5, 1.5)),
+        ((1.3, 1.5), (1.3, 1.5)),
+    ])
+    def test_calibration(
+            self,
+            diffraction_simulation: DiffractionSimulation,
+            calibration, expected
+    ):
+        diffraction_simulation.calibration = calibration
+        assert diffraction_simulation.calibration == expected
 
-    def test_intensities(self):
-        pass
+    @pytest.mark.parametrize('coordinates, with_direct_beam, expected', [
+        (
+            np.array([[-1, 0, 0], [0, 0, 0], [1, 0, 0]]),
+            False,
+            np.array([True, False, True])
+        ),
+        (
+            np.array([[-1, 0, 0], [0, 0, 0], [1, 0, 0]]),
+            True,
+            np.array([True, True, True])
+        ),
+        (
+            np.array([[-1, 0, 0], [1, 0, 0]]),
+            False,
+            np.array([True, True])
+        ),
+    ])
+    def test_direct_beam_mask(
+            self,
+            diffraction_simulation: DiffractionSimulation,
+            coordinates, with_direct_beam, expected
+    ):
+        diffraction_simulation.coordinates = coordinates
+        diffraction_simulation.with_direct_beam = with_direct_beam
+        mask = diffraction_simulation.direct_beam_mask
+        assert np.all(mask == expected)
+
+    @pytest.mark.parametrize('coordinates, calibration, offset, expected', [
+        (
+            np.array([[1., 0., 0.], [1., 2., 0.]]),
+            1., (0., 0.),
+            np.array([[1., 0., 0.], [1., 2., 0.]]),
+        ),
+        (
+            np.array([[1., 0., 0.], [1., 2., 0.]]),
+            1., (1., 1.),
+            np.array([[2, 1, 0], [2, 3, 0]]),
+        ),
+        (
+            np.array([[1., 0., 0.], [1., 2., 0.]]),
+            0.25, (0., 0.),
+            np.array([[4., 0., 0.], [4., 8., 0.]]),
+        ),
+        (
+            np.array([[1., 0., 0.], [1., 2., 0.]]),
+            (0.5, 0.25), (0., 0.),
+            np.array([[2., 0., 0.], [2., 8., 0.]]),
+        ),
+        (
+            np.array([[1., 0., 0.], [1., 2., 0.]]),
+            0.5, (1., 0.),
+            np.array([[4., 0., 0.], [4., 4., 0.]]),
+        )
+    ])
+    def test_calibrated_coordinates(
+            self,
+            diffraction_simulation: DiffractionSimulation,
+            coordinates, calibration, offset, expected
+    ):
+        diffraction_simulation.coordinates = coordinates
+        diffraction_simulation.calibration = calibration
+        diffraction_simulation.offset = offset
+        assert np.allclose(diffraction_simulation.calibrated_coordinates, expected)
+
+
+@image_comparison(baseline_images=['basic_pattern'], extensions=['png'])
+def test_plot_simulated_pattern():
+    diffraction_simulation = DiffractionSimulation()
+    diffraction_simulation.coordinates = np.array([
+        [-1, 0, 0],
+        [0, 0, 0],
+        [1, 0, 0],
+    ])
+    diffraction_simulation.intensities = np.array([100, 1000, 10000])
+    diffraction_simulation.with_direct_beam = True
+    diffraction_simulation.plot_simulated_pattern()
+    assert True
+
+
