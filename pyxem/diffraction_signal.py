@@ -26,6 +26,7 @@ from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from .utils.expt_utils import *
 from .utils.peakfinders2D import *
 from .diffraction_vectors import DiffractionVectors
+from .diffraction_profile import DiffractionProfile
 
 def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
@@ -386,18 +387,19 @@ class ElectronDiffraction(Signal2D):
         centers = Signal1D(centers)
 
         # TODO: the cython implementation is throwing dtype errors
-        radial_profiles = self.map(radial_average, center=centers, inplace=False, cython=False)
+        radial_profiles = self.map(radial_average, center=centers,
+                                   inplace=False, cython=False)
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
             max_len = max(map(len, radial_profiles.data))
             radial_profiles = Signal1D([
                 np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
                 for row in radial_profiles.data])
-            return radial_profiles
+            return DiffractionProfile(radial_profiles)
         else:
             radial_profiles.axes_manager.signal_axes[0].offset = 0
             signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            return radial_profiles.as_signal1D(signal_axis)
+            return DiffractionProfile(radial_profiles.as_signal1D(signal_axis))
 
     def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
         """Reproject the diffraction data into polar coordinates.

@@ -24,9 +24,6 @@ from hyperspy.signals import Signal1D
 
 from .utils.expt_utils import *
 
-def peaks_as_gvectors(z, center, calibration):
-    g = (z - center) * calibration
-    return g[0]
 
 class DiffractionProfile(Signal1D):
     _signal_type = "diffraction_profile"
@@ -34,4 +31,4 @@ class DiffractionProfile(Signal1D):
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
 
-    def 
+    def
