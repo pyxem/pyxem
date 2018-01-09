@@ -16,24 +16,28 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-import nose.tools as nt
+import pytest
 
-from pyxem.diffraction_signal import ElectronDiffraction
+from pyxem.diffraction_generator import ElectronDiffractionCalculator
+from pyxem.library_generator import DiffractionLibraryGenerator, DiffractionLibrary
 from hyperspy.signals import Signal1D, Signal2D
 
+@pytest.fixture
+def diffraction_calculator():
+    return ElectronDiffractionCalculator(300., 0.02)
 
-class TestLibraryGenerator:
-
-    def setUp(self):
-        # Initialize diffraction library generator.
-        pass
-
-    def test_get_diffraction_library(self):
-        # Test creation of a diffraction library.
-        pass
+@pytest.fixture
+def library_generator(diffraction_calculator):
+    return DiffractionLibraryGenerator(diffraction_calculator)
 
 
-class TestDiffractionLibrary:
+class TestDiffractionLibraryGenerator:
 
-    def setUp(self):
+    def test_get_diffraction_library(
+            self,
+            library_generator: DiffractionLibraryGenerator,
+            structure_library, calibration, reciprocal_radius, representation
+    ):
+        library = library_generator.get_diffraction_library(
+            structure_library, calibration, reciprocal_radius, representation)
+        assert isinstance(library, DiffractionLibrary)
