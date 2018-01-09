@@ -18,15 +18,8 @@
 
 import pytest
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-from pycrystem.diffraction_signal import ElectronDiffraction
-=======
-from pyxem.library_generator import DiffractionLibraryGenerator
->>>>>>> Stashed changes
-=======
 from pyxem.diffraction_signal import ElectronDiffraction
->>>>>>> upstream/master
+from pyxem.library_generator import DiffractionLibraryGenerator
 from hyperspy.signals import Signal1D, Signal2D
 
 
