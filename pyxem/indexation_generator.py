@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The pyXem developers
+# Copyright 2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -34,18 +34,18 @@ def correlate_library(image, library,n_largest,keys=[]):
     with a particular experimental diffraction pattern (image) stored as a
     numpy array. See the correlate method of IndexationGenerator for details.
     """
-    
+
     i=0
     out_arr = np.zeros((n_largest * len(library),5))
     if keys:
         ordered_library_keys = keys
     else:
         ordered_library_keys = library.keys()
-    
+
     if set(ordered_library_keys) != set(library.keys()):
         raise RuntimeError(""" You have submitted keys that do not map one to one
                            to those in the library. The library has %s""" % library.keys())
-    
+
     for key in ordered_library_keys:
         correlations = dict()
         for orientation, diffraction_pattern in library[key].items():
@@ -105,11 +105,11 @@ class IndexationGenerator():
         ----------
         n_largest : integer
             The n orientations with the highest correlation values are returned.
-        
+
         keys      : list
             If more than one phase present in library it is recommended that these
             are submitted. This allows a mapping from the number to the phase.
-            
+
             eg) keys = ['si','ga'] will have an output with 0 for 'si' and 1 for 'ga'
 
         *args/**kwargs : keyword arguments
@@ -119,10 +119,10 @@ class IndexationGenerator():
         Returns
         -------
         matching_results : MatchingResults
-            Navigation axes of the electron diffraction signal containing correlation 
+            Navigation axes of the electron diffraction signal containing correlation
             results for each diffraction pattern. As an example, the signal in
             Euler reads ( Library Number , Z , X , Z , Correlation Score )
-        
+
 
         """
         signal = self.signal

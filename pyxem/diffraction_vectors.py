@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The pyXem developers
+# Copyright 2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -43,7 +43,7 @@ class DiffractionVectors(BaseSignal):
 # This overwrited a method in base signal and has been renamed
     def plot_diff_vects(self):
         #Plot the diffraction vectors.
-        
+
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
@@ -111,19 +111,19 @@ class DiffractionVectors(BaseSignal):
         from scipy.spatial import distance_matrix
         def get_new_indices_from_distance_matrix(distances,distance_threshold):
         #Checks if the distances from one vector in vlist to all other vectors in gvlist
-        #is larger than distance_threshold. 
+        #is larger than distance_threshold.
             new_indices = []
             l = np.shape(distances)[0]
             for i in range(np.shape(distances)[1]):
                 if (np.sum(distances[:,i] > distance_threshold) == l):
                     new_indices = np.append(new_indices, i)
             return np.array(new_indices,dtype=np.int)
-        
+
         if (self.axes_manager.navigation_dimension == 2):
             gvlist = np.array([self.data[0,0][0]])
         else:
             gvlist = np.array([self.data[0][0]])
-            
+
         for i in tqdm(self._iterate_signal()):
             vlist = i[0]
             distances = distance_matrix(gvlist,vlist)

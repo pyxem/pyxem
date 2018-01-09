@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The pyXem developers
+# Copyright 2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -375,7 +375,7 @@ class ElectronDiffraction(Signal2D):
         Examples
         --------
         .. code-block:: python
-            
+
             centers = ed.get_direct_beam_position(method="blur")
             profiles = ed.get_radial_profile(centers)
             profiles.plot()
@@ -459,14 +459,14 @@ class ElectronDiffraction(Signal2D):
         method : string
             Specify the method used to determine the direct beam position.
 
-            * 'blur' - Use gaussian filter to blur the image and take the 
+            * 'blur' - Use gaussian filter to blur the image and take the
                 pixel with the maximum intensity value as the center
-            * 'refine_local' - Refine the position of the direct beam and 
+            * 'refine_local' - Refine the position of the direct beam and
                 hence an estimate for the position of the pattern center in
                 each SED pattern.
 
         sigma : int
-            Standard deviation for the gaussian convolution (only for 
+            Standard deviation for the gaussian convolution (only for
             'blur' method).
 
         Returns
@@ -503,9 +503,9 @@ class ElectronDiffraction(Signal2D):
         method : string
             Specify the method used to determine the direct beam position.
 
-            * 'h-dome' - 
-            * 'model' - fit a model to the radial profile of the average 
-                diffraction pattern and then smooth remaining noise using 
+            * 'h-dome' -
+            * 'model' - fit a model to the radial profile of the average
+                diffraction pattern and then smooth remaining noise using
                 an h-dome method.
             * 'gaussian_difference' - Uses a difference between two gaussian
 				convolutions to determine where the peaks are, and sets
@@ -516,12 +516,12 @@ class ElectronDiffraction(Signal2D):
             The radius, in pixels, of the saturated data (if any) in the direct
             beam if the model method is used (h-dome / model only).
         sigma_min : int, float
-            Standard deviation for the minimum gaussian convolution 
+            Standard deviation for the minimum gaussian convolution
             (gaussian_difference only)
         sigma_max : int, float
-            Standard deviation for the maximum gaussian convolution 
+            Standard deviation for the maximum gaussian convolution
             (gaussian_difference only)
-        footprint : int 
+        footprint : int
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
@@ -737,7 +737,7 @@ class ElectronDiffraction(Signal2D):
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            #ToDo Remove this hardcore            
+            #ToDo Remove this hardcore
             peaks = peaks.transpose(navigation_axes=2)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             raise RuntimeWarning('You do not have the same size navigation axes for your \
