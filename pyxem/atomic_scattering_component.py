@@ -28,7 +28,6 @@ class AtomicScatteringFunction(Component):
 
     Parameters
     ----------
-
     elements : list
         List of the elements present in the specimen.
 
@@ -38,7 +37,6 @@ class AtomicScatteringFunction(Component):
 
     Attributes
     ----------
-
     N : float
         Scaling factor applied to the scattering function to be fitted.
 

@@ -101,7 +101,7 @@ class DiffractionProfile(Signal1D):
 
     def get_rpdf(self, elements, fracs, s, cut_off, damp=1):
         """Calculate the reduced pair distribution function (rpdf) from a given
-        diffracted intensity profile via the reduced intensity.
+        diffracted intensity profile along with the reduced intensity.
 
         Parameters
         ----------
