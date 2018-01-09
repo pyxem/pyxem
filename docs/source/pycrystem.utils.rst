@@ -1,53 +1,53 @@
-pycrystem.utils package
+pyxem.utils package
 =======================
 
 Submodules
 ----------
 
-pycrystem.utils.expt_utils module
+pyxem.utils.expt_utils module
 ---------------------------------
 
-.. automodule:: pycrystem.utils.expt_utils
+.. automodule:: pyxem.utils.expt_utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-pycrystem.utils.peakfinder2D_gui module
+pyxem.utils.peakfinder2D_gui module
 ---------------------------------------
 
-.. automodule:: pycrystem.utils.peakfinder2D_gui
+.. automodule:: pyxem.utils.peakfinder2D_gui
     :members:
     :undoc-members:
     :show-inheritance:
 
-pycrystem.utils.peakfinders2D module
+pyxem.utils.peakfinders2D module
 ------------------------------------
 
-.. automodule:: pycrystem.utils.peakfinders2D
+.. automodule:: pyxem.utils.peakfinders2D
     :members:
     :undoc-members:
     :show-inheritance:
 
-pycrystem.utils.plot module
+pyxem.utils.plot module
 ---------------------------
 
-.. automodule:: pycrystem.utils.plot
+.. automodule:: pyxem.utils.plot
     :members:
     :undoc-members:
     :show-inheritance:
 
-pycrystem.utils.sim_utils module
+pyxem.utils.sim_utils module
 --------------------------------
 
-.. automodule:: pycrystem.utils.sim_utils
+.. automodule:: pyxem.utils.sim_utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-pycrystem.utils.strain_utils module
+pyxem.utils.strain_utils module
 -----------------------------------
 
-.. automodule:: pycrystem.utils.strain_utils
+.. automodule:: pyxem.utils.strain_utils
     :members:
     :undoc-members:
     :show-inheritance:
@@ -56,7 +56,7 @@ pycrystem.utils.strain_utils module
 Module contents
 ---------------
 
-.. automodule:: pycrystem.utils
+.. automodule:: pyxem.utils
     :members:
     :undoc-members:
     :show-inheritance:
