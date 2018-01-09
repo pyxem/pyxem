@@ -16,24 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-import nose.tools as nt
+import pytest
 
+<<<<<<< Updated upstream
 from pycrystem.diffraction_signal import ElectronDiffraction
+=======
+from pyxem.library_generator import DiffractionLibraryGenerator
+>>>>>>> Stashed changes
 from hyperspy.signals import Signal1D, Signal2D
 
 
-class TestLibraryGenerator:
+@pytest.fixture
+def generator():
+    return DiffractionLibraryGenerator()
 
-    def setUp(self):
-        # Initialize diffraction library generator.
-        pass
-
-    def test_get_diffraction_library(self):
-        # Test creation of a diffraction library.
-        pass
-
-
-class TestDiffractionLibrary:
-
-    def setUp(self):
