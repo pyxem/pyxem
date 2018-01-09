@@ -434,6 +434,8 @@ class ElectronDiffraction(Signal2D):
                    jacobian=jacobian,
                    dr=dr, dt=dt)
 
+    # TODO: This method needs to keep track of what's what better, with labels
+    # axes also need to track calibrations.
     def get_diffraction_variance(self):
         """Calculates the variance of associated with each diffraction pixel.
 
