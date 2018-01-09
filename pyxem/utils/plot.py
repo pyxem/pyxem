@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The pyXem developers
+# Copyright 2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -42,7 +42,7 @@ def manual_orientation(data,  #: np.ndarray,
                        calculator,  #: ElectronDiffractionCalculator,
                        ax=None):
     """
-    
+
     """
     if ax is None:
         ax = plt.figure().add_subplot(111)
@@ -83,24 +83,24 @@ def _find_max_length_peaks(peaks):
     Worker function for generate_marker_inputs_from_peaks
     """
     #FIX ME
-    x_size,y_size = peaks.axes_manager.navigation_shape[0],peaks.axes_manager.navigation_shape[1]    
+    x_size,y_size = peaks.axes_manager.navigation_shape[0],peaks.axes_manager.navigation_shape[1]
     length_of_longest_peaks_list = 0
     for x in np.arange(0,x_size):
             for y in np.arange(0,y_size):
                 if peaks.data[y,x].shape[0] > length_of_longest_peaks_list:
                     length_of_longest_peaks_list = peaks.data[y,x].shape[0]
-    return length_of_longest_peaks_list  
+    return length_of_longest_peaks_list
 
 
 def generate_marker_inputs_from_peaks(peaks):
     """
     Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan and returns markers.
     The example illustrates how to get these onto images.
-        
+
     Example:
-        
+
     mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
-    dp.plot(cmap='viridis') 
+    dp.plot(cmap='viridis')
     for mx,my in zip(mmx,mmy):
         m = hs.markers.point(x=mx,y=my,color='red',marker='x')
         dp.add_marker(m,plot_marker=True,permanent=False)
@@ -110,8 +110,8 @@ def generate_marker_inputs_from_peaks(peaks):
     max_peak_len = _find_max_length_peaks(peaks)
     pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data),fillvalue=[np.nan,np.nan])))
     pad = pad.reshape((max_peak_len),peaks.data.shape[0],peaks.data.shape[1],2)
-    xy_cords = np.transpose(pad,[3,0,1,2]) #move the x,y pairs to the front 
-    x = xy_cords[0] 
+    xy_cords = np.transpose(pad,[3,0,1,2]) #move the x,y pairs to the front
+    x = xy_cords[0]
     y = xy_cords[1]
-    
-    return x,y 
+
+    return x,y

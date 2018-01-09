@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The pyXem developers
+# Copyright 2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -110,9 +110,9 @@ def radial_average(z, center,cython=True):
     center : array
         The array indices of the diffraction pattern center about which the
         radial integration is performed.
-    
+
     cython=True
-        Set to False if cython needs to be avoided. If cythonized option is not 
+        Set to False if cython needs to be avoided. If cythonized option is not
         not avaliable the behaviour is equivilant to cython == False
     Returns
     -------
@@ -124,7 +124,7 @@ def radial_average(z, center,cython=True):
     else:
         y, x = np.indices(z.shape)
         r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-        r = (r+0.5).astype(np.int) # conversion involves a floor function 
+        r = (r+0.5).astype(np.int) # conversion involves a floor function
 
         tbin = np.bincount(r.ravel(), z.ravel())
         nr = np.bincount(r.ravel())
@@ -341,7 +341,7 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
     Returns
     -------
         Pattern with background subtracted as np.array
-    """   
+    """
 
     if implementation == 'scipy':
         bg_subtracted = z - ndi.median_filter(z, size=footprint)

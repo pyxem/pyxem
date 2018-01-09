@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The pyXem developers
+# Copyright 2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -56,7 +56,7 @@ def correlate(image, pattern,
 
     pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
     in_bounds = np.product((pixel_coordinates > 0) *(pixel_coordinates < shape[0]), axis=1)
-    
+
     pattern_intensities = pattern.intensities
     large_intensities = pattern_intensities > sim_threshold
     mask = np.logical_and(in_bounds, large_intensities)
