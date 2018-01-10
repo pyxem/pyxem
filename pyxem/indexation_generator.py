@@ -37,16 +37,11 @@ def correlate_library(image, library,n_largest,keys=[]):
 
     i=0
     out_arr = np.zeros((n_largest * len(library),5))
-    if keys:
-        ordered_library_keys = keys
-    else:
-        ordered_library_keys = library.keys()
-
-    if set(ordered_library_keys) != set(library.keys()):
-        raise RuntimeError(""" You have submitted keys that do not map one to one
-                           to those in the library. The library has %s""" % library.keys())
-
-    for key in ordered_library_keys:
+    for key in library.keys():
+        if n_largest:
+            pass
+        else:
+            n_largest=len(library[key])
         correlations = dict()
         for orientation, diffraction_pattern in library[key].items():
             correlation = correlate(image, diffraction_pattern)
