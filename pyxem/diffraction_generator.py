@@ -273,6 +273,8 @@ class DiffractionSimulation:
             and then assinged to 'detectors'. This is slower but more correct.
 
         """
+        # TODO: determine why there seems to be a discrepancy between sigma values
+        # for 'qual' / 'quant' methods.
         
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
         coords = self.coordinates[:, :2]
