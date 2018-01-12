@@ -122,12 +122,12 @@ class ElectronDiffraction(Signal2D):
 
         dx.name = 'dx'
         dx.scale = calibration
-        dx.offset = -center[0] * calibration
+        dx.offset = -center[0]
         dx.units = '$A^{-1}$'
 
         dy.name = 'dy'
         dy.scale = calibration
-        dy.offset = -center[1] * calibration
+        dy.offset = -center[1]
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, roi):
