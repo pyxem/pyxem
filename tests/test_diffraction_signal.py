@@ -73,7 +73,8 @@ def test_default_params(diffraction_pattern):
     (0.5, None,),
 ])
 def test_set_calibration(diffraction_pattern, calibration, center):
-    diffraction_pattern.set_calibration(calibration, center=center)
+    calibrated_center = calibration * np.array(center) if center is not None else center
+    diffraction_pattern.set_calibration(calibration, center=calibrated_center)
     dx, dy = diffraction_pattern.axes_manager.signal_axes
     assert dx.scale == calibration and dy.scale == calibration
     if center is not None:
