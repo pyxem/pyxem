@@ -279,14 +279,9 @@ class DiffractionSimulation:
             faster. In 'quant' mode 'electrons' are fired from exact peak location
             and then assinged to 'detectors'. This is slower but more correct.
 
-        """
-        # TODO: determine why there seems to be a discrepancy between sigma values
-        # for 'qual' / 'quant' methods.
-        
+        """        
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
         coords = self.coordinates[:, :2]
-        coords = coords[np.logical_and(coords[:,0]<max_r,coords[:,0]>-max_r)]
-        coords = coords[np.logical_and(coords[:,1]<max_r,coords[:,1]>-max_r)]
         if mode == 'legacy':
             dp_dat = 0
             x, y = np.meshgrid(l, l)
@@ -300,22 +295,24 @@ class DiffractionSimulation:
         elif mode == 'qual':
             dp_dat = np.zeros([size,size])
             coords = np.hstack((coords,self.intensities.reshape(len(self.intensities),-1))) #attaching int to coords
+            coords = coords[np.logical_and(coords[:,0]<max_r,coords[:,0]>-max_r)]
+            coords = coords[np.logical_and(coords[:,1]<max_r,coords[:,1]>-max_r)]
             x,y = (coords)[:,0] , (coords)[:,1]
             num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
             dp_dat[num] = coords[:,2] #using the intensities
             from skimage.filters import gaussian as point_spread
             dp_dat = point_spread(dp_dat,sigma=sigma/delta_l) #sigma in terms of pixels
         elif mode == 'quant':
-            warnings.warn("You may wish to recalibrate your sigma value for this method")
+            var = np.power(sigma,2)
             electron_array = False
             ss = 75 #sample size to be multiplied by intensity
             peak_location_detailed = np.hstack((coords,(self.intensities.reshape(len(self.intensities),1))))
             for peak in peak_location_detailed:
                 if type(electron_array) == np.ndarray:
-                    electron_array_2 = np.random.multivariate_normal(peak[:2],(sigma)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
+                    electron_array_2 = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
                     electron_array = np.vstack((electron_array,electron_array_2))  
                 else:
-                    electron_array = np.random.multivariate_normal(peak[:2],(sigma)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
+                    electron_array = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
             dp_dat = np.zeros([size,size])
             ## chuck electrons that go to far out
             electron_array = electron_array[np.logical_and(electron_array[:,0]<max_r,electron_array[:,0]>-max_r)]
