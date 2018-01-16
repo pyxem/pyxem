@@ -20,7 +20,7 @@ import numpy as np
 import nose.tools as nt
 
 from pyxem.scalable_reference_pattern import ScalableReferencePattern
-from pyxem.tensor_field2d import TensorField2D
+from pyxem.tensor_field import DisplacementGradientMap
 
 class TestScalableReferencePattern:
 
@@ -28,11 +28,11 @@ class TestScalableReferencePattern:
         ref = ScalableReferencePattern(np.ones((2, 2, 2, 2)))
         self.signal = ref
 
-    def test_function(self):
-        ref = self.signal
-        md = dp.metadata
-        nt.assert_equal(md.Acquisition_instrument.TEM.rocking_angle,
-                        preferences.ElectronDiffraction.ed_precession_angle)
+    # def test_function(self):
+    #     ref = self.signal
+    #     md = dp.metadata
+    #     nt.assert_equal(md.Acquisition_instrument.TEM.rocking_angle,
+    #                     preferences.ElectronDiffraction.ed_precession_angle)
 
     def test_construct_displacement_gradient_tensor_type(self):
         ref = self.signal
