@@ -240,3 +240,11 @@ class DiffractionVectors(BaseSignal):
         -------
 
         """
+        pass
+    
+    def get_diffracting_pixels_map(self):
+        """Get a map of the number of diffraction vectors at each navigation
+        position.
+        
+        """
+        pass
