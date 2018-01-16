@@ -124,7 +124,7 @@ def radial_average(z, center,cython=True):
     else:
         y, x = np.indices(z.shape)
         r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-        r = (r+0.5).astype(np.int) # conversion involves a floor function
+        r = np.rint(r).astype(np.int)
 
         tbin = np.bincount(r.ravel(), z.ravel())
         nr = np.bincount(r.ravel())
