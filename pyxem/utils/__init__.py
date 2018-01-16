@@ -35,17 +35,17 @@ def correlate(image, pattern,
 
     Parameters
     ----------
-    image : :class:`np.ndarray`
+    image : :class:`numpy.ndarray`
         A single electron diffraction signal. Should be appropriately scaled
         and centered.
-    pattern : :class:`DiffractionSimulation`
+    pattern : :class:`pyxem.diffraction_generator.DiffractionSimulation`
         The pattern to compare to.
     sim_threshold : float
         The threshold simulation intensity to consider for correlation
     interpolate : bool
         If True, perform sub-pixel interpolation of the image.
     **kwargs
-        Arguments to pass to scipy.interpolate.RectBivariateSpline
+        Arguments to pass to :class:`scipy.interpolate.RectBivariateSpline`
 
     Returns
     -------
