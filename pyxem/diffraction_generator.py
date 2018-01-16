@@ -26,7 +26,7 @@ from hyperspy.components2d import Expression
 from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
-from pycrystem.utils.pyprismatic_io_utils import generate_pyprismatic_input, \
+from pyxem.utils.pyprismatic_io_utils import generate_pyprismatic_input, \
     run_pyprismatic_simulation, import_pyprismatic_data
 from pymatgen.util.plotting import pretty_plot
 import warnings
