@@ -96,11 +96,14 @@ def generate_marker_inputs_from_peaks(peaks):
     """Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan
     and returns markers.
 
-    The example illustrates how to get these onto images.
+    Parameters
+    ----------
+    peaks : :class:`pyxem.diffraction_vectors.DiffractionVectors`
+        Identifies peaks in a diffraction signal.
 
-    Examples
-    --------
-    ::
+    Example
+    -------
+    How to get these onto images::
 
         mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
         dp.plot(cmap='viridis')
