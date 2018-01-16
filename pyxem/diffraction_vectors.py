@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The PyCrystEM developers
+# Copyright 2018 The pyXem developers
 #
-# This file is part of PyCrystEM.
+# This file is part of pyXem.
 #
-# PyCrystEM is free software: you can redistribute it and/or modify
+# pyXem is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# PyCrystEM is distributed in the hope that it will be useful,
+# pyXem is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
 from .utils.expt_utils import *
+from tqdm import tqdm
 
 """
 Signal class for diffraction vectors.
@@ -32,48 +33,17 @@ def _calculate_norms(z):
         norms.append(np.linalg.norm(i))
     return np.asarray(norms)
 
-def get_new_unique_vectors_in_list(vlist,
-                               gvlist,
-                              distance_threshold=0):
-    """Obtain a list of unique diffraction vectors from vlist, that are not found in gvlist.
-    NB This function is used by get_unique_vectors
-
-    Parameters
-    ----------
-    vlist : ndarray
-        List of vectors.
-    distance_threshold : float
-        The minimum distance between gvectors for them to be considered as
-        different gvectors.
-    gvlist : ndarray
-        List of unique vectors to be compared to the diffraction vectors in vlist.
-
-    Returns
-    -------
-    unique_vectors : list
-        List of unique diffraction vectors from vlist, that are not found in gvlist. 
-        None will be returned if there are no such vectors.
-
-    """
-    if sum(map(lambda x: np.allclose(vlist,
-                                      x, 
-                                      rtol=0, 
-                                      atol=distance_threshold, 
-                                      equal_nan=False), 
-               gvlist)):
-        pass
-    else:
-        return np.asarray(vlist)
-
 class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
-    def plot(self):
-        """Plot the diffraction vectors.
-        """
+
+# This overwrited a method in base signal and has been renamed
+    def plot_diff_vects(self):
+        #Plot the diffraction vectors.
+
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
@@ -124,47 +94,51 @@ class DiffractionVectors(BaseSignal):
         return ghis
 
     def get_unique_vectors(self,
-                           distance_threshold=None,
-                           x=0,y=0,z=0):
-        """Obtain a unique list of diffraction vectors.
+                           distance_threshold=0):
+        """Obtain a list of unique diffraction vectors.
 
         Parameters
         ----------
         distance_threshold : float
-            The minimum distance between gvectors for them to be considered as
-            different gvectors.
-        x,y,z : int
-            Integers defining the position of the g-vector to use as the first
-            vector in the list of unique vectors. 
-            Notation: self.inav[x,y].data[z] or self.inav[x].data[z] 
+            The minimum distance between diffraction vectors for them to be considered
+            as unique diffraction vectors.
 
         Returns
         -------
-        unique_vectors : list
-            List of all unique diffraction vectors.
+        unique_vectors : float
+            Ndarray of all unique diffraction vectors.
         """
-        #Pick one gvector defined by x,y,z, as staring point for gvlist. 
-        if np.shape(np.shape(self.axes_manager))[0] >= 2:
-            gvlist=np.asarray([self.inav[x,y].data[z]])
+        from scipy.spatial import distance_matrix
+        def get_new_indices_from_distance_matrix(distances,distance_threshold):
+        #Checks if the distances from one vector in vlist to all other vectors in gvlist
+        #is larger than distance_threshold.
+            new_indices = []
+            l = np.shape(distances)[0]
+            for i in range(np.shape(distances)[1]):
+                if (np.sum(distances[:,i] > distance_threshold) == l):
+                    new_indices = np.append(new_indices, i)
+            return np.array(new_indices,dtype=np.int)
+
+        if (self.axes_manager.navigation_dimension == 2):
+            gvlist = np.array([self.data[0,0][0]])
         else:
-            gvlist=np.asarray([self.inav[x].data[z]])
+            gvlist = np.array([self.data[0][0]])
 
-        #Iterate through self, find and append all unique vectors to gvlist.
-        for i in self._iterate_signal():
-            gvlist_new=list(map(lambda x: get_new_unique_vectors_in_list(x,
-                                                                     gvlist,
-                                                                     distance_threshold=distance_threshold),
-                            np.asarray(i[0])))
-            #For all vectors in i that are not unique, gvlist_new will include None values. Those are deleted. 
-            gvlist_new= list(filter(lambda x: x is not None, gvlist_new))
-            gvlist_new=np.reshape(gvlist_new, newshape=(-1,2))
-
-            #If gvlist_new contain new unique vectors, add these to gvlist. 
+        for i in tqdm(self._iterate_signal()):
+            vlist = i[0]
+            distances = distance_matrix(gvlist,vlist)
+            new_indices = get_new_indices_from_distance_matrix(distances,distance_threshold)
+            gvlist_new = vlist[new_indices]
             if gvlist_new.any():
                 gvlist=np.concatenate((gvlist, gvlist_new),axis=0)
-
-        unique_vectors = np.asarray(gvlist)
-        return unique_vectors
+        #An internal check, just to be sure.
+        delete_indices = []
+        l = np.shape(gvlist)[0]
+        distances = distance_matrix(gvlist,gvlist)
+        for i in range(np.shape(distances)[1]):
+            if (np.sum(distances[:,i] <= distance_threshold) > 1):
+                delete_indices = np.append(delete_indices, i)
+        return np.delete(gvlist,delete_indices,axis = 0)
 
     def get_vdf_images(self,
                        electron_diffraction,

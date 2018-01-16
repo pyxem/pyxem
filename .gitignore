@@ -45,6 +45,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+tests/result_images/
 
 # Translations
 *.mo
@@ -95,3 +96,7 @@ ENV/
 
 # PyCharm project settings
 .idea/
+
+#auto changing files
+build/
+src/

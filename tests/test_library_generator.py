@@ -1,39 +1,43 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The PyCrystEM developers
+# Copyright 2018 The pyXem developers
 #
-# This file is part of PyCrystEM.
+# This file is part of pyXem.
 #
-# PyCrystEM is free software: you can redistribute it and/or modify
+# pyXem is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# PyCrystEM is distributed in the hope that it will be useful,
+# pyXem is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-import nose.tools as nt
+import pytest
 
-from pycrystem.diffraction_signal import ElectronDiffraction
+from pyxem.diffraction_generator import ElectronDiffractionCalculator
+from pyxem.library_generator import DiffractionLibraryGenerator, DiffractionLibrary
 from hyperspy.signals import Signal1D, Signal2D
 
+@pytest.fixture
+def diffraction_calculator():
+    return ElectronDiffractionCalculator(300., 0.02)
 
-class TestLibraryGenerator:
-
-    def setUp(self):
-        # Initialize diffraction library generator.
-        pass
-
-    def test_get_diffraction_library(self):
-        # Test creation of a diffraction library.
-        pass
+@pytest.fixture
+def library_generator(diffraction_calculator):
+    return DiffractionLibraryGenerator(diffraction_calculator)
 
 
-class TestDiffractionLibrary:
+class TestDiffractionLibraryGenerator:
 
-    def setUp(self):
+    def test_get_diffraction_library(
+            self,
+            library_generator: DiffractionLibraryGenerator,
+            structure_library, calibration, reciprocal_radius, representation
+    ):
+        library = library_generator.get_diffraction_library(
+            structure_library, calibration, reciprocal_radius, representation)
+        assert isinstance(library, DiffractionLibrary)

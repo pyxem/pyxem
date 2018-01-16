@@ -1,8 +1,8 @@
-pycrystem
+pyxem
 =========
 
 .. toctree::
    :maxdepth: 4
 
-   pycrystem
+   pyxem
    setup

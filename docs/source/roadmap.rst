@@ -1,7 +1,7 @@
-pycrystem roadmap
+pyxem roadmap
 =================
 
-pycrystem-v0.1
+pyxem-v0.1
 --------------
 
 Conventions : check axes alignments, Bunge convention etc. write up for docs

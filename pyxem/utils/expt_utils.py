@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The PyCrystEM developers
+# Copyright 2018 The pyXem developers
 #
-# This file is part of PyCrystEM.
+# This file is part of pyXem.
 #
-# PyCrystEM is free software: you can redistribute it and/or modify
+# pyXem is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# PyCrystEM is distributed in the hope that it will be useful,
+# pyXem is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
 import scipy.ndimage as ndi
@@ -101,7 +101,7 @@ def _polar2cart(r, theta):
     x = r * np.sin(theta)
     return x, y
 
-def radial_average(z, center):
+def radial_average(z, center,cython=True):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
 
@@ -111,17 +111,20 @@ def radial_average(z, center):
         The array indices of the diffraction pattern center about which the
         radial integration is performed.
 
+    cython=True
+        Set to False if cython needs to be avoided. If cythonized option is not
+        not avaliable the behaviour is equivilant to cython == False
     Returns
     -------
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
-    if _USE_CY_RADIAL_PROFILE:
+    if _USE_CY_RADIAL_PROFILE and cython:
         averaged = radialprofile_cy(z, center)
     else:
         y, x = np.indices(z.shape)
         r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-        r = r.astype(np.int)
+        r = (r+0.5).astype(np.int) # conversion involves a floor function
 
         tbin = np.bincount(r.ravel(), z.ravel())
         nr = np.bincount(r.ravel())
@@ -338,7 +341,7 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
     Returns
     -------
         Pattern with background subtracted as np.array
-    """   
+    """
 
     if implementation == 'scipy':
         bg_subtracted = z - ndi.median_filter(z, size=footprint)
@@ -350,6 +353,28 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
         raise ValueError("Unknown implementation `{}`".format(implementation))
 
     return np.maximum(bg_subtracted, 0)
+
+
+def circular_mask(shape, radius, center=None):
+    """Produces a mask of radius 'r' centered on 'center' of shape 'shape'.
+
+    Parameters
+    ----------
+    shape : tuple
+    radius : int
+    center : tuple (optional)
+        Default: (0, 0)
+
+    Returns
+    -------
+    np.ndarray
+
+    """
+    l_x, l_y = shape
+    x, y = center if center else (l_x / 2, l_y / 2)
+    X, Y = np.ogrid[:l_x, :l_y]
+    mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
+    return mask
 
 def find_beam_position_blur(z, sigma=30):
     """Estimate direct beam position by blurring the image with a large
@@ -365,9 +390,8 @@ def find_beam_position_blur(z, sigma=30):
     center : np.array
         np.array containing indices of estimated direct beam positon.
     """
-    blurred = ndi.gaussian_filter(z, sigma)
+    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
     center = np.unravel_index(blurred.argmax(), blurred.shape)
-
     return np.array(center)
 
 def refine_beam_position(z, start, radius):

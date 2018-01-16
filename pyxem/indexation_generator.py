@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The PyCrystEM developers
+# Copyright 2018 The pyXem developers
 #
-# This file is part of PyCrystEM.
+# This file is part of pyXem.
 #
-# PyCrystEM is free software: you can redistribute it and/or modify
+# pyXem is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# PyCrystEM is distributed in the hope that it will be useful,
+# pyXem is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Indexation generator and associated tools.
 
@@ -22,7 +22,6 @@
 
 import numpy as np
 from hyperspy.signals import BaseSignal
-from tqdm import tqdm
 from heapq import nlargest
 from operator import itemgetter
 from scipy.constants import pi
@@ -30,11 +29,12 @@ from scipy.constants import pi
 from .utils import correlate
 from .crystallographic_map import CrystallographicMap
 
-def correlate_library(image, library, n_largest):
+def correlate_library(image, library,n_largest,keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image) stored as a
-    numpy array.
+    numpy array. See the correlate method of IndexationGenerator for details.
     """
+
     i=0
     out_arr = np.zeros((n_largest * len(library),5))
     for key in library.keys():
@@ -91,6 +91,7 @@ class IndexationGenerator():
 
     def correlate(self,
                   n_largest=5,
+                  keys=[],
                   *args, **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
@@ -100,16 +101,23 @@ class IndexationGenerator():
         n_largest : integer
             The n orientations with the highest correlation values are returned.
 
+        keys      : list
+            If more than one phase present in library it is recommended that these
+            are submitted. This allows a mapping from the number to the phase.
+
+            eg) keys = ['si','ga'] will have an output with 0 for 'si' and 1 for 'ga'
+
         *args/**kwargs : keyword arguments
             Keyword arguments passed to the HyperSpy map() function. Important
             options include...
 
         Returns
         -------
-        matching_results : ndarray
-            Numpy array with the same shape as the the navigation axes of the
-            electron diffraction signal containing correlation results for each
-            diffraction pattern.
+        matching_results : MatchingResults
+            Navigation axes of the electron diffraction signal containing correlation
+            results for each diffraction pattern. As an example, the signal in
+            Euler reads ( Library Number , Z , X , Z , Correlation Score )
+
 
         """
         signal = self.signal
@@ -117,6 +125,7 @@ class IndexationGenerator():
         matching_results = signal.map(correlate_library,
                                       library=library,
                                       n_largest=n_largest,
+                                      keys=keys,
                                       inplace=False,
                                       *args, **kwargs)
         return MatchingResults(matching_results)

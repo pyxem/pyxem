@@ -1,0 +1,30 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+
+sudo: false
+
+before_install:
+  - "pip install sphinx hyperspy pymatgen Cython transforms3d"
+  - "pip install sphinx_bootstrap_theme"
+
+install:
+  - "python setup.py install"
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
+script:
+  - pytest tests/test_diffraction_signal.py  # until more tests implemented
+  - pytest tests/test_diffraction_generator.py
+  - sphinx-build -b html docs/source docs/build
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: ${TRAVIS_BUILD_DIR}/docs/build
+  on:
+    branch: continuous-integration

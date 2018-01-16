@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The PyCrystEM developers
+# Copyright 2018 The pyXem developers
 #
-# This file is part of PyCrystEM.
+# This file is part of pyXem.
 #
-# PyCrystEM is free software: you can redistribute it and/or modify
+# pyXem is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# PyCrystEM is distributed in the hope that it will be useful,
+# pyXem is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 """Signal class for Electron Diffraction data
 
 """
@@ -22,11 +22,11 @@
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from skimage.morphology import square
 
 from .utils.expt_utils import *
 from .utils.peakfinders2D import *
 from .diffraction_vectors import DiffractionVectors
+from .diffraction_profile import DiffractionProfile
 
 def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
@@ -370,13 +370,13 @@ class ElectronDiffraction(Signal2D):
 
         See also
         --------
-        :func:`~pycrystem.utils.expt_utils.radial_average`
+        :func:`~pyxem.utils.expt_utils.radial_average`
         :meth:`get_direct_beam_position`
 
         Examples
         --------
         .. code-block:: python
-            
+
             centers = ed.get_direct_beam_position(method="blur")
             profiles = ed.get_radial_profile(centers)
             profiles.plot()
@@ -384,19 +384,22 @@ class ElectronDiffraction(Signal2D):
         # TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
+        centers = Signal1D(centers)
 
-        radial_profiles = self.map(radial_average, center=centers, inplace=False)
+        # TODO: the cython implementation is throwing dtype errors
+        radial_profiles = self.map(radial_average, center=centers,
+                                   inplace=False, cython=False)
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
             max_len = max(map(len, radial_profiles.data))
             radial_profiles = Signal1D([
                 np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
                 for row in radial_profiles.data])
-            return radial_profiles
+            return DiffractionProfile(radial_profiles)
         else:
             radial_profiles.axes_manager.signal_axes[0].offset = 0
             signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            return radial_profiles.as_signal1D(signal_axis)
+            return DiffractionProfile(radial_profiles.as_signal1D(signal_axis))
 
     def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
         """Reproject the diffraction data into polar coordinates.
@@ -425,7 +428,7 @@ class ElectronDiffraction(Signal2D):
             The electron diffraction data in polar coordinates.
 
         """
-        return map(self,
+        return self.map(
                    reproject_polar,
                    origin=origin,
                    jacobian=jacobian,
@@ -458,14 +461,14 @@ class ElectronDiffraction(Signal2D):
         method : string
             Specify the method used to determine the direct beam position.
 
-            * 'blur' - Use gaussian filter to blur the image and take the 
+            * 'blur' - Use gaussian filter to blur the image and take the
                 pixel with the maximum intensity value as the center
-            * 'refine_local' - Refine the position of the direct beam and 
+            * 'refine_local' - Refine the position of the direct beam and
                 hence an estimate for the position of the pattern center in
                 each SED pattern.
 
         sigma : int
-            Standard deviation for the gaussian convolution (only for 
+            Standard deviation for the gaussian convolution (only for
             'blur' method).
 
         Returns
@@ -492,7 +495,6 @@ class ElectronDiffraction(Signal2D):
             raise NotImplementedError("The method specified is not implemented. "
                                       "See documentation for available "
                                       "implementations.")
-
         return centers
 
     def remove_background(self, method='model', *args, **kwargs):
@@ -503,9 +505,9 @@ class ElectronDiffraction(Signal2D):
         method : string
             Specify the method used to determine the direct beam position.
 
-            * 'h-dome' - 
-            * 'model' - fit a model to the radial profile of the average 
-                diffraction pattern and then smooth remaining noise using 
+            * 'h-dome' -
+            * 'model' - fit a model to the radial profile of the average
+                diffraction pattern and then smooth remaining noise using
                 an h-dome method.
             * 'gaussian_difference' - Uses a difference between two gaussian
 				convolutions to determine where the peaks are, and sets
@@ -515,13 +517,13 @@ class ElectronDiffraction(Signal2D):
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
             beam if the model method is used (h-dome / model only).
-        min_sigma : int, float
-            Standard deviation for the minimum gaussian convolution 
+        sigma_min : int, float
+            Standard deviation for the minimum gaussian convolution
             (gaussian_difference only)
-        max_sigma : int, float
-            Standard deviation for the maximum gaussian convolution 
+        sigma_max : int, float
+            Standard deviation for the maximum gaussian convolution
             (gaussian_difference only)
-        footprint : int 
+        footprint : int
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
@@ -547,28 +549,27 @@ class ElectronDiffraction(Signal2D):
         elif method == 'model':
             bg = self.get_background_model(*args, **kwargs)
 
-            bg_removed = np.clip(self - bg, 0, 255)
+            bg_removed = np.clip(self - bg, self.min(), self.max())
 
+            h = max(bg.data.min(), 1e-6)
             denoised = ElectronDiffraction(
-                bg_removed.map(regional_flattener,
-                               h=bg.data.min()-1,
-                               inplace=False))
+                bg_removed.map(
+                    regional_flattener, h=h, inplace=False))
             denoised.axes_manager.update_axes_attributes_from(
                 self.axes_manager.navigation_axes)
             denoised.axes_manager.update_axes_attributes_from(
                 self.axes_manager.signal_axes)
 
         elif method == 'gaussian_difference':
-            denoised = self.map(subtract_background_dog, *args, **kwargs)
+            denoised = self.map(subtract_background_dog, inplace=False, *args, **kwargs)
 
         elif method == 'median':
-			# no denoising applied here
-            denoised = self.map(subtract_background_median, *args, **kwargs)
-
+            # no denoising applied here
+            denoised = self.map(subtract_background_median, inplace=False, *args, **kwargs)
         else:
-            raise NotImplementedError("The method specified is not implemented. "
-                                      "See documentation for available "
-                                      "implementations.")
+            raise NotImplementedError(
+                "The method specified, '{}', is not implemented. See"
+                "documentation for available implementations.".format(method))
 
         return denoised
 
@@ -694,8 +695,6 @@ class ElectronDiffraction(Signal2D):
             * 'zaefferer' - based on gradient thresholding and refinement
               by local region of interest optimisation
             * 'stat' - statistical approach requiring no free params.
-            * 'massiel' - finds peaks in each direction and compares the
-              positions where these coincide.
             * 'laplacian_of_gaussians' - a blob finder implemented in
               `scikit-image` which uses the laplacian of Gaussian matrices
               approach.
@@ -739,6 +738,12 @@ class ElectronDiffraction(Signal2D):
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
+        if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
+            #ToDo Remove this hardcore
+            peaks = peaks.transpose(navigation_axes=2)
+        if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
+            raise RuntimeWarning('You do not have the same size navigation axes for your \
+            Diffraction pattern and your peaks')
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
@@ -748,5 +753,5 @@ class ElectronDiffraction(Signal2D):
 
         """
         from .utils import peakfinder2D_gui
-        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(**imshow_kwargs)
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)

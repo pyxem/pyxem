@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The PyCrystEM developers
+# Copyright 2018 The pyXem developers
 #
-# This file is part of PyCrystEM.
+# This file is part of pyXem.
 #
-# PyCrystEM is free software: you can redistribute it and/or modify
+# pyXem is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# PyCrystEM is distributed in the hope that it will be useful,
+# pyXem is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with PyCrystEM.  If not, see <http://www.gnu.org/licenses/>.
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
@@ -54,10 +54,9 @@ def correlate(image, pattern,
     shape = image.shape
     half_shape = tuple(i // 2 for i in shape)
 
-    pixel_coordinates = pattern.calibrated_coordinates.astype(int)[
-        :, :2] + half_shape
-    in_bounds = np.product((pixel_coordinates > 0) *
-                           (pixel_coordinates < shape[0]), axis=1).astype(bool)
+    pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
+    in_bounds = np.product((pixel_coordinates > 0) *(pixel_coordinates < shape[0]), axis=1)
+
     pattern_intensities = pattern.intensities
     large_intensities = pattern_intensities > sim_threshold
     mask = np.logical_and(in_bounds, large_intensities)
@@ -74,7 +73,7 @@ def correlate(image, pattern,
         image_intensities = ip.ev(pattern.coordinates[:, 0][mask],
                                   pattern.coordinates[:, 1][mask])
     else:
-        image_intensities = image.T[pixel_coordinates[:, 0][in_bounds], pixel_coordinates[:, 1][in_bounds]]
+        image_intensities = image.T[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
     pattern_intensities = pattern_intensities[mask]
     return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
 
@@ -113,8 +112,4 @@ def correlate_component(image, pattern):
 
 
 def _correlate(intensities_1, intensities_2):
-    return np.dot(intensities_1, intensities_2) / (
-        np.sqrt(np.dot(intensities_1, intensities_1)) *
-        np.sqrt(np.dot(intensities_2, intensities_2))
-    )
-
+    return np.dot(intensities_1, intensities_2) / (np.sqrt(np.dot(intensities_1, intensities_1) * np.dot(intensities_2, intensities_2)))
