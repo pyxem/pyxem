@@ -22,7 +22,7 @@ from hyperspy.api import roi
 from pymatgen import Lattice, Structure
 
 from .diffraction_signal import ElectronDiffraction
-from .diffraction_generator import ElectronDiffractionCalculator
+from .diffraction_generator import ElectronDiffractionCalculator, DiffractionSimulation
 from .library_generator import DiffractionLibraryGenerator
 from .diffraction_component import ElectronDiffractionForwardModel
 from .scalable_reference_pattern import ScalableReferencePattern

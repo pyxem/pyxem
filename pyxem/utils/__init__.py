@@ -26,30 +26,36 @@ def correlate(image, pattern,
               interpolate=False,
               **kwargs):
     """The correlation between a diffraction pattern and a simulation.
+
     Calculated using
-        .. math::
-            \frac{\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\sqrt{\sum_{j=1}^m P^2(x_j, y_j)} \sqrt{\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    .. math::
+
+        \\frac{\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\sqrt{\sum_{j=1}^m P^2(x_j, y_j)} \sqrt{\sum_{j=1}^m T^2(x_j, y_j)}}
+
     Parameters
     ----------
-    image : :class:`np.ndarray`
+    image : :class:`numpy.ndarray`
         A single electron diffraction signal. Should be appropriately scaled
         and centered.
-    pattern : :class:`DiffractionSimulation`
+    pattern : :class:`pyxem.diffraction_generator.DiffractionSimulation`
         The pattern to compare to.
     sim_threshold : float
         The threshold simulation intensity to consider for correlation
     interpolate : bool
         If True, perform sub-pixel interpolation of the image.
     **kwargs
-        Arguments to pass to scipy.interpolate.RectBivariateSpline
+        Arguments to pass to :class:`scipy.interpolate.RectBivariateSpline`
+
     Returns
     -------
     float
         The correlation coefficient.
+
     References
     ----------
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
-        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
+       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
     shape = image.shape
     half_shape = tuple(i // 2 for i in shape)
@@ -76,39 +82,6 @@ def correlate(image, pattern,
         image_intensities = image.T[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
     pattern_intensities = pattern_intensities[mask]
     return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
-
-
-def correlate_component(image, pattern):
-    """The correlation between a diffraction pattern and a simulation.
-
-    Calculated using
-        .. math::
-            \frac{\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\sqrt{\sum_{j=1}^m P^2(x_j, y_j)} \sqrt{\sum_{j=1}^m T^2(x_j, y_j)}}
-
-    Parameters
-    ----------
-    image : :class:`ElectronDiffraction`
-        A single electron diffraction signal. Should be appropriately scaled
-        and centered.
-    pattern : :class:`DiffractionSimulation`
-        The pattern to compare to.
-
-    Returns
-    -------
-    float
-        The correlation coefficient.
-
-    References
-    ----------
-    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
-        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
-
-    """
-    image_intensities = np.array(
-        [image.isig[c[0], c[1]].data for c in pattern.coordinates]
-    ).flatten()
-    pattern_intensities = pattern.intensities
-    return _correlate(image_intensities, pattern_intensities)
 
 
 def _correlate(intensities_1, intensities_2):

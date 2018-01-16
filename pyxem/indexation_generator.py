@@ -92,24 +92,21 @@ class IndexationGenerator():
     def correlate(self,
                   n_largest=5,
                   keys=[],
-                  *args, **kwargs):
+                  **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
 
         Parameters
         ----------
-        n_largest : integer
+        n_largest : int
             The n orientations with the highest correlation values are returned.
-
-        keys      : list
-            If more than one phase present in library it is recommended that these
-            are submitted. This allows a mapping from the number to the phase.
-
-            eg) keys = ['si','ga'] will have an output with 0 for 'si' and 1 for 'ga'
-
-        *args/**kwargs : keyword arguments
-            Keyword arguments passed to the HyperSpy map() function. Important
-            options include...
+        keys : list
+            If more than one phase present in library it is recommended that
+            these are submitted. This allows a mapping from the number to the
+            phase.  For example, keys = ['si','ga'] will have an output with 0
+            for 'si' and 1 for 'ga'.
+        **kwargs
+            Keyword arguments passed to the HyperSpy map() function.
 
         Returns
         -------
@@ -127,7 +124,7 @@ class IndexationGenerator():
                                       n_largest=n_largest,
                                       keys=keys,
                                       inplace=False,
-                                      *args, **kwargs)
+                                      **kwargs)
         return MatchingResults(matching_results)
 
 
@@ -156,11 +153,11 @@ class MatchingResults(BaseSignal):
     def get_phase_results(self,
                           phaseid,
                           *args, **kwargs):
-        """Obtain matching results for speicified phase.
+        """Obtain matching results for specified phase.
 
-        Paramters
-        ---------
-        phaseid = int
+        Parameters
+        ----------
+        phaseid : int
             Identifying integer of phase to obtain results for.
 
         Returns
