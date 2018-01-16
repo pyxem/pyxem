@@ -19,6 +19,7 @@ before_script:
 script:
   - pytest tests/test_diffraction_signal.py  # until more tests implemented
   - pytest tests/test_diffraction_generator.py
+  - sphinx-apidoc -fo docs/source .
   - sphinx-build -b html docs/source docs/build
 
 deploy:
