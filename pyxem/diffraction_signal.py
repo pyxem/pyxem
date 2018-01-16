@@ -370,7 +370,7 @@ class ElectronDiffraction(Signal2D):
 
         See also
         --------
-        :func:`~pyxem.utils.expt_utils.radial_average`
+        :func:`pyxem.utils.expt_utils.radial_average`
         :meth:`get_direct_beam_position`
 
         Examples

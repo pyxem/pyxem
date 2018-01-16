@@ -26,13 +26,15 @@ import math
 Signal class for Tensor Fields
 """
 
-def polar_decomposition(image, side):
+
+def _polar_decomposition(image, side):
     """Perform a polar decomposition of a second rank tensor and return the
     results as a numpy array.
     """
     return np.array(polar(image, side=side))
 
-def get_rotation_angle(matrix):
+
+def _get_rotation_angle(matrix):
     """Return the rotation angle corresponding to a
 
     Returns
@@ -42,6 +44,7 @@ def get_rotation_angle(matrix):
 
     """
     return np.array(-math.asin(matrix[1,0]))
+
 
 class DisplacementGradientMap(Signal2D):
     _signal_type = "tensor_field"
@@ -54,11 +57,10 @@ class DisplacementGradientMap(Signal2D):
     def polar_decomposition(self):
         """Perform polar decomposition on the second rank tensors describing
         the TensorField. The polar decomposition is right handed and given by
-            D = RU
+        :math:`D = RU`
 
         Returns
         -------
-
         R : TensorField
             The orthogonal matrix describing the rotation field.
 
@@ -66,7 +68,7 @@ class DisplacementGradientMap(Signal2D):
             The strain tensor field.
 
         """
-        RU = self.map(polar_decomposition,
+        RU = self.map(_polar_decomposition,
                       side='right',
                       inplace=False)
         return RU.isig[:,:,0], RU.isig[:,:,1]
@@ -87,7 +89,7 @@ class DisplacementGradientMap(Signal2D):
         e12 = U.isig[0, 1].T
         e21 = U.isig[1, 0].T
         e22 = -U.isig[1, 1].T + 1
-        theta = R.map(get_rotation_angle, inplace=False)
+        theta = R.map(_get_rotation_angle, inplace=False)
         theta.axes_manager.set_signal_dimension(2)
 
         strain_results = stack([e11, e22, e12, theta])

@@ -5,5 +5,3 @@ pyxem
    :maxdepth: 4
 
    pyxem
-   setup
-   tests
