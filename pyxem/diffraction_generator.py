@@ -63,35 +63,9 @@ class ElectronDiffractionCalculator(object):
         self.wavelength = get_electron_wavelength(accelerating_voltage)
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
-    
-    def calculate_ed_data(self,*args,**kwargs):
-        raise ValueError("This function has been split up, please use one of those functions")
-        
-    def calculate_ed_data_dynamic(self,structure,prismatic_kwargs=None):
-        """ Calculates the Electron Diffraction data for a structure using a dynamic model
-        
-        Parameters
-        ----------
-        structure: Structure
-            The unit cell of the structure from which to derive the diffraction pattern
             
-        prismatic_kwargs: Arguments to be passed to Pyprismatic as a dict 
         
-        Returns
-        -------
-        None
-            The best return choice remains under consideration
-        
-        """
-        generate_pyprismatic_input(structure)
-        meta = run_pyprismatic_simulation(prismatic_kwargs)
-        #below is designed for 3D data, we now work in 4
-	#output = import_pyprismatic_data(meta)
-        #diffracted_intensity = np.squeeze(np.sum(output,axis=2)) #see prismatic-em examples for what this is
-        
-        return None
-        
-    def calculate_ed_data_kinematic(self, structure, reciprocal_radius):
+    def calculate_ed_data(self, structure, reciprocal_radius):
         """Calculates the Electron Diffraction data for a structure using a kinematic model:
             
              1. Calculate reciprocal lattice of structure. Find all reciprocal points
@@ -168,6 +142,31 @@ class ElectronDiffractionCalculator(object):
                                      intensities=intensities,
                                      with_direct_beam=True)
 
+
+    def calculate_ed_data_dynamic(self,structure,prismatic_kwargs=None):
+        """ Calculates the Electron Diffraction data for a structure using a dynamic model
+        
+        Parameters
+        ----------
+        structure: Structure
+            The unit cell of the structure from which to derive the diffraction pattern
+            
+        prismatic_kwargs: Arguments to be passed to Pyprismatic as a dict 
+        
+        Returns
+        -------
+        None
+            The best return choice remains under consideration
+        
+        """
+        warnings.warn("This functionality is a work in progress ")
+        generate_pyprismatic_input(structure)
+        meta = run_pyprismatic_simulation(prismatic_kwargs)
+        #below is designed for 3D data, we now work in 4
+	    #output = import_pyprismatic_data(meta)
+        #diffracted_intensity = np.squeeze(np.sum(output,axis=2)) #see prismatic-em examples for what this is
+        
+        return None
 
 class DiffractionSimulation:
     """Holds the result of a given diffraction pattern.
