@@ -14,8 +14,10 @@ def generate_pyprismatic_input(structure,delete_mode=False):
             file 'PP_input.XYZ'
         
         """
-        
-        if os.path.exists('PP_input.XYZ') and (not delete_mode):
+        if delete_mode:
+            ##remove the file
+            pass
+        if os.path.exists('PP_input.XYZ'):
             raise IOError('The file the program is attempting to write to already exists, please remove it.')
             #If one turned this warning off extra data would be added to the existing file (NOT a simple overwrite) 
         

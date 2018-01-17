@@ -143,7 +143,7 @@ class ElectronDiffractionCalculator(object):
                                      with_direct_beam=True)
 
 
-    def calculate_ed_data_dynamic(self,structure,prismatic_kwargs=None):
+    def calculate_ed_data_dynamic(self,structure,delete_mode=False,prismatic_kwargs=None):
         """ Calculates the Electron Diffraction data for a structure using a dynamic model
         
         Parameters
@@ -160,7 +160,7 @@ class ElectronDiffractionCalculator(object):
         
         """
         warnings.warn("This functionality is a work in progress ")
-        generate_pyprismatic_input(structure)
+        generate_pyprismatic_input(structure,delete_mode=delete_mode)
         meta = run_pyprismatic_simulation(prismatic_kwargs)
         #below is designed for 3D data, we now work in 4
 	    #output = import_pyprismatic_data(meta)
