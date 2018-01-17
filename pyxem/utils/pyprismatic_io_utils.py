@@ -3,7 +3,7 @@ import pymatgen as pmg
 import os
 import pyprismatic as pr
 
-def generate_pyprismatic_input(structure):
+def generate_pyprismatic_input(structure,delete_mode=False):
         """     Generates a .XYZ file on which Pyprismatic can run
         
         Args:
@@ -15,7 +15,7 @@ def generate_pyprismatic_input(structure):
         
         """
         
-        if os.path.exists('PP_input.XYZ'):
+        if os.path.exists('PP_input.XYZ') and (not delete_mode):
             raise IOError('The file the program is attempting to write to already exists, please remove it.')
             #If one turned this warning off extra data would be added to the existing file (NOT a simple overwrite) 
         
