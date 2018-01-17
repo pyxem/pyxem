@@ -159,15 +159,28 @@ class ElectronDiffractionCalculator(object):
             The best return choice remains under consideration
         
         """
+        import pyprismatic as pr
+        import os
+        
         warnings.warn("This functionality is a work in progress ")
         generate_pyprismatic_input(structure,delete_mode=delete_mode)
-        meta = run_pyprismatic_simulation(prismatic_kwargs)
-        #below is designed for 3D data, we now work in 4
-	    #output = import_pyprismatic_data(meta)
-        #diffracted_intensity = np.squeeze(np.sum(output,axis=2)) #see prismatic-em examples for what this is
+        run_pyprismatic_simulation(prismatic_kwargs)
         
-        return None
-
+        mrc_file_list =  [ x for x in os.listdir() if x.endswith(".mrc") ]
+        
+        k_size = pr.fileio.readMRC(mrc_file_list[0])[0].shape
+        real_size = np.rint(np.sqrt(len(mrc_file_list))).astype(int) #real space must be square
+        output = np.full((real_size,real_size,k_size[0],k_size[1]),np.nan) #makes error catching easier
+        
+        for read_file in mrc_file_list:
+            x_cord = read_file[read_file.find('_X')+2:read_file.find('_Y')]
+            y_cord = read_file[read_file.find('_Y')+2:read_file.find('_F')] #unclear how stable the F behaviour is
+            output[int(x_cord),int(y_cord)] = np.fft.fftshift(pr.fileio.readMRC(read_file))
+        for read_file in mrc_file_list:
+            os.remove(read_file)
+        
+        return output
+        
 class DiffractionSimulation:
     """Holds the result of a given diffraction pattern.
 

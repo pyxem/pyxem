@@ -61,7 +61,6 @@ def run_pyprismatic_simulation(prismatic_kwargs=None):
     return meta
 
 def import_pyprismatic_data(meta):
-    read_file = meta.filenameOutput
-    output = pr.fileio.readMRC(read_file)
-    # TODO Choose and implement an output format
-    return output
+    # XXX
+    pass
+    
