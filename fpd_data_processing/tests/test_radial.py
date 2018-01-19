@@ -46,7 +46,7 @@ class test_radial_module(unittest.TestCase):
     def test_get_optimal_centre_position(self):
         x0, y0 = 300., 300.
         test_data = mdtd.MakeTestData(size_x=600, size_y=600, default=False)
-        test_data.add_ring(x0=x0, y0=y0, r=200, I=10, lw_pix=2)
+        test_data.add_ring(x0=x0, y0=y0, r=200, intensity=10, lw_pix=2)
         s = test_data.signal
         s.axes_manager[0].offset = -301.
         s.axes_manager[1].offset = -301.
@@ -61,7 +61,7 @@ class test_radial_module(unittest.TestCase):
                 size_x=300, size_y=400,
                 default=False, blur=True, downscale=False)
         x0, y0 = 150, 170
-        test_data.add_ring(x0=x0, y0=y0, r=100, I=10, lw_pix=1)
+        test_data.add_ring(x0=x0, y0=y0, r=100, intensity=10, lw_pix=1)
         s = test_data.signal
         s.axes_manager[0].offset = -x0-2
         s.axes_manager[1].offset = -y0-3

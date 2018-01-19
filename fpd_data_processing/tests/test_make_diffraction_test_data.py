@@ -82,7 +82,7 @@ class test_make_diffraction_test_data_disks(unittest.TestCase):
         test_data_1 = mdtd.MakeTestData(
                 size_x=10, size_y=10,
                 scale=0.01, default=False)
-        test_data_1.add_disk(x0=5, y0=5, r=20, I=100)
+        test_data_1.add_disk(x0=5, y0=5, r=20, intensity=100)
         self.assertTrue((test_data_1.signal.data > 0.).all())
 
 
@@ -94,7 +94,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         test_data = mdtd.MakeTestData(
                 size_x=100, size_y=100, default=False,
                 blur=False, downscale=False)
-        test_data.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
+        test_data.add_ring(x0=x0, y0=y0, r=r, intensity=10, lw_pix=lw)
         r_inner = 20 - 2.5*scale
 
         s_h0 = test_data.signal.isig[x0, :y0+1]
@@ -123,7 +123,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         ring_1 = mdtd.MakeTestData(
                 size_x=100, size_y=100, default=False,
                 blur=False, downscale=False)
-        ring_1.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
+        ring_1.add_ring(x0=x0, y0=y0, r=r, intensity=10, lw_pix=lw)
         s_h0 = ring_1.signal.isig[x0, :]
         s_h0_edge = s_h0.axes_manager[0].index2value(s_h0.data[::-1].argmax())
         r_h0 = s_h0.data.size - s_h0_edge - 0.5*scale
@@ -139,7 +139,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         ring_2 = mdtd.MakeTestData(
                 size_x=100, size_y=100, default=False,
                 blur=False, downscale=False)
-        ring_2.add_ring(x0=x0, y0=y0, r=r, I=10, lw_pix=lw)
+        ring_2.add_ring(x0=x0, y0=y0, r=r, intensity=10, lw_pix=lw)
         s_h2 = ring_2.signal.isig[-1, :]
         s_h2_edge = s_h2.axes_manager[0].index2value(s_h2.data.argmax())
         r_h2 = 100 - (s_h2_edge - 0.5*scale)
@@ -151,28 +151,30 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         self.assertTrue(r_h3 == r_out)
 
     def test_ring_radius1(self):
-        I = 20
+        intensity = 20
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=50, r=1, I=I, lw_pix=0)
+        test.add_ring(x0=50, y0=50, r=1, intensity=intensity, lw_pix=0)
 
         self.assertTrue((test.signal.isig[50, 50].data == 0.).all())
-        test.signal.data[50, 50] = I
-        self.assertTrue((test.signal.isig[49:52, 49:52].data == I).all())
+        test.signal.data[50, 50] = intensity
+        self.assertTrue(
+                (test.signal.isig[49:52, 49:52].data == intensity).all())
         test.signal.data[49:52, 49:52] = 0.
         self.assertFalse(test.signal.data.any())
 
     def test_ring_radius2(self):
-        I = 10
+        intensity = 10
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=50, r=2, I=I, lw_pix=0)
+        test.add_ring(x0=50, y0=50, r=2, intensity=intensity, lw_pix=0)
 
         self.assertTrue((test.signal.isig[49:52, 49:52].data == 0.).all())
-        test.signal.data[49:52, 49:52] = I
-        self.assertTrue((test.signal.isig[48:53, 48:53].data == I).all())
+        test.signal.data[49:52, 49:52] = intensity
+        self.assertTrue(
+                (test.signal.isig[48:53, 48:53].data == intensity).all())
         test.signal.data[48:53, 48:53] = 0.
         self.assertFalse(test.signal.data.any())
 
@@ -180,36 +182,37 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=50, r=300, I=19, lw_pix=1)
+        test.add_ring(x0=50, y0=50, r=300, intensity=19, lw_pix=1)
         self.assertFalse(test.signal.data.any())
 
     def test_ring_rectangle_image(self):
-        I = 10
+        intensity = 10
         test = mdtd.MakeTestData(
                 size_x=100, size_y=50,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=50, y0=25, r=1, I=I, lw_pix=0)
+        test.add_ring(x0=50, y0=25, r=1, intensity=intensity, lw_pix=0)
 
         self.assertTrue((test.signal.isig[50, 25].data == 0.).all())
-        test.signal.data[25, 50] = I
-        self.assertTrue((test.signal.isig[49:52, 24:27].data == I).all())
+        test.signal.data[25, 50] = intensity
+        self.assertTrue(
+                (test.signal.isig[49:52, 24:27].data == intensity).all())
         test.signal.data[24:27, 49:52] = 0.
         self.assertFalse(test.signal.data.any())
 
     def test_ring_cover_whole_image(self):
-        I = 10.
+        intensity = 10.
         test = mdtd.MakeTestData(
                 size_x=50, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=25, y0=200, r=150, I=I, lw_pix=100)
-        self.assertTrue((test.signal.data == I).all())
+        test.add_ring(x0=25, y0=200, r=150, intensity=intensity, lw_pix=100)
+        self.assertTrue((test.signal.data == intensity).all())
 
     def test_ring_position(self):
         x0, y0, r = 40., 60., 20
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=False)
-        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=0)
+        test.add_ring(x0=x0, y0=y0, r=r, intensity=20, lw_pix=0)
         s_h0 = test.signal.isig[x0, 0.:y0]
         max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
         self.assertEqual(max_h0, y0-r)
@@ -229,7 +232,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=True, downscale=False)
-        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        test.add_ring(x0=x0, y0=y0, r=r, intensity=20, lw_pix=1)
         s_h0 = test.signal.isig[x0, 0:y0]
         max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
         self.assertEqual(max_h0, y0-r)
@@ -249,7 +252,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=True, downscale=False)
-        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        test.add_ring(x0=x0, y0=y0, r=r, intensity=20, lw_pix=1)
         s_h0 = test.signal.isig[x0, 0:y0]
         max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
         self.assertEqual(max_h0, y0-r)
@@ -269,7 +272,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=False, downscale=True)
-        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=0)
+        test.add_ring(x0=x0, y0=y0, r=r, intensity=20, lw_pix=0)
         s_h0 = test.signal.isig[x0, 0:y0]
         max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
         self.assertEqual(max_h0, y0-r)
@@ -289,7 +292,7 @@ class test_make_diffraction_test_data_ring(unittest.TestCase):
         test = mdtd.MakeTestData(
                 size_x=100, size_y=100,
                 default=False, blur=True, downscale=True)
-        test.add_ring(x0=x0, y0=y0, r=r, I=20, lw_pix=1)
+        test.add_ring(x0=x0, y0=y0, r=r, intensity=20, lw_pix=1)
         s_h0 = test.signal.isig[x0, 0:y0]
         max_h0 = s_h0.axes_manager[0].index2value(s_h0.data.argmax())
         self.assertEqual(max_h0, y0-r)
@@ -346,20 +349,20 @@ class test_generate_4d_data(unittest.TestCase):
         self.assertTrue((s.data == 50).all())
 
     def test_disk_position_array(self):
-        ps_x, ps_y, I = 4, 7, 30
+        ps_x, ps_y, intensity = 4, 7, 30
         disk_x = np.random.randint(5, 35, size=(ps_y, ps_x))
         disk_y = np.random.randint(5, 45, size=(ps_y, ps_x))
         s = mdtd.generate_4d_data(
                 probe_size_x=ps_x, probe_size_y=ps_y,
                 image_size_x=40, image_size_y=50,
-                ring_x=None, disk_x=disk_x, disk_y=disk_y, disk_r=1, disk_I=I,
-                blur=False, downscale=False)
+                ring_x=None, disk_x=disk_x, disk_y=disk_y, disk_r=1,
+                disk_I=intensity, blur=False, downscale=False)
         for x in range(ps_x):
             for y in range(ps_y):
                 cX, cY = disk_x[y, x], disk_y[y, x]
                 sl = np.s_[cY-1:cY+2, cX-1:cX+2]
                 im = s.inav[x, y].data[:]
-                self.assertTrue((im[sl] == I).all())
+                self.assertTrue((im[sl] == intensity).all())
                 im[sl] = 0
                 self.assertFalse(im.any())
 

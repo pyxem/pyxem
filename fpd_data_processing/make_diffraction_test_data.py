@@ -79,11 +79,11 @@ def _get_elliptical_ring(s, x, y, semi_len0, semi_len1, rotation, lw_r=1):
 
 
 class Circle(object):
-    def __init__(self, xx, yy, x0, y0, r, I, scale, lw=None):
+    def __init__(self, xx, yy, x0, y0, r, intensity, scale, lw=None):
         self.x0 = x0
         self.y0 = y0
         self.r = r
-        self.I = I
+        self.intensity = intensity
         self.lw = lw
         self.circle = (yy - self.y0) ** 2 + (xx - self.x0) ** 2
         self.mask_outside_r(scale)
@@ -92,7 +92,7 @@ class Circle(object):
     def __repr__(self):
         return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
             self.__class__.__name__,
-            self.r, self.x0, self.y0, self.I,
+            self.r, self.x0, self.y0, self.intensity,
             )
 
     def mask_outside_r(self, scale):
@@ -133,7 +133,7 @@ class Circle(object):
 
     def set_uniform_intensity(self):
         circle_ring_indices = self.circle > 0
-        self.circle[circle_ring_indices] = self.I
+        self.circle[circle_ring_indices] = self.intensity
 
     def update_axis(self, xx, yy):
         self.circle = (xx - self.x0) ** 2 + (yy - self.y0) ** 2
@@ -144,8 +144,8 @@ class Disk(object):
     """
     Disk object, with outer edge of the ring at r
     """
-    def __init__(self, xx, yy, scale, x0, y0, r, I):
-        self.z = Circle(xx, yy, x0, y0, r, I, scale)
+    def __init__(self, xx, yy, scale, x0, y0, r, intensity):
+        self.z = Circle(xx, yy, x0, y0, r, intensity, scale)
         self.z.set_uniform_intensity()
         self.set_centre_intensity()
 
@@ -155,7 +155,7 @@ class Disk(object):
             self.z.r,
             self.z.x0,
             self.z.y0,
-            self.z.I,
+            self.z.intensity,
             )
 
     def set_centre_intensity(self):
@@ -165,7 +165,7 @@ class Disk(object):
         """
         for x in self.z.centre_x_pixels:
             for y in self.z.centre_y_pixels:
-                self.z.circle[y, x] = self.z.I  # This is correct
+                self.z.circle[y, x] = self.z.intensity  # This is correct
 
     def get_signal(self):
         return(self.z.circle)
@@ -182,19 +182,19 @@ class Ring(object):
     The radius of the ring is defined as in the middle of the line making
     up the ring.
     """
-    def __init__(self, xx, yy, scale, x0, y0, r, I, lr):
+    def __init__(self, xx, yy, scale, x0, y0, r, intensity, lr):
         if lr > r:
             raise ValueError('Ring line width too big'.format(lr, r))
         self.lr = lr
         self.lw = 1 + 2*lr  # scalar line width of the ring
-        self.z = Circle(xx, yy, x0, y0, r, I, scale, lw=lr)
+        self.z = Circle(xx, yy, x0, y0, r, intensity, scale, lw=lr)
         self.mask_inside_r(scale)
         self.z.set_uniform_intensity()
 
     def __repr__(self):
         return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
-            self.__class__.__name__, self.z.r, self.z.x0, self.z.y0, self.z.I,
-            )
+            self.__class__.__name__, self.z.r, self.z.x0, self.z.y0,
+            self.z.intensity,)
 
     def mask_inside_r(self, scale):
         indices = self.z.circle < (self.z.r - self.lr)**2
@@ -266,8 +266,8 @@ class MakeTestData:
     More control
 
     >>> test_data = MakeTestData(default=False)
-    >>> test_data.add_disk(x0=50, y0=50, r=10, I=30)
-    >>> test_data.add_ring(x0=45, y0=52, r=25, I=10)
+    >>> test_data.add_disk(x0=50, y0=50, r=10, intensity=30)
+    >>> test_data.add_ring(x0=45, y0=52, r=25, intensity=10)
     >>> test_data.signal.plot()
 
     """
@@ -308,12 +308,12 @@ class MakeTestData:
         self.Y = np.arange(0, self.size_y, self.scale/self.downscale_factor)
         self.xx, self.yy = np.meshgrid(self.X, self.Y, sparse=True)
 
-    def add_disk(self, x0=50, y0=50, r=5, I=10):
+    def add_disk(self, x0=50, y0=50, r=5, intensity=10):
         scale = self.scale/self.downscale_factor
-        self.z_list.append(Disk(self.xx, self.yy, scale, x0, y0, r, I))
+        self.z_list.append(Disk(self.xx, self.yy, scale, x0, y0, r, intensity))
         self.update_signal()
 
-    def add_ring(self, x0=50, y0=50, r=20, I=10, lw_pix=0):
+    def add_ring(self, x0=50, y0=50, r=20, intensity=10, lw_pix=0):
         """
         Add a ring to the test data.
 
@@ -325,7 +325,7 @@ class MakeTestData:
             Radius of the ring, defined as the distance from the centre to the
             middle of the line of the ring, which will be most intense after
             blurring.
-        I : number, default 10
+        intensity : number, default 10
             Pixel value of the ring. Note, this value will be lowered
             if blur or downscale is True
         lw_pix : number, default 0
@@ -337,7 +337,7 @@ class MakeTestData:
         scale = self.scale/self.downscale_factor
         lr = lw_pix*self.scale  # scalar
         self.z_list.append(
-                Ring(self.xx, self.yy, scale, x0, y0, r, I, lr))
+                Ring(self.xx, self.yy, scale, x0, y0, r, intensity, lr))
         self.update_signal()
 
     def make_signal(self):
@@ -542,11 +542,11 @@ def generate_4d_data(
         if plot_disk:
             dx, dy, dr = disk_x[index], disk_y[index], disk_r[index]
             dI = disk_I[index]
-            test_data.add_disk(dx, dy, dr, I=dI)
+            test_data.add_disk(dx, dy, dr, intensity=dI)
         if plot_ring:
             rx, ry, rr = ring_x[index], ring_y[index], ring_r[index]
             rI, rLW = ring_I[index], ring_lw[index]
-            test_data.add_ring(rx, ry, rr, I=rI, lw_pix=rLW)
+            test_data.add_ring(rx, ry, rr, intensity=rI, lw_pix=rLW)
         s.data[index][:] = test_data.signal.data[:]
         if add_noise:
             s.data[index][:] += np.random.random(
