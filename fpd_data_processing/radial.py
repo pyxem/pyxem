@@ -439,8 +439,20 @@ def _get_ellipse_parameters(g):
 
     Returns
     -------
-    xC, yC, semi_len0, semi_len1, rot, eccen
+    xC, yC : floats
+        Centre position
+    semi_len0, semi_len1 : floats
+        Length of minor and major semi-axis
+    rot : float
+        Angle between the major semi-axis and the positive x-axis.
+        In radians, between 0 and pi. The rotation is clockwise, so
+        at rot = 0.1 the ellipse will be pointing in the positive x-direction,
+        and negative y-direction.
+    eccen : float
+        Eccentricity of the ellipse
 
+    Note
+    ----
     http://mathworld.wolfram.com/Ellipse.html
 
     """
@@ -464,6 +476,7 @@ def _get_ellipse_parameters(g):
             rot = math.atan((2*b)/(a - c))/2
         else:
             rot = math.pi/2 + (math.atan((2*b)/(a - c))/2)
+    rot = rot % np.pi
     eccen = math.sqrt(1-((b*b)/(a*a)))
     return(xC, yC, semi_len0, semi_len1, rot, eccen)
 
@@ -508,6 +521,21 @@ def fit_single_ellipse_to_signal(
 
     Returns
     -------
+    signal : HyperSpy 2D signal
+        Fitted ellipse and fitting points are stored as HyperSpy markers
+        in the metadata
+    xC, yC : floats
+        Centre position
+    semi_len0, semi_len1 : floats
+        Length of minor and major semi-axis
+    rot : float
+        Angle between the major semi-axis and the positive x-axis.
+        In radians, between 0 and pi. The rotation is clockwise, so
+        at rot = 0.1 the ellipse will be pointing in the positive x-direction,
+        and negative y-direction.
+    eccen : float
+        Eccentricity of the ellipse
+
     signal, xC, yC, semi0, semi1, rot, ecc
 
     Examples
@@ -553,7 +581,20 @@ def fit_ellipses_to_signal(
 
     Returns
     -------
-    signal, xC, yC, semi0, semi1, rot, ecc
+    signal : HyperSpy 2D signal
+        Fitted ellipse and fitting points are stored as HyperSpy markers
+        in the metadata
+    xC, yC : floats
+        Centre position
+    semi_len0, semi_len1 : floats
+        Length of minor and major semi-axis
+    rot : float
+        Angle between the major semi-axis and the positive x-axis.
+        In radians, between 0 and pi. The rotation is clockwise, so
+        at rot = 0.1 the ellipse will be pointing in the positive x-direction,
+        and negative y-direction.
+    eccen : float
+        Eccentricity of the ellipse
 
     Examples
     --------
