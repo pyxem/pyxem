@@ -212,6 +212,28 @@ class test_fit_ellipse(unittest.TestCase):
         self.assertAlmostEqual(output[4], 60, places=-1)
         self.assertAlmostEqual(output[6], 1., places=5)
 
+    def test_fit_single_ellipse_to_signal_rotation(self):
+        rot_list = [
+                -np.pi/16, -np.pi/8, -np.pi/4, -np.pi/2, -0.1,
+                0.1, np.pi/16, np.pi/8, np.pi/4, np.pi/2, np.pi + 0.1,
+                np.pi*2 + 0.1, np.pi*2.5, np.pi*3 + 0.1, np.pi*3.2]
+        for rot in rot_list:
+            s = fp.PixelatedSTEM(np.zeros((200, 200)))
+            s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
+            s.data += mdtd._get_elliptical_ring(s, 0, 0, 70, 60, rot, lw_r=1)
+            output = ra.fit_single_ellipse_to_signal(
+                    s, (50, 80), angleN=10, show_progressbar=False)
+            output_rot = output[5] % np.pi
+            self.assertAlmostEqual(output_rot, rot % np.pi, places=1)
+        for rot in rot_list:
+            s = fp.PixelatedSTEM(np.zeros((200, 200)))
+            s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
+            s.data += mdtd._get_elliptical_ring(s, 0, 0, 60, 70, rot, lw_r=1)
+            output = ra.fit_single_ellipse_to_signal(
+                    s, (50, 80), angleN=10, show_progressbar=False)
+            output_rot = (output[5] + np.pi/2) % np.pi
+            self.assertAlmostEqual(output_rot, rot % np.pi, places=1)
+
     def test_fit_ellipses_to_signal(self):
         s = fp.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
