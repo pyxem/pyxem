@@ -4,16 +4,17 @@
 Installing
 ==========
 
-Download the source tar-file from the `fpd_data_processing GitLab <https://gitlab.com/pixelated_stem/fpd_data_processing/repository/master/archive.tar.gz>`__.
-Then install using:
+Install using PyPi:
 
 .. code-block:: bash
 
-    $ pip3 install fpd_data_processing-master-*.tar.gz
+    $ pip3 install fpd_data_processing hyperspy_gui_ipywidgets hyperspy_gui_traitsui
+
+Continue with the tutorial: :ref:`using_pixelated_stem_class`.
 
 
-Notes: old matplotlib
----------------------
+For Ubuntu 16.04
+----------------
 
 Note: the matplotlib package in Ubuntu 16.04 is too old, which causes conflicts when installing the newer version through PyPI.
 
