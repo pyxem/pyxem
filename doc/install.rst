@@ -48,7 +48,7 @@ Ubuntu 17.10
 
     $ sudo apt-get install ipython3 python3-pip python3-numpy python3-scipy python3-matplotlib python3-sklearn python3-skimage python3-h5py python3-dask python3-traits python3-tqdm python3-pint python3-dask python3-pyqt4 python3-lxml
     $ sudo apt-get install python3-sympy --no-install-recommends
-    $ pip3 install --upgrade pip
+    $ pip3 install --upgrade pip
     $ pip3 install --user fpd_data_processing
 
 
@@ -65,8 +65,8 @@ In addition, due to a recent bug with HyperSpy and matplotlib 2.1.x, matplotlib 
     $ sudo apt-get install python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-pyqt4
     $ sudo apt-get install python3-sympy --no-install-recommends
     $ sudo apt-get remove python3-matplotlib
-    $ pip3 install --user --upgrade pip
-    $ pip3 install --user matplotlib==2.0.2
+    $ pip3 install --user --upgrade pip
+    $ pip3 install --user matplotlib==2.0.2
     $ pip3 install --user fpd_data_processing
 
 
