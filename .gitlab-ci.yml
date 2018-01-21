@@ -25,7 +25,7 @@ pydocstyle_checks:
     - python3 -m pydocstyle fpd_data_processing/
     allow_failure: true
 
-make_documentation:
+pages_development_branch:
     image: debian:unstable
     stage: deploy
     script:
