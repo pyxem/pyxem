@@ -11,7 +11,7 @@ These are implemented as HyperSpy-type signals, where these new signals inherit 
 Installing
 ----------
 
-The easiest way is grabbing the source, and installing using PIP:
+The easiest way is installing using with pip:
 
 $ pip3 install fpd_data_processing
 
