@@ -1,7 +1,11 @@
 Welcome to fpd_data_processing's documentation!
 ===============================================
 
-Library for processing data acquired on a fast pixelated electron detector, acquired using a scanning transmission electron microscopy.
+Library for processing data acquired on a fast pixelated electron detector, acquired using scanning transmission electron microscopy.
+
+Install instructions: :ref:`install`.
+
+Atomap is available under the GNU GPL v3 license, and the source code is found in the `GitLab repository <https://gitlab.com/fast_pixelated_detectors/fpd_data_processing/tree/master/>`_.
 
 .. image:: images/frontpage/stem_diffraction.jpg
     :scale: 49 %
