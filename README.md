@@ -1,4 +1,5 @@
 Webpage: https://fast_pixelated_detectors.gitlab.io/fpd_data_processing/
+
 Webpage (development verion): https://gitlab.com/fast_pixelated_detectors/fpd_data_processing/builds/artifacts/master/file/pages_development/index.html?job=pages_development_branch
 
 Python library for analysing pixelated scanning transmission electron microscopy (STEM) datasets.
@@ -13,13 +14,16 @@ Installing
 
 The easiest way is installing using with pip:
 
-$ pip3 install fpd_data_processing
-
+```bash
+pip3 install fpd_data_processing
+```
 
 Using
 -----
 
->>> import fpd_data_processing.api as fp
->>> import numpy as np
->>> s = fp.PixelatedSTEM(np.random.random(size=(5, 5, 10, 10)))
->>> s_r = s.radial_integration()
+```python
+import fpd_data_processing.api as fp
+import numpy as np
+s = fp.PixelatedSTEM(np.random.random(size=(5, 5, 10, 10)))
+s_r =s.radial_integration()
+```
