@@ -179,6 +179,7 @@ class ElectronDiffractionCalculator(object):
         for read_file in mrc_file_list:
             os.remove(read_file)
         
+	output = output/np.max(output) #normalize to the highest on any frame.
         return output
         
 class DiffractionSimulation:
