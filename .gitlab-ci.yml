@@ -1,5 +1,5 @@
 all_tests_debian:
-    image: debian:stretch
+    image: debian:testing
     script:
     - apt-get update -q
     - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-matplotlib python3-skimage python3-pint python3-requests python3-tqdm python3-traits python3-toolz python3-jupyter-client python3-ipython python3-ipykernel
@@ -11,14 +11,14 @@ all_tests_debian:
     - xvfb-run -a python3 -m pytest --doctest-glob="*.rst" doc/
 
 flake8_checks:
-    image: debian:stretch
+    image: debian:testing
     script:
     - apt-get update -q
     - apt-get install -qy python3-flake8
     - python3 -m flake8 --exclude fpd_data_processing/api.py fpd_data_processing/
 
 pydocstyle_checks:
-    image: debian:stretch
+    image: debian:testing
     script:
     - apt-get update -q
     - apt-get install -qy python3-pydocstyle
@@ -26,7 +26,7 @@ pydocstyle_checks:
     allow_failure: true
 
 pages_development_branch:
-    image: debian:stretch
+    image: debian:testing
     stage: deploy
     script:
     - apt-get update -q
@@ -52,7 +52,7 @@ pages_development_branch:
     - master
 
 pages:
-    image: debian:stretch
+    image: debian:testing
     stage: deploy
     script:
     - apt-get update -q
