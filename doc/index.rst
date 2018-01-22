@@ -5,7 +5,7 @@ Library for processing data acquired on a fast pixelated electron detector, acqu
 
 Install instructions: :ref:`install`.
 
-Atomap is available under the GNU GPL v3 license, and the source code is found in the `GitLab repository <https://gitlab.com/fast_pixelated_detectors/fpd_data_processing/tree/master/>`_.
+fpd_data_processing is available under the GNU GPL v3 license, and the source code is found in the `GitLab repository <https://gitlab.com/fast_pixelated_detectors/fpd_data_processing/tree/master/>`_.
 
 .. image:: images/frontpage/stem_diffraction.jpg
     :scale: 49 %
