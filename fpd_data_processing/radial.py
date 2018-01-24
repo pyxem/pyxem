@@ -444,7 +444,9 @@ def _get_ellipse_parameters(g):
     semi_len0, semi_len1 : floats
         Length of minor and major semi-axis
     rot : float
-        Angle between the major semi-axis and the positive x-axis.
+        Angle between semi_len0 and the positive x-axis. Since semi_len0,
+        is not necessarily the longest semi-axis, the rotation will _not_ be
+        between the major semi-axis and the positive x-axis.
         In radians, between 0 and pi. The rotation is clockwise, so
         at rot = 0.1 the ellipse will be pointing in the positive x-direction,
         and negative y-direction.
@@ -529,7 +531,9 @@ def fit_single_ellipse_to_signal(
     semi_len0, semi_len1 : floats
         Length of minor and major semi-axis
     rot : float
-        Angle between the major semi-axis and the positive x-axis.
+        Angle between semi_len0 and the positive x-axis. Since semi_len0,
+        is not necessarily the longest semi-axis, the rotation will _not_ be
+        between the major semi-axis and the positive x-axis.
         In radians, between 0 and pi. The rotation is clockwise, so
         at rot = 0.1 the ellipse will be pointing in the positive x-direction,
         and negative y-direction.
@@ -587,9 +591,11 @@ def fit_ellipses_to_signal(
     xC, yC : floats
         Centre position
     semi_len0, semi_len1 : floats
-        Length of minor and major semi-axis
+        Length of the two semi-axes.
     rot : float
-        Angle between the major semi-axis and the positive x-axis.
+        Angle between semi_len0 and the positive x-axis. Since semi_len0,
+        is not necessarily the longest semi-axis, the rotation will _not_ be
+        between the major semi-axis and the positive x-axis.
         In radians, between 0 and pi. The rotation is clockwise, so
         at rot = 0.1 the ellipse will be pointing in the positive x-direction,
         and negative y-direction.
