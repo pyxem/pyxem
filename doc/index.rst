@@ -21,11 +21,12 @@ fpd_data_processing is available under the GNU GPL v3 license, and the source co
    analysing_holz_datasets
    analysing_dpc_datasets
    generate_test_data
+   related_projects
    api
    :maxdepth: 2
    :caption: Contents:
 
-
+Contributions from Magnus Nord funded by EPSRC via the project "Fast Pixel Detectors: a paradigm shift in STEM imaging" (Grant reference EP/M009963/1).
 
 Indices and tables
 ==================
