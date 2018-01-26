@@ -509,7 +509,7 @@ class DPCSignal2D(Signal2D):
     and the second navigation is the y-shift (s.inav[1]).
     """
 
-    def correct_ramp(self, corner_size=0.05, out=None):
+    def correct_ramp(self, corner_size=0.05, only_offset=False, out=None):
         """
         Subtracts a plane from the signal, useful for removing
         the effects of d-scan in a STEM beam shift dataset.
@@ -525,11 +525,27 @@ class DPCSignal2D(Signal2D):
             If corner_size is 0.05 (5%), and the image is 500 x 1000,
             the size of the corners will be (500*0.05) x (1000*0.05) = 25 x 50.
             Default 0.05
-        out : optional, DPCImage signal
+        only_offset : bool, optional
+            If True, will subtract a "flat" plane, i.e. it will subtract the
+            mean value of the corners. Default False
+        out : optional, DPCSignal2D signal
 
         Returns
         -------
         corrected_signal : Signal2D
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=True)
+        >>> s_corr = s.correct_ramp()
+        >>> s_corr.plot()
+
+        Only correct offset
+
+        >>> s_corr = s.correct_ramp(only_offset=True)
+        >>> s_corr.plot()
+
         """
         if out is None:
             output = self.deepcopy()
@@ -537,7 +553,11 @@ class DPCSignal2D(Signal2D):
             output = out
 
         for i, s in enumerate(self):
-            ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+            if only_offset:
+                corners = pst._get_corner_value(s, corner_size=corner_size)[2]
+                ramp = corners.mean()
+            else:
+                ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
             output.data[i, :, :] -= ramp
         if out is None:
             return(output)
