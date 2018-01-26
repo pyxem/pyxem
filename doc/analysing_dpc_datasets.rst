@@ -33,6 +33,9 @@ The first step is the remove the effects of the d-scan:
     >>> s = s.correct_ramp()
     >>> s.plot()
 
+Note that this method only does a plane correction, using the corners
+of the signal. For many datasets, this will not work very well.
+Possibly tweaks is to change the corner size.
 
 .. image:: images/analysing_dpc_data/dpc_x_cor.jpg
     :scale: 49 %
