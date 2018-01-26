@@ -178,8 +178,8 @@ class ElectronDiffractionCalculator(object):
             output[int(x_cord),int(y_cord)] = np.fft.fftshift(pr.fileio.readMRC(read_file))
         for read_file in mrc_file_list:
             os.remove(read_file)
+        output = output/np.max(output) #normalize to the highest on any frame.
         
-	output = output/np.max(output) #normalize to the highest on any frame.
         return output
         
 class DiffractionSimulation:
