@@ -26,9 +26,10 @@ from hyperspy.components2d import Expression
 from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
+from pyxem.utils.pyprismatic_io_utils import generate_pyprismatic_input, \
+    run_pyprismatic_simulation, import_pyprismatic_data
 from pymatgen.util.plotting import pretty_plot
 import warnings
-
 
 _GAUSSIAN2D_EXPR = \
     "intensity * exp(" \
@@ -40,17 +41,7 @@ _GAUSSIAN2D_EXPR = \
 class ElectronDiffractionCalculator(object):
     """Computes electron diffraction patterns for a crystal structure.
 
-    1. Calculate reciprocal lattice of structure. Find all reciprocal points
-       within the limiting sphere given by :math:`\\frac{2}{\\lambda}`.
-
-    2. For each reciprocal point :math:`\\mathbf{g_{hkl}}` corresponding to
-       lattice plane :math:`(hkl)`, compute the Bragg condition
-       :math:`\\sin(\\theta) = \\frac{\\lambda}{2d_{hkl}}`
-
-    3. The intensity of each reflection is then given in the kinematic
-       approximation as the modulus square of the structure factor.
-       :math:`I_{hkl} = F_{hkl}F_{hkl}^*`
-
+   
     Parameters
     ----------
     accelerating_voltage : float
@@ -72,9 +63,21 @@ class ElectronDiffractionCalculator(object):
         self.wavelength = get_electron_wavelength(accelerating_voltage)
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
-
+            
+        
     def calculate_ed_data(self, structure, reciprocal_radius):
-        """Calculates the Electron Diffraction data for a structure.
+        """Calculates the Electron Diffraction data for a structure using a kinematic model:
+            
+             1. Calculate reciprocal lattice of structure. Find all reciprocal points
+             within the limiting sphere given by :math:`\\frac{2}{\\lambda}`.
+
+        2. For each reciprocal point :math:`\\mathbf{g_{hkl}}` corresponding to
+            lattice plane :math:`(hkl)`, compute the Bragg condition
+            :math:`\\sin(\\theta) = \\frac{\\lambda}{2d_{hkl}}`
+
+        3. The intensity of each reflection is then given in the kinematic
+            approximation as the modulus square of the structure factor.
+            :math:`I_{hkl} = F_{hkl}F_{hkl}^*`
 
         Parameters
         ----------
@@ -140,6 +143,45 @@ class ElectronDiffractionCalculator(object):
                                      with_direct_beam=True)
 
 
+    def calculate_ed_data_dynamic(self,structure,delete_mode=False,prismatic_kwargs=None):
+        """ Calculates the Electron Diffraction data for a structure using a dynamic model
+        
+        Parameters
+        ----------
+        structure: Structure
+            The unit cell of the structure from which to derive the diffraction pattern
+            
+        prismatic_kwargs: Arguments to be passed to Pyprismatic as a dict 
+        
+        Returns
+        -------
+        None
+            The best return choice remains under consideration
+        
+        """
+        import pyprismatic as pr
+        import os
+        
+        warnings.warn("This functionality is a work in progress ")
+        generate_pyprismatic_input(structure,delete_mode=delete_mode)
+        run_pyprismatic_simulation(prismatic_kwargs)
+        
+        mrc_file_list =  [ x for x in os.listdir() if x.endswith(".mrc") ]
+        
+        k_size = pr.fileio.readMRC(mrc_file_list[0])[0].shape
+        real_size = np.rint(np.sqrt(len(mrc_file_list))).astype(int) #real space must be square
+        output = np.full((real_size,real_size,k_size[0],k_size[1]),np.nan) #makes error catching easier
+        
+        for read_file in mrc_file_list:
+            x_cord = read_file[read_file.find('_X')+2:read_file.find('_Y')]
+            y_cord = read_file[read_file.find('_Y')+2:read_file.find('_F')] #unclear how stable the F behaviour is
+            output[int(x_cord),int(y_cord)] = np.fft.fftshift(pr.fileio.readMRC(read_file))
+        for read_file in mrc_file_list:
+            os.remove(read_file)
+        output = output/np.max(output) #normalize to the highest on any frame.
+        
+        return output
+        
 class DiffractionSimulation:
     """Holds the result of a given diffraction pattern.
 

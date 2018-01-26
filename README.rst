@@ -45,6 +45,7 @@ From a clean install the following commands to install everything you need shoul
 
 (Note that conda cannot install pymatgen on a 32-bit machine, use pip)
 
+
 Citing pyXem
 ------------
 
