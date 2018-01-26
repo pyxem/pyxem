@@ -28,9 +28,7 @@ def generate_pyprismatic_input(structure,delete_mode=False):
         debeye_waller = np.zeros_like(atomic_numbers)
         printing_array = np.hstack([atomic_numbers,cart_coords,percent_occupied,debeye_waller])
         
-        try:
-            unit_cell_size = [lattice_vector for lattice_vector in structure.lattice.abc]
-        ### exception handling to deal with non-periodic structures
+        unit_cell_size = [lattice_vector for lattice_vector in structure.lattice.abc]
         
         with open('PP_input.XYZ', 'a') as f:
             print("Default Comment",file=f)
