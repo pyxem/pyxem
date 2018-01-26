@@ -28,14 +28,9 @@ def generate_pyprismatic_input(structure,delete_mode=False):
         debeye_waller = np.zeros_like(atomic_numbers)
         printing_array = np.hstack([atomic_numbers,cart_coords,percent_occupied,debeye_waller])
         
-        # TODO introduce logic to allow actual unit cells to be introduced
-        unit_cell_size = [np.max(cart_coords[:,0]),np.max(cart_coords[:,1]),np.max(cart_coords[:,2])]
-        
-        # TODO consider if these violations are prevented by the use of pymatgen.Structure
-        if [0,0,0] not in structure.cart_coords:
-            raise ValueError('To use the whole sample as a unit cell we require [0,0,0] as a co-ordinate')
-        if np.max(unit_cell_size) <= 1:
-            raise ValueError('Inputs should not be in fractional form')
+        try:
+            unit_cell_size = [lattice_vector for lattice_vector in structure.lattice.abc]
+        ### exception handling to deal with non-periodic structures
         
         with open('PP_input.XYZ', 'a') as f:
             print("Default Comment",file=f)
@@ -54,7 +49,7 @@ def run_pyprismatic_simulation(prismatic_kwargs=None):
         prismatic_kwargs.update({'filenameAtoms':"PP_input.XYZ"})
     if 'filenameOutput' not in prismatic_kwargs.keys():
         prismatic_kwargs.update({'filenameOutput':"PP_output.mrc"})
-    print(prismatic_kwargs)
+    #print(prismatic_kwargs)
     meta = pr.Metadata(**prismatic_kwargs) ##Sticks to defaults apart from the unpacked dict
     meta.go()
     # TODO Clean up here so that users don't have loads of files floating around
