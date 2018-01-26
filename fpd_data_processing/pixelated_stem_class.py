@@ -836,6 +836,8 @@ class DPCSignal2D(Signal2D):
                     masked=masked,
                     bins=bins,
                     spatial_std=spatial_std)
+        s_hist.metadata.General.title = "Bivariate histogram of {0}".format(
+                self.metadata.General.title)
         return(s_hist)
 
     def flip_axis_90_degrees(self, flips=1):
