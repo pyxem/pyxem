@@ -80,8 +80,14 @@ def correlate(image, pattern,
                                   pattern.coordinates[:, 1][mask])
     else:
         image_intensities = image.T[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
+    
     pattern_intensities = pattern_intensities[mask]
-    return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
+    
+    # Take care here to use ALL image pixels in the imageimage product.
+    numerator = np.dot(image_intensities,pattern_intensities)
+    denominator = np.dot(pattern_intensities,pattern_intensities)*np.dot(image,image)
+    
+    return np.nan_to_num(numerator,denominator)
 
 
 def _correlate(intensities_1, intensities_2):
