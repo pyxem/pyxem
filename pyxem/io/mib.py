@@ -1,25 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright 2007-2016 The HyperSpy developers
+# Copyright 2017-2018 The pyXem developers
 #
-# This file is part of  HyperSpy.
+# This file is part of pyXem.
 #
-#  HyperSpy is free software: you can redistribute it and/or modify
+# pyXem is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-#  HyperSpy is distributed in the hope that it will be useful,
+# pyXem is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with  HyperSpy.  If not, see <http://www.gnu.org/licenses/>.
-
-#  for more information on the hdr/RAW format, see
-#  http://www.nist.gov/lispix/
-#  and
-#  http://www.nist.gov/lispix/doc/image-file-formats /raw-file-format.htm
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import codecs
 import os.path
@@ -134,9 +129,9 @@ def parse_hdr(fp):
             line = [seg.strip() for seg in line.split(sep)]  # now it's a list
             line[0] = line[0].strip(':') #remove ':' from keys
         hdr_info[line[0]] = line[1]
-        
+
     #assign values to mandatory keys
-    #set the array size of the chip 
+    #set the array size of the chip
     if hdr_info['Assembly Size (1X1, 2X2)'] == '1x1':
         hdr_info['width'] = 256
         hdr_info['height'] = 256
@@ -154,11 +149,11 @@ def parse_hdr(fp):
         cd_int = int(hdr_info['Counter Depth (number)'] )
         hdr_info['data-length'] = str(int((cd_int + cd_int/3) ))
     else:
-        hdr_info['data-length'] = hdr_info['Counter Depth (number)'] 
+        hdr_info['data-length'] = hdr_info['Counter Depth (number)']
     #set byte order
     hdr_info['byte-order'] = 'dont-care'
     #set record by to stack of images
-    hdr_info['record-by'] = 'image'  
+    hdr_info['record-by'] = 'image'
     #set title to file name
     hdr_info['title'] = fp.name.split('\\')[-1]
     #set time and date
