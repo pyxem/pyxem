@@ -85,9 +85,9 @@ def correlate(image, pattern,
     
     # Take care here to use ALL image pixels in the imageimage product.
     numerator = np.dot(image_intensities,pattern_intensities)
-    denominator = np.dot(pattern_intensities,pattern_intensities)*np.dot(image,image)
+    denominator = np.sqrt(np.dot(pattern_intensities,pattern_intensities)*np.dot(image,image))
     
-    return np.nan_to_num(numerator,denominator)
+    return np.nan_to_num(numerator/denominator)
 
 
 def _correlate(intensities_1, intensities_2):
