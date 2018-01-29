@@ -1,5 +1,6 @@
 import numpy as np
 from hyperspy.components1d import Gaussian
+from scipy.ndimage.filters import gaussian_filter
 import fpd_data_processing.make_diffraction_test_data as mdtd
 from fpd_data_processing.pixelated_stem_class import DPCSignal2D
 
@@ -127,6 +128,29 @@ def get_single_ring_diffraction_signal():
     data.add_ring(x, y, r=40)
     s = data.signal
     s.axes_manager[0].offset, s.axes_manager[1].offset = -x, -y
+    return(s)
+
+
+def get_dead_pixel_signal():
+    """Get HyperSpy 2D signal with a disk in the middle.
+
+    Has 4 pixels with value equal to 0, to simulate dead pixels.
+
+    Example
+    -------
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_dead_pixel_signal()
+
+    """
+    data = mdtd.MakeTestData(size_x=128, size_y=128, default=False, blur=True)
+    data.add_disk(64, 64, r=30, intensity=10000)
+    s = data.signal
+    s.change_dtype('int64')
+    s.data += gaussian_filter(s.data, sigma=50)
+    s.data[61, 73] = 0
+    s.data[46, 53] = 0
+    s.data[88, 88] = 0
+    s.data[112, 20] = 0
     return(s)
 
 
