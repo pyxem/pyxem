@@ -417,21 +417,21 @@ def remove_dead_pixels(data, dead_pixel_list):
     Parameters
     ----------
     data : 2-D numpy array
-    dead_pixel_list : list of x,y coordinates
-        Form [[x0, y0], [x1, y1]]
+    dead_pixel_x : list of integers
+    dead_pixel_y : list of integers
 
     Example
     -------
     >>> import numpy as np
-    >>> import fpd_data_processing.pixelated_stem_tools as pst
-    >>> data = np.random.random((256, 256))
-    >>> dead_pixel_list = [[10, 50], [76, 251]]
-    >>> pst.remove_dead_pixels(data, dead_pixel_list)
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_dead_pixel_signal()
+    >>> dead_pixel_list = np.where(s.data == 0)
+    >>> from fpd_data_processing.pixelated_stem_tools import remove_dead_pixels
+    >>> remove_dead_pixels(s.data, dead_pixel_list)
 
     """
-    for dead_pixel in dead_pixel_list:
-        x_pixel = dead_pixel[0]
-        y_pixel = dead_pixel[1]
+    x_list, y_list = dead_pixel_list[0], dead_pixel_list[1]
+    for x_pixel, y_pixel in zip(x_list, y_list):
         if x_pixel == 0:
             pass
         elif x_pixel == 255:
