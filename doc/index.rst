@@ -21,6 +21,7 @@ fpd_data_processing is available under the GNU GPL v3 license, and the source co
    analysing_holz_datasets
    analysing_dpc_datasets
    generate_test_data
+   misc_functions
    related_projects
    api
    :maxdepth: 2
