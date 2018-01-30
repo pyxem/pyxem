@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -279,7 +279,7 @@ class DiffractionSimulation:
             faster. In 'quant' mode 'electrons' are fired from exact peak location
             and then assinged to 'detectors'. This is slower but more correct.
 
-        """        
+        """
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
         coords = self.coordinates[:, :2]
         if mode == 'legacy':
@@ -310,7 +310,7 @@ class DiffractionSimulation:
             for peak in peak_location_detailed:
                 if type(electron_array) == np.ndarray:
                     electron_array_2 = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
-                    electron_array = np.vstack((electron_array,electron_array_2))  
+                    electron_array = np.vstack((electron_array,electron_array_2))
                 else:
                     electron_array = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
             dp_dat = np.zeros([size,size])
@@ -320,7 +320,7 @@ class DiffractionSimulation:
             x_num,y_num = np.digitize(electron_array[:,0],l,right=True),np.digitize(electron_array[:,1],l,right=True)
             for i in np.arange(len(x_num)):
                 dp_dat[x_num[i],y_num[i]] += 1
-        
+
         dp_dat = dp_dat/np.max(dp_dat) #normalise to unit intensity
         dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(2*max_r/size)

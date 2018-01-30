@@ -26,6 +26,9 @@ from pymatgen import Lattice, Structure
 from natsort import natsorted
 
 from .diffraction_signal import ElectronDiffraction
+from .diffraction_profile import DiffractionProfile
+from .crystallographic_map import CrystallographicMap
+from .diffraction_vectors import DiffractionVectors
 from .diffraction_generator import ElectronDiffractionCalculator, DiffractionSimulation
 from .library_generator import DiffractionLibraryGenerator
 from .diffraction_component import ElectronDiffractionForwardModel

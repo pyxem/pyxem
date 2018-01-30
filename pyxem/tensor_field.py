@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
