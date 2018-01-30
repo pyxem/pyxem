@@ -349,6 +349,7 @@ def assign_signal_subclass(dtype,
     Signal or subclass
 
     """
+    # TODO: This method needs to be re-written for pyXem signals!
     import hyperspy.signals
     import hyperspy._lazy_signals
     from hyperspy.signal import BaseSignal
