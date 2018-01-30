@@ -59,7 +59,7 @@ def correlate(image, pattern,
     """
     shape = image.shape
     half_shape = tuple(i // 2 for i in shape)
-
+    
     pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
     in_bounds = np.product((pixel_coordinates > 0) *(pixel_coordinates < shape[0]), axis=1)
 
@@ -79,9 +79,14 @@ def correlate(image, pattern,
         image_intensities = ip.ev(pattern.coordinates[:, 0][mask],
                                   pattern.coordinates[:, 1][mask])
     else:
-        image_intensities = image.T[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
+        image_intensities = image[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
+    
     pattern_intensities = pattern_intensities[mask]
-    return np.nan_to_num(_correlate(image_intensities, pattern_intensities))
+    # Take care here to use ALL image pixels in the imageimage product.
+    numerator = np.dot(image_intensities,pattern_intensities)
+    denominator = np.sqrt(np.dot(pattern_intensities,pattern_intensities)*np.sum(np.dot(image,image)))
+    
+    return np.nan_to_num(numerator/denominator)
 
 
 def _correlate(intensities_1, intensities_2):
