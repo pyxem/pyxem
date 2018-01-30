@@ -211,9 +211,9 @@ def gain_normalise(z, dref, bref):
 
     Parameters
     ----------
-    dref : ElectronDiffraction
+    dref : DiffractionSignal
         Dark reference image.
-    bref : ElectronDiffraction
+    bref : DiffractionSignal
         Flat-field bright reference image.
 
     Returns

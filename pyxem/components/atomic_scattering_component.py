@@ -18,7 +18,7 @@
 
 
 from hyperspy.component import Component
-from .utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
+from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 import numpy as np
 
 

@@ -190,8 +190,8 @@ def simulate_kinematic_scattering(atomic_coordinates,
 
     Returns
     -------
-    simulation : ElectronDiffraction
-        ElectronDiffraction simulation.
+    simulation : DiffractionSignal
+        DiffractionSignal simulation.
     """
     #Get atomic scattering parameters for specified element.
     c = np.array(ATOMIC_SCATTERING_PARAMS[element])

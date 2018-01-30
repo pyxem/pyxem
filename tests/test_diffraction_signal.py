@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
 import numpy as np
-
-from pyxem.diffraction_signal import ElectronDiffraction
+import pytest
 from hyperspy.signals import Signal1D, Signal2D
+from pyxem.signals.diffraction_signal import DiffractionSignal
 
 
 @pytest.fixture(params=[
@@ -58,7 +57,7 @@ from hyperspy.signals import Signal1D, Signal2D
                [0., 0., 0., 0., 0., 0., 0., 0.]]]),
 ])
 def diffraction_pattern(request):
-    return ElectronDiffraction(request.param)
+    return DiffractionSignal(request.param)
 
 
 @pytest.mark.skip(reason='Defaults not implemented in PyCrystEM')
@@ -86,7 +85,7 @@ def test_set_calibration(diffraction_pattern, calibration, center):
     (0, 1),
     (0, 256),
 ])
-def test_apply_gain_normalisation(diffraction_pattern: ElectronDiffraction,
+def test_apply_gain_normalisation(diffraction_pattern: DiffractionSignal,
                                   dark_reference, bright_reference):
     diffraction_pattern.apply_gain_normalisation(
         dark_reference=dark_reference, bright_reference=bright_reference)
@@ -94,7 +93,7 @@ def test_apply_gain_normalisation(diffraction_pattern: ElectronDiffraction,
     assert diffraction_pattern.min() == dark_reference
 
 
-def test_reproject_as_polar(diffraction_pattern: ElectronDiffraction):
+def test_reproject_as_polar(diffraction_pattern: DiffractionSignal):
     shape_cartesian = diffraction_pattern.axes_manager.signal_shape
     diffraction_pattern.reproject_as_polar()
     assert isinstance(diffraction_pattern, Signal2D)
@@ -103,7 +102,7 @@ def test_reproject_as_polar(diffraction_pattern: ElectronDiffraction):
     assert shape_polar[1] > np.sqrt(2) * shape_cartesian[0] / 2
 
 
-def test_get_diffraction_variance(diffraction_pattern: ElectronDiffraction):
+def test_get_diffraction_variance(diffraction_pattern: DiffractionSignal):
     dv = diffraction_pattern.get_diffraction_variance()
     assert dv.axes_manager.navigation_shape == (3,)
     assert dv.axes_manager.signal_shape == diffraction_pattern.axes_manager.signal_shape
@@ -173,7 +172,7 @@ class TestRadialProfile:
 
     @pytest.fixture
     def diffraction_pattern(self):
-        dp = ElectronDiffraction(np.zeros((2, 8, 8)))
+        dp = DiffractionSignal(np.zeros((2, 8, 8)))
         dp.data[0] = np.array([[0., 0., 1., 2., 2., 1., 0., 0.],
                                [0., 1., 2., 3., 3., 2., 1., 0.],
                                [1., 2., 3., 4., 4., 3., 2., 1.],
@@ -219,7 +218,7 @@ class TestApplyAffineTransformation:
             D=np.array([[1., 0., 0.],
                         [0., 1., 0.],
                         [0., 0., 1.]]))
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, DiffractionSignal)
 
     @pytest.mark.parametrize('diffraction_pattern, transformation, expected', [
         (
@@ -267,7 +266,7 @@ class TestBackgroundMethods:
         2,
     ])
     def test_get_background_model(
-            self, diffraction_pattern: ElectronDiffraction, saturation_radius):
+            self, diffraction_pattern: DiffractionSignal, saturation_radius):
         bgm = diffraction_pattern.get_background_model(saturation_radius)
         assert bgm.axes_manager.signal_shape == diffraction_pattern.axes_manager.signal_shape
 
@@ -277,7 +276,7 @@ class TestBackgroundMethods:
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
         ('median', {'footprint': 4, })
     ])
-    def test_remove_background(self, diffraction_pattern: ElectronDiffraction,
+    def test_remove_background(self, diffraction_pattern: DiffractionSignal,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
         assert bgr.data.shape == diffraction_pattern.data.shape

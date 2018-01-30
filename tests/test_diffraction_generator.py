@@ -16,14 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
 import numpy as np
 import pymatgen as pmg
-from matplotlib.testing.decorators import image_comparison
-
-from pyxem.diffraction_generator import (
-    ElectronDiffractionCalculator,
-    DiffractionSimulation
+import pytest
+from pyxem import DiffractionSimulation
+from pyxem.generators.diffraction_generator import (
+    DiffractionGenerator
 )
 
 
@@ -31,7 +29,7 @@ from pyxem.diffraction_generator import (
     (300, 0.02, None),
 ])
 def diffraction_calculator(request):
-    return ElectronDiffractionCalculator(*request.param)
+    return DiffractionGenerator(*request.param)
 
 @pytest.fixture(params=[
     "Si",
@@ -61,7 +59,7 @@ def diffraction_simulation(request):
 
 class TestDiffractionCalculator:
 
-    def test_init(self, diffraction_calculator: ElectronDiffractionCalculator):
+    def test_init(self, diffraction_calculator: DiffractionGenerator):
         assert diffraction_calculator.debye_waller_factors == {}
 
     def test_matching_results(self, diffraction_calculator, structure):
@@ -69,7 +67,7 @@ class TestDiffractionCalculator:
         assert len(diffraction.indices) == len(diffraction.coordinates)
         assert len(diffraction.coordinates) == len(diffraction.intensities)
 
-    def test_appropriate_scaling(self, diffraction_calculator: ElectronDiffractionCalculator):
+    def test_appropriate_scaling(self, diffraction_calculator: DiffractionGenerator):
         """Tests that doubling the unit cell halves the pattern spacing."""
         si = pmg.Element("Si")
         lattice = pmg.Lattice.cubic(5.431)

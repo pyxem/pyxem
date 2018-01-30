@@ -19,22 +19,21 @@
 
 """
 
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
-from hyperspy._signals.lazy import LazySignal
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-
-from .utils.expt_utils import *
-from .utils.peakfinders2D import *
-from .diffraction_vectors import DiffractionVectors
-from .diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.utils.expt_utils import *
+from pyxem.utils.peakfinders2D import *
 
 
 def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
     return g[0]
 
-class ElectronDiffraction(Signal2D):
+class DiffractionSignal(Signal2D):
     _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):
@@ -297,7 +296,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-            ElectronDiffraction Signal containing the affine Transformed
+            DiffractionSignal Signal containing the affine Transformed
             diffraction patterns.
 
         """
@@ -315,9 +314,9 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        dark_reference : ElectronDiffraction
+        dark_reference : DiffractionSignal
             Dark reference image.
-        bright_reference : ElectronDiffraction
+        bright_reference : DiffractionSignal
             Bright reference image.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
@@ -337,7 +336,7 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        deadpixels : ElectronDiffraction
+        deadpixels : DiffractionSignal
             List
         deadvalue : string
             Specify how deadpixels should be treated. 'average' sets the dead
@@ -368,7 +367,7 @@ class ElectronDiffraction(Signal2D):
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
-            in the ElectronDiffraction signal as a Signal1D.
+            in the DiffractionSignal signal as a Signal1D.
 
         See also
         --------
@@ -426,7 +425,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        output : ElectronDiffraction
+        output : DiffractionSignal
             The electron diffraction data in polar coordinates.
 
         """
@@ -441,7 +440,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        ElectronDiffraction
+        DiffractionSignal
               A two dimensional signal containing the mean,
               mean squared, and variance.
         """
@@ -534,7 +533,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        denoised : :obj:`ElectronDiffraction`
+        denoised : :obj:`DiffractionSignal`
             A copy of the data with the background removed and the noise
             smoothed.
 
@@ -556,7 +555,7 @@ class ElectronDiffraction(Signal2D):
             bg_removed = np.clip(self - bg, self.min(), self.max())
 
             h = max(bg.data.min(), 1e-6)
-            denoised = ElectronDiffraction(
+            denoised = DiffractionSignal(
                 bg_removed.map(
                     regional_flattener, h=h, inplace=False))
             denoised.axes_manager.update_axes_attributes_from(
@@ -602,7 +601,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        ElectronDiffraction
+        DiffractionSignal
             The mean background of the signal.
 
         """
@@ -636,7 +635,7 @@ class ElectronDiffraction(Signal2D):
         y_axis = self.axes_manager.signal_axes[1].axis
         xs, ys = np.meshgrid(x_axis, y_axis)
         rs = (xs ** 2 + ys ** 2) ** 0.5
-        bg = ElectronDiffraction(
+        bg = DiffractionSignal(
             diffuse_scatter.function(rs) + linear_decay.function(rs))
         for i in (0, 1):
             bg.axes_manager.signal_axes[i].update_from(
@@ -801,7 +800,7 @@ class ElectronDiffraction(Signal2D):
         return enhanced
 
 
-class LazyElectronDiffraction(LazySignal, ElectronDiffraction):
+class LazyDiffractionSignal(LazySignal, DiffractionSignal):
 
     _lazy = True
 

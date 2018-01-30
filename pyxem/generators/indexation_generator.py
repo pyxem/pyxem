@@ -20,14 +20,14 @@
 
 """
 
-import numpy as np
-from hyperspy.signals import BaseSignal
 from heapq import nlargest
 from operator import itemgetter
-from scipy.constants import pi
 
-from .utils import correlate
-from .crystallographic_map import CrystallographicMap
+import numpy as np
+from pyxem.signals.indexation_results import IndexationResults
+
+from pyxem.utils import correlate
+
 
 def correlate_library(image, library,n_largest,keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -56,30 +56,13 @@ def correlate_library(image, library,n_largest,keys=[]):
         i = i + 1
     return out_arr
 
-def crystal_from_matching_results(matching_results):
-    """Takes matching results for a single navigation position and returns the
-    best matching phase and orientation with correlation and reliability to
-    define a crystallographic map.
-    """
-    res_arr = np.zeros(6)
-    top_index = np.where(matching_results.T[-1]==matching_results.T[-1].max())
-    res_arr[:5] = matching_results[top_index][0]
-    res_arr[5] = res_arr[4] - np.partition(matching_results.T[-1], -2)[-2]
-    return res_arr
-
-def phase_specific_results(matching_results, phaseid):
-    """Takes matching results for a single navigation position and returns the
-    matching results for a phase specified by a phase id.
-    """
-    return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
-
 
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
 
     Parameters
     ----------
-    signal : ElectronDiffraction
+    signal : DiffractionSignal
         The signal of electron diffraction patterns to be indexed.
     library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation
@@ -110,7 +93,7 @@ class IndexationGenerator():
 
         Returns
         -------
-        matching_results : MatchingResults
+        matching_results : pyxem.signals.indexation_results.IndexationResults
             Navigation axes of the electron diffraction signal containing correlation
             results for each diffraction pattern. As an example, the signal in
             Euler reads ( Library Number , Z , X , Z , Correlation Score )
@@ -125,48 +108,6 @@ class IndexationGenerator():
                                       keys=keys,
                                       inplace=False,
                                       **kwargs)
-        return MatchingResults(matching_results)
+        return IndexationResults(matching_results)
 
 
-class MatchingResults(BaseSignal):
-    _signal_type = "matching_results"
-    _signal_dimension = 2
-
-    def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
-        self.axes_manager.set_signal_dimension(2)
-
-    def get_crystallographic_map(self,
-                                 *args, **kwargs):
-        """Obtain a crystallographic map specifying the best matching
-        phase and orientation at each probe position with corresponding
-        correlation and reliabilty scores.
-
-        """
-        #TODO: Add alternative methods beyond highest correlation score at each
-        #navigation position.
-        cryst_map = self.map(crystal_from_matching_results,
-                             inplace=False,
-                             *args, **kwargs)
-        return CrystallographicMap(cryst_map)
-
-    def get_phase_results(self,
-                          phaseid,
-                          *args, **kwargs):
-        """Obtain matching results for specified phase.
-
-        Parameters
-        ----------
-        phaseid : int
-            Identifying integer of phase to obtain results for.
-
-        Returns
-        -------
-        phase_matching_results: MatchingResults
-            Matching results for the specified phase.
-
-        """
-        return self.map(phase_specific_results,
-                        phaseid=phaseid,
-                        inplace=False,
-                        *args, **kwargs)

@@ -16,37 +16,32 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import glob
-import warnings
 import logging
+import os
+import warnings
+
 import numpy as np
-
-from pymatgen import Lattice, Structure
-from natsort import natsorted
-
-from .diffraction_signal import ElectronDiffraction
-from .diffraction_profile import DiffractionProfile
-from .crystallographic_map import CrystallographicMap
-from .diffraction_vectors import DiffractionVectors
-from .diffraction_generator import ElectronDiffractionCalculator, DiffractionSimulation
-from .library_generator import DiffractionLibraryGenerator
-from .diffraction_component import ElectronDiffractionForwardModel
-from .scalable_reference_pattern import ScalableReferencePattern
-from .io_plugins import io_plugins, default_write_ext
-
-from hyperspy.api import roi
 from hyperspy.drawing.marker import markers_metadata_dict_to_markers
+from hyperspy.exceptions import VisibleDeprecationWarning
+from hyperspy.io import load_with_reader
 from hyperspy.misc.io.tools import ensure_directory
 from hyperspy.misc.io.tools import overwrite as overwrite_method
-from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.misc.utils import stack as stack_method
-from hyperspy.exceptions import VisibleDeprecationWarning
-from hyperspy.defaults_parser import preferences
+from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.ui_registry import get_gui
+from natsort import natsorted
+from pyxem.components.diffraction_component import ElectronDiffractionForwardModel
+from pyxem.generators.diffraction_generator import DiffractionGenerator
+from pyxem.generators.library_generator import DiffractionLibraryGenerator
+from pyxem.signals.crystallographic_map import CrystallographicMap
+from pyxem.signals.diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_signal import DiffractionSignal
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.signals.diffraction_vectors import DiffractionVectors
 
+from .io_plugins import io_plugins, default_write_ext
 from .io_plugins import mib as mib_reader
-from hyperspy.io import load_with_reader
 
 _logger = logging.getLogger(__name__)
 
@@ -350,7 +345,6 @@ def assign_signal_subclass(dtype,
 
     """
     # TODO: This method needs to be re-written for pyXem signals!
-    import hyperspy.signals
     import hyperspy._lazy_signals
     from hyperspy.signal import BaseSignal
     # Check if parameter values are allowed:
@@ -506,7 +500,7 @@ def save(filename, signal, overwrite=None, **kwds):
 
 def load_mib(filename):
     dpt = load_with_reader(filename=filename, reader=mib_reader)
-    dpt = ElectronDiffraction(dpt.data.reshape((256,256,256,256)))
+    dpt = DiffractionSignal(dpt.data.reshape((256, 256, 256, 256)))
     trace = dpt.inav[:,0:5].sum((1,2,3))
     edge = np.where(trace==max(trace.data))[0][0]
-    return ElectronDiffraction(np.concatenate((dpt.inav[edge+1:,1:], dpt.inav[0:edge,1:]), axis=1))
+    return DiffractionSignal(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
