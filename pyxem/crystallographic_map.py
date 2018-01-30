@@ -60,5 +60,18 @@ class CrystallographicMap(BaseSignal):
         """
         return self.isig[5].as_signal2D((0,1))
 
-    def savetxt(self):
-        pass
+    def save_match_results(self, filename):
+        """Create an array of match results, save it to specified file, so that
+        it can be later imported into MTEX:
+        http://mtex-toolbox.github.io/
+        Columns: 1 = phase id,
+        2-4 = Euler angles in the zxz convention (radians), 5 = Correlation
+        score (only the best match is saved), 6 = x, 7 = y.
+        """
+        results_array = np.zeros([0,7])
+        for i in range (0, self.data.shape[1]):
+            for j in range (0, self.data.shape[0]):
+                newrow = self.inav[i,j].data[0,0:5]
+                newrow = np.append(newrow, [i,j])
+                results_array = np.vstack([results_array, newrow])
+        np.savetxt('{filename}', results_array, delimiter = "\t", newline="\r\n")
