@@ -30,6 +30,7 @@ Contents
     indexation_integration
     orientation_imaging
     strain_mapping
+    roadmap
     modules
 
 

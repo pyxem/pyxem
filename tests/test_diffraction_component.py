@@ -20,7 +20,7 @@ import numpy as np
 import nose.tools as nt
 
 from pyxem.diffraction_component import ElectronDiffractionForwardModel
-from pyxem.electron_diffraction_calculator import ElectronDiffractionCalculator
+from pyxem.diffraction_generator import ElectronDiffractionCalculator
 from pymatgen import Structure
 
 class TestDiffractionComponent:

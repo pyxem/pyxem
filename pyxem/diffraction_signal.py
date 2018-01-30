@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,12 +21,14 @@
 
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 
 from .utils.expt_utils import *
 from .utils.peakfinders2D import *
 from .diffraction_vectors import DiffractionVectors
 from .diffraction_profile import DiffractionProfile
+
 
 def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
@@ -122,12 +124,12 @@ class ElectronDiffraction(Signal2D):
 
         dx.name = 'dx'
         dx.scale = calibration
-        dx.offset = -center[0] * calibration
+        dx.offset = -center[0]
         dx.units = '$A^{-1}$'
 
         dy.name = 'dy'
         dy.scale = calibration
-        dy.offset = -center[1] * calibration
+        dy.offset = -center[1]
         dy.units = '$A^{-1}$'
 
     def plot_interactive_virtual_image(self, roi):
@@ -370,7 +372,7 @@ class ElectronDiffraction(Signal2D):
 
         See also
         --------
-        :func:`~pyxem.utils.expt_utils.radial_average`
+        :func:`pyxem.utils.expt_utils.radial_average`
         :meth:`get_direct_beam_position`
 
         Examples
@@ -515,6 +517,8 @@ class ElectronDiffraction(Signal2D):
 				convolutions to determine where the peaks are, and sets
 				all other pixels to 0.
             * 'median' - Use a median filter for background removal
+            * 'from_vacuum' - Uses get_background_from_vacuum to get background
+            from an average pattern of vacuum region of the sample
 
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
@@ -568,6 +572,10 @@ class ElectronDiffraction(Signal2D):
         elif method == 'median':
             # no denoising applied here
             denoised = self.map(subtract_background_median, inplace=False, *args, **kwargs)
+
+        elif method == 'from_vacuum':
+            denoised=self.map(subtract_background, *args, **kwargs)
+
         else:
             raise NotImplementedError(
                 "The method specified, '{}', is not implemented. See"
@@ -757,3 +765,47 @@ class ElectronDiffraction(Signal2D):
         from .utils import peakfinder2D_gui
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
+
+    def enhance(self, *args, **kwargs):
+        """Enhances peaks in the diffraction patterns. Current method includes:
+        using gaussian filter to blur the pattern and then subtracting it from
+        original, small threshold cutting out low intensity peaks, local
+        Sauvola thresholding to create a mask of peaks, final blurring with
+        gaussian filter.
+
+        Parameters:
+        ------------
+        sigma_blur : float
+            Sigma of the gaussian filter used for initial blur.
+
+        sigma_enhance : float
+            Sigma of the gaussian filter used for the ehnancement of the peaks
+
+        threshold : float
+            Value of the small threshold for removal of low intensity fake peaks
+
+        k : float
+            Parameter for Sauvola thresholding
+        window_size : int
+            Size of the window considered for each pixel when calculating local
+            Sauvola threshold. Has to be odd and >=3.
+
+        For more information on Sauvola thresholding see:
+        http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_niblack_sauvola.html#id2
+        J. Sauvola and M. Pietikainen, “Adaptive document image binarization,” Pattern Recognition 33(2), pp. 225-236, 2000. DOI:10.1016/S0031-3203(99)00055-2
+
+        Good starting values: sigma_blur = 1.6, sigma_enhance = 0.5
+        threshold = 6.5, window_size = 11, k = 0.01
+
+        ------------
+        """
+        enhanced = self.map(enhance_gauss_sauvola, *args, **kwargs)
+        return enhanced
+
+
+class LazyElectronDiffraction(LazySignal, ElectronDiffraction):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

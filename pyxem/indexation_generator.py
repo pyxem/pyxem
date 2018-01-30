@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -37,16 +37,11 @@ def correlate_library(image, library,n_largest,keys=[]):
 
     i=0
     out_arr = np.zeros((n_largest * len(library),5))
-    if keys:
-        ordered_library_keys = keys
-    else:
-        ordered_library_keys = library.keys()
-
-    if set(ordered_library_keys) != set(library.keys()):
-        raise RuntimeError(""" You have submitted keys that do not map one to one
-                           to those in the library. The library has %s""" % library.keys())
-
-    for key in ordered_library_keys:
+    for key in library.keys():
+        if n_largest:
+            pass
+        else:
+            n_largest=len(library[key])
         correlations = dict()
         for orientation, diffraction_pattern in library[key].items():
             correlation = correlate(image, diffraction_pattern)
@@ -97,24 +92,21 @@ class IndexationGenerator():
     def correlate(self,
                   n_largest=5,
                   keys=[],
-                  *args, **kwargs):
+                  **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
 
         Parameters
         ----------
-        n_largest : integer
+        n_largest : int
             The n orientations with the highest correlation values are returned.
-
-        keys      : list
-            If more than one phase present in library it is recommended that these
-            are submitted. This allows a mapping from the number to the phase.
-
-            eg) keys = ['si','ga'] will have an output with 0 for 'si' and 1 for 'ga'
-
-        *args/**kwargs : keyword arguments
-            Keyword arguments passed to the HyperSpy map() function. Important
-            options include...
+        keys : list
+            If more than one phase present in library it is recommended that
+            these are submitted. This allows a mapping from the number to the
+            phase.  For example, keys = ['si','ga'] will have an output with 0
+            for 'si' and 1 for 'ga'.
+        **kwargs
+            Keyword arguments passed to the HyperSpy map() function.
 
         Returns
         -------
@@ -132,7 +124,7 @@ class IndexationGenerator():
                                       n_largest=n_largest,
                                       keys=keys,
                                       inplace=False,
-                                      *args, **kwargs)
+                                      **kwargs)
         return MatchingResults(matching_results)
 
 
@@ -161,11 +153,11 @@ class MatchingResults(BaseSignal):
     def get_phase_results(self,
                           phaseid,
                           *args, **kwargs):
-        """Obtain matching results for speicified phase.
+        """Obtain matching results for specified phase.
 
-        Paramters
-        ---------
-        phaseid = int
+        Parameters
+        ----------
+        phaseid : int
             Identifying integer of phase to obtain results for.
 
         Returns

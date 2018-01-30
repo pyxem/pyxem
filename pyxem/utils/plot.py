@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -65,7 +65,7 @@ def manual_orientation(data,  #: np.ndarray,
         p = plt.scatter(
             electron_diffraction.calibrated_coordinates[:, 0],
             electron_diffraction.calibrated_coordinates[:, 1],
-            s=electron_diffraction.intensities,
+            s=np.sqrt(electron_diffraction.intensities),
             facecolors='none',
             edgecolors='r'
         )
@@ -93,17 +93,23 @@ def _find_max_length_peaks(peaks):
 
 
 def generate_marker_inputs_from_peaks(peaks):
-    """
-    Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan and returns markers.
-    The example illustrates how to get these onto images.
+    """Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan
+    and returns markers.
 
-    Example:
+    Parameters
+    ----------
+    peaks : :class:`pyxem.diffraction_vectors.DiffractionVectors`
+        Identifies peaks in a diffraction signal.
 
-    mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
-    dp.plot(cmap='viridis')
-    for mx,my in zip(mmx,mmy):
-        m = hs.markers.point(x=mx,y=my,color='red',marker='x')
-        dp.add_marker(m,plot_marker=True,permanent=False)
+    Example
+    -------
+    How to get these onto images::
+
+        mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
+        dp.plot(cmap='viridis')
+        for mx,my in zip(mmx,mmy):
+            m = hs.markers.point(x=mx,y=my,color='red',marker='x')
+            dp.add_marker(m,plot_marker=True,permanent=False)
 
     """
     ### XXX: non-square signals or single images

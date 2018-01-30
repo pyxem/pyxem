@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,6 +27,7 @@ from .diffraction_signal import ElectronDiffraction
 from .utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities
 from pymatgen.util.plotting import pretty_plot
+import warnings
 
 
 _GAUSSIAN2D_EXPR = \
@@ -135,7 +136,8 @@ class ElectronDiffractionCalculator(object):
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
-                                     intensities=intensities)
+                                     intensities=intensities,
+                                     with_direct_beam=True)
 
 
 class DiffractionSimulation:
@@ -192,6 +194,8 @@ class DiffractionSimulation:
 
     @calibration.setter
     def calibration(self, calibration):
+        if np.all(np.equal(calibration, 0)):
+            raise ValueError("`calibration` cannot be zero.")
         if isinstance(calibration, float) or isinstance(calibration, int):
             self._calibration = (calibration, calibration)
         elif len(calibration) == 2:
@@ -203,16 +207,18 @@ class DiffractionSimulation:
     @property
     def direct_beam_mask(self):
         """ndarray : If `with_direct_beam` is True, returns a True array for all
-        points. If `with_direct_beam is False, returns a True array with False
+        points. If `with_direct_beam` is False, returns a True array with False
         in the position of the direct beam."""
         if self.with_direct_beam:
             return np.ones_like(self._intensities, dtype=bool)
         else:
-            return np.sum(self._coordinates == 0., axis=1) != 3
+            return np.any(self._coordinates, axis=1)
 
     @property
     def coordinates(self):
         """ndarray : The coordinates of all unmasked points."""
+        if self._coordinates is None:
+            return None
         return self._coordinates[self.direct_beam_mask]
 
     @coordinates.setter
@@ -222,6 +228,8 @@ class DiffractionSimulation:
     @property
     def intensities(self):
         """ndarray : The intensities of all unmasked points."""
+        if self._intensities is None:
+            return None
         return self._intensities[self.direct_beam_mask]
 
     @intensities.setter
@@ -247,13 +255,13 @@ class DiffractionSimulation:
         ax.scatter(
             self.coordinates[:, 0],
             self.coordinates[:, 1],
-            s=np.log10(self.intensities)
+            s=np.log2(self.intensities)
         )
         ax.set_xlabel("Reciprocal Dimension ($A^{-1}$)")
         ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")
         return ax
 
-    def as_signal(self, size, sigma, max_r):
+    def as_signal(self, size, sigma, max_r, mode='qual'):
         """Returns the diffraction data as an ElectronDiffraction signal with
         two-dimensional Gaussians representing each diffracted peak.
 
@@ -265,24 +273,55 @@ class DiffractionSimulation:
             Standard deviation of the Gaussian function to be plotted.
         max_r : float
             Half the side length in reciprocal Angstroms. Defines the signal's
-            calibration.
+            calibration
+        mode  : 'qual','quant' or 'legacy'
+            In 'qual' mode the peaks are discretized and then broadened. This is
+            faster. In 'quant' mode 'electrons' are fired from exact peak location
+            and then assinged to 'detectors'. This is slower but more correct.
 
         """
-        # Plot a 2D Gaussian at each peak position.
-        # TODO: Update this method so plots intensity at each position and then
-        # convolves with a Gaussian to make faster - needs interpolation care.
-        dp_dat = 0
-        l = np.linspace(-max_r, max_r, size)
-        x, y = np.meshgrid(l, l)
+        l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
         coords = self.coordinates[:, :2]
-        g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
-        for (cx, cy), intensity in zip(coords, self.intensities):
-            g.intensity.value = intensity
-            g.sigma.value = sigma
-            g.cx.value = cx
-            g.cy.value = cy
-            dp_dat += g.function(x, y)
+        if mode == 'legacy':
+            dp_dat = 0
+            x, y = np.meshgrid(l, l)
+            g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
+            for (cx, cy), intensity in zip(coords, self.intensities):
+                g.intensity.value = intensity
+                g.sigma.value = sigma
+                g.cx.value = cx
+                g.cy.value = cy
+                dp_dat += g.function(x, y)
+        elif mode == 'qual':
+            dp_dat = np.zeros([size,size])
+            coords = np.hstack((coords,self.intensities.reshape(len(self.intensities),-1))) #attaching int to coords
+            coords = coords[np.logical_and(coords[:,0]<max_r,coords[:,0]>-max_r)]
+            coords = coords[np.logical_and(coords[:,1]<max_r,coords[:,1]>-max_r)]
+            x,y = (coords)[:,0] , (coords)[:,1]
+            num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
+            dp_dat[num] = coords[:,2] #using the intensities
+            from skimage.filters import gaussian as point_spread
+            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l) #sigma in terms of pixels
+        elif mode == 'quant':
+            var = np.power(sigma,2)
+            electron_array = False
+            ss = 75 #sample size to be multiplied by intensity
+            peak_location_detailed = np.hstack((coords,(self.intensities.reshape(len(self.intensities),1))))
+            for peak in peak_location_detailed:
+                if type(electron_array) == np.ndarray:
+                    electron_array_2 = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
+                    electron_array = np.vstack((electron_array,electron_array_2))
+                else:
+                    electron_array = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
+            dp_dat = np.zeros([size,size])
+            ## chuck electrons that go to far out
+            electron_array = electron_array[np.logical_and(electron_array[:,0]<max_r,electron_array[:,0]>-max_r)]
+            electron_array = electron_array[np.logical_and(electron_array[:,1]<max_r,electron_array[:,1]>-max_r)]
+            x_num,y_num = np.digitize(electron_array[:,0],l,right=True),np.digitize(electron_array[:,1],l,right=True)
+            for i in np.arange(len(x_num)):
+                dp_dat[x_num[i],y_num[i]] += 1
 
+        dp_dat = dp_dat/np.max(dp_dat) #normalise to unit intensity
         dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(2*max_r/size)
 

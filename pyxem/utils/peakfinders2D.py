@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -37,7 +37,7 @@ def find_peaks_minmax(z, separation=5., threshold=10.):
     and minimum filtered images.
     Parameters
     ----------
-    z : ndarray
+    z : numpy.ndarray
         Matrix of image intensities.
     separation : float
         Expected distance between peaks.
@@ -112,7 +112,7 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
 
     Parameters
     ----------
-    z : ndarray
+    z : numpy.ndarray
         Matrix of image intensities.
     grad_threshold : float
         The minimum gradient required to begin a peak search.
@@ -128,6 +128,7 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
     peaks : numpy.ndarray
         (n_peaks, 2)
         Peak pixel coordinates.
+
     Notes
     -----
     Implemented as described in Zaefferer "New developments of computer-aided
@@ -162,11 +163,11 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
 
         Parameters
         ----------
-        image : ndarray
+        image : numpy.ndarray
 
         Returns
         -------
-        ndarray
+        numpy.ndarray
 
         """
         gradient_of_image = np.gradient(image)
@@ -202,12 +203,12 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
 
 
 def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
-    """
-    Method to locate positive peaks in an image based on statistical refinement
-    and difference with respect to mean intensity.
+    """Locate positive peaks in an image based on statistical refinement and
+    difference with respect to mean intensity.
+
     Parameters
     ----------
-    z : ndarray
+    z : numpy.ndarray
         Array of image intensities.
     alpha : float
         Only maxima above `alpha * sigma` are found, where `sigma` is the
@@ -218,11 +219,13 @@ def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
     convergence_ratio : float
         The algorithm will stop finding peaks when the proportion of new peaks
         being found is less than `convergence_ratio`.
+
     Returns
     -------
-    ndarray
+    numpy.ndarray
         (n_peaks, 2)
         Array of peak coordinates.
+
     Notes
     -----
     Implemented as described in the PhD thesis of Thomas White (2009) the
@@ -326,23 +329,22 @@ def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
 
     Parameters
     ----------
-    z : ndarray
+    z : numpy.ndarray
         2-d array of intensities
-    min_sigma, max_sigma, sigma_ratio, threshold, overlap :
+    float min_sigma, max_sigma, sigma_ratio, threshold, overlap
         Additional parameters to be passed to the algorithm. See `blob_dog`
         documentation for details:
         http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog
 
     Returns
     -------
-    ndarray
-        (n_peaks, 2)
-        Array of peak coordinates.
+    numpy.ndarray
+        Array of peak coordinates of shape `(n_peaks, 2)`
 
     Notes
     -----
     While highly effective at finding even very faint peaks, this method is
-        sensitive to fluctuations in intensity near the edges of the image.
+    sensitive to fluctuations in intensity near the edges of the image.
 
     """
     from skimage.feature import blob_dog
@@ -371,16 +373,16 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
 
     Parameters
     ----------
-    z : ndarray
+    z : numpy.ndarray
         Array of image intensities.
-    min_sigma, max_sigma, num_sigma, threshold, overlap, log_scale :
+    float min_sigma, max_sigma, num_sigma, threshold, overlap, log_scale
         Additional parameters to be passed to the algorithm. See
         `blob_log` documentation for details:
         http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-log
 
     Returns
     -------
-    ndarray
+    numpy.ndarray
         (n_peaks, 2)
         Array of peak coordinates.
 
@@ -409,7 +411,7 @@ def find_peaks_regionprops(z, min_sigma=4, max_sigma=5, threshold=1,
 
     Parameters
     ----------
-    z : ndarray
+    z : numpy.ndarray
         Array of image intensities.
     min_sigma : int, float
         Standard deviation for the minimum gaussian convolution
@@ -424,7 +426,7 @@ def find_peaks_regionprops(z, min_sigma=4, max_sigma=5, threshold=1,
 
     Returns
     -------
-    ndarray
+    numpy.ndarray
         (n_peaks, 2)
         Array of peak coordinates.
 

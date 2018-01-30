@@ -1,12 +1,8 @@
-.. -*- mode: rst -*-
+.. image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
+    :target: https://travis-ci.org/pyxem/pyxem
 
-|Travis|_ |Coveralls|_
-
-.. |Travis| image:: https://api.travis-ci.org/pyxem/pyxem.png?branch=master
-.. _Travis: https://travis-ci.org/pyxem/pyxem
-
-.. |Coveralls| image:: https://coveralls.io/repos/hyperspy/hyperspy/badge.svg
-.. _Coveralls: https://coveralls.io/r/hyperspy/hyperspy
+.. image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
+    :target: https://coveralls.io/github/pyxem/pyxem?branch=master
 
 
 pyXem (Python Crystallographic Electron Microscopy) is an open-source Python library for crystallographic electron microscopy.
@@ -41,7 +37,7 @@ From a clean install the following commands to install everything you need shoul
 
 	$ conda install hyperspy -c conda-forge
 
-	$ conda install --channel matsci pymatgen
+	$ conda install --channel matsci pymatgen Cython
 
 	$ pip install transforms3d
 

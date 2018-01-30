@@ -30,7 +30,7 @@ from pyxem.version import __author__, __version__, __copyright__
 
 # Custom CSS
 def setup(app):
-    app.add_stylesheet('css/custom.css')
+    app.add_stylesheet('custom.css')
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
@@ -358,11 +358,14 @@ texinfo_documents = [
 #
 # texinfo_no_detailmenu = False
 
+# Fix incorrect napoleon handling
+napoleon_use_param = True
+napoleon_google_docstring = False
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'https://docs.python.org/': None,
     'numpy': ('http://docs.scipy.org/doc/numpy/', None),
     'hyperspy': ('http://hyperspy.org/hyperspy-doc/current/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
 }

@@ -12,8 +12,14 @@ before_install:
 install:
   - "python setup.py install"
 
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
 script:
   - pytest tests/test_diffraction_signal.py  # until more tests implemented
+  - pytest tests/test_diffraction_generator.py
+  - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 
 deploy:

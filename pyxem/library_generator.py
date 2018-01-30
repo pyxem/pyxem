@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -95,10 +95,10 @@ class DiffractionLibraryGenerator(object):
             orientations = structure_library[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
-                if representation=='axis-angle':
+                if representation == 'axis-angle':
                     axis = [orientation[0], orientation[1], orientation[2]]
                     angle = orientation[3] / 180 * pi
-                if representation=='euler':
+                if representation == 'euler':
                     axis, angle = euler2axangle(orientation[0], orientation[1],
                                                 orientation[2], 'rzxz')
                 # Apply rotation to the structure
