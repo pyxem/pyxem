@@ -3,7 +3,7 @@
 import os, sys
 from setuptools import setup, Extension
 
-exec(open('pyxem/version.py').read())  # grab version info 
+exec(open('pyxem/version.py').read())  # grab version info
 
 from Cython.Build import cythonize
 import numpy as np
@@ -38,6 +38,7 @@ setup(
     packages=[
         'pyxem',
         'pyxem.utils',
+        'pyxem.io_plugins'
     ],
 
     package_data={

@@ -16,7 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.api import load as hsload
+import os
+import glob
+import warnings
+import logging
+import numpy as np
+
 from hyperspy.api import roi
 
 from pymatgen import Lattice, Structure
@@ -27,33 +32,9 @@ from .diffraction_generator import ElectronDiffractionCalculator, DiffractionSim
 from .library_generator import DiffractionLibraryGenerator
 from .diffraction_component import ElectronDiffractionForwardModel
 from .scalable_reference_pattern import ScalableReferencePattern
-from .utils import mib as mib_reader
+from .io_plugins import io_plugins, default_write_ext
+from .io_plugins import mib as mib_reader
 from hyperspy.io import load_with_reader
-
-# -*- coding: utf-8 -*-
-# Copyright 2007-2016 The HyperSpy developers
-#
-# This file is part of  HyperSpy.
-#
-#  HyperSpy is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-#  HyperSpy is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with  HyperSpy.  If not, see <http://www.gnu.org/licenses/>.
-
-import os
-import glob
-import warnings
-import logging
-
-import numpy as np
 from natsort import natsorted
 from hyperspy.drawing.marker import markers_metadata_dict_to_markers
 
@@ -61,7 +42,6 @@ from hyperspy.misc.io.tools import ensure_directory
 from hyperspy.misc.io.tools import overwrite as overwrite_method
 from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.misc.utils import stack as stack_method
-from hyperspy.io_plugins import io_plugins, default_write_ext
 from hyperspy.exceptions import VisibleDeprecationWarning
 from hyperspy.defaults_parser import preferences
 from hyperspy.ui_registry import get_gui
