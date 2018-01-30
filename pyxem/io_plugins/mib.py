@@ -66,7 +66,7 @@ endianess2hdr = {
 # Warning: for selection lists use tuples not lists.
 #keys extracted fromt the hdr file
 hdr_keys = {
-    # spectrum/image keys
+    # diffraction/image keys
     'width': int,
     'height': int,
     'depth': int,
@@ -89,19 +89,11 @@ hdr_keys = {
     'height-scale': float,
     'height-units': str,
     'signal': str,
-    # EELS HyperSpy keys
-    'collection-angle': float,
     # TEM HyperSpy keys
     'convergence-angle': float,
     'beam-energy': float,
-    # EDS HyperSpy keys
-    'elevation-angle': float,
-    'azimuth-angle': float,
+    # SED HyperSpy keys
     'live-time': float,
-    # From 0.8.5 energy-resolution is deprecated as it is a duplicate of
-    # detector-peak-width-ev of the hdr standard format. We keep it here
-    # to keep compatibility with hdr file written by HyperSpy < 0.8.4
-    'energy-resolution': float,
     'tilt-stage': float,
     'date': str,
     'time': str,
@@ -235,11 +227,10 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
 
 def file_reader(filename, hdr_info=None, encoding="latin-1",
                 mmap_mode='c', *args, **kwds):
-    """Parses a hdr (.hdr) file
-    and reads the data from the corresponding raw (.mib) file;
-    or, read a mib file if the dictionary hdr_info is provided.
+    """Parses a hdr (.hdr) file and reads the data from the corresponding raw
+    (.mib) file; or, read a mib file if the dictionary hdr_info is provided.
 
-    This format is often uses in EDS/EDX experiments.
+    This format is often uses in SED experiments.
 
     Images and spectral images or data cubes that are written in the
     (Lispix) mib file format are just a continuous string of numbers.
@@ -258,7 +249,7 @@ def file_reader(filename, hdr_info=None, encoding="latin-1",
     Alternatively, dictionary 'hdr_info' containing the information can
     be given.
 
-    Some keys are specific to HyperSpy and will be ignored by other software.
+    Some keys are specific to pyXem & HyperSpy.
 
     hdr isan ASCII text, tab delimited file in
     which HyperSpy reads the image parameters for a mib file.

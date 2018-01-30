@@ -63,14 +63,15 @@ def load(filenames=None,
          lazy=False,
          **kwds):
     """
-    Load potentially multiple supported file into an hyperspy structure
+    Load supported files into a pyxem structure.
 
-    Supported formats: hspy (HDF5), msa, Gatan dm3, Ripple (rpl+raw), Bruker bcf,
-    FEI ser and emi, SEMPER unf, EMD, EDAX spd/spc, tif, and a number
-    of image formats.
+    Supported formats: hspy (HDF5), Medipix (hdr + mib), blockfile, Gatan dm3,
+    tif, msa, Bruker bcf, FEI ser and emi, SEMPER unf, EMD, EDAX spd/spc, tif,
+    and a number of image formats.
 
-    Any extra keyword is passed to the corresponding reader. For
-    available options see their individual documentation.
+    Additional keyword arguments are passed to the corresponding reader. For
+    available options see their individual documentation, which may be found in
+    either pyxem or hyperspy.
 
     Parameters
     ----------
@@ -138,8 +139,6 @@ def load(filenames=None,
     select_type: {'spectrum', 'image', None}
        For Bruker bcf files, if one of 'spectrum' or 'image' (default is None)
        the loader returns either only hypermap or only SEM/TEM electron images.
-
-
 
     Returns
     -------
