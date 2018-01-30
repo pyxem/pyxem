@@ -23,6 +23,7 @@ from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square
+from skimage.filters import (threshold_sauvola, threshold_otsu)
 
 try:
     from .radialprofile import radialprofile as radialprofile_cy
@@ -354,6 +355,20 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
 
     return np.maximum(bg_subtracted, 0)
 
+def subtract_background(z, bg_vac):
+    """Subtracts background using a user-defined background pattern.
+
+    Parameters
+    ----------
+    bg_vac: array
+        User-defined diffraction pattern to be subtracted as background.
+    """
+    im = z.astype(np.float64)-bg_vac
+    for i in range (0,z.shape[0]):
+        for j in range (0,z.shape[1]):
+            if im[i,j]<0:
+                im[i,j]=0
+    return im
 
 def circular_mask(shape, radius, center=None):
     """Produces a mask of radius 'r' centered on 'center' of shape 'shape'.
@@ -443,3 +458,19 @@ def refine_beam_position(z, start, radius):
     c = np.asarray(ndi.measurements.center_of_mass(np.array(ztmp)))
 
     return c
+
+def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold):
+    z = z.astype(np.float64)
+    im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')
+    im2 = ndi.gaussian_filter(im1, sigma=sigma_enhance, mode='constant', cval=255)
+    im3= im1 - im2
+    im3[im3<2] = 0
+
+    mask = im3 > threshold
+    im4 = im3*mask
+    thresh_sauvola = threshold_sauvola(im4, window_size, k)
+    binary_sauvola = im4 > thresh_sauvola
+    binary_sauvola_blur = ndi.gaussian_filter(binary_sauvola, sigma = 0.12)
+    final = im4*binary_sauvola_blur
+
+    return final
