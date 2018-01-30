@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,6 +21,7 @@
 
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 
 from .utils.expt_utils import *
@@ -795,6 +796,14 @@ class ElectronDiffraction(Signal2D):
         threshold = 6.5, window_size = 11, k = 0.01
 
         ------------
-        """ 
+        """
         enhanced = self.map(enhance_gauss_sauvola, *args, **kwargs)
         return enhanced
+
+
+class LazyElectronDiffraction(LazySignal, ElectronDiffraction):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
