@@ -88,7 +88,8 @@ def load(filenames=None,
         files can be loaded by using simple shell-style wildcards,
         e.g. 'my_file*.msa' loads all the files that starts
         by 'my_file' and has the '.msa' extension.
-    signal_type : {None, "EELS", "EDS_SEM", "EDS_TEM", "", str}
+    signal_type : {None, "electron_diffraction", "diffraction_profile",
+                   "diffraction_vectors", "crystallographic_map", str}
         The acronym that identifies the signal type.
         The value provided may determine the Signal subclass assigned to the
         data.
@@ -339,7 +340,8 @@ def assign_signal_subclass(dtype,
     ----------
     dtype : :class:`~.numpy.dtype`
     signal_dimension: int
-    signal_type : {"EELS", "EDS", "EDS_SEM", "EDS_TEM", "DielectricFunction", "", str}
+    signal_type : {None, "electron_diffraction", "diffraction_profile",
+                   "diffraction_vectors", "crystallographic_map", str}
     lazy: bool
 
     Returns

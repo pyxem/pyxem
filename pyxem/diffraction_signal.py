@@ -21,6 +21,7 @@
 
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 
 from .utils.expt_utils import *
@@ -755,3 +756,11 @@ class ElectronDiffraction(Signal2D):
         from .utils import peakfinder2D_gui
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
+
+
+class LazyElectronDiffraction(LazySignal, ElectronDiffraction):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
