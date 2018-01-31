@@ -106,8 +106,8 @@ class DiffractionProfile(Signal1D):
             List of the elements present in the specimen.
 
         fracs : list
-            List of atomic fraction of each element present in the specimen. Must be
-            specified in the same order as the elements.
+            List of atomic fraction of each element present in the specimen.
+            Must be specified in the same order as the elements.
 
         s : array
             The scattering vector s axis in Angstroms
