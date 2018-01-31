@@ -12,7 +12,7 @@ Start using pyXem
 
 The best way to start understanding how pyXem is to use it.
 
-For developing the code the home of HyperSpy is on github and you'll see that
+For developing the code the home of pyXem is on github and you'll see that
 a lot of this guide boils down to using that platform well. so visit the
 following link and poke around the code, issues, and pull requests: `pyXem
 on Github <https://github.com/pyxem/pyxem>`_.
