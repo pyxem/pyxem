@@ -31,14 +31,14 @@ from hyperspy.misc.utils import stack as stack_method
 from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.ui_registry import get_gui
 from natsort import natsorted
-from pyxem.components.diffraction_component import ElectronDiffractionForwardModel
-from pyxem.generators.diffraction_generator import DiffractionGenerator
-from pyxem.generators.library_generator import DiffractionLibraryGenerator
-from pyxem.signals.crystallographic_map import CrystallographicMap
-from pyxem.signals.diffraction_profile import DiffractionProfile
-from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from .components.diffraction_component import ElectronDiffractionForwardModel
+from .generators.diffraction_generator import DiffractionGenerator
+from .generators.library_generator import DiffractionLibraryGenerator
+from .signals.crystallographic_map import CrystallographicMap
+from .signals.diffraction_profile import DiffractionProfile
+from .signals.electron_diffraction import ElectronDiffraction
+from .signals.diffraction_simulation import DiffractionSimulation
+from .signals.diffraction_vectors import DiffractionVectors
 
 from .io_plugins import io_plugins, default_write_ext
 from .io_plugins import mib as mib_reader

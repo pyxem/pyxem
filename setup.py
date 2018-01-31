@@ -38,7 +38,10 @@ setup(
     packages=[
         'pyxem',
         'pyxem.utils',
-        'pyxem.io_plugins'
+        'pyxem.io_plugins',
+	'pyxem.components',
+        'pyxem.generators',
+	'pyxem.signals'
     ],
 
     package_data={
