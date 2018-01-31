@@ -60,7 +60,9 @@ def correlate(image, pattern,
     shape = image.shape
     half_shape = tuple(i // 2 for i in shape)
     
-    in_bounds_z = np.abs(pattern.coordinates[:,2]) < 1e-2    
+    #the care code on this number should be considered    
+    in_bounds_z = np.abs(pattern.coordinates[:,2]) < 1e-2
+    
     pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
     in_bounds = np.product((pixel_coordinates > 0)*(pixel_coordinates < shape[0]), axis=1)
 
