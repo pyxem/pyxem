@@ -17,22 +17,52 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+import pymatgen as pmg
 
-from pyxem.diffraction_generator import ElectronDiffractionCalculator
-from pyxem.library_generator import DiffractionLibraryGenerator, DiffractionLibrary
-from hyperspy.signals import Signal1D, Signal2D
+from pyxem.generators.diffraction_generator import DiffractionGenerator
+from pyxem.generators.library_generator import DiffractionLibraryGenerator
+from pyxem.signals.diffraction_library import DiffractionLibrary
+
 
 @pytest.fixture
 def diffraction_calculator():
-    return ElectronDiffractionCalculator(300., 0.02)
+    return DiffractionGenerator(300., 0.02)
+
 
 @pytest.fixture
 def library_generator(diffraction_calculator):
     return DiffractionLibraryGenerator(diffraction_calculator)
 
+@pytest.fixture(params=[
+    "Si",
+])
+def element(request):
+    return pmg.Element(request.param)
+
+
+@pytest.fixture(params=[
+    5.431
+])
+def lattice(request):
+    return pmg.Lattice.cubic(request.param)
+
+
+@pytest.fixture(params=[
+    "Fd-3m"
+])
+def structure(request, lattice, element):
+    return pmg.Structure.from_spacegroup(request.param, lattice, [element], [[0, 0, 0]])
+
+@pytest.fixture
+def structure_library(structure):
+    return {'Si': (structure, [(0, 0, 0)])}
+
 
 class TestDiffractionLibraryGenerator:
 
+    @pytest.mark.parametrize('calibration, reciprocal_radius, representation', [
+        (0.017, 2.4, 'euler'),
+    ])
     def test_get_diffraction_library(
             self,
             library_generator: DiffractionLibraryGenerator,

@@ -19,12 +19,13 @@
 from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
-from .utils.expt_utils import *
+from pyxem.utils.expt_utils import *
 from tqdm import tqdm
 
 """
 Signal class for diffraction vectors.
 """
+
 
 def _calculate_norms(z):
     norms = []
@@ -33,6 +34,7 @@ def _calculate_norms(z):
         norms.append(np.linalg.norm(i))
     return np.asarray(norms)
 
+
 class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
@@ -40,7 +42,7 @@ class DiffractionVectors(BaseSignal):
         BaseSignal.__init__(self, *args, **kwargs)
 
 
-# This overwrited a method in base signal and has been renamed
+    # This overwrited a method in base signal and has been renamed
     def plot_diff_vects(self):
         #Plot the diffraction vectors.
 

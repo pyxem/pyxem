@@ -17,8 +17,7 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - pytest tests/test_diffraction_signal.py  # until more tests implemented
-  - pytest tests/test_diffraction_generator.py
+  - pytest tests
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 
@@ -29,3 +28,8 @@ deploy:
   local_dir: ${TRAVIS_BUILD_DIR}/docs/build
   on:
     branch: continuous-integration
+
+matrix:
+  allow_failures:
+    - script: sphinx-apidoc -fo docs/source pyxem
+    - script: sphinx-build -b html docs/source docs/build

@@ -17,10 +17,10 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from hyperspy.component import Component
-from .tensor_field import DisplacementGradientMap
-from skimage import transform as tf
 import numpy as np
+from hyperspy.component import Component
+from pyxem.signals.tensor_field import DisplacementGradientMap
+from skimage import transform as tf
 
 
 class ScalableReferencePattern(Component):

@@ -38,7 +38,7 @@ class ElectronDiffractionForwardModel(Component):
 
     Parameters
     ----------
-    electron_diffraction_calculator : ElectronDiffractionCalculator
+    electron_diffraction_calculator : DiffractionGenerator
         The model used to simulate electron diffraction patterns from
         structures.
     structure : Structure

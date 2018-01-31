@@ -38,7 +38,7 @@ def correlate(image, pattern,
     image : :class:`numpy.ndarray`
         A single electron diffraction signal. Should be appropriately scaled
         and centered.
-    pattern : :class:`pyxem.diffraction_generator.DiffractionSimulation`
+    pattern : :class:`pyxem.DiffractionSimulation`
         The pattern to compare to.
     sim_threshold : float
         The threshold simulation intensity to consider for correlation

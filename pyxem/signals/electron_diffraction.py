@@ -19,15 +19,14 @@
 
 """
 
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
-from hyperspy._signals.lazy import LazySignal
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-
-from .utils.expt_utils import *
-from .utils.peakfinders2D import *
-from .diffraction_vectors import DiffractionVectors
-from .diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.utils.expt_utils import *
+from pyxem.utils.peakfinders2D import *
 
 
 def peaks_as_gvectors(z, center, calibration):
@@ -317,7 +316,7 @@ class ElectronDiffraction(Signal2D):
         ----------
         dark_reference : ElectronDiffraction
             Dark reference image.
-        bright_reference : ElectronDiffraction
+        bright_reference : DiffractionSignal
             Bright reference image.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a

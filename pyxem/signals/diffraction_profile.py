@@ -19,12 +19,9 @@
 
 """
 
-from hyperspy.components1d import Voigt, Exponential, Polynomial
-from hyperspy.signals import Signal1D
-
-from .atomic_scattering_component import AtomicScatteringFunction
-
 import numpy as np
+from hyperspy.signals import Signal1D
+from pyxem.components.atomic_scattering_component import AtomicScatteringFunction
 
 
 def reduced_intensity(rp, elements, fracs, s, cut_off, damp=1):
