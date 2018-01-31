@@ -60,12 +60,13 @@ def correlate(image, pattern,
     shape = image.shape
     half_shape = tuple(i // 2 for i in shape)
     
+    in_bounds_z = np.abs(pattern.coordinates[:,2]) < 1e-2    
     pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
-    in_bounds = np.product((pixel_coordinates > 0) *(pixel_coordinates < shape[0]), axis=1)
+    in_bounds = np.product((pixel_coordinates > 0)*(pixel_coordinates < shape[0]), axis=1)
 
     pattern_intensities = pattern.intensities
     large_intensities = pattern_intensities > sim_threshold
-    mask = np.logical_and(in_bounds, large_intensities)
+    mask = np.logical_and(in_bounds_z,np.logical_and(in_bounds, large_intensities))
 
     if interpolate:
         x = np.arange(shape[0], dtype='float') - half_shape[0]
