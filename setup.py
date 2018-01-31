@@ -43,6 +43,13 @@ setup(
         'pyxem.generators',
 	'pyxem.signals'
     ],
+	
+    install_requires=[
+	'hyperspy', 
+        'pymatgen', 
+        'transforms3d', 
+        'cython'
+    ],
 
     package_data={
         "": ["LICENSE", "readme.rst", "requirements.txt"],
