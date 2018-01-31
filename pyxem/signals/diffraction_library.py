@@ -39,11 +39,11 @@ class DiffractionLibrary(dict):
     def plot(self):
         """Plots the library interactively.
         """
-        from pyxem.signals.diffraction_signal import DiffractionSignal
+        from pyxem.signals.electron_diffraction import ElectronDiffraction
         sim_diff_dat = []
         for key in self.keys():
             for ori in self[key].keys():
                 dpi = self[key][ori].as_signal(128, 0.03, 1)
                 sim_diff_dat.append(dpi.data)
-        ppt_test = DiffractionSignal(sim_diff_dat)
+        ppt_test = ElectronDiffraction(sim_diff_dat)
         ppt_test.plot()

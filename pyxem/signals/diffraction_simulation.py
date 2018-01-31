@@ -1,7 +1,7 @@
 import numpy as np
 from hyperspy._components.expression import Expression
 from pymatgen.util.plotting import pretty_plot
-from pyxem.signals.diffraction_signal import DiffractionSignal
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 
 _GAUSSIAN2D_EXPR = \
@@ -133,7 +133,7 @@ class DiffractionSimulation:
         return ax
 
     def as_signal(self, size, sigma, max_r, mode='qual'):
-        """Returns the diffraction data as an DiffractionSignal signal with
+        """Returns the diffraction data as an ElectronDiffraction signal with
         two-dimensional Gaussians representing each diffracted peak.
 
         Parameters
@@ -193,7 +193,7 @@ class DiffractionSimulation:
                 dp_dat[x_num[i],y_num[i]] += 1
 
         dp_dat = dp_dat/np.max(dp_dat) #normalise to unit intensity
-        dp = DiffractionSignal(dp_dat)
+        dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(2*max_r/size)
 
         return dp

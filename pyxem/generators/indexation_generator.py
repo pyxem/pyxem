@@ -62,7 +62,7 @@ class IndexationGenerator():
 
     Parameters
     ----------
-    signal : DiffractionSignal
+    signal : ElectronDiffraction
         The signal of electron diffraction patterns to be indexed.
     library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation

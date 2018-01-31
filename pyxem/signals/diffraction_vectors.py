@@ -147,7 +147,7 @@ class DiffractionVectors(BaseSignal):
                        radius,
                        unique_vectors=None):
         """Obtain the intensity scattered to each diffraction vector at each
-        navigation position in an DiffractionSignal Signal by summation in a
+        navigation position in an ElectronDiffraction Signal by summation in a
         circular window of specified radius.
 
         Parameters
@@ -156,8 +156,8 @@ class DiffractionVectors(BaseSignal):
             Unique list of diffracting vectors if pre-calculated. If None the
             unique vectors in self are determined and used.
 
-        electron_diffraction : DiffractionSignal
-            DiffractionSignal signal from which to extract the reflection
+        electron_diffraction : ElectronDiffraction
+            ElectronDiffraction signal from which to extract the reflection
             intensities.
 
         radius : float

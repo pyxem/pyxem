@@ -36,7 +36,7 @@ from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.generators.library_generator import DiffractionLibraryGenerator
 from pyxem.signals.crystallographic_map import CrystallographicMap
 from pyxem.signals.diffraction_profile import DiffractionProfile
-from pyxem.signals.diffraction_signal import DiffractionSignal
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
@@ -500,7 +500,7 @@ def save(filename, signal, overwrite=None, **kwds):
 
 def load_mib(filename):
     dpt = load_with_reader(filename=filename, reader=mib_reader)
-    dpt = DiffractionSignal(dpt.data.reshape((256, 256, 256, 256)))
+    dpt = ElectronDiffraction(dpt.data.reshape((256, 256, 256, 256)))
     trace = dpt.inav[:,0:5].sum((1,2,3))
     edge = np.where(trace==max(trace.data))[0][0]
-    return DiffractionSignal(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
+    return ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))

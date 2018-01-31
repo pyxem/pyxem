@@ -33,7 +33,7 @@ def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
     return g[0]
 
-class DiffractionSignal(Signal2D):
+class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):
@@ -296,7 +296,7 @@ class DiffractionSignal(Signal2D):
 
         Returns
         -------
-            DiffractionSignal Signal containing the affine Transformed
+            ElectronDiffraction Signal containing the affine Transformed
             diffraction patterns.
 
         """
@@ -314,7 +314,7 @@ class DiffractionSignal(Signal2D):
 
         Parameters
         ----------
-        dark_reference : DiffractionSignal
+        dark_reference : ElectronDiffraction
             Dark reference image.
         bright_reference : DiffractionSignal
             Bright reference image.
@@ -336,7 +336,7 @@ class DiffractionSignal(Signal2D):
 
         Parameters
         ----------
-        deadpixels : DiffractionSignal
+        deadpixels : ElectronDiffraction
             List
         deadvalue : string
             Specify how deadpixels should be treated. 'average' sets the dead
@@ -367,7 +367,7 @@ class DiffractionSignal(Signal2D):
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
-            in the DiffractionSignal signal as a Signal1D.
+            in the ElectronDiffraction signal as a Signal1D.
 
         See also
         --------
@@ -425,7 +425,7 @@ class DiffractionSignal(Signal2D):
 
         Returns
         -------
-        output : DiffractionSignal
+        output : ElectronDiffraction
             The electron diffraction data in polar coordinates.
 
         """
@@ -442,7 +442,7 @@ class DiffractionSignal(Signal2D):
 
         Returns
         -------
-        DiffractionSignal
+        ElectronDiffraction
               A two dimensional signal containing the mean,
               mean squared, and variance.
         """
@@ -535,7 +535,7 @@ class DiffractionSignal(Signal2D):
 
         Returns
         -------
-        denoised : :obj:`DiffractionSignal`
+        denoised : :obj:`ElectronDiffraction`
             A copy of the data with the background removed and the noise
             smoothed.
 
@@ -557,7 +557,7 @@ class DiffractionSignal(Signal2D):
             bg_removed = np.clip(self - bg, self.min(), self.max())
 
             h = max(bg.data.min(), 1e-6)
-            denoised = DiffractionSignal(
+            denoised = ElectronDiffraction(
                 bg_removed.map(
                     regional_flattener, h=h, inplace=False))
             denoised.axes_manager.update_axes_attributes_from(
@@ -603,7 +603,7 @@ class DiffractionSignal(Signal2D):
 
         Returns
         -------
-        DiffractionSignal
+        ElectronDiffraction
             The mean background of the signal.
 
         """
@@ -637,7 +637,7 @@ class DiffractionSignal(Signal2D):
         y_axis = self.axes_manager.signal_axes[1].axis
         xs, ys = np.meshgrid(x_axis, y_axis)
         rs = (xs ** 2 + ys ** 2) ** 0.5
-        bg = DiffractionSignal(
+        bg = ElectronDiffraction(
             diffuse_scatter.function(rs) + linear_decay.function(rs))
         for i in (0, 1):
             bg.axes_manager.signal_axes[i].update_from(
@@ -802,7 +802,7 @@ class DiffractionSignal(Signal2D):
         return enhanced
 
 
-class LazyDiffractionSignal(LazySignal, DiffractionSignal):
+class LazyElectronDiffraction(LazySignal, ElectronDiffraction):
 
     _lazy = True
 
