@@ -60,7 +60,7 @@ def correlate(image, pattern,
     shape = image.shape
     half_shape = tuple(i // 2 for i in shape)
     
-    #the care code on this number should be considered    
+    #the hard code on this number should be considered    
     in_bounds_z = np.abs(pattern.coordinates[:,2]) < 1e-2
     
     pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
