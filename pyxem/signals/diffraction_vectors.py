@@ -189,7 +189,7 @@ class DiffractionVectors(BaseSignal):
         vdfs : Signal2D
             Signal containing virtual dark field images for all unique vectors.
         """
-        if unique_vectors==None:
+        if unique_vectors is None:
             unique_vectors = self.get_unique_vectors()
         else:
             unique_vectors = unique_vectors
