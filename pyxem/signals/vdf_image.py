@@ -121,7 +121,9 @@ class VDFgvectorStack():
 
     def __init__(self, images, vectors, *args,**kwargs):
         self.images = Signal2D(images)
-        self.vectors = DiffractionVectors(vectors)
+        #TODO:This was DiffractionVectors but now circular import - check
+        #implications
+        self.vectors = BaseSignal(vectors)
         self.vectors.axes_manager.set_signal_dimension(0)
 
     def image_correlate_stack(self,corr_threshold=0.9):
