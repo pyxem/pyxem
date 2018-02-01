@@ -169,9 +169,22 @@ class DiffractionVectors(BaseSignal):
 
     def get_diffracting_pixels_map(self, binary=False):
         """Map of the number of vectors at each navigation position.
-        """
 
-        pass
+        Parameters
+        ----------
+        binary : boolean
+            If True a binary image with diffracting pixels taking value == 1 is
+            returned.
+
+        Returns
+        -------
+        crystim : Signal2D
+            2D map of diffracting pixels.        
+        """
+        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0,1))
+        if binary==True:
+            crystim = crystim == 1
+        return crystim
 
     def get_gvector_indexation(self,
                                calculated_peaks,
