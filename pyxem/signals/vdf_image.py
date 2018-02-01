@@ -33,7 +33,7 @@ def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
     return g[0]
 
-class VDFStack(Signal2D):
+class VDFImage(Signal2D):
     _signal_type = "vdf_stack"
 
     def __init__(self, *args, **kwargs):

@@ -22,6 +22,7 @@ from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
@@ -44,7 +45,6 @@ class DiffractionVectors(BaseSignal):
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
-        import matplotlib.pyplot as plt
         plt.plot(unique_vectors.T[1], unique_vectors.T[0], 'ro')
         plt.axes().set_aspect('equal')
         plt.show()
@@ -198,7 +198,7 @@ class DiffractionVectors(BaseSignal):
             vdf = disk(electron_diffraction,
                        axes=electron_diffraction.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
-        return VDFStack(np.asarray(vdfs))
+        return VDFImage(np.asarray(vdfs))
 
     def get_diffracting_pixels_map(self, binary=False):
         """Map of the number of vectors at each navigation position.

@@ -20,7 +20,7 @@ import numpy as np
 import pytest
 from hyperspy.signals import Signal1D, Signal2D
 from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.vdf_image import VDFImage
 
 
 @pytest.fixture(params=[
