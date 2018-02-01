@@ -19,12 +19,9 @@
 
 """
 
-from hyperspy.api import interactive, stack
-from hyperspy.components1d import Voigt, Exponential, Polynomial
+import numpy as np
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from pyxem.signals.diffraction_profile import DiffractionProfile
-from pyxem.utils.expt_utils import *
-from pyxem.utils.peakfinders2D import *
+from pyxem.utils.vdf_utils import *
 
 # TODO: This class really needs to keep the g-vector with the corresponding VDF.
 class VDFImage(Signal2D):
@@ -38,7 +35,7 @@ class VDFImage(Signal2D):
                        threshold,
                        min_size,
                        max_size,
-                       max_number_of_grains = np.inf,
+                       max_number_of_grains=1000,
                        exclude_border=0):
         """Separate grains from a stack of images using the watershed
         segmentation implemented in skimage [1], by mapping the function
