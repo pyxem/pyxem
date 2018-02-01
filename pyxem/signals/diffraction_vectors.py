@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
-from pyxem.signals.vdf_stack import VDFStack
+from pyxem.signals.vdf_image import VDFImage
 
 """
 Signal class for diffraction vectors.
