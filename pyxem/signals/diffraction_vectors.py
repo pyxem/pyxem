@@ -25,6 +25,7 @@ from tqdm import tqdm
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
+from pyxem.signals.vdf_stack import VDFStack
 
 """
 Signal class for diffraction vectors.
@@ -197,7 +198,7 @@ class DiffractionVectors(BaseSignal):
             vdf = disk(electron_diffraction,
                        axes=electron_diffraction.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
-        return Signal2D(np.asarray(vdfs))
+        return VDFStack(np.asarray(vdfs))
 
     def get_diffracting_pixels_map(self, binary=False):
         """Map of the number of vectors at each navigation position.
