@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'fpd_data_processing'
+project = 'Fast pixelated detector data processing'
 copyright = '2018, Magnus Nord'
 author = 'Magnus Nord'
 
