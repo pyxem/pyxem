@@ -39,7 +39,7 @@ class ElectronDiffraction(Signal2D):
 
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
-        # Attributes defaults
+        # Set default attributes
         if 'Acquisition_instrument.TEM' not in self.metadata:
             if 'Acquisition_instrument.SEM' in self.metadata:
                 self.metadata.set_item(

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -221,5 +221,3 @@ class TestDiffractionSimulation:
         dots = ax.collections[0]
         assert np.allclose(dots.get_offsets(), coordinates[:, :2])
         assert np.allclose(dots.get_sizes(), np.log2(intensities))
-
-

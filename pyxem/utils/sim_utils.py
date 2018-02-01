@@ -27,6 +27,8 @@ import os
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 
+from pyxem.signals.electron_diffraction import ElectronDiffraction
+
 
 def get_electron_wavelength(accelerating_voltage):
     """Calculates the (relativistic) electron wavelength in Angstroms
@@ -169,8 +171,8 @@ def simulate_kinematic_scattering(atomic_coordinates,
                                   max_k = 1.5,
                                   illumination = 'plane_wave',
                                   sigma = 20):
-    """Simulate electron scattering from an arrangement of atoms
-
+    """Simulate electron scattering from arrangement of atoms comprising one
+    elemental species.
 
     Parameters
     ----------
@@ -228,7 +230,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
     #Calculate intensity
     intensity  = (scattering * scattering.conjugate()).real
 
-    return pxm.ElectronDiffraction(intensity)
+    return ElectronDiffraction(intensity)
 
 
 def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):
