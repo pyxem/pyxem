@@ -220,18 +220,17 @@ class DiffractionVectors(BaseSignal):
         return crystim
 
     def get_gvector_indexation(self,
-                               calculated_peaks,
+                               structure,
                                magnitude_threshold,
-                               angular_threshold=None):
+                               angular_threshold=None,
+                               maximum_length=1):
         """Index diffraction vectors based on the magnitude of individual
         vectors and optionally the angles between pairs of vectors.
 
         Parameters
         ----------
-
-        calculated_peaks : array
-            Structured array containing the theoretical diffraction vector
-            magnitudes and angles between vectors.
+        structure : Structure
+            pymatgen structure to be used for indexation
 
         magnitude_threshold : Float
             Maximum deviation in diffraction vector magnitude from the
@@ -239,15 +238,23 @@ class DiffractionVectors(BaseSignal):
 
         angular_threshold : float
             Maximum deviation in the measured angle between vector
+
+        maximum_length : float
+            Maximum g-vector length to included in indexation.
+
         Returns
         -------
-
         gindex : array
             Structured array containing possible indexations
             consistent with the data.
 
         """
         #TODO: Specify threshold as a fraction of the g-vector magnitude.
+
+        recip_latt = structure.lattice.reciprocal_lattice_crystallographic
+        recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], maximum_length)
+        calc_peaks = np.asarray(sorted(recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])))
+
         arr_shape = (self.axes_manager._navigation_shape_in_array
                      if self.axes_manager.navigation_size > 0
                      else [1, ])
