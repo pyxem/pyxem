@@ -20,7 +20,7 @@ import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
 
-def correlate(image, pattern,half_shape):
+def correlate(image, pattern_dictionary):
     """The correlation between a diffraction pattern and a simulation.
 
     Calculated using
@@ -36,11 +36,11 @@ def correlate(image, pattern,half_shape):
     image : :class:`numpy.ndarray`
         A single electron diffraction signal. Should be appropriately scaled
         and centered.
-    pattern : :class:`pyxem.DiffractionSimulation`
-        The pattern to compare to.
-    half_shape: tuple
-        The image dimensions, halved. So for a 144x144 we use (72,72)
-    
+    pattern_dictrionary : dict
+        Containing:
+            :class:`pyxem.DiffractionSimulation`
+            The calibrated coords as 'pixel_coords',masked correctly
+            The intensities as 'intensities', masked correctly
     Returns
     -------
     float
@@ -52,12 +52,10 @@ def correlate(image, pattern,half_shape):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    #the hard code on this number should be considered    
-    mask = np.abs(pattern.coordinates[:,2]) < 1e-2
     
-    pattern_intensities = pattern.intensities[mask]
+    pattern_intensities = pattern_dictionary['intensities']
+    pixel_coordinates   = pattern_dictionary['pixel_coords'] 
     
-    pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
-    image_intensities = image[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
+    image_intensities = image[pixel_coordinates[:, 0], pixel_coordinates[:, 1]]
     
     return np.dot(image_intensities,pattern_intensities)/np.sqrt(np.dot(pattern_intensities,pattern_intensities))
