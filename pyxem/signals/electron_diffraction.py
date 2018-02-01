@@ -27,6 +27,7 @@ from pyxem.signals.diffraction_profile import DiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import *
 from pyxem.utils.peakfinders2D import *
+from pyxem.utils import peakfinder2D_gui
 
 
 def peaks_as_gvectors(z, center, calibration):
@@ -764,7 +765,6 @@ class ElectronDiffraction(Signal2D):
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
-        from .utils import peakfinder2D_gui
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
 
