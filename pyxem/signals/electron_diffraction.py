@@ -30,10 +30,6 @@ from pyxem.utils.peakfinders2D import *
 from pyxem.utils import peakfinder2D_gui
 
 
-def peaks_as_gvectors(z, center, calibration):
-    g = (z - center) * calibration
-    return g[0]
-
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
 
