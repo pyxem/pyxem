@@ -19,20 +19,15 @@
 from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
+from scipy.spatial import distance_matrix
+
 from pyxem.utils.expt_utils import *
+from pyxem.utils.vector_utils import *
 from tqdm import tqdm
 
 """
 Signal class for diffraction vectors.
 """
-
-
-def _calculate_norms(z):
-    norms = []
-    #print(z)
-    for i in z[0]:
-        norms.append(np.linalg.norm(i))
-    return np.asarray(norms)
 
 
 class DiffractionVectors(BaseSignal):
@@ -41,11 +36,9 @@ class DiffractionVectors(BaseSignal):
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
-
-    # This overwrited a method in base signal and has been renamed
-    def plot_diff_vects(self):
-        #Plot the diffraction vectors.
-
+    def plot_diffraction_vectors(self):
+        """Plot the diffraction vectors.
+        """
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
@@ -54,7 +47,7 @@ class DiffractionVectors(BaseSignal):
         plt.axes().set_aspect('equal')
         plt.show()
 
-    def get_magnitudes(self):
+    def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
 
         Returns
@@ -65,7 +58,9 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
-        magnitudes = self.map(_calculate_norms, inplace=False)
+        magnitudes = self.map(calculate_norms,
+                              inplace=False,
+                              *args, **kwargs)
         return magnitudes
 
     def get_magnitude_histogram(self, bins):
@@ -82,10 +77,10 @@ class DiffractionVectors(BaseSignal):
             Histogram of gvector magnitudes.
 
         """
-        gnorms = self.get_magnitudes()
+        gmags = self.get_magnitudes()
 
         glist=[]
-        for i in gnorms._iterate_signal():
+        for i in gmags._iterate_signal():
             for j in np.arange(len(i[0])):
                 glist.append(i[0][j])
         gs = np.asarray(glist)
@@ -102,25 +97,15 @@ class DiffractionVectors(BaseSignal):
         Parameters
         ----------
         distance_threshold : float
-            The minimum distance between diffraction vectors for them to be considered
-            as unique diffraction vectors.
+            The minimum distance between diffraction vectors for them to be
+            considered unique diffraction vectors.
 
         Returns
         -------
         unique_vectors : float
             Ndarray of all unique diffraction vectors.
         """
-        from scipy.spatial import distance_matrix
-        def get_new_indices_from_distance_matrix(distances,distance_threshold):
-        #Checks if the distances from one vector in vlist to all other vectors in gvlist
-        #is larger than distance_threshold.
-            new_indices = []
-            l = np.shape(distances)[0]
-            for i in range(np.shape(distances)[1]):
-                if (np.sum(distances[:,i] > distance_threshold) == l):
-                    new_indices = np.append(new_indices, i)
-            return np.array(new_indices,dtype=np.int)
-
+        #TODO: tidy up this method and put in clustering option.
         if (self.axes_manager.navigation_dimension == 2):
             gvlist = np.array([self.data[0,0][0]])
         else:
@@ -128,8 +113,9 @@ class DiffractionVectors(BaseSignal):
 
         for i in tqdm(self._iterate_signal()):
             vlist = i[0]
-            distances = distance_matrix(gvlist,vlist)
-            new_indices = get_new_indices_from_distance_matrix(distances,distance_threshold)
+            distances = distance_matrix(gvlist, vlist)
+            new_indices = get_indices_from_distance_matrix(distances,
+                                                           distance_threshold)
             gvlist_new = vlist[new_indices]
             if gvlist_new.any():
                 gvlist=np.concatenate((gvlist, gvlist_new),axis=0)
@@ -161,12 +147,12 @@ class DiffractionVectors(BaseSignal):
             intensities.
 
         radius : float
-            Radius of the integration window summed over in reciprocal angstroms.
+            Radius of the integration window in reciprocal angstroms.
 
         Returns
         -------
         vdfs : Signal2D
-            Signal containing virtual dark field images for all unique g-vectors.
+            Signal containing virtual dark field images for all unique vectors.
         """
         if unique_vectors==None:
             unique_vectors = self.get_unique_vectors()
@@ -180,6 +166,12 @@ class DiffractionVectors(BaseSignal):
                        axes=electron_diffraction.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
         return Signal2D(np.asarray(vdfs))
+
+    def get_diffracting_pixels_map(self, binary=False):
+        """Map of the number of vectors at each navigation position.
+        """
+
+        pass
 
     def get_gvector_indexation(self,
                                calculated_peaks,
@@ -240,13 +232,6 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-
-        """
-        pass
-
-    def get_diffracting_pixels_map(self):
-        """Get a map of the number of diffraction vectors at each navigation
-        position.
 
         """
         pass
