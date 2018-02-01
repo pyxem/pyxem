@@ -516,8 +516,9 @@ class ElectronDiffraction(Signal2D):
 				convolutions to determine where the peaks are, and sets
 				all other pixels to 0.
             * 'median' - Use a median filter for background removal
-            * 'from_vacuum' - Uses get_background_from_vacuum to get background
-            from an average pattern of vacuum region of the sample
+            * 'from_vacuum' - Subtract a user-defined background array from every
+                diffraction pattern. TO DO: make the vacuum region choice inside
+                this function
 
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
@@ -532,6 +533,8 @@ class ElectronDiffraction(Signal2D):
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
+        bg : array
+            Background array extracted from vacuum.
 
         Returns
         -------
@@ -785,6 +788,7 @@ class ElectronDiffraction(Signal2D):
 
         k : float
             Parameter for Sauvola thresholding
+
         window_size : int
             Size of the window considered for each pixel when calculating local
             Sauvola threshold. Has to be odd and >=3.

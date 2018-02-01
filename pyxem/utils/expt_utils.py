@@ -355,7 +355,7 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
 
     return np.maximum(bg_subtracted, 0)
 
-def subtract_background(z, bg_vac):
+def subtract_background(z, bg):
     """Subtracts background using a user-defined background pattern.
 
     Parameters
@@ -363,7 +363,7 @@ def subtract_background(z, bg_vac):
     bg_vac: array
         User-defined diffraction pattern to be subtracted as background.
     """
-    im = z.astype(np.float64)-bg_vac
+    im = z.astype(np.float64)-bg
     for i in range (0,z.shape[0]):
         for j in range (0,z.shape[1]):
             if im[i,j]<0:
@@ -464,10 +464,11 @@ def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshol
     im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')
     im2 = ndi.gaussian_filter(im1, sigma=sigma_enhance, mode='constant', cval=255)
     im3= im1 - im2
-    im3[im3<2] = 0
+    im3[im3<0] = 0
 
     mask = im3 > threshold
     im4 = im3*mask
+
     thresh_sauvola = threshold_sauvola(im4, window_size, k)
     binary_sauvola = im4 > thresh_sauvola
     binary_sauvola_blur = ndi.gaussian_filter(binary_sauvola, sigma = 0.12)
