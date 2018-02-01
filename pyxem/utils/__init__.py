@@ -20,7 +20,7 @@ import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
 
-def correlate(image, pattern):
+def correlate(image, pattern,half_shape):
     """The correlation between a diffraction pattern and a simulation.
 
     Calculated using
@@ -38,6 +38,8 @@ def correlate(image, pattern):
         and centered.
     pattern : :class:`pyxem.DiffractionSimulation`
         The pattern to compare to.
+    half_shape: tuple
+        The image dimensions, halved. So for a 144x144 we use (72,72)
     
     Returns
     -------
@@ -50,8 +52,6 @@ def correlate(image, pattern):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    shape = image.shape
-    half_shape = tuple(i // 2 for i in shape)
     #the hard code on this number should be considered    
     mask = np.abs(pattern.coordinates[:,2]) < 1e-2
     
@@ -60,4 +60,4 @@ def correlate(image, pattern):
     pixel_coordinates = np.rint(pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
     image_intensities = image[pixel_coordinates[:, 0][mask], pixel_coordinates[:, 1][mask]]
     
-    return np.dot(image_intensities,pattern_intensities)/np.sqrt(np.dot(pattern_intensities,pattern_intensities)))
+    return np.dot(image_intensities,pattern_intensities)/np.sqrt(np.dot(pattern_intensities,pattern_intensities))
