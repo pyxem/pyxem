@@ -39,13 +39,15 @@ class DiffractionVectors(BaseSignal):
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
-    def plot_diffraction_vectors(self):
+    def plot_diffraction_vectors(self, xlim, ylim):
         """Plot the diffraction vectors.
         """
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
         plt.plot(unique_vectors.T[1], unique_vectors.T[0], 'ro')
+        plt.xlim(-xlim, xlim)
+        plt.ylim(-ylim, ylim)
         plt.axes().set_aspect('equal')
         plt.show()
 
@@ -250,7 +252,6 @@ class DiffractionVectors(BaseSignal):
 
         """
         #TODO: Specify threshold as a fraction of the g-vector magnitude.
-
         recip_latt = structure.lattice.reciprocal_lattice_crystallographic
         recip_pts = recip_latt.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], maximum_length)
         calc_peaks = np.asarray(sorted(recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])))
