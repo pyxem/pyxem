@@ -51,8 +51,9 @@ class DiffractionLibraryGenerator(object):
                                 structure_library,
                                 calibration,
                                 reciprocal_radius,
-                                representation='euler',
-                                half_shape):
+                                half_shape,
+                                representation='euler'
+                                ):
         """Calculates a dictionary of diffraction data for a library of crystal
         structures and orientations.
 
