@@ -20,10 +20,11 @@ from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
 from scipy.spatial import distance_matrix
+from sklearn.cluster import DBSCAN
+from tqdm import tqdm
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
-from tqdm import tqdm
 
 """
 Signal class for diffraction vectors.
@@ -105,7 +106,6 @@ class DiffractionVectors(BaseSignal):
         unique_vectors : float
             Ndarray of all unique diffraction vectors.
         """
-        #TODO: tidy up this method and put in clustering option.
         if (self.axes_manager.navigation_dimension == 2):
             gvlist = np.array([self.data[0,0][0]])
         else:
@@ -127,6 +127,38 @@ class DiffractionVectors(BaseSignal):
             if (np.sum(distances[:,i] <= distance_threshold) > 1):
                 delete_indices = np.append(delete_indices, i)
         return np.delete(gvlist,delete_indices,axis = 0)
+
+    def get_vector_clusters(self, eps=0.01, min_samples=10):
+        """Perform DBSCAN clustering on the diffraction vectors.
+
+        Parameters
+        ----------
+        eps : float
+            The maximum distance between two samples for them to be considered
+            as in the same neighborhood.
+
+        min_samples : float
+            The number of samples (or total weight) in a neighborhood for a
+            point to be considered as a core point. This includes the point itself.
+
+        Returns
+        -------
+        db : clustering
+            Results of the DBSCAN clustering.
+
+        See also
+        --------
+        sklearn.cluster.DBSCAN
+
+        """
+        if (self.axes_manager.navigation_dimension == 2):
+            gvs = np.array([self.data[0,0][0]])
+        else:
+            gvs = np.array([self.data[0][0]])
+
+        db = DBSCAN(eps=eps, min_samples=min_samples).fit(gvs)
+
+        return db
 
     def get_vdf_images(self,
                        electron_diffraction,
@@ -179,7 +211,7 @@ class DiffractionVectors(BaseSignal):
         Returns
         -------
         crystim : Signal2D
-            2D map of diffracting pixels.        
+            2D map of diffracting pixels.
         """
         crystim = self.map(get_npeaks, inplace=False).as_signal2D((0,1))
         if binary==True:
