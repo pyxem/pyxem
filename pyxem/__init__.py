@@ -30,6 +30,7 @@ from hyperspy.misc.io.tools import overwrite as overwrite_method
 from hyperspy.misc.utils import stack as stack_method
 from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.ui_registry import get_gui
+from hyperspy.api import roi
 from natsort import natsorted
 from .components.diffraction_component import ElectronDiffractionForwardModel
 from .generators.diffraction_generator import DiffractionGenerator
@@ -498,9 +499,19 @@ def save(filename, signal, overwrite=None, **kwds):
             signal.tmp_parameters.set_item('extension', extension)
 
 
-def load_mib(filename):
+def load_mib(filename, scan_size):
+    """
+    Load medipix file.
+    Paramters:
+        filename : string
+            File path and name
+        scan_size : int
+            Scan size in pixels, allows the function to reshape the array into
+            the right shape.
+            
+    """
     dpt = load_with_reader(filename=filename, reader=mib_reader)
-    dpt = ElectronDiffraction(dpt.data.reshape((256, 256, 256, 256)))
+    dpt = ElectronDiffraction(dpt.data.reshape((scan_size, scan_size, 256, 256)))
     trace = dpt.inav[:,0:5].sum((1,2,3))
     edge = np.where(trace==max(trace.data))[0][0]
     return ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
