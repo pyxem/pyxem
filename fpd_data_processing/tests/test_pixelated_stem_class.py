@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from numpy.random import randint
 import dask.array as da
+from hyperspy.signals import Signal2D
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 import fpd_data_processing.make_diffraction_test_data as mdtd
@@ -23,6 +24,24 @@ class test_pixelated_stem(unittest.TestCase):
         array1 = np.zeros(shape=(10, 10))
         s1 = PixelatedSTEM(array1)
         self.assertEqual(array1.shape, s1.axes_manager.shape)
+
+
+class test_plotting(unittest.TestCase):
+
+    def test_simple_plot(self):
+        s = PixelatedSTEM(np.zeros(shape=(3, 4, 6, 10)))
+        s.plot()
+
+    def test_navigation_signal_plot(self):
+        s = PixelatedSTEM(np.zeros(shape=(3, 4, 6, 10)))
+        s_nav = Signal2D(np.zeros((3, 4)))
+        s.navigation_signal = s_nav
+        s.plot()
+
+    def test_navigation_signal_plot_argument(self):
+        s = PixelatedSTEM(np.zeros(shape=(3, 4, 6, 10)))
+        s_nav = Signal2D(np.zeros((3, 4)))
+        s.plot(navigator=s_nav)
 
 
 class test_pixelated_stem_flip_diffraction(unittest.TestCase):

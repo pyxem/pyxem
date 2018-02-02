@@ -13,6 +13,26 @@ from tqdm import tqdm
 
 class PixelatedSTEM(Signal2D):
 
+    def plot(self, *args, **kwargs):
+        if 'navigator' in kwargs:
+            super().plot(*args, **kwargs)
+        elif hasattr(self, *args, 'navigation_signal'):
+            if self.navigation_signal is not None:
+                nav_sig_shape = self.navigation_signal.axes_manager.shape
+                self_nav_shape = self.axes_manager.navigation_shape
+                if nav_sig_shape == self_nav_shape:
+                    kwargs['navigator'] = self.navigation_signal
+                    super().plot(*args, **kwargs)
+                else:
+                    raise ValueError(
+                            "navigation_signal does not have the same shape "
+                            "({0}) as the signal's navigation shape "
+                            "({1})".format(nav_sig_shape, self_nav_shape))
+            else:
+                super().plot(*args, **kwargs)
+        else:
+            super().plot(*args, **kwargs)
+
     def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
         """
         Rotate the diffraction dimensions.

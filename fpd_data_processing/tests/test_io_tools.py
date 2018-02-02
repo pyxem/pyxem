@@ -121,6 +121,22 @@ class test_pixelatedstem_signal_io(unittest.TestCase):
         s = fp.load_fpd_signal(filename, lazy=True)
         self.assertEqual(s.axes_manager.shape, (2, 2, 256, 256))
 
+    def test_navigation_signal(self):
+        # Dataset has known size (2, 2, 256, 256)
+        filename = os.path.join(
+                my_path, "test_data", "fpd_file_test.hdf5")
+        s = fp.load_fpd_signal(filename)
+        self.assertEqual(s.axes_manager.shape, (2, 2, 256, 256))
+
+        s_nav0 = hs.signals.Signal2D(np.zeros((2, 2)))
+        s = fp.load_fpd_signal(filename, lazy=True, navigation_signal=s_nav0)
+        s.plot()
+
+        s_nav1 = hs.signals.Signal2D(np.zeros((2, 4)))
+        with self.assertRaises(ValueError):
+            s = fp.load_fpd_signal(
+                    filename, lazy=True, navigation_signal=s_nav1)
+
 
 class test_signal_to_pixelated_stem(unittest.TestCase):
 
