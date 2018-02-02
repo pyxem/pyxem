@@ -557,8 +557,7 @@ class ElectronDiffraction(Signal2D):
 
             h = max(bg.data.min(), 1e-6)
             bg_subtracted = ElectronDiffraction(
-                bg_removed.map(
-                    regional_flattener, h=h, inplace=False))
+                bg_removed.map(regional_flattener, h=h, inplace=False))
             bg_subtracted.axes_manager.update_axes_attributes_from(
                 self.axes_manager.navigation_axes)
             bg_subtracted.axes_manager.update_axes_attributes_from(
