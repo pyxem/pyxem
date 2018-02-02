@@ -22,7 +22,7 @@ from scipy.ndimage.interpolation import shift
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
-from skimage.morphology import square
+from skimage.morphology import square, opening
 from skimage.filters import (threshold_sauvola, threshold_otsu)
 
 try:
@@ -471,7 +471,7 @@ def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshol
 
     thresh_sauvola = threshold_sauvola(im4, window_size, k)
     binary_sauvola = im4 > thresh_sauvola
-    binary_sauvola_blur = ndi.gaussian_filter(binary_sauvola, sigma = 0.12)
-    final = im4*binary_sauvola_blur
+    opened = opening(binary_sauvola)
 
-    return final
+
+    return opened
