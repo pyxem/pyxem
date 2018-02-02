@@ -252,3 +252,19 @@ class test_fit_ellipse(unittest.TestCase):
             ra.fit_ellipses_to_signal(
                     s, [(50, 70), (70, 95), (80, 105)],
                     angleN=[20, 30], show_progressbar=False)
+
+
+class test_holz_calibration(unittest.TestCase):
+
+    def test_get_holz_angle(self):
+        wavelength = 2.51/1000
+        lattice_parameter = 0.3905*2**0.5
+        angle = ra._get_holz_angle(wavelength, lattice_parameter)
+        self.assertAlmostEqual(95.37805/1000, angle, places=4)
+
+    def test_scattering_angle_to_lattice_parameter(self):
+        wavelength = 2.51/1000
+        angle = 95.37805/1000
+        lattice_size = ra._scattering_angle_to_lattice_parameter(
+                wavelength, angle)
+        self.assertAlmostEqual(0.55225047, lattice_size, places=4)
