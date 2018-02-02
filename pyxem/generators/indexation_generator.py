@@ -44,6 +44,7 @@ def correlate_library(image, library,n_largest,keys=[]):
             n_largest=len(library[key])
         correlations = dict()
         for orientation, diffraction_pattern in library[key].items():
+            #diffraction_pattern here is in fact a library of diffraction_pattern_properties
             correlation = correlate(image, diffraction_pattern)
             correlations[orientation] = correlation
         res = nlargest(n_largest, correlations.items(), key=itemgetter(1))

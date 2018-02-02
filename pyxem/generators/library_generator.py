@@ -20,12 +20,14 @@
 
 """
 
+import numpy as np
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from pyxem.signals.diffraction_library import DiffractionLibrary
 from scipy.constants import pi
 from tqdm import tqdm
 from transforms3d.euler import euler2axangle
+
 
 
 class DiffractionLibraryGenerator(object):
@@ -49,7 +51,9 @@ class DiffractionLibraryGenerator(object):
                                 structure_library,
                                 calibration,
                                 reciprocal_radius,
-                                representation='euler'):
+                                half_shape,
+                                representation='euler'
+                                ):
         """Calculates a dictionary of diffraction data for a library of crystal
         structures and orientations.
 
@@ -75,6 +79,9 @@ class DiffractionLibraryGenerator(object):
             If 'euler' the zxz convention is taken and values are in radians, if
             'axis-angle' the rotational angle is in degrees.
 
+        half_shape: tuple
+            The half shape of the target patterns, for 144x144 use (72,72) etc
+        
         Returns
         -------
         diffraction_library : dict of :class:`DiffractionSimulation`
@@ -108,8 +115,12 @@ class DiffractionLibraryGenerator(object):
                                                     reciprocal_radius)
                 # Calibrate simulation
                 data.calibration = calibration
+                mask = np.abs(data.coordinates[:,2]) < 1e-2
+                pattern_intensities = data.intensities[mask]
+                pixel_coordinates = np.rint(data.calibrated_coordinates[:,:2]+half_shape).astype(int)[mask]
                 # Construct diffraction simulation library.
-                phase_diffraction_library[tuple(orientation)] = data
+                phase_diffraction_library[tuple(orientation)] = \
+                {'Sim':data,'intensities':pattern_intensities,'pixel_coords':pixel_coordinates}
             diffraction_library[key] = phase_diffraction_library
         return diffraction_library
 
