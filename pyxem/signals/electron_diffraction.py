@@ -645,7 +645,7 @@ class ElectronDiffraction(Signal2D):
 
     def get_no_diffraction_mask(self, *args, **kwargs):
         """Identify electron diffraction patterns containing no diffraction
-        peaks for removal in further processing steps.
+        peaks to remove from further processing.
 
         Parameters
         ----------
