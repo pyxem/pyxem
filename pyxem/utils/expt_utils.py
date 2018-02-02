@@ -355,12 +355,12 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
 
     return np.maximum(bg_subtracted, 0)
 
-def subtract_background(z, bg):
+def subtract_reference(z, bg):
     """Subtracts background using a user-defined background pattern.
 
     Parameters
     ----------
-    bg_vac: array
+    bg: array
         User-defined diffraction pattern to be subtracted as background.
     """
     im = z.astype(np.float64)-bg

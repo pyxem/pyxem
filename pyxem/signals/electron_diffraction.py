@@ -426,11 +426,10 @@ class ElectronDiffraction(Signal2D):
             The electron diffraction data in polar coordinates.
 
         """
-        return self.map(
-                   reproject_polar,
-                   origin=origin,
-                   jacobian=jacobian,
-                   dr=dr, dt=dt)
+        return self.map(reproject_polar,
+                        origin=origin,
+                        jacobian=jacobian,
+                        dr=dr, dt=dt)
 
     # TODO: This method needs to keep track of what's what better, with labels
     # axes also need to track calibrations.
@@ -480,16 +479,17 @@ class ElectronDiffraction(Signal2D):
         """
         #TODO: add sub-pixel capabilities and model fitting methods.
         if method == 'blur':
-            centers = self.map(find_beam_position_blur, sigma=sigma, inplace=False)
+            centers = self.map(find_beam_position_blur,
+                               sigma=sigma, inplace=False)
 
         elif method == 'refine_local':
             if initial_center==None:
                 initial_center = np.int(self.signal_axes.shape / 2)
 
             centers = self.map(refine_beam_position,
-                          initial_center=initial_center,
-                          radius=radius,
-                          inplace=False)
+                               initial_center=initial_center,
+                               radius=radius,
+                               inplace=False)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "
@@ -513,9 +513,8 @@ class ElectronDiffraction(Signal2D):
 				convolutions to determine where the peaks are, and sets
 				all other pixels to 0.
             * 'median' - Use a median filter for background removal
-            * 'from_vacuum' - Subtract a user-defined background array from every
-                diffraction pattern. TO DO: make the vacuum region choice inside
-                this function
+            * 'reference_pattern' - Subtract a user-defined reference patterns
+                from every diffraction pattern.
 
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
@@ -531,13 +530,12 @@ class ElectronDiffraction(Signal2D):
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
         bg : array
-            Background array extracted from vacuum.
+            Background array extracted from vacuum. (subtract_reference only)
 
         Returns
         -------
-        denoised : :obj:`ElectronDiffraction`
-            A copy of the data with the background removed and the noise
-            smoothed.
+        bg_subtracted : :obj:`ElectronDiffraction`
+            A copy of the data with the background subtracted.
 
         See Also
         --------
@@ -547,9 +545,10 @@ class ElectronDiffraction(Signal2D):
         if method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
-            denoised = self.map(regional_filter, inplace=False, *args, **kwargs)
-            denoised.map(filters.rank.mean, selem=square(3))
-            denoised.data = denoised.data / denoised.data.max()
+            bg_subtracted = self.map(regional_filter,
+                                     inplace=False, *args, **kwargs)
+            bg_subtracted.map(filters.rank.mean, selem=square(3))
+            bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
         elif method == 'model':
             bg = self.get_background_model(*args, **kwargs)
@@ -557,30 +556,31 @@ class ElectronDiffraction(Signal2D):
             bg_removed = np.clip(self - bg, self.min(), self.max())
 
             h = max(bg.data.min(), 1e-6)
-            denoised = ElectronDiffraction(
+            bg_subtracted = ElectronDiffraction(
                 bg_removed.map(
                     regional_flattener, h=h, inplace=False))
-            denoised.axes_manager.update_axes_attributes_from(
+            bg_subtracted.axes_manager.update_axes_attributes_from(
                 self.axes_manager.navigation_axes)
-            denoised.axes_manager.update_axes_attributes_from(
+            bg_subtracted.axes_manager.update_axes_attributes_from(
                 self.axes_manager.signal_axes)
 
         elif method == 'gaussian_difference':
-            denoised = self.map(subtract_background_dog, inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(subtract_background_dog,
+                                     inplace=False, *args, **kwargs)
 
         elif method == 'median':
-            # no denoising applied here
-            denoised = self.map(subtract_background_median, inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(subtract_background_median,
+                                     inplace=False, *args, **kwargs)
 
-        elif method == 'from_vacuum':
-            denoised=self.map(subtract_background, *args, **kwargs)
+        elif method == 'reference_pattern':
+            bg_subtracted = self.map(subtract_reference, *args, **kwargs)
 
         else:
             raise NotImplementedError(
                 "The method specified, '{}', is not implemented. See"
                 "documentation for available implementations.".format(method))
 
-        return denoised
+        return bg_subtracted
 
     def get_background_model(self, saturation_radius):
         """Creates a model for the background of the signal.
