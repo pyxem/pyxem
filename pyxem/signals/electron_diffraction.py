@@ -608,7 +608,6 @@ class ElectronDiffraction(Signal2D):
 
         """
         # TODO: get this done without taking the mean
-
         profile = self.get_radial_profile().mean()
         model = profile.create_model()
         e1 = saturation_radius * profile.axes_manager.signal_axes[0].scale
@@ -751,8 +750,8 @@ class ElectronDiffraction(Signal2D):
             #ToDo Remove this hardcore
             peaks = peaks.transpose(navigation_axes=2)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            raise RuntimeWarning('You do not have the same size navigation axes for your \
-            Diffraction pattern and your peaks')
+            raise RuntimeWarning('You do not have the same size navigation axes \
+            for your Diffraction pattern and your peaks')
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
@@ -764,12 +763,14 @@ class ElectronDiffraction(Signal2D):
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
 
-    def enhance(self, *args, **kwargs):
-        """Enhances peaks in the diffraction patterns. Current method includes:
-        using gaussian filter to blur the pattern and then subtracting it from
-        original, small threshold cutting out low intensity peaks, local
-        Sauvola thresholding to create a mask of peaks, final blurring with
-        gaussian filter.
+    def enhance(self,sigma_blur=1.6, sigma_enhance=0.5,
+                threshold=6.5, k=0.01, window_size=11,
+                *args, **kwargs):
+        """Enhances peaks in the diffraction patterns.
+
+        A gaussian filter is applied and the blurred image subtracted from the
+        original, thresholding removes low intensities, local Sauvola
+        thresholding creates a mask of peaks, final Gaussian blurring.
 
         Parameters:
         ------------
@@ -789,17 +790,19 @@ class ElectronDiffraction(Signal2D):
             Size of the window considered for each pixel when calculating local
             Sauvola threshold. Has to be odd and >=3.
 
-        For more information on Sauvola thresholding see:
+        See Also
+        --------
         http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_niblack_sauvola.html#id2
-        J. Sauvola and M. Pietikainen, “Adaptive document image binarization,” Pattern Recognition 33(2), pp. 225-236, 2000. DOI:10.1016/S0031-3203(99)00055-2
-
-        Good starting values: sigma_blur = 1.6, sigma_enhance = 0.5
-        threshold = 6.5, window_size = 11, k = 0.01
-
-        ------------
+        J. Sauvola and M. Pietikainen, “Adaptive document image binarization,”
+        Pattern Recognition 33(2), pp. 225-236, 2000.
+        DOI:10.1016/S0031-3203(99)00055-2
         """
-        enhanced = self.map(enhance_gauss_sauvola, *args, **kwargs)
-        return enhanced
+        return self.map(enhance_gauss_sauvola,
+                        sigma_blur=sigma_blur,
+                        sigma_enhance=sigma_enhance,
+                        threshold=threshold,
+                        window_size=window_size,
+                        k=k, *args, **kwargs)
 
 
 class LazyElectronDiffraction(LazySignal, ElectronDiffraction):
