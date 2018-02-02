@@ -12,7 +12,7 @@ from fpd_data_processing.pixelated_stem_class import (
 
 def _fpd_checker(filename, attr_substring='fpd_version'):
     if h5py.is_hdf5(filename):
-        hdf5_file = h5py.File(filename)
+        hdf5_file = h5py.File(filename, mode='r')
         for attr in hdf5_file.attrs:
             if attr_substring in attr:
                 return(True)
@@ -21,7 +21,7 @@ def _fpd_checker(filename, attr_substring='fpd_version'):
 
 def _hspy_checker(filename, attr_substring='fpd_version'):
     if h5py.is_hdf5(filename):
-        hdf5_file = h5py.File(filename)
+        hdf5_file = h5py.File(filename, mode='r')
         for attr in hdf5_file.attrs:
             if 'file_format' in attr:
                 if hdf5_file.attrs['file_format'] == 'HyperSpy':
@@ -30,7 +30,7 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
 
 
 def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
-    f = h5py.File(filename)
+    f = h5py.File(filename, mode='r')
     if 'fpd_expt' in f:
         data = f['/fpd_expt/fpd_data/data']
         if len(data.shape) == 5:
@@ -50,7 +50,7 @@ def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
 
 
 def _load_fpd_sum_im(filename):
-    f = h5py.File(filename)
+    f = h5py.File(filename, mode='r')
     if 'fpd_expt' in f:
         if len(f['/fpd_expt/fpd_sum_im/data'].shape) == 3:
             data = f['/fpd_expt/fpd_sum_im/data'][:, :, 0]
@@ -66,7 +66,7 @@ def _load_fpd_sum_im(filename):
 
 
 def _load_fpd_sum_dif(filename):
-    f = h5py.File(filename)
+    f = h5py.File(filename, mode='r')
     if 'fpd_expt' in f:
         if len(f['/fpd_expt/fpd_sum_dif/data'].shape) == 3:
             data = f['fpd_expt/fpd_sum_dif/data'][0, :, :]
