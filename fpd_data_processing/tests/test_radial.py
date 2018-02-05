@@ -185,8 +185,8 @@ class test_fit_ellipse(unittest.TestCase):
         ellipse_parameters = ra._fit_ellipse_to_xy_points(x, y)
         xC, yC, semi_len0, semi_len1, rot, eccen = ra._get_ellipse_parameters(
                 ellipse_parameters)
-        self.assertAlmostEqual(xC, 0.)
-        self.assertAlmostEqual(yC, 0.)
+        self.assertAlmostEqual(xC, 0., places=1)
+        self.assertAlmostEqual(yC, 0., places=1)
         self.assertAlmostEqual(semi_len0, axis2, places=-1)
         self.assertAlmostEqual(semi_len1, axis1, places=-1)
 
@@ -206,8 +206,8 @@ class test_fit_ellipse(unittest.TestCase):
         output = ra.fit_single_ellipse_to_signal(
                 s, (50, 70), angleN=10, show_progressbar=False)
         output[0].plot()
-        self.assertAlmostEqual(output[1], 0.)
-        self.assertAlmostEqual(output[2], 0.)
+        self.assertAlmostEqual(output[1], 0., places=2)
+        self.assertAlmostEqual(output[2], 0., places=2)
         self.assertAlmostEqual(output[3], 60, places=-1)
         self.assertAlmostEqual(output[4], 60, places=-1)
         self.assertAlmostEqual(output[6], 1., places=5)

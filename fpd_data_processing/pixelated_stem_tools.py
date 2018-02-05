@@ -307,7 +307,6 @@ def _get_angle_sector_mask(
     signal : HyperSpy 2-D signal
         Can have several navigation dimensions.
     angle0, angle1 : numbers
-        Must be between 0 and 2*pi.
 
     Returns
     -------
@@ -317,13 +316,19 @@ def _get_angle_sector_mask(
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
+    >>> import fpd_data_processing.pixelated_stem_tools as pst
     >>> import numpy as np
     >>> s = fp.PixelatedSTEM(np.arange(100).reshape(10, 10))
     >>> s.axes_manager.signal_axes[0].offset = -5
     >>> s.axes_manager.signal_axes[1].offset = -5
-    >>> mask = _get_angle_sector_mask(s, 0.5*np.pi, np.pi)
+    >>> mask = pst._get_angle_sector_mask(s, 0.5*np.pi, np.pi)
+
     """
+    if angle0 > angle1:
+        raise ValueError(
+                "angle1 ({0}) needs to be larger than angle0 ({1})".format(
+                    angle1, angle0))
+
     bool_array = np.zeros_like(signal.data, dtype=np.bool)
     for s in signal:
         indices = signal.axes_manager.indices[::-1]
@@ -343,8 +348,21 @@ def _get_angle_sector_mask(
         x, y = np.mgrid[
                 signal_axes[1].low_value:signal_axes[1].high_value:x_size,
                 signal_axes[0].low_value:signal_axes[0].high_value:y_size]
-        t = np.arctan2(x, y)+np.pi
-        bool_array[indices] = (t > angle0)*(t < angle1)
+        t = np.arctan2(x, y) + np.pi
+        if (angle1 - angle0) >= (2 * np.pi):
+            bool_array[indices] = True
+        else:
+            angle0 = angle0 % (2 * np.pi)
+            angle1 = angle1 % (2 * np.pi)
+            if angle0 < angle1:
+                bool_array[indices] = (t > angle0)*(t < angle1)
+            elif angle1 < angle0:
+                bool_array[indices] = (t > angle0)*(t <= (2 * np.pi))
+                bool_array[indices] += (t >= 0)*(t < angle1)
+            else:
+                raise ValueError(
+                    "Not able to process with angle0: {0}, and angle1: {1}. "
+                    "This error should not happen...")
     return(bool_array)
 
 

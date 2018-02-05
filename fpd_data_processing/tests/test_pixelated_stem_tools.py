@@ -1,4 +1,5 @@
 import unittest
+import pytest
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 import fpd_data_processing.pixelated_stem_tools as pst
 import numpy as np
@@ -84,7 +85,10 @@ class test_pixelated_tools(unittest.TestCase):
         self.assertTrue((-offset0_x == mask[0]).all())
         self.assertTrue((-offset0_y == mask[1]).all())
 
-    def test_get_angle_sector_mask_0d(self):
+
+class TestGetAngleSectorMask(unittest.TestCase):
+
+    def test_0d(self):
         data_shape = (10, 8)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
@@ -111,7 +115,7 @@ class test_pixelated_tools(unittest.TestCase):
         mask3 = pst._get_angle_sector_mask(s, angle0=np.pi*3/2, angle1=np.pi*2)
         self.assertFalse(mask3.any())
 
-    def test_get_angle_sector_mask_0d_com(self):
+    def test_0d_com(self):
         data_shape = (10, 8)
         data = np.zeros(data_shape)
         s = PixelatedSTEM(data)
@@ -123,7 +127,7 @@ class test_pixelated_tools(unittest.TestCase):
                 centre_y_array=s_com.inav[1].data,
                 angle0=np.pi*3/2, angle1=np.pi*2)
 
-    def test_get_angle_sector_mask_1d(self):
+    def test_1d(self):
         data_shape = (5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
@@ -140,21 +144,21 @@ class test_pixelated_tools(unittest.TestCase):
         np.testing.assert_array_equal(
                 mask1, np.zeros_like(mask1, dtype=np.bool))
 
-    def test_get_angle_sector_mask_2d(self):
+    def test_2d(self):
         data_shape = (3, 5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
         self.assertEqual(mask0.shape, data_shape)
 
-    def test_get_angle_sector_mask_3d(self):
+    def test_3d(self):
         data_shape = (5, 3, 5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
         self.assertEqual(mask0.shape, data_shape)
 
-    def test_get_angle_sector_mask_centre_xy(self):
+    def test_centre_xy(self):
         data_shape = (3, 5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
@@ -165,6 +169,58 @@ class test_pixelated_tools(unittest.TestCase):
             s, angle0=np.pi, angle1=2*np.pi,
             centre_x_array=centre_x, centre_y_array=centre_y)
         self.assertEqual(mask0.shape, data_shape)
+
+    def test_bad_angles(self):
+        s = Signal2D(np.zeros((100, 100)))
+        with pytest.raises(ValueError):
+            pst._get_angle_sector_mask(s, angle0=2, angle1=-1)
+
+    def test_angles_across_pi(self):
+        s = Signal2D(np.zeros((100, 100)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -49.5, -49.5
+        mask0 = pst._get_angle_sector_mask(s, 0.5*np.pi, 1.5*np.pi)
+        assert np.invert(mask0[:, 0:50]).all()
+        assert mask0[:, 50:].all()
+
+        mask1 = pst._get_angle_sector_mask(s, 2.5*np.pi, 3.5*np.pi)
+        assert np.invert(mask1[:, 0:50]).all()
+        assert mask1[:, 50:].all()
+
+        mask2 = pst._get_angle_sector_mask(s, 4.5*np.pi, 5.5*np.pi)
+        assert np.invert(mask2[:, 0:50]).all()
+        assert mask2[:, 50:].all()
+
+        mask3 = pst._get_angle_sector_mask(s, -3.5*np.pi, -2.5*np.pi)
+        assert np.invert(mask3[:, 0:50]).all()
+        assert mask3[:, 50:].all()
+
+    def test_angles_across_zero(self):
+        s = Signal2D(np.zeros((100, 100)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -50
+        mask0 = pst._get_angle_sector_mask(s, -0.5*np.pi, 0.5*np.pi)
+        assert mask0[:, 0:50].all()
+        assert np.invert(mask0[:, 50:]).all()
+
+        mask1 = pst._get_angle_sector_mask(s, 1.5*np.pi, 2.5*np.pi)
+        assert mask1[:, 0:50].all()
+        assert np.invert(mask1[:, 50:]).all()
+
+        mask2 = pst._get_angle_sector_mask(s, 3.5*np.pi, 4.5*np.pi)
+        assert mask2[:, 0:50].all()
+        assert np.invert(mask2[:, 50:]).all()
+
+        mask3 = pst._get_angle_sector_mask(s, -4.5*np.pi, -3.5*np.pi)
+        assert mask3[:, 0:50].all()
+        assert np.invert(mask3[:, 50:]).all()
+
+    def test_angles_more_than_2pi(self):
+        s = Signal2D(np.zeros((100, 100)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -50
+        mask0 = pst._get_angle_sector_mask(s, 0.1*np.pi, 4*np.pi)
+        assert mask0.all()
+
+        mask1 = pst._get_angle_sector_mask(s, -1*np.pi, 2.1*np.pi)
+        assert mask1.all()
 
 
 class test_dpcsignal_tools(unittest.TestCase):
