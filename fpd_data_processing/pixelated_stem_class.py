@@ -379,7 +379,7 @@ class PixelatedSTEM(Signal2D):
 
     def angular_slice_radial_integration(
             self, angleN=20, centre_x=None, centre_y=None,
-            show_progressbar=True):
+            slice_overlap=None, show_progressbar=True):
         """Do radial integration of different angular slices.
         Useful for analysing anisotropy in round diffraction features,
         such as diffraction rings from polycrystalline materials or
@@ -400,6 +400,13 @@ class PixelatedSTEM(Signal2D):
             missing, both will be set from the signal (0., 0.) positions.
             If no values are given, the (0., 0.) positions in the signal will
             be used.
+        slice_overlap : float, optional
+            Amount of overlap between the slices, given in fractions of
+            angle slice (0 to 1). For angleN=4, each slice will be 90
+            degrees. If slice_overlap=0.5, each slice will overlap by 45
+            degrees on each side. The range of the slices will then be:
+            (-45, 135), (45, 225), (135, 315) and (225, 45).
+            Default off: meaning there is no overlap between the slices.
 
         Returns
         -------
@@ -414,14 +421,25 @@ class PixelatedSTEM(Signal2D):
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_integration(
         ...     angleN=10, centre_x=s_com.inav[0].data,
-        ...     centre_y=s_com.inav[1].data, show_progressbar=False)
+        ...     centre_y=s_com.inav[1].data, slice_overlap=0.2,
+        ...     show_progressbar=False)
         >>> s_ar.plot()
 
         """
         signal_list = []
         angle_list = []
+        if slice_overlap is None:
+            slice_overlap = 0
+        else:
+            if (slice_overlap < 0) or (slice_overlap > 1):
+                raise ValueError(
+                        "slice_overlap is {0}. But must be between "
+                        "0 and 1".format(slice_overlap))
+        angle_step = 2*np.pi/angleN
         for i in range(angleN):
-            angle_list.append((2*np.pi*i/angleN, 2*np.pi*(i+1)/angleN))
+            angle0 = (angle_step * i) - (angle_step * slice_overlap)
+            angle1 = (angle_step * (i + 1)) + (angle_step * slice_overlap)
+            angle_list.append((angle0, angle1))
         if (centre_x is None) or (centre_y is None):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
         elif (not isiterable(centre_x)) or (not isiterable(centre_y)):

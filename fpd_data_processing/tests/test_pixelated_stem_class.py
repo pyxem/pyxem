@@ -525,6 +525,32 @@ class test_angular_slice_radial_integration(unittest.TestCase):
         self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())
         self.assertTrue((s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all())
 
+    def test_slice_overlap(self):
+        x, y, r, px, py, iX, iY = 40, 55, 20, 6, 5, 120, 100
+        kwrds = {
+                'probe_size_x': px, 'probe_size_y': py,
+                'image_size_x': iX, 'image_size_y': iY, 'disk_I': 0,
+                'ring_x': x, 'ring_y': y, 'ring_r': r, 'ring_I': 5,
+                'blur': True, 'downscale': False}
+        r0, r1 = 20, 30
+        kwrds['ring_r'] = r0
+        s = mdtd.generate_4d_data(**kwrds)
+        kwrds['ring_r'] = r1
+        kwrds['ring_I'] = 500
+        s1 = mdtd.generate_4d_data(**kwrds)
+
+        s.data[:, :, y:, :] = s1.data[:, :, y:, :]
+
+        s_ar = s.angular_slice_radial_integration(
+                centre_x=x, centre_y=y, angleN=2)
+        self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
+        self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
+
+        s_ar1 = s.angular_slice_radial_integration(
+                centre_x=x, centre_y=y, angleN=2, slice_overlap=0.1)
+        self.assertTrue((s_ar1.inav[:, :, 0].data.argmax(axis=-1) == r1).all())
+        self.assertTrue((s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
+
 
 class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
 
