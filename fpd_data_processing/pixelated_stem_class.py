@@ -301,6 +301,7 @@ class PixelatedSTEM(Signal2D):
         >>> s_r = s.radial_integration(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
         >>> s_r.plot()
+
         """
 
         if (centre_x is None) or (centre_y is None):
@@ -350,7 +351,6 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         angle0, angle1 : numbers
-            Must be between 0 and 2*pi.
         centre_x_array, centre_y_array : NumPy 2D array, optional
             Has to have the same shape as the navigation axis of
             the signal.
@@ -368,6 +368,7 @@ class PixelatedSTEM(Signal2D):
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
         >>> mask_array = s.angular_mask(0.5*np.pi, np.pi)
+
         """
 
         bool_array = pst._get_angle_sector_mask(
@@ -387,7 +388,7 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         angleN : int, default 20
-            Number of angular slices. If angleN=2, each slice
+            Number of angular slices. If angleN=4, each slice
             will be 90 degrees. The integration will start in the top left
             corner (0, 0) when plotting using s.plot(), and go clockwise.
         centre_x, centre_y : int or NumPy array, optional

@@ -316,8 +316,9 @@ def _get_angle_sector_mask(
 
     Examples
     --------
-    >>> import fpd_data_processing.pixelated_stem_tools as pst
     >>> import numpy as np
+    >>> import fpd_data_processing.api as fp
+    >>> import fpd_data_processing.pixelated_stem_tools as pst
     >>> s = fp.PixelatedSTEM(np.arange(100).reshape(10, 10))
     >>> s.axes_manager.signal_axes[0].offset = -5
     >>> s.axes_manager.signal_axes[1].offset = -5
