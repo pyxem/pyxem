@@ -459,7 +459,7 @@ def refine_beam_position(z, start, radius):
 
     return c
 
-def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold):
+def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
     z = z.astype(np.float64)
     im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')
     im2 = ndi.gaussian_filter(im1, sigma=sigma_enhance, mode='constant', cval=255)
@@ -471,7 +471,9 @@ def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshol
 
     thresh_sauvola = threshold_sauvola(im4, window_size, k)
     binary_sauvola = im4 > thresh_sauvola
-    opened = opening(binary_sauvola)
+    if morph_opening:
+        final = opening(binary_sauvola)
+    else:
+        final=binary_sauvola
 
-
-    return opened
+    return final
