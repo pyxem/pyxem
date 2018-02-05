@@ -3,6 +3,7 @@ class DiffractionLibrary(dict):
     axis-angle pair) to simulated diffraction data.
     """
 
+    ## Possibly obsolete after the changes to DiffractionLibrary 
     def set_calibration(self, calibration):
         """Sets the scale of every diffraction pattern simulation in the
         library.
@@ -19,6 +20,7 @@ class DiffractionLibrary(dict):
             for diffraction_pattern in diff_lib.values():
                 diffraction_pattern.calibration = calibration
 
+    ## Again, may well be obsolete
     def set_offset(self, offset):
         """Sets the offset of every diffraction pattern simulation in the
         library.
@@ -43,7 +45,7 @@ class DiffractionLibrary(dict):
         sim_diff_dat = []
         for key in self.keys():
             for ori in self[key].keys():
-                dpi = self[key][ori].as_signal(128, 0.03, 1)
+                dpi = self[key][ori]['Sim'].as_signal(128, 0.03, 1)
                 sim_diff_dat.append(dpi.data)
         ppt_test = ElectronDiffraction(sim_diff_dat)
         ppt_test.plot()
