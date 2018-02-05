@@ -172,7 +172,7 @@ class DiffractionSimulation:
             num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
             dp_dat[num] = coords[:,2] #using the intensities
             from skimage.filters import gaussian as point_spread
-            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l) #sigma in terms of pixels
+            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
         elif mode == 'quant':
             var = np.power(sigma,2)
             electron_array = False
@@ -191,6 +191,7 @@ class DiffractionSimulation:
             x_num,y_num = np.digitize(electron_array[:,0],l,right=True),np.digitize(electron_array[:,1],l,right=True)
             for i in np.arange(len(x_num)):
                 dp_dat[x_num[i],y_num[i]] += 1
+            dp_dat = dp_dat.T #Hyperspy transpose
 
         dp_dat = dp_dat/np.max(dp_dat) #normalise to unit intensity
         dp = ElectronDiffraction(dp_dat)
