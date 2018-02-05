@@ -1,3 +1,4 @@
+import pytest
 import unittest
 import numpy as np
 from numpy.random import randint
@@ -550,6 +551,11 @@ class test_angular_slice_radial_integration(unittest.TestCase):
                 centre_x=x, centre_y=y, angleN=2, slice_overlap=0.1)
         self.assertTrue((s_ar1.inav[:, :, 0].data.argmax(axis=-1) == r1).all())
         self.assertTrue((s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
+
+        with pytest.raises(ValueError):
+                s.angular_slice_radial_integration(slice_overlap=1.2)
+        with pytest.raises(ValueError):
+                s.angular_slice_radial_integration(slice_overlap=-0.2)
 
 
 class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
