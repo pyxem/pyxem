@@ -415,6 +415,7 @@ class PixelatedSTEM(Signal2D):
         ...     angleN=10, centre_x=s_com.inav[0].data,
         ...     centre_y=s_com.inav[1].data, show_progressbar=False)
         >>> s_ar.plot()
+
         """
         signal_list = []
         angle_list = []
@@ -457,6 +458,7 @@ class DPCBaseSignal(BaseSignal):
 
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -473,6 +475,7 @@ class DPCSignal1D(Signal1D):
 
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
+
     """
 
     def get_bivariate_histogram(
@@ -527,6 +530,7 @@ class DPCSignal2D(Signal2D):
 
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
+
     """
 
     def correct_ramp(self, corner_size=0.05, only_offset=False, out=None):
