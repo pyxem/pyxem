@@ -48,7 +48,8 @@ setup(
 #    	'hyperspy',
 #        'pymatgen',
 #        'transforms3d',
-#        'cython'
+#        'cython',
+#        'lxml',
 #    ],
 
     package_data={
