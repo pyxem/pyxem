@@ -27,7 +27,7 @@ def coords_intensity_simulation():
 
 @pytest.fixture
 def as_signal_size_sigma_max_r():
-    return [144,0.03,4]
+    return [144,0.03,1.5]
 
 @pytest.fixture
 def get_qual_signal():
@@ -52,11 +52,11 @@ def get_quant_signal():
 
 def test_legacy_against_qual():
     assert get_qual_signal().data.shape == get_legacy_signal().data.shape
-    assert np.allclose(get_qual_signal().data,get_legacy_signal().data,rtol=0.5,atol=0.5) == True
+    assert np.allclose(get_qual_signal().data,get_legacy_signal().data,rtol=0,atol=0.5) == True
     
 def test_legacy_against_quant():
     assert get_quant_signal().data.shape == get_legacy_signal().data.shape
-    assert np.allclose(get_quant_signal().data,get_legacy_signal().data,rtol=0.5,atol=0.5) == True
+    assert np.allclose(get_quant_signal().data,get_legacy_signal().data,rtol=0,atol=0.5) == True
     
 def test_qual_against_quant():
-    assert np.allclose(get_qual_signal().data,get_quant_signal().data,rtol=0.5,atol=0.5) == True
+    assert np.allclose(get_qual_signal().data,get_quant_signal().data,rtol=0,atol=0.5) == True
