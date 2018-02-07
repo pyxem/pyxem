@@ -207,19 +207,3 @@ class TestDiffractionSimulation:
         diffraction_simulation.offset = offset
         assert np.allclose(diffraction_simulation.calibrated_coordinates, expected)
 
-    def test_plot_simulated_pattern(self, diffraction_simulation):
-        coordinates = np.array([
-            [-1, 0, 0],
-            [0, 0, 0],
-            [1, 0, 0],
-        ])
-        intensities = np.array([100, 1000, 10000])
-        diffraction_simulation.coordinates = coordinates
-        diffraction_simulation.intensities = intensities
-        diffraction_simulation.with_direct_beam = True
-        ax = diffraction_simulation.plot_simulated_pattern()
-        dots = ax.collections[0]
-        assert np.allclose(dots.get_offsets(), coordinates[:, :2])
-        assert np.allclose(dots.get_sizes(), np.log2(intensities))
-
-
