@@ -12,7 +12,7 @@ _GAUSSIAN2D_EXPR = \
 
 
 class DiffractionSimulation:
-    """Holds the result of a given diffraction pattern.
+    """Holds the result of a given kinematic simulation of a diffraction pattern.
 
     Parameters
     ----------
@@ -132,9 +132,10 @@ class DiffractionSimulation:
         ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")
         return ax
 
-    def as_signal(self, size, sigma, max_r, mode='qual'):
+    def as_signal(self, size, sigma, max_r):
         """Returns the diffraction data as an ElectronDiffraction signal with
-        two-dimensional Gaussians representing each diffracted peak.
+        two-dimensional Gaussians representing each diffracted peak. Should only
+        be used for qualitative work.
 
         Parameters
         ----------
@@ -145,54 +146,22 @@ class DiffractionSimulation:
         max_r : float
             Half the side length in reciprocal Angstroms. Defines the signal's
             calibration
-        mode  : 'qual','quant' or 'legacy'
-            In 'qual' mode the peaks are discretized and then broadened. This is
-            faster. In 'quant' mode 'electrons' are fired from exact peak location
-            and then assinged to 'detectors'. This is slower but more correct.
 
         """
+        from skimage.filters import gaussian as point_spread
+        
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
         coords = self.coordinates[:, :2]
-        if mode == 'legacy':
-            dp_dat = 0
-            x, y = np.meshgrid(l, l)
-            g = Expression(_GAUSSIAN2D_EXPR, 'Gaussian2D', module='numexpr')
-            for (cx, cy), intensity in zip(coords, self.intensities):
-                g.intensity.value = intensity
-                g.sigma.value = sigma
-                g.cx.value = cx
-                g.cy.value = cy
-                dp_dat += g.function(x, y)
-        elif mode == 'qual':
-            dp_dat = np.zeros([size,size])
-            coords = np.hstack((coords,self.intensities.reshape(len(self.intensities),-1))) #attaching int to coords
-            coords = coords[np.logical_and(coords[:,0]<max_r,coords[:,0]>-max_r)]
-            coords = coords[np.logical_and(coords[:,1]<max_r,coords[:,1]>-max_r)]
-            x,y = (coords)[:,0] , (coords)[:,1]
-            num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
-            dp_dat[num] = coords[:,2] #using the intensities
-            from skimage.filters import gaussian as point_spread
-            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
-        elif mode == 'quant':
-            var = np.power(sigma,2)
-            electron_array = False
-            ss = 400 #sample size to be multiplied by intensity
-            peak_location_detailed = np.hstack((coords,(self.intensities.reshape(len(self.intensities),1))))
-            for peak in peak_location_detailed:
-                if type(electron_array) == np.ndarray:
-                    electron_array_2 = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
-                    electron_array = np.vstack((electron_array,electron_array_2))
-                else:
-                    electron_array = np.random.multivariate_normal(peak[:2],(var)*np.eye(2,2),size=ss*np.rint(peak[2]).astype(int))
-            dp_dat = np.zeros([size,size])
-            ## chuck electrons that go to far out
-            electron_array = electron_array[np.logical_and(electron_array[:,0]<max_r,electron_array[:,0]>-max_r)]
-            electron_array = electron_array[np.logical_and(electron_array[:,1]<max_r,electron_array[:,1]>-max_r)]
-            x_num,y_num = np.digitize(electron_array[:,0],l,right=True),np.digitize(electron_array[:,1],l,right=True)
-            for i in np.arange(len(x_num)):
-                dp_dat[x_num[i],y_num[i]] += 1
-            dp_dat = dp_dat.T #Hyperspy transpose
-
+        
+        coords = np.hstack((coords,self.intensities.reshape(len(self.intensities),-1))) #attaching int to coords
+        coords = coords[np.logical_and(coords[:,0]<max_r,coords[:,0]>-max_r)]
+        coords = coords[np.logical_and(coords[:,1]<max_r,coords[:,1]>-max_r)]
+        
+        dp_dat = np.zeros([size,size])
+        x,y = (coords)[:,0] , (coords)[:,1]
+        num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
+        dp_dat[num] = coords[:,2] #using the intensities
+        dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
         dp_dat = dp_dat/np.max(dp_dat) #normalise to unit intensity
         dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(2*max_r/size)
