@@ -176,7 +176,7 @@ class DiffractionSimulation:
         elif mode == 'quant':
             var = np.power(sigma,2)
             electron_array = False
-            ss = 75 #sample size to be multiplied by intensity
+            ss = 400 #sample size to be multiplied by intensity
             peak_location_detailed = np.hstack((coords,(self.intensities.reshape(len(self.intensities),1))))
             for peak in peak_location_detailed:
                 if type(electron_array) == np.ndarray:
