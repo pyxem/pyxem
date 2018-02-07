@@ -91,7 +91,7 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         angle : scalar
-            Clickwise rotation in degrees.
+            Clockwise rotation in degrees.
         parallel : bool, default True
         show_progressbar : bool, default True
 
@@ -151,7 +151,7 @@ class PixelatedSTEM(Signal2D):
         The function returns a new signal, but the data itself
         is a view of the original signal. So changing the returned signal
         will also change the original signal (and visa versa). To avoid
-        changing the orignal signal, use the deepcopy method afterwards,
+        changing the original signal, use the deepcopy method afterwards,
         but note that this requires double the amount of memory.
         See below for an example of this.
 
