@@ -107,30 +107,6 @@ class DiffractionSimulation:
     def intensities(self, intensities):
         self._intensities = intensities
 
-    def plot_simulated_pattern(self, ax=None):
-        """Plots the simulated electron diffraction pattern with a logarithmic
-        intensity scale.
-
-        Run `.show()` on the result of this method to display the plot.
-
-        Parameters
-        ----------
-        ax : :obj:`matplotlib.axes.Axes`, optional
-            A `matplotlib` axes instance. Used if the plot needs to be in a
-            figure that has been created elsewhere.
-
-        """
-        if ax is None:
-            plt = pretty_plot(10, 10)
-            ax = plt.gca()
-        ax.scatter(
-            self.coordinates[:, 0],
-            self.coordinates[:, 1],
-            s=np.log2(self.intensities)
-        )
-        ax.set_xlabel("Reciprocal Dimension ($A^{-1}$)")
-        ax.set_ylabel("Reciprocal Dimension ($A^{-1}$)")
-        return ax
 
     def as_signal(self, size, sigma, max_r):
         """Returns the diffraction data as an ElectronDiffraction signal with
