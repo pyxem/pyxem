@@ -36,5 +36,8 @@ def get_signal():
     max_r = as_signal_size_sigma_max_r()[2]
     return coords_intensity_simulation().as_signal(size,sigma,max_r)
 
-# test size is as expected
-# consider putting a correct image in
+def test_shape_as_expected():
+    assert get_signal().data.shape == (as_signal_size_sigma_max_r()[0],as_signal_size_sigma_max_r()[0])
+    
+# ToDo - Test low and high sigma 
+# ToDo - Test out of z plane signal
