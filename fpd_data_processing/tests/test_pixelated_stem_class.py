@@ -1,5 +1,4 @@
 import pytest
-from pytest import approx
 import unittest
 import numpy as np
 from numpy.random import randint
@@ -650,7 +649,6 @@ class TestPixelatedStemShiftDiffraction:
         assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
-
 
     @pytest.mark.parametrize("centre_x,centre_y", [(25, 25), (30, 20)])
     def test_random_shifts(self, centre_x, centre_y):
