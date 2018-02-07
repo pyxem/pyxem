@@ -86,6 +86,48 @@ class test_pixelated_tools(unittest.TestCase):
         self.assertTrue((-offset0_y == mask[1]).all())
 
 
+class TestShiftSingleFrame:
+
+    @pytest.mark.parametrize("x,y", [(1, 1), (-2, 2), (-2, 5), (-4, -3)])
+    def test_simple_shift(self, x, y):
+        im = np.zeros((20, 20))
+        x0, y0 = 10, 12
+        im[x0, y0] = 1
+        # Note that the shifts are switched when calling the function,
+        # to stay consistent with the HyperSpy axis ordering
+        im_shift = pst._shift_single_frame(im=im, shift_x=y, shift_y=x)
+        assert im_shift[x0 - x, y0 - y] == 1
+        assert im_shift.sum() == 1
+        im_shift[x0 - x, y0 - y] = 0
+        assert (im_shift == 0.0).all()
+
+    @pytest.mark.parametrize(
+            "x,y", [(0.5, 1), (-4, 2.5), (-6, 1.5), (-3.5, -4)])
+    def test_single_half_shift(self, x, y):
+        im = np.zeros((20, 20))
+        x0, y0 = 10, 12
+        im[x0, y0] = 1
+        # Note that the shifts are switched when calling the function,
+        # to stay consistent with the HyperSpy axis ordering
+        im_shift = pst._shift_single_frame(im=im, shift_x=y, shift_y=x)
+        assert im_shift[x0 - int(x), y0 - int(y)] == 0.5
+        assert im_shift.max() == 0.5
+        assert im_shift.sum() == 1
+
+    @pytest.mark.parametrize(
+            "x,y", [(0.5, 1.5), (-4.5, 2.5), (-6.5, 1.5), (-3.5, -4.5)])
+    def test_two_half_shift(self, x, y):
+        im = np.zeros((20, 20))
+        x0, y0 = 10, 12
+        im[x0, y0] = 1
+        # Note that the shifts are switched when calling the function,
+        # to stay consistent with the HyperSpy axis ordering
+        im_shift = pst._shift_single_frame(im=im, shift_x=y, shift_y=x)
+        assert im_shift[x0 - int(x), y0 - int(y)] == 0.25
+        assert im_shift.max() == 0.25
+        assert im_shift.sum() == 1
+
+
 class TestGetAngleSectorMask(unittest.TestCase):
 
     def test_0d(self):

@@ -1,7 +1,7 @@
 import copy
 import math
 import numpy as np
-from scipy.ndimage import measurements
+from scipy.ndimage import measurements, shift
 from scipy.optimize import leastsq
 from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
@@ -19,6 +19,11 @@ def _center_of_mass_single_frame(im, threshold=None, mask=None):
         image[image > mean_value] = 1
     data = measurements.center_of_mass(image, labels=mask)
     return(np.array(data)[::-1])
+
+
+def _shift_single_frame(im, shift_x, shift_y):
+    im_shifted = shift(im, (-shift_y, -shift_x), order=1)
+    return im_shifted
 
 
 def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
