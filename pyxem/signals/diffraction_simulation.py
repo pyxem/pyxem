@@ -117,19 +117,21 @@ class DiffractionSimulation:
         from skimage.filters import gaussian as point_spread
         
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
-        mask_in_z = np.abs(self.coordinates[:,2]) < 1e-2
-        coords = self.coordinates[:, :2][mask_in_z]
         
-        coords = np.hstack((coords,self.intensities.reshape(len(self.intensities[mask_in_z]),-1))) #attaching int to coords
-        coords = coords[np.logical_and(coords[:,0]<max_r,coords[:,0]>-max_r)]
-        coords = coords[np.logical_and(coords[:,1]<max_r,coords[:,1]>-max_r)]
+        mask_in_z = np.abs(self.coordinates[:,2]) < 1e-2
+        mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,np.abs(self.coordinates[:,1])<max_r)
+        
+        coords = self.coordinates[np.logical_and(mask_in_z,mask_for_max_r)]
+        inten  = self.intensities[np.logical_and(mask_in_z,mask_for_max_r)]
         
         dp_dat = np.zeros([size,size])
         x,y = (coords)[:,0] , (coords)[:,1]
-        num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
-        dp_dat[num] = coords[:,2] #using the intensities
-        dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
-        dp_dat = dp_dat/np.max(dp_dat) #normalise to unit intensity
+        if len(x) > 0: #avoiding problems in the peakless case
+            num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
+            dp_dat[num] = inten
+            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
+            dp_dat = dp_dat/np.max(dp_dat)
+        
         dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(2*max_r/size)
 
