@@ -1,15 +1,5 @@
 import numpy as np
-from hyperspy._components.expression import Expression
-from pymatgen.util.plotting import pretty_plot
 from pyxem.signals.electron_diffraction import ElectronDiffraction
-
-
-_GAUSSIAN2D_EXPR = \
-    "intensity * exp(" \
-    "-((x-cx)**2 / (2 * sigma ** 2)" \
-    " + (y-cy)**2 / (2 * sigma ** 2))" \
-    ")"
-
 
 class DiffractionSimulation:
     """Holds the result of a given kinematic simulation of a diffraction pattern.
