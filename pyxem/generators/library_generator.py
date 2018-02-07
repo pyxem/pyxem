@@ -120,7 +120,9 @@ class DiffractionLibraryGenerator(object):
                 pixel_coordinates = np.rint(data.calibrated_coordinates[:,:2]+half_shape).astype(int)[mask]
                 # Construct diffraction simulation library.
                 phase_diffraction_library[tuple(orientation)] = \
-                {'Sim':data,'intensities':pattern_intensities,'pixel_coords':pixel_coordinates}
+                {'Sim':data,'intensities':pattern_intensities, \
+                 'pixel_coords':pixel_coordinates, \
+                 'pattern_norm': np.sqrt(np.dot(pattern_intensities,pattern_intensities))}
             diffraction_library[key] = phase_diffraction_library
         return diffraction_library
 
