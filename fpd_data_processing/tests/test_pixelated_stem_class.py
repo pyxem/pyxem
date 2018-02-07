@@ -1,4 +1,5 @@
 import pytest
+from pytest import approx
 import unittest
 import numpy as np
 from numpy.random import randint
@@ -636,3 +637,41 @@ class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
                 np.ones_like(s_rot.data[0, 0, :6, :7]))
         s_rot.data[:, :, :6, :7] = 0
         np.testing.assert_almost_equal(s_rot.data, np.zeros_like(s.data))
+
+
+class TestPixelatedStemShiftDiffraction:
+
+    @pytest.mark.parametrize("shift_x,shift_y", [(2, 5), (-6, -1), (2, -4)])
+    def test_single_shift(self, shift_x, shift_y):
+        s = PixelatedSTEM(np.zeros((10, 10, 30, 40)))
+        x, y = 20, 10
+        s.data[:, :, y, x] = 1
+        s_shift = s.shift_diffraction(shift_x=shift_x, shift_y=shift_y)
+        assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
+        s_shift.data[:, :, y - shift_y, x - shift_x] = 0
+        assert s_shift.data.sum() == 0
+
+    def test_random_shifts(self):
+        y, x = np.mgrid[20:30:7j, 20:30:5j]
+        s = mdtd.generate_4d_data(
+                probe_size_x=5, probe_size_y=7,
+                disk_x=x, disk_y=y, disk_r=1, blur=True, ring_x=None)
+        s_com = s.center_of_mass()
+        s_com -= 25
+        s_shift = s.shift_diffraction(
+                shift_x=s_com.inav[0].data, shift_y=s_com.inav[1].data)
+        s_shift_com = s_shift.center_of_mass()
+        assert s_shift_com.data == approx(np.ones_like(s_shift_com.data) * 25)
+
+    def test_lazy(self):
+        data = np.zeros((10, 10, 30, 30))
+        x, y = 20, 10
+        data[:, :, y, x] += 1
+        data = da.from_array(data, chunks=(5, 5, 5, 5))
+        s = LazyPixelatedSTEM(data)
+        shift_x, shift_y = 4, 3
+        s_shift = s.shift_diffraction(shift_x=shift_x, shift_y=shift_y)
+        s_shift.compute()
+        assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
+        s_shift.data[:, :, y - shift_y, x - shift_x] = 0
+        assert s_shift.data.sum() == 0

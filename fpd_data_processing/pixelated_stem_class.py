@@ -33,6 +33,57 @@ class PixelatedSTEM(Signal2D):
         else:
             super().plot(*args, **kwargs)
 
+    def shift_diffraction(
+            self, shift_x=None, shift_y=None, parallel=True,
+            show_progressbar=True):
+        """Shift the diffraction patterns in a pixelated STEM signal.
+
+        The points outside the boundaries are set to zero.
+
+        Parameters
+        ----------
+        shift_x, shift_y : int or NumPy array
+            If given as int, all the diffraction patterns will have the same
+            shifts. Each diffraction pattern can also have different shifts,
+            by passing a NumPy array with the same dimensions as the navigation
+            axes.
+        parallel : bool, default True
+            If True, run the processing on several cores.
+            In most cases this should be True, but for debugging False can be
+            useful.
+        show_progressbar : bool
+            Default True.
+
+        Returns
+        -------
+        shifted_signal : PixelatedSTEM signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s_c = s.center_of_mass(threshold=3.)
+        >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
+        >>> s_shift = s.shift_diffraction(s_c.inav[0].data, s_c.inav[1].data)
+        >>> s_shift.plot()
+
+        """
+
+        if (not isiterable(shift_x)) or (not isiterable(shift_y)):
+            shift_x, shift_y = pst._make_centre_array_from_signal(
+                    self, x=shift_x, y=shift_y)
+        shift_x = shift_x.flatten()
+        shift_y = shift_y.flatten()
+        iterating_kwargs = [
+                ('shift_x', shift_x),
+                ('shift_y', shift_y)]
+
+        s_shift = self._map_iterate(
+                pst._shift_single_frame, iterating_kwargs=iterating_kwargs,
+                inplace=False, ragged=False, parallel=parallel,
+                show_progressbar=show_progressbar)
+        return s_shift
+
     def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
         """
         Rotate the diffraction dimensions.
