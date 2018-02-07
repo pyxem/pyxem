@@ -30,6 +30,10 @@ def as_signal_size_sigma_max_r():
     return [144,0.03,1.5]
 
 @pytest.fixture
+def out_of_plane_only():
+    return DiffractionSimulation(coordinates = np.asarray([[0.3,0.7,1]]), intensities = np.ones(1))
+
+@pytest.fixture
 def get_signal():
     size  = as_signal_size_sigma_max_r()[0]
     sigma = as_signal_size_sigma_max_r()[1]
@@ -38,6 +42,8 @@ def get_signal():
 
 def test_shape_as_expected():
     assert get_signal().data.shape == (as_signal_size_sigma_max_r()[0],as_signal_size_sigma_max_r()[0])
+        
+def test_out_of_plane_removal():
+    assert np.all(out_of_plane_only().as_signal(144,0.03,1.5).data == np.zeros((144,144)))
     
 # ToDo - Test low and high sigma 
-# ToDo - Test out of z plane signal
