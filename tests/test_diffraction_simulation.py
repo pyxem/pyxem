@@ -30,33 +30,11 @@ def as_signal_size_sigma_max_r():
     return [144,0.03,1.5]
 
 @pytest.fixture
-def get_qual_signal():
+def get_signal():
     size  = as_signal_size_sigma_max_r()[0]
     sigma = as_signal_size_sigma_max_r()[1]
     max_r = as_signal_size_sigma_max_r()[2]
-    return coords_intensity_simulation().as_signal(size,sigma,max_r,mode='qual')
+    return coords_intensity_simulation().as_signal(size,sigma,max_r)
 
-@pytest.fixture
-def get_legacy_signal():
-    size  = as_signal_size_sigma_max_r()[0]
-    sigma = as_signal_size_sigma_max_r()[1]
-    max_r = as_signal_size_sigma_max_r()[2]
-    return coords_intensity_simulation().as_signal(size,sigma,max_r,mode='legacy')
-
-@pytest.fixture
-def get_quant_signal():
-    size  = as_signal_size_sigma_max_r()[0]
-    sigma = as_signal_size_sigma_max_r()[1]
-    max_r = as_signal_size_sigma_max_r()[2]
-    return coords_intensity_simulation().as_signal(size,sigma,max_r,mode='quant')
-
-def test_legacy_against_qual():
-    assert get_qual_signal().data.shape == get_legacy_signal().data.shape
-    assert np.allclose(get_qual_signal().data,get_legacy_signal().data,rtol=0,atol=0.5) == True
-    
-def test_legacy_against_quant():
-    assert get_quant_signal().data.shape == get_legacy_signal().data.shape
-    assert np.allclose(get_quant_signal().data,get_legacy_signal().data,rtol=0,atol=0.5) == True
-    
-def test_qual_against_quant():
-    assert np.allclose(get_qual_signal().data,get_quant_signal().data,rtol=0,atol=0.5) == True
+# test size is as expected
+# consider putting a correct image in
