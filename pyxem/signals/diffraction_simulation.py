@@ -117,9 +117,10 @@ class DiffractionSimulation:
         from skimage.filters import gaussian as point_spread
         
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
-        coords = self.coordinates[:, :2]
+        mask_in_z = np.abs(self.coordinates[:,2]) < 1e-2
+        coords = self.coordinates[:, :2][mask_in_z]
         
-        coords = np.hstack((coords,self.intensities.reshape(len(self.intensities),-1))) #attaching int to coords
+        coords = np.hstack((coords,self.intensities.reshape(len(self.intensities[mask_in_z]),-1))) #attaching int to coords
         coords = coords[np.logical_and(coords[:,0]<max_r,coords[:,0]>-max_r)]
         coords = coords[np.logical_and(coords[:,1]<max_r,coords[:,1]>-max_r)]
         
