@@ -63,7 +63,7 @@ class DiffractionGenerator(object):
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
 
-    def calculate_ed_data(self, structure, reciprocal_radius):
+    def calculate_ed_data(self, structure, reciprocal_radius, with_direct_beam=True):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -127,6 +127,6 @@ class DiffractionGenerator(object):
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
                                      intensities=intensities,
-                                     with_direct_beam=True)
+                                     with_direct_beam=with_direct_beam)
 
 
