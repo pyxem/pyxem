@@ -35,7 +35,7 @@ class PixelatedSTEM(Signal2D):
 
     def shift_diffraction(
             self, shift_x, shift_y, parallel=True,
-            show_progressbar=True):
+            inplace=False, show_progressbar=True):
         """Shift the diffraction patterns in a pixelated STEM signal.
 
         The points outside the boundaries are set to zero.
@@ -51,6 +51,11 @@ class PixelatedSTEM(Signal2D):
             If True, run the processing on several cores.
             In most cases this should be True, but for debugging False can be
             useful. Default True
+        inplace : bool
+            If True (default), the data is replaced by the result. Useful when
+            working with very large datasets, as this avoids doubling the
+            amount of memory needed. If False, a new signal with the results
+            is returned.
         show_progressbar : bool
             Default True.
 
@@ -80,9 +85,10 @@ class PixelatedSTEM(Signal2D):
 
         s_shift = self._map_iterate(
                 pst._shift_single_frame, iterating_kwargs=iterating_kwargs,
-                inplace=False, ragged=False, parallel=parallel,
+                inplace=inplace, ragged=False, parallel=parallel,
                 show_progressbar=show_progressbar)
-        return s_shift
+        if not inplace:
+            return s_shift
 
     def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
         """

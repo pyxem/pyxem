@@ -667,6 +667,15 @@ class TestPixelatedStemShiftDiffraction:
         np.testing.assert_allclose(
                 s_shift_c.data[1], np.ones_like(s_shift_c.data[1])*centre_y)
 
+    def test_inplace(self):
+        s = PixelatedSTEM(np.zeros((10, 10, 30, 40)))
+        x, y, shift_x, shift_y = 20, 10, 4, -3
+        s.data[:, :, y, x] = 1
+        s.shift_diffraction(shift_x=shift_x, shift_y=shift_y, inplace=True)
+        assert s.data[0, 0, y - shift_y, x - shift_x] == 1
+        s.data[:, :, y - shift_y, x - shift_x] = 0
+        assert s.data.sum() == 0
+
     def test_lazy(self):
         data = np.zeros((10, 10, 30, 30))
         x, y = 20, 10
