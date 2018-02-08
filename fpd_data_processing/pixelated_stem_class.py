@@ -34,7 +34,7 @@ class PixelatedSTEM(Signal2D):
             super().plot(*args, **kwargs)
 
     def shift_diffraction(
-            self, shift_x=None, shift_y=None, parallel=True,
+            self, shift_x, shift_y, parallel=True,
             show_progressbar=True):
         """Shift the diffraction patterns in a pixelated STEM signal.
 
@@ -47,10 +47,10 @@ class PixelatedSTEM(Signal2D):
             shifts. Each diffraction pattern can also have different shifts,
             by passing a NumPy array with the same dimensions as the navigation
             axes.
-        parallel : bool, default True
+        parallel : bool
             If True, run the processing on several cores.
             In most cases this should be True, but for debugging False can be
-            useful.
+            useful. Default True
         show_progressbar : bool
             Default True.
 
@@ -92,8 +92,10 @@ class PixelatedSTEM(Signal2D):
         ----------
         angle : scalar
             Clockwise rotation in degrees.
-        parallel : bool, default True
-        show_progressbar : bool, default True
+        parallel : bool
+            Default True
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
