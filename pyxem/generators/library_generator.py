@@ -52,7 +52,8 @@ class DiffractionLibraryGenerator(object):
                                 calibration,
                                 reciprocal_radius,
                                 half_shape,
-                                representation='euler'
+                                representation='euler',
+				with_direct_beam=True
                                 ):
         """Calculates a dictionary of diffraction data for a library of crystal
         structures and orientations.
@@ -112,16 +113,20 @@ class DiffractionLibraryGenerator(object):
                 rotated_structure = rotation.apply_transformation(structure)
                 # Calculate electron diffraction for rotated structure
                 data = diffractor.calculate_ed_data(rotated_structure,
-                                                    reciprocal_radius)
+                                                    reciprocal_radius,
+						    with_direct_beam)
                 # Calibrate simulation
                 data.calibration = calibration
                 mask = np.abs(data.coordinates[:,2]) < 1e-2
                 pattern_intensities = data.intensities[mask]
                 pixel_coordinates = np.rint(data.calibrated_coordinates[:,:2]+half_shape).astype(int)[mask]
-                # Construct diffraction simulation library.
-                phase_diffraction_library[tuple(orientation)] = \
-                {'Sim':data,'intensities':pattern_intensities,'pixel_coords':pixel_coordinates}
-            diffraction_library[key] = phase_diffraction_library
+                # Construct diffraction simulation library, removing those that contain no peaks
+                if len(pattern_intensities) > 0:
+                    phase_diffraction_library[tuple(orientation)] = \
+                    {'Sim':data,'intensities':pattern_intensities, \
+                     'pixel_coords':pixel_coordinates, \
+                     'pattern_norm': np.sqrt(np.dot(pattern_intensities,pattern_intensities))}
+                    diffraction_library[key] = phase_diffraction_library
         return diffraction_library
 
 
