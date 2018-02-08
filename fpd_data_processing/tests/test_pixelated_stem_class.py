@@ -1,5 +1,4 @@
 import pytest
-from pytest import approx
 import unittest
 import numpy as np
 from numpy.random import randint
@@ -651,17 +650,22 @@ class TestPixelatedStemShiftDiffraction:
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
 
-    def test_random_shifts(self):
+    @pytest.mark.parametrize("centre_x,centre_y", [(25, 25), (30, 20)])
+    def test_random_shifts(self, centre_x, centre_y):
         y, x = np.mgrid[20:30:7j, 20:30:5j]
         s = mdtd.generate_4d_data(
                 probe_size_x=5, probe_size_y=7,
                 disk_x=x, disk_y=y, disk_r=1, blur=True, ring_x=None)
         s_com = s.center_of_mass()
-        s_com -= 25
+        s_com.data[0] -= centre_x
+        s_com.data[1] -= centre_y
         s_shift = s.shift_diffraction(
                 shift_x=s_com.inav[0].data, shift_y=s_com.inav[1].data)
-        s_shift_com = s_shift.center_of_mass()
-        assert s_shift_com.data == approx(np.ones_like(s_shift_com.data) * 25)
+        s_shift_c = s_shift.center_of_mass()
+        np.testing.assert_allclose(
+                s_shift_c.data[0], np.ones_like(s_shift_c.data[0])*centre_x)
+        np.testing.assert_allclose(
+                s_shift_c.data[1], np.ones_like(s_shift_c.data[1])*centre_y)
 
     def test_lazy(self):
         data = np.zeros((10, 10, 30, 30))
