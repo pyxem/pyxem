@@ -21,6 +21,9 @@ import pytest
 from pyxem.signals.diffraction_simulation import DiffractionSimulation as DiffractionSimulation
 
 
+
+""" These are .as_signal() tests and should/could be wrapped in a class"""
+
 @pytest.fixture
 def coords_intensity_simulation():
     return DiffractionSimulation(coordinates = np.asarray([[0.3,0.7,0],[0.1,0.8,1],[0.2,1.2,2]]), intensities = np.ones(3))
@@ -28,10 +31,6 @@ def coords_intensity_simulation():
 @pytest.fixture
 def as_signal_size_sigma_max_r():
     return [144,0.03,1.5]
-
-@pytest.fixture
-def out_of_plane_only():
-    return DiffractionSimulation(coordinates = np.asarray([[0.3,0.7,1]]), intensities = np.ones(1))
 
 @pytest.fixture
 def get_signal():
@@ -43,5 +42,11 @@ def get_signal():
 def test_shape_as_expected():
     assert get_signal().data.shape == (as_signal_size_sigma_max_r()[0],as_signal_size_sigma_max_r()[0])
         
-    
-# ToDo - Test low and high sigma 
+# ToDo - Test low and high sigma
+
+""" These test that our kinematic simulation behaves as we would expect it to """
+
+# Generate Cubic I both ways and test ==
+# Use both to produce kinematic models and then check that IA sys absence condition is satisfied
+# Generate an A and test the sys condition is satisfied 
+# Consider testing the Weiss Zone Law
