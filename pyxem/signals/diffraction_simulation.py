@@ -118,11 +118,10 @@ class DiffractionSimulation:
         
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
         
-        mask_in_z = np.abs(self.coordinates[:,2]) < 1e-2
         mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,np.abs(self.coordinates[:,1])<max_r)
         
-        coords = self.coordinates[np.logical_and(mask_in_z,mask_for_max_r)]
-        inten  = self.intensities[np.logical_and(mask_in_z,mask_for_max_r)]
+        coords = self.coordinates[mask_for_max_r]
+        inten  = self.intensities[mask_for_max_r]
         
         dp_dat = np.zeros([size,size])
         x,y = (coords)[:,0] , (coords)[:,1]
