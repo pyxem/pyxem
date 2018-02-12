@@ -117,9 +117,8 @@ class DiffractionLibraryGenerator(object):
 						    with_direct_beam)
                 # Calibrate simulation
                 data.calibration = calibration
-                mask = np.abs(data.coordinates[:,2]) < 1e-2
-                pattern_intensities = data.intensities[mask]
-                pixel_coordinates = np.rint(data.calibrated_coordinates[:,:2]+half_shape).astype(int)[mask]
+                pattern_intensities = data.intensities
+                pixel_coordinates = np.rint(data.calibrated_coordinates[:,:2]+half_shape).astype(int)
                 # Construct diffraction simulation library, removing those that contain no peaks
                 if len(pattern_intensities) > 0:
                     phase_diffraction_library[tuple(orientation)] = \
