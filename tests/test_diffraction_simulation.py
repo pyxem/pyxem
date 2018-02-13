@@ -18,8 +18,12 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.diffraction_simulation import DiffractionSimulation as DiffractionSimulation
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.generators.diffraction_generator import DiffractionGenerator
+import pymatgen as pmg
 
+
+""" These are .as_signal() tests and should/could be wrapped in a class"""
 
 @pytest.fixture
 def coords_intensity_simulation():
@@ -28,10 +32,6 @@ def coords_intensity_simulation():
 @pytest.fixture
 def as_signal_size_sigma_max_r():
     return [144,0.03,1.5]
-
-@pytest.fixture
-def out_of_plane_only():
-    return DiffractionSimulation(coordinates = np.asarray([[0.3,0.7,1]]), intensities = np.ones(1))
 
 @pytest.fixture
 def get_signal():
@@ -43,7 +43,48 @@ def get_signal():
 def test_shape_as_expected():
     assert get_signal().data.shape == (as_signal_size_sigma_max_r()[0],as_signal_size_sigma_max_r()[0])
         
-def test_out_of_plane_removal():
-    assert np.all(out_of_plane_only().as_signal(144,0.03,1.5).data == np.zeros((144,144)))
+# ToDo - Test low and high sigma
+
+""" These test that our kinematic simulation behaves as we would expect it to """
+
+# Generate Cubic I both ways and test ==
+
+Ga = pmg.Element("Ga")
+cubic_lattice = pmg.Lattice.cubic(5)
+Mscope = DiffractionGenerator(300, 5e-2) #a 300kev EM
+
+@pytest.fixture
+def formal_Cubic_I():
+    # Formal is using the correct space group
+    return pmg.Structure.from_spacegroup("I23",cubic_lattice, [Ga], [[0, 0, 0]])
+
+@pytest.fixture
+def casual_Cubic_I():
+    # Casual is dropping a motif onto a primitive lattice
+    return pmg.Structure.from_spacegroup(195,cubic_lattice, [Ga,Ga], [[0, 0, 0],[0.5,0.5,0.5]])
+
+@pytest.fixture
+def formal_pattern():
+    return Mscope.calculate_ed_data(formal_Cubic_I(),1)
+
+@pytest.fixture
+def casual_pattern():
+    return Mscope.calculate_ed_data(casual_Cubic_I(),1)
     
-# ToDo - Test low and high sigma 
+def test_casual_formal():
+    # Checks that Pymatgen understands that these are the same structure
+    assert formal_Cubic_I() == casual_Cubic_I()
+
+def test_casual_formal_in_simulation():
+    ## Checks that are simulations also realise that
+    assert np.allclose(formal_pattern().coordinates,casual_pattern().coordinates)
+    assert np.allclose(formal_pattern().intensities,casual_pattern().intensities)
+    assert np.allclose(formal_pattern().indices,casual_pattern().indices)
+    
+def test_systematic_absence():
+    ## Cubic I thus each peak must have indicies that sum to an even number
+    assert np.all(np.sum(formal_pattern().indices,axis=1) % 2 == 0)
+    assert np.all(np.sum(casual_pattern().indices,axis=1) % 2 == 0)
+
+#ToDo Generate an A centered and test the sys condition is satisfied 
+#ToDo Check obvious thing like doubling lattice size and changing voltages
