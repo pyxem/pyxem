@@ -26,6 +26,7 @@ import pymatgen as pmg
 """ These are .as_signal() tests and should/could be wrapped in a class"""
 #XXX
 
+
 @pytest.fixture
 def coords_intensity_simulation():
     return DiffractionSimulation(coordinates = np.asarray([[0.3,0.7,0],[0.1,0.8,1],[0.2,1.2,2]]), intensities = np.ones(3))
