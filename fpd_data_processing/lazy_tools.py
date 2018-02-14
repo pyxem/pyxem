@@ -22,7 +22,7 @@ def _get_dask_chunk_slice_list(dask_array):
 
     """
     chunk_list_dim = dask_array.shape
-    if (len(chunk_list_dim) < 2) and (len(chunk_list_dim) > 4):
+    if (len(chunk_list_dim) == 2) or (len(chunk_list_dim) > 4):
         raise NotImplementedError(
                 "dask_array must have either 3 or 4 dimensions")
     temp_slice_list = []
@@ -80,7 +80,7 @@ def _calculate_function_on_dask_array(
     ...     return_sig_size=2, show_progressbar=False)
 
     """
-    if (len(dask_array.shape) == 2) and (len(dask_array.shape) > 4):
+    if (len(dask_array.shape) == 2) or (len(dask_array.shape) > 4):
         raise NotImplementedError(
                 "dask_array must have either 3 or 4 dimensions")
     return_data = np.zeros((*dask_array.shape[:-2], return_sig_size))
