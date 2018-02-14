@@ -24,6 +24,7 @@ import pymatgen as pmg
 
 
 """ These are .as_signal() tests and should/could be wrapped in a class"""
+#XXX
 
 @pytest.fixture
 def coords_intensity_simulation():
@@ -47,44 +48,49 @@ def test_shape_as_expected():
 
 """ These test that our kinematic simulation behaves as we would expect it to """
 
-# Generate Cubic I both ways and test ==
-
-Ga = pmg.Element("Ga")
+Cl = pmg.Element("Cl")
+Ar = pmg.Element("Ar")
 cubic_lattice = pmg.Lattice.cubic(5)
 Mscope = DiffractionGenerator(300, 5e-2) #a 300kev EM
 
-@pytest.fixture
-def formal_Cubic_I():
-    # Formal is using the correct space group
-    return pmg.Structure.from_spacegroup("I23",cubic_lattice, [Ga], [[0, 0, 0]])
+formal_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
+casual_cubic_I = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Cl], [[0, 0, 0],[0.5,0.5,0.5]])
+fake_cubic_I   = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Ar], [[0, 0, 0],[0.5,0.5,0.5]])
 
-@pytest.fixture
-def casual_Cubic_I():
-    # Casual is dropping a motif onto a primitive lattice
-    return pmg.Structure.from_spacegroup(195,cubic_lattice, [Ga,Ga], [[0, 0, 0],[0.5,0.5,0.5]])
+larger_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
+larger_cubic_I.make_supercell([2,4,2])
 
-@pytest.fixture
-def formal_pattern():
-    return Mscope.calculate_ed_data(formal_Cubic_I(),1)
+def get_pattern(microscope,structure):
+    return microscope.calculate_ed_data(structure,1)
 
-@pytest.fixture
-def casual_pattern():
-    return Mscope.calculate_ed_data(casual_Cubic_I(),1)
+def check_pattern_equivilance(p1,p2,coords_only=False):
+    assert np.allclose(p1.coordinates,p2.coordinates)
+    if not coords_only:
+        assert np.allclose(p1.indices,p2.indices)
+        assert np.allclose(p1.intensities,p2.intensities) 
     
 def test_casual_formal():
     # Checks that Pymatgen understands that these are the same structure
-    assert formal_Cubic_I() == casual_Cubic_I()
+    assert formal_cubic_I == casual_cubic_I
+
+formal_pattern = get_pattern(Mscope,formal_cubic_I)
+casual_pattern = get_pattern(Mscope,casual_cubic_I)
+fake_pattern   = get_pattern(Mscope,fake_cubic_I)
+larger_pattern = get_pattern(Mscope,larger_cubic_I)
 
 def test_casual_formal_in_simulation():
     ## Checks that are simulations also realise that
-    assert np.allclose(formal_pattern().coordinates,casual_pattern().coordinates)
-    assert np.allclose(formal_pattern().intensities,casual_pattern().intensities)
-    assert np.allclose(formal_pattern().indices,casual_pattern().indices)
+    check_pattern_equivilance(formal_pattern,casual_pattern)
     
 def test_systematic_absence():
     ## Cubic I thus each peak must have indicies that sum to an even number
-    assert np.all(np.sum(formal_pattern().indices,axis=1) % 2 == 0)
-    assert np.all(np.sum(casual_pattern().indices,axis=1) % 2 == 0)
+    assert np.all(np.sum(formal_pattern.indices,axis=1) % 2 == 0)
+    assert np.all(np.sum(casual_pattern.indices,axis=1) % 2 == 0)
+    ## This isn't actually cubic I, so we expect a (100) type
+    assert np.any(fake_pattern.indices == np.array([1,0,0]))
 
+def test_scaling():
+    check_pattern_equivilance(formal_pattern,larger_pattern,coords_only=True)
+    
 #ToDo Generate an A centered and test the sys condition is satisfied 
 #ToDo Check obvious thing like doubling lattice size and changing voltages
