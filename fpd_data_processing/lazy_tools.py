@@ -50,7 +50,7 @@ def _get_dask_chunk_slice_list(dask_array):
 
 
 def _calculate_function_on_dask_array(
-        dask_array, function, func_args, return_sig_size=1,
+        dask_array, function, func_args=None, return_sig_size=1,
         show_progressbar=True):
     """Apply a function to a dask array, immediately returning the results.
 
@@ -76,14 +76,19 @@ def _calculate_function_on_dask_array(
     >>> import fpd_data_processing.pixelated_stem_tools as pst
     >>> import fpd_data_processing.lazy_tools as lt
     >>> out_data = lt._calculate_function_on_dask_array(
-    ...     dask_data, pst._center_of_mass_single_frame, func_args,
+    ...     dask_data, pst._center_of_mass_single_frame,
     ...     return_sig_size=2, show_progressbar=False)
 
     """
     if (len(dask_array.shape) == 2) or (len(dask_array.shape) > 4):
         raise NotImplementedError(
                 "dask_array must have either 3 or 4 dimensions")
-    return_data = np.zeros((*dask_array.shape[:-2], return_sig_size))
+    if func_args is None:
+        func_args = {}
+    if return_sig_size == 1:
+        return_data = np.zeros((*dask_array.shape[:-2], ))
+    else:
+        return_data = np.zeros((*dask_array.shape[:-2], return_sig_size))
     slice_list = _get_dask_chunk_slice_list(dask_array)
     for slice_chunk in tqdm(slice_list):
         data_slice = dask_array[slice_chunk]
@@ -97,7 +102,10 @@ def _calculate_function_on_dask_array(
                 im = data_slice[im_slice]
                 i = slice_chunk.start + im_slice[0]
                 out_data = function(im, **func_args)
-                return_data[i, :] = out_data
+                if return_sig_size == 1:
+                    return_data[i] = out_data
+                else:
+                    return_data[i, :] = out_data
         elif len(data_slice_shape) == 2:
             for im_slice0 in range(data_slice_shape[0]):
                 for im_slice1 in range(data_slice_shape[1]):
@@ -107,5 +115,8 @@ def _calculate_function_on_dask_array(
                 i_x = slice_chunk[0].start + im_slice[0]
                 i_y = slice_chunk[1].start + im_slice[1]
                 out_data = function(im, **func_args)
-                return_data[i_x, i_y, :] = out_data
+                if return_sig_size == 1:
+                    return_data[i_x, i_y] = out_data
+                else:
+                    return_data[i_x, i_y, :] = out_data
     return return_data
