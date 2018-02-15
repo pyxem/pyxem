@@ -6,6 +6,7 @@ from scipy.optimize import leastsq
 from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
+import fpd_data_processing.lazy_tools as lt
 
 
 def _center_of_mass_single_frame(im, threshold=None, mask=None):
@@ -19,6 +20,15 @@ def _center_of_mass_single_frame(im, threshold=None, mask=None):
         image[image > mean_value] = 1
     data = measurements.center_of_mass(image, labels=mask)
     return(np.array(data)[::-1])
+
+
+def _center_of_mass_dask_array(
+        dask_array, threshold=None, mask=None, show_progressbar=True):
+    func_args = {'threshold': threshold, 'mask': mask}
+    data = lt._calculate_function_on_dask_array(
+            dask_array, _center_of_mass_single_frame, func_args=func_args,
+            return_sig_size=2, show_progressbar=show_progressbar)
+    return data
 
 
 def _shift_single_frame(im, shift_x, shift_y):

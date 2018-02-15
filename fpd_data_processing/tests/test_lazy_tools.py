@@ -15,6 +15,13 @@ class TestGetDaskChunkSliceList:
         assert slice_list[2] == np.s_[5:10, 0:5, :, :]
         assert slice_list[3] == np.s_[5:10, 5:10, :, :]
 
+    def test_1d_nav(self):
+        dask_array = da.zeros((10, 50, 50), chunks=(5, 25, 25))
+        slice_list = lt._get_dask_chunk_slice_list(dask_array)
+        assert len(slice_list) == 2
+        assert slice_list[0] == np.s_[0:5, :, :]
+        assert slice_list[1] == np.s_[5:10, :, :]
+
     def test_nav_chunk_1(self):
         dask_array = da.zeros((2, 2, 10, 10), chunks=(1, 1, 10, 10))
         slice_list = lt._get_dask_chunk_slice_list(dask_array)
@@ -64,6 +71,25 @@ class TestCalculateFunctionOnDaskArray:
                 dask_array, sum_frame, show_progressbar=False)
         assert data.shape == (10, 10)
         assert (data == (np.ones((10, 10))*50*50)).all()
+
+    def test_1d_nav(self):
+        dask_array = da.ones((10, 50, 50), chunks=(5, 25, 25))
+        data = lt._calculate_function_on_dask_array(
+                dask_array, sum_frame, show_progressbar=False)
+        assert data.shape == (10, )
+        assert (data == (np.ones((10, ))*50*50)).all()
+
+    def test_2_dim_error(self):
+        dask_array = da.ones((50, 50), chunks=(25, 25))
+        with pytest.raises(NotImplementedError):
+            lt._calculate_function_on_dask_array(
+                    dask_array, sum_frame, show_progressbar=False)
+
+    def test_5_dim_error(self):
+        dask_array = da.ones((4, 4, 6, 50, 50), chunks=(2, 2, 2, 25, 25))
+        with pytest.raises(NotImplementedError):
+            lt._calculate_function_on_dask_array(
+                    dask_array, sum_frame, show_progressbar=False)
 
     def test_nav_size(self):
         dask_array = da.ones((6, 9, 10, 10), chunks=(3, 3, 10, 10))

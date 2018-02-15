@@ -300,9 +300,30 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
                 downscale=False)
         s_lazy = LazyPixelatedSTEM(
                 da.from_array(s.data, chunks=(1, 1, 140, 160)))
-        s_com = s_lazy.center_of_mass()
-        np.testing.assert_allclose(s_com.inav[0].data, x)
-        np.testing.assert_allclose(s_com.inav[1].data, y)
+        s_lazy_com = s_lazy.center_of_mass()
+        np.testing.assert_allclose(s_lazy_com.inav[0].data, x)
+        np.testing.assert_allclose(s_lazy_com.inav[1].data, y)
+
+    def test_compare_lazy_and_nonlazy(self):
+        y, x = np.mgrid[75:83:9j, 85:95:11j]
+        s = mdtd.generate_4d_data(
+                probe_size_x=11, probe_size_y=9, ring_x=None,
+                image_size_x=160, image_size_y=140, disk_x=x, disk_y=y,
+                disk_r=40, disk_I=20, blur=True, blur_sigma=1,
+                downscale=False)
+        s_lazy = LazyPixelatedSTEM(
+                da.from_array(s.data, chunks=(1, 1, 140, 160)))
+        s_com = s.center_of_mass()
+        s_lazy_com = s_lazy.center_of_mass()
+        np.testing.assert_equal(s_com.data, s_lazy_com.data)
+
+        com_nav_extent = s_com.axes_manager.navigation_extent
+        lazy_com_nav_extent = s_lazy_com.axes_manager.navigation_extent
+        assert com_nav_extent == lazy_com_nav_extent
+
+        com_sig_extent = s_com.axes_manager.signal_extent
+        lazy_com_sig_extent = s_lazy_com.axes_manager.signal_extent
+        assert com_sig_extent == lazy_com_sig_extent
 
 
 class test_pixelated_stem_radial_integration(unittest.TestCase):

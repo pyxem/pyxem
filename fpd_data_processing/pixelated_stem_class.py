@@ -218,29 +218,38 @@ class PixelatedSTEM(Signal2D):
         >>> s_com = s.center_of_mass(threshold=1.5, show_progressbar=False)
 
         """
-
         if mask is not None:
             x, y, r = mask
             im_x, im_y = self.axes_manager.signal_shape
             mask = pst._make_circular_mask(x, y, im_x, im_y, r)
 
+        nav_dim = self.axes_manager.navigation_dimension
         # Signal is transposed, due to the DPC signals having the
         # x and y deflections as navigation dimension, and probe
         # positions as signal dimensions
-        s_com = self.map(
-                function=pst._center_of_mass_single_frame,
-                ragged=False, inplace=False, parallel=True,
-                show_progressbar=show_progressbar,
-                threshold=threshold, mask=mask)
-        if self._lazy:
-            s_com.compute(progressbar=show_progressbar)
+        if (not self._lazy) or (nav_dim == 0):
+            s_com = self.map(
+                    function=pst._center_of_mass_single_frame,
+                    ragged=False, inplace=False, parallel=True,
+                    show_progressbar=show_progressbar,
+                    threshold=threshold, mask=mask)
+            data = s_com.data
+        else:
+            data = pst._center_of_mass_dask_array(
+                    self.data, threshold=threshold, mask=mask,
+                    show_progressbar=show_progressbar)
         if self.axes_manager.navigation_dimension == 0:
-            s_com = DPCBaseSignal(s_com.data).T
+            s_com = DPCBaseSignal(data).T
         elif self.axes_manager.navigation_dimension == 1:
-            s_com = DPCSignal1D(s_com.T.data)
+            s_com = DPCSignal1D(np.swapaxes(data, 0, 1))
         elif self.axes_manager.navigation_dimension == 2:
-            s_com = DPCSignal2D(s_com.T.data)
-        s_com.axes_manager.navigation_axes[0].name = "Beam position"
+            data = np.swapaxes(np.swapaxes(data, 0, 1), 0, 2)
+            s_com = DPCSignal2D(data)
+#        s_com.axes_manager.navigation_axes[0].name = "Beam position"
+        for nav_axes, sig_axes in zip(
+                self.axes_manager.navigation_axes,
+                s_com.axes_manager.signal_axes):
+            pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return(s_com)
 
     def _virtual_detector(self, cx, cy, r, r_inner=None):
