@@ -51,6 +51,11 @@ def sum_frame(image, multiplier=1):
     return data
 
 
+def return_two_value(image):
+    data = image[0:2, 0]
+    return data
+
+
 class TestCalculateFunctionOnDaskArray:
 
     def test_simple(self):
@@ -76,3 +81,20 @@ class TestCalculateFunctionOnDaskArray:
         assert data[0, 0] == 100
         data[0, 0] = 0
         assert not data.any()
+
+    def test_return_sig_size(self):
+        dask_array = da.ones((10, 10, 50, 50), chunks=(5, 5, 25, 25))
+        data0 = lt._calculate_function_on_dask_array(
+                dask_array, return_two_value, return_sig_size=2,
+                show_progressbar=False)
+        assert data0.shape == (10, 10, 2)
+        data1 = lt._calculate_function_on_dask_array(
+                dask_array, sum_frame, show_progressbar=False)
+        assert data1.shape == (10, 10)
+
+    def test_return_sig_size_wrong(self):
+        dask_array = da.ones((10, 10, 50, 50), chunks=(5, 5, 25, 25))
+        with pytest.raises(ValueError):
+            lt._calculate_function_on_dask_array(
+                    dask_array, return_two_value, return_sig_size=1,
+                    show_progressbar=False)
