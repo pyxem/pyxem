@@ -20,7 +20,8 @@ pydocstyle_checks:
     image: debian:stable
     script:
     - apt-get update -q
-    - apt-get install -qy python3-pydocstyle
+    - apt-get install -qy python3-pip
+    - pip3 install pydocstyle
     - python3 -m pydocstyle fpd_data_processing/
     allow_failure: true
 
