@@ -54,7 +54,7 @@ def create_library_entry(library,rotation,DiffractionSimulation):
     return library
 
 
-for alpha in np.arange(0,5,1):
+for alpha in np.arange(0,10,1):
     rotation = (alpha,0,0)
     if rotation[0] < 4:
         library = create_library_entry(library,rotation,dp_sim_list[rotation[0]])
