@@ -198,6 +198,8 @@ class PixelatedSTEM(Signal2D):
             this threshold value.
         mask : tuple (x, y, r)
             Round mask centered on x and y, with radius r.
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
@@ -271,6 +273,8 @@ class PixelatedSTEM(Signal2D):
             x- and y-centre positions.
         r : float, optional
             Outer radius.
+        show_progressbar : bool
+            Default True.
 
         Returns
         -------
@@ -351,12 +355,14 @@ class PixelatedSTEM(Signal2D):
             missing, both will be set from the signal (0., 0.) positions.
             If no values are given, the (0., 0.) positions in the signal will
             be used.
-        mask_array : Boolean numpy array, optional
+        mask_array : Boolean NumPy array, optional
             Mask with the same shape as the signal.
         parallel : bool, default True
             If True, run the processing on several cores.
             In most cases this should be True, but for debugging False can be
             useful.
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
@@ -475,6 +481,8 @@ class PixelatedSTEM(Signal2D):
             degrees on each side. The range of the slices will then be:
             (-45, 135), (45, 225), (135, 315) and (225, 45).
             Default off: meaning there is no overlap between the slices.
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
