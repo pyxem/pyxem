@@ -283,29 +283,42 @@ class test_dpcsignal_tools(unittest.TestCase):
         self.assertTrue(((high_value-pos, high_value-pos, 1) == corner3).all())
 
 
-class test_copy_signal2d_axes_manager_metadata(unittest.TestCase):
+class AxesManagerMetadataCopying:
 
-    def setUp(self):
+    def setup_method(self):
         s = Signal2D(np.zeros((50, 50)))
         s.axes_manager.signal_axes[0].offset = 10
         s.axes_manager.signal_axes[1].offset = 20
         s.axes_manager.signal_axes[0].scale = 0.5
         s.axes_manager.signal_axes[1].scale = 0.3
+        s.axes_manager.signal_axes[0].name = 'axes0'
+        s.axes_manager.signal_axes[1].name = 'axes1'
+        s.axes_manager.signal_axes[0].units = 'unit0'
+        s.axes_manager.signal_axes[1].units = 'unit1'
         self.s = s
 
-    def test_simple(self):
+    def test_copy_axes_manager(self):
         s = self.s
         s_new = Signal2D(np.zeros((50, 50)))
         pst._copy_signal2d_axes_manager_metadata(s, s_new)
-        self.assertEqual(
-                s.axes_manager.signal_axes[0].offset,
-                s_new.axes_manager.signal_axes[0].offset)
-        self.assertEqual(
-                s.axes_manager.signal_axes[1].offset,
-                s_new.axes_manager.signal_axes[1].offset)
-        self.assertEqual(
-                s.axes_manager.signal_axes[0].scale,
-                s_new.axes_manager.signal_axes[0].scale)
-        self.assertEqual(
-                s.axes_manager.signal_axes[1].scale,
-                s_new.axes_manager.signal_axes[1].scale)
+        sa_ori = s.axes_manager.signal_axes
+        sa_new = s_new.axes_manager.signal_axes
+        assert sa_ori[0].offset == sa_new[0].offset
+        assert sa_ori[1].offset == sa_new[1].offset
+        assert sa_ori[0].scale == sa_new[0].scale
+        assert sa_ori[1].scale == sa_new[1].scale
+        assert sa_ori[0].name == sa_new[0].name
+        assert sa_ori[1].name == sa_new[1].name
+        assert sa_ori[0].units == sa_new[0].units
+        assert sa_ori[1].units == sa_new[1].units
+
+    def test_copy_axes_object(self):
+        s = self.s
+        s_new = Signal2D(np.zeros((50, 50)))
+        ax_o = s.axes_manager[0]
+        ax_n = s_new.axes_manager[0]
+        pst._copy_axes_object_metadata(ax_o, ax_n)
+        assert ax_o.offset == ax_n.offset
+        assert ax_o.scale == ax_n.scale
+        assert ax_o.name == ax_n.name
+        assert ax_o.units == ax_n.units

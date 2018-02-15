@@ -430,10 +430,15 @@ def _make_bivariate_histogram(
 def _copy_signal2d_axes_manager_metadata(signal_original, signal_new):
     ax_o = signal_original.axes_manager.signal_axes
     ax_n = signal_new.axes_manager.signal_axes
-    ax_n[0].scale, ax_n[1].scale = ax_o[0].scale, ax_o[1].scale
-    ax_n[0].offset, ax_n[1].offset = ax_o[0].offset, ax_o[1].offset
-    ax_n[0].name, ax_n[1].name = ax_o[0].name, ax_o[1].name
-    ax_n[0].units, ax_n[1].units = ax_o[0].units, ax_o[1].units
+    _copy_axes_object_metadata(ax_o[0], ax_n[0])
+    _copy_axes_object_metadata(ax_o[1], ax_n[1])
+
+
+def _copy_axes_object_metadata(axes_original, axes_new):
+    axes_new.scale = axes_original.scale
+    axes_new.offset = axes_original.offset
+    axes_new.name = axes_original.name
+    axes_new.units = axes_original.units
 
 
 def remove_dead_pixels(data, dead_pixel_list):
