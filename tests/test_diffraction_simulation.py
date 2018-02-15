@@ -18,7 +18,9 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.diffraction_simulation import DiffractionSimulation as DiffractionSimulation
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.generators.diffraction_generator import DiffractionGenerator
+import pymatgen as pmg
 
 
 
@@ -47,6 +49,43 @@ def test_shape_as_expected():
 """ These test that our kinematic simulation behaves as we would expect it to """
 
 # Generate Cubic I both ways and test ==
-# Use both to produce kinematic models and then check that IA sys absence condition is satisfied
-# Generate an A and test the sys condition is satisfied 
-# Consider testing the Weiss Zone Law
+
+Ga = pmg.Element("Ga")
+cubic_lattice = pmg.Lattice.cubic(5)
+Mscope = DiffractionGenerator(300, 5e-2) #a 300kev EM
+
+@pytest.fixture
+def formal_Cubic_I():
+    # Formal is using the correct space group
+    return pmg.Structure.from_spacegroup("I23",cubic_lattice, [Ga], [[0, 0, 0]])
+
+@pytest.fixture
+def casual_Cubic_I():
+    # Casual is dropping a motif onto a primitive lattice
+    return pmg.Structure.from_spacegroup(195,cubic_lattice, [Ga,Ga], [[0, 0, 0],[0.5,0.5,0.5]])
+
+@pytest.fixture
+def formal_pattern():
+    return Mscope.calculate_ed_data(formal_Cubic_I(),1)
+
+@pytest.fixture
+def casual_pattern():
+    return Mscope.calculate_ed_data(casual_Cubic_I(),1)
+    
+def test_casual_formal():
+    # Checks that Pymatgen understands that these are the same structure
+    assert formal_Cubic_I() == casual_Cubic_I()
+
+def test_casual_formal_in_simulation():
+    ## Checks that are simulations also realise that
+    assert np.allclose(formal_pattern().coordinates,casual_pattern().coordinates)
+    assert np.allclose(formal_pattern().intensities,casual_pattern().intensities)
+    assert np.allclose(formal_pattern().indices,casual_pattern().indices)
+    
+def test_systematic_absence():
+    ## Cubic I thus each peak must have indicies that sum to an even number
+    assert np.all(np.sum(formal_pattern().indices,axis=1) % 2 == 0)
+    assert np.all(np.sum(casual_pattern().indices,axis=1) % 2 == 0)
+
+#ToDo Generate an A centered and test the sys condition is satisfied 
+#ToDo Check obvious thing like doubling lattice size and changing voltages
