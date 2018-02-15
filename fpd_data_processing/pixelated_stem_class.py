@@ -245,7 +245,7 @@ class PixelatedSTEM(Signal2D):
         elif self.axes_manager.navigation_dimension == 2:
             data = np.swapaxes(np.swapaxes(data, 0, 1), 0, 2)
             s_com = DPCSignal2D(data)
-#        s_com.axes_manager.navigation_axes[0].name = "Beam position"
+        s_com.axes_manager.navigation_axes[0].name = "Beam position"
         for nav_axes, sig_axes in zip(
                 self.axes_manager.navigation_axes,
                 s_com.axes_manager.signal_axes):
