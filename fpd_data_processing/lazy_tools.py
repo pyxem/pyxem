@@ -100,7 +100,7 @@ def _calculate_function_on_dask_array(
                 im_slice_list.append(np.s_[im_slice0, :, :])
             for im_slice in im_slice_list:
                 im = data_slice[im_slice]
-                i = slice_chunk.start + im_slice[0]
+                i = slice_chunk[0].start + im_slice[0]
                 out_data = function(im, **func_args)
                 if return_sig_size == 1:
                     return_data[i] = out_data
