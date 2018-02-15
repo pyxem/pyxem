@@ -70,7 +70,8 @@ class DiffractionGenerator(object):
         ----------
         structure : Structure
             The structure for which to derive the diffraction pattern. Note that
-            the structure must be rotated to the appropriate orientation.
+            the structure must be rotated to the appropriate orientation and that testing
+            is conducted on unit cells (rather than supercells)
         reciprocal_radius : float
             The maximum radius of the sphere of reciprocal space to sample, in
             reciprocal angstroms.
