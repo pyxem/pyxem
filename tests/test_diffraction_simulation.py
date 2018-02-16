@@ -49,6 +49,7 @@ def test_shape_as_expected():
 
 """ These test that our kinematic simulation behaves as we would expect it to """
 
+
 Cl = pmg.Element("Cl")
 Ar = pmg.Element("Ar")
 cubic_lattice = pmg.Lattice.cubic(5)
