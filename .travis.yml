@@ -8,6 +8,8 @@ sudo: false
 before_install:
   - "pip install sphinx hyperspy pymatgen Cython transforms3d lxml"
   - "pip install sphinx_bootstrap_theme"
+  - "pip install pytest pytest-cov"
+  - "pip install coveralls"
 
 install:
   - "python setup.py install"
