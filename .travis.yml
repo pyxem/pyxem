@@ -19,7 +19,7 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - pytest tests --cov coveralls
+  - pytest --cov=pyxem tests
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 after_success:
