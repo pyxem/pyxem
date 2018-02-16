@@ -20,7 +20,9 @@ script:
   - pytest tests
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
-
+after_success:
+  - coveralls
+  
 deploy:
   provider: pages
   skip_cleanup: true
