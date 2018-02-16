@@ -50,7 +50,7 @@ def create_library_entry(library,rotation,DiffractionSimulation):
     library["Phase"][rotation]['Sim'] = p
     library["Phase"][rotation]['intensities']  = p.intensities
     library["Phase"][rotation]['pixel_coords'] = (p.calibrated_coordinates[:,:2]+half_shape).astype(int)
-    library["Phase"][rotation]['pattern_norm'] = np.sum(p.intensities)
+    library["Phase"][rotation]['pattern_norm'] = np.sqrt(np.dot(p.intensities,p.intensities))
     return library
 
 
@@ -76,6 +76,10 @@ def test_match_results():
     
 """ Visualization Code 
 
+from pyxem.utils.sim_utils import peaks_from_best_template
+from pyxem.utils.plot import generate_marker_inputs_from_peaks
+import hyperspy.api as hs
+
 peaks = match_results.map(peaks_from_best_template,
                           phase=["Phase"],library=library,inplace=False)
 mmx,mmy = generate_marker_inputs_from_peaks(peaks)
@@ -84,4 +88,5 @@ dp.plot(cmap='viridis')
 for mx,my in zip(mmx,mmy):
     m = hs.markers.point(x=my,y=mx,color='red',marker='x')
     dp.add_marker(m,plot_marker=True,permanent=True)
+
 """
