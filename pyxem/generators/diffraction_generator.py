@@ -63,14 +63,15 @@ class DiffractionGenerator(object):
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
 
-    def calculate_ed_data(self, structure, reciprocal_radius):
+    def calculate_ed_data(self, structure, reciprocal_radius, with_direct_beam=True):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
         ----------
         structure : Structure
             The structure for which to derive the diffraction pattern. Note that
-            the structure must be rotated to the appropriate orientation.
+            the structure must be rotated to the appropriate orientation and that testing
+            is conducted on unit cells (rather than supercells)
         reciprocal_radius : float
             The maximum radius of the sphere of reciprocal space to sample, in
             reciprocal angstroms.
@@ -127,6 +128,6 @@ class DiffractionGenerator(object):
         return DiffractionSimulation(coordinates=intersection_coordinates,
                                      indices=intersection_indices,
                                      intensities=intensities,
-                                     with_direct_beam=True)
+                                     with_direct_beam=with_direct_beam)
 
 

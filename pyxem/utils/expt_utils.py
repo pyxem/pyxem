@@ -22,7 +22,7 @@ from scipy.ndimage.interpolation import shift
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
-from skimage.morphology import square
+from skimage.morphology import square, opening
 from skimage.filters import (threshold_sauvola, threshold_otsu)
 
 try:
@@ -459,7 +459,7 @@ def refine_beam_position(z, start, radius):
 
     return c
 
-def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold):
+def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
     z = z.astype(np.float64)
     im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')
     im2 = ndi.gaussian_filter(im1, sigma=sigma_enhance, mode='constant', cval=255)
@@ -471,8 +471,10 @@ def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshol
 
     thresh_sauvola = threshold_sauvola(im4, window_size, k)
     binary_sauvola = im4 > thresh_sauvola
-    binary_sauvola_blur = ndi.gaussian_filter(binary_sauvola, sigma = 0.12)
-    final = im4*binary_sauvola_blur
+    if morph_opening:
+        final = opening(binary_sauvola)
+    else:
+        final=binary_sauvola
 
     return final
 

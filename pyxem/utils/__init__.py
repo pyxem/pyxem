@@ -55,7 +55,8 @@ def correlate(image, pattern_dictionary):
     
     pattern_intensities = pattern_dictionary['intensities']
     pixel_coordinates   = pattern_dictionary['pixel_coords'] 
+    pattern_normalization = pattern_dictionary['pattern_norm']
     
     image_intensities = image[pixel_coordinates[:, 0], pixel_coordinates[:, 1]]
     
-    return np.dot(image_intensities,pattern_intensities)/np.sqrt(np.dot(pattern_intensities,pattern_intensities))
+    return np.dot(image_intensities,pattern_intensities)/pattern_normalization

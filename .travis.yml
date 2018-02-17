@@ -6,8 +6,10 @@ python:
 sudo: false
 
 before_install:
-  - "pip install sphinx hyperspy pymatgen Cython transforms3d"
+  - "pip install sphinx hyperspy pymatgen Cython transforms3d lxml"
   - "pip install sphinx_bootstrap_theme"
+  - "pip install pytest pytest-cov"
+  - "pip install coveralls"
 
 install:
   - "python setup.py install"
@@ -17,10 +19,12 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - pytest tests
+  - pytest --cov=pyxem tests
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
-
+after_success:
+  - coveralls
+  
 deploy:
   provider: pages
   skip_cleanup: true

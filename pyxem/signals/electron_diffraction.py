@@ -790,6 +790,10 @@ class ElectronDiffraction(Signal2D):
             Size of the window considered for each pixel when calculating local
             Sauvola threshold. Has to be odd and >=3.
 
+        morph_opening: boolean
+            If true, thresholded image will be morphologically opened to remove
+            very small and linear artifacts.
+
         See Also
         --------
         http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_niblack_sauvola.html#id2

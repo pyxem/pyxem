@@ -60,14 +60,14 @@ def structure_library(structure):
 
 class TestDiffractionLibraryGenerator:
 
-    @pytest.mark.parametrize('calibration, reciprocal_radius, representation', [
-        (0.017, 2.4, 'euler'),
+    @pytest.mark.parametrize('calibration, reciprocal_radius, half_shape, representation', [
+        (0.017, 2.4, (72,72) ,'euler'),
     ])
     def test_get_diffraction_library(
             self,
             library_generator: DiffractionLibraryGenerator,
-            structure_library, calibration, reciprocal_radius, representation
+            structure_library, calibration, reciprocal_radius, half_shape, representation
     ):
         library = library_generator.get_diffraction_library(
-            structure_library, calibration, reciprocal_radius, representation)
+            structure_library, calibration, reciprocal_radius,half_shape, representation)
         assert isinstance(library, DiffractionLibrary)
