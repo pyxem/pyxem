@@ -18,6 +18,9 @@
 
 import pymatgen as pmg
 import numpy as np
+import pyxem as pxm
+from transforms3d.euler import euler2axangle
+from pymatgen.transformations.standard_transformations import RotationTransformation
 
 half_side_length = 72
 
@@ -27,11 +30,10 @@ def create_GaAs():
     lattice = pmg.Lattice.cubic(5.6535)
     return pmg.Structure.from_spacegroup("F23",lattice, [Ga,As], [[0, 0, 0],[0.25,0.25,0.25]])
 
-def create_twin_angles():
-    " Returns a list contains two sep by rotation of 20"
-    twin_angles_1 = [0,0,0]
-    twin_angles_2 = np.add(twin_angles_1,[20,0,0])
-    return [twin_angles_1,twin_angles_2]
+def create_pair(angle_start,angle_change):
+    """ Lists for angles """
+    angle_2 = np.add(angle_start,angle_change)
+    return [angle_start,angle_start,angle_2,angle_2]
 
 def build_linear_grid_in_euler(alpha_max,beta_max,gamma_max,resolution):
     a = np.arange(0,alpha_max,step=resolution)
@@ -39,3 +41,17 @@ def build_linear_grid_in_euler(alpha_max,beta_max,gamma_max,resolution):
     c = np.arange(0,gamma_max,step=resolution)
     from itertools import product
     return list(product(a,b,c))
+
+def create_sample(edc,structure,angle_start,angle_change):
+    dps = []
+    for orientation in create_pair(angle_start,angle_change):
+        axis, angle = euler2axangle(orientation[0], orientation[1],orientation[2], 'rzxz')
+        rotation = RotationTransformation(axis, angle,angle_in_radians=True)
+        rotated_structure = rotation.apply_transformation(structure)
+        data = edc.calculate_ed_data(rotated_structure,
+                                 reciprocal_radius=0.9, #avoiding a reflection issue
+                                 with_direct_beam=False)
+        dps.append(data.as_signal(2*half_side_length,0.025,1).data)
+    dp = pxm.ElectronDiffraction([dps[0:2],dps[2:]])
+    dp.set_calibration(1/half_side_length)
+    return dp
