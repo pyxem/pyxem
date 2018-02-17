@@ -6,7 +6,7 @@ python:
 sudo: false
 
 before_install:
-  - "pip install sphinx hyperspy pymatgen Cython transforms3d lxml"
+  - "pip install sphinx hyperspy pymatgen Cython transforms3d lxml scikit-learn"
   - "pip install sphinx_bootstrap_theme"
   - "pip install pytest pytest-cov"
   - "pip install coveralls"
@@ -24,7 +24,7 @@ script:
   - sphinx-build -b html docs/source docs/build
 after_success:
   - coveralls
-  
+
 deploy:
   provider: pages
   skip_cleanup: true
