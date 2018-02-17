@@ -20,16 +20,15 @@ import numpy as np
 import pytest
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
+from pyxem import ElectronDiffraction
 import pymatgen as pmg
 
 
 """ These are .as_signal() tests and should/could be wrapped in a class"""
-#XXX
-
 
 @pytest.fixture
 def coords_intensity_simulation():
-    return DiffractionSimulation(coordinates = np.asarray([[0.3,0.7,0],[0.1,0.8,1],[0.2,1.2,2]]), intensities = np.ones(3))
+    return DiffractionSimulation(coordinates = np.asarray([[0.3,1.2,0]]), intensities = np.ones(1))
 
 @pytest.fixture
 def as_signal_size_sigma_max_r():
@@ -42,9 +41,26 @@ def get_signal():
     max_r = as_signal_size_sigma_max_r()[2]
     return coords_intensity_simulation().as_signal(size,sigma,max_r)
 
+def test_typing():
+    assert type(get_signal()) is ElectronDiffraction
+    
 def test_shape_as_expected():
     assert get_signal().data.shape == (as_signal_size_sigma_max_r()[0],as_signal_size_sigma_max_r()[0])
-        
+
+def test_correct_quadrant_np():
+    A = get_signal().data
+    assert (np.sum(A[:72,:72]) == 0)    
+    assert (np.sum(A[72:,:72]) == 0)    
+    assert (np.sum(A[:72,72:]) == 0)    
+    assert (np.sum(A[72:,72:])  > 0)    
+
+def test_correct_quadrant_hs():
+    S = get_signal()
+    assert (np.sum(S.isig[:72,:72].data) == 0)    
+    assert (np.sum(S.isig[72:,:72].data) == 0)    
+    assert (np.sum(S.isig[:72,72:].data) == 0)    
+    assert (np.sum(S.isig[72:,72:].data)  > 0) 
+    
 # ToDo - Test low and high sigma
 
 """ These test that our kinematic simulation behaves as we would expect it to """
