@@ -90,3 +90,6 @@ for mx,my in zip(mmx,mmy):
     m = hs.markers.point(x=mx,y=my,color='red',marker='x')
     dp.add_marker(m,plot_marker=True,permanent=True)
 
+def test_visuals():
+    # Hand checking again
+    assert False
