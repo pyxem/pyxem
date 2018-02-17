@@ -349,7 +349,7 @@ class ElectronDiffraction(Signal2D):
                         deadvalue=deadvalue,
                         inplace=inplace)
 
-    def get_radial_profile(self, centers=None):
+    def get_radial_profile(self, centers=None, cython=False):
         """Return the radial profile of the diffraction pattern.
 
         Parameters
@@ -379,25 +379,26 @@ class ElectronDiffraction(Signal2D):
             profiles = ed.get_radial_profile(centers)
             profiles.plot()
         """
-        # TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
         centers = Signal1D(centers)
 
-        # TODO: the cython implementation is throwing dtype errors
-        radial_profiles = self.map(radial_average, center=centers,
-                                   inplace=False, cython=False)
-        ragged = len(radial_profiles.data.shape) == 1
+        rp = self.map(radial_average, center=centers,
+                      cython=cython, inplace=False)
+
+        ragged = len(rp.data.shape) == 1
+
         if ragged:
-            max_len = max(map(len, radial_profiles.data))
-            radial_profiles = Signal1D([
+            max_len = max(map(len, rp.data))
+            rp = Signal1D([
                 np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
-                for row in radial_profiles.data])
-            return DiffractionProfile(radial_profiles)
+                for row in rp.data])
         else:
-            radial_profiles.axes_manager.signal_axes[0].offset = 0
+            rp.axes_manager.signal_axes[0].offset = 0
             signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            return DiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+            radial_profiles.as_signal1D(signal_axis)
+
+        return DiffractionProfile(rp)
 
     def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
         """Reproject the diffraction data into polar coordinates.
