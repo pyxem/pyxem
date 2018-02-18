@@ -112,7 +112,7 @@ def generate_marker_inputs_from_peaks(peaks):
             dp.add_marker(m,plot_marker=True,permanent=False)
 
     """
-    ### XXX: non-square signals or single images
+    ### XXX: non-square signals
     max_peak_len = _find_max_length_peaks(peaks)
     pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data),fillvalue=[np.nan,np.nan])))
     pad = pad.reshape((max_peak_len),peaks.data.shape[0],peaks.data.shape[1],2)
