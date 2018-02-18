@@ -4,7 +4,7 @@ setup(
         packages = [
             'fpd_data_processing',
             ],
-        version = '0.2.0',
+        version = '0.2.1',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a fast pixelated detector',
         author = 'Magnus Nord',
         author_email = 'magnunor@gmail.com',
@@ -21,5 +21,6 @@ setup(
             'ipython>=2.0',
             'matplotlib>=2.0',
             'hyperspy>=1.3',
+            'dask',
             ],
 )
