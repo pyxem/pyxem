@@ -4,7 +4,7 @@ setup(
         packages = [
             'fpd_data_processing',
             ],
-        version = '0.2.1',
+        version = '0.2.1.dev1',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a fast pixelated detector',
         author = 'Magnus Nord',
         author_email = 'magnunor@gmail.com',
