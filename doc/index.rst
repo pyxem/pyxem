@@ -1,6 +1,17 @@
 Welcome to fpd_data_processing's documentation!
 ===============================================
 
+News
+----
+**2018-2-18: fpd_data_processing 0.2.1 released!**
+
+This release includes a major improvement for lazy signal processing with center of mass and radial integration.
+It also includes a new method for shifting diffraction patterns in the PixelatedSTEM class.
+
+
+About fpd_data_processing
+-------------------------
+
 Library for processing data acquired on a fast pixelated electron detector, acquired using scanning transmission electron microscopy.
 
 Install instructions: :ref:`install`.
