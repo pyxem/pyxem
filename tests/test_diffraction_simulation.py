@@ -24,29 +24,20 @@ from pyxem import ElectronDiffraction
 import pymatgen as pmg
 
 
-""" These are .as_signal() tests and should/could be wrapped in a class"""
-
 @pytest.fixture
 def coords_intensity_simulation():
     return DiffractionSimulation(coordinates = np.asarray([[0.3,1.2,0]]), intensities = np.ones(1))
 
 @pytest.fixture
-def as_signal_size_sigma_max_r():
-    return [144,0.03,1.5]
-
-@pytest.fixture
 def get_signal():
-    size  = as_signal_size_sigma_max_r()[0]
-    sigma = as_signal_size_sigma_max_r()[1]
-    max_r = as_signal_size_sigma_max_r()[2]
+    size  = 144
+    sigma = 0.03
+    max_r = 1.5
     return coords_intensity_simulation().as_signal(size,sigma,max_r)
 
 def test_typing():
     assert type(get_signal()) is ElectronDiffraction
     
-def test_shape_as_expected():
-    assert get_signal().data.shape == (as_signal_size_sigma_max_r()[0],as_signal_size_sigma_max_r()[0])
-
 def test_correct_quadrant_np():
     A = get_signal().data
     assert (np.sum(A[:72,:72]) == 0)    
@@ -63,23 +54,7 @@ def test_correct_quadrant_hs():
     
 # ToDo - Test low and high sigma
 
-
-
-
 """ These test that our kinematic simulation behaves as we would expect it to """
-
-
-Cl = pmg.Element("Cl")
-Ar = pmg.Element("Ar")
-cubic_lattice = pmg.Lattice.cubic(5)
-Mscope = DiffractionGenerator(300, 5e-2) #a 300kev EM
-
-formal_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
-casual_cubic_I = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Cl], [[0, 0, 0],[0.5,0.5,0.5]])
-fake_cubic_I   = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Ar], [[0, 0, 0],[0.5,0.5,0.5]])
-
-larger_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
-larger_cubic_I.make_supercell([2,4,2])
 
 def get_pattern(microscope,structure):
     return microscope.calculate_ed_data(structure,1)
@@ -89,15 +64,30 @@ def check_pattern_equivilance(p1,p2,coords_only=False):
     if not coords_only:
         assert np.allclose(p1.indices,p2.indices)
         assert np.allclose(p1.intensities,p2.intensities) 
-    
-def test_casual_formal():
-    # Checks that Pymatgen understands that these are the same structure
-    assert formal_cubic_I == casual_cubic_I
+
+# Becuase of the slight differences between each of the structures, the
+# explictily named, ugly pathway has been taken
+
+Cl = pmg.Element("Cl")
+Ar = pmg.Element("Ar")
+cubic_lattice = pmg.Lattice.cubic(5)
+Mscope = DiffractionGenerator(300, 5e-2) #a 300kev EM
+
+formal_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
+casual_cubic_I = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Cl], [[0, 0, 0],[0.5,0.5,0.5]])
+fake_cubic_I   = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Ar], [[0, 0, 0],[0.5,0.5,0.5]])
+larger_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
+larger_cubic_I.make_supercell([2,4,2])
 
 formal_pattern = get_pattern(Mscope,formal_cubic_I)
 casual_pattern = get_pattern(Mscope,casual_cubic_I)
 fake_pattern   = get_pattern(Mscope,fake_cubic_I)
 larger_pattern = get_pattern(Mscope,larger_cubic_I)
+
+    
+def test_casual_formal():
+    # Checks that Pymatgen understands that these are the same structure
+    assert formal_cubic_I == casual_cubic_I
 
 def test_casual_formal_in_simulation():
     ## Checks that are simulations also realise that
@@ -112,6 +102,3 @@ def test_systematic_absence():
 
 def test_scaling():
     check_pattern_equivilance(formal_pattern,larger_pattern,coords_only=True)
-    
-#ToDo Generate an A centered and test the sys condition is satisfied 
-#ToDo Check obvious thing like doubling lattice size and changing voltages
