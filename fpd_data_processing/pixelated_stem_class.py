@@ -400,18 +400,22 @@ class PixelatedSTEM(Signal2D):
             mask_flat = mask_array.reshape(-1, *mask_array.shape[-2:])
             iterating_kwargs.append(('mask', mask_flat))
 
-        s_radial = self._map_iterate(
-                pst._get_radial_profile_of_diff_image,
-                iterating_kwargs=iterating_kwargs,
-                inplace=False, ragged=False,
-                parallel=parallel,
-                radial_array_size=radial_array_size,
-                show_progressbar=show_progressbar)
         if self._lazy:
-            s_radial.compute(progressbar=show_progressbar)
+            data = pst._radial_integration_dask_array(
+                    self.data, return_sig_size=radial_array_size,
+                    centre_x=centre_x, centre_y=centre_y,
+                    mask_array=mask_array, show_progressbar=show_progressbar)
+            s_radial = hs.signals.Signal1D(data)
         else:
-            s_radial = hs.signals.Signal1D(s_radial.data)
-
+            s_radial = self._map_iterate(
+                    pst._get_radial_profile_of_diff_image,
+                    iterating_kwargs=iterating_kwargs,
+                    inplace=False, ragged=False,
+                    parallel=parallel,
+                    radial_array_size=radial_array_size,
+                    show_progressbar=show_progressbar)
+            data = s_radial.data
+        s_radial = hs.signals.Signal1D(data)
         return(s_radial)
 
     def angular_mask(

@@ -44,6 +44,46 @@ class TestCenterOfMassDaskArray:
         assert (data1 == np.ones((10, 10, 2))).all()
 
 
+class TestRadialIntegrationDaskArray:
+
+    def test_simple(self):
+        dask_array = da.zeros((10, 10, 15, 15), chunks=(5, 5, 5, 5))
+        centre_x, centre_y = np.ones((2, 100))*7.5
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=11,
+                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+        assert data.shape == (10, 10, 11)
+        assert (data == 0.0).all()
+
+    def test_different_size(self):
+        dask_array = da.zeros((5, 10, 12, 15), chunks=(5, 5, 5, 5))
+        centre_x, centre_y = np.ones((2, 100))*7.5
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=11,
+                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+        assert data.shape == (5, 10, 11)
+        assert (data == 0.0).all()
+
+    def test_mask(self):
+        numpy_array = np.zeros((10, 10, 30, 30))
+        numpy_array[:, :, 0, 0] = 1000
+        numpy_array[:, :, -1, -1] = 1
+        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+        centre_x, centre_y = np.ones((2, 100))*15
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=22,
+                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+        assert data.shape == (10, 10, 22)
+        assert (data != 0.0).any()
+        mask = pst._make_circular_mask(15, 15, 30, 30, 15)
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=22,
+                centre_x=centre_x, centre_y=centre_y, mask_array=mask,
+                show_progressbar=False)
+        assert data.shape == (10, 10, 22)
+        assert (data == 0.0).all()
+
+
 class test_pixelated_tools(unittest.TestCase):
 
     def test_find_longest_distance_manual(self):

@@ -50,8 +50,8 @@ def _get_dask_chunk_slice_list(dask_array):
 
 
 def _calculate_function_on_dask_array(
-        dask_array, function, func_args=None, return_sig_size=1,
-        show_progressbar=True):
+        dask_array, function, func_args=None, func_iterating_args=None,
+        return_sig_size=1, show_progressbar=True):
     """Apply a function to a dask array, immediately returning the results.
 
     Parameters
@@ -59,6 +59,7 @@ def _calculate_function_on_dask_array(
     dask_array : dask array
     function : function
     func_args : dict
+    func_iterating_args : dict
     return_sig_size : int
         Default 1
     show_progressbar : bool
@@ -85,6 +86,8 @@ def _calculate_function_on_dask_array(
                 "dask_array must have either 3 or 4 dimensions")
     if func_args is None:
         func_args = {}
+    if func_iterating_args is None:
+        func_iterating_args = {}
     if return_sig_size == 1:
         return_data = np.zeros((*dask_array.shape[:-2], ))
     else:
@@ -101,6 +104,8 @@ def _calculate_function_on_dask_array(
             for im_slice in im_slice_list:
                 im = data_slice[im_slice]
                 i = slice_chunk[0].start + im_slice[0]
+                for k, v in func_iterating_args.items():
+                    func_args[k] = v[i]
                 out_data = function(im, **func_args)
                 if return_sig_size == 1:
                     return_data[i] = out_data
@@ -114,6 +119,9 @@ def _calculate_function_on_dask_array(
                 im = data_slice[im_slice]
                 i_x = slice_chunk[0].start + im_slice[0]
                 i_y = slice_chunk[1].start + im_slice[1]
+                for k, v in func_iterating_args.items():
+                    i = return_data.shape[1]*i_x + i_y
+                    func_args[k] = v[i]
                 out_data = function(im, **func_args)
                 if return_sig_size == 1:
                     return_data[i_x, i_y] = out_data

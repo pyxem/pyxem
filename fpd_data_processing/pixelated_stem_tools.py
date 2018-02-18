@@ -31,6 +31,18 @@ def _center_of_mass_dask_array(
     return data
 
 
+def _radial_integration_dask_array(
+        dask_array, return_sig_size, centre_x, centre_y,
+        mask_array=None, show_progressbar=True):
+    func_args = {'mask': mask_array, 'radial_array_size': return_sig_size}
+    func_iterating_args = {'centre_x': centre_x, 'centre_y': centre_y}
+    data = lt._calculate_function_on_dask_array(
+            dask_array, _get_radial_profile_of_diff_image, func_args=func_args,
+            func_iterating_args=func_iterating_args,
+            return_sig_size=return_sig_size, show_progressbar=show_progressbar)
+    return data
+
+
 def _shift_single_frame(im, shift_x, shift_y):
     im_shifted = shift(im, (-shift_y, -shift_x), order=1)
     return im_shifted
