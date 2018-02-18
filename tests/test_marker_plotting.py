@@ -20,41 +20,23 @@ import numpy as np
 import pytest
 import pyxem as pxm
 import hyperspy.api as hs
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
 
-### When you run this the markers should land at the center of the peaks, simple as.
-
-dps, dp_cord_list, dp_calib_cord = [],[],[]
-
-# Create 4 random diffraction simulations
-half_side_length = 72
-for alpha in [0,1,2,3]:
-    coords = (np.random.rand(1,2)-0.5)*2 #zero mean, range from -1 to +1
-    dp_sim = DiffractionSimulation(coordinates=coords,
-                                   intensities=np.ones_like(coords[:,0]),
-                                   calibration=1/half_side_length)
-    dp_cord_list.append(dp_sim.coordinates[:,:2]) #stores the simulations coords
-    dp_calib_cord.append(dp_sim.calibrated_coordinates[:,:2])
-    dps.append(dp_sim.as_signal(2*half_side_length,0.075,1).data) #stores a numpy array of pattern
-
-def test_calibrated_coords_are_correct():
-    # Explicit is best
-    for i in [0,1,2,3]:
-        dp_single = dps[i]
-        x,y = dp_calib_cord[i][0][0].astype(int),dp_calib_cord[i][0][1].astype(int)
-        ### ALARM BELLS - you need to swap y and x here to get a pass
-        assert dp_single[y+half_side_length,x+half_side_length] > 0.3 
-        # This just tested that the peak is where it should be
-        
-""" This is py36 on Toshibia Laptop
-matplotlib 2.1.0
-numpy  1.13.3
-hyperspy 1.4.dev0+git.96.g2900677
+"""
+When you run this the markers should land at the center of the peaks
+near the dots.
 """
 
-# See above
-dp_cord_list = [np.flip(x,axis=1) for x in dp_cord_list ]
+dps, dp_cord_list = [],[]
+for alpha in [0,1,2,3]:
+    coords = np.array([5+3*alpha,20*alpha,0]).reshape(1,3)
+    dp_cord_list.append(coords[:,:2]) #stores the simulations coords
+    back = np.zeros((144,144))
+    x = coords.astype(int)[0,0]
+    y = coords.astype(int)[0,1]
+    back[x,y] = 1 
+    dps.append(back.T) #stores a numpy array of pattern, This is dangerous
 
 # And onwards
 dp = pxm.ElectronDiffraction(np.array([dps[0:2],dps[2:]])) #now from a 2x2 array of patterns
@@ -63,12 +45,40 @@ peaks = hs.signals.Signal2D(np.array([dp_cord_list[0:2],dp_cord_list[2:]]))
 ### And plot!
 
 mmx,mmy = generate_marker_inputs_from_peaks(peaks)
-dp.set_calibration(2/144)
 dp.plot(cmap='viridis')
 for mx,my in zip(mmx,mmy):
     m = hs.markers.point(x=mx,y=my,color='red',marker='x')
     dp.add_marker(m,plot_marker=True,permanent=True)
 
-def test_marker_placement_correct():
+def test_marker_placement_correct_alpha():
+    #This is human assessed, if you see this comment, you should check it
+    assert True
+
+### Now get .as_signal()
+
+dps = []
+dp_cord_list= np.divide(dp_cord_list,80)
+max_r = np.max(dp_cord_list) + 0.1
+# Create 4 random diffraction simulations
+half_side_length = 72
+for alpha in [0,1,2,3]:
+    dp_sim = DiffractionSimulation(coordinates=dp_cord_list[alpha],
+                                   intensities=np.ones_like(dp_cord_list[alpha][:,0]),
+                                   )
+    dps.append(dp_sim.as_signal(2*half_side_length,0.025,max_r).data) #stores a numpy array of pattern
+# And onwards
+dpx = pxm.ElectronDiffraction(np.array([dps[0:2],dps[2:]])) #now from a 2x2 array of patterns
+peaks = hs.signals.Signal2D(np.array([dp_cord_list[0:2],dp_cord_list[2:]]))
+
+### And plot!
+
+mmx,mmy = generate_marker_inputs_from_peaks(peaks)
+dpx.set_calibration(2*max_r/(2*half_side_length))
+dpx.plot(cmap='viridis')
+for mx,my in zip(mmx,mmy):
+    m = hs.markers.point(x=mx,y=my,color='red',marker='x')
+    dpx.add_marker(m,plot_marker=True,permanent=True)
+
+def test_marker_placement_correct_beta():
     #This is human assessed, if you see this comment, you should check it
     assert True
