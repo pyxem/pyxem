@@ -13,6 +13,83 @@ from tqdm import tqdm
 
 class PixelatedSTEM(Signal2D):
 
+    def plot(self, *args, **kwargs):
+        if 'navigator' in kwargs:
+            super().plot(*args, **kwargs)
+        elif hasattr(self, *args, 'navigation_signal'):
+            if self.navigation_signal is not None:
+                nav_sig_shape = self.navigation_signal.axes_manager.shape
+                self_nav_shape = self.axes_manager.navigation_shape
+                if nav_sig_shape == self_nav_shape:
+                    kwargs['navigator'] = self.navigation_signal
+                    super().plot(*args, **kwargs)
+                else:
+                    raise ValueError(
+                            "navigation_signal does not have the same shape "
+                            "({0}) as the signal's navigation shape "
+                            "({1})".format(nav_sig_shape, self_nav_shape))
+            else:
+                super().plot(*args, **kwargs)
+        else:
+            super().plot(*args, **kwargs)
+
+    def shift_diffraction(
+            self, shift_x, shift_y, parallel=True,
+            inplace=False, show_progressbar=True):
+        """Shift the diffraction patterns in a pixelated STEM signal.
+
+        The points outside the boundaries are set to zero.
+
+        Parameters
+        ----------
+        shift_x, shift_y : int or NumPy array
+            If given as int, all the diffraction patterns will have the same
+            shifts. Each diffraction pattern can also have different shifts,
+            by passing a NumPy array with the same dimensions as the navigation
+            axes.
+        parallel : bool
+            If True, run the processing on several cores.
+            In most cases this should be True, but for debugging False can be
+            useful. Default True
+        inplace : bool
+            If True (default), the data is replaced by the result. Useful when
+            working with very large datasets, as this avoids doubling the
+            amount of memory needed. If False, a new signal with the results
+            is returned.
+        show_progressbar : bool
+            Default True.
+
+        Returns
+        -------
+        shifted_signal : PixelatedSTEM signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s_c = s.center_of_mass(threshold=3.)
+        >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
+        >>> s_shift = s.shift_diffraction(s_c.inav[0].data, s_c.inav[1].data)
+        >>> s_shift.plot()
+
+        """
+
+        if (not isiterable(shift_x)) or (not isiterable(shift_y)):
+            shift_x, shift_y = pst._make_centre_array_from_signal(
+                    self, x=shift_x, y=shift_y)
+        shift_x = shift_x.flatten()
+        shift_y = shift_y.flatten()
+        iterating_kwargs = [
+                ('shift_x', shift_x),
+                ('shift_y', shift_y)]
+
+        s_shift = self._map_iterate(
+                pst._shift_single_frame, iterating_kwargs=iterating_kwargs,
+                inplace=inplace, ragged=False, parallel=parallel,
+                show_progressbar=show_progressbar)
+        if not inplace:
+            return s_shift
+
     def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
         """
         Rotate the diffraction dimensions.
@@ -20,9 +97,11 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         angle : scalar
-            Clickwise rotation in degrees.
-        parallel : bool, default True
-        show_progressbar : bool, default True
+            Clockwise rotation in degrees.
+        parallel : bool
+            Default True
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
@@ -80,7 +159,7 @@ class PixelatedSTEM(Signal2D):
         The function returns a new signal, but the data itself
         is a view of the original signal. So changing the returned signal
         will also change the original signal (and visa versa). To avoid
-        changing the orignal signal, use the deepcopy method afterwards,
+        changing the original signal, use the deepcopy method afterwards,
         but note that this requires double the amount of memory.
         See below for an example of this.
 
@@ -119,6 +198,8 @@ class PixelatedSTEM(Signal2D):
             this threshold value.
         mask : tuple (x, y, r)
             Round mask centered on x and y, with radius r.
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
@@ -139,29 +220,38 @@ class PixelatedSTEM(Signal2D):
         >>> s_com = s.center_of_mass(threshold=1.5, show_progressbar=False)
 
         """
-
         if mask is not None:
             x, y, r = mask
             im_x, im_y = self.axes_manager.signal_shape
             mask = pst._make_circular_mask(x, y, im_x, im_y, r)
 
+        nav_dim = self.axes_manager.navigation_dimension
         # Signal is transposed, due to the DPC signals having the
         # x and y deflections as navigation dimension, and probe
         # positions as signal dimensions
-        s_com = self.map(
-                function=pst._center_of_mass_single_frame,
-                ragged=False, inplace=False, parallel=True,
-                show_progressbar=show_progressbar,
-                threshold=threshold, mask=mask)
-        if self._lazy:
-            s_com.compute(progressbar=show_progressbar)
+        if (not self._lazy) or (nav_dim == 0):
+            s_com = self.map(
+                    function=pst._center_of_mass_single_frame,
+                    ragged=False, inplace=False, parallel=True,
+                    show_progressbar=show_progressbar,
+                    threshold=threshold, mask=mask)
+            data = s_com.data
+        else:
+            data = pst._center_of_mass_dask_array(
+                    self.data, threshold=threshold, mask=mask,
+                    show_progressbar=show_progressbar)
         if self.axes_manager.navigation_dimension == 0:
-            s_com = DPCBaseSignal(s_com.data).T
+            s_com = DPCBaseSignal(data).T
         elif self.axes_manager.navigation_dimension == 1:
-            s_com = DPCSignal1D(s_com.T.data)
+            s_com = DPCSignal1D(np.swapaxes(data, 0, 1))
         elif self.axes_manager.navigation_dimension == 2:
-            s_com = DPCSignal2D(s_com.T.data)
+            data = np.swapaxes(np.swapaxes(data, 0, 1), 0, 2)
+            s_com = DPCSignal2D(data)
         s_com.axes_manager.navigation_axes[0].name = "Beam position"
+        for nav_axes, sig_axes in zip(
+                self.axes_manager.navigation_axes,
+                s_com.axes_manager.signal_axes):
+            pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return(s_com)
 
     def _virtual_detector(self, cx, cy, r, r_inner=None):
@@ -183,6 +273,8 @@ class PixelatedSTEM(Signal2D):
             x- and y-centre positions.
         r : float, optional
             Outer radius.
+        show_progressbar : bool
+            Default True.
 
         Returns
         -------
@@ -263,12 +355,14 @@ class PixelatedSTEM(Signal2D):
             missing, both will be set from the signal (0., 0.) positions.
             If no values are given, the (0., 0.) positions in the signal will
             be used.
-        mask_array : Boolean numpy array, optional
+        mask_array : Boolean NumPy array, optional
             Mask with the same shape as the signal.
         parallel : bool, default True
             If True, run the processing on several cores.
             In most cases this should be True, but for debugging False can be
             useful.
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
@@ -281,6 +375,7 @@ class PixelatedSTEM(Signal2D):
         >>> s_r = s.radial_integration(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
         >>> s_r.plot()
+
         """
 
         if (centre_x is None) or (centre_y is None):
@@ -305,18 +400,22 @@ class PixelatedSTEM(Signal2D):
             mask_flat = mask_array.reshape(-1, *mask_array.shape[-2:])
             iterating_kwargs.append(('mask', mask_flat))
 
-        s_radial = self._map_iterate(
-                pst._get_radial_profile_of_diff_image,
-                iterating_kwargs=iterating_kwargs,
-                inplace=False, ragged=False,
-                parallel=parallel,
-                radial_array_size=radial_array_size,
-                show_progressbar=show_progressbar)
         if self._lazy:
-            s_radial.compute(progressbar=show_progressbar)
+            data = pst._radial_integration_dask_array(
+                    self.data, return_sig_size=radial_array_size,
+                    centre_x=centre_x, centre_y=centre_y,
+                    mask_array=mask_array, show_progressbar=show_progressbar)
+            s_radial = hs.signals.Signal1D(data)
         else:
-            s_radial = hs.signals.Signal1D(s_radial.data)
-
+            s_radial = self._map_iterate(
+                    pst._get_radial_profile_of_diff_image,
+                    iterating_kwargs=iterating_kwargs,
+                    inplace=False, ragged=False,
+                    parallel=parallel,
+                    radial_array_size=radial_array_size,
+                    show_progressbar=show_progressbar)
+            data = s_radial.data
+        s_radial = hs.signals.Signal1D(data)
         return(s_radial)
 
     def angular_mask(
@@ -330,7 +429,6 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         angle0, angle1 : numbers
-            Must be between 0 and 2*pi.
         centre_x_array, centre_y_array : NumPy 2D array, optional
             Has to have the same shape as the navigation axis of
             the signal.
@@ -348,6 +446,7 @@ class PixelatedSTEM(Signal2D):
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
         >>> mask_array = s.angular_mask(0.5*np.pi, np.pi)
+
         """
 
         bool_array = pst._get_angle_sector_mask(
@@ -358,7 +457,7 @@ class PixelatedSTEM(Signal2D):
 
     def angular_slice_radial_integration(
             self, angleN=20, centre_x=None, centre_y=None,
-            show_progressbar=True):
+            slice_overlap=None, show_progressbar=True):
         """Do radial integration of different angular slices.
         Useful for analysing anisotropy in round diffraction features,
         such as diffraction rings from polycrystalline materials or
@@ -367,7 +466,7 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         angleN : int, default 20
-            Number of angular slices. If angleN=2, each slice
+            Number of angular slices. If angleN=4, each slice
             will be 90 degrees. The integration will start in the top left
             corner (0, 0) when plotting using s.plot(), and go clockwise.
         centre_x, centre_y : int or NumPy array, optional
@@ -379,6 +478,15 @@ class PixelatedSTEM(Signal2D):
             missing, both will be set from the signal (0., 0.) positions.
             If no values are given, the (0., 0.) positions in the signal will
             be used.
+        slice_overlap : float, optional
+            Amount of overlap between the slices, given in fractions of
+            angle slice (0 to 1). For angleN=4, each slice will be 90
+            degrees. If slice_overlap=0.5, each slice will overlap by 45
+            degrees on each side. The range of the slices will then be:
+            (-45, 135), (45, 225), (135, 315) and (225, 45).
+            Default off: meaning there is no overlap between the slices.
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
@@ -393,13 +501,25 @@ class PixelatedSTEM(Signal2D):
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_integration(
         ...     angleN=10, centre_x=s_com.inav[0].data,
-        ...     centre_y=s_com.inav[1].data, show_progressbar=False)
+        ...     centre_y=s_com.inav[1].data, slice_overlap=0.2,
+        ...     show_progressbar=False)
         >>> s_ar.plot()
+
         """
         signal_list = []
         angle_list = []
+        if slice_overlap is None:
+            slice_overlap = 0
+        else:
+            if (slice_overlap < 0) or (slice_overlap > 1):
+                raise ValueError(
+                        "slice_overlap is {0}. But must be between "
+                        "0 and 1".format(slice_overlap))
+        angle_step = 2*np.pi/angleN
         for i in range(angleN):
-            angle_list.append((2*np.pi*i/angleN, 2*np.pi*(i+1)/angleN))
+            angle0 = (angle_step * i) - (angle_step * slice_overlap)
+            angle1 = (angle_step * (i + 1)) + (angle_step * slice_overlap)
+            angle_list.append((angle0, angle1))
         if (centre_x is None) or (centre_y is None):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
         elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
@@ -437,6 +557,7 @@ class DPCBaseSignal(BaseSignal):
 
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
+
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -453,6 +574,7 @@ class DPCSignal1D(Signal1D):
 
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
+
     """
 
     def get_bivariate_histogram(
@@ -507,9 +629,10 @@ class DPCSignal2D(Signal2D):
 
     The first navigation index (s.inav[0]) is assumed to the be x-shift
     and the second navigation is the y-shift (s.inav[1]).
+
     """
 
-    def correct_ramp(self, corner_size=0.05, out=None):
+    def correct_ramp(self, corner_size=0.05, only_offset=False, out=None):
         """
         Subtracts a plane from the signal, useful for removing
         the effects of d-scan in a STEM beam shift dataset.
@@ -525,11 +648,27 @@ class DPCSignal2D(Signal2D):
             If corner_size is 0.05 (5%), and the image is 500 x 1000,
             the size of the corners will be (500*0.05) x (1000*0.05) = 25 x 50.
             Default 0.05
-        out : optional, DPCImage signal
+        only_offset : bool, optional
+            If True, will subtract a "flat" plane, i.e. it will subtract the
+            mean value of the corners. Default False
+        out : optional, DPCSignal2D signal
 
         Returns
         -------
         corrected_signal : Signal2D
+
+        Examples
+        --------
+        >>> import fpd_data_processing.api as fp
+        >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=True)
+        >>> s_corr = s.correct_ramp()
+        >>> s_corr.plot()
+
+        Only correct offset
+
+        >>> s_corr = s.correct_ramp(only_offset=True)
+        >>> s_corr.plot()
+
         """
         if out is None:
             output = self.deepcopy()
@@ -537,7 +676,11 @@ class DPCSignal2D(Signal2D):
             output = out
 
         for i, s in enumerate(self):
-            ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+            if only_offset:
+                corners = pst._get_corner_value(s, corner_size=corner_size)[2]
+                ramp = corners.mean()
+            else:
+                ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
             output.data[i, :, :] -= ramp
         if out is None:
             return(output)
@@ -816,6 +959,8 @@ class DPCSignal2D(Signal2D):
                     masked=masked,
                     bins=bins,
                     spatial_std=spatial_std)
+        s_hist.metadata.General.title = "Bivariate histogram of {0}".format(
+                self.metadata.General.title)
         return(s_hist)
 
     def flip_axis_90_degrees(self, flips=1):

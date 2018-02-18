@@ -67,6 +67,7 @@ Radial integration
     >>> s_r = s.radial_integration(show_progressbar=False)
     >>> s_r.plot()
 
+
 Rotating the diffraction pattern
 --------------------------------
 
@@ -77,3 +78,18 @@ Rotating the diffraction pattern
     >>> s = fp.dummy_data.get_holz_simple_test_signal()
     >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
     >>> s_rot.plot()
+
+
+Shifting the diffraction pattern
+--------------------------------
+
+:py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.shift_diffraction`
+
+.. code-block:: python
+
+    >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
+    >>> s_com = s.center_of_mass(threshold=3., show_progressbar=False)
+    >>> s_com -= 25 # To shift the centre spot to (25, 25)
+    >>> s_shift = s.shift_diffraction(
+    ...     shift_x=s_com.inav[0].data, shift_y=s_com.inav[1].data, show_progressbar=False)
+    >>> s_shift.plot()

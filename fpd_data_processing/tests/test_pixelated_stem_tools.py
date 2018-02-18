@@ -1,8 +1,87 @@
 import unittest
+import pytest
+import numpy as np
+import dask.array as da
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 import fpd_data_processing.pixelated_stem_tools as pst
-import numpy as np
 from hyperspy.signals import Signal2D
+
+
+class TestCenterOfMassDaskArray:
+
+    def test_simple(self):
+        numpy_array = np.zeros((10, 10, 50, 50))
+        numpy_array[:, :, 25, 25] = 1
+        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+        data = pst._center_of_mass_dask_array(
+                dask_array, show_progressbar=False)
+        assert data.shape == (10, 10, 2)
+        assert (data == np.ones((10, 10, 2))*25).all()
+
+    def test_mask(self):
+        numpy_array = np.zeros((10, 10, 50, 50))
+        numpy_array[:, :, 25, 25] = 1
+        numpy_array[:, :, 1, 1] = 100000000
+        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+        data0 = pst._center_of_mass_dask_array(
+                dask_array, show_progressbar=False)
+        np.testing.assert_allclose(data0, np.ones((10, 10, 2)), rtol=1e-05)
+        mask = pst._make_circular_mask(25, 25, 50, 50, 10)
+        data1 = pst._center_of_mass_dask_array(
+                dask_array, mask=mask, show_progressbar=False)
+        assert (data1 == np.ones((10, 10, 2))*25).all()
+
+    def test_threshold(self):
+        numpy_array = np.zeros((10, 10, 50, 50))
+        numpy_array[:, :, 25, 25] = 1
+        numpy_array[:, :, 1, 1] = 100000000
+        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+        data0 = pst._center_of_mass_dask_array(
+                dask_array, show_progressbar=False)
+        np.testing.assert_allclose(data0, np.ones((10, 10, 2)), rtol=1e-05)
+        data1 = pst._center_of_mass_dask_array(
+                dask_array, threshold=1, show_progressbar=False)
+        assert (data1 == np.ones((10, 10, 2))).all()
+
+
+class TestRadialIntegrationDaskArray:
+
+    def test_simple(self):
+        dask_array = da.zeros((10, 10, 15, 15), chunks=(5, 5, 5, 5))
+        centre_x, centre_y = np.ones((2, 100))*7.5
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=11,
+                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+        assert data.shape == (10, 10, 11)
+        assert (data == 0.0).all()
+
+    def test_different_size(self):
+        dask_array = da.zeros((5, 10, 12, 15), chunks=(5, 5, 5, 5))
+        centre_x, centre_y = np.ones((2, 100))*7.5
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=11,
+                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+        assert data.shape == (5, 10, 11)
+        assert (data == 0.0).all()
+
+    def test_mask(self):
+        numpy_array = np.zeros((10, 10, 30, 30))
+        numpy_array[:, :, 0, 0] = 1000
+        numpy_array[:, :, -1, -1] = 1
+        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+        centre_x, centre_y = np.ones((2, 100))*15
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=22,
+                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+        assert data.shape == (10, 10, 22)
+        assert (data != 0.0).any()
+        mask = pst._make_circular_mask(15, 15, 30, 30, 15)
+        data = pst._radial_integration_dask_array(
+                dask_array, return_sig_size=22,
+                centre_x=centre_x, centre_y=centre_y, mask_array=mask,
+                show_progressbar=False)
+        assert data.shape == (10, 10, 22)
+        assert (data == 0.0).all()
 
 
 class test_pixelated_tools(unittest.TestCase):
@@ -84,7 +163,52 @@ class test_pixelated_tools(unittest.TestCase):
         self.assertTrue((-offset0_x == mask[0]).all())
         self.assertTrue((-offset0_y == mask[1]).all())
 
-    def test_get_angle_sector_mask_0d(self):
+
+class TestShiftSingleFrame:
+
+    @pytest.mark.parametrize("x,y", [(1, 1), (-2, 2), (-2, 5), (-4, -3)])
+    def test_simple_shift(self, x, y):
+        im = np.zeros((20, 20))
+        x0, y0 = 10, 12
+        im[x0, y0] = 1
+        # Note that the shifts are switched when calling the function,
+        # to stay consistent with the HyperSpy axis ordering
+        im_shift = pst._shift_single_frame(im=im, shift_x=y, shift_y=x)
+        assert im_shift[x0 - x, y0 - y] == 1
+        assert im_shift.sum() == 1
+        im_shift[x0 - x, y0 - y] = 0
+        assert (im_shift == 0.0).all()
+
+    @pytest.mark.parametrize(
+            "x,y", [(0.5, 1), (-4, 2.5), (-6, 1.5), (-3.5, -4)])
+    def test_single_half_shift(self, x, y):
+        im = np.zeros((20, 20))
+        x0, y0 = 10, 12
+        im[x0, y0] = 1
+        # Note that the shifts are switched when calling the function,
+        # to stay consistent with the HyperSpy axis ordering
+        im_shift = pst._shift_single_frame(im=im, shift_x=y, shift_y=x)
+        assert im_shift[x0 - int(x), y0 - int(y)] == 0.5
+        assert im_shift.max() == 0.5
+        assert im_shift.sum() == 1
+
+    @pytest.mark.parametrize(
+            "x,y", [(0.5, 1.5), (-4.5, 2.5), (-6.5, 1.5), (-3.5, -4.5)])
+    def test_two_half_shift(self, x, y):
+        im = np.zeros((20, 20))
+        x0, y0 = 10, 12
+        im[x0, y0] = 1
+        # Note that the shifts are switched when calling the function,
+        # to stay consistent with the HyperSpy axis ordering
+        im_shift = pst._shift_single_frame(im=im, shift_x=y, shift_y=x)
+        assert im_shift[x0 - int(x), y0 - int(y)] == 0.25
+        assert im_shift.max() == 0.25
+        assert im_shift.sum() == 1
+
+
+class TestGetAngleSectorMask(unittest.TestCase):
+
+    def test_0d(self):
         data_shape = (10, 8)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
@@ -111,7 +235,7 @@ class test_pixelated_tools(unittest.TestCase):
         mask3 = pst._get_angle_sector_mask(s, angle0=np.pi*3/2, angle1=np.pi*2)
         self.assertFalse(mask3.any())
 
-    def test_get_angle_sector_mask_0d_com(self):
+    def test_0d_com(self):
         data_shape = (10, 8)
         data = np.zeros(data_shape)
         s = PixelatedSTEM(data)
@@ -123,7 +247,7 @@ class test_pixelated_tools(unittest.TestCase):
                 centre_y_array=s_com.inav[1].data,
                 angle0=np.pi*3/2, angle1=np.pi*2)
 
-    def test_get_angle_sector_mask_1d(self):
+    def test_1d(self):
         data_shape = (5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
@@ -140,21 +264,21 @@ class test_pixelated_tools(unittest.TestCase):
         np.testing.assert_array_equal(
                 mask1, np.zeros_like(mask1, dtype=np.bool))
 
-    def test_get_angle_sector_mask_2d(self):
+    def test_2d(self):
         data_shape = (3, 5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
         self.assertEqual(mask0.shape, data_shape)
 
-    def test_get_angle_sector_mask_3d(self):
+    def test_3d(self):
         data_shape = (5, 3, 5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
         self.assertEqual(mask0.shape, data_shape)
 
-    def test_get_angle_sector_mask_centre_xy(self):
+    def test_centre_xy(self):
         data_shape = (3, 5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
@@ -165,6 +289,58 @@ class test_pixelated_tools(unittest.TestCase):
             s, angle0=np.pi, angle1=2*np.pi,
             centre_x_array=centre_x, centre_y_array=centre_y)
         self.assertEqual(mask0.shape, data_shape)
+
+    def test_bad_angles(self):
+        s = Signal2D(np.zeros((100, 100)))
+        with pytest.raises(ValueError):
+            pst._get_angle_sector_mask(s, angle0=2, angle1=-1)
+
+    def test_angles_across_pi(self):
+        s = Signal2D(np.zeros((100, 100)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -49.5, -49.5
+        mask0 = pst._get_angle_sector_mask(s, 0.5*np.pi, 1.5*np.pi)
+        assert np.invert(mask0[:, 0:50]).all()
+        assert mask0[:, 50:].all()
+
+        mask1 = pst._get_angle_sector_mask(s, 2.5*np.pi, 3.5*np.pi)
+        assert np.invert(mask1[:, 0:50]).all()
+        assert mask1[:, 50:].all()
+
+        mask2 = pst._get_angle_sector_mask(s, 4.5*np.pi, 5.5*np.pi)
+        assert np.invert(mask2[:, 0:50]).all()
+        assert mask2[:, 50:].all()
+
+        mask3 = pst._get_angle_sector_mask(s, -3.5*np.pi, -2.5*np.pi)
+        assert np.invert(mask3[:, 0:50]).all()
+        assert mask3[:, 50:].all()
+
+    def test_angles_across_zero(self):
+        s = Signal2D(np.zeros((100, 100)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -50
+        mask0 = pst._get_angle_sector_mask(s, -0.5*np.pi, 0.5*np.pi)
+        assert mask0[:, 0:50].all()
+        assert np.invert(mask0[:, 50:]).all()
+
+        mask1 = pst._get_angle_sector_mask(s, 1.5*np.pi, 2.5*np.pi)
+        assert mask1[:, 0:50].all()
+        assert np.invert(mask1[:, 50:]).all()
+
+        mask2 = pst._get_angle_sector_mask(s, 3.5*np.pi, 4.5*np.pi)
+        assert mask2[:, 0:50].all()
+        assert np.invert(mask2[:, 50:]).all()
+
+        mask3 = pst._get_angle_sector_mask(s, -4.5*np.pi, -3.5*np.pi)
+        assert mask3[:, 0:50].all()
+        assert np.invert(mask3[:, 50:]).all()
+
+    def test_angles_more_than_2pi(self):
+        s = Signal2D(np.zeros((100, 100)))
+        s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -50
+        mask0 = pst._get_angle_sector_mask(s, 0.1*np.pi, 4*np.pi)
+        assert mask0.all()
+
+        mask1 = pst._get_angle_sector_mask(s, -1*np.pi, 2.1*np.pi)
+        assert mask1.all()
 
 
 class test_dpcsignal_tools(unittest.TestCase):
@@ -185,29 +361,42 @@ class test_dpcsignal_tools(unittest.TestCase):
         self.assertTrue(((high_value-pos, high_value-pos, 1) == corner3).all())
 
 
-class test_copy_signal2d_axes_manager_metadata(unittest.TestCase):
+class AxesManagerMetadataCopying:
 
-    def setUp(self):
+    def setup_method(self):
         s = Signal2D(np.zeros((50, 50)))
         s.axes_manager.signal_axes[0].offset = 10
         s.axes_manager.signal_axes[1].offset = 20
         s.axes_manager.signal_axes[0].scale = 0.5
         s.axes_manager.signal_axes[1].scale = 0.3
+        s.axes_manager.signal_axes[0].name = 'axes0'
+        s.axes_manager.signal_axes[1].name = 'axes1'
+        s.axes_manager.signal_axes[0].units = 'unit0'
+        s.axes_manager.signal_axes[1].units = 'unit1'
         self.s = s
 
-    def test_simple(self):
+    def test_copy_axes_manager(self):
         s = self.s
         s_new = Signal2D(np.zeros((50, 50)))
         pst._copy_signal2d_axes_manager_metadata(s, s_new)
-        self.assertEqual(
-                s.axes_manager.signal_axes[0].offset,
-                s_new.axes_manager.signal_axes[0].offset)
-        self.assertEqual(
-                s.axes_manager.signal_axes[1].offset,
-                s_new.axes_manager.signal_axes[1].offset)
-        self.assertEqual(
-                s.axes_manager.signal_axes[0].scale,
-                s_new.axes_manager.signal_axes[0].scale)
-        self.assertEqual(
-                s.axes_manager.signal_axes[1].scale,
-                s_new.axes_manager.signal_axes[1].scale)
+        sa_ori = s.axes_manager.signal_axes
+        sa_new = s_new.axes_manager.signal_axes
+        assert sa_ori[0].offset == sa_new[0].offset
+        assert sa_ori[1].offset == sa_new[1].offset
+        assert sa_ori[0].scale == sa_new[0].scale
+        assert sa_ori[1].scale == sa_new[1].scale
+        assert sa_ori[0].name == sa_new[0].name
+        assert sa_ori[1].name == sa_new[1].name
+        assert sa_ori[0].units == sa_new[0].units
+        assert sa_ori[1].units == sa_new[1].units
+
+    def test_copy_axes_object(self):
+        s = self.s
+        s_new = Signal2D(np.zeros((50, 50)))
+        ax_o = s.axes_manager[0]
+        ax_n = s_new.axes_manager[0]
+        pst._copy_axes_object_metadata(ax_o, ax_n)
+        assert ax_o.offset == ax_n.offset
+        assert ax_o.scale == ax_n.scale
+        assert ax_o.name == ax_n.name
+        assert ax_o.units == ax_n.units
