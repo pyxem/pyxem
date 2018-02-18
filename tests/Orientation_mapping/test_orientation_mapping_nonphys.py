@@ -25,25 +25,6 @@ from pyxem.generators.indexation_generator import IndexationGenerator
 # This test suite is aimed at checking the basic functionality of the Omapping process, obviously to have a succesful OM process 
 # many other components will also need to be correct
 
-dps, dp_sim_list = [],[]
-
-# Create 4 random diffraction simulations
-half_side_length = 72
-for alpha in [0,1,2,3]:
-    coords = (np.random.rand(5,2)-0.5)*2 #zero mean, range from -1 to +1
-    dp_sim = DiffractionSimulation(coordinates=coords,
-                                   intensities=np.ones_like(coords[:,0]),
-                                   calibration=1/half_side_length)
-    dp_sim_list.append(dp_sim) #stores the simulations
-    dps.append(dp_sim.as_signal(2*half_side_length,0.075,1).data) #stores a numpy array of pattern
-
-dp = pxm.ElectronDiffraction([dps[0:2],dps[2:]]) #now from a 2x2 array of patterns
-
-
-library = dict()
-half_shape = (half_side_length,half_side_length)
-library["Phase"] = {}
-
 def create_library_entry(library,rotation,DiffractionSimulation):
     library["Phase"][rotation] = {}
     p = DiffractionSimulation #for concision
@@ -53,6 +34,23 @@ def create_library_entry(library,rotation,DiffractionSimulation):
     library["Phase"][rotation]['pattern_norm'] = np.sqrt(np.dot(p.intensities,p.intensities))
     return library
 
+dps, dp_sim_list = [],[]
+half_side_length = 72
+library = dict()
+half_shape = (half_side_length,half_side_length)
+library["Phase"] = {}
+
+# Creating the matchresults.
+
+for alpha in [0,1,2,3]:
+    coords = (np.random.rand(5,2)-0.5)*2 #zero mean, range from -1 to +1
+    dp_sim = DiffractionSimulation(coordinates=coords,
+                                   intensities=np.ones_like(coords[:,0]),
+                                   calibration=1/half_side_length)
+    dp_sim_list.append(dp_sim) #stores the simulations
+    dps.append(dp_sim.as_signal(2*half_side_length,0.075,1).data) #stores a numpy array of pattern
+
+dp = pxm.ElectronDiffraction([dps[0:2],dps[2:]]) #now from a 2x2 array of patterns
 
 for alpha in np.arange(0,10,1):
     rotation = (alpha,0,0)
@@ -74,22 +72,21 @@ def test_match_results():
     assert match_results.inav[0,1].data[0][1] == 2
     assert match_results.inav[1,1].data[0][1] == 3
     
-
-# Visualization Code 
-
-from pyxem.utils.sim_utils import peaks_from_best_template
-from pyxem.utils.plot import generate_marker_inputs_from_peaks
-import hyperspy.api as hs
-
-peaks = match_results.map(peaks_from_best_template,
-                          phase=["Phase"],library=library,inplace=False)
-mmx,mmy = generate_marker_inputs_from_peaks(peaks)
-dp.set_calibration(2/144)
-dp.plot(cmap='viridis')
-for mx,my in zip(mmx,mmy):
-    m = hs.markers.point(x=mx,y=my,color='red',marker='x')
-    dp.add_marker(m,plot_marker=True,permanent=True)
-
 def test_visuals():
+    ## This functions will need to abuse globals.
+    ## & Can be removed if we trust the other tests
+    from pyxem.utils.sim_utils import peaks_from_best_template
+    from pyxem.utils.plot import generate_marker_inputs_from_peaks
+    import hyperspy.api as hs
+
+    peaks = match_results.map(peaks_from_best_template,
+                          phase=["Phase"],library=library,inplace=False)
+    mmx,mmy = generate_marker_inputs_from_peaks(peaks)
+    dp.set_calibration(2/144)
+    dp.plot(cmap='viridis')
+    for mx,my in zip(mmx,mmy):
+        m = hs.markers.point(x=mx,y=my,color='red',marker='x')
+        dp.add_marker(m,plot_marker=True,permanent=True)
+
     # Hand checking again
     assert True
