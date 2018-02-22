@@ -45,7 +45,7 @@ class DiffractionVectors(BaseSignal):
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
-        plt.plot(unique_vectors.T[1], unique_vectors.T[0], 'ro')
+        plt.plot(unique_vectors.data.T[1], unique_vectors.data.T[0], 'ro')
         plt.xlim(-xlim, xlim)
         plt.ylim(-ylim, ylim)
         plt.axes().set_aspect('equal')
@@ -62,14 +62,16 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
+        #If ragged the signal axes will not be defined
         if len(self.axes_manager.signal_axes)==0:
             magnitudes = self.map(calculate_norms_ragged,
                                   inplace=False,
                                   *args, **kwargs)
+        #
         else:
-            magnitudes = self.map(calculate_norms,
-                                  inplace=False,
-                                  *args, **kwargs)
+            magnitudes = BaseSignal(calculate_norms(self))
+            magnitudes.axes_manager.set_signal_dimension(0)
+
         return magnitudes
 
     def get_magnitude_histogram(self, bins):
@@ -137,7 +139,7 @@ class DiffractionVectors(BaseSignal):
                 delete_indices = np.append(delete_indices, i)
         gvecs = np.delete(gvlist, delete_indices,axis = 0)
         #Manipulate into DiffractionVectors class
-        unique_vectors = pxm.DiffractionVectors(gvecs)
+        unique_vectors = DiffractionVectors(gvecs)
         unique_vectors.axes_manager.set_signal_dimension(1)
         return unique_vectors
 
