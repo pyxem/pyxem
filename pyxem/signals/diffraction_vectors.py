@@ -62,9 +62,14 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
-        magnitudes = self.map(calculate_norms,
-                              inplace=False,
-                              *args, **kwargs)
+        if len(self.axes_manager.signal_axes)==0:
+            magnitudes = self.map(calculate_norms_ragged,
+                                  inplace=False,
+                                  *args, **kwargs)
+        else:
+            magnitudes = self.map(calculate_norms,
+                                  inplace=False,
+                                  *args, **kwargs)
         return magnitudes
 
     def get_magnitude_histogram(self, bins):
@@ -96,7 +101,7 @@ class DiffractionVectors(BaseSignal):
 
     def get_unique_vectors(self,
                            distance_threshold=0):
-        """Obtain a list of unique diffraction vectors.
+        """Obtain the unique diffraction vectors.
 
         Parameters
         ----------
@@ -106,15 +111,16 @@ class DiffractionVectors(BaseSignal):
 
         Returns
         -------
-        unique_vectors : float
-            Ndarray of all unique diffraction vectors.
+        unique_vectors : DiffractionVectors
+            A DiffractionVectors object containing only the unique diffraction
+            vectors in the original object.
         """
         if (self.axes_manager.navigation_dimension == 2):
             gvlist = np.array([self.data[0,0][0]])
         else:
             gvlist = np.array([self.data[0][0]])
 
-        for i in tqdm(self._iterate_signal()):
+        for i in self._iterate_signal():
             vlist = i[0]
             distances = distance_matrix(gvlist, vlist)
             new_indices = get_indices_from_distance_matrix(distances,
@@ -129,7 +135,11 @@ class DiffractionVectors(BaseSignal):
         for i in range(np.shape(distances)[1]):
             if (np.sum(distances[:,i] <= distance_threshold) > 1):
                 delete_indices = np.append(delete_indices, i)
-        return np.delete(gvlist,delete_indices,axis = 0)
+        gvecs = np.delete(gvlist, delete_indices,axis = 0)
+        #Manipulate into DiffractionVectors class
+        unique_vectors = pxm.DiffractionVectors(gvecs)
+        unique_vectors.axes_manager.set_signal_dimension(1)
+        return unique_vectors
 
     def get_vector_clusters(self, eps=0.01, min_samples=10):
         """Perform DBSCAN clustering on the diffraction vectors.

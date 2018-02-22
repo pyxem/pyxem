@@ -20,6 +20,12 @@ import numpy as np
 
 def calculate_norms(z):
     norms = []
+    for i in z:
+        norms.append(np.linalg.norm(i))
+    return np.asarray(norms)
+
+def calculate_norms_ragged(z):
+    norms = []
     for i in z[0]:
         norms.append(np.linalg.norm(i))
     return np.asarray(norms)

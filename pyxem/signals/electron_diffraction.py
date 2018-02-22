@@ -719,10 +719,11 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        peaks : structured array
-            An array of shape _navigation_shape_in_array in which
-            each cell contains an array with dimensions (npeaks, 2) that
-            contains the x, y pixel coordinates of peaks found in each image.
+        peaks : DiffractionVectors
+            A DiffractionVectors object with navigation dimensions identical to
+            the original ElectronDiffraction object. Each signal is a BaseSignal
+            object contiaining the diffraction vectors found at each navigation
+            position, in calibrated units.
         """
         method_dict = {
             'skimage': peak_local_max,
@@ -740,6 +741,7 @@ class ElectronDiffraction(Signal2D):
             raise NotImplementedError("The method `{}` is not implemented. "
                                       "See documentation for available "
                                       "implementations.".format(method))
+
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
         peaks.map(peaks_as_gvectors,
                   center=np.array(self.axes_manager.signal_shape)/2,
@@ -752,6 +754,7 @@ class ElectronDiffraction(Signal2D):
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             raise RuntimeWarning('You do not have the same size navigation axes \
             for your Diffraction pattern and your peaks')
+
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
