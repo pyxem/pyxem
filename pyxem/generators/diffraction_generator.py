@@ -21,10 +21,14 @@
 """
 
 import numpy as np
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from math import sin, cos, asin, pi
 
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.signals.diffraction_simulation import ProfileSimulation
+
+from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.utils.sim_utils import get_electron_wavelength,\
-    get_kinematical_intensities
+    get_kinematical_intensities, get_unique_families
 
 
 class DiffractionGenerator(object):
@@ -225,8 +229,7 @@ class DiffractionGenerator(object):
                 g_dot_r = np.dot(fcoords, np.transpose([hkl])).T[0]
 
                 # Highly vectorized computation of atomic scattering factors.
-                fs = zs - 41.78214 * s2 * np.sum(
-                    coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+                fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
 
                 dw_correction = np.exp(-dwfactors * s2)
 

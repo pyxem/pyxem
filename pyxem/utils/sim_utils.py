@@ -24,6 +24,7 @@ from math import radians, sin
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
 import os
+import collections
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 
