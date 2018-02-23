@@ -30,6 +30,15 @@ from pyxem.signals.vdf_image import VDFImage
 
 """
 Signal class for diffraction vectors.
+
+There are two cases that are supported:
+
+1. A map of diffraction vectors, which will in general be a ragged signal of
+signals. It the navigation dimensions of the map and contains a signal for each
+peak at every position.
+
+2. A list of diffraction vectors with dimensions < n | 2 > where n is the
+number of peaks.
 """
 
 
@@ -40,7 +49,7 @@ class DiffractionVectors(BaseSignal):
         BaseSignal.__init__(self, *args, **kwargs)
 
     def plot_diffraction_vectors(self, xlim, ylim):
-        """Plot the diffraction vectors.
+        """Plot the unique diffraction vectors.
         """
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
@@ -90,15 +99,21 @@ class DiffractionVectors(BaseSignal):
         """
         gmags = self.get_magnitudes()
 
-        glist=[]
-        for i in gmags._iterate_signal():
-            for j in np.arange(len(i[0])):
-                glist.append(i[0][j])
-        gs = np.asarray(glist)
-        gsig = Signal1D(gs)
-        ghis = gsig.get_histogram(bins=bins)
+        if len(self.axes_manager.signal_axes)==0:
+            glist=[]
+            for i in gmags._iterate_signal():
+                for j in np.arange(len(i[0])):
+                    glist.append(i[0][j])
+            gs = np.asarray(glist)
+            gsig = Signal1D(gs)
+            ghis = gsig.get_histogram(bins=bins)
+
+        else:
+            ghis = gmags.get_histogram(bins=bins)
+
         ghis.axes_manager.signal_axes[0].name = 'g-vector magnitude'
         ghis.axes_manager.signal_axes[0].units = '$A^{-1}$'
+
         return ghis
 
     def get_unique_vectors(self,
@@ -130,6 +145,7 @@ class DiffractionVectors(BaseSignal):
             gvlist_new = vlist[new_indices]
             if gvlist_new.any():
                 gvlist=np.concatenate((gvlist, gvlist_new),axis=0)
+
         #An internal check, just to be sure.
         delete_indices = []
         l = np.shape(gvlist)[0]
@@ -138,42 +154,13 @@ class DiffractionVectors(BaseSignal):
             if (np.sum(distances[:,i] <= distance_threshold) > 1):
                 delete_indices = np.append(delete_indices, i)
         gvecs = np.delete(gvlist, delete_indices,axis = 0)
+
         #Manipulate into DiffractionVectors class
         unique_vectors = DiffractionVectors(gvecs)
         unique_vectors.axes_manager.set_signal_dimension(1)
+
         return unique_vectors
 
-    def get_vector_clusters(self, eps=0.01, min_samples=10):
-        """Perform DBSCAN clustering on the diffraction vectors.
-
-        Parameters
-        ----------
-        eps : float
-            The maximum distance between two samples for them to be considered
-            as in the same neighborhood.
-
-        min_samples : float
-            The number of samples (or total weight) in a neighborhood for a
-            point to be considered as a core point. This includes the point itself.
-
-        Returns
-        -------
-        db : clustering
-            Results of the DBSCAN clustering.
-
-        See also
-        --------
-        sklearn.cluster.DBSCAN
-
-        """
-        if (self.axes_manager.navigation_dimension == 2):
-            gvs = np.array([self.data[0,0][0]])
-        else:
-            gvs = np.array([self.data[0][0]])
-
-        db = DBSCAN(eps=eps, min_samples=min_samples).fit(gvs)
-
-        return db
 
     def get_vdf_images(self,
                        electron_diffraction,
