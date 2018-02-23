@@ -21,10 +21,13 @@ from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from scipy.spatial import distance_matrix
+
+from pyxem.signals.vdf_image import VDFImage
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
-from pyxem.signals.vdf_image import VDFImage
+from pyxem.utils.vdf_utils import normalize_vdf
 
 """
 Signal class for diffraction vectors.
@@ -74,7 +77,7 @@ class DiffractionVectors(BaseSignal):
             magnitudes = self.map(calculate_norms_ragged,
                                   inplace=False,
                                   *args, **kwargs)
-        #
+        #Otherwise easier to calculate.
         else:
             magnitudes = BaseSignal(calculate_norms(self))
             magnitudes.axes_manager.set_signal_dimension(0)
@@ -163,17 +166,13 @@ class DiffractionVectors(BaseSignal):
     def get_vdf_images(self,
                        electron_diffraction,
                        radius,
-                       unique_vectors=None):
+                       normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction Signal by summation in a
         circular window of specified radius.
 
         Parameters
         ----------
-        unique_vectors : list (optional)
-            Unique list of diffracting vectors if pre-calculated. If None the
-            unique vectors in self are determined and used.
-
         electron_diffraction : ElectronDiffraction
             ElectronDiffraction signal from which to extract the reflection
             intensities.
@@ -181,23 +180,35 @@ class DiffractionVectors(BaseSignal):
         radius : float
             Radius of the integration window in reciprocal angstroms.
 
+        normalize : boolean
+            If True each VDF image is normalized so that the maximum intensity
+            in each VDF is 1.
+
         Returns
         -------
         vdfs : Signal2D
             Signal containing virtual dark field images for all unique vectors.
         """
-        if unique_vectors is None:
+        #If ragged the signal axes will not be defined
+        if len(self.axes_manager.signal_axes)==0:
             unique_vectors = self.get_unique_vectors()
+
         else:
-            unique_vectors = unique_vectors
+            unique_vectors = self
 
         vdfs = []
-        for v in unique_vectors:
+        for v in unique_vectors.data:
             disk = roi.CircleROI(cx=v[1], cy=v[0], r=radius, r_inner=0)
             vdf = disk(electron_diffraction,
                        axes=electron_diffraction.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
-        return VDFImage(np.asarray(vdfs))
+
+        vdfim = VDFImage(np.asarray(vdfs))
+
+        if normalize==True:
+            vdfim.map(normalize_vdf)
+
+        return vdfim
 
     def get_diffracting_pixels_map(self, binary=False):
         """Map of the number of vectors at each navigation position.

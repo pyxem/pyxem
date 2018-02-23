@@ -25,6 +25,8 @@ from skimage.morphology import watershed
 from skimage.feature import peak_local_max
 from skimage.feature import match_template
 
+def normalize_vdf(im):
+    return im / im.max()
 
 def separate(VDF_temp,
              min_distance,
