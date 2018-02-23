@@ -225,8 +225,12 @@ class DiffractionVectors(BaseSignal):
             2D map of diffracting pixels.
         """
         crystim = self.map(get_npeaks, inplace=False).as_signal2D((0,1))
+
         if binary==True:
             crystim = crystim == 1
+
+        crystim.change_dtype('float')
+
         return crystim
 
     def get_gvector_indexation(self,
@@ -284,16 +288,3 @@ class DiffractionVectors(BaseSignal):
             pass
 
         return gindex
-
-    def get_zone_axis_indexation(self):
-        """Determine the zone axis consistent with the majority of indexed
-        diffraction vectors.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        pass

@@ -77,6 +77,40 @@ def get_interaction_constant(accelerating_voltage):
     return sigma
 
 
+def get_unique_families(hkls):
+    """
+    Returns unique families of Miller indices, which must be permutations
+    of each other.
+
+    Args:
+        hkls ([h, k, l]): List of Miller indices.
+
+    Returns:
+        {hkl: multiplicity}: A dict with unique hkl and multiplicity.
+    """
+    def is_perm(hkl1, hkl2):
+        h1 = np.abs(hkl1)
+        h2 = np.abs(hkl2)
+        return all([i == j for i, j in zip(sorted(h1), sorted(h2))])
+
+    unique = collections.defaultdict(list)
+    for hkl1 in hkls:
+        found = False
+        for hkl2 in unique.keys():
+            if is_perm(hkl1, hkl2):
+                found = True
+                unique[hkl2].append(hkl1)
+                break
+        if not found:
+            unique[hkl1].append(hkl1)
+
+    pretty_unique = {}
+    for k, v in unique.items():
+        pretty_unique[sorted(v)[-1]] = len(v)
+
+    return pretty_unique
+
+
 def get_kinematical_intensities(structure,
                                 g_indices,
                                 g_hkls,

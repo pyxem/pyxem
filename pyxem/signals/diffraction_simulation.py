@@ -115,14 +115,14 @@ class DiffractionSimulation:
 
         """
         from skimage.filters import gaussian as point_spread
-        
+
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
-        
+
         mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,np.abs(self.coordinates[:,1])<max_r)
-        
+
         coords = self.coordinates[mask_for_max_r]
         inten  = self.intensities[mask_for_max_r]
-        
+
         dp_dat = np.zeros([size,size])
         x,y = (coords)[:,0] , (coords)[:,1]
         if len(x) > 0: #avoiding problems in the peakless case
@@ -130,10 +130,42 @@ class DiffractionSimulation:
             dp_dat[num] = inten
             dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
             dp_dat = dp_dat/np.max(dp_dat)
-        
+
         dp = ElectronDiffraction(dp_dat)
         dp.set_calibration(2*max_r/size)
 
         return dp
 
 
+class ProfileSimulation:
+    """Holds the result of a given kinematic simulation of a diffraction profile
+
+    Parameters
+    ----------
+
+    coordinates : array-like, shape [n_peaks, 1]
+        Magnitudes of scattering.
+    indices : array-like, shape [n_points, 3]
+        The indices of the reciprocal lattice points that intersect the
+        Ewald sphere.
+    intensities : array-like, shape [n_peaks, 1]
+        The kinematic intensity of the diffraction peaks.
+    calibration : float or tuple of float, optional
+        The scaling of the pattern, with respect to the original reciprocal
+        angstrom coordinates.
+    """
+
+    def __init__(self, magnitudes=None, indices=None, intensities=None,
+                 calibration=1.,):
+        """Initializes the ProfileSimulation object with data values for the
+        magnitudees, indices, intensities, calibration and offset.
+        """
+        self._coordinates = None
+        self.coordinates = coordinates
+        self.indices = indices
+        self._intensities = None
+        self.intensities = intensities
+        self._calibration = (1., 1.)
+        self.calibration = calibration
+        self.offset = offset
+        self.with_direct_beam = with_direct_beam

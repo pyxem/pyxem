@@ -52,7 +52,6 @@ class DiffractionGenerator(object):
         Maps element names to their temperature-dependent Debye-Waller factors.
 
     """
-    # TODO: Include camera length, when implemented.
     # TODO: Refactor the excitation error to a structure property.
 
     def __init__(self,
@@ -63,7 +62,10 @@ class DiffractionGenerator(object):
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
 
-    def calculate_ed_data(self, structure, reciprocal_radius, with_direct_beam=True):
+    def calculate_ed_data(self,
+                          structure,
+                          reciprocal_radius,
+                          with_direct_beam=True):
         """Calculates the Electron Diffraction data for a structure.
 
         Parameters
@@ -130,4 +132,143 @@ class DiffractionGenerator(object):
                                      intensities=intensities,
                                      with_direct_beam=with_direct_beam)
 
+    def calculate_profile_data(self, structure,
+                               reciprocal_radius=1.0,
+                               magnitude_tolerance=1e-5,
+                               minimum_intensity=1e-3):
+        """
+        Calculates a one dimensional diffraction profile for a structure.
 
+        Parameters
+        ----------
+        structure : Structure
+            The structure for which to calculate the diffraction profile.
+        reciprocal_radius : float
+            The maximum radius of the sphere of reciprocal space to sample, in
+            reciprocal angstroms.
+        magnitude_tolerance : float
+            The minimum difference between diffraction magnitudes in reciprocal
+            angstroms for two peaks to be consdiered different.
+        minimum_intensity : float
+            The minimum intensity required for a diffraction peak to be
+            considered real. Deals with numerical precision issues.
+
+        Returns
+        -------
+        pyxem.ProfileSimulation
+            The diffraction profile corresponding to this structure and
+            experimental conditions.
+        """
+        max_r = reciprocal_radius
+        wavelength = self.wavelength
+        latt = structure.lattice
+        is_hex = latt.is_hexagonal()
+
+        # Obtain crystallographic reciprocal lattice points within range
+        recip_latt = latt.reciprocal_lattice_crystallographic
+        recip_pts = recip_latt.get_points_in_sphere(
+            [[0, 0, 0]], [0, 0, 0], max_r)
+
+        # Create a flattened array of zs, coeffs, fcoords and occus. This is
+        # used to perform vectorized computation of atomic scattering factors
+        # later. Note that these are not necessarily the same size as the
+        # structure as each partially occupied specie occupies its own
+        # position in the flattened array.
+        zs = []
+        coeffs = []
+        fcoords = []
+        occus = []
+        dwfactors = []
+
+        for site in structure:
+            for sp, occu in site.species_and_occu.items():
+                zs.append(sp.Z)
+                try:
+                    c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
+                except KeyError:
+                    raise ValueError("Unable to calculate XRD pattern as "
+                                     "there is no scattering coefficients for"
+                                     " %s." % sp.symbol)
+                coeffs.append(c)
+                dwfactors.append(self.debye_waller_factors.get(sp.symbol, 0))
+                fcoords.append(site.frac_coords)
+                occus.append(occu)
+
+        zs = np.array(zs)
+        coeffs = np.array(coeffs)
+        fcoords = np.array(fcoords)
+        occus = np.array(occus)
+        dwfactors = np.array(dwfactors)
+        peaks = {}
+        gs = []
+
+        for hkl, g_hkl, ind in sorted(
+                recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])):
+            # Force miller indices to be integers.
+            hkl = [int(round(i)) for i in hkl]
+            if g_hkl != 0:
+
+                d_hkl = 1 / g_hkl
+
+                # Bragg condition
+                #theta = asin(wavelength * g_hkl / 2)
+
+                # s = sin(theta) / wavelength = 1 / 2d = |ghkl| / 2 (d =
+                # 1/|ghkl|)
+                s = g_hkl / 2
+
+                # Store s^2 since we are using it a few times.
+                s2 = s ** 2
+
+                # Vectorized computation of g.r for all fractional coords and
+                # hkl.
+                g_dot_r = np.dot(fcoords, np.transpose([hkl])).T[0]
+
+                # Highly vectorized computation of atomic scattering factors.
+                fs = zs - 41.78214 * s2 * np.sum(
+                    coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+
+                dw_correction = np.exp(-dwfactors * s2)
+
+                # Structure factor = sum of atomic scattering factors (with
+                # position factor exp(2j * pi * g.r and occupancies).
+                # Vectorized computation.
+                f_hkl = np.sum(fs * occus * np.exp(2j * pi * g_dot_r)
+                               * dw_correction)
+
+                # Intensity for hkl is modulus square of structure factor.
+                i_hkl = (f_hkl * f_hkl.conjugate()).real
+
+                #two_theta = degrees(2 * theta)
+
+                if is_hex:
+                    # Use Miller-Bravais indices for hexagonal lattices.
+                    hkl = (hkl[0], hkl[1], - hkl[0] - hkl[1], hkl[2])
+                # Deal with floating point precision issues.
+                ind = np.where(np.abs(np.subtract(gs, g_hkl)) <
+                               magnitude_tolerance)
+                if len(ind[0]) > 0:
+                    peaks[gs[ind[0][0]]][0] += i_hkl
+                    peaks[gs[ind[0][0]]][1].append(tuple(hkl))
+                else:
+                    peaks[g_hkl] = [i_hkl, [tuple(hkl)], d_hkl]
+                    gs.append(g_hkl)
+
+        # Scale intensities so that the max intensity is 100.
+        max_intensity = max([v[0] for v in peaks.values()])
+        x = []
+        y = []
+        hkls = []
+        d_hkls = []
+        for k in sorted(peaks.keys()):
+            v = peaks[k]
+            fam = get_unique_families(v[1])
+            if v[0] / max_intensity * 100 > minimum_intensity:
+                x.append(k)
+                y.append(v[0])
+                hkls.append(fam)
+                d_hkls.append(v[2])
+
+        y = y / max(y) * 100
+
+        return x, y, hkls
