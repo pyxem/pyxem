@@ -19,8 +19,6 @@
 from hyperspy.api import roi
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 
-from scipy.spatial import distance_matrix
-from sklearn.cluster import DBSCAN
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
