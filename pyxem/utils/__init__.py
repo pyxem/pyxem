@@ -17,8 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from scipy.interpolate import RectBivariateSpline
-
 
 def correlate(image, pattern_dictionary):
     """The correlation between a diffraction pattern and a simulation.
@@ -57,6 +55,6 @@ def correlate(image, pattern_dictionary):
     pixel_coordinates   = pattern_dictionary['pixel_coords'] 
     pattern_normalization = pattern_dictionary['pattern_norm']
     
-    image_intensities = image[pixel_coordinates[:, 0], pixel_coordinates[:, 1]]
+    image_intensities = image[pixel_coordinates[:, 1], pixel_coordinates[:, 0]]
     
     return np.dot(image_intensities,pattern_intensities)/pattern_normalization
