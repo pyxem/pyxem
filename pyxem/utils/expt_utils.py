@@ -494,7 +494,7 @@ def subpixel_beam_finder(single_pattern,half_shape):
     x_center = cf(_capped_gaussian,i_array,np.ravel(pattern[size:size+3,:].T),p0=[2,5,hs])[0][2]
     y_center = cf(_capped_gaussian,i_array,np.ravel(pattern[:,size:size+3].T),p0=[2,5,hs])[0][2]
     
-    return (x_center,y_center)
+    return np.asarray([x_center,y_center])
 
 
 def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
