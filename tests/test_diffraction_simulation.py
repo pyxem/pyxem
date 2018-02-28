@@ -84,7 +84,6 @@ casual_pattern = get_pattern(Mscope,casual_cubic_I)
 fake_pattern   = get_pattern(Mscope,fake_cubic_I)
 larger_pattern = get_pattern(Mscope,larger_cubic_I)
 
-    
 def test_casual_formal():
     # Checks that Pymatgen understands that these are the same structure
     assert formal_cubic_I == casual_cubic_I
@@ -92,7 +91,7 @@ def test_casual_formal():
 def test_casual_formal_in_simulation():
     ## Checks that are simulations also realise that
     check_pattern_equivilance(formal_pattern,casual_pattern)
-    
+
 def test_systematic_absence():
     ## Cubic I thus each peak must have indicies that sum to an even number
     assert np.all(np.sum(formal_pattern.indices,axis=1) % 2 == 0)
