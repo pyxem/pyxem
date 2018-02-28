@@ -456,6 +456,7 @@ class ElectronDiffraction(Signal2D):
     def get_direct_beam_position(self,
                                  method='blur',
                                  sigma=30,
+                                 half_shape=72,
                                  *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
@@ -470,16 +471,20 @@ class ElectronDiffraction(Signal2D):
             * 'refine_local' - Refine the position of the direct beam and
                 hence an estimate for the position of the pattern center in
                 each SED pattern.
+            * 'subpixel' - Fits a capped gaussian to data that has already
+                been roughly centered.
 
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
+        
+        half_shape: int 
+            The half shape of the SED patterns, only for subpixel
 
         Returns
         -------
         centers : ndarray
-            Array containing the shift to be applied to each SED pattern to
-            center it.
+            Array containing the centers for each SED pattern.
 
         """
         #TODO: add sub-pixel capabilities and model fitting methods.
@@ -494,6 +499,8 @@ class ElectronDiffraction(Signal2D):
                           initial_center=initial_center,
                           radius=radius,
                           inplace=False)
+        elif method == 'subpixel':
+            centers = self.map(subpixel_beam_finder,half_shape=half_shape,inplace=False)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "
