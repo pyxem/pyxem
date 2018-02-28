@@ -72,16 +72,6 @@ rot_list = build_linear_grid_in_euler(12,10,5,1)
 structure = create_GaAs()
 edc = pxm.DiffractionGenerator(300, 5e-2)
 
-@pytest.mark.parametrize("structure,rot_list,edc", 
-    [
-    (create_GaAs(),rot_list,edc),
-    (create_GaAs(),rot_list,edc),
-    (create_GaAs(),rot_list,edc),
-    ])
-
-# https://docs.pytest.org/en/latest/parametrize.html#parametrize-basics
-
-@pytest.fixture
 def get_template_library(structure,rot_list,edc):    
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
     struc_lib = build_structure_lib(structure,rot_list)
@@ -93,53 +83,71 @@ def get_template_library(structure,rot_list,edc):
                                            with_direct_beam=False)
     return library
 
-@pytest.fixture
-def get_match_results_case_a(): #get params
+def get_match_results_case_a(structure,rot_list,edc): #get params
     """
     Case A -
     We rotate about 4 on the first, z axis, as we don't rotate around x at all we can
     then rotate again around the second z axis in a similar way
     """
     dp = create_sample(edc,structure,[0,0,0],[4,0,0])
-    library = get_template_library()
+    library = get_template_library(structure,rot_list,edc)
     indexer = IndexationGenerator(dp,library)
     match_results = indexer.correlate()
     return match_results
 
-"""
-@pytest.fixture  
-def get_match_results_case_b():
-    dp = create_sample(edc,structure,[0,0,0],[3,7,1])
-    library = get_template_library()
-    indexer = IndexationGenerator(dp,library)
-    match_results = indexer.correlate()
-    return match_results
-
-@pytest.fixture  
-def get_match_results_case_c():
+def get_match_results_case_b(structure,rot_list,edc):
     """
-    #Case C -
-    #Use non-ints
+    Case B -
+    Now an arbitary rotation
+    """
+    dp = create_sample(edc,structure,[0,0,0],[3,7,1])
+    library = get_template_library(structure,rot_list,edc)
+    indexer = IndexationGenerator(dp,library)
+    match_results = indexer.correlate()
+    return match_results
+
+
+def get_match_results_case_c(structure,rot_list,edc):
+    """
+    Case C -
+    Use non-ints for the rotation in B
     """
     dp = create_sample(edc,structure,[0,0,0],[3,7.01,0.99])
-    library = get_template_library()
+    library = get_template_library(structure,rot_list,edc)
     indexer = IndexationGenerator(dp,library)
     match_results = indexer.correlate()
     return match_results
+
+"""
+#This runs the test twice, but only the test directly below -
+
+rot_list_1 = build_linear_grid_in_euler(12,10,5,1)
+rot_list_2 = build_linear_grid_in_euler(12,10,7,5)
+@pytest.mark.parametrize("structure",[create_GaAs()])
+@pytest.mark.parametrize("rot_list",[rot_list_1,rot_list_2])
+@pytest.mark.parametrize("edc",[edc])
 """
 
-""" Basic run once tests"""
-
-def test_match_results_essential():
-        M = get_match_results_case_a() #for concision
-        assert np.all(M.inav[0,0] == M.inav[1,0])
-        assert np.all(M.inav[0,1] == M.inav[1,1])
-        # also test peaks from best template
-        peaks = M.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
-        assert peaks.inav[0,0] == library["A"][(0,0,0)]['Sim'].coordinates[:,:2] 
+@pytest.mark.parametrize("structure",[create_GaAs()])
+@pytest.mark.parametrize("rot_list",[rot_list])
+@pytest.mark.parametrize("edc",[edc])
+    
+def test_match_results_essential(structure,rot_list,edc):
+    M = get_match_results_case_a(structure,rot_list,edc) #for concision
+    assert np.all(M.inav[0,0] == M.inav[1,0])
+    assert np.all(M.inav[0,1] == M.inav[1,1])
         
-def test_match_results_caseA():
-    M = get_match_results_case_a()
+    # also test peaks from best template
+    library = get_template_library(structure,rot_list,edc)
+    peaks = M.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
+    assert peaks.inav[0,0] == library["A"][(0,0,0)]['Sim'].coordinates[:,:2] 
+
+@pytest.mark.parametrize("structure",[create_GaAs()])
+@pytest.mark.parametrize("rot_list",[rot_list])
+@pytest.mark.parametrize("edc",[edc])
+
+def test_match_results_caseA(structure,rot_list,edc):
+    M = get_match_results_case_a(structure,rot_list,edc)
     assert np.all(M.inav[0,0].data[0,1:4] == np.array([0,0,0]))
     assert M.inav[1,1].data[0,2]   == 0 #no rotation in z 
     
@@ -147,14 +155,23 @@ def test_match_results_caseA():
     assert np.all(np.sum(M.inav[1,1].data[:,1:4],axis=1) == 4)
     #and each must give the same coefficient
     assert np.all(M.inav[1,1].data[:,4] == M.inav[1,1].data[0,4])
-"""
-def test_match_results_caseB():
-    assert np.all(match_results.inav[1,1].data[0,1:4] == np.array([3,7,1]))
 
-def test_match_results_caseC():
-    assert np.all(match_results.inav[1,1].data[0,1:4] == np.array([3,7,1]))
+@pytest.mark.parametrize("structure",[create_GaAs()])
+@pytest.mark.parametrize("rot_list",[rot_list])
+@pytest.mark.parametrize("edc",[edc])
+
+def test_match_results_caseB(structure,rot_list,edc):
+    M = get_match_results_case_b(structure,rot_list,edc)
+    assert np.all(M.inav[1,1].data[0,1:4] == np.array([3,7,1]))
+
+@pytest.mark.parametrize("structure",[create_GaAs()])
+@pytest.mark.parametrize("rot_list",[rot_list])
+@pytest.mark.parametrize("edc",[edc])
+     
+def test_match_results_caseC(structure,rot_list,edc):
+    M = get_match_results_case_c(structure,rot_list,edc)
+    assert np.all(M.inav[1,1].data[0,1:4] == np.array([3,7,1]))
     
-"""
 """
 # Visualization Code 
 peaks = match_results.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
