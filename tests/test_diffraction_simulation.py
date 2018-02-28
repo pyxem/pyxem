@@ -84,6 +84,7 @@ casual_pattern = get_pattern(Mscope,casual_cubic_I)
 fake_pattern   = get_pattern(Mscope,fake_cubic_I)
 larger_pattern = get_pattern(Mscope,larger_cubic_I)
 
+
 def test_casual_formal():
     # Checks that Pymatgen understands that these are the same structure
     assert formal_cubic_I == casual_cubic_I
