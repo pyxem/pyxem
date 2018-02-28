@@ -494,6 +494,8 @@ class ElectronDiffraction(Signal2D):
                           initial_center=initial_center,
                           radius=radius,
                           inplace=False)
+        elif method == 'subpixel'
+            centers = self.map(subpixel_beam_finder,half_shape=half_shape,inplace=False)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "
