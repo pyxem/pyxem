@@ -19,23 +19,14 @@
 import numpy as np
 import pytest
 import pyxem as pxm
-import hyperspy.api as hs
 import pymatgen as pmg
 
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.utils.sim_utils import peaks_from_best_template
-from pyxem.utils.plot import generate_marker_inputs_from_peaks
 from transforms3d.euler import euler2axangle
 from pymatgen.transformations.standard_transformations import RotationTransformation
 
 half_side_length = 72
-
-def create_GaAs():
-    Ga = pmg.Element("Ga")
-    As = pmg.Element("As")
-    lattice = pmg.Lattice.cubic(5.6535)
-    return pmg.Structure.from_spacegroup("F23",lattice, [Ga,As], [[0, 0, 0],[0.25,0.25,0.25]])
 
 def create_pair(angle_start,angle_change):
     """ Lists for angles """
@@ -68,9 +59,32 @@ def build_structure_lib(structure,rot_list):
     struc_lib["A"] = (structure,rot_list)
     return struc_lib    
 
-rot_list = build_linear_grid_in_euler(12,10,5,1)
-structure = create_GaAs()
-edc = pxm.DiffractionGenerator(300, 5e-2)
+@pytest.fixture
+def create_GaAs():
+    Ga = pmg.Element("Ga")
+    As = pmg.Element("As")
+    lattice = pmg.Lattice.cubic(5.6535)
+    return pmg.Structure.from_spacegroup("F23",lattice, [Ga,As], [[0, 0, 0],[0.25,0.25,0.25]])
+
+@pytest.fixture
+def create_Mono():
+    Zn = pmg.Element("Zn")
+    lattice = pmg.Lattice.monoclinic(4.5,4.3,5.7,65)
+    return pmg.Structure.from_spacegroup("P2",lattice, [Zn], [[0, 0, 0]])
+
+@pytest.fixture
+def create_Hex():
+    Ni = pmg.Element("Ni")
+    lattice = pmg.Lattice.hexagonal(3.5,5)
+    return pmg.Structure.from_spacegroup(162,lattice, [Ni], [[0, 0, 0]])
+@pytest.fixture
+def rot_list():
+    return build_linear_grid_in_euler(12,10,5,1)
+
+@pytest.fixture
+def edc():
+    return pxm.DiffractionGenerator(300, 5e-2)
+
 
 def get_template_library(structure,rot_list,edc):    
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
@@ -83,57 +97,20 @@ def get_template_library(structure,rot_list,edc):
                                            with_direct_beam=False)
     return library
 
-def get_match_results_case_a(structure,rot_list,edc): #get params
-    """
-    Case A -
-    We rotate about 4 on the first, z axis, as we don't rotate around x at all we can
-    then rotate again around the second z axis in a similar way
-    """
-    dp = create_sample(edc,structure,[0,0,0],[4,0,0])
+def get_match_results(structure,rot_list,edc,rots): #get params
+
+    dp = create_sample(edc,structure,rots[0],rots[1])
     library = get_template_library(structure,rot_list,edc)
     indexer = IndexationGenerator(dp,library)
     match_results = indexer.correlate()
     return match_results
-
-def get_match_results_case_b(structure,rot_list,edc):
-    """
-    Case B -
-    Now an arbitary rotation
-    """
-    dp = create_sample(edc,structure,[0,0,0],[3,7,1])
-    library = get_template_library(structure,rot_list,edc)
-    indexer = IndexationGenerator(dp,library)
-    match_results = indexer.correlate()
-    return match_results
-
-
-def get_match_results_case_c(structure,rot_list,edc):
-    """
-    Case C -
-    Use non-ints for the rotation in B
-    """
-    dp = create_sample(edc,structure,[0,0,0],[3,7.01,0.99])
-    library = get_template_library(structure,rot_list,edc)
-    indexer = IndexationGenerator(dp,library)
-    match_results = indexer.correlate()
-    return match_results
-
-"""
-#This runs the test twice, but only the test directly below -
-
-rot_list_1 = build_linear_grid_in_euler(12,10,5,1)
-rot_list_2 = build_linear_grid_in_euler(12,10,7,5)
-@pytest.mark.parametrize("structure",[create_GaAs()])
-@pytest.mark.parametrize("rot_list",[rot_list_1,rot_list_2])
-@pytest.mark.parametrize("edc",[edc])
-"""
 
 @pytest.mark.parametrize("structure",[create_GaAs()])
-@pytest.mark.parametrize("rot_list",[rot_list])
-@pytest.mark.parametrize("edc",[edc])
-    
+@pytest.mark.parametrize("rot_list",[rot_list()])
+@pytest.mark.parametrize("edc",[edc()])
+
 def test_match_results_essential(structure,rot_list,edc):
-    M = get_match_results_case_a(structure,rot_list,edc) #for concision
+    M = get_match_results(structure,rot_list,edc,[[0,0,0],[4,0,0]]) #for concision
     assert np.all(M.inav[0,0] == M.inav[1,0])
     assert np.all(M.inav[0,1] == M.inav[1,1])
         
@@ -142,12 +119,24 @@ def test_match_results_essential(structure,rot_list,edc):
     peaks = M.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
     assert peaks.inav[0,0] == library["A"][(0,0,0)]['Sim'].coordinates[:,:2] 
 
-@pytest.mark.parametrize("structure",[create_GaAs()])
-@pytest.mark.parametrize("rot_list",[rot_list])
-@pytest.mark.parametrize("edc",[edc])
 
-def test_match_results_caseA(structure,rot_list,edc):
-    M = get_match_results_case_a(structure,rot_list,edc)
+"""
+We now test three cases, in
+A : We have a single rotation about the first axis
+B : We have a rotation around each of the three axes
+C : This rotation is then displaced slightly to non-int values
+
+A is only run for one structure, B and C are run on GaAs, a monoclinc
+and a hexagonal sample.
+"""
+
+@pytest.mark.parametrize("structure",[create_GaAs()])
+@pytest.mark.parametrize("rot_list",[rot_list()])
+@pytest.mark.parametrize("edc",[edc()])
+
+
+def test_caseA(structure,rot_list,edc):
+    M = get_match_results(structure,rot_list,edc,[[0,0,0],[4,0,0]])
     assert np.all(M.inav[0,0].data[0,1:4] == np.array([0,0,0]))
     assert M.inav[1,1].data[0,2]   == 0 #no rotation in z 
     
@@ -156,24 +145,28 @@ def test_match_results_caseA(structure,rot_list,edc):
     #and each must give the same coefficient
     assert np.all(M.inav[1,1].data[:,4] == M.inav[1,1].data[0,4])
 
-@pytest.mark.parametrize("structure",[create_GaAs()])
-@pytest.mark.parametrize("rot_list",[rot_list])
-@pytest.mark.parametrize("edc",[edc])
+@pytest.mark.parametrize("structure",[create_GaAs(),create_Mono(),create_Hex()])
+@pytest.mark.parametrize("rot_list",[rot_list()])
+@pytest.mark.parametrize("edc",[edc()])
 
-def test_match_results_caseB(structure,rot_list,edc):
-    M = get_match_results_case_b(structure,rot_list,edc)
+def test_caseB(structure,rot_list,edc):
+    M = get_match_results(structure,rot_list,edc,[[0,0,0],[3,7,1]])
     assert np.all(M.inav[1,1].data[0,1:4] == np.array([3,7,1]))
 
-@pytest.mark.parametrize("structure",[create_GaAs()])
-@pytest.mark.parametrize("rot_list",[rot_list])
-@pytest.mark.parametrize("edc",[edc])
+@pytest.mark.parametrize("structure",[create_GaAs(),create_Mono(),create_Hex()])
+@pytest.mark.parametrize("rot_list",[rot_list()])
+@pytest.mark.parametrize("edc",[edc()])
      
-def test_match_results_caseC(structure,rot_list,edc):
-    M = get_match_results_case_c(structure,rot_list,edc)
+def test_caseC(structure,rot_list,edc):
+    M = get_match_results(structure,rot_list,edc,[[0,0,0],[3,7.01,0.99]])
     assert np.all(M.inav[1,1].data[0,1:4] == np.array([3,7,1]))
     
 """
 # Visualization Code 
+import hyperspy.api as hs
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.utils.plot import generate_marker_inputs_from_peaks
+
 peaks = match_results.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
 mmx,mmy = generate_marker_inputs_from_peaks(peaks)
 dp.plot(cmap='viridis')
