@@ -1,3 +1,4 @@
+import numpy as np
 import scipy.constants as sc
 
 
@@ -6,12 +7,12 @@ def acceleration_voltage_to_wavelength(acceleration_voltage):
 
     Parameters
     ----------
-    acceleration_voltage : float
+    acceleration_voltage : float or array-like
         In Volt
 
     Returns
     -------
-    wavelength : float
+    wavelength : float or array-like
         In meters
 
     Examples
