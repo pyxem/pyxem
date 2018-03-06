@@ -28,3 +28,40 @@ def acceleration_voltage_to_wavelength(acceleration_voltage):
     c = sc.speed_of_light
     wavelength = h/(2*m0*E*(1 + (E/(2*m0*c**2))))**0.5
     return wavelength
+
+
+def diffraction_scattering_angle(
+        acceleration_voltage, lattice_size, miller_index):
+    """Get electron scattering angle from a crystal lattice.
+
+    Returns the total scattering angle, as measured from the middle of the
+    direct beam (0, 0, 0) to the given Miller index.
+
+    Miller index: h, k, l = miller_index
+    Interplanar distance: d = a / (h**2 + k**2 + l**2)**0.5
+    Bragg's law: theta = arcsin(electron_wavelength / (2 * d))
+    Total scattering angle (phi):  phi = 2 * theta
+
+    Parameters
+    ----------
+    acceleration_voltage : float
+        In Volt
+    lattice_size : float or array-like
+        In nanometer
+    miller_index : tuple
+        (h, k, l)
+
+    Returns
+    -------
+    angle : float
+        Scattering angle in mrad.
+
+    """
+    wavelength = acceleration_voltage_to_wavelength(acceleration_voltage)
+    wavelength_nm = wavelength*10**9
+    H, K, L = miller_index
+    a = lattice_size
+    d = a/(H**2 + K**2 + L**2)**0.5
+    scattering_angle = 2 * np.arcsin(wavelength_nm / (2 * d))
+    scattering_angle_mrad = scattering_angle*1000
+    return scattering_angle_mrad
