@@ -18,7 +18,9 @@ def acceleration_voltage_to_wavelength(acceleration_voltage):
     Examples
     --------
     >>> import fpd_data_processing.diffraction_tools as dt
-    >>> wavelength = dt.acceleration_voltage_to_wavelength(200000)
+    >>> acceleration_voltage = 200000  # 200 kV (in Volt)
+    >>> wavelength = dt.acceleration_voltage_to_wavelength(
+    ...     acceleration_voltage)
     >>> wavelength_picometer = wavelength*10**12
 
     """
@@ -47,21 +49,30 @@ def diffraction_scattering_angle(
     acceleration_voltage : float
         In Volt
     lattice_size : float or array-like
-        In nanometer
+        In meter
     miller_index : tuple
         (h, k, l)
 
     Returns
     -------
     angle : float
-        Scattering angle in mrad.
+        Scattering angle in radians.
+
+    Examples
+    --------
+    >>> import fpd_data_processing.diffraction_tools as dt
+    >>> acceleration_voltage = 200000  # 200 kV (in Volt)
+    >>> lattice_size = 4e-10  # 4 Ångstrøm, (in meters).
+    >>> miller_index = (1, 0, 0)
+    >>> scattering_angle = dt.diffraction_scattering_angle(
+    ...     acceleration_voltage=acceleration_voltage,
+    ...     lattice_size=lattice_size,
+    ...     miller_index=miller_index)
 
     """
     wavelength = acceleration_voltage_to_wavelength(acceleration_voltage)
-    wavelength_nm = wavelength*10**9
     H, K, L = miller_index
     a = lattice_size
     d = a/(H**2 + K**2 + L**2)**0.5
-    scattering_angle = 2 * np.arcsin(wavelength_nm / (2 * d))
-    scattering_angle_mrad = scattering_angle*1000
-    return scattering_angle_mrad
+    scattering_angle = 2 * np.arcsin(wavelength / (2 * d))
+    return scattering_angle
