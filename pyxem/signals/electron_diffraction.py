@@ -383,20 +383,19 @@ class ElectronDiffraction(Signal2D):
             profiles = ed.get_radial_profile(centers)
             profiles.plot()
         """
-        # TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
         centers = Signal1D(centers)
 
+        dp_length = self.axes_manager.signal_shape[0]
+        max_length = np.sqrt((dp_length - np.min(centers.data[...,0]))**2 \
+                             +(dp_length - np.min(centers.data[...,1]))**2)
         # TODO: the cython implementation is throwing dtype errors
         radial_profiles = self.map(radial_average, center=centers,
+                                   max_length = max_length, 
                                    inplace=False, cython=False)
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
-            max_len = max(map(len, radial_profiles.data))
-            radial_profiles = Signal1D([
-                np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
-                for row in radial_profiles.data])
             return DiffractionProfile(radial_profiles)
         else:
             radial_profiles.axes_manager.signal_axes[0].offset = 0

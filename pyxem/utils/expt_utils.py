@@ -112,7 +112,7 @@ def _capped_gaussian(x,prefactor,sigma,center):
     model_value[np.greater(model_value,np.ones_like(model_value))] = 1 #finite dynamic range
     return np.ravel(model_value) #convert this to 1D
 
-def radial_average(z, center,cython=True):
+def radial_average(z, center, cython=True, max_length=False):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
 
@@ -140,7 +140,10 @@ def radial_average(z, center,cython=True):
         tbin = np.bincount(r.ravel(), z.ravel())
         nr = np.bincount(r.ravel())
         averaged = tbin / nr
-
+        if max_length:
+            length_diff = int(max_length - averaged.shape[0])
+            if (length_diff>0): 
+                averaged = np.append(averaged,np.zeros((length_diff)))
     return averaged
 
 def reproject_polar(z, origin=None, jacobian=False, dr=1, dt=None):
