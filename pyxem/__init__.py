@@ -518,4 +518,9 @@ def load_mib(filename, scan_size):
     dpt = ElectronDiffraction(dpt.data.reshape((scan_size, scan_size, 256, 256)))
     trace = dpt.inav[:,0:5].sum((1,2,3))
     edge = np.where(trace==max(trace.data))[0][0]
-    return ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
+    if edge==scan_size - 1:
+        dp = ElectronDiffraction(dpt.inav[0:edge, 1:])
+    else:
+        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
+
+    return dp
