@@ -1,5 +1,5 @@
 import os
-import unittest
+import pytest
 import numpy as np
 from tempfile import TemporaryDirectory
 import hyperspy.api as hs
@@ -10,12 +10,12 @@ import fpd_data_processing.io_tools as it
 my_path = os.path.dirname(__file__)
 
 
-class test_dpcsignal_io(unittest.TestCase):
+class TestDpcsignalIo:
 
-    def setUp(self):
+    def setup_method(self):
         self.tmpdir = TemporaryDirectory()
 
-    def tearDown(self):
+    def teardown_method(self):
         self.tmpdir.cleanup()
 
     def test_load_basesignal(self):
@@ -36,7 +36,7 @@ class test_dpcsignal_io(unittest.TestCase):
     def test_load_signal2d_too_many_nav_dim(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcsignal2d_test_too_many_nav_dim.hdf5")
-        with self.assertRaises(Exception):
+        with pytest.raises(Exception):
             fp.load_dpc_signal(filename)
 
     def test_load_basesignal_too_many_signal_dim(self):
@@ -44,7 +44,7 @@ class test_dpcsignal_io(unittest.TestCase):
                 my_path,
                 "test_data",
                 "dpcbasesignal_test_too_many_signal_dims.hdf5")
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             fp.load_dpc_signal(filename)
 
     def test_retain_metadata(self):
@@ -53,7 +53,7 @@ class test_dpcsignal_io(unittest.TestCase):
         filename = os.path.join(self.tmpdir.name, 'test_metadata.hspy')
         s.save(filename)
         s_load = fp.load_dpc_signal(filename)
-        self.assertEqual(s_load.metadata.General.title, "test_data")
+        assert s_load.metadata.General.title == "test_data"
 
     def test_retain_axes_manager(self):
         s = fp.DPCSignal2D(np.ones((2, 10, 5)))
@@ -64,24 +64,24 @@ class test_dpcsignal_io(unittest.TestCase):
         filename = os.path.join(self.tmpdir.name, 'test_axes_manager.hspy')
         s.save(filename)
         s_load = fp.load_dpc_signal(filename)
-        self.assertEqual(s_load.axes_manager[1].offset, 20)
-        self.assertEqual(s_load.axes_manager[2].offset, 10)
-        self.assertEqual(s_load.axes_manager[1].scale, 0.2)
-        self.assertEqual(s_load.axes_manager[2].scale, 0.3)
-        self.assertEqual(s_load.axes_manager[1].units, "a")
-        self.assertEqual(s_load.axes_manager[2].units, "b")
-        self.assertEqual(s_load.axes_manager[1].name, "e")
-        self.assertEqual(s_load.axes_manager[2].name, "f")
+        assert s_load.axes_manager[1].offset == 20
+        assert s_load.axes_manager[2].offset == 10
+        assert s_load.axes_manager[1].scale == 0.2
+        assert s_load.axes_manager[2].scale == 0.3
+        assert s_load.axes_manager[1].units == "a"
+        assert s_load.axes_manager[2].units == "b"
+        assert s_load.axes_manager[1].name == "e"
+        assert s_load.axes_manager[2].name == "f"
 
 
-class test_pixelatedstem_signal_io(unittest.TestCase):
+class TestPixelatedstemSignalIo:
 
     def test_load_hspy_signal(self):
         # Has shape (2, 5, 4, 3)
         filename = os.path.join(
                 my_path, "test_data", "pixelated_stem_test.hdf5")
         s = fp.load_fpd_signal(filename)
-        self.assertEqual(s.axes_manager.shape, (2, 5, 4, 3))
+        assert s.axes_manager.shape == (2, 5, 4, 3)
 
     def test_load_hspy_signal_generated(self):
         shape = (7, 6, 3, 5)
@@ -92,9 +92,8 @@ class test_pixelatedstem_signal_io(unittest.TestCase):
         s.save(filename)
 
         sl = fp.load_fpd_signal(filename, lazy=False)
-        self.assertEqual(
-                sl.axes_manager.shape,
-                (shape[1], shape[0], shape[3], shape[2]))
+        assert sl.axes_manager.shape == (
+                shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
 
     def test_load_hspy_signal_generated_lazy(self):
@@ -106,9 +105,8 @@ class test_pixelatedstem_signal_io(unittest.TestCase):
         s.save(filename)
 
         sl = fp.load_fpd_signal(filename, lazy=True)
-        self.assertEqual(
-                sl.axes_manager.shape,
-                (shape[1], shape[0], shape[3], shape[2]))
+        assert sl.axes_manager.shape == (
+                shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
 
     def test_load_fpd_signal(self):
@@ -116,13 +114,13 @@ class test_pixelatedstem_signal_io(unittest.TestCase):
         filename = os.path.join(
                 my_path, "test_data", "fpd_file_test.hdf5")
         s = fp.load_fpd_signal(filename)
-        self.assertEqual(s.axes_manager.shape, (2, 2, 256, 256))
+        assert s.axes_manager.shape == (2, 2, 256, 256)
 
         s = fp.load_fpd_signal(filename, lazy=True)
-        self.assertEqual(s.axes_manager.shape, (2, 2, 256, 256))
+        assert s.axes_manager.shape == (2, 2, 256, 256)
 
 
-class test_signal_to_pixelated_stem(unittest.TestCase):
+class TestSignalToPixelatedStem:
 
     def test_conserve_signal_axes_metadata(self):
         x_nav, y_nav, x_sig, y_sig = 9, 8, 5, 7
@@ -147,25 +145,25 @@ class test_signal_to_pixelated_stem(unittest.TestCase):
 
         s1 = it.signal_to_pixelated_stem(s)
 
-        self.assertTrue((data == s1.data).all())
-        self.assertEqual(s1.metadata.General.title, title)
-        self.assertEqual(s1.axes_manager.shape, (x_nav, y_nav, x_sig, y_sig))
-        self.assertEqual(s1.axes_manager[0].scale, x_nav_scale)
-        self.assertEqual(s1.axes_manager[1].scale, y_nav_scale)
-        self.assertEqual(s1.axes_manager[2].scale, x_sig_scale)
-        self.assertEqual(s1.axes_manager[3].scale, y_sig_scale)
+        assert (data == s1.data).all()
+        assert s1.metadata.General.title == title
+        assert s1.axes_manager.shape == (x_nav, y_nav, x_sig, y_sig)
+        assert s1.axes_manager[0].scale == x_nav_scale
+        assert s1.axes_manager[1].scale == y_nav_scale
+        assert s1.axes_manager[2].scale == x_sig_scale
+        assert s1.axes_manager[3].scale == y_sig_scale
 
-        self.assertEqual(s1.axes_manager[0].offset, x_nav_off)
-        self.assertEqual(s1.axes_manager[1].offset, y_nav_off)
-        self.assertEqual(s1.axes_manager[2].offset, x_sig_off)
-        self.assertEqual(s1.axes_manager[3].offset, y_sig_off)
+        assert s1.axes_manager[0].offset == x_nav_off
+        assert s1.axes_manager[1].offset == y_nav_off
+        assert s1.axes_manager[2].offset == x_sig_off
+        assert s1.axes_manager[3].offset == y_sig_off
 
-        self.assertEqual(s1.axes_manager[0].name, x_nav_name)
-        self.assertEqual(s1.axes_manager[1].name, y_nav_name)
-        self.assertEqual(s1.axes_manager[2].name, x_sig_name)
-        self.assertEqual(s1.axes_manager[3].name, y_sig_name)
+        assert s1.axes_manager[0].name == x_nav_name
+        assert s1.axes_manager[1].name == y_nav_name
+        assert s1.axes_manager[2].name == x_sig_name
+        assert s1.axes_manager[3].name == y_sig_name
 
-        self.assertEqual(s1.axes_manager[0].units, x_nav_unit)
-        self.assertEqual(s1.axes_manager[1].units, y_nav_unit)
-        self.assertEqual(s1.axes_manager[2].units, x_sig_unit)
-        self.assertEqual(s1.axes_manager[3].units, y_sig_unit)
+        assert s1.axes_manager[0].units == x_nav_unit
+        assert s1.axes_manager[1].units == y_nav_unit
+        assert s1.axes_manager[2].units == x_sig_unit
+        assert s1.axes_manager[3].units == y_sig_unit

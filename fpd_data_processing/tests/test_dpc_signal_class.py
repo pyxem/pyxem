@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
 from fpd_data_processing.pixelated_stem_class import (
@@ -7,36 +7,36 @@ import fpd_data_processing.dummy_data as dd
 import fpd_data_processing.pixelated_stem_tools as pst
 
 
-class test_dpc_basesignal_create(unittest.TestCase):
+class TestDpcBasesignalCreate:
 
     def test_create(self):
         data = np.ones(shape=(2))
         DPCBaseSignal(data)
 
 
-class test_dpc_signal_1d_create(unittest.TestCase):
+class TestDpcSignal1dCreate:
 
     def test_create(self):
         data = np.ones(shape=(2, 10))
         DPCSignal1D(data)
 
 
-class test_dpc_signal_2d_create(unittest.TestCase):
+class TestDpcSignal2dCreate:
 
     def test_create(self):
         data = np.ones(shape=(2, 10, 10))
         DPCSignal2D(data)
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             DPCSignal2D(np.zeros(10))
 
 
-class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
+class TestDpcSignal2dCorrectRamp:
 
     def test_correct_ramp_flat(self):
         data0 = np.ones(shape=(2, 64, 64))
         s0 = DPCSignal2D(data0)
         s0_corr = s0.correct_ramp(corner_size=0.05)
-        self.assertTrue((s0.data == data0).all())
+        assert (s0.data == data0).all()
         assert_allclose(s0_corr.data, np.zeros_like(data0), atol=1e-8)
 
         s0.correct_ramp(corner_size=0.05, out=s0)
@@ -97,11 +97,10 @@ class test_dpc_signal_2d_correct_ramp(unittest.TestCase):
         s = DPCSignal2D(data)
         s_corr = s.correct_ramp()
         s_corr.data[:, 20:30, 30:40] -= 1000
-        print(s_corr.data.max())
         assert_allclose(s_corr.data, np.zeros_like(data), atol=1e-8)
 
 
-class test_get_dpc_signal(unittest.TestCase):
+class TestGetDpcSignal:
 
     def test_get_color_signal(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
@@ -116,14 +115,14 @@ class test_get_dpc_signal(unittest.TestCase):
     def test_get_color_signal_zeros(self):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
         s_color = s.get_color_signal()
-        self.assertTrue((s_color.data['R'] == 0).all())
-        self.assertTrue((s_color.data['G'] == 0).all())
-        self.assertTrue((s_color.data['B'] == 0).all())
+        assert (s_color.data['R'] == 0).all()
+        assert (s_color.data['G'] == 0).all()
+        assert (s_color.data['B'] == 0).all()
 
     def test_get_magnitude_signal_zeros(self):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
         s_magnitude = s.get_magnitude_signal()
-        self.assertTrue((s_magnitude.data == 0).all())
+        assert (s_magnitude.data == 0).all()
 
     def test_get_phase_signal(self):
         s = DPCSignal2D(np.zeros((2, 100, 100)))
@@ -139,7 +138,7 @@ class test_get_dpc_signal(unittest.TestCase):
         s.get_color_image_with_indicator(only_phase=True)
 
 
-class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
+class TestDpcSignal2dBivariateHistogram:
 
     def test_get_bivariate_histogram(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
@@ -160,26 +159,26 @@ class test_dpc_signal_2d_bivariate_histogram(unittest.TestCase):
                 spatial_std=3)
 
 
-class test_rotate_data(unittest.TestCase):
+class TestRotateData:
 
     def test_clockwise(self):
         s = dd.get_simple_dpc_signal()
         s_rot = s.rotate_data(1)
-        self.assertFalse((s_rot.data[0, 0, 0:10] == 0).all())
-        self.assertTrue((s_rot.data[0, 0, -10:] == 0).all())
-        self.assertFalse((s_rot.data[0, -10:, 0] == 0).all())
-        self.assertTrue((s_rot.data[0, 0:10, 0] == 0).all())
+        assert not (s_rot.data[0, 0, 0:10] == 0).all()
+        assert (s_rot.data[0, 0, -10:] == 0).all()
+        assert not (s_rot.data[0, -10:, 0] == 0).all()
+        assert (s_rot.data[0, 0:10, 0] == 0).all()
 
     def test_counterclockwise(self):
         s = dd.get_simple_dpc_signal()
         s_rot = s.rotate_data(-1)
-        self.assertTrue((s_rot.data[0, 0, 0:10] == 0).all())
-        self.assertFalse((s_rot.data[0, 0, -10:] == 0).all())
-        self.assertTrue((s_rot.data[0, -10:, 0] == 0).all())
-        self.assertFalse((s_rot.data[0, 0:10, 0] == 0).all())
+        assert (s_rot.data[0, 0, 0:10] == 0).all()
+        assert not (s_rot.data[0, 0, -10:] == 0).all()
+        assert (s_rot.data[0, -10:, 0] == 0).all()
+        assert not (s_rot.data[0, 0:10, 0] == 0).all()
 
 
-class test_rotate_beam_shifts(unittest.TestCase):
+class TestRotateBeamShifts:
 
     def test_clockwise_90_degrees(self):
         s = DPCSignal2D((np.ones((90, 70)), np.zeros((90, 70))))
@@ -219,9 +218,9 @@ class test_rotate_beam_shifts(unittest.TestCase):
         assert_almost_equal(data_y, -np.ones_like(data_y)*sin_rad)
 
 
-class test_flip_axis_90_degrees(unittest.TestCase):
+class TestFlipAxis90Degrees:
 
-    def setUp(self):
+    def setup_method(self):
         data = np.zeros((2, 100, 50))
         for i in range(10, 90, 20):
             data[0, i:i+10, 10:40] = 1.1
@@ -265,9 +264,9 @@ class test_flip_axis_90_degrees(unittest.TestCase):
         assert_allclose(s_r.axes_manager.navigation_shape, (2, ))
 
 
-class test_gaussian_blur(unittest.TestCase):
+class TestGaussianBlur:
 
-    def setUp(self):
+    def setup_method(self):
         data = np.zeros((2, 25, 50))
         data[0, 10, 5] = 10
         data[1, 20, 15] = -10
@@ -281,7 +280,7 @@ class test_gaussian_blur(unittest.TestCase):
         assert s.data[1, 20, 15] == -10
         s.data[0, 10, 5] = 0
         s.data[1, 20, 15] = 0
-        self.assertFalse(s.data.any())
+        assert not s.data.any()
 
         assert s_out.data[0, 10, 5] < 10
         assert s_out.data[0, 10, 5] > 0
