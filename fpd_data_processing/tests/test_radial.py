@@ -46,7 +46,7 @@ class test_radial_module(unittest.TestCase):
     def test_get_optimal_centre_position(self):
         x0, y0 = 300., 300.
         test_data = mdtd.MakeTestData(size_x=600, size_y=600, default=False)
-        test_data.add_ring(x0=x0, y0=y0, r=200, I=10, lw_pix=2)
+        test_data.add_ring(x0=x0, y0=y0, r=200, intensity=10, lw_pix=2)
         s = test_data.signal
         s.axes_manager[0].offset = -301.
         s.axes_manager[1].offset = -301.
@@ -61,7 +61,7 @@ class test_radial_module(unittest.TestCase):
                 size_x=300, size_y=400,
                 default=False, blur=True, downscale=False)
         x0, y0 = 150, 170
-        test_data.add_ring(x0=x0, y0=y0, r=100, I=10, lw_pix=1)
+        test_data.add_ring(x0=x0, y0=y0, r=100, intensity=10, lw_pix=1)
         s = test_data.signal
         s.axes_manager[0].offset = -x0-2
         s.axes_manager[1].offset = -y0-3
@@ -185,8 +185,8 @@ class test_fit_ellipse(unittest.TestCase):
         ellipse_parameters = ra._fit_ellipse_to_xy_points(x, y)
         xC, yC, semi_len0, semi_len1, rot, eccen = ra._get_ellipse_parameters(
                 ellipse_parameters)
-        self.assertAlmostEqual(xC, 0.)
-        self.assertAlmostEqual(yC, 0.)
+        self.assertAlmostEqual(xC, 0., places=1)
+        self.assertAlmostEqual(yC, 0., places=1)
         self.assertAlmostEqual(semi_len0, axis2, places=-1)
         self.assertAlmostEqual(semi_len1, axis1, places=-1)
 
@@ -206,11 +206,33 @@ class test_fit_ellipse(unittest.TestCase):
         output = ra.fit_single_ellipse_to_signal(
                 s, (50, 70), angleN=10, show_progressbar=False)
         output[0].plot()
-        self.assertAlmostEqual(output[1], 0.)
-        self.assertAlmostEqual(output[2], 0.)
+        self.assertAlmostEqual(output[1], 0., places=2)
+        self.assertAlmostEqual(output[2], 0., places=2)
         self.assertAlmostEqual(output[3], 60, places=-1)
         self.assertAlmostEqual(output[4], 60, places=-1)
         self.assertAlmostEqual(output[6], 1., places=5)
+
+    def test_fit_single_ellipse_to_signal_rotation(self):
+        rot_list = [
+                -np.pi/16, -np.pi/8, -np.pi/4, -np.pi/2, -0.1,
+                0.1, np.pi/16, np.pi/8, np.pi/4, np.pi/2, np.pi + 0.1,
+                np.pi*2 + 0.1, np.pi*2.5, np.pi*3 + 0.1, np.pi*3.2]
+        for rot in rot_list:
+            s = fp.PixelatedSTEM(np.zeros((200, 200)))
+            s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
+            s.data += mdtd._get_elliptical_ring(s, 0, 0, 70, 60, rot, lw_r=1)
+            output = ra.fit_single_ellipse_to_signal(
+                    s, (50, 80), angleN=10, show_progressbar=False)
+            output_rot = output[5] % np.pi
+            self.assertAlmostEqual(output_rot, rot % np.pi, places=1)
+        for rot in rot_list:
+            s = fp.PixelatedSTEM(np.zeros((200, 200)))
+            s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
+            s.data += mdtd._get_elliptical_ring(s, 0, 0, 60, 70, rot, lw_r=1)
+            output = ra.fit_single_ellipse_to_signal(
+                    s, (50, 80), angleN=10, show_progressbar=False)
+            output_rot = (output[5] + np.pi/2) % np.pi
+            self.assertAlmostEqual(output_rot, rot % np.pi, places=1)
 
     def test_fit_ellipses_to_signal(self):
         s = fp.PixelatedSTEM(np.zeros((200, 220)))
@@ -230,3 +252,19 @@ class test_fit_ellipse(unittest.TestCase):
             ra.fit_ellipses_to_signal(
                     s, [(50, 70), (70, 95), (80, 105)],
                     angleN=[20, 30], show_progressbar=False)
+
+
+class test_holz_calibration(unittest.TestCase):
+
+    def test_get_holz_angle(self):
+        wavelength = 2.51/1000
+        lattice_parameter = 0.3905*2**0.5
+        angle = ra._get_holz_angle(wavelength, lattice_parameter)
+        self.assertAlmostEqual(95.37805/1000, angle, places=4)
+
+    def test_scattering_angle_to_lattice_parameter(self):
+        wavelength = 2.51/1000
+        angle = 95.37805/1000
+        lattice_size = ra._scattering_angle_to_lattice_parameter(
+                wavelength, angle)
+        self.assertAlmostEqual(0.55225047, lattice_size, places=4)

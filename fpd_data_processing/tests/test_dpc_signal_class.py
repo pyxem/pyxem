@@ -99,6 +99,18 @@ class TestDpcSignal2dCorrectRamp:
         s_corr.data[:, 20:30, 30:40] -= 1000
         assert_allclose(s_corr.data, np.zeros_like(data), atol=1e-8)
 
+    def test_correct_ramp_only_offset(self):
+        data = np.ones((2, 50, 50))
+        data[1, :, :] = -3
+        s = DPCSignal2D(np.zeros((2, 50, 50)))
+        s_corr1 = s.correct_ramp(only_offset=True)
+        assert_allclose(s_corr1.data, np.zeros_like(data), atol=1e-8)
+
+        data_ramp = np.mgrid[-5:5:50j, -5:5:50j]
+        s.data += data_ramp
+        s_corr2 = s.correct_ramp(only_offset=True)
+        assert_allclose(s_corr2.data, data_ramp, atol=1e-8)
+
 
 class TestGetDpcSignal:
 

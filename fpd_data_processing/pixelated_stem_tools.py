@@ -1,11 +1,12 @@
 import copy
 import math
 import numpy as np
-from scipy.ndimage import measurements
+from scipy.ndimage import measurements, shift
 from scipy.optimize import leastsq
 from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
+import fpd_data_processing.lazy_tools as lt
 
 
 def _center_of_mass_single_frame(im, threshold=None, mask=None):
@@ -19,6 +20,32 @@ def _center_of_mass_single_frame(im, threshold=None, mask=None):
         image[image > mean_value] = 1
     data = measurements.center_of_mass(image, labels=mask)
     return(np.array(data)[::-1])
+
+
+def _center_of_mass_dask_array(
+        dask_array, threshold=None, mask=None, show_progressbar=True):
+    func_args = {'threshold': threshold, 'mask': mask}
+    data = lt._calculate_function_on_dask_array(
+            dask_array, _center_of_mass_single_frame, func_args=func_args,
+            return_sig_size=2, show_progressbar=show_progressbar)
+    return data
+
+
+def _radial_integration_dask_array(
+        dask_array, return_sig_size, centre_x, centre_y,
+        mask_array=None, show_progressbar=True):
+    func_args = {'mask': mask_array, 'radial_array_size': return_sig_size}
+    func_iterating_args = {'centre_x': centre_x, 'centre_y': centre_y}
+    data = lt._calculate_function_on_dask_array(
+            dask_array, _get_radial_profile_of_diff_image, func_args=func_args,
+            func_iterating_args=func_iterating_args,
+            return_sig_size=return_sig_size, show_progressbar=show_progressbar)
+    return data
+
+
+def _shift_single_frame(im, shift_x, shift_y):
+    im_shifted = shift(im, (-shift_y, -shift_x), order=1)
+    return im_shifted
 
 
 def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
@@ -307,7 +334,6 @@ def _get_angle_sector_mask(
     signal : HyperSpy 2-D signal
         Can have several navigation dimensions.
     angle0, angle1 : numbers
-        Must be between 0 and 2*pi.
 
     Returns
     -------
@@ -317,13 +343,20 @@ def _get_angle_sector_mask(
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
     >>> import numpy as np
+    >>> import fpd_data_processing.api as fp
+    >>> import fpd_data_processing.pixelated_stem_tools as pst
     >>> s = fp.PixelatedSTEM(np.arange(100).reshape(10, 10))
     >>> s.axes_manager.signal_axes[0].offset = -5
     >>> s.axes_manager.signal_axes[1].offset = -5
-    >>> mask = _get_angle_sector_mask(s, 0.5*np.pi, np.pi)
+    >>> mask = pst._get_angle_sector_mask(s, 0.5*np.pi, np.pi)
+
     """
+    if angle0 > angle1:
+        raise ValueError(
+                "angle1 ({0}) needs to be larger than angle0 ({1})".format(
+                    angle1, angle0))
+
     bool_array = np.zeros_like(signal.data, dtype=np.bool)
     for s in signal:
         indices = signal.axes_manager.indices[::-1]
@@ -343,8 +376,21 @@ def _get_angle_sector_mask(
         x, y = np.mgrid[
                 signal_axes[1].low_value:signal_axes[1].high_value:x_size,
                 signal_axes[0].low_value:signal_axes[0].high_value:y_size]
-        t = np.arctan2(x, y)+np.pi
-        bool_array[indices] = (t > angle0)*(t < angle1)
+        t = np.arctan2(x, y) + np.pi
+        if (angle1 - angle0) >= (2 * np.pi):
+            bool_array[indices] = True
+        else:
+            angle0 = angle0 % (2 * np.pi)
+            angle1 = angle1 % (2 * np.pi)
+            if angle0 < angle1:
+                bool_array[indices] = (t > angle0)*(t < angle1)
+            elif angle1 < angle0:
+                bool_array[indices] = (t > angle0)*(t <= (2 * np.pi))
+                bool_array[indices] += (t >= 0)*(t < angle1)
+            else:
+                raise ValueError(
+                    "Not able to process with angle0: {0}, and angle1: {1}. "
+                    "This error should not happen...")
     return(bool_array)
 
 
@@ -406,10 +452,15 @@ def _make_bivariate_histogram(
 def _copy_signal2d_axes_manager_metadata(signal_original, signal_new):
     ax_o = signal_original.axes_manager.signal_axes
     ax_n = signal_new.axes_manager.signal_axes
-    ax_n[0].scale, ax_n[1].scale = ax_o[0].scale, ax_o[1].scale
-    ax_n[0].offset, ax_n[1].offset = ax_o[0].offset, ax_o[1].offset
-    ax_n[0].name, ax_n[1].name = ax_o[0].name, ax_o[1].name
-    ax_n[0].units, ax_n[1].units = ax_o[0].units, ax_o[1].units
+    _copy_axes_object_metadata(ax_o[0], ax_n[0])
+    _copy_axes_object_metadata(ax_o[1], ax_n[1])
+
+
+def _copy_axes_object_metadata(axes_original, axes_new):
+    axes_new.scale = axes_original.scale
+    axes_new.offset = axes_original.offset
+    axes_new.name = axes_original.name
+    axes_new.units = axes_original.units
 
 
 def remove_dead_pixels(data, dead_pixel_list):
@@ -417,21 +468,21 @@ def remove_dead_pixels(data, dead_pixel_list):
     Parameters
     ----------
     data : 2-D numpy array
-    dead_pixel_list : list of x,y coordinates
-        Form [[x0, y0], [x1, y1]]
+    dead_pixel_x : list of integers
+    dead_pixel_y : list of integers
 
     Example
     -------
     >>> import numpy as np
-    >>> import fpd_data_processing.pixelated_stem_tools as pst
-    >>> data = np.random.random((256, 256))
-    >>> dead_pixel_list = [[10, 50], [76, 251]]
-    >>> pst.remove_dead_pixels(data, dead_pixel_list)
+    >>> import fpd_data_processing.api as fp
+    >>> s = fp.dummy_data.get_dead_pixel_signal()
+    >>> dead_pixel_list = np.where(s.data == 0)
+    >>> from fpd_data_processing.pixelated_stem_tools import remove_dead_pixels
+    >>> remove_dead_pixels(s.data, dead_pixel_list)
 
     """
-    for dead_pixel in dead_pixel_list:
-        x_pixel = dead_pixel[0]
-        y_pixel = dead_pixel[1]
+    x_list, y_list = dead_pixel_list[0], dead_pixel_list[1]
+    for x_pixel, y_pixel in zip(x_list, y_list):
         if x_pixel == 0:
             pass
         elif x_pixel == 255:

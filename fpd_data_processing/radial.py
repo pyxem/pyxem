@@ -391,6 +391,67 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     return s
 
 
+def _get_holz_angle(electron_wavelength, lattice_parameter):
+    """
+    Parameters
+    ----------
+    electron_wavelength : scalar
+        In nanometers
+    lattice_parameter : scalar
+        In nanometers
+
+    Returns
+    -------
+    scattering_angle : scalar
+        Scattering angle in radians
+
+    Examples
+    --------
+    >>> import fpd_data_processing.radial as ra
+    >>> lattice_size = 0.3905 # STO-(001) in nm
+    >>> wavelength = 2.51/1000 # Electron wavelength for 200 kV
+    >>> angle = ra._get_holz_angle(wavelength, lattice_size)
+
+    """
+    k0 = 1./electron_wavelength
+    kz = 1./lattice_parameter
+    in_root = kz*((2*k0)-kz)
+    sin_angle = (in_root**0.5)/k0
+    angle = math.asin(sin_angle)
+    return(angle)
+
+
+def _scattering_angle_to_lattice_parameter(electron_wavelength, angle):
+    """Convert scattering angle data to lattice parameter sizes.
+
+    Parameters
+    ----------
+    electron_wavelength : float
+        Wavelength of the electrons in the electron beam. In nm.
+        For 200 kV electrons: 0.00251 (nm)
+    angle : NumPy array
+        Scattering angle, in radians.
+
+    Returns
+    -------
+    lattice_parameter : NumPy array
+        Lattice parameter, in nanometers
+
+    Examples
+    --------
+    >>> import fpd_data_processing.radial as ra
+    >>> angle_list = [0.1, 0.1, 0.1, 0.1] # in radians
+    >>> wavelength = 2.51/1000 # Electron wavelength for 200 kV
+    >>> lattice_size = ra._scattering_angle_to_lattice_parameter(
+    ...     wavelength, angle_list)
+
+    """
+
+    k0 = 1./electron_wavelength
+    kz = k0 - (k0*((1-(np.sin(angle)**2))**0.5))
+    return(1/kz)
+
+
 def _get_xy_points_from_radius_angle_plot(s_ra):
     x_list = []
     y_list = []
@@ -439,8 +500,22 @@ def _get_ellipse_parameters(g):
 
     Returns
     -------
-    xC, yC, semi_len0, semi_len1, rot, eccen
+    xC, yC : floats
+        Centre position
+    semi_len0, semi_len1 : floats
+        Length of minor and major semi-axis
+    rot : float
+        Angle between semi_len0 and the positive x-axis. Since semi_len0,
+        is not necessarily the longest semi-axis, the rotation will _not_ be
+        between the major semi-axis and the positive x-axis.
+        In radians, between 0 and pi. The rotation is clockwise, so
+        at rot = 0.1 the ellipse will be pointing in the positive x-direction,
+        and negative y-direction.
+    eccen : float
+        Eccentricity of the ellipse
 
+    Note
+    ----
     http://mathworld.wolfram.com/Ellipse.html
 
     """
@@ -464,6 +539,7 @@ def _get_ellipse_parameters(g):
             rot = math.atan((2*b)/(a - c))/2
         else:
             rot = math.pi/2 + (math.atan((2*b)/(a - c))/2)
+    rot = rot % np.pi
     eccen = math.sqrt(1-((b*b)/(a*a)))
     return(xC, yC, semi_len0, semi_len1, rot, eccen)
 
@@ -508,6 +584,23 @@ def fit_single_ellipse_to_signal(
 
     Returns
     -------
+    signal : HyperSpy 2D signal
+        Fitted ellipse and fitting points are stored as HyperSpy markers
+        in the metadata
+    xC, yC : floats
+        Centre position
+    semi_len0, semi_len1 : floats
+        Length of minor and major semi-axis
+    rot : float
+        Angle between semi_len0 and the positive x-axis. Since semi_len0,
+        is not necessarily the longest semi-axis, the rotation will _not_ be
+        between the major semi-axis and the positive x-axis.
+        In radians, between 0 and pi. The rotation is clockwise, so
+        at rot = 0.1 the ellipse will be pointing in the positive x-direction,
+        and negative y-direction.
+    eccen : float
+        Eccentricity of the ellipse
+
     signal, xC, yC, semi0, semi1, rot, ecc
 
     Examples
@@ -553,7 +646,22 @@ def fit_ellipses_to_signal(
 
     Returns
     -------
-    signal, xC, yC, semi0, semi1, rot, ecc
+    signal : HyperSpy 2D signal
+        Fitted ellipse and fitting points are stored as HyperSpy markers
+        in the metadata
+    xC, yC : floats
+        Centre position
+    semi_len0, semi_len1 : floats
+        Length of the two semi-axes.
+    rot : float
+        Angle between semi_len0 and the positive x-axis. Since semi_len0,
+        is not necessarily the longest semi-axis, the rotation will _not_ be
+        between the major semi-axis and the positive x-axis.
+        In radians, between 0 and pi. The rotation is clockwise, so
+        at rot = 0.1 the ellipse will be pointing in the positive x-direction,
+        and negative y-direction.
+    eccen : float
+        Eccentricity of the ellipse
 
     Examples
     --------

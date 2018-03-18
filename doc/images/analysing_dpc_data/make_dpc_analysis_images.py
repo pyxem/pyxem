@@ -22,6 +22,12 @@ s1.axes_manager.indices = (1, )
 fig_sig_y = s1._plot.signal_plot.figure
 fig_sig_y.savefig("dpc_y_cor.jpg")
 
+# Plot DPC color image
+s_color = s1.get_color_signal()
+s_color.plot()
+fig_sig = s_color._plot.signal_plot.figure
+fig_sig.savefig("dpc_color_image.jpg")
+
 # Plot DPC phase image
 s_phase = s1.get_phase_signal()
 s_phase.plot()

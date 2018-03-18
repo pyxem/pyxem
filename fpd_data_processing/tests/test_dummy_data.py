@@ -44,3 +44,7 @@ class TestDummyDataModule:
         s.plot()
         s_ramp = dd.get_square_dpc_signal(add_ramp=True)
         s_ramp.plot()
+
+    def test_get_dead_pixel_signal(self):
+        s = dd.get_dead_pixel_signal()
+        s.plot()

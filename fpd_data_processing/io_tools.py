@@ -12,7 +12,7 @@ from fpd_data_processing.pixelated_stem_class import (
 
 def _fpd_checker(filename, attr_substring='fpd_version'):
     if h5py.is_hdf5(filename):
-        hdf5_file = h5py.File(filename)
+        hdf5_file = h5py.File(filename, mode='r')
         for attr in hdf5_file.attrs:
             if attr_substring in attr:
                 return(True)
@@ -21,7 +21,7 @@ def _fpd_checker(filename, attr_substring='fpd_version'):
 
 def _hspy_checker(filename, attr_substring='fpd_version'):
     if h5py.is_hdf5(filename):
-        hdf5_file = h5py.File(filename)
+        hdf5_file = h5py.File(filename, mode='r')
         for attr in hdf5_file.attrs:
             if 'file_format' in attr:
                 if hdf5_file.attrs['file_format'] == 'HyperSpy':
@@ -30,7 +30,7 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
 
 
 def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
-    f = h5py.File(filename)
+    f = h5py.File(filename, mode='r')
     if 'fpd_expt' in f:
         data = f['/fpd_expt/fpd_data/data']
         if len(data.shape) == 5:
@@ -50,14 +50,14 @@ def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
 
 
 def _load_fpd_sum_im(filename):
-    f = h5py.File(filename)
+    f = h5py.File(filename, mode='r')
     if 'fpd_expt' in f:
         if len(f['/fpd_expt/fpd_sum_im/data'].shape) == 3:
             data = f['/fpd_expt/fpd_sum_im/data'][:, :, 0]
         elif len(f['/fpd_expt/fpd_sum_im/data'].shape) == 2:
             data = f['/fpd_expt/fpd_sum_im/data'][:, :]
         else:
-            Exception("fpd_sum_im does not have the correct dimensions")
+            ValueError("fpd_sum_im does not have the correct dimensions")
         s = Signal2D(data)
         f.close()
         return(s)
@@ -66,14 +66,14 @@ def _load_fpd_sum_im(filename):
 
 
 def _load_fpd_sum_dif(filename):
-    f = h5py.File(filename)
+    f = h5py.File(filename, mode='r')
     if 'fpd_expt' in f:
         if len(f['/fpd_expt/fpd_sum_dif/data'].shape) == 3:
             data = f['fpd_expt/fpd_sum_dif/data'][0, :, :]
         elif len(f['/fpd_expt/fpd_sum_dif/data'].shape) == 2:
             data = f['fpd_expt/fpd_sum_dif/data'][:, :]
         else:
-            Exception("fpd_sum_dif does not have the correct dimensions")
+            ValueError("fpd_sum_dif does not have the correct dimensions")
         s = Signal2D(data)
         f.close()
         return(s)
@@ -154,7 +154,9 @@ def signal_to_pixelated_stem(s):
     return s_new
 
 
-def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
+def load_fpd_signal(
+        filename, lazy=False, chunk_size=(16, 16),
+        navigation_signal=None):
     """
     Parameters
     ----------
@@ -164,6 +166,7 @@ def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
         Used if Lazy is True. Sets the chunk size of the signal in the
         navigation dimension. Higher number will potentially make the
         calculations be faster, but use more memory.
+    navigation_signal : Signal2D
     """
     if _fpd_checker(filename, attr_substring='fpd_version'):
         if lazy:
@@ -175,6 +178,26 @@ def load_fpd_signal(filename, lazy=False, chunk_size=(16, 16)):
     else:
         # Attempt to load non-fpd and non-HyperSpy signal
         s = _load_other_file(filename, lazy=lazy)
+    if navigation_signal is None:
+        try:
+            s_nav = _load_fpd_sum_im(filename)
+            s.navigation_signal = s_nav
+        except IOError:
+            logging.debug("Nav signal not found in {0}".format(filename))
+            s.navigation_signal = None
+        except ValueError:
+            logging.debug("Nav signal in {0}: wrong shape".format(filename))
+            s.navigation_signal = None
+    else:
+        nav_im_shape = navigation_signal.axes_manager.signal_shape
+        nav_ax_shape = s.axes_manager.navigation_shape
+        if nav_im_shape == nav_ax_shape:
+            s.navigation_signal = navigation_signal
+        else:
+            raise ValueError(
+                    "navigation_signal does not have the same shape ({0}) as "
+                    "the signal's navigation shape ({1})".format(
+                        nav_im_shape, nav_ax_shape))
     return s
 
 

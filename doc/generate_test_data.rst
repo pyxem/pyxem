@@ -95,8 +95,8 @@ The last image is without blurring and rescaling.
 
     >>> a = mdtd.MakeTestData(size_x=100, size_y=100, scale=0.1, default=False,
     ...         blur_sigma=2)
-    >>> a.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=2)
-    >>> a.add_disk(x0=50.05, y0=50.02, r=5, I=10)
+    >>> a.add_ring(x0=50, y0=50, r=20, lw_pix=2, intensity=2)
+    >>> a.add_disk(x0=50.05, y0=50.02, r=5, intensity=10)
 
 .. image:: images/doc/TestData_advanced_smooth_2.png
     :width: 50 %
@@ -106,8 +106,8 @@ The last image is without blurring and rescaling.
 
     >>> b = mdtd.MakeTestData(size_x=100, size_y=100, scale=0.1, default=False,
     ...         blur_sigma=1)
-    >>> b.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=2)
-    >>> b.add_disk(x0=50.05, y0=50.02, r=5, I=10)
+    >>> b.add_ring(x0=50, y0=50, r=20, lw_pix=2, intensity=2)
+    >>> b.add_disk(x0=50.05, y0=50.02, r=5, intensity=10)
 
 .. image:: images/doc/TestData_advanced_smooth.png
     :width: 50 %
@@ -117,8 +117,8 @@ The last image is without blurring and rescaling.
 
     >>> c = mdtd.MakeTestData(size_x=100, size_y=100, scale=0.1, default=False,
     ...         blur=False, downscale=False)
-    >>> c.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=2)
-    >>> c.add_disk(x0=50.05, y0=50.02, r=5, I=10)
+    >>> c.add_ring(x0=50, y0=50, r=20, lw_pix=2, intensity=2)
+    >>> c.add_disk(x0=50.05, y0=50.02, r=5, intensity=10)
 
 .. image:: images/doc/TestData_advanced_non_smooth.png
     :width: 50 %
@@ -135,10 +135,10 @@ By setting the offset of the axes_manager as below, the coordinates of the centr
 
     >>> a = mdtd.MakeTestData(size_x=100, size_y=100, scale=0.1,
     ...         default=False, blur_sigma=2)
-    >>> a.add_ring(x0=50, y0=50, r=20, lw_pix=2, I=5)
-    >>> a.add_ring(x0=50, y0=50, r=30, lw_pix=2, I=2)
-    >>> a.add_ring(x0=50, y0=50, r=10, lw_pix=2, I=2)
-    >>> a.add_disk(x0=50, y0=50, r=5, I=10)
+    >>> a.add_ring(x0=50, y0=50, r=20, lw_pix=2, intensity=5)
+    >>> a.add_ring(x0=50, y0=50, r=30, lw_pix=2, intensity=2)
+    >>> a.add_ring(x0=50, y0=50, r=10, lw_pix=2, intensity=2)
+    >>> a.add_disk(x0=50, y0=50, r=5, intensity=10)
     >>> a.signal.axes_manager[0].offset = -50
     >>> a.signal.axes_manager[1].offset = -50
 

@@ -11,3 +11,5 @@
 *.png
 *.hdf5
 *.hspy
+build/
+dist/
