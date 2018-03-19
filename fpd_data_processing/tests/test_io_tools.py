@@ -124,14 +124,14 @@ class TestPixelatedstemSignalIo:
         filename = os.path.join(
                 my_path, "test_data", "fpd_file_test.hdf5")
         s = fp.load_fpd_signal(filename)
-        self.assertEqual(s.axes_manager.shape, (2, 2, 256, 256))
+        assert s.axes_manager.shape == (2, 2, 256, 256)
 
         s_nav0 = hs.signals.Signal2D(np.zeros((2, 2)))
         s = fp.load_fpd_signal(filename, lazy=True, navigation_signal=s_nav0)
         s.plot()
 
         s_nav1 = hs.signals.Signal2D(np.zeros((2, 4)))
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             s = fp.load_fpd_signal(
                     filename, lazy=True, navigation_signal=s_nav1)
 
