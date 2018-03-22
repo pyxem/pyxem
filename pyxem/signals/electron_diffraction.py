@@ -103,8 +103,9 @@ class ElectronDiffraction(Signal2D):
                 exposure_time
             )
 
-    def set_calibration(self, calibration, center=None):
-        """Set pixel size in reciprocal Angstroms and origin location.
+    def set_diffraction_calibration(self, calibration, center=None):
+        """Set diffraction pattern pixel size in reciprocal Angstroms and origin
+        location.
 
         Parameters
         ----------
@@ -131,6 +132,25 @@ class ElectronDiffraction(Signal2D):
         dy.scale = calibration
         dy.offset = -center[1]
         dy.units = '$A^{-1}$'
+
+    def set_scan_calibration(self, calibration):
+        """Set scan pixel size in nanometres.
+
+        Parameters
+        ----------
+        calibration: float
+            Calibration in nanometres per pixel
+        """
+        x = self.axes_manager.navigation_axes[0]
+        y = self.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = calibration
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = calibration
+        y.units = 'nm'
 
     def plot_interactive_virtual_image(self, roi):
         """Plots an interactive virtual image formed with a specified and
@@ -201,8 +221,8 @@ class ElectronDiffraction(Signal2D):
             axis=dark_field.axes_manager.signal_axes
         )
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
-        # TODO: make outputs neat in obvious cases i.e. 2D for normal vdf
-        return dark_field_sum
+        vdf = dark_field_sum.as_signal2D((0,1))
+        return vdf
 
     def get_direct_beam_mask(self, radius, center=None):
         """Generate a signal mask for the direct beam.
@@ -477,8 +497,8 @@ class ElectronDiffraction(Signal2D):
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
-        
-        half_shape: int 
+
+        half_shape: int
             The half shape of the SED patterns, only for subpixel
 
         Returns

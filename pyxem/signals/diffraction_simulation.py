@@ -115,14 +115,14 @@ class DiffractionSimulation:
 
         """
         from skimage.filters import gaussian as point_spread
-        
+
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
-        
+
         mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,np.abs(self.coordinates[:,1])<max_r)
-        
+
         coords = self.coordinates[mask_for_max_r]
         inten  = self.intensities[mask_for_max_r]
-        
+
         dp_dat = np.zeros([size,size])
         x,y = (coords)[:,0] , (coords)[:,1]
         if len(x) > 0: #avoiding problems in the peakless case
@@ -130,10 +130,8 @@ class DiffractionSimulation:
             dp_dat[num] = inten
             dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
             dp_dat = dp_dat/np.max(dp_dat)
-        
+
         dp = ElectronDiffraction(dp_dat)
-        dp.set_calibration(2*max_r/size)
+        dp.set_diffraction_calibration(2*max_r/size)
 
         return dp
-
-
