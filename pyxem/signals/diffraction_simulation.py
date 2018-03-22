@@ -156,55 +156,55 @@ class DiffractionSimulation:
         return dp
 
 
--class ProfileSimulation:
--    """Holds the result of a given kinematic simulation of a diffraction profile
--
--    Parameters
--    ----------
--    magnitudes : array-like, shape [n_peaks, 1]
--        Magnitudes of scattering vectors.
--    intensities : array-like, shape [n_peaks, 1]
--        The kinematic intensity of the diffraction peaks.
--    hkls: [{(h, k, l): mult}] {(h, k, l): mult} is a dict of Miller
--        indices for all diffracted lattice facets contributing to each
--        intensity.
--    """
--
--    def __init__(self, magnitudes, intensities, hkls):
--        """Initializes the ProfileSimulation object with data values for the
--        magnitudes, intensities, and hkls.
--        """
--        self.magnitudes = magnitudes
--        self.intensities = intensities
--        self.hkls = hkls
--
--    def plot(self, g_max, annotate_peaks=True, with_labels=True, fontsize=12):
--        """Plots the diffraction profile simulation.
--
--        Parameters
--        ----------
--        g_max : float
--            Maximum g-vector magnitude to plot.
--        annotate_peaks : boolean
--            If True, peaks are annotaed with hkl information.
--        with_labels : boolean
--            If True, xlabels and ylabels are added to the plot.
--        fontsize : integer
--            Fontsize for peak labels.
--        """
--        ax=plt.gca()
--        for g, i, hkls in zip(self.magnitudes, self.intensities, self.hkls):
--            if g <= g_max:
--                label = ", ".join([str(hkl) for hkl in hkls.keys()])
--                ax.plot([g, g], [0, i], color='k',
--                         linewidth=3, label=label)
--                if annotate_peaks:
--                    ax.annotate(label, xy=[g, i],
--                                xytext=[g, i], fontsize=fontsize)
--
--            if with_labels:
--                ax.set_xlabel("A ($^{-1}$)")
--                ax.set_ylabel("Intensities (scaled)")
--
--            if hasattr(ax, "tight_layout"):
--                ax.tight_layout()
+class ProfileSimulation:
+    """Holds the result of a given kinematic simulation of a diffraction profile
+
+    Parameters
+    ----------
+    magnitudes : array-like, shape [n_peaks, 1]
+        Magnitudes of scattering vectors.
+    intensities : array-like, shape [n_peaks, 1]
+        The kinematic intensity of the diffraction peaks.
+    hkls: [{(h, k, l): mult}] {(h, k, l): mult} is a dict of Miller
+        indices for all diffracted lattice facets contributing to each
+        intensity.
+    """
+
+    def __init__(self, magnitudes, intensities, hkls):
+        """Initializes the ProfileSimulation object with data values for the
+        magnitudes, intensities, and hkls.
+        """
+        self.magnitudes = magnitudes
+        self.intensities = intensities
+        self.hkls = hkls
+
+    def plot(self, g_max, annotate_peaks=True, with_labels=True, fontsize=12):
+        """Plots the diffraction profile simulation.
+
+        Parameters
+        ----------
+        g_max : float
+            Maximum g-vector magnitude to plot.
+        annotate_peaks : boolean
+            If True, peaks are annotaed with hkl information.
+        with_labels : boolean
+            If True, xlabels and ylabels are added to the plot.
+        fontsize : integer
+            Fontsize for peak labels.
+        """
+        ax=plt.gca()
+        for g, i, hkls in zip(self.magnitudes, self.intensities, self.hkls):
+            if g <= g_max:
+                label = ", ".join([str(hkl) for hkl in hkls.keys()])
+                ax.plot([g, g], [0, i], color='k',
+                         linewidth=3, label=label)
+                if annotate_peaks:
+                    ax.annotate(label, xy=[g, i],
+                                xytext=[g, i], fontsize=fontsize)
+
+            if with_labels:
+                ax.set_xlabel("A ($^{-1}$)")
+                ax.set_ylabel("Intensities (scaled)")
+
+            if hasattr(ax, "tight_layout"):
+                ax.tight_layout()
