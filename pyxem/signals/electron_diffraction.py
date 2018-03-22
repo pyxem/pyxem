@@ -371,7 +371,6 @@ class ElectronDiffraction(Signal2D):
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
-
         Parameters
         ----------
         centers : array, optional
@@ -379,46 +378,41 @@ class ElectronDiffraction(Signal2D):
             origin for the radial integration in each diffraction
             pattern. If None (default) the centers are calculated using
             :meth:`get_direct_beam_position`
-
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
-
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
         :meth:`get_direct_beam_position`
-
         Examples
         --------
         .. code-block:: python
-
             centers = ed.get_direct_beam_position(method="blur")
             profiles = ed.get_radial_profile(centers)
             profiles.plot()
         """
+        # TODO: fix for case when data is singleton
         if centers is None:
             centers = self.get_direct_beam_position(radius=10)
         centers = Signal1D(centers)
 
-        rp = self.map(radial_average, center=centers,
-                      cython=cython, inplace=False)
-
-        ragged = len(rp.data.shape) == 1
-
+        # TODO: the cython implementation is throwing dtype errors
+        radial_profiles = self.map(radial_average, center=centers,
+                                   inplace=False, cython=False)
+        ragged = len(radial_profiles.data.shape) == 1
         if ragged:
-            max_len = max(map(len, rp.data))
-            rp = Signal1D([
+            max_len = max(map(len, radial_profiles.data))
+            radial_profiles = Signal1D([
                 np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
-                for row in rp.data])
+                for row in radial_profiles.data])
+            return DiffractionProfile(radial_profiles)
         else:
-            rp.axes_manager.signal_axes[0].offset = 0
+            radial_profiles.axes_manager.signal_axes[0].offset = 0
             signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            radial_profiles.as_signal1D(signal_axis)
-
-        return DiffractionProfile(rp)
+            return DiffractionProfile(radial_profiles.as_signal1D(signal_axis))
 
     def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
         """Reproject the diffraction data into polar coordinates.
