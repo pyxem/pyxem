@@ -3,7 +3,7 @@ class DiffractionLibrary(dict):
     axis-angle pair) to simulated diffraction data.
     """
 
-    ## Possibly obsolete after the changes to DiffractionLibrary 
+    ## Possibly obsolete after the changes to DiffractionLibrary
     def set_calibration(self, calibration):
         """Sets the scale of every diffraction pattern simulation in the
         library.
