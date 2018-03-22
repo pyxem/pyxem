@@ -365,12 +365,12 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
 
     return np.maximum(bg_subtracted, 0)
 
-def subtract_background(z, bg):
+def subtract_reference(z, bg):
     """Subtracts background using a user-defined background pattern.
 
     Parameters
     ----------
-    bg_vac: array
+    bg: array
         User-defined diffraction pattern to be subtracted as background.
     """
     im = z.astype(np.float64)-bg
@@ -419,56 +419,6 @@ def find_beam_position_blur(z, sigma=30):
     center = np.unravel_index(blurred.argmax(), blurred.shape)
     return np.array(center)
 
-def refine_beam_position(z, start, radius):
-    """Refine the position of the direct beam and hence an estimate for the
-    position of the pattern center in each SED pattern.
-
-    Parameters
-    ----------
-    radius : int
-        Defines the size of the circular region within which the direct beam
-        position is refined.
-    center : bool
-        If True the direct beam position is refined to sub-pixel precision
-        via calculation of the intensity center of mass.
-
-    Return
-    ------
-    center: array
-        Refined position (x, y) of the direct beam.
-
-    Notes
-    -----
-    This method is based on work presented by Thomas White in his PhD (2009)
-    which itself built on Zaefferer (2000).
-    """
-    # initialise problem with initial center estimate
-    c_int = z[start[0], start[1]]
-    mask = circular_mask(shape=z.shape, radius=radius, center=start)
-    z_tmp = z * mask
-    # refine center position with shifting ROI
-    if c_int == z_tmp.max():
-        maxes = np.asarray(np.where(z_tmp == z_tmp.max()))
-        c = np.rint([np.average(maxes[0]), np.average(maxes[1])])
-        c = c.astype(int)
-        c_int = z[c[0], c[1]]
-        mask = circular_mask(shape=z.shape, radius=radius, center=c)
-        ztmp = z * mask
-    while c_int < z_tmp.max():
-        maxes = np.asarray(np.where(z_tmp == z_tmp.max()))
-        c = np.rint([np.average(maxes[0]),
-                            np.average(maxes[1])])
-        c = c.astype(int)
-        c_int = z[c[0], c[1]]
-        mask = circular_mask(shape=z.shape, radius=radius, center=c)
-        ztmp = z * mask
-
-    # For some reason the dask array is behaving badly in this function
-    # so convert it to an array before computation
-    c = np.asarray(ndi.measurements.center_of_mass(np.array(ztmp)))
-
-    return c
-
 def subpixel_beam_finder(single_pattern,half_shape):
     """
     This routine is designed to find, to sub-pixel accuracy, the 
@@ -496,7 +446,6 @@ def subpixel_beam_finder(single_pattern,half_shape):
     
     return np.asarray([x_center,y_center])
 
-
 def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
     z = z.astype(np.float64)
     im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')
@@ -515,3 +464,7 @@ def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshol
         final=binary_sauvola
 
     return final
+
+def peaks_as_gvectors(z, center, calibration):
+    g = (z - center) * calibration
+    return g[0]
