@@ -55,6 +55,7 @@ def correlate(image, pattern_dictionary):
     pixel_coordinates   = pattern_dictionary['pixel_coords'] 
     pattern_normalization = pattern_dictionary['pattern_norm']
     
+    # The x,y choice here is correct. Basically the numpy/hyperspy conversion is a danger
     image_intensities = image[pixel_coordinates[:, 1], pixel_coordinates[:, 0]]
     
     return np.dot(image_intensities,pattern_intensities)/pattern_normalization
