@@ -496,7 +496,7 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        half_shape  = (self.data.shape[2],self.data.shape[3])
+        half_tuple = (self.data.shape[2],self.data.shape[3]) #must be sym
         
         #TODO: model fitting methods.
         if method == 'blur':
@@ -514,14 +514,14 @@ class ElectronDiffraction(Signal2D):
                                inplace=False)
 
         elif method == 'subpixel':
-            centers = self.map(subpixel_beam_finder,half_shape=half_shape,inplace=False)
+            centers = self.map(subpixel_beam_finder,half_shape=half_tuple[0],inplace=False)
 
         else:
             raise NotImplementedError("The method specified is not implemented. "
                                       "See documentation for available "
                                       "implementations.")
         
-        shifts = centers.data - np.array((half_shape,half_shape))
+        shifts = centers.data - np.array(half_tuple)
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
         return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
