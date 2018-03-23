@@ -19,6 +19,8 @@
 
 """
 
+import numpy as np
+
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
@@ -465,7 +467,7 @@ class ElectronDiffraction(Signal2D):
 
     def center_direct_beam(self,
                            method='blur',
-                           sigma=30,
+                           sigma=3,
                            *args, **kwargs):
         
         """Estimate the direct beam position in each experimentally acquired
@@ -479,9 +481,6 @@ class ElectronDiffraction(Signal2D):
 
             * 'blur' - Use gaussian filter to blur the image and take the
                 pixel with the maximum intensity value as the center
-            * 'refine_local' - Refine the position of the direct beam and
-                hence an estimate for the position of the pattern center in
-                each SED pattern.
             * 'subpixel' - Fits a capped (satured detector) 
                 gaussian to data that has already been roughly centered.
 
@@ -496,30 +495,20 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2) #must be sym
+        half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2)
         
         #TODO: model fitting methods.
         if method == 'blur':
             centers = self.map(find_beam_position_blur,
-                               sigma=sigma, inplace=False)
-
-        elif method == 'refine_local':
-            # To be deprecated? (March 2018)
-            if initial_center==None:
-                initial_center = np.int(self.signal_axes.shape / 2)
-
-            centers = self.map(refine_beam_position,
-                               initial_center=initial_center,
-                               radius=radius,
+                               sigma=sigma,
                                inplace=False)
-
+            
         elif method == 'subpixel':
-            centers = self.map(subpixel_beam_finder,half_shape=half_tuple[0],inplace=False)
-
+            raise NotImplementedError("Under development")
+            centers = self.map(subpixel_beam_finder,
+                               inplace=False)
         else:
-            raise NotImplementedError("The method specified is not implemented. "
-                                      "See documentation for available "
-                                      "implementations.")
+            raise NotImplementedError("Method not implemented")
         
         shifts = centers.data - np.array(half_tuple)
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
