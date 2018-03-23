@@ -27,7 +27,7 @@ import numpy as np
 from pyxem.signals.indexation_results import IndexationResults
 
 from pyxem.utils import correlate
-
+from pyxem.utils.indexation_utils import index_magnitudes
 
 def correlate_library(image, library,n_largest,keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -112,3 +112,71 @@ class IndexationGenerator():
         return IndexationResults(matching_results)
 
 
+class ProfileIndexationGenerator():
+    """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    profile : DiffractionProfile
+        The signal of diffraction profiles to be indexed.
+    library : ProfileSimulation
+        The simulated profile data.
+
+    """
+    def __init__(self, magnitudes, simulation, mapping=True):
+        self.map = mapping
+        self.magnitudes = magnitudes
+        self.simulation = simulation
+
+    def index_peaks(self,
+                    tolerance=0.1,
+                    **kwargs):
+        """Assigns hkl indices to peaks in the diffraction profile.
+
+        Parameters
+        ----------
+        tolerance : float
+            The n orientations with the highest correlation values are returned.
+        keys : list
+            If more than one phase present in library it is recommended that
+            these are submitted. This allows a mapping from the number to the
+            phase.  For example, keys = ['si','ga'] will have an output with 0
+            for 'si' and 1 for 'ga'.
+        **kwargs
+            Keyword arguments passed to the HyperSpy map() function.
+
+        Returns
+        -------
+        matching_results : pyxem.signals.indexation_results.IndexationResults
+            Navigation axes of the electron diffraction signal containing correlation
+            results for each diffraction pattern. As an example, the signal in
+            Euler reads ( Library Number , Z , X , Z , Correlation Score )
+
+
+        """
+        mapping = self.map
+        mags = self.magnitudes
+        simulation = self.simulation
+
+        if mapping==True:
+            indexation = mags.map(index_magnitudes,
+                                  simulation=simulation,
+                                  tolerance=tolerance,
+                                  **kwargs)
+
+        else:
+            mags = np.array(mags)
+            sim_mags = np.array(simulation.magnitudes)
+            sim_hkls = np.array(simulation.hkls)
+            indexation = np.zeros(len(mags), dtype=object)
+
+            for i in np.arange(len(mags)):
+                diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
+
+                hkls = sim_hkls[np.where(diff < tolerance)]
+                diffs = diff[np.where(diff < tolerance)]
+
+                indices = np.array((hkls, diffs))
+                indexation[i] = np.array((mags.data[i], indices))
+
+        return indexation

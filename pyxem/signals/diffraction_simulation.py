@@ -1,4 +1,24 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2018 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+import matplotlib.pyplot as plt
 import numpy as np
+
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 class DiffractionSimulation:
@@ -6,7 +26,6 @@ class DiffractionSimulation:
 
     Parameters
     ----------
-
     coordinates : array-like, shape [n_points, 2]
         The x-y coordinates of points in reciprocal space.
     indices : array-like, shape [n_points, 3]
@@ -115,14 +134,14 @@ class DiffractionSimulation:
 
         """
         from skimage.filters import gaussian as point_spread
-        
+
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
-        
+
         mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,np.abs(self.coordinates[:,1])<max_r)
-        
+
         coords = self.coordinates[mask_for_max_r]
         inten  = self.intensities[mask_for_max_r]
-        
+
         dp_dat = np.zeros([size,size])
         x,y = (coords)[:,0] , (coords)[:,1]
         if len(x) > 0: #avoiding problems in the peakless case
@@ -130,10 +149,62 @@ class DiffractionSimulation:
             dp_dat[num] = inten
             dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
             dp_dat = dp_dat/np.max(dp_dat)
-        
+
         dp = ElectronDiffraction(dp_dat)
-        dp.set_calibration(2*max_r/size)
+        dp.set_diffraction_calibration(2*max_r/size)
 
         return dp
 
 
+class ProfileSimulation:
+    """Holds the result of a given kinematic simulation of a diffraction profile
+
+    Parameters
+    ----------
+    magnitudes : array-like, shape [n_peaks, 1]
+        Magnitudes of scattering vectors.
+    intensities : array-like, shape [n_peaks, 1]
+        The kinematic intensity of the diffraction peaks.
+    hkls: [{(h, k, l): mult}] {(h, k, l): mult} is a dict of Miller
+        indices for all diffracted lattice facets contributing to each
+        intensity.
+    """
+
+    def __init__(self, magnitudes, intensities, hkls):
+        """Initializes the ProfileSimulation object with data values for the
+        magnitudes, intensities, and hkls.
+        """
+        self.magnitudes = magnitudes
+        self.intensities = intensities
+        self.hkls = hkls
+
+    def plot(self, g_max, annotate_peaks=True, with_labels=True, fontsize=12):
+        """Plots the diffraction profile simulation.
+
+        Parameters
+        ----------
+        g_max : float
+            Maximum g-vector magnitude to plot.
+        annotate_peaks : boolean
+            If True, peaks are annotaed with hkl information.
+        with_labels : boolean
+            If True, xlabels and ylabels are added to the plot.
+        fontsize : integer
+            Fontsize for peak labels.
+        """
+        ax=plt.gca()
+        for g, i, hkls in zip(self.magnitudes, self.intensities, self.hkls):
+            if g <= g_max:
+                label = ", ".join([str(hkl) for hkl in hkls.keys()])
+                ax.plot([g, g], [0, i], color='k',
+                         linewidth=3, label=label)
+                if annotate_peaks:
+                    ax.annotate(label, xy=[g, i],
+                                xytext=[g, i], fontsize=fontsize)
+
+            if with_labels:
+                ax.set_xlabel("A ($^{-1}$)")
+                ax.set_ylabel("Intensities (scaled)")
+
+            if hasattr(ax, "tight_layout"):
+                ax.tight_layout()

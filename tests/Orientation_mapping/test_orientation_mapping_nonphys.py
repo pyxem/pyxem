@@ -22,7 +22,7 @@ import pyxem as pxm
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
 
-# This test suite is aimed at checking the basic functionality of the Omapping process, obviously to have a succesful OM process 
+# This test suite is aimed at checking the basic functionality of the Omapping process, obviously to have a succesful OM process
 # many other components will also need to be correct
 
 def create_library_entry(library,rotation,DiffractionSimulation):
@@ -60,7 +60,7 @@ for alpha in np.arange(0,10,1):
         local_cords = np.random.rand(5,2)
         pat = DiffractionSimulation(coordinates=local_cords,intensities=np.ones_like(local_cords[:,0]))
         library = create_library_entry(library,rotation,pat)
-        
+
 indexer = IndexationGenerator(dp,library)
 match_results = indexer.correlate()
 
@@ -71,7 +71,7 @@ def test_match_results():
     assert match_results.inav[1,0].data[0][1] == 1
     assert match_results.inav[0,1].data[0][1] == 2
     assert match_results.inav[1,1].data[0][1] == 3
-    
+
 def test_visuals():
     ## This functions will need to abuse globals.
     ## & Can be removed if we trust the other tests
@@ -82,7 +82,7 @@ def test_visuals():
     peaks = match_results.map(peaks_from_best_template,
                           phase=["Phase"],library=library,inplace=False)
     mmx,mmy = generate_marker_inputs_from_peaks(peaks)
-    dp.set_calibration(2/144)
+    dp.set_diffraction_calibration(2/144)
     dp.plot(cmap='viridis')
     for mx,my in zip(mmx,mmy):
         m = hs.markers.point(x=mx,y=my,color='red',marker='x')
