@@ -496,7 +496,7 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        half_tuple = (self.data.shape[2],self.data.shape[3]) #must be sym
+        half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2) #must be sym
         
         #TODO: model fitting methods.
         if method == 'blur':
