@@ -435,7 +435,7 @@ def subpixel_beam_finder(single_pattern,half_shape):
     size = np.int(half_shape/7) #this prevents fitting to the far out noise
     pattern = single_pattern[hs-size:hs+size,hs-size:hs+size]
     
-    if np.max(pattern) > 1:
+    if (np.max(pattern)) > 1 or (np.max(pattern) < 0.2):
         raise ValueError('Patterns should be normalised to max intensity')
     
     #fitting

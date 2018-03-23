@@ -463,13 +463,14 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
-    def get_direct_beam_position(self,
-                                 method='blur',
-                                 sigma=30,
-                                 half_shape=72,
-                                 *args, **kwargs):
+    def center_direct_beam(self,
+                           method='blur',
+                           sigma=30,
+                           *args, **kwargs):
+        
         """Estimate the direct beam position in each experimentally acquired
-        electron diffraction pattern.
+        electron diffraction pattern and translate it to the center of the
+        image square.
 
         Parameters
         ----------
@@ -481,28 +482,29 @@ class ElectronDiffraction(Signal2D):
             * 'refine_local' - Refine the position of the direct beam and
                 hence an estimate for the position of the pattern center in
                 each SED pattern.
-            * 'subpixel' - Fits a capped gaussian to data that has already
-                been roughly centered.
+            * 'subpixel' - Fits a capped (satured detector) 
+                gaussian to data that has already been roughly centered.
 
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
 
-        half_shape: int
-            The half shape of the SED patterns, only for subpixel
-
         Returns
         -------
-        centers : ndarray
-            Array containing the centers for each SED pattern.
+        Diffraction Pattern, centered.
 
         """
-        #TODO: add sub-pixel capabilities and model fitting methods.
+        nav_shape_x = self.data.shape[0]
+        nav_shape_y = self.data.shape[1]
+        half_shape  = (self.data.shape[2],self.data.shape[3])
+        
+        #TODO: model fitting methods.
         if method == 'blur':
             centers = self.map(find_beam_position_blur,
                                sigma=sigma, inplace=False)
 
         elif method == 'refine_local':
+            # To be deprecated? (March 2018)
             if initial_center==None:
                 initial_center = np.int(self.signal_axes.shape / 2)
 
@@ -518,7 +520,10 @@ class ElectronDiffraction(Signal2D):
             raise NotImplementedError("The method specified is not implemented. "
                                       "See documentation for available "
                                       "implementations.")
-        return centers
+        
+        shifts = centers.data - np.array((half_shape,half_shape))
+        shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.
