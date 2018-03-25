@@ -25,10 +25,10 @@ Contents
     :maxdepth: 2
 
     introduction
-    diffraction_simulation
     post_facto_imaging
     orientation_imaging
     strain_mapping
+    diffraction_simulation
     contributing
     modules
 
