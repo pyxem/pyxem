@@ -65,7 +65,7 @@ reconstruction by dilatation is then performed in which high-intensity values
 replace nearby low intensity values. The seed image specifies the values that are
 subject to dilatation and the raw image specifies the maximum value at each pixel.
 The reconstructed image then appears similar to the original image but with peak
-above the \textit{h} value cut off. 
+above the \textit{h} value cut off.
 
 Peak Finding
 ------------
@@ -79,5 +79,5 @@ can be made to e.g. by applying a Gaussian convolution to a pattern containing
 intense disks. Peak finding in two dimensional signals (or images) is a general
 problem and numerous methods are implemented in the \textit{find\_peaks()} method.
 
-Unsupervised Learning
----------------------
+Unsupervised Machine Learning
+-----------------------------
