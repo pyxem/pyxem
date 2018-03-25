@@ -25,12 +25,11 @@ Contents
     :maxdepth: 2
 
     introduction
-    diffraction_simulation
     post_facto_imaging
-    indexation_integration
     orientation_imaging
     strain_mapping
-    roadmap
+    diffraction_simulation
+    contributing
     modules
 
 
