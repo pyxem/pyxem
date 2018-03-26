@@ -9,14 +9,22 @@ described in this section. Many operations involve selecting a subset of pixels
 in the diffraction pattern and this is achieved in pyXem using the roi
 functionality implemented in HyperSpy.
 
-Intensity Imaging
-=================
+.. code-block:: python
+
+    >>> dp = pxm.load('')
+    >>> dp.add_gaussian_noise(std=100)
+
+Virtual bright-field imaging
+----------------------------
 
 Vitual diffraction imaging involves plotting the intensity within a subset of
 pixels in the recorded diffraction patterns as a function of probe position.
 
-Variance Imaging
-================
 
-Variance imaging involves plotting the variance within a subset of pixels in
-the recorded diffraction patterns as a function of probe position.
+Virtual annular dark-field imaging
+----------------------------------
+
+
+
+Virtual dark-field imaging
+--------------------------
