@@ -14,7 +14,9 @@ dimensions (i, j) are set as navigation axes and the two axes corresponding to
 the diffraction pattern plane (a, b) are set as signal axes, which can be
 written:
 
-<i, j | a, b>
+.. code-block:: python
+
+    <i, j | a, b>
 
 There are numerous ways to obtain physical insight from 4D-S(P)ED data all of
 which ultimately require the assignment of an atomic arrangement to each probe
@@ -23,15 +25,39 @@ this goal are summarized in the following schematic.
 
 .. figure:: images/sed_analysis_scheme.png
 
+To illustrate the data methods implemented in pyXem we will consider data from a
+model system of GaAs nanowires comprising a series of twinned regions along its
+length, as shown below. (We acknolwedge Prof. Ton van Helvoort, NTNU, Norway, for
+providing these samples).
 
-Alignment & Calibration
------------------------
+.. figure:: images/model_system.png
 
-Many analyses, from radial integration to pattern matching, require knowledge of
-the diffraction pattern centre. It was found that a sufficiently accurate
-estimate could often be obtained simply by blurring the central region of the
-diffraction pattern with a broad Gaussian kernel to give a unique maximum and
-then finding the position of this value, as shown in Figure \ref{fig:initial-processing}c.
+
+Alignment, Corrections & Calibration
+------------------------------------
+
+Experimental artifacts in 4D-S(P)ED commonly include: (1) geometric distortions
+due to projection optics, (2) small translations of the direct beam in the diffraction
+plane, and (3) recorded intensities that depend on the response of the detector.
+Methods to correct these effects to a first order are made available in pyXem.
+
+Projection distortions may be corrected by the application of an opposite image
+distortion, often an affine transformation, to all recorded diffraction patterns.
+The appropriate transformation may be determined using diffraction patterns acquired
+from a reference sample and then applied using the apply_affine_transformation()
+method.
+
+
+Translation of the direct beam is corrected for by aligning the stack of diffraction
+patterns. A simple and sufficiently successful routine to achieve this is to crop
+a region around the direct beam and apply a two-dimensional alignment based on phase
+correlation. This is achieved through the hyperspy method, \textit{align2D()}, which
+incorporates a statistical estimation of the optimal alignment position. Intensity
+corrections most simply involve gain normalization based on dark-reference and
+bright-reference images. Such gain normalization may be performed in pyXem using
+the \textit{apply\_gain\_normalisation()} method.
+
+
 
 Radial Ingegration
 ------------------
@@ -39,8 +65,7 @@ Radial Ingegration
 Radial integration of a two-dimensional electron diffraction pattern about its
 centre provides a one-dimensional plot of diffracted intensity as a function of
 scattering angle. This integration can be performed on every diffraction pattern
-in the 4D-S(P)ED dataset using the \textit{get\_radial\_profile()} method, as
-shown in Figure \ref{fig:initial-processing}d.
+in the 4D-S(P)ED dataset using the get_radial_profile() method, as follows:
 
 Background Subtraction
 ----------------------
@@ -77,7 +102,10 @@ subsequent analyses and amounts to a peak finding problem either because the
 recorded diffraction patterns approximate sharp spot patterns or because they
 can be made to e.g. by applying a Gaussian convolution to a pattern containing
 intense disks. Peak finding in two dimensional signals (or images) is a general
-problem and numerous methods are implemented in the \textit{find\_peaks()} method.
+problem and numerous methods are implemented in the find_peaks() method.
 
 Unsupervised Machine Learning
 -----------------------------
+
+Usupervised machine learning algorithms may be applied to SED as a route to
+obtain representative component diffraction patterns

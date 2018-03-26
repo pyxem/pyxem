@@ -22,6 +22,7 @@ import pymatgen as pmg
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.generators.library_generator import DiffractionLibraryGenerator
 from pyxem.signals.diffraction_library import DiffractionLibrary
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
 
 
 @pytest.fixture
@@ -56,8 +57,7 @@ def structure(request, lattice, element):
 @pytest.fixture
 def structure_library(structure):
     return {'Si': (structure, [(0, 0, 0)])}
-
-
+    
 class TestDiffractionLibraryGenerator:
 
     @pytest.mark.parametrize('calibration, reciprocal_radius, half_shape, representation', [
@@ -67,7 +67,23 @@ class TestDiffractionLibraryGenerator:
             self,
             library_generator: DiffractionLibraryGenerator,
             structure_library, calibration, reciprocal_radius, half_shape, representation
-    ):
+            ):
         library = library_generator.get_diffraction_library(
             structure_library, calibration, reciprocal_radius,half_shape, representation)
         assert isinstance(library, DiffractionLibrary)
+
+class TestDiffractionLibrary:
+     
+    @pytest.mark.parametrize('calibration, reciprocal_radius, half_shape, representation', [
+        (0.017, 2.4, (72,72) ,'euler'),
+        ])
+    def test_get_pattern(
+            self,
+            library_generator: DiffractionLibraryGenerator,
+            structure_library, calibration, reciprocal_radius, half_shape, representation
+            ):
+        library = library_generator.get_diffraction_library(
+            structure_library, calibration, reciprocal_radius,half_shape, representation)
+        assert isinstance(library.get_pattern(),DiffractionSimulation)
+        assert isinstance(library.get_pattern(phase='Si'),DiffractionSimulation)
+        assert isinstance(library.get_pattern(phase='Si',angle=(0,0,0)),DiffractionSimulation)
