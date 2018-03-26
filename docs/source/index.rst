@@ -12,7 +12,7 @@ developed as a platform for hybrid diffraction-imaging electron microscopy based
 on scanning (precession) electron diffraction (S(P)ED) data. This approach may
 be illustrated schematically, as follows:
 
-.. figure:: docs/images/sped_scheme.png
+.. figure:: images/sped_scheme.png
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
 by the HyperSpy library
@@ -37,6 +37,7 @@ Contents
     strain_mapping
     diffraction_simulation
     contributing
+    bibliography
     modules
 
 

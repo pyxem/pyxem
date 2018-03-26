@@ -21,7 +21,7 @@ which ultimately require the assignment of an atomic arrangement to each probe
 position that explains the observed diffraction. Different approaches to achieve
 this goal are summarized in the following schematic.
 
-.. figure:: docs/images/sed_analysis_scheme.png
+.. figure:: images/sed_analysis_scheme.png
 
 
 Alignment & Calibration
