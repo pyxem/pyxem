@@ -1,30 +1,22 @@
 Post-facto Imaging
 ==================
 
-Post-facto imaging refers to the formation of images from a scanning electron
-diffraction dataset by applying some operation to the diffraction pattern
-associated with each pixel in the scan. Numerous operations may be applied to
-the diffraction data and a number of methods are implemented accordingly as
-described in this section. Many operations involve selecting a subset of pixels
-in the diffraction pattern and this is achieved in pyXem using the roi
-functionality implemented in HyperSpy.
+'Virtual' images are formed post-facto from scanning electron diffraction data
+by plotting the scattered intensity in a subset of pixels in the diffraction
+plane as a function of probe position. This is achieved by specifying a region
+of interest (roi) in the diffraction plane within which intensity is summed.
+
+Post-facto imaging can be performed interactively, as follows:
 
 .. code-block:: python
 
-    >>> dp = pxm.load('')
-    >>> dp.add_gaussian_noise(std=100)
+    >>> dp = pxm.load('nanowire_precession.hdf5')
+    >>> roi = pxm.roi.CircleROI(cx=0.,cy=0, r_inner=0, r=0.07)
+    >>> dp.plot_interactive_virtual_image(roi=roi)
 
-Virtual bright-field imaging
-----------------------------
-
-Vitual diffraction imaging involves plotting the intensity within a subset of
-pixels in the recorded diffraction patterns as a function of probe position.
-
-
-Virtual annular dark-field imaging
-----------------------------------
+Note: It is important to ensure that the SED data is well aligned when interpreting
+contrast in virtual images.
 
 
 
-Virtual dark-field imaging
---------------------------
+.. figure:: images/vdf_example.png
