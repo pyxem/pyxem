@@ -10,6 +10,10 @@ Bibliography
    *Acta Materialia* 61 (2013): 3090–3098
    [`link <https://doi.org/10.1016/j.actamat.2013.01.069>`_].
 
+   .. [1] S. Zaefferer, “New developments of computer-aided
+      crystallographic analysis in transmission electron microscopy research
+      papers,” J. Appl. Crystallogr., vol. 33, no. v, pp. 10–25, 2000.
+
 .. _Zhou2011:
 
 :ref:`[Zhou2011] <Zhou2011>`
