@@ -31,7 +31,7 @@ deploy:
   github_token: $GITHUB_TOKEN
   local_dir: ${TRAVIS_BUILD_DIR}/docs/build
   on:
-    branch: continuous-integration
+    branch: master
 
 matrix:
   allow_failures:

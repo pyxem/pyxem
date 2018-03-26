@@ -7,7 +7,9 @@ diffraction data, particularly as acquired in scanning mode.
 
 Alignment & Centering
 ---------------------
+WIP
 
 
 Calibration
 -----------
+WIP
