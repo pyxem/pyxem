@@ -1,4 +1,4 @@
-Orientation Imaging
+Orientation Mapping
 ===================
 
 Orientation imaging can be achieved in a number of ways based on the acquisition
