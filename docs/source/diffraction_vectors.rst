@@ -27,3 +27,20 @@ identify in such integrated data. An alternative is to plot a histogram of the
 found diffraction vector magnitudes, as shown below. Such diffraction vector
 histograms effectively provide a denoised view of the diffraction vectors present
 and may be used for phase identification.
+
+Vector Based Imaging & Segmentation
+-----------------------------------
+
+Globally unique diffraction vectors are of interest for the formation of
+diffraction contrast images and the segmentation of individual crystallites based
+on those images \cite{Meng}. To identify unique vectors in a 4D-S(P)ED dataset
+can be found in this way using the get_unique_vectors() method, which returns a
+new DiffractionVectors() object containing only the unique vectors.
+
+A complete set of diffraction contrast images revealing the spatial variation in
+diffraction condition in a given 4D-S(P)ED dataset can be obtained by forming a
+virtual diffraction contrast image with an integration window positioned at each
+unique diffraction vector in the dataset. This is achieved using the get_virtual_images()
+method. The complete set of images obtained can be analyzed further to reveal
+microstructure and may be used to segment the data by identifying diffraction
+vectors produced by the same crystal.

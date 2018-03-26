@@ -49,10 +49,22 @@ Pattern Matching Metric
 ***********************
 
 Pattern matching between point like geometric templates and experimental spot
-diffraction patterns is typically based on a normalized correlation index, $Q_{i}$, defined as:
+diffraction patterns is typically based on a normalized correlation index,
+$Q_{i}$, defined as:
 
 \begin{equation} \label{eq:correlation}
 Q_{i} = \frac{\sum_{x,y} P(x,y) T_{i}(x,y)}{\sqrt[]{\sum_{x,y}P^{2}(x,y)}\sqrt[]{\sum_{x,y}T_{i}^{2}(x,y)}}
 \end{equation}
 
-where $P(x,y)$ is the intensity of the pixel with coordinates (x,y) in the experimental diffraction pattern and $T_{i}(x,y)$ is the intensity of template i at (x,y). Efficient evaluation of Equation \ref{eq:correlation} is achieved by only considering pixels corresponding to non-zero values in the geometric templates. This metric presents two primary limitations: (1) the range of values is not normalised between different phases meaning that some phases will typically give greater scores than others, and (2) the presence of additional diffraction peaks in the experimental diffraction pattern with respect to the template is not penalized but the opposite is. Normalisation may be achieved by scaling the matching results of different phases by a factor. The presence of too many peaks in the experimental data might in future be penalised by adding an additional regularisation term.
+where $P(x,y)$ is the intensity of the pixel with coordinates (x,y) in the
+experimental diffraction pattern and $T_{i}(x,y)$ is the intensity of template i
+at (x,y). Efficient evaluation of Equation \ref{eq:correlation} is achieved by
+only considering pixels corresponding to non-zero values in the geometric templates.
+This metric presents two primary limitations: (1) the range of values is not
+normalised between different phases meaning that some phases will typically give
+greater scores than others, and (2) the presence of additional diffraction peaks
+in the experimental diffraction pattern with respect to the template is not
+penalized but the opposite is. Normalisation may be achieved by scaling the
+matching results of different phases by a factor. The presence of too many peaks
+in the experimental data might in future be penalised by adding an additional
+regularisation term.
