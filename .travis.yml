@@ -29,7 +29,7 @@ deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN
-  local_dir: ${TRAVIS_BUILD_DIR}/docs/build
+  local_dir: docs/build
   on:
     branch: master
 
