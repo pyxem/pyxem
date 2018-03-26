@@ -4,9 +4,9 @@ Electron Diffraction - Signal Class
 pyXem provides a library of tools primarily developed for the analysis of
 4D-S(P)ED data, although many methods are applicable to electron diffraction
 data in general. 4D-S(P)ED datasets comprise many thousands of electron
-diffraction patterns and the ElectronDiffraction() class provides a specialized
-HyperSpy Signal() class for this data. If the data array is imagined as a
-tensor, D, of rank n then entries are addressed by n indices, D_{i,j,...,n}.
+diffraction patterns and the :py:class:`~.ElectronDiffraction` class provides a
+specialized HyperSpy Signal() class for this data. If the data array is imagined
+as a tensor, D, of rank n then entries are addressed by n indices, D_{i,j,...,n}.
 The HyperSpy Signal() class allows some indices, or equivalently some axes, to
 be defined as navigation axes and others to be defined as signal axes. In the
 context of a 4D-S(P)ED data, the two axes corresponding to the real-space scan
@@ -33,6 +33,7 @@ providing these samples).
 .. figure:: images/model_system.png
 
 
+
 Alignment, Corrections & Calibration
 ------------------------------------
 
@@ -42,10 +43,10 @@ plane, and (3) recorded intensities that depend on the response of the detector.
 Methods to correct these effects to a first order are made available in pyXem.
 
 Projection distortions may be (approximately) corrected by the application of an
-opposite image distortion, often an affine transformation, to all recorded diffraction
-patterns. The appropriate transformation may be determined using diffraction patterns
-acquired from a reference sample and then applied using the apply_affine_transformation()
-method.
+opposite image distortion, often an affine transformation, to all recorded
+diffraction patterns. The appropriate transformation may be determined using
+diffraction patterns acquired from a reference sample and then applied using
+:py:meth:`~.ElectronDiffraction.apply_affine_transformation`.
 
 Translation of the direct beam is corrected for by aligning the stack of diffraction
 patterns. A simple routine to achieve this is to crop a region around the direct
@@ -55,7 +56,7 @@ of the optimal alignment position.
 
 Intensity corrections most simply involve gain normalization based on dark-reference
 and bright-reference images. Such gain normalization may be performed in pyXem using
-the apply_gain_normalisation() method.
+:py:meth:`~.ElectronDiffraction.apply_gain_normalisation`.
 
 
 Radial Ingegration
@@ -64,7 +65,8 @@ Radial Ingegration
 Radial integration of a two-dimensional electron diffraction pattern about its
 centre provides a one-dimensional plot of diffracted intensity as a function of
 scattering angle. This integration can be performed on every diffraction pattern
-in the 4D-S(P)ED dataset using the get_radial_profile() method, as follows:
+in a 4D-S(P)ED dataset using the :py:meth:`~.ElectronDiffraction.get_radial_profile`.
+
 
 Background Subtraction
 ----------------------
@@ -143,7 +145,7 @@ standard deviations. Both are very rapid and relatively robust, given
 appropriate parameters.
 
 Interactive Parametrization
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -171,6 +173,7 @@ Several widgets are available:
     where there are a large number of peaks to be found. The plotting window
     may be inactive during this time.
 
+
 Unsupervised Machine Learning
 -----------------------------
 
@@ -183,4 +186,4 @@ obtain representative "component diffraction patterns" and their respective
     >>> dp.decomposition()
 
 The decomposition method is inherited directy from HyperSpy and is documented
-`here http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html`__.
+`here <http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html>`__.
