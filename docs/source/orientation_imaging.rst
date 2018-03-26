@@ -43,11 +43,12 @@ Pattern Matching Metric
 
 Pattern matching between point like geometric templates and experimental spot
 diffraction patterns is based on a correlation index,
-Q_{i}, defined as:
+Q, defined as:
 
 .. math::
-Q_{i} = \frac{\sum_{x,y} P(x,y) T_{i}(x,y)}{\sqrt[]{\sum_{x,y}P^{2}(x,y)}}}
+    Q = \frac{\Sigma P(x,y) T(x,y)}{\sqrt[]{\Sigma T^{2}(x,y)}}
 
 where P(x,y) is the intensity of the pixel with coordinates (x,y) in the
-experimental diffraction pattern and T_{i}(x,y) is the intensity of template i
-at (x,y). This metric is in common use in orientation mapping.
+experimental diffraction pattern and T(x,y) is the intensity of template
+at (x,y). Q is evaluated for each template, and the template with the largest value
+is considered to be correct for this P.
