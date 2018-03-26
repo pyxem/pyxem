@@ -7,10 +7,17 @@ Welcome to pyXem's documentation!
 =====================================
 
 pyXem (Python Crystallographic Electron Microscopy) is an open-source Python
-library for crystallographic electron microscopy.
+library for crystallographic electron microscopy. The code is primarily
+developed as a platform for hybrid diffraction-imaging electron microscopy based
+on scanning (precession) electron diffraction (S(P)ED) data. This approach may
+be illustrated schematically, as follows:
 
-pyXem builds on the tools for multi-dimensional data analysis provided by
-the HyperSpy library for treatment of experimental electron diffraction data and
+.. figure:: docs/images/sped_scheme.png
+
+pyXem builds heavily on the tools for multi-dimensional data analysis provided
+by the HyperSpy library
+
+
 tools for atomic structure manipulation provided by the PyMatGen library.
 
 pyXem is released under the GPL v3 license.
