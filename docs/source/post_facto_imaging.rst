@@ -17,6 +17,12 @@ Post-facto imaging can be performed interactively, as follows:
 Note: It is important to ensure that the SED data is well aligned when interpreting
 contrast in virtual images.
 
-
+Virtual images are typically formed to obtain diffraction contrast. A virtual
+bright-field (VBF) image is formed by plotting the intensity within a disk positioned
+at the centre of the diffraction pattern, around the direct beam. Virtual dark-field
+(VDF) images are formed by plotting the intensity within pixels not containing the
+direct beam. This integration window may typically be either an annulus positioned
+around the centre of the diffraction pattern, or a disk centered on a particular
+diffracted beam. Examples of such virtual images are shown below.
 
 .. figure:: images/vdf_example.png
