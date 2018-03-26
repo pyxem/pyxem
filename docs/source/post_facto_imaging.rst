@@ -9,6 +9,11 @@ described in this section. Many operations involve selecting a subset of pixels
 in the diffraction pattern and this is achieved in pyXem using the roi
 functionality implemented in HyperSpy.
 
+.. code-block:: python
+
+    >>> dp = pxm.load('')
+    >>> dp.add_gaussian_noise(std=100)
+
 Virtual bright-field imaging
 ----------------------------
 

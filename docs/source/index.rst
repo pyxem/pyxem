@@ -37,6 +37,7 @@ Contents
     strain_mapping
     diffraction_simulation
     contributing
+    bibliography
     modules
 
 
