@@ -41,22 +41,21 @@ due to projection optics, (2) small translations of the direct beam in the diffr
 plane, and (3) recorded intensities that depend on the response of the detector.
 Methods to correct these effects to a first order are made available in pyXem.
 
-Projection distortions may be corrected by the application of an opposite image
-distortion, often an affine transformation, to all recorded diffraction patterns.
-The appropriate transformation may be determined using diffraction patterns acquired
-from a reference sample and then applied using the apply_affine_transformation()
+Projection distortions may be (approximately) corrected by the application of an
+opposite image distortion, often an affine transformation, to all recorded diffraction
+patterns. The appropriate transformation may be determined using diffraction patterns
+acquired from a reference sample and then applied using the apply_affine_transformation()
 method.
 
-
 Translation of the direct beam is corrected for by aligning the stack of diffraction
-patterns. A simple and sufficiently successful routine to achieve this is to crop
-a region around the direct beam and apply a two-dimensional alignment based on phase
-correlation. This is achieved through the hyperspy method, \textit{align2D()}, which
-incorporates a statistical estimation of the optimal alignment position. Intensity
-corrections most simply involve gain normalization based on dark-reference and
-bright-reference images. Such gain normalization may be performed in pyXem using
-the \textit{apply\_gain\_normalisation()} method.
+patterns. A simple routine to achieve this is to crop a region around the direct
+beam and apply a two-dimensional alignment based on phase correlation. This is
+achieved through the method, align2D(), which incorporates a statistical estimation
+of the optimal alignment position.
 
+Intensity corrections most simply involve gain normalization based on dark-reference
+and bright-reference images. Such gain normalization may be performed in pyXem using
+the apply_gain_normalisation() method.
 
 
 Radial Ingegration
@@ -104,8 +103,18 @@ can be made to e.g. by applying a Gaussian convolution to a pattern containing
 intense disks. Peak finding in two dimensional signals (or images) is a general
 problem and numerous methods are implemented in the find_peaks() method.
 
+
+
 Unsupervised Machine Learning
 -----------------------------
 
 Usupervised machine learning algorithms may be applied to SED as a route to
-obtain representative component diffraction patterns
+obtain representative "component diffraction patterns" and their respective
+"loadings" in real space. This is achieved through various decomposition methods:
+
+.. code-block:: python
+
+    >>> dp.decomposition()
+
+The decomposition method is inherited directy from HyperSpy and is documented
+`here http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html`__.
