@@ -15,10 +15,8 @@ be illustrated schematically, as follows:
 .. figure:: images/sped_scheme.png
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
-by the HyperSpy library
-
-
-tools for atomic structure manipulation provided by the PyMatGen library.
+by the `HyperSpy <http://hyperspy.org>`__library. Tools for atomic structure
+manipulation are provided by the `PyMatGen <http://pymatgen.org>`__ library.
 
 pyXem is released under the GPL v3 license.
 

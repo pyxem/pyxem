@@ -31,7 +31,7 @@ Many analyses, from radial integration to pattern matching, require knowledge of
 the diffraction pattern centre. It was found that a sufficiently accurate
 estimate could often be obtained simply by blurring the central region of the
 diffraction pattern with a broad Gaussian kernel to give a unique maximum and
-then finding the position of this value, as shown in Figure \ref{fig:initial-processing}c.
+then finding the position of this value, as follows:
 
 Radial Ingegration
 ------------------
@@ -39,8 +39,7 @@ Radial Ingegration
 Radial integration of a two-dimensional electron diffraction pattern about its
 centre provides a one-dimensional plot of diffracted intensity as a function of
 scattering angle. This integration can be performed on every diffraction pattern
-in the 4D-S(P)ED dataset using the \textit{get\_radial\_profile()} method, as
-shown in Figure \ref{fig:initial-processing}d.
+in the 4D-S(P)ED dataset using the get_radial_profile() method, as follows:
 
 Background Subtraction
 ----------------------
