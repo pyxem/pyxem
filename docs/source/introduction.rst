@@ -14,7 +14,9 @@ dimensions (i, j) are set as navigation axes and the two axes corresponding to
 the diffraction pattern plane (a, b) are set as signal axes, which can be
 written:
 
-<i, j | a, b>
+.. code-block:: python
+
+    <i, j | a, b>
 
 There are numerous ways to obtain physical insight from 4D-S(P)ED data all of
 which ultimately require the assignment of an atomic arrangement to each probe
@@ -23,9 +25,15 @@ this goal are summarized in the following schematic.
 
 .. figure:: images/sed_analysis_scheme.png
 
+To illustrate the data analysis methods
 
-Alignment & Calibration
------------------------
+.. figure:: images/model_system.png
+
+
+Alignment, Corrections & Calibration
+------------------------------------
+
+
 
 Many analyses, from radial integration to pattern matching, require knowledge of
 the diffraction pattern centre. It was found that a sufficiently accurate
