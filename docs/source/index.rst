@@ -3,10 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-<a href="https://github.com/pyxem/pyxem"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork pyXem on GitHub"></a>
 
 pyXem - Pythonic Crystallographic Electron Microscopy
 =====================================================
+
+<a href="https://github.com/pyxem/pyxem"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork pyXem on GitHub"></a>
+
 
 pyXem is an open-source Python library for crystallographic electron microscopy.
 The code is primarily developed as a platform for hybrid diffraction-imaging
@@ -17,7 +19,7 @@ This approach may be illustrated schematically, as follows:
    :align: center
    :width: 600
 
-pyXem builds heavily on the tools for multi-dimensional data analysis provided by the `HyperSpy <http://hyperspy.org>`__library.
+pyXem builds heavily on the tools for multi-dimensional data analysis provided by the `HyperSpy <http://hyperspy.org>`__ library.
 
 Tools for atomic structure manipulation are provided by the `PyMatGen <http://pymatgen.org>`__ library.
 
