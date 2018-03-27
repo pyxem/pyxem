@@ -159,25 +159,26 @@ Backgound modelling, as described above yields the following:
 Morphological Background Removal
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Background removal based on morphological operations provides a fast and
+versatile method for removing non-smooth background. A so-called h-dome method
+is implemented here. This involves forming a 'seed' image by subtracting a
+constant offset, h, from the raw image. A morphological reconstruction by
+dilatation is then performed in which high-intensity values replace nearby low
+intensity values. The seed image specifies the values that are subject to
+dilatation and the raw image specifies the maximum value at each pixel. The
+reconstructed image then appears similar to the original image but with peak
+above the h value cut off.
 
 .. code-block:: python
 
-    >>> dp.remove_background(method='h-dome')
+    >>> dp.remove_background(method='h-dome', h=0.4)
 
-A morphological h-dome
-method is also implemented. This involves forming a \textit{seed} image by
-subtracting a constant offset, \textit{h}, from the raw image. A morphological
-reconstruction by dilatation is then performed in which high-intensity values
-replace nearby low intensity values. The seed image specifies the values that
-are subject to dilatation and the raw image specifies the maximum value at each
-pixel. The reconstructed image then appears similar to the original image but
-with peak above the h value cut off.
-
-Backgound modelling, as described above yields the following:
+Morphological background removal, as described above yields the following:
 
 .. figure:: images/background_morphological.png
    :align: center
    :width: 600
+
 
 Peak Finding
 ------------
