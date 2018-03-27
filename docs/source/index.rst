@@ -7,7 +7,6 @@
     :align: right
     :target: https://github.com/pyxem/pyxem
 
-
 pyXem - Pythonic Crystallographic Electron Microscopy
 =====================================================
 
