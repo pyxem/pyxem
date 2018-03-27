@@ -3,19 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-
 <a href="https://github.com/pyxem/pyxem"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork pyXem on GitHub"></a>
 
-Welcome to pyXem's documentation!
-=================================
+pyXem - Pythonic Crystallographic Electron Microscopy
+=====================================================
 
-pyXem (Python X-tallographic Electron Microscopy) is an open-source Python
-library for crystallographic electron microscopy. The code is primarily
-developed as a platform for hybrid diffraction-imaging microscopy based on
-scanning (precession) electron diffraction (S(P)ED) data. This approach may be
-illustrated schematically, as follows:
+pyXem is an open-source Python library for crystallographic electron microscopy.
+The code is primarily developed as a platform for hybrid diffraction-imaging
+microscopy based on scanning (precession) electron diffraction (S(P)ED) data.
+This approach may be illustrated schematically, as follows:
 
 .. figure:: images/sped_scheme.png
+   :align: center
+   :width: 600
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided by the `HyperSpy <http://hyperspy.org>`__library.
 
@@ -88,16 +88,21 @@ be entered into the terminal, or anaconda prompt terminal in Windows::
         python setup.py install
 
 
+Credits
+=======
+
+pyXem is developed by numerous `contributors <https://github.com/pyxem/pyxem/graphs/contributors>`__.
+
+
 Citing pyXem
 ============
 
-If pyXem has enabled significant parts of an academic publication, please acknowledge that by citing the software. Until a specific publication is written about pyXem please site the github URL: www.github.com/pyxem/pyXem
+If pyXem has enabled significant parts of an academic publication, please
+acknowledge that by citing the software. Until a specific publication is written
+about pyXem please site the github URL: www.github.com/pyxem/pyxem
 
-We also recommend that you cite HyperSpy: http://hyperspy.org/hyperspy-doc/current/citing.html
-
-and PyMatGen:
-
-Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier, Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A. Persson, Gerbrand Ceder. Python Materials Genomics (pymatgen) : A Robust, Open-Source Python Library for Materials Analysis. Computational Materials Science, 2013, 68, 314–319. doi:10.1016/j.commatsci.2012.10.028
+We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
+and`PyMatGen <http://pymatgen.org/#how-to-cite-pymatgen>`__
 
 
 Indices and tables

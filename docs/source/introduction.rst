@@ -40,7 +40,6 @@ The methods described in this documentation are demonstrated in a series of
 [Jupyter Notebooks](http://jupyter.org/), which can be used as analysis
 templates on which to build. These are available `here <https://github.com/pyxem/pyxem-demos>`__.
 
-
 Experimental parameters associated with the data acquisition can be stored in
 metadata for future reference using the utility function
 :py:meth:`~.ElectronDiffraction.set_experimental_parameters`, for example:
@@ -60,7 +59,7 @@ Alignment, Corrections & Calibration
 Experimental artifacts in 4D-S(P)ED commonly include: (1) geometric distortions
 due to projection optics, (2) small translations of the direct beam in the
 diffraction plane, and (3) recorded intensities that depend on the response of
-the detector. Methods to correct these effects to a first order approximationi
+the detector. Methods to correct these effects to a first order approximation
 are made available in pyXem.
 
 Projection distortions may be (approximately) corrected by the application of an
@@ -77,13 +76,22 @@ diffraction patterns acquired from a reference sample and then applied using
 
 Translation of the direct beam is corrected for by aligning the stack of
 diffraction patterns. A simple routine to achieve this is to crop a region
-around the direct beam and apply a two-dimensional alignment based on phase
-correlation. This is achieved through the method, align2D(), which incorporates
-a statistical estimation of the optimal alignment position.
+around the direct beam and then find the position of the direct beam using the
+:py:meth:`~.ElectronDiffraction.get_direct_beam_position` method. The shift to
+align and centre each pattern is then calculated and applied using the align2D()
+method. E.g.
 
 .. code-block:: python
 
-    >>> dp.apply_affine_transformation()
+    #Crop the central region of the pattern
+    >>> roi = pxm.roi.RectangularROI(left=67, top=67, right=77, bottom=77)
+    >>> db = roi(dp, axes=dp.axes_manager.signal_axes)
+    #Find the centers and calculate shifts
+    >>> centers = db.get_direct_beam_position(sigma=2)
+    >>> shifts = centers.data - np.array((5,5))
+    >>> shifts = shifts.reshape(3000, 2)
+    #Apply the alignment
+    >>> dp.align2D(shifts=shifts, crop=False, fill_value=0)
 
 Intensity corrections most simply involve gain normalization based on
 dark-reference and bright-reference images. Such gain normalization may be
@@ -265,11 +273,18 @@ Unsupervised Machine Learning
 
 Usupervised machine learning algorithms may be applied to SED as a route to
 obtain representative "component diffraction patterns" and their respective
-"loadings" in real space. This is achieved through various decomposition methods:
+"loadings" in real space. These methods involve unfolding each diffraction
+pattern into an image vector and stacking these vectors together to construct a
+data matrix, which is then factorized:
+
+.. figure::  images/ml_sed_scheme.png
+   :align: center
+   :width: 600
+
+Various matrix decomposition methods are available through the decomposition()
+method, which is inherited directy from HyperSpy and is documented
+`here <http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html>`__.
 
 .. code-block:: python
 
     >>> dp.decomposition()
-
-The decomposition method is inherited directy from HyperSpy and is documented
-`here <http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html>`__.
