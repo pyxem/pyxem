@@ -7,7 +7,8 @@
 pyXem - Pythonic Crystallographic Electron Microscopy
 =====================================================
 
-<a href="https://github.com/pyxem/pyxem"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork pyXem on GitHub"></a>
+ .. figure:: images/forkme_right_orange_ff7600.png
+    :align: right
 
 
 pyXem is an open-source Python library for crystallographic electron microscopy.
