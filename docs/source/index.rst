@@ -4,11 +4,11 @@
    contain the root `toctree` directive.
 
 
+.. figure:: images/forkme_right_orange_ff7600.png
+    :align: right
+
 pyXem - Pythonic Crystallographic Electron Microscopy
 =====================================================
-
-<a href="https://github.com/pyxem/pyxem"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork pyXem on GitHub"></a>
-
 
 pyXem is an open-source Python library for crystallographic electron microscopy.
 The code is primarily developed as a platform for hybrid diffraction-imaging
@@ -104,7 +104,7 @@ acknowledge that by citing the software. Until a specific publication is written
 about pyXem please site the github URL: www.github.com/pyxem/pyxem
 
 We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
-and`PyMatGen <http://pymatgen.org/#how-to-cite-pymatgen>`__
+and`PyMatGen `<http://pymatgen.org/#how-to-cite-pymatgen>`__
 
 
 Indices and tables
