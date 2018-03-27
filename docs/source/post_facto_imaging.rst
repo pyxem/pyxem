@@ -26,3 +26,5 @@ around the centre of the diffraction pattern, or a disk centered on a particular
 diffracted beam. Examples of such virtual images are shown below.
 
 .. figure:: images/vdf_example.png
+   :align: center
+   :width: 600
