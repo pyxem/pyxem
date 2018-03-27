@@ -4,12 +4,11 @@
    contain the root `toctree` directive.
 
 
-pyXem - Pythonic Crystallographic Electron Microscopy
-=====================================================
-
- .. figure:: images/forkme_right_orange_ff7600.png
+.. figure:: images/forkme_right_orange_ff7600.png
     :align: right
 
+pyXem - Pythonic Crystallographic Electron Microscopy
+=====================================================
 
 pyXem is an open-source Python library for crystallographic electron microscopy.
 The code is primarily developed as a platform for hybrid diffraction-imaging
