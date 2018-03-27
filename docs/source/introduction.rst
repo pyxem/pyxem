@@ -75,22 +75,23 @@ diffraction patterns acquired from a reference sample and then applied using
                                                  [0   ,0.69,0],
                                                  [0   ,0   ,1]]))
 
-Translation of the direct beam is corrected for by aligning the stack of diffraction
-patterns. A simple routine to achieve this is to crop a region around the direct
-beam and apply a two-dimensional alignment based on phase correlation. This is
-achieved through the method, align2D(), which incorporates a statistical estimation
-of the optimal alignment position.
+Translation of the direct beam is corrected for by aligning the stack of
+diffraction patterns. A simple routine to achieve this is to crop a region
+around the direct beam and apply a two-dimensional alignment based on phase
+correlation. This is achieved through the method, align2D(), which incorporates
+a statistical estimation of the optimal alignment position.
 
 .. code-block:: python
 
     >>> dp.apply_affine_transformation()
 
-Intensity corrections most simply involve gain normalization based on dark-reference
-and bright-reference images. Such gain normalization may be performed in pyXem using
-:py:meth:`~.ElectronDiffraction.apply_gain_normalisation`.
+Intensity corrections most simply involve gain normalization based on
+dark-reference and bright-reference images. Such gain normalization may be
+performed in pyXem using :py:meth:`~.ElectronDiffraction.apply_gain_normalisation`.
 
+.. code-block:: python
 
-    >>>
+    >>> dp.apply_gain_normalisation(bref=bright_reference, dref=dark_reference)
 
 Following alignment and the application of necessary corrections to the data, it
 may be calibrated and utility functions exist to apply calibrations to the
@@ -167,11 +168,16 @@ A morphological h-dome
 method is also implemented. This involves forming a \textit{seed} image by
 subtracting a constant offset, \textit{h}, from the raw image. A morphological
 reconstruction by dilatation is then performed in which high-intensity values
-replace nearby low intensity values. The seed image specifies the values that are
-subject to dilatation and the raw image specifies the maximum value at each pixel.
-The reconstructed image then appears similar to the original image but with peak
-above the \textit{h} value cut off.
+replace nearby low intensity values. The seed image specifies the values that
+are subject to dilatation and the raw image specifies the maximum value at each
+pixel. The reconstructed image then appears similar to the original image but
+with peak above the h value cut off.
 
+Backgound modelling, as described above yields the following:
+
+.. figure:: images/background_morphological.png
+   :align: center
+   :width: 600
 
 Peak Finding
 ------------
@@ -191,8 +197,8 @@ Zaeferrer peak finder
 This algorithm was developed by Zaefferer and the implementation here is after
 the description of the algorithm in the Ph.D. thesis of Thomas A. White. It is
 based on a gradient threshold followed by a local maximum search within a square
-window, which is moved until it is centered on the brightest point, which is taken
-as a peak if it is within a certain distance of the starting point.
+window, which is moved until it is centered on the brightest point, which is
+taken as a peak if it is within a certain distance of the starting point.
 
 Ball statistical peak finder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
