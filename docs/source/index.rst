@@ -104,7 +104,7 @@ acknowledge that by citing the software. Until a specific publication is written
 about pyXem please site the github URL: www.github.com/pyxem/pyxem
 
 We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
-and`PyMatGen <http://pymatgen.org/#how-to-cite-pymatgen>`__
+and`PyMatGen `<http://pymatgen.org/#how-to-cite-pymatgen>`__
 
 
 Indices and tables
