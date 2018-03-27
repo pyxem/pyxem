@@ -59,7 +59,7 @@ Alignment, Corrections & Calibration
 Experimental artifacts in 4D-S(P)ED commonly include: (1) geometric distortions
 due to projection optics, (2) small translations of the direct beam in the
 diffraction plane, and (3) recorded intensities that depend on the response of
-the detector. Methods to correct these effects to a first order approximationi
+the detector. Methods to correct these effects to a first order approximation
 are made available in pyXem.
 
 Projection distortions may be (approximately) corrected by the application of an
@@ -273,11 +273,18 @@ Unsupervised Machine Learning
 
 Usupervised machine learning algorithms may be applied to SED as a route to
 obtain representative "component diffraction patterns" and their respective
-"loadings" in real space. This is achieved through various decomposition methods:
+"loadings" in real space. These methods involve unfolding each diffraction
+pattern into an image vector and stacking these vectors together to construct a
+data matrix, which is then factorized:
+
+.. figure::  images/ml_sed_scheme.png
+   :align: center
+   :width: 600
+
+Various matrix decomposition methods are available through the decomposition()
+method, which is inherited directy from HyperSpy and is documented
+`here <http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html>`__.
 
 .. code-block:: python
 
     >>> dp.decomposition()
-
-The decomposition method is inherited directy from HyperSpy and is documented
-`here <http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html>`__.
