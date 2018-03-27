@@ -40,7 +40,6 @@ The methods described in this documentation are demonstrated in a series of
 [Jupyter Notebooks](http://jupyter.org/), which can be used as analysis
 templates on which to build. These are available `here <https://github.com/pyxem/pyxem-demos>`__.
 
-
 Experimental parameters associated with the data acquisition can be stored in
 metadata for future reference using the utility function
 :py:meth:`~.ElectronDiffraction.set_experimental_parameters`, for example:
@@ -77,13 +76,22 @@ diffraction patterns acquired from a reference sample and then applied using
 
 Translation of the direct beam is corrected for by aligning the stack of
 diffraction patterns. A simple routine to achieve this is to crop a region
-around the direct beam and apply a two-dimensional alignment based on phase
-correlation. This is achieved through the method, align2D(), which incorporates
-a statistical estimation of the optimal alignment position.
+around the direct beam and then find the position of the direct beam using the
+:py:meth:`~.ElectronDiffraction.get_direct_beam_position` method. The shift to
+align and centre each pattern is then calculated and applied using the align2D()
+method. E.g.
 
 .. code-block:: python
 
-    >>> dp.apply_affine_transformation()
+    #Crop the central region of the pattern
+    >>> roi = pxm.roi.RectangularROI(left=67, top=67, right=77, bottom=77)
+    >>> db = roi(dp, axes=dp.axes_manager.signal_axes)
+    #Find the centers and calculate shifts
+    >>> centers = db.get_direct_beam_position(sigma=2)
+    >>> shifts = centers.data - np.array((5,5))
+    >>> shifts = shifts.reshape(3000, 2)
+    #Apply the alignment
+    >>> dp.align2D(shifts=shifts, crop=False, fill_value=0)
 
 Intensity corrections most simply involve gain normalization based on
 dark-reference and bright-reference images. Such gain normalization may be
