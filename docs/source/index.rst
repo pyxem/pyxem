@@ -76,7 +76,8 @@ New to Python?
 --------------
 
 If you are new to python the simplest way to install everything you need is using
-`Anaconda <www.continuum.io/downloads>`__  ( make sure to install the Python 3 version).
+`Anaconda <http://www.continuum.io/downloads>`__  ( make sure to install the
+Python 3 version).
 
 From a clean install the following commands to install everything you need should
 be entered into the terminal, or anaconda prompt terminal in Windows::
@@ -104,7 +105,7 @@ acknowledge that by citing the software. Until a specific publication is written
 about pyXem please site the github URL: www.github.com/pyxem/pyxem
 
 We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
-and`PyMatGen `<http://pymatgen.org/#how-to-cite-pymatgen>`__
+and `PyMatGen <http://pymatgen.org/#how-to-cite-pymatgen>`__
 
 
 Indices and tables
