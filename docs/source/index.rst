@@ -19,11 +19,13 @@ This approach may be illustrated schematically, as follows:
    :align: center
    :width: 600
 
-pyXem builds heavily on the tools for multi-dimensional data analysis provided by the `HyperSpy <http://hyperspy.org>`__ library.
-
-Tools for atomic structure manipulation are provided by the `PyMatGen <http://pymatgen.org>`__ library.
+pyXem builds heavily on the tools for multi-dimensional data analysis provided
+by the `HyperSpy <http://hyperspy.org>`__ library and draws on `PyMatGen <http://pymatgen.org>`__
+for atomic structure manipulation.
 
 pyXem is released under the GPL v3 license.
+
+Tutorial notebooks are available `here <https://github.com/pyxem/pyxem-demos>`__.
 
 .. warning::
 
@@ -76,7 +78,8 @@ New to Python?
 --------------
 
 If you are new to python the simplest way to install everything you need is using
-`Anaconda <www.continuum.io/downloads>`__  ( make sure to install the Python 3 version).
+`Anaconda <http://www.continuum.io/downloads>`__  ( make sure to install the
+Python 3 version).
 
 From a clean install the following commands to install everything you need should
 be entered into the terminal, or anaconda prompt terminal in Windows::
@@ -104,7 +107,7 @@ acknowledge that by citing the software. Until a specific publication is written
 about pyXem please site the github URL: www.github.com/pyxem/pyxem
 
 We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
-and`PyMatGen `<http://pymatgen.org/#how-to-cite-pymatgen>`__
+and `PyMatGen <http://pymatgen.org/#how-to-cite-pymatgen>`__
 
 
 Indices and tables
