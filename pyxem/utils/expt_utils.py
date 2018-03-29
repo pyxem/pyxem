@@ -112,15 +112,12 @@ def _capped_gaussian(x,prefactor,sigma,center):
     model_value[np.greater(model_value,np.ones_like(model_value))] = 1 #finite dynamic range
     return np.ravel(model_value) #convert this to 1D
 
-def radial_average(z, center,cython=True):
+def radial_average(z,cython=False):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
 
     Parameters
     ----------
-    center : array
-        The array indices of the diffraction pattern center about which the
-        radial integration is performed.
 
     cython=True
         Set to False if cython needs to be avoided. If cythonized option is not
@@ -130,6 +127,8 @@ def radial_average(z, center,cython=True):
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
+    center = (z.shape[0],z.shape[1]) #geometric shape work
+    
     if _USE_CY_RADIAL_PROFILE and cython:
         averaged = radialprofile_cy(z, center)
     else:
@@ -139,7 +138,7 @@ def radial_average(z, center,cython=True):
 
         tbin = np.bincount(r.ravel(), z.ravel())
         nr = np.bincount(r.ravel())
-        averaged = tbin / nr
+        averaged = np.nan_to_num(tbin / nr)
 
     return averaged
 

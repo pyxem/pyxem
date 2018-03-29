@@ -369,38 +369,30 @@ class ElectronDiffraction(Signal2D):
                         deadvalue=deadvalue,
                         inplace=inplace)
 
-    def get_radial_profile(self, centers=None):
+    def get_radial_profile(self):
         """Return the radial profile of the diffraction pattern.
-        Parameters
-        ----------
-        centers : array, optional
-            Array of dimensions (navigation_shape, 2) containing the
-            origin for the radial integration in each diffraction
-            pattern. If None (default) the centers are calculated using
-            :meth:`get_direct_beam_position`
+       
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
+            
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
-        :meth:`get_direct_beam_position`
+       
         Examples
         --------
         .. code-block:: python
-            centers = ed.get_direct_beam_position(method="blur")
             profiles = ed.get_radial_profile(centers)
             profiles.plot()
         """
         # TODO: fix for case when data is singleton
-        if centers is None:
-            centers = self.get_direct_beam_position(radius=10)
-        centers = Signal1D(centers)
-
+        center = (self.axes_manager.signal_axes[0].size,self.axes_manager.signal_axes[1].size)
+        
         # TODO: the cython implementation is throwing dtype errors
-        radial_profiles = self.map(radial_average, center=centers,
+        radial_profiles = self.map(radial_average,
                                    inplace=False, cython=False)
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
