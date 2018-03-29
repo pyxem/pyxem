@@ -33,7 +33,7 @@ generally selected as a uniform sampling of symmetry inequivalent orientations
 corresponding to the crystallography of the given phases. The symmetry
 inequivalence is very important. True uniform sampling of orientation space
 requires consideration of the topology of orientation space. Pyxem contains
-utility functions, (e.g. - :py:method:`~.utils.sim_utils.get_equispaced_so3_mesh`
+utility functions, (e.g. - :py:method:`~utils.sim_utils.get_equispaced_so3_grid`
 to assist in this matter.
 
 E.g. for cubic symmetry:
@@ -41,6 +41,9 @@ E.g. for cubic symmetry:
 .. code-block:: python
 
     >>> orientations = equispaced_so3_grid(90,180,90,5)
+
+Pre-calculated orientation grids with approximately 1 degree angular resolution
+are also available for all proper rotational point groups `here <https://drive.google.com/open?id=1Xj064eDB9D5drYOuCkdzwZmR5lcCULPG>`__.
 
 A structure library can then be constructed containing all the expected phases,
 which are defined as PyMatGen structures and corresponding orientations.
