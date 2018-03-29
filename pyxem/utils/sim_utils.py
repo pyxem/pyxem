@@ -24,8 +24,11 @@ from math import radians, sin
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
 import os
+import collections
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
+
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 
 def get_electron_wavelength(accelerating_voltage):
@@ -73,6 +76,40 @@ def get_interaction_constant(accelerating_voltage):
     sigma = (2 * pi * (m_e + e * E))
 
     return sigma
+
+
+def get_unique_families(hkls):
+    """
+    Returns unique families of Miller indices, which must be permutations
+    of each other.
+
+    Args:
+        hkls ([h, k, l]): List of Miller indices.
+
+    Returns:
+        {hkl: multiplicity}: A dict with unique hkl and multiplicity.
+    """
+    def is_perm(hkl1, hkl2):
+        h1 = np.abs(hkl1)
+        h2 = np.abs(hkl2)
+        return all([i == j for i, j in zip(sorted(h1), sorted(h2))])
+
+    unique = collections.defaultdict(list)
+    for hkl1 in hkls:
+        found = False
+        for hkl2 in unique.keys():
+            if is_perm(hkl1, hkl2):
+                found = True
+                unique[hkl2].append(hkl1)
+                break
+        if not found:
+            unique[hkl1].append(hkl1)
+
+    pretty_unique = {}
+    for k, v in unique.items():
+        pretty_unique[sorted(v)[-1]] = len(v)
+
+    return pretty_unique
 
 
 def get_kinematical_intensities(structure,
@@ -169,8 +206,8 @@ def simulate_kinematic_scattering(atomic_coordinates,
                                   max_k = 1.5,
                                   illumination = 'plane_wave',
                                   sigma = 20):
-    """Simulate electron scattering from an arrangement of atoms
-
+    """Simulate electron scattering from arrangement of atoms comprising one
+    elemental species.
 
     Parameters
     ----------
@@ -228,7 +265,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
     #Calculate intensity
     intensity  = (scattering * scattering.conjugate()).real
 
-    return pxm.ElectronDiffraction(intensity)
+    return ElectronDiffraction(intensity)
 
 
 def equispaced_s2_grid(theta_range, phi_range, resolution=2.5, no_center=False):

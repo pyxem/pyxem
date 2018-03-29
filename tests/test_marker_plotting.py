@@ -43,7 +43,7 @@ def local_plotter(dp,dp_cord_list):
     for mx,my in zip(mmx,mmy):
         m = hs.markers.point(x=mx,y=my,color='red',marker='x')
         dp.add_marker(m,plot_marker=True,permanent=True)
-    
+
     return None
 
 def test_marker_placement_correct_alpha():
@@ -53,10 +53,10 @@ def test_marker_placement_correct_alpha():
         back = np.zeros((144,144))
         x = coords.astype(int)[0,0]
         y = coords.astype(int)[0,1]
-        back[x,y] = 1 
+        back[x,y] = 1
         dps.append(back.T) #stores a numpy array of pattern, This is dangerous (T everywhere)
 
-    dp = pxm.ElectronDiffraction(np.array([dps[0:2],dps[2:]])) 
+    dp = pxm.ElectronDiffraction(np.array([dps[0:2],dps[2:]]))
     local_plotter(dp,dp_cord_list)
 
     #This is human assessed, if you see this comment, you should check it
@@ -72,8 +72,8 @@ def test_marker_placement_correct_beta():
                                        intensities=np.ones_like(coords[:,0]))
         dps.append(dp_sim.as_signal(144,0.025,max_r).data) #stores a numpy array of pattern
     dp = pxm.ElectronDiffraction(np.array([dps[0:2],dps[2:]])) #now from a 2x2 array of patterns
-    dp.set_calibration(2*max_r/(144))
+    dp.set_diffraction_calibration(2*max_r/(144))
     local_plotter(dp,dp_cord_list)
-    
+
     #This is human assessed, if you see this comment, you should check it
     assert True

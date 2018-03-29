@@ -30,16 +30,12 @@ from pyxem.utils.peakfinders2D import *
 from pyxem.utils import peakfinder2D_gui
 
 
-def peaks_as_gvectors(z, center, calibration):
-    g = (z - center) * calibration
-    return g[0]
-
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
-        # Attributes defaults
+        # Set default attributes
         if 'Acquisition_instrument.TEM' not in self.metadata:
             if 'Acquisition_instrument.SEM' in self.metadata:
                 self.metadata.set_item(
@@ -103,8 +99,9 @@ class ElectronDiffraction(Signal2D):
                 exposure_time
             )
 
-    def set_calibration(self, calibration, center=None):
-        """Set pixel size in reciprocal Angstroms and origin location.
+    def set_diffraction_calibration(self, calibration, center=None):
+        """Set diffraction pattern pixel size in reciprocal Angstroms and origin
+        location.
 
         Parameters
         ----------
@@ -131,6 +128,25 @@ class ElectronDiffraction(Signal2D):
         dy.scale = calibration
         dy.offset = -center[1]
         dy.units = '$A^{-1}$'
+
+    def set_scan_calibration(self, calibration):
+        """Set scan pixel size in nanometres.
+
+        Parameters
+        ----------
+        calibration: float
+            Calibration in nanometres per pixel
+        """
+        x = self.axes_manager.navigation_axes[0]
+        y = self.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = calibration
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = calibration
+        y.units = 'nm'
 
     def plot_interactive_virtual_image(self, roi):
         """Plots an interactive virtual image formed with a specified and
@@ -201,8 +217,8 @@ class ElectronDiffraction(Signal2D):
             axis=dark_field.axes_manager.signal_axes
         )
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
-        # TODO: make outputs neat in obvious cases i.e. 2D for normal vdf
-        return dark_field_sum
+        vdf = dark_field_sum.as_signal2D((0,1))
+        return vdf
 
     def get_direct_beam_mask(self, radius, center=None):
         """Generate a signal mask for the direct beam.
@@ -355,7 +371,6 @@ class ElectronDiffraction(Signal2D):
 
     def get_radial_profile(self, centers=None):
         """Return the radial profile of the diffraction pattern.
-
         Parameters
         ----------
         centers : array, optional
@@ -363,22 +378,18 @@ class ElectronDiffraction(Signal2D):
             origin for the radial integration in each diffraction
             pattern. If None (default) the centers are calculated using
             :meth:`get_direct_beam_position`
-
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
-
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
         :meth:`get_direct_beam_position`
-
         Examples
         --------
         .. code-block:: python
-
             centers = ed.get_direct_beam_position(method="blur")
             profiles = ed.get_radial_profile(centers)
             profiles.plot()
@@ -430,11 +441,10 @@ class ElectronDiffraction(Signal2D):
             The electron diffraction data in polar coordinates.
 
         """
-        return self.map(
-                   reproject_polar,
-                   origin=origin,
-                   jacobian=jacobian,
-                   dr=dr, dt=dt)
+        return self.map(reproject_polar,
+                        origin=origin,
+                        jacobian=jacobian,
+                        dr=dr, dt=dt)
 
     # TODO: This method needs to keep track of what's what better, with labels
     # axes also need to track calibrations.
@@ -477,8 +487,8 @@ class ElectronDiffraction(Signal2D):
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
-        
-        half_shape: int 
+
+        half_shape: int
             The half shape of the SED patterns, only for subpixel
 
         Returns
@@ -489,16 +499,18 @@ class ElectronDiffraction(Signal2D):
         """
         #TODO: add sub-pixel capabilities and model fitting methods.
         if method == 'blur':
-            centers = self.map(find_beam_position_blur, sigma=sigma, inplace=False)
+            centers = self.map(find_beam_position_blur,
+                               sigma=sigma, inplace=False)
 
         elif method == 'refine_local':
             if initial_center==None:
                 initial_center = np.int(self.signal_axes.shape / 2)
 
             centers = self.map(refine_beam_position,
-                          initial_center=initial_center,
-                          radius=radius,
-                          inplace=False)
+                               initial_center=initial_center,
+                               radius=radius,
+                               inplace=False)
+
         elif method == 'subpixel':
             centers = self.map(subpixel_beam_finder,half_shape=half_shape,inplace=False)
 
@@ -524,9 +536,8 @@ class ElectronDiffraction(Signal2D):
 				convolutions to determine where the peaks are, and sets
 				all other pixels to 0.
             * 'median' - Use a median filter for background removal
-            * 'from_vacuum' - Subtract a user-defined background array from every
-                diffraction pattern. TO DO: make the vacuum region choice inside
-                this function
+            * 'reference_pattern' - Subtract a user-defined reference patterns
+                from every diffraction pattern.
 
         saturation_radius : int, optional
             The radius, in pixels, of the saturated data (if any) in the direct
@@ -542,13 +553,12 @@ class ElectronDiffraction(Signal2D):
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
         bg : array
-            Background array extracted from vacuum.
+            Background array extracted from vacuum. (subtract_reference only)
 
         Returns
         -------
-        denoised : :obj:`ElectronDiffraction`
-            A copy of the data with the background removed and the noise
-            smoothed.
+        bg_subtracted : :obj:`ElectronDiffraction`
+            A copy of the data with the background subtracted.
 
         See Also
         --------
@@ -558,9 +568,10 @@ class ElectronDiffraction(Signal2D):
         if method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
-            denoised = self.map(regional_filter, inplace=False, *args, **kwargs)
-            denoised.map(filters.rank.mean, selem=square(3))
-            denoised.data = denoised.data / denoised.data.max()
+            bg_subtracted = self.map(regional_filter,
+                                     inplace=False, *args, **kwargs)
+            bg_subtracted.map(filters.rank.mean, selem=square(3))
+            bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
         elif method == 'model':
             bg = self.get_background_model(*args, **kwargs)
@@ -568,30 +579,30 @@ class ElectronDiffraction(Signal2D):
             bg_removed = np.clip(self - bg, self.min(), self.max())
 
             h = max(bg.data.min(), 1e-6)
-            denoised = ElectronDiffraction(
-                bg_removed.map(
-                    regional_flattener, h=h, inplace=False))
-            denoised.axes_manager.update_axes_attributes_from(
+            bg_subtracted = ElectronDiffraction(
+                bg_removed.map(regional_flattener, h=h, inplace=False))
+            bg_subtracted.axes_manager.update_axes_attributes_from(
                 self.axes_manager.navigation_axes)
-            denoised.axes_manager.update_axes_attributes_from(
+            bg_subtracted.axes_manager.update_axes_attributes_from(
                 self.axes_manager.signal_axes)
 
         elif method == 'gaussian_difference':
-            denoised = self.map(subtract_background_dog, inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(subtract_background_dog,
+                                     inplace=False, *args, **kwargs)
 
         elif method == 'median':
-            # no denoising applied here
-            denoised = self.map(subtract_background_median, inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(subtract_background_median,
+                                     inplace=False, *args, **kwargs)
 
-        elif method == 'from_vacuum':
-            denoised=self.map(subtract_background, *args, **kwargs)
+        elif method == 'reference_pattern':
+            bg_subtracted = self.map(subtract_reference, *args, **kwargs)
 
         else:
             raise NotImplementedError(
                 "The method specified, '{}', is not implemented. See"
                 "documentation for available implementations.".format(method))
 
-        return denoised
+        return bg_subtracted
 
     def get_background_model(self, saturation_radius):
         """Creates a model for the background of the signal.
@@ -619,7 +630,6 @@ class ElectronDiffraction(Signal2D):
 
         """
         # TODO: get this done without taking the mean
-
         profile = self.get_radial_profile().mean()
         model = profile.create_model()
         e1 = saturation_radius * profile.axes_manager.signal_axes[0].scale
@@ -657,7 +667,7 @@ class ElectronDiffraction(Signal2D):
 
     def get_no_diffraction_mask(self, *args, **kwargs):
         """Identify electron diffraction patterns containing no diffraction
-        peaks for removal in further processing steps.
+        peaks to remove from further processing.
 
         Parameters
         ----------
@@ -731,10 +741,11 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        peaks : structured array
-            An array of shape _navigation_shape_in_array in which
-            each cell contains an array with dimensions (npeaks, 2) that
-            contains the x, y pixel coordinates of peaks found in each image.
+        peaks : DiffractionVectors
+            A DiffractionVectors object with navigation dimensions identical to
+            the original ElectronDiffraction object. Each signal is a BaseSignal
+            object contiaining the diffraction vectors found at each navigation
+            position, in calibrated units.
         """
         method_dict = {
             'skimage': peak_local_max,
@@ -752,6 +763,7 @@ class ElectronDiffraction(Signal2D):
             raise NotImplementedError("The method `{}` is not implemented. "
                                       "See documentation for available "
                                       "implementations.".format(method))
+
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
         peaks.map(peaks_as_gvectors,
                   center=np.array(self.axes_manager.signal_shape)/2,
@@ -762,8 +774,9 @@ class ElectronDiffraction(Signal2D):
             #ToDo Remove this hardcore
             peaks = peaks.transpose(navigation_axes=2)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            raise RuntimeWarning('You do not have the same size navigation axes for your \
-            Diffraction pattern and your peaks')
+            raise RuntimeWarning('You do not have the same size navigation axes \
+            for your Diffraction pattern and your peaks')
+
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
@@ -775,12 +788,14 @@ class ElectronDiffraction(Signal2D):
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
 
-    def enhance(self, *args, **kwargs):
-        """Enhances peaks in the diffraction patterns. Current method includes:
-        using gaussian filter to blur the pattern and then subtracting it from
-        original, small threshold cutting out low intensity peaks, local
-        Sauvola thresholding to create a mask of peaks, final blurring with
-        gaussian filter.
+    def enhance(self,sigma_blur=1.6, sigma_enhance=0.5,
+                threshold=6.5, k=0.01, window_size=11,
+                *args, **kwargs):
+        """Enhances peaks in the diffraction patterns.
+
+        A gaussian filter is applied and the blurred image subtracted from the
+        original, thresholding removes low intensities, local Sauvola
+        thresholding creates a mask of peaks, final Gaussian blurring.
 
         Parameters:
         ------------
@@ -804,17 +819,19 @@ class ElectronDiffraction(Signal2D):
             If true, thresholded image will be morphologically opened to remove
             very small and linear artifacts.
 
-        For more information on Sauvola thresholding see:
+        See Also
+        --------
         http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_niblack_sauvola.html#id2
-        J. Sauvola and M. Pietikainen, “Adaptive document image binarization,” Pattern Recognition 33(2), pp. 225-236, 2000. DOI:10.1016/S0031-3203(99)00055-2
-
-        Good starting values: sigma_blur = 1.6, sigma_enhance = 0.5
-        threshold = 6.5, window_size = 11, k = 0.01
-
-        ------------
+        J. Sauvola and M. Pietikainen, “Adaptive document image binarization,”
+        Pattern Recognition 33(2), pp. 225-236, 2000.
+        DOI:10.1016/S0031-3203(99)00055-2
         """
-        enhanced = self.map(enhance_gauss_sauvola, *args, **kwargs)
-        return enhanced
+        return self.map(enhance_gauss_sauvola,
+                        sigma_blur=sigma_blur,
+                        sigma_enhance=sigma_enhance,
+                        threshold=threshold,
+                        window_size=window_size,
+                        k=k, *args, **kwargs)
 
 
 class LazyElectronDiffraction(LazySignal, ElectronDiffraction):

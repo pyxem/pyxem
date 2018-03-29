@@ -51,13 +51,13 @@ def create_sample(edc,structure,angle_start,angle_change):
                                  with_direct_beam=False)
         dps.append(data.as_signal(2*half_side_length,0.025,1).data)
     dp = pxm.ElectronDiffraction([dps[0:2],dps[2:]])
-    dp.set_calibration(1/half_side_length)
+    dp.set_diffraction_calibration(1/half_side_length)
     return dp
 
 def build_structure_lib(structure,rot_list):
     struc_lib = dict()
     struc_lib["A"] = (structure,rot_list)
-    return struc_lib    
+    return struc_lib
 
 @pytest.fixture
 def create_GaAs():
@@ -86,7 +86,7 @@ def edc():
     return pxm.DiffractionGenerator(300, 5e-2)
 
 
-def get_template_library(structure,rot_list,edc):    
+def get_template_library(structure,rot_list,edc):
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
     struc_lib = build_structure_lib(structure,rot_list)
     library = diff_gen.get_diffraction_library(struc_lib,
@@ -113,11 +113,11 @@ def test_match_results_essential(structure,rot_list,edc):
     M = get_match_results(structure,rot_list,edc,[[0,0,0],[4,0,0]]) #for concision
     assert np.all(M.inav[0,0] == M.inav[1,0])
     assert np.all(M.inav[0,1] == M.inav[1,1])
-        
+
     # also test peaks from best template
     library = get_template_library(structure,rot_list,edc)
     peaks = M.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
-    assert peaks.inav[0,0] == library["A"][(0,0,0)]['Sim'].coordinates[:,:2] 
+    assert peaks.inav[0,0] == library["A"][(0,0,0)]['Sim'].coordinates[:,:2]
 
 
 """
@@ -138,9 +138,9 @@ and a hexagonal sample.
 def test_caseA(structure,rot_list,edc):
     M = get_match_results(structure,rot_list,edc,[[0,0,0],[4,0,0]])
     assert np.all(M.inav[0,0].data[0,1:4] == np.array([0,0,0]))
-    assert M.inav[1,1].data[0,2]   == 0 #no rotation in z 
-    
-    #for the twinning the rotation totals must equal 4 
+    assert M.inav[1,1].data[0,2]   == 0 #no rotation in z
+
+    #for the twinning the rotation totals must equal 4
     assert np.all(np.sum(M.inav[1,1].data[:,1:4],axis=1) == 4)
     #and each must give the same coefficient
     assert np.all(M.inav[1,1].data[:,4] == M.inav[1,1].data[0,4])
@@ -156,13 +156,13 @@ def test_caseB(structure,rot_list,edc):
 @pytest.mark.parametrize("structure",[create_GaAs(),create_Mono(),create_Hex()])
 @pytest.mark.parametrize("rot_list",[rot_list()])
 @pytest.mark.parametrize("edc",[edc()])
-     
+
 def test_caseC(structure,rot_list,edc):
     M = get_match_results(structure,rot_list,edc,[[0,0,0],[3,7.01,0.99]])
     assert np.all(M.inav[1,1].data[0,1:4] == np.array([3,7,1]))
-    
+
 """
-# Visualization Code 
+# Visualization Code
 import hyperspy.api as hs
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.utils.plot import generate_marker_inputs_from_peaks

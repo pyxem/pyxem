@@ -1,45 +1,58 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2018 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 class DiffractionLibrary(dict):
     """Maps crystal structure (phase) and orientation (Euler angles or
     axis-angle pair) to simulated diffraction data.
     """
 
-    ## Possibly obsolete after the changes to DiffractionLibrary 
-    def set_calibration(self, calibration):
-        """Sets the scale of every diffraction pattern simulation in the
-        library.
-
+    def get_pattern(self,phase=False,angle=False):
+        """ Extracts a single pattern for viewing,
+        unspecified layers of dict are selected randomly and so this method
+        is not entirely repeatable
+        
+        
         Parameters
         ----------
-        calibration : {:obj:`float`, :obj:`tuple` of :obj:`float`}, optional
-            The x- and y-scales of the patterns, with respect to the original
-            reciprocal angstrom coordinates.
-
+        
+        Phase : Label for the Phase you are interested in. Randomly chosen
+        if False
+        Angle : Label for the Angle you are interested in. Randomly chosen 
+        if False
+        
         """
-        for key in self.keys():
-            diff_lib = self[key]
-            for diffraction_pattern in diff_lib.values():
-                diffraction_pattern.calibration = calibration
-
-    ## Again, may well be obsolete
-    def set_offset(self, offset):
-        """Sets the offset of every diffraction pattern simulation in the
-        library.
-
-        Parameters
-        ----------
-        offset : :obj:`tuple` of :obj:`float`, optional
-            The x-y offset of the patterns in reciprocal angstroms. Defaults to
-            zero in each direction.
-
-        """
-        assert len(offset) == 2
-        for key in self.keys():
-            diff_lib = self[key]
-            for diffraction_pattern in diff_lib.values():
-                diffraction_pattern.offset = offset
+        
+        if phase:
+            if angle:
+                return self[phase][angle]['Sim']
+            else:
+                diff_lib = self[phase]
+                for diffraction_pattern in diff_lib.values():
+                    return diffraction_pattern['Sim']
+        else:
+            for key in self.keys():
+                diff_lib = self[key]
+                for diffraction_pattern in diff_lib.values():
+                    return diffraction_pattern['Sim']
 
     def plot(self):
-        """Plots the library interactively.
+        """Plots the library interactively. This is a helper method and it is
+        not tested.
         """
         from pyxem.signals.electron_diffraction import ElectronDiffraction
         sim_diff_dat = []

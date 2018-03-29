@@ -32,14 +32,18 @@ from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.ui_registry import get_gui
 from hyperspy.api import roi
 from natsort import natsorted
+
 from .components.diffraction_component import ElectronDiffractionForwardModel
+
 from .generators.diffraction_generator import DiffractionGenerator
 from .generators.library_generator import DiffractionLibraryGenerator
+
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_profile import DiffractionProfile
 from .signals.electron_diffraction import ElectronDiffraction
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
+from .signals.vdf_image import VDFImage
 
 from .io_plugins import io_plugins, default_write_ext
 from .io_plugins import mib as mib_reader
@@ -508,10 +512,15 @@ def load_mib(filename, scan_size):
         scan_size : int
             Scan size in pixels, allows the function to reshape the array into
             the right shape.
-            
+
     """
     dpt = load_with_reader(filename=filename, reader=mib_reader)
     dpt = ElectronDiffraction(dpt.data.reshape((scan_size, scan_size, 256, 256)))
     trace = dpt.inav[:,0:5].sum((1,2,3))
     edge = np.where(trace==max(trace.data))[0][0]
-    return ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
+    if edge==scan_size - 1:
+        dp = ElectronDiffraction(dpt.inav[0:edge, 1:])
+    else:
+        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
+
+    return dp
