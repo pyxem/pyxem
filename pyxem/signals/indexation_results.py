@@ -83,3 +83,16 @@ class IndexationResults(BaseSignal):
                         phaseid=phaseid,
                         inplace=False,
                         *args, **kwargs)
+        
+    def get_modal_angles(self):
+        """ Obtain the modal angles (and their prevelance)
+        
+        Returns
+        ------
+        scipy.ModeResult object
+        """
+        
+        from scipy import stats
+        size = self.axes_manager.navigation_shape[0] * \
+               self.axes_manager.navigation_shape[1]
+        return(stats.mode(self.isig[1:4,0].data.reshape(size,3)))
