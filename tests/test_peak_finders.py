@@ -28,6 +28,7 @@ from scipy.misc import face, ascent
 from scipy.ndimage import fourier_shift
 
 import hyperspy.api as hs
+from pyxem import ElectronDiffraction
 from hyperspy.decorators import lazifyTestClass
 
 
@@ -44,7 +45,7 @@ class TestFindPeaks2D:
         )
         dense = np.zeros((1024, 1024), dtype=complex)
         dense[coordinates[0], coordinates[1]] = coefficients
-        dense = hs.signals.Signal2D(np.real(np.fft.ifft2(dense)))
+        dense = ElectronDiffraction(np.real(np.fft.ifft2(dense)))
         self.dense = dense.isig[500:550, 500:550]
 
         coefficients = np.array(
@@ -69,14 +70,14 @@ class TestFindPeaks2D:
         for (x0, y0), a in zip(coordinates, coefficients):
             sparse += a * sp.stats.norm.pdf(xs, x0)*sp.stats.norm.pdf(ys, y0)
         sparse = sparse[50:100, 50:100]
-        self.sparse0d = hs.signals.Signal2D(sparse)
-        self.sparse1d = hs.signals.Signal2D(np.array([sparse for i in range(2)]))
-        self.sparse2d = hs.signals.Signal2D(np.array([[sparse for i in range(2)] for j in range(2)]))
+        self.sparse0d = ElectronDiffraction(sparse)
+        self.sparse1d = ElectronDiffraction(np.array([sparse for i in range(2)]))
+        self.sparse2d = ElectronDiffraction(np.array([[sparse for i in range(2)] for j in range(2)]))
         xref, yref = 72, 72
         ref = np.zeros((144, 144))
         ref += 100 * sp.stats.norm.pdf(xs, xref)*sp.stats.norm.pdf(ys, yref)
 
-        self.ref = hs.signals.Signal2D(ref)
+        self.ref = ElectronDiffraction(ref)
         ans = np.empty((1,), dtype=object)
         ans[0] = np.array([[xref, yref]])
         self.ans = ans
@@ -98,19 +99,19 @@ class TestFindPeaks2D:
             yield self.gets_right_answer, method, self.ref, self.ans
 
     def creates_array(self, method, dataset):
-        peaks = dataset.find_peaks2D(method=method)
+        peaks = dataset.find_peaks(method=method)
         nt.assert_is_instance(peaks, np.ndarray)
 
     def peaks_match_input(self, method, dataset):
-        peaks = dataset.find_peaks2D(method=method)
+        peaks = dataset.find_peaks(method=method)
         signal_shape = dataset.axes_manager.navigation_shape[::-1] if dataset.axes_manager.navigation_size > 0 else (1,)
         nt.assert_equal(peaks.shape, signal_shape)
 
     def peaks_are_coordinates(self, method, dataset):
-        peaks = dataset.find_peaks2D(method=method)
+        peaks = dataset.find_peaks(method=method)
         peak_shapes = np.array([peak.shape for peak in peaks.flatten()])
         nt.assert_true(np.all(peak_shapes[:, 1] == 2))
 
     def gets_right_answer(self, method, dataset, answer):
-        peaks = dataset.find_peaks2D()
+        peaks = dataset.find_peaks()
         nt.assert_true(np.all(peaks[0] == answer[0]))
