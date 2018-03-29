@@ -102,16 +102,6 @@ def _polar2cart(r, theta):
     x = r * np.sin(theta)
     return x, y
 
-def _capped_gaussian(x,prefactor,sigma,center):
-    """
-    Worker functions for : subpixel_beam_finder()
-    Creates a 1D Gaussian model, and then truncates all values
-    greate than 1 to unity. There is no discretisation here.
-    """
-    model_value = prefactor*np.exp(-(x-center)**2/(2*sigma**2))
-    model_value[np.greater(model_value,np.ones_like(model_value))] = 1 #finite dynamic range
-    return np.ravel(model_value) #convert this to 1D
-
 def radial_average(z,cython=False):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
@@ -417,33 +407,6 @@ def find_beam_position_blur(z, sigma=30):
     blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
     center = np.unravel_index(blurred.argmax(), blurred.shape)
     return np.array(center)
-
-def subpixel_beam_finder(single_pattern,half_shape):
-    """
-    This routine is designed to find, to sub-pixel accuracy, the 
-    center of a pattern that has saturated a detector. The noise
-    model is Gaussian. The input dp should be approximately (within about 3 
-    pixels) centered. Use one of the other centering methods to achieve this.
-    
-    single_pattern : numpy array : A dp (for .map purposes)
-    half_shape     : int         : An int for the approx center of the pattern
-    """
-    
-    # Set up 
-    hs = half_shape #readability
-    size = np.int(half_shape/7) #this prevents fitting to the far out noise
-    pattern = single_pattern[hs-size:hs+size,hs-size:hs+size]
-    
-    if np.max(pattern) > 1:
-        raise ValueError('Patterns should be normalised to max intensity')
-    
-    #fitting
-    from scipy.optimize import curve_fit as cf
-    i_array = np.array([np.arange(hs-size,hs+size),np.arange(hs-size,hs+size),np.arange(hs-size,hs+size)])
-    x_center = cf(_capped_gaussian,i_array,np.ravel(pattern[size:size+3,:].T),p0=[2,5,hs])[0][2]
-    y_center = cf(_capped_gaussian,i_array,np.ravel(pattern[:,size:size+3].T),p0=[2,5,hs])[0][2]
-    
-    return np.asarray([x_center,y_center])
 
 def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
     z = z.astype(np.float64)
