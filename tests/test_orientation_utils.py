@@ -29,10 +29,10 @@ def test_DiffractionLibraryIO():
 
 def test_build_linear_grid_in_euler():
     alpha,beta,gamma = 5,5,5
-    width = 5
-    resolution = 2
+    width = 3
+    resolution = 2.5
     
-    # Thus we expect 5,7 and 9 from each of the three, 27 items
+    # Thus we expect 2,4.5 and 7 from each of the three, 27 items
     grid = build_linear_grid_in_euler(alpha,beta,gamma,width,resolution)
     assert len(grid) == 27
     return None
