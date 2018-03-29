@@ -23,7 +23,8 @@ def build_linear_grid_in_euler(alpha,beta,gamma,width,resolution):
     """ 
     Returns tuples between (alpha,beta,gamma) and
     (alpha,beta,gamma) -+ width at steps of resolution. Each
-    angle increased incrementaly.
+    angle increased incrementaly. Depending on width and resolution
+    the tuple (alpha,beta,gamma) may not be included
     
     Parameters:
     ----------
