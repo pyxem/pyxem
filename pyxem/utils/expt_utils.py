@@ -419,43 +419,6 @@ def find_beam_position_blur(z, sigma=30):
     center = np.unravel_index(blurred.argmax(), blurred.shape)
     return np.array(center)
 
-def subpixel_beam_finder(single_pattern):
-    """
-    Find direct beam centers to sub-pixel accuracy.
-    
-    Parameters:
-        single_pattern : numpy array : A dp (for .map purposes)
-    """
-    raise NotImplementedError("This method is not yet implemented correctly")
-    
-    hs = np.int(single_pattern.data.shape[0]/2)
-    size = np.int(hs/7) #this prevents fitting to the far out noise
-    pattern = single_pattern[hs-size:hs+size+1,hs-size:hs+size+1]
-    
-    if (np.max(pattern)) > 1:# or (np.max(pattern) < 0.2):
-        raise ValueError('Patterns should be normalised to max intensity \
-                         and approximately pre-centered')
-    #fitting
-    from scipy.optimize import curve_fit as cf
- 
-    i_array = np.array([np.arange(hs-size,hs+size+1)])
-    x_sum,y_sum = 0,0
-    for linetracer in np.arange((size/2)-1,(size/2)+1):
-        x_center = cf(_capped_gaussian,i_array,
-                  np.array(pattern[np.int(linetracer),:].T),
-                  p0=[2,5,hs])[0][2]
-        y_center = cf(_capped_gaussian,i_array,
-                  np.array(pattern[:,np.int(linetracer)].T),
-                  p0=[2,5,hs])[0][2]
-        
-        x_sum += x_center
-        y_sum += y_center
-    
-    x_center = x_sum/len(np.arange(hs-2,hs+2))
-    y_center = y_sum/len(np.arange(hs-2,hs+2))
-    
-    return np.asarray([x_center,y_center])
-
 def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
     z = z.astype(np.float64)
     im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')

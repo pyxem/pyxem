@@ -481,9 +481,7 @@ class ElectronDiffraction(Signal2D):
 
             * 'blur' - Use gaussian filter to blur the image and take the
                 pixel with the maximum intensity value as the center
-            * 'subpixel' - Fits a capped (satured detector) 
-                gaussian to data that has already been roughly centered.
-
+            
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
@@ -503,10 +501,6 @@ class ElectronDiffraction(Signal2D):
                                sigma=sigma,
                                inplace=False)
             
-        elif method == 'subpixel':
-            raise NotImplementedError("Under development")
-            centers = self.map(subpixel_beam_finder,
-                               inplace=False)
         else:
             raise NotImplementedError("Method not implemented")
         
