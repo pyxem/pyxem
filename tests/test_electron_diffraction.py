@@ -60,7 +60,7 @@ def diffraction_pattern(request):
     return ElectronDiffraction(request.param)
 
 
-@pytest.mark.skip(reason='Defaults not implemented in PyCrystEM')
+@pytest.mark.skip(reason='Defaults not implemented in pyXem')
 def test_default_params(diffraction_pattern):
     a = diffraction_pattern.metadata.Acquisition_instrument.TEM.rocking_angle
     pass
