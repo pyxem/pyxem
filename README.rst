@@ -30,7 +30,9 @@ This will not install any of the dependancies, to do so you should add the -r re
 New to Python?
 --------------
 
-If you are new to python the simplest way to install everything you need is using Anaconda, which can be downloaded from www.continuum.io/downloads (again be aware that you will need Python 3)
+If you are new to python the simplest way to install everything you need is using
+`Anaconda <http://www.continuum.io/downloads>`__  ( make sure to install the
+Python 3 version).
 
 From a clean install the following commands to install everything you need should be entered into the terminal, or anaconda prompt terminal in Windows::
 
