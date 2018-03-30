@@ -30,7 +30,9 @@ This will not install any of the dependancies, to do so you should add the -r re
 New to Python?
 --------------
 
-If you are new to python the simplest way to install everything you need is using Anaconda, which can be downloaded from www.continuum.io/downloads (again be aware that you will need Python 3)
+If you are new to python the simplest way to install everything you need is using
+`Anaconda <http://www.continuum.io/downloads>`__  ( make sure to install the
+Python 3 version).
 
 From a clean install the following commands to install everything you need should be entered into the terminal, or anaconda prompt terminal in Windows::
 
@@ -50,8 +52,5 @@ Citing pyXem
 
 If pyXem has enabled significant parts of an academic publication, please acknowledge that by citing the software. Until a specific publication is written about pyXem please site the github URL: www.github.com/pyxem/pyXem
 
-We also recommend that you cite HyperSpy: http://hyperspy.org/hyperspy-doc/current/citing.html
-
-and PyMatGen:
-
-Shyue Ping Ong, William Davidson Richards, Anubhav Jain, Geoffroy Hautier, Michael Kocher, Shreyas Cholia, Dan Gunter, Vincent Chevrier, Kristin A. Persson, Gerbrand Ceder. Python Materials Genomics (pymatgen) : A Robust, Open-Source Python Library for Materials Analysis. Computational Materials Science, 2013, 68, 314–319. doi:10.1016/j.commatsci.2012.10.028
+We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
+and `PyMatGen <http://pymatgen.org/#how-to-cite-pymatgen>`__
