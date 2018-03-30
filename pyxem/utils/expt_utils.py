@@ -109,7 +109,7 @@ def radial_average(z,cython=False):
     Parameters
     ----------
 
-    cython=True
+    cython=False
         Set to False if cython needs to be avoided. If cythonized option is not
         not avaliable the behaviour is equivilant to cython == False
     Returns
@@ -117,7 +117,8 @@ def radial_average(z,cython=False):
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
-    center = (z.shape[0],z.shape[1]) #geometric shape work
+    
+    center = (z.shape[0]/2,z.shape[1]/2) #geometric shape work
     
     if _USE_CY_RADIAL_PROFILE and cython:
         averaged = radialprofile_cy(z, center)
