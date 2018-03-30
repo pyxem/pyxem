@@ -71,7 +71,7 @@ def test_default_params(diffraction_pattern):
     (0.017, (3, 3)),
     (0.5, None,),
 ])
-def test_set_calibration(diffraction_pattern, calibration, center):
+def test_set_diffraction_calibration(diffraction_pattern, calibration, center):
     calibrated_center = calibration * np.array(center) if center is not None else center
     diffraction_pattern.set_diffraction_calibration(calibration, center=calibrated_center)
     dx, dy = diffraction_pattern.axes_manager.signal_axes
@@ -110,12 +110,7 @@ def test_get_diffraction_variance(diffraction_pattern: ElectronDiffraction):
 
 class TestDirectBeamMethods:
 
-    def test_get_direct_beam_position(self, diffraction_pattern):
-        c = diffraction_pattern.get_direct_beam_position(radius=2)
-        positions = np.array([[3, 3], [4, 4], [3, 3], [4, 4]])
-        assert np.allclose(c, positions)
-
-    @pytest.mark.skip(reason="`get_direct_beam_shifts` not implemented")
+    @pytest.mark.skip(reason="Tests currently out of date")
     @pytest.mark.parametrize('centers, shifts_expected', [
         (None, np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),),
         (
@@ -196,18 +191,14 @@ class TestRadialProfile:
         rp = diffraction_pattern.get_radial_profile()
         assert isinstance(rp, Signal1D)
 
-    @pytest.mark.parametrize('centers, expected', [
-        (None, np.array([
+    @pytest.mark.parametrize('expected',[
+        (np.array([
             [[5., 4.25, 3.16666667, 2.125, 0.95454545, 0., 0.],
              [5., 4.375, 3.66666667, 3., 2.33333333, 1.375, 0.5]]
-        ])),
-        (np.array([[4, 3], [4, 3]]), np.array([
-            [[5., 4.25, 3.16666667, 2.125, 0.95454545, 0., 0.],
-             [5., 4.375, 3.66666667, 2.75, 2.04545455, 1., 1.]]
-        ])),
-    ])
-    def test_radial_profile(self, diffraction_pattern, centers, expected):
-        rp = diffraction_pattern.get_radial_profile(centers=centers)
+        ]))]
+        
+    def test_radial_profile(self, diffraction_pattern,expected):
+        rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
 
 
