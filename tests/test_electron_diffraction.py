@@ -195,7 +195,7 @@ class TestRadialProfile:
         (np.array([
             [[5., 4.25, 3.16666667, 2.125, 0.95454545, 0., 0.],
              [5., 4.375, 3.66666667, 3., 2.33333333, 1.375, 0.5]]
-        ]))]
+        ]))])
         
     def test_radial_profile(self, diffraction_pattern,expected):
         rp = diffraction_pattern.get_radial_profile()
