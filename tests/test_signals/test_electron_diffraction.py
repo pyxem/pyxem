@@ -197,7 +197,7 @@ class TestRadialProfile:
             [[5., 4.25, 3.16666667, 2.125, 0.95454545, 0., 0.],
              [1., 0., 0., 0., 0., 0.]]
         ))])
-    @pytest.mark.skip(reason="Broken, in URGENT NEED OF FIXING")
+    # XXX
     def test_radial_profile(self, diffraction_pattern,expected):
         rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
