@@ -371,7 +371,7 @@ class ElectronDiffraction(Signal2D):
                         deadvalue=deadvalue,
                         inplace=inplace)
 
-    def get_radial_profile(self):
+    def get_radial_profile(self,cython=False):
         """Return the radial profile of the diffraction pattern.
        
         Returns
@@ -387,15 +387,14 @@ class ElectronDiffraction(Signal2D):
         Examples
         --------
         .. code-block:: python
-            profiles = ed.get_radial_profile(centers)
+            profiles = ed.get_radial_profile()
             profiles.plot()
         """
-        # TODO: fix for case when data is singleton
-        center = (self.axes_manager.signal_axes[0].size,self.axes_manager.signal_axes[1].size)
         
         # TODO: the cython implementation is throwing dtype errors
         radial_profiles = self.map(radial_average,
-                                   inplace=False, cython=False)
+                                   inplace=False, cython=cython)
+        # TODO: check this
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
             max_len = max(map(len, radial_profiles.data))
