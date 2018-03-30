@@ -19,24 +19,3 @@
 import numpy as np
 import pytest
 
-desired_ratio = 13.5996633 / (1 + np.sqrt(2))**3
-#https://en.wikipedia.org/wiki/Truncated_cube#Cartesian_coordinates 
-# Octagon side length is unity
-    
-master_array = (np.random.rand(500000,3))*((1+np.sqrt(2))*np.sqrt(3)/2) #upper octet random points
-
-def build_linear_grid_in_euler(alpha_min,alpha_max,resolution):
-    a = np.arange(alpha_min,alpha_max,step=resolution)
-    from itertools import product
-    return list(product(a,a,a))
-
-master_array = build_linear_grid_in_euler(0,(1+np.sqrt(2))*np.sqrt(3)/2,0.0251) 
-ext_corner = np.asarray([1,1,1])*(((1+np.sqrt(2))*np.sqrt(3)/2))
-int_corner = ext_corner - (1/np.sqrt(2))*np.asarray([1,1,1])    
-    
-absent = 0
-for p in master_array:
-        if np.linalg.norm(int_corner-p) > np.linalg.norm(ext_corner-p) :
-            absent += 1
-            
-found_ratio = (len(master_array) - absent) / len(master_array)    
