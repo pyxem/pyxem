@@ -118,7 +118,9 @@ def radial_average(z,cython=False):
         Radial profile of the diffraction pattern.
     """
     
-    center = (z.shape[0]/2,z.shape[1]/2) #geometric shape work
+    raise RuntimeWarning('Function currently untested')
+    
+    center = ((z.shape[0]-0.5)/2,(z.shape[1]-0.5)/2) #geometric shape work, not 0 indexing
     
     if _USE_CY_RADIAL_PROFILE and cython:
         averaged = radialprofile_cy(z, center)
