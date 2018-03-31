@@ -19,7 +19,7 @@
 import itertools
 import math
 from decimal import Decimal, ROUND_HALF_UP
-from math import radians, sin
+from math import radians, sin, cos, acos
 
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
