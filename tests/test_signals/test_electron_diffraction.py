@@ -168,14 +168,14 @@ class TestRadialProfile:
     @pytest.fixture
     def diffraction_pattern(self):
         dp = ElectronDiffraction(np.zeros((2, 8, 8)))
-        dp.data[0] = np.array([[0., 0., 1., 2., 2., 1., 0., 0.],
-                               [0., 1., 2., 3., 3., 2., 1., 0.],
-                               [1., 2., 3., 4., 4., 3., 2., 1.],
+        dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
+                               [0., 2., 3., 3., 3., 3., 2., 0.],
+                               [2., 3., 3., 4., 4., 3., 3., 2.],
                                [2., 3., 4., 5., 5., 4., 3., 2.],
                                [2., 3., 4., 5., 5., 4., 3., 2.],
-                               [1., 2., 3., 4., 4., 3., 2., 1.],
-                               [0., 1., 2., 3., 3., 2., 1., 0.],
-                               [0., 0., 1., 2., 2., 1., 0., 0.]])
+                               [2., 3., 3., 4., 4., 3., 3., 2.],
+                               [0., 2., 3., 3., 3., 3., 2., 0.],
+                               [0., 0., 2., 2., 2., 2., 0., 0.]])
     
         dp.data[1] = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
@@ -194,10 +194,10 @@ class TestRadialProfile:
 
     @pytest.mark.parametrize('expected',[
         (np.array(
-            [[5., 4.25, 3.16666667, 2.125, 0.95454545, 0., 0.],
-             [1., 0., 0., 0., 0., 0.]]
+            [[5., 4., 3., 2., 0.],
+             [1., 0., 0., 0., 0.]]
         ))])
-    # XXX
+    
     def test_radial_profile(self, diffraction_pattern,expected):
         rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
