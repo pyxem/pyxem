@@ -222,7 +222,7 @@ class ElectronDiffraction(Signal2D):
         vdf = dark_field_sum.as_signal2D((0,1))
         return vdf
 
-    def get_direct_beam_mask(self, radius, center=None):
+    def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
 
         Parameters
@@ -240,8 +240,7 @@ class ElectronDiffraction(Signal2D):
             The mask of the direct beam
         """
         shape = self.axes_manager.signal_shape
-        if center is None:
-            center = (shape[1] - 1) / 2, (shape[0] - 1) / 2
+        center = (shape[1] - 1) / 2, (shape[0] - 1) / 2
 
         signal_mask = Signal2D(circular_mask(shape=shape,
                                              radius=radius,
@@ -249,7 +248,7 @@ class ElectronDiffraction(Signal2D):
 
         return signal_mask
 
-    def get_vacuum_mask(self, radius, threshold, center=None,
+    def get_vacuum_mask(self, radius, threshold,
                         closing=True, opening=False):
         """Generate a navigation mask to exclude SED patterns acquired in vacuum.
 
@@ -283,7 +282,7 @@ class ElectronDiffraction(Signal2D):
         --------
         get_direct_beam_mask
         """
-        db = np.invert(self.get_direct_beam_mask(radius=radius, center=center))
+        db = np.invert(self.get_direct_beam_mask(radius=radius))
         diff_only = db * self
         mask = (diff_only.max((-1, -2)) <= threshold)
         if closing:
@@ -371,7 +370,7 @@ class ElectronDiffraction(Signal2D):
                         deadvalue=deadvalue,
                         inplace=inplace)
 
-    def get_radial_profile(self,cython=False):
+    def get_radial_profile(self,cython=False,inplace=False,**kwargs):
         """Return the radial profile of the diffraction pattern.
        
         Returns
@@ -392,8 +391,8 @@ class ElectronDiffraction(Signal2D):
         """
         
         # TODO: the cython implementation is throwing dtype errors
-        radial_profiles = self.map(radial_average,
-                                   inplace=False, cython=cython)
+        radial_profiles = self.map(radial_average, cython=cython,
+                                   inplace=inplace,**kwargs)
         # TODO: check this
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
