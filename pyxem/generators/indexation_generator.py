@@ -24,10 +24,15 @@ from heapq import nlargest
 from operator import itemgetter
 
 import numpy as np
-from pyxem.signals.indexation_results import IndexationResults
+from math import acos, cos, sin, pi, radians, degrees
+import itertools
 
+from pyxem.signals.indexation_results import IndexationResults
 from pyxem.utils import correlate
+from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.indexation_utils import index_magnitudes
+from pyxem.utils.sim_utils import get_interplanar_angle
+
 
 def correlate_library(image, library,n_largest,keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -56,6 +61,100 @@ def correlate_library(image, library,n_largest,keys=[]):
             out_arr[j + i*n_largest][4] = res[j][1]
         i = i + 1
     return out_arr
+
+def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
+                               mag_threshold, angle_threshold):
+    """Determine valid indexations for pairs of vectors based on
+    their magnitude and the angle between them.
+
+    Parameters
+    ----------
+    structure : Structure
+        The structure for which to calculate the interplanar angle.
+    edc : DiffractionGenerator
+        Miller indices of first plane.
+    guni : DiffractionVectors
+        Miller indices of second plane.
+    maximum_length : float
+        maximum g-vector magnitude for simulation.
+    mag_threshold : float
+        maximum percentage error in g-vector magnitude for indexation.
+    angle_threshold : float
+        maximum angular error in radians for g-vector pair interplanar angle.
+
+    Returns
+    -------
+    indexed_pairs : array
+        Array containing possible consistent indexations for each pair
+        of g-vectors.
+
+    """
+
+    sim_prof = edc.calculate_profile_data(structure=structure,
+                                          reciprocal_radius=maximum_length)
+    #get theoretical g-vector magnitudes from family indexation
+    magnitudes = np.array(sim_prof.magnitudes)
+
+    rl = structure.lattice.reciprocal_lattice_crystallographic
+    recip_pts = rl.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], maximum_length)
+    calc_peaks = np.asarray(sorted(recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])))
+
+    mags = guni.get_magnitudes()
+    mag_index = ProfileIndexationGenerator(mags, sim_prof, mapping=False)
+    indexation = mag_index.index_peaks(tolerance=mag_threshold)
+
+    #convert array of unique vectors to polar coordinates
+    gpolar = np.array(_cart2polar(vectors.data.T[0], vectors.data.T[1]))
+
+    #get array of indices comparing all values in list with all other values in same list.
+    reduced_pairs = []
+    for pair in np.array(list(itertools.product(np.arange(len(vectors)), np.arange(len(vectors))))):
+        #this loop removes self comparisons
+        if pair[0]==pair[1]:
+            pass
+        else:
+            reduced_pairs.append(pair)
+    reduced_pairs = np.array(reduced_pairs)
+
+    #iterate through all pairs checking theoretical interplanar angle
+    indexed_pairs = []
+
+    for pair in reduced_pairs:
+
+        i, j = pair[0], pair[1]
+
+        g1 = magnitudes[np.where(sim_prof.hkls==indexation[i][1][0])]
+        g2 = magnitudes[np.where(sim_prof.hkls==indexation[j][1][0])]
+
+        d1 = 1 / g1
+        d2 = 1 / g2
+
+        #get hkl values for all planes in indexed family
+        hkls1 = calc_peaks.T[0][np.where(calc_peaks.T[1]==g1)]
+        hkls2 = calc_peaks.T[0][np.where(calc_peaks.T[1]==g2)]
+
+        phis = np.zeros((len(hkls1), len(hkls2)))
+
+        for m in np.arange(len(hkls1)):
+            for n in np.arange(len(hkls2)):
+                hkl1 = hkls1[m]
+                hkl2 = hkls2[n]
+                #These two special cases give math domain errors so treat separately.
+                if np.array_equal(hkl1, hkl2):
+                    phis[m,n] = 0
+                elif np.array_equal(-hkl1, hkl2):
+                    phis[m,n] = pi
+                else:
+                    phis[m,n] = get_interplanar_angle(structure, hkl1, hkl2)
+
+                phi_expt = gpolar[1][j] - gpolar[1][i]
+        phi_diffs = phis - phi_expt
+
+        valid_pairs = np.array(np.where(phi_diffs<ang_thresh))
+
+        indexed_pairs.append([hkls1[valid_pairs[0]], hkls2[valid_pairs[1]]])
+    #results give two arrays containing Miller indices for each reflection in pair that are self consistent.
+    return np.array(indexed_pairs)
 
 
 class IndexationGenerator():
