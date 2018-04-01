@@ -88,6 +88,9 @@ follows:
     >>> indexer = IndexationGenerator(dp, library)
     >>> match_results = indexer.correlate()
 
+Once again (this bears repeating) if :code:`dp` is not a set of centered S(P)ED scans this method will fail
+to produce meaningful results in weird and hard to define ways. 
+
 The correlation index, Q, used to achieve this matching is defined as:
 
 .. math::

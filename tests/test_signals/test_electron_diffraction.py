@@ -60,7 +60,7 @@ def diffraction_pattern(request):
     return ElectronDiffraction(request.param)
 
 
-@pytest.mark.skip(reason='Defaults not implemented in PyCrystEM')
+@pytest.mark.skip(reason='Defaults not implemented in pyXem')
 def test_default_params(diffraction_pattern):
     a = diffraction_pattern.metadata.Acquisition_instrument.TEM.rocking_angle
     pass
@@ -71,7 +71,7 @@ def test_default_params(diffraction_pattern):
     (0.017, (3, 3)),
     (0.5, None,),
 ])
-def test_set_calibration(diffraction_pattern, calibration, center):
+def test_set_diffraction_calibration(diffraction_pattern, calibration, center):
     calibrated_center = calibration * np.array(center) if center is not None else center
     diffraction_pattern.set_diffraction_calibration(calibration, center=calibrated_center)
     dx, dy = diffraction_pattern.axes_manager.signal_axes
@@ -110,30 +110,8 @@ def test_get_diffraction_variance(diffraction_pattern: ElectronDiffraction):
 
 class TestDirectBeamMethods:
 
-    def test_get_direct_beam_position(self, diffraction_pattern):
-        c = diffraction_pattern.get_direct_beam_position(radius=2)
-        positions = np.array([[3, 3], [4, 4], [3, 3], [4, 4]])
-        assert np.allclose(c, positions)
-
-    @pytest.mark.skip(reason="`get_direct_beam_shifts` not implemented")
-    @pytest.mark.parametrize('centers, shifts_expected', [
-        (None, np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),),
-        (
-                np.array([[3, 3], [4, 4], [3, 3], [4, 4]]),
-                np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),
-        ),
-        pytest.param(
-            np.array([[3, 3], [4, 4], [3, 3]]),
-            np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),
-            marks=pytest.mark.xfail(raises=ValueError)
-        )
-    ])
-    def test_get_direct_beam_shifts(self, diffraction_pattern, centers, shifts_expected):
-        shifts_calculated = diffraction_pattern.get_direct_beam_shifts(radius=2, centers=centers)
-        assert np.allclose(shifts_calculated, shifts_expected)
-
-    @pytest.mark.parametrize('center, mask_expected', [
-        (None, np.array([
+    @pytest.mark.parametrize('mask_expected', [
+        (np.array([
             [False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False],
             [False, False, False,  True,  True, False, False, False],
@@ -142,18 +120,9 @@ class TestDirectBeamMethods:
             [False, False, False,  True,  True, False, False, False],
             [False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False]]),),
-        ((4.5, 3.5), np.array([
-            [False, False, False, False, False, False, False, False],
-            [False, False, False, False, False, False, False, False],
-            [False, False, False, False,  True,  True, False, False],
-            [False, False, False,  True,  True,  True,  True, False],
-            [False, False, False,  True,  True,  True,  True, False],
-            [False, False, False, False,  True,  True, False, False],
-            [False, False, False, False, False, False, False, False],
-            [False, False, False, False, False, False, False, False]]),)
-    ])
-    def test_get_direct_beam_mask(self, diffraction_pattern, center, mask_expected):
-        mask_calculated = diffraction_pattern.get_direct_beam_mask(2, center=center)
+                  ])
+    def test_get_direct_beam_mask(self, diffraction_pattern, mask_expected):
+        mask_calculated = diffraction_pattern.get_direct_beam_mask(2)
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
 
@@ -173,41 +142,38 @@ class TestRadialProfile:
     @pytest.fixture
     def diffraction_pattern(self):
         dp = ElectronDiffraction(np.zeros((2, 8, 8)))
-        dp.data[0] = np.array([[0., 0., 1., 2., 2., 1., 0., 0.],
-                               [0., 1., 2., 3., 3., 2., 1., 0.],
-                               [1., 2., 3., 4., 4., 3., 2., 1.],
+        dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
+                               [0., 2., 3., 3., 3., 3., 2., 0.],
+                               [2., 3., 3., 4., 4., 3., 3., 2.],
                                [2., 3., 4., 5., 5., 4., 3., 2.],
                                [2., 3., 4., 5., 5., 4., 3., 2.],
-                               [1., 2., 3., 4., 4., 3., 2., 1.],
-                               [0., 1., 2., 3., 3., 2., 1., 0.],
-                               [0., 0., 1., 2., 2., 1., 0., 0.]])
+                               [2., 3., 3., 4., 4., 3., 3., 2.],
+                               [0., 2., 3., 3., 3., 3., 2., 0.],
+                               [0., 0., 2., 2., 2., 2., 0., 0.]])
+    
+        dp.data[1] = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
+                               [0., 0., 0., 0., 0., 0., 0., 0.],
+                               [0., 0., 0., 0., 0., 0., 0., 0.],
+                               [0., 0., 0., 1., 1., 0., 0., 0.],
+                               [0., 0., 0., 1., 1., 0., 0., 0.],
+                               [0., 0., 0., 0., 0., 0., 0., 0.],
+                               [0., 0., 0., 0., 0., 0., 0., 0.],
+                               [0., 0., 0., 0., 0., 0., 0., 0.]])
 
-        dp.data[1] = np.array([[0., 1., 2., 3., 3., 3., 2., 1.],
-                               [1., 2., 3., 4., 4., 4., 3., 2.],
-                               [2., 3., 4., 5., 5., 5., 4., 3.],
-                               [2., 3., 4., 5., 6., 5., 4., 3.],
-                               [2., 3., 4., 5., 5., 5., 4., 3.],
-                               [1., 2., 3., 4., 4., 4., 3., 2.],
-                               [0., 1., 2., 3., 3., 3., 2., 1.],
-                               [0., 0., 1., 2., 2., 2., 1., 0.]])
         return dp
 
     def test_radial_profile_signal_type(self, diffraction_pattern):
         rp = diffraction_pattern.get_radial_profile()
         assert isinstance(rp, Signal1D)
 
-    @pytest.mark.parametrize('centers, expected', [
-        (None, np.array([
-            [[5., 4.25, 3.16666667, 2.125, 0.95454545, 0., 0.],
-             [5., 4.375, 3.66666667, 3., 2.33333333, 1.375, 0.5]]
-        ])),
-        (np.array([[4, 3], [4, 3]]), np.array([
-            [[5., 4.25, 3.16666667, 2.125, 0.95454545, 0., 0.],
-             [5., 4.375, 3.66666667, 2.75, 2.04545455, 1., 1.]]
-        ])),
-    ])
-    def test_radial_profile(self, diffraction_pattern, centers, expected):
-        rp = diffraction_pattern.get_radial_profile(centers=centers)
+    @pytest.mark.parametrize('expected',[
+        (np.array(
+            [[5., 4., 3., 2., 0.],
+             [1., 0., 0., 0., 0.]]
+        ))])
+    
+    def test_radial_profile(self, diffraction_pattern,expected):
+        rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
 
 

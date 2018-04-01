@@ -19,6 +19,8 @@
 
 """
 
+import numpy as np
+
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
@@ -220,7 +222,7 @@ class ElectronDiffraction(Signal2D):
         vdf = dark_field_sum.as_signal2D((0,1))
         return vdf
 
-    def get_direct_beam_mask(self, radius, center=None):
+    def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
 
         Parameters
@@ -238,8 +240,7 @@ class ElectronDiffraction(Signal2D):
             The mask of the direct beam
         """
         shape = self.axes_manager.signal_shape
-        if center is None:
-            center = (shape[1] - 1) / 2, (shape[0] - 1) / 2
+        center = (shape[1] - 1) / 2, (shape[0] - 1) / 2
 
         signal_mask = Signal2D(circular_mask(shape=shape,
                                              radius=radius,
@@ -247,7 +248,7 @@ class ElectronDiffraction(Signal2D):
 
         return signal_mask
 
-    def get_vacuum_mask(self, radius, threshold, center=None,
+    def get_vacuum_mask(self, radius, threshold,
                         closing=True, opening=False):
         """Generate a navigation mask to exclude SED patterns acquired in vacuum.
 
@@ -281,7 +282,7 @@ class ElectronDiffraction(Signal2D):
         --------
         get_direct_beam_mask
         """
-        db = np.invert(self.get_direct_beam_mask(radius=radius, center=center))
+        db = np.invert(self.get_direct_beam_mask(radius=radius))
         diff_only = db * self
         mask = (diff_only.max((-1, -2)) <= threshold)
         if closing:
@@ -369,39 +370,30 @@ class ElectronDiffraction(Signal2D):
                         deadvalue=deadvalue,
                         inplace=inplace)
 
-    def get_radial_profile(self, centers=None):
+    def get_radial_profile(self,cython=False,inplace=False,**kwargs):
         """Return the radial profile of the diffraction pattern.
-        Parameters
-        ----------
-        centers : array, optional
-            Array of dimensions (navigation_shape, 2) containing the
-            origin for the radial integration in each diffraction
-            pattern. If None (default) the centers are calculated using
-            :meth:`get_direct_beam_position`
+       
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
+            
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
-        :meth:`get_direct_beam_position`
+       
         Examples
         --------
         .. code-block:: python
-            centers = ed.get_direct_beam_position(method="blur")
-            profiles = ed.get_radial_profile(centers)
+            profiles = ed.get_radial_profile()
             profiles.plot()
         """
-        # TODO: fix for case when data is singleton
-        if centers is None:
-            centers = self.get_direct_beam_position(radius=10)
-        centers = Signal1D(centers)
-
+        
         # TODO: the cython implementation is throwing dtype errors
-        radial_profiles = self.map(radial_average, center=centers,
-                                   inplace=False, cython=False)
+        radial_profiles = self.map(radial_average, cython=cython,
+                                   inplace=inplace,**kwargs)
+        # TODO: check this
         ragged = len(radial_profiles.data.shape) == 1
         if ragged:
             max_len = max(map(len, radial_profiles.data))
@@ -463,62 +455,36 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
-    def get_direct_beam_position(self,
-                                 method='blur',
-                                 sigma=30,
-                                 half_shape=72,
-                                 *args, **kwargs):
+    def center_direct_beam(self,
+                           sigma=3,
+                           *args, **kwargs):
+        
         """Estimate the direct beam position in each experimentally acquired
-        electron diffraction pattern.
+        electron diffraction pattern and translate it to the center of the
+        image square.
 
         Parameters
         ----------
-        method : string
-            Specify the method used to determine the direct beam position.
-
-            * 'blur' - Use gaussian filter to blur the image and take the
-                pixel with the maximum intensity value as the center
-            * 'refine_local' - Refine the position of the direct beam and
-                hence an estimate for the position of the pattern center in
-                each SED pattern.
-            * 'subpixel' - Fits a capped gaussian to data that has already
-                been roughly centered.
-
+       
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
 
-        half_shape: int
-            The half shape of the SED patterns, only for subpixel
-
         Returns
         -------
-        centers : ndarray
-            Array containing the centers for each SED pattern.
+        Diffraction Pattern, centered.
 
         """
-        #TODO: add sub-pixel capabilities and model fitting methods.
-        if method == 'blur':
-            centers = self.map(find_beam_position_blur,
-                               sigma=sigma, inplace=False)
-
-        elif method == 'refine_local':
-            if initial_center==None:
-                initial_center = np.int(self.signal_axes.shape / 2)
-
-            centers = self.map(refine_beam_position,
-                               initial_center=initial_center,
-                               radius=radius,
-                               inplace=False)
-
-        elif method == 'subpixel':
-            centers = self.map(subpixel_beam_finder,half_shape=half_shape,inplace=False)
-
-        else:
-            raise NotImplementedError("The method specified is not implemented. "
-                                      "See documentation for available "
-                                      "implementations.")
-        return centers
+        nav_shape_x = self.data.shape[0]
+        nav_shape_y = self.data.shape[1]
+        half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2)
+        
+        centers = self.map(find_beam_position_blur,
+                           sigma=sigma,
+                           inplace=False)
+        shifts = centers.data - np.array(half_tuple)
+        shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.
@@ -768,7 +734,7 @@ class ElectronDiffraction(Signal2D):
         peaks.map(peaks_as_gvectors,
                   center=np.array(self.axes_manager.signal_shape)/2,
                   calibration=self.axes_manager.signal_axes[0].scale)
-        peaks = DiffractionVectors(peaks)
+        
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             #ToDo Remove this hardcore
@@ -776,7 +742,9 @@ class ElectronDiffraction(Signal2D):
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             raise RuntimeWarning('You do not have the same size navigation axes \
             for your Diffraction pattern and your peaks')
-
+        
+        peaks = DiffractionVectors(peaks)
+        
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):

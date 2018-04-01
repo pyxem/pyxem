@@ -24,6 +24,8 @@ import numpy as np
 Signal class for crystallographic phase and orientation maps.
 """
 
+### Need a reconsideration wrt .get_crystallographic_map() method of MatchResults
+
 def euler2axangle_signal(euler):
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
@@ -71,7 +73,12 @@ class CrystallographicMap(BaseSignal):
         results_array = np.zeros([0,7])
         for i in range (0, self.data.shape[1]):
             for j in range (0, self.data.shape[0]):
-                newrow = self.inav[i,j].data[0,0:5]
+                # XXX 
+                # This won't work for a multiphase sample, can't guarentee [0] is the best fit
+                try:
+                    newrow = self.inav[i,j].data[0,0:5]
+                except IndexError: #only 1 row at any given data point
+                    newrow = self.inav[i,j].data[0:5]
                 newrow = np.append(newrow, [i,j])
                 results_array = np.vstack([results_array, newrow])
         np.savetxt('{filename}', results_array, delimiter = "\t", newline="\r\n")
