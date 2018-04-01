@@ -35,3 +35,33 @@ def index_magnitudes(x, simulation, tolerance):
         indexation[i] = np.array((magsx[i], indices))
 
     return indexation
+
+def zone_axis_from_indexed_vectors(structure, hkl1, hkl2):
+    """Calculate zone axis from two indexed vectors.
+
+    Parameters
+    ----------
+    structure : Structure
+        Structure against which data was indexed.
+    hkl1 : np.array
+        First indexed g-vector.
+    hkl2 : np.array
+        Second indexed g-vector.
+
+    Returns
+    -------
+
+    """
+    l = structure.lattice
+
+    Ai = l.inv_matrix
+
+    gto1 = np.dot(Ai, hkl1)
+    gto2 = np.dot(Ai, hkl2)
+
+    n1 = gto1/np.linalg.norm(gto1)
+    n2 = gto2/np.linalg.norm(gto2)
+
+    u = np.cross(n1, n2)
+
+    return u / max(np.abs(u))
