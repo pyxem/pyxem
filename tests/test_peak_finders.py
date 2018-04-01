@@ -51,3 +51,13 @@ def test_argless_run(sample):
 @pytest.mark.parametrize("method",methods)
 def test_findpeaks_runs_without_error(sample,method):
     assert type(sample.find_peaks(method)) == DiffractionVectors
+
+@pytest.mark.parametrize("sample",create_single_peak(create_blank_background())) #single peak
+@pytest.mark.parametrize("method",methods)
+
+def test_findpeaks_single(sample,method):
+    output = (sample.find_peaks(method)).inav[0,0] #should be <2,2|stuff>
+    assert output.data.shape[0] == 1        #  correct number of peaks
+    assert output.data[0] == output.data[1] #  sym peaks
+    assert output.data[0] == -22.5          #  peak as expected
+    
