@@ -110,25 +110,8 @@ def test_get_diffraction_variance(diffraction_pattern: ElectronDiffraction):
 
 class TestDirectBeamMethods:
 
-    @pytest.mark.skip(reason="Tests currently out of date")
-    @pytest.mark.parametrize('centers, shifts_expected', [
-        (None, np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),),
-        (
-                np.array([[3, 3], [4, 4], [3, 3], [4, 4]]),
-                np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),
-        ),
-        pytest.param(
-            np.array([[3, 3], [4, 4], [3, 3]]),
-            np.array([[-0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5]]),
-            marks=pytest.mark.xfail(raises=ValueError)
-        )
-    ])
-    def test_get_direct_beam_shifts(self, diffraction_pattern, centers, shifts_expected):
-        shifts_calculated = diffraction_pattern.get_direct_beam_shifts(radius=2, centers=centers)
-        assert np.allclose(shifts_calculated, shifts_expected)
-
-    @pytest.mark.parametrize('center, mask_expected', [
-        (None, np.array([
+    @pytest.mark.parametrize('mask_expected', [
+        (np.array([
             [False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False],
             [False, False, False,  True,  True, False, False, False],
@@ -137,18 +120,9 @@ class TestDirectBeamMethods:
             [False, False, False,  True,  True, False, False, False],
             [False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False]]),),
-        ((4.5, 3.5), np.array([
-            [False, False, False, False, False, False, False, False],
-            [False, False, False, False, False, False, False, False],
-            [False, False, False, False,  True,  True, False, False],
-            [False, False, False,  True,  True,  True,  True, False],
-            [False, False, False,  True,  True,  True,  True, False],
-            [False, False, False, False,  True,  True, False, False],
-            [False, False, False, False, False, False, False, False],
-            [False, False, False, False, False, False, False, False]]),)
-    ])
-    def test_get_direct_beam_mask(self, diffraction_pattern, center, mask_expected):
-        mask_calculated = diffraction_pattern.get_direct_beam_mask(2, center=center)
+                  ])
+    def test_get_direct_beam_mask(self, diffraction_pattern, mask_expected):
+        mask_calculated = diffraction_pattern.get_direct_beam_mask(2)
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
 
