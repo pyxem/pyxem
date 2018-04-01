@@ -123,15 +123,9 @@ def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
 
         i, j = pair[0], pair[1]
 
-        g1 = magnitudes[np.where(sim_prof.hkls==indexation[i][1][0])]
-        g2 = magnitudes[np.where(sim_prof.hkls==indexation[j][1][0])]
-
-        d1 = 1 / g1
-        d2 = 1 / g2
-
         #get hkl values for all planes in indexed family
-        hkls1 = calc_peaks.T[0][np.where(calc_peaks.T[1]==g1)]
-        hkls2 = calc_peaks.T[0][np.where(calc_peaks.T[1]==g2)]
+        hkls1 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[i][1][1]))]
+        hkls2 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[j][1][1]))]
 
         phis = np.zeros((len(hkls1), len(hkls2)))
 
