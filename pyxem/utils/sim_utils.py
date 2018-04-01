@@ -148,8 +148,12 @@ def get_interplanar_angle(structure, hkl1, hkl2, degrees=False):
     #evaluate two parts of angle calculation
     x = h1 * h2 * rl.a**2 + k1 * k2 * rl.b**2 + l1 * l2 * rl.c**2
     y = (k1 * l2 + l1 * k2) * rl.b * rl.c * cos(alpha) + (h1 * l2 + l1 * h2) * rl.a * rl.c * cos(beta) + (h1 * k2 + k1 * h2) * rl.a * rl.b * cos(gamma)
+    cos_phi = d1 * d2 * (x + y)
+    #to avoid acos failing due to numerical precision
+    if np.isclose(cos_phi, 1): cos_phi = 1
+    if np.isclose(cos_phi, -1): cos_phi = -1
     #calculate angle
-    phi = acos(d1 * d2 * (x + y))
+    phi = acos(cos_phi)
     #convert answer to degrees and return
     if degrees==True:
         phi = math.degrees(phi)
