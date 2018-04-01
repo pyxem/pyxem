@@ -99,7 +99,7 @@ def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
     recip_pts = rl.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], maximum_length)
     calc_peaks = np.asarray(sorted(recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])))
 
-    mags = guni.get_magnitudes()
+    mags = vectors.get_magnitudes()
     mag_index = ProfileIndexationGenerator(mags, sim_prof, mapping=False)
     indexation = mag_index.index_peaks(tolerance=mag_threshold)
 
@@ -150,7 +150,7 @@ def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
                 phi_expt = gpolar[1][j] - gpolar[1][i]
         phi_diffs = phis - phi_expt
 
-        valid_pairs = np.array(np.where(phi_diffs<ang_thresh))
+        valid_pairs = np.array(np.where(phi_diffs<angle_threshold))
 
         indexed_pairs.append([hkls1[valid_pairs[0]], hkls2[valid_pairs[1]]])
     #results give two arrays containing Miller indices for each reflection in pair that are self consistent.
