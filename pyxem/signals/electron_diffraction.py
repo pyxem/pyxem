@@ -456,7 +456,6 @@ class ElectronDiffraction(Signal2D):
         return stack((mean, meansquare, variance))
 
     def center_direct_beam(self,
-                           method='blur',
                            sigma=3,
                            *args, **kwargs):
         
@@ -466,12 +465,7 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        method : string
-            Specify the method used to determine the direct beam position.
-
-            * 'blur' - Use gaussian filter to blur the image and take the
-                pixel with the maximum intensity value as the center
-            
+       
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
@@ -485,15 +479,9 @@ class ElectronDiffraction(Signal2D):
         nav_shape_y = self.data.shape[1]
         half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2)
         
-        #TODO: model fitting methods.
-        if method == 'blur':
-            centers = self.map(find_beam_position_blur,
-                               sigma=sigma,
-                               inplace=False)
-            
-        else:
-            raise NotImplementedError("Method not implemented")
-        
+        centers = self.map(find_beam_position_blur,
+                           sigma=sigma,
+                           inplace=False)
         shifts = centers.data - np.array(half_tuple)
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
         return self.align2D(shifts=shifts, crop=False, fill_value=0)
