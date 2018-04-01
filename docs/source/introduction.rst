@@ -75,23 +75,14 @@ diffraction patterns acquired from a reference sample and then applied using
                                                  [0   ,0   ,1]]))
 
 Translation of the direct beam is corrected for by aligning the stack of
-diffraction patterns. A simple routine to achieve this is to crop a region
-around the direct beam and then find the position of the direct beam using the
-:py:meth:`~.ElectronDiffraction.get_direct_beam_position` method. The shift to
-align and centre each pattern is then calculated and applied using the align2D()
-method. E.g.
+diffraction patterns. This can be achieve with
 
 .. code-block:: python
 
-    #Crop the central region of the pattern
-    >>> roi = pxm.roi.RectangularROI(left=67, top=67, right=77, bottom=77)
-    >>> db = roi(dp, axes=dp.axes_manager.signal_axes)
-    #Find the centers and calculate shifts
-    >>> centers = db.get_direct_beam_position(sigma=2)
-    >>> shifts = centers.data - np.array((5,5))
-    >>> shifts = shifts.reshape(3000, 2)
-    #Apply the alignment
-    >>> dp.align2D(shifts=shifts, crop=False, fill_value=0)
+    >>> dp.center_direct_beam()
+
+This method has an argument (sigma) that should be smaller (in pixel terms) than the distance from the edge of
+the nearest diffraction spot to the direct beam. Furthermore, the code assumes the direct beam is brightest spot.
 
 Intensity corrections most simply involve gain normalization based on
 dark-reference and bright-reference images. Such gain normalization may be
@@ -101,9 +92,8 @@ performed in pyXem using :py:meth:`~.ElectronDiffraction.apply_gain_normalisatio
 
     >>> dp.apply_gain_normalisation(bref=bright_reference, dref=dark_reference)
 
-Following alignment and the application of necessary corrections to the data, it
-may be calibrated and utility functions exist to apply calibrations to the
-diffraction and scan axes respectively.
+Following alignment and the application of necessary corrections to the data (ESSENTIAL DO NOT SKIP!), one
+may be calibrate the signals. Utility functions exist to apply calibrations to the diffraction and scan axes respectively.
 
 .. code-block:: python
 
@@ -131,6 +121,7 @@ scattering angle.
    :align: center
    :width: 400
 
+Again, this will not work if you fail to center all of the patterns in your S(P)ED scan.
 
 Background Removal
 ------------------
@@ -271,7 +262,7 @@ Several widgets are available:
 Unsupervised Machine Learning
 -----------------------------
 
-Usupervised machine learning algorithms may be applied to SED as a route to
+Unsupervised machine learning algorithms may be applied to SED as a route to
 obtain representative "component diffraction patterns" and their respective
 "loadings" in real space. These methods involve unfolding each diffraction
 pattern into an image vector and stacking these vectors together to construct a
