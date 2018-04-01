@@ -147,7 +147,7 @@ def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
                 else:
                     phis[m,n] = get_interplanar_angle(structure, hkl1, hkl2)
 
-                phi_expt = gpolar[1][j] - gpolar[1][i]
+        phi_expt = gpolar[1][j] - gpolar[1][i]
         phi_diffs = phis - phi_expt
 
         valid_pairs = np.array(np.where(phi_diffs<angle_threshold))
@@ -273,9 +273,10 @@ class ProfileIndexationGenerator():
                 diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
 
                 hkls = sim_hkls[np.where(diff < tolerance)]
+                mags_out = sim_mags[np.where(diff < tolerance)]
                 diffs = diff[np.where(diff < tolerance)]
 
-                indices = np.array((hkls, diffs))
+                indices = np.array((hkls, mags_out, diffs))
                 indexation[i] = np.array((mags.data[i], indices))
 
         return indexation
