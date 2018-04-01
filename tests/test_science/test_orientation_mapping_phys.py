@@ -77,6 +77,7 @@ def create_Hex():
     Ni = pmg.Element("Ni")
     lattice = pmg.Lattice.hexagonal(3.5,5)
     return pmg.Structure.from_spacegroup(162,lattice, [Ni], [[0, 0, 0]])
+
 @pytest.fixture
 def rot_list():
     return build_linear_grid_in_euler(12,10,5,1)
