@@ -247,3 +247,42 @@ class TestBackgroundMethods:
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
+
+class TestPeakFinding:
+    #This isn't testing the finding, that is done in test_peakfinders2D
+    @pytest.fixture
+    def single_peak(self):
+        pattern = np.zeros((2,2,128,128))
+        pattern[:,:,40,45] = 1 
+        return ElectronDiffraction(pattern)
+
+    @pytest.fixture
+    def ragged_peak(self):
+        pattern = np.zeros((2,2,128,128))
+        pattern[:,:,40,45] = 1 
+        pattern[1,0,71,21] = 1
+        return ElectronDiffraction(pattern)
+
+    methods = ['skimage', 'max', 'minmax', 'zaefferer','laplacian_of_gaussians', 'difference_of_gaussians']
+    #  'stat' needs to go back in 
+    def test_argless_run(self,single_peak):
+        single_peak.find_peaks()
+        pass
+    
+    @pytest.mark.parametrize('method', methods)
+    def test_findpeaks_single(self,single_peak,method):
+        output = (single_peak.find_peaks(method)).inav[0,0] #should be <2,2|2,1>
+        assert output.isig[1] == 2        #  correct number of dims
+        assert output.isig[0] == 1        #  correct number of peaks
+        assert output.isig[0] == (40-(128/2)) #x
+        assert output.isig[1] == (45-(128/2)) #y
+        
+    def test_findpeaks_ragged(self,ragged_peak,method):
+        output = (ragged_peak.find_peaks(method))
+        # as before at 0,0
+        assert output.inav[0,0].isig[1] == 2        #  correct number of dims
+        assert output.inav[0,0].isig[0] == 1        #  correct number of peaks
+        assert output.inav[0,0].isig[0] == (40-(128/2)) #x
+        assert output.inav[0,0].isig[1] == (45-(128/2)) #y
+        #but at 
+    
