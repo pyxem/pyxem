@@ -62,8 +62,8 @@ def correlate_library(image, library,n_largest,keys=[]):
         i = i + 1
     return out_arr
 
-def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
-                               mag_threshold, angle_threshold):
+def get_vector_pair_indexation(z, structure, edc, max_length,
+                                mag_threshold, angle_threshold):
     """Determine valid indexations for pairs of vectors based on
     their magnitude and the angle between them.
 
@@ -89,6 +89,7 @@ def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
         of g-vectors.
 
     """
+    vectors = z[0]
     #set up simulator
     sim_prof = edc.calculate_profile_data(structure=structure,
                                           reciprocal_radius=maximum_length)
@@ -201,7 +202,7 @@ class ProfileIndexationGenerator():
         self.simulation = simulation
 
     def index_peaks(self,
-                    tolerance=0.1,
+                    tolerance,
                     **kwargs):
         """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -251,5 +252,109 @@ class ProfileIndexationGenerator():
 
                 indices = np.array((hkls, mags_out, diffs))
                 indexation[i] = np.array((mags.data[i], indices))
+
+        return indexation
+
+
+class VectorsIndexationGenerator():
+    """Generates an indexer for DiffractionVectors using a number of methods.
+
+    Parameters
+    ----------
+    vectors : DiffractionVectors
+        DiffractionVectors to be indexed.
+    structure : Structure
+        Structure against which to perform indexation.
+    edc : DiffractionGenerator
+
+    """
+    def __init__(self, vectors, structure, edc, mapping=True):
+        self.map = mapping
+        self.vectors = vectors
+        self.strucutre = structure
+        self.edc = edc
+
+    def index_vectors(self,
+                      max_length,
+                      mag_threshold,
+                      angle_threshold,
+                      **kwargs):
+        """Assigns hkl indices to peaks in the diffraction profile.
+
+        Parameters
+        ----------
+        tolerance : float
+            The n orientations with the highest correlation values are returned.
+        keys : list
+            If more than one phase present in library it is recommended that
+            these are submitted. This allows a mapping from the number to the
+            phase.  For example, keys = ['si','ga'] will have an output with 0
+            for 'si' and 1 for 'ga'.
+        **kwargs
+            Keyword arguments passed to the HyperSpy map() function.
+
+        Returns
+        -------
+        matching_results : pyxem.signals.indexation_results.IndexationResults
+            Navigation axes of the electron diffraction signal containing correlation
+            results for each diffraction pattern. As an example, the signal in
+            Euler reads ( Library Number , Z , X , Z , Correlation Score )
+
+
+        """
+        mapping = self.map
+        vectors = self.vectors
+        structure = self.strucutre = structure
+        edc = self.edc
+
+        if mapping==True:
+            indexation = vectors.map(get_vector_pair_indexation,
+                                     structure=structure,
+                                     edc=edc,
+                                     max_length=max_length,
+                                     mag_threshold=mag_threshold,
+                                     angle_threshold=angle_threshold,
+                                     **kwargs)
+
+        else:
+            #set up simulator
+            sim_prof = edc.calculate_profile_data(structure=structure,
+                                                  reciprocal_radius=maximum_length)
+            #get theoretical g-vector magnitudes from family indexation
+            magnitudes = np.array(sim_prof.magnitudes)
+            #set various theoretical structural parameters
+            rl = structure.lattice.reciprocal_lattice_crystallographic
+            recip_pts = rl.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], maximum_length)
+            calc_peaks = np.asarray(sorted(recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])))
+            #assign possible indices based on magnitude alone
+            mags = vectors.get_magnitudes()
+            mag_index = ProfileIndexationGenerator(mags, sim_prof, mapping=False)
+            indexation = mag_index.index_peaks(tolerance=mag_threshold)
+            #convert array of unique vectors to polar coordinates
+            gpolar = np.array(_cart2polar(vectors.data.T[0], vectors.data.T[1]))
+            #assign empty list for
+            indexed_pairs = []
+            #iterate through all pairs calculating theoretical interplanar angle
+            for comb in itertools.combinations(np.arange(len(vectors)), 2):
+                i, j = comb[0], comb[1]
+                #get hkl values for all planes in indexed family
+                hkls1 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[i][1][1]))]
+                hkls2 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[j][1][1]))]
+                #assign empty array for indexation results
+                phis = np.zeros((len(hkls1), len(hkls2)))
+                #iterate through all pairs of indices
+                for prod in itertools.product(np.arange(len(hkls1)), np.arange(len(hkls2))):
+                    m, n = prod[0], prod[1]
+                    hkl1, hkl2 = hkls1[m], hkls2[n]
+                    phis[m,n] = get_interplanar_angle(structure, hkl1, hkl2)
+                #calculate experimental interplanar angle
+                phi_expt = gpolar[1][j] - gpolar[1][i]
+                #compare theory with experiment with threshold on mag of difference
+                phi_diffs = phis - phi_expt
+                valid_pairs = np.array(np.where(np.abs(phi_diffs)<angle_threshold))
+                #obtain Miller indices corresponding to planes satisfying mag + angle.
+                indexed_pairs.append([vectors.data[i], hkls1[valid_pairs[0]], vectors.data[j], hkls2[valid_pairs[1]]])
+            #results give two arrays containing Miller indices for each reflection in pair that are self consistent.
+            indexation = np.array(indexed_pairs)
 
         return indexation
