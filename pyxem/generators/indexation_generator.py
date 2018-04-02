@@ -125,7 +125,7 @@ def get_vector_pair_indexation(structure, edc, vectors, maximum_length,
         phi_diffs = phis - phi_expt
         valid_pairs = np.array(np.where(np.abs(phi_diffs)<angle_threshold))
         #obtain Miller indices corresponding to planes satisfying mag + angle.
-        indexed_pairs.append([hkls1[valid_pairs[0]], hkls2[valid_pairs[1]]])
+        indexed_pairs.append([vectors.data[i], hkls1[valid_pairs[0]], vectors.data[j], hkls2[valid_pairs[1]]])
     #results give two arrays containing Miller indices for each reflection in pair that are self consistent.
     return np.array(indexed_pairs)
 
