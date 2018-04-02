@@ -81,7 +81,7 @@ def _cart2polar(x, y):
 
     """
     r = np.sqrt(x**2 + y**2)
-    theta = np.arctan2(x, y)  # θ referenced to vertical
+    theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
 def _polar2cart(r, theta):
