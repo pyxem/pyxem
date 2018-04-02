@@ -253,7 +253,7 @@ class TestPeakFinding:
     @pytest.fixture
     def single_peak(self):
         pattern = np.zeros((2,2,128,128))
-        pattern[:,:,40,45] = 1 
+        pattern[:,:,40,45] = 1  #single point peak
         return ElectronDiffraction(pattern)
 
     @pytest.fixture
@@ -285,4 +285,4 @@ class TestPeakFinding:
         assert output.inav[0,0].isig[0] == (40-(128/2)) #x
         assert output.inav[0,0].isig[1] == (45-(128/2)) #y
         #but at 
-    
+        assert np.sum(output.inav[0,1].data.shape) == 4 # 2+2
