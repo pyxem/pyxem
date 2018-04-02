@@ -430,5 +430,7 @@ def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshol
     return final
 
 def peaks_as_gvectors(z, center, calibration):
+    """
+    """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T
