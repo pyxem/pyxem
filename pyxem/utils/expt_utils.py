@@ -117,15 +117,15 @@ def radial_average(z,cython=False):
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
-    
+
     center = ((z.shape[0]/2)-0.5,(z.shape[1]/2)-0.5) #geometric shape work, not 0 indexing
-    
+
     if _USE_CY_RADIAL_PROFILE and cython:
         averaged = radialprofile_cy(z, center)
     else:
         y, x = np.indices(z.shape)
         r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-        r = np.rint(r-0.5).astype(np.int) 
+        r = np.rint(r-0.5).astype(np.int)
         #the subtraction of 0.5 gets the 0 in the correct place
 
         tbin = np.bincount(r.ravel(), z.ravel())
@@ -431,4 +431,4 @@ def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshol
 
 def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
-    return g[0]
+    return np.array([g[0].T[1], g[0].T[0]]).T
