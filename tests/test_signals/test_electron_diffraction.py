@@ -263,8 +263,7 @@ class TestPeakFinding:
         pattern[1,0,71,21] = 1
         return ElectronDiffraction(pattern)
 
-    methods = ['skimage', 'max', 'minmax', 'zaefferer','laplacian_of_gaussians', 'difference_of_gaussians']
-    #  'stat' needs to go back in 
+    methods = ['skimage', 'zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
     def test_argless_run(self,single_peak):
         single_peak.find_peaks()
         pass
