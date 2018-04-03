@@ -16,26 +16,6 @@ def double_peak():
     return pattern
 
 
-
-@pytest.mark.skip(reason="This method should probably be removed")
-def test_fp_minmax(single_peak):
-    peaks = find_peaks_minmax(single_peak,threshold=0.5)
-
-@pytest.mark.skip(reason="This method should probably be removed")
-def test_fp_regp(single_peak):
-    peaks = find_peaks_regionprops(single_peak)
-    assert peaks[0,0] > 39.5 
-    assert peaks[0,0] < 42.5
-    assert peaks[0,0] == peaks[0,1]
-
-@pytest.mark.skip(reason="This method can also probably go")
-def test_fp_max(single_peak):
-    peaks = find_peaks_max(single_peak,alpha=0.00001)
-    assert peaks[0,0] > 39.5 
-    assert peaks[0,0] < 42.5
-    assert peaks[0,0] == peaks[0,1]
-    ## Fails at double peaks
-
 def test_fp_dog(single_peak):
     peaks = find_peaks_dog(single_peak)
     assert peaks[0,0] > 39.5 
