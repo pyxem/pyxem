@@ -58,14 +58,6 @@ def crystal_from_matching_results(z_matches):
 
     return results_array
 
-
-def phase_specific_results(matching_results, phaseid):
-    """Takes matching results for a single navigation position and returns the
-    matching results for a phase specified by a phase id.
-    """
-    return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
-
-
 class IndexationResults(BaseSignal):
     _signal_type = "matching_results"
     _signal_dimension = 2
@@ -83,31 +75,11 @@ class IndexationResults(BaseSignal):
         """
         #TODO: Add alternative methods beyond highest correlation score at each
         #navigation position.
+        #TODO Only keep a subset of the data for the map
         cryst_map = self.map(crystal_from_matching_results,
                              inplace=False,
                              *args, **kwargs)
         return CrystallographicMap(cryst_map)
-
-    def get_phase_results(self,
-                          phaseid,
-                          *args, **kwargs):
-        """Obtain matching results for specified phase.
-
-        Parameters
-        ----------
-        phaseid : int
-            Identifying integer of phase to obtain results for.
-
-        Returns
-        -------
-        phase_matching_results: IndexationResults
-            Matching results for the specified phase.
-
-        """
-        return self.map(phase_specific_results,
-                        phaseid=phaseid,
-                        inplace=False,
-                        *args, **kwargs)
 
     def get_modal_angles(self):
         """ Obtain the modal angles (and their prevelance)
