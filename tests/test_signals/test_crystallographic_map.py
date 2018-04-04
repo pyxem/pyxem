@@ -33,12 +33,12 @@ def sp_cryst_map():
 
 def test_get_phase_map(sp_cryst_map):
     pmap = sp_cryst_map.get_phase_map()
-    assert pmap.inav[0,0] == 0
+    assert pmap.isig[0,0] == 0
 
 def test_get_correlation_map(sp_cryst_map):
     cmap = sp_cryst_map.get_correlation_map()
-    assert cmap.inav[0,0] == 3e-17
+    assert cmap.isig[0,0] == 3e-17
 
 def test_get_reliability_map_orientation(sp_cryst_map):
-    rmap = sp_cryst_map.get_reliabilty_map_orientation()
-    assert rmap.inav[0,0] == 0.5
+    rmap = sp_cryst_map.get_reliability_map_orientation()
+    assert rmap.isig[0,0] == 0.5
