@@ -54,3 +54,8 @@ def test_get_correlation_map(sp_cryst_map):
 def test_get_reliability_map_orientation(sp_cryst_map):
     rmap = sp_cryst_map.get_reliability_map_orientation()
     assert rmap.isig[0,0] == 0.5
+    
+def test_get_reliability_map_phase(dp_cryst_map):
+    rmap = sp_cryst_map.get_reliability_map_phase()
+    assert rmap.isig[0,0] == 0.6
+    
