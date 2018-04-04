@@ -52,15 +52,41 @@ class CrystallographicMap(BaseSignal):
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
         each navigation position.
-
         """
+
         return self.isig[4].as_signal2D((0,1))
 
-    def get_reliability_map(self):
+    def get_reliability_map_orientation(self):
         """Obtain a reliability map showing the difference between the highest
-        correlation scor and the next best score at each navigation position.
+        correlation score of the most suitable phase
+        and the next best score (for the phase) at each navigation position.
         """
+
         return self.isig[5].as_signal2D((0,1))
+
+    def get_reliability_map_phase(self):
+        """Obtain a reliability map showing the difference between the highest
+        correlation score of the most suitable phase
+        and the next best score from a different phase at each navigation position.
+        """
+        return self.isig[6].as_signal2D((0,1))
+
+    def get_modal_angles(self):
+        """ Obtain the modal angles (and their prevelance)
+
+            Returns
+            ------
+            scipy.ModeResult object
+        """
+        #needs to be fixed/error raised
+        if True:
+            return 0
+        if False:
+            from scipy import stats
+            size = self.axes_manager.navigation_shape[0] * \
+                   self.axes_manager.navigation_shape[1]
+            return(stats.mode(self.isig[1:4,0].data.reshape(size,3)))
+
 
     def save_match_results(self, filename):
         """Create an array of match results, save it to specified file, so that
@@ -73,7 +99,7 @@ class CrystallographicMap(BaseSignal):
         results_array = np.zeros([0,7])
         for i in range (0, self.data.shape[1]):
             for j in range (0, self.data.shape[0]):
-                # XXX 
+                # XXX
                 # This won't work for a multiphase sample, can't guarentee [0] is the best fit
                 try:
                     newrow = self.inav[i,j].data[0,0:5]
