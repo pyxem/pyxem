@@ -43,16 +43,16 @@ def crystal_from_matching_results(z_matches):
     else:
         results_array = np.zeros(7)
         index_best_match = np.argmax(z_matches[:,4])
-        # stores phase,angle,angle,angle,correlation
+        # store phase,angle,angle,angle,correlation
         results_array[:5] = z_matches[index_best_match,:5]
         # do reliability_orientation
-        z = z_matches[z_matches[0]==results_array[0]]
+        z = z_matches[z_matches[:,0]==results_array[0]]
         second_score = np.partition(z[:,4],-2)[-2]
         results_array[5]  = 100*(1 -
                             second_score/results_array[4])
         # and reliability phase
-        z = z_matches[z_matches[0]!=results_array[0]]
-        second_score = np.partition(z[:,4],-2)[-2]
+        z = z_matches[z_matches[:,0]!=results_array[0]]
+        second_score = np.max(z[:,4])
         results_array[6]  = 100*(1 -
                             second_score/results_array[4])
 
