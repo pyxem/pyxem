@@ -37,9 +37,9 @@ def crystal_from_matching_results(z_matches):
     if np.unique(z_matches[:,0]).shape[0] == 1:
         #these case is easier as output is correctly ordered
         results_array = np.zeros(6)
-        results_array[:5] = z_matches[index_best_match,:5]
+        results_array[:5] = z_matches[0,:5]
         results_array[5]  = 100*(1 -
-                            z_matches[1,5]/results_array[4])
+                            z_matches[1,4]/results_array[4])
     else:
         results_array = np.zeros(7)
         index_best_match = np.argmax(z_matches[:,4])
