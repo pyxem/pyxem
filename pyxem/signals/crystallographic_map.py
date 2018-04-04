@@ -24,7 +24,12 @@ import numpy as np
 Signal class for crystallographic phase and orientation maps.
 """
 
-### Need a reconsideration wrt .get_crystallographic_map() method of MatchResults
+def load_map(filename):
+        """
+        Loads a map saved by previously saved via .save_map()
+        
+        """
+        raise NotImplementedError("Not yet needed")
 
 def euler2axangle_signal(euler):
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
@@ -108,10 +113,4 @@ class CrystallographicMap(BaseSignal):
                 newrow = np.append(newrow, [i,j])
                 results_array = np.vstack([results_array, newrow])
         np.savetxt('{filename}', results_array, delimiter = "\t", newline="\r\n")
-
-    def load_map(filename):
-        """
-        Loads a map saved by previously saved via .save_map()
-        
-        """
-        raise NotImplementedError("Not yet needed")
+    
