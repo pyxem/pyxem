@@ -31,6 +31,18 @@ def sp_cryst_map():
     crystal_map = CrystallographicMap(base.reshape((2,2,6)))
     return crystal_map
 
+
+@pytest.fixture()
+def dp_cryst_map():
+    #dp for double phase
+    base = np.zeros((4,6))
+    base[0] = [0,5,17,6,3e-17,0.5,0.6]
+    base[1] = [1,6,17,6,2e-17,0.4,0.7]
+    base[2] = [0,12,3,6,4e-17,0.3,0.1]
+    base[3] = [0,12,3,5,8e-16,0.2,0.8]
+    crystal_map = CrystallographicMap(base.reshape((2,2,7)))
+    return crystal_map
+
 def test_get_phase_map(sp_cryst_map):
     pmap = sp_cryst_map.get_phase_map()
     assert pmap.isig[0,0] == 0
