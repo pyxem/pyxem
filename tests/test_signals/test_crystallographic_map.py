@@ -21,11 +21,24 @@ import pytest
 from pyxem.signals.crystallographic_map  import CrystallographicMap
 
 @pytest.fixture()
-def single_phase_cryst_map():
+def sp_cryst_map():
+    #sp for single phase
     base = np.zeros((4,6))
     base[0] = [0,5,17,6,3e-17,0.5]
     base[1] = [0,6,17,6,2e-17,0.4]
     base[2] = [0,12,3,6,4e-17,0.3]
     base[3] = [0,12,3,5,8e-16,0.2]
-    crystal_map = CrystallographicMap(base.reshape((2,2,7)))
+    crystal_map = CrystallographicMap(base.reshape((2,2,6)))
     return crystal_map
+
+def test_get_phase_map(sp_cryst_map):
+    pmap = sp_cryst_map.get_phase_map()
+    assert pmap.inav[0,0] == 0
+
+def test_get_correlation_map(sp_cryst_map):
+    cmap = sp_cryst_map.get_correlation_map()
+    assert cmap.inav[0,0] == 3e-17
+
+def test_get_reliability_map_orientation(sp_cryst_map):
+    rmap = sp_cryst_map.get_reliabilty_map_orientation()
+    assert rmap.inav[0,0] == 0.5
