@@ -35,7 +35,7 @@ def sp_cryst_map():
 @pytest.fixture()
 def dp_cryst_map():
     #dp for double phase
-    base = np.zeros((4,6))
+    base = np.zeros((4,7))
     base[0] = [0,5,17,6,3e-17,0.5,0.6]
     base[1] = [1,6,17,6,2e-17,0.4,0.7]
     base[2] = [0,12,3,6,4e-17,0.3,0.1]
@@ -56,6 +56,6 @@ def test_get_reliability_map_orientation(sp_cryst_map):
     assert rmap.isig[0,0] == 0.5
     
 def test_get_reliability_map_phase(dp_cryst_map):
-    rmap = sp_cryst_map.get_reliability_map_phase()
+    rmap = dp_cryst_map.get_reliability_map_phase()
     assert rmap.isig[0,0] == 0.6
     
