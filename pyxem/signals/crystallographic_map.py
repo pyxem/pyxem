@@ -30,7 +30,11 @@ def euler2axangle_signal(euler):
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 class CrystallographicMap(BaseSignal):
-
+    """ 
+    Stores a map of a SED scan. At each navigtion position there
+    will be a phase, three angles, a correlation index and 1/2 reliability 
+    scores. See the .get_crystallographic_maps() method
+    """
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
@@ -78,10 +82,11 @@ class CrystallographicMap(BaseSignal):
             scipy.ModeResult object
         """
         raise NotImplementedError("Under construction")
-        from scipy import stats
-        size = self.axes_manager.navigation_shape[0] * \
+        
+        #from scipy import stats
+        #size = self.axes_manager.navigation_shape[0] * \
                    self.axes_manager.navigation_shape[1]
-        return(stats.mode(self.isig[1:4,0].data.reshape(size,3)))
+        #return(stats.mode(self.isig[1:4,0].data.reshape(size,3)))
 
 
     def save_match_results(self, filename):
