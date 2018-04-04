@@ -37,7 +37,6 @@ class CrystallographicMap(BaseSignal):
 
     def get_phase_map(self):
         """Obtain a map of the best matching phase at each navigation position.
-
         """
         return self.isig[0].as_signal2D((0,1))
 
@@ -78,14 +77,11 @@ class CrystallographicMap(BaseSignal):
             ------
             scipy.ModeResult object
         """
-        #needs to be fixed/error raised
-        if True:
-            return 0
-        if False:
-            from scipy import stats
-            size = self.axes_manager.navigation_shape[0] * \
+        raise NotImplementedError("Under construction")
+        from scipy import stats
+        size = self.axes_manager.navigation_shape[0] * \
                    self.axes_manager.navigation_shape[1]
-            return(stats.mode(self.isig[1:4,0].data.reshape(size,3)))
+        return(stats.mode(self.isig[1:4,0].data.reshape(size,3)))
 
 
     def save_match_results(self, filename):
