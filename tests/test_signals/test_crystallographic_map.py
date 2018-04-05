@@ -19,6 +19,8 @@
 import numpy as np
 import pytest
 from pyxem.signals.crystallographic_map  import CrystallographicMap
+from pyxem.signals.crystallographic_map import load_map
+import os
 
 @pytest.fixture()
 def sp_cryst_map():
@@ -58,4 +60,12 @@ def test_get_reliability_map_orientation(sp_cryst_map):
 def test_get_reliability_map_phase(dp_cryst_map):
     rmap = dp_cryst_map.get_reliability_map_phase()
     assert rmap.isig[0,0] == 0.6
+
+@pytest.mark.parametrize('maps',[sp_cryst_map(),dp_cryst_map()]) 
+def test_save_load(maps):
+    maps.save_map('file_01.txt')
+    lmap = load_map('file_01.txt')
+    os.remove('file_01.txt')
+    # remember we've dropped reliability in saving
+    assert np.allclose(maps.data[:,:,:5],lmap.data)
     
