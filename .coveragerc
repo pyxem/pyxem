@@ -1,0 +1,7 @@
+[run]
+branch  = True
+source = pyxem
+include = */pyxem/*
+omit =
+     */pyxem/io_plugins/mib.py
+     */pyxem/__init__.py
