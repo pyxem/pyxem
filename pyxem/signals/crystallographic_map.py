@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from hyperspy.signals import BaseSignal
+from hyperspy.signals import Signal2D
 from transforms3d.euler import euler2axangle
 import numpy as np
 
@@ -26,18 +27,24 @@ Signal class for crystallographic phase and orientation maps.
 
 def load_map(filename):
         """
-        Loads a map saved by previously saved via .save_map()
-        
+        Loads a crystallographic map saved by previously saved via .save_map()
         """
-        raise NotImplementedError("Not yet needed")
+        load_array = np.loadtxt(filename,delimiter='\t')
+        x_max = np.max(load_array[:,5]).astype(int)
+        y_max = np.max(load_array[:,6]).astype(int)
+        # add one for zero indexing
+        array = load_array.reshape(x_max+1,y_max+1,7)
+        array = np.transpose(array,(1,0,2)) #this gets x,y in the hs convention
+        cmap = Signal2D(array).transpose(navigation_axes=2)
+        return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
 def euler2axangle_signal(euler):
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 class CrystallographicMap(BaseSignal):
-    """ 
+    """
     Stores a map of a SED scan. At each navigtion position there
-    will be a phase, three angles, a correlation index and 1/2 reliability 
+    will be a phase, three angles, a correlation index and 1/2 reliability
     scores. See the .get_crystallographic_maps() method
     """
     def __init__(self, *args, **kwargs):
@@ -87,7 +94,7 @@ class CrystallographicMap(BaseSignal):
             scipy.ModeResult object
         """
         raise NotImplementedError("Under construction")
-        
+
         #from scipy import stats
         #size = self.axes_manager.navigation_shape[0] * \
                    #self.axes_manager.navigation_shape[1]
@@ -98,12 +105,13 @@ class CrystallographicMap(BaseSignal):
         """
         Save map so that in a format such that it can be imported into MTEX
         http://mtex-toolbox.github.io/
-        
-        Columns: 
+        GOTCHA: This drops the reliability
+
+        Columns:
         1 = phase id,
         2-4 = Euler angles in the zxz convention (radians),
         5 = Correlation score (only the best match is saved),
-        6 = x co-ord in navigation space, 
+        6 = x co-ord in navigation space,
         7 = y co-ord in navigation space.
         """
         results_array = np.zeros([0,7]) #header row
@@ -112,5 +120,4 @@ class CrystallographicMap(BaseSignal):
                 newrow = self.inav[i,j].data[0:5]
                 newrow = np.append(newrow, [i,j])
                 results_array = np.vstack([results_array, newrow])
-        np.savetxt('{filename}', results_array, delimiter = "\t", newline="\r\n")
-    
+        np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
