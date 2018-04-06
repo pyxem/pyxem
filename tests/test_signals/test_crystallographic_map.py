@@ -74,7 +74,7 @@ def test_get_reliability_map_phase(dp_cryst_map):
     assert rmap.isig[0,0] == 0.6
 
 @pytest.mark.parametrize('maps',[sp_cryst_map(),dp_cryst_map()])
-def test_save_load(maps):
+def test_CrystallographicMap_io(maps):
     maps.save_map('file_01.txt')
     lmap = load_map('file_01.txt')
     os.remove('file_01.txt')
