@@ -392,7 +392,7 @@ def circular_mask(shape, radius, center=None):
     mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
     return mask
 
-def find_beam_position_blur(z, sigma=30):
+def find_beam_position_blur(z, sigma=3):
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 

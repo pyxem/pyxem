@@ -715,13 +715,10 @@ class ElectronDiffraction(Signal2D):
         """
         method_dict = {
             'skimage': peak_local_max,
-            'max': find_peaks_max,
-            'minmax': find_peaks_minmax,
             'zaefferer': find_peaks_zaefferer,
             'stat': find_peaks_stat,
             'laplacian_of_gaussians':  find_peaks_log,
             'difference_of_gaussians': find_peaks_dog,
-            'regionprops': find_peaks_regionprops,
         }
         if method in method_dict:
             method = method_dict[method]
