@@ -23,8 +23,6 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
-from pyxem.signals.vdf_image import VDFImage
-
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
 
