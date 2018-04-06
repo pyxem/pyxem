@@ -1,0 +1,9 @@
+[run]
+source = pyxem
+include = */pyxem/*
+omit =
+     */pyxem/io_plugins/mib.py
+     */pyxem/__init__.py
+     */pyxem/utils/atomic_scattering_params.py
+     */pyxem/utils/scattering_params.py
+     */pyxem/utils/peakfinder2D_gui.py
