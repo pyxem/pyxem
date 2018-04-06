@@ -93,12 +93,8 @@ class CrystallographicMap(BaseSignal):
             ------
             scipy.ModeResult object
         """
-
-        from scipy import stats
-        size = self.axes_manager.navigation_shape[0] * \
-               self.axes_manager.navigation_shape[1]
-        smode = (stats.mode(self.isig[1:4,0].data.reshape(size,3)))
-        return smode
+        raise NotImplemented("Suitable Modal function not found")
+        #see https://stackoverflow.com/questions/49694879/
 
     def save_map(self, filename):
         """
