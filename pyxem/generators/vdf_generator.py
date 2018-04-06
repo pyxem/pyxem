@@ -70,10 +70,10 @@ class VDFGenerator():
             Signal containing virtual dark field images for all unique vectors.
         """
         vdfs = []
-        for v in unique_vectors.data:
+        for v in self.vectors.data:
             disk = roi.CircleROI(cx=v[1], cy=v[0], r=radius, r_inner=0)
-            vdf = disk(electron_diffraction,
-                       axes=electron_diffraction.axes_manager.signal_axes)
+            vdf = disk(self.signal,
+                       axes=self.signal.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
 
         vdfim = VDFImage(np.asarray(vdfs))
