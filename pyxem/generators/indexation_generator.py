@@ -283,8 +283,10 @@ class VectorsIndexationGenerator():
                     phis[m,n] = get_interplanar_angle(structure, hkl1, hkl2)
                 #calculate experimental interplanar angle
                 phi_expt = gpolar[1][j] - gpolar[1][i]
+                if np.absolute(phi_expt) > np.pi:
+                    phi_expt = 2*np.pi - np.absolute(phi_expt)
                 #compare theory with experiment with threshold on mag of difference
-                phi_diffs = phis - phi_expt
+                phi_diffs = phis - np.absolute(phi_expt)
                 valid_pairs = np.array(np.where(np.abs(phi_diffs)<angle_threshold))
                 #obtain Miller indices corresponding to planes satisfying mag + angle.
                 indexed_pairs.append([vectors.data[i], hkls1[valid_pairs[0]], vectors.data[j], hkls2[valid_pairs[1]]])
