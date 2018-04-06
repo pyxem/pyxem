@@ -33,7 +33,6 @@ def sp_cryst_map():
     crystal_map = CrystallographicMap(base.reshape((2,2,6)))
     return crystal_map
 
-
 @pytest.fixture()
 def dp_cryst_map():
     #dp for double phase
@@ -44,6 +43,19 @@ def dp_cryst_map():
     base[3] = [0,12,3,5,8e-16,0.2,0.8]
     crystal_map = CrystallographicMap(base.reshape((2,2,7)))
     return crystal_map
+
+@pytest.fixture()
+def mod_cryst_map():
+    base = np.zeros((6,6))
+    base[0] = [0,5,17,6,5e-17,0.5]
+    base[1] = [0,5,17,6,5e-17,0.5] #5,17,6 is modal
+    base[2] = [0,6,19,6,5e-17,0.5]
+    base[3] = [0,7,19,6,5e-17,0.5]
+    base[4] = [0,8,19,6,5e-17,0.5]
+    base[5] = [0,9,19,6,5e-17,0.5]
+    crystal_map = CrystallographicMap(base.reshape((3,2,6)))
+    return crystal_map
+
 
 def test_get_phase_map(sp_cryst_map):
     pmap = sp_cryst_map.get_phase_map()
@@ -56,16 +68,20 @@ def test_get_correlation_map(sp_cryst_map):
 def test_get_reliability_map_orientation(sp_cryst_map):
     rmap = sp_cryst_map.get_reliability_map_orientation()
     assert rmap.isig[0,0] == 0.5
-    
+
 def test_get_reliability_map_phase(dp_cryst_map):
     rmap = dp_cryst_map.get_reliability_map_phase()
     assert rmap.isig[0,0] == 0.6
 
-@pytest.mark.parametrize('maps',[sp_cryst_map(),dp_cryst_map()]) 
+@pytest.mark.parametrize('maps',[sp_cryst_map(),dp_cryst_map()])
 def test_save_load(maps):
     maps.save_map('file_01.txt')
     lmap = load_map('file_01.txt')
     os.remove('file_01.txt')
     # remember we've dropped reliability in saving
     assert np.allclose(maps.data[:,:,:5],lmap.data)
-    
+
+def test_get_modal_angles(mod_cryst_map):
+    out = mod_cryst_map.get_modal_angles()
+    assert np.allclose(out[0],[5,17,6])
+    assert np.allclose(out[1],(2/6))
