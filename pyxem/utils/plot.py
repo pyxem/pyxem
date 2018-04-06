@@ -31,52 +31,6 @@ from transforms3d.euler import euler2axangle
 from pyxem.utils import correlate
 from ipywidgets import interact
 
-# from . import Structure, ElectronDiffractionCalculator
-
-
-
-
-
-def manual_orientation(data,  #: np.ndarray,
-                       structure,  #: Structure,
-                       calculator,  #: ElectronDiffractionCalculator,
-                       ax=None):
-    """
-
-    """
-    if ax is None:
-        ax = plt.figure().add_subplot(111)
-    dimension = data.shape[0] / 2
-    extent = [-dimension, dimension] * 2
-    ax.imshow(data, extent=extent, interpolation='none', origin='lower')
-    text = plt.text(dimension, dimension, "Loading...")
-    p = plt.scatter([0, ], [0, ], s=0)
-
-    def plot(alpha=0., beta=0., gamma=0., calibration=1., reciprocal_radius=1.0):
-        calibration /= 100
-        orientation = euler2axangle(alpha, beta, gamma, 'rzyz')
-        rotation = RotationTransformation(orientation[0], orientation[1],
-                                          angle_in_radians=True).apply_transformation(
-            structure)
-        electron_diffraction = calculator.calculate_ed_data(rotation, reciprocal_radius)
-        electron_diffraction.calibration = calibration
-        nonlocal p
-        p.remove()
-        p = plt.scatter(
-            electron_diffraction.calibrated_coordinates[:, 0],
-            electron_diffraction.calibrated_coordinates[:, 1],
-            s=np.sqrt(electron_diffraction.intensities),
-            facecolors='none',
-            edgecolors='r'
-        )
-        text.set_text('\n'.join([str(correlate(data, electron_diffraction)), str(calibration)]))
-        ax.set_xlim(-dimension, dimension)
-        ax.set_ylim(-dimension, dimension)
-        plt.show()
-
-    interact(plot, alpha=(-np.pi, np.pi, 0.01), beta=(-np.pi, np.pi, 0.01),
-             gamma=(-np.pi, np.pi, 0.01), calibration=(1e-2, 1e1, 1e-2),
-             reciprocal_radius=(1e-1, 5., 1e-1))
 
 def _find_max_length_peaks(peaks):
     """
