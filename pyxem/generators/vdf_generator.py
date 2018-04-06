@@ -23,6 +23,8 @@
 from pyxem.signals.vdf_image import VDFImage
 from pyxem.utils.vdf_utils import normalize_vdf
 
+from hyperspy.api import roi
+import numpy as np
 
 class VDFGenerator():
     """Generates an VDF images for a specified signal and set of aperture
@@ -71,7 +73,7 @@ class VDFGenerator():
         """
         vdfs = []
         for v in self.vectors.data:
-            disk = roi.CircleROI(cx=v[1], cy=v[0], r=radius, r_inner=0)
+            disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
             vdf = disk(self.signal,
                        axes=self.signal.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
