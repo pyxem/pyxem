@@ -22,24 +22,41 @@ from hyperspy.signal import BaseSignal
 from pyxem import CrystallographicMap
 
 
-def crystal_from_matching_results(matching_results):
-    """Takes matching results for a single navigation position and returns the
-    best matching phase and orientation with correlation and reliability to
-    define a crystallographic map.
+def crystal_from_matching_results(z_matches):
+    """Takes matching results for a single navigation position
+    and returns the best matching phase and orientation with correlation
+    and reliability/ies to define a crystallographic map.
+
+    inputs: z_matches a numpy.array (m,5)
+
+    outputs: np.array of shape (6) or (7)
+    phase, angle,angle,angle, correlation, R_orientation,(R_phase)
     """
-    res_arr = np.zeros(6)
-    top_index = np.where(matching_results.T[-1]==matching_results.T[-1].max())
-    res_arr[:5] = matching_results[top_index][0]
-    res_arr[5] = res_arr[4] - np.partition(matching_results.T[-1], -2)[-2]
-    return res_arr
 
+    #count the phases
+    if np.unique(z_matches[:,0]).shape[0] == 1:
+        #these case is easier as output is correctly ordered
+        results_array = np.zeros(6)
+        results_array[:5] = z_matches[0,:5]
+        results_array[5]  = 100*(1 -
+                            z_matches[1,4]/results_array[4])
+    else:
+        results_array = np.zeros(7)
+        index_best_match = np.argmax(z_matches[:,4])
+        # store phase,angle,angle,angle,correlation
+        results_array[:5] = z_matches[index_best_match,:5]
+        # do reliability_orientation
+        z = z_matches[z_matches[:,0]==results_array[0]]
+        second_score = np.partition(z[:,4],-2)[-2]
+        results_array[5]  = 100*(1 -
+                            second_score/results_array[4])
+        # and reliability phase
+        z = z_matches[z_matches[:,0]!=results_array[0]]
+        second_score = np.max(z[:,4])
+        results_array[6]  = 100*(1 -
+                            second_score/results_array[4])
 
-def phase_specific_results(matching_results, phaseid):
-    """Takes matching results for a single navigation position and returns the
-    matching results for a phase specified by a phase id.
-    """
-    return matching_results.T[:,:len(np.where(matching_results.T[0]==phaseid)[0])].T
-
+    return results_array
 
 class IndexationResults(BaseSignal):
     _signal_type = "matching_results"
@@ -58,41 +75,8 @@ class IndexationResults(BaseSignal):
         """
         #TODO: Add alternative methods beyond highest correlation score at each
         #navigation position.
+        #TODO Only keep a subset of the data for the map
         cryst_map = self.map(crystal_from_matching_results,
                              inplace=False,
                              *args, **kwargs)
         return CrystallographicMap(cryst_map)
-
-    def get_phase_results(self,
-                          phaseid,
-                          *args, **kwargs):
-        """Obtain matching results for specified phase.
-
-        Parameters
-        ----------
-        phaseid : int
-            Identifying integer of phase to obtain results for.
-
-        Returns
-        -------
-        phase_matching_results: IndexationResults
-            Matching results for the specified phase.
-
-        """
-        return self.map(phase_specific_results,
-                        phaseid=phaseid,
-                        inplace=False,
-                        *args, **kwargs)
-        
-    def get_modal_angles(self):
-        """ Obtain the modal angles (and their prevelance)
-        
-        Returns
-        ------
-        scipy.ModeResult object
-        """
-        
-        from scipy import stats
-        size = self.axes_manager.navigation_shape[0] * \
-               self.axes_manager.navigation_shape[1]
-        return(stats.mode(self.isig[1:4,0].data.reshape(size,3)))
