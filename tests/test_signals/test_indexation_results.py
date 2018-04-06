@@ -19,6 +19,7 @@
 import numpy as np
 import pytest
 from pyxem.signals.indexation_results import crystal_from_matching_results, IndexationResults
+import os
 
 @pytest.fixture
 def sp_match_result():
@@ -53,3 +54,11 @@ def test_get_crystalographic_map(dp_match_result,sp_match_result):
     results = IndexationResults(results)
     results.get_crystallographic_map()
     return 0
+
+def test_IndexationResults_io(dp_match_result,sp_match_result):
+    results = np.vstack((dp_match_result,sp_match_result))
+    results = IndexationResults(results)
+    results.pickle_results('file_01.pkl')
+    results_loaded = load_results('file_01.pkl')
+    os.remove('file_01.txt')
+    assert np.allclose(results.data,results_loaded.data)
