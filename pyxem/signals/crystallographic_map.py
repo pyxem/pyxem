@@ -87,14 +87,17 @@ class CrystallographicMap(BaseSignal):
         return self.isig[6].as_signal2D((0,1))
 
     def get_modal_angles(self):
-        """ Obtain the modal angles (and their prevelance)
+        """ Obtain the modal angles (and their fractional occurances)
 
             Returns
             ------
-            scipy.ModeResult object
+            list: [modal_angles, fractional_occurance]
         """
-        raise NotImplemented("Suitable Modal function not found")
-        #see https://stackoverflow.com/questions/49694879/
+        element_count = self.data.shape[0]*self.data.shape[1]
+        euler_array = self.isig[1:4].data.reshape(element_count,3)
+        pairs, counts = np.unique(euler_array, axis=0, return_counts=True)
+        return [pairs[counts.argmax()],counts[counts.argmax()]/np.sum(counts)]
+
 
     def save_map(self, filename):
         """
