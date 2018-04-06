@@ -24,8 +24,9 @@ from pyxem.signals.vdf_image import VDFImage
 from pyxem.utils.vdf_utils import normalize_vdf
 
 
-class IndexationGenerator():
-    """Generates an indexer for data using a number of methods.
+class VDFGenerator():
+    """Generates an VDF images for a specified signal and set of aperture
+    positions.
 
     Parameters
     ----------
