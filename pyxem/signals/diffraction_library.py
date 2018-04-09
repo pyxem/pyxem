@@ -16,6 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import pyxem as pxm
+import pickle
+
+def load_DiffractionLibrary(filename,safety=False):
+    if safety:
+        with open(filename, 'wb') as handle:
+            pickle.load(handle)
+    else:
+        raise RuntimeError('Unpickling is risky, turn safety to True if \
+        trust the author of this content')
+
+
 class DiffractionLibrary(dict):
     """Maps crystal structure (phase) and orientation (Euler angles or
     axis-angle pair) to simulated diffraction data.
@@ -25,18 +37,18 @@ class DiffractionLibrary(dict):
         """ Extracts a single pattern for viewing,
         unspecified layers of dict are selected randomly and so this method
         is not entirely repeatable
-        
-        
+
+
         Parameters
         ----------
-        
+
         Phase : Label for the Phase you are interested in. Randomly chosen
         if False
-        Angle : Label for the Angle you are interested in. Randomly chosen 
+        Angle : Label for the Angle you are interested in. Randomly chosen
         if False
-        
+
         """
-        
+
         if phase:
             if angle:
                 return self[phase][angle]['Sim']
@@ -62,3 +74,7 @@ class DiffractionLibrary(dict):
                 sim_diff_dat.append(dpi.data)
         ppt_test = ElectronDiffraction(sim_diff_dat)
         ppt_test.plot()
+
+    def pickle_library(self,filename):
+        with open(filename, 'wb') as handle:
+            pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
