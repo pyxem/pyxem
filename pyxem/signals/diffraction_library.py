@@ -21,8 +21,8 @@ import pickle
 
 def load_DiffractionLibrary(filename,safety=False):
     if safety:
-        with open(filename, 'wb') as handle:
-            pickle.load(handle)
+        with open(filename, 'rb') as handle:
+            return pickle.load(handle)
     else:
         raise RuntimeError('Unpickling is risky, turn safety to True if \
         trust the author of this content')
