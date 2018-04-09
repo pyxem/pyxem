@@ -51,7 +51,7 @@ def test_library_io(get_library):
     assert get_library == loaded_library
 
 @pytest.mark.xfail(RuntimeError)
-def test_unsafe_loading(get_library)
+def test_unsafe_loading(get_library):
     get_library.pickle_library('file_01.pickle')
     loaded_library = load_DiffractionLibrary('file_01.pickle')
     os.remove('file_01.pickle')
