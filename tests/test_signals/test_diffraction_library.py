@@ -16,14 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyxem.generators.library_generator import library_generator
-import pymatgen
+import pytest
+import pymatgen as pmg
+import pyxem as pxm
+import os
 
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.signals.diffraction_library import load_DiffractionLibrary
 
 @pytest.fixture
 def get_library():
-        diffraction_calculator = DiffractionGenerator(300., 0.02)
-        DiffractionLibraryGenerator(diffraction_calculator)
+        diffraction_calculator = pxm.DiffractionGenerator(300., 0.02)
+        dfl = pxm.DiffractionLibraryGenerator(diffraction_calculator)
 
         element = pmg.Element('Si')
         lattice = pmg.Lattice.cubic(5)
@@ -31,7 +35,7 @@ def get_library():
         structure = pmg.Structure.from_spacegroup("F-43m", lattice, [element], [[0, 0, 0]])
         structure_library = {'Si': (structure, [(0, 0, 0)])}
 
-        return library_generator.get_diffraction_library(
+        return dfl.get_diffraction_library(
             structure_library, 0.017, 2.4, (72,72) ,'euler')
 
 
@@ -40,5 +44,15 @@ def test_get_pattern(get_library):
         assert isinstance(get_library.get_pattern(phase='Si'),DiffractionSimulation)
         assert isinstance(get_library.get_pattern(phase='Si',angle=(0,0,0)),DiffractionSimulation)
 
-def test_library_io()
-    pass
+def test_library_io(get_library):
+    get_library.pickle_library('file_01.pickle')
+    loaded_library = load_DiffractionLibrary('file_01.pickle',safety=True)
+    os.remove('file_01.pickle')
+    assert get_library == loaded_library
+
+@pytest.mark.xfail(RuntimeError)
+def test_unsafe_loading(get_library)
+    get_library.pickle_library('file_01.pickle')
+    loaded_library = load_DiffractionLibrary('file_01.pickle')
+    os.remove('file_01.pickle')
+    return 0
