@@ -7,3 +7,7 @@ omit =
      */pyxem/utils/atomic_scattering_params.py
      */pyxem/utils/scattering_params.py
      */pyxem/utils/peakfinder2D_gui.py
+     */pyxem/version.py
+     */pyxem/utils/__init__.py
+     */pyxem/signals/__init__.py
+     */pyxem/io_plugins/__init__.py
