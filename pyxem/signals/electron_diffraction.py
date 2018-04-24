@@ -372,24 +372,24 @@ class ElectronDiffraction(Signal2D):
 
     def get_radial_profile(self,cython=False,inplace=False,**kwargs):
         """Return the radial profile of the diffraction pattern.
-       
+
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
-            
+
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
-       
+
         Examples
         --------
         .. code-block:: python
             profiles = ed.get_radial_profile()
             profiles.plot()
         """
-        
+
         # TODO: the cython implementation is throwing dtype errors
         radial_profiles = self.map(radial_average, cython=cython,
                                    inplace=inplace,**kwargs)
@@ -455,17 +455,40 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
+    def get_direct_beam_position(self, sigma=3,
+                                 *args, **kwargs):
+        """Estimate the direct beam position in each experimentally acquired
+        electron diffraction pattern.
+
+
+        Parameters
+        ----------
+        sigma : int
+            Standard deviation for the gaussian convolution (only for
+            'blur' method).
+
+        Returns
+        -------
+        centers : ndarray
+            Array containing the centers for each SED pattern.
+
+        """
+        centers = self.map(find_beam_position_blur,
+                           sigma=sigma, inplace=False)
+        return centers
+
+
     def center_direct_beam(self,
                            sigma=3,
                            *args, **kwargs):
-        
+
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
         image square.
 
         Parameters
         ----------
-       
+
         sigma : int
             Standard deviation for the gaussian convolution (only for
             'blur' method).
@@ -478,7 +501,7 @@ class ElectronDiffraction(Signal2D):
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
         half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2)
-        
+
         centers = self.map(find_beam_position_blur,
                            sigma=sigma,
                            inplace=False)
@@ -731,7 +754,7 @@ class ElectronDiffraction(Signal2D):
         peaks.map(peaks_as_gvectors,
                   center=np.array(self.axes_manager.signal_shape)/2,
                   calibration=self.axes_manager.signal_axes[0].scale)
-        
+
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             #ToDo Remove this hardcore
@@ -739,9 +762,9 @@ class ElectronDiffraction(Signal2D):
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             raise RuntimeWarning('You do not have the same size navigation axes \
             for your Diffraction pattern and your peaks')
-        
+
         peaks = DiffractionVectors(peaks)
-        
+
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
