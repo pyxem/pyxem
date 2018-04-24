@@ -51,12 +51,8 @@ comment = ';'
 sep = '\t'
 
 dtype2keys = {
-    'float64': ('float', 8),
-    'float32': ('float', 4),
     'uint8': ('unsigned', 1),
-    'uint16': ('unsigned', 2),
-    'int32': ('signed', 4),
-    'int64': ('signed', 8), }
+    'uint16': ('unsigned', 2)}
 
 endianess2hdr = {
     '=': 'dont-care',
