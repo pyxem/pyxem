@@ -150,7 +150,7 @@ class ElectronDiffraction(Signal2D):
         y.scale = calibration
         y.units = 'nm'
 
-    def plot_interactive_virtual_image(self, roi):
+    def plot_interactive_virtual_image(self, roi, **kwargs):
         """Plots an interactive virtual image formed with a specified and
         adjustable roi.
 
@@ -158,6 +158,8 @@ class ElectronDiffraction(Signal2D):
         ----------
         roi: :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
+        kwargs: 
+            Keyword arguments to be passed to `ElectronDiffraction.plot`
 
         Examples
         --------
@@ -168,7 +170,7 @@ class ElectronDiffraction(Signal2D):
             data.plot_interactive_virtual_image(roi)
 
         """
-        self.plot()
+        self.plot(**kwargs)
         roi.add_widget(self, axes=self.axes_manager.signal_axes)
         # Add the ROI to the appropriate signal axes.
         dark_field = roi.interactive(self, navigation_signal='same')
