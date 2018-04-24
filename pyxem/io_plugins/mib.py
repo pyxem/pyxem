@@ -75,9 +75,6 @@ hdr_keys = {
     'data-type': ('signed', 'unsigned', 'float'),
     'byte-order': ('little-endian', 'big-endian', 'dont-care'),
     'record-by': ('image', 'vector', 'dont-care'),
-    # X-ray keys
-    'ev-per-chan': float,    # usually 5 or 10 eV
-    'detector-peak-width-ev': float,  # usually 150 eV
     # HyperSpy-specific keys
     'depth-origin': float,
     'depth-scale': float,
@@ -124,12 +121,20 @@ def parse_hdr(fp):
 
     #assign values to mandatory keys
     #set the array size of the chip
-    if hdr_info['Assembly Size (1X1, 2X2)'] == '1x1':
-        hdr_info['width'] = 256
-        hdr_info['height'] = 256
-    elif hdr_info['Assembly Size (1X1, 2X2)'] == '2x2':
-        hdr_info['width'] = 512
-        hdr_info['height'] = 512
+    if 'Assembly Size (1X1, 2X2)' in hdr_info.keys():
+        if hdr_info['Assembly Size (1X1, 2X2)'] == '1x1':
+            hdr_info['width'] = 256
+            hdr_info['height'] = 256
+        elif hdr_info['Assembly Size (1X1, 2X2)'] == '2x2':
+            hdr_info['width'] = 512
+            hdr_info['height'] = 512
+    else:
+        if hdr_info['Assembly Size (NX1, 2X2)'] == '1x1':
+            hdr_info['width'] = 256
+            hdr_info['height'] = 256
+        elif hdr_info['Assembly Size (NX1, 2X2)'] == '2x2':
+            hdr_info['width'] = 512
+            hdr_info['height'] = 512
     #convert frames to depth
     hdr_info['depth'] = int(hdr_info['Frames in Acquisition (Number)'])
     #set mib offset
@@ -149,7 +154,10 @@ def parse_hdr(fp):
     #set title to file name
     hdr_info['title'] = fp.name.split('\\')[-1]
     #set time and date
-    day, month, year_time = hdr_info['Time and Date Stamp (yr, mnth, day, hr, min, s)'].split('/')
+    if 'Time and Date Stamp (yr, mnth, day, hr, min, s)' in hdr_info.keys():
+        day, month, year_time = hdr_info['Time and Date Stamp (yr, mnth, day, hr, min, s)'].split('/')
+    else:
+        day, month, year_time = hdr_info['Time and Date Stamp (day, mnth, yr, hr, min, s)'].split('/')
     year , time = year_time.split(' ')
     hdr_info['date'] = year + month + day
     hdr_info['time'] = time
