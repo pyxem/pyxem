@@ -2,6 +2,37 @@ import scipy.constants as sc
 import fpd_data_processing.diffraction_tools as dt
 
 
+def bst_to_beta(bst, acceleration_voltage):
+    """Calculate beam deflection (beta) values from Bs * t.
+
+    Parameters
+    ----------
+    bst : NumPy array
+        Saturation induction Bs times thickness t of the sample. In Tesla*meter
+    acceleration_voltage : float
+        In Volts
+
+    Returns
+    -------
+    Bst : NumPy array
+        In radians
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> data = np.random.random((100, 100))  # In Tesla*meter
+    >>> acceleration_voltage = 200000  # 200 kV (in Volt)
+    >>> beta = dpct.bst_to_beta(data, 200000)
+
+    """
+    wavelength = dt.acceleration_voltage_to_wavelength(acceleration_voltage)
+    e = sc.elementary_charge
+    h = sc.Planck
+    beta = e*wavelength*bst/h
+    return beta
+
+
 def beta_to_bst(beam_deflection, acceleration_voltage):
     """Calculate Bs * t values from beam deflection (beta).
 
