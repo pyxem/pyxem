@@ -23,7 +23,7 @@
 import numpy as np
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
-from pyxem.signals.diffraction_library import DiffractionLibrary
+from pyxem.libraries.diffraction_library import DiffractionLibrary
 from scipy.constants import pi
 from tqdm import tqdm
 from transforms3d.euler import euler2axangle
@@ -82,7 +82,7 @@ class DiffractionLibraryGenerator(object):
 
         half_shape: tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
-        
+
         Returns
         -------
         diffraction_library : dict of :class:`DiffractionSimulation`
@@ -127,5 +127,3 @@ class DiffractionLibraryGenerator(object):
                      'pattern_norm': np.sqrt(np.dot(pattern_intensities,pattern_intensities))}
                     diffraction_library[key] = phase_diffraction_library
         return diffraction_library
-
-
