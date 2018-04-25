@@ -90,6 +90,19 @@ class PixelatedSTEM(Signal2D):
         if not inplace:
             return s_shift
 
+    def threshold_and_mask(
+            self, threshold=None, mask=None, show_progressbar=True):
+        if mask is not None:
+            x, y, r = mask
+            im_x, im_y = self.axes_manager.signal_shape
+            mask = pst._make_circular_mask(x, y, im_x, im_y, r)
+        s_out = self.map(
+                function=pst._threshold_and_mask_single_frame,
+                ragged=False, inplace=False, parallel=True,
+                show_progressbar=show_progressbar,
+                threshold=threshold, mask=mask)
+        return s_out
+
     def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
         """
         Rotate the diffraction dimensions.

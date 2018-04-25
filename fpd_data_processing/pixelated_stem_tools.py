@@ -9,15 +9,23 @@ from matplotlib.colors import hsv_to_rgb
 import fpd_data_processing.lazy_tools as lt
 
 
-def _center_of_mass_single_frame(im, threshold=None, mask=None):
-    if (mask is not None) or (threshold is not None):
-        image = copy.deepcopy(im)
-    else:
-        image = im
+def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
+    image = copy.deepcopy(im)
+    if mask is not None:
+        image *= mask
     if threshold is not None:
         mean_value = measurements.mean(image, mask)*threshold
         image[image <= mean_value] = 0
         image[image > mean_value] = 1
+    return image
+
+
+def _center_of_mass_single_frame(im, threshold=None, mask=None):
+    if (mask is not None) or (threshold is not None):
+        image = _threshold_and_mask_single_frame(
+                im, threshold=threshold, mask=mask)
+    else:
+        image = im
     data = measurements.center_of_mass(image, labels=mask)
     return(np.array(data)[::-1])
 
