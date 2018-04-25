@@ -25,7 +25,7 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from pyxem.signals.diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import *
 from pyxem.utils.peakfinders2D import *
@@ -158,7 +158,7 @@ class ElectronDiffraction(Signal2D):
         ----------
         roi: :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
-        kwargs: 
+        kwargs:
             Keyword arguments to be passed to `ElectronDiffraction.plot`
 
         Examples
@@ -402,11 +402,11 @@ class ElectronDiffraction(Signal2D):
             radial_profiles = Signal1D([
                 np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
                 for row in radial_profiles.data])
-            return DiffractionProfile(radial_profiles)
+            return ElectronDiffractionProfile(radial_profiles)
         else:
             radial_profiles.axes_manager.signal_axes[0].offset = 0
             signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            return DiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+            return ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
 
     def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
         """Reproject the diffraction data into polar coordinates.
