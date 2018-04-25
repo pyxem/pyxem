@@ -23,7 +23,7 @@ import os
 import numpy as np
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
-from pyxem.signals.diffraction_library import load_DiffractionLibrary
+from pyxem.libraries.diffraction_library import load_DiffractionLibrary
 
 @pytest.fixture
 def get_library():

@@ -39,7 +39,7 @@ from .generators.diffraction_generator import DiffractionGenerator
 from .generators.library_generator import DiffractionLibraryGenerator
 
 from .signals.crystallographic_map import CrystallographicMap
-from .signals.diffraction_profile import DiffractionProfile
+from .signals.diffraction_profile import ElectronDiffractionProfile
 from .signals.electron_diffraction import ElectronDiffraction
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
