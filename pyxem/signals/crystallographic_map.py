@@ -19,6 +19,7 @@
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
 from transforms3d.euler import euler2axangle
+from transforms3d.quaternions import axangle2quat
 import numpy as np
 
 """
@@ -39,7 +40,33 @@ def load_map(filename):
         return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
 def euler2axangle_signal(euler):
+    """ Find the magnitude of a rotation"""
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
+
+def _euler2quart(euler):
+    """ Converts an Euler angle to a Quarternion"""
+    ax_angle = euler2axangle(euler[0],euler[1],euler[2],'rzxz')
+    quat    = axangle2quat(ax_angle[0],ax_angle[1])
+    return quat
+
+def distance_from_fixed_angle(angle,fixed_angle):
+    """
+    Designed to be mapped, this function finds the smallest rotation between
+    two rotation, however note the following:
+    - This implementation is based on a NO SYMMETTRY SYSTEM
+    -- This is more likely to be okay if your angles are small and away from
+       Fundemental zone boundaries.
+
+    The algorithm involves converting angles to quarternions, then finding the
+    appropriate misorientation
+
+    """
+    q_data  = _euler2quart(angle)
+    q_fixed = _euler2quart(fixed_angle)
+    # normalise
+    #https://math.stackexchange.com/questions/90081/quaternion-distance
+    theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
+    return theta
 
 class CrystallographicMap(BaseSignal):
     """
