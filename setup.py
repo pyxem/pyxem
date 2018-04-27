@@ -56,9 +56,10 @@ setup(
         'pyxem',
         'pyxem.utils',
         'pyxem.io_plugins',
-	'pyxem.components',
+	    'pyxem.components',
         'pyxem.generators',
-	'pyxem.signals'
+	    'pyxem.signals',
+        'pyxem.libraries'
     ],
 
 #    install_requires=[
