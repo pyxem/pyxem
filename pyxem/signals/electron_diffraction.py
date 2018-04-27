@@ -518,6 +518,7 @@ class ElectronDiffraction(Signal2D):
             shifts = self.map(find_beam_offset_cross_correlation,
                               radius_start=radius_start,radius_finish=radius_finish,
                               inplace=False)
+	    shifts = shifts.data
 
         else:
             centers = self.map(find_beam_position_blur,
