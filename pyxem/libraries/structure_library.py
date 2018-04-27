@@ -31,7 +31,7 @@ def load_StructureLibrary(filename, safety=False):
 class StructureLibrary(dict):
     """Maps phase identifiers to crystal structure and corresponding expected or
     allowed orientations.
-    
+
     """
 
     def __init__(self,
