@@ -1,5 +1,7 @@
+import pytest
 from pytest import approx
 import numpy as np
+import scipy.constants as sc
 import fpd_data_processing.dpc_tools as dpct
 
 
@@ -48,3 +50,26 @@ class TestBstToBeta:
         bst = 10e-6
         output = dpct.beta_to_bst(dpct.bst_to_beta(bst, 200000), 200000)
         assert bst == output
+
+
+class TestAccelerationVoltageToVelocity:
+
+    def test_zero(self):
+        assert dpct.acceleration_voltage_to_velocity(0) == 0.0
+
+    @pytest.mark.parametrize("av,vel", [
+        (100000, 1.6434e8), (200000, 2.0844e8), (300000, 2.3279e8)])  # V, m/s
+    def test_values(self, av, vel):
+        v = dpct.acceleration_voltage_to_velocity(av)
+        assert approx(v, rel=0.001) == vel
+
+
+class TestAccelerationVoltageToRelativisticMass:
+
+    def test_zero(self):
+        mr = dpct.acceleration_voltage_to_relativistic_mass(0.0)
+        assert approx(mr) == sc.electron_mass
+
+    def test_200kv(self):
+        mr = dpct.acceleration_voltage_to_relativistic_mass(200000)
+        assert approx(mr) == 1.268e-30

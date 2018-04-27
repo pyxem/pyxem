@@ -78,6 +78,8 @@ def tesla_to_am(data):
     output_data : NumPy array
         In A/m
 
+    Examples
+    --------
     >>> import numpy as np
     >>> import fpd_data_processing.dpc_tools as dpct
     >>> data_T = np.random.random((100, 100))  # In tesla
@@ -85,3 +87,61 @@ def tesla_to_am(data):
 
     """
     return data/sc.mu_0
+
+
+def acceleration_voltage_to_velocity(acceleration_voltage):
+    """Get relativistic velocity of electron from acceleration voltage.
+
+    Parameters
+    ----------
+    acceleration_voltage : float
+        In Volt
+
+    Returns
+    -------
+    v : float
+        In m/s
+
+    Example
+    -------
+    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> v = dpct.acceleration_voltage_to_velocity(200000) # 200 kV
+    >>> round(v)
+    208450035
+
+    """
+    c = sc.speed_of_light
+    av = acceleration_voltage
+    e = sc.elementary_charge
+    me = sc.electron_mass
+    part1 = (1 + (av * e)/(me * c**2))**2
+    v = c * (1 - (1/part1))**0.5
+    return v
+
+
+def acceleration_voltage_to_relativistic_mass(acceleration_voltage):
+    """Get relativistic mass of electron as function of acceleration voltage.
+
+    Parameters
+    ----------
+    acceleration_voltage : float
+        In Volt
+
+    Returns
+    -------
+    mr : float
+        Relativistic electron mass
+
+    Example
+    -------
+    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> mr = dpct.acceleration_voltage_to_relativistic_mass(200000) # 200 kV
+
+    """
+    av = acceleration_voltage
+    c = sc.speed_of_light
+    v = acceleration_voltage_to_velocity(av)
+    me = sc.electron_mass
+    part1 = (1 - (v**2)/(c**2))
+    mr = me / (part1)**0.5
+    return mr
