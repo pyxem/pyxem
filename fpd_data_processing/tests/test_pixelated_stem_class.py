@@ -7,6 +7,7 @@ from hyperspy.signals import Signal2D
 from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
 from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
 import fpd_data_processing.make_diffraction_test_data as mdtd
+import fpd_data_processing.dummy_data as dd
 
 
 class test_pixelated_stem(unittest.TestCase):
@@ -64,6 +65,56 @@ class test_pixelated_stem_flip_diffraction(unittest.TestCase):
         s_flip = s.flip_diffraction_y()
         self.assertTrue((s_flip.data[:, :, 3:, :] == 0).all())
         self.assertTrue((s_flip.data[:, :, :3, :] == 1).all())
+
+
+class TestPixelatedSTEMThresholdAndMask:
+
+    @pytest.mark.parametrize(
+            "shape", [(9, 9, 9, 9), (4, 8, 6, 3), (6, 3, 2, 5)])
+    def test_no_change(self, shape):
+        s = PixelatedSTEM(np.zeros(shape))
+        s1 = s.threshold_and_mask()
+        assert (s.data == s1.data).all()
+
+    @pytest.mark.parametrize("mask", [(3, 5, 1), (6, 8, 1), (4, 6, 1)])
+    def test_mask(self, mask):
+        s = PixelatedSTEM(np.ones((10, 10, 10, 10)))
+        s1 = s.threshold_and_mask(mask=mask)
+        slice0 = np.s_[:, :, mask[1]-mask[2]:mask[1]+mask[2]+1, mask[0]]
+        assert (s1.data[slice0] == 1.).all()
+        slice1 = np.s_[:, :, mask[1], mask[0]-mask[2]:mask[0]+mask[2]+1]
+        assert (s1.data[slice1] == 1.).all()
+        s1.data[slice0] = 0
+        s1.data[slice1] = 0
+        assert (s1.data == 0).all()
+
+    @pytest.mark.parametrize("x, y", [(3, 5), (7, 5), (5, 2)])
+    def test_threshold(self, x, y):
+        s = PixelatedSTEM(np.random.randint(0, 10, size=(10, 10, 10, 10)))
+        s.data[:, :, x, y] = 1000000
+        s1 = s.threshold_and_mask(threshold=1)
+        assert (s1.data[:, :, x, y] == 1.).all()
+        s1.data[:, :, x, y] = 0
+        assert (s1.data == 0).all()
+
+    def test_threshold_mask(self):
+        s = PixelatedSTEM(np.zeros((12, 11, 13, 10)))
+        s.data[:, :, 1, 2] = 1000000
+        s.data[:, :, 8, 6] = 10
+        s1 = s.threshold_and_mask(threshold=1)
+        assert (s1.data[:, :, 1, 2] == 1.).all()
+        s1.data[:, :, 1, 2] = 0
+        assert (s1.data == 0).all()
+
+        s2 = s.threshold_and_mask(threshold=1, mask=(6, 8, 1))
+        assert (s2.data[:, :, 8, 6] == 1.).all()
+        s2.data[:, :, 8, 6] = 0
+        assert (s2.data == 0).all()
+
+    def test_lazy_exception(self):
+        s = dd.get_disk_shift_simple_test_signal(lazy=True)
+        with pytest.raises(NotImplementedError):
+            s.threshold_and_mask()
 
 
 class test_pixelated_stem_center_of_mass(unittest.TestCase):
