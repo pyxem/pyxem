@@ -84,6 +84,39 @@ class TestRadialIntegrationDaskArray:
         assert (data == 0.0).all()
 
 
+class TestThresholdAndMaskSingleFrame:
+
+    def test_no_data_change(self):
+        im = np.random.random((52, 43))
+        im_out = pst._threshold_and_mask_single_frame(im)
+        assert (im == im_out).all()
+
+    def test_mask_all_zeros(self):
+        im = np.zeros((12, 45))
+        im[2, 10] = 10
+        mask = pst._make_circular_mask(6, 31, 45, 12, 2)
+        im_out = pst._threshold_and_mask_single_frame(im, mask=mask)
+        assert (im_out == 0).all()
+
+    def test_mask_not_all_zeros(self):
+        im = np.zeros((12, 45))
+        im[7, 31] = 10
+        im[2, 43] = 5
+        mask = pst._make_circular_mask(32, 7, 45, 12, 2)
+        im_out = pst._threshold_and_mask_single_frame(im, mask=mask)
+        assert im_out[7, 31] == 10
+        im_out[7, 31] = 0
+        assert (im_out == 0).all()
+
+    def test_threshold(self):
+        im = np.ones((12, 45))
+        im[7, 12] = 10000000
+        im_out = pst._threshold_and_mask_single_frame(im, threshold=2)
+        assert im_out[7, 12] == 1
+        im_out[7, 12] = 0
+        assert (im_out == 0).all()
+
+
 class test_pixelated_tools(unittest.TestCase):
 
     def test_find_longest_distance_manual(self):

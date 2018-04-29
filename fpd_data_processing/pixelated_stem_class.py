@@ -92,6 +92,41 @@ class PixelatedSTEM(Signal2D):
 
     def threshold_and_mask(
             self, threshold=None, mask=None, show_progressbar=True):
+        """Get a thresholded and masked of the signal.
+
+        Useful for figuring out optimal settings for the center_of_mass
+        method.
+
+        Parameters
+        ----------
+       threshold : number, optional
+            The thresholding will be done at mean times
+            this threshold value.
+        mask : tuple (x, y, r)
+            Round mask centered on x and y, with radius r.
+        show_progressbar : bool
+            Default True
+
+        Returns
+        -------
+        s_out : PixelatedSTEM signal
+
+        Examples
+        --------
+        >>> import fpd_data_processing.dummy_data as dd
+        >>> s = dd.get_disk_shift_simple_test_signal()
+        >>> mask = (25, 25, 10)
+        >>> s_out = s.threshold_and_mask(
+        ...     mask=mask, threshold=2, show_progressbar=False)
+        >>> s_out.plot()
+
+        """
+        if self._lazy:
+            raise NotImplementedError(
+                    "threshold_and_mask is currently not implemented for "
+                    "lazy signals. Use compute() first to turn signal into "
+                    "a non-lazy signal. Note that this will load the full "
+                    "dataset into memory, which might crash your computer.")
         if mask is not None:
             x, y, r = mask
             im_x, im_y = self.axes_manager.signal_shape
