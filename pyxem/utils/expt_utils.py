@@ -24,6 +24,8 @@ from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square, opening
 from skimage.filters import (threshold_sauvola, threshold_otsu)
+from skimage.draw import ellipse_perimeter
+from skimage.feature import register_translation
 
 try:
     from .radialprofile import radialprofile as radialprofile_cy
@@ -409,6 +411,80 @@ def find_beam_position_blur(z, sigma=3):
     blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
     center = np.unravel_index(blurred.argmax(), blurred.shape)
     return np.array(center)
+
+def reference_circle(coords, dimX, dimY,radius):
+    """Draw the perimeter of an circle at a given position
+    in the diffraction pattern (e.g. to provide a reference for
+    finding the direct beam center).
+
+    Parameters
+    ----------
+    coords : np.array size n,2
+        size n,2 array of coordinates to draw the circle.
+
+    dimX : int
+        first dimension of the diffraction pattern (size)
+
+    dimY : int
+        second dimension of the diffraction pattern (size)
+
+    radius : int
+        radius of the circle to be drawn
+
+    Returns
+    -------
+    img: np.array
+        np.array containing the circle drawn at the position given in the coordinates.
+    """
+    img = np.zeros((dimX, dimY))
+    
+    for n in range(np.size(coords,0)):
+        rr, cc = ellipse_perimeter(coords[n,0],coords[n,1], radius, radius)
+        img[rr, cc] = 1
+        
+    return img
+
+def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
+    """Method to centre the direct beam centre by a cross-correlation algorithm.
+    The shift is calculated relative to an circle perimeter. The circle can be
+    refined across a range of radii during the centring procedure to improve
+    performance in regions where the direct beam size changes,
+    e.g. during sample thickness variation.
+
+    Parameters
+    ----------
+    radius_start : int
+        The lower bound for the radius of the central disc to be used in the alignment
+        
+    radius_finish : int
+        The upper bounds for the radius of the central disc to be used in the alignment
+
+    Returns
+    -------
+    shift: np.array
+        np.array containing offset (from center) of the direct beam positon.
+    """
+    radiusList = np.arange(radius_start,radius_finish)
+    errRecord = np.zeros_like(radiusList,dtype='single')
+    origin = np.array([[round(np.size(z,axis=-2)/2),round(np.size(z,axis=-1)/2)]])
+    
+    for ind in np.arange(0,np.size(radiusList)):
+        radius = radiusList[ind]
+        ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radius)
+        h0= np.hanning(np.size(ref,0))
+        h1= np.hanning(np.size(ref,1))
+        hann2d = np.sqrt(np.outer(h0,h1))
+        ref= hann2d*ref
+        im = hann2d*z
+        shift, error, diffphase = register_translation(ref,im, 10)
+        errRecord[ind] = error
+        index_min = np.argmin(errRecord)
+        
+        ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radiusList[index_min])
+        ref= hann2d*ref
+        shift, error, diffphase = register_translation(ref,im, 100)
+        
+    return shift
 
 def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
     z = z.astype(np.float64)
