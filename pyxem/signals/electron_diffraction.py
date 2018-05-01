@@ -754,18 +754,15 @@ class ElectronDiffraction(Signal2D):
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
         peaks.map(peaks_as_gvectors,
-                  center=np.array(self.axes_manager.signal_shape)/2,
+                  center=np.array(self.axes_manager.signal_shape)/2 - 0.5,
                   calibration=self.axes_manager.signal_axes[0].scale)
-
+        peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            #ToDo Remove this hardcore
             peaks = peaks.transpose(navigation_axes=2)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             raise RuntimeWarning('You do not have the same size navigation axes \
             for your Diffraction pattern and your peaks')
-
-        peaks = DiffractionVectors(peaks)
 
         return peaks
 
