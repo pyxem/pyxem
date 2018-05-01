@@ -176,7 +176,7 @@ class DiffractionVectors(BaseSignal):
         crystim : Signal2D
             2D map of diffracting pixels.
         """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0,1))
+        crystim = self.T.map(get_npeaks, inplace=False).as_signal2D((0,1))
 
         if binary==True:
             crystim = crystim == 1
