@@ -14,8 +14,8 @@ def bst_to_beta(bst, acceleration_voltage):
 
     Returns
     -------
-    Bst : NumPy array
-        In radians
+    beta : NumPy array
+        Beam deflection in radians
 
     Examples
     --------
@@ -23,10 +23,11 @@ def bst_to_beta(bst, acceleration_voltage):
     >>> import fpd_data_processing.dpc_tools as dpct
     >>> data = np.random.random((100, 100))  # In Tesla*meter
     >>> acceleration_voltage = 200000  # 200 kV (in Volt)
-    >>> beta = dpct.bst_to_beta(data, 200000)
+    >>> beta = dpct.bst_to_beta(data, acceleration_voltage)
 
     """
-    wavelength = dt.acceleration_voltage_to_wavelength(acceleration_voltage)
+    av = acceleration_voltage
+    wavelength = dt.acceleration_voltage_to_wavelength(av)
     e = sc.elementary_charge
     h = sc.Planck
     beta = e*wavelength*bst/h
@@ -145,3 +146,40 @@ def acceleration_voltage_to_relativistic_mass(acceleration_voltage):
     part1 = (1 - (v**2)/(c**2))
     mr = me / (part1)**0.5
     return mr
+
+
+def et_to_beta(et, acceleration_voltage):
+    """Calculate beam deflection (beta) values from E * t.
+
+    Parameters
+    ----------
+    et : NumPy array
+        Electric field times thickness t of the sample.
+    acceleration_voltage : float
+        In Volts
+
+    Returns
+    -------
+    beta: NumPy array
+        Beam deflection in radians
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> data = np.random.random((100, 100))
+    >>> acceleration_voltage = 200000  # 200 kV (in Volt)
+    >>> beta = dpct.et_to_beta(data, acceleration_voltage)
+
+    """
+    av = acceleration_voltage
+    e = sc.elementary_charge
+    wavelength = dt.acceleration_voltage_to_wavelength(av)
+    m = acceleration_voltage_to_relativistic_mass(av)
+    h = sc.Planck
+
+    wavelength2 = wavelength**2
+    h2 = h**2
+
+    beta = e*wavelength2*m*et/h2
+    return beta

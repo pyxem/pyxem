@@ -36,20 +36,35 @@ class TestBstToBeta:
 
     def test_zero(self):
         data = np.zeros((100, 100))
-        bst = dpct.bst_to_beta(data, 200000)
-        assert data.shape == bst.shape
+        beta = dpct.bst_to_beta(data, 200000)
+        assert data.shape == beta.shape
         assert (data == 0.).all()
 
     def test_ones(self):
         data = np.ones((100, 100))*10
-        bst = dpct.bst_to_beta(data, 200000)
-        assert data.shape == bst.shape
+        beta = dpct.bst_to_beta(data, 200000)
+        assert data.shape == beta.shape
         assert (data != 0.).all()
 
     def test_bst_to_beta_to_bst(self):
         bst = 10e-6
         output = dpct.beta_to_bst(dpct.bst_to_beta(bst, 200000), 200000)
         assert bst == output
+
+
+class TestEtToBeta:
+
+    def test_zero(self):
+        data = np.zeros((100, 100))
+        beta = dpct.et_to_beta(data, 200000)
+        assert data.shape == beta.shape
+        assert (data == 0.).all()
+
+    def test_ones(self):
+        data = np.ones((100, 100))*10
+        beta = dpct.bst_to_beta(data, 200000)
+        assert data.shape == beta.shape
+        assert (data != 0.).all()
 
 
 class TestAccelerationVoltageToVelocity:
