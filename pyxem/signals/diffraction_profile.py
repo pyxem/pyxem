@@ -23,7 +23,7 @@ import numpy as np
 from hyperspy.signals import Signal1D
 
 
-class DiffractionProfile(Signal1D):
+class ElectronDiffractionProfile(Signal1D):
     _signal_type = "diffraction_profile"
 
     def __init__(self, *args, **kwargs):
