@@ -512,7 +512,7 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2)
+        origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
 
         if subpixel:
             shifts = self.map(find_beam_offset_cross_correlation,
@@ -525,7 +525,7 @@ class ElectronDiffraction(Signal2D):
             centers = self.map(find_beam_position_blur,
                                sigma=sigma,
                                inplace=False)
-            shifts = centers.data - np.array(half_tuple)
+            shifts = centers.data - origin_coordinates
             
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
         return self.align2D(shifts=shifts, crop=False, fill_value=0)
