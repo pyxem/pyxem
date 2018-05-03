@@ -28,3 +28,12 @@ from pyxem.utils.sim_utils import *
 def test_get_electron_wavelength(accelerating_voltage, wavelength):
     val = get_electron_wavelength(accelerating_voltage=accelerating_voltage)
     np.testing.assert_almost_equal(val, wavelength)
+
+@pytest.mark.parametrize('accelerating_voltage, interaction_constant',[
+    (100, 1.0066772603317773e-16),
+    (200, 2.0133545206634971e-16),
+    (300, 3.0200317809952176e-16),
+])
+def test_get_interaction_constant(accelerating_voltage, interaction_constant):
+    val = get_interaction_constant(accelerating_voltage=accelerating_voltage)
+    np.testing.assert_almost_equal(val, interaction_constant)
