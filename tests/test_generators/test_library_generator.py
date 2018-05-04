@@ -21,7 +21,7 @@ import pymatgen as pmg
 
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.generators.library_generator import DiffractionLibraryGenerator
-from pyxem.signals.diffraction_library import DiffractionLibrary
+from pyxem.libraries.diffraction_library import DiffractionLibrary
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 
 

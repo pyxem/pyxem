@@ -66,7 +66,6 @@ endianess2hdr = {
 # Warning: for selection lists use tuples not lists.
 #keys extracted fromt the hdr file
 hdr_keys = {
-    # diffraction/image keys
     'width': int,
     'height': int,
     'depth': int,
@@ -75,9 +74,6 @@ hdr_keys = {
     'data-type': ('signed', 'unsigned', 'float'),
     'byte-order': ('little-endian', 'big-endian', 'dont-care'),
     'record-by': ('image', 'vector', 'dont-care'),
-    # X-ray keys
-    'ev-per-chan': float,    # usually 5 or 10 eV
-    'detector-peak-width-ev': float,  # usually 150 eV
     # HyperSpy-specific keys
     'depth-origin': float,
     'depth-scale': float,
@@ -92,18 +88,14 @@ hdr_keys = {
     # TEM HyperSpy keys
     'convergence-angle': float,
     'beam-energy': float,
-    # SED HyperSpy keys
-    'live-time': float,
-    'tilt-stage': float,
     'date': str,
     'time': str,
     'title': str,
 }
 
-
 def parse_hdr(fp):
     """Parse information from hdr (.hdr) file.
-    Accepts file object 'fp'. Returns dictionary hdr_info.
+    Accepts file object 'fp. Returns dictionary hdr_info.
     """
     hdr_info = {}
     for line in fp.readlines():
@@ -124,12 +116,22 @@ def parse_hdr(fp):
 
     #assign values to mandatory keys
     #set the array size of the chip
-    if hdr_info['Assembly Size (1X1, 2X2)'] == '1x1':
-        hdr_info['width'] = 256
-        hdr_info['height'] = 256
-    elif hdr_info['Assembly Size (1X1, 2X2)'] == '2x2':
-        hdr_info['width'] = 512
-        hdr_info['height'] = 512
+    #Adding the try argument to accommodate the new hdr formatting as of April 2018
+    try:
+        if hdr_info['Assembly Size (1X1, 2X2)'] == '1x1':
+            hdr_info['width'] = 256
+            hdr_info['height'] = 256
+        elif hdr_info['Assembly Size (1X1, 2X2)'] == '2x2':
+            hdr_info['width'] = 512
+            hdr_info['height'] = 512
+    except:
+        if hdr_info['Assembly Size (NX1, 2X2)'] == '1x1':
+            hdr_info['width'] = 256
+            hdr_info['height'] = 256
+        elif hdr_info['Assembly Size (NX1, 2X2)'] == '2x2':
+            hdr_info['width'] = 512
+            hdr_info['height'] = 512
+
     #convert frames to depth
     hdr_info['depth'] = int(hdr_info['Frames in Acquisition (Number)'])
     #set mib offset
@@ -146,13 +148,21 @@ def parse_hdr(fp):
     hdr_info['byte-order'] = 'dont-care'
     #set record by to stack of images
     hdr_info['record-by'] = 'image'
+
     #set title to file name
     hdr_info['title'] = fp.name.split('\\')[-1]
     #set time and date
-    day, month, year_time = hdr_info['Time and Date Stamp (yr, mnth, day, hr, min, s)'].split('/')
-    year , time = year_time.split(' ')
-    hdr_info['date'] = year + month + day
-    hdr_info['time'] = time
+    #Adding the try argument to accommodate the new hdr formatting as of April 2018
+    try:
+        day, month, year_time = hdr_info['Time and Date Stamp (day, mnth, yr, hr, min, s)'].split('/')
+        year , time = year_time.split(' ')
+        hdr_info['date'] = year + month + day
+        hdr_info['time'] = time
+    except:
+        day, month, year_time = hdr_info['Time and Date Stamp (yr, mnth, day, hr, min, s)'].split('/')
+        year , time = year_time.split(' ')
+        hdr_info['date'] = year + month + day
+        hdr_info['time'] = time
     return hdr_info
 
 
@@ -195,16 +205,15 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
     else:
         raise TypeError('Unknown "data-type" string.')
 
-    if endian == 'big-endian':
-        endian = '>'
-    elif endian == 'little-endian':
-        endian = '<'
-    else:
-        endian = '='
+    endian = '>'
 
     data_type += str(int(data_length))
     data_type = np.dtype(data_type)
     data_type = data_type.newbyteorder(endian)
+
+    #set header number of bits
+    hdr_multiplier = (int(data_length)/8)**-1
+    hdr_bits = int(384 * hdr_multiplier)
 
     data = np.memmap(fp,
                      offset=offset,
@@ -216,9 +225,12 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
         data = data.reshape(size)
     elif record_by == 'image':  # stack of images
         width_height = width * height
+        #a_width, a_height = round(np.sqrt(depth)), depth/ (round(np.sqrt(depth)))
         size = (depth, height, width)
+        #print(size)
         #remove headers at the beginning of each frame and reshape
-        data = data.reshape(-1, width_height + 384)[:,-width_height:].reshape(size)
+        data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(size)
+        #print()
     elif record_by == 'dont-care':  # stack of images
         size = (height, width)
         data = data.reshape(size)
@@ -227,13 +239,14 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
 
 def file_reader(filename, hdr_info=None, encoding="latin-1",
                 mmap_mode='c', *args, **kwds):
-    """Parses a hdr (.hdr) file and reads the data from the corresponding raw
-    (.mib) file; or, read a mib file if the dictionary hdr_info is provided.
+    """Parses a Lispix (http://www.nist.gov/lispix/) hdr (.hdr) file
+    and reads the data from the corresponding raw (.raw) file;
+    or, read a raw file if the dictionary hdr_info is provided.
 
-    This format is often uses in SED experiments.
+    This format is often uses in EDS/EDX experiments.
 
     Images and spectral images or data cubes that are written in the
-    (Lispix) mib file format are just a continuous string of numbers.
+    (Lispix) raw file format are just a continuous string of numbers.
 
     Data cubes can be stored image by image, or spectrum by spectrum.
     Single images are stored row by row, vector cubes are stored row by row
@@ -242,17 +255,17 @@ def file_reader(filename, hdr_info=None, encoding="latin-1",
     All of the numbers are in the same format, such as 16 bit signed integer,
     IEEE 8-byte real, 8-bit unsigned byte, etc.
 
-    The "mib" file should be accompanied by text file with the same name and
-    ".hdr" extension. This file lists the characteristics of the mib file so
+    The "raw" file should be accompanied by text file with the same name and
+    ".hdr" extension. This file lists the characteristics of the raw file so
     that it can be loaded without human intervention.
 
     Alternatively, dictionary 'hdr_info' containing the information can
     be given.
 
-    Some keys are specific to pyXem & HyperSpy.
+    Some keys are specific to HyperSpy and will be ignored by other software.
 
-    hdr isan ASCII text, tab delimited file in
-    which HyperSpy reads the image parameters for a mib file.
+    hdr stands for "Raw Parameter List", an ASCII text, tab delimited file in
+    which HyperSpy reads the image parameters for a raw file.
 
                     TABLE OF hdr PARAMETERS
         key             type     description
@@ -266,9 +279,6 @@ def file_reader(filename, hdr_info=None, encoding="latin-1",
       data-length      str      # bytes per pixel  '1', '2', '4', or '8'
       byte-order       str      # 'big-endian', 'little-endian', or 'dont-care'
       record-by        str      # 'image', 'vector', or 'dont-care'
-      # X-ray keys:
-      ev-per-chan      int      # optional, eV per channel
-      detector-peak-width-ev  int   # optional, FWHM for the Mn K-alpha line
       # HyperSpy-specific keys
       depth-origin    int      # energy offset in pixels
       depth-scale     float    # energy scaling (units per pixel)
@@ -284,12 +294,6 @@ def file_reader(filename, hdr_info=None, encoding="latin-1",
       height-name      str           # Name of the magnitude stored as height
       signal            str        # Type of the signal stored, e.g. EDS_SEM
       convergence-angle float   # TEM convergence angle in mrad
-      collection-angle  float   # EELS spectrometer collection semi-angle in mrad
-      beam-energy       float   # TEM beam energy in keV
-      elevation-angle   float   # Elevation angle of the EDS detector
-      azimuth-angle     float   # Elevation angle of the EDS detector
-      live-time         float   # Live time per spectrum
-      energy-resolution float   # Resolution of the EDS (FHWM of MnKa)
       tilt-stage        float   # The tilt of the stage
       date              str     # date in ISO 8601
       time              str     # time in ISO 8601
@@ -641,7 +645,7 @@ def write_hdr(filename, keys_dictionary, encoding='ascii'):
     f.close()
 
 
-def write_raw(filename, signal, record_by):
+def write_mib(filename, signal, record_by):
     """Writes the raw file object
 
     Parameters:
@@ -652,7 +656,7 @@ def write_raw(filename, signal, record_by):
      'vector' or 'image'
 
         """
-    filename = os.path.splitext(filename)[0] + '.raw'
+    filename = os.path.splitext(filename)[0] + '.mib'
     dshape = signal.data.shape
     data = signal.data
     if len(dshape) == 3:

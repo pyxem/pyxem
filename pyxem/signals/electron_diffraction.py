@@ -25,7 +25,7 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy.api import interactive, stack
 from hyperspy.components1d import Voigt, Exponential, Polynomial
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from pyxem.signals.diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import *
 from pyxem.utils.peakfinders2D import *
@@ -150,7 +150,7 @@ class ElectronDiffraction(Signal2D):
         y.scale = calibration
         y.units = 'nm'
 
-    def plot_interactive_virtual_image(self, roi):
+    def plot_interactive_virtual_image(self, roi, **kwargs):
         """Plots an interactive virtual image formed with a specified and
         adjustable roi.
 
@@ -158,6 +158,8 @@ class ElectronDiffraction(Signal2D):
         ----------
         roi: :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
+        kwargs:
+            Keyword arguments to be passed to `ElectronDiffraction.plot`
 
         Examples
         --------
@@ -168,7 +170,7 @@ class ElectronDiffraction(Signal2D):
             data.plot_interactive_virtual_image(roi)
 
         """
-        self.plot()
+        self.plot(**kwargs)
         roi.add_widget(self, axes=self.axes_manager.signal_axes)
         # Add the ROI to the appropriate signal axes.
         dark_field = roi.interactive(self, navigation_signal='same')
@@ -372,24 +374,24 @@ class ElectronDiffraction(Signal2D):
 
     def get_radial_profile(self,cython=False,inplace=False,**kwargs):
         """Return the radial profile of the diffraction pattern.
-       
+
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
-            
+
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
-       
+
         Examples
         --------
         .. code-block:: python
             profiles = ed.get_radial_profile()
             profiles.plot()
         """
-        
+
         # TODO: the cython implementation is throwing dtype errors
         radial_profiles = self.map(radial_average, cython=cython,
                                    inplace=inplace,**kwargs)
@@ -400,11 +402,11 @@ class ElectronDiffraction(Signal2D):
             radial_profiles = Signal1D([
                 np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
                 for row in radial_profiles.data])
-            return DiffractionProfile(radial_profiles)
+            return ElectronDiffractionProfile(radial_profiles)
         else:
             radial_profiles.axes_manager.signal_axes[0].offset = 0
             signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            return DiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+            return ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
 
     def reproject_as_polar(self, origin=None, jacobian=False, dr=1, dt=None):
         """Reproject the diffraction data into polar coordinates.
@@ -455,20 +457,53 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
+    def get_direct_beam_position(self, sigma=3,
+                                 *args, **kwargs):
+        """Estimate the direct beam position in each experimentally acquired
+        electron diffraction pattern.
+
+
+        Parameters
+        ----------
+        sigma : int
+            Standard deviation for the gaussian convolution (only for
+            'blur' method).
+
+        Returns
+        -------
+        centers : ndarray
+            Array containing the centers for each SED pattern.
+
+        """
+        centers = self.map(find_beam_position_blur,
+                           sigma=sigma, inplace=False)
+        return centers
+
+
     def center_direct_beam(self,
-                           sigma=3,
+                           subpixel=False,
+                           sigma=3, radius_start=4, radius_finish=8,
                            *args, **kwargs):
-        
+
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
         image square.
 
         Parameters
         ----------
-       
-        sigma : int
+
+        subpixel : bool
+            Choice of subpixel cross-correlation method (blur method if False)
+            
+        sigma : int, optional
             Standard deviation for the gaussian convolution (only for
             'blur' method).
+        
+        radius_start : int, optional
+            The lower bound for the radius of the central disc to be used in the alignment
+        
+        radius_finish : int, optional
+            The upper bounds for the radius of the central disc to be used in the alignment
 
         Returns
         -------
@@ -477,12 +512,21 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        half_tuple = (self.data.shape[2]/2,self.data.shape[3]/2)
-        
-        centers = self.map(find_beam_position_blur,
-                           sigma=sigma,
-                           inplace=False)
-        shifts = centers.data - np.array(half_tuple)
+        origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
+
+        if subpixel:
+            shifts = self.map(find_beam_offset_cross_correlation,
+                              radius_start=radius_start,radius_finish=radius_finish,
+                              inplace=False)
+
+            shifts = -1*shifts.data
+
+        else:
+            centers = self.map(find_beam_position_blur,
+                               sigma=sigma,
+                               inplace=False)
+            shifts = centers.data - origin_coordinates
+            
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
         return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
@@ -729,19 +773,16 @@ class ElectronDiffraction(Signal2D):
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
         peaks.map(peaks_as_gvectors,
-                  center=np.array(self.axes_manager.signal_shape)/2,
+                  center=np.array(self.axes_manager.signal_shape)/2 - 0.5,
                   calibration=self.axes_manager.signal_axes[0].scale)
-        
+        peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            #ToDo Remove this hardcore
             peaks = peaks.transpose(navigation_axes=2)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             raise RuntimeWarning('You do not have the same size navigation axes \
             for your Diffraction pattern and your peaks')
-        
-        peaks = DiffractionVectors(peaks)
-        
+
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):

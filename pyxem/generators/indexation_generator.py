@@ -117,7 +117,7 @@ class ProfileIndexationGenerator():
 
     Parameters
     ----------
-    profile : DiffractionProfile
+    profile : ElectronDiffractionProfile
         The signal of diffraction profiles to be indexed.
     library : ProfileSimulation
         The simulated profile data.
