@@ -1,4 +1,5 @@
 import pytest
+from pytest import approx
 import numpy as np
 import hyperspy.api as hs
 import fpd_data_processing.pixelated_stem_tools as pst
@@ -209,6 +210,37 @@ class TestGetCornerValues:
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
         with pytest.raises(ValueError):
             pst._get_corner_values(s)
+
+
+class TestFitRampToImage:
+
+    def test_zero_values(self):
+        data = np.zeros((100, 100))
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert approx(ramp) == data
+
+    def test_ones_values(self):
+        data = np.ones((100, 100))
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert approx(ramp) == data
+
+    def test_negative_values(self):
+        data = np.ones((100, 100))*-10
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert approx(ramp) == data
+
+    def test_large_values_in_middle(self):
+        data = np.zeros((100, 100))
+        data[5:95, :] = 10
+        data[:, 5:95] = 10
+        s = hs.signals.Signal2D(data)
+        ramp05 = pst._fit_ramp_to_image(s, corner_size=0.05)
+        assert approx(ramp05) == np.zeros((100, 100))
+        ramp10 = pst._fit_ramp_to_image(s, corner_size=0.1)
+        assert (ramp05 != ramp10).all()
 
 
 class TestGetSignalMeanPositionAndValue:

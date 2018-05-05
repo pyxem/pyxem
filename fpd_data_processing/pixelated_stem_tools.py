@@ -173,14 +173,17 @@ def _residuals(params, signal, X):
 
 
 def _fit_ramp_to_image(signal, corner_size=0.05):
+    if len(signal.axes_manager.navigation_axes) != 0:
+        raise ValueError("s need to have 0 navigation dimensions")
+    if len(signal.axes_manager.signal_axes) != 2:
+        raise ValueError("s need to have 2 signal dimensions")
     corner_values = _get_corner_values(signal, corner_size=corner_size)
     p0 = [0.1, 0.1, 0.1, 0.1]
 
     p = leastsq(_residuals, p0, args=(None, corner_values))[0]
 
-    xx, yy = np.meshgrid(
-            signal.axes_manager[0].axis,
-            signal.axes_manager[1].axis)
+    sam = signal.axes_manager.signal_axes
+    xx, yy = np.meshgrid(sam[0].axis, sam[1].axis)
     zz = (-p[0]*xx-p[1]*yy-p[3])/p[2]
     return(zz)
 
