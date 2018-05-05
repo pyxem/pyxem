@@ -89,6 +89,45 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     return(mask)
 
 
+def _get_signal_mean_position_and_value(signal):
+    """Get the scaled position and mean data value from a signal
+
+    Note: due to how HyperSpy numbers the axis values, the results
+    can sometimes be not as expected. For example, the signal
+    initialized Signal2D(np.zeros((10, 10))) will the output of this
+    function will be (4.5, 4.5, 0), due to the axis values being
+    from 0 to 9 (see example).
+
+    Parameters
+    ----------
+    signal : HyperSpy signal
+        Must have 2 signal dimensions and 0 navigation dimensions.
+
+    Returns
+    -------
+    output_values : tuple (x_mean, y_mean, value_mean)
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import hyperspy.api as hs
+    >>> import fpd_data_processing.pixelated_stem_tools as pst
+    >>> s = hs.signals.Signal2D(np.zeros((10, 10)))
+    >>> pst._get_signal_mean_position_and_value(s)
+    (4.5, 4.5, 0.0)
+
+    """
+    if len(signal.axes_manager.navigation_axes) != 0:
+        raise ValueError("signal need to have 0 navigation dimensions")
+    if len(signal.axes_manager.signal_axes) != 2:
+        raise ValueError("signal need to have 2 signal dimensions")
+    sam = signal.axes_manager.signal_axes
+    x_mean = sam[0].axis.mean()
+    y_mean = sam[1].axis.mean()
+    value_mean = signal.data.mean()
+    return(x_mean, y_mean, value_mean)
+
+
 def _get_corner_value(s, corner_size=0.05):
     am = s.axes_manager
     a0_range = (am[0].high_value - am[0].low_value)*corner_size

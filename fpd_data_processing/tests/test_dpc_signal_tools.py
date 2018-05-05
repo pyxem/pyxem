@@ -1,4 +1,6 @@
+import pytest
 import numpy as np
+import hyperspy.api as hs
 import fpd_data_processing.pixelated_stem_tools as pst
 
 
@@ -93,3 +95,79 @@ class TestMakeBivariateHistogram:
         assert s.data[hist_iY, hist_iX] == size
         s.data[hist_iY, hist_iX] = 0
         assert not s.data.any()
+
+
+class TestGetSignalMeanPositionAndValue:
+
+    def test_simple(self):
+        s = hs.signals.Signal2D(np.zeros((10, 10)))
+        # s has the values 0 to 9, so middle position will be 4.5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert len(output) == 3
+        assert output[0] == 4.5  # x-position
+        assert output[1] == 4.5  # y-position
+        assert output[2] == 0.0  # Mean value
+
+    def test_mean_value(self):
+        s = hs.signals.Signal2D(np.ones((10, 10))*9)
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output[2] == 9.0
+
+    def test_non_square_shape(self):
+        s = hs.signals.Signal2D(np.zeros((10, 5)))
+        # s gets the shape 5, 10. Due to the axes being reversed
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output[0] == 2.
+        assert output[1] == 4.5
+
+    def test_wrong_input_dimensions(self):
+        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_signal_mean_position_and_value(s)
+        s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_signal_mean_position_and_value(s)
+
+    def test_origin(self):
+        s = hs.signals.Signal2D(np.zeros((20, 10)))
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (4.5, 9.5, 0)
+        s.axes_manager[0].offset = 10
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, 9.5, 0)
+        s.axes_manager[1].offset = 6
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, 15.5, 0)
+        s.axes_manager[1].offset = -5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, 4.5, 0)
+        s.axes_manager[1].offset = -50
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (14.5, -40.5, 0)
+
+    def test_scale(self):
+        s = hs.signals.Signal2D(np.ones((20, 10)))
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (4.5, 9.5, 1)
+        s.axes_manager[0].scale = 2
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (9, 9.5, 1)
+        s.axes_manager[0].scale = 0.5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (2.25, 9.5, 1)
+        s.axes_manager[1].scale = 10
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (2.25, 95., 1)
+
+    def test_origin_and_scale(self):
+        s = hs.signals.Signal2D(np.zeros((30, 10)))
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (4.5, 14.5, 0)
+        s.axes_manager[0].offset = 10
+        s.axes_manager[0].scale = 0.5
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (12.25, 14.5, 0)
+        s.axes_manager[1].offset = -50
+        s.axes_manager[1].scale = 2
+        output = pst._get_signal_mean_position_and_value(s)
+        assert output == (12.25, -21., 0)
