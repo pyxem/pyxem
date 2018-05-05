@@ -97,6 +97,120 @@ class TestMakeBivariateHistogram:
         assert not s.data.any()
 
 
+class TestGetCornerValues:
+
+    def test_simple(self):
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        corner_values = pst._get_corner_values(s)
+        assert corner_values.shape == (3, 4)
+        # tl: top left, bl: bottom right, tr: top right, br: bottom right
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (2.5, 2.5, 0.0)).all()
+        assert (corner_bl == (2.5, 97.5, 0.0)).all()
+        assert (corner_tr == (97.5, 2.5, 0.0)).all()
+        assert (corner_br == (97.5, 97.5, 0.0)).all()
+
+    def test_non_square_shape(self):
+        s = hs.signals.Signal2D(np.zeros((201, 101)))
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (2.5, 5., 0.0)).all()
+        assert (corner_bl == (2.5, 195., 0.0)).all()
+        assert (corner_tr == (97.5, 5., 0.0)).all()
+        assert (corner_br == (97.5, 195., 0.0)).all()
+
+    def test_corner_size_parameters(self):
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        corner_values = pst._get_corner_values(s, corner_size=0.1)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (5., 5., 0.0)).all()
+        assert (corner_bl == (5., 95., 0.0)).all()
+        assert (corner_tr == (95., 5., 0.0)).all()
+        assert (corner_br == (95., 95., 0.0)).all()
+
+    def test_different_corner_values(self):
+        s = hs.signals.Signal2D(np.zeros((100, 100)))
+        s.data[:5, :5] = 10
+        s.data[-5:, :5] = 20
+        s.data[:5, -5:] = 30
+        s.data[-5:, -5:] = 40
+        corner_values = pst._get_corner_values(s)
+        assert (corner_values[2] == (10, 20, 30, 40)).all()
+        corner_values = pst._get_corner_values(s, corner_size=0.1)
+        assert (corner_values[2] == (2.5, 5., 7.5, 10.)).all()
+
+    def test_different_corner_values_non_square(self):
+        s = hs.signals.Signal2D(np.zeros((200, 100)))
+        s.data[:10, :5] = 10
+        s.data[-10:, :5] = 20
+        s.data[:10, -5:] = 30
+        s.data[-10:, -5:] = 40
+        corner_values = pst._get_corner_values(s)
+        assert (corner_values[2] == (10, 20, 30, 40)).all()
+        corner_values = pst._get_corner_values(s, corner_size=0.1)
+        assert (corner_values[2] == (2.5, 5., 7.5, 10.)).all()
+
+    def test_offset(self):
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        s.axes_manager[0].offset = 10
+        s.axes_manager[1].offset = -10
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (12.5, -7.5, 0.0)).all()
+        assert (corner_bl == (12.5, 87.5, 0.0)).all()
+        assert (corner_tr == (107.5, -7.5, 0.0)).all()
+        assert (corner_br == (107.5, 87.5, 0.0)).all()
+
+    def test_scale(self):
+        s = hs.signals.Signal2D(np.zeros((101, 101)))
+        s.axes_manager[0].scale = 0.5
+        s.axes_manager[1].scale = 2
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (1.25, 5., 0.0)).all()
+        assert (corner_bl == (1.25, 195., 0.0)).all()
+        assert (corner_tr == (48.75, 5., 0.0)).all()
+        assert (corner_br == (48.75, 195., 0.0)).all()
+
+    def test_crop_square(self):
+        s = hs.signals.Signal2D(np.zeros((200, 200))).isig[50:150, 50:150]
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (52., 52, 0.0)).all()
+        assert (corner_bl == (52., 147., 0.0)).all()
+        assert (corner_tr == (147., 52., 0.0)).all()
+        assert (corner_br == (147., 147., 0.0)).all()
+
+    def test_crop_square_values(self):
+        s = hs.signals.Signal2D(np.zeros((200, 200)))
+        s.data[50:60, 50:60] = 10
+        s.data[140:150, 50:60] = 20
+        s.data[50:60, 140:150] = 30
+        s.data[140:150, 140:150] = 40
+        s = s.isig[50:150, 50:150]
+        corner_values = pst._get_corner_values(s)
+        corner_tl, corner_bl = corner_values[:, 0], corner_values[:, 1]
+        corner_tr, corner_br = corner_values[:, 2], corner_values[:, 3]
+        assert (corner_tl == (52., 52, 10.)).all()
+        assert (corner_bl == (52., 147., 20.)).all()
+        assert (corner_tr == (147., 52., 30.)).all()
+        assert (corner_br == (147., 147., 40.)).all()
+
+    def test_wrong_input_dimensions(self):
+        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_corner_values(s)
+        s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_corner_values(s)
+
+
 class TestGetSignalMeanPositionAndValue:
 
     def test_simple(self):

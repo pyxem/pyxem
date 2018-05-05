@@ -128,32 +128,36 @@ def _get_signal_mean_position_and_value(signal):
     return(x_mean, y_mean, value_mean)
 
 
-def _get_corner_value(s, corner_size=0.05):
-    am = s.axes_manager
-    a0_range = (am[0].high_value - am[0].low_value)*corner_size
-    a1_range = (am[1].high_value - am[1].low_value)*corner_size
+def _get_corner_values(s, corner_size=0.05):
+    """Get the corner positions and mean values from a 2D signal
 
-    s_corner00 = s.isig[:a0_range+1, :a1_range+1]
-    s_corner01 = s.isig[:a0_range+1, am[1].high_value-a1_range:]
-    s_corner10 = s.isig[am[0].high_value-a0_range:, :a1_range+1]
-    s_corner11 = s.isig[am[0].high_value-a0_range:, am[1].high_value-a1_range:]
+    Returns
+    -------
+    corner_array : NumPy array
+        corner_array[:, 0] top left corner,
+        corner_array[:, 1] bottom left corner,
+        corner_array[:, 2] top right corner,
+        corner_array[:, 3] bottom right corner.
 
-    corner00 = (
-            s_corner00.axes_manager[0].axis.mean(),
-            s_corner00.axes_manager[1].axis.mean(),
-            s_corner00.data.mean())
-    corner01 = (
-            s_corner01.axes_manager[0].axis.mean(),
-            s_corner01.axes_manager[1].axis.mean(),
-            s_corner01.data.mean())
-    corner10 = (
-            s_corner10.axes_manager[0].axis.mean(),
-            s_corner10.axes_manager[1].axis.mean(),
-            s_corner10.data.mean())
-    corner11 = (
-            s_corner11.axes_manager[0].axis.mean(),
-            s_corner11.axes_manager[1].axis.mean(),
-            s_corner11.data.mean())
+    """
+    if len(s.axes_manager.navigation_axes) != 0:
+        raise ValueError("s need to have 0 navigation dimensions")
+    if len(s.axes_manager.signal_axes) != 2:
+        raise ValueError("s need to have 2 signal dimensions")
+    am = s.axes_manager.signal_axes
+    a0_range = (am[0].high_index - am[0].low_index)*corner_size
+    a1_range = (am[1].high_index - am[1].low_index)*corner_size
+    a0_range, a1_range = int(a0_range), int(a1_range)
+
+    s_corner00 = s.isig[:a0_range + 1, :a1_range + 1]
+    s_corner01 = s.isig[:a0_range + 1, am[1].high_index-a1_range:]
+    s_corner10 = s.isig[am[0].high_index-a0_range:, :a1_range + 1]
+    s_corner11 = s.isig[am[0].high_index-a0_range:, am[1].high_index-a1_range:]
+
+    corner00 = _get_signal_mean_position_and_value(s_corner00)
+    corner01 = _get_signal_mean_position_and_value(s_corner01)
+    corner10 = _get_signal_mean_position_and_value(s_corner10)
+    corner11 = _get_signal_mean_position_and_value(s_corner11)
 
     return(np.array((corner00, corner01, corner10, corner11)).T)
 
@@ -169,7 +173,7 @@ def _residuals(params, signal, X):
 
 
 def _fit_ramp_to_image(signal, corner_size=0.05):
-    corner_values = _get_corner_value(signal, corner_size=corner_size)
+    corner_values = _get_corner_values(signal, corner_size=corner_size)
     p0 = [0.1, 0.1, 0.1, 0.1]
 
     p = leastsq(_residuals, p0, args=(None, corner_values))[0]
