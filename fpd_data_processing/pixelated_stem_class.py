@@ -725,7 +725,7 @@ class DPCSignal2D(Signal2D):
 
         for i, s in enumerate(self):
             if only_offset:
-                corners = pst._get_corner_value(s, corner_size=corner_size)[2]
+                corners = pst._get_corner_values(s, corner_size=corner_size)[2]
                 ramp = corners.mean()
             else:
                 ramp = pst._fit_ramp_to_image(s, corner_size=0.05)

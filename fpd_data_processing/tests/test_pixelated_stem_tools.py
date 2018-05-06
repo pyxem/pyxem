@@ -382,7 +382,7 @@ class test_dpcsignal_tools(unittest.TestCase):
         corner_size = 0.1
         image_size = 100
         s = Signal2D(np.ones(shape=(image_size, image_size)))
-        corner_list = pst._get_corner_value(s, corner_size=0.1)
+        corner_list = pst._get_corner_values(s, corner_size=0.1)
         corner0, corner1 = corner_list[:, 0], corner_list[:, 1]
         corner2, corner3 = corner_list[:, 2], corner_list[:, 3]
 

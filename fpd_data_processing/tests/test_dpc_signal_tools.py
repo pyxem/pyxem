@@ -242,6 +242,20 @@ class TestFitRampToImage:
         ramp10 = pst._fit_ramp_to_image(s, corner_size=0.1)
         assert (ramp05 != ramp10).all()
 
+    def test_different_corner_values(self):
+        data = np.zeros((100, 100))
+        data[:5, :5], data[:5, -5:] = -10, 10
+        data[-5:, :5] = 10
+        data[-5:, -5:] = 30
+        s = hs.signals.Signal2D(data)
+        ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
+        s.data = s.data - ramp
+        assert approx(s.data[:5, :5].mean()) == 0.
+        assert approx(s.data[:5, -5:].mean()) == 0.
+        assert approx(s.data[-5:, :5].mean()) == 0.
+        assert approx(s.data[-5:, -5:].mean()) == 0.
+        assert s.data[5:95, 5:95].mean() != 0
+
 
 class TestGetSignalMeanPositionAndValue:
 
