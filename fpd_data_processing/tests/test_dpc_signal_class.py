@@ -1,4 +1,5 @@
 import pytest
+from pytest import approx
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
 from fpd_data_processing.pixelated_stem_class import (
@@ -135,6 +136,17 @@ class TestDpcSignal2dCorrectRamp:
         assert_allclose(s1.isig[-5:, :5].data, np.zeros((2, 5, 5)), atol=1e-7)
         assert_allclose(s1.isig[:5, -5:].data, np.zeros((2, 5, 5)), atol=1e-7)
         assert_allclose(s1.isig[-5:, -5:].data, np.zeros((2, 5, 5)), atol=1e-7)
+
+    def test_random_negative_values(self):
+        s = DPCSignal2D(np.zeros((2, 1000, 1000)))
+        s.data[:, :300, :300] = np.random.random((300, 300)) * 10 - 5
+        s.data[:, :300, -300:] = np.random.random((300, 300)) * 10 - 5
+        s.data[:, -300:, :300] = np.random.random((300, 300)) * 10 - 5
+        s.data[:, -300:, -300:] = np.random.random((300, 300)) * 10 - 5
+
+        s_corr = s.correct_ramp(corner_size=0.3)
+        assert approx(s_corr.data[:, 300:-300, :].mean(), abs=0.1) == 0.0
+        assert approx(s_corr.data[:, :, 300:-300].mean(), abs=0.1) == 0.0
 
     def test_cropped_dpcsignal(self):
         s = DPCSignal2D(np.random.random((2, 200, 200)))
