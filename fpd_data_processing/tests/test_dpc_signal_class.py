@@ -111,6 +111,33 @@ class TestDpcSignal2dCorrectRamp:
         s_corr2 = s.correct_ramp(only_offset=True)
         assert_allclose(s_corr2.data, data_ramp, atol=1e-8)
 
+    def test_large_values_not_in_corners(self):
+        s = DPCSignal2D(np.zeros((2, 100, 100)))
+        s.inav[0].data[:5, :5], s.inav[0].data[:5, -5:] = 10, 10
+        s.inav[0].data[-5:, :5], s.inav[0].data[-5:, -5:] = 10, 10
+        s.inav[1].data[:5, :5], s.inav[1].data[:5, -5:] = 30, 30
+        s.inav[1].data[-5:, :5], s.inav[1].data[-5:, -5:] = 30, 30
+
+        cross_array = np.zeros((100, 100))
+        cross_array[30:70, :], cross_array[:, 30:70] = 1000, 1000
+        s.data = s.data + cross_array
+
+        s1 = s.correct_ramp(corner_size=0.05)
+        s1.data = s1.data - cross_array
+
+        assert_allclose(s1.inav[0].data[5:95, :], np.ones((90, 100))*-10)
+        assert_allclose(s1.inav[0].data[:, 5:95], np.ones((100, 90))*-10)
+        assert_allclose(s1.inav[0].data[5:95, :], np.ones((90, 100))*-10)
+        assert_allclose(s1.isig[:5, :5].data, np.zeros((2, 5, 5)), atol=1e-7)
+        assert_allclose(s1.isig[-5:, :5].data, np.zeros((2, 5, 5)), atol=1e-7)
+        assert_allclose(s1.isig[:5, -5:].data, np.zeros((2, 5, 5)), atol=1e-7)
+        assert_allclose(s1.isig[-5:, -5:].data, np.zeros((2, 5, 5)), atol=1e-7)
+
+    def test_cropped_dpcsignal(self):
+        s = DPCSignal2D(np.random.random((2, 200, 200)))
+        s_crop = s.isig[50:150, 50:150]
+        s_crop.correct_ramp()
+
 
 class TestGetDpcSignal:
 
