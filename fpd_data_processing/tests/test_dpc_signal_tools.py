@@ -218,19 +218,19 @@ class TestFitRampToImage:
         data = np.zeros((100, 100))
         s = hs.signals.Signal2D(data)
         ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
-        assert approx(ramp) == data
+        assert (approx(ramp) == data).all()
 
     def test_ones_values(self):
         data = np.ones((100, 100))
         s = hs.signals.Signal2D(data)
         ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
-        assert approx(ramp) == data
+        assert (approx(ramp) == data).all()
 
     def test_negative_values(self):
         data = np.ones((100, 100))*-10
         s = hs.signals.Signal2D(data)
         ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
-        assert approx(ramp) == data
+        assert (approx(ramp) == data).all()
 
     def test_large_values_in_middle(self):
         data = np.zeros((100, 100))
@@ -238,7 +238,7 @@ class TestFitRampToImage:
         data[:, 5:95] = 10
         s = hs.signals.Signal2D(data)
         ramp05 = pst._fit_ramp_to_image(s, corner_size=0.05)
-        assert approx(ramp05) == np.zeros((100, 100))
+        assert (approx(ramp05) == np.zeros((100, 100))).all()
         ramp10 = pst._fit_ramp_to_image(s, corner_size=0.1)
         assert (ramp05 != ramp10).all()
 
