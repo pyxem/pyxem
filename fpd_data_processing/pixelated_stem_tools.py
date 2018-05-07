@@ -517,38 +517,47 @@ def _copy_axes_object_metadata(axes_original, axes_new):
     axes_new.units = axes_original.units
 
 
-def remove_dead_pixels(data, dead_pixel_list):
-    """
+def find_and_remove_dead_pixels(s):
+    """Find and remove zero values from a signal.
+
     Parameters
     ----------
-    data : 2-D numpy array
-    dead_pixel_x : list of integers
-    dead_pixel_y : list of integers
+    s : HyperSpy-like signal
+        Does not work for lazy signals.
 
-    Example
-    -------
-    >>> import numpy as np
+    Examples
+    --------
     >>> import fpd_data_processing.api as fp
     >>> s = fp.dummy_data.get_dead_pixel_signal()
-    >>> dead_pixel_list = np.where(s.data == 0)
-    >>> from fpd_data_processing.pixelated_stem_tools import remove_dead_pixels
-    >>> remove_dead_pixels(s.data, dead_pixel_list)
+    >>> import fpd_data_processing.pixelated_stem_tools as pst
+    >>> pst.find_and_remove_dead_pixels(s)
 
     """
-    x_list, y_list = dead_pixel_list[0], dead_pixel_list[1]
-    for x_pixel, y_pixel in zip(x_list, y_list):
-        if x_pixel == 0:
+    if s._lazy:
+        raise NotImplementedError("Not implemented for lazy signals.")
+    s_dif = s.sum(s.axes_manager.navigation_axes)
+    sig_x_max, sig_y_max = s.axes_manager.signal_shape
+    sig_x_max, sig_y_max = sig_x_max - 1, sig_y_max - 1
+    y_dead_list, x_dead_list = np.where(s_dif.data == 0)
+    x_list, y_list, value_list = [], [], []
+    for ix, iy in zip(x_dead_list, y_dead_list):
+        if ix == 0:
             pass
-        elif x_pixel == 255:
+        elif ix == sig_x_max:
             pass
-        elif y_pixel == 0:
+        elif iy == 0:
             pass
-        elif y_pixel == 255:
+        elif iy == sig_y_max:
             pass
         else:
-            neighbor0 = data[x_pixel + 1, y_pixel]
-            neighbor1 = data[x_pixel - 1, y_pixel]
-            neighbor2 = data[x_pixel, y_pixel + 1]
-            neighbor3 = data[x_pixel, y_pixel - 1]
-            new_value = (neighbor0 + neighbor1 + neighbor2 + neighbor3)/4
-            data[x_pixel, y_pixel] = new_value
+            p0 = s.data[..., iy + 1, ix]
+            p1 = s.data[..., iy - 1, ix]
+            p2 = s.data[..., iy, ix + 1]
+            p3 = s.data[..., iy, ix - 1]
+            value = ((p0 + p1 + p2 + p3)*0.25).astype(s.data.dtype)
+            value_list.append(value)
+            x_list.append(ix)
+            y_list.append(iy)
+
+    for ix, iy, value in zip(x_list, y_list, value_list):
+        s.data[..., iy, ix] = value

@@ -376,7 +376,7 @@ class TestGetAngleSectorMask(unittest.TestCase):
         assert mask1.all()
 
 
-class AxesManagerMetadataCopying:
+class TestAxesManagerMetadataCopying:
 
     def setup_method(self):
         s = Signal2D(np.zeros((50, 50)))
@@ -415,3 +415,29 @@ class AxesManagerMetadataCopying:
         assert ax_o.scale == ax_n.scale
         assert ax_o.name == ax_n.name
         assert ax_o.units == ax_n.units
+
+
+class TestFindAndRemoveDeadPixels:
+
+    def test_no_changes(self):
+        s = PixelatedSTEM(np.ones((10, 10, 10, 10)))
+        s_orig = s.deepcopy()
+        pst.find_and_remove_dead_pixels(s)
+        assert (s.data == s_orig.data).all()
+
+    def test_some_dead_pixels(self):
+        s = PixelatedSTEM(np.ones((10, 10, 10, 10)))
+        s.data[:, :, 5, 2] = 0
+        s.data[:, :, 2, 4] = 0
+        pst.find_and_remove_dead_pixels(s)
+        assert len(np.where(s.data == 0)[0]) == 0
+
+    def test_dead_pixel_camera_edge(self):
+        s = PixelatedSTEM(np.ones((10, 10, 10, 10)))
+        s.data[:, :, 0, 5] = 0
+        s.data[:, :, 2, 0] = 0
+        s.data[:, :, 2, -1] = 0
+        s.data[:, :, -1, 7] = 0
+        s_orig = s.deepcopy()
+        pst.find_and_remove_dead_pixels(s)
+        assert (s.data == s_orig.data).all()
