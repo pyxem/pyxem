@@ -429,7 +429,8 @@ class PixelatedSTEM(Signal2D):
         >>> s = dd.get_disk_shift_simple_test_signal()
         >>> s_com = s.center_of_mass(threshold=2)
         >>> s_r = s.radial_integration(
-        ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data])
+        ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
+        >>> s_r.plot()
 
         """
         if (centre_x is None) or (centre_y is None):
