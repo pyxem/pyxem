@@ -424,8 +424,14 @@ class PixelatedSTEM(Signal2D):
         ...     show_progressbar=False)
         >>> s_r.plot()
 
-        """
+        Using center_of_mass to find bright field disk position
 
+        >>> s = dd.get_disk_shift_simple_test_signal()
+        >>> s_com = s.center_of_mass(threshold=2)
+        >>> s_r = s.radial_integration(
+        ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data])
+
+        """
         if (centre_x is None) or (centre_y is None):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
         elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
