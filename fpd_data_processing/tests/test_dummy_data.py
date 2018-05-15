@@ -48,3 +48,4 @@ class TestDummyDataModule:
     def test_get_dead_pixel_signal(self):
         s = dd.get_dead_pixel_signal()
         s.plot()
+        assert (s.data == 0).any()
