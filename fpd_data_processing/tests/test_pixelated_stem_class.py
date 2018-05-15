@@ -10,12 +10,12 @@ import fpd_data_processing.make_diffraction_test_data as mdtd
 import fpd_data_processing.dummy_data as dd
 
 
-class test_pixelated_stem(unittest.TestCase):
+class TestPixelatedStem:
 
     def test_create(self):
         array0 = np.zeros(shape=(10, 10, 10, 10))
         s0 = PixelatedSTEM(array0)
-        self.assertEqual(array0.shape, s0.axes_manager.shape)
+        assert array0.shape == s0.axes_manager.shape
 
         # This should fail due to PixelatedSTEM inheriting
         # signal2D, i.e. the data has to be at least
@@ -25,10 +25,10 @@ class test_pixelated_stem(unittest.TestCase):
 
         array1 = np.zeros(shape=(10, 10))
         s1 = PixelatedSTEM(array1)
-        self.assertEqual(array1.shape, s1.axes_manager.shape)
+        assert array1.shape == s1.axes_manager.shape
 
 
-class test_plotting(unittest.TestCase):
+class TestPlotting:
 
     def test_simple_plot(self):
         s = PixelatedSTEM(np.zeros(shape=(3, 4, 6, 10)))
@@ -46,25 +46,25 @@ class test_plotting(unittest.TestCase):
         s.plot(navigator=s_nav)
 
 
-class test_pixelated_stem_flip_diffraction(unittest.TestCase):
+class TestPixelatedStemFlipDiffraction:
 
     def test_flip_x(self):
         array = np.zeros(shape=(3, 4, 6, 10))
         array[:, :, :, 5:] = 1
         s = PixelatedSTEM(array)
-        self.assertTrue((s.data[:, :, :, 5:] == 1).all())
+        assert (s.data[:, :, :, 5:] == 1).all()
         s_flip = s.flip_diffraction_x()
-        self.assertTrue((s_flip.data[:, :, :, 5:] == 0).all())
-        self.assertTrue((s_flip.data[:, :, :, :5] == 1).all())
+        assert (s_flip.data[:, :, :, 5:] == 0).all()
+        assert (s_flip.data[:, :, :, :5] == 1).all()
 
     def test_flip_y(self):
         array = np.zeros(shape=(3, 4, 6, 10))
         array[:, :, 3:, :] = 1
         s = PixelatedSTEM(array)
-        self.assertTrue((s.data[:, :, 3:, :] == 1).all())
+        assert (s.data[:, :, 3:, :] == 1).all()
         s_flip = s.flip_diffraction_y()
-        self.assertTrue((s_flip.data[:, :, 3:, :] == 0).all())
-        self.assertTrue((s_flip.data[:, :, :3, :] == 1).all())
+        assert (s_flip.data[:, :, 3:, :] == 0).all()
+        assert (s_flip.data[:, :, :3, :] == 1).all()
 
 
 class TestPixelatedSTEMThresholdAndMask:
@@ -117,7 +117,7 @@ class TestPixelatedSTEMThresholdAndMask:
             s.threshold_and_mask()
 
 
-class test_pixelated_stem_center_of_mass(unittest.TestCase):
+class TestPixelatedStemCenterOfMass:
 
     def test_center_of_mass_0d(self):
         x0, y0 = 2, 3
@@ -125,10 +125,10 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         array0[y0, x0] = 1
         s0 = PixelatedSTEM(array0)
         s_com0 = s0.center_of_mass()
-        self.assertTrue((s_com0.inav[0].data == x0).all())
-        self.assertTrue((s_com0.inav[1].data == y0).all())
-        self.assertEqual(s_com0.axes_manager.navigation_shape, (2, ))
-        self.assertEqual(s_com0.axes_manager.signal_shape, ())
+        assert (s_com0.inav[0].data == x0).all()
+        assert (s_com0.inav[1].data == y0).all()
+        assert s_com0.axes_manager.navigation_shape == (2, )
+        assert s_com0.axes_manager.signal_shape == ()
 
     def test_center_of_mass_1d(self):
         x0, y0 = 2, 3
@@ -136,10 +136,10 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         array0[:, y0, x0] = 1
         s0 = PixelatedSTEM(array0)
         s_com0 = s0.center_of_mass()
-        self.assertTrue((s_com0.inav[0].data == x0).all())
-        self.assertTrue((s_com0.inav[1].data == y0).all())
-        self.assertEqual(s_com0.axes_manager.navigation_shape, (2, ))
-        self.assertEqual(s_com0.axes_manager.signal_shape, (5, ))
+        assert (s_com0.inav[0].data == x0).all()
+        assert (s_com0.inav[1].data == y0).all()
+        assert s_com0.axes_manager.navigation_shape == (2, )
+        assert s_com0.axes_manager.signal_shape == (5, )
 
     def test_center_of_mass(self):
         x0, y0 = 5, 7
@@ -147,8 +147,8 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         array0[:, :, y0, x0] = 1
         s0 = PixelatedSTEM(array0)
         s_com0 = s0.center_of_mass()
-        self.assertTrue((s_com0.inav[0].data == x0).all())
-        self.assertTrue((s_com0.inav[1].data == y0).all())
+        assert (s_com0.inav[0].data == x0).all()
+        assert (s_com0.inav[1].data == y0).all()
 
         array1 = np.zeros(shape=(10, 10, 10, 10))
         x1_array = np.random.randint(0, 10, size=(10, 10))
@@ -158,8 +158,8 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
                 array1[i, j, y1_array[i, j], x1_array[i, j]] = 1
         s1 = PixelatedSTEM(array1)
         s_com1 = s1.center_of_mass()
-        self.assertTrue((s_com1.data[0] == x1_array).all())
-        self.assertTrue((s_com1.data[1] == y1_array).all())
+        assert (s_com1.data[0] == x1_array).all()
+        assert (s_com1.data[1] == y1_array).all()
 
     def test_center_of_mass_different_shapes(self):
         array1 = np.zeros(shape=(5, 10, 15, 8))
@@ -170,15 +170,15 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
                 array1[i, j, y1_array[i, j], x1_array[i, j]] = 1
         s1 = PixelatedSTEM(array1)
         s_com1 = s1.center_of_mass()
-        self.assertTrue((s_com1.inav[0].data == x1_array).all())
-        self.assertTrue((s_com1.inav[1].data == y1_array).all())
+        assert (s_com1.inav[0].data == x1_array).all()
+        assert (s_com1.inav[1].data == y1_array).all()
 
     def test_center_of_mass_different_shapes2(self):
         psX, psY = 11, 9
         s = mdtd.generate_4d_data(
                 probe_size_x=psX, probe_size_y=psY, ring_x=None)
         s_com = s.center_of_mass()
-        self.assertEqual(s_com.axes_manager.shape, (2, psX, psY))
+        assert s_com.axes_manager.shape == (2, psX, psY)
 
     def test_different_shape_no_blur_no_downscale(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
@@ -188,8 +188,8 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
                 disk_r=40, disk_I=20, blur=False, blur_sigma=1,
                 downscale=False)
         s_com = s.center_of_mass()
-        self.assertTrue((s_com.inav[0].data == x).all())
-        self.assertTrue((s_com.inav[1].data == y).all())
+        assert (s_com.inav[0].data == x).all()
+        assert (s_com.inav[1].data == y).all()
 
     def test_different_shape_no_downscale(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
@@ -212,10 +212,10 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         s.data[:, :, 15, 10] = 1000000
         s_com0 = s.center_of_mass()
         s_com1 = s.center_of_mass(mask=(90, 79, 60))
-        self.assertFalse((s_com0.inav[0].data == x).all())
-        self.assertFalse((s_com0.inav[1].data == y).all())
-        self.assertTrue((s_com1.inav[0].data == x).all())
-        self.assertTrue((s_com1.inav[1].data == y).all())
+        assert not (s_com0.inav[0].data == x).all()
+        assert not (s_com0.inav[1].data == y).all()
+        assert (s_com1.inav[0].data == x).all()
+        assert (s_com1.inav[1].data == y).all()
 
     def test_mask_2(self):
         x, y = 60, 50
@@ -229,41 +229,41 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         # Center of mass should not be in center of the disk, due to the
         # large value.
         s_com0 = s.center_of_mass()
-        self.assertFalse((s_com0.inav[0].data == x).all())
-        self.assertTrue((s_com0.inav[1].data == y).all())
+        assert not (s_com0.inav[0].data == x).all()
+        assert (s_com0.inav[1].data == y).all()
 
         # Here, the large value is masked
         s_com1 = s.center_of_mass(mask=(60, 50, 25))
-        self.assertTrue((s_com1.inav[0].data == x).all())
-        self.assertTrue((s_com1.inav[1].data == y).all())
+        assert (s_com1.inav[0].data == x).all()
+        assert (s_com1.inav[1].data == y).all()
 
         # Here, the large value is right inside the edge of the mask
         s_com3 = s.center_of_mass(mask=(60, 50, 31))
-        self.assertFalse((s_com3.inav[0].data == x).all())
-        self.assertTrue((s_com3.inav[1].data == y).all())
+        assert not (s_com3.inav[0].data == x).all()
+        assert (s_com3.inav[1].data == y).all()
 
         # Here, the large value is right inside the edge of the mask
         s_com4 = s.center_of_mass(mask=(59, 50, 30))
-        self.assertFalse((s_com4.inav[0].data == x).all())
-        self.assertTrue((s_com4.inav[1].data == y).all())
+        assert not (s_com4.inav[0].data == x).all()
+        assert (s_com4.inav[1].data == y).all()
 
         s.data[:, :, 50, 30] = 0
         s.data[:, :, 80, 60] = 200000  # Large value under the disk
 
         # The large value is masked
         s_com5 = s.center_of_mass(mask=(60, 50, 25))
-        self.assertTrue((s_com5.inav[0].data == x).all())
-        self.assertTrue((s_com5.inav[1].data == y).all())
+        assert (s_com5.inav[0].data == x).all()
+        assert (s_com5.inav[1].data == y).all()
 
         # The large value just not masked
         s_com6 = s.center_of_mass(mask=(60, 50, 31))
-        self.assertTrue((s_com6.inav[0].data == x).all())
-        self.assertFalse((s_com6.inav[1].data == y).all())
+        assert (s_com6.inav[0].data == x).all()
+        assert not (s_com6.inav[1].data == y).all()
 
         # The large value just not masked
         s_com7 = s.center_of_mass(mask=(60, 55, 25))
-        self.assertTrue((s_com7.inav[0].data == x).all())
-        self.assertFalse((s_com7.inav[1].data == y).all())
+        assert (s_com7.inav[0].data == x).all()
+        assert not (s_com7.inav[1].data == y).all()
 
     def test_threshold(self):
         x, y = 60, 50
@@ -276,18 +276,18 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
         # The extra values are ignored due to thresholding
         s_com0 = s.center_of_mass(threshold=2)
-        self.assertTrue((s_com0.inav[0].data == x).all())
-        self.assertTrue((s_com0.inav[1].data == y).all())
+        assert (s_com0.inav[0].data == x).all()
+        assert (s_com0.inav[1].data == y).all()
 
         # The extra values are not ignored
         s_com1 = s.center_of_mass(threshold=1)
-        self.assertFalse((s_com1.inav[0].data == x).all())
-        self.assertFalse((s_com1.inav[1].data == y).all())
+        assert not (s_com1.inav[0].data == x).all()
+        assert not (s_com1.inav[1].data == y).all()
 
         # The extra values are not ignored
         s_com2 = s.center_of_mass()
-        self.assertFalse((s_com2.inav[0].data == x).all())
-        self.assertFalse((s_com2.inav[1].data == y).all())
+        assert (s_com2.inav[0].data == x).all()
+        assert (s_com2.inav[1].data == y).all()
 
     def test_threshold_and_mask(self):
         x, y = 60, 50
@@ -301,23 +301,23 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
 
         # The extra values are ignored due to thresholding and mask
         s_com0 = s.center_of_mass(threshold=2, mask=(60, 50, 50))
-        self.assertTrue((s_com0.inav[0].data == x).all())
-        self.assertTrue((s_com0.inav[1].data == y).all())
+        assert (s_com0.inav[0].data == x).all()
+        assert (s_com0.inav[1].data == y).all()
 
         # The extra values are not ignored
         s_com1 = s.center_of_mass(mask=(60, 50, 50))
-        self.assertFalse((s_com1.inav[0].data == x).all())
-        self.assertFalse((s_com1.inav[1].data == y).all())
+        assert not (s_com1.inav[0].data == x).all()
+        assert not (s_com1.inav[1].data == y).all()
 
         # The extra values are not ignored
         s_com3 = s.center_of_mass(threshold=2)
-        self.assertFalse((s_com3.inav[0].data == x).all())
-        self.assertFalse((s_com3.inav[1].data == y).all())
+        assert not (s_com3.inav[0].data == x).all()
+        assert not (s_com3.inav[1].data == y).all()
 
         # The extra values are not ignored
         s_com4 = s.center_of_mass()
-        self.assertFalse((s_com4.inav[0].data == x).all())
-        self.assertFalse((s_com4.inav[1].data == y).all())
+        assert not (s_com4.inav[0].data == x).all()
+        assert not (s_com4.inav[1].data == y).all()
 
     def test_1d_signal(self):
         x = np.arange(45, 45+9).reshape((1, 9))
@@ -328,8 +328,8 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
                 disk_r=20, disk_I=20, blur=False, blur_sigma=1,
                 downscale=False)
         s_com = s.inav[:, 0].center_of_mass()
-        self.assertTrue((s_com.inav[0].data == x).all())
-        self.assertTrue((s_com.inav[1].data == y).all())
+        assert (s_com.inav[0].data == x).all()
+        assert (s_com.inav[1].data == y).all()
 
     def test_0d_signal(self):
         x, y = 40, 51
@@ -339,8 +339,8 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
                 disk_r=20, disk_I=20, blur=False, blur_sigma=1,
                 downscale=False)
         s_com = s.inav[0, 0].center_of_mass()
-        self.assertTrue((s_com.inav[0].data == x).all())
-        self.assertTrue((s_com.inav[1].data == y).all())
+        assert (s_com.inav[0].data == x).all()
+        assert (s_com.inav[1].data == y).all()
 
     def test_lazy(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
@@ -377,13 +377,13 @@ class test_pixelated_stem_center_of_mass(unittest.TestCase):
         assert com_sig_extent == lazy_com_sig_extent
 
 
-class test_pixelated_stem_radial_integration(unittest.TestCase):
+class TestPixelatedStemRadialIntegration:
 
     def test_simple(self):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
-        self.assertTrue((s0_r.data[:, :, :-1] == 1).all())
+        assert (s0_r.data[:, :, :-1] == 1).all()
 
         data_shape = 2, 2, 11, 11
         array1 = np.zeros(data_shape)
@@ -392,30 +392,30 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         s1.axes_manager.signal_axes[0].offset = -5
         s1.axes_manager.signal_axes[1].offset = -5
         s1_r = s1.radial_integration()
-        self.assertTrue(np.all(s1_r.data[:, :, 0] == 1))
-        self.assertTrue(np.all(s1_r.data[:, :, 1:] == 0))
+        assert np.all(s1_r.data[:, :, 0] == 1)
+        assert np.all(s1_r.data[:, :, 1:] == 0)
 
     def test_different_shape(self):
         array = np.ones(shape=(7, 9, 30, 40))
         s = PixelatedSTEM(array)
         s_r = s.radial_integration()
-        self.assertTrue((s_r.data[:, :, :-2] == 1).all())
+        assert (s_r.data[:, :, :-2] == 1).all()
 
     def test_nav_0(self):
         data_shape = (40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
-        self.assertEqual(s0_r.axes_manager.navigation_dimension, 0)
-        self.assertTrue((s0_r.data[:-1] == 1).all())
+        assert s0_r.axes_manager.navigation_dimension == 0
+        assert (s0_r.data[:-1] == 1).all()
 
     def test_nav_1(self):
         data_shape = (5, 40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
-        self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
-        self.assertTrue((s0_r.data[:, :-1] == 1).all())
+        assert s0_r.axes_manager.navigation_shape == data_shape[:1]
+        assert (s0_r.data[:, :-1] == 1).all()
 
     def test_big_value(self):
         data_shape = (5, 40, 40)
@@ -423,8 +423,8 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         array0 = np.ones(shape=data_shape)*big_value
         s0 = PixelatedSTEM(array0)
         s0_r = s0.radial_integration()
-        self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
-        self.assertTrue((s0_r.data[:, :-1] == big_value).all())
+        assert s0_r.axes_manager.navigation_shape == data_shape[:1]
+        assert (s0_r.data[:, :-1] == big_value).all()
 
     def test_correct_radius_simple(self):
         x, y, r, px, py = 40, 51, 30, 4, 5
@@ -436,8 +436,8 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
         s_r = s.radial_integration()
-        self.assertEqual(s_r.axes_manager.navigation_shape, (px, py))
-        self.assertTrue((s_r.data.argmax(axis=-1) == 30).all())
+        assert s_r.axes_manager.navigation_shape == (px, py))
+        assert (s_r.data.argmax(axis=-1) == 30).all()
 
     def test_correct_radius_random(self):
         x, y, px, py = 56, 48, 4, 5
@@ -450,7 +450,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
         s_r = s.radial_integration()
-        self.assertTrue((s_r.data.argmax(axis=-1) == r).all())
+        assert (s_r.data.argmax(axis=-1) == r).all()
 
     def test_correct_disk_x_y_and_radius_random(self):
         x, y, px, py = 56, 48, 4, 5
@@ -467,7 +467,7 @@ class test_pixelated_stem_radial_integration(unittest.TestCase):
                 centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
         s_r = s_r.isig[15:]  # Do not include the disk
         r -= 15  # Need to shift the radius, due to not including the disk
-        self.assertTrue((s_r.data.argmax(axis=-1) == r).all())
+        assert (s_r.data.argmax(axis=-1) == r).all()
 
 
 class TestPixelatedStemRadialIntegrationLazy(unittest.TestCase):
