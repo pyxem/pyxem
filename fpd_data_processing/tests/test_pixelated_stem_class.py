@@ -20,7 +20,7 @@ class TestPixelatedStem:
         # This should fail due to PixelatedSTEM inheriting
         # signal2D, i.e. the data has to be at least
         # 2-dimensions
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             PixelatedSTEM(np.zeros(10))
 
         array1 = np.zeros(shape=(10, 10))
@@ -286,8 +286,8 @@ class TestPixelatedStemCenterOfMass:
 
         # The extra values are not ignored
         s_com2 = s.center_of_mass()
-        assert (s_com2.inav[0].data == x).all()
-        assert (s_com2.inav[1].data == y).all()
+        assert not (s_com2.inav[0].data == x).all()
+        assert not (s_com2.inav[1].data == y).all()
 
     def test_threshold_and_mask(self):
         x, y = 60, 50
@@ -436,7 +436,7 @@ class TestPixelatedStemRadialIntegration:
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
         s_r = s.radial_integration()
-        assert s_r.axes_manager.navigation_shape == (px, py))
+        assert s_r.axes_manager.navigation_shape == (px, py)
         assert (s_r.data.argmax(axis=-1) == 30).all()
 
     def test_correct_radius_random(self):
