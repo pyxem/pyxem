@@ -20,25 +20,6 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
     return image
 
 
-def _center_of_mass_single_frame(im, threshold=None, mask=None):
-    if (mask is not None) or (threshold is not None):
-        image = _threshold_and_mask_single_frame(
-                im, threshold=threshold, mask=mask)
-    else:
-        image = im
-    data = measurements.center_of_mass(image, labels=mask)
-    return(np.array(data)[::-1])
-
-
-def _center_of_mass_dask_array(
-        dask_array, threshold=None, mask=None, show_progressbar=True):
-    func_args = {'threshold': threshold, 'mask': mask}
-    data = lt._calculate_function_on_dask_array(
-            dask_array, _center_of_mass_single_frame, func_args=func_args,
-            return_sig_size=2, show_progressbar=show_progressbar)
-    return data
-
-
 def _radial_integration_dask_array(
         dask_array, return_sig_size, centre_x, centre_y,
         mask_array=None, show_progressbar=True):

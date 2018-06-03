@@ -77,8 +77,8 @@ def _calculate_function_on_dask_array(
     >>> import fpd_data_processing.pixelated_stem_tools as pst
     >>> import fpd_data_processing.lazy_tools as lt
     >>> out_data = lt._calculate_function_on_dask_array(
-    ...     dask_data, pst._center_of_mass_single_frame,
-    ...     return_sig_size=2, show_progressbar=False)
+    ...     dask_data, np.sum,
+    ...     return_sig_size=1, show_progressbar=False)
 
     """
     if (len(dask_array.shape) == 2) or (len(dask_array.shape) > 4):

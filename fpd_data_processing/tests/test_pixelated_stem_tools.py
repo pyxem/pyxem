@@ -7,43 +7,6 @@ import fpd_data_processing.pixelated_stem_tools as pst
 from hyperspy.signals import Signal2D
 
 
-class TestCenterOfMassDaskArray:
-
-    def test_simple(self):
-        numpy_array = np.zeros((10, 10, 50, 50))
-        numpy_array[:, :, 25, 25] = 1
-        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
-        data = pst._center_of_mass_dask_array(
-                dask_array, show_progressbar=False)
-        assert data.shape == (10, 10, 2)
-        assert (data == np.ones((10, 10, 2))*25).all()
-
-    def test_mask(self):
-        numpy_array = np.zeros((10, 10, 50, 50))
-        numpy_array[:, :, 25, 25] = 1
-        numpy_array[:, :, 1, 1] = 100000000
-        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
-        data0 = pst._center_of_mass_dask_array(
-                dask_array, show_progressbar=False)
-        np.testing.assert_allclose(data0, np.ones((10, 10, 2)), rtol=1e-05)
-        mask = pst._make_circular_mask(25, 25, 50, 50, 10)
-        data1 = pst._center_of_mass_dask_array(
-                dask_array, mask=mask, show_progressbar=False)
-        assert (data1 == np.ones((10, 10, 2))*25).all()
-
-    def test_threshold(self):
-        numpy_array = np.zeros((10, 10, 50, 50))
-        numpy_array[:, :, 25, 25] = 1
-        numpy_array[:, :, 1, 1] = 100000000
-        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
-        data0 = pst._center_of_mass_dask_array(
-                dask_array, show_progressbar=False)
-        np.testing.assert_allclose(data0, np.ones((10, 10, 2)), rtol=1e-05)
-        data1 = pst._center_of_mass_dask_array(
-                dask_array, threshold=1, show_progressbar=False)
-        assert (data1 == np.ones((10, 10, 2))).all()
-
-
 class TestRadialIntegrationDaskArray:
 
     def test_simple(self):

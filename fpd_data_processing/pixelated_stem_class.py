@@ -3,11 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from scipy.ndimage import rotate, gaussian_filter
+import dask.array as da
+from dask.diagnostics import ProgressBar
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 from hyperspy.misc.utils import isiterable
 import fpd_data_processing.pixelated_stem_tools as pst
+import fpd_data_processing.dask_tools as dat
 from tqdm import tqdm
 
 
@@ -67,7 +70,7 @@ class PixelatedSTEM(Signal2D):
         --------
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
-        >>> s_c = s.center_of_mass(threshold=3.)
+        >>> s_c = s.center_of_mass(threshold=3., show_progressbar=False)
         >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
         >>> s_shift = s.shift_diffraction(s_c.inav[0].data, s_c.inav[1].data)
         >>> s_shift.plot()
@@ -233,7 +236,9 @@ class PixelatedSTEM(Signal2D):
         s_out.data = np.flip(self.data, axis=-2)
         return s_out
 
-    def center_of_mass(self, threshold=None, mask=None, show_progressbar=True):
+    def center_of_mass(
+            self, threshold=None, mask=None, lazy_result=False,
+            show_progressbar=True, chunk_calculations=None):
         """Get the centre of the STEM diffraction pattern using
         center of mass. Threshold can be set to only use the most
         intense parts of the pattern. A mask can be used to exclude
@@ -244,14 +249,18 @@ class PixelatedSTEM(Signal2D):
         threshold : number, optional
             The thresholding will be done at mean times
             this threshold value.
-        mask : tuple (x, y, r)
+        mask : tuple (x, y, r), optional
             Round mask centered on x and y, with radius r.
         show_progressbar : bool
             Default True
+        chunk_calculations : tuple
+            Chunking values when running the calculations.
 
         Returns
         -------
-        center x and y array (com x, com y) : tuple
+        s_com : DPCSignal
+            DPCSignal with beam shifts along the navigation dimension
+            and spatial dimensions as the signal dimension(s).
 
         Examples
         --------
@@ -268,33 +277,41 @@ class PixelatedSTEM(Signal2D):
         >>> s_com = s.center_of_mass(threshold=1.5, show_progressbar=False)
 
         """
+        det_shape = self.axes_manager.signal_shape
+        nav_dim = self.axes_manager.navigation_dimension
+        if chunk_calculations is None:
+            chunk_calculations = [16] * nav_dim + list(det_shape)
         if mask is not None:
             x, y, r = mask
-            im_x, im_y = self.axes_manager.signal_shape
-            mask = pst._make_circular_mask(x, y, im_x, im_y, r)
-
-        nav_dim = self.axes_manager.navigation_dimension
-        # Signal is transposed, due to the DPC signals having the
-        # x and y deflections as navigation dimension, and probe
-        # positions as signal dimensions
-        if (not self._lazy) or (nav_dim == 0):
-            s_com = self.map(
-                    function=pst._center_of_mass_single_frame,
-                    ragged=False, inplace=False, parallel=True,
-                    show_progressbar=show_progressbar,
-                    threshold=threshold, mask=mask)
-            data = s_com.data
+            mask_array = pst._make_circular_mask(
+                    x, y, det_shape[0], det_shape[1], r)
+            mask_array = np.invert(mask_array)
         else:
-            data = pst._center_of_mass_dask_array(
-                    self.data, threshold=threshold, mask=mask,
-                    show_progressbar=show_progressbar)
-        if self.axes_manager.navigation_dimension == 0:
-            s_com = DPCBaseSignal(data).T
-        elif self.axes_manager.navigation_dimension == 1:
-            s_com = DPCSignal1D(np.swapaxes(data, 0, 1))
-        elif self.axes_manager.navigation_dimension == 2:
-            data = np.swapaxes(np.swapaxes(data, 0, 1), 0, 2)
-            s_com = DPCSignal2D(data)
+            mask_array = None
+        dask_array = da.from_array(self.data, chunks=chunk_calculations)
+        data = dat._center_of_mass_array(
+                dask_array, threshold_value=threshold,
+                mask_array=mask_array)
+        if lazy_result:
+            if nav_dim == 2:
+                s_com = LazyDPCSignal2D(data)
+            elif nav_dim == 1:
+                s_com = LazyDPCSignal1D(data)
+            elif nav_dim == 0:
+                s_com = LazyDPCBaseSignal(data).T
+        else:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            data = data.compute()
+            if show_progressbar:
+                pbar.unregister()
+            if nav_dim == 2:
+                s_com = DPCSignal2D(data)
+            elif nav_dim == 1:
+                s_com = DPCSignal1D(data)
+            elif nav_dim == 0:
+                s_com = DPCBaseSignal(data).T
         s_com.axes_manager.navigation_axes[0].name = "Beam position"
         for nav_axes, sig_axes in zip(
                 self.axes_manager.navigation_axes,
@@ -427,7 +444,7 @@ class PixelatedSTEM(Signal2D):
         Using center_of_mass to find bright field disk position
 
         >>> s = dd.get_disk_shift_simple_test_signal()
-        >>> s_com = s.center_of_mass(threshold=2)
+        >>> s_com = s.center_of_mass(threshold=2, show_progressbar=False)
         >>> s_r = s.radial_integration(
         ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
         >>> s_r.plot()
