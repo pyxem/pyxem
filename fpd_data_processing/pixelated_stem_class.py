@@ -8,6 +8,7 @@ from dask.diagnostics import ProgressBar
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
+from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
 import fpd_data_processing.pixelated_stem_tools as pst
 import fpd_data_processing.dask_tools as dat
@@ -251,9 +252,12 @@ class PixelatedSTEM(Signal2D):
             this threshold value.
         mask : tuple (x, y, r), optional
             Round mask centered on x and y, with radius r.
-        show_progressbar : bool
+        lazy_result : bool, optional
+            If True, will not compute the data directly, but
+            return a lazy signal. Default False
+        show_progressbar : bool, optional
             Default True
-        chunk_calculations : tuple
+        chunk_calculations : tuple, optional
             Chunking values when running the calculations.
 
         Returns
@@ -275,6 +279,11 @@ class PixelatedSTEM(Signal2D):
         Also threshold
 
         >>> s_com = s.center_of_mass(threshold=1.5, show_progressbar=False)
+
+        Get a lazy signal, then calculate afterwards
+
+        >>> s_com = s.center_of_mass(lazy_result=True, show_progressbar=False)
+        >>> s_com.compute(progressbar=False)
 
         """
         det_shape = self.axes_manager.signal_shape
@@ -325,7 +334,8 @@ class PixelatedSTEM(Signal2D):
         return s
 
     def virtual_bright_field(
-            self, cx=None, cy=None, r=None, show_progressbar=True):
+            self, cx=None, cy=None, r=None,
+            lazy_result=False, show_progressbar=True):
         """Get a virtual bright field signal.
 
         Can be sum the whole diffraction plane, or a circle subset.
@@ -338,8 +348,11 @@ class PixelatedSTEM(Signal2D):
             x- and y-centre positions.
         r : float, optional
             Outer radius.
-        show_progressbar : bool
+        show_progressbar : bool, optional
             Default True.
+        lazy_result : bool, optional
+            If True, will not compute the data directly, but
+            return a lazy signal. Default False
 
         Returns
         -------
@@ -349,23 +362,39 @@ class PixelatedSTEM(Signal2D):
         --------
         >>> import fpd_data_processing.api as fp
         >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
-        >>> s_bf = s.virtual_bright_field()
+        >>> s_bf = s.virtual_bright_field(show_progressbar=False)
         >>> s_bf.plot()
 
         Sum a subset of the diffraction pattern
 
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
         >>> s_bf = s.virtual_bright_field(40, 40, 10, show_progressbar=False)
         >>> s_bf.plot()
 
+        Get a lazy signal, then compute
+
+        >>> s_bf = s.virtual_bright_field(
+        ...     lazy_result=True, show_progressbar=False)
+        >>> s_bf.compute(progressbar=False)
+
         """
+        det_shape = self.axes_manager.signal_shape
+        nav_dim = self.axes_manager.navigation_dimension
         if (cx is None) or (cy is None) or (r is None):
-            s_bf = self.sum(self.axes_manager.signal_axes).T
+            mask_array = np.zeros(det_shape[::-1], dtype=np.bool)
         else:
-            s_bf = self._virtual_detector(cx=cx, cy=cy, r=r, r_inner=None)
-        if self._lazy:
+            mask_array = pst._make_circular_mask(
+                    cx, cy, det_shape[0], det_shape[1], r)
+            mask_array = np.invert(mask_array)
+        data = dat._mask_array(
+                self.data, mask_array=mask_array).sum(axis=(-2, -1))
+        s_bf = LazySignal2D(data)
+        if not lazy_result:
             s_bf.compute(progressbar=show_progressbar)
+        for nav_axes, sig_axes in zip(
+                self.axes_manager.navigation_axes,
+                s_bf.axes_manager.signal_axes):
+            pst._copy_axes_object_metadata(nav_axes, sig_axes)
+
         return s_bf
 
     def virtual_annular_dark_field(

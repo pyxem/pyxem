@@ -376,6 +376,12 @@ class TestPixelatedStemCenterOfMass:
         lazy_com_sig_extent = s_lazy_com.axes_manager.signal_extent
         assert com_sig_extent == lazy_com_sig_extent
 
+    def test_lazy(self):
+        data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
+        s_lazy = LazyPixelatedSTEM(data)
+        s_lazy_com = s_lazy.center_of_mass(lazy_result=True)
+        assert s_lazy_com._lazy
+
 
 class TestPixelatedStemRadialIntegration:
 
@@ -775,6 +781,12 @@ class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
         s = LazyPixelatedSTEM(data)
         s1 = s.virtual_bright_field(cx=6, cy=6, r=5)
         self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+
+    def test_lazy_result(self):
+        data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
+        s = LazyPixelatedSTEM(data)
+        s_out = s.virtual_bright_field(lazy_result=True)
+        assert s_out._lazy
 
 
 class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
