@@ -378,7 +378,6 @@ class PixelatedSTEM(Signal2D):
 
         """
         det_shape = self.axes_manager.signal_shape
-        nav_dim = self.axes_manager.navigation_dimension
         if (cx is None) or (cy is None) or (r is None):
             mask_array = np.zeros(det_shape[::-1], dtype=np.bool)
         else:
