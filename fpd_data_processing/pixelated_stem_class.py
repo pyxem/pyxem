@@ -328,11 +328,6 @@ class PixelatedSTEM(Signal2D):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return(s_com)
 
-    def _virtual_detector(self, cx, cy, r, r_inner=None):
-        roi = hs.roi.CircleROI(cx=cx, cy=cy, r=r, r_inner=r_inner)
-        s = roi(self, axes=(2, 3)).nansum((2, 3)).T
-        return s
-
     def virtual_bright_field(
             self, cx=None, cy=None, r=None,
             lazy_result=False, show_progressbar=True):
@@ -348,11 +343,11 @@ class PixelatedSTEM(Signal2D):
             x- and y-centre positions.
         r : float, optional
             Outer radius.
-        show_progressbar : bool, optional
-            Default True.
         lazy_result : bool, optional
             If True, will not compute the data directly, but
             return a lazy signal. Default False
+        show_progressbar : bool, optional
+            Default True.
 
         Returns
         -------
@@ -397,7 +392,8 @@ class PixelatedSTEM(Signal2D):
         return s_bf
 
     def virtual_annular_dark_field(
-            self, cx, cy, r_inner, r, show_progressbar=True):
+            self, cx, cy, r_inner, r, lazy_result=False,
+            show_progressbar=True):
         """Get a virtual annular dark field signal.
 
         Parameters
@@ -408,6 +404,9 @@ class PixelatedSTEM(Signal2D):
             Inner radius.
         r : float
             Outer radius.
+        lazy_result : bool, optional
+            If True, will not compute the data directly, but
+            return a lazy signal. Default False
         show_progressbar : bool, default True
 
         Returns
@@ -422,14 +421,35 @@ class PixelatedSTEM(Signal2D):
         ...     40, 40, 20, 40, show_progressbar=False)
         >>> s_adf.plot()
 
+        Get a lazy signal, then compute
+
+        >>> s_adf = s.virtual_annular_dark_field(
+        ...     40, 40, 20, 40, lazy_result=True, show_progressbar=False)
+        >>> s_adf.compute(progressbar=False)
+        >>> s_adf.plot()
+
         """
         if r_inner > r:
             raise ValueError(
                     "r_inner must be higher than r. The argument order is " +
                     "(cx, cy, r_inner, r)")
-        s_adf = self._virtual_detector(cx=cx, cy=cy, r=r, r_inner=r_inner)
-        if self._lazy:
+        det_shape = self.axes_manager.signal_shape
+
+        mask_array0 = pst._make_circular_mask(
+                cx, cy, det_shape[0], det_shape[1], r)
+        mask_array1 = pst._make_circular_mask(
+                cx, cy, det_shape[0], det_shape[1], r_inner)
+        mask_array = mask_array0 == mask_array1
+
+        data = dat._mask_array(
+                self.data, mask_array=mask_array).sum(axis=(-2, -1))
+        s_adf = LazySignal2D(data)
+        if not lazy_result:
             s_adf.compute(progressbar=show_progressbar)
+        for nav_axes, sig_axes in zip(
+                self.axes_manager.navigation_axes,
+                s_adf.axes_manager.signal_axes):
+            pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_adf
 
     def radial_integration(
