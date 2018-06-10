@@ -4,10 +4,10 @@ import numpy as np
 from numpy.random import randint
 import dask.array as da
 from hyperspy.signals import Signal2D
-from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
-from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
-import fpd_data_processing.make_diffraction_test_data as mdtd
-import fpd_data_processing.dummy_data as dd
+from pixstem.pixelated_stem_class import PixelatedSTEM
+from pixstem.pixelated_stem_class import LazyPixelatedSTEM
+import pixstem.make_diffraction_test_data as mdtd
+import pixstem.dummy_data as dd
 
 
 class TestPixelatedStem:

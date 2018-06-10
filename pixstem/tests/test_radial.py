@@ -1,27 +1,27 @@
 import unittest
 import numpy as np
-import fpd_data_processing.api as fp
-import fpd_data_processing.radial as ra
-import fpd_data_processing.make_diffraction_test_data as mdtd
+import pixstem.api as ps
+import pixstem.radial as ra
+import pixstem.make_diffraction_test_data as mdtd
 
 
 class test_radial_module(unittest.TestCase):
 
     def test_centre_comparison(self):
-        s = fp.PixelatedSTEM(np.ones((20, 20)))
+        s = ps.PixelatedSTEM(np.ones((20, 20)))
         s_list = ra._centre_comparison(s, 1, 1)
         self.assertEqual(len(s_list), 9)
 
-        s1 = fp.PixelatedSTEM(np.ones((5, 20, 20)))
+        s1 = ps.PixelatedSTEM(np.ones((5, 20, 20)))
         with self.assertRaises(ValueError):
             ra._centre_comparison(s1, 1, 1)
 
-        s2 = fp.PixelatedSTEM(np.ones((30, 30)))
+        s2 = ps.PixelatedSTEM(np.ones((30, 30)))
         s2_list = ra._centre_comparison(s2, 1, 1, angleN=20)
         for temp_s in s2_list:
             self.assertEqual(temp_s.axes_manager.navigation_shape, (20, ))
 
-        s3 = fp.PixelatedSTEM(np.ones((40, 40)))
+        s3 = ps.PixelatedSTEM(np.ones((40, 40)))
         s3_list = ra._centre_comparison(
                 s3, 1, 1, angleN=10,
                 crop_radial_signal=(3, 8))
@@ -33,7 +33,7 @@ class test_radial_module(unittest.TestCase):
         array = np.ones((10, 10))*10
         x, y = 7, 5
         array[y, x] = 1  # In NumPy the order is [y, x]
-        s = fp.PixelatedSTEM(array)
+        s = ps.PixelatedSTEM(array)
         s.axes_manager[0].offset = 55
         s.axes_manager[1].offset = 50
         s.axes_manager[0].scale = 0.5
@@ -52,7 +52,7 @@ class test_radial_module(unittest.TestCase):
         s.axes_manager[1].offset = -301.
         s_centre_position = ra.get_optimal_centre_position(
                 s, radial_signal_span=(180, 210), steps=2, step_size=1)
-        x, y = fp.radial.get_coordinate_of_min(s_centre_position)
+        x, y = ps.radial.get_coordinate_of_min(s_centre_position)
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
         self.assertTrue((x0 - 0.5) <= x and x <= (x0 + 0.5))
 
@@ -169,7 +169,7 @@ class test_fit_ellipse(unittest.TestCase):
 
     def setUp(self):
         axis1, axis2 = 40, 70
-        s = fp.PixelatedSTEM(np.zeros((200, 220)))
+        s = ps.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
         ellipse_ring = mdtd._get_elliptical_ring(
                 s, 0, 0, axis1, axis2, 0.8, lw_r=1)
@@ -198,7 +198,7 @@ class test_fit_ellipse(unittest.TestCase):
         ra._get_marker_list(s, ellipse_parameters, x_list=x, y_list=y)
 
     def test_fit_single_ellipse_to_signal(self):
-        s = fp.PixelatedSTEM(np.zeros((200, 220)))
+        s = ps.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
         ellipse_ring = mdtd._get_elliptical_ring(
                 s, 0, 0, 60, 60, 0.8, lw_r=1)
@@ -218,7 +218,7 @@ class test_fit_ellipse(unittest.TestCase):
                 0.1, np.pi/16, np.pi/8, np.pi/4, np.pi/2, np.pi + 0.1,
                 np.pi*2 + 0.1, np.pi*2.5, np.pi*3 + 0.1, np.pi*3.2]
         for rot in rot_list:
-            s = fp.PixelatedSTEM(np.zeros((200, 200)))
+            s = ps.PixelatedSTEM(np.zeros((200, 200)))
             s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
             s.data += mdtd._get_elliptical_ring(s, 0, 0, 70, 60, rot, lw_r=1)
             output = ra.fit_single_ellipse_to_signal(
@@ -226,7 +226,7 @@ class test_fit_ellipse(unittest.TestCase):
             output_rot = output[5] % np.pi
             self.assertAlmostEqual(output_rot, rot % np.pi, places=1)
         for rot in rot_list:
-            s = fp.PixelatedSTEM(np.zeros((200, 200)))
+            s = ps.PixelatedSTEM(np.zeros((200, 200)))
             s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
             s.data += mdtd._get_elliptical_ring(s, 0, 0, 60, 70, rot, lw_r=1)
             output = ra.fit_single_ellipse_to_signal(
@@ -235,7 +235,7 @@ class test_fit_ellipse(unittest.TestCase):
             self.assertAlmostEqual(output_rot, rot % np.pi, places=1)
 
     def test_fit_ellipses_to_signal(self):
-        s = fp.PixelatedSTEM(np.zeros((200, 220)))
+        s = ps.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
         ellipse_ring0 = mdtd._get_elliptical_ring(s, 2, -1, 60, 60, 0.8)
         ellipse_ring1 = mdtd._get_elliptical_ring(s, 1, -2, 80, 80, 0.8)

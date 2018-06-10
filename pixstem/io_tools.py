@@ -5,7 +5,7 @@ from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
 from hyperspy.signals import Signal2D
-from fpd_data_processing.pixelated_stem_class import (
+from pixstem.pixelated_stem_class import (
         PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D,
         LazyPixelatedSTEM)
 
@@ -133,12 +133,12 @@ def signal_to_pixelated_stem(s):
     --------
     >>> import numpy as np
     >>> import hyperspy.api as hs
-    >>> import fpd_data_processing.api as fp
+    >>> import pixstem.api as ps
     >>> s = hs.signals.Signal2D(np.random.random((8, 11, 21, 13)))
     >>> s.metadata.General.title = "test dataset"
     >>> s
     <Signal2D, title: test dataset, dimensions: (11, 8|13, 21)>
-    >>> from fpd_data_processing.io_tools import signal_to_pixelated_stem
+    >>> from pixstem.io_tools import signal_to_pixelated_stem
     >>> s_new = signal_to_pixelated_stem(s)
     >>> s_new
     <PixelatedSTEM, title: test dataset, dimensions: (11, 8|13, 21)>
@@ -229,11 +229,11 @@ def load_dpc_signal(filename):
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
+    >>> import pixstem.api as ps
     >>> import numpy as np
-    >>> s = fp.DPCSignal2D(np.random.random((2, 90, 50)))
+    >>> s = ps.DPCSignal2D(np.random.random((2, 90, 50)))
     >>> s.save("test_dpc_signal2d.hspy")
-    >>> s_dpc = fp.load_dpc_signal("test_dpc_signal2d.hspy")
+    >>> s_dpc = ps.load_dpc_signal("test_dpc_signal2d.hspy")
     >>> s_dpc
     <DPCSignal2D, title: , dimensions: (2|50, 90)>
     >>> s_dpc.plot()
@@ -243,7 +243,7 @@ def load_dpc_signal(filename):
     >>> import hyperspy.api as hs
     >>> s = hs.signals.Signal1D(np.random.random((2, 10)))
     >>> s.save("test_dpc_signal1d.hspy")
-    >>> s_dpc_1d = fp.load_dpc_signal("test_dpc_signal1d.hspy")
+    >>> s_dpc_1d = ps.load_dpc_signal("test_dpc_signal1d.hspy")
     >>> s_dpc_1d
     <DPCSignal1D, title: , dimensions: (2|10)>
 

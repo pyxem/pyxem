@@ -1,4 +1,4 @@
-import fpd_data_processing.pixelated_stem_tools as pst
+import pixstem.pixelated_stem_tools as pst
 import numpy as np
 
 

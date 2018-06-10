@@ -6,7 +6,7 @@ from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
 from hyperspy.utils.markers import point, line_segment
 from hyperspy.misc.utils import isiterable
-import fpd_data_processing.pixelated_stem_tools as pst
+import pixstem.pixelated_stem_tools as pst
 
 
 def _centre_comparison(
@@ -129,11 +129,11 @@ def get_optimal_centre_position(
 
     Examples
     --------
-    >>> import fpd_data_processing.dummy_data as dd
+    >>> import pixstem.dummy_data as dd
     >>> s = dd.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
-    >>> import fpd_data_processing.radial as ra
+    >>> import pixstem.radial as ra
     >>> s_ocp = ra.get_optimal_centre_position(s, (35, 45), steps=2)
     >>> centre_pos = ra.get_coordinate_of_min(s_ocp)
 
@@ -190,8 +190,8 @@ def refine_signal_centre_position(
 
     Example
     -------
-    >>> import fpd_data_processing.dummy_data as dd
-    >>> import fpd_data_processing.radial as ra
+    >>> import pixstem.dummy_data as dd
+    >>> import pixstem.radial as ra
     >>> s = dd.get_single_ring_diffraction_signal()
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -103, -69
     >>> ra.refine_signal_centre_position(s, (32., 48.), angleN=4)
@@ -282,11 +282,11 @@ def get_radius_vs_angle(
 
     Examples
     --------
-    >>> import fpd_data_processing.dummy_data as dd
+    >>> import pixstem.dummy_data as dd
     >>> s = dd.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
-    >>> import fpd_data_processing.radial as ra
+    >>> import pixstem.radial as ra
     >>> s_centre = ra.get_radius_vs_angle(s, (35, 45), show_progressbar=False)
 
     """
@@ -353,7 +353,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
 
     Examples
     --------
-    >>> from fpd_data_processing.make_diffraction_test_data import MakeTestData
+    >>> from pixstem.make_diffraction_test_data import MakeTestData
     >>> test_data0 = MakeTestData(300, 300)
     >>> test_data0.add_ring(150, 150, 40)
     >>> test_data1 = MakeTestData(300, 300)
@@ -362,7 +362,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     >>> s1 = test_data1.signal
     >>> s0.axes_manager[0].offset, s0.axes_manager[1].offset = -150, -150
     >>> s1.axes_manager[0].offset, s1.axes_manager[1].offset = -150, -150
-    >>> import fpd_data_processing.radial as ra
+    >>> import pixstem.radial as ra
     >>> s = ra.get_angle_image_comparison(s0, s1)
     >>> s.plot()
 
@@ -407,7 +407,7 @@ def _get_holz_angle(electron_wavelength, lattice_parameter):
 
     Examples
     --------
-    >>> import fpd_data_processing.radial as ra
+    >>> import pixstem.radial as ra
     >>> lattice_size = 0.3905 # STO-(001) in nm
     >>> wavelength = 2.51/1000 # Electron wavelength for 200 kV
     >>> angle = ra._get_holz_angle(wavelength, lattice_size)
@@ -439,7 +439,7 @@ def _scattering_angle_to_lattice_parameter(electron_wavelength, angle):
 
     Examples
     --------
-    >>> import fpd_data_processing.radial as ra
+    >>> import pixstem.radial as ra
     >>> angle_list = [0.1, 0.1, 0.1, 0.1] # in radians
     >>> wavelength = 2.51/1000 # Electron wavelength for 200 kV
     >>> lattice_size = ra._scattering_angle_to_lattice_parameter(
@@ -605,13 +605,13 @@ def fit_single_ellipse_to_signal(
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
-    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
-    >>> s = fp.PixelatedSTEM(np.zeros((200, 220)))
+    >>> import pixstem.api as ps
+    >>> import pixstem.make_diffraction_test_data as mdtd
+    >>> s = ps.PixelatedSTEM(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> ellipse_ring = mdtd._get_elliptical_ring(s, 0, 0, 50, 70, 0.8)
     >>> s.data += ellipse_ring
-    >>> from fpd_data_processing.radial import fit_single_ellipse_to_signal
+    >>> from pixstem.radial import fit_single_ellipse_to_signal
     >>> output = fit_single_ellipse_to_signal(
     ...     s, (40, 80), angleN=30, show_progressbar=False)
 
@@ -665,13 +665,13 @@ def fit_ellipses_to_signal(
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
-    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
-    >>> s = fp.PixelatedSTEM(np.zeros((200, 220)))
+    >>> import pixstem.api as ps
+    >>> import pixstem.make_diffraction_test_data as mdtd
+    >>> s = ps.PixelatedSTEM(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> ellipse_ring = mdtd._get_elliptical_ring(s, 0, 0, 50, 70, 0.8)
     >>> s.data += ellipse_ring
-    >>> from fpd_data_processing.radial import fit_ellipses_to_signal
+    >>> from pixstem.radial import fit_ellipses_to_signal
     >>> output = fit_ellipses_to_signal(
     ...     s, [(40, 80)], angleN=30, show_progressbar=False)
 

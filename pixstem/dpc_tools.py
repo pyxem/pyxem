@@ -1,5 +1,5 @@
 import scipy.constants as sc
-import fpd_data_processing.diffraction_tools as dt
+import pixstem.diffraction_tools as dt
 
 
 def bst_to_beta(bst, acceleration_voltage):
@@ -20,7 +20,7 @@ def bst_to_beta(bst, acceleration_voltage):
     Examples
     --------
     >>> import numpy as np
-    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> import pixstem.dpc_tools as dpct
     >>> data = np.random.random((100, 100))  # In Tesla*meter
     >>> acceleration_voltage = 200000  # 200 kV (in Volt)
     >>> beta = dpct.bst_to_beta(data, acceleration_voltage)
@@ -52,7 +52,7 @@ def beta_to_bst(beam_deflection, acceleration_voltage):
     Examples
     --------
     >>> import numpy as np
-    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> import pixstem.dpc_tools as dpct
     >>> data = np.random.random((100, 100))  # In radians
     >>> acceleration_voltage = 200000  # 200 kV (in Volt)
     >>> bst = dpct.beta_to_bst(data, 200000)
@@ -82,7 +82,7 @@ def tesla_to_am(data):
     Examples
     --------
     >>> import numpy as np
-    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> import pixstem.dpc_tools as dpct
     >>> data_T = np.random.random((100, 100))  # In tesla
     >>> data_am = dpct.tesla_to_am(data_T)
 
@@ -105,7 +105,7 @@ def acceleration_voltage_to_velocity(acceleration_voltage):
 
     Example
     -------
-    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> import pixstem.dpc_tools as dpct
     >>> v = dpct.acceleration_voltage_to_velocity(200000) # 200 kV
     >>> round(v)
     208450035
@@ -135,7 +135,7 @@ def acceleration_voltage_to_relativistic_mass(acceleration_voltage):
 
     Example
     -------
-    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> import pixstem.dpc_tools as dpct
     >>> mr = dpct.acceleration_voltage_to_relativistic_mass(200000) # 200 kV
 
     """
@@ -166,7 +166,7 @@ def et_to_beta(et, acceleration_voltage):
     Examples
     --------
     >>> import numpy as np
-    >>> import fpd_data_processing.dpc_tools as dpct
+    >>> import pixstem.dpc_tools as dpct
     >>> data = np.random.random((100, 100))
     >>> acceleration_voltage = 200000  # 200 kV (in Volt)
     >>> beta = dpct.et_to_beta(data, acceleration_voltage)

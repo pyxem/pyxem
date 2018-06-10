@@ -6,13 +6,13 @@ Loading data
 
 Data is loaded by using two specialized loading functions:
 
-- One for the :py:class:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM` datasets which has two spatial probe dimensions
-  and two reciprocal detector dimensions: :py:func:`fpd_data_processing.io_tools.load_fpd_signal`.
+- One for the :py:class:`~pixstem.pixelated_stem_class.PixelatedSTEM` datasets which has two spatial probe dimensions
+  and two reciprocal detector dimensions: :py:func:`pixstem.io_tools.load_fpd_signal`.
 - And another one for loading disk shift datasets, which consist of one navigation
   dimensions, and (normally) two signal dimensions:
-  :py:func:`fpd_data_processing.io_tools.load_dpc_signal`
+  :py:func:`pixstem.io_tools.load_dpc_signal`
 
-Both these functions are accessible through :py:mod:`fpd_data_processing.api`.
+Both these functions are accessible through :py:mod:`pixstem.api`.
 
 Pixelated STEM
 --------------
@@ -22,16 +22,16 @@ To generate a test pixelated STEM dataset:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.dummy_data as dd
+    >>> import pixstem.dummy_data as dd
     >>> s = dd.get_holz_simple_test_signal()
     >>> s.save("test_data.hdf5")
 
-Load the data using :py:func:`~fpd_data_processing.io_tools.load_fpd_signal`:
+Load the data using :py:func:`~pixstem.io_tools.load_fpd_signal`:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.load_fpd_signal("test_data.hdf5", lazy=True)
+    >>> import pixstem.api as ps
+    >>> s = ps.load_fpd_signal("test_data.hdf5", lazy=True)
 
 Here `lazy=True` was used.
 Essentially this does not load all the data into memory, meaning very large datasets
@@ -45,8 +45,8 @@ Here the dataset is fairly small, so it should easily fit into memory.:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.load_fpd_signal("test_data.hdf5")
+    >>> import pixstem.api as ps
+    >>> s = ps.load_fpd_signal("test_data.hdf5")
 
 Note: for larger datasets this might take a long time, and might use all of your memory.
 This might cause the computer to crash, so be careful when loading large datasets.
@@ -61,14 +61,14 @@ To visualize the data, use plot:
 From NumPy array to PixelatedSTEM object
 ****************************************
 
-The :py:class:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM` class can also be created using a NumPy array directly.
+The :py:class:`~pixstem.pixelated_stem_class.PixelatedSTEM` class can also be created using a NumPy array directly.
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
+    >>> import pixstem.api as ps
     >>> import numpy as np
     >>> data = np.random.random((10, 15, 30, 35))
-    >>> s = fp.PixelatedSTEM(data)
+    >>> s = ps.PixelatedSTEM(data)
     >>> s
     <PixelatedSTEM, title: , dimensions: (15, 10|35, 30)>
 
@@ -83,14 +83,14 @@ From Dask array to LazyPixelatedSTEM object
 
 When working with very large datasets, lazy loading is preferred.
 One way of doing this is by using the `dask library <https://dask.pydata.org/en/latest/>`__.
-See the `HyperSpy big data documentation <http://hyperspy.org/hyperspy-doc/current/user_guide/big_data.html#working-with-big-data>`__ for more information on how to utilize lazy loading the fpd_data_processing library.
+See the `HyperSpy big data documentation <http://hyperspy.org/hyperspy-doc/current/user_guide/big_data.html#working-with-big-data>`__ for more information on how to utilize lazy loading the pixstem library.
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
+    >>> import pixstem.api as ps
     >>> import dask.array as da
     >>> data = da.random.random((10, 7, 15, 32), chunks=((2, 2, 2, 2)))
-    >>> s = fp.LazyPixelatedSTEM(data)
+    >>> s = ps.LazyPixelatedSTEM(data)
     >>> s
     <LazyPixelatedSTEM, title: , dimensions: (7, 10|32, 15)>
 
@@ -98,7 +98,7 @@ See the `HyperSpy big data documentation <http://hyperspy.org/hyperspy-doc/curre
 From HyperSpy signal to PixelatedSTEM
 *************************************
 
-To retain the axes manager and metadata, use the :py:func:`fpd_data_processing.io_tools.signal_to_pixelated_stem` function.
+To retain the axes manager and metadata, use the :py:func:`pixstem.io_tools.signal_to_pixelated_stem` function.
 
 .. code-block:: python
 
@@ -106,7 +106,7 @@ To retain the axes manager and metadata, use the :py:func:`fpd_data_processing.i
     >>> import hyperspy.api as hs
     >>> data = np.random.random((10, 15, 30, 35))
     >>> s = hs.signals.Signal2D(data)
-    >>> import fpd_data_processing.io_tools as it
+    >>> import pixstem.io_tools as it
     >>> s_new = it.signal_to_pixelated_stem(s)
 
 
@@ -115,9 +115,9 @@ To retain the axes manager and metadata, use the :py:func:`fpd_data_processing.i
 Differential phase contrast (beam shift) data
 ---------------------------------------------
 
-Differential phase contrast (DPC) datasets are loaded using :py:func:`fpd_data_processing.io_tools.load_dpc_signal`.
+Differential phase contrast (DPC) datasets are loaded using :py:func:`pixstem.io_tools.load_dpc_signal`.
 These datasets must have one navigation dimensions with two indices, where the first navigation index is the x-direction beam shift, and the second navigation dimension is the y-direction beam shift.
-The signal dimensions must be either two, one or zero, giving either :py:class:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D`, :py:class:`~fpd_data_processing.pixelated_stem_class.DPCSignal1D` or :py:class:`~fpd_data_processing.pixelated_stem_class.DPCBaseSignal`.
+The signal dimensions must be either two, one or zero, giving either :py:class:`~pixstem.pixelated_stem_class.DPCSignal2D`, :py:class:`~pixstem.pixelated_stem_class.DPCSignal1D` or :py:class:`~pixstem.pixelated_stem_class.DPCBaseSignal`.
 
 Files saved using HyperSpy can also be opened directly, as long as the dataset has one navigation dimension with a shape of 2.
 
@@ -126,7 +126,7 @@ To generate a test DPC dataset:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.dummy_data as dd
+    >>> import pixstem.dummy_data as dd
     >>> s = dd.get_simple_dpc_signal()
     >>> s.save("test_dpc_data.hdf5")
 
@@ -134,8 +134,8 @@ To load the test file (or your own file):
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.load_dpc_signal("test_dpc_data.hdf5")
+    >>> import pixstem.api as ps
+    >>> s = ps.load_dpc_signal("test_dpc_data.hdf5")
 
 Plotting the data:
 
@@ -149,37 +149,37 @@ From NumPy array to DPCSignal objects
 *************************************
 
 
-The :py:class:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D` object can be created using
+The :py:class:`~pixstem.pixelated_stem_class.DPCSignal2D` object can be created using
 
 
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
+    >>> import pixstem.api as ps
     >>> import numpy as np
     >>> data = np.random.random((2, 21, 54))
-    >>> s = fp.DPCSignal2D(data)
+    >>> s = ps.DPCSignal2D(data)
     >>> s
     <DPCSignal2D, title: , dimensions: (2|54, 21)>
 
 
 Note the switch of the x/y signal axis.
 
-The :py:class:`~fpd_data_processing.pixelated_stem_class.DPCSignal1D` object can be created using:
+The :py:class:`~pixstem.pixelated_stem_class.DPCSignal1D` object can be created using:
 
 .. code-block:: python
 
     >>> data = np.random.random((2, 109))
-    >>> s = fp.DPCSignal1D(data)
+    >>> s = ps.DPCSignal1D(data)
     >>> s
     <DPCSignal1D, title: , dimensions: (2|109)>
 
 
-The :py:class:`~fpd_data_processing.pixelated_stem_class.DPCBaseSignal` object can be created using:
+The :py:class:`~pixstem.pixelated_stem_class.DPCBaseSignal` object can be created using:
 
 .. code-block:: python
 
     >>> data = np.random.random((2, ))
-    >>> s = fp.DPCBaseSignal(data)
+    >>> s = ps.DPCBaseSignal(data)
     >>> s
     <DPCBaseSignal, title: , dimensions: (|2)>

@@ -4,7 +4,7 @@
 Using the pixelated STEM class
 ==============================
 
-The :py:class:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM` class extends HyperSpy's Signal2D class, and makes heavy use of the lazy loading and ``map`` method to do lazy processing.
+The :py:class:`~pixstem.pixelated_stem_class.PixelatedSTEM` class extends HyperSpy's Signal2D class, and makes heavy use of the lazy loading and ``map`` method to do lazy processing.
 
 
 Visualizing the data
@@ -14,8 +14,8 @@ If you have a small dataset, ``s.plot`` can be used directly:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_holz_simple_test_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_holz_simple_test_signal()
     >>> s.plot()
 
 If the dataset is very large and loaded lazily, there are some tricks which makes it easier to visualizie the signal.
@@ -25,8 +25,8 @@ Some various ways of avoiding this issue:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_holz_simple_test_signal(lazy=True)
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_holz_simple_test_signal(lazy=True)
 
 Using the navigator slider:
 
@@ -34,7 +34,7 @@ Using the navigator slider:
 
     >>> s.plot(navigator='slider')
 
-Using another signal as navigator, generated using :py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.virtual_annular_dark_field` or :py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.virtual_bright_field`:
+Using another signal as navigator, generated using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.virtual_annular_dark_field` or :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.virtual_bright_field`:
 
 .. code-block:: python
 
@@ -47,7 +47,7 @@ Using another signal as navigator, generated using :py:meth:`~fpd_data_processin
 Center of mass
 --------------
 
-:py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.center_of_mass`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.center_of_mass`
 
 .. code-block:: python
 
@@ -58,7 +58,7 @@ Center of mass
 Radial integration
 ------------------
 
-:py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.radial_integration`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_integration`
 
 .. code-block:: python
 
@@ -71,11 +71,11 @@ Radial integration
 Rotating the diffraction pattern
 --------------------------------
 
-:py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.rotate_diffraction`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.rotate_diffraction`
 
 .. code-block:: python
 
-    >>> s = fp.dummy_data.get_holz_simple_test_signal()
+    >>> s = ps.dummy_data.get_holz_simple_test_signal()
     >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
     >>> s_rot.plot()
 
@@ -83,11 +83,11 @@ Rotating the diffraction pattern
 Shifting the diffraction pattern
 --------------------------------
 
-:py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.shift_diffraction`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.shift_diffraction`
 
 .. code-block:: python
 
-    >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
+    >>> s = ps.dummy_data.get_disk_shift_simple_test_signal()
     >>> s_com = s.center_of_mass(threshold=3., show_progressbar=False)
     >>> s_com -= 25 # To shift the centre spot to (25, 25)
     >>> s_shift = s.shift_diffraction(

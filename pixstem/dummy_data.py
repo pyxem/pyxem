@@ -1,8 +1,8 @@
 import numpy as np
 from hyperspy.components1d import Gaussian
 from scipy.ndimage.filters import gaussian_filter
-import fpd_data_processing.make_diffraction_test_data as mdtd
-from fpd_data_processing.pixelated_stem_class import DPCSignal2D
+import pixstem.make_diffraction_test_data as mdtd
+from pixstem.pixelated_stem_class import DPCSignal2D
 
 
 def get_disk_shift_simple_test_signal(lazy=False):
@@ -21,13 +21,13 @@ def get_disk_shift_simple_test_signal(lazy=False):
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_disk_shift_simple_test_signal()
     >>> s.plot()
 
     Load as lazy
 
-    >>> s = fp.dummy_data.get_disk_shift_simple_test_signal(lazy=True)
+    >>> s = ps.dummy_data.get_disk_shift_simple_test_signal(lazy=True)
 
     """
     disk_x, disk_y = np.mgrid[22:28:20j, 22:28:20j]
@@ -56,13 +56,13 @@ def get_holz_simple_test_signal(lazy=False):
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_holz_simple_test_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_holz_simple_test_signal()
     >>> s.plot()
 
     Load as lazy
 
-    >>> s = fp.dummy_data.get_holz_simple_test_signal(lazy=True)
+    >>> s = ps.dummy_data.get_holz_simple_test_signal(lazy=True)
 
     """
     ring_x, ring_y = np.mgrid[24:26:20j, 24:26:20j]
@@ -91,13 +91,13 @@ def get_holz_heterostructure_test_signal(lazy=False):
 
     Example
     -------
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
     >>> s.plot()
 
     Load as lazy
 
-    >>> s = fp.dummy_data.get_holz_heterostructure_test_signal(lazy=True)
+    >>> s = ps.dummy_data.get_holz_heterostructure_test_signal(lazy=True)
 
     """
     probe_size_x, probe_size_y = 40, 40
@@ -138,8 +138,8 @@ def get_dead_pixel_signal():
 
     Example
     -------
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_dead_pixel_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_dead_pixel_signal()
 
     """
     data = mdtd.MakeTestData(size_x=128, size_y=128, default=False, blur=True)
@@ -159,8 +159,8 @@ def get_simple_dpc_signal():
 
     Example
     -------
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_simple_dpc_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_simple_dpc_signal()
 
     """
     data = np.mgrid[-5:5:100j, -5:5:100j]
@@ -181,8 +181,8 @@ def get_stripe_pattern_dpc_signal():
 
     Example
     -------
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_stripe_pattern_dpc_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
 
     """
     data = np.zeros((2, 100, 50))
@@ -208,13 +208,13 @@ def get_square_dpc_signal(add_ramp=False):
 
     Examples
     --------
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_square_dpc_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_square_dpc_signal()
     >>> s.plot()
 
     Adding a ramp
 
-    >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=True)
+    >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=True)
     >>> s.plot()
 
     """

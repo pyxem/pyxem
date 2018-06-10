@@ -17,7 +17,7 @@ def _get_dask_chunk_slice_list(dask_array):
     --------
     >>> import dask.array as da
     >>> data = da.random.random((64, 64, 100, 100), chunks=(8, 8, 100, 100))
-    >>> import fpd_data_processing.lazy_tools as lt
+    >>> import pixstem.lazy_tools as lt
     >>> slice_list = lt._get_dask_chunk_slice_list(data)
 
     """
@@ -74,8 +74,8 @@ def _calculate_function_on_dask_array(
     >>> import dask.array as da
     >>> dask_data = da.random.random(
     ...     (64, 64, 100, 100), chunks=(8, 8, 100, 100))
-    >>> import fpd_data_processing.pixelated_stem_tools as pst
-    >>> import fpd_data_processing.lazy_tools as lt
+    >>> import pixstem.pixelated_stem_tools as pst
+    >>> import pixstem.lazy_tools as lt
     >>> out_data = lt._calculate_function_on_dask_array(
     ...     dask_data, np.sum,
     ...     return_sig_size=1, show_progressbar=False)

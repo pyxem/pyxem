@@ -4,15 +4,15 @@
 Analysing differential phase contrast data
 ==========================================
 
-Differential phase contrast analysis (DPC) is done using using the DPCSignal classes: :py:class:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D`, :py:class:`~fpd_data_processing.pixelated_stem_class.DPCSignal1D` and :py:class:`~fpd_data_processing.pixelated_stem_class.DPCBaseSignal`.
+Differential phase contrast analysis (DPC) is done using using the DPCSignal classes: :py:class:`~pixstem.pixelated_stem_class.DPCSignal2D`, :py:class:`~pixstem.pixelated_stem_class.DPCSignal1D` and :py:class:`~pixstem.pixelated_stem_class.DPCBaseSignal`.
 
 Here, a test dataset is used to show the methods used to process this type of data.
 For information on how to load your own data, see `:ref:load_dpc_data`.
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=True)
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=True)
     >>> s.plot()
 
 
@@ -47,7 +47,7 @@ Possibly tweaks is to change the corner size.
 Plotting methods
 ----------------
 
-Plotting DPC color image using: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.get_color_signal`
+Plotting DPC color image using: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.get_color_signal`
 
 .. code-block:: python
 
@@ -57,7 +57,7 @@ Plotting DPC color image using: :py:meth:`~fpd_data_processing.pixelated_stem_cl
 .. image:: images/analysing_dpc_data/dpc_color_image.jpg
     :scale: 49 %
 
-Plotting DPC phase image: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.get_phase_signal`
+Plotting DPC phase image: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.get_phase_signal`
 
 .. code-block:: python
 
@@ -67,7 +67,7 @@ Plotting DPC phase image: :py:meth:`~fpd_data_processing.pixelated_stem_class.DP
 .. image:: images/analysing_dpc_data/dpc_phase_image.jpg
     :scale: 49 %
 
-Plotting DPC magnitude image: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.get_magnitude_signal`
+Plotting DPC magnitude image: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.get_magnitude_signal`
 
 .. code-block:: python
 
@@ -77,7 +77,7 @@ Plotting DPC magnitude image: :py:meth:`~fpd_data_processing.pixelated_stem_clas
 .. image:: images/analysing_dpc_data/dpc_magnitude_image.jpg
     :scale: 49 %
 
-Plotting bivariate histogram: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.get_bivariate_histogram`
+Plotting bivariate histogram: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.get_bivariate_histogram`
 
 .. code-block:: python
 
@@ -87,7 +87,7 @@ Plotting bivariate histogram: :py:meth:`~fpd_data_processing.pixelated_stem_clas
 .. image:: images/analysing_dpc_data/dpc_hist_image.jpg
     :scale: 49 %
 
-Plotting color image with more customizability: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.get_color_image_with_indicator`
+Plotting color image with more customizability: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.get_color_image_with_indicator`
 
 .. code-block:: python
 
@@ -101,7 +101,7 @@ Plotting color image with more customizability: :py:meth:`~fpd_data_processing.p
 Rotating the data
 -----------------
 
-Rotating the probe axes: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.rotate_data`.
+Rotating the probe axes: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.rotate_data`.
 Note, this will not rotate the beam shifts.
 
 .. code-block:: python
@@ -112,7 +112,7 @@ Note, this will not rotate the beam shifts.
 .. image:: images/analysing_dpc_data/dpc_rotate_probe_color.jpg
     :scale: 49 %
 
-Rotating the beam shifts: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.rotate_beam_shifts`.
+Rotating the beam shifts: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.rotate_beam_shifts`.
 
 .. code-block:: python
 
@@ -122,7 +122,7 @@ Rotating the beam shifts: :py:meth:`~fpd_data_processing.pixelated_stem_class.DP
 .. image:: images/analysing_dpc_data/dpc_rotate_shifts_color.jpg
     :scale: 49 %
 
-Rotating both the probe dimensions and beam shifts by 90 degrees: :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.flip_axis_90_degrees`.
+Rotating both the probe dimensions and beam shifts by 90 degrees: :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.flip_axis_90_degrees`.
 Note: in this dataset there will not be any difference compared to the original dataset.
 So we slightly alter the dataset.
 
@@ -144,13 +144,13 @@ So we slightly alter the dataset.
 Blurring the data
 -----------------
 
-The beam shifts can be blurred using :py:meth:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D.gaussian_blur`.
+The beam shifts can be blurred using :py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.gaussian_blur`.
 
 This is useful for suppressing the effects of variations in the crystal structure.
 
 .. code-block:: python
 
-    >>> s = fp.dummy_data.get_square_dpc_signal()
+    >>> s = ps.dummy_data.get_square_dpc_signal()
     >>> s_blur = s.gaussian_blur()
     >>> s.get_color_signal().plot()
     >>> s_blur.get_color_signal().plot()

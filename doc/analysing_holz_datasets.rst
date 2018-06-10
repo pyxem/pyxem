@@ -13,20 +13,20 @@ Loading dataset
 ---------------
 
 This example will use a test dataset, containing disk and a ring.
-The dataset is found in :py:func:`fpd_data_processing.dummy_data.get_holz_heterostructure_test_signal`
+The dataset is found in :py:func:`pixstem.dummy_data.get_holz_heterostructure_test_signal`
 The disk represents the STEM bright field disk, while the ring represents the HOLZ ring.
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
 
-Your own data can be loaded using :py:func:`fpd_data_processing.io_tools.load_fpd_signal`:
+Your own data can be loaded using :py:func:`pixstem.io_tools.load_fpd_signal`:
 
 .. code-block:: python
 
-    >>> import fpd_data_processing.api as fp
-    >>> s = fp.load_fpd_signal(yourfilname)  # doctest: +SKIP
+    >>> import pixstem.api as ps
+    >>> s = ps.load_fpd_signal(yourfilname)  # doctest: +SKIP
 
 In some cases, the datasets might be too large to load into memory.
 For these datasets,  lazy loading can be used.
@@ -36,7 +36,7 @@ For more information on this, see :ref:`loading_data`.
 Visualizing the data
 --------------------
 
-The data is loaded as an :py:class:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM` object, which extends HyperSpy's Signal2D class.
+The data is loaded as an :py:class:`~pixstem.pixelated_stem_class.PixelatedSTEM` object, which extends HyperSpy's Signal2D class.
 All functions which are present Signal2D is also in the PixelatedSTEM class.
 
 .. code-block:: python
@@ -70,7 +70,7 @@ Finding the centre position
 ---------------------------
 
 To do radial integration of the datasets, we first need to find the centre position of the diffraction patterns.
-The easiest way of doing this is using :py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.center_of_mass`
+The easiest way of doing this is using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.center_of_mass`
 
 .. code-block:: python
 
@@ -84,7 +84,7 @@ The easiest way of doing this is using :py:meth:`~fpd_data_processing.pixelated_
 .. image:: images/analysing_holz_datasets/testdata_com_signal.png
     :scale: 49 %
 
-This returns a :py:class:`~fpd_data_processing.pixelated_stem_class.DPCSignal2D` object, which is another specialized class for analysing disk shifts (for example from magnetic materials).
+This returns a :py:class:`~pixstem.pixelated_stem_class.DPCSignal2D` object, which is another specialized class for analysing disk shifts (for example from magnetic materials).
 For more information about how to use this for analysing magnetic materials see (TO BE WRITTEN).
 
 The first navigation index is the beam shifts in the x-direction, and the second is the beam shifts in the y-direction.
@@ -93,7 +93,7 @@ The first navigation index is the beam shifts in the x-direction, and the second
 Doing the radial integration
 ----------------------------
 
-The next step is radially integrating the dataset as a function of distance from the centre position, which is done using :py:meth:`~fpd_data_processing.pixelated_stem_class.PixelatedSTEM.radial_integration`.
+The next step is radially integrating the dataset as a function of distance from the centre position, which is done using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_integration`.
 
 .. code-block:: python
 

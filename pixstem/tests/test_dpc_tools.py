@@ -2,7 +2,7 @@ import pytest
 from pytest import approx
 import numpy as np
 import scipy.constants as sc
-import fpd_data_processing.dpc_tools as dpct
+import pixstem.dpc_tools as dpct
 
 
 class TestBetaToBst:

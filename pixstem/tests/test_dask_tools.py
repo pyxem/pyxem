@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 import dask.array as da
-import fpd_data_processing.dask_tools as dat
-import fpd_data_processing.pixelated_stem_tools as pst
+import pixstem.dask_tools as dat
+import pixstem.pixelated_stem_tools as pst
 
 
 class TestCenterOfMassArray:

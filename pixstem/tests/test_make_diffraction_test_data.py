@@ -1,6 +1,6 @@
 import numpy as np
 from hyperspy.signals import Signal2D
-import fpd_data_processing.make_diffraction_test_data as mdtd
+import pixstem.make_diffraction_test_data as mdtd
 
 
 class TestMakeDiffractionTestData:

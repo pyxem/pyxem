@@ -1,4 +1,4 @@
-import fpd_data_processing.dummy_data as dd
+import pixstem.dummy_data as dd
 
 
 class TestDummyDataModule:

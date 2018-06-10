@@ -17,7 +17,7 @@ def acceleration_voltage_to_wavelength(acceleration_voltage):
 
     Examples
     --------
-    >>> import fpd_data_processing.diffraction_tools as dt
+    >>> import pixstem.diffraction_tools as dt
     >>> acceleration_voltage = 200000  # 200 kV (in Volt)
     >>> wavelength = dt.acceleration_voltage_to_wavelength(
     ...     acceleration_voltage)
@@ -60,7 +60,7 @@ def diffraction_scattering_angle(
 
     Examples
     --------
-    >>> import fpd_data_processing.diffraction_tools as dt
+    >>> import pixstem.diffraction_tools as dt
     >>> acceleration_voltage = 200000  # 200 kV (in Volt)
     >>> lattice_size = 4e-10  # 4 Ångstrøm, (in meters).
     >>> miller_index = (1, 0, 0)

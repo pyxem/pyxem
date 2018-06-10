@@ -1,7 +1,7 @@
 import pytest
 from pytest import approx
 import numpy as np
-import fpd_data_processing.diffraction_tools as dt
+import pixstem.diffraction_tools as dt
 
 
 @pytest.mark.parametrize("av,wl", [

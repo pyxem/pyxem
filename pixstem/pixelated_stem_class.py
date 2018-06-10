@@ -10,8 +10,8 @@ from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
-import fpd_data_processing.pixelated_stem_tools as pst
-import fpd_data_processing.dask_tools as dat
+import pixstem.pixelated_stem_tools as pst
+import pixstem.dask_tools as dat
 from tqdm import tqdm
 
 
@@ -69,8 +69,8 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_disk_shift_simple_test_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_disk_shift_simple_test_signal()
         >>> s_c = s.center_of_mass(threshold=3., show_progressbar=False)
         >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
         >>> s_shift = s.shift_diffraction(s_c.inav[0].data, s_c.inav[1].data)
@@ -117,7 +117,7 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.dummy_data as dd
+        >>> import pixstem.dummy_data as dd
         >>> s = dd.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_out = s.threshold_and_mask(
@@ -161,8 +161,8 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_holz_simple_test_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_holz_simple_test_signal()
         >>> s_rot = s.rotate_diffraction(30)
 
         """
@@ -190,8 +190,8 @@ class PixelatedSTEM(Signal2D):
 
         Example
         -------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_holz_simple_test_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_x()
 
         To avoid changing the original object afterwards
@@ -222,8 +222,8 @@ class PixelatedSTEM(Signal2D):
 
         Example
         -------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_holz_simple_test_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_y()
 
         To avoid changing the original object afterwards
@@ -270,7 +270,7 @@ class PixelatedSTEM(Signal2D):
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
 
-        >>> import fpd_data_processing.dummy_data as dd
+        >>> import pixstem.dummy_data as dd
         >>> s = dd.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
@@ -360,8 +360,8 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
         >>> s_bf = s.virtual_bright_field(show_progressbar=False)
         >>> s_bf.plot()
 
@@ -417,8 +417,8 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_holz_heterostructure_test_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
         >>> s_adf = s.virtual_annular_dark_field(
         ...     40, 40, 20, 40, show_progressbar=False)
         >>> s_adf.plot()
@@ -464,7 +464,7 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.dummy_data as dd
+        >>> import pixstem.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
         >>> s_r = s.radial_integration(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
@@ -542,7 +542,7 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.dummy_data as dd
+        >>> import pixstem.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
@@ -597,7 +597,7 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.dummy_data as dd
+        >>> import pixstem.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_integration(
@@ -760,8 +760,8 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=True)
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=True)
         >>> s_corr = s.correct_ramp()
         >>> s_corr.plot()
 
@@ -805,8 +805,8 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_magnitude = s.get_magnitude_signal()
         >>> s_magnitude.plot()
 
@@ -853,8 +853,8 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_color = s.get_phase_signal(rotation=20)
         >>> s_color.plot()
 
@@ -901,8 +901,8 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_color = s.get_color_signal()
         >>> s_color.plot()
 
@@ -963,8 +963,8 @@ class DPCSignal2D(Signal2D):
             If None, generate a new subplot for the indicator.
             If False, do not include an indicator
 
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> fig = s.get_color_image_with_indicator()
         >>> fig.savefig("simple_dpc_test_signal.png")
 
@@ -1046,8 +1046,8 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_stripe_pattern_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
         >>> s_hist = s.get_bivariate_histogram()
         >>> s_hist.plot()
 
@@ -1078,8 +1078,8 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_stripe_pattern_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
         >>> s
         <DPCSignal2D, title: , dimensions: (2|50, 100)>
         >>> s_rot = s.flip_axis_90_degrees()
@@ -1123,8 +1123,8 @@ class DPCSignal2D(Signal2D):
 
         Rotate data by 10 degrees clockwise
 
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_rot = s.rotate_data(10)
         >>> s_rot.plot()
 
@@ -1152,8 +1152,8 @@ class DPCSignal2D(Signal2D):
 
         Rotate beam shifts by 10 degrees clockwise
 
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_simple_dpc_signal()
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_new = s.rotate_beam_shifts(10)
         >>> s_new.plot()
 
@@ -1181,8 +1181,8 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import fpd_data_processing.api as fp
-        >>> s = fp.dummy_data.get_square_dpc_signal(add_ramp=False)
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=False)
         >>> s_blur = s.gaussian_blur()
 
         Different sigma

@@ -3,8 +3,8 @@ import pytest
 import numpy as np
 from tempfile import TemporaryDirectory
 import hyperspy.api as hs
-import fpd_data_processing.api as fp
-import fpd_data_processing.io_tools as it
+import pixstem.api as ps
+import pixstem.io_tools as it
 
 
 my_path = os.path.dirname(__file__)
@@ -21,23 +21,23 @@ class TestDpcsignalIo:
     def test_load_basesignal(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcbasesignal_test.hdf5")
-        fp.load_dpc_signal(filename)
+        ps.load_dpc_signal(filename)
 
     def test_load_signal1d(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcsignal1d_test.hdf5")
-        fp.load_dpc_signal(filename)
+        ps.load_dpc_signal(filename)
 
     def test_load_signal2d(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcsignal2d_test.hdf5")
-        fp.load_dpc_signal(filename)
+        ps.load_dpc_signal(filename)
 
     def test_load_signal2d_too_many_nav_dim(self):
         filename = os.path.join(
                 my_path, "test_data", "dpcsignal2d_test_too_many_nav_dim.hdf5")
         with pytest.raises(Exception):
-            fp.load_dpc_signal(filename)
+            ps.load_dpc_signal(filename)
 
     def test_load_basesignal_too_many_signal_dim(self):
         filename = os.path.join(
@@ -45,25 +45,25 @@ class TestDpcsignalIo:
                 "test_data",
                 "dpcbasesignal_test_too_many_signal_dims.hdf5")
         with pytest.raises(NotImplementedError):
-            fp.load_dpc_signal(filename)
+            ps.load_dpc_signal(filename)
 
     def test_retain_metadata(self):
-        s = fp.DPCSignal2D(np.ones((2, 10, 5)))
+        s = ps.DPCSignal2D(np.ones((2, 10, 5)))
         s.metadata.General.title = "test_data"
         filename = os.path.join(self.tmpdir.name, 'test_metadata.hspy')
         s.save(filename)
-        s_load = fp.load_dpc_signal(filename)
+        s_load = ps.load_dpc_signal(filename)
         assert s_load.metadata.General.title == "test_data"
 
     def test_retain_axes_manager(self):
-        s = fp.DPCSignal2D(np.ones((2, 10, 5)))
+        s = ps.DPCSignal2D(np.ones((2, 10, 5)))
         s_sa0 = s.axes_manager.signal_axes[0]
         s_sa1 = s.axes_manager.signal_axes[1]
         s_sa0.offset, s_sa1.offset, s_sa0.scale, s_sa1.scale = 20, 10, 0.2, 0.3
         s_sa0.units, s_sa1.units, s_sa0.name, s_sa1.name = "a", "b", "e", "f"
         filename = os.path.join(self.tmpdir.name, 'test_axes_manager.hspy')
         s.save(filename)
-        s_load = fp.load_dpc_signal(filename)
+        s_load = ps.load_dpc_signal(filename)
         assert s_load.axes_manager[1].offset == 20
         assert s_load.axes_manager[2].offset == 10
         assert s_load.axes_manager[1].scale == 0.2
@@ -80,7 +80,7 @@ class TestPixelatedstemSignalIo:
         # Has shape (2, 5, 4, 3)
         filename = os.path.join(
                 my_path, "test_data", "pixelated_stem_test.hdf5")
-        s = fp.load_fpd_signal(filename)
+        s = ps.load_fpd_signal(filename)
         assert s.axes_manager.shape == (2, 5, 4, 3)
 
     def test_load_hspy_signal_generated(self):
@@ -88,10 +88,10 @@ class TestPixelatedstemSignalIo:
         tmpdir = TemporaryDirectory()
         filename = os.path.join(
                 tmpdir.name, "test.hdf5")
-        s = fp.PixelatedSTEM(np.zeros(shape))
+        s = ps.PixelatedSTEM(np.zeros(shape))
         s.save(filename)
 
-        sl = fp.load_fpd_signal(filename, lazy=False)
+        sl = ps.load_fpd_signal(filename, lazy=False)
         assert sl.axes_manager.shape == (
                 shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
@@ -101,10 +101,10 @@ class TestPixelatedstemSignalIo:
         tmpdir = TemporaryDirectory()
         filename = os.path.join(
                 tmpdir.name, "test_lazy.hdf5")
-        s = fp.PixelatedSTEM(np.zeros(shape))
+        s = ps.PixelatedSTEM(np.zeros(shape))
         s.save(filename)
 
-        sl = fp.load_fpd_signal(filename, lazy=True)
+        sl = ps.load_fpd_signal(filename, lazy=True)
         assert sl.axes_manager.shape == (
                 shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
@@ -113,26 +113,26 @@ class TestPixelatedstemSignalIo:
         # Dataset has known size (2, 2, 256, 256)
         filename = os.path.join(
                 my_path, "test_data", "fpd_file_test.hdf5")
-        s = fp.load_fpd_signal(filename)
+        s = ps.load_fpd_signal(filename)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
-        s = fp.load_fpd_signal(filename, lazy=True)
+        s = ps.load_fpd_signal(filename, lazy=True)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
     def test_navigation_signal(self):
         # Dataset has known size (2, 2, 256, 256)
         filename = os.path.join(
                 my_path, "test_data", "fpd_file_test.hdf5")
-        s = fp.load_fpd_signal(filename)
+        s = ps.load_fpd_signal(filename)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
         s_nav0 = hs.signals.Signal2D(np.zeros((2, 2)))
-        s = fp.load_fpd_signal(filename, lazy=True, navigation_signal=s_nav0)
+        s = ps.load_fpd_signal(filename, lazy=True, navigation_signal=s_nav0)
         s.plot()
 
         s_nav1 = hs.signals.Signal2D(np.zeros((2, 4)))
         with pytest.raises(ValueError):
-            s = fp.load_fpd_signal(
+            s = ps.load_fpd_signal(
                     filename, lazy=True, navigation_signal=s_nav1)
 
 

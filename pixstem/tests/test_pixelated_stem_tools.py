@@ -2,8 +2,8 @@ import unittest
 import pytest
 import numpy as np
 import dask.array as da
-from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
-import fpd_data_processing.pixelated_stem_tools as pst
+from pixstem.pixelated_stem_class import PixelatedSTEM
+import pixstem.pixelated_stem_tools as pst
 from hyperspy.signals import Signal2D
 
 

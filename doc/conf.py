@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# fpd_data_processing documentation build configuration file, created by
+# pixStem documentation build configuration file, created by
 # sphinx-quickstart on Wed Jan 31 13:59:51 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Fast pixelated detector data processing'
+project = 'Analysis of pixelated STEM data'
 copyright = '2018, Magnus Nord'
 author = 'Magnus Nord'
 
@@ -140,7 +140,7 @@ html_theme = 'sphinx_rtd_theme'
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = 'fpd_data_processing v0.2.0.dev2'
+# html_title = 'pixstem v0.2.0.dev2'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -240,7 +240,7 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'fpd_data_processingdoc'
+htmlhelp_basename = 'pixstemdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -266,7 +266,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'fpd_data_processing.tex', 'fpd\\_data\\_processing Documentation',
+    (master_doc, 'pixstem.tex', 'fpd\\_data\\_processing Documentation',
      'Magnus Nord', 'manual'),
 ]
 
@@ -308,7 +308,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'fpd_data_processing', 'fpd_data_processing Documentation',
+    (master_doc, 'pixstem', 'pixstem Documentation',
      [author], 1)
 ]
 
@@ -323,8 +323,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'fpd_data_processing', 'fpd_data_processing Documentation',
-     author, 'fpd_data_processing', 'One line description of project.',
+    (master_doc, 'pixstem', 'pixstem Documentation',
+     author, 'pixStem', 'One line description of project.',
      'Miscellaneous'),
 ]
 

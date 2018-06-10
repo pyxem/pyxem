@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import dask.array as da
-import fpd_data_processing.lazy_tools as lt
+import pixstem.lazy_tools as lt
 
 
 class TestGetDaskChunkSliceList:

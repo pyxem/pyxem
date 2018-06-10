@@ -1,11 +1,11 @@
 from setuptools import setup
 setup(
-        name = 'fpd_data_processing',
+        name = 'pixstem',
         packages = [
-            'fpd_data_processing',
+            'pixstem',
             ],
         version = '0.2.1.dev1',
-        description = 'Library for processing scanning transmission electron microscopy data acquired using a fast pixelated detector',
+        description = 'Library for processing scanning transmission electron microscopy data acquired using a pixelated detector',
         author = 'Magnus Nord',
         author_email = 'magnunor@gmail.com',
         license = 'GPL v3',

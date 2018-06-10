@@ -2,8 +2,8 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 import dask.array as da
 from hyperspy.misc.utils import isiterable
-from fpd_data_processing.pixelated_stem_class import PixelatedSTEM
-from fpd_data_processing.pixelated_stem_class import LazyPixelatedSTEM
+from pixstem.pixelated_stem_class import PixelatedSTEM
+from pixstem.pixelated_stem_class import LazyPixelatedSTEM
 
 
 def _get_elliptical_mask(s, x, y, semi_len0, semi_len1, rotation):
@@ -23,7 +23,7 @@ def _get_elliptical_mask(s, x, y, semi_len0, semi_len1, rotation):
     Examples
     --------
     >>> from hyperspy.signals import Signal2D
-    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
     >>> ellipse_data = mdtd._get_elliptical_mask(s, 10, -10, 12, 18, 1.5)
@@ -61,7 +61,7 @@ def _get_elliptical_ring(s, x, y, semi_len0, semi_len1, rotation, lw_r=1):
     Examples
     --------
     >>> from hyperspy.signals import Signal2D
-    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
     >>> ellipse_data = mdtd._get_elliptical_ring(s, 10, -10, 12, 18, 1.5, 2)
@@ -259,7 +259,7 @@ class MakeTestData:
 
     Default settings
 
-    >>> from fpd_data_processing.make_diffraction_test_data import MakeTestData
+    >>> from pixstem.make_diffraction_test_data import MakeTestData
     >>> test_data = MakeTestData()
     >>> test_data.signal.plot()
 
@@ -460,7 +460,7 @@ def generate_4d_data(
 
     Examples
     --------
-    >>> import fpd_data_processing.make_diffraction_test_data as mdtd
+    >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = mdtd.generate_4d_data()
     >>> s.plot()
 

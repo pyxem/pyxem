@@ -22,7 +22,7 @@ def _mask_array(dask_array, mask_array):
     Examples
     --------
     >>> import dask.array as da
-    >>> import fpd_data_processing.dask_tools as dt
+    >>> import pixstem.dask_tools as dt
     >>> data = da.random.random(
     ...     size=(32, 32, 128, 128), chunks=(16, 16, 128, 128))
     >>> mask_array = np.ones(shape=(128, 128), dtype=bool)
@@ -62,7 +62,7 @@ def _threshold_array(dask_array, threshold_value=1, mask_array=None):
     Examples
     --------
     >>> import dask.array as da
-    >>> import fpd_data_processing.dask_tools as dt
+    >>> import pixstem.dask_tools as dt
     >>> data = da.random.random(
     ...     size=(32, 32, 128, 128), chunks=(16, 16, 128, 128))
     >>> output_dask = dt._threshold_array(data)
@@ -129,7 +129,7 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     Examples
     --------
     >>> import dask.array as da
-    >>> import fpd_data_processing.dask_tools as dt
+    >>> import pixstem.dask_tools as dt
     >>> data = da.random.random(
     ...     size=(64, 64, 128, 128), chunks=(16, 16, 128, 128))
     >>> output_dask = dt._center_of_mass_array(data)

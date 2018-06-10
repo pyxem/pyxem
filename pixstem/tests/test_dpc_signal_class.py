@@ -2,10 +2,10 @@ import pytest
 from pytest import approx
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
-from fpd_data_processing.pixelated_stem_class import (
+from pixstem.pixelated_stem_class import (
         DPCBaseSignal, DPCSignal1D, DPCSignal2D)
-import fpd_data_processing.dummy_data as dd
-import fpd_data_processing.pixelated_stem_tools as pst
+import pixstem.dummy_data as dd
+import pixstem.pixelated_stem_tools as pst
 
 
 class TestDpcBasesignalCreate:

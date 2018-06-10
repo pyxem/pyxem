@@ -3,7 +3,7 @@ from pytest import approx
 import numpy as np
 from numpy.testing import assert_allclose
 import hyperspy.api as hs
-import fpd_data_processing.pixelated_stem_tools as pst
+import pixstem.pixelated_stem_tools as pst
 
 
 class TestGetRgbPhaseMagnitudeArray:
