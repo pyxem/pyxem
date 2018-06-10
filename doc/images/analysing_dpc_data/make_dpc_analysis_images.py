@@ -1,9 +1,9 @@
 import matplotlib
 import matplotlib.pyplot as plt
-import fpd_data_processing.api as fp
+import pixstem.api as ps
 
 # Initial dummy DPC data
-s = fp.dummy_data.get_square_dpc_signal(add_ramp=True)
+s = ps.dummy_data.get_square_dpc_signal(add_ramp=True)
 s.plot()
 fig_sig_x = s._plot.signal_plot.figure
 fig_sig_x.savefig("dpc_x_raw.jpg")
@@ -79,7 +79,7 @@ fig_sig = s2_rot_flip_color._plot.signal_plot.figure
 fig_sig.savefig("dpc_rotate_flip_color2.jpg")
 
 # Blurring the data
-s = fp.dummy_data.get_square_dpc_signal()
+s = ps.dummy_data.get_square_dpc_signal()
 s_color = s.get_color_signal()
 s_color.plot()
 fig_color = s_color._plot.signal_plot.figure

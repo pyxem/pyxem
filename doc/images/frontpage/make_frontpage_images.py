@@ -1,8 +1,8 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import hyperspy.api as hs
-import fpd_data_processing.api as fp
-from fpd_data_processing.make_diffraction_test_data import MakeTestData
+import pixstem.api as ps
+from pixstem.make_diffraction_test_data import MakeTestData
 
 # Plotting STEM diffraction pattern
 s = hs.load("stem_diffraction_pattern.hspy")
@@ -13,7 +13,7 @@ fig.subplots_adjust(0, 0, 1, 1)
 fig.savefig("stem_diffraction.jpg")
 
 # DPC color image
-s = fp.dummy_data.get_square_dpc_signal().get_color_signal()
+s = ps.dummy_data.get_square_dpc_signal().get_color_signal()
 s.metadata.General.title = "Magnetic DPC example data"
 s.plot()
 fig_sig_x = s._plot.signal_plot.figure

@@ -1,7 +1,7 @@
 import matplotlib
-import fpd_data_processing.api as fp
+import pixstem.api as ps
 
-s = fp.dummy_data.get_holz_heterostructure_test_signal()
+s = ps.dummy_data.get_holz_heterostructure_test_signal()
 
 # First look at the dataset
 s.plot()
