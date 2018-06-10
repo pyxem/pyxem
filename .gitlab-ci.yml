@@ -6,7 +6,7 @@ all_tests_debian:
     - apt-get install -qy python3-sympy --no-install-recommends
     - apt-get install -qy python3-pytest python3-pytest-cov xvfb
     - pip3 install .
-    - xvfb-run -a python3 -m pytest --doctest-modules --cov=fpd_data_processing fpd_data_processing/
+    - xvfb-run -a python3 -m pytest --doctest-modules --cov=pixstem pixstem/
     - xvfb-run -a python3 -m pytest --doctest-glob="*.rst" doc/
 
 flake8_checks:
@@ -14,7 +14,7 @@ flake8_checks:
     script:
     - apt-get update -q
     - apt-get install -qy python3-flake8
-    - python3 -m flake8 --exclude fpd_data_processing/api.py fpd_data_processing/
+    - python3 -m flake8 --exclude pixstem/api.py pixstem/
 
 pydocstyle_checks:
     image: debian:stable
@@ -22,7 +22,7 @@ pydocstyle_checks:
     - apt-get update -q
     - apt-get install -qy python3-pip
     - pip3 install pydocstyle
-    - python3 -m pydocstyle fpd_data_processing/
+    - python3 -m pydocstyle pixstem/
     allow_failure: true
 
 pages_development_branch:
