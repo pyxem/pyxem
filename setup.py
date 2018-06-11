@@ -11,7 +11,7 @@ setup(
         version = '0.2.1.dev2',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a pixelated detector',
         long_description=long_description,
-        long_description_content_type='text/markdown'
+        long_description_content_type='text/markdown',
         author = 'Magnus Nord',
         author_email = 'magnunor@gmail.com',
         license = 'GPL v3',
