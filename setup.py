@@ -4,7 +4,7 @@ setup(
         packages = [
             'pixstem',
             ],
-        version = '0.2.1.dev1',
+        version = '0.2.1.dev2',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a pixelated detector',
         author = 'Magnus Nord',
         author_email = 'magnunor@gmail.com',
