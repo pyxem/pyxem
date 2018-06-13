@@ -7,7 +7,7 @@ Loading data
 Data is loaded by using two specialized loading functions:
 
 - One for the :py:class:`~pixstem.pixelated_stem_class.PixelatedSTEM` datasets which has two spatial probe dimensions
-  and two reciprocal detector dimensions: :py:func:`pixstem.io_tools.load_fpd_signal`.
+  and two reciprocal detector dimensions: :py:func:`pixstem.io_tools.load_ps_signal`.
 - And another one for loading disk shift datasets, which consist of one navigation
   dimensions, and (normally) two signal dimensions:
   :py:func:`pixstem.io_tools.load_dpc_signal`
@@ -26,12 +26,12 @@ To generate a test pixelated STEM dataset:
     >>> s = dd.get_holz_simple_test_signal()
     >>> s.save("test_data.hdf5")
 
-Load the data using :py:func:`~pixstem.io_tools.load_fpd_signal`:
+Load the data using :py:func:`~pixstem.io_tools.load_ps_signal`:
 
 .. code-block:: python
 
     >>> import pixstem.api as ps
-    >>> s = ps.load_fpd_signal("test_data.hdf5", lazy=True)
+    >>> s = ps.load_ps_signal("test_data.hdf5", lazy=True)
 
 Here `lazy=True` was used.
 Essentially this does not load all the data into memory, meaning very large datasets
@@ -46,7 +46,7 @@ Here the dataset is fairly small, so it should easily fit into memory.:
 .. code-block:: python
 
     >>> import pixstem.api as ps
-    >>> s = ps.load_fpd_signal("test_data.hdf5")
+    >>> s = ps.load_ps_signal("test_data.hdf5")
 
 Note: for larger datasets this might take a long time, and might use all of your memory.
 This might cause the computer to crash, so be careful when loading large datasets.
