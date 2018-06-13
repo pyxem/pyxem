@@ -3,16 +3,25 @@ Welcome to pixStem's documentation!
 
 News
 ----
-**2018-2-18: pixStem 0.2.1 released!**
+**2018-6-13: pixStem 0.3.0 released!**
+
+fpd_data_processing has been renamed pixStem!
+This release also includes greatly improved center of mass, virtual annular dark field and virtual bright field functions, which now uses only `dask <https://dask.pydata.org/en/latest/>`_ array operations.
+This means they can return lazy signal, which makes it much easier to work with large datasets on computers with limited memory.
+It also includes several backend improvements to `DPCSignal.correct_ramp` and utility functions for getting diffraction values.
+A Jupyter Notebook giving a basic introduction to pixStem's features is available at `pixStem demos <https://gitlab.com/pixstem/pixstem_demos/blob/master/introduction_to_pixstem.ipynb>`_.
+
+
+*2018-2-18: fpd_data_processing 0.2.1 released!*
 
 This release includes a major improvement for lazy signal processing with center of mass and radial integration.
 It also includes a new method for shifting diffraction patterns in the PixelatedSTEM class.
 
 
 About pixStem
--------------------------
+-------------
 
-Library for processing data acquired on a fast pixelated electron detector, acquired using scanning transmission electron microscopy.
+Library for processing data acquired on a fast pixelated electron detector, acquired using scanning transmission electron microscopy (STEM).
 
 Install instructions: :ref:`install`.
 
