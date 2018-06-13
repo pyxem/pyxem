@@ -154,7 +154,7 @@ def signal_to_pixelated_stem(s):
     return s_new
 
 
-def load_fpd_signal(
+def load_ps_signal(
         filename, lazy=False, chunk_size=(16, 16),
         navigation_signal=None):
     """

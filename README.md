@@ -1,6 +1,6 @@
 # pixStem
 
-## Webpage: https://pixstem.gitlab.io/pixstem/
+## Webpage: http://pixstem.org
 
 Webpage (development version): https://gitlab.com/pixstem/pixstem/builds/artifacts/master/file/pages_development/index.html?job=pages_development_branch
 

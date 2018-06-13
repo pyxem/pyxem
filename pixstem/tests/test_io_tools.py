@@ -80,7 +80,7 @@ class TestPixelatedstemSignalIo:
         # Has shape (2, 5, 4, 3)
         filename = os.path.join(
                 my_path, "test_data", "pixelated_stem_test.hdf5")
-        s = ps.load_fpd_signal(filename)
+        s = ps.load_ps_signal(filename)
         assert s.axes_manager.shape == (2, 5, 4, 3)
 
     def test_load_hspy_signal_generated(self):
@@ -91,7 +91,7 @@ class TestPixelatedstemSignalIo:
         s = ps.PixelatedSTEM(np.zeros(shape))
         s.save(filename)
 
-        sl = ps.load_fpd_signal(filename, lazy=False)
+        sl = ps.load_ps_signal(filename, lazy=False)
         assert sl.axes_manager.shape == (
                 shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
@@ -104,35 +104,35 @@ class TestPixelatedstemSignalIo:
         s = ps.PixelatedSTEM(np.zeros(shape))
         s.save(filename)
 
-        sl = ps.load_fpd_signal(filename, lazy=True)
+        sl = ps.load_ps_signal(filename, lazy=True)
         assert sl.axes_manager.shape == (
                 shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
 
-    def test_load_fpd_signal(self):
+    def test_load_ps_signal(self):
         # Dataset has known size (2, 2, 256, 256)
         filename = os.path.join(
                 my_path, "test_data", "fpd_file_test.hdf5")
-        s = ps.load_fpd_signal(filename)
+        s = ps.load_ps_signal(filename)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
-        s = ps.load_fpd_signal(filename, lazy=True)
+        s = ps.load_ps_signal(filename, lazy=True)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
     def test_navigation_signal(self):
         # Dataset has known size (2, 2, 256, 256)
         filename = os.path.join(
                 my_path, "test_data", "fpd_file_test.hdf5")
-        s = ps.load_fpd_signal(filename)
+        s = ps.load_ps_signal(filename)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
         s_nav0 = hs.signals.Signal2D(np.zeros((2, 2)))
-        s = ps.load_fpd_signal(filename, lazy=True, navigation_signal=s_nav0)
+        s = ps.load_ps_signal(filename, lazy=True, navigation_signal=s_nav0)
         s.plot()
 
         s_nav1 = hs.signals.Signal2D(np.zeros((2, 4)))
         with pytest.raises(ValueError):
-            s = ps.load_fpd_signal(
+            s = ps.load_ps_signal(
                     filename, lazy=True, navigation_signal=s_nav1)
 
 
