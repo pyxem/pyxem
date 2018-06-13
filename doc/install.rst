@@ -17,7 +17,7 @@ In this prompt run:
 .. code-block:: bash
 
     $ conda install hyperspy -c conda-forge
-    $ pip install hyperspy_gui_traitsui
+    $ pip install hyperspy_gui_traitsui
     $ pip install pixstem
 
 To check everything is working correctly, go to "Anaconda3" in the start menu, and start "Jupyter Notebook".
