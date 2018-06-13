@@ -7,12 +7,37 @@ Installing
 Installing in Windows
 ---------------------
 
+Anaconda Python environment
+***************************
+
+Currently, the easiest way to install pixStem is using the Anaconda python environment `Anaconda environment <https://www.continuum.io/downloads>`_,
+Install HyperSpy, then pixStem via the `Anaconda prompt` (Start menu - Anaconda3), this will open a command line prompt.
+In this prompt run:
+
+.. code-block:: bash
+
+    $ conda install hyperspy -c conda-forge
+    $ pip install hyperspy_gui_traitsui
+    $ pip install pixstem
+
+To check everything is working correctly, go to "Anaconda3" in the start menu, and start "Jupyter Notebook".
+This will open a browser window (or a new browser tab).
+Start a new Python 3 notebook, and run in the first cell:
+
+.. code-block:: python
+
+    %matplotlib qt5
+    import pixstem.api as ps
+
+If this works, continue with the :ref:`using_pixelated_stem_class`.
+
+
 WinPython HyperSpy installer
 ****************************
 
-Currently, the easiest way to install is using the WinPython HyperSpy installer.
-Firstly download and install the `WinPython HyperSpy bundle <http://hyperspy.org/download.html#windows-bundle-installers>`_:
-HyperSpy-1.3 for Windows 64-bits.
+Alternatively, the WinPython HyperSpy bundle can be used.
+Firstly download and install the `WinPython HyperSpy bundle <://github.com/hyperspy/hyperspy-bundle/releases>`_:
+HyperSpy-1.3 for Windows 64-bits (get the most recent version).
 
 After installing the bundle, there should be a folder in the start menu called "HyperSpy WinPython Bundle", and this
 folder should contain the "WinPython prompt". Start the "WinPython prompt". This will open a terminal window called
@@ -71,7 +96,7 @@ In addition, due to a recent bug with HyperSpy and matplotlib 2.1.x, matplotlib 
 
 
 Starting pixStem
-****************************
+****************
 
 To check that everything is working, open a terminal and run :code:`ipython3 --matplotlib qt5`. In the ipython terminal run:
 
@@ -81,8 +106,6 @@ To check that everything is working, open a terminal and run :code:`ipython3 --m
 
 If this works, continue with the :ref:`using_pixelated_stem_class`.
 If you get some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
-Note, having the system and pip version of matplotlib installed at the same might cause an error with matplotlib not finding matplotlib.external.
-The easiest way of fixing this is by removing the system version of matplotlib.
 
 
 Development version
