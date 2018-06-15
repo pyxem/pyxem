@@ -84,6 +84,8 @@ def _load_fpd_sum_dif(filename):
 def _load_fpd_emd_file(filename, lazy=False):
     logging.basicConfig(level=logging.ERROR)
     s_list = load_with_reader(filename, reader=emd, lazy=lazy)
+    if hasattr(s_list, 'data'):
+        s_list = [s_list, ]
     logging.basicConfig(level=logging.WARNING)
     temp_s = None
     longest_dims = 0
