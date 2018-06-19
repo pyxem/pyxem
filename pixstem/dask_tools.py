@@ -186,3 +186,52 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     beam_shifts = da.stack((x_shift, y_shift))
     beam_shifts = da.divide(beam_shifts[:], sum_array, dtype=np.float64)
     return beam_shifts
+
+
+def _find_dead_pixels(dask_array, dead_pixel_value=0, mask_array=None):
+    """Find pixels which have the same value for all images.
+
+    Useful for finding dead pixels.
+
+    Parameters
+    ----------
+    dask_array : Dask array
+        Must be at least 2 dimensions
+    dead_pixel_value : scalar
+        Default 0
+    mask_array : NumPy array, optional
+        Array with bool values. The True values will be masked
+        (i.e. ignored). Must have the same shape as the two
+        last dimensions in dask_array.
+
+    Returns
+    -------
+    dead_pixels : Dask array
+
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_dead_pixel_signal(lazy=True)
+    >>> dead_pixels = dt._find_dead_pixels(s.data)
+
+    With a mask
+
+    >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+    >>> mask_array[:, :100] = True
+    >>> dead_pixels = dt._find_dead_pixels(s.data, mask_array=mask_array)
+
+    With a dead_pixel_value
+
+    >>> dead_pixels = dt._find_dead_pixels(s.data, dead_pixel_value=2)
+
+    """
+    if len(dask_array.shape) < 2:
+        raise ValueError("_find_dead_pixels must have at least 2 dimensions")
+    nav_dim_size = len(dask_array.shape) - 2
+    nav_axes = tuple(range(nav_dim_size))
+    data_sum = dask_array.sum(axis=nav_axes, dtype=np.int64)
+    dead_pixels = data_sum == dead_pixel_value
+    if mask_array is not None:
+        dead_pixels = dead_pixels * np.invert(mask_array)
+    return dead_pixels
