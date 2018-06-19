@@ -1,8 +1,9 @@
 import numpy as np
+import dask.array as da
 from hyperspy.components1d import Gaussian
 from scipy.ndimage.filters import gaussian_filter
 import pixstem.make_diffraction_test_data as mdtd
-from pixstem.pixelated_stem_class import DPCSignal2D
+from pixstem.pixelated_stem_class import DPCSignal2D, LazyPixelatedSTEM
 
 
 def get_disk_shift_simple_test_signal(lazy=False):
@@ -131,7 +132,7 @@ def get_single_ring_diffraction_signal():
     return(s)
 
 
-def get_dead_pixel_signal():
+def get_dead_pixel_signal(lazy=False):
     """Get HyperSpy 2D signal with a disk in the middle.
 
     Has 4 pixels with value equal to 0, to simulate dead pixels.
@@ -140,6 +141,10 @@ def get_dead_pixel_signal():
     -------
     >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_dead_pixel_signal()
+
+    Lazy signal
+
+    >>> s_lazy = ps.dummy_data.get_dead_pixel_signal(lazy=True)
 
     """
     data = mdtd.MakeTestData(size_x=128, size_y=128, default=False, blur=True)
@@ -151,6 +156,9 @@ def get_dead_pixel_signal():
     s.data[46, 53] = 0
     s.data[88, 88] = 0
     s.data[112, 20] = 0
+    if lazy:
+        s = LazyPixelatedSTEM(s)
+        s.data = da.from_array(s.data, chunks=(64, 64))
     return(s)
 
 
