@@ -188,6 +188,115 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     return beam_shifts
 
 
+def _get_border_slices(nav_dim_size):
+    """Get a list of slices for doing pixel interpolation.
+
+    Parameters
+    ----------
+    nav_dim_size : scalar
+
+    Returns
+    -------
+    slice_mi, slice_xp, slice_xm, slice_yp, slice_ym : list of slices
+
+    Examples
+    --------
+    >>> import pixstem.dask_tools as dt
+    >>> s_mi, s_xp, s_xm, s_yp, s_ym = dt._get_border_slices(2)
+
+    """
+    nav_slice = [slice(None, None, None)] * nav_dim_size
+
+    slice_mi = copy.deepcopy(nav_slice)
+    slice_mi.extend(np.s_[1:-1, 1:-1])
+    slice_mi = tuple(slice_mi)
+
+    slice_xp = copy.deepcopy(nav_slice)
+    slice_xp.extend(np.s_[0:-2, 1:-1])
+    slice_xp = tuple(slice_xp)
+
+    slice_xm = copy.deepcopy(nav_slice)
+    slice_xm.extend(np.s_[2:None, 1:-1])
+    slice_xm = tuple(slice_xm)
+
+    slice_yp = copy.deepcopy(nav_slice)
+    slice_yp.extend(np.s_[1:-1, 0:-2])
+    slice_yp = tuple(slice_yp)
+
+    slice_ym = copy.deepcopy(nav_slice)
+    slice_ym.extend(np.s_[1:-1, 2:None])
+    slice_ym = tuple(slice_ym)
+    return(slice_mi, slice_xp, slice_xm, slice_yp, slice_ym)
+
+
+def _remove_bad_pixels(dask_array, bad_pixel_array):
+    """Replace values in bad pixels with mean of neighbors.
+
+    Parameters
+    ----------
+    dask_array : Dask array
+        Must be at least two dimensions
+    bad_pixel_array : array-like
+        Must either have the same shape as dask_array,
+        or the same shape as the two last dimensions of dask_array.
+
+    Returns
+    -------
+    data_output : Dask array
+
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_dead_pixel_signal(lazy=True)
+    >>> dead_pixels = dt._find_dead_pixels(s.data)
+    >>> data_output = dt._remove_bad_pixels(s.data, dead_pixels)
+
+    """
+    if len(dask_array.shape) < 2:
+        raise ValueError("dask_array {0} must be at least 2 dimensions".format(
+            dask_array.shape))
+    if bad_pixel_array.shape == dask_array.shape:
+        pass
+    elif bad_pixel_array.shape == dask_array.shape[-2:]:
+        temp_array = da.zeros_like(dask_array)
+        bad_pixel_array = da.add(temp_array, bad_pixel_array)
+    else:
+        raise ValueError(
+                "bad_pixel_array {0} must either 2-D and have the same shape "
+                "as the two last dimensions in dask_array {1}. Or be "
+                "the same shape as dask_array {2}".format(
+                    bad_pixel_array.shape,
+                    dask_array.shape[-2:], dask_array.shape))
+
+    nav_dim_size = len(dask_array.shape) - 2
+    s_mi, s_xp, s_xm, s_yp, s_ym = _get_border_slices(nav_dim_size)
+
+    data_xp = dask_array[s_xp]
+    data_xm = dask_array[s_xm]
+    data_yp = dask_array[s_yp]
+    data_ym = dask_array[s_ym]
+
+    n_shape = list(dask_array.shape[:-2])
+    sx, sy = dask_array.shape[-2:]
+
+    pad_y_size = n_shape + [1, sy - 2]
+    pad_y = da.zeros(pad_y_size, chunks=[16]*len(pad_y_size))
+    pad_x_size = n_shape + [sx, 1]
+    pad_x = da.zeros(pad_x_size, chunks=[16]*len(pad_x_size))
+
+    data_pixel_sum = (data_xp + data_xm + data_yp + data_ym) / 4
+    data_pixel_sum = da.concatenate((data_pixel_sum, pad_y), axis=-2)
+    data_pixel_sum = da.concatenate((pad_y, data_pixel_sum), axis=-2)
+    data_pixel_sum = da.concatenate((data_pixel_sum, pad_x), axis=-1)
+    data_pixel_sum = da.concatenate((pad_x, data_pixel_sum), axis=-1)
+    data_pixel_sum = data_pixel_sum * bad_pixel_array
+
+    data_output = dask_array * da.logical_not(bad_pixel_array)
+    data_output = data_output + data_pixel_sum
+    return data_output
+
+
 def _find_dead_pixels(dask_array, dead_pixel_value=0, mask_array=None):
     """Find pixels which have the same value for all images.
 

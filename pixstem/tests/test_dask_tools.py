@@ -156,3 +156,64 @@ class TestFindDeadPixels:
         dask_array = da.from_array(data, chunks=(5))
         with pytest.raises(ValueError):
             dt._find_dead_pixels(dask_array)
+
+
+class TestRemoveBadPixels:
+
+    def test_simple(self):
+        data = np.ones((20, 30))*12
+        data[5, 9] = 0
+        data[2, 1] = 0
+        dask_array = da.from_array(data, chunks=(5, 5))
+        dead_pixels = dt._find_dead_pixels(dask_array)
+        output = dt._remove_bad_pixels(dask_array, dead_pixels)
+        output = output.compute()
+        assert (output == 12).all()
+
+    def test_3d(self):
+        data = np.ones((5, 20, 30))*12
+        data[:, 5, 9] = 0
+        data[:, 2, 1] = 0
+        dask_array = da.from_array(data, chunks=(5, 5, 5))
+        dead_pixels = dt._find_dead_pixels(dask_array)
+        output = dt._remove_bad_pixels(dask_array, dead_pixels)
+        output = output.compute()
+        assert (output == 12).all()
+
+    def test_4d(self):
+        data = np.ones((5, 10, 20, 30))*12
+        data[:, :, 5, 9] = 0
+        data[:, :, 2, 1] = 0
+        dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
+        dead_pixels = dt._find_dead_pixels(dask_array)
+        output = dt._remove_bad_pixels(dask_array, dead_pixels)
+        output = output.compute()
+        assert (output == 12).all()
+
+    def test_3d_same_bad_pixel_array_shape(self):
+        data = np.ones((5, 20, 30))*12
+        data[2, 5, 9] = 0
+        data[3, 2, 1] = 0
+        dask_array = da.from_array(data, chunks=(5, 5, 5))
+        bad_pixel_array = np.zeros_like(dask_array)
+        bad_pixel_array[2, 5, 9] = True
+        bad_pixel_array[3, 2, 1] = True
+        bad_pixel_array = da.from_array(bad_pixel_array, chunks=(5, 5, 5))
+        output = dt._remove_bad_pixels(dask_array, bad_pixel_array)
+        output = output.compute()
+        assert (output == 12).all()
+
+    def test_wrong_dask_array_shape_1d(self):
+        data = np.ones((30))
+        dask_array = da.from_array(data, chunks=(5))
+        with pytest.raises(ValueError):
+            dt._remove_bad_pixels(dask_array, dask_array)
+
+    def test_wrong_shape_bad_pixel_array(self):
+        data = np.ones((5, 10, 20, 30))
+        dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
+        bad_pixel_array = da.zeros_like(dask_array)
+        with pytest.raises(ValueError):
+            dt._remove_bad_pixels(dask_array, bad_pixel_array[1, :, :, :])
+        with pytest.raises(ValueError):
+            dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
