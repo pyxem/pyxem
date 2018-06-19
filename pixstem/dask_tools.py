@@ -1,19 +1,19 @@
+import copy
 import numpy as np
 import dask.array as da
 
 
-def _mask_array(dask_array, mask_array):
+def _mask_array(dask_array, mask_array, fill_value=None):
     """Mask two last dimensions in a dask array.
 
     Parameters
     ----------
     dask_array : Dask array
     mask_array : NumPy array
-        True values will be masked.
-    mask_array : NumPy array
         Array with bool values. The True values will be masked
         (i.e. ignored). Must have the same shape as the two
         last dimensions in dask_array.
+    fill_value : scalar, optional
 
     Returns
     -------
@@ -30,6 +30,12 @@ def _mask_array(dask_array, mask_array):
     >>> output_dask = dt._mask_array(data, mask_array=mask_array)
     >>> output = output_dask.compute()
 
+    With fill value specified
+
+    >>> output_dask = dt._mask_array(
+    ...     data, mask_array=mask_array, fill_value=0.0)
+    >>> output = output_dask.compute()
+
     """
     if not dask_array.shape[-2:] == mask_array.shape:
         raise ValueError(
@@ -38,7 +44,8 @@ def _mask_array(dask_array, mask_array):
                     mask_array.shape, dask_array.shape[-2:]))
     mask_array_4d = da.ones_like(dask_array, dtype=np.bool)
     mask_array_4d = mask_array_4d[:, :] * mask_array
-    dask_array_masked = da.ma.masked_array(dask_array, mask_array_4d)
+    dask_array_masked = da.ma.masked_array(
+            dask_array, mask_array_4d, fill_value=fill_value)
     return dask_array_masked
 
 
