@@ -1,4 +1,3 @@
-import pytest
 import pixstem.dask_test_data as dtd
 
 
