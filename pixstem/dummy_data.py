@@ -3,7 +3,8 @@ import dask.array as da
 from hyperspy.components1d import Gaussian
 from scipy.ndimage.filters import gaussian_filter
 import pixstem.make_diffraction_test_data as mdtd
-from pixstem.pixelated_stem_class import DPCSignal2D, LazyPixelatedSTEM
+from pixstem.pixelated_stem_class import (
+        DPCSignal2D, LazyPixelatedSTEM, PixelatedSTEM)
 
 
 def get_disk_shift_simple_test_signal(lazy=False):
@@ -133,7 +134,7 @@ def get_single_ring_diffraction_signal():
 
 
 def get_dead_pixel_signal(lazy=False):
-    """Get HyperSpy 2D signal with a disk in the middle.
+    """Get 2D PixelatedSTEM signal with a disk in the middle.
 
     Has 4 pixels with value equal to 0, to simulate dead pixels.
 
@@ -159,6 +160,40 @@ def get_dead_pixel_signal(lazy=False):
     if lazy:
         s = LazyPixelatedSTEM(s)
         s.data = da.from_array(s.data, chunks=(64, 64))
+    else:
+        s = PixelatedSTEM(s)
+    return(s)
+
+
+def get_hot_pixel_signal(lazy=False):
+    """Get 2D PixelatedSTEM signal with a disk in the middle.
+
+    Has 4 pixels with value equal to 50000, to simulate hot pixels.
+
+    Example
+    -------
+    >>> import pixstem.api as ps
+    >>> s = ps.dummy_data.get_hot_pixel_signal()
+
+    Lazy signal
+
+    >>> s_lazy = ps.dummy_data.get_hot_pixel_signal(lazy=True)
+
+    """
+    data = mdtd.MakeTestData(size_x=128, size_y=128, default=False, blur=True)
+    data.add_disk(64, 64, r=30, intensity=10000)
+    s = data.signal
+    s.change_dtype('int64')
+    s.data += gaussian_filter(s.data, sigma=50)
+    s.data[76, 4] = 50000
+    s.data[12, 102] = 50000
+    s.data[32, 10] = 50000
+    s.data[120, 61] = 50000
+    if lazy:
+        s = LazyPixelatedSTEM(s)
+        s.data = da.from_array(s.data, chunks=(64, 64))
+    else:
+        s = PixelatedSTEM(s)
     return(s)
 
 
