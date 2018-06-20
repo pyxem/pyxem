@@ -8,6 +8,7 @@ from pixstem.pixelated_stem_class import PixelatedSTEM
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
 import pixstem.make_diffraction_test_data as mdtd
 import pixstem.dummy_data as dd
+import pixstem.dask_test_data as dtd
 
 
 class TestPixelatedStem:
@@ -115,6 +116,154 @@ class TestPixelatedSTEMThresholdAndMask:
         s = dd.get_disk_shift_simple_test_signal(lazy=True)
         with pytest.raises(NotImplementedError):
             s.threshold_and_mask()
+
+
+class TestFindHotPixels:
+
+    def test_2d(self):
+        s = LazyPixelatedSTEM(dtd._get_hot_pixel_test_data_2d())
+        s_hot_pixels = s.find_hot_pixels()
+        assert not s_hot_pixels._lazy
+        assert s_hot_pixels.data.shape == s.data.shape
+        assert s_hot_pixels.data[21, 11]
+        assert s_hot_pixels.data[5, 38]
+        s_hot_pixels.data[21, 11] = False
+        s_hot_pixels.data[5, 38] = False
+        assert not s_hot_pixels.data.any()
+
+    def test_3d(self):
+        s = LazyPixelatedSTEM(dtd._get_hot_pixel_test_data_3d())
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels.data.shape == s.data.shape
+
+    def test_4d(self):
+        s = LazyPixelatedSTEM(dtd._get_hot_pixel_test_data_4d())
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels.data.shape == s.data.shape
+
+    def test_lazy_result(self):
+        s = LazyPixelatedSTEM(dtd._get_hot_pixel_test_data_4d())
+        s_hot_pixels = s.find_hot_pixels(lazy_result=True)
+        assert s_hot_pixels._lazy
+
+    def test_threshold_multiplier(self):
+        s = LazyPixelatedSTEM(dtd._get_hot_pixel_test_data_4d())
+        s_hot_pixels = s.find_hot_pixels(threshold_multiplier=1000000)
+        assert not s_hot_pixels.data.any()
+
+    def test_mask_array(self):
+        s = LazyPixelatedSTEM(dtd._get_hot_pixel_test_data_2d())
+        mask_array = np.ones_like(s.data, dtype=np.bool)
+        s_hot_pixels = s.find_hot_pixels(mask_array=mask_array)
+        assert not s_hot_pixels.data.any()
+
+    def test_non_lazy_signal(self):
+        data = dtd._get_hot_pixel_test_data_2d()
+        s = PixelatedSTEM(data.compute())
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels.data.shape == s.data.shape
+        assert s_hot_pixels.data[21, 11]
+        assert s_hot_pixels.data[5, 38]
+        s_hot_pixels.data[21, 11] = False
+        s_hot_pixels.data[5, 38] = False
+        assert not s_hot_pixels.data.any()
+
+
+class TestFindDeadPixels:
+
+    def test_2d(self):
+        s = LazyPixelatedSTEM(dtd._get_dead_pixel_test_data_2d())
+        s_dead_pixels = s.find_dead_pixels()
+        assert not s_dead_pixels._lazy
+        assert s_dead_pixels.data.shape == s.data.shape
+        assert s_dead_pixels.data[14, 42]
+        assert s_dead_pixels.data[2, 12]
+        s_dead_pixels.data[14, 42] = False
+        s_dead_pixels.data[2, 12] = False
+        assert not s_dead_pixels.data.any()
+
+    def test_3d(self):
+        s = LazyPixelatedSTEM(dtd._get_dead_pixel_test_data_3d())
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape[-2:]
+
+    def test_4d(self):
+        s = LazyPixelatedSTEM(dtd._get_dead_pixel_test_data_4d())
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape[-2:]
+
+    def test_lazy_result(self):
+        s = LazyPixelatedSTEM(dtd._get_dead_pixel_test_data_2d())
+        s_dead_pixels = s.find_dead_pixels(lazy_result=True)
+        assert s_dead_pixels._lazy
+
+    def test_dead_pixel_value(self):
+        s = LazyPixelatedSTEM(dtd._get_dead_pixel_test_data_2d())
+        s_dead_pixels = s.find_dead_pixels(dead_pixel_value=-10)
+        assert not s_dead_pixels.data.any()
+
+    def test_mask_array(self):
+        s = LazyPixelatedSTEM(dtd._get_dead_pixel_test_data_2d())
+        mask_array = np.ones_like(s.data, dtype=np.bool)
+        s_dead_pixels = s.find_dead_pixels(mask_array=mask_array)
+        assert not s_dead_pixels.data.any()
+
+    def test_non_lazy_signal(self):
+        data = dtd._get_dead_pixel_test_data_2d()
+        data.compute()
+        s = PixelatedSTEM(data)
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape
+        assert s_dead_pixels.data[14, 42]
+        assert s_dead_pixels.data[2, 12]
+        s_dead_pixels.data[14, 42] = False
+        s_dead_pixels.data[2, 12] = False
+        assert not s_dead_pixels.data.any()
+
+
+class TestCorrectBadPixels:
+
+    def test_2d(self):
+        data = np.ones((100, 90))
+        data[41, 21] = 0
+        data[9, 81] = 50000
+        dask_array = da.from_array(data, chunks=(10, 10))
+        s = LazyPixelatedSTEM(dask_array)
+        s_dead_pixels = s.find_dead_pixels(lazy_result=True)
+        s_hot_pixels = s.find_hot_pixels(lazy_result=True)
+        s_bad_pixels = s_dead_pixels + s_hot_pixels
+        s_corr = s.correct_bad_pixels(s_bad_pixels)
+        assert s_dead_pixels.data.shape == data.shape
+        assert s_dead_pixels._lazy
+        s_corr.compute()
+        assert (s_corr.data == 1.).all()
+
+    def test_non_lazy_result(self):
+        data = np.ones((100, 90))
+        data[41, 21] = 0
+        data[9, 81] = 50000
+        dask_array = da.from_array(data, chunks=(10, 10))
+        s = LazyPixelatedSTEM(dask_array)
+        s_dead_pixels = s.find_dead_pixels(lazy_result=True)
+        s_hot_pixels = s.find_hot_pixels(lazy_result=True)
+        s_bad_pixels = s_dead_pixels + s_hot_pixels
+        s_corr = s.correct_bad_pixels(s_bad_pixels, lazy_result=False)
+        assert s_dead_pixels.data.shape == data.shape
+        assert not s_corr._lazy
+        assert (s_corr.data == 1.).all()
+
+    def test_non_lazy_input(self):
+        data = np.ones((100, 90))
+        data[41, 21] = 0
+        data[9, 81] = 50000
+        s = PixelatedSTEM(data)
+        s_dead_pixels = s.find_dead_pixels()
+        s_hot_pixels = s.find_hot_pixels()
+        s_bad_pixels = s_dead_pixels + s_hot_pixels
+        s_corr = s.correct_bad_pixels(s_bad_pixels, lazy_result=False)
+        assert s_dead_pixels.data.shape == data.shape
+        assert not s_corr._lazy
+        assert (s_corr.data == 1.).all()
 
 
 class TestPixelatedStemCenterOfMass:

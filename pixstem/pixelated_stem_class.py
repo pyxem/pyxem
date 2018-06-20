@@ -11,7 +11,7 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
 import pixstem.pixelated_stem_tools as pst
-import pixstem.dask_tools as dat
+import pixstem.dask_tools as dt
 from tqdm import tqdm
 
 
@@ -73,7 +73,9 @@ class PixelatedSTEM(Signal2D):
         >>> s = ps.dummy_data.get_disk_shift_simple_test_signal()
         >>> s_c = s.center_of_mass(threshold=3., show_progressbar=False)
         >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
-        >>> s_shift = s.shift_diffraction(s_c.inav[0].data, s_c.inav[1].data)
+        >>> s_shift = s.shift_diffraction(
+        ...     s_c.inav[0].data, s_c.inav[1].data,
+        ...     show_progressbar=False)
         >>> s_shift.plot()
 
         """
@@ -163,7 +165,7 @@ class PixelatedSTEM(Signal2D):
         --------
         >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_holz_simple_test_signal()
-        >>> s_rot = s.rotate_diffraction(30)
+        >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
 
         """
         s_rotated = self.map(
@@ -298,7 +300,7 @@ class PixelatedSTEM(Signal2D):
         else:
             mask_array = None
         dask_array = da.from_array(self.data, chunks=chunk_calculations)
-        data = dat._center_of_mass_array(
+        data = dt._center_of_mass_array(
                 dask_array, threshold_value=threshold,
                 mask_array=mask_array)
         if lazy_result:
@@ -379,7 +381,7 @@ class PixelatedSTEM(Signal2D):
             mask_array = pst._make_circular_mask(
                     cx, cy, det_shape[0], det_shape[1], r)
             mask_array = np.invert(mask_array)
-        data = dat._mask_array(
+        data = dt._mask_array(
                 self.data, mask_array=mask_array).sum(axis=(-2, -1))
         s_bf = LazySignal2D(data)
         if not lazy_result:
@@ -441,7 +443,7 @@ class PixelatedSTEM(Signal2D):
                 cx, cy, det_shape[0], det_shape[1], r_inner)
         mask_array = mask_array0 == mask_array1
 
-        data = dat._mask_array(
+        data = dt._mask_array(
                 self.data, mask_array=mask_array).sum(axis=(-2, -1))
         s_adf = LazySignal2D(data)
         if not lazy_result:
@@ -494,7 +496,8 @@ class PixelatedSTEM(Signal2D):
         >>> s = dd.get_disk_shift_simple_test_signal()
         >>> s_com = s.center_of_mass(threshold=2, show_progressbar=False)
         >>> s_r = s.radial_integration(
-        ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
+        ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data,
+        ...     show_progressbar=False)
         >>> s_r.plot()
 
         """
@@ -664,6 +667,159 @@ class PixelatedSTEM(Signal2D):
         signal.axes_manager['Angle slice'].units = 'Radians'
         signal.axes_manager[-1].name = 'Scattering angle'
         return(signal)
+
+    def find_dead_pixels(
+            self, dead_pixel_value=0, mask_array=None, lazy_result=False,
+            show_progressbar=True):
+        """Find dead pixels in the diffraction images.
+
+        Parameters
+        ----------
+        dead_pixel_value : scalar
+            Default 0
+        mask_array : Boolean Numpy array
+        lazy_result : bool
+            If True, return a lazy signal. If False, compute
+            the result and return a non-lazy signal.
+        show_prograssbar : bool
+
+        Examples
+        --------
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_dead_pixel_signal()
+        >>> s_dead_pixels = s.find_dead_pixels(show_progressbar=False)
+
+        Using a mask array
+
+        >>> import numpy as np
+        >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+        >>> mask_array[:, 100:] = True
+        >>> s = ps.dummy_data.get_dead_pixel_signal()
+        >>> s_dead_pixels = s.find_dead_pixels(
+        ...     mask_array=mask_array, show_progressbar=False)
+
+        Getting a lazy signal as output
+
+        >>> s_dead_pixels = s.find_dead_pixels(
+        ...     lazy_result=True, show_progressbar=False)
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        dead_pixels = dt._find_dead_pixels(
+                dask_array, dead_pixel_value=dead_pixel_value,
+                mask_array=mask_array)
+        s_dead_pixels = LazySignal2D(dead_pixels)
+        if not lazy_result:
+            s_dead_pixels.compute(progressbar=show_progressbar)
+        return s_dead_pixels
+
+    def find_hot_pixels(
+            self, threshold_multiplier=500, mask_array=None, lazy_result=False,
+            show_progressbar=True):
+        """Find hot pixels in the diffraction images.
+
+        Parameters
+        ----------
+        threshold_multiplier : scalar
+            Default 500
+        mask_array : Boolean Numpy array
+        lazy_result : bool
+            If True, return a lazy signal. If False, compute
+            the result and return a non-lazy signal.
+        show_progressbar : bool
+
+        Examples
+        --------
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s_hot_pixels = s.find_hot_pixels(show_progressbar=False)
+
+        Using a mask array
+
+        >>> import numpy as np
+        >>> mask_array = np.zeros((128, 128), dtype=np.bool)
+        >>> mask_array[:, 100:] = True
+        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s_hot_pixels = s.find_hot_pixels(
+        ...     mask_array=mask_array, show_progressbar=False)
+
+        Getting a lazy signal as output
+
+        >>> s_hot_pixels = s.find_hot_pixels(
+        ...     lazy_result=True, show_progressbar=False)
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        hot_pixels = dt._find_hot_pixels(
+                dask_array, threshold_multiplier=threshold_multiplier,
+                mask_array=mask_array)
+
+        s_hot_pixels = LazySignal2D(hot_pixels)
+        if not lazy_result:
+            s_hot_pixels.compute(progressbar=show_progressbar)
+        return s_hot_pixels
+
+    def correct_bad_pixels(
+            self, bad_pixel_array, lazy_result=True, show_progressbar=True):
+        """Correct bad pixels by getting mean value of neighbors.
+
+        Parameters
+        ----------
+        bad_pixel_array : array-like
+        lazy_result : bool
+            Default True.
+
+        Returns
+        -------
+        signal_corrected : PixelatedSTEM
+
+        Examples
+        --------
+        >>> import pixstem.api as ps
+        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s_hot_pixels = s.find_hot_pixels(
+        ...     show_progressbar=False, lazy_result=True)
+        >>> s_corr = s.correct_bad_pixels(s_hot_pixels)
+
+        Dead pixels
+
+        >>> s = ps.dummy_data.get_dead_pixel_signal()
+        >>> s_dead_pixels = s.find_dead_pixels(
+        ...     show_progressbar=False, lazy_result=True)
+        >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
+
+        Combine both dead pixels and hot pixels
+
+        >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
+        >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        bad_pixel_removed = dt._remove_bad_pixels(
+                dask_array, bad_pixel_array.data)
+        s_bad_pixel_removed = LazyPixelatedSTEM(bad_pixel_removed)
+        pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)
+        if not lazy_result:
+            s_bad_pixel_removed.compute(progressbar=show_progressbar)
+        return s_bad_pixel_removed
 
 
 class DPCBaseSignal(BaseSignal):
