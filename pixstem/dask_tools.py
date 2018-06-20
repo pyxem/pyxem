@@ -268,32 +268,16 @@ def _remove_bad_pixels(dask_array, bad_pixel_array):
                 "the same shape as dask_array {2}".format(
                     bad_pixel_array.shape,
                     dask_array.shape[-2:], dask_array.shape))
+    dif0 = da.roll(dask_array, shift=1, axis=-2)
+    dif1 = da.roll(dask_array, shift=-1, axis=-2)
+    dif2 = da.roll(dask_array, shift=1, axis=-1)
+    dif3 = da.roll(dask_array, shift=-1, axis=-1)
 
-    nav_dim_size = len(dask_array.shape) - 2
-    s_mi, s_xp, s_xm, s_yp, s_ym = _get_border_slices(nav_dim_size)
+    dif = (dif0 + dif1 + dif2 + dif3) / 4
+    dif = dif * bad_pixel_array
 
-    data_xp = dask_array[s_xp]
-    data_xm = dask_array[s_xm]
-    data_yp = dask_array[s_yp]
-    data_ym = dask_array[s_ym]
-
-    n_shape = list(dask_array.shape[:-2])
-    sx, sy = dask_array.shape[-2:]
-
-    pad_y_size = n_shape + [1, sy - 2]
-    pad_y = da.zeros(pad_y_size, chunks=[16]*len(pad_y_size))
-    pad_x_size = n_shape + [sx, 1]
-    pad_x = da.zeros(pad_x_size, chunks=[16]*len(pad_x_size))
-
-    data_pixel_sum = (data_xp + data_xm + data_yp + data_ym) / 4
-    data_pixel_sum = da.concatenate((data_pixel_sum, pad_y), axis=-2)
-    data_pixel_sum = da.concatenate((pad_y, data_pixel_sum), axis=-2)
-    data_pixel_sum = da.concatenate((data_pixel_sum, pad_x), axis=-1)
-    data_pixel_sum = da.concatenate((pad_x, data_pixel_sum), axis=-1)
-    data_pixel_sum = data_pixel_sum * bad_pixel_array
-
-    data_output = dask_array * da.logical_not(bad_pixel_array)
-    data_output = data_output + data_pixel_sum
+    data_output = da.multiply(dask_array, da.logical_not(bad_pixel_array))
+    data_output = data_output + dif
     return data_output
 
 
@@ -344,3 +328,52 @@ def _find_dead_pixels(dask_array, dead_pixel_value=0, mask_array=None):
     if mask_array is not None:
         dead_pixels = dead_pixels * np.invert(mask_array)
     return dead_pixels
+
+
+def _find_hot_pixels(dask_array, threshold_multiplier=500, mask_array=None):
+    """Find single pixels which have much larger values compared to neighbors.
+
+    Finds pixel which has very large value difference compared to its
+    neighbors. The functions looks at both at the direct neighbors
+    (x-1, y), and also the diagonal neighbors (x-1, y-1).
+
+    Experimental function, so use with care.
+
+    Parameters
+    ----------
+    dask_array : Dask array
+        Must be have 4 dimensions.
+    threshold_multiplier : scaler
+        Used to threshold the dif.
+    mask_array : NumPy array, optional
+        Array with bool values. The True values will be masked
+        (i.e. ignored). Must have the same shape as the two
+        last dimensions in dask_array.
+
+    """
+    if len(dask_array.shape) < 2:
+        raise ValueError("dask_array must have at least 2 dimensions")
+
+    dask_array = dask_array.astype('float64')
+    dif0 = da.roll(dask_array, shift=1, axis=-2)
+    dif1 = da.roll(dask_array, shift=-1, axis=-2)
+    dif2 = da.roll(dask_array, shift=1, axis=-1)
+    dif3 = da.roll(dask_array, shift=-1, axis=-1)
+
+    dif4 = da.roll(dask_array, shift=(1, 1), axis=(-2, -1))
+    dif5 = da.roll(dask_array, shift=(-1, 1), axis=(-2, -1))
+    dif6 = da.roll(dask_array, shift=(1, -1), axis=(-2, -1))
+    dif7 = da.roll(dask_array, shift=(-1, -1), axis=(-2, -1))
+
+    dif = dif0 + dif1 + dif2 + dif3 + dif4 + dif5 + dif6 + dif7
+    dif = dif - (dask_array * 8)
+
+    if mask_array is not None:
+        data = _mask_array(dask_array, mask_array=mask_array)
+    else:
+        data = dask_array
+    data_mean = data.mean() * threshold_multiplier
+    data_threshold = dif < -data_mean
+    if mask_array is not None:
+        data_threshold = data_threshold * np.invert(mask_array)
+    return data_threshold
