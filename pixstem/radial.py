@@ -306,7 +306,7 @@ def get_radius_vs_angle(
 
     polynomial = Polynomial(1)
     m_ra.append(polynomial)
-    m_ra.multifit()
+    m_ra.multifit(show_progressbar=show_progressbar)
     polynomial.set_parameters_not_free()
 
     m_ra.reset_signal_range()
@@ -320,7 +320,8 @@ def get_radius_vs_angle(
     gaussian.centre.bmin = sa.low_value
     gaussian.centre.bmax = sa.high_value
     m_ra.append(gaussian)
-    m_ra.multifit(fitter='mpfit', bounded=True, show_progressbar=False)
+    m_ra.multifit(fitter='mpfit', bounded=True,
+                  show_progressbar=show_progressbar)
 
     s_centre = m_ra.components.Gaussian.centre.as_signal()
     return s_centre

@@ -234,7 +234,7 @@ def load_dpc_signal(filename):
     >>> import pixstem.api as ps
     >>> import numpy as np
     >>> s = ps.DPCSignal2D(np.random.random((2, 90, 50)))
-    >>> s.save("test_dpc_signal2d.hspy")
+    >>> s.save("test_dpc_signal2d.hspy", overwrite=True)
     >>> s_dpc = ps.load_dpc_signal("test_dpc_signal2d.hspy")
     >>> s_dpc
     <DPCSignal2D, title: , dimensions: (2|50, 90)>
@@ -244,7 +244,7 @@ def load_dpc_signal(filename):
 
     >>> import hyperspy.api as hs
     >>> s = hs.signals.Signal1D(np.random.random((2, 10)))
-    >>> s.save("test_dpc_signal1d.hspy")
+    >>> s.save("test_dpc_signal1d.hspy", overwrite=True)
     >>> s_dpc_1d = ps.load_dpc_signal("test_dpc_signal1d.hspy")
     >>> s_dpc_1d
     <DPCSignal1D, title: , dimensions: (2|10)>

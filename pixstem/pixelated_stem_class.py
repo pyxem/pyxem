@@ -681,7 +681,7 @@ class PixelatedSTEM(Signal2D):
         lazy_result : bool
             If True, return a lazy signal. If False, compute
             the result and return a non-lazy signal.
-        show_prograssbar : bool
+        show_progressbar : bool
 
         Examples
         --------
@@ -702,6 +702,11 @@ class PixelatedSTEM(Signal2D):
 
         >>> s_dead_pixels = s.find_dead_pixels(
         ...     lazy_result=True, show_progressbar=False)
+
+        See also
+        --------
+        find_hot_pixels
+        correct_bad_pixels
 
         """
         if self._lazy:
@@ -754,6 +759,11 @@ class PixelatedSTEM(Signal2D):
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     lazy_result=True, show_progressbar=False)
 
+        See also
+        --------
+        find_dead_pixels
+        correct_bad_pixels
+
         """
         if self._lazy:
             dask_array = self.data
@@ -804,6 +814,11 @@ class PixelatedSTEM(Signal2D):
 
         >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
         >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
+
+        See also
+        --------
+        find_dead_pixels
+        find_hot_pixels
 
         """
         if self._lazy:
