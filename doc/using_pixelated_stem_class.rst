@@ -93,3 +93,40 @@ Shifting the diffraction pattern
     >>> s_shift = s.shift_diffraction(
     ...     shift_x=s_com.inav[0].data, shift_y=s_com.inav[1].data, show_progressbar=False)
     >>> s_shift.plot()
+
+
+Finding and removing bad pixels
+--------------------------------
+
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_dead_pixels`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_hot_pixels`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels`
+
+Removing dead pixels:
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_dead_pixel_signal()
+    >>> s_dead_pixels = s.find_dead_pixels(show_progressbar=False, lazy_result=True)
+    >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
+
+
+Removing hot pixels, or single-pixel cosmic rays:
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_hot_pixel_signal()
+    >>> s_hot_pixels = s.find_hot_pixels(show_progressbar=False, lazy_result=True)
+    >>> s_corr = s.correct_bad_pixels(s_hot_pixels)
+
+
+Or both at the same time:
+
+.. code-block:: python
+
+    >>> s_corr = s.correct_bad_pixels(s_hot_pixels + s_dead_pixels)
+    >>> s_corr.compute(progressbar=False)  # To get a non-lazy signal
+
+
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels` returns a lazy signal
+by default, to avoid large datasets using up excessive amount of memory.
