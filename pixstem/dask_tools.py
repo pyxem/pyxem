@@ -375,5 +375,6 @@ def _find_hot_pixels(dask_array, threshold_multiplier=500, mask_array=None):
     data_mean = data.mean() * threshold_multiplier
     data_threshold = dif < -data_mean
     if mask_array is not None:
+        mask_array = mask_array.astype(np.float64)
         data_threshold = data_threshold * np.invert(mask_array)
     return data_threshold
