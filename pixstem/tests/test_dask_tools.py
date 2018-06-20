@@ -3,6 +3,7 @@ import numpy as np
 import dask.array as da
 import pixstem.dask_tools as dt
 import pixstem.pixelated_stem_tools as pst
+import pixstem.dask_test_data as dtd
 
 
 class TestCenterOfMassArray:
@@ -80,56 +81,45 @@ class TestThresholdArray:
 
 class TestFindDeadPixels:
 
-    def test_simple(self):
-        data = np.random.randint(10, 100, size=(20, 30))
-        data[5, 9] = 0
-        data[2, 1] = 0
-        dask_array = da.from_array(data, chunks=(5, 5))
-        dead_pixels = dt._find_dead_pixels(dask_array)
+    def test_2d(self):
+        data = dtd._get_dead_pixel_test_data_2d()
+        dead_pixels = dt._find_dead_pixels(data)
         assert data.shape == dead_pixels.shape
         dead_pixels = dead_pixels.compute()
-        assert dead_pixels[5, 9]
-        assert dead_pixels[2, 1]
-        dead_pixels[5, 9] = False
-        dead_pixels[2, 1] = False
+        assert dead_pixels[14, 42]
+        assert dead_pixels[2, 12]
+        dead_pixels[14, 42] = False
+        dead_pixels[2, 12] = False
         assert not dead_pixels.any()
 
     def test_3d(self):
-        data = np.random.randint(10, 100, size=(5, 20, 30))
-        data[:, 5, 9] = 0
-        data[:, 2, 1] = 0
-        data[3, 9, 3] = 0
-        dask_array = da.from_array(data, chunks=(5, 5, 5))
-        dead_pixels = dt._find_dead_pixels(dask_array)
+        data = dtd._get_dead_pixel_test_data_3d()
+        dead_pixels = dt._find_dead_pixels(data)
         assert data.shape[-2:] == dead_pixels.shape
         dead_pixels = dead_pixels.compute()
-        assert (dead_pixels[5, 9]).all()
-        assert (dead_pixels[2, 1]).all()
-        dead_pixels[5, 9] = False
-        dead_pixels[2, 1] = False
+        assert dead_pixels[14, 42]
+        assert dead_pixels[2, 12]
+        dead_pixels[14, 42] = False
+        dead_pixels[2, 12] = False
         assert not dead_pixels.any()
 
     def test_4d(self):
-        data = np.random.randint(10, 100, size=(8, 5, 20, 30))
-        data[:, :, 5, 9] = 0
-        data[:, :, 2, 1] = 0
-        data[6, :, 6, 8] = 0
-        dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
-        dead_pixels = dt._find_dead_pixels(dask_array)
+        data = dtd._get_dead_pixel_test_data_4d()
+        dead_pixels = dt._find_dead_pixels(data)
         assert data.shape[-2:] == dead_pixels.shape
         dead_pixels = dead_pixels.compute()
-        assert (dead_pixels[5, 9]).all()
-        assert (dead_pixels[2, 1]).all()
-        dead_pixels[5, 9] = False
-        dead_pixels[2, 1] = False
+        assert dead_pixels[14, 42]
+        assert dead_pixels[2, 12]
+        dead_pixels[14, 42] = False
+        dead_pixels[2, 12] = False
         assert not dead_pixels.any()
 
     def test_dead_pixel_value(self):
         data = np.random.randint(10, 100, size=(20, 30))
         data[5, 9] = 3
         data[2, 1] = 3
-        dask_array = da.from_array(data, chunks=(5, 5))
-        dead_pixels = dt._find_dead_pixels(dask_array, dead_pixel_value=3)
+        data = da.from_array(data, chunks=(5, 5))
+        dead_pixels = dt._find_dead_pixels(data, dead_pixel_value=3)
         assert data.shape == dead_pixels.shape
         dead_pixels = dead_pixels.compute()
         assert dead_pixels[5, 9]
@@ -139,23 +129,100 @@ class TestFindDeadPixels:
         assert not dead_pixels.any()
 
     def test_mask_array(self):
-        data = np.random.randint(10, 100, size=(20, 30))
-        data[16, 25] = 0
-        data[2, 1] = 0
-        dask_array = da.from_array(data, chunks=(5, 5))
-        mask_array = np.zeros((20, 30), dtype=np.bool)
-        mask_array[:10, :] = True
-        dead_pixels = dt._find_dead_pixels(dask_array, mask_array=mask_array)
+        data = dtd._get_dead_pixel_test_data_2d()
+        mask_array = np.zeros((40, 50), dtype=np.bool)
+        mask_array[:, 30:] = True
+        dead_pixels = dt._find_dead_pixels(data, mask_array=mask_array)
+        assert data.shape == dead_pixels.shape
         dead_pixels = dead_pixels.compute()
-        assert dead_pixels[16, 25]
-        dead_pixels[16, 25] = False
+        assert dead_pixels[2, 12]
+        dead_pixels[2, 12] = False
         assert not dead_pixels.any()
 
     def test_1d_wrong_shape(self):
         data = np.random.randint(10, 100, size=40)
-        dask_array = da.from_array(data, chunks=(5))
+        data = da.from_array(data, chunks=(5))
         with pytest.raises(ValueError):
-            dt._find_dead_pixels(dask_array)
+            dt._find_dead_pixels(data)
+
+
+class TestFindHotPixels:
+
+    def test_2d(self):
+        data = dtd._get_hot_pixel_test_data_2d()
+        hot_pixels = dt._find_hot_pixels(data)
+        assert data.shape == hot_pixels.shape
+        hot_pixels = hot_pixels.compute()
+        assert hot_pixels[21, 11]
+        assert hot_pixels[5, 38]
+        hot_pixels[21, 11] = False
+        hot_pixels[5, 38] = False
+        assert not hot_pixels.any()
+
+    def test_3d(self):
+        data = dtd._get_hot_pixel_test_data_3d()
+        hot_pixels = dt._find_hot_pixels(data)
+        assert data.shape == hot_pixels.shape
+        hot_pixels = hot_pixels.compute()
+        assert hot_pixels[2, 21, 11]
+        assert hot_pixels[1, 5, 38]
+        hot_pixels[2, 21, 11] = False
+        hot_pixels[1, 5, 38] = False
+        assert not hot_pixels.any()
+
+    def test_4d(self):
+        data = dtd._get_hot_pixel_test_data_4d()
+        hot_pixels = dt._find_hot_pixels(data)
+        assert data.shape == hot_pixels.shape
+        hot_pixels = hot_pixels.compute()
+        assert hot_pixels[4, 2, 21, 11]
+        assert hot_pixels[6, 1, 5, 38]
+        hot_pixels[4, 2, 21, 11] = False
+        hot_pixels[6, 1, 5, 38] = False
+        assert not hot_pixels.any()
+
+    def test_2d_mask(self):
+        mask_array = np.zeros((40, 50), dtype=np.bool)
+        mask_array[:, 30:] = True
+        data = dtd._get_hot_pixel_test_data_2d()
+        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
+        assert data.shape == hot_pixels.shape
+        hot_pixels = hot_pixels.compute()
+        assert hot_pixels[21, 11]
+        hot_pixels[21, 11] = False
+        assert not hot_pixels.any()
+
+    def test_3d_mask(self):
+        mask_array = np.zeros((40, 50), dtype=np.bool)
+        mask_array[:, 30:] = True
+        data = dtd._get_hot_pixel_test_data_3d()
+        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
+        assert data.shape == hot_pixels.shape
+        hot_pixels = hot_pixels.compute()
+        assert hot_pixels[2, 21, 11]
+        hot_pixels[2, 21, 11] = False
+        assert not hot_pixels.any()
+
+    def test_4d_mask(self):
+        mask_array = np.zeros((40, 50), dtype=np.bool)
+        mask_array[:, 30:] = True
+        data = dtd._get_hot_pixel_test_data_4d()
+        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
+        assert data.shape == hot_pixels.shape
+        hot_pixels = hot_pixels.compute()
+        assert hot_pixels[4, 2, 21, 11]
+        hot_pixels[4, 2, 21, 11] = False
+        assert not hot_pixels.any()
+
+    def test_threshold_multiplier(self):
+        data = dtd._get_hot_pixel_test_data_2d()
+        hot_pixels = dt._find_hot_pixels(data, threshold_multiplier=1000000)
+        hot_pixels = hot_pixels.compute()
+        assert not hot_pixels.any()
+
+        hot_pixels = dt._find_hot_pixels(data, threshold_multiplier=-1000000)
+        hot_pixels = hot_pixels.compute()
+        assert hot_pixels.all()
 
 
 class TestRemoveBadPixels:
