@@ -247,6 +247,44 @@ def _get_offset_image(model_list, s, steps, step_size):
     return s_offset
 
 
+def _make_radius_vs_angle_model(
+        signal, radial_signal_span, angleN=15,
+        centre_x=None, centre_y=None,
+        prepeak_range=None,
+        show_progressbar=True):
+    s_ra = signal.angular_slice_radial_integration(
+            angleN=angleN, centre_x=centre_x, centre_y=centre_y,
+            show_progressbar=show_progressbar)
+    s_ra = s_ra.isig[radial_signal_span[0]:radial_signal_span[1]]
+
+    m_ra = s_ra.create_model()
+
+    # Fit 1 order polynomial to edges of data to account for the background
+    sa = m_ra.axes_manager.signal_axes[0]
+    if prepeak_range is None:
+        prepeak_range = (sa.low_value, sa.index2value(4))
+    m_ra.set_signal_range(prepeak_range[0], prepeak_range[1])
+    m_ra.add_signal_range(sa.index2value(-3), sa.high_value)
+
+    polynomial = Polynomial(1)
+    m_ra.append(polynomial)
+    m_ra.multifit(show_progressbar=show_progressbar)
+    polynomial.set_parameters_not_free()
+
+    m_ra.reset_signal_range()
+
+    # Fit Gaussian to diffraction ring
+    centre_initial = (sa.high_value + sa.low_value)*0.5
+    sigma = 3
+    A = (s_ra - s_ra.min(axis=1)).data.max() * 2 * sigma
+
+    gaussian = Gaussian(A=A, sigma=sigma, centre=centre_initial)
+    gaussian.centre.bmin = sa.low_value
+    gaussian.centre.bmax = sa.high_value
+    m_ra.append(gaussian)
+    return m_ra
+
+
 def get_radius_vs_angle(
         signal, radial_signal_span, angleN=15,
         centre_x=None, centre_y=None,
@@ -290,36 +328,11 @@ def get_radius_vs_angle(
     >>> s_centre = ra.get_radius_vs_angle(s, (35, 45), show_progressbar=False)
 
     """
-    s_ra = signal.angular_slice_radial_integration(
-            angleN=angleN, centre_x=centre_x, centre_y=centre_y,
-            show_progressbar=show_progressbar)
-    s_ra = s_ra.isig[radial_signal_span[0]:radial_signal_span[1]]
-
-    m_ra = s_ra.create_model()
-
-    # Fit 1 order polynomial to edges of data to account for the background
-    sa = m_ra.axes_manager.signal_axes[0]
-    if prepeak_range is None:
-        prepeak_range = (sa.low_value, sa.index2value(4))
-    m_ra.set_signal_range(prepeak_range[0], prepeak_range[1])
-    m_ra.add_signal_range(sa.index2value(-3), sa.high_value)
-
-    polynomial = Polynomial(1)
-    m_ra.append(polynomial)
-    m_ra.multifit(show_progressbar=show_progressbar)
-    polynomial.set_parameters_not_free()
-
-    m_ra.reset_signal_range()
-
-    # Fit Gaussian to diffraction ring
-    centre_initial = (sa.high_value + sa.low_value)*0.5
-    sigma = 3
-    A = (s_ra - s_ra.min(axis=1)).data.max() * 2 * sigma
-
-    gaussian = Gaussian(A=A, sigma=sigma, centre=centre_initial)
-    gaussian.centre.bmin = sa.low_value
-    gaussian.centre.bmax = sa.high_value
-    m_ra.append(gaussian)
+    m_ra = _make_radius_vs_angle_model(
+        signal=signal, radial_signal_span=radial_signal_span, angleN=angleN,
+        centre_x=centre_x, centre_y=centre_y,
+        prepeak_range=prepeak_range,
+        show_progressbar=show_progressbar)
     m_ra.multifit(fitter='mpfit', bounded=True,
                   show_progressbar=show_progressbar)
 
