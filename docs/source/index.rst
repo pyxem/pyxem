@@ -52,9 +52,6 @@ Contents
 
     introduction
     post_facto_imaging
-    orientation_imaging
-    strain_mapping
-    diffraction_simulation
     contributing
     bibliography
     modules

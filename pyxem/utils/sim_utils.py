@@ -415,18 +415,6 @@ def equispaced_so3_grid(alpha_max, beta_max, gamma_max, resolution=2.5,
     return so3_grid
 
 
-def astar_style_orientations(
-        alpha_range: tuple,
-        beta_range:  tuple,
-        gamma_range: tuple,
-        resolution:  float,
-):
-    grid = equispaced_s2_grid(beta_range, gamma_range, resolution)
-    grid = [tuple(g) for g in grid]
-    gamma = np.radians(np.arange(*alpha_range, resolution))
-    orientations = np.array([(a, b, c) for a, (b, c) in itertools.product(gamma, grid)])
-    return orientations
-
 def peaks_from_best_template(single_match_result,phase,library):
     """ Takes a match_result object and return the associated peaks, to be used with
     in combination with map.
