@@ -625,13 +625,13 @@ class TestPixelatedStemRadialIntegration:
         assert (s_r.data.argmax(axis=-1) == r).all()
 
 
-class TestPixelatedStemRadialIntegrationLazy(unittest.TestCase):
+class TestPixelatedStemRadialIntegrationLazy:
 
     def test_simple(self):
         array0 = da.ones(shape=(10, 10, 40, 40), chunks=(5, 5, 5, 5))
         s0 = LazyPixelatedSTEM(array0)
         s0_r = s0.radial_integration()
-        self.assertTrue((s0_r.data[:, :, :-1] == 1).all())
+        assert (s0_r.data[:, :, :-1] == 1).all()
 
         data_shape = 2, 2, 11, 11
         array1 = np.zeros(data_shape)
@@ -641,22 +641,22 @@ class TestPixelatedStemRadialIntegrationLazy(unittest.TestCase):
         s1.axes_manager.signal_axes[0].offset = -5
         s1.axes_manager.signal_axes[1].offset = -5
         s1_r = s1.radial_integration()
-        self.assertTrue(np.all(s1_r.data[:, :, 0] == 1))
-        self.assertTrue(np.all(s1_r.data[:, :, 1:] == 0))
+        assert np.all(s1_r.data[:, :, 0] == 1)
+        assert np.all(s1_r.data[:, :, 1:] == 0)
 
     def test_different_shape(self):
         array = da.ones(shape=(7, 9, 30, 40), chunks=(3, 3, 5, 5))
         s = LazyPixelatedSTEM(array)
         s_r = s.radial_integration()
-        self.assertTrue((s_r.data[:, :, :-2] == 1).all())
+        assert (s_r.data[:, :, :-2] == 1).all()
 
     def test_nav_1(self):
         data_shape = (5, 40, 40)
         array0 = da.ones(shape=data_shape, chunks=(5, 5, 5))
         s0 = LazyPixelatedSTEM(array0)
         s0_r = s0.radial_integration()
-        self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
-        self.assertTrue((s0_r.data[:, :-1] == 1).all())
+        assert s0_r.axes_manager.navigation_shape == data_shape[:1]
+        assert (s0_r.data[:, :-1] == 1).all()
 
     def test_big_value(self):
         data_shape = (5, 40, 40)
@@ -665,8 +665,8 @@ class TestPixelatedStemRadialIntegrationLazy(unittest.TestCase):
         dask_array = da.from_array(array0, chunks=(2, 10, 10))
         s0 = LazyPixelatedSTEM(dask_array)
         s0_r = s0.radial_integration()
-        self.assertEqual(s0_r.axes_manager.navigation_shape, data_shape[:1])
-        self.assertTrue((s0_r.data[:, :-1] == big_value).all())
+        assert s0_r.axes_manager.navigation_shape == data_shape[:1]
+        assert (s0_r.data[:, :-1] == big_value).all()
 
     def test_correct_radius_simple(self):
         x, y, r, px, py = 40, 51, 30, 4, 5
@@ -680,8 +680,8 @@ class TestPixelatedStemRadialIntegrationLazy(unittest.TestCase):
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
         s_r = s.radial_integration()
-        self.assertEqual(s_r.axes_manager.navigation_shape, (px, py))
-        self.assertTrue((s_r.data.argmax(axis=-1) == 30).all())
+        assert s_r.axes_manager.navigation_shape == (px, py)
+        assert (s_r.data.argmax(axis=-1) == 30).all()
 
     def test_correct_radius_random(self):
         x, y, px, py = 56, 48, 4, 5
@@ -696,7 +696,7 @@ class TestPixelatedStemRadialIntegrationLazy(unittest.TestCase):
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
         s_r = s.radial_integration()
-        self.assertTrue((s_r.data.argmax(axis=-1) == r).all())
+        assert (s_r.data.argmax(axis=-1) == r).all()
 
     def test_correct_disk_x_y_and_radius_random(self):
         x, y, px, py = 56, 48, 4, 5
@@ -715,7 +715,7 @@ class TestPixelatedStemRadialIntegrationLazy(unittest.TestCase):
                 centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
         s_r = s_r.isig[15:]  # Do not include the disk
         r -= 15  # Need to shift the radius, due to not including the disk
-        self.assertTrue((s_r.data.argmax(axis=-1) == r).all())
+        assert (s_r.data.argmax(axis=-1) == r).all()
 
 
 class test_pixelated_stem_angle_sector(unittest.TestCase):
@@ -727,9 +727,9 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
         s.axes_manager.signal_axes[0].offset = -4.5
         s.axes_manager.signal_axes[1].offset = -4.5
         mask = s.angular_mask(0.0, 0.5*np.pi)
-        self.assertTrue(mask[:, :, 0:5, 0:5].all())
-        self.assertFalse(mask[:, :, 5:, :].any())
-        self.assertFalse(mask[:, :, :, 5:].any())
+        assert mask[:, :, 0:5, 0:5].all()
+        assert not mask[:, :, 5:, :].any()
+        assert not mask[:, :, :, 5:].any()
 
     def test_get_angle_sector_mask_radial_integration1(self):
         x, y = 4.5, 4.5
@@ -744,25 +744,25 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
         s_r0 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask0)
-        self.assertTrue(np.all(s_r0.isig[0:6].data == 1.))
+        assert np.all(s_r0.isig[0:6].data == 1.)
 
         mask1 = s.angular_mask(0, np.pi)
         s_r1 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask1)
-        self.assertTrue(np.all(s_r1.isig[0:6].data == 0.5))
+        assert np.all(s_r1.isig[0:6].data == 0.5)
 
         mask2 = s.angular_mask(0.0, 2*np.pi)
         s_r2 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask2)
-        self.assertTrue(np.all(s_r2.isig[0:6].data == 0.25))
+        assert np.all(s_r2.isig[0:6].data == 0.25)
 
         mask3 = s.angular_mask(np.pi, 2*np.pi)
         s_r3 = s.radial_integration(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask3)
-        self.assertTrue(np.all(s_r3.data == 0.0))
+        assert np.all(s_r3.data == 0.0)
 
     def test_com_angle_sector_mask(self):
         x, y = 4, 7
@@ -776,7 +776,7 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
                 centre_y_array=s_com.inav[1].data)
 
 
-class test_angular_slice_radial_integration(unittest.TestCase):
+class TestAngularSliceRadialIntegration:
 
     def test_same_radius(self):
         x, y, r, px, py, angleN = 56, 48, 20, 4, 5, 20
@@ -787,8 +787,8 @@ class test_angular_slice_radial_integration(unittest.TestCase):
                 blur=True, downscale=False)
         s_ar = s.angular_slice_radial_integration(
                 centre_x=x, centre_y=y, angleN=20)
-        self.assertTrue(s_ar.axes_manager.navigation_shape, (x, y, angleN))
-        self.assertTrue((s_ar.data.argmax(-1) == r).all())
+        assert s_ar.axes_manager.navigation_shape, (x, y, angleN)
+        assert (s_ar.data.argmax(-1) == r).all()
 
     def test_different_radius(self):
         x, y, r, px, py, iX, iY = 50, 50, 20, 6, 5, 100, 100
@@ -813,10 +813,10 @@ class test_angular_slice_radial_integration(unittest.TestCase):
 
         s_ar = s.angular_slice_radial_integration(
                 centre_x=x, centre_y=y, angleN=4)
-        self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
-        self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
-        self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())
-        self.assertTrue((s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all())
+        assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
+        assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
+        assert (s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all()
+        assert (s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all()
 
     def test_different_radius_not_square_image(self):
         x, y, r, px, py, iX, iY = 40, 55, 20, 6, 5, 120, 100
@@ -841,10 +841,10 @@ class test_angular_slice_radial_integration(unittest.TestCase):
 
         s_ar = s.angular_slice_radial_integration(
                 centre_x=x, centre_y=y, angleN=4)
-        self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
-        self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
-        self.assertTrue((s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all())
-        self.assertTrue((s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all())
+        assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
+        assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
+        assert (s_ar.inav[:, :, 2].data.argmax(axis=-1) == r2).all()
+        assert (s_ar.inav[:, :, 3].data.argmax(axis=-1) == r3).all()
 
     def test_slice_overlap(self):
         x, y, r, px, py, iX, iY = 40, 55, 20, 6, 5, 120, 100
@@ -864,13 +864,13 @@ class test_angular_slice_radial_integration(unittest.TestCase):
 
         s_ar = s.angular_slice_radial_integration(
                 centre_x=x, centre_y=y, angleN=2)
-        self.assertTrue((s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all())
-        self.assertTrue((s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
+        assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
+        assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
         s_ar1 = s.angular_slice_radial_integration(
                 centre_x=x, centre_y=y, angleN=2, slice_overlap=0.1)
-        self.assertTrue((s_ar1.inav[:, :, 0].data.argmax(axis=-1) == r1).all())
-        self.assertTrue((s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all())
+        assert (s_ar1.inav[:, :, 0].data.argmax(axis=-1) == r1).all()
+        assert (s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
         with pytest.raises(ValueError):
                 s.angular_slice_radial_integration(slice_overlap=1.2)
@@ -884,23 +884,23 @@ class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
         shape = (5, 9, 12, 14)
         s = PixelatedSTEM(np.zeros(shape))
         s1 = s.virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
-        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
-        self.assertEqual(s1.data.sum(), 0.)
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert s1.data.sum() == 0.
 
     def test_one_value(self):
         shape = (5, 9, 12, 14)
         s = PixelatedSTEM(np.zeros(shape))
         s.data[:, :, 9, 9] = 1
         s1 = s.virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
-        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
-        self.assertTrue((s1.data == 1.).all())
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert (s1.data == 1.).all()
 
     def test_lazy(self):
         shape = (5, 9, 12, 14)
         data = da.zeros((5, 9, 12, 14), chunks=(10, 10, 10, 10))
         s = LazyPixelatedSTEM(data)
         s1 = s.virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
-        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
 
 
 class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
@@ -909,27 +909,27 @@ class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
         shape = (5, 9, 12, 14)
         s = PixelatedSTEM(np.zeros(shape))
         s1 = s.virtual_bright_field()
-        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
-        self.assertEqual(s1.data.sum(), 0.)
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert s1.data.sum() == 0.
 
     def test_one_value(self):
         shape = (5, 9, 12, 14)
         s = PixelatedSTEM(np.zeros(shape))
         s.data[:, :, 10, 13] = 1
         s1 = s.virtual_bright_field()
-        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
-        self.assertTrue((s1.data == 1.).all())
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert (s1.data == 1.).all()
 
         s2 = s.virtual_bright_field(6, 6, 2)
-        self.assertEqual(s2.axes_manager.signal_shape, (shape[1], shape[0]))
-        self.assertEqual(s2.data.sum(), 0)
+        assert s2.axes_manager.signal_shape == (shape[1], shape[0])
+        assert s2.data.sum() == 0
 
     def test_lazy(self):
         shape = (5, 9, 12, 14)
         data = da.zeros((5, 9, 12, 14), chunks=(10, 10, 10, 10))
         s = LazyPixelatedSTEM(data)
         s1 = s.virtual_bright_field(cx=6, cy=6, r=5)
-        self.assertEqual(s1.axes_manager.signal_shape, (shape[1], shape[0]))
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
 
     def test_lazy_result(self):
         data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
