@@ -641,7 +641,7 @@ def fit_single_ellipse_to_signal(
     marker_list = _get_marker_list(
             s, ellipse_parameters, x_list=x, y_list=y)
     s_m = s.deepcopy()
-    s_m.add_marker(marker_list, permanent=True)
+    s_m.add_marker(marker_list, permanent=True, plot_marker=False)
     return s_m, xC, yC, semi0, semi1, rot, ecc
 
 
@@ -713,5 +713,5 @@ def fit_ellipses_to_signal(
                 s, ellipse_parameters, x_list=x, y_list=y,
                 name='circle' + str(i)))
     s_m = s.deepcopy()
-    s_m.add_marker(marker_list, permanent=True)
+    s_m.add_marker(marker_list, permanent=True, plot_marker=False)
     return s_m, ellipse_list
