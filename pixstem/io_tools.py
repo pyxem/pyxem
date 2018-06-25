@@ -1,5 +1,6 @@
 import h5py
 import logging
+import numpy as np
 import dask.array as da
 from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
@@ -8,6 +9,84 @@ from hyperspy.signals import Signal2D
 from pixstem.pixelated_stem_class import (
         PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D,
         LazyPixelatedSTEM)
+
+
+def _get_dtype_from_header_string(header_string):
+    header_split_list = header_string.split(",")
+    dtype_string = header_split_list[6]
+    if dtype_string == 'U16':
+        dtype = ">u2"
+    elif dtype_string == 'U32':
+        dtype = ">u4"
+    else:
+        print("dtype {0} not recognized, trying unsigned 16 bit".format(
+            dtype_string))
+        dtype = ">u2"
+    return dtype
+
+
+def _get_detector_pixel_size(header_string):
+    header_split_list = header_string.split(",")
+    det_x_string = header_split_list[4]
+    det_y_string = header_split_list[5]
+    try:
+        det_x = int(det_x_string)
+        det_y = int(det_y_string)
+    except NameError:
+        print(
+                "detector size strings {0} and {1} not recognized, "
+                "trying 256 x 256".format(det_x_string, det_y_string))
+        det_x, det_y = 256, 256
+    if det_x == 256:
+        det_x_value = det_x
+    elif det_x == 512:
+        det_x_value = det_x
+    else:
+        print("detector x size {0} not recognized, trying 256".format(det_x))
+        det_x_value = 256
+    if det_y == 256:
+        det_y_value = det_y
+    elif det_y == 512:
+        det_y_value = det_y
+    else:
+        print("detector y size {0} not recognized, trying 256".format(det_y))
+        det_y_value = 256
+    return(det_x_value, det_y_value)
+
+
+def _get_binary_merlin_signal(filename, probe_x=None, probe_y=None,
+                              chunks=(32, 32, 32, 32)):
+    """Temporary function for loading Merlin binary data.
+
+    This function will be replaced at some point, so do not rely on it for
+    other functions!
+
+    """
+    f = open(filename, 'rb')
+    header_string = f.read(50).decode()
+    f.close()
+
+    datatype = _get_dtype_from_header_string(header_string)
+    det_x, det_y = _get_detector_pixel_size(header_string)
+
+    value_between_frames = 192
+    flyback_pixels = 1
+
+    frametype = np.dtype(
+            [
+                ('head', np.uint8, value_between_frames*2),
+                ('data', datatype, (det_x, det_y))])
+
+    data_with_HF = np.memmap(
+            filename, frametype, mode='r',
+            shape=(probe_y, probe_x + flyback_pixels))
+    data_with_HF = data_with_HF[:, 0:-flyback_pixels]
+
+    data_array = data_with_HF['data']
+
+    dask_array = da.from_array(data_array, chunks=chunks)
+    s = LazyPixelatedSTEM(dask_array)
+    return s
 
 
 def _fpd_checker(filename, attr_substring='fpd_version'):
