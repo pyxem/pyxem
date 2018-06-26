@@ -22,7 +22,7 @@ setup(
             ],
         install_requires = [
             'scipy',
-            'numpy>=1.10',
+            'numpy>=1.13',
             'h5py',
             'ipython>=2.0',
             'matplotlib>=2.0',
