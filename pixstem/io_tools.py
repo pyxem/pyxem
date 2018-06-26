@@ -54,14 +54,23 @@ def _get_detector_pixel_size(header_string):
     return(det_x_value, det_y_value)
 
 
-def _get_binary_merlin_signal(filename, probe_x=None, probe_y=None,
-                              chunks=(32, 32, 32, 32)):
+def _load_binary_merlin_signal(
+        filename, probe_x=None, probe_y=None, chunks=(32, 32, 32, 32),
+        flyback_pixels=1, lazy_result=True):
     """Temporary function for loading Merlin binary data.
 
     This function will be replaced at some point, so do not rely on it for
     other functions!
 
     """
+    if (probe_x is None) and (probe_y is None):
+        flyback_pixels = 0
+        lazy_result = False
+    if probe_x is None:
+        probe_x = 1
+    if probe_y is None:
+        probe_y = 1
+
     f = open(filename, 'rb')
     header_string = f.read(50).decode()
     f.close()
@@ -70,7 +79,6 @@ def _get_binary_merlin_signal(filename, probe_x=None, probe_y=None,
     det_x, det_y = _get_detector_pixel_size(header_string)
 
     value_between_frames = 192
-    flyback_pixels = 1
 
     frametype = np.dtype(
             [
@@ -80,12 +88,17 @@ def _get_binary_merlin_signal(filename, probe_x=None, probe_y=None,
     data_with_HF = np.memmap(
             filename, frametype, mode='r',
             shape=(probe_y, probe_x + flyback_pixels))
-    data_with_HF = data_with_HF[:, 0:-flyback_pixels]
+    if flyback_pixels != 0:
+        data_with_HF = data_with_HF[:, 0:-flyback_pixels]
 
     data_array = data_with_HF['data']
 
     dask_array = da.from_array(data_array, chunks=chunks)
-    s = LazyPixelatedSTEM(dask_array)
+    dask_array = dask_array.squeeze()
+    if lazy_result:
+        s = LazyPixelatedSTEM(dask_array)
+    else:
+        s = PixelatedSTEM(dask_array.compute())
     return s
 
 
