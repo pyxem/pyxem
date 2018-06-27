@@ -69,7 +69,6 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_disk_shift_simple_test_signal()
         >>> s_c = s.center_of_mass(threshold=3., show_progressbar=False)
         >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
@@ -163,7 +162,6 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_holz_simple_test_signal()
         >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
 
@@ -224,7 +222,6 @@ class PixelatedSTEM(Signal2D):
 
         Example
         -------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_y()
 
