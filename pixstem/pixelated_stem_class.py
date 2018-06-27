@@ -190,7 +190,6 @@ class PixelatedSTEM(Signal2D):
 
         Example
         -------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_x()
 
@@ -354,7 +353,6 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
         >>> s_bf = s.virtual_bright_field(show_progressbar=False)
         >>> s_bf.plot()
@@ -414,7 +412,6 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
         >>> s_adf = s.virtual_annular_dark_field(
         ...     40, 40, 20, 40, show_progressbar=False)
@@ -682,7 +679,6 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(show_progressbar=False)
 
@@ -738,7 +734,6 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(show_progressbar=False)
 
@@ -794,7 +789,6 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     show_progressbar=False, lazy_result=True)
@@ -947,7 +941,6 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=True)
         >>> s_corr = s.correct_ramp()
         >>> s_corr.plot()
@@ -992,7 +985,6 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_magnitude = s.get_magnitude_signal()
         >>> s_magnitude.plot()
@@ -1040,7 +1032,6 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_color = s.get_phase_signal(rotation=20)
         >>> s_color.plot()
@@ -1088,7 +1079,6 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_color = s.get_color_signal()
         >>> s_color.plot()
@@ -1150,7 +1140,6 @@ class DPCSignal2D(Signal2D):
             If None, generate a new subplot for the indicator.
             If False, do not include an indicator
 
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> fig = s.get_color_image_with_indicator()
         >>> fig.savefig("simple_dpc_test_signal.png")
@@ -1233,7 +1222,6 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
         >>> s_hist = s.get_bivariate_histogram()
         >>> s_hist.plot()
@@ -1265,7 +1253,6 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
         >>> s
         <DPCSignal2D, title: , dimensions: (2|50, 100)>
@@ -1310,7 +1297,6 @@ class DPCSignal2D(Signal2D):
 
         Rotate data by 10 degrees clockwise
 
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_rot = s.rotate_data(10)
         >>> s_rot.plot()
@@ -1339,7 +1325,6 @@ class DPCSignal2D(Signal2D):
 
         Rotate beam shifts by 10 degrees clockwise
 
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> s_new = s.rotate_beam_shifts(10)
         >>> s_new.plot()
@@ -1368,7 +1353,6 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.api as ps
         >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=False)
         >>> s_blur = s.gaussian_blur()
 

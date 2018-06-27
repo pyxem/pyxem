@@ -379,7 +379,6 @@ def _get_angle_sector_mask(
     Examples
     --------
     >>> import numpy as np
-    >>> import pixstem.api as ps
     >>> import pixstem.pixelated_stem_tools as pst
     >>> s = ps.PixelatedSTEM(np.arange(100).reshape(10, 10))
     >>> s.axes_manager.signal_axes[0].offset = -5
@@ -508,7 +507,6 @@ def find_and_remove_dead_pixels(s):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_dead_pixel_signal()
     >>> import pixstem.pixelated_stem_tools as pst
     >>> pst.find_and_remove_dead_pixels(s)

@@ -619,7 +619,6 @@ def fit_single_ellipse_to_signal(
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = ps.PixelatedSTEM(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
@@ -679,7 +678,6 @@ def fit_ellipses_to_signal(
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = ps.PixelatedSTEM(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110

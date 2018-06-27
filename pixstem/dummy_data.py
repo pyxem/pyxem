@@ -23,7 +23,6 @@ def get_disk_shift_simple_test_signal(lazy=False):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_disk_shift_simple_test_signal()
     >>> s.plot()
 
@@ -58,7 +57,6 @@ def get_holz_simple_test_signal(lazy=False):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_holz_simple_test_signal()
     >>> s.plot()
 
@@ -93,7 +91,6 @@ def get_holz_heterostructure_test_signal(lazy=False):
 
     Example
     -------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
     >>> s.plot()
 
@@ -140,7 +137,6 @@ def get_dead_pixel_signal(lazy=False):
 
     Example
     -------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_dead_pixel_signal()
 
     Lazy signal
@@ -172,7 +168,6 @@ def get_hot_pixel_signal(lazy=False):
 
     Example
     -------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_hot_pixel_signal()
 
     Lazy signal
@@ -202,7 +197,6 @@ def get_simple_dpc_signal():
 
     Example
     -------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_simple_dpc_signal()
 
     """
@@ -224,7 +218,6 @@ def get_stripe_pattern_dpc_signal():
 
     Example
     -------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
 
     """
@@ -251,7 +244,6 @@ def get_square_dpc_signal(add_ramp=False):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_square_dpc_signal()
     >>> s.plot()
 

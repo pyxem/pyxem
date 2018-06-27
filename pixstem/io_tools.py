@@ -227,7 +227,6 @@ def signal_to_pixelated_stem(s):
     --------
     >>> import numpy as np
     >>> import hyperspy.api as hs
-    >>> import pixstem.api as ps
     >>> s = hs.signals.Signal2D(np.random.random((8, 11, 21, 13)))
     >>> s.metadata.General.title = "test dataset"
     >>> s
@@ -323,7 +322,6 @@ def load_dpc_signal(filename):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import numpy as np
     >>> s = ps.DPCSignal2D(np.random.random((2, 90, 50)))
     >>> s.save("test_dpc_signal2d.hspy", overwrite=True)
