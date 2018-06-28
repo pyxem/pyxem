@@ -104,7 +104,7 @@ class PixelatedSTEM(Signal2D):
 
         Parameters
         ----------
-       threshold : number, optional
+        threshold : number, optional
             The thresholding will be done at mean times
             this threshold value.
         mask : tuple (x, y, r)
