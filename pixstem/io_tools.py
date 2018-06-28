@@ -54,7 +54,7 @@ def _get_detector_pixel_size(header_string):
     return(det_x_value, det_y_value)
 
 
-def _load_binary_merlin_signal(
+def load_binary_merlin_signal(
         filename, probe_x=None, probe_y=None, chunks=(32, 32, 32, 32),
         flyback_pixels=1, lazy_result=True):
     """Temporary function for loading Merlin binary data.
