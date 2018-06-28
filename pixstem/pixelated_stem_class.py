@@ -674,8 +674,13 @@ class PixelatedSTEM(Signal2D):
         mask_array : Boolean Numpy array
         lazy_result : bool
             If True, return a lazy signal. If False, compute
-            the result and return a non-lazy signal.
+            the result and return a non-lazy signal. Default False.
         show_progressbar : bool
+
+        Returns
+        -------
+        s_dead_pixels : HyperSpy 2D signal
+            With dead pixels as True, rest as False.
 
         Examples
         --------
@@ -718,9 +723,18 @@ class PixelatedSTEM(Signal2D):
         return s_dead_pixels
 
     def find_hot_pixels(
-            self, threshold_multiplier=500, mask_array=None, lazy_result=False,
+            self, threshold_multiplier=500, mask_array=None, lazy_result=True,
             show_progressbar=True):
         """Find hot pixels in the diffraction images.
+
+        Note: this method will be default return a lazy signal, since the
+        size of the returned signal is the same shape as the original
+        signal. So for large datasets actually calculating computing
+        the results can use a lot of memory.
+
+        In addition, this signal is currently not very optimized with
+        regards to memory use, so be careful when using this method
+        for large datasets.
 
         Parameters
         ----------
@@ -729,7 +743,7 @@ class PixelatedSTEM(Signal2D):
         mask_array : Boolean Numpy array
         lazy_result : bool
             If True, return a lazy signal. If False, compute
-            the result and return a non-lazy signal.
+            the result and return a non-lazy signal. Default True.
         show_progressbar : bool
 
         Examples
@@ -777,15 +791,21 @@ class PixelatedSTEM(Signal2D):
             self, bad_pixel_array, lazy_result=True, show_progressbar=True):
         """Correct bad pixels by getting mean value of neighbors.
 
+        Note: this method is currently not very optimized with regards
+        to memory use, so currently be careful when using it on
+        large datasets.
+
         Parameters
         ----------
         bad_pixel_array : array-like
         lazy_result : bool
             Default True.
+        show_progressbar : bool
+            Default True
 
         Returns
         -------
-        signal_corrected : PixelatedSTEM
+        signal_corrected : PixelatedSTEM or LazyPixelatedSTEM
 
         Examples
         --------
