@@ -760,10 +760,10 @@ class PixelatedSTEM(Signal2D):
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     mask_array=mask_array, show_progressbar=False)
 
-        Getting a lazy signal as output
+        Getting a non-lazy signal as output
 
         >>> s_hot_pixels = s.find_hot_pixels(
-        ...     lazy_result=True, show_progressbar=False)
+        ...     lazy_result=False, show_progressbar=False)
 
         See also
         --------

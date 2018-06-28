@@ -123,7 +123,8 @@ class TestFindHotPixels:
     def test_2d(self):
         s = LazyPixelatedSTEM(dtd._get_hot_pixel_test_data_2d())
         s_hot_pixels = s.find_hot_pixels()
-        assert not s_hot_pixels._lazy
+        assert s_hot_pixels._lazy
+        s_hot_pixels.compute()
         assert s_hot_pixels.data.shape == s.data.shape
         assert s_hot_pixels.data[21, 11]
         assert s_hot_pixels.data[5, 38]
@@ -161,6 +162,7 @@ class TestFindHotPixels:
         data = dtd._get_hot_pixel_test_data_2d()
         s = PixelatedSTEM(data.compute())
         s_hot_pixels = s.find_hot_pixels()
+        s_hot_pixels.compute()
         assert s_hot_pixels.data.shape == s.data.shape
         assert s_hot_pixels.data[21, 11]
         assert s_hot_pixels.data[5, 38]
