@@ -14,7 +14,9 @@ from pixstem.pixelated_stem_class import (
 def _get_dtype_from_header_string(header_string):
     header_split_list = header_string.split(",")
     dtype_string = header_split_list[6]
-    if dtype_string == 'U16':
+    if dtype_string == 'U08':
+        dtype = ">u1"
+    elif dtype_string == 'U16':
         dtype = ">u2"
     elif dtype_string == 'U32':
         dtype = ">u4"
