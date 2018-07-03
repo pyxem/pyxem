@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 from scipy.ndimage.filters import gaussian_filter
 import dask.array as da
 from hyperspy.misc.utils import isiterable
@@ -393,7 +394,8 @@ def generate_4d_data(
         disk_x=25, disk_y=25, disk_r=5, disk_I=20,
         ring_x=25, ring_y=25, ring_r=20, ring_I=6, ring_lw=0,
         blur=True, blur_sigma=1, downscale=True, add_noise=False,
-        noise_amplitude=1, lazy=False, lazy_chunks=None):
+        noise_amplitude=1, lazy=False, lazy_chunks=None,
+        show_progressbar=True):
     """
     Generate a test dataset containing a disk and diffraction ring.
     Useful for checking that radial integration
@@ -416,7 +418,7 @@ def generate_4d_data(
     disk_x, disk_y : int or NumPy 2D-array, default 20
         Centre position of the disk. Either integer or NumPy 2-D array.
         See examples on how to make them the correct size.
-        To deactivate the ring, set disk_x=None.
+        To deactivate the disk, set disk_x=None.
     disk_r : int or NumPy 2D-array, default 5
         Radius of the disk. Either integer or NumPy 2-D array.
         See examples on how to make it the correct size.
@@ -461,7 +463,7 @@ def generate_4d_data(
     Examples
     --------
     >>> import pixstem.make_diffraction_test_data as mdtd
-    >>> s = mdtd.generate_4d_data()
+    >>> s = mdtd.generate_4d_data(show_progressbar=False)
     >>> s.plot()
 
     Using more arguments
@@ -470,11 +472,12 @@ def generate_4d_data(
     ...         image_size_x=50, image_size_y=90,
     ...         disk_x=30, disk_y=70, disk_r=9, disk_I=30,
     ...         ring_x=35, ring_y=65, ring_r=20, ring_I=10,
-    ...         blur=False, downscale=False)
+    ...         blur=False, downscale=False, show_progressbar=False)
 
     Adding some Gaussian random noise
 
-    >>> s = mdtd.generate_4d_data(add_noise=True, noise_amplitude=3)
+    >>> s = mdtd.generate_4d_data(add_noise=True, noise_amplitude=3,
+    ...         show_progressbar=False)
 
     Different centre positions for each probe position.
     Note the size=(20, 10), and probe_x=10, probe_y=20: size=(y, x).
@@ -491,18 +494,17 @@ def generate_4d_data(
     >>> s = mdtd.generate_4d_data(probe_size_x=10, probe_size_y=20,
     ...         image_size_x=40, image_size_y=50, disk_x=disk_x, disk_y=disk_y,
     ...         disk_I=disk_I, ring_x=ring_x, ring_y=ring_y, ring_r=ring_r,
-    ...         ring_I=ring_I, ring_lw=ring_lw)
+    ...         ring_I=ring_I, ring_lw=ring_lw, show_progressbar=False)
 
     Do not plot the disk
 
-    >>> s = mdtd.generate_4d_data(disk_x=None)
+    >>> s = mdtd.generate_4d_data(disk_x=None, show_progressbar=False)
 
     Do not plot the ring
 
-    >>> s = mdtd.generate_4d_data(ring_x=None)
+    >>> s = mdtd.generate_4d_data(ring_x=None, show_progressbar=False)
 
     """
-
     if disk_x is None:
         plot_disk = False
     else:
@@ -533,7 +535,7 @@ def generate_4d_data(
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
-    for i in s:
+    for i in tqdm(s, desc='Make test data', disable=not show_progressbar):
         index = s.axes_manager.indices[::-1]
         test_data = MakeTestData(
                 size_x=image_size_x, size_y=image_size_y,
@@ -551,6 +553,7 @@ def generate_4d_data(
         if add_noise:
             s.data[index][:] += np.random.random(
                     size=(image_size_y, image_size_x)) * noise_amplitude
+    s.axes_manager.indices = [0] * s.axes_manager.navigation_dimension
     if lazy:
         if lazy_chunks is None:
             lazy_chunks = 10, 10, 10, 10
