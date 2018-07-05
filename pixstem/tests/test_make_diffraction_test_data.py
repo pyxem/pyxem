@@ -304,6 +304,138 @@ class TestMakeDiffractionTestDataRing:
         assert max_v1 == x0+r
 
 
+class TestMakeDiffractionTestDataDisksEllipse:
+
+    def test_disk_cover_all(self):
+        test = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                default=False, blur=False, downscale=False)
+        test.add_disk_ellipse(
+                x0=50, y0=50, semi_len0=100, semi_len1=130, intensity=2)
+        assert (test.signal.data == 2).all()
+
+    def test_with_downscale_blur_default(self):
+        test = mdtd.MakeTestData(size_x=120, size_y=100)
+        test.add_disk_ellipse(
+                x0=50, y0=50, semi_len0=10, semi_len1=13, intensity=2)
+
+    def test_disk_cover_nothing(self):
+        test = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                default=False, blur=False, downscale=False)
+        test.add_disk_ellipse(
+                x0=350, y0=50, semi_len0=10, semi_len1=10, intensity=2)
+        assert not test.signal.data.any()
+
+    def test_disk_semi_len0_very_small(self):
+        test = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                default=False, blur=False, downscale=False)
+        x0, y0 = 50, 40
+        intensity = 2
+        test.add_disk_ellipse(
+                x0=x0, y0=y0, semi_len0=0.1, semi_len1=1000,
+                intensity=intensity, rotation=0)
+        data = test.signal.data
+        assert (data[:, x0] == intensity).all()
+        data[:, x0] = 0
+        assert not data.any()
+
+    def test_disk_semi_len1_very_small(self):
+        test = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                default=False, blur=False, downscale=False)
+        x0, y0 = 50, 40
+        intensity = 2
+        test.add_disk_ellipse(
+                x0=x0, y0=y0, semi_len0=1000, semi_len1=0.1,
+                intensity=intensity, rotation=0)
+        data = test.signal.data
+        assert (data[y0, :] == intensity).all()
+        data[y0, :] = 0
+        assert not data.any()
+
+    def test_disk_semi_len1_very_small_rot_90(self):
+        test = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                default=False, blur=False, downscale=False)
+        x0, y0 = 50, 40
+        intensity = 2
+        test.add_disk_ellipse(
+                x0=x0, y0=y0, semi_len0=1000, semi_len1=0.1,
+                intensity=intensity, rotation=np.pi/2)
+        data = test.signal.data
+        assert (data[:, x0] == intensity).all()
+        data[:, x0] = 0
+        assert not data.any()
+
+    def test_disk_semi_len1_very_small_180(self):
+        test = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                default=False, blur=False, downscale=False)
+        x0, y0 = 50, 40
+        intensity = 2
+        test.add_disk_ellipse(
+                x0=x0, y0=y0, semi_len0=1000, semi_len1=0.1,
+                intensity=intensity, rotation=np.pi)
+        data = test.signal.data
+        assert (data[y0, :] == intensity).all()
+        data[y0, :] = 0
+        assert not data.any()
+
+
+class TestMakeDiffractionTestDataDisksRing:
+
+    def test_downscale(self):
+        test0 = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                downscale=True, blur=False, default=False)
+        test0.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=8, semi_len1=13, intensity=2)
+        test1 = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                downscale=False, blur=False, default=False)
+        test1.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=8, semi_len1=13, intensity=2)
+        assert not (test0.signal.data == test1.signal.data).all()
+
+    def test_blur(self):
+        test0 = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                downscale=False, blur=True, default=False)
+        test0.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=8, semi_len1=13, intensity=2)
+        test1 = mdtd.MakeTestData(
+                size_x=120, size_y=100,
+                downscale=False, blur=False, default=False)
+        test1.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=8, semi_len1=13, intensity=2)
+        assert not (test0.signal.data == test1.signal.data).all()
+
+    def test_very_large_radius_no_cover(self):
+        test = mdtd.MakeTestData(size_x=120, size_y=100)
+        test.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=200, semi_len1=159, intensity=2)
+        assert not test.signal.data.any()
+
+    def test_lw_r(self):
+        test0 = mdtd.MakeTestData(size_x=120, size_y=100)
+        test0.add_ring_ellipse(x0=50, y0=50, semi_len0=20, semi_len1=30)
+        test1 = mdtd.MakeTestData(size_x=120, size_y=100)
+        test1.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=20, semi_len1=30, lw_r=3)
+        assert test0.signal.data.sum() < test1.signal.data.sum()
+
+    def test_rotation(self):
+        test0 = mdtd.MakeTestData(size_x=120, size_y=100)
+        test0.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=20, semi_len1=30)
+        test1 = mdtd.MakeTestData(size_x=120, size_y=100)
+        test1.add_ring_ellipse(
+                x0=50, y0=50, semi_len0=20, semi_len1=30, rotation=1)
+        assert not (test0.signal.data == test1.signal.data).all()
+
+
 class TestGenerate4dData:
 
     def test_simple0(self):
@@ -314,14 +446,14 @@ class TestGenerate4dData:
                 probe_size_x=10, probe_size_y=10,
                 image_size_x=50, image_size_y=50,
                 disk_x=20, disk_y=20, disk_r=5, disk_I=30,
-                ring_x=None, blur=True, blur_sigma=1,
+                ring_x=None, ring_e_x=None, blur=True, blur_sigma=1,
                 downscale=True, add_noise=True,
                 noise_amplitude=2)
         assert s.axes_manager.shape == (10, 10, 50, 50)
 
     def test_different_size(self):
         s = mdtd.generate_4d_data(
-                probe_size_x=5, probe_size_y=7, ring_x=None,
+                probe_size_x=5, probe_size_y=7, ring_x=None, ring_e_x=None,
                 image_size_x=30, image_size_y=50)
         ax = s.axes_manager
         assert ax.navigation_dimension == 2
@@ -333,14 +465,15 @@ class TestGenerate4dData:
         s = mdtd.generate_4d_data(
                 probe_size_x=6, probe_size_y=4,
                 image_size_x=40, image_size_y=40,
-                ring_x=None, disk_x=1000, disk_y=1000, disk_r=5)
+                ring_x=None, ring_e_x=None, disk_x=1000, disk_y=1000, disk_r=5)
         assert (s.data == 0).all()
 
     def test_disk_cover_whole_image(self):
         s = mdtd.generate_4d_data(
                 probe_size_x=6, probe_size_y=4,
                 image_size_x=20, image_size_y=20,
-                ring_x=None, disk_x=10, disk_y=10, disk_r=40, disk_I=50,
+                ring_x=None, ring_e_x=None,
+                disk_x=10, disk_y=10, disk_r=40, disk_I=50,
                 blur=False, downscale=False)
         assert (s.data == 50).all()
 
@@ -351,7 +484,8 @@ class TestGenerate4dData:
         s = mdtd.generate_4d_data(
                 probe_size_x=ps_x, probe_size_y=ps_y,
                 image_size_x=40, image_size_y=50,
-                ring_x=None, disk_x=disk_x, disk_y=disk_y, disk_r=1,
+                ring_x=None, ring_e_x=None,
+                disk_x=disk_x, disk_y=disk_y, disk_r=1,
                 disk_I=intensity, blur=False, downscale=False)
         for x in range(ps_x):
             for y in range(ps_y):
@@ -367,7 +501,7 @@ class TestGenerate4dData:
                 probe_size_x=6, probe_size_y=4,
                 image_size_x=40, image_size_y=40,
                 disk_x=1000, disk_y=1000, disk_r=5,
-                ring_x=1000, ring_y=1000, ring_r=10)
+                ring_x=1000, ring_y=1000, ring_r=10, ring_e_x=None)
         assert (s.data == 0).all()
 
     def test_ring_center(self):
@@ -376,28 +510,52 @@ class TestGenerate4dData:
                 probe_size_x=4, probe_size_y=5,
                 image_size_x=120, image_size_y=100,
                 disk_x=x, disk_y=y, disk_r=10, disk_I=0,
-                ring_x=x, ring_y=y, ring_r=30, ring_I=5,
+                ring_x=x, ring_y=y, ring_r=30, ring_I=5, ring_e_x=None,
+                blur=False, downscale=False)
+        s_com = s.center_of_mass()
+        assert (s_com.inav[0].data == x).all()
+        assert (s_com.inav[1].data == y).all()
+
+    def test_ring_ellipse_center(self):
+        x, y = 40, 51
+        s = mdtd.generate_4d_data(
+                probe_size_x=4, probe_size_y=5,
+                image_size_x=120, image_size_y=100,
+                disk_x=None, ring_x=None,
+                ring_e_x=x, ring_e_y=y,
                 blur=False, downscale=False)
         s_com = s.center_of_mass()
         assert (s_com.inav[0].data == x).all()
         assert (s_com.inav[1].data == y).all()
 
     def test_input_numpy_array(self):
-        disk_x = np.random.randint(5, 35, size=(20, 10))
-        disk_y = np.random.randint(5, 45, size=(20, 10))
-        disk_r = np.random.randint(5, 9, size=(20, 10))
-        disk_I = np.random.randint(50, 100, size=(20, 10))
-        ring_x = np.random.randint(5, 35, size=(20, 10))
-        ring_y = np.random.randint(5, 45, size=(20, 10))
-        ring_r = np.random.randint(10, 15, size=(20, 10))
-        ring_I = np.random.randint(1, 30, size=(20, 10))
-        ring_lw = np.random.randint(1, 5, size=(20, 10))
+        size = (20, 10)
+        disk_x = np.random.randint(5, 35, size=size)
+        disk_y = np.random.randint(5, 45, size=size)
+        disk_r = np.random.randint(5, 9, size=size)
+        disk_I = np.random.randint(50, 100, size=size)
+        ring_x = np.random.randint(5, 35, size=size)
+        ring_y = np.random.randint(5, 45, size=size)
+        ring_r = np.random.randint(10, 15, size=size)
+        ring_I = np.random.randint(1, 30, size=size)
+        ring_lw = np.random.randint(1, 5, size=size)
+        ring_e_x = np.random.randint(20, 30, size)
+        ring_e_y = np.random.randint(20, 30, size)
+        ring_e_semi_len0 = np.random.randint(10, 20, size)
+        ring_e_semi_len1 = np.random.randint(10, 20, size)
+        ring_e_r = np.random.random(size)*np.pi
+        ring_e_lw = np.random.randint(1, 3, size)
+
         mdtd.generate_4d_data(
                 probe_size_x=10, probe_size_y=20,
                 image_size_x=40, image_size_y=50,
                 disk_x=disk_x, disk_y=disk_y, disk_I=disk_I, disk_r=disk_r,
                 ring_x=ring_x, ring_y=ring_y, ring_r=ring_r,
-                ring_I=ring_I, ring_lw=ring_lw)
+                ring_I=ring_I, ring_lw=ring_lw,
+                ring_e_x=ring_e_x, ring_e_y=ring_e_y,
+                ring_e_semi_len0=ring_e_semi_len0,
+                ring_e_semi_len1=ring_e_semi_len1,
+                ring_e_r=ring_e_r, ring_e_lw=ring_e_lw)
 
 
 class TestGetEllipticalRing:
@@ -405,22 +563,25 @@ class TestGetEllipticalRing:
     def test_simple(self):
         s = Signal2D(np.zeros((110, 200)))
         x, y, semi_len0, semi_len1, rotation = 60, 70, 12, 9, 0.2
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_image = mdtd._get_elliptical_ring(
-                s, x, y, semi_len0, semi_len1, rotation, 3)
+                xx, yy, x, y, semi_len0, semi_len1, rotation, 3)
         assert ellipse_image.any()
 
     def test_cover_no_signal1(self):
         s = Signal2D(np.zeros((50, 56)))
         x, y, semi_len0, semi_len1, rotation = 523, 620, 20, 30, 2.0
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_image = mdtd._get_elliptical_ring(
-                s, x, y, semi_len0, semi_len1, rotation)
+                xx, yy, x, y, semi_len0, semi_len1, rotation)
         assert not ellipse_image.any()
 
     def test_cover_no_signal2(self):
         s = Signal2D(np.zeros((50, 56)))
         x, y, semi_len0, semi_len1, rotation = 20, 20, 90, 130, 2.0
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_image = mdtd._get_elliptical_ring(
-                s, x, y, semi_len0, semi_len1, rotation)
+                xx, yy, x, y, semi_len0, semi_len1, rotation)
         assert not ellipse_image.any()
 
 
@@ -428,22 +589,25 @@ class TestGetEllipticalMask:
 
     def test_simple(self):
         s = Signal2D(np.zeros((110, 200)))
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         x, y, semi_len0, semi_len1, rotation = 60, 70, 12, 9, 0.2
-        ellipse_image = mdtd._get_elliptical_mask(
-                s, x, y, semi_len0, semi_len1, rotation)
+        ellipse_image = mdtd._get_elliptical_disk(
+                xx, yy, x, y, semi_len0, semi_len1, rotation)
         assert s.data.shape == ellipse_image.shape
 
     def test_cover_all_signal(self):
         s = Signal2D(np.zeros((50, 56)))
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         x, y, semi_len0, semi_len1, rotation = 23, 20, 200, 200, 0.0
-        ellipse_image = mdtd._get_elliptical_mask(
-                s, x, y, semi_len0, semi_len1, rotation)
+        ellipse_image = mdtd._get_elliptical_disk(
+                xx, yy, x, y, semi_len0, semi_len1, rotation)
         assert s.data.shape == ellipse_image.shape
         assert ellipse_image.all()
 
     def test_cover_no_signal(self):
         s = Signal2D(np.zeros((50, 56)))
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         x, y, semi_len0, semi_len1, rotation = 523, 620, 20, 30, 2.0
-        ellipse_image = mdtd._get_elliptical_mask(
-                s, x, y, semi_len0, semi_len1, rotation)
+        ellipse_image = mdtd._get_elliptical_disk(
+                xx, yy, x, y, semi_len0, semi_len1, rotation)
         assert not ellipse_image.any()

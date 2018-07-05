@@ -2,7 +2,6 @@ import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.filters import gaussian_filter
 import dask.array as da
-from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from pixstem.pixelated_stem_class import PixelatedSTEM
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
@@ -67,18 +66,133 @@ def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
     >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
-    >>> ellipse_data = mdtd._get_elliptical_ring(s, 10, -10, 12, 18, 1.5, 2)
+    >>> xx, yy = np.meshgrid(
+    ...     s.axes_manager.signal_axes[0].axis,
+    ...     s.axes_manager.signal_axes[1].axis)
+    >>> ellipse_data = mdtd._get_elliptical_ring(
+    ...     xx, yy, 10, -10, 12, 18, 1.5, 2)
     >>> s.data += ellipse_data
     >>> s.plot()
 
     """
-    mask_outer = _get_elliptical_mask(
-            s, x, y, semi_len0 + lw_r, semi_len1 + lw_r, rotation)
-    mask_inner = _get_elliptical_mask(
-            s, x, y, semi_len0 - lw_r, semi_len1 - lw_r, rotation)
+    mask_outer = _get_elliptical_disk(
+            xx, yy, x, y, semi_len0 + lw_r, semi_len1 + lw_r, rotation)
+    mask_inner = _get_elliptical_disk(
+            xx, yy, x, y, semi_len0 - lw_r, semi_len1 - lw_r, rotation)
     ellipse = np.logical_xor(mask_outer, mask_inner)
     ellipse = ellipse.astype('uint32')
     return ellipse
+
+
+class EllipseRing(object):
+
+    def __init__(
+            self, xx, yy, x0, y0, semi_len0, semi_len1, rotation,
+            intensity, lw_r=1):
+        """
+
+        Parameters
+        ----------
+        xx, yy : int
+            Size of the image
+        x, y : float
+            Centre positions for the ellipse
+        semi_len0, semi_len1 : float
+        rotation : float
+            In radians
+        lw_r : optional, default 1
+
+        Methods
+        -------
+        get_signal
+            Generate numpy array with the ellipse ring
+
+        Examples
+        --------
+        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> ellipse = mdtd.EllipseRing(
+        ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
+        ...     rotation=1.57, intensity=10, lw_r=2)
+
+        """
+        self.x0, self.y0 = x0, y0
+        self.semi_len0 = semi_len0
+        self.semi_len1 = semi_len1
+        self.rotation = rotation
+        self.intensity = intensity
+        self.xx, self.yy = xx, yy
+        self.lw_r = lw_r
+
+    def __repr__(self):
+        return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
+                ' r: %s, I: %s, lw: %s)>' % (
+                        self.__class__.__name__,
+                        self.x0, self.y0, self.semi_len0, self.semi_len1,
+                        self.rotation, self.intensity, self.lw_r,
+                        )
+
+    def get_signal(self):
+        ellipse = _get_elliptical_ring(
+                xx=self.xx, yy=self.yy, x=self.x0, y=self.y0,
+                semi_len0=self.semi_len0, semi_len1=self.semi_len1,
+                rotation=self.rotation, lw_r=self.lw_r)
+        self.ellipse = ellipse * self.intensity
+        return(self.ellipse)
+
+
+class EllipseDisk(object):
+
+    def __init__(
+            self, xx, yy, x0, y0, semi_len0, semi_len1, rotation,
+            intensity):
+        """
+
+        Parameters
+        ----------
+        xx, yy : int
+            Size of the image
+        x, y : float
+            Centre positions for the ellipse
+        semi_len0, semi_len1 : float
+        rotation : float
+            In radians
+        lw_r : optional, default 1
+
+        Methods
+        -------
+        get_signal
+            Generate numpy array with the elliptical disk
+
+        Examples
+        --------
+        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> ellipse_disk = mdtd.EllipseDisk(
+        ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
+        ...     rotation=1.57, intensity=10)
+
+        """
+        self.x0, self.y0 = x0, y0
+        self.semi_len0 = semi_len0
+        self.semi_len1 = semi_len1
+        self.rotation = rotation
+        self.intensity = intensity
+        self.xx, self.yy = xx, yy
+
+    def __repr__(self):
+        return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
+               ' r: %s, I: %s)>' % (
+                        self.__class__.__name__,
+                        self.x0, self.y0, self.semi_len0, self.semi_len1,
+                        self.rotation, self.intensity,
+                        )
+
+    def get_signal(self):
+        ellipse = _get_elliptical_disk(
+                xx=self.xx, yy=self.yy, x=self.x0, y=self.y0,
+                semi_len0=self.semi_len0, semi_len1=self.semi_len1,
+                rotation=self.rotation)
+        self.ellipse = ellipse * self.intensity
+        return(self.ellipse)
 
 
 class Circle(object):
@@ -180,10 +294,11 @@ class Disk(object):
 
 
 class Ring(object):
-    """
-    Ring object, with outer edge of the ring at r+lr, and inner r-lr.
+    """Ring object, with outer edge of the ring at r+lr, and inner r-lr.
+
     The radius of the ring is defined as in the middle of the line making
     up the ring.
+
     """
     def __init__(self, xx, yy, scale, x0, y0, r, intensity, lr):
         if lr > r:
@@ -212,32 +327,26 @@ class Ring(object):
         self.z.set_uniform_intensity()
 
 
-class MakeTestData:
-    """
-    MakeTestData is an object containing a generated test signal. The default
-    signal is consisting of a Disk and concentric Ring, with the Ring being
-    less intensive than the centre Disk. Unlimited number of Rings and Disks
-    can be added separately.
+class MakeTestData(object):
+    """MakeTestData is an object containing a generated test signal.
+
+    The default signal consists of a Disk and concentric Ring, with the
+    Ring being less intensive than the centre Disk. Unlimited number of
+    Rings and Disk can be added separately.
 
     Parameters
     ----------
-
     size_x, size_y : float, int
         The range of the x and y axis goes from 0 to size_x, size_y
-
     scale : float, int
         The step size of the x and y axis
-
     default : bool, default False
         If True, the default object should be generated. If false, Ring and
         Disk must be added separately by self.add_ring(), self.add_disk()
-
     blur : bool, default True
         If True, do a Gaussian blur of the disk.
-
     blur_sigma : int, default 1
         Sigma of the Gaussian blurring, if blur is True.
-
     downscale : bool, default True
         Note: currently using downscale and adding a disk, will lead to the
         center of the disk being shifted. Ergo: the disk_x and disk_y will not
@@ -245,13 +354,10 @@ class MakeTestData:
 
     Attributes
     ----------
-
     signal : hyperspy.signals.Signal2D
         Test signal
-
     z_list : list
         List containing Ring and Disk objects added to the signal
-
     downscale_factor : int
         The data is upscaled before Circle is added, and similarly
         downscaled to return to given dimensions. This improves the
@@ -316,6 +422,15 @@ class MakeTestData:
         self.z_list.append(Disk(self.xx, self.yy, scale, x0, y0, r, intensity))
         self.update_signal()
 
+    def add_disk_ellipse(
+            self, x0=50, y0=50, semi_len0=5, semi_len1=8, rotation=0.78,
+            intensity=10):
+        ellipse = EllipseDisk(
+                xx=self.xx, yy=self.yy, x0=x0, y0=y0, semi_len0=semi_len0,
+                semi_len1=semi_len1, rotation=rotation, intensity=intensity)
+        self.z_list.append(ellipse)
+        self.update_signal()
+
     def add_ring(self, x0=50, y0=50, r=20, intensity=10, lw_pix=0):
         """
         Add a ring to the test data.
@@ -341,6 +456,16 @@ class MakeTestData:
         lr = lw_pix*self.scale  # scalar
         self.z_list.append(
                 Ring(self.xx, self.yy, scale, x0, y0, r, intensity, lr))
+        self.update_signal()
+
+    def add_ring_ellipse(
+            self, x0=50, y0=50, semi_len0=11, semi_len1=13, rotation=0.78,
+            intensity=10, lw_r=2):
+        ellipse = EllipseRing(
+                xx=self.xx, yy=self.yy, x0=x0, y0=y0, semi_len0=semi_len0,
+                semi_len1=semi_len1, rotation=rotation, intensity=intensity,
+                lw_r=lw_r)
+        self.z_list.append(ellipse)
         self.update_signal()
 
     def make_signal(self):
@@ -395,21 +520,28 @@ def generate_4d_data(
         probe_size_x=10, probe_size_y=10, image_size_x=50, image_size_y=50,
         disk_x=25, disk_y=25, disk_r=5, disk_I=20,
         ring_x=25, ring_y=25, ring_r=20, ring_I=6, ring_lw=0,
+        ring_e_x=None, ring_e_y=25, ring_e_semi_len0=15, ring_e_semi_len1=15,
+        ring_e_r=0, ring_e_I=6, ring_e_lw=1,
         blur=True, blur_sigma=1, downscale=True, add_noise=False,
         noise_amplitude=1, lazy=False, lazy_chunks=None,
         show_progressbar=True):
-    """
-    Generate a test dataset containing a disk and diffraction ring.
-    Useful for checking that radial integration
-    algorithms are working properly.
+    """Generate a test dataset containing a disk and diffraction ring.
+
+    Useful for checking that radial integration algorithms are working
+    properly.
 
     The centre, intensity and radius position of the ring and disk can vary
     as a function of probe position, through the disk_x, disk_y, disk_r,
     disk_I, ring_x, ring_y, ring_r and ring_I arguments.
     In addition, the line width of the ring can be varied with ring_lw.
 
+    There is also an elliptical ring, which can be added separately
+    to the circular ring. This elliptical ring uses the ring_e_*
+    arguments. It is disabled by default.
+
     The ring can be deactivated by setting ring_x=None.
     The disk can be deactivated by setting disk_x=None.
+    The elliptical ring can be deactivated by setting ring_e_x=None.
 
     Parameters
     ----------
@@ -432,7 +564,7 @@ def generate_4d_data(
         Centre position of the ring. Either integer or NumPy 2-D array.
         See examples on how to make them the correct size.
         To deactivate the ring, set ring_x=None.
-    ring_r : int or NumPy 2D-array, default 5
+    ring_r : int or NumPy 2D-array, default 20
         Radius of the ring. Either integer or NumPy 2-D array.
         See examples on how to make it the correct size.
     ring_I : int or NumPy 2D-array, default 6
@@ -440,6 +572,22 @@ def generate_4d_data(
         So if I=5, each pixel in the ring will have a value of 5.
         Note, this value will change if blur=True or downscale=True.
     ring_lw : int or NumPy 2D-array, default 0
+        Line width of the ring. If ring_lw=1, the line will be 3 pixels wide.
+        If ring_lw=2, the line will be 5 pixels wide.
+    ring_e_x, ring_e_y : int or NumPy 2D-array, default 20
+        Centre position of the elliptical ring. Either integer or
+        NumPy 2-D array. See examples on how to make them the correct size.
+        To deactivate the ring, set ring_x=None (which is the default).
+    ring_e_semi_len0, ring_e_semi_len1 : int or NumPy 2D-array, default 15
+        Semi lengths of the elliptical ring. Either integer or NumPy 2-D
+        arrays. See examples on how to make it the correct size.
+    ring_e_I : int or NumPy 2D-array, default 6
+        Intensity of the elliptical ring, for each of the pixels.
+        So if I=5, each pixel in the ring will have a value of 5.
+        Note, this value will change if blur=True or downscale=True.
+    ring_e_r : int or NumPy 2D-array, default 0
+        Rotation of the elliptical ring, in radians.
+    ring_e_lw : int or NumPy 2D-array, default 0
         Line width of the ring. If ring_lw=1, the line will be 3 pixels wide.
         If ring_lw=2, the line will be 5 pixels wide.
     blur : bool, default True
@@ -506,6 +654,19 @@ def generate_4d_data(
 
     >>> s = mdtd.generate_4d_data(ring_x=None, show_progressbar=False)
 
+    Plot only an elliptical ring
+
+    >>> from numpy.random import randint, random
+    >>> s = mdtd.generate_4d_data(
+    ...        probe_size_x=10, probe_size_y=10,
+    ...        disk_x=None, ring_x=None,
+    ...        ring_e_x=randint(20, 30, (10, 10)),
+    ...        ring_e_y=randint(20, 30, (10, 10)),
+    ...        ring_e_semi_len0=randint(10, 20, (10, 10)),
+    ...        ring_e_semi_len1=randint(10, 20, (10, 10)),
+    ...        ring_e_r=random((10, 10))*np.pi,
+    ...        ring_e_lw=randint(1, 3, (10, 10)))
+
     """
     if disk_x is None:
         plot_disk = False
@@ -513,12 +674,6 @@ def generate_4d_data(
         plot_disk = True
         if not isiterable(disk_x):
             disk_x = np.ones((probe_size_y, probe_size_x))*disk_x
-    if ring_x is None:
-        plot_ring = False
-    else:
-        plot_ring = True
-        if not isiterable(ring_x):
-            ring_x = np.ones((probe_size_y, probe_size_x))*ring_x
     if not isiterable(disk_y):
         disk_y = np.ones((probe_size_y, probe_size_x))*disk_y
     if not isiterable(disk_r):
@@ -526,6 +681,12 @@ def generate_4d_data(
     if not isiterable(disk_I):
         disk_I = np.ones((probe_size_y, probe_size_x))*disk_I
 
+    if ring_x is None:
+        plot_ring = False
+    else:
+        plot_ring = True
+        if not isiterable(ring_x):
+            ring_x = np.ones((probe_size_y, probe_size_x))*ring_x
     if not isiterable(ring_y):
         ring_y = np.ones((probe_size_y, probe_size_x))*ring_y
     if not isiterable(ring_r):
@@ -534,6 +695,27 @@ def generate_4d_data(
         ring_I = np.ones((probe_size_y, probe_size_x))*ring_I
     if not isiterable(ring_lw):
         ring_lw = np.ones((probe_size_y, probe_size_x))*ring_lw
+
+    if ring_e_x is None:
+        plot_ring_e = False
+    else:
+        plot_ring_e = True
+        if not isiterable(ring_e_x):
+            ring_e_x = np.ones((probe_size_y, probe_size_x))*ring_e_x
+    if not isiterable(ring_e_y):
+        ring_e_y = np.ones((probe_size_y, probe_size_x))*ring_e_y
+    if not isiterable(ring_e_semi_len0):
+        ring_e_semi_len0 = np.ones(
+                (probe_size_y, probe_size_x)) * ring_e_semi_len0
+    if not isiterable(ring_e_semi_len1):
+        ring_e_semi_len1 = np.ones(
+                (probe_size_y, probe_size_x)) * ring_e_semi_len1
+    if not isiterable(ring_e_I):
+        ring_e_I = np.ones((probe_size_y, probe_size_x))*ring_e_I
+    if not isiterable(ring_e_lw):
+        ring_e_lw = np.ones((probe_size_y, probe_size_x))*ring_e_lw
+    if not isiterable(ring_e_r):
+        ring_e_r = np.ones((probe_size_y, probe_size_x))*ring_e_r
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
@@ -551,6 +733,13 @@ def generate_4d_data(
             rx, ry, rr = ring_x[index], ring_y[index], ring_r[index]
             rI, rLW = ring_I[index], ring_lw[index]
             test_data.add_ring(rx, ry, rr, intensity=rI, lw_pix=rLW)
+        if plot_ring_e:
+            rex, rey = ring_e_x[index], ring_e_y[index]
+            resl0, resl1 = ring_e_semi_len0[index], ring_e_semi_len1[index]
+            reI, reLW, rer = ring_e_I[index], ring_e_lw[index], ring_e_r[index]
+            test_data.add_ring_ellipse(
+                    x0=rex, y0=rey, semi_len0=resl0, semi_len1=resl1,
+                    rotation=rer, intensity=reI, lw_r=reLW)
         s.data[index][:] = test_data.signal.data[:]
         if add_noise:
             s.data[index][:] += np.random.random(
