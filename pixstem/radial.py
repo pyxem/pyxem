@@ -622,7 +622,8 @@ def fit_single_ellipse_to_signal(
     >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = ps.PixelatedSTEM(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
-    >>> ellipse_ring = mdtd._get_elliptical_ring(s, 0, 0, 50, 70, 0.8)
+    >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
+    >>> ellipse_ring = mdtd._get_elliptical_ring(xx, yy, 0, 0, 50, 70, 0.8)
     >>> s.data += ellipse_ring
     >>> from pixstem.radial import fit_single_ellipse_to_signal
     >>> output = fit_single_ellipse_to_signal(
@@ -681,7 +682,8 @@ def fit_ellipses_to_signal(
     >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = ps.PixelatedSTEM(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
-    >>> ellipse_ring = mdtd._get_elliptical_ring(s, 0, 0, 50, 70, 0.8)
+    >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
+    >>> ellipse_ring = mdtd._get_elliptical_ring(xx, yy, 0, 0, 50, 70, 0.8)
     >>> s.data += ellipse_ring
     >>> from pixstem.radial import fit_ellipses_to_signal
     >>> output = fit_ellipses_to_signal(

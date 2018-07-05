@@ -171,8 +171,9 @@ class test_fit_ellipse(unittest.TestCase):
         axis1, axis2 = 40, 70
         s = ps.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_ring = mdtd._get_elliptical_ring(
-                s, 0, 0, axis1, axis2, 0.8, lw_r=1)
+                xx, yy, 0, 0, axis1, axis2, 0.8, lw_r=1)
         s.data += ellipse_ring
         self.s = s
         self.axis1, self.axis2 = axis1, axis2
@@ -200,8 +201,9 @@ class test_fit_ellipse(unittest.TestCase):
     def test_fit_single_ellipse_to_signal(self):
         s = ps.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_ring = mdtd._get_elliptical_ring(
-                s, 0, 0, 60, 60, 0.8, lw_r=1)
+                xx, yy, 0, 0, 60, 60, 0.8, lw_r=1)
         s.data += ellipse_ring
         output = ra.fit_single_ellipse_to_signal(
                 s, (50, 70), angleN=10, show_progressbar=False)
@@ -220,7 +222,10 @@ class test_fit_ellipse(unittest.TestCase):
         for rot in rot_list:
             s = ps.PixelatedSTEM(np.zeros((200, 200)))
             s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
-            s.data += mdtd._get_elliptical_ring(s, 0, 0, 70, 60, rot, lw_r=1)
+            xx, yy = np.meshgrid(
+                    s.axes_manager[0].axis, s.axes_manager[1].axis)
+            s.data += mdtd._get_elliptical_ring(
+                    xx, yy, 0, 0, 70, 60, rot, lw_r=1)
             output = ra.fit_single_ellipse_to_signal(
                     s, (50, 80), angleN=10, show_progressbar=False)
             output_rot = output[5] % np.pi
@@ -228,7 +233,10 @@ class test_fit_ellipse(unittest.TestCase):
         for rot in rot_list:
             s = ps.PixelatedSTEM(np.zeros((200, 200)))
             s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
-            s.data += mdtd._get_elliptical_ring(s, 0, 0, 60, 70, rot, lw_r=1)
+            xx, yy = np.meshgrid(
+                    s.axes_manager[0].axis, s.axes_manager[1].axis)
+            s.data += mdtd._get_elliptical_ring(
+                    xx, yy, 0, 0, 60, 70, rot, lw_r=1)
             output = ra.fit_single_ellipse_to_signal(
                     s, (50, 80), angleN=10, show_progressbar=False)
             output_rot = (output[5] + np.pi/2) % np.pi
@@ -237,8 +245,9 @@ class test_fit_ellipse(unittest.TestCase):
     def test_fit_ellipses_to_signal(self):
         s = ps.PixelatedSTEM(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
-        ellipse_ring0 = mdtd._get_elliptical_ring(s, 2, -1, 60, 60, 0.8)
-        ellipse_ring1 = mdtd._get_elliptical_ring(s, 1, -2, 80, 80, 0.8)
+        xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
+        ellipse_ring0 = mdtd._get_elliptical_ring(xx, yy, 2, -1, 60, 60, 0.8)
+        ellipse_ring1 = mdtd._get_elliptical_ring(xx, yy, 1, -2, 80, 80, 0.8)
         s.data += ellipse_ring0
         s.data += ellipse_ring1
         output0 = ra.fit_ellipses_to_signal(

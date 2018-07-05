@@ -2,16 +2,17 @@ import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.filters import gaussian_filter
 import dask.array as da
+from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from pixstem.pixelated_stem_class import PixelatedSTEM
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
 
 
-def _get_elliptical_mask(s, x, y, semi_len0, semi_len1, rotation):
+def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
     """
     Parameters
     ----------
-    s : HyperSpy Signal2D
+    xx, yy : 2D NumPy array
     x, y : float
     semi_len0, semi_len1 : float
     rotation : float
@@ -27,28 +28,29 @@ def _get_elliptical_mask(s, x, y, semi_len0, semi_len1, rotation):
     >>> import pixstem.make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
-    >>> ellipse_data = mdtd._get_elliptical_mask(s, 10, -10, 12, 18, 1.5)
+    >>> xx, yy = np.meshgrid(
+    ...     s.axes_manager.signal_axes[0].axis,
+    ...     s.axes_manager.signal_axes[1].axis)
+    >>> ellipse_data = mdtd._get_elliptical_disk(xx, yy, 10, -10, 12, 18, 1.5)
     >>> s.data += ellipse_data
     >>> s.plot()
 
     """
-    xx, yy = np.meshgrid(
-            s.axes_manager.signal_axes[0].axis,
-            s.axes_manager.signal_axes[1].axis)
-    xx -= x
-    yy -= y
-    z0 = ((xx*np.cos(rotation) + yy*np.sin(rotation))**2)/(semi_len0*semi_len0)
-    z1 = ((xx*np.sin(rotation) - yy*np.cos(rotation))**2)/(semi_len1*semi_len1)
+    rot = rotation
+    xx0 = xx - x
+    yy0 = yy - y
+    z0 = ((xx0*np.cos(rot) + yy0*np.sin(rot))**2)/(semi_len0*semi_len0)
+    z1 = ((xx0*np.sin(rot) - yy0*np.cos(rot))**2)/(semi_len1*semi_len1)
     zz = z0 + z1
     elli_mask = zz <= 1.
     return elli_mask
 
 
-def _get_elliptical_ring(s, x, y, semi_len0, semi_len1, rotation, lw_r=1):
+def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
     """
     Parameters
     ----------
-    s : HyperSpy Signal2D
+    xx, yy : 2D NumPy array
     x, y : float
     semi_len0, semi_len1 : float
     rotation : float
