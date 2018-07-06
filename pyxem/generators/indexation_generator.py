@@ -36,10 +36,9 @@ def correlate_library(image, library,n_largest,mask,keys=[]):
     with a particular experimental diffraction pattern (image) stored as a
     numpy array. See the correlate method of IndexationGenerator for details.
     """
-    print(mask)
+    i=0
+    out_arr = np.zeros((n_largest * len(library),5))
     if mask == 1:
-        i=0
-        out_arr = np.zeros((n_largest * len(library),5))
         for key in library.keys():
             if n_largest:
                 pass
@@ -61,11 +60,7 @@ def correlate_library(image, library,n_largest,mask,keys=[]):
                         
     else:
         for j in np.arange(n_largest):
-            out_arr[j + i*n_largest][0] = i
-            out_arr[j + i*n_largest][1] = 0
-            out_arr[j + i*n_largest][2] = 0
-            out_arr[j + i*n_largest][3] = 0
-            out_arr[j + i*n_largest][4] = 0
+            out_arr[j + i*n_largest][0] = len(library)+1
         i = i + 1
     return out_arr
 
@@ -120,10 +115,10 @@ class IndexationGenerator():
         signal = self.signal
         library = self.library
         if mask is None:
-           #index all real space pixels
+           #index at all real space pixels
            sig_shape = signal.axes_manager.navigation_shape 
            mask = hs.signals.Signal1D(np.ones((sig_shape[0],sig_shape[1],1)))
-           print(mask.data)
+           
         matching_results = signal.map(correlate_library,
                                       library=library,
                                       n_largest=n_largest,
