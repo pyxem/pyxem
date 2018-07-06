@@ -1,4 +1,3 @@
-import unittest
 import pytest
 import numpy as np
 import dask.array as da
@@ -80,7 +79,7 @@ class TestThresholdAndMaskSingleFrame:
         assert (im_out == 0).all()
 
 
-class test_pixelated_tools(unittest.TestCase):
+class TestPixelatedTools:
 
     def test_find_longest_distance_manual(self):
         # These values are tested manually, against knowns results,
@@ -90,27 +89,27 @@ class test_pixelated_tools(unittest.TestCase):
         distance = 14
         for cX, cY in centre_list:
             dist = pst._find_longest_distance(imX, imY, cX, cY, cX, cY)
-            self.assertEqual(dist, distance)
+            assert dist == distance
 
         centre_list = ((1, 1), (imX-1, 1), (1, imY-1), (imX-1, imY-1))
         distance = 12
         for cX, cY in centre_list:
             dist = pst._find_longest_distance(imX, imY, cX, cY, cX, cY)
-            self.assertEqual(dist, distance)
+            assert dist == distance
 
         imX, imY = 10, 5
         centre_list = ((0, 0), (imX, 0), (0, imY), (imX, imY))
         distance = 11
         for cX, cY in centre_list:
             dist = pst._find_longest_distance(imX, imY, cX, cY, cX, cY)
-            self.assertEqual(dist, distance)
+            assert dist == distance
 
         imX, imY = 10, 10
         cX_min, cX_max, cY_min, cY_max = 1, 2, 2, 3
         distance = 12
         dist = pst._find_longest_distance(
                 imX, imY, cX_min, cX_max, cY_min, cY_max)
-        self.assertEqual(dist, distance)
+        assert dist == distance
 
     def test_find_longest_distance_all(self):
         imX, imY = 100, 100
@@ -119,28 +118,28 @@ class test_pixelated_tools(unittest.TestCase):
             distance = int(((imX-x)**2+(imY-y)**2)**0.5)
             dist = pst._find_longest_distance(
                     imX, imY, x, y, x, y)
-            self.assertEqual(dist, distance)
+            assert dist == distance
 
         x_array, y_array = np.mgrid[90:100, 90:100]
         for x, y in zip(x_array.flatten(), y_array.flatten()):
             distance = int((x**2+y**2)**0.5)
             dist = pst._find_longest_distance(
                     imX, imY, x, y, x, y)
-            self.assertEqual(dist, distance)
+            assert dist == distance
 
         x_array, y_array = np.mgrid[0:10, 90:100]
         for x, y in zip(x_array.flatten(), y_array.flatten()):
             distance = int(((imX-x)**2+y**2)**0.5)
             dist = pst._find_longest_distance(
                     imX, imY, x, y, x, y)
-            self.assertEqual(dist, distance)
+            assert dist == distance
 
         x_array, y_array = np.mgrid[90:100, 0:10]
         for x, y in zip(x_array.flatten(), y_array.flatten()):
             distance = int((x**2+(imY-y)**2)**0.5)
             dist = pst._find_longest_distance(
                     imX, imY, x, y, x, y)
-            self.assertEqual(dist, distance)
+            assert dist == distance
 
     def test_make_centre_array_from_signal(self):
         s = Signal2D(np.ones((5, 10, 20, 7)))
@@ -148,16 +147,16 @@ class test_pixelated_tools(unittest.TestCase):
         offset_x = sa[0].offset
         offset_y = sa[1].offset
         mask = pst._make_centre_array_from_signal(s)
-        self.assertEqual(mask[0].shape[::-1], s.axes_manager.navigation_shape)
-        self.assertEqual(mask[1].shape[::-1], s.axes_manager.navigation_shape)
-        self.assertTrue((offset_x == mask[0]).all())
-        self.assertTrue((offset_y == mask[1]).all())
+        assert mask[0].shape[::-1] == s.axes_manager.navigation_shape
+        assert mask[1].shape[::-1] == s.axes_manager.navigation_shape
+        assert (offset_x == mask[0]).all()
+        assert (offset_y == mask[1]).all()
 
         offset0_x, offset0_y = -3, -2
         sa[0].offset, sa[1].offset = offset0_x, offset0_y
         mask = pst._make_centre_array_from_signal(s)
-        self.assertTrue((-offset0_x == mask[0]).all())
-        self.assertTrue((-offset0_y == mask[1]).all())
+        assert (-offset0_x == mask[0]).all()
+        assert (-offset0_y == mask[1]).all()
 
 
 class TestShiftSingleFrame:
@@ -202,7 +201,7 @@ class TestShiftSingleFrame:
         assert im_shift.sum() == 1
 
 
-class TestGetAngleSectorMask(unittest.TestCase):
+class TestGetAngleSectorMask:
 
     def test_0d(self):
         data_shape = (10, 8)
@@ -211,12 +210,12 @@ class TestGetAngleSectorMask(unittest.TestCase):
         mask0 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
         np.testing.assert_array_equal(
                 mask0, np.zeros_like(mask0, dtype=np.bool))
-        self.assertEqual(mask0.shape, data_shape)
+        assert mask0.shape == data_shape
 
         s.axes_manager.signal_axes[0].offset = -5
         s.axes_manager.signal_axes[1].offset = -5
         mask1 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
-        self.assertTrue(mask1[:5, :5].all())
+        assert mask1[:5, :5].all()
         mask1[:5, :5] = False
         np.testing.assert_array_equal(
                 mask1, np.zeros_like(mask1, dtype=np.bool))
@@ -224,12 +223,12 @@ class TestGetAngleSectorMask(unittest.TestCase):
         s.axes_manager.signal_axes[0].offset = -15
         s.axes_manager.signal_axes[1].offset = -15
         mask2 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
-        self.assertTrue(mask2.all())
+        assert mask2.all()
 
         s.axes_manager.signal_axes[0].offset = -15
         s.axes_manager.signal_axes[1].offset = -15
         mask3 = pst._get_angle_sector_mask(s, angle0=np.pi*3/2, angle1=np.pi*2)
-        self.assertFalse(mask3.any())
+        assert not mask3.any()
 
     def test_0d_com(self):
         data_shape = (10, 8)
@@ -250,12 +249,12 @@ class TestGetAngleSectorMask(unittest.TestCase):
         mask0 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
         np.testing.assert_array_equal(
                 mask0, np.zeros_like(mask0, dtype=np.bool))
-        self.assertEqual(mask0.shape, data_shape)
+        assert mask0.shape == data_shape
 
         s.axes_manager.signal_axes[0].offset = -5
         s.axes_manager.signal_axes[1].offset = -4
         mask1 = pst._get_angle_sector_mask(s, angle0=0.0, angle1=np.pi/2)
-        self.assertTrue(mask1[:, :4, :5].all())
+        assert mask1[:, :4, :5].all()
         mask1[:, :4, :5] = False
         np.testing.assert_array_equal(
                 mask1, np.zeros_like(mask1, dtype=np.bool))
@@ -265,14 +264,14 @@ class TestGetAngleSectorMask(unittest.TestCase):
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
-        self.assertEqual(mask0.shape, data_shape)
+        assert mask0.shape == data_shape
 
     def test_3d(self):
         data_shape = (5, 3, 5, 7, 10)
         data = np.ones(data_shape)*100.
         s = Signal2D(data)
         mask0 = pst._get_angle_sector_mask(s, angle0=np.pi, angle1=2*np.pi)
-        self.assertEqual(mask0.shape, data_shape)
+        assert mask0.shape == data_shape
 
     def test_centre_xy(self):
         data_shape = (3, 5, 7, 10)
@@ -284,7 +283,7 @@ class TestGetAngleSectorMask(unittest.TestCase):
         mask0 = pst._get_angle_sector_mask(
             s, angle0=np.pi, angle1=2*np.pi,
             centre_x_array=centre_x, centre_y_array=centre_y)
-        self.assertEqual(mask0.shape, data_shape)
+        assert mask0.shape == data_shape
 
     def test_bad_angles(self):
         s = Signal2D(np.zeros((100, 100)))
