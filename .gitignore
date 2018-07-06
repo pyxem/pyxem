@@ -13,3 +13,4 @@
 *.hspy
 build/
 dist/
+.pytest_cache
