@@ -20,11 +20,13 @@ import numpy as np
 import pytest
 import pyxem as pxm
 import pymatgen as pmg
+import hyperspy.api as hs
 
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.utils.sim_utils import peaks_from_best_template
 from transforms3d.euler import euler2axangle
 from pymatgen.transformations.standard_transformations import RotationTransformation
+
 
 half_side_length = 72
 
@@ -161,6 +163,21 @@ def test_caseB(structure,rot_list,edc):
 def test_caseC(structure,rot_list,edc):
     M = get_match_results(structure,rot_list,edc,[[0,0,0],[3,7.01,0.99]])
     assert np.all(M.inav[1,1].data[0,1:4] == np.array([3,7,1]))
+
+@pytest.mark.parametrize("structure",[create_GaAs()])
+@pytest.mark.parametrize("rot_list",[rot_list()])
+@pytest.mark.parametrize("edc",[edc()])
+
+def test_masking(structure,rot_list,edc):
+    dp = create_sample(edc,structure,rot_list[0],rot_list[1])
+    library = get_template_library(structure,rot_list,edc)
+    indexer = IndexationGenerator(dp,library)
+    mask = hs.signals.Signal1D(([[[1],[1]],[[0],[1]]]))
+    match_results = indexer.correlate(mask=mask)
+    assert match_results.inav[0,1].isig[4] == 0 #correlation of zero
+    
+
+
 
 """
 # Visualization Code
