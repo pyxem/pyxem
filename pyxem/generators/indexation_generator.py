@@ -34,31 +34,38 @@ from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.sim_utils import get_interplanar_angle
 
 
-def correlate_library(image, library,n_largest,keys=[]):
+import hyperspy.api as hs
+
+def correlate_library(image, library,n_largest,mask,keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image) stored as a
     numpy array. See the correlate method of IndexationGenerator for details.
     """
-
     i=0
     out_arr = np.zeros((n_largest * len(library),5))
-    for key in library.keys():
-        if n_largest:
-            pass
-        else:
-            n_largest=len(library[key])
-        correlations = dict()
-        for orientation, diffraction_pattern in library[key].items():
-            #diffraction_pattern here is in fact a library of diffraction_pattern_properties
-            correlation = correlate(image, diffraction_pattern)
-            correlations[orientation] = correlation
-        res = nlargest(n_largest, correlations.items(), key=itemgetter(1))
+    if mask == 1:
+        for key in library.keys():
+            if n_largest:
+                pass
+            else:
+                n_largest=len(library[key])
+            correlations = dict()
+            for orientation, diffraction_pattern in library[key].items():
+                #diffraction_pattern here is in fact a library of diffraction_pattern_properties
+                correlation = correlate(image, diffraction_pattern)
+                correlations[orientation] = correlation
+                res = nlargest(n_largest, correlations.items(), key=itemgetter(1))
+            for j in np.arange(n_largest):
+                out_arr[j + i*n_largest][0] = i
+                out_arr[j + i*n_largest][1] = res[j][0][0]
+                out_arr[j + i*n_largest][2] = res[j][0][1]
+                out_arr[j + i*n_largest][3] = res[j][0][2]
+                out_arr[j + i*n_largest][4] = res[j][1]
+            i = i + 1
+                        
+    else:
         for j in np.arange(n_largest):
-            out_arr[j + i*n_largest][0] = i
-            out_arr[j + i*n_largest][1] = res[j][0][0]
-            out_arr[j + i*n_largest][2] = res[j][0][1]
-            out_arr[j + i*n_largest][3] = res[j][0][2]
-            out_arr[j + i*n_largest][4] = res[j][1]
+            out_arr[j + i*n_largest][0] = len(library)+1
         i = i + 1
     return out_arr
 
@@ -81,6 +88,7 @@ class IndexationGenerator():
     def correlate(self,
                   n_largest=5,
                   keys=[],
+                  mask=None,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
@@ -94,6 +102,9 @@ class IndexationGenerator():
             these are submitted. This allows a mapping from the number to the
             phase.  For example, keys = ['si','ga'] will have an output with 0
             for 'si' and 1 for 'ga'.
+        mask : Array
+            Array with the same size as signal (in navigation) True False 
+            
         **kwargs
             Keyword arguments passed to the HyperSpy map() function.
 
@@ -108,10 +119,16 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
+        if mask is None:
+           #index at all real space pixels
+           sig_shape = signal.axes_manager.navigation_shape 
+           mask = hs.signals.Signal1D(np.ones((sig_shape[0],sig_shape[1],1)))
+           
         matching_results = signal.map(correlate_library,
                                       library=library,
                                       n_largest=n_largest,
                                       keys=keys,
+                                      mask=mask,
                                       inplace=False,
                                       **kwargs)
         return IndexationResults(matching_results)
