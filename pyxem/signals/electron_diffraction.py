@@ -459,7 +459,7 @@ class ElectronDiffraction(Signal2D):
         return stack((mean, meansquare, variance))
 
     def get_direct_beam_position(self, radius_start,
-                                 radius_finish
+                                 radius_finish,
                                  *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
