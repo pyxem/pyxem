@@ -457,7 +457,8 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
-    def get_direct_beam_position(self, sigma=3,
+    def get_direct_beam_position(self, radius_start,
+                                 radius_finish
                                  *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
@@ -465,19 +466,22 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        sigma : int
-            Standard deviation for the gaussian convolution (only for
-            'blur' method).
-
+        radius_start : int
+            The lower bound for the radius of the central disc to be used in the alignment
+        
+        radius_finish : int
+            The upper bounds for the radius of the central disc to be used in the alignment
+            
         Returns
         -------
         centers : ndarray
             Array containing the centers for each SED pattern.
 
         """
-        centers = self.map(find_beam_position_blur,
-                           sigma=sigma, inplace=False)
-        return centers
+        shifts = self.map(find_beam_offset_cross_correlation,
+                              radius_start=radius_start,radius_finish=radius_finish,
+                              inplace=False)
+        return shifts
 
 
     def center_direct_beam(self,
@@ -507,14 +511,12 @@ class ElectronDiffraction(Signal2D):
         origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
 
       
-        shifts = self.map(find_beam_offset_cross_correlation,
-                              radius_start=radius_start,radius_finish=radius_finish,
-                              inplace=False)
+        shifts = self.get_direct_beam_position(radius_start,radius_finish)
 
         shifts = -1*shifts.data
-	shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
+        shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
         
-	return self.align2D(shifts=shifts, crop=False, fill_value=0)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.
