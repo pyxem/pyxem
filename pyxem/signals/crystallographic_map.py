@@ -148,10 +148,10 @@ class CrystallographicMap(BaseSignal):
         6 = x co-ord in navigation space,
         7 = y co-ord in navigation space.
         """
-        results_array = np.zeros([0,7]) #header row
-        for i in range (0, self.data.shape[1]):
-            for j in range (0, self.data.shape[0]):
-                newrow = self.inav[i,j].data[0:5]
-                newrow = np.append(newrow, [i,j])
-                results_array = np.vstack([results_array, newrow])
+        x_size_nav = self.data.shape[1]
+        y_size_nav = self.data.shape[0]
+        results_array = np.zeros((x_size_nav*y_size_nav,7))
+        for i in range (0,x_size_nav):
+            for j in range (0, y_size_nav):
+                results_array[(i)*y_size_nav+j] = np.append(self.inav[i,j].data[0:5],[i,j])
         np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
