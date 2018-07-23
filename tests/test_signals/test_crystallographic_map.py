@@ -100,6 +100,7 @@ def old_method(sp_cryst_map):
     
 def test_save_mtex_map(sp_cryst_map):
     ra_old = old_method(sp_cryst_map)
-    ra_new = load_mtex_map(sp_cryst_map.save_mtex_map('file_01.txt'))
+    sp_cryst_map.save_mtex_map('file_01.txt')
+    ra_new = load_mtex_map('file_01.txt')
     os.remove('file_01.txt')
     assert np.allclose(ra_old,ra_new)
