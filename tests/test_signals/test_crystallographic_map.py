@@ -88,18 +88,20 @@ def test_get_modal_angles(mod_cryst_map):
     
 ## Old method for saving, was very slow:
 
-def old_method(sp_cryst_map): 
+def old_method(sp_cryst_map,filename): 
     results_array = np.zeros([0,7]) #header row
     for i in range (0, sp_cryst_map.data.shape[1]):
         for j in range (0, sp_cryst_map.data.shape[0]):
             newrow = sp_cryst_map.inav[i,j].data[0:5]
             newrow = np.append(newrow, [i,j])
             results_array = np.vstack([results_array, newrow])
-    return results_array
-#np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
+    np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
     
 def test_save_mtex_map(sp_cryst_map):
-    ra_old = old_method(sp_cryst_map)
+    old_method(sp_cryst_map,'file_00.txt')
+    ra_old = load_mtex_map('file_00.txt')
+    os.remove('file_00.txt')
+
     sp_cryst_map.save_mtex_map('file_01.txt')
     ra_new = load_mtex_map('file_01.txt')
     os.remove('file_01.txt')
