@@ -323,7 +323,8 @@ class ElectronDiffraction(Signal2D):
         return self.map(affine_transformation,
                         matrix=D,
                         order=order,
-                        inplace=inplace)
+                        inplace=inplace,
+                        *args,**kwargs)
 
     def apply_gain_normalisation(self,
                                  dark_reference,
@@ -457,7 +458,8 @@ class ElectronDiffraction(Signal2D):
         variance = meansquare / np.square(mean) - 1
         return stack((mean, meansquare, variance))
 
-    def get_direct_beam_position(self, sigma=3,
+    def get_direct_beam_position(self, radius_start,
+                                 radius_finish,
                                  *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
@@ -465,24 +467,26 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        sigma : int
-            Standard deviation for the gaussian convolution (only for
-            'blur' method).
-
+        radius_start : int
+            The lower bound for the radius of the central disc to be used in the alignment
+        
+        radius_finish : int
+            The upper bounds for the radius of the central disc to be used in the alignment
+            
         Returns
         -------
         centers : ndarray
             Array containing the centers for each SED pattern.
 
         """
-        centers = self.map(find_beam_position_blur,
-                           sigma=sigma, inplace=False)
-        return centers
+        shifts = self.map(find_beam_offset_cross_correlation,
+                              radius_start=radius_start,radius_finish=radius_finish,
+                              inplace=False,*args,**kwargs)
+        return shifts
 
 
     def center_direct_beam(self,
-                           subpixel=False,
-                           sigma=3, radius_start=4, radius_finish=8,
+                           radius_start, radius_finish,
                            *args, **kwargs):
 
         """Estimate the direct beam position in each experimentally acquired
@@ -492,17 +496,10 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
 
-        subpixel : bool
-            Choice of subpixel cross-correlation method (blur method if False)
-            
-        sigma : int, optional
-            Standard deviation for the gaussian convolution (only for
-            'blur' method).
-        
-        radius_start : int, optional
+        radius_start : int
             The lower bound for the radius of the central disc to be used in the alignment
         
-        radius_finish : int, optional
+        radius_finish : int
             The upper bounds for the radius of the central disc to be used in the alignment
 
         Returns
@@ -514,21 +511,13 @@ class ElectronDiffraction(Signal2D):
         nav_shape_y = self.data.shape[1]
         origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
 
-        if subpixel:
-            shifts = self.map(find_beam_offset_cross_correlation,
-                              radius_start=radius_start,radius_finish=radius_finish,
-                              inplace=False)
+      
+        shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
 
-            shifts = -1*shifts.data
-
-        else:
-            centers = self.map(find_beam_position_blur,
-                               sigma=sigma,
-                               inplace=False)
-            shifts = centers.data - origin_coordinates
-            
+        shifts = -1*shifts.data
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
-        return self.align2D(shifts=shifts, crop=False, fill_value=0)
+        
+        return self.align2D(shifts=shifts, crop=False, fill_value=0,*args,**kwargs)
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.

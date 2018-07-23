@@ -394,23 +394,6 @@ def circular_mask(shape, radius, center=None):
     mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
     return mask
 
-def find_beam_position_blur(z, sigma=3):
-    """Estimate direct beam position by blurring the image with a large
-    Gaussian kernel and finding the maximum.
-
-    Parameters
-    ----------
-    sigma : float
-        Sigma value for Gaussian blurring kernel.
-
-    Returns
-    -------
-    center : np.array
-        np.array containing indices of estimated direct beam positon.
-    """
-    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
-    center = np.unravel_index(blurred.argmax(), blurred.shape)
-    return np.array(center)
 
 def reference_circle(coords, dimX, dimY,radius):
     """Draw the perimeter of an circle at a given position
