@@ -323,7 +323,8 @@ class ElectronDiffraction(Signal2D):
         return self.map(affine_transformation,
                         matrix=D,
                         order=order,
-                        inplace=inplace)
+                        inplace=inplace
+			show_progressbar=False)
 
     def apply_gain_normalisation(self,
                                  dark_reference,
@@ -517,7 +518,7 @@ class ElectronDiffraction(Signal2D):
         if subpixel:
             shifts = self.map(find_beam_offset_cross_correlation,
                               radius_start=radius_start,radius_finish=radius_finish,
-                              inplace=False)
+                              inplace=False, show_progressbar=False)
 
             shifts = -1*shifts.data
 
@@ -528,7 +529,7 @@ class ElectronDiffraction(Signal2D):
             shifts = centers.data - origin_coordinates
             
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
-        return self.align2D(shifts=shifts, crop=False, fill_value=0)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0, show_progressbar=False)
 
     def remove_background(self, method='model', *args, **kwargs):
         """Perform background subtraction via multiple methods.
