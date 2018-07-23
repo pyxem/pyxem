@@ -26,7 +26,7 @@ import numpy as np
 Signal class for crystallographic phase and orientation maps.
 """
 
-def load_map(filename):
+def load_mtex_map(filename):
         """
         Loads a crystallographic map saved by previously saved via .save_map()
         """
@@ -39,7 +39,7 @@ def load_map(filename):
         cmap = Signal2D(array).transpose(navigation_axes=2)
         return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
-def euler2axangle_signal(euler):
+def _euler2axangle_signal(euler):
     """ Find the magnitude of a rotation"""
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
@@ -89,7 +89,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         eulers = self.isig[1:4]
-        return eulers.map(euler2axangle_signal, inplace=False)
+        return eulers.map(_euler2axangle_signal, inplace=False)
 
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
@@ -126,7 +126,7 @@ class CrystallographicMap(BaseSignal):
         return [pairs[counts.argmax()],counts[counts.argmax()]/np.sum(counts)]
 
 
-    def save_map(self, filename):
+    def save_mtex_map(self, filename):
         """
         Save map so that in a format such that it can be imported into MTEX
         http://mtex-toolbox.github.io/
