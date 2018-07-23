@@ -21,6 +21,7 @@ from hyperspy.signals import Signal2D
 from transforms3d.euler import euler2axangle
 from transforms3d.quaternions import axangle2quat
 import numpy as np
+from tqdm import tqdm
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -151,7 +152,7 @@ class CrystallographicMap(BaseSignal):
         x_size_nav = self.data.shape[1]
         y_size_nav = self.data.shape[0]
         results_array = np.zeros((x_size_nav*y_size_nav,7))
-        for i in range (0,x_size_nav):
+        for i in tqdm(range(0,x_size_nav)):
             for j in range (0, y_size_nav):
                 results_array[(i)*y_size_nav+j] = np.append(self.inav[i,j].data[0:5],[i,j])
         np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
