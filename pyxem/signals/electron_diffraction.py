@@ -323,7 +323,7 @@ class ElectronDiffraction(Signal2D):
         return self.map(affine_transformation,
                         matrix=D,
                         order=order,
-                        inplace=inplace
+                        inplace=inplace,
 			show_progressbar=False)
 
     def apply_gain_normalisation(self,
