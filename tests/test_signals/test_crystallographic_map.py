@@ -19,7 +19,7 @@
 import numpy as np
 import pytest
 from pyxem.signals.crystallographic_map  import CrystallographicMap
-from pyxem.signals.crystallographic_map import load_map
+from pyxem.signals.crystallographic_map import load_mtex_map
 import os
 
 @pytest.fixture()
@@ -75,8 +75,8 @@ def test_get_reliability_map_phase(dp_cryst_map):
 
 @pytest.mark.parametrize('maps',[sp_cryst_map(),dp_cryst_map()])
 def test_CrystallographicMap_io(maps):
-    maps.save_map('file_01.txt')
-    lmap = load_map('file_01.txt')
+    maps.save_mtex_map('file_01.txt')
+    lmap = load_mtex_map('file_01.txt')
     os.remove('file_01.txt')
     # remember we've dropped reliability in saving
     assert np.allclose(maps.data[:,:,:5],lmap.data)
@@ -85,3 +85,21 @@ def test_get_modal_angles(mod_cryst_map):
     out = mod_cryst_map.get_modal_angles()
     assert np.allclose(out[0],[5,17,6])
     assert np.allclose(out[1],(2/6))
+    
+## Old method for saving, was very slow:
+
+def old_method(sp_cryst_map): 
+    results_array = np.zeros([0,7]) #header row
+    for i in range (0, sp_cryst_map.data.shape[1]):
+        for j in range (0, sp_cryst_map.data.shape[0]):
+            newrow = sp_cryst_map.inav[i,j].data[0:5]
+            newrow = np.append(newrow, [i,j])
+            results_array = np.vstack([results_array, newrow])
+    return results_array
+#np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
+    
+def test_save_mtex_map(sp_cryst_map):
+    ra_old = old_method(sp_cryst_map)
+    ra_new = load_mtex_map(sp_cryst_map.save_mtex_map('file_01.txt'))
+    os.remove('file_01.txt')
+    assert np.allclose(ra_old,ra_new)
