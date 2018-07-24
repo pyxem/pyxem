@@ -469,25 +469,6 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
         
     return shift
 
-def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
-    z = z.astype(np.float64)
-    im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')
-    im2 = ndi.gaussian_filter(im1, sigma=sigma_enhance, mode='constant', cval=255)
-    im3= im1 - im2
-    im3[im3<0] = 0
-
-    mask = im3 > threshold
-    im4 = im3*mask
-
-    thresh_sauvola = threshold_sauvola(im4, window_size, k)
-    binary_sauvola = im4 > thresh_sauvola
-    if morph_opening:
-        final = opening(binary_sauvola)
-    else:
-        final=binary_sauvola
-
-    return final
-
 def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
     return g[0]
