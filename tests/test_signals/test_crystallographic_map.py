@@ -28,7 +28,7 @@ def old_method(sp_cryst_map,filename):
     """
     Historical method for saving maps to MTEX, used to verify the new
     implementation.
-    To be removed in 0.7
+    To be removed in 0.6
     """
     results_array = np.zeros([0,7]) #header row
     for i in range (0, sp_cryst_map.data.shape[1]):
@@ -154,6 +154,6 @@ def test_get_distance_from_fixed_angle():
     assert np.allclose(implemented,testing)
 
 def test_get_distance_from_modal(zero_modal_map):
-    formal = zero_modal_map.get_distance_modal_angles()
+    formal = zero_modal_map.get_distance_from_modal_angles()
     casual = zero_modal_map.get_orientation_image()
     assert np.all_close(formal,casual)
