@@ -18,8 +18,7 @@
 
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
-from transforms3d.euler import euler2axangle
-from transforms3d.quaternions import axangle2quat
+from transforms3d.euler import euler2axangle,euler2quat
 import numpy as np
 from tqdm import tqdm
 
@@ -40,15 +39,6 @@ def load_mtex_map(filename):
         cmap = Signal2D(array).transpose(navigation_axes=2)
         return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
-def _euler2axangle_signal(euler):
-    """ Find the magnitude of a rotation"""
-    return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
-
-def _euler2quart(euler):
-    """ Converts an Euler angle to a Quarternion"""
-    ax_angle = euler2axangle(euler[0],euler[1],euler[2],'rzxz')
-    quat    = axangle2quat(ax_angle[0],ax_angle[1])
-    return quat
 
 def _distance_from_fixed_angle(angle,fixed_angle):
     """
@@ -60,8 +50,8 @@ def _distance_from_fixed_angle(angle,fixed_angle):
     version finding the joining rotation.
 
     """
-    q_data  = _euler2quart(angle)
-    q_fixed = _euler2quart(fixed_angle)
+    q_data  = euler2quat(*angle,axes='rzxz')
+    q_fixed = euler2quat(*fixed_angle,axes='rzxz')
     theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
     #https://math.stackexchange.com/questions/90081/quaternion-distance
     
@@ -82,7 +72,6 @@ class CrystallographicMap(BaseSignal):
         """
         return self.isig[0].as_signal2D((0,1))
 
-    
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
         each navigation position.
@@ -126,8 +115,7 @@ class CrystallographicMap(BaseSignal):
         """
         modal_angle = self.get_modal_angles()[0]
         return self.isig[1:4].map(_distance_from_fixed_angle,fixed_angle=modal_angle,inplace=False)
-        
-    
+         
     
     def save_mtex_map(self, filename):
         """
