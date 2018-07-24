@@ -154,6 +154,6 @@ def test_get_distance_from_fixed_angle():
     assert np.allclose(implemented,testing)
 
 def test_get_distance_from_modal(zero_modal_map):
-    formal = zero_modal_map.get_distance_from_modal_angles()
+    formal = zero_modal_map.get_distance_from_modal_angle()
     casual = zero_modal_map.get_orientation_image()
-    assert np.all_close(formal,casual)
+    assert np.allclose(formal,casual)
