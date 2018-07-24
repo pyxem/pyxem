@@ -24,20 +24,6 @@ from transforms3d.euler import euler2quat,quat2axangle
 from transforms3d.quaternions import qmult,qinverse
 import os
 
-def old_method(sp_cryst_map,filename): 
-    """
-    Historical method for saving maps to MTEX, used to verify the new
-    implementation.
-    To be removed in 0.6
-    """
-    results_array = np.zeros([0,7]) #header row
-    for i in range (0, sp_cryst_map.data.shape[1]):
-        for j in range (0, sp_cryst_map.data.shape[0]):
-            newrow = sp_cryst_map.inav[i,j].data[0:5]
-            newrow = np.append(newrow, [i,j])
-            results_array = np.vstack([results_array, newrow])
-    np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
-    
 def get_distance_between_two_angles_longform(angle_1,angle_2):
     """
     Using the long form to find the distance between two angles in euler form
@@ -135,16 +121,6 @@ def test_get_modal_angles(mod_cryst_map):
     out = mod_cryst_map.get_modal_angles()
     assert np.allclose(out[0],[5,17,6])
     assert np.allclose(out[1],(2/6))
-    
-def test_save_mtex_map(sp_cryst_map):
-    old_method(sp_cryst_map,'file_00.txt')
-    ra_old = load_mtex_map('file_00.txt')
-    os.remove('file_00.txt')
-
-    sp_cryst_map.save_mtex_map('file_01.txt')
-    ra_new = load_mtex_map('file_01.txt')
-    os.remove('file_01.txt')
-    assert np.allclose(ra_old,ra_new)
     
 def test_get_distance_from_fixed_angle():
     angle_1 = [1,1,3]
