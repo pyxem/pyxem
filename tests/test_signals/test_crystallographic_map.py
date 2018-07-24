@@ -92,6 +92,20 @@ def mod_cryst_map():
     crystal_map = CrystallographicMap(base.reshape((3,2,6)))
     return crystal_map
 
+@pytest.fixture()
+def zero_modal_map():
+    """
+    Generates a crystallographic map, modal angle (0,0,0)
+    """
+    base = np.zeros((4,7))
+    base[0] = [0,2,0,4,3e-17,0.5,0.6]
+    base[1] = [0,0,0,0,2e-17,0.4,0.7]
+    base[2] = [0,0,0,0,4e-17,0.3,0.1]
+    base[3] = [0,0,0,0,8e-16,0.2,0.8]
+    crystal_map = CrystallographicMap(base.reshape((2,2,7)))
+    return crystal_map
+
+
 
 def test_get_phase_map(sp_cryst_map):
     phasemap = sp_cryst_map.get_phase_map()
@@ -138,3 +152,8 @@ def test_get_distance_from_fixed_angle():
     implemented = _distance_from_fixed_angle(angle_1,angle_2)
     testing = get_distance_between_two_angles_longform(angle_1,angle_2)
     assert np.allclose(implemented,testing)
+
+def test_get_distance_from_modal(zero_modal_map):
+    formal = zero_modal_map.get_distance_modal_angles()
+    casual = zero_modal_map.get_orientation_image()
+    assert np.all_close(formal,casual)
