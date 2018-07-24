@@ -19,12 +19,43 @@
 import numpy as np
 import pytest
 from pyxem.signals.crystallographic_map  import CrystallographicMap
-from pyxem.signals.crystallographic_map import load_map
+from pyxem.signals.crystallographic_map import load_mtex_map,_distance_from_fixed_angle
+from transforms3d.euler import euler2quat,quat2axangle
+from transforms3d.quaternions import qmult,qinverse
 import os
 
+def old_method(sp_cryst_map,filename): 
+    """
+    Historical method for saving maps to MTEX, used to verify the new
+    implementation.
+    To be removed in 0.7
+    """
+    results_array = np.zeros([0,7]) #header row
+    for i in range (0, sp_cryst_map.data.shape[1]):
+        for j in range (0, sp_cryst_map.data.shape[0]):
+            newrow = sp_cryst_map.inav[i,j].data[0:5]
+            newrow = np.append(newrow, [i,j])
+            results_array = np.vstack([results_array, newrow])
+    np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
+    
+def get_distance_between_two_angles_longform(angle_1,angle_2):
+    """
+    Using the long form to find the distance between two angles in euler form
+    """
+    q1 = euler2quat(*angle_1,axes='rzxz')
+    q2 = euler2quat(*angle_2,axes='rzxz')
+    ## now assume transform of the form MODAL then Something = TOTAL
+    ## so we want to calculate MODAL^{-1} TOTAL
+    
+    q_from_mode = qmult(qinverse(q2),q1)
+    axis,angle = quat2axangle(q_from_mode)
+    return angle
+    
 @pytest.fixture()
 def sp_cryst_map():
-    #sp for single phase
+    """
+    Generates a single phase Crystallographic Map
+    """
     base = np.zeros((4,6))
     base[0] = [0,5,17,6,3e-17,0.5]
     base[1] = [0,6,17,6,2e-17,0.4]
@@ -35,7 +66,9 @@ def sp_cryst_map():
 
 @pytest.fixture()
 def dp_cryst_map():
-    #dp for double phase
+    """
+    Generates a Crystallographic Map with two phases
+    """
     base = np.zeros((4,7))
     base[0] = [0,5,17,6,3e-17,0.5,0.6]
     base[1] = [1,6,17,6,2e-17,0.4,0.7]
@@ -46,9 +79,12 @@ def dp_cryst_map():
 
 @pytest.fixture()
 def mod_cryst_map():
+    """
+    Generates a Crystallographic Map with (5,17,6) as the modal angle
+    """
     base = np.zeros((6,6))
     base[0] = [0,5,17,6,5e-17,0.5]
-    base[1] = [0,5,17,6,5e-17,0.5] #5,17,6 is modal
+    base[1] = [0,5,17,6,5e-17,0.5] 
     base[2] = [0,6,19,6,5e-17,0.5]
     base[3] = [0,7,19,6,5e-17,0.5]
     base[4] = [0,8,19,6,5e-17,0.5]
@@ -58,25 +94,25 @@ def mod_cryst_map():
 
 
 def test_get_phase_map(sp_cryst_map):
-    pmap = sp_cryst_map.get_phase_map()
-    assert pmap.isig[0,0] == 0
+    phasemap = sp_cryst_map.get_phase_map()
+    assert phasemap.isig[0,0] == 0
 
 def test_get_correlation_map(sp_cryst_map):
-    cmap = sp_cryst_map.get_correlation_map()
-    assert cmap.isig[0,0] == 3e-17
+    correlationmap = sp_cryst_map.get_correlation_map()
+    assert correlationmap.isig[0,0] == 3e-17
 
 def test_get_reliability_map_orientation(sp_cryst_map):
-    rmap = sp_cryst_map.get_reliability_map_orientation()
-    assert rmap.isig[0,0] == 0.5
+    reliabilitymap_orientation = sp_cryst_map.get_reliability_map_orientation()
+    assert reliabilitymap_orientation.isig[0,0] == 0.5
 
 def test_get_reliability_map_phase(dp_cryst_map):
-    rmap = dp_cryst_map.get_reliability_map_phase()
-    assert rmap.isig[0,0] == 0.6
+    reliabilitymap_phase = dp_cryst_map.get_reliability_map_phase()
+    assert reliabilitymap_phase.isig[0,0] == 0.6
 
 @pytest.mark.parametrize('maps',[sp_cryst_map(),dp_cryst_map()])
 def test_CrystallographicMap_io(maps):
-    maps.save_map('file_01.txt')
-    lmap = load_map('file_01.txt')
+    maps.save_mtex_map('file_01.txt')
+    lmap = load_mtex_map('file_01.txt')
     os.remove('file_01.txt')
     # remember we've dropped reliability in saving
     assert np.allclose(maps.data[:,:,:5],lmap.data)
@@ -85,3 +121,20 @@ def test_get_modal_angles(mod_cryst_map):
     out = mod_cryst_map.get_modal_angles()
     assert np.allclose(out[0],[5,17,6])
     assert np.allclose(out[1],(2/6))
+    
+def test_save_mtex_map(sp_cryst_map):
+    old_method(sp_cryst_map,'file_00.txt')
+    ra_old = load_mtex_map('file_00.txt')
+    os.remove('file_00.txt')
+
+    sp_cryst_map.save_mtex_map('file_01.txt')
+    ra_new = load_mtex_map('file_01.txt')
+    os.remove('file_01.txt')
+    assert np.allclose(ra_old,ra_new)
+    
+def test_get_distance_from_fixed_angle():
+    angle_1 = [1,1,3]
+    angle_2 = [1,2,4]
+    implemented = _distance_from_fixed_angle(angle_1,angle_2)
+    testing = get_distance_between_two_angles_longform(angle_1,angle_2)
+    assert np.allclose(implemented,testing)

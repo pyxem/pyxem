@@ -45,6 +45,13 @@ def test_get_pattern(get_library):
         assert isinstance(get_library.get_pattern(phase='Si'),DiffractionSimulation)
         assert isinstance(get_library.get_pattern(phase='Si',angle=(0,0,0)),DiffractionSimulation)
 
+@pytest.mark.xfail(raises=RuntimeError)
+def test_unsafe_loading(get_library):
+    get_library.pickle_library('file_01.pickle')
+    loaded_library = load_DiffractionLibrary('file_01.pickle')
+    os.remove('file_01.pickle')
+    return 0 #maybe should fail
+
 def test_library_io(get_library):
     get_library.pickle_library('file_01.pickle')
     loaded_library = load_DiffractionLibrary('file_01.pickle',safety=True)
@@ -52,9 +59,4 @@ def test_library_io(get_library):
     # we can't check that the entire libraries are the same as the location of the 'Sim' changes
     assert np.allclose(get_library['Si'][(0,0,0)]['intensities'],loaded_library['Si'][(0,0,0)]['intensities'])
 
-@pytest.mark.xfail(raises=RuntimeError)
-def test_unsafe_loading(get_library):
-    get_library.pickle_library('file_01.pickle')
-    loaded_library = load_DiffractionLibrary('file_01.pickle')
-    os.remove('file_01.pickle')
-    return 0
+

@@ -19,13 +19,15 @@
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
 from transforms3d.euler import euler2axangle
+from transforms3d.quaternions import axangle2quat
 import numpy as np
+from tqdm import tqdm
 
 """
 Signal class for crystallographic phase and orientation maps.
 """
 
-def load_map(filename):
+def load_mtex_map(filename):
         """
         Loads a crystallographic map saved by previously saved via .save_map()
         """
@@ -38,8 +40,32 @@ def load_map(filename):
         cmap = Signal2D(array).transpose(navigation_axes=2)
         return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
-def euler2axangle_signal(euler):
+def _euler2axangle_signal(euler):
+    """ Find the magnitude of a rotation"""
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
+
+def _euler2quart(euler):
+    """ Converts an Euler angle to a Quarternion"""
+    ax_angle = euler2axangle(euler[0],euler[1],euler[2],'rzxz')
+    quat    = axangle2quat(ax_angle[0],ax_angle[1])
+    return quat
+
+def _distance_from_fixed_angle(angle,fixed_angle):
+    """
+    Designed to be mapped, this function finds the smallest rotation between
+    two rotations. It assumes a no-symmettry system.
+    
+    The algorithm involves converting angles to quarternions, then finding the
+    appropriate misorientation. It is tested against the slower more complete
+    version finding the joining rotation.
+
+    """
+    q_data  = _euler2quart(angle)
+    q_fixed = _euler2quart(fixed_angle)
+    theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
+    #https://math.stackexchange.com/questions/90081/quaternion-distance
+    
+    return theta
 
 class CrystallographicMap(BaseSignal):
     """
@@ -62,7 +88,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         eulers = self.isig[1:4]
-        return eulers.map(euler2axangle_signal, inplace=False)
+        return eulers.map(_euler2axangle_signal, inplace=False)
 
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
@@ -98,8 +124,19 @@ class CrystallographicMap(BaseSignal):
         pairs, counts = np.unique(euler_array, axis=0, return_counts=True)
         return [pairs[counts.argmax()],counts[counts.argmax()]/np.sum(counts)]
 
-
-    def save_map(self, filename):
+    def get_distance_from_modal_angle(self):
+        """ Warning - This function is for early inspection, it will
+        only provide good answers when the sampling of orientation space is over
+        a small range. We would always recommend checking your results in MTEX
+        
+        see also: method: save_mtex_map
+        """
+        modal_angle = self.get_modal_angles()[0]
+        return self.isig[1:4].map(_distance_from_fixed_angle,fixed_angle=modal_angle,inplace=False)
+        
+    
+    
+    def save_mtex_map(self, filename):
         """
         Save map so that in a format such that it can be imported into MTEX
         http://mtex-toolbox.github.io/
@@ -112,10 +149,10 @@ class CrystallographicMap(BaseSignal):
         6 = x co-ord in navigation space,
         7 = y co-ord in navigation space.
         """
-        results_array = np.zeros([0,7]) #header row
-        for i in range (0, self.data.shape[1]):
-            for j in range (0, self.data.shape[0]):
-                newrow = self.inav[i,j].data[0:5]
-                newrow = np.append(newrow, [i,j])
-                results_array = np.vstack([results_array, newrow])
+        x_size_nav = self.data.shape[1]
+        y_size_nav = self.data.shape[0]
+        results_array = np.zeros((x_size_nav*y_size_nav,7))
+        for i in tqdm(range(0,x_size_nav),ascii=True):
+            for j in range (0, y_size_nav):
+                results_array[(i)*y_size_nav+j] = np.append(self.inav[i,j].data[0:5],[i,j])
         np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")

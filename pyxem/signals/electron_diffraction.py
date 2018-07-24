@@ -516,7 +516,7 @@ class ElectronDiffraction(Signal2D):
 
         shifts = -1*shifts.data
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
-        
+
         return self.align2D(shifts=shifts, crop=False, fill_value=0,*args,**kwargs)
 
     def remove_background(self, method='model', *args, **kwargs):
