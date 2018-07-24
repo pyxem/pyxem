@@ -131,8 +131,8 @@ class CrystallographicMap(BaseSignal):
         
         see also: method: save_mtex_map
         """
-        modal_angle = self.get_model_angles()[0]
-        return _distance_from_fixed_angle(self.isig[1:4],modal_angle)
+        modal_angle = self.get_modal_angles()[0]
+        return self.isig[1:4].map(_distance_from_fixed_angle,fixed_angle=modal_angle,inplace=False)
         
     
     
@@ -152,7 +152,7 @@ class CrystallographicMap(BaseSignal):
         x_size_nav = self.data.shape[1]
         y_size_nav = self.data.shape[0]
         results_array = np.zeros((x_size_nav*y_size_nav,7))
-        for i in tqdm(range(0,x_size_nav)):
+        for i in tqdm(range(0,x_size_nav,ascii=True)):
             for j in range (0, y_size_nav):
                 results_array[(i)*y_size_nav+j] = np.append(self.inav[i,j].data[0:5],[i,j])
         np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
