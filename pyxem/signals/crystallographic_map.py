@@ -82,14 +82,7 @@ class CrystallographicMap(BaseSignal):
         """
         return self.isig[0].as_signal2D((0,1))
 
-    def get_orientation_image(self):
-        """Obtain an orientation image of the rotational angle associated with
-        the crystal orientation at each navigation position.
-
-        """
-        eulers = self.isig[1:4]
-        return eulers.map(_euler2axangle_signal, inplace=False)
-
+    
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
         each navigation position.
