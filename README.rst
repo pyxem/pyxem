@@ -4,6 +4,10 @@
 .. image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
     :target: https://coveralls.io/github/pyxem/pyxem?branch=master
 
+.. image:: https://landscape.io/github/pyxem/pyxem/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/pyxem/pyxem/master
+   :alt: Code Health
+
 .. https://github.com/lemurheavy/coveralls-public/issues/971
 
 pyXem (Python Crystallographic Electron Microscopy) is an open-source Python library for crystallographic electron microscopy. It builds on the tools for multi-dimensional data analysis provided by the HyperSpy library for treatment of experimental electron diffraction data and tools for atomic structure manipulation provided by the PyMatGen library.
