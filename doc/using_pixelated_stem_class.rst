@@ -18,7 +18,7 @@ If you have a small dataset, ``s.plot`` can be used directly:
     >>> s = ps.dummy_data.get_holz_simple_test_signal()
     >>> s.plot()
 
-If the dataset is very large and loaded lazily, there are some tricks which makes it easier to visualizie the signal.
+If the dataset is very large and loaded lazily, there are some tricks which makes it easier to visualize the signal.
 Using ``s.plot()`` on a lazy signal makes the library calculate a navigation image, which can be time consuming.
 See `HyperSpy's big data documentation <http://hyperspy.org/hyperspy-doc/current/user_guide/big_data.html#navigator-plot>`_ for more info.
 Some various ways of avoiding this issue:
