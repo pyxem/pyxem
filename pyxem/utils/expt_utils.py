@@ -258,28 +258,34 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     return z
 
-def affine_transformation(z, order, **kwargs):
+def affine_transformation(z,matrix,order,**kwargs):
     """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
     ----------
+    z : np.array
+        Array to be transformed
     matrix : np.array
         3x3 numpy array specifying the affine transformation to be applied.
     order : int
         Interpolation order.
+    kwargs :
+        To be passed to skimage.warp
 
     Returns
     -------
     trans : array
         Affine transformed diffraction pattern.
     """
+    
+    # These three lines account for the transformation center not being (0,0)
     shift_y, shift_x = np.array(z.shape[:2]) / 2.
     tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
     tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
 
-    transformation = tf.AffineTransform(**kwargs)
+    transformation = tf.AffineTransform(matrix=matrix)
     trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order)
+                    order=order,**kwargs)
 
     return trans
 
