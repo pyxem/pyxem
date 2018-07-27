@@ -340,5 +340,6 @@ class TestSimpleMaps:
 
     methods = ['threshold']
     @pytest.mark.parametrize('method', methods)
+    @pytest.mark.xfail(raises=NotImplementedError)
     def test_get_no_diffraction_mask(self, diffraction_pattern,method):
         mask = diffraction_pattern.get_no_diffraction_mask(method = method)
