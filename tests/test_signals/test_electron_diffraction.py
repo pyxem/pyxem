@@ -54,9 +54,48 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
                [0., 0., 0., 2., 2., 2., 0., 0.],
                [0., 0., 0., 0., 2., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]]]),
+               [0., 0., 0., 0., 0., 0., 0., 0.]]])
 ])
 def diffraction_pattern(request):
+    return ElectronDiffraction(request.param)
+
+
+@pytest.fixture(params=[
+    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 2., 1., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 2.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 2., 2., 2., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
+])
+
+def diffraction_pattern_SED(request):
     return ElectronDiffraction(request.param)
 
 
@@ -150,7 +189,7 @@ class TestRadialProfile:
                                [2., 3., 3., 4., 4., 3., 3., 2.],
                                [0., 2., 3., 3., 3., 3., 2., 0.],
                                [0., 0., 2., 2., 2., 2., 0., 0.]])
-    
+
         dp.data[1] = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
@@ -171,7 +210,7 @@ class TestRadialProfile:
             [[5., 4., 3., 2., 0.],
              [1., 0., 0., 0., 0.]]
         ))])
-    
+
     def test_radial_profile(self, diffraction_pattern,expected):
         rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
@@ -260,7 +299,7 @@ class TestPeakFinding:
     @pytest.fixture
     def ragged_peak(self):
         pattern = np.zeros((2,2,128,128))
-        pattern[:,:,40,45] = 1 
+        pattern[:,:,40,45] = 1
         pattern[1,0,71,21] = 1
         return ElectronDiffraction(pattern)
 
@@ -268,7 +307,7 @@ class TestPeakFinding:
     def test_argless_run(self,single_peak):
         single_peak.find_peaks()
         pass
-    
+
     @pytest.mark.parametrize('method', methods)
     def test_findpeaks_single(self,single_peak,method):
         output = (single_peak.find_peaks(method)).inav[0,0] #should be <2,2|2,1>
@@ -276,7 +315,7 @@ class TestPeakFinding:
         assert output.isig[0] == 1        #  correct number of peaks
         assert output.isig[0] == (40-(128/2)) #x
         assert output.isig[1] == (45-(128/2)) #y
-        
+
     def test_findpeaks_ragged(self,ragged_peak,method):
         output = (ragged_peak.find_peaks(method))
         # as before at 0,0
@@ -284,5 +323,22 @@ class TestPeakFinding:
         assert output.inav[0,0].isig[0] == 1        #  correct number of peaks
         assert output.inav[0,0].isig[0] == (40-(128/2)) #x
         assert output.inav[0,0].isig[1] == (45-(128/2)) #y
-        #but at 
+        #but at
         assert np.sum(output.inav[0,1].data.shape) == 4 # 2+2
+
+class TestSimpleMaps:
+    #This class simply confirms that maps run without error.
+    # These tests are not suitable for objects that may return ragged arrays
+
+    def test_get_direct_beam_postion(self,diffraction_pattern_SED):
+        shifts = diffraction_pattern_SED.get_direct_beam_position(radius_start=1,radius_finish=3)
+
+    def test_center_direct_beam(self,diffraction_pattern_SED):
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #before inplace transform applied
+        diffraction_pattern_SED.center_direct_beam(radius_start=1,radius_finish=3)
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #after inplace transform applied
+
+    methods = ['threshold']
+    @pytest.mark.parametrize('method', methods)
+    def test_get_no_diffraction_mask(self, diffraction_pattern,method):
+        mask = diffraction_pattern.get_no_diffraction_mask(method = method)
