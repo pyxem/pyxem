@@ -783,51 +783,6 @@ class ElectronDiffraction(Signal2D):
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
 
-    def enhance(self,sigma_blur=1.6, sigma_enhance=0.5,
-                threshold=6.5, k=0.01, window_size=11,
-                *args, **kwargs):
-        """Enhances peaks in the diffraction patterns.
-
-        A gaussian filter is applied and the blurred image subtracted from the
-        original, thresholding removes low intensities, local Sauvola
-        thresholding creates a mask of peaks, final Gaussian blurring.
-
-        Parameters:
-        ------------
-        sigma_blur : float
-            Sigma of the gaussian filter used for initial blur.
-
-        sigma_enhance : float
-            Sigma of the gaussian filter used for the ehnancement of the peaks
-
-        threshold : float
-            Value of the small threshold for removal of low intensity fake peaks
-
-        k : float
-            Parameter for Sauvola thresholding
-
-        window_size : int
-            Size of the window considered for each pixel when calculating local
-            Sauvola threshold. Has to be odd and >=3.
-
-        morph_opening: boolean
-            If true, thresholded image will be morphologically opened to remove
-            very small and linear artifacts.
-
-        See Also
-        --------
-        http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_niblack_sauvola.html#id2
-        J. Sauvola and M. Pietikainen, “Adaptive document image binarization,”
-        Pattern Recognition 33(2), pp. 225-236, 2000.
-        DOI:10.1016/S0031-3203(99)00055-2
-        """
-        return self.map(enhance_gauss_sauvola,
-                        sigma_blur=sigma_blur,
-                        sigma_enhance=sigma_enhance,
-                        threshold=threshold,
-                        window_size=window_size,
-                        k=k, *args, **kwargs)
-
 
 class LazyElectronDiffraction(LazySignal, ElectronDiffraction):
 
