@@ -302,9 +302,3 @@ class TestSimpleMaps:
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #before inplace transform applied
         diffraction_pattern_SED.center_direct_beam(radius_start=1,radius_finish=3)
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #after inplace transform applied
-
-    methods = ['threshold']
-    @pytest.mark.parametrize('method', methods)
-    @pytest.mark.xfail(raises=NotImplementedError)
-    def test_get_no_diffraction_mask(self, diffraction_pattern,method):
-        mask = diffraction_pattern.get_no_diffraction_mask(method = method)
