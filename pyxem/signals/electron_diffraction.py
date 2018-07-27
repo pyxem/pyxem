@@ -417,7 +417,7 @@ class ElectronDiffraction(Signal2D):
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,*args,**kwargs)
 
-    def remove_background(self, *args, **kwargs):
+    def remove_background(self, method, *args, **kwargs):
         """Perform background subtraction via multiple methods.
 
         Parameters
