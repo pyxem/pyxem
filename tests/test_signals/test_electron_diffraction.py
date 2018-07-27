@@ -132,21 +132,6 @@ def test_apply_gain_normalisation(diffraction_pattern: ElectronDiffraction,
     assert diffraction_pattern.min() == dark_reference
 
 
-def test_reproject_as_polar(diffraction_pattern: ElectronDiffraction):
-    shape_cartesian = diffraction_pattern.axes_manager.signal_shape
-    diffraction_pattern.reproject_as_polar()
-    assert isinstance(diffraction_pattern, Signal2D)
-    shape_polar = diffraction_pattern.axes_manager.signal_shape
-    assert shape_polar[0] == max(shape_cartesian)
-    assert shape_polar[1] > np.sqrt(2) * shape_cartesian[0] / 2
-
-
-def test_get_diffraction_variance(diffraction_pattern: ElectronDiffraction):
-    dv = diffraction_pattern.get_diffraction_variance()
-    assert dv.axes_manager.navigation_shape == (3,)
-    assert dv.axes_manager.signal_shape == diffraction_pattern.axes_manager.signal_shape
-
-
 class TestDirectBeamMethods:
 
     @pytest.mark.parametrize('mask_expected', [
@@ -164,16 +149,6 @@ class TestDirectBeamMethods:
         mask_calculated = diffraction_pattern.get_direct_beam_mask(2)
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
-
-    @pytest.mark.parametrize('closing, opening, mask_expected', [
-        (False, False, np.array([True, True, False, True])),
-        (True, False, np.array([True, True, True, True])),
-        (False, True, np.array([True, True, False, False])),
-    ])
-    def test_get_vacuum_mask(self, diffraction_pattern, closing, opening, mask_expected):
-        mask_calculated = diffraction_pattern.get_vacuum_mask(
-            radius=3, threshold=1, closing=closing, opening=opening)
-        assert np.allclose(mask_calculated, mask_expected)
 
 
 class TestRadialProfile:
@@ -266,18 +241,8 @@ class TestApplyAffineTransformation:
 
 class TestBackgroundMethods:
 
-    @pytest.mark.parametrize('saturation_radius', [
-        1,
-        2,
-    ])
-    def test_get_background_model(
-            self, diffraction_pattern: ElectronDiffraction, saturation_radius):
-        bgm = diffraction_pattern.get_background_model(saturation_radius)
-        assert bgm.axes_manager.signal_shape == diffraction_pattern.axes_manager.signal_shape
-
     @pytest.mark.parametrize('method, kwargs', [
         ('h-dome', {'h': 1}),
-        ('model', {'saturation_radius': 2, }),
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
         ('median', {'footprint': 4, })
     ])
