@@ -21,12 +21,12 @@ The disk represents the STEM bright field disk, while the ring represents the HO
     >>> import pixstem.api as ps
     >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
 
-Your own data can be loaded using :py:func:`pixstem.io_tools.load_fpd_signal`:
+Your own data can be loaded using :py:func:`pixstem.io_tools.load_ps_signal`:
 
 .. code-block:: python
 
     >>> import pixstem.api as ps
-    >>> s = ps.load_fpd_signal(yourfilname)  # doctest: +SKIP
+    >>> s = ps.load_ps_signal(yourfilname)  # doctest: +SKIP
 
 In some cases, the datasets might be too large to load into memory.
 For these datasets,  lazy loading can be used.
