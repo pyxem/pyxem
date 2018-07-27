@@ -282,8 +282,12 @@ def affine_transformation(z,matrix,order,**kwargs):
     shift_y, shift_x = np.array(z.shape[:2]) / 2.
     tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
     tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-
+    
+    # This defines the transform you want to perform
     transformation = tf.AffineTransform(matrix=matrix)
+    
+    #skimage transforms can be added like this, actually matrix multiplication,
+    #hence the need for the brackets. (Note tf.warp takes the inverse)
     trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
                     order=order,**kwargs)
 
