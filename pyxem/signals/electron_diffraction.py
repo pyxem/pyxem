@@ -469,10 +469,10 @@ class ElectronDiffraction(Signal2D):
         ----------
         radius_start : int
             The lower bound for the radius of the central disc to be used in the alignment
-        
+
         radius_finish : int
             The upper bounds for the radius of the central disc to be used in the alignment
-            
+
         Returns
         -------
         centers : ndarray
@@ -498,7 +498,7 @@ class ElectronDiffraction(Signal2D):
 
         radius_start : int
             The lower bound for the radius of the central disc to be used in the alignment
-        
+
         radius_finish : int
             The upper bounds for the radius of the central disc to be used in the alignment
 
@@ -511,7 +511,7 @@ class ElectronDiffraction(Signal2D):
         nav_shape_y = self.data.shape[1]
         origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
 
-      
+
         shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
 
         shifts = -1*shifts.data
@@ -678,6 +678,8 @@ class ElectronDiffraction(Signal2D):
         mask : Signal
             Signal object containing the mask.
         """
+        raise NotImplementedError("This function is not yet implemented")
+        """
         #TODO: Make this actually work.
         if method == 'shapiro-wilk':
             shapiro_values = self.map(stats.shapiro)
@@ -692,7 +694,8 @@ class ElectronDiffraction(Signal2D):
                                       "implementations.")
 
         return mask
-
+        """
+        
     def decomposition(self, *args, **kwargs):
         """Decomposition with a choice of algorithms.
 
