@@ -19,6 +19,7 @@
 import numpy as np
 import pytest
 from hyperspy.signals import Signal1D, Signal2D
+from hyperspy.roi import CircleROI
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 
@@ -97,6 +98,46 @@ def diffraction_pattern(request):
 
 def diffraction_pattern_SED(request):
     return ElectronDiffraction(request.param)
+
+
+class TestSimpleMaps:
+    #Confirms that maps run without error.
+
+    def test_get_direct_beam_postion(self,diffraction_pattern_SED):
+        shifts = diffraction_pattern_SED.get_direct_beam_position(radius_start=1,radius_finish=3)
+
+    def test_center_direct_beam(self,diffraction_pattern_SED):
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #before inplace transform applied
+        diffraction_pattern_SED.center_direct_beam(radius_start=1,radius_finish=3)
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #after inplace transform applied
+
+class TestSimpleHyperspy:
+    # Tests functions that assign to hyperspy metadata
+
+    def test_set_experimental_parameters(self,diffraction_pattern_SED):
+        diffraction_pattern_SED.set_experimental_parameters(accelerating_voltage=3,
+                                                             camera_length=3,
+                                                             scan_rotation=1,
+                                                             convergence_angle=1,
+                                                             rocking_angle=1,
+                                                             rocking_frequency=1,
+                                                             exposure_time=1)
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
+
+    def set_scan_calibration(self,diffraction_pattern_SED):
+        diffraction_pattern_SED.set_scan_calibration(19)
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
+
+class TestVirtualImaging:
+    # Tests that virtual imaging runs without failure
+
+    def test_plot_interactive_virtual_image(self,diffraction_pattern_SED):
+        roi = CircleROI(3,3,5)
+        diffraction_pattern_SED.plot_interactive_virtual_image(roi)
+
+    def test_get_virtual_image(self,diffraction_pattern_SED):
+        roi = CircleROI(3,3,5)
+        diffraction_pattern_SED.get_virtual_image(roi)
 
 
 @pytest.mark.skip(reason='Defaults not implemented in pyXem')
@@ -290,15 +331,3 @@ class TestPeakFinding:
         assert output.inav[0,0].isig[1] == (45-(128/2)) #y
         #but at
         assert np.sum(output.inav[0,1].data.shape) == 4 # 2+2
-
-class TestSimpleMaps:
-    #This class simply confirms that maps run without error.
-    # These tests are not suitable for objects that may return ragged arrays
-
-    def test_get_direct_beam_postion(self,diffraction_pattern_SED):
-        shifts = diffraction_pattern_SED.get_direct_beam_position(radius_start=1,radius_finish=3)
-
-    def test_center_direct_beam(self,diffraction_pattern_SED):
-        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #before inplace transform applied
-        diffraction_pattern_SED.center_direct_beam(radius_start=1,radius_finish=3)
-        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #after inplace transform applied
