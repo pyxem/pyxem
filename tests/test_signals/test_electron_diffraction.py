@@ -19,6 +19,7 @@
 import numpy as np
 import pytest
 from hyperspy.signals import Signal1D, Signal2D
+from hyperspy.roi import CircleROI
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 
@@ -54,10 +55,89 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
                [0., 0., 0., 2., 2., 2., 0., 0.],
                [0., 0., 0., 0., 2., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]]]),
+               [0., 0., 0., 0., 0., 0., 0., 0.]]])
 ])
 def diffraction_pattern(request):
     return ElectronDiffraction(request.param)
+
+
+@pytest.fixture(params=[
+    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 2., 1., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 2.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 2., 2., 2., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
+])
+
+def diffraction_pattern_SED(request):
+    return ElectronDiffraction(request.param)
+
+
+class TestSimpleMaps:
+    #Confirms that maps run without error.
+
+    def test_get_direct_beam_postion(self,diffraction_pattern_SED):
+        shifts = diffraction_pattern_SED.get_direct_beam_position(radius_start=1,radius_finish=3)
+
+    def test_center_direct_beam(self,diffraction_pattern_SED):
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #before inplace transform applied
+        diffraction_pattern_SED.center_direct_beam(radius_start=1,radius_finish=3)
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #after inplace transform applied
+
+class TestSimpleHyperspy:
+    # Tests functions that assign to hyperspy metadata
+
+    def test_set_experimental_parameters(self,diffraction_pattern_SED):
+        diffraction_pattern_SED.set_experimental_parameters(accelerating_voltage=3,
+                                                             camera_length=3,
+                                                             scan_rotation=1,
+                                                             convergence_angle=1,
+                                                             rocking_angle=1,
+                                                             rocking_frequency=1,
+                                                             exposure_time=1)
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
+
+    def set_scan_calibration(self,diffraction_pattern_SED):
+        diffraction_pattern_SED.set_scan_calibration(19)
+        assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
+
+class TestVirtualImaging:
+    # Tests that virtual imaging runs without failure
+
+    def test_plot_interactive_virtual_image(self,diffraction_pattern_SED):
+        roi = CircleROI(3,3,5)
+        diffraction_pattern_SED.plot_interactive_virtual_image(roi)
+
+    def test_get_virtual_image(self,diffraction_pattern_SED):
+        roi = CircleROI(3,3,5)
+        diffraction_pattern_SED.get_virtual_image(roi)
 
 
 @pytest.mark.skip(reason='Defaults not implemented in pyXem')
@@ -93,21 +173,6 @@ def test_apply_gain_normalisation(diffraction_pattern: ElectronDiffraction,
     assert diffraction_pattern.min() == dark_reference
 
 
-def test_reproject_as_polar(diffraction_pattern: ElectronDiffraction):
-    shape_cartesian = diffraction_pattern.axes_manager.signal_shape
-    diffraction_pattern.reproject_as_polar()
-    assert isinstance(diffraction_pattern, Signal2D)
-    shape_polar = diffraction_pattern.axes_manager.signal_shape
-    assert shape_polar[0] == max(shape_cartesian)
-    assert shape_polar[1] > np.sqrt(2) * shape_cartesian[0] / 2
-
-
-def test_get_diffraction_variance(diffraction_pattern: ElectronDiffraction):
-    dv = diffraction_pattern.get_diffraction_variance()
-    assert dv.axes_manager.navigation_shape == (3,)
-    assert dv.axes_manager.signal_shape == diffraction_pattern.axes_manager.signal_shape
-
-
 class TestDirectBeamMethods:
 
     @pytest.mark.parametrize('mask_expected', [
@@ -126,16 +191,6 @@ class TestDirectBeamMethods:
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
 
-    @pytest.mark.parametrize('closing, opening, mask_expected', [
-        (False, False, np.array([True, True, False, True])),
-        (True, False, np.array([True, True, True, True])),
-        (False, True, np.array([True, True, False, False])),
-    ])
-    def test_get_vacuum_mask(self, diffraction_pattern, closing, opening, mask_expected):
-        mask_calculated = diffraction_pattern.get_vacuum_mask(
-            radius=3, threshold=1, closing=closing, opening=opening)
-        assert np.allclose(mask_calculated, mask_expected)
-
 
 class TestRadialProfile:
 
@@ -150,7 +205,7 @@ class TestRadialProfile:
                                [2., 3., 3., 4., 4., 3., 3., 2.],
                                [0., 2., 3., 3., 3., 3., 2., 0.],
                                [0., 0., 2., 2., 2., 2., 0., 0.]])
-    
+
         dp.data[1] = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
@@ -171,7 +226,7 @@ class TestRadialProfile:
             [[5., 4., 3., 2., 0.],
              [1., 0., 0., 0., 0.]]
         ))])
-    
+
     def test_radial_profile(self, diffraction_pattern,expected):
         rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
@@ -227,18 +282,8 @@ class TestApplyAffineTransformation:
 
 class TestBackgroundMethods:
 
-    @pytest.mark.parametrize('saturation_radius', [
-        1,
-        2,
-    ])
-    def test_get_background_model(
-            self, diffraction_pattern: ElectronDiffraction, saturation_radius):
-        bgm = diffraction_pattern.get_background_model(saturation_radius)
-        assert bgm.axes_manager.signal_shape == diffraction_pattern.axes_manager.signal_shape
-
     @pytest.mark.parametrize('method, kwargs', [
         ('h-dome', {'h': 1}),
-        ('model', {'saturation_radius': 2, }),
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
         ('median', {'footprint': 4, })
     ])
@@ -260,7 +305,7 @@ class TestPeakFinding:
     @pytest.fixture
     def ragged_peak(self):
         pattern = np.zeros((2,2,128,128))
-        pattern[:,:,40,45] = 1 
+        pattern[:,:,40,45] = 1
         pattern[1,0,71,21] = 1
         return ElectronDiffraction(pattern)
 
@@ -268,7 +313,7 @@ class TestPeakFinding:
     def test_argless_run(self,single_peak):
         single_peak.find_peaks()
         pass
-    
+
     @pytest.mark.parametrize('method', methods)
     def test_findpeaks_single(self,single_peak,method):
         output = (single_peak.find_peaks(method)).inav[0,0] #should be <2,2|2,1>
@@ -276,7 +321,7 @@ class TestPeakFinding:
         assert output.isig[0] == 1        #  correct number of peaks
         assert output.isig[0] == (40-(128/2)) #x
         assert output.isig[1] == (45-(128/2)) #y
-        
+
     def test_findpeaks_ragged(self,ragged_peak,method):
         output = (ragged_peak.find_peaks(method))
         # as before at 0,0
@@ -284,5 +329,5 @@ class TestPeakFinding:
         assert output.inav[0,0].isig[0] == 1        #  correct number of peaks
         assert output.inav[0,0].isig[0] == (40-(128/2)) #x
         assert output.inav[0,0].isig[1] == (45-(128/2)) #y
-        #but at 
+        #but at
         assert np.sum(output.inav[0,1].data.shape) == 4 # 2+2
