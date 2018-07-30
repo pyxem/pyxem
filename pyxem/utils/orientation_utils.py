@@ -19,31 +19,6 @@
 import numpy as np
 import pickle
 
-def build_linear_grid_in_euler(alpha,beta,gamma,width,resolution):
-    """ 
-    Returns tuples between (alpha,beta,gamma) and
-    (alpha,beta,gamma) -+ width at steps of resolution. Each
-    angle increased incrementaly. Depending on width and resolution
-    the tuple (alpha,beta,gamma) may not be included
-    
-    Parameters:
-    ----------
-    
-    alpha,beta,gamma: Lower angles (0-90,0-180,0-90)
-    width           : gives the distance to the min/max. ie) from center-width to center+width
-    resolution      : gives the size of the steps
-    
-    Returns:
-    --------
-    
-    list: rotation list
-    """
-    a = np.arange(alpha-width,alpha+width,step=resolution)
-    b = np.arange(beta-width,beta+width,step=resolution)
-    c = np.arange(gamma-width,gamma+width,step=resolution)
-    from itertools import product
-    return list(product(a,b,c))
-
 def save_DiffractionLibrary(library,filename):
     """
     pickles (saves) the DiffractionLibrary
