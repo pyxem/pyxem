@@ -124,7 +124,7 @@ class TestSimpleHyperspy:
                                                              exposure_time=1)
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
 
-    def set_scan_calibration(self,diffraction_pattern_SED):
+    def test_set_scan_calibration(self,diffraction_pattern_SED):
         diffraction_pattern_SED.set_scan_calibration(19)
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
 
