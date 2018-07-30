@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-from pyxem.utils.orientation_utils import build_linear_grid_in_euler
 
 @pytest.mark.skip(reason="function not currently implemented")
 def test_DiffractionLibraryIO():
@@ -27,12 +26,3 @@ def test_DiffractionLibraryIO():
     # Assert loaded is the same as saved
     return None
 
-def test_build_linear_grid_in_euler():
-    alpha,beta,gamma = 5,5,5
-    width = 3
-    resolution = 2.5
-    
-    # Thus we expect 2,4.5 and 7 from each of the three, 27 items
-    grid = build_linear_grid_in_euler(alpha,beta,gamma,width,resolution)
-    assert len(grid) == 27
-    return None
