@@ -33,8 +33,8 @@ class DiffractionLibrary(dict):
     axis-angle pair) to simulated diffraction data.
     """
 
-    def get_pattern(self,phase=False,angle=False):
-        """ Extracts a single pattern for viewing,
+    def get_library_entry(self,phase=None,angle=None):
+        """ Extracts a single library entry for viewing,
         unspecified layers of dict are selected randomly and so this method
         is not entirely repeatable
 
@@ -49,18 +49,18 @@ class DiffractionLibrary(dict):
 
         """
 
-        if phase:
-            if angle:
-                return self[phase][angle]['Sim']
+        if phase is not None:
+            if angle is not None:
+                return self[phase][angle]
             else:
-                diff_lib = self[phase]
-                for diffraction_pattern in diff_lib.values():
-                    return diffraction_pattern['Sim']
+                for rotation in self[phase].keys():
+                    return self[phase][rotation]
         else:
-            for key in self.keys():
-                diff_lib = self[key]
-                for diffraction_pattern in diff_lib.values():
-                    return diffraction_pattern['Sim']
+            for phase in self.keys():
+                for rotation in self[phase].keys():
+                    return self[phase][rotation]
+
+
 
     def pickle_library(self,filename):
         with open(filename, 'wb') as handle:

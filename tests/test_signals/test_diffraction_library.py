@@ -40,10 +40,10 @@ def get_library():
             structure_library, 0.017, 2.4, (72,72) ,'euler')
 
 
-def test_get_pattern(get_library):
-        assert isinstance(get_library.get_pattern(),DiffractionSimulation)
-        assert isinstance(get_library.get_pattern(phase='Si'),DiffractionSimulation)
-        assert isinstance(get_library.get_pattern(phase='Si',angle=(0,0,0)),DiffractionSimulation)
+def test_get_library_entry(get_library):
+        assert isinstance(get_library.get_library_entry()['Sim'],DiffractionSimulation)
+        assert isinstance(get_library.get_library_entry(phase='Si')['Sim'],DiffractionSimulation)
+        assert isinstance(get_library.get_library_entry(phase='Si',angle=(0,0,0))['Sim'],DiffractionSimulation)
 
 @pytest.mark.xfail(raises=RuntimeError)
 def test_unsafe_loading(get_library):
