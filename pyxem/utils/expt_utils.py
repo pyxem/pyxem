@@ -312,13 +312,6 @@ def regional_filter(z, h):
 
     return z - dilated
 
-def regional_flattener(z, h):
-    """Localised erosion of the image 'z' for features below a value 'h'"""
-    seed = np.copy(z) + h
-    mask = z
-    eroded = morphology.reconstruction(seed, mask, method='erosion')
-    return eroded - h
-
 def subtract_background_dog(z, sigma_min, sigma_max):
     """Difference of gaussians method for background removal.
 
@@ -491,8 +484,9 @@ def peaks_as_gvectors(z, center, calibration):
 
     Returns
     ----------
-    g : numpy arrays
-    
+    g : numpy array
+        
+
     """
     g = (z - center) * calibration
-    return np.array([g[0].T[1], g[0].T[0]]).T
+    return g[0]
