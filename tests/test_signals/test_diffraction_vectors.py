@@ -35,9 +35,10 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
              [0.123566, 0.151468]])
 ])
 def diffraction_vectors_single(request):
-    dvec = DiffractionVectors(request.param)
-    dvec.axes_manager.set_signal_dimension(1)
-    return dvec
+    dvs = DiffractionVectors(request.param)
+    dvs.axes_manager.set_signal_dimension(1)
+    return dvs
+
 
 @pytest.fixture(params=[
     np.array([[np.array([[ 0.089685,  0.292971],
@@ -74,9 +75,10 @@ def diffraction_vectors_single(request):
             np.array([[ 0.001993,  0.001993]])]], dtype=object)
 ])
 def diffraction_vectors_map(request):
-    dvec = DiffractionVectors(request.param)
-    dvec.axes_manager.set_signal_dimension(0)
-    return dvec
+    dvm = DiffractionVectors(request.param)
+    dvm.axes_manager.set_signal_dimension(0)
+    return dvm
+
 
 @pytest.mark.skip(reason='Plot not testable')
 def test_plot_diffraction_vectors(diffraction_vectors_single):
@@ -92,10 +94,10 @@ class TestMagnitudes:
     def test_get_magnitude_histogram_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
-    def test_get_magnitudes_map(self, diffraction_vectors_single):
+    def test_get_magnitudes_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_magnitudes()
 
-    def test_get_magnitude_histogram_map(self, diffraction_vectors_single):
+    def test_get_magnitude_histogram_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
 
