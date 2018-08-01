@@ -34,23 +34,28 @@ def get_library():
         lattice = pmg.Lattice.cubic(5)
 
         structure = pmg.Structure.from_spacegroup("F-43m", lattice, [element], [[0, 0, 0]])
-        structure_library = {'Si': (structure, [(0, 0, 0)])}
+        structure_library = {'Si': (structure, [(0, 0, 0),(0,0.2,0)])}
 
         return dfl.get_diffraction_library(
             structure_library, 0.017, 2.4, (72,72) ,'euler')
 
 
-def test_get_pattern(get_library):
-        assert isinstance(get_library.get_pattern(),DiffractionSimulation)
-        assert isinstance(get_library.get_pattern(phase='Si'),DiffractionSimulation)
-        assert isinstance(get_library.get_pattern(phase='Si',angle=(0,0,0)),DiffractionSimulation)
+@pytest.mark.xfail(raises=ValueError)
+def test_unknown_library_entry(get_library):
+    # The angle we have asked for is not in the library
+    assert isinstance(get_library.get_library_entry(phase='Si',angle=(1e-3,0,0))['Sim'],DiffractionSimulation)
 
 @pytest.mark.xfail(raises=RuntimeError)
 def test_unsafe_loading(get_library):
     get_library.pickle_library('file_01.pickle')
     loaded_library = load_DiffractionLibrary('file_01.pickle')
-    os.remove('file_01.pickle')
-    return 0 #maybe should fail
+    return 0
+
+def test_get_library_entry(get_library):
+        assert isinstance(get_library.get_library_entry()['Sim'],DiffractionSimulation)
+        assert isinstance(get_library.get_library_entry(phase='Si')['Sim'],DiffractionSimulation)
+        assert isinstance(get_library.get_library_entry(phase='Si',angle=(0,0,0))['Sim'],DiffractionSimulation)
+        assert isinstance(get_library.get_library_entry(phase='Si',angle=(1e-8,0,0))['Sim'],DiffractionSimulation)
 
 def test_library_io(get_library):
     get_library.pickle_library('file_01.pickle')
@@ -58,5 +63,3 @@ def test_library_io(get_library):
     os.remove('file_01.pickle')
     # we can't check that the entire libraries are the same as the location of the 'Sim' changes
     assert np.allclose(get_library['Si'][(0,0,0)]['intensities'],loaded_library['Si'][(0,0,0)]['intensities'])
-
-
