@@ -28,8 +28,8 @@ def get_distance_between_two_angles_longform(angle_1,angle_2):
     """
     Using the long form to find the distance between two angles in euler form
     """
-    q1 = euler2quat(*angle_1,axes='rzxz')
-    q2 = euler2quat(*angle_2,axes='rzxz')
+    q1 = euler2quat(*np.deg2rad(angle_1),axes='rzxz')
+    q2 = euler2quat(*np.deg2rad(angle_2),axes='rzxz')
     ## now assume transform of the form MODAL then Something = TOTAL
     ## so we want to calculate MODAL^{-1} TOTAL
 

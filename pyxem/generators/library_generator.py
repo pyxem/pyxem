@@ -77,8 +77,8 @@ class DiffractionLibraryGenerator(object):
 
         representation : 'euler' or 'axis-angle'
             The representation in which the orientations are provided.
-            If 'euler' the zxz convention is taken and values are in radians, if
-            'axis-angle' the rotational angle is in degrees.
+            In both cases angles are in degrees.
+            If 'euler' the zxz convention is taken.
 
         half_shape: tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
@@ -103,8 +103,9 @@ class DiffractionLibraryGenerator(object):
             for orientation in tqdm(orientations, leave=False):
                 if representation == 'axis-angle':
                     axis = [orientation[0], orientation[1], orientation[2]]
-                    angle = orientation[3] / 180 * pi
+                    angle = np.deg2rad(orientation[3])
                 if representation == 'euler':
+                    orientation = np.deg2rad(orientation)
                     axis, angle = euler2axangle(orientation[0], orientation[1],
                                                 orientation[2], 'rzxz')
                 # Apply rotation to the structure
