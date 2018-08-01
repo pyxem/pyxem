@@ -180,7 +180,7 @@ class PixelatedSTEM(Signal2D):
         The function returns a new signal, but the data itself
         is a view of the original signal. So changing the returned signal
         will also change the original signal (and visa versa). To avoid
-        changing the orignal signal, use the deepcopy method afterwards,
+        changing the original signal, use the deepcopy method afterwards,
         but note that this requires double the amount of memory.
         See below for an example of this.
 
@@ -552,7 +552,7 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        mask_array : Numpy array
+        mask_array : NumPy array
             The True values will be the region between angle0 and angle1.
             The array will have the same dimensions as the signal.
 
@@ -740,7 +740,7 @@ class PixelatedSTEM(Signal2D):
         ----------
         threshold_multiplier : scalar
             Default 500
-        mask_array : Boolean Numpy array
+        mask_array : Boolean NumPy array
         lazy_result : bool
             If True, return a lazy signal. If False, compute
             the result and return a non-lazy signal. Default True.
@@ -893,7 +893,7 @@ class DPCSignal1D(Signal1D):
         histogram_range : tuple, optional
             Set the minimum and maximum of the histogram range.
             Default is setting it automatically.
-        masked : 1-D numpy bool array, optional
+        masked : 1-D NumPy bool array, optional
             Mask parts of the data. The array must be the same
             size as the signal. The True values are masked.
             Default is not masking anything.
@@ -1225,7 +1225,7 @@ class DPCSignal2D(Signal2D):
         histogram_range : tuple, optional
             Set the minimum and maximum of the histogram range.
             Default is setting it automatically.
-        masked : 2-D numpy bool array, optional
+        masked : 2-D NumPy bool array, optional
             Mask parts of the data. The array must be the same
             size as the signal. The True values are masked.
             Default is not masking anything.
