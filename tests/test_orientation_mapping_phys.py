@@ -102,13 +102,24 @@ def test_orientation_mapping_physical(structure,rot_list,pattern_list,edc):
     assert np.all(M.inav[0,0] == M.inav[1,0])
     assert np.allclose(M.inav[0,0].isig[:,0].data,[0,0.01,0,0,2],atol=1e-3)
 
+@pytest.mark.parametrize("structure",[create_Ortho(),create_Hex()])
+@pytest.mark.parametrize("rot_list",[rot_list()])
+@pytest.mark.parametrize("edc",[edc()])
+@pytest.mark.parametrize("pattern_list",[pattern_rot_list()])
+
+def test_masked_OM(structure,rot_list,pattern_list,edc):
+    dp_library = get_template_library(structure,pattern_list,edc)
+    for key in dp_library['A']:
+        pattern = (dp_library['A'][key]['Sim'].as_signal(2*half_side_length,0.025,1).data)
+    dp = pxm.ElectronDiffraction([[pattern,pattern],[pattern,pattern]])
+    library = get_template_library(structure,rot_list,edc)
+    indexer = IndexationGenerator(dp,library)
+    mask = hs.signals.Signal1D(([[[1],[1]],[[0],[1]]]))
+    M = indexer.correlate(mask=mask)
+    assert np.all(np.isnan(M.inav[0,1].data))
 
 @pytest.mark.skip()
 def test_generate_peaks_from_best_template():
     # also test peaks from best template
     peaks = M.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
     assert peaks.inav[0,0] == library["A"][(0,0,0)]['Sim'].coordinates[:,:2]
-
-@pytest.mark.skip()
-def test_masked_OM():
-    pass
