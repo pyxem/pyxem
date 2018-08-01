@@ -86,9 +86,7 @@ def get_template_library(structure,rot_list,edc):
     return library
 
 @pytest.mark.parametrize("structure",[create_Ortho(),create_Hex()])
-@pytest.mark.parametrize("rot_list",[rot_list()])
-@pytest.mark.parametrize("edc",[edc()])
-@pytest.mark.parametrize("pattern_list",[pattern_rot_list()])
+@pytest.mark.parametrize("rot_list,edc,pattern_list",[[rot_list(),edc(),pattern_rot_list()]])
 
 def test_orientation_mapping_physical(structure,rot_list,pattern_list,edc):
     dp_library = get_template_library(structure,pattern_list,edc)
@@ -102,10 +100,7 @@ def test_orientation_mapping_physical(structure,rot_list,pattern_list,edc):
     assert np.all(M.inav[0,0] == M.inav[1,0])
     assert np.allclose(M.inav[0,0].isig[:,0].data,[0,0.01,0,0,2],atol=1e-3)
 
-@pytest.mark.parametrize("structure",[create_Ortho(),create_Hex()])
-@pytest.mark.parametrize("rot_list",[rot_list()])
-@pytest.mark.parametrize("edc",[edc()])
-@pytest.mark.parametrize("pattern_list",[pattern_rot_list()])
+@pytest.mark.parametrize("structure,rot_list,edc,pattern_list",[[create_Ortho(),rot_list(),edc(),pattern_rot_list()]])
 
 def test_masked_OM(structure,rot_list,pattern_list,edc):
     dp_library = get_template_library(structure,pattern_list,edc)
