@@ -322,7 +322,7 @@ class ElectronDiffraction(Signal2D):
                         deadvalue=deadvalue,
                         inplace=inplace)
 
-    def get_radial_profile(self,cython=False,inplace=False,**kwargs):
+    def get_radial_profile(self,inplace=False,**kwargs):
         """Return the radial profile of the diffraction pattern.
 
         Returns
@@ -342,7 +342,7 @@ class ElectronDiffraction(Signal2D):
             profiles.plot()
         """
         # TODO: the cython implementation is throwing dtype errors
-        radial_profiles = self.map(radial_average, cython=cython,
+        radial_profiles = self.map(radial_average,
                                    inplace=inplace,**kwargs)
         # TODO: check this
         ragged = len(radial_profiles.data.shape) == 1
@@ -477,7 +477,7 @@ class ElectronDiffraction(Signal2D):
                 "documentation for available implementations.".format(method))
 
         return bg_subtracted
-      
+
     def decomposition(self, *args, **kwargs):
         """Decomposition with a choice of algorithms.
 
@@ -567,4 +567,3 @@ class ElectronDiffraction(Signal2D):
         """
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
-
