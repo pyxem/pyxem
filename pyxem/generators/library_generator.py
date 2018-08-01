@@ -52,14 +52,15 @@ class DiffractionLibraryGenerator(object):
                                 calibration,
                                 reciprocal_radius,
                                 half_shape,
-                                representation='euler',
-				with_direct_beam=True
+				                with_direct_beam=True
                                 ):
         """Calculates a dictionary of diffraction data for a library of crystal
         structures and orientations.
 
         Each structure in the structure library is rotated to each associated
         orientation and the diffraction pattern is calculated each time.
+
+        Angles must be in the Euler representation (Z,X,Z) and in degrees
 
         Parameters
         ----------
@@ -74,11 +75,6 @@ class DiffractionLibraryGenerator(object):
 
         reciprocal_radius : float
             The maximum g-vector magnitude to be included in the simulations.
-
-        representation : 'euler' or 'axis-angle'
-            The representation in which the orientations are provided.
-            If 'euler' the zxz convention is taken and values are in radians, if
-            'axis-angle' the rotational angle is in degrees.
 
         half_shape: tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
@@ -101,11 +97,8 @@ class DiffractionLibraryGenerator(object):
             orientations = structure_library[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
-                if representation == 'axis-angle':
-                    axis = [orientation[0], orientation[1], orientation[2]]
-                    angle = orientation[3] / 180 * pi
-                if representation == 'euler':
-                    axis, angle = euler2axangle(orientation[0], orientation[1],
+                orientation = np.deg2rad(orientation)
+                axis, angle = euler2axangle(orientation[0], orientation[1],
                                                 orientation[2], 'rzxz')
                 # Apply rotation to the structure
                 rotation = RotationTransformation(axis, angle,
