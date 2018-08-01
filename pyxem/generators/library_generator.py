@@ -97,9 +97,8 @@ class DiffractionLibraryGenerator(object):
             orientations = structure_library[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
-                if representation == 'euler':
-                    orientation = np.deg2rad(orientation)
-                    axis, angle = euler2axangle(orientation[0], orientation[1],
+                orientation = np.deg2rad(orientation)
+                axis, angle = euler2axangle(orientation[0], orientation[1],
                                                 orientation[2], 'rzxz')
                 # Apply rotation to the structure
                 rotation = RotationTransformation(axis, angle,
