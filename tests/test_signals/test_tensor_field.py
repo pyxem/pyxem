@@ -21,3 +21,29 @@ import numpy as np
 
 from pyxem.signals.tensor_field import _polar_decomposition, _get_rotation_angle
 from pyxem.signals.tensor_field import DisplacementGradientMap
+
+@pytest.mark.parametrize('D, R, U',[
+    (np.array([[100,10,0],
+               [200,20,0],
+               [150,-15,0]]),
+     np.array([[100,10,0],
+                [200,20,0],
+                [150,-15,0]]),
+     np.array([[100,10,0],
+                [200,20,0],
+                [150,-15,0]])),
+])
+def test_polar_decomposition(D, R, U):
+    Rc, Uc = _polar_decomposition(D)
+    np.testing.assert_almost_equal(Rc, R)
+    np.testing.assert_almost_equal(Uc, U)
+
+@pytest.mark.parametrize('R, theta',[
+    (np.array([[100,10,0],
+               [200,20,0],
+               [150,-15,0]]),
+     15),
+])
+def test_get_rotation_angle(R, theta):
+    tc = _get_rotation_angle(R)
+    np.testing.assert_almost_equal(tc, theta)
