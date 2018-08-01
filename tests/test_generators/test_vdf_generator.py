@@ -69,8 +69,9 @@ def diffraction_vectors(request):
     dvec.axes_manager.set_signal_dimension(1)
     return dvec
 
+@pytest.fixture
 def vdf_generator(electron_diffraction, diffraction_vectors):
-    return VDFGenerator(*request.param)
+    return VDFGenerator(electron_diffraction, diffraction_vectors)
 
 class TestVDFGenerator:
 
