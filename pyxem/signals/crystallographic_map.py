@@ -44,17 +44,17 @@ def _distance_from_fixed_angle(angle,fixed_angle):
     """
     Designed to be mapped, this function finds the smallest rotation between
     two rotations. It assumes a no-symmettry system.
-    
+
     The algorithm involves converting angles to quarternions, then finding the
     appropriate misorientation. It is tested against the slower more complete
     version finding the joining rotation.
 
     """
-    q_data  = euler2quat(*angle,axes='rzxz')
-    q_fixed = euler2quat(*fixed_angle,axes='rzxz')
+    q_data  = euler2quat(*np.deg2rad(angle),axes='rzxz')
+    q_fixed = euler2quat(*np.deg2rad(fixed_angle),axes='rzxz')
     theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
     #https://math.stackexchange.com/questions/90081/quaternion-distance
-    
+
     return theta
 
 class CrystallographicMap(BaseSignal):
@@ -110,13 +110,13 @@ class CrystallographicMap(BaseSignal):
         """ Warning - This function is for early inspection, it will
         only provide good answers when the sampling of orientation space is over
         a small range. We would always recommend checking your results in MTEX
-        
+
         see also: method: save_mtex_map
         """
         modal_angle = self.get_modal_angles()[0]
         return self.isig[1:4].map(_distance_from_fixed_angle,fixed_angle=modal_angle,inplace=False)
-         
-    
+
+
     def save_mtex_map(self, filename):
         """
         Save map so that in a format such that it can be imported into MTEX

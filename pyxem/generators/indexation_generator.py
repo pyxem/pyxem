@@ -62,10 +62,11 @@ def correlate_library(image, library,n_largest,mask,keys=[]):
                 out_arr[j + i*n_largest][3] = res[j][0][2]
                 out_arr[j + i*n_largest][4] = res[j][1]
             i = i + 1
-                        
+
     else:
         for j in np.arange(n_largest):
-            out_arr[j + i*n_largest][0] = len(library)+1
+            for k in [0,1,2,3,4]:
+                out_arr[j + i*n_largest][k] = np.nan
         i = i + 1
     return out_arr
 
@@ -103,8 +104,8 @@ class IndexationGenerator():
             phase.  For example, keys = ['si','ga'] will have an output with 0
             for 'si' and 1 for 'ga'.
         mask : Array
-            Array with the same size as signal (in navigation) True False 
-            
+            Array with the same size as signal (in navigation) True False
+
         **kwargs
             Keyword arguments passed to the HyperSpy map() function.
 
@@ -121,9 +122,9 @@ class IndexationGenerator():
         library = self.library
         if mask is None:
            #index at all real space pixels
-           sig_shape = signal.axes_manager.navigation_shape 
+           sig_shape = signal.axes_manager.navigation_shape
            mask = hs.signals.Signal1D(np.ones((sig_shape[0],sig_shape[1],1)))
-           
+
         matching_results = signal.map(correlate_library,
                                       library=library,
                                       n_largest=n_largest,
