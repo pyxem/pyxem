@@ -119,7 +119,6 @@ def radial_average(z,cython=False):
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
-
     center = ((z.shape[0]/2)-0.5,(z.shape[1]/2)-0.5) #geometric shape work, not 0 indexing
 
     if _USE_CY_RADIAL_PROFILE and cython:
@@ -277,7 +276,6 @@ def affine_transformation(z,matrix,order,**kwargs):
     trans : array
         Affine transformed diffraction pattern.
     """
-
     # These three lines account for the transformation center not being (0,0)
     shift_y, shift_x = np.array(z.shape[:2]) / 2.
     tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
@@ -403,7 +401,6 @@ def circular_mask(shape, radius, center=None):
     X, Y = np.ogrid[:l_x, :l_y]
     mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
     return mask
-
 
 def reference_circle(coords, dimX, dimY,radius):
     """Draw the perimeter of an circle at a given position
