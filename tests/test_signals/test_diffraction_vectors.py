@@ -1,0 +1,69 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2018 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+import pytest
+
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+
+# DiffractionVectors correspond to a single list of vectors, a map of vectors
+# all of equal length, and the ragged case. A fixture is defined for each of
+# these cases and all methods tested for it.
+
+@pytest.fixture(params=[
+    np.array([[0.063776, 0.011958],
+             [-0.035874, 0.131538],
+             [0.035874, -0.131538],
+             [0.035874, 0.143496],
+             [-0.035874, -0.13951],
+             [-0.115594, 0.123566],
+             [0.103636, -0.11958],
+             [0.123566, 0.151468]])
+])
+
+def diffraction_vectors_single(request):
+    return DiffractionVectors(request.param)
+
+
+@pytest.mark.skip(reason='Plot not testable')
+def test_plot_diffraction_vectors(diffraction_vectors_single):
+    diffraction_vectors_single.plot_diffraction_vectors
+    pass
+
+
+class TestMagnitudes:
+
+    def test_get_magnitudes_single(self, diffraction_vectors_single):
+        mags = diffraction_vectors_single.get_magnitudes()
+
+    def test_get_magnitude_histogram_single(self, diffraction_vectors_single):
+        diffraction_vectors_single.get_magnitude_histogram()
+
+
+class TestUniqueVectors:
+
+    def test_get_unique_vectors_single(self, diffraction_vectors_single):
+        diffraction_pattern_SED.get_virtual_image(roi)
+
+
+#class TestDiffractingPixelMaps:
+#
+#    def test_get_dpm_map(self, diffraction_vectors_single):
+#        diffraction_pattern_SED.get_virtual_image(roi)
+#
+#    def test_get_dpm_map_binary(self, diffraction_vectors_single):
+#        diffraction_pattern_SED.get_virtual_image(roi)
