@@ -282,6 +282,6 @@ def peaks_from_best_template(single_match_result,phase,library):
 
     best_fit = single_match_result[np.argmax(single_match_result[:,4])]
     _phase = phase[int(best_fit[0])]
-    pattern = library[_phase][best_fit[1],best_fit[2],best_fit[3]]['Sim']
+    pattern = library.get_library_entry(phase=_phase,angle=(best_fit[1],best_fit[2],best_fit[3]))['Sim']
     peaks = pattern.coordinates[:,:2] #cut z
     return peaks
