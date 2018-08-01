@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import numpy
+import numpy as np
 from pyxem.utils.sim_utils import *
 
 @pytest.mark.parametrize('accelerating_voltage, wavelength',[
