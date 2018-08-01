@@ -21,6 +21,7 @@ import pytest
 import pyxem as pxm
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.libraries.diffraction_library import DiffractionLibrary
 
 # This test suite is aimed at checking the basic functionality of the Omapping process, obviously to have a succesful OM process
 # many other components will also need to be correct
@@ -31,7 +32,7 @@ def create_library_entry(library,rotation,pattern):
     library["Phase"][rotation]['intensities']  = pattern.intensities
     library["Phase"][rotation]['pixel_coords'] = (pattern.calibrated_coordinates[:,:2]+half_shape).astype(int)
     library["Phase"][rotation]['pattern_norm'] = np.sqrt(np.dot(pattern.intensities,pattern.intensities))
-    return library
+    return DiffractionLibrary(library)
 
 dps, dp_sim_list = [],[]
 half_side_length = 72
