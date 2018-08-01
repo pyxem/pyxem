@@ -18,7 +18,8 @@
 
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
-from transforms3d.euler import euler2axangle,euler2quat
+from transforms3d.euler import euler2axangle,euler2quat,quat2axangle
+from transforms3d.quaternions import qmult,qinverse
 import numpy as np
 from tqdm import tqdm
 
@@ -56,7 +57,7 @@ def _distance_from_fixed_angle(angle,fixed_angle):
         #https://math.stackexchange.com/questions/90081/quaternion-distance
         theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
     else: #slower, but also good
-        q_from_mode = qmult(qinverse(q2),q1)
+        q_from_mode = qmult(qinverse(q_fixed),q_data)
         axis,theta = quat2axangle(q_from_mode)
 
     return theta
