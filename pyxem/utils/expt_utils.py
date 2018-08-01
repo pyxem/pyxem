@@ -403,7 +403,7 @@ def peaks_as_gvectors(z, center, calibration):
     Converts peaks found as array indices to calibrated units.
 
     Parameters
-    -------
+    ----------
     z : numpy array
 
     center : numpy array
@@ -411,10 +411,10 @@ def peaks_as_gvectors(z, center, calibration):
     calibration : float
 
     Returns
-    ----------
+    -------
     g : numpy array
 
 
     """
     g = (z - center) * calibration
-    return g[0]
+    return np.array([g[0].T[1], g[0].T[0]]).T
