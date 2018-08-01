@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-
+import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
