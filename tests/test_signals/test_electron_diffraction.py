@@ -128,6 +128,19 @@ class TestSimpleHyperspy:
         diffraction_pattern_SED.set_scan_calibration(19)
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
 
+    @pytest.mark.parametrize('calibration, center', [
+                                (1, (4, 4),),
+                                (0.017, (3, 3)),
+                                (0.5, None,),])
+
+    def test_set_diffraction_calibration(self,diffraction_pattern_SED, calibration, center):
+        calibrated_center = calibration * np.array(center) if center is not None else center
+        diffraction_pattern_SED.set_diffraction_calibration(calibration, center=calibrated_center)
+        dx, dy = diffraction_pattern_SED.axes_manager.signal_axes
+        assert dx.scale == calibration and dy.scale == calibration
+        if center is not None:
+            assert np.all(diffraction_pattern_SED.isig[0., 0.].data == diffraction_pattern_SED.isig[center[0], center[1]].data)
+
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
@@ -140,24 +153,7 @@ class TestVirtualImaging:
         diffraction_pattern_SED.get_virtual_image(roi)
 
 
-@pytest.mark.skip(reason='Defaults not implemented in pyXem')
-def test_default_params(diffraction_pattern):
-    a = diffraction_pattern.metadata.Acquisition_instrument.TEM.rocking_angle
-    pass
 
-
-@pytest.mark.parametrize('calibration, center', [
-    (1, (4, 4),),
-    (0.017, (3, 3)),
-    (0.5, None,),
-])
-def test_set_diffraction_calibration(diffraction_pattern, calibration, center):
-    calibrated_center = calibration * np.array(center) if center is not None else center
-    diffraction_pattern.set_diffraction_calibration(calibration, center=calibrated_center)
-    dx, dy = diffraction_pattern.axes_manager.signal_axes
-    assert dx.scale == calibration and dy.scale == calibration
-    if center is not None:
-        assert np.all(diffraction_pattern.isig[0., 0.].data == diffraction_pattern.isig[center[0], center[1]].data)
 
 
 @pytest.mark.parametrize('dark_reference, bright_reference', [
