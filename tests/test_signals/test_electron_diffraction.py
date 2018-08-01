@@ -111,6 +111,13 @@ class TestSimpleMaps:
         diffraction_pattern_SED.center_direct_beam(radius_start=1,radius_finish=3)
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #after inplace transform applied
 
+    def test_apply_affine_transformation(self, diffraction_pattern_SED):
+        diffraction_pattern_SED.apply_affine_transformation(
+                                                        D=np.array([[1., 0., 0.],
+                                                                    [0., 1., 0.],
+                                                                    [0., 0., 1.]]))
+        assert isinstance(diffraction_pattern_SED, ElectronDiffraction)
+
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
@@ -154,7 +161,7 @@ class TestVirtualImaging:
 
 
 
-
+#class TestGainNormalisation
 
 @pytest.mark.parametrize('dark_reference, bright_reference', [
     (-1, 1),
@@ -226,55 +233,6 @@ class TestRadialProfile:
     def test_radial_profile(self, diffraction_pattern,expected):
         rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
-
-
-class TestApplyAffineTransformation:
-
-    def test_affine_transformation_signal_type(self, diffraction_pattern):
-        diffraction_pattern.apply_affine_transformation(
-            D=np.array([[1., 0., 0.],
-                        [0., 1., 0.],
-                        [0., 0., 1.]]))
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
-
-    @pytest.mark.parametrize('diffraction_pattern, transformation, expected', [
-        (
-            np.array([
-                [0, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0],
-            ], dtype=float), np.array([
-                [1, 0, 0],
-                [0, 1, 0],
-                [0, 0, 1],
-            ], dtype=float), np.array([
-                [0, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0]
-            ], dtype=float),
-        ),
-        (
-            np.array([
-                [0, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0],
-            ], dtype=float),
-            np.array([
-                [0, 1, 0],
-                [1, 0, 0],
-                [0, 0, 1],
-            ], dtype=float),
-            np.array([
-                [0, 0, 0],
-                [1, 1, 1],
-                [0, 0, 0],
-            ], dtype=float),
-        )
-    ], indirect=['diffraction_pattern'])
-    def test_geometric_distortion(self, diffraction_pattern, transformation, expected):
-        diffraction_pattern.apply_affine_transformation(D=transformation)
-        assert np.allclose(diffraction_pattern.data, expected)
-
 
 class TestBackgroundMethods:
 
