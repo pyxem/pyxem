@@ -83,7 +83,7 @@ def _cart2polar(x, y):
 
     """
     r = np.sqrt(x**2 + y**2)
-    theta = np.arctan2(x, y)  # θ referenced to vertical
+    theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
 def _polar2cart(r, theta):
@@ -119,15 +119,15 @@ def radial_average(z,cython=False):
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
-    
+
     center = ((z.shape[0]/2)-0.5,(z.shape[1]/2)-0.5) #geometric shape work, not 0 indexing
-    
+
     if _USE_CY_RADIAL_PROFILE and cython:
         averaged = radialprofile_cy(z, center)
     else:
         y, x = np.indices(z.shape)
         r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-        r = np.rint(r-0.5).astype(np.int) 
+        r = np.rint(r-0.5).astype(np.int)
         #the subtraction of 0.5 gets the 0 in the correct place
 
         tbin = np.bincount(r.ravel(), z.ravel())
@@ -277,15 +277,15 @@ def affine_transformation(z,matrix,order,**kwargs):
     trans : array
         Affine transformed diffraction pattern.
     """
-    
+
     # These three lines account for the transformation center not being (0,0)
     shift_y, shift_x = np.array(z.shape[:2]) / 2.
     tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
     tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-    
+
     # This defines the transform you want to perform
     transformation = tf.AffineTransform(matrix=matrix)
-    
+
     #skimage transforms can be added like this, actually matrix multiplication,
     #hence the need for the brackets. (Note tf.warp takes the inverse)
     trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
@@ -430,11 +430,11 @@ def reference_circle(coords, dimX, dimY,radius):
         np.array containing the circle drawn at the position given in the coordinates.
     """
     img = np.zeros((dimX, dimY))
-    
+
     for n in range(np.size(coords,0)):
         rr, cc = ellipse_perimeter(coords[n,0],coords[n,1], radius, radius)
         img[rr, cc] = 1
-        
+
     return img
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
@@ -448,7 +448,7 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     ----------
     radius_start : int
         The lower bound for the radius of the central disc to be used in the alignment
-        
+
     radius_finish : int
         The upper bounds for the radius of the central disc to be used in the alignment
 
@@ -460,7 +460,7 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     radiusList = np.arange(radius_start,radius_finish)
     errRecord = np.zeros_like(radiusList,dtype='single')
     origin = np.array([[round(np.size(z,axis=-2)/2),round(np.size(z,axis=-1)/2)]])
-    
+
     for ind in np.arange(0,np.size(radiusList)):
         radius = radiusList[ind]
         ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radius)
@@ -472,13 +472,15 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
         shift, error, diffphase = register_translation(ref,im, 10)
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
-        
+
         ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radiusList[index_min])
         ref= hann2d*ref
         shift, error, diffphase = register_translation(ref,im, 100)
-        
+
     return shift
 
 def peaks_as_gvectors(z, center, calibration):
+    """
+    """
     g = (z - center) * calibration
-    return g[0]
+    return np.array([g[0].T[1], g[0].T[0]]).T
