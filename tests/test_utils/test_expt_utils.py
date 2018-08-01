@@ -18,7 +18,8 @@
 
 import pytest
 import numpy as np
-from pyxem.utils.expt_utils import _cart2polar, _polar2cart
+from pyxem.utils.expt_utils import _cart2polar, _polar2cart,
+from pyxem.utils.expt_utils import *
 
 @pytest.mark.parametrize('x, y, r, theta',[
     (2, 2, 2.8284271247461903, -0.78539816339744828),
