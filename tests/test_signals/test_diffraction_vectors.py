@@ -34,7 +34,6 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
              [0.103636, -0.11958],
              [0.123566, 0.151468]])
 ])
-
 def diffraction_vectors_single(request):
     dvec = DiffractionVectors(request.param)
     dvec.axes_manager.set_signal_dimension(1)
@@ -53,7 +52,7 @@ class TestMagnitudes:
         diffraction_vectors_single.get_magnitudes()
 
     def test_get_magnitude_histogram_single(self, diffraction_vectors_single):
-        diffraction_vectors_single.get_magnitude_histogram()
+        diffraction_vectors_single.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
 
 #class TestUniqueVectors:
