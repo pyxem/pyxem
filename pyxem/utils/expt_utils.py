@@ -105,34 +105,26 @@ def _polar2cart(r, theta):
     y = -r * np.sin(theta)
     return x, y
 
-def radial_average(z,cython=False):
+def radial_average(z):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
 
-    Parameters
-    ----------
-
-    cython=False
-        Set to False if cython needs to be avoided. If cythonized option is not
-        not avaliable the behaviour is equivilant to cython == False
     Returns
     -------
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
+
     center = ((z.shape[0]/2)-0.5,(z.shape[1]/2)-0.5) #geometric shape work, not 0 indexing
 
-    if _USE_CY_RADIAL_PROFILE and cython:
-        averaged = radialprofile_cy(z, center)
-    else:
-        y, x = np.indices(z.shape)
-        r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-        r = np.rint(r-0.5).astype(np.int)
-        #the subtraction of 0.5 gets the 0 in the correct place
+    y, x = np.indices(z.shape)
+    r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
+    r = np.rint(r-0.5).astype(np.int)
+    #the subtraction of 0.5 gets the 0 in the correct place
 
-        tbin = np.bincount(r.ravel(), z.ravel())
-        nr = np.bincount(r.ravel())
-        averaged = np.nan_to_num(tbin / nr)
+    tbin = np.bincount(r.ravel(), z.ravel())
+    nr = np.bincount(r.ravel())
+    averaged = np.nan_to_num(tbin / nr)
 
     return averaged
 
