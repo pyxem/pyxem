@@ -28,15 +28,15 @@ def get_distance_between_two_angles_longform(angle_1,angle_2):
     """
     Using the long form to find the distance between two angles in euler form
     """
-    q1 = euler2quat(*angle_1,axes='rzxz')
-    q2 = euler2quat(*angle_2,axes='rzxz')
+    q1 = euler2quat(*np.deg2rad(angle_1),axes='rzxz')
+    q2 = euler2quat(*np.deg2rad(angle_2),axes='rzxz')
     ## now assume transform of the form MODAL then Something = TOTAL
     ## so we want to calculate MODAL^{-1} TOTAL
-    
+
     q_from_mode = qmult(qinverse(q2),q1)
     axis,angle = quat2axangle(q_from_mode)
     return angle
-    
+
 @pytest.fixture()
 def sp_cryst_map():
     """
@@ -70,7 +70,7 @@ def mod_cryst_map():
     """
     base = np.zeros((6,6))
     base[0] = [0,5,17,6,5e-17,0.5]
-    base[1] = [0,5,17,6,5e-17,0.5] 
+    base[1] = [0,5,17,6,5e-17,0.5]
     base[2] = [0,6,19,6,5e-17,0.5]
     base[3] = [0,7,19,6,5e-17,0.5]
     base[4] = [0,8,19,6,5e-17,0.5]
@@ -121,7 +121,7 @@ def test_get_modal_angles(mod_cryst_map):
     out = mod_cryst_map.get_modal_angles()
     assert np.allclose(out[0],[5,17,6])
     assert np.allclose(out[1],(2/6))
-    
+
 def test_get_distance_from_fixed_angle():
     angle_1 = [1,1,3]
     angle_2 = [1,2,4]
@@ -132,4 +132,4 @@ def test_get_distance_from_fixed_angle():
 def test_get_distance_from_modal(zero_modal_map):
     formal = zero_modal_map.get_distance_from_modal_angle()
     #if this runs, the test above has confirmed that is works
-    assert True 
+    assert True
