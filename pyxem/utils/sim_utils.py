@@ -19,7 +19,7 @@
 import itertools
 import math
 from decimal import Decimal, ROUND_HALF_UP
-from math import radians, sin
+from math import radians, sin, cos, acos
 
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
@@ -79,15 +79,15 @@ def get_interaction_constant(accelerating_voltage):
 
 
 def get_unique_families(hkls):
-    """
-    Returns unique families of Miller indices, which must be permutations
-    of each other.
+    """ Get unique families of Miller indices.
 
-    Args:
-        hkls ([h, k, l]): List of Miller indices.
+    Parameters
+    ----------
+    hkls ([h, k, l]): List of Miller indices.
 
-    Returns:
-        {hkl: multiplicity}: A dict with unique hkl and multiplicity.
+    Returns
+    -------
+    {hkl: multiplicity}: A dict with unique hkl and multiplicity.
     """
     def is_perm(hkl1, hkl2):
         h1 = np.abs(hkl1)
@@ -111,6 +111,53 @@ def get_unique_families(hkls):
 
     return pretty_unique
 
+def get_interplanar_angle(structure, hkl1, hkl2, degrees=False):
+    """Calculate the angle between two crystallogrpahic planes or reciprocal
+    lattice vectors.
+
+    Parameters
+    ----------
+    structure : Structure
+        The structure for which to calculate the interplanar angle.
+    hkl1 : list
+        Miller indices of first plane.
+    hkl2 : list
+        Miller indices of second plane.
+    degrees : bool
+        If True, angle returned in degrees, else angle returned in radians.
+
+    Returns
+    -------
+    phi : float
+        The inter-planar angle.
+
+    """
+    #define lattice in real and reciprocal space
+    l = structure.lattice
+    rl = l.reciprocal_lattice_crystallographic
+    #calculate real space interplanar spacings
+    d1 = l.d_hkl(hkl1)
+    d2 = l.d_hkl(hkl2)
+    #separate h, k, l for angle calculation
+    h1, k1, l1 = hkl1[0], hkl1[1], hkl1[2]
+    h2, k2, l2 = hkl2[0], hkl2[1], hkl2[2]
+    #specify reciprocal basis vector angles in radians
+    alpha = radians(rl.alpha)
+    beta = radians(rl.beta)
+    gamma = radians(rl.gamma)
+    #evaluate two parts of angle calculation
+    x = h1 * h2 * rl.a**2 + k1 * k2 * rl.b**2 + l1 * l2 * rl.c**2
+    y = (k1 * l2 + l1 * k2) * rl.b * rl.c * cos(alpha) + (h1 * l2 + l1 * h2) * rl.a * rl.c * cos(beta) + (h1 * k2 + k1 * h2) * rl.a * rl.b * cos(gamma)
+    cos_phi = d1 * d2 * (x + y)
+    #to avoid acos failing due to numerical precision
+    if np.isclose(cos_phi, 1): cos_phi = 1
+    if np.isclose(cos_phi, -1): cos_phi = -1
+    #calculate angle
+    phi = acos(cos_phi)
+    #convert answer to degrees and return
+    if degrees==True:
+        phi = math.degrees(phi)
+    return phi
 
 def get_kinematical_intensities(structure,
                                 g_indices,
