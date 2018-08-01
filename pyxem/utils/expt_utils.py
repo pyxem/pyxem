@@ -100,8 +100,9 @@ def _polar2cart(r, theta):
     x, y : floats or arrays
         Cartesian coordinates
     """
-    y = r * np.cos(theta)   # θ referenced to vertical
-    x = r * np.sin(theta)
+    # +ve quadrant in bottom right corner when plotted
+    x = r * np.cos(theta)
+    y = -r * np.sin(theta)
     return x, y
 
 def radial_average(z,cython=False):
@@ -478,6 +479,20 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
 
 def peaks_as_gvectors(z, center, calibration):
     """
+    Converts peaks found as array indices to calibrated units.
+
+    Parameters
+    -------
+    z : numpy array
+
+    center : numpy array
+
+    calibration : float
+
+    Returns
+    ----------
+    g : numpy arrays
+    
     """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T
