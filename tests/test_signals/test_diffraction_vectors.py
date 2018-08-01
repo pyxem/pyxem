@@ -39,6 +39,44 @@ def diffraction_vectors_single(request):
     dvec.axes_manager.set_signal_dimension(1)
     return dvec
 
+@pytest.fixture(params=[
+    np.array([[np.array([[ 0.089685,  0.292971],
+             [ 0.017937,  0.277027],
+             [-0.069755,  0.257097],
+             [-0.165419,  0.241153],
+             [ 0.049825,  0.149475],
+             [-0.037867,  0.129545],
+             [-0.117587,  0.113601]]),
+            np.array([[ 0.089685,  0.292971],
+              [ 0.017937,  0.277027],
+              [-0.069755,  0.257097],
+              [-0.165419,  0.241153],
+              [ 0.049825,  0.149475],
+              [-0.037867,  0.129545],
+              [-0.117587,  0.113601],
+              [ 0.149475,  0.065769],
+              [ 0.229195,  0.045839],
+              [ 0.141503,  0.025909],
+              [ 0.073741,  0.013951],
+              [ 0.001993,  0.001993],
+              [-0.069755, -0.009965]])],
+              [np.array([[ 0.089685,  0.292971],
+              [ 0.017937,  0.277027],
+              [-0.069755,  0.257097],
+              [-0.165419,  0.241153],
+              [ 0.049825,  0.149475],
+              [-0.037867,  0.129545],
+              [-0.117587,  0.113601],
+              [ 0.149475,  0.065769],
+              [ 0.229195,  0.045839],
+              [ 0.141503,  0.025909],
+              [ 0.073741,  0.013951]]),
+            np.array([[ 0.001993,  0.001993]])]], dtype=object)
+])
+def diffraction_vectors_map(request):
+    dvec = DiffractionVectors(request.param)
+    dvec.axes_manager.set_signal_dimension(0)
+    return dvec
 
 @pytest.mark.skip(reason='Plot not testable')
 def test_plot_diffraction_vectors(diffraction_vectors_single):
@@ -54,17 +92,44 @@ class TestMagnitudes:
     def test_get_magnitude_histogram_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
+    def test_get_magnitudes_map(self, diffraction_vectors_single):
+        diffraction_vectors_map.get_magnitudes()
 
-#class TestUniqueVectors:
-#
-#    def test_get_unique_vectors_single(self, diffraction_vectors_single):
-#        diffraction_pattern_SED.get_virtual_image(roi)
+    def test_get_magnitude_histogram_map(self, diffraction_vectors_single):
+        diffraction_vectors_map.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
 
-#class TestDiffractingPixelMaps:
-#
-#    def test_get_dpm_map(self, diffraction_vectors_single):
-#        diffraction_pattern_SED.get_virtual_image(roi)
-#
-#    def test_get_dpm_map_binary(self, diffraction_vectors_single):
-#        diffraction_pattern_SED.get_virtual_image(roi)
+class TestUniqueVectors:
+
+    def test_get_unique_vectors_map_type(self, diffraction_vectors_map):
+        unique_vectors = diffraction_vectors_map.test_get_unique_vectors()
+        assert isinstance(unique_vectors,DiffractionVectors)
+
+    @pytest.mark.parametrize('distance_threshold, answer',[
+        (0.01, np.array([[ 0.089685,  0.292971],
+                        [ 0.017937,  0.277027],
+                        [-0.069755,  0.257097],
+                        [-0.165419,  0.241153],
+                        [ 0.049825,  0.149475],
+                        [-0.037867,  0.129545],
+                        [-0.117587,  0.113601],
+                        [ 0.149475,  0.065769],
+                        [ 0.229195,  0.045839],
+                        [ 0.141503,  0.025909],
+                        [ 0.073741,  0.013951],
+                        [ 0.001993,  0.001993],
+                        [-0.069755, -0.009965]])),
+        (0.1, np.array([[ 0.089685,  0.292971]])),
+    ])
+    def test_get_unique_vectors_map_values(self, diffraction_vectors_map):
+        unique_vectors = diffraction_vectors_map.test_get_unique_vectors(distance_threshold=distance_threshold)
+        np.testing.assert_almost_equal(unique_vectors.data, answer)
+
+
+class TestDiffractingPixelMaps:
+
+    def test_get_dpm_map(self, diffraction_vectors_map):
+        diffraction_vectors_map.get_diffracting_pixels_map()
+
+    def test_get_dpm_map_binary(self, diffraction_vectors_map):
+        diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
