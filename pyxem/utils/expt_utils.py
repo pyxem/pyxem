@@ -400,21 +400,22 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
 
 def peaks_as_gvectors(z, center, calibration):
     """
-    Converts peaks found as array indices to calibrated units.
+    Converts peaks found as array indices to calibrated units, for use in a
+    hyperspy map function.
 
     Parameters
-    -------
+    ----------
     z : numpy array
-
+        peak postitions as array indices.
     center : numpy array
-
+        diffraction pattern centre in array indices.
     calibration : float
+        calibration in reciprocal Angstroms per pixels.
 
     Returns
-    ----------
+    -------
     g : numpy array
-
-
+        peak positions in calibrated units.
     """
     g = (z - center) * calibration
-    return g[0]
+    return np.array([g[0].T[1], g[0].T[0]]).T

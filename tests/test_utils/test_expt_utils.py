@@ -19,6 +19,7 @@
 import pytest
 import numpy as np
 from pyxem.utils.expt_utils import _cart2polar, _polar2cart
+from pyxem.utils.expt_utils import *
 
 @pytest.mark.parametrize('x, y, r, theta',[
     (2, 2, 2.8284271247461903, -0.78539816339744828),
@@ -40,11 +41,14 @@ def test_polar2cart(r, theta, x, y):
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
-#@pytest.mark.parametrize('z, center, calibration, g',[
-#    (np.array((10,10)), 0.0370143659),
-#    (200, 0.0250793403),
-#    (300, 0.0196874888),
-#])
-#def test_peaks_as_gvectors(z, center, calibration, g):
-#    gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
-#    np.testing.assert_almost_equal(gc, g)
+@pytest.mark.parametrize('z, center, calibration, g',[
+    (np.array([[100,100],
+              [200,200],
+              [150,-150]]),
+     np.array((127.5, 127.5)),
+     0.0039,
+     np.array([-0.10725, -0.10725])),
+])
+def test_peaks_as_gvectors(z, center, calibration, g):
+    gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
+    np.testing.assert_almost_equal(gc, g)
