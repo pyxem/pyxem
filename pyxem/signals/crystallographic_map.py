@@ -52,8 +52,12 @@ def _distance_from_fixed_angle(angle,fixed_angle):
     """
     q_data  = euler2quat(*np.deg2rad(angle),axes='rzxz')
     q_fixed = euler2quat(*np.deg2rad(fixed_angle),axes='rzxz')
-    theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
-    #https://math.stackexchange.com/questions/90081/quaternion-distance
+    if np.abs(2*(np.dot(q_data,q_fixed))**2 - 1) < 1: #arcos will work
+        #https://math.stackexchange.com/questions/90081/quaternion-distance
+        theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
+    else: #slower, but also good
+        q_from_mode = qmult(qinverse(q2),q1)
+        axis,theta = quat2axangle(q_from_mode)
 
     return theta
 
