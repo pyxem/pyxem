@@ -81,7 +81,6 @@ def get_template_library(structure,rot_list,edc):
                                            calibration=1/half_side_length,
                                            reciprocal_radius=0.8,
                                            half_shape=(half_side_length,half_side_length),
-                                           representation='euler',
                                            with_direct_beam=False)
     return library
 
