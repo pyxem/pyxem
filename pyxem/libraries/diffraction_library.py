@@ -18,6 +18,7 @@
 
 import pyxem as pxm
 import pickle
+import numpy as np
 
 def load_DiffractionLibrary(filename,safety=False):
     if safety:
@@ -26,6 +27,25 @@ def load_DiffractionLibrary(filename,safety=False):
     else:
         raise RuntimeError('Unpickling is risky, turn safety to True if \
         trust the author of this content')
+
+def _get_library_from_angles(library,phase,angle):
+    """
+    This function is designed to find an element that is 'basically' the same
+    as the rotation one has asked for. This is needed because
+    of floating point round off/hashability.
+    """
+    residual = 0.1
+    for key in library[phase]:
+        residual_temp = np.sum(np.subtract(list(key),angle))
+        if np.abs(residual_temp) < residual:
+            residual = residual_temp
+            stored_key = key
+
+    if np.abs(residual) < 1e-5:
+        return library[phase][stored_key]
+    else:
+        raise ValueError("It appears that no library entry lies with 1e-5 of the target angle")
+
 
 
 class DiffractionLibrary(dict):
@@ -51,7 +71,10 @@ class DiffractionLibrary(dict):
 
         if phase is not None:
             if angle is not None:
-                return self[phase][angle]
+                try:
+                    return self[phase][angle]
+                except KeyError:
+                    return _get_library_from_angles(self,phase,angle)
             else:
                 for rotation in self[phase].keys():
                     return self[phase][rotation]
