@@ -40,11 +40,22 @@ def test_polar2cart(r, theta, x, y):
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
-#@pytest.mark.parametrize('z, center, calibration, g',[
-#    (np.array((10,10)), 0.0370143659),
-#    (200, 0.0250793403),
-#    (300, 0.0196874888),
-#])
-#def test_peaks_as_gvectors(z, center, calibration, g):
-#    gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
-#    np.testing.assert_almost_equal(gc, g)
+@pytest.fixture(params=[
+    np.array([[100,100],
+              [200,200],
+              [150,-150]])
+])
+def example_peaks(request):
+    return ElectronDiffraction(request.param)
+
+@pytest.mark.parametrize('z, center, calibration, g',[
+    (np.array([[100,100],
+              [200,200],
+              [150,-150]]),
+     np.array((127.5, 127.5)),
+     0.0039,
+     np.array([-0.10725, -0.10725])),
+])
+def test_peaks_as_gvectors(z, center, calibration, g):
+    gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
+    np.testing.assert_almost_equal(gc, g)
