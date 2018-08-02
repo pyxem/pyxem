@@ -32,7 +32,7 @@ from pyxem.signals.tensor_field import DisplacementGradientMap
                [0., 0., 1.]]),
      np.array([[1.02, -0.013, 0.],
                [-0.013, 0.98, 0.],
-               [0. , 0. , 1.]]),
+               [0. , 0. , 1.]])),
 ])
 def test_polar_decomposition(D, side, R, U):
     Rc, Uc = _polar_decomposition(D, side=side)
@@ -52,3 +52,20 @@ def test_polar_decomposition(D, side, R, U):
 def test_get_rotation_angle(R, theta):
     tc = _get_rotation_angle(R)
     np.testing.assert_almost_equal(tc, theta)
+
+@pytest.fixture(params=[
+    np.array([[[[0.98860899, -0.2661997 ,  0.],
+                [0.2514384 ,  0.94324267,  0.],
+                [0.        ,  0.        ,  1.]],
+               [[0.98860899, -0.2661997 ,  0.],
+                [0.2514384 ,  0.94324267,  0.],
+                [0.        ,  0.        ,  1.]]],
+              [[[0.98860899, -0.2661997 ,  0.],
+                [0.2514384 ,  0.94324267,  0.],
+                [0.        ,  0.        ,  1.]],
+               [[0.98860899, -0.2661997 ,  0.],
+                [0.2514384 ,  0.94324267,  0.],
+                [0.        ,  0.        ,  1.]]]])                                                                                    
+])
+def displacement_gradient_map(request):
+    return DisplacementGradientMap(request.param)
