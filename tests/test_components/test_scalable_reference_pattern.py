@@ -20,3 +20,16 @@ import pytest
 import numpy as np
 
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
+
+@pytest.fixture(params=[
+    np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 1., 2., 1., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 1., 2., 1., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 0., 0., 0., 0.]])
+])
+def diffraction_pattern(request):
+    return ElectronDiffraction(request.param)
