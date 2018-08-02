@@ -83,6 +83,23 @@ def test_function(diffraction_pattern):
 def diffraction_pattern_SED(request):
     return ElectronDiffraction(request.param)
 
-#def test_construct_displacement_gradient(diffraction_pattern,
-#                                         diffraction_pattern_SED):
-#    ref = ScalableReferencePattern(diffraction_pattern)
+def test_construct_displacement_gradient(diffraction_pattern,
+                                         diffraction_pattern_SED):
+    ref = ScalableReferencePattern(diffraction_pattern)
+    m = diffraction_pattern_SED.create_model()
+    m.append(ref)
+    m.multifit()
+    disp_grad = ref.construct_displacement_gradient()
+    answer = np.array([[[[  0.4658891 ,   0.27604863,   0.        ],
+                         [  0.27605045,   0.46588744,   0.        ],
+                         [  0.        ,   0.        ,   1.        ]],
+                        [[-46.8117649 ,  47.34050532,   0.        ],
+                         [-46.89390475,  47.49897645,   0.        ],
+                         [  0.        ,   0.        ,   1.        ]]],
+                       [[[-46.8117649 ,  47.34050532,   0.        ],
+                         [-46.89390475,  47.49897645,   0.        ],
+                         [  0.        ,   0.        ,   1.        ]],
+                        [[-46.8117649 ,  47.34050532,   0.        ],
+                         [-46.89390475,  47.49897645,   0.        ],
+                         [  0.        ,   0.        ,   1.        ]]]])
+    np.testing.assert_almost_equal(disp_grad.data, answer)
