@@ -100,7 +100,7 @@ def displacement_gradient_map(request):
 def test_map_polar_decomposition(dgm,
                                  rotation_map,
                                  distortion_map):
-    Rc, Uc = displacement_gradient_map.polar_decomposition()
+    Rc, Uc = dgm.polar_decomposition()
     np.testing.assert_almost_equal(Rc.data, rotation_map)
     np.testing.assert_almost_equal(Uc.data, distortion_map)
 
@@ -117,5 +117,5 @@ def test_map_polar_decomposition(dgm,
 ])
 def test_get_strain_maps(dgm,
                          strain_answers):
-    strain_results = displacement_gradient_map.get_strain_maps()
+    strain_results = dgm.get_strain_maps()
     np.testing.assert_almost_equal(Rc.data, rotation_map)
