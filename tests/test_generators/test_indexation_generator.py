@@ -20,6 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.generators.indexation_generator import *
+from pyxem.signals.diffraction_simulation import ProfileSimulation
 
 @pytest.fixture
 def profile_simulation():
@@ -75,3 +76,24 @@ def test_profile_indexation_generator_init(profile_simulation):
                                                  1.2756772657476541],
                                     simulation=profile_simulation)
     assert isinstance(pig, ProfileIndexationGenerator)
+
+def test_profile_indexation_generator_init(profile_simulation):
+    pig = ProfileIndexationGenerator(magnitudes=[0.31891931643691351,
+                                                 0.52079306292509475,
+                                                 0.6106839974876449,
+                                                 0.73651261277849378,
+                                                 0.80259601243613932,
+                                                 0.9020400452156796,
+                                                 0.95675794931074043,
+                                                 1.0415861258501895,
+                                                 1.0893168446141808,
+                                                 1.1645286909108374,
+                                                 1.2074090451670043,
+                                                 1.2756772657476541],
+                                    simulation=profile_simulation,
+                                    mapping=False)
+    indexation = pig.index_peaks(tolerance=0.02)
+    np.testing.assert_almost_equal(indexation[0], np.array([0.3189193164369135,
+                                                            np.array([[{(1, 1, 1): 8}],
+                                                            [0.0]], dtype=object)],
+                                                            dtype=object))
