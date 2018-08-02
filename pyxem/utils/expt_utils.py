@@ -18,17 +18,14 @@
 
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.ndimage.interpolation import shift
-from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
-from skimage.morphology import square, opening
 from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 
 try:
-    from .radialprofile import radialprofile as radialprofile_cy
+    pass
 except ImportError:
     _USE_CY_RADIAL_PROFILE = False
 else:

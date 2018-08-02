@@ -17,19 +17,12 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import matplotlib.pyplot as plt
 import itertools
 
 from mpl_toolkits.axisartist.floating_axes import GridHelperCurveLinear, \
     FloatingSubplot
-from matplotlib.projections import PolarAxes
-from matplotlib.transforms import Affine2D
-from scipy.interpolate import griddata
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
-from transforms3d.euler import euler2axangle
-from pyxem.utils import correlate
-from ipywidgets import interact
 
 
 def _find_max_length_peaks(peaks):

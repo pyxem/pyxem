@@ -266,7 +266,6 @@ class TestPeakFinding:
     methods = ['skimage', 'zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
     def test_argless_run(self,single_peak):
         single_peak.find_peaks()
-        pass
 
     @pytest.mark.parametrize('method', methods)
     def test_findpeaks_single(self,single_peak,method):

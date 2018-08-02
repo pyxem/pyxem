@@ -16,14 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-from tqdm import tqdm
 
-from scipy.ndimage import distance_transform_edt, label
 
-from skimage.morphology import watershed
-from skimage.feature import peak_local_max
-from skimage.feature import match_template
 
 def normalize_vdf(im):
     return im / im.max()
