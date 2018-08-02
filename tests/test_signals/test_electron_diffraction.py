@@ -111,6 +111,13 @@ class TestSimpleMaps:
         diffraction_pattern_SED.center_direct_beam(radius_start=1,radius_finish=3)
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction) #after inplace transform applied
 
+    def test_apply_affine_transformation(self, diffraction_pattern_SED):
+        diffraction_pattern_SED.apply_affine_transformation(
+                                                        D=np.array([[1., 0., 0.],
+                                                                    [0., 1., 0.],
+                                                                    [0., 0., 1.]]))
+        assert isinstance(diffraction_pattern_SED, ElectronDiffraction)
+
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
@@ -128,6 +135,19 @@ class TestSimpleHyperspy:
         diffraction_pattern_SED.set_scan_calibration(19)
         assert isinstance(diffraction_pattern_SED,ElectronDiffraction)
 
+    @pytest.mark.parametrize('calibration, center', [
+                                (1, (4, 4),),
+                                (0.017, (3, 3)),
+                                (0.5, None,),])
+
+    def test_set_diffraction_calibration(self,diffraction_pattern_SED, calibration, center):
+        calibrated_center = calibration * np.array(center) if center is not None else center
+        diffraction_pattern_SED.set_diffraction_calibration(calibration, center=calibrated_center)
+        dx, dy = diffraction_pattern_SED.axes_manager.signal_axes
+        assert dx.scale == calibration and dy.scale == calibration
+        if center is not None:
+            assert np.all(diffraction_pattern_SED.isig[0., 0.].data == diffraction_pattern_SED.isig[center[0], center[1]].data)
+
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
@@ -140,25 +160,8 @@ class TestVirtualImaging:
         diffraction_pattern_SED.get_virtual_image(roi)
 
 
-@pytest.mark.skip(reason='Defaults not implemented in pyXem')
-def test_default_params(diffraction_pattern):
-    a = diffraction_pattern.metadata.Acquisition_instrument.TEM.rocking_angle
-    pass
 
-
-@pytest.mark.parametrize('calibration, center', [
-    (1, (4, 4),),
-    (0.017, (3, 3)),
-    (0.5, None,),
-])
-def test_set_diffraction_calibration(diffraction_pattern, calibration, center):
-    calibrated_center = calibration * np.array(center) if center is not None else center
-    diffraction_pattern.set_diffraction_calibration(calibration, center=calibrated_center)
-    dx, dy = diffraction_pattern.axes_manager.signal_axes
-    assert dx.scale == calibration and dy.scale == calibration
-    if center is not None:
-        assert np.all(diffraction_pattern.isig[0., 0.].data == diffraction_pattern.isig[center[0], center[1]].data)
-
+#class TestGainNormalisation
 
 @pytest.mark.parametrize('dark_reference, bright_reference', [
     (-1, 1),
@@ -231,55 +234,6 @@ class TestRadialProfile:
         rp = diffraction_pattern.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
 
-
-class TestApplyAffineTransformation:
-
-    def test_affine_transformation_signal_type(self, diffraction_pattern):
-        diffraction_pattern.apply_affine_transformation(
-            D=np.array([[1., 0., 0.],
-                        [0., 1., 0.],
-                        [0., 0., 1.]]))
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
-
-    @pytest.mark.parametrize('diffraction_pattern, transformation, expected', [
-        (
-            np.array([
-                [0, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0],
-            ], dtype=float), np.array([
-                [1, 0, 0],
-                [0, 1, 0],
-                [0, 0, 1],
-            ], dtype=float), np.array([
-                [0, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0]
-            ], dtype=float),
-        ),
-        (
-            np.array([
-                [0, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0],
-            ], dtype=float),
-            np.array([
-                [0, 1, 0],
-                [1, 0, 0],
-                [0, 0, 1],
-            ], dtype=float),
-            np.array([
-                [0, 0, 0],
-                [1, 1, 1],
-                [0, 0, 0],
-            ], dtype=float),
-        )
-    ], indirect=['diffraction_pattern'])
-    def test_geometric_distortion(self, diffraction_pattern, transformation, expected):
-        diffraction_pattern.apply_affine_transformation(D=transformation)
-        assert np.allclose(diffraction_pattern.data, expected)
-
-
 class TestBackgroundMethods:
 
     @pytest.mark.parametrize('method, kwargs', [
@@ -312,7 +266,6 @@ class TestPeakFinding:
     methods = ['skimage', 'zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
     def test_argless_run(self,single_peak):
         single_peak.find_peaks()
-        pass
 
     @pytest.mark.parametrize('method', methods)
     def test_findpeaks_single(self,single_peak,method):

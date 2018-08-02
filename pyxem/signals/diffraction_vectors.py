@@ -16,9 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import BaseSignal, Signal1D, Signal2D
+from hyperspy.signals import BaseSignal, Signal1D
 
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 

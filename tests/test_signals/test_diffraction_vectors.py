@@ -90,7 +90,6 @@ def diffraction_vectors_map(request):
 @pytest.mark.skip(reason='Plot not testable')
 def test_plot_diffraction_vectors(diffraction_vectors_single):
     diffraction_vectors_single.plot_diffraction_vectors
-    pass
 
 
 class TestMagnitudes:

@@ -19,7 +19,6 @@
 
 """
 
-import numpy as np
 from hyperspy.signals import Signal1D
 
 

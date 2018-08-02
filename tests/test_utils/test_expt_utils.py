@@ -18,8 +18,44 @@
 
 import pytest
 import numpy as np
-from pyxem.utils.expt_utils import _cart2polar, _polar2cart
+
+from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.utils.expt_utils import _cart2polar, _polar2cart, _index_coords
 from pyxem.utils.expt_utils import *
+
+@pytest.fixture(params=[
+    np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 1., 2., 1., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 1., 2., 1., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 0., 0., 0., 0.]])
+])
+def diffraction_pattern(request):
+    return ElectronDiffraction(request.param)
+
+def test_index_coords(diffraction_pattern):
+    x = np.array([[-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
+                  [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
+                  [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
+                  [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
+                  [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
+                  [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
+                  [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
+                  [-4., -3., -2., -1.,  0.,  1.,  2.,  3.]])
+    y = np.array([[-4., -4., -4., -4., -4., -4., -4., -4.],
+                  [-3., -3., -3., -3., -3., -3., -3., -3.],
+                  [-2., -2., -2., -2., -2., -2., -2., -2.],
+                  [-1., -1., -1., -1., -1., -1., -1., -1.],
+                  [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+                  [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+                  [ 2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.],
+                  [ 3.,  3.,  3.,  3.,  3.,  3.,  3.,  3.]])
+    xc, yc = _index_coords(diffraction_pattern.data)
+    np.testing.assert_almost_equal(xc, x)
+    np.testing.assert_almost_equal(yc, y)
 
 @pytest.mark.parametrize('x, y, r, theta',[
     (2, 2, 2.8284271247461903, -0.78539816339744828),

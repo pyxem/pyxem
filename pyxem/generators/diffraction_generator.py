@@ -21,7 +21,7 @@
 """
 
 import numpy as np
-from math import sin, cos, asin, pi
+from math import pi
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.signals.diffraction_simulation import ProfileSimulation
