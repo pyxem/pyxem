@@ -49,7 +49,14 @@ def structure(request, lattice, element):
 
 def test_electron_diffraction_component_init(diffraction_calculator,
                                              structure):
-    ref = ElectronDiffractionForwardModel(diffraction_pattern,
+    ref = ElectronDiffractionForwardModel(diffraction_calculator,
                                           structure,
                                           calibration=0.01)
     assert isinstance(ref, ElectronDiffractionForwardModel)
+
+def test_function(diffraction_calculator, structure):
+    ref = ElectronDiffractionForwardModel(diffraction_calculator,
+                                          structure,
+                                          calibration=0.01)
+    func = ref.function()
+    np.testing.assert_almost_equal(func, 1)
