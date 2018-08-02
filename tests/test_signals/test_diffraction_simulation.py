@@ -37,21 +37,21 @@ def get_signal():
 
 def test_typing():
     assert type(get_signal()) is ElectronDiffraction
-    
+
 def test_correct_quadrant_np():
     A = get_signal().data
-    assert (np.sum(A[:72,:72]) == 0)    
-    assert (np.sum(A[72:,:72]) == 0)    
-    assert (np.sum(A[:72,72:]) == 0)    
-    assert (np.sum(A[72:,72:])  > 0)    
+    assert (np.sum(A[:72,:72]) == 0)
+    assert (np.sum(A[72:,:72]) == 0)
+    assert (np.sum(A[:72,72:]) == 0)
+    assert (np.sum(A[72:,72:])  > 0)
 
 def test_correct_quadrant_hs():
     S = get_signal()
-    assert (np.sum(S.isig[:72,:72].data) == 0)    
-    assert (np.sum(S.isig[72:,:72].data) == 0)    
-    assert (np.sum(S.isig[:72,72:].data) == 0)    
-    assert (np.sum(S.isig[72:,72:].data)  > 0) 
-    
+    assert (np.sum(S.isig[:72,:72].data) == 0)
+    assert (np.sum(S.isig[72:,:72].data) == 0)
+    assert (np.sum(S.isig[:72,72:].data) == 0)
+    assert (np.sum(S.isig[72:,72:].data)  > 0)
+
 # ToDo - Test low and high sigma
 
 """ These test that our kinematic simulation behaves as we would expect it to """
@@ -63,7 +63,7 @@ def check_pattern_equivilance(p1,p2,coords_only=False):
     assert np.allclose(p1.coordinates,p2.coordinates)
     if not coords_only:
         assert np.allclose(p1.indices,p2.indices)
-        assert np.allclose(p1.intensities,p2.intensities) 
+        assert np.allclose(p1.intensities,p2.intensities)
 
 # Becuase of the slight differences between each of the structures, the
 # explictily named, ugly pathway has been taken
