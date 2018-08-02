@@ -65,7 +65,41 @@ def test_get_rotation_angle(R, theta):
                 [0.        ,  0.        ,  1.]],
                [[0.98860899, -0.2661997 ,  0.],
                 [0.2514384 ,  0.94324267,  0.],
-                [0.        ,  0.        ,  1.]]]])                                                                                    
+                [0.        ,  0.        ,  1.]]]])
 ])
 def displacement_gradient_map(request):
     return DisplacementGradientMap(request.param)
+
+@pytest.mark.parametrize('dgm, rotation_map, distortion_map',[
+    (displacement_gradient_map,
+     np.array([[[[ 0.96592583, -0.25881905,  0.        ],
+                 [ 0.25881905,  0.96592583,  0.        ],
+                 [ 0.        ,  0.        ,  1.        ]],
+                [[ 0.96592583, -0.25881905,  0.        ],
+                 [ 0.25881905,  0.96592583,  0.        ],
+                 [ 0.        ,  0.        ,  1.        ]]],
+               [[[ 0.96592583, -0.25881905,  0.        ],
+                 [ 0.25881905,  0.96592583,  0.        ],
+                 [ 0.        ,  0.        ,  1.        ]],
+                [[ 0.96592583, -0.25881905,  0.        ],
+                 [ 0.25881905,  0.96592583,  0.        ],
+                 [ 0.        ,  0.        ,  1.        ]]]]),
+     np.array([[[[ 1.02 , -0.013,  0.   ],
+                 [-0.013,  0.98 ,  0.   ],
+                 [ 0.   ,  0.   ,  1.   ]],
+                [[ 1.02 , -0.013,  0.   ],
+                 [-0.013,  0.98 ,  0.   ],
+                 [ 0.   ,  0.   ,  1.   ]]],
+               [[[ 1.02 , -0.013,  0.   ],
+                 [-0.013,  0.98 ,  0.   ],
+                 [ 0.   ,  0.   ,  1.   ]],
+                [[ 1.02 , -0.013,  0.   ],
+                 [-0.013,  0.98 ,  0.   ],
+                 [ 0.   ,  0.   ,  1.   ]]]]),
+])
+def test_map_polar_decomposition(dgm,
+                                 rotation_map,
+                                 distortion_map):
+    Rc, Uc = displacement_gradient_map.polar_decomposition()
+    np.testing.assert_almost_equal(Rc.data, rotation_map)
+    np.testing.assert_almost_equal(Uc.data, distortion_map)
