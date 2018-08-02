@@ -22,27 +22,32 @@ import numpy as np
 from pyxem.signals.tensor_field import _polar_decomposition, _get_rotation_angle
 from pyxem.signals.tensor_field import DisplacementGradientMap
 
-@pytest.mark.parametrize('D, R, U',[
-    (np.array([[100,10,0],
-               [200,20,0],
-               [150,-15,0]]),
-     np.array([[100,10,0],
-                [200,20,0],
-                [150,-15,0]]),
-     np.array([[100,10,0],
-                [200,20,0],
-                [150,-15,0]])),
+@pytest.mark.parametrize('D, side, R, U',[
+    (np.array([[0.98860899, -0.2661997, 0.],
+               [0.2514384, 0.94324267, 0.],
+               [0., 0., 1.]]),
+     'right',
+     np.array([[0.96592583, -0.25881905, 0.],
+               [0.25881905, 0.96592583, 0.],
+               [0., 0., 1.]]),
+     np.array([[1.02, -0.013, 0.],
+               [-0.013, 0.98, 0.],
+               [0. , 0. , 1.]]),
 ])
-def test_polar_decomposition(D, R, U):
-    Rc, Uc = _polar_decomposition(D)
+def test_polar_decomposition(D, side, R, U):
+    Rc, Uc = _polar_decomposition(D, side=side)
     np.testing.assert_almost_equal(Rc, R)
     np.testing.assert_almost_equal(Uc, U)
 
 @pytest.mark.parametrize('R, theta',[
-    (np.array([[100,10,0],
-               [200,20,0],
-               [150,-15,0]]),
-     15),
+    (np.array([[0.76604444, 0.64278761, 0.],
+               [-0.64278761, 0.76604444, 0.],
+               [0. , 0. , 1.]]),
+     0.6981317007977318),
+    (np.array([[0.96592583, -0.25881905, 0.],
+               [0.25881905, 0.96592583, 0.],
+               [0., 0. , 1.]]),
+     -0.2617993877991494),
 ])
 def test_get_rotation_angle(R, theta):
     tc = _get_rotation_angle(R)
