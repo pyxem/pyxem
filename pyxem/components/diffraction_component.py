@@ -78,7 +78,8 @@ class ElectronDiffractionForwardModel(Component):
         return 1
 
     def simulate(self):
-        """Deforms the structure and simulates the resultant diffraction pattern
+        """Deforms the structure and simulates the corresponding electron
+        diffraction pattern.
 
         Returns
         -------
