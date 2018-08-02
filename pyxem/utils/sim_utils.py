@@ -16,14 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import itertools
 import math
-from decimal import Decimal, ROUND_HALF_UP
-from math import radians, sin
 
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
-import os
 import collections
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS

@@ -21,9 +21,7 @@
 
 import numpy as np
 
-from hyperspy._signals.lazy import LazySignal
-from hyperspy.api import interactive, stack
-from hyperspy.components1d import Voigt, Exponential, Polynomial
+from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors

@@ -17,9 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from skimage.feature import peak_local_max
 import scipy.ndimage as ndi
-import copy
 
 NO_PEAKS = np.array([[np.nan, np.nan]])
 

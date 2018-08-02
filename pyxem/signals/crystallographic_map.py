@@ -18,7 +18,7 @@
 
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
-from transforms3d.euler import euler2axangle,euler2quat,quat2axangle
+from transforms3d.euler import euler2quat, quat2axangle
 from transforms3d.quaternions import qmult,qinverse
 import numpy as np
 from tqdm import tqdm

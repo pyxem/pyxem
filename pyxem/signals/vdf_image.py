@@ -19,9 +19,7 @@
 
 """
 
-import numpy as np
-from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from pyxem.utils.vdf_utils import *
+from hyperspy.signals import Signal2D
 
 class VDFImage(Signal2D):
     _signal_type = "vdf_image"
