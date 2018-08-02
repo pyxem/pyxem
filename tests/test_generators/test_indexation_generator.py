@@ -77,7 +77,7 @@ def test_profile_indexation_generator_init(profile_simulation):
                                     simulation=profile_simulation)
     assert isinstance(pig, ProfileIndexationGenerator)
 
-def test_profile_indexation_generator_init(profile_simulation):
+def test_profile_indexation_generator_single_indexation(profile_simulation):
     pig = ProfileIndexationGenerator(magnitudes=[0.31891931643691351,
                                                  0.52079306292509475,
                                                  0.6106839974876449,
