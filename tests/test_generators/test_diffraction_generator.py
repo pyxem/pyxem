@@ -19,7 +19,7 @@
 import numpy as np
 import pymatgen as pmg
 import pytest
-from pyxem import DiffractionSimulation, ProfileSimulation
+from pyxem.signals.diffraction_simulation import DiffractionSimulation, ProfileSimulation
 from pyxem.generators.diffraction_generator import (
     DiffractionGenerator
 )
