@@ -44,4 +44,45 @@ def test_function(diffraction_pattern):
     ref = ScalableReferencePattern(diffraction_pattern)
     x, y = _index_coords(diffraction_pattern.data)
     func = ref.function(x=x, y=y)
-    assert np.equal(func, diffraction_pattern.data)
+    np.testing.assert_almost_equal(func, diffraction_pattern.data)
+
+@pytest.fixture(params=[
+    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 2., 1., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 2.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 2., 2., 2., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
+])
+def diffraction_pattern_SED(request):
+    return ElectronDiffraction(request.param)
+
+#def test_construct_displacement_gradient(diffraction_pattern,
+#                                         diffraction_pattern_SED):
+#    ref = ScalableReferencePattern(diffraction_pattern)
