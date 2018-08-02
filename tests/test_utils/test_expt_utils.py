@@ -18,6 +18,8 @@
 
 import pytest
 import numpy as np
+
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.expt_utils import _cart2polar, _polar2cart, _index_coords
 from pyxem.utils.expt_utils import *
 

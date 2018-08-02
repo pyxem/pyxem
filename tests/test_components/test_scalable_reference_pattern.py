@@ -39,3 +39,9 @@ def diffraction_pattern(request):
 def test_scalable_reference_pattern_init(diffraction_pattern):
     ref = ScalableReferencePattern(diffraction_pattern)
     assert isinstance(ref, ScalableReferencePattern)
+
+def test_function(diffraction_pattern):
+    ref = ScalableReferencePattern(diffraction_pattern)
+    x, y = _index_coords(diffraction_pattern.data)
+    func = ref.function(x=x, y=y)
+    assert np.equal(func, diffraction_pattern.data)
