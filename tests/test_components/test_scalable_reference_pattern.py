@@ -19,11 +19,32 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.vdf_generator import VDFGenerator
-
+from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
 from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.vdf_image import VDFImage
+from pyxem.utils.expt_utils import _index_coords
+
+@pytest.fixture(params=[
+    np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 1., 2., 1., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 1., 2., 1., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 0., 0., 0., 0.]])
+])
+def diffraction_pattern(request):
+    return ElectronDiffraction(request.param)
+
+def test_scalable_reference_pattern_init(diffraction_pattern):
+    ref = ScalableReferencePattern(diffraction_pattern)
+    assert isinstance(ref, ScalableReferencePattern)
+
+def test_function(diffraction_pattern):
+    ref = ScalableReferencePattern(diffraction_pattern)
+    x, y = _index_coords(diffraction_pattern.data)
+    func = ref.function(x=x, y=y)
+    np.testing.assert_almost_equal(func, diffraction_pattern.data)
 
 @pytest.fixture(params=[
     np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
@@ -59,33 +80,26 @@ from pyxem.signals.vdf_image import VDFImage
                [0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
 ])
-def electron_diffraction(request):
+def diffraction_pattern_SED(request):
     return ElectronDiffraction(request.param)
 
-@pytest.fixture(params=[
-    np.array([[1, 1],
-              [2, 2]])
-])
-def diffraction_vectors(request):
-    dvec = DiffractionVectors(request.param)
-    dvec.axes_manager.set_signal_dimension(1)
-    return dvec
-
-@pytest.fixture
-def vdf_generator(electron_diffraction, diffraction_vectors):
-    return VDFGenerator(electron_diffraction, diffraction_vectors)
-
-
-class TestVDFGenerator:
-
-    @pytest.mark.parametrize('radius, normalize', [
-        (1., False),
-        (1., True)
-    ])
-    def test_get_vdf_image(
-            self,
-            vdf_generator: VDFGenerator,
-            radius, normalize
-            ):
-        vdfs = vdf_generator.get_vdf_images(radius, normalize)
-        assert isinstance(vdfs, VDFImage)
+#def test_construct_displacement_gradient(diffraction_pattern,
+#                                         diffraction_pattern_SED):
+#    ref = ScalableReferencePattern(diffraction_pattern)
+#    m = diffraction_pattern_SED.create_model()
+#    m.append(ref)
+#    m.multifit()
+#    disp_grad = ref.construct_displacement_gradient()
+#    answer = np.array([[[[  0.4658891 ,   0.27604863,   0.        ],
+#                         [  0.27605045,   0.46588744,   0.        ],
+#                         [  0.        ,   0.        ,   1.        ]],
+#                        [[-46.8117649 ,  47.34050532,   0.        ],
+#                         [-46.89390475,  47.49897645,   0.        ],
+#                         [  0.        ,   0.        ,   1.        ]]],
+#                       [[[-46.8117649 ,  47.34050532,   0.        ],
+#                         [-46.89390475,  47.49897645,   0.        ],
+#                         [  0.        ,   0.        ,   1.        ]],
+#                        [[-46.8117649 ,  47.34050532,   0.        ],
+#                         [-46.89390475,  47.49897645,   0.        ],
+#                         [  0.        ,   0.        ,   1.        ]]]])
+#    np.testing.assert_almost_equal(disp_grad.data, answer)
