@@ -50,8 +50,6 @@ class ElectronDiffractionForwardModel(Component):
         Defaults to the identity matrix.
 
     """
-    # TODO: examples in the docstring
-
     def __init__(self, electron_diffraction_calculator,
                  structure,
                  calibration,
