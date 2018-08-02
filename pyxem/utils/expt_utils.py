@@ -27,12 +27,6 @@ from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 
-try:
-    from .radialprofile import radialprofile as radialprofile_cy
-except ImportError:
-    _USE_CY_RADIAL_PROFILE = False
-else:
-    _USE_CY_RADIAL_PROFILE = True
 
 """
 This module contains utility functions for processing electron diffraction
