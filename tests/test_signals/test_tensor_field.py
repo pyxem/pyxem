@@ -103,3 +103,19 @@ def test_map_polar_decomposition(dgm,
     Rc, Uc = displacement_gradient_map.polar_decomposition()
     np.testing.assert_almost_equal(Rc.data, rotation_map)
     np.testing.assert_almost_equal(Uc.data, distortion_map)
+
+@pytest.mark.parametrize('dgm, strain_answers',[
+    (displacement_gradient_map,
+     np.array([[[-0.02      , -0.02      ],
+                [-0.02      , -0.02      ]],
+               [[ 0.02      ,  0.02      ],
+                [ 0.02      ,  0.02      ]],
+               [[-0.013     , -0.013     ],
+                [-0.013     , -0.013     ]],
+               [[-0.26179939, -0.26179939],
+                [-0.26179939, -0.26179939]]]),
+])
+def test_get_strain_maps(dgm,
+                         strain_answers):
+    strain_results = displacement_gradient_map.get_strain_maps()
+    np.testing.assert_almost_equal(Rc.data, rotation_map)
