@@ -30,11 +30,20 @@ from hyperspy.misc.io.tools import overwrite as overwrite_method
 from hyperspy.misc.utils import stack as stack_method
 from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.ui_registry import get_gui
+from hyperspy.api import roi
 from natsort import natsorted
 
+from .components.diffraction_component import ElectronDiffractionForwardModel
 
+from .generators.diffraction_generator import DiffractionGenerator
+from .generators.library_generator import DiffractionLibraryGenerator
 
+from .signals.crystallographic_map import CrystallographicMap
+from .signals.diffraction_profile import ElectronDiffractionProfile
 from .signals.electron_diffraction import ElectronDiffraction
+from .signals.diffraction_simulation import DiffractionSimulation
+from .signals.diffraction_vectors import DiffractionVectors
+from .signals.vdf_image import VDFImage
 
 from .io_plugins import io_plugins, default_write_ext
 from .io_plugins import mib as mib_reader
