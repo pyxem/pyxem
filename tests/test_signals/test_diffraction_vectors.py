@@ -16,13 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-<<<<<<< HEAD
-import numpy as np
-import pytest
-from hyperspy.signals import Signal1D, Signal2D
-from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-=======
 import pytest
 import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
@@ -141,4 +134,3 @@ class TestDiffractingPixelMaps:
 
     def test_get_dpm_map_binary(self, diffraction_vectors_map):
         diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
->>>>>>> master
