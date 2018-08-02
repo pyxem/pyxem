@@ -27,7 +27,6 @@ import numpy as np
 from pyxem.signals.indexation_results import IndexationResults
 
 from pyxem.utils import correlate
-from pyxem.utils.indexation_utils import index_magnitudes
 
 import hyperspy.api as hs
 
