@@ -62,3 +62,11 @@ def test_function(diffraction_calculator, structure):
                                           calibration=0.01)
     func = ref.function()
     np.testing.assert_almost_equal(func, 1)
+
+def test_simulate(diffraction_calculator, structure):
+    ref = ElectronDiffractionForwardModel(diffraction_calculator,
+                                          structure,
+                                          reciprocal_radius=1.,
+                                          calibration=0.01)
+    sim = ref.simulate()
+    assert isinstance(ref, DiffractionSimulation)
