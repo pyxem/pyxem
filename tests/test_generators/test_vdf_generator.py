@@ -18,7 +18,9 @@
 
 import pytest
 import numpy as np
+
 from pyxem.generators.vdf_generator import VDFGenerator
+
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.vdf_image import VDFImage
