@@ -123,4 +123,4 @@ def test_map_polar_decomposition(dgm,
 def test_get_strain_maps(dgm,
                          strain_answers):
     strain_results = dgm.get_strain_maps()
-    np.testing.assert_almost_equal(Rc.data, rotation_map)
+    np.testing.assert_almost_equal(strain_results.data, strain_answers)
