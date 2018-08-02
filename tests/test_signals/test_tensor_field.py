@@ -95,7 +95,7 @@ def displacement_gradient_map(request):
                  [ 0.   ,  0.   ,  1.   ]],
                 [[ 1.02 , -0.013,  0.   ],
                  [-0.013,  0.98 ,  0.   ],
-                 [ 0.   ,  0.   ,  1.   ]]]]),
+                 [ 0.   ,  0.   ,  1.   ]]]])),
 ])
 def test_map_polar_decomposition(dgm,
                                  rotation_map,
@@ -113,7 +113,7 @@ def test_map_polar_decomposition(dgm,
                [[-0.013     , -0.013     ],
                 [-0.013     , -0.013     ]],
                [[-0.26179939, -0.26179939],
-                [-0.26179939, -0.26179939]]]),
+                [-0.26179939, -0.26179939]]])),
 ])
 def test_get_strain_maps(dgm,
                          strain_answers):
