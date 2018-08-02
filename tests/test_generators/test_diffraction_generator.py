@@ -19,7 +19,7 @@
 import numpy as np
 import pymatgen as pmg
 import pytest
-from pyxem import DiffractionSimulation
+from pyxem import DiffractionSimulation, ProfileSimulation
 from pyxem.generators.diffraction_generator import (
     DiffractionGenerator
 )
@@ -56,6 +56,9 @@ def structure(request, lattice, element):
 def diffraction_simulation(request):
     return DiffractionSimulation(**request.param)
 
+@pytest.fixture(params=[{}])
+def profile_simulation(request):
+    return ProfileSimulation(**request.param)
 
 class TestDiffractionCalculator:
 
@@ -207,3 +210,10 @@ class TestDiffractionSimulation:
         diffraction_simulation.offset = offset
         assert np.allclose(diffraction_simulation.calibrated_coordinates, expected)
 
+class TestDiffractionProfileSimulation:
+
+    def test_init(self):
+        profile_simulation = ProfileSimulation()
+        assert profile_simulation.magnitudes is None
+        assert profile_simulation.intensities is None
+        assert profile_simulation.hkls is None
