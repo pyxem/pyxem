@@ -51,12 +51,14 @@ def test_electron_diffraction_component_init(diffraction_calculator,
                                              structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
                                           structure,
+                                          reciprocal_radius=1.,
                                           calibration=0.01)
     assert isinstance(ref, ElectronDiffractionForwardModel)
 
 def test_function(diffraction_calculator, structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
                                           structure,
+                                          reciprocal_radius=1.,
                                           calibration=0.01)
     func = ref.function()
     np.testing.assert_almost_equal(func, 1)
