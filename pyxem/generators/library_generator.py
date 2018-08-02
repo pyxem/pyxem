@@ -24,7 +24,6 @@ import numpy as np
 from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from pyxem.libraries.diffraction_library import DiffractionLibrary
-from scipy.constants import pi
 from tqdm import tqdm
 from transforms3d.euler import euler2axangle
 

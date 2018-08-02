@@ -24,8 +24,6 @@ import hyperspy.api as hs
 
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.utils.sim_utils import peaks_from_best_template
-from transforms3d.euler import euler2axangle
-from pymatgen.transformations.standard_transformations import RotationTransformation
 
 """
 The test are designed to make sure orientation mapping works when actual

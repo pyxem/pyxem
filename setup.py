@@ -17,12 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys
-from setuptools import setup, Extension
+from setuptools import setup
 
 exec(open('pyxem/version.py').read())  # grab version info
 
-import numpy as np
 
 setup(
     name='pyxem',
