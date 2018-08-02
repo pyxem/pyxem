@@ -19,4 +19,4 @@
 import numpy as np
 import pytest
 
-from pyxem.signals.diffraction_profile import DiffractionProfile
+from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
