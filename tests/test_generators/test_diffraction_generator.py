@@ -19,7 +19,7 @@
 import numpy as np
 import pymatgen as pmg
 import pytest
-from pyxem import DiffractionSimulation
+from pyxem.signals.diffraction_simulation import DiffractionSimulation, ProfileSimulation
 from pyxem.generators.diffraction_generator import (
     DiffractionGenerator
 )
@@ -117,6 +117,14 @@ class TestDiffractionCalculator:
         smaller = np.greater_equal(diffraction.intensities[central_beam], diffraction.intensities)
         assert np.all(smaller)
 
+    def test_calculate_profile_class(self, diffraction_calculator):
+        si = pmg.Element("Si")
+        lattice = pmg.Lattice.cubic(5.431)
+        silicon = pmg.Structure.from_spacegroup("Fd-3m", lattice, [si], [[0, 0, 0]])
+        profile = diffraction_calculator.calculate_profile_data(structure=silicon,
+                                                                reciprocal_radius=1.)
+        assert isinstance(profile, ProfileSimulation)
+
 
 class TestDiffractionSimulation:
 
@@ -206,4 +214,3 @@ class TestDiffractionSimulation:
         diffraction_simulation.calibration = calibration
         diffraction_simulation.offset = offset
         assert np.allclose(diffraction_simulation.calibrated_coordinates, expected)
-

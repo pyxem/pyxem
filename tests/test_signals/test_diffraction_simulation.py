@@ -19,6 +19,7 @@
 import numpy as np
 import pytest
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.signals.diffraction_simulation import ProfileSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem import ElectronDiffraction
 import pymatgen as pmg
@@ -37,21 +38,21 @@ def get_signal():
 
 def test_typing():
     assert type(get_signal()) is ElectronDiffraction
-    
+
 def test_correct_quadrant_np():
     A = get_signal().data
-    assert (np.sum(A[:72,:72]) == 0)    
-    assert (np.sum(A[72:,:72]) == 0)    
-    assert (np.sum(A[:72,72:]) == 0)    
-    assert (np.sum(A[72:,72:])  > 0)    
+    assert (np.sum(A[:72,:72]) == 0)
+    assert (np.sum(A[72:,:72]) == 0)
+    assert (np.sum(A[:72,72:]) == 0)
+    assert (np.sum(A[72:,72:])  > 0)
 
 def test_correct_quadrant_hs():
     S = get_signal()
-    assert (np.sum(S.isig[:72,:72].data) == 0)    
-    assert (np.sum(S.isig[72:,:72].data) == 0)    
-    assert (np.sum(S.isig[:72,72:].data) == 0)    
-    assert (np.sum(S.isig[72:,72:].data)  > 0) 
-    
+    assert (np.sum(S.isig[:72,:72].data) == 0)
+    assert (np.sum(S.isig[72:,:72].data) == 0)
+    assert (np.sum(S.isig[:72,72:].data) == 0)
+    assert (np.sum(S.isig[72:,72:].data)  > 0)
+
 # ToDo - Test low and high sigma
 
 """ These test that our kinematic simulation behaves as we would expect it to """
@@ -63,7 +64,7 @@ def check_pattern_equivilance(p1,p2,coords_only=False):
     assert np.allclose(p1.coordinates,p2.coordinates)
     if not coords_only:
         assert np.allclose(p1.indices,p2.indices)
-        assert np.allclose(p1.intensities,p2.intensities) 
+        assert np.allclose(p1.intensities,p2.intensities)
 
 # Becuase of the slight differences between each of the structures, the
 # explictily named, ugly pathway has been taken
@@ -102,3 +103,54 @@ def test_systematic_absence():
 
 def test_scaling():
     check_pattern_equivilance(formal_pattern,larger_pattern,coords_only=True)
+
+# Test Profile Simulation
+
+@pytest.fixture(params=[
+    (300, 0.02, None),
+])
+def diffraction_calculator(request):
+    return DiffractionGenerator(*request.param)
+
+@pytest.fixture
+def profile_simulation():
+    return ProfileSimulation(magnitudes=[0.31891931643691351,
+                                         0.52079306292509475,
+                                         0.6106839974876449,
+                                         0.73651261277849378,
+                                         0.80259601243613932,
+                                         0.9020400452156796,
+                                         0.95675794931074043,
+                                         1.0415861258501895,
+                                         1.0893168446141808,
+                                         1.1645286909108374,
+                                         1.2074090451670043,
+                                         1.2756772657476541],
+                             intensities = np.array([100.,
+                                                     99.34619104,
+                                                     64.1846346,
+                                                     18.57137199,
+                                                     28.84307971,
+                                                     41.31084268,
+                                                     23.42104951,
+                                                     13.996264,
+                                                     24.87559364,
+                                                     20.85636003,
+                                                     9.46737774,
+                                                     5.43222307]),
+                             hkls = [{(1, 1, 1): 8},
+                                     {(2, 2, 0): 12},
+                                     {(3, 1, 1): 24},
+                                     {(4, 0, 0): 6},
+                                     {(3, 3, 1): 24},
+                                     {(4, 2, 2): 24},
+                                     {(3, 3, 3): 8, (5, 1, 1): 24},
+                                     {(4, 4, 0): 12},
+                                     {(5, 3, 1): 48},
+                                     {(6, 2, 0): 24},
+                                     {(5, 3, 3): 24},
+                                     {(4, 4, 4): 8}])
+
+@pytest.mark.skip(reason='Plot not testable')
+def test_plot_diffraction_vectors(profile_simulation):
+    profile_simulation.plot
