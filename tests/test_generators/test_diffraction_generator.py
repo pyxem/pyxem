@@ -121,8 +121,8 @@ class TestDiffractionCalculator:
         assert np.all(smaller)
 
     def test_calculate_profile_class(self, diffraction_calculator, structure):
-        profile = diffraction_calculator(structure=strucutre,
-                                         reciprocal_radius=1.)
+        profile = diffraction_calculator.calculate_profile_data(structure=strucutre,
+                                                                reciprocal_radius=1.)
         assert isinstance(profile, ProfileSimulation)
 
 
