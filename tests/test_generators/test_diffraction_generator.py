@@ -56,9 +56,6 @@ def structure(request, lattice, element):
 def diffraction_simulation(request):
     return DiffractionSimulation(**request.param)
 
-@pytest.fixture(params=[{}])
-def profile_simulation(request):
-    return ProfileSimulation(**request.param)
 
 class TestDiffractionCalculator:
 
