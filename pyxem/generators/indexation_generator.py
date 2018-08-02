@@ -141,8 +141,7 @@ class ProfileIndexationGenerator():
         The simulated profile data.
 
     """
-    def __init__(self, magnitudes, simulation, mapping=True):
-        self.map = mapping
+    def __init__(self, magnitudes, simulation):
         self.magnitudes = magnitudes
         self.simulation = simulation
 
@@ -176,25 +175,18 @@ class ProfileIndexationGenerator():
         mags = self.magnitudes
         simulation = self.simulation
 
-        if mapping==True:
-            indexation = mags.map(index_magnitudes,
-                                  simulation=simulation,
-                                  tolerance=tolerance,
-                                  **kwargs)
+        mags = np.array(mags)
+        sim_mags = np.array(simulation.magnitudes)
+        sim_hkls = np.array(simulation.hkls)
+        indexation = np.zeros(len(mags), dtype=object)
 
-        else:
-            mags = np.array(mags)
-            sim_mags = np.array(simulation.magnitudes)
-            sim_hkls = np.array(simulation.hkls)
-            indexation = np.zeros(len(mags), dtype=object)
+        for i in np.arange(len(mags)):
+            diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
 
-            for i in np.arange(len(mags)):
-                diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
+            hkls = sim_hkls[np.where(diff < tolerance)]
+            diffs = diff[np.where(diff < tolerance)]
 
-                hkls = sim_hkls[np.where(diff < tolerance)]
-                diffs = diff[np.where(diff < tolerance)]
-
-                indices = np.array((hkls, diffs))
-                indexation[i] = np.array((mags.data[i], indices))
+            indices = np.array((hkls, diffs))
+            indexation[i] = np.array((mags.data[i], indices))
 
         return indexation

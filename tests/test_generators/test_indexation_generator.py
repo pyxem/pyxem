@@ -90,7 +90,6 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
                                                  1.1645286909108374,
                                                  1.2074090451670043,
                                                  1.2756772657476541],
-                                    simulation=profile_simulation,
-                                    mapping=False)
+                                    simulation=profile_simulation)
     indexation = pig.index_peaks(tolerance=0.02)
     np.testing.assert_almost_equal(indexation[0][0], 0.3189193164369)
