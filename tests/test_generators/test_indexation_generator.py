@@ -93,7 +93,4 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
                                     simulation=profile_simulation,
                                     mapping=False)
     indexation = pig.index_peaks(tolerance=0.02)
-    np.testing.assert_almost_equal(indexation[0], np.array([0.3189193164369135,
-                                                            np.array([[{(1, 1, 1): 8}],
-                                                            [0.0]], dtype=object)],
-                                                            dtype=object))
+    np.testing.assert_almost_equal(indexation[0][0], 0.3189193164369)
