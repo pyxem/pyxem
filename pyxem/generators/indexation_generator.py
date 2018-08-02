@@ -170,7 +170,6 @@ class ProfileIndexationGenerator():
 
 
         """
-        mapping = self.map
         mags = self.magnitudes
         simulation = self.simulation
 
