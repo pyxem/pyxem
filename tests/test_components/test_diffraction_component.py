@@ -70,4 +70,4 @@ def test_simulate(diffraction_calculator, structure):
                                           reciprocal_radius=1.,
                                           calibration=0.01)
     sim = ref.simulate()
-    assert isinstance(ref, DiffractionSimulation)
+    assert isinstance(sim, DiffractionSimulation)
