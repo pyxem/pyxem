@@ -20,6 +20,7 @@ import pytest
 import pymatgen as pmg
 import numpy as np
 
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.components.diffraction_component import ElectronDiffractionForwardModel
 
