@@ -198,7 +198,7 @@ class TestDirectBeamMethods:
 class TestRadialProfile:
 
     @pytest.fixture
-    def diffraction_pattern(self):
+    def diffraction_pattern_for_radial(self):
         dp = ElectronDiffraction(np.zeros((2, 8, 8)))
         dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
                                [0., 2., 3., 3., 3., 3., 2., 0.],
@@ -220,8 +220,8 @@ class TestRadialProfile:
 
         return dp
 
-    def test_radial_profile_signal_type(self, diffraction_pattern):
-        rp = diffraction_pattern.get_radial_profile()
+    def test_radial_profile_signal_type(self, diffraction_pattern_for_radial):
+        rp = diffraction_pattern_for_radial.get_radial_profile()
         assert isinstance(rp, Signal1D)
 
     @pytest.mark.parametrize('expected',[
@@ -230,8 +230,8 @@ class TestRadialProfile:
              [1., 0., 0., 0., 0.]]
         ))])
 
-    def test_radial_profile(self, diffraction_pattern,expected):
-        rp = diffraction_pattern.get_radial_profile()
+    def test_radial_profile(self, diffraction_pattern_for_radial,expected):
+        rp = diffraction_pattern_for_radial.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
 
 class TestBackgroundMethods:
