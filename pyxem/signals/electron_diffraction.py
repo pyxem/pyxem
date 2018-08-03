@@ -476,6 +476,25 @@ class ElectronDiffraction(Signal2D):
 
         return bg_subtracted
 
+    def get_diffraction_variance(dp, a):
+        """Calculates the variance of associated with each diffraction pixel.
+
+        Returns
+        -------
+
+        vardps : Signal2D
+              A two dimensional Signal class object containing the mean DP,
+              mean squared DP, and variance DP.
+        """
+        mean_dp = dp.mean((0,1))
+        meansq_dp = hs.signals.Signal2D(np.square(dp.data)).mean((0,1))
+        var_dp = hs.signals.Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
+        corr_var = hs.signals.Signal2D(((var_dp.data - (np.divide(a, mean_dp)))))
+        return hs.stack((mean_dp, meansq_dp, var_dp, corr_var))
+
+    def get_corrected_variance(var_dp, mean_dp, a):
+        return hs.signals.Signal2D(((var_dp.data - (np.divide(a, mean_dp)))))
+
     def decomposition(self, *args, **kwargs):
         """Decomposition with a choice of algorithms.
 
