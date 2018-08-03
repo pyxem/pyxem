@@ -23,8 +23,11 @@ import numpy as np
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
+
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_variance import DiffractionVariance
+
 from pyxem.utils.expt_utils import *
 from pyxem.utils.peakfinders2D import *
 from pyxem.utils import peakfinder2D_gui
@@ -490,10 +493,8 @@ class ElectronDiffraction(Signal2D):
         meansq_dp = hs.signals.Signal2D(np.square(dp.data)).mean((0,1))
         var_dp = hs.signals.Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
         corr_var = hs.signals.Signal2D(((var_dp.data - (np.divide(a, mean_dp)))))
-        return hs.stack((mean_dp, meansq_dp, var_dp, corr_var))
-
-    def get_corrected_variance(var_dp, mean_dp, a):
-        return hs.signals.Signal2D(((var_dp.data - (np.divide(a, mean_dp)))))
+        res = hs.stack((mean_dp, meansq_dp, var_dp, corr_var))
+        return DiffractionVariance(res)
 
     def decomposition(self, *args, **kwargs):
         """Decomposition with a choice of algorithms.
