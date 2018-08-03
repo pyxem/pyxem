@@ -54,7 +54,7 @@ class DiffractionVectors(BaseSignal):
         plt.xlim(-xlim, xlim)
         plt.ylim(-ylim, ylim)
         plt.axes().set_aspect('equal')
-        plt.show()
+        return plt
 
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.

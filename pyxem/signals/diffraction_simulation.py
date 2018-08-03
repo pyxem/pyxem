@@ -178,7 +178,7 @@ class ProfileSimulation:
         self.intensities = intensities
         self.hkls = hkls
 
-    def plot(self, g_max, annotate_peaks=True, with_labels=True, fontsize=12):
+    def get_plot(self, g_max, annotate_peaks=True, with_labels=True, fontsize=12):
         """Plots the diffraction profile simulation.
 
         Parameters
@@ -206,5 +206,4 @@ class ProfileSimulation:
                 ax.set_xlabel("A ($^{-1}$)")
                 ax.set_ylabel("Intensities (scaled)")
 
-            if hasattr(ax, "tight_layout"):
-                ax.tight_layout()
+        return plt

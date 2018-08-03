@@ -79,10 +79,8 @@ def diffraction_vectors_map(request):
     dvm.axes_manager.set_signal_dimension(0)
     return dvm
 
-
-@pytest.mark.skip(reason='Plot not testable')
-def test_plot_diffraction_vectors(diffraction_vectors_single):
-    diffraction_vectors_single.plot_diffraction_vectors
+def test_plot_diffraction_vectors(diffraction_vectors_map):
+    diffraction_vectors_map.plot_diffraction_vectors(xlim=1., ylim=1.)
 
 
 class TestMagnitudes:
