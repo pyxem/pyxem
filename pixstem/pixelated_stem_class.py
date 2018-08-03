@@ -1160,6 +1160,8 @@ class DPCSignal2D(Signal2D):
             If None, generate a new subplot for the indicator.
             If False, do not include an indicator
 
+        Examples
+        --------
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> fig = s.get_color_image_with_indicator()
         >>> fig.savefig("simple_dpc_test_signal.png")
