@@ -93,6 +93,7 @@ def vdf_generator(electron_diffraction, diffraction_vectors):
 
 def vdf_generator_from_map(electron_diffraction, diffraction_vectors_map):
     vdfgen = VDFGenerator(electron_diffraction, diffraction_vectors_map)
+    assert isinstance(vdfs, VDFGenerator)
 
 
 class TestVDFGenerator:
