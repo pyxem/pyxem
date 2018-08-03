@@ -54,7 +54,7 @@ class DiffractionVectors(BaseSignal):
         plt.xlim(-xlim, xlim)
         plt.ylim(-ylim, ylim)
         plt.axes().set_aspect('equal')
-        plt.show()
+        return plt
 
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
@@ -131,7 +131,7 @@ class DiffractionVectors(BaseSignal):
         if (self.axes_manager.navigation_dimension == 2):
             gvlist = np.array([self.data[0,0][0]])
         else:
-            gvlist = np.array([self.data[0][0]])
+            raise ValueError("This method only works for ragged vector maps!")
 
         for i in self._iterate_signal():
             vlist = i[0]
