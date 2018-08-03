@@ -189,8 +189,8 @@ class TestDirectBeamMethods:
             [False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False]]),),
                   ])
-    def test_get_direct_beam_mask(self, diffraction_pattern, mask_expected):
-        mask_calculated = diffraction_pattern.get_direct_beam_mask(2)
+    def test_get_direct_beam_mask(self, diffraction_pattern_SED, mask_expected):
+        mask_calculated = diffraction_pattern_SED.get_direct_beam_mask(2)
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
 
