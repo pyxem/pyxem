@@ -1193,7 +1193,9 @@ class DPCSignal2D(Signal2D):
                     autolim_sigma=autolim_sigma)
         s.change_dtype('uint16')
         s.change_dtype('float64')
-        ax.imshow(s.data/65536., extent=self.axes_manager.signal_extent)
+        extent = self.axes_manager.signal_extent
+        extent = [extent[0], extent[1], extent[3], extent[2]]
+        ax.imshow(s.data/65536., extent=extent)
         if ax_indicator is not False:
             if ax_indicator is None:
                 ax_indicator = fig.add_subplot(331)
