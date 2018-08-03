@@ -18,6 +18,9 @@
 
 import pytest
 import numpy as np
+import pymatgen as pmg
+
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import *
 
 @pytest.mark.parametrize('accelerating_voltage, wavelength',[
@@ -37,3 +40,33 @@ def test_get_electron_wavelength(accelerating_voltage, wavelength):
 def test_get_interaction_constant(accelerating_voltage, interaction_constant):
     val = get_interaction_constant(accelerating_voltage=accelerating_voltage)
     np.testing.assert_almost_equal(val, interaction_constant)
+
+def test_kinematic_simulator_plane_wave():
+    si = pmg.Element("Si")
+    lattice = pmg.Lattice.cubic(5.431)
+    structure = pmg.Structure.from_spacegroup("Fd-3m",lattice, [si], [[0, 0, 0]])
+    atomic_coordinates = structure.cart_coords
+    sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
+                                        simulation_size=32)
+    assert isinstance(sim, ElectronDiffraction)
+
+def test_kinematic_simulator_gaussian_probe():
+    si = pmg.Element("Si")
+    lattice = pmg.Lattice.cubic(5.431)
+    structure = pmg.Structure.from_spacegroup("Fd-3m",lattice, [si], [[0, 0, 0]])
+    atomic_coordinates = structure.cart_coords
+    sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
+                                        simulation_size=32,
+                                        illumination='gaussian_probe')
+    assert isinstance(sim, ElectronDiffraction)
+
+@pytest.mark.xfail(raises=ValueError)
+def test_kinematic_simulator_invalid_illumination():
+    si = pmg.Element("Si")
+    lattice = pmg.Lattice.cubic(5.431)
+    structure = pmg.Structure.from_spacegroup("Fd-3m",lattice, [si], [[0, 0, 0]])
+    atomic_coordinates = structure.cart_coords
+    sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
+                                        simulation_size=32,
+                                        illumination='gaussian')
+    assert isinstance(sim, ElectronDiffraction)

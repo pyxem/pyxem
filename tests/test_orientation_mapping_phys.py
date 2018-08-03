@@ -78,13 +78,14 @@ def get_template_library(structure,rot_list,edc):
     library = diff_gen.get_diffraction_library(struc_lib,
                                            calibration=1/half_side_length,
                                            reciprocal_radius=0.8,
-                                           half_shape=(half_side_length,half_side_length),
+                                           half_shape=(half_side_length,
+                                                       half_side_length),
                                            with_direct_beam=False)
     return library
 
 @pytest.mark.parametrize("structure",[create_Ortho(),create_Hex()])
-@pytest.mark.parametrize("rot_list,edc,pattern_list",[[rot_list(),edc(),pattern_rot_list()]])
-
+@pytest.mark.parametrize("rot_list,edc,pattern_list",[[rot_list(),edc(),
+                                                       pattern_rot_list()]])
 def test_orientation_mapping_physical(structure,rot_list,pattern_list,edc):
     dp_library = get_template_library(structure,pattern_list,edc)
     for key in dp_library['A']:
@@ -97,7 +98,8 @@ def test_orientation_mapping_physical(structure,rot_list,pattern_list,edc):
     assert np.all(M.inav[0,0] == M.inav[1,0])
     assert np.allclose(M.inav[0,0].isig[:,0].data,[0,0.01,0,0,2],atol=1e-3)
 
-@pytest.mark.parametrize("structure,rot_list,edc,pattern_list",[[create_Ortho(),rot_list(),edc(),pattern_rot_list()]])
+@pytest.mark.parametrize("structure,rot_list,edc,pattern_list",
+                         [[create_Ortho(),rot_list(),edc(),pattern_rot_list()]])
 
 def test_masked_OM(structure,rot_list,pattern_list,edc):
     dp_library = get_template_library(structure,pattern_list,edc)
@@ -113,5 +115,6 @@ def test_masked_OM(structure,rot_list,pattern_list,edc):
 @pytest.mark.skip()
 def test_generate_peaks_from_best_template():
     # also test peaks from best template
-    peaks = M.map(peaks_from_best_template,phase=["A"],library=library,inplace=False)
+    peaks = M.map(peaks_from_best_template,
+                  phase=["A"],library=library,inplace=False)
     assert peaks.inav[0,0] == library["A"][(0,0,0)]['Sim'].coordinates[:,:2]

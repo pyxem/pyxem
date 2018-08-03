@@ -39,10 +39,6 @@ def correlate_library(image, library,n_largest,mask,keys=[]):
     out_arr = np.zeros((n_largest * len(library),5))
     if mask == 1:
         for key in library.keys():
-            if n_largest:
-                pass
-            else:
-                n_largest=len(library[key])
             correlations = dict()
             for orientation, diffraction_pattern in library[key].items():
                 #diffraction_pattern here is in fact a library of diffraction_pattern_properties

@@ -148,12 +148,7 @@ def get_kinematical_intensities(structure,
     for site in structure:
         for sp, occu in site.species_and_occu.items():
             zs.append(sp.Z)
-            try:
-                c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
-            except KeyError:
-                raise ValueError("Unable to calculate ED pattern as "
-                                 "there is no scattering coefficients for"
-                                 " %s." % sp.symbol)
+            c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
             coeffs.append(c)
             dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
             fcoords.append(site.frac_coords)
@@ -199,9 +194,9 @@ def simulate_kinematic_scattering(atomic_coordinates,
                                   element,
                                   accelerating_voltage,
                                   simulation_size=256,
-                                  max_k = 1.5,
-                                  illumination = 'plane_wave',
-                                  sigma = 20):
+                                  max_k=1.5,
+                                  illumination='plane_wave',
+                                  sigma=20):
     """Simulate electron scattering from arrangement of atoms comprising one
     elemental species.
 
@@ -251,7 +246,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
     if illumination == 'plane_wave':
         for r in atomic_coordinates:
             scattering = scattering + (fs * np.exp(np.dot(k.T, r) * np.pi * 2j))
-    if illumination == 'gaussian_probe':
+    elif illumination == 'gaussian_probe':
         for r in atomic_coordinates:
             probe = (1 / (np.sqrt(2*np.pi)*sigma))*np.exp((-np.abs(((r[0]**2) - (r[1]**2))))/(4*sigma**2))
             scattering = scattering + (probe * fs * np.exp(np.dot(k.T, r) * np.pi * 2j))
