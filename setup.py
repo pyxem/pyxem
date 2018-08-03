@@ -17,23 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys
-from setuptools import setup, Extension
+from setuptools import setup
 
 exec(open('pyxem/version.py').read())  # grab version info
-
-from Cython.Build import cythonize
-import numpy as np
-
-if sys.platform == "win32":
-    extensions = [
-        Extension('pyxem.utils.radialprofile', ['src/radialprofile.pyx'], include_dirs=[np.get_include()])
-    ]
-else:
-    extensions = [
-        Extension('pyxem.utils.radialprofile', ['src/radialprofile.pyx'], include_dirs=[np.get_include()])
-    ]
-ext_modules = cythonize(extensions)
 
 
 setup(
@@ -49,8 +35,6 @@ setup(
     classifiers=[
         'Programming Language :: Python :: 3.6',
     ],
-
-    ext_modules = ext_modules,
 
     packages=[
         'pyxem',

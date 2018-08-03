@@ -19,7 +19,6 @@
 import numpy as np
 import pytest
 from pyxem.signals.indexation_results import * #import both objects
-import os
 
 @pytest.fixture
 def sp_match_result():

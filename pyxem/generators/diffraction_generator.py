@@ -21,7 +21,7 @@
 """
 
 import numpy as np
-from math import sin, cos, asin, pi
+from math import pi
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.signals.diffraction_simulation import ProfileSimulation
@@ -206,7 +206,7 @@ class DiffractionGenerator(object):
         peaks = {}
         gs = []
 
-        for hkl, g_hkl, ind in sorted(
+        for hkl, g_hkl, ind, _ in sorted(
                 recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])):
             # Force miller indices to be integers.
             hkl = [int(round(i)) for i in hkl]

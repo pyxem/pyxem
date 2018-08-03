@@ -18,7 +18,6 @@
 
 import codecs
 import os.path
-from io import StringIO
 import logging
 
 import numpy as np

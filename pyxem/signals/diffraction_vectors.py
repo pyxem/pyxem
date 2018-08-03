@@ -16,18 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.api import roi
-from hyperspy.signals import BaseSignal, Signal1D, Signal2D
+from hyperspy.signals import BaseSignal, Signal1D
 
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
-from pyxem.signals.vdf_image import VDFImage
-
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
-from pyxem.utils.vdf_utils import normalize_vdf
 
 """
 Signal class for diffraction vectors.

@@ -57,8 +57,8 @@ class ScalableReferencePattern(Component):
                  ):
 
         Component.__init__(self, ['d11', 'd12',
-                                    'd21', 'd22',
-                                    't1', 't2'])
+                                  'd21', 'd22',
+                                  't1', 't2'])
 
         self._whitelist['signal2D'] = ('init,sig', signal2D)
         self.signal = signal2D

@@ -16,8 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pyxem as pxm
 import pickle
+import numpy as np
 
 def load_DiffractionLibrary(filename,safety=False):
     if safety:
@@ -27,14 +27,33 @@ def load_DiffractionLibrary(filename,safety=False):
         raise RuntimeError('Unpickling is risky, turn safety to True if \
         trust the author of this content')
 
+def _get_library_from_angles(library,phase,angle):
+    """
+    This function is designed to find an element that is 'basically' the same
+    as the rotation one has asked for. This is needed because
+    of floating point round off/hashability.
+    """
+    residual = 0.1
+    for key in library[phase]:
+        residual_temp = np.sum(np.subtract(list(key),angle))
+        if np.abs(residual_temp) < residual:
+            residual = residual_temp
+            stored_key = key
+
+    if np.abs(residual) < 1e-5:
+        return library[phase][stored_key]
+    else:
+        raise ValueError("It appears that no library entry lies with 1e-5 of the target angle")
+
+
 
 class DiffractionLibrary(dict):
     """Maps crystal structure (phase) and orientation (Euler angles or
     axis-angle pair) to simulated diffraction data.
     """
 
-    def get_pattern(self,phase=False,angle=False):
-        """ Extracts a single pattern for viewing,
+    def get_library_entry(self,phase=None,angle=None):
+        """ Extracts a single library entry for viewing,
         unspecified layers of dict are selected randomly and so this method
         is not entirely repeatable
 
@@ -49,18 +68,21 @@ class DiffractionLibrary(dict):
 
         """
 
-        if phase:
-            if angle:
-                return self[phase][angle]['Sim']
+        if phase is not None:
+            if angle is not None:
+                try:
+                    return self[phase][angle]
+                except KeyError:
+                    return _get_library_from_angles(self,phase,angle)
             else:
-                diff_lib = self[phase]
-                for diffraction_pattern in diff_lib.values():
-                    return diffraction_pattern['Sim']
+                for rotation in self[phase].keys():
+                    return self[phase][rotation]
         else:
-            for key in self.keys():
-                diff_lib = self[key]
-                for diffraction_pattern in diff_lib.values():
-                    return diffraction_pattern['Sim']
+            for phase in self.keys():
+                for rotation in self[phase].keys():
+                    return self[phase][rotation]
+
+
 
     def pickle_library(self,filename):
         with open(filename, 'wb') as handle:

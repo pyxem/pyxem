@@ -27,12 +27,6 @@ from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 
-try:
-    from .radialprofile import radialprofile as radialprofile_cy
-except ImportError:
-    _USE_CY_RADIAL_PROFILE = False
-else:
-    _USE_CY_RADIAL_PROFILE = True
 
 """
 This module contains utility functions for processing electron diffraction
@@ -83,7 +77,7 @@ def _cart2polar(x, y):
 
     """
     r = np.sqrt(x**2 + y**2)
-    theta = np.arctan2(x, y)  # θ referenced to vertical
+    theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
 def _polar2cart(r, theta):
@@ -100,113 +94,33 @@ def _polar2cart(r, theta):
     x, y : floats or arrays
         Cartesian coordinates
     """
-    y = r * np.cos(theta)   # θ referenced to vertical
-    x = r * np.sin(theta)
+    # +ve quadrant in bottom right corner when plotted
+    x = r * np.cos(theta)
+    y = -r * np.sin(theta)
     return x, y
 
-def radial_average(z,cython=False):
+def radial_average(z):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
 
-    Parameters
-    ----------
-
-    cython=False
-        Set to False if cython needs to be avoided. If cythonized option is not
-        not avaliable the behaviour is equivilant to cython == False
     Returns
     -------
     radial_profile : array
         Radial profile of the diffraction pattern.
     """
-    
-    center = ((z.shape[0]/2)-0.5,(z.shape[1]/2)-0.5) #geometric shape work, not 0 indexing
-    
-    if _USE_CY_RADIAL_PROFILE and cython:
-        averaged = radialprofile_cy(z, center)
-    else:
-        y, x = np.indices(z.shape)
-        r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-        r = np.rint(r-0.5).astype(np.int) 
-        #the subtraction of 0.5 gets the 0 in the correct place
 
-        tbin = np.bincount(r.ravel(), z.ravel())
-        nr = np.bincount(r.ravel())
-        averaged = np.nan_to_num(tbin / nr)
+    center = ((z.shape[0]/2)-0.5,(z.shape[1]/2)-0.5) #geometric shape work, not 0 indexing
+
+    y, x = np.indices(z.shape)
+    r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
+    r = np.rint(r-0.5).astype(np.int)
+    #the subtraction of 0.5 gets the 0 in the correct place
+
+    tbin = np.bincount(r.ravel(), z.ravel())
+    nr = np.bincount(r.ravel())
+    averaged = np.nan_to_num(tbin / nr)
 
     return averaged
-
-def reproject_polar(z, origin=None, jacobian=False, dr=1, dt=None):
-    """
-    Reprojects a 2D diffraction pattern into a polar coordinate system.
-
-    Parameters
-    ----------
-    origin : tuple
-        The coordinate (x0, y0) of the image center, relative to bottom-left. If
-        'None'defaults to
-    Jacobian : boolean
-        Include ``r`` intensity scaling in the coordinate transform.
-        This should be included to account for the changing pixel size that
-        occurs during the transform.
-    dr : float
-        Radial coordinate spacing for the grid interpolation
-        tests show that there is not much point in going below 0.5
-    dt : float
-        Angular coordinate spacing (in radians)
-        if ``dt=None``, dt will be set such that the number of theta values
-        is equal to the maximum value between the height or the width of
-        the image.
-
-    Returns
-    -------
-    output : 2D np.array
-        The polar image (r, theta)
-
-    Notes
-    -----
-    Adapted from: PyAbel, www.github.com/PyAbel/PyAbel
-
-    """
-    # bottom-left coordinate system requires numpy image to be np.flipud
-    data = np.flipud(z)
-
-    ny, nx = data.shape[:2]
-    if origin is None:
-        origin = (nx//2, ny//2)
-
-    # Determine that the min and max r and theta coords will be...
-    x, y = _index_coords(z, origin=origin)  # (x,y) coordinates of each pixel
-    r, theta = _cart2polar(x, y)  # convert (x,y) -> (r,θ), note θ=0 is vertical
-
-    nr = np.int(np.ceil((r.max()-r.min())/dr))
-
-    if dt is None:
-        nt = max(nx, ny)
-    else:
-        # dt in radians
-        nt = np.int(np.ceil((theta.max()-theta.min())/dt))
-
-    # Make a regular (in polar space) grid based on the min and max r & theta
-    r_i = np.linspace(r.min(), r.max(), nr, endpoint=False)
-    theta_i = np.linspace(theta.min(), theta.max(), nt, endpoint=False)
-    theta_grid, r_grid = np.meshgrid(theta_i, r_i)
-
-    # Project the r and theta grid back into pixel coordinates
-    X, Y = _polar2cart(r_grid, theta_grid)
-
-    X += origin[0]  # We need to shift the origin
-    Y += origin[1]  # back to the bottom-left corner...
-    xi, yi = X.flatten(), Y.flatten()
-    coords = np.vstack((yi, xi))  # (map_coordinates requires a 2xn array)
-
-    zi = ndi.map_coordinates(z, coords)
-    output = zi.reshape((nr, nt))
-
-    if jacobian:
-        output = output*r_i[:, np.newaxis]
-
-    return output
 
 def gain_normalise(z, dref, bref):
     """Apply gain normalization to experimentally acquired electron
@@ -258,28 +172,37 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     return z
 
-def affine_transformation(z, order, **kwargs):
+def affine_transformation(z,matrix,order,**kwargs):
     """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
     ----------
+    z : np.array
+        Array to be transformed
     matrix : np.array
         3x3 numpy array specifying the affine transformation to be applied.
     order : int
         Interpolation order.
+    kwargs :
+        To be passed to skimage.warp
 
     Returns
     -------
     trans : array
         Affine transformed diffraction pattern.
     """
+    # These three lines account for the transformation center not being (0,0)
     shift_y, shift_x = np.array(z.shape[:2]) / 2.
     tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
     tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
 
-    transformation = tf.AffineTransform(**kwargs)
+    # This defines the transform you want to perform
+    transformation = tf.AffineTransform(matrix=matrix)
+
+    #skimage transforms can be added like this, actually matrix multiplication,
+    #hence the need for the brackets. (Note tf.warp takes the inverse)
     trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order)
+                    order=order,**kwargs)
 
     return trans
 
@@ -302,13 +225,6 @@ def regional_filter(z, h):
     dilated = morphology.reconstruction(seed, mask, method='dilation')
 
     return z - dilated
-
-def regional_flattener(z, h):
-    """Localised erosion of the image 'z' for features below a value 'h'"""
-    seed = np.copy(z) + h
-    mask = z
-    eroded = morphology.reconstruction(seed, mask, method='erosion')
-    return eroded - h
 
 def subtract_background_dog(z, sigma_min, sigma_max):
     """Difference of gaussians method for background removal.
@@ -394,24 +310,6 @@ def circular_mask(shape, radius, center=None):
     mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
     return mask
 
-def find_beam_position_blur(z, sigma=3):
-    """Estimate direct beam position by blurring the image with a large
-    Gaussian kernel and finding the maximum.
-
-    Parameters
-    ----------
-    sigma : float
-        Sigma value for Gaussian blurring kernel.
-
-    Returns
-    -------
-    center : np.array
-        np.array containing indices of estimated direct beam positon.
-    """
-    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
-    center = np.unravel_index(blurred.argmax(), blurred.shape)
-    return np.array(center)
-
 def reference_circle(coords, dimX, dimY,radius):
     """Draw the perimeter of an circle at a given position
     in the diffraction pattern (e.g. to provide a reference for
@@ -437,11 +335,11 @@ def reference_circle(coords, dimX, dimY,radius):
         np.array containing the circle drawn at the position given in the coordinates.
     """
     img = np.zeros((dimX, dimY))
-    
+
     for n in range(np.size(coords,0)):
         rr, cc = ellipse_perimeter(coords[n,0],coords[n,1], radius, radius)
         img[rr, cc] = 1
-        
+
     return img
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
@@ -455,7 +353,7 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     ----------
     radius_start : int
         The lower bound for the radius of the central disc to be used in the alignment
-        
+
     radius_finish : int
         The upper bounds for the radius of the central disc to be used in the alignment
 
@@ -467,7 +365,7 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     radiusList = np.arange(radius_start,radius_finish)
     errRecord = np.zeros_like(radiusList,dtype='single')
     origin = np.array([[round(np.size(z,axis=-2)/2),round(np.size(z,axis=-1)/2)]])
-    
+
     for ind in np.arange(0,np.size(radiusList)):
         radius = radiusList[ind]
         ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radius)
@@ -479,32 +377,31 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
         shift, error, diffphase = register_translation(ref,im, 10)
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
-        
+
         ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radiusList[index_min])
         ref= hann2d*ref
         shift, error, diffphase = register_translation(ref,im, 100)
-        
+
     return shift
 
-def enhance_gauss_sauvola(z, sigma_blur, sigma_enhance, k, window_size, threshold, morph_opening=True):
-    z = z.astype(np.float64)
-    im1 = ndi.gaussian_filter(z, sigma=sigma_blur, mode='mirror')
-    im2 = ndi.gaussian_filter(im1, sigma=sigma_enhance, mode='constant', cval=255)
-    im3= im1 - im2
-    im3[im3<0] = 0
-
-    mask = im3 > threshold
-    im4 = im3*mask
-
-    thresh_sauvola = threshold_sauvola(im4, window_size, k)
-    binary_sauvola = im4 > thresh_sauvola
-    if morph_opening:
-        final = opening(binary_sauvola)
-    else:
-        final=binary_sauvola
-
-    return final
-
 def peaks_as_gvectors(z, center, calibration):
+    """
+    Converts peaks found as array indices to calibrated units, for use in a
+    hyperspy map function.
+
+    Parameters
+    ----------
+    z : numpy array
+        peak postitions as array indices.
+    center : numpy array
+        diffraction pattern centre in array indices.
+    calibration : float
+        calibration in reciprocal Angstroms per pixels.
+
+    Returns
+    -------
+    g : numpy array
+        peak positions in calibrated units.
+    """
     g = (z - center) * calibration
-    return g[0]
+    return np.array([g[0].T[1], g[0].T[0]]).T
