@@ -71,6 +71,26 @@ def diffraction_vectors(request):
     dvec.axes_manager.set_signal_dimension(1)
     return dvec
 
+@pytest.fixture(params=[
+    np.array([[np.array([[1, 1],
+                         [2, 2]]),
+               np.array([[1, 1],
+                         [2, 2],
+                         [1, 2]])],
+              [np.array([[1, 1],
+                         [2, 2]]),
+               np.array([[1, 1],
+                         [2, 2]])]], dtype=object)
+])
+def diffraction_vectors_map(request):
+    dvm = DiffractionVectors(request.param)
+    dvm.axes_manager.set_signal_dimension(0)
+    return dvm
+
+@pytest.fixture
+def vdf_generator_from_map(electron_diffraction, diffraction_vectors_map):
+    return VDFGenerator(electron_diffraction, diffraction_vectors_map)
+
 @pytest.fixture
 def vdf_generator(electron_diffraction, diffraction_vectors):
     return VDFGenerator(electron_diffraction, diffraction_vectors)
