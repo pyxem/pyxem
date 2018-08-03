@@ -148,12 +148,7 @@ def get_kinematical_intensities(structure,
     for site in structure:
         for sp, occu in site.species_and_occu.items():
             zs.append(sp.Z)
-            try:
-                c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
-            except KeyError:
-                raise ValueError("Unable to calculate ED pattern as "
-                                 "there is no scattering coefficients for"
-                                 " %s." % sp.symbol)
+            c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
             coeffs.append(c)
             dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
             fcoords.append(site.frac_coords)
