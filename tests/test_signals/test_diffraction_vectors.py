@@ -105,7 +105,7 @@ class TestUniqueVectors:
         assert isinstance(unique_vectors,DiffractionVectors)
 
     @pytest.mark.xfail(raises=ValueError)
-    def test_failing_run(self, diffraction_vectors_single):
+    def test_get_unique_vectors_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_unique_vectors()
 
     @pytest.mark.parametrize('distance_threshold, answer',[
@@ -124,7 +124,8 @@ class TestUniqueVectors:
                         [-0.069755, -0.009965]])),
         (0.1, np.array([[ 0.089685,  0.292971]])),
     ])
-    def test_get_unique_vectors_map_values(self, diffraction_vectors_map, distance_threshold, answer):
+    def test_get_unique_vectors_map_values(self, diffraction_vectors_map,
+                                           distance_threshold, answer):
         unique_vectors = diffraction_vectors_map.get_unique_vectors(distance_threshold=distance_threshold)
         np.testing.assert_almost_equal(unique_vectors.data, answer)
 
