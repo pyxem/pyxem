@@ -27,7 +27,8 @@ import pymatgen as pmg
 
 @pytest.fixture
 def coords_intensity_simulation():
-    return DiffractionSimulation(coordinates = np.asarray([[0.3,1.2,0]]), intensities = np.ones(1))
+    return DiffractionSimulation(coordinates = np.asarray([[0.3,1.2,0]]),
+                                 intensities = np.ones(1))
 
 @pytest.fixture
 def get_signal():
@@ -53,9 +54,7 @@ def test_correct_quadrant_hs():
     assert (np.sum(S.isig[:72,72:].data) == 0)
     assert (np.sum(S.isig[72:,72:].data)  > 0)
 
-# ToDo - Test low and high sigma
-
-""" These test that our kinematic simulation behaves as we would expect it to """
+# These test that our kinematic simulation behaves physically
 
 def get_pattern(microscope,structure):
     return microscope.calculate_ed_data(structure,1)
@@ -74,10 +73,16 @@ Ar = pmg.Element("Ar")
 cubic_lattice = pmg.Lattice.cubic(5)
 Mscope = DiffractionGenerator(300, 5e-2) #a 300kev EM
 
-formal_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
-casual_cubic_I = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Cl], [[0, 0, 0],[0.5,0.5,0.5]])
-fake_cubic_I   = pmg.Structure.from_spacegroup(195,cubic_lattice, [Cl,Ar], [[0, 0, 0],[0.5,0.5,0.5]])
-larger_cubic_I = pmg.Structure.from_spacegroup("I23",cubic_lattice, [Cl], [[0, 0, 0]])
+formal_cubic_I = pmg.Structure.from_spacegroup("I23", cubic_lattice,
+                                               [Cl], [[0, 0, 0]])
+casual_cubic_I = pmg.Structure.from_spacegroup(195, cubic_lattice,
+                                               [Cl,Cl], [[0, 0, 0],
+                                               [0.5,0.5,0.5]])
+fake_cubic_I   = pmg.Structure.from_spacegroup(195, cubic_lattice,
+                                               [Cl,Ar], [[0, 0, 0],
+                                               [0.5,0.5,0.5]])
+larger_cubic_I = pmg.Structure.from_spacegroup("I23", cubic_lattice,
+                                               [Cl], [[0, 0, 0]])
 larger_cubic_I.make_supercell([2,4,2])
 
 formal_pattern = get_pattern(Mscope,formal_cubic_I)
