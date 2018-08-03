@@ -88,12 +88,11 @@ def diffraction_vectors_map(request):
     return dvm
 
 @pytest.fixture
-def vdf_generator_from_map(electron_diffraction, diffraction_vectors_map):
-    return VDFGenerator(electron_diffraction, diffraction_vectors_map)
-
-@pytest.fixture
 def vdf_generator(electron_diffraction, diffraction_vectors):
     return VDFGenerator(electron_diffraction, diffraction_vectors)
+
+def vdf_generator_from_map(electron_diffraction, diffraction_vectors_map):
+    vdfgen = VDFGenerator(electron_diffraction, diffraction_vectors_map)
 
 
 class TestVDFGenerator:
