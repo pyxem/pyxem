@@ -206,6 +206,4 @@ class ProfileSimulation:
                 ax.set_xlabel("A ($^{-1}$)")
                 ax.set_ylabel("Intensities (scaled)")
 
-            if hasattr(ax, "tight_layout"):
-                ax.tight_layout()
         return plt
