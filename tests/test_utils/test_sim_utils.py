@@ -18,6 +18,9 @@
 
 import pytest
 import numpy as np
+import pymatgen as pmg
+
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import *
 
 @pytest.mark.parametrize('accelerating_voltage, wavelength',[
