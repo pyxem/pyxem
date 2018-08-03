@@ -154,3 +154,4 @@ def profile_simulation():
 @pytest.mark.skip(reason='Plot not testable')
 def test_plot_profile_simulation(profile_simulation):
     profile_simulation.plot()
+    assert isinstance(profile_simulation, Profilesimulation)
