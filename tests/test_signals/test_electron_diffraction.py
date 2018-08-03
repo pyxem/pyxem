@@ -220,20 +220,33 @@ class TestPeakFinding:
         pattern[1,0,71:73,21:23] = 1
         return ElectronDiffraction(pattern)
 
+    @pytest.fixture
+    def nonragged_peak(self):
+            pattern = np.zeros((2,2,128,128))
+            pattern[:,:,40:42,45] = 1
+            pattern[:,:,110,30:32] = 1
+            return ElectronDiffraction(pattern)
+
+
     methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
 
     @pytest.mark.parametrize('method', methods)
-
-    def test_findpeaks_ragged(self,ragged_peak,method):
+    @pytest.mark.parametrize('peak',[ragged_peak,nonragged_peak])
+    def test_findpeaks_ragged(self,peak,method):
+        output = peak(self).find_peaks(method=method)
         if method != 'difference_of_gaussians':
-            output = ragged_peak.find_peaks(method=method)
+            # three methods return the expect peak
+            assert output.inav[0,0].isig[1] == 2        #  correct number of dims (boring square)
+            assert output.inav[0,0].isig[0] == 1        #   """ peaks """
+            if peak(self).data[1,0,72,22] == 1: # 3 peaks
+                assert output.inav[0,1].data.shape == (3,2)
+            else: #2 peaks
+                assert output.data.shape == (2,2,2,2)
         else:
-            return 0
-            #output = ragged_peak.find_peaks(method=method,min_sigma=0.1,threshold=0.2) # attempted hack for brittle behaviour
+            # DoG doesn't find the correct peaks, but runs without error
+            if peak(self).data[1,0,72,22] == 1: # 3 peaks
+                assert output.data.shape == (2,2) # tests we have a sensible ragged array
 
-        assert output.inav[0,0].isig[1] == 2        #  correct number of dims
-        assert output.inav[0,0].isig[0] == 1        #  correct number of peaks
-        assert output.inav[0,1].data.shape == (3,2)
 
     def test_argless_run(self,ragged_peak):
         ragged_peak.find_peaks()
