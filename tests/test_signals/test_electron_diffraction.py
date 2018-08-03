@@ -241,11 +241,11 @@ class TestBackgroundMethods:
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
         ('median', {'footprint': 4, })
     ])
-    def test_remove_background(self, diffraction_pattern: ElectronDiffraction,
+    def test_remove_background(self, diffraction_pattern_SED: ElectronDiffraction,
                                method, kwargs):
-        bgr = diffraction_pattern.remove_background(method=method, **kwargs)
-        assert bgr.data.shape == diffraction_pattern.data.shape
-        assert bgr.max() <= diffraction_pattern.max()
+        bgr = diffraction_pattern_SED.remove_background(method=method, **kwargs)
+        assert bgr.data.shape == diffraction_pattern_SED.data.shape
+        assert bgr.max() <= diffraction_pattern_SED.max()
 
 @pytest.mark.skip(reason="Diffraction Simulation not yet fixed")
 class TestPeakFinding:
