@@ -161,19 +161,19 @@ class TestVirtualImaging:
 
 
 
-#class TestGainNormalisation
+class TestGainNormalisation:
 
-@pytest.mark.parametrize('dark_reference, bright_reference', [
-    (-1, 1),
-    (0, 1),
-    (0, 256),
-])
-def test_apply_gain_normalisation(diffraction_pattern: ElectronDiffraction,
+    @pytest.mark.parametrize('dark_reference, bright_reference', [
+                                                                    (-1, 1),
+                                                                    (0, 1),
+                                                                    (0, 256),
+                                                                ])
+    def test_apply_gain_normalisation(self, diffraction_pattern_SED,
                                   dark_reference, bright_reference):
-    diffraction_pattern.apply_gain_normalisation(
+        diffraction_pattern_SED.apply_gain_normalisation(
         dark_reference=dark_reference, bright_reference=bright_reference)
-    assert diffraction_pattern.max() == bright_reference
-    assert diffraction_pattern.min() == dark_reference
+        assert diffraction_pattern_SED.max() == bright_reference
+        assert diffraction_pattern_SED.min() == dark_reference
 
 
 class TestDirectBeamMethods:
