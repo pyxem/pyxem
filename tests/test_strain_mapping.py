@@ -22,6 +22,7 @@ import numpy as np
 import pymatgen as pmg
 from pymatgen.transformations.standard_transformations import DeformStructureTransformation
 
+from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
@@ -31,9 +32,9 @@ def test_strain_mapping_affine_transform():
     structure = pmg.Structure.from_spacegroup("Fd-3m",lattice, [si], [[0, 0, 0]])
     ediff = DiffractionGenerator(300., 0.025)
     affines = [[[1, 0, 0], [0, 1, 0], [0, 0,  1]],
-           [[1.002, 0, 0], [0, 1, 0], [0, 0,  1]],
-           [[1.004, 0, 0], [0, 1, 0], [0, 0,  1]],
-           [[1.006, 0, 0], [0, 1, 0], [0, 0,  1]]]
+           [[1.04, 0, 0], [0, 1, 0], [0, 0,  1]],
+           [[1.08, 0, 0], [0, 1, 0], [0, 0,  1]],
+           [[1.12, 0, 0], [0, 1, 0], [0, 0,  1]]]
 
     data = []
     for affine in affines:
