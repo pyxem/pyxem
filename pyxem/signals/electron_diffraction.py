@@ -487,7 +487,7 @@ class ElectronDiffraction(Signal2D):
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
 
-    def find_peaks(self, method='skimage', *args, **kwargs):
+    def find_peaks(self, method='stat', *args, **kwargs):
         """Find the position of diffraction peaks.
 
         Function to locate the positive peaks in an image using various, user
@@ -499,11 +499,6 @@ class ElectronDiffraction(Signal2D):
         method : str
             Select peak finding algorithm to implement. Available methods are:
 
-            * 'max' - simple local maximum search
-            * 'skimage' - call the peak finder implemented in scikit-image which
-              uses a maximum filter
-            * 'minmax' - finds peaks by comparing maximum filter results
-              with minimum filter, calculates centers of mass
             * 'zaefferer' - based on gradient thresholding and refinement
               by local region of interest optimisation
             * 'stat' - statistical approach requiring no free params.
@@ -530,7 +525,6 @@ class ElectronDiffraction(Signal2D):
             position, in calibrated units.
         """
         method_dict = {
-            'skimage': peak_local_max,
             'zaefferer': find_peaks_zaefferer,
             'stat': find_peaks_stat,
             'laplacian_of_gaussians':  find_peaks_log,
