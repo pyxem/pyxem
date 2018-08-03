@@ -125,6 +125,15 @@ class TestDiffractionCalculator:
                                                                 reciprocal_radius=1.)
         assert isinstance(profile, ProfileSimulation)
 
+    def test_calculate_profile_hex(self, diffraction_calculator):
+        Ni = pmg.Element("Ni")
+        lattice = pmg.Lattice.hexagonal(3.5,5)
+        struc = pmg.Structure.from_spacegroup(162,lattice, [Ni], [[0, 0, 0]])
+        profile = diffraction_calculator.calculate_profile_data(structure=struc,
+                                                                reciprocal_radius=1.)
+        assert isinstance(profile, ProfileSimulation)
+
+
 
 class TestDiffractionSimulation:
 

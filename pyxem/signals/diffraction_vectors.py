@@ -131,7 +131,7 @@ class DiffractionVectors(BaseSignal):
         if (self.axes_manager.navigation_dimension == 2):
             gvlist = np.array([self.data[0,0][0]])
         else:
-            gvlist = np.array([self.data[0][0]])
+            raise ValueError("This method only works for ragged vector maps!")
 
         for i in self._iterate_signal():
             vlist = i[0]
