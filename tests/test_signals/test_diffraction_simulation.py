@@ -152,4 +152,4 @@ def profile_simulation():
                                      {(4, 4, 4): 8}])
 
 def test_plot_profile_simulation(profile_simulation):
-    profile_simulation.get_plot(gmax=1)
+    profile_simulation.get_plot(g_max=1)
