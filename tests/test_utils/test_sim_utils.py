@@ -68,5 +68,5 @@ def test_kinematic_simulator_invalid_illumination():
     atomic_coordinates = structure.cart_coords
     sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
                                         simulation_size=32,
-                                        illumination='gaussian_probe')
+                                        illumination='gaussian')
     assert isinstance(sim, ElectronDiffraction)
