@@ -2,7 +2,6 @@ alabaster==0.7.9
 atomicfile==1.0
 Babel==2.3.4
 cycler==0.10.0
-cython==0.27.3
 dask==0.11.0
 decorator==4.0.10
 dill==0.2.5
