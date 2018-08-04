@@ -276,3 +276,72 @@ def peaks_from_best_template(single_match_result,phase,library):
     pattern = library.get_library_entry(phase=_phase,angle=(best_fit[1],best_fit[2],best_fit[3]))['Sim']
     peaks = pattern.coordinates[:,:2] #cut z
     return peaks
+
+def _addnoise(x, alpha, mu, sigma):
+    """Add Poisson-Gaussian noise to the data x
+
+    Parameters
+    ----------
+    x : float
+        The original data
+
+    alpha : float
+        Level of noise gain
+
+    mu : float
+        Level of noise offset
+
+    sigma : float
+        Level of Gaussian noise
+
+    Returns
+    -------
+    y : float
+        The corrupted data
+
+    """
+    y = alpha * np.random.poisson(x / alpha) + mu + sigma * np.random.randn()
+    return y
+
+def add_poisson_gaussian_noise(X, alpha, mu, sigma):
+    """Add Poisson-Gaussian noise to the data X
+
+    Parameters
+    ----------
+    X : array
+        The data to be corrupted
+
+    alpha : float
+        Level of noise gain
+
+    mu : float
+        Level of noise offset
+
+    sigma : float
+        Level of Gaussian noise
+
+    Returns
+    -------
+    Y : array
+        The corrupted data
+
+    """
+    # Do some error checking
+    if alpha < 0. or alpha > 1.:
+        raise ValueError("alpha should be in range [0,1]")
+    # Vectorize noise function
+    addnoise = np.vectorize(_addnoise, otypes=[np.float])
+
+    # Rescale to [0,1] range
+    Xmax = np.amax(X)
+    X = X / Xmax
+
+    # Add noise
+    Y = addnoise(X, alpha, mu, sigma)
+
+    # Rescale to [0,1] range
+    Y = Y + np.abs(np.amin(Y))
+
+    # Rescale to X range
+    Y = Xmax * Y / np.amax(Y)
+    return Y
