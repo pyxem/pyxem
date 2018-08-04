@@ -72,7 +72,7 @@ class DiffractionVectors(BaseSignal):
                                   *args, **kwargs)
 
         # now convert all arrays into equivilant ragged format
-        magnitudes = BaseSignal(calculate_norms(self))
+        magnitudes = BaseSignal(magnitudes)
         magnitudes.axes_manager.set_signal_dimension(0)
 
         return magnitudes
