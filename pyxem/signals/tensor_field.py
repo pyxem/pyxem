@@ -45,6 +45,33 @@ def _get_rotation_angle(matrix):
     """
     return np.array(-math.asin(matrix[1,0]))
 
+def _transform_basis(D, angle):
+    """Method to transform the 2D basis in which a 2nd-order tensor is described.
+    Parameters
+    ----------
+    D : 3x3 matrix
+    angle : float
+        The anti-clockwise rotation angle between the diffraction x/y axes and
+        the x/y axes in which the tensor is to be specified.
+    Returns
+    -------
+    T : TensorField
+        Operates in place, replacing the original tensor field object with a
+        tensor field described in the new basis.
+    """
+
+    a=angle*np.pi/180.0
+    r11 = math.cos(a)
+    r12 = math.sin(a)
+    r21 = -math.sin(a)
+    r22 = math.cos(a)
+
+    R = np.array([[r11, r12, 0.],
+                  [r21, r22, 0.],
+                  [0.,  0.,  1.]])
+
+    T = np.dot(np.dot(R, D), R.T)
+    return T
 
 class DisplacementGradientMap(Signal2D):
     _signal_type = "tensor_field"
