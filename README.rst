@@ -36,7 +36,7 @@ From a clean install the following commands to install everything you need shoul
 
 	$ conda install hyperspy -c conda-forge
 
-	$ conda install --channel matsci pymatgen Cython
+	$ conda install --channel matsci pymatgen
 
 	$ pip install transforms3d
 
