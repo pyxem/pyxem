@@ -405,9 +405,17 @@ def peaks_as_gvectors(z, center, calibration):
     """
     g = (z - center) * calibration
     try:    # ragged case
+        _ = z[0,0,0]
+        ragged = True
+    except IndexError:
+        ragged = False
+
+    if ragged:
         return np.array([g[0].T[1], g[0].T[0]]).T
-    except IndexError: # non-ragged case
+    else:
         try:
             return np.array([g[:,1], g[:,0]]).T
         except IndexError: # no peaks case
             return np.array([np.nan,np.nan])
+
+        

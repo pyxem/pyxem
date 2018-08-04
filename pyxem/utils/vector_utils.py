@@ -19,15 +19,20 @@
 import numpy as np
 
 def calculate_norms(z):
-    norms = []
-    for i in z:
-        norms.append(np.linalg.norm(i))
-    return np.asarray(norms)
+    try: #ragged
+        _  = z[0,0,0] #will raise an index error on a non-ragged signal
+        ragged = True
+    except IndexError:
+        ragged = False
 
-def calculate_norms_ragged(z):
     norms = []
-    for i in z[0]:
-        norms.append(np.linalg.norm(i))
+    if ragged:
+        for i in z[0]:
+            norms.append(np.linalg.norm(i))
+    else: #non-ragged
+        for i in z:
+            norms.append(np.linalg.norm(i))
+
     return np.asarray(norms)
 
 def get_indices_from_distance_matrix(distances, distance_threshold):

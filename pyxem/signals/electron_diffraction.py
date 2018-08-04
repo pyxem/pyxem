@@ -339,21 +339,12 @@ class ElectronDiffraction(Signal2D):
             profiles = ed.get_radial_profile()
             profiles.plot()
         """
-        # TODO: the cython implementation is throwing dtype errors
         radial_profiles = self.map(radial_average,
                                    inplace=inplace,**kwargs)
-        # TODO: check this
-        ragged = len(radial_profiles.data.shape) == 1
-        if ragged:
-            max_len = max(map(len, radial_profiles.data))
-            radial_profiles = Signal1D([
-                np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
-                for row in radial_profiles.data])
-            return ElectronDiffractionProfile(radial_profiles)
-        else:
-            radial_profiles.axes_manager.signal_axes[0].offset = 0
-            signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            return ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+        radial_profiles.axes_manager.signal_axes[0].offset = 0
+        signal_axis = radial_profiles.axes_manager.signal_axes[0]
+
+        return ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
 
     def get_direct_beam_position(self, radius_start,
                                  radius_finish,

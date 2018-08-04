@@ -67,15 +67,13 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
-        #If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes)==0:
-            magnitudes = self.map(calculate_norms_ragged,
+        magnitudes = self.map(calculate_norms,
                                   inplace=False,
                                   *args, **kwargs)
-        #Otherwise easier to calculate.
-        else:
-            magnitudes = BaseSignal(calculate_norms(self))
-            magnitudes.axes_manager.set_signal_dimension(0)
+
+        # now convert all arrays into equivilant ragged format
+        magnitudes = BaseSignal(magnitudes)
+        magnitudes.axes_manager.set_signal_dimension(0)
 
         return magnitudes
 
