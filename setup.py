@@ -47,12 +47,11 @@ setup(
     ],
 
     install_requires=[
-    	'hyperspy',
-        'pymatgen',
-        'transforms3d']
+    	'hyperspy > 1.3',
+        'pymatgen >= 2018.7.23',
+        'transforms3d'],
 #        'cython',
-#        'lxml',
-#    ],
+#        'lxml'
 
     package_data={
         "": ["LICENSE", "readme.rst", "requirements.txt"],
