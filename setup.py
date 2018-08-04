@@ -46,10 +46,10 @@ setup(
         'pyxem.libraries'
     ],
 
-#    install_requires=[
-#    	'hyperspy',
-#        'pymatgen',
-#        'transforms3d',
+    install_requires=[
+    	'hyperspy',
+        'pymatgen',
+        'transforms3d']
 #        'cython',
 #        'lxml',
 #    ],

@@ -5,8 +5,8 @@ python:
 sudo: false
 
 before_install:
-  - "pip install sphinx hyperspy pymatgen"
-  - "pip install Cython transforms3d lxml ipywidgets scikit-learn"
+  - "pip install sphinx"
+  - "pip install transforms3d lxml ipywidgets scikit-learn"
   - "pip install sphinx_bootstrap_theme"
   - "pip install pytest pytest-cov"
   - "pip install coveralls"
