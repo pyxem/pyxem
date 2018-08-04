@@ -77,14 +77,18 @@ def test_polar2cart(r, theta, x, y):
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
-@pytest.mark.parametrize('z, center, calibration, g',[
-    (np.array([[100,100],
-              [200,200],
-              [150,-150]]),
+@pytest.mark.parametrize('z, center, calibration, g',
+    [(np.array([[100,100],
+               [200,200],
+               [150,-150]]),
      np.array((127.5, 127.5)),
      0.0039,
-     np.array([-0.10725, -0.10725])),
-])
+     np.array([[-0.10725, -0.10725],
+               [0.28275,  0.28275],
+               [-1.08225,  0.08775]
+              ])
+    )])
+
 def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
