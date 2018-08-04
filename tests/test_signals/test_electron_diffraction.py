@@ -234,18 +234,14 @@ class TestPeakFinding:
     @pytest.mark.parametrize('peak',[ragged_peak,nonragged_peak])
     def test_findpeaks_ragged(self,peak,method):
         output = peak(self).find_peaks(method=method)
+
+        assert output.inav[0,1].data.shape == (2,)
+        assert output.inav[0,0].data.shape == (2,)
+
         if method != 'difference_of_gaussians':
             # three methods return the expect peak
             assert output.inav[0,0].isig[1] == 2        #  correct number of dims (boring square)
-            assert output.inav[0,0].isig[0] == 1        #   """ peaks """
-            if peak(self).data[1,0,72,22] == 1: # 3 peaks
-                assert output.inav[0,1].data.shape == (3,2)
-            else: #2 peaks
-                assert output.data.shape == (2,2,2,2)
-        else:
-            # DoG doesn't find the correct peaks, but runs without error
-            if peak(self).data[1,0,72,22] == 1: # 3 peaks
-                assert output.data.shape == (2,2) # tests we have a sensible ragged array
+            assert output.inav[0,0].isig[0] == 1        #   ditto peaks
 
 
     def test_argless_run(self,ragged_peak):
