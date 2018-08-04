@@ -71,6 +71,10 @@ class DiffractionVectors(BaseSignal):
                                   inplace=False,
                                   *args, **kwargs)
 
+        # now convert all arrays into equivilant ragged format
+        magnitudes = BaseSignal(calculate_norms(self))
+        magnitudes.axes_manager.set_signal_dimension(0)
+
         return magnitudes
 
     def get_magnitude_histogram(self, bins):
