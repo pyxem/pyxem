@@ -488,7 +488,7 @@ class ElectronDiffraction(Signal2D):
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
 
-    def find_peaks(self, method='stat', *args, **kwargs):
+    def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
 
         Function to locate the positive peaks in an image using various, user
