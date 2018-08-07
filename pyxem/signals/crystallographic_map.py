@@ -59,8 +59,9 @@ def _distance_from_fixed_angle(angle,fixed_angle):
     else: #slower, but also good
         q_from_mode = qmult(qinverse(q_fixed),q_data)
         axis,theta = quat2axangle(q_from_mode)
+        theta = np.abs(theta)
 
-    return theta
+    return np.rad2deg(theta)
 
 class CrystallographicMap(BaseSignal):
     """
