@@ -46,13 +46,11 @@ setup(
         'pyxem.libraries'
     ],
 
-#    install_requires=[
-#    	'hyperspy',
-#        'pymatgen',
-#        'transforms3d',
-#        'cython',
-#        'lxml',
-#    ],
+    install_requires=[
+    	'hyperspy >= 1.3',
+        'pymatgen >= 2018.8.7',
+        'transforms3d'
+      ],
 
     package_data={
         "": ["LICENSE", "readme.rst", "requirements.txt"],
