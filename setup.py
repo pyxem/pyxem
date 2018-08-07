@@ -47,8 +47,8 @@ setup(
     ],
 
     install_requires=[
-    	'hyperspy',
-        'pymatgen',
+    	'hyperspy >= 1.3',
+        'pymatgen >= 2018.8.7',
         'transforms3d'
       ],
 
