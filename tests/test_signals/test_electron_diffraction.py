@@ -73,6 +73,11 @@ class TestSimpleMaps:
         diffraction_pattern.center_direct_beam(radius_start=1,radius_finish=3)
         assert isinstance(diffraction_pattern,ElectronDiffraction) #after inplace transform applied
 
+    def test_center_direct_beam(self,diffraction_pattern):
+        assert isinstance(diffraction_pattern,ElectronDiffraction)
+        diffraction_pattern.center_direct_beam(radius_start=1,radius_finish=3,square_width=3)
+        assert isinstance(diffraction_pattern,ElectronDiffraction) 
+
     def test_apply_affine_transformation(self, diffraction_pattern):
         diffraction_pattern.apply_affine_transformation(
                                                         D=np.array([[1., 0., 0.],
