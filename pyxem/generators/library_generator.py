@@ -96,9 +96,9 @@ class DiffractionLibraryGenerator(object):
             orientations = structure_library[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
-                orientation = np.deg2rad(orientation)
-                axis, angle = euler2axangle(orientation[0], orientation[1],
-                                                orientation[2], 'rzxz')
+                _orientation = np.deg2rad(orientation)
+                axis, angle = euler2axangle(_orientation[0], _orientation[1],
+                                                _orientation[2], 'rzxz')
                 # Apply rotation to the structure
                 rotation = RotationTransformation(axis, angle,
                                                   angle_in_radians=True)
@@ -106,7 +106,7 @@ class DiffractionLibraryGenerator(object):
                 # Calculate electron diffraction for rotated structure
                 data = diffractor.calculate_ed_data(rotated_structure,
                                                     reciprocal_radius,
-						    with_direct_beam)
+						                            with_direct_beam)
                 # Calibrate simulation
                 data.calibration = calibration
                 pattern_intensities = data.intensities
