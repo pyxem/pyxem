@@ -374,6 +374,7 @@ class ElectronDiffraction(Signal2D):
 
     def center_direct_beam(self,
                            radius_start, radius_finish,
+                           square_width=None,
                            *args, **kwargs):
 
         """Estimate the direct beam position in each experimentally acquired
@@ -389,6 +390,11 @@ class ElectronDiffraction(Signal2D):
         radius_finish : int
             The upper bounds for the radius of the central disc to be used in the alignment
 
+        square_width  : int
+            Half the side length of square that captures the direct beam in all scans. Means
+            that the centering algorithm is stable against diffracted spots brighter than
+            the direct beam.
+
         Returns
         -------
         Diffraction Pattern, centered.
@@ -398,8 +404,12 @@ class ElectronDiffraction(Signal2D):
         nav_shape_y = self.data.shape[1]
         origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
 
-
-        shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+        if square_width is not None:
+            min_index = np.int(origin_coordinates[0]-(0.5+square_width))
+            max_index = np.int(origin_coordinates[0]+(1.5+square_width)) #fails if non-square dp
+            shifts = self.isig[min_index:max_index,min_index:max_index].get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+        else:
+            shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
 
         shifts = -1*shifts.data
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
