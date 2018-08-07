@@ -253,9 +253,6 @@ class TestPeakFinding:
                 assert output.data.shape == (2,2) # tests we have a sensible ragged array
 
 
-    def test_argless_run(self,ragged_peak):
-        ragged_peak.find_peaks()
-
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_failing_run(self,ragged_peak):
         ragged_peak.find_peaks(method='no_such_method_exists')
