@@ -379,7 +379,11 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
         index_min = np.argmin(errRecord)
 
     ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radiusList[index_min])
+    h0= np.hanning(np.size(ref,0))
+    h1= np.hanning(np.size(ref,1))
+    hann2d = np.sqrt(np.outer(h0,h1))
     ref= hann2d*ref
+    im = hann2d*z
     shift, error, diffphase = register_translation(ref,im, 100)
 
     return (shift - 0.5)
