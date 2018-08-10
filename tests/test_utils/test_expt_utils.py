@@ -22,6 +22,8 @@ import numpy as np
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.expt_utils import _cart2polar, _polar2cart, _index_coords
 from pyxem.utils.expt_utils import *
+from scipy.ndimage.filters import gaussian_filter
+
 
 @pytest.fixture(params=[
     np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
@@ -88,3 +90,31 @@ def test_polar2cart(r, theta, x, y):
 def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
+
+class TestCenteringAlgorithm:
+
+    @pytest.mark.parametrize('shifts_expected',[(0, 0)])
+    @pytest.mark.parametrize('radius',[1,2,3])
+    def test_perfectly_centered_spot(shifts_expected,radius):
+        z = np.zeros((50,50))
+        z[24:26,24:26] = 1
+        z = gaussian_filter(z,sigma=2,truncate=3)
+        shifts =  find_beam_offset_cross_correlation(z,radius,radius)
+        assert np.allclose(shifts,shifts_expected,rtol=0.01)
+
+    @pytest.mark.parametrize('shifts_expected',[(3.5, -0.5)])
+    @pytest.mark.parametrize('sigma',[1,2,3])
+    def test_single_pixel_spot(shifts_expected,sigma):
+        z = np.zeros((50,50))
+        z[28,24] = 1
+        z = gaussian_filter(z,sigma=sigma,truncate=3)
+        shifts =  find_beam_offset_cross_correlation(z,1)
+        assert np.allclose(shifts,shifts_expected,rtol=0.01)
+
+    @pytest.mark.parametrize('shifts_expected',[(4.5, 1.5)])
+    def test_broader_starting_square_spot(shifts_expected):
+        z = np.zeros((50,50))
+        z[28:32,24:28] = 1
+        z = gaussian_filter(z,sigma=2,truncate=3)
+        shifts =  find_beam_offset_cross_correlation(z,1)
+        assert np.allclose(shifts,shifts_expected,rtol=0.01)
