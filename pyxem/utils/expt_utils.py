@@ -382,7 +382,7 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     ref= hann2d*ref
     shift, error, diffphase = register_translation(ref,im, 100)
 
-    return shift
+    return (shift - 0.5)
 
 def peaks_as_gvectors(z, center, calibration):
     """
