@@ -95,7 +95,7 @@ class TestCenteringAlgorithm:
 
     @pytest.mark.parametrize("shifts_expected",[(0, 0)])
     @pytest.mark.parametrize("radius",[1,2,3])
-    def test_perfectly_centered_spot(shifts_expected,radius):
+    def test_perfectly_centered_spot(self,shifts_expected,radius):
         z = np.zeros((50,50))
         z[24:26,24:26] = 1
         z = gaussian_filter(z,sigma=2,truncate=3)
@@ -104,7 +104,7 @@ class TestCenteringAlgorithm:
 
     @pytest.mark.parametrize("shifts_expected",[(3.5, -0.5)])
     @pytest.mark.parametrize("sigma",[1,2,3])
-    def test_single_pixel_spot(shifts_expected,sigma):
+    def test_single_pixel_spot(self,shifts_expected,sigma):
         z = np.zeros((50,50))
         z[28,24] = 1
         z = gaussian_filter(z,sigma=sigma,truncate=3)
@@ -112,7 +112,7 @@ class TestCenteringAlgorithm:
         assert np.allclose(shifts,shifts_expected,rtol=0.01)
 
     @pytest.mark.parametrize("shifts_expected",[(4.5, 1.5)])
-    def test_broader_starting_square_spot(shifts_expected):
+    def test_broader_starting_square_spot(self,shifts_expected):
         z = np.zeros((50,50))
         z[28:32,24:28] = 1
         z = gaussian_filter(z,sigma=2,truncate=3)
