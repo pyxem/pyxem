@@ -102,7 +102,7 @@ class TestCenteringAlgorithm:
         shifts =  find_beam_offset_cross_correlation(z,radius,radius+1)
         assert np.allclose(shifts,shifts_expected,atol=0.05)
 
-    @pytest.mark.parametrize("shifts_expected",[(3.5, -0.5)])
+    @pytest.mark.parametrize("shifts_expected",[(-3.5, +0.5)])
     @pytest.mark.parametrize("sigma",[1,2,3])
     def test_single_pixel_spot(self,shifts_expected,sigma):
         z = np.zeros((50,50))
@@ -111,7 +111,7 @@ class TestCenteringAlgorithm:
         shifts =  find_beam_offset_cross_correlation(z,1,2)
         assert np.allclose(shifts,shifts_expected,atol=0.05)
 
-    @pytest.mark.parametrize("shifts_expected",[(4.5, 1.5)])
+    @pytest.mark.parametrize("shifts_expected",[(-4.5, -1.5)])
     def test_broader_starting_square_spot(self,shifts_expected):
         z = np.zeros((50,50))
         z[28:32,24:28] = 1
