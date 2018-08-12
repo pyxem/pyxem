@@ -107,7 +107,7 @@ class TestCenteringAlgorithm:
         z = np.zeros((50,50))
         z[28,24] = 1
         z = gaussian_filter(z,sigma=sigma,truncate=3)
-        shifts =  find_beam_offset_cross_correlation(z,1,4)
+        shifts =  find_beam_offset_cross_correlation(z,1,6)
         assert np.allclose(shifts,shifts_expected,atol=0.1)
 
     @pytest.mark.parametrize("shifts_expected",[(-4.5, -0.5)])
