@@ -94,12 +94,11 @@ def test_peaks_as_gvectors(z, center, calibration, g):
 class TestCenteringAlgorithm:
 
     @pytest.mark.parametrize("shifts_expected",[(0, 0)])
-    @pytest.mark.parametrize("radius",[1,2,3])
     def test_perfectly_centered_spot(self,shifts_expected,radius):
         z = np.zeros((50,50))
         z[24:26,24:26] = 1
         z = gaussian_filter(z,sigma=2,truncate=3)
-        shifts =  find_beam_offset_cross_correlation(z,radius,radius+1)
+        shifts =  find_beam_offset_cross_correlation(z,1,4)
         assert np.allclose(shifts,shifts_expected,atol=0.05)
 
     @pytest.mark.parametrize("shifts_expected",[(-3.5, +0.5)])
@@ -108,7 +107,7 @@ class TestCenteringAlgorithm:
         z = np.zeros((50,50))
         z[28,24] = 1
         z = gaussian_filter(z,sigma=sigma,truncate=3)
-        shifts =  find_beam_offset_cross_correlation(z,1,2)
+        shifts =  find_beam_offset_cross_correlation(z,1,4)
         assert np.allclose(shifts,shifts_expected,atol=0.05)
 
     @pytest.mark.parametrize("shifts_expected",[(-4.5, -1.5)])
@@ -116,5 +115,5 @@ class TestCenteringAlgorithm:
         z = np.zeros((50,50))
         z[28:32,24:28] = 1
         z = gaussian_filter(z,sigma=2,truncate=3)
-        shifts =  find_beam_offset_cross_correlation(z,1,2)
+        shifts =  find_beam_offset_cross_correlation(z,1,4)
         assert np.allclose(shifts,shifts_expected,atol=0.05)
