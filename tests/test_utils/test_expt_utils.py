@@ -110,7 +110,7 @@ class TestCenteringAlgorithm:
         shifts =  find_beam_offset_cross_correlation(z,1,4)
         assert np.allclose(shifts,shifts_expected,atol=0.1)
 
-    @pytest.mark.parametrize("shifts_expected",[(-4.5, -1.5)])
+    @pytest.mark.parametrize("shifts_expected",[(-4.5, -0.5)])
     def test_broader_starting_square_spot(self,shifts_expected):
         z = np.zeros((50,50))
         z[28:31,24:27] = 1
