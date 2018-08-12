@@ -99,7 +99,7 @@ class TestCenteringAlgorithm:
         z[24:26,24:26] = 1
         z = gaussian_filter(z,sigma=2,truncate=3)
         shifts =  find_beam_offset_cross_correlation(z,1,4)
-        assert np.allclose(shifts,shifts_expected,atol=0.1)
+        assert np.allclose(shifts,shifts_expected,atol=0.2)
 
     @pytest.mark.parametrize("shifts_expected",[(-3.5, +0.5)])
     @pytest.mark.parametrize("sigma",[1,2,3])
@@ -108,7 +108,7 @@ class TestCenteringAlgorithm:
         z[28,24] = 1
         z = gaussian_filter(z,sigma=sigma,truncate=3)
         shifts =  find_beam_offset_cross_correlation(z,1,6)
-        assert np.allclose(shifts,shifts_expected,atol=0.1)
+        assert np.allclose(shifts,shifts_expected,atol=0.2)
 
     @pytest.mark.parametrize("shifts_expected",[(-4.5, -0.5)])
     def test_broader_starting_square_spot(self,shifts_expected):
@@ -116,4 +116,4 @@ class TestCenteringAlgorithm:
         z[28:31,24:27] = 1
         z = gaussian_filter(z,sigma=2,truncate=3)
         shifts =  find_beam_offset_cross_correlation(z,1,4)
-        assert np.allclose(shifts,shifts_expected,atol=0.1)
+        assert np.allclose(shifts,shifts_expected,atol=0.2)
