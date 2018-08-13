@@ -49,7 +49,8 @@ setup(
     install_requires=[
     	'hyperspy >= 1.3',
         'pymatgen >= 2018.8.7',
-        'transforms3d'
+        'transforms3d',
+	'scikit-learn >= 0.19'
       ],
 
     package_data={
