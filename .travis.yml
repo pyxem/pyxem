@@ -6,7 +6,7 @@ sudo: false
 
 before_install:
   - "pip install sphinx"
-  - "pip install lxml ipywidgets scikit-learn"
+  - "pip install ipywidgets"
   - "pip install sphinx_bootstrap_theme"
   - "pip install pytest pytest-cov"
   - "pip install coveralls"
