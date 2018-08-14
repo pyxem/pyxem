@@ -14,7 +14,7 @@ flake8_checks:
     script:
     - apt-get update -q
     - apt-get install -qy python3-flake8
-    - python3 -m flake8 --exclude pixstem/api.py pixstem/
+    - python3 -m flake8 pixstem/
 
 pydocstyle_checks:
     image: debian:stable
