@@ -10,6 +10,8 @@
 
 .. https://github.com/lemurheavy/coveralls-public/issues/971
 
+Introduction
+---
 
 pyXem (Python Crystallographic Electron Microscopy) is an open-source Python library for crystallographic electron microscopy. It builds on the tools for multi-dimensional data analysis provided by the HyperSpy library for treatment of experimental electron diffraction data and tools for atomic structure manipulation provided by the PyMatGen library.
 
@@ -23,10 +25,10 @@ pyXem requires python 3 and can be installed by navigating to the directory cont
 	$ pip install .
 
 However we suggest using an isolated environment. A good option is to use
-`Miniconda https://conda.io/miniconda.html`__  ( make sure to install the
-Python 3 version).
+`Miniconda <https://conda.io/miniconda.html>`__  ( make sure to install the
+Python 3 version), which has extensive documentation.
 
-From a clean install the following commands to install everything you need should be entered into the terminal (located in the pyxem directory), or anaconda prompt terminal in Windows::
+From a clean install the following command will install everything you need. It should be entered into the terminal (located in the pyxem directory)::
 
 	$ pip install . -r requirements.txt
 
