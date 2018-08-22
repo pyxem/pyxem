@@ -36,7 +36,7 @@ def load_mtex_map(filename):
         y_max = np.max(load_array[:,6]).astype(int)
         # add one for zero indexing
         array = load_array.reshape(x_max+1,y_max+1,7)
-        array = np.transpose(array,(1,0,2)) #this gets x,y in the hs convention
+        #array = np.transpose(array,(1,0,2)) #this gets x,y in the hs convention
         cmap = Signal2D(array).transpose(navigation_axes=2)
         return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
