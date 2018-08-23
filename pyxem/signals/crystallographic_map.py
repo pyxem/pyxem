@@ -36,7 +36,6 @@ def load_mtex_map(filename):
         y_max = np.max(load_array[:,6]).astype(int)
         # add one for zero indexing
         array = load_array.reshape(x_max+1,y_max+1,7)
-        array = np.transpose(array,(1,0,2)) #this gets x,y in the hs convention
         cmap = Signal2D(array).transpose(navigation_axes=2)
         return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
@@ -141,5 +140,5 @@ class CrystallographicMap(BaseSignal):
         results_array = np.zeros((x_size_nav*y_size_nav,7))
         for i in tqdm(range(0,x_size_nav),ascii=True):
             for j in range (0, y_size_nav):
-                results_array[(i)*y_size_nav+j] = np.append(self.inav[i,j].data[0:5],[i,j])
+                results_array[(j)*x_size_nav+i] = np.append(self.inav[i,j].data[0:5],[i,j])
         np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
