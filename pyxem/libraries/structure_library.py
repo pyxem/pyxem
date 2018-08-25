@@ -17,36 +17,29 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyxem as pxm
-import pickle
-
-def load_StructureLibrary(filename, safety=False):
-    if safety:
-        with open(filename, 'rb') as handle:
-            return pickle.load(handle)
-    else:
-        raise RuntimeError('Unpickling is risky, turn safety to True if \
-        trust the author of this content')
-
 
 class StructureLibrary(dict):
-    """Maps phase identifiers to crystal structure and corresponding expected or
-    allowed orientations.
+    """
+    A dictionary containing all the structures and their associated rotations
+    in the .struct_lib attribute.
 
+    identifiers: list of strings/ints
+
+    structures: list of pymatgen.structures
+
+    orientations: a list (over identifiers)
+    of lists of euler angles (as tuples) in rzxz conventions
     """
 
     def __init__(self,
                  identifiers,
                  structures,
-                 orientations,
-                 representation='euler',
-                 *args, **kwargs):
-        """
+                 orientations):
 
-        """
-        self.representation = representation
-
-
-
-    def pickle_library(self,filename):
-        with open(filename, 'wb') as handle:
-            pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        self.identifiers = identifiers
+        self.structures  = structures
+        self.orientations = orientations
+        # create the actual dictionary
+        self.struct_lib = dict()
+        for ident,struct,ori in zip(identifiers,structures,orientations):
+                self.struct_lib[ident] = (struct,ori)

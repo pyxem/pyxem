@@ -63,10 +63,9 @@ class DiffractionLibraryGenerator(object):
 
         Parameters
         ----------
-        structure_library : dict
-            Dictionary of structures and associated orientations (represented as
-            Euler angles or axis-angle pairs) for which electron diffraction is
-            to be simulated.
+        structure_library : pyxem:StructureLibrary Object
+            Dictionary of structures and associated orientations for which electron diffraction
+            is to be simulated.
 
         calibration : float
             The calibration of experimental data to be correlated with the
@@ -89,6 +88,7 @@ class DiffractionLibraryGenerator(object):
         diffraction_library = DiffractionLibrary()
         # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
+        structure_library = structure_library.struct_lib
         # Iterate through phases in library.
         for key in structure_library.keys():
             phase_diffraction_library = dict()
