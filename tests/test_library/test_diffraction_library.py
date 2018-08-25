@@ -24,6 +24,7 @@ import numpy as np
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.libraries.diffraction_library import load_DiffractionLibrary
+from pyxem.libraries.structure_library import StructureLibrary
 
 @pytest.fixture
 def get_library():
@@ -34,7 +35,7 @@ def get_library():
         lattice = pmg.Lattice.cubic(5)
 
         structure = pmg.Structure.from_spacegroup("F-43m", lattice, [element], [[0, 0, 0]])
-        structure_library = {'Si': (structure, [(0, 0, 0),(0,0.2,0)])}
+        structure_library = StructureLibrary(['Si'],[structure],[[(0, 0, 0),(0,0.2,0)]])
 
         return dfl.get_diffraction_library(
             structure_library, 0.017, 2.4, (72,72) ,'euler')

@@ -22,6 +22,7 @@ import pymatgen as pmg
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.generators.library_generator import DiffractionLibraryGenerator
 from pyxem.libraries.diffraction_library import DiffractionLibrary
+from pyxem.libraries.structure_library import StructureLibrary
 
 
 @pytest.fixture
@@ -55,7 +56,7 @@ def structure(request, lattice, element):
 
 @pytest.fixture
 def structure_library(structure):
-    return {'Si': (structure, [(0, 0, 0)])}
+    return StructureLibrary(['Si'],[structure],[[(0, 0, 0)]])
 
 class TestDiffractionLibraryGenerator:
 
