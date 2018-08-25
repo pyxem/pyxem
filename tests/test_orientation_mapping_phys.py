@@ -23,6 +23,7 @@ import pymatgen as pmg
 import hyperspy.api as hs
 
 from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.utils.sim_utils import peaks_from_best_template
 
 """
@@ -73,8 +74,7 @@ def pattern_rot_list():
 
 def get_template_library(structure,rot_list,edc):
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
-    struc_lib = dict()
-    struc_lib['A'] = (structure,rot_list)
+    struc_lib = StructureLibrary(['A'],[structure],[rot_list])
     library = diff_gen.get_diffraction_library(struc_lib,
                                            calibration=1/half_side_length,
                                            reciprocal_radius=0.8,
