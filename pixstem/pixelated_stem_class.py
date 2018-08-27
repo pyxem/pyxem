@@ -1368,7 +1368,7 @@ class DPCSignal2D(Signal2D):
 
         Parameters
         ----------
-        sigma : scalar, default 5
+        sigma : scalar, default 2
         output : HyperSpy signal
 
         Returns
