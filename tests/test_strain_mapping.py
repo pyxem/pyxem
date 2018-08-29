@@ -19,8 +19,6 @@
 import pytest
 
 import numpy as np
-import pymatgen as pmg
-from pymatgen.transformations.standard_transformations import DeformStructureTransformation
 
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
 from pyxem.generators.diffraction_generator import DiffractionGenerator

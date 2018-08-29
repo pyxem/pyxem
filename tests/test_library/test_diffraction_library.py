@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pymatgen as pmg
 import pyxem as pxm
 import os
 import numpy as np

@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pymatgen as pmg
 import numpy as np
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation

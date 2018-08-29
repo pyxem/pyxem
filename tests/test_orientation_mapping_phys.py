@@ -19,7 +19,6 @@
 import numpy as np
 import pytest
 import pyxem as pxm
-import pymatgen as pmg
 import hyperspy.api as hs
 
 from pyxem.generators.indexation_generator import IndexationGenerator
