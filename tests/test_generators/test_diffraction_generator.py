@@ -78,6 +78,14 @@ class TestDiffractionCalculator:
         big_coordinates = big_diffraction.coordinates[big_indices.index((2, 2, 0))]
         assert np.allclose(coordinates, big_coordinates * 2)
 
+    def test_appropriate_intensities(self, diffraction_calculator, structure):
+        """Tests the central beam is strongest."""
+        diffraction = diffraction_calculator.calculate_ed_data(structure=structure, reciprocal_radius=5.)
+        indices = [tuple(i) for i in diffraction.indices]
+        central_beam = indices.index((0, 0, 0))
+        smaller = np.greater_equal(diffraction.intensities[central_beam], diffraction.intensities)
+        assert np.all(smaller)
+
     @pytest.mark.skip(reason="This can't be done as yet with diffpy")
     @pytest.mark.parametrize('structure, expected', [
         ('Fd-3m', (2, 2, 0)),
@@ -105,13 +113,6 @@ class TestDiffractionCalculator:
         indices = [tuple(i) for i in diffraction.indices]
         assert expected_extinction not in indices
 
-    def test_appropriate_intensities(self, diffraction_calculator, structure):
-        """Tests the central beam is strongest."""
-        diffraction = diffraction_calculator.calculate_ed_data(structure=structure, reciprocal_radius=5.)
-        indices = [tuple(i) for i in diffraction.indices]
-        central_beam = indices.index((0, 0, 0))
-        smaller = np.greater_equal(diffraction.intensities[central_beam], diffraction.intensities)
-        assert np.all(smaller)
 
     @pytest.mark.skip(reason="This currently contains an explicit call to pymatgen")
     def test_calculate_profile_class(self, diffraction_calculator):
@@ -132,7 +133,7 @@ class TestDiffractionCalculator:
         assert isinstance(profile, ProfileSimulation)
 
 
-@pytest.mark.skip(reason="Not to with the generation of the simulation")
+@pytest.mark.skip(reason="Not to do with the generation of the simulation")
 class TestDiffractionSimulation:
 
     def test_init(self):
