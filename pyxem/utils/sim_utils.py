@@ -136,24 +136,21 @@ def get_kinematical_intensities(structure,
         The intensities of the peaks.
 
     """
-    # Create a flattened array of zs, coeffs, fcoords and occus for vectorized
+    # Create a flattened array of coeffs, fcoords and occus for vectorized
     # computation of atomic scattering factors later. Note that these are not
     # necessarily the same size as the structure as each partially occupied
     # specie occupies its own position in the flattened array.
-    zs = []
     coeffs = []
     fcoords = []
     occus = []
     dwfactors = []
     for site in structure:
         for sp, occu in site.species_and_occu.items():
-            zs.append(sp.Z)
             c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
             coeffs.append(c)
             dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
             fcoords.append(site.frac_coords)
             occus.append(occu)
-    zs = np.array(zs)
     coeffs = np.array(coeffs)
     fcoords = np.array(fcoords)
     occus = np.array(occus)
@@ -288,7 +285,7 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
     Returns: lists of: spot_indicies, spot_coords, spot_distances
              The first two are tuples, and the latter is a float.
              Note that spot_coords are in the lattice basis.
-            
+
     """
 
     spot_indicies = []
