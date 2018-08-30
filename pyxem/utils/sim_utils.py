@@ -276,3 +276,34 @@ def peaks_from_best_template(single_match_result,phase,library):
     pattern = library.get_library_entry(phase=_phase,angle=(best_fit[1],best_fit[2],best_fit[3]))['Sim']
     peaks = pattern.coordinates[:,:2] #cut z
     return peaks
+
+def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
+    """
+    Finds all reciprocal lattice points inside a given reciprocal sphere. Utilised
+    within the DifractionGenerator.
+
+    Inputs:  reciprocal_lattice : Diffy Lattice Object
+             reciprocal_radius  : float
+
+    Returns: lists of: spot_indicies, spot_coords, spot_distances
+             The first two are tuples, and the latter is a float.
+             Note that spot_coords are in the lattice basis.
+            
+    """
+
+    spot_indicies = []
+    spot_distances = []
+    spot_coords = []
+    a,b,c = reciprocal_lattice.a,reciprocal_lattice.b,reciprocal_lattice.c
+    h_max = np.ceil(reciprocal_radius/a)
+    k_max = np.ceil(reciprocal_radius/b)
+    l_max = np.ceil(reciprocal_radius/c)
+    for h in np.arange(-h_max,h_max):
+        for k in np.arange(-k_max,k_max):
+            for l in np.arange(-l_max,l_max):
+                if np.abs(reciprocal_lattice.dist([h,k,l],[0,0,0])) < reciprocal_radius:
+                    spot_indicies.append((h,k,l))
+                    spot_coords.append((h*a,k*b,l*c))
+                    spot_distances.append(reciprocal_lattice.dist([h*a,k*b,l*c],[0,0,0]))
+
+    return spot_indicies,spot_coords,spot_distances
