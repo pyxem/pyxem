@@ -18,6 +18,7 @@
 
 import pytest
 import numpy as np
+import diffpy
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import *
@@ -59,6 +60,13 @@ def test_kinematic_simulator_gaussian_probe():
                                         illumination='gaussian_probe')
     assert isinstance(sim, ElectronDiffraction)
 
+def test_get_points_in_sphere():
+    latt = diffpy.structure.lattice.Lattice(0.5,0.5,0.5,90,90,90)
+    ind,cord,dist = get_points_in_sphere(rlatt,0.6)
+    assert len(ind) == len(cord)
+    assert len(ind) == len(dist)
+    assert len(dist) == 1+6
+    
 @pytest.mark.xfail(raises=ValueError)
 def test_kinematic_simulator_invalid_illumination():
     si = pmg.Element("Si")
