@@ -97,7 +97,7 @@ class DiffractionGenerator(object):
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
         recip_latt = latt.reciprocal()
-        spot_indicies, spot_coords = get_points_in_sphere(recip_latt,reciprocal_radius)
+        spot_indicies, spot_coords, spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
         cartesian_coordinates = recip_latt.cartesian(spot_coords)
 
         # Identify points intersecting the Ewald sphere within maximum

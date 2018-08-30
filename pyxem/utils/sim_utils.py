@@ -299,5 +299,6 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
     in_sphere = np.abs(reciprocal_lattice.dist(potential_points,[0,0,0])) < reciprocal_radius
     spot_indicies = potential_points[in_sphere]
     spot_coords   = np.multiply(spot_indicies,[a,b,c])
+    spot_distances = reciprocal_lattice.dist(spot_indicies,[0,0,0])
 
-    return spot_indicies,spot_coords
+    return spot_indicies,spot_coords,spot_distances
