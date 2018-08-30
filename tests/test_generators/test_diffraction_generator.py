@@ -32,7 +32,7 @@ def diffraction_calculator(request):
 @pytest.fixture()
 def structure(lattice_parameter=None):
     """
-    We construct an Fd-3m silicon with lattice parameter 5.431
+    We construct an Fd-3m silicon (with lattice parameter 5.431 as a default)
     """
     if lattice_parameter is not None:
         a = lattice_parameter
@@ -64,14 +64,10 @@ class TestDiffractionCalculator:
         assert len(diffraction.coordinates) == len(diffraction.intensities)
 
 
-    @pytest.mark.skip(reason="To be implemented")
     def test_appropriate_scaling(self, diffraction_calculator: DiffractionGenerator):
         """Tests that doubling the unit cell halves the pattern spacing."""
-        si = pmg.Element("Si")
-        lattice = pmg.Lattice.cubic(5.431)
-        big_lattice = pmg.Lattice.cubic(10.862)
-        silicon = pmg.Structure.from_spacegroup("Fd-3m", lattice, [si], [[0, 0, 0]])
-        big_silicon = pmg.Structure.from_spacegroup("Fd-3m", big_lattice, [si], [[0, 0, 0]])
+        silicon = structure(5)
+        big_silicon = structure(10)
         diffraction = diffraction_calculator.calculate_ed_data(structure=silicon, reciprocal_radius=5.)
         big_diffraction = diffraction_calculator.calculate_ed_data(structure=big_silicon, reciprocal_radius=5.)
         indices = [tuple(i) for i in diffraction.indices]
