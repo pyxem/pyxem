@@ -288,7 +288,6 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
     """
 
     spot_indicies = []
-    spot_distances = []
     spot_coords = []
     a,b,c = reciprocal_lattice.a,reciprocal_lattice.b,reciprocal_lattice.c
     h_max = np.ceil(reciprocal_radius/a)
@@ -300,6 +299,5 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
                 if np.abs(reciprocal_lattice.dist([h,k,l],[0,0,0])) < reciprocal_radius:
                     spot_indicies.append((h,k,l))
                     spot_coords.append((h*a,k*b,l*c))
-                    spot_distances.append(reciprocal_lattice.dist([h*a,k*b,l*c],[0,0,0]))
-
-    return np.asarray(spot_indicies),np.asarray(spot_coords),np.asarray(spot_distances)
+                    
+    return np.asarray(spot_indicies),np.asarray(spot_coords)
