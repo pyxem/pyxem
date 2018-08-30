@@ -28,7 +28,7 @@ from pyxem.signals.diffraction_simulation import ProfileSimulation
 
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.utils.sim_utils import get_electron_wavelength,\
-    get_kinematical_intensities, get_unique_families
+    get_kinematical_intensities, get_unique_families, get_points_in_sphere
 
 
 class DiffractionGenerator(object):
@@ -96,12 +96,9 @@ class DiffractionGenerator(object):
 
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
-        recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_pts, g_hkls = \
-            recip_latt.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
-                                            reciprocal_radius,
-                                            zip_results=False)[:2]
-        cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
+        recip_latt = latt.reciprocal()
+        spot_indicies, spot_coords, spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
+        cartesian_coordinates = recip_latt.cartesian(spot_coords)
 
         # Identify points intersecting the Ewald sphere within maximum
         # excitation error and store the magnitude of their excitation error.
@@ -113,9 +110,9 @@ class DiffractionGenerator(object):
         intersection = proximity < max_excitation_error
         # Mask parameters corresponding to excited reflections.
         intersection_coordinates = cartesian_coordinates[intersection]
-        intersection_indices = recip_pts[intersection]
+        intersection_indices = spot_indicies[intersection]
         proximity = proximity[intersection]
-        g_hkls = g_hkls[intersection]
+        g_hkls = spot_distances[intersection]
 
         # Calculate diffracted intensities based on a kinematical model.
         intensities = get_kinematical_intensities(structure,
