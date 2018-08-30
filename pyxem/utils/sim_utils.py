@@ -145,12 +145,12 @@ def get_kinematical_intensities(structure,
     occus = []
     dwfactors = []
     for site in structure:
-        for sp, occu in site.species_and_occu.items():
-            c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
-            coeffs.append(c)
-            dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
-            fcoords.append(site.frac_coords)
-            occus.append(occu)
+        c = ATOMIC_SCATTERING_PARAMS[site.element]
+        coeffs.append(c)
+        dwfactors.append(debye_waller_factors.get(site.element, 0))
+        fcoords.append(site.frac_coords)
+        occus.append(site.occupancy)
+
     coeffs = np.array(coeffs)
     fcoords = np.array(fcoords)
     occus = np.array(occus)
