@@ -148,7 +148,7 @@ def get_kinematical_intensities(structure,
         c = ATOMIC_SCATTERING_PARAMS[site.element]
         coeffs.append(c)
         dwfactors.append(debye_waller_factors.get(site.element, 0))
-        fcoords.append(site.frac_coords)
+        fcoords.append(site.xyz)
         occus.append(site.occupancy)
 
     coeffs = np.array(coeffs)
@@ -282,8 +282,7 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
     Inputs:  reciprocal_lattice : Diffy Lattice Object
              reciprocal_radius  : float
 
-    Returns: lists of: spot_indicies, spot_coords, spot_distances
-             The first two are tuples, and the latter is a float.
+    Returns: np.arrays(): spot_indicies, spot_coords, spot_distances
              Note that spot_coords are in the lattice basis.
 
     """
@@ -303,4 +302,4 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
                     spot_coords.append((h*a,k*b,l*c))
                     spot_distances.append(reciprocal_lattice.dist([h*a,k*b,l*c],[0,0,0]))
 
-    return spot_indicies,spot_coords,spot_distances
+    return np.asarray(spot_indicies),np.asarray(spot_coords),np.asarray(spot_distances)
