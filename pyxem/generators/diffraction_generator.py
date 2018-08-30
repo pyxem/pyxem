@@ -102,10 +102,9 @@ class DiffractionGenerator(object):
 
         # Identify points intersecting the Ewald sphere within maximum
         # excitation error and store the magnitude of their excitation error.
-        radius = 1 / wavelength
-        r = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
-        theta = np.arcsin(r / radius)
-        z_sphere = radius * (1 - np.cos(theta))
+        r_sphere = 1 / wavelength
+        r_spot = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
+        z_sphere = -np.sqrt(r_sphere**2-r_spot**2) + r_sphere
         proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
         intersection = proximity < max_excitation_error
         # Mask parameters corresponding to excited reflections.
