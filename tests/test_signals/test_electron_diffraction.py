@@ -61,6 +61,14 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 def diffraction_pattern(request):
     return ElectronDiffraction(request.param)
 
+def hyperspy_signal(request):
+    return Signal2d(request.param)
+
+class TestInit:
+    def test_init_SEM(self,hyperspy_signal):
+        S = hyperspy_signal
+        S.metadata.Acquisition_instrument = 'SEM'
+        dp = ElectronDiffraction(S)
 
 class TestSimpleMaps:
     #Confirms that maps run without error.
