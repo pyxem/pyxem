@@ -100,8 +100,6 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
         return gradient_of_image
 
     # Generate an ordered list of matrix coordinates.
-    if len(z.shape) != 2:
-        raise ValueError("'z' should be a 2-d image matrix.")
     z = z / np.max(z)
     coordinates = np.indices(z.data.shape).reshape(2, -1).T
     # Calculate the gradient at every point.
