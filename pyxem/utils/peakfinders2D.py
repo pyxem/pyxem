@@ -274,10 +274,8 @@ def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
     blobs = blob_dog(z, min_sigma=min_sigma, max_sigma=max_sigma,
                      sigma_ratio=sigma_ratio, threshold=threshold,
                      overlap=overlap)
-    try:
-        centers = blobs[:, :2]
-    except IndexError:
-        return NO_PEAKS
+
+    centers = blobs[:, :2]
     clean_centers = []
     for center in centers:
         if len(np.intersect1d(center, (0, 1) + z.shape + tuple(
@@ -314,10 +312,6 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
     blobs = blob_log(z, min_sigma=min_sigma, max_sigma=max_sigma,
                      num_sigma=num_sigma, threshold=threshold, overlap=overlap,
                      log_scale=log_scale)
-    # Attempt to return only peak positions. If no peaks exist, return an
-    # empty array.
-    try:
-        centers = blobs[:, :2]
-    except IndexError:
-        return NO_PEAKS
+
+    centers = blobs[:, :2]
     return centers
