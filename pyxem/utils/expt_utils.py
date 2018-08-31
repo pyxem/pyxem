@@ -43,7 +43,7 @@ def _index_coords(z, origin=None):
         2D data
     origin : (x,y) tuple
         defaults to the center of the image. Specify origin=(0,0)
-        to set the origin to the *bottom-left* corner of the image.
+        to set the origin to the *top-left* corner of the image.
 
     Returns
     -------

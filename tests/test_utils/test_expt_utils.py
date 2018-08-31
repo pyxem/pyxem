@@ -59,6 +59,13 @@ def test_index_coords(diffraction_pattern):
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
+def test_index_coords_non_centeral(diffraction_pattern):
+    xc, yc = _index_coords(diffraction_pattern.data,origin=(0,0))
+    assert xc[0,0] == 0
+    assert yc[0,0] == 0
+    assert xc[0,5] == 5
+    assert yc[0,5] == 0
+
 @pytest.mark.parametrize('x, y, r, theta',[
     (2, 2, 2.8284271247461903, -0.78539816339744828),
     (1, -2, 2.2360679774997898, 1.1071487177940904),
