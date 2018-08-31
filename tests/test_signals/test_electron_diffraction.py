@@ -76,7 +76,7 @@ class TestSimpleMaps:
     def test_center_direct_beam_in_small_region(self,diffraction_pattern):
         assert isinstance(diffraction_pattern,ElectronDiffraction)
         diffraction_pattern.center_direct_beam(radius_start=1,radius_finish=3,square_width=3)
-        assert isinstance(diffraction_pattern,ElectronDiffraction) 
+        assert isinstance(diffraction_pattern,ElectronDiffraction)
 
     def test_apply_affine_transformation(self, diffraction_pattern):
         diffraction_pattern.apply_affine_transformation(
@@ -84,6 +84,19 @@ class TestSimpleMaps:
                                                                     [0., 1., 0.],
                                                                     [0., 0., 1.]]))
         assert isinstance(diffraction_pattern, ElectronDiffraction)
+
+    methods = ['average','nan']
+    @pytest.mark.parametrize('method', methods)
+    #@pytest.mark.skip(reason="currently crashes via a tqdm issue")
+    def test_remove_dead_pixels(self,diffraction_pattern,method):
+        diffraction_pattern.remove_deadpixels([[1,2],[5,6]],method,progress_bar=False)
+        assert isinstance(diffraction_pattern, ElectronDiffraction)
+
+    @pytest.mark.xfail(raises=NotImplementedError)
+    def test_remove_dead_pixels_failing(self,diffraction_pattern):
+        diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',progress_bar=False)
+
+
 
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
