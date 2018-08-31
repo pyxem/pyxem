@@ -61,13 +61,6 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 def diffraction_pattern(request):
     return ElectronDiffraction(request.param)
 
-
-class TestInit:
-    def test_init_SEM(self,diffraction_pattern):
-        S = Signal2D(diffraction_pattern)
-        S.metadata.Acquisition_instrument = 'SEM'
-        dp = ElectronDiffraction(S)
-
 class TestSimpleMaps:
     #Confirms that maps run without error.
 
