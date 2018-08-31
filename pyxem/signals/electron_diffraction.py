@@ -17,8 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 """Signal class for Electron Diffraction data
 
-"""
 
+"""
 import numpy as np
 
 from hyperspy.api import interactive
@@ -549,10 +549,7 @@ class ElectronDiffraction(Signal2D):
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             peaks = peaks.transpose(navigation_axes=2)
-        if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            raise RuntimeWarning('You do not have the same size navigation axes \
-            for your Diffraction pattern and your peaks')
-
+        
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
