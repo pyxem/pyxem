@@ -87,14 +87,13 @@ class TestSimpleMaps:
 
     methods = ['average','nan']
     @pytest.mark.parametrize('method', methods)
-    #@pytest.mark.skip(reason="currently crashes via a tqdm issue")
     def test_remove_dead_pixels(self,diffraction_pattern,method):
-        diffraction_pattern.remove_deadpixels([[1,2],[5,6]],method,progress_bar=False)
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],method,inplace=False)
+        assert isinstance(dpr, ElectronDiffraction)
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_remove_dead_pixels_failing(self,diffraction_pattern):
-        diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',progress_bar=False)
+        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',inplace=False,progress_bar=False)
 
 
 
@@ -150,10 +149,10 @@ class TestGainNormalisation:
                                                                 ])
     def test_apply_gain_normalisation(self, diffraction_pattern,
                                   dark_reference, bright_reference):
-        diffraction_pattern.apply_gain_normalisation(
-        dark_reference=dark_reference, bright_reference=bright_reference)
-        assert diffraction_pattern.max() == bright_reference
-        assert diffraction_pattern.min() == dark_reference
+        dpr = diffraction_pattern.apply_gain_normalisation(
+        dark_reference=dark_reference, bright_reference=bright_reference,inplace=False)
+        assert dpr.max() == bright_reference
+        assert dpr.min() == dark_reference
 
 
 class TestDirectBeamMethods:
