@@ -91,6 +91,24 @@ def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
 
+
+methods = ['average','nan']
+@pytest.mark.parametrize('method', methods)
+def test_remove_dead_pixels(diffraction_pattern,method):
+    z = diffraction_pattern.data
+    dead_removed = remove_dead(z,[[3,3]],deadvalue=method)
+    assert z[3,3] != dead_removed[3,3]
+
+
+def test_subtract_reference(diffraction_pattern):
+    z = diffraction_pattern.data
+    ref = 2*(z/3)
+    ref[0,0] = 1e6 #so that we get a less than zero subtraction
+    ref_subtracted = subtract_reference(z,ref)
+    assert ref_subtracted[0,0] == 0
+    assert ref_subtracted[0,1] == z[0,1]*(1/3)
+
+
 class TestCenteringAlgorithm:
 
     @pytest.mark.parametrize("shifts_expected",[(0, 0)])
