@@ -76,46 +76,6 @@ def test_many_peak_case(many_peak,method):
     peaks = dispatcher[method](many_peak)
     assert np.max(peaks) > 2
 
-
-
-
-
-
-
-"""
-@pytest.mark.skip(reason="params")
-def test_fp_dog_double(double_peak):
-    peaks = find_peaks_dog(double_peak)
-    assert (np.array([71,21]) in peaks)
-    assert (np.array([41,41]) in peaks)
-
-
-
-def test_fp_log_double(double_peak):
-    peaks = find_peaks_log(double_peak)
-    assert (np.array([71,21]) in peaks)
-    assert (np.array([41,41]) in peaks)
-
-def test_fp_zaef(single_peak):
-    peaks = find_peaks_zaefferer(single_peak)
-    assert peaks[0,0] > 39.5
-    assert peaks[0,0] < 42.5
-    assert peaks[0,0] == peaks[0,1]
-
-@pytest.mark.skip(reason="needs params")
-def test_fp_zaef_double(double_peak):
-    peaks = find_peaks_zaefferer(double_peak)
-    assert (np.array([71,21]) in peaks)
-    assert (np.array([41,41]) in peaks)
-
-def test_fp_stat(single_peak):
-    peaks = find_peaks_stat(single_peak)
-    assert peaks[0,0] > 39.5
-    assert peaks[0,0] < 42.5
-    assert peaks[0,0] == peaks[0,1]
-
-def test_fp_stat_double(double_peak):
-    peaks = find_peaks_stat(double_peak)
-    assert (np.array([71,21]) in peaks)
-    assert (np.array([41,41]) in peaks)
-"""
+class TestUncoveredCodePaths:
+    def test_zaf_continue(self,many_peak):
+        peaks = find_peaks_zaefferer(many_peak,distance_cutoff=1e-5)
