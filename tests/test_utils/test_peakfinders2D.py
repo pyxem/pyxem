@@ -53,10 +53,8 @@ def no_peak():
 
 
 methods = ['zaf']
-"""
-dog and log have no safe way of returning for an empty peak array
-Stat throws an error while running
-"""
+# dog and log have no safe way of returning for an empty peak array
+# stat throws an error while running
 @pytest.mark.parametrize('method', methods)
 def test_no_peak_case(no_peak,method):
     peaks = dispatcher[method](no_peak)
