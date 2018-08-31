@@ -91,12 +91,6 @@ class TestSimpleMaps:
         dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],method,inplace=False)
         assert isinstance(dpr, ElectronDiffraction)
 
-    @pytest.mark.xfail(raises=NotImplementedError)
-    def test_remove_dead_pixels_failing(self,diffraction_pattern):
-        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',inplace=False,progress_bar=False)
-
-
-
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
@@ -216,16 +210,18 @@ class TestRadialProfile:
 class TestBackgroundMethods:
 
     @pytest.mark.parametrize('method, kwargs', [
-        ('h-dome', {'h': 1}),
+        ('h-dome', {'h': 1,}),
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
-        ('median', {'footprint': 4, })
+        ('median', {'footprint': 4,}),
+        ('reference_pattern',{'bg':np.ones((8,8)),})
     ])
-    def test_remove_background(self, diffraction_pattern: ElectronDiffraction,
+    def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
+#@pytest.mark.skip(reason="Uncommented for speed during development")
 class TestPeakFinding:
     #This isn't testing the finding, that is done in test_peakfinders2D
 
@@ -264,7 +260,14 @@ class TestPeakFinding:
             if peak(self).data[1,0,72,22] == 1: # 3 peaks
                 assert output.data.shape == (2,2) # tests we have a sensible ragged array
 
-
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_failing_run(self,ragged_peak):
         ragged_peak.find_peaks(method='no_such_method_exists')
+
+@pytest.mark.xfail(raises=NotImplementedError)
+class TestNotImplemented():
+    def test_remove_dead_pixels_failing(self,diffraction_pattern):
+        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',inplace=False,progress_bar=False)
+
+    def test_remove_background(self, diffraction_pattern):
+        bgr = diffraction_pattern.remove_background(method='fake_method')
