@@ -232,10 +232,13 @@ def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
         n_peaks = np.infty  # Initial number of peaks
         image, peaks = _peak_find_once(image)  # 4-6
         m_peaks = len(peaks)  # Actual number of peaks
+        """
+        #XXX
         while (n_peaks - m_peaks) / n_peaks > convergence_ratio:  # 8
             n_peaks = m_peaks
             image, peaks = _peak_find_once(image)
             m_peaks = len(peaks)
+        """
         peak_centers = np.array(
             [np.mean(peak, axis=0) for peak in peaks])  # 7
         return peak_centers
