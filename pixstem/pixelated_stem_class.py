@@ -824,7 +824,7 @@ class PixelatedSTEM(Signal2D):
         Combine both dead pixels and hot pixels
 
         >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
-        >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
+        >>> s_corr = s.correct_bad_pixels(s_bad_pixels)
 
         See also
         --------
