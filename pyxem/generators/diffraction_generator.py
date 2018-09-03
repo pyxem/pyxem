@@ -161,11 +161,13 @@ class DiffractionGenerator(object):
         """
         max_r = reciprocal_radius
         wavelength = self.wavelength
+
         latt = structure.lattice
-        is_hex = latt.is_hexagonal()
+        is_hex = is_lattice_hexagonal(latt)
 
         # Obtain crystallographic reciprocal lattice points within range
-        recip_latt = latt.reciprocal_lattice_crystallographic
+        recip_latt = latt.reciprocal()
+
         recip_pts = recip_latt.get_points_in_sphere(
             [[0, 0, 0]], [0, 0, 0], max_r)
 

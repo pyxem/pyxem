@@ -311,3 +311,16 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
     spot_distances = reciprocal_lattice.dist(spot_indicies,[0,0,0])
 
     return spot_indicies,spot_coords,spot_distances
+
+def is_lattice_hexagonal(lattice):
+    """
+    Attempts to determine if a lattice belongs
+    to a hexagonal crystal. Will also return true
+    for trigonal systems
+    """
+    truth_list = []
+    truth_list.append(latt.a==latt.b)
+    truth_list.append(latt.alpha == 90)
+    truth_list.append(latt.beta == 90)
+    truth_list.append(latt.gamma == 120)
+    return len(truth_list) == np.sum(truth_list)
