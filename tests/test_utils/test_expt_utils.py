@@ -59,6 +59,13 @@ def test_index_coords(diffraction_pattern):
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
+def test_index_coords_non_centeral(diffraction_pattern):
+    xc, yc = _index_coords(diffraction_pattern.data,origin=(0,0))
+    assert xc[0,0] == 0
+    assert yc[0,0] == 0
+    assert xc[0,5] == 5
+    assert yc[0,5] == 0
+
 @pytest.mark.parametrize('x, y, r, theta',[
     (2, 2, 2.8284271247461903, -0.78539816339744828),
     (1, -2, 2.2360679774997898, 1.1071487177940904),
@@ -90,6 +97,14 @@ def test_polar2cart(r, theta, x, y):
 def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
+
+
+methods = ['average','nan']
+@pytest.mark.parametrize('method', methods)
+def test_remove_dead_pixels(diffraction_pattern,method):
+    z = diffraction_pattern.data
+    dead_removed = remove_dead(z,[[3,3]],deadvalue=method)
+    assert z[3,3] != dead_removed[3,3]
 
 class TestCenteringAlgorithm:
 

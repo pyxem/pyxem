@@ -43,7 +43,7 @@ def _index_coords(z, origin=None):
         2D data
     origin : (x,y) tuple
         defaults to the center of the image. Specify origin=(0,0)
-        to set the origin to the *bottom-left* corner of the image.
+        to set the origin to the *top-left* corner of the image.
 
     Returns
     -------
@@ -157,20 +157,21 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     img : array
         Array containing the diffraction pattern with dead pixels removed.
     """
+    z_bar = np.copy(z)
     if deadvalue == 'average':
         for (i,j) in deadpixels:
             neighbours = z[i-d:i+d+1, j-d:j+d+1].flatten()
-            z[i,j] = np.mean(neighbours)
+            z_bar[i,j] = np.mean(neighbours)
 
     elif deadvalue == 'nan':
         for (i,j) in deadpixels:
-            z[i,j] = np.nan
+            z_bar[i,j] = np.nan
     else:
         raise NotImplementedError("The method specified is not implemented. "
                                   "See documentation for available "
                                   "implementations.")
 
-    return z
+    return z_bar
 
 def affine_transformation(z,matrix,order,**kwargs):
     """Apply an affine transformation to a 2-dimensional array.
@@ -270,7 +271,7 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
         # skimage only accepts input image as uint16
         bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
     else:
-        raise ValueError("Unknown implementation `{}`".format(implementation))
+        raise NotImplementedError("Unknown implementation `{}`".format(implementation))
 
     return np.maximum(bg_subtracted, 0)
 

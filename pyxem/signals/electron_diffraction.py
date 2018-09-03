@@ -17,8 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 """Signal class for Electron Diffraction data
 
-"""
 
+"""
 import numpy as np
 
 from hyperspy.api import interactive
@@ -299,7 +299,8 @@ class ElectronDiffraction(Signal2D):
     def remove_deadpixels(self,
                           deadpixels,
                           deadvalue='average',
-                          inplace=True):
+                          inplace=True,
+                          progress_bar=True):
         """Remove deadpixels from experimentally acquired diffraction patterns.
 
         Parameters
@@ -318,7 +319,8 @@ class ElectronDiffraction(Signal2D):
         return self.map(remove_dead,
                         deadpixels=deadpixels,
                         deadvalue=deadvalue,
-                        inplace=inplace)
+                        inplace=inplace,
+                        show_progressbar=progress_bar)
 
     def get_radial_profile(self,inplace=False,**kwargs):
         """Return the radial profile of the diffraction pattern.
@@ -448,7 +450,8 @@ class ElectronDiffraction(Signal2D):
         Returns
         -------
         bg_subtracted : :obj:`ElectronDiffraction`
-            A copy of the data with the background subtracted.
+            A copy of the data with the background subtracted. Be aware that
+            this function will only return inplace.
 
         """
         if method == 'h-dome':
@@ -468,7 +471,7 @@ class ElectronDiffraction(Signal2D):
                                      inplace=False, *args, **kwargs)
 
         elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, *args, **kwargs)
+            bg_subtracted = self.map(subtract_reference, inplace=False, *args, **kwargs)
 
         else:
             raise NotImplementedError(
@@ -546,10 +549,7 @@ class ElectronDiffraction(Signal2D):
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             peaks = peaks.transpose(navigation_axes=2)
-        if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            raise RuntimeWarning('You do not have the same size navigation axes \
-            for your Diffraction pattern and your peaks')
-
+        
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):

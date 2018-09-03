@@ -61,7 +61,6 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 def diffraction_pattern(request):
     return ElectronDiffraction(request.param)
 
-
 class TestSimpleMaps:
     #Confirms that maps run without error.
 
@@ -76,7 +75,7 @@ class TestSimpleMaps:
     def test_center_direct_beam_in_small_region(self,diffraction_pattern):
         assert isinstance(diffraction_pattern,ElectronDiffraction)
         diffraction_pattern.center_direct_beam(radius_start=1,radius_finish=3,square_width=3)
-        assert isinstance(diffraction_pattern,ElectronDiffraction) 
+        assert isinstance(diffraction_pattern,ElectronDiffraction)
 
     def test_apply_affine_transformation(self, diffraction_pattern):
         diffraction_pattern.apply_affine_transformation(
@@ -84,6 +83,12 @@ class TestSimpleMaps:
                                                                     [0., 1., 0.],
                                                                     [0., 0., 1.]]))
         assert isinstance(diffraction_pattern, ElectronDiffraction)
+
+    methods = ['average','nan']
+    @pytest.mark.parametrize('method', methods)
+    def test_remove_dead_pixels(self,diffraction_pattern,method):
+        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],method,inplace=False)
+        assert isinstance(dpr, ElectronDiffraction)
 
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
@@ -137,10 +142,10 @@ class TestGainNormalisation:
                                                                 ])
     def test_apply_gain_normalisation(self, diffraction_pattern,
                                   dark_reference, bright_reference):
-        diffraction_pattern.apply_gain_normalisation(
-        dark_reference=dark_reference, bright_reference=bright_reference)
-        assert diffraction_pattern.max() == bright_reference
-        assert diffraction_pattern.min() == dark_reference
+        dpr = diffraction_pattern.apply_gain_normalisation(
+        dark_reference=dark_reference, bright_reference=bright_reference,inplace=False)
+        assert dpr.max() == bright_reference
+        assert dpr.min() == dark_reference
 
 
 class TestDirectBeamMethods:
@@ -204,16 +209,19 @@ class TestRadialProfile:
 class TestBackgroundMethods:
 
     @pytest.mark.parametrize('method, kwargs', [
-        ('h-dome', {'h': 1}),
+        ('h-dome', {'h': 1,}),
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
-        ('median', {'footprint': 4, })
+        ('median', {'footprint': 4,}),
+        ('median', {'footprint': 4, 'implementation': 'skimage'}),
+        ('reference_pattern',{'bg':np.ones((8,8)),})
     ])
-    def test_remove_background(self, diffraction_pattern: ElectronDiffraction,
+    def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
+#@pytest.mark.skip(reason="Uncommented for speed during development")
 class TestPeakFinding:
     #This isn't testing the finding, that is done in test_peakfinders2D
 
@@ -252,7 +260,17 @@ class TestPeakFinding:
             if peak(self).data[1,0,72,22] == 1: # 3 peaks
                 assert output.data.shape == (2,2) # tests we have a sensible ragged array
 
-
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_failing_run(self,ragged_peak):
         ragged_peak.find_peaks(method='no_such_method_exists')
+
+@pytest.mark.xfail(raises=NotImplementedError)
+class TestNotImplemented():
+    def test_remove_dead_pixels_failing(self,diffraction_pattern):
+        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',inplace=False,progress_bar=False)
+
+    def test_remove_background_fake_method(self, diffraction_pattern):
+        bgr = diffraction_pattern.remove_background(method='fake_method')
+
+    def test_remove_background_fake_implementation(self, diffraction_pattern):
+        bgr = diffraction_pattern.remove_background(method='median',implementation='fake_implementation')
