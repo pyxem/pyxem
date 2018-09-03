@@ -221,7 +221,7 @@ class TestBackgroundMethods:
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
-#@pytest.mark.skip(reason="Uncommented for speed during development")
+@pytest.mark.skip(reason="Uncommented for speed during development")
 class TestPeakFinding:
     #This isn't testing the finding, that is done in test_peakfinders2D
 

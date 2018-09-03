@@ -22,7 +22,6 @@ from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.signals.diffraction_simulation import ProfileSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem import ElectronDiffraction
-import pymatgen as pmg
 
 
 @pytest.fixture
