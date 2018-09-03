@@ -49,19 +49,13 @@ def test_get_points_in_sphere():
     assert len(dist) == 1+6
 
 def test_kinematic_simulator_plane_wave():
-    si = pmg.Element("Si")
-    lattice = pmg.Lattice.cubic(5.431)
-    structure = pmg.Structure.from_spacegroup("Fd-3m",lattice, [si], [[0, 0, 0]])
-    atomic_coordinates = structure.cart_coords
+    atomic_coordinates = np.asarray([[0,0,0]]) #structure.cart_coords
     sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
                                         simulation_size=32)
     assert isinstance(sim, ElectronDiffraction)
 
 def test_kinematic_simulator_gaussian_probe():
-    si = pmg.Element("Si")
-    lattice = pmg.Lattice.cubic(5.431)
-    structure = pmg.Structure.from_spacegroup("Fd-3m",lattice, [si], [[0, 0, 0]])
-    atomic_coordinates = structure.cart_coords
+    atomic_coordinates = np.asarray([[0,0,0]]) #structure.cart_coords
     sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
                                         simulation_size=32,
                                         illumination='gaussian_probe')
@@ -69,10 +63,7 @@ def test_kinematic_simulator_gaussian_probe():
 
 @pytest.mark.xfail(raises=ValueError)
 def test_kinematic_simulator_invalid_illumination():
-    si = pmg.Element("Si")
-    lattice = pmg.Lattice.cubic(5.431)
-    structure = pmg.Structure.from_spacegroup("Fd-3m",lattice, [si], [[0, 0, 0]])
-    atomic_coordinates = structure.cart_coords
+    atomic_coordinates = np.asarray([[0,0,0]]) #structure.cart_coords
     sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
                                         simulation_size=32,
                                         illumination='gaussian')
