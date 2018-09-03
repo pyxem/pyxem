@@ -22,8 +22,7 @@ before_install:
   - "pip install coveralls"
 
 install:
-  - conda config --add channels diffpy/dev
-  - conda install diffpy.structure
+  - conda install -c diffpy/channel/dev -c diffpy.structure diffpy-cmi
   - "pip install . -r requirements.txt"
 
 before_script:
