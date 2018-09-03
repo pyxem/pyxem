@@ -18,6 +18,7 @@
 
 import pytest
 import numpy as np
+import diffpy.structure
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
@@ -29,23 +30,11 @@ from pyxem.components.diffraction_component import ElectronDiffractionForwardMod
 def diffraction_calculator(request):
     return DiffractionGenerator(*request.param)
 
-@pytest.fixture(params=[
-    "Si",
-])
-def element(request):
-    return pmg.Element(request.param)
-
-@pytest.fixture(params=[
-    5.431
-])
-def lattice(request):
-    return pmg.Lattice.cubic(request.param)
-
-@pytest.fixture(params=[
-    "Fd-3m"
-])
-def structure(request, lattice, element):
-    return pmg.Structure.from_spacegroup(request.param, lattice, [element], [[0, 0, 0]])
+@pytest.fixture()
+def structure():
+    latt = diffpy.structure.lattice.Lattice(3,4,5,90,90,90)
+    atom = diffpy.structure.atom.Atom(atype='Zn',xyz=[0,0,0],lattice=latt)
+    return diffpy.structure.Structure(atoms=[atom],lattice=latt)
 
 def test_electron_diffraction_component_init(diffraction_calculator,
                                              structure):
