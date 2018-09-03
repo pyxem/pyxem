@@ -168,8 +168,7 @@ class DiffractionGenerator(object):
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
 
-        recip_pts = recip_latt.get_points_in_sphere(
-            [[0, 0, 0]], [0, 0, 0], max_r)
+        spot_indicies, _ , spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
 
         coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,debye_waller_factors)
         peaks = {}
