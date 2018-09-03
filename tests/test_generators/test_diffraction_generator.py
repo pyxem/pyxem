@@ -113,25 +113,18 @@ class TestDiffractionCalculator:
         indices = [tuple(i) for i in diffraction.indices]
         assert expected_extinction not in indices
 
-
-    @pytest.mark.skip(reason="This currently contains an explicit call to pymatgen")
-    def test_calculate_profile_class(self, diffraction_calculator):
-        si = pmg.Element("Si")
-        lattice = pmg.Lattice.cubic(5.431)
-        silicon = pmg.Structure.from_spacegroup("Fd-3m", lattice, [si], [[0, 0, 0]])
-        profile = diffraction_calculator.calculate_profile_data(structure=silicon,
+    def test_calculate_profile_class(self, structure, diffraction_calculator):
+        # tests the non-hexagonal (cubic) case
+        profile = diffraction_calculator.calculate_profile_data(structure=structure,
                                                                 reciprocal_radius=1.)
         assert isinstance(profile, ProfileSimulation)
 
-    @pytest.mark.skip(reason="This currently contains an explicit call to pymatgen")
-    def test_calculate_profile_hex(self, diffraction_calculator):
-        Ni = pmg.Element("Ni")
-        lattice = pmg.Lattice.hexagonal(3.5,5)
-        struc = pmg.Structure.from_spacegroup(162,lattice, [Ni], [[0, 0, 0]])
-        profile = diffraction_calculator.calculate_profile_data(structure=struc,
+        latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
+        atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
+        hexagonal_structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
+        hexagonal_profile = diffraction_calculator.calculate_profile_data(structure=hexagonal_structure,
                                                                 reciprocal_radius=1.)
-        assert isinstance(profile, ProfileSimulation)
-
+        assert isinstance(hexagonal_profile, ProfileSimulation)
 
 @pytest.mark.skip(reason="Not to do with the generation of the simulation")
 class TestDiffractionSimulation:

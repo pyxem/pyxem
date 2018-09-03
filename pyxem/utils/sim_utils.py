@@ -162,8 +162,7 @@ def get_kinematical_intensities(structure,
         The intensities of the peaks.
 
     """
-    coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure=structure,
-                                                                                       debye_waller_factors=debye_waller_factors)
+    coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure=structure,debye_waller_factors=debye_waller_factors)
 
     # Store array of s^2 values since used multiple times.
     s2s = (g_hkls / 2) ** 2
@@ -312,7 +311,7 @@ def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
 
     return spot_indicies,spot_coords,spot_distances
 
-def is_lattice_hexagonal(lattice):
+def is_lattice_hexagonal(latt):
     """
     Attempts to determine if a lattice belongs
     to a hexagonal crystal. Will also return true

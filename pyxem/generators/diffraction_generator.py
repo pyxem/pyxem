@@ -28,8 +28,8 @@ from pyxem.signals.diffraction_simulation import ProfileSimulation
 
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.utils.sim_utils import get_electron_wavelength,\
-    get_kinematical_intensities, get_unique_families, get_points_in_sphere \
-    get_vectorized_list_for_atomic_scattering_factors
+    get_kinematical_intensities, get_unique_families, get_points_in_sphere, \
+    get_vectorized_list_for_atomic_scattering_factors,is_lattice_hexagonal
 
 
 class DiffractionGenerator(object):
@@ -165,19 +165,16 @@ class DiffractionGenerator(object):
         latt = structure.lattice
         is_hex = is_lattice_hexagonal(latt)
 
-        coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,debye_waller_factors)
+        coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,{})
 
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
         spot_indicies, _ , spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
 
         peaks = {}
+        mask = np.logical_not((np.any(spot_indicies,axis=1) == 0))
 
-        origin_index = spot_indicies.index((0.0,0.0,0.0))
-        _ = spot_distances.pop(origin_index)
-        _ = spot_indicies.pop(origin_index)
-
-        for hkl, g_hkl in zip(spot_indicies,spot_distances):
+        for hkl, g_hkl in zip(spot_indicies[mask],spot_distances[mask]):
             # Force miller indices to be integers.
             hkl = [int(round(i)) for i in hkl]
 
@@ -218,7 +215,7 @@ class DiffractionGenerator(object):
                 hkl = (hkl[0], hkl[1], - hkl[0] - hkl[1], hkl[2])
 
             peaks[g_hkl] = [i_hkl, [tuple(hkl)], d_hkl]
-            
+
         # Scale intensities so that the max intensity is 100.
         max_intensity = max([v[0] for v in peaks.values()])
         x = []
