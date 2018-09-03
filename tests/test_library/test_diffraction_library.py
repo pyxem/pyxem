@@ -20,6 +20,7 @@ import pytest
 import pyxem as pxm
 import os
 import numpy as np
+import diffpy.structure
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.libraries.diffraction_library import load_DiffractionLibrary
@@ -30,10 +31,10 @@ def get_library():
         diffraction_calculator = pxm.DiffractionGenerator(300., 0.02)
         dfl = pxm.DiffractionLibraryGenerator(diffraction_calculator)
 
-        element = pmg.Element('Si')
-        lattice = pmg.Lattice.cubic(5)
+        latt = diffpy.structure.lattice.Lattice(3,4,5,90,90,90)
+        atom = diffpy.structure.atom.Atom(atype='Si',xyz=[0,0,0],lattice=latt)
+        structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
 
-        structure = pmg.Structure.from_spacegroup("F-43m", lattice, [element], [[0, 0, 0]])
         structure_library = StructureLibrary(['Si'],[structure],[[(0, 0, 0),(0,0.2,0)]])
 
         return dfl.get_diffraction_library(
