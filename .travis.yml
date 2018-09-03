@@ -31,8 +31,8 @@ before_script:
   - sleep 3
 script:
   - pytest --cov=pyxem -p no:warnings tests 
-  - sphinx-apidoc -fo docs/source pyxem
-  - sphinx-build -b html docs/source docs/build
+#  - sphinx-apidoc -fo docs/source pyxem
+#  - sphinx-build -b html docs/source docs/build
 after_success:
   - coveralls
 
