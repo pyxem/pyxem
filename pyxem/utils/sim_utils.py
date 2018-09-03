@@ -107,6 +107,32 @@ def get_unique_families(hkls):
 
     return pretty_unique
 
+def get_vectorized_list_for_atomic_scattering_factors(structure,debye_waller_factors):
+    """
+    Create a flattened array of coeffs, fcoords and occus for vectorized
+    computation of atomic scattering factors later. Note that these are not
+    necessarily the same size as the structure as each partially occupied
+    specie occupies its own position in the flattened array.
+
+    For primarily for internal use
+    """
+
+    coeffs,fcoords,occus,dwfactors = [],[],[],[]
+
+    for site in structure:
+        c = ATOMIC_SCATTERING_PARAMS[site.element]
+        coeffs.append(c)
+        dwfactors.append(debye_waller_factors.get(site.element, 0))
+        fcoords.append(site.xyz)
+        occus.append(site.occupancy)
+
+    coeffs = np.array(coeffs)
+    fcoords = np.array(fcoords)
+    occus = np.array(occus)
+    dwfactors = np.array(dwfactors)
+
+    return coeffs,fcoords,occus,dwfactors
+
 
 def get_kinematical_intensities(structure,
                                 g_indices,
@@ -136,25 +162,8 @@ def get_kinematical_intensities(structure,
         The intensities of the peaks.
 
     """
-    # Create a flattened array of coeffs, fcoords and occus for vectorized
-    # computation of atomic scattering factors later. Note that these are not
-    # necessarily the same size as the structure as each partially occupied
-    # specie occupies its own position in the flattened array.
-    coeffs = []
-    fcoords = []
-    occus = []
-    dwfactors = []
-    for site in structure:
-        c = ATOMIC_SCATTERING_PARAMS[site.element]
-        coeffs.append(c)
-        dwfactors.append(debye_waller_factors.get(site.element, 0))
-        fcoords.append(site.xyz)
-        occus.append(site.occupancy)
-
-    coeffs = np.array(coeffs)
-    fcoords = np.array(fcoords)
-    occus = np.array(occus)
-    dwfactors = np.array(dwfactors)
+    coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure=structure,
+                                                                                       debye_waller_factors=debye_waller_factors)
 
     # Store array of s^2 values since used multiple times.
     s2s = (g_hkls / 2) ** 2

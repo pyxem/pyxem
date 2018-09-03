@@ -28,7 +28,8 @@ from pyxem.signals.diffraction_simulation import ProfileSimulation
 
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.utils.sim_utils import get_electron_wavelength,\
-    get_kinematical_intensities, get_unique_families, get_points_in_sphere
+    get_kinematical_intensities, get_unique_families, get_points_in_sphere \
+    get_vectorized_list_for_atomic_scattering_factors
 
 
 class DiffractionGenerator(object):
@@ -168,31 +169,7 @@ class DiffractionGenerator(object):
         recip_pts = recip_latt.get_points_in_sphere(
             [[0, 0, 0]], [0, 0, 0], max_r)
 
-        # Create a flattened array of zs, coeffs, fcoords and occus. This is
-        # used to perform vectorized computation of atomic scattering factors
-        # later. Note that these are not necessarily the same size as the
-        # structure as each partially occupied specie occupies its own
-        # position in the flattened array.
-        zs = []
-        coeffs = []
-        fcoords = []
-        occus = []
-        dwfactors = []
-
-        for site in structure:
-            for sp, occu in site.species_and_occu.items():
-                zs.append(sp.Z)
-                c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
-                coeffs.append(c)
-                dwfactors.append(self.debye_waller_factors.get(sp.symbol, 0))
-                fcoords.append(site.frac_coords)
-                occus.append(occu)
-
-        zs = np.array(zs)
-        coeffs = np.array(coeffs)
-        fcoords = np.array(fcoords)
-        occus = np.array(occus)
-        dwfactors = np.array(dwfactors)
+        coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,debye_waller_factors)
         peaks = {}
         gs = []
 
