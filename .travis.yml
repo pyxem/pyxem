@@ -2,9 +2,19 @@ language: python
 python:
   - "3.6"
 
-sudo: false
+sudo: True #in order to get Miniconda
 
 before_install:
+  # https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n test-environment 
+  - source activate test-environment
   - "pip install sphinx"
   - "pip install ipywidgets"
   - "pip install sphinx_bootstrap_theme"
@@ -12,6 +22,7 @@ before_install:
   - "pip install coveralls"
 
 install:
+  - conda install -c diffpy/channel/dev -c diffpy diffpy-cmi
   - "pip install . -r requirements.txt"
 
 before_script:
