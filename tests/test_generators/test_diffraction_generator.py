@@ -126,7 +126,7 @@ class TestDiffractionCalculator:
                                                                 reciprocal_radius=1.)
         assert isinstance(hexagonal_profile, ProfileSimulation)
 
-@pytest.mark.skip(reason="Not to do with the generation of the simulation")
+#@pytest.mark.skip(reason="Not to do with the generation of the simulation")
 class TestDiffractionSimulation:
 
     def test_init(self):
