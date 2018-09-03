@@ -25,7 +25,8 @@ from pymatgen.transformations.standard_transformations \
     import RotationTransformation
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 from tqdm import tqdm
-from transforms3d.euler import euler2axangle
+from transforms3d.euler import euler2mat
+import diffpy.structure
 
 
 
