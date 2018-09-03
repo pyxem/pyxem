@@ -165,66 +165,60 @@ class DiffractionGenerator(object):
         latt = structure.lattice
         is_hex = is_lattice_hexagonal(latt)
 
+        coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,debye_waller_factors)
+
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
-
         spot_indicies, _ , spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
 
-        coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,debye_waller_factors)
         peaks = {}
-        gs = []
 
-        for hkl, g_hkl, ind, _ in sorted(
-                recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])):
+        origin_index = spot_indicies.index((0.0,0.0,0.0))
+        _ = spot_distances.pop(origin_index)
+        _ = spot_indicies.pop(origin_index)
+
+        for hkl, g_hkl in zip(spot_indicies,spot_distances):
             # Force miller indices to be integers.
             hkl = [int(round(i)) for i in hkl]
-            if g_hkl != 0:
 
-                d_hkl = 1 / g_hkl
+            d_hkl = 1 / g_hkl
 
-                # Bragg condition
-                #theta = asin(wavelength * g_hkl / 2)
+            # Bragg condition
+            #theta = asin(wavelength * g_hkl / 2)
 
-                # s = sin(theta) / wavelength = 1 / 2d = |ghkl| / 2 (d =
-                # 1/|ghkl|)
-                s = g_hkl / 2
+            # s = sin(theta) / wavelength = 1 / 2d = |ghkl| / 2 (d =
+            # 1/|ghkl|)
+            s = g_hkl / 2
 
-                # Store s^2 since we are using it a few times.
-                s2 = s ** 2
+            # Store s^2 since we are using it a few times.
+            s2 = s ** 2
 
-                # Vectorized computation of g.r for all fractional coords and
-                # hkl.
-                g_dot_r = np.dot(fcoords, np.transpose([hkl])).T[0]
+            # Vectorized computation of g.r for all fractional coords and
+            # hkl.
+            g_dot_r = np.dot(fcoords, np.transpose([hkl])).T[0]
 
-                # Highly vectorized computation of atomic scattering factors.
-                fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+            # Highly vectorized computation of atomic scattering factors.
+            fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
 
-                dw_correction = np.exp(-dwfactors * s2)
+            dw_correction = np.exp(-dwfactors * s2)
 
-                # Structure factor = sum of atomic scattering factors (with
-                # position factor exp(2j * pi * g.r and occupancies).
-                # Vectorized computation.
-                f_hkl = np.sum(fs * occus * np.exp(2j * pi * g_dot_r)
+            # Structure factor = sum of atomic scattering factors (with
+            # position factor exp(2j * pi * g.r and occupancies).
+            # Vectorized computation.
+            f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * g_dot_r)
                                * dw_correction)
 
-                # Intensity for hkl is modulus square of structure factor.
-                i_hkl = (f_hkl * f_hkl.conjugate()).real
+            # Intensity for hkl is modulus square of structure factor.
+            i_hkl = (f_hkl * f_hkl.conjugate()).real
 
-                #two_theta = degrees(2 * theta)
+            #two_theta = degrees(2 * theta)
 
-                if is_hex:
-                    # Use Miller-Bravais indices for hexagonal lattices.
-                    hkl = (hkl[0], hkl[1], - hkl[0] - hkl[1], hkl[2])
-                # Deal with floating point precision issues.
-                ind = np.where(np.abs(np.subtract(gs, g_hkl)) <
-                               magnitude_tolerance)
-                if len(ind[0]) > 0:
-                    peaks[gs[ind[0][0]]][0] += i_hkl
-                    peaks[gs[ind[0][0]]][1].append(tuple(hkl))
-                else:
-                    peaks[g_hkl] = [i_hkl, [tuple(hkl)], d_hkl]
-                    gs.append(g_hkl)
+            if is_hex:
+                # Use Miller-Bravais indices for hexagonal lattices.
+                hkl = (hkl[0], hkl[1], - hkl[0] - hkl[1], hkl[2])
 
+            peaks[g_hkl] = [i_hkl, [tuple(hkl)], d_hkl]
+            
         # Scale intensities so that the max intensity is 100.
         max_intensity = max([v[0] for v in peaks.values()])
         x = []
