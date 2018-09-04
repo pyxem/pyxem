@@ -16,7 +16,7 @@ before_install:
   - conda create -q -n test-environment 
   - source activate test-environment
   - conda install pip
-  - "pip install sphinx"
+  - conda install sphinx
   - "pip install ipywidgets"
   - "pip install sphinx_bootstrap_theme"
   - "pip install pytest pytest-cov"
@@ -31,6 +31,7 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
+  - conda list sphinx
   - pytest --cov=pyxem -p no:warnings tests 
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
