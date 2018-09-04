@@ -15,6 +15,7 @@ before_install:
   - conda info -a
   - conda create -q -n test-environment 
   - source activate test-environment
+  - conda install pip
   - "pip install sphinx"
   - "pip install ipywidgets"
   - "pip install sphinx_bootstrap_theme"
@@ -31,8 +32,8 @@ before_script:
   - sleep 3
 script:
   - pytest --cov=pyxem -p no:warnings tests 
-#  - sphinx-apidoc -fo docs/source pyxem
-#  - sphinx-build -b html docs/source docs/build
+  - sphinx-apidoc -fo docs/source pyxem
+  - sphinx-build -b html docs/source docs/build
 after_success:
   - coveralls
 
