@@ -25,7 +25,7 @@ class StructureLibrary(dict):
 
     identifiers: list of strings/ints
 
-    structures: list of pymatgen.structures
+    structures: list of diffpy.structure.Structures
 
     orientations: a list (over identifiers)
     of lists of euler angles (as tuples) in rzxz conventions
