@@ -49,6 +49,6 @@ deploy:
 
 matrix:
   allow_failures:
-    - script: pytest --cov=pyxem 
+    - script: timeout 1m pytest --cov=pyxem 
     - script: sphinx-apidoc -fo docs/source pyxem
     - script: sphinx-build -b html docs/source docs/build
