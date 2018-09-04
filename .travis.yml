@@ -18,9 +18,10 @@ before_install:
   - conda install pip
   - conda install sphinx
   - conda install -c conda-forge sphinx_bootstrap_theme
-  - "pip install ipywidgets"
-  - "pip install pytest pytest-cov"
-  - "pip install coveralls"
+  - conda install -c anaconda ipywidgets
+  - conda install -c anaconda pytest
+  - conda install -c conda-forge pytest-cov
+  - conda install -c conda-forge coveralls
 
 install:
   - conda install -c diffpy/label/dev diffpy.structure
