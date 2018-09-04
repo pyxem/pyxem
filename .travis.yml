@@ -19,8 +19,9 @@ before_install:
   - conda install sphinx
   - conda install -c conda-forge sphinx_bootstrap_theme
   - conda install -c anaconda ipywidgets
-  - conda install -c anaconda pytest
-  - conda install -c conda-forge pytest-cov
+#  - conda install -c anaconda pytest
+#  - conda install -c conda-forge pytest-cov
+  - pip install pytest pytest-cov #for unknown reasons the testing hung off the conda versions of these
   - conda install -c conda-forge coveralls
 
 install:
