@@ -2,16 +2,29 @@ language: python
 python:
   - "3.6"
 
-sudo: false
+sudo: True #for Miniconda 
 
 before_install:
-  - "pip install sphinx"
-  - "pip install ipywidgets"
-  - "pip install sphinx_bootstrap_theme"
-  - "pip install pytest pytest-cov"
-  - "pip install coveralls"
+  # https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n test-environment 
+  - source activate test-environment
+  - conda install pip
+  - conda install sphinx
+  - conda install -c conda-forge sphinx_bootstrap_theme
+  - conda install -c anaconda ipywidgets
+  - conda install -c anaconda pytest
+  - conda install -c conda-forge pytest-cov
+  - conda install -c conda-forge coveralls
 
 install:
+  - conda install -c diffpy/label/dev diffpy.structure
   - "pip install . -r requirements.txt"
 
 before_script:
@@ -19,7 +32,7 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - pytest --cov=pyxem tests
+  - pytest --cov=pyxem -p no:warnings tests 
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 after_success:

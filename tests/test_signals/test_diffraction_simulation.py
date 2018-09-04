@@ -22,7 +22,6 @@ from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.signals.diffraction_simulation import ProfileSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem import ElectronDiffraction
-import pymatgen as pmg
 
 
 @pytest.fixture
@@ -59,61 +58,6 @@ def test_correct_quadrant_hs():
     assert (np.sum(S.isig[72:,:72].data) == 0)
     assert (np.sum(S.isig[:72,72:].data) == 0)
     assert (np.sum(S.isig[72:,72:].data)  > 0)
-
-# These test that our kinematic simulation behaves physically
-
-def get_pattern(microscope,structure):
-    return microscope.calculate_ed_data(structure,1)
-
-def check_pattern_equivilance(p1,p2,coords_only=False):
-    assert np.allclose(p1.coordinates,p2.coordinates)
-    if not coords_only:
-        assert np.allclose(p1.indices,p2.indices)
-        assert np.allclose(p1.intensities,p2.intensities)
-
-# Becuase of the slight differences between each of the structures, the
-# explictily named, ugly pathway has been taken
-
-Cl = pmg.Element("Cl")
-Ar = pmg.Element("Ar")
-cubic_lattice = pmg.Lattice.cubic(5)
-Mscope = DiffractionGenerator(300, 5e-2) #a 300kev EM
-
-formal_cubic_I = pmg.Structure.from_spacegroup("I23", cubic_lattice,
-                                               [Cl], [[0, 0, 0]])
-casual_cubic_I = pmg.Structure.from_spacegroup(195, cubic_lattice,
-                                               [Cl,Cl], [[0, 0, 0],
-                                               [0.5,0.5,0.5]])
-fake_cubic_I   = pmg.Structure.from_spacegroup(195, cubic_lattice,
-                                               [Cl,Ar], [[0, 0, 0],
-                                               [0.5,0.5,0.5]])
-larger_cubic_I = pmg.Structure.from_spacegroup("I23", cubic_lattice,
-                                               [Cl], [[0, 0, 0]])
-larger_cubic_I.make_supercell([2,4,2])
-
-formal_pattern = get_pattern(Mscope,formal_cubic_I)
-casual_pattern = get_pattern(Mscope,casual_cubic_I)
-fake_pattern   = get_pattern(Mscope,fake_cubic_I)
-larger_pattern = get_pattern(Mscope,larger_cubic_I)
-
-
-def test_casual_formal():
-    # Checks that Pymatgen understands that these are the same structure
-    assert formal_cubic_I == casual_cubic_I
-
-def test_casual_formal_in_simulation():
-    ## Checks that are simulations also realise that
-    check_pattern_equivilance(formal_pattern,casual_pattern)
-
-def test_systematic_absence():
-    ## Cubic I thus each peak must have indicies that sum to an even number
-    assert np.all(np.sum(formal_pattern.indices,axis=1) % 2 == 0)
-    assert np.all(np.sum(casual_pattern.indices,axis=1) % 2 == 0)
-    ## This isn't actually cubic I, so we expect a (100) type
-    assert np.any(fake_pattern.indices == np.array([1,0,0]))
-
-def test_scaling():
-    check_pattern_equivilance(formal_pattern,larger_pattern,coords_only=True)
 
 # Test Profile Simulation
 

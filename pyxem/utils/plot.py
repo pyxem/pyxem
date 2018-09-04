@@ -21,8 +21,6 @@ import itertools
 
 from mpl_toolkits.axisartist.floating_axes import GridHelperCurveLinear, \
     FloatingSubplot
-from pymatgen.transformations.standard_transformations \
-    import RotationTransformation
 
 
 def _find_max_length_peaks(peaks):

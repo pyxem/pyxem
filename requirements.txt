@@ -43,7 +43,6 @@ ptyprocess==0.6.0
 py==1.5.4            
 PyDispatcher==2.0.5           
 Pygments==2.2.0          
-pymatgen==2018.8.10      
 pyparsing==2.2.0           
 pytest==3.7.1          
 pytest-cov==2.5.1         
