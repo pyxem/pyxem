@@ -15,24 +15,20 @@ before_install:
   - conda info -a
   - conda create -q -n test-environment 
   - source activate test-environment
-  - conda install pip
-  - conda install sphinx
-  - conda install -c conda-forge sphinx_bootstrap_theme
-  - conda install -c anaconda ipywidgets
-  - conda install -c anaconda pytest
-  - conda install -c conda-forge pytest-cov
-  - conda install -c conda-forge coveralls
+  - conda install -c diffpy/label/dev diffpy.structure
+  - conda install pip sphinx
+  - conda install -c conda-forge sphinx_bootstrap_theme pytest-cov coveralls
+  - conda install -c anaconda ipywidgets pytest
 
 install:
-  - conda install -c diffpy/label/dev diffpy.structure
-  - "pip install . -r requirements.txt"
+  - pip install . -r requirements.txt
 
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - pytest --cov=pyxem -p no:warnings tests 
+  - timeout 1m pytest --cov=pyxem 
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 after_success:
@@ -46,7 +42,3 @@ deploy:
   on:
     branch: master
 
-matrix:
-  allow_failures:
-    - script: sphinx-apidoc -fo docs/source pyxem
-    - script: sphinx-build -b html docs/source docs/build
