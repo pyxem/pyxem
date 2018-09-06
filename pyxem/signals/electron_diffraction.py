@@ -17,8 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 """Signal class for Electron Diffraction data
 
-"""
 
+"""
 import numpy as np
 
 from hyperspy.api import interactive
@@ -302,7 +302,8 @@ class ElectronDiffraction(Signal2D):
     def remove_deadpixels(self,
                           deadpixels,
                           deadvalue='average',
-                          inplace=True):
+                          inplace=True,
+                          progress_bar=True):
         """Remove deadpixels from experimentally acquired diffraction patterns.
 
         Parameters
@@ -321,7 +322,8 @@ class ElectronDiffraction(Signal2D):
         return self.map(remove_dead,
                         deadpixels=deadpixels,
                         deadvalue=deadvalue,
-                        inplace=inplace)
+                        inplace=inplace,
+                        show_progressbar=progress_bar)
 
     def get_radial_profile(self,inplace=False,**kwargs):
         """Return the radial profile of the diffraction pattern.
@@ -342,21 +344,12 @@ class ElectronDiffraction(Signal2D):
             profiles = ed.get_radial_profile()
             profiles.plot()
         """
-        # TODO: the cython implementation is throwing dtype errors
         radial_profiles = self.map(radial_average,
                                    inplace=inplace,**kwargs)
-        # TODO: check this
-        ragged = len(radial_profiles.data.shape) == 1
-        if ragged:
-            max_len = max(map(len, radial_profiles.data))
-            radial_profiles = Signal1D([
-                np.pad(row.reshape(-1,), (0, max_len-len(row)), mode="constant", constant_values=0)
-                for row in radial_profiles.data])
-            return ElectronDiffractionProfile(radial_profiles)
-        else:
-            radial_profiles.axes_manager.signal_axes[0].offset = 0
-            signal_axis = radial_profiles.axes_manager.signal_axes[0]
-            return ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+
+        radial_profiles.axes_manager.signal_axes[0].offset = 0
+        signal_axis = radial_profiles.axes_manager.signal_axes[0]
+        return ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
 
     def get_direct_beam_position(self, radius_start,
                                  radius_finish,
@@ -386,6 +379,7 @@ class ElectronDiffraction(Signal2D):
 
     def center_direct_beam(self,
                            radius_start, radius_finish,
+                           square_width=None,
                            *args, **kwargs):
 
         """Estimate the direct beam position in each experimentally acquired
@@ -401,6 +395,11 @@ class ElectronDiffraction(Signal2D):
         radius_finish : int
             The upper bounds for the radius of the central disc to be used in the alignment
 
+        square_width  : int
+            Half the side length of square that captures the direct beam in all scans. Means
+            that the centering algorithm is stable against diffracted spots brighter than
+            the direct beam.
+
         Returns
         -------
         Diffraction Pattern, centered.
@@ -410,8 +409,12 @@ class ElectronDiffraction(Signal2D):
         nav_shape_y = self.data.shape[1]
         origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
 
-
-        shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+        if square_width is not None:
+            min_index = np.int(origin_coordinates[0]-(0.5+square_width))
+            max_index = np.int(origin_coordinates[0]+(1.5+square_width)) #fails if non-square dp
+            shifts = self.isig[min_index:max_index,min_index:max_index].get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+        else:
+            shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
 
         shifts = -1*shifts.data
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
@@ -450,7 +453,8 @@ class ElectronDiffraction(Signal2D):
         Returns
         -------
         bg_subtracted : :obj:`ElectronDiffraction`
-            A copy of the data with the background subtracted.
+            A copy of the data with the background subtracted. Be aware that
+            this function will only return inplace.
 
         """
         if method == 'h-dome':
@@ -470,7 +474,7 @@ class ElectronDiffraction(Signal2D):
                                      inplace=False, *args, **kwargs)
 
         elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, *args, **kwargs)
+            bg_subtracted = self.map(subtract_reference, inplace=False, *args, **kwargs)
 
         else:
             raise NotImplementedError(
@@ -507,7 +511,7 @@ class ElectronDiffraction(Signal2D):
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
 
-    def find_peaks(self, method='stat', *args, **kwargs):
+    def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
 
         Function to locate the positive peaks in an image using various, user
@@ -565,10 +569,7 @@ class ElectronDiffraction(Signal2D):
         peaks.axes_manager.set_signal_dimension(0)
         if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
             peaks = peaks.transpose(navigation_axes=2)
-        if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            raise RuntimeWarning('You do not have the same size navigation axes \
-            for your Diffraction pattern and your peaks')
-
+        
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):

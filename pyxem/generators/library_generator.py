@@ -21,11 +21,10 @@
 """
 
 import numpy as np
-from pymatgen.transformations.standard_transformations \
-    import RotationTransformation
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 from tqdm import tqdm
-from transforms3d.euler import euler2axangle
+from transforms3d.euler import euler2mat
+import diffpy.structure
 
 
 
@@ -63,10 +62,9 @@ class DiffractionLibraryGenerator(object):
 
         Parameters
         ----------
-        structure_library : dict
-            Dictionary of structures and associated orientations (represented as
-            Euler angles or axis-angle pairs) for which electron diffraction is
-            to be simulated.
+        structure_library : pyxem:StructureLibrary Object
+            Dictionary of structures and associated orientations for which electron diffraction
+            is to be simulated.
 
         calibration : float
             The calibration of experimental data to be correlated with the
@@ -89,24 +87,26 @@ class DiffractionLibraryGenerator(object):
         diffraction_library = DiffractionLibrary()
         # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
+        structure_library = structure_library.struct_lib
         # Iterate through phases in library.
         for key in structure_library.keys():
             phase_diffraction_library = dict()
             structure = structure_library[key][0]
+            a,b,c = structure.lattice.a,structure.lattice.b,structure.lattice.c
+            alpha,beta,gamma = structure.lattice.alpha,structure.lattice.beta,structure.lattice.gamma
             orientations = structure_library[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
-                orientation = np.deg2rad(orientation)
-                axis, angle = euler2axangle(orientation[0], orientation[1],
-                                                orientation[2], 'rzxz')
-                # Apply rotation to the structure
-                rotation = RotationTransformation(axis, angle,
-                                                  angle_in_radians=True)
-                rotated_structure = rotation.apply_transformation(structure)
+                _orientation = np.deg2rad(orientation)
+                matrix = euler2mat(_orientation[0],_orientation[1],_orientation[2], 'rzxz')
+
+                latt_rot = diffpy.structure.lattice.Lattice(a,b,c,alpha,beta,gamma,baserot=matrix)
+                structure.placeInLattice(latt_rot)
+
                 # Calculate electron diffraction for rotated structure
-                data = diffractor.calculate_ed_data(rotated_structure,
+                data = diffractor.calculate_ed_data(structure,
                                                     reciprocal_radius,
-						    with_direct_beam)
+						                            with_direct_beam)
                 # Calibrate simulation
                 data.calibration = calibration
                 pattern_intensities = data.intensities

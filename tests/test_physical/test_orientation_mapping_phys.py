@@ -19,10 +19,11 @@
 import numpy as np
 import pytest
 import pyxem as pxm
-import pymatgen as pmg
 import hyperspy.api as hs
+import diffpy.structure
 
 from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.utils.sim_utils import peaks_from_best_template
 
 """
@@ -40,15 +41,15 @@ half_side_length = 72
 
 @pytest.fixture
 def create_Ortho():
-    Zn = pmg.Element("Zn")
-    lattice = pmg.Lattice.orthorhombic(4.5,4.3,5.7)
-    return pmg.Structure.from_spacegroup("P2",lattice, [Zn], [[0, 0, 0]])
+    latt = diffpy.structure.lattice.Lattice(3,4,5,90,90,90)
+    atom = diffpy.structure.atom.Atom(atype='Zn',xyz=[0,0,0],lattice=latt)
+    return diffpy.structure.Structure(atoms=[atom],lattice=latt)
 
 @pytest.fixture
 def create_Hex():
-    Ni = pmg.Element("Ni")
-    lattice = pmg.Lattice.hexagonal(3.5,5)
-    return pmg.Structure.from_spacegroup(162,lattice, [Ni], [[0, 0, 0]])
+    latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
+    atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
+    return diffpy.structure.Structure(atoms=[atom],lattice=latt)
 
 @pytest.fixture
 def edc():
@@ -73,8 +74,7 @@ def pattern_rot_list():
 
 def get_template_library(structure,rot_list,edc):
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
-    struc_lib = dict()
-    struc_lib['A'] = (structure,rot_list)
+    struc_lib = StructureLibrary(['A'],[structure],[rot_list])
     library = diff_gen.get_diffraction_library(struc_lib,
                                            calibration=1/half_side_length,
                                            reciprocal_radius=0.8,

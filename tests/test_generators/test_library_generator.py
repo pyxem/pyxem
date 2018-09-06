@@ -17,11 +17,13 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pymatgen as pmg
+import diffpy.structure
 
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.generators.library_generator import DiffractionLibraryGenerator
 from pyxem.libraries.diffraction_library import DiffractionLibrary
+from pyxem.libraries.structure_library import StructureLibrary
+
 
 
 @pytest.fixture
@@ -33,40 +35,27 @@ def diffraction_calculator():
 def library_generator(diffraction_calculator):
     return DiffractionLibraryGenerator(diffraction_calculator)
 
-@pytest.fixture(params=[
-    "Si",
-])
-def element(request):
-    return pmg.Element(request.param)
-
-
-@pytest.fixture(params=[
-    5.431
-])
-def lattice(request):
-    return pmg.Lattice.cubic(request.param)
-
-
-@pytest.fixture(params=[
-    "Fd-3m"
-])
-def structure(request, lattice, element):
-    return pmg.Structure.from_spacegroup(request.param, lattice, [element], [[0, 0, 0]])
+@pytest.fixture
+def structure():
+    latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
+    atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
+    hexagonal_structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
+    return hexagonal_structure
 
 @pytest.fixture
 def structure_library(structure):
-    return {'Si': (structure, [(0, 0, 0)])}
+    return StructureLibrary(['Si'],[structure],[[(0, 0, 0),(0.1,0.1,0)]])
 
 class TestDiffractionLibraryGenerator:
 
-    @pytest.mark.parametrize('calibration, reciprocal_radius, half_shape, representation', [
-        (0.017, 2.4, (72,72) ,'euler'),
+    @pytest.mark.parametrize('calibration, reciprocal_radius, half_shape, with_direct_beam', [
+        (0.017, 2.4, (72,72) ,False),
     ])
     def test_get_diffraction_library(
             self,
             library_generator: DiffractionLibraryGenerator,
-            structure_library, calibration, reciprocal_radius, half_shape, representation
+            structure_library, calibration, reciprocal_radius, half_shape, with_direct_beam
             ):
         library = library_generator.get_diffraction_library(
-            structure_library, calibration, reciprocal_radius,half_shape, representation)
+            structure_library, calibration, reciprocal_radius,half_shape, with_direct_beam)
         assert isinstance(library, DiffractionLibrary)

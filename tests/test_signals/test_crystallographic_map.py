@@ -35,7 +35,7 @@ def get_distance_between_two_angles_longform(angle_1,angle_2):
 
     q_from_mode = qmult(qinverse(q2),q1)
     axis,angle = quat2axangle(q_from_mode)
-    return angle
+    return np.rad2deg(angle)
 
 @pytest.fixture()
 def sp_cryst_map():
@@ -126,3 +126,4 @@ class TestModalAngularFunctionality:
         implemented = _distance_from_fixed_angle(angle_1,angle_2)
         testing = get_distance_between_two_angles_longform(angle_1,angle_2)
         assert np.allclose(implemented,testing)
+        assert np.allclose(implemented,1)
