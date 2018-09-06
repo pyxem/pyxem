@@ -20,13 +20,12 @@
 import logging
 
 from hyperspy.io_plugins import (msa, digital_micrograph, fei, mrc, ripple,
-                                 tiff, semper_unf, blockfile, dens, emd,
-                                 protochips, edax, bruker)
+                                 tiff, blockfile, emd)
 
 from pyxem.io_plugins import mib
 
-io_plugins = [msa, digital_micrograph, fei, mrc, ripple, tiff, semper_unf,
-              blockfile, dens, emd, protochips, edax, bruker, mib]
+io_plugins = [msa, digital_micrograph, fei, mrc, ripple, tiff, blockfile, 
+              emd, mib]
 
 _logger = logging.getLogger(__name__)
 
