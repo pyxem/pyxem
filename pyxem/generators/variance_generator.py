@@ -42,7 +42,7 @@ class VarianceGenerator():
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
 
-    def get_diffraction_variance(dqe):
+    def get_diffraction_variance(self, dqe):
         """Calculates the variance in scattered intensity as a function of
         scattering vector.
 
@@ -68,7 +68,7 @@ class VarianceGenerator():
         vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
         return DiffractionVariance(vardps)
 
-    def get_image_variance():
+    def get_image_variance(self):
         """Calculates the variance in scattered intensity as a function of
         scattering vector.
 
