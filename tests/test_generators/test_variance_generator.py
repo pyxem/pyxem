@@ -20,3 +20,60 @@ import pytest
 import numpy as np
 
 from pyxem.generators.variance_generator import VarianceGenerator
+
+from pyxem.signals.diffraction_variance import DiffractionVariance
+
+@pytest.fixture(params=[
+    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 2., 1., 0., 0.],
+               [0., 0., 0., 0., 1., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 2.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 1., 2., 1., 0., 0., 0.],
+               [0., 0., 0., 1., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]],
+              [[0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 2., 2., 2., 0., 0.],
+               [0., 0., 0., 0., 2., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.],
+               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
+])
+def electron_diffraction(request):
+    return ElectronDiffraction(request.param)
+
+@pytest.fixture
+def variance_generator(electron_diffraction):
+    return VarianceGenerator(electron_diffraction)
+
+class TestVarianceGenerator:
+
+    @pytest.mark.parametrize('dqe', [
+        0.5,
+        0.6
+    ])
+    def test_get_diffraction_variance(
+            self,
+            variance_generator: VarianceGenerator,
+            dqe
+            ):
+        vardps = variance_generator.get_diffraction_variance, dqe)
+        assert isinstance(vdfs, DiffractionVariance)
