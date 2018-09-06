@@ -26,6 +26,7 @@ from hyperspy.signals import Signal2D
 from hyperspy.api import stack
 
 from pyxem.signals.diffraction_variance import DiffractionVariance
+from pyxem.signals.diffraction_variance import ImageVariance
 
 
 class VarianceGenerator():
@@ -56,7 +57,7 @@ class VarianceGenerator():
         -------
 
         vardps : Signal2D
-            A two dimensional Signal class object containing the mean DP, mean
+            A DiffractionVariance object containing the mean DP, mean
             squared DP, and variance DP.
         """
         dp = self.signal
@@ -66,3 +67,28 @@ class VarianceGenerator():
         corr_var = Signal2D(((var_dp.data - (np.divide(dqe, mean_dp)))))
         vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
         return DiffractionVariance(vardps)
+
+    def get_image_variance():
+        """Calculates the variance in scattered intensity as a function of
+        scattering vector.
+
+        Parameters
+        ----------
+
+        dqe : float
+            Detective quantum efficiency of the detector for Poisson noise
+            correction.
+
+        Returns
+        -------
+
+        varims : Signal2D
+            A two dimensional Signal class object containing the mean DP, mean
+            squared DP, and variance DP.
+        """
+        im = self.signal.T
+        mean_im = im.mean((0,1))
+        meansq_im = Signal2D(np.square(im.data)).mean((0,1))
+        var_im = Signal2D(((meansq_im.data / np.square(mean_im.data)) - 1.))
+        varims = stack((mean_im, meansq_im, var_im))
+        return ImageVariance(varims)

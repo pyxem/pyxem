@@ -26,3 +26,10 @@ class DiffractionVariance(Signal2D):
 
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
+
+
+class ImageVariance(Signal2D):
+    _signal_type = "image_variance"
+
+    def __init__(self, *args, **kwargs):
+        Signal2D.__init__(self, *args, **kwargs)
