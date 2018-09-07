@@ -26,7 +26,7 @@ Start a new Python 3 notebook, and run in the first cell:
 
 .. code-block:: python
 
-    %matplotlib qt5
+    %matplotlib qt
     import pixstem.api as ps
 
 If this works, continue with the :ref:`using_pixelated_stem_class`.
@@ -36,8 +36,7 @@ WinPython HyperSpy installer
 ****************************
 
 Alternatively, the WinPython HyperSpy bundle can be used.
-Firstly download and install the `WinPython HyperSpy bundle <://github.com/hyperspy/hyperspy-bundle/releases>`_:
-HyperSpy-1.3 for Windows 64-bits (get the most recent version).
+Firstly download and install the `WinPython HyperSpy bundle <https://github.com/hyperspy/hyperspy-bundle/releases>`_:
 
 After installing the bundle, there should be a folder in the start menu called "HyperSpy WinPython Bundle", and this
 folder should contain the "WinPython prompt". Start the "WinPython prompt". This will open a terminal window called
@@ -52,7 +51,7 @@ This will open a new window. In this window, run:
 
 .. code-block:: python
 
-    %matplotlib qt5
+    %matplotlib qt
     import pixstem.api as ps
 
 If this works, continue with the :ref:`using_pixelated_stem_class`.
