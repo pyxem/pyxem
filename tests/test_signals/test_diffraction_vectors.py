@@ -88,12 +88,14 @@ class TestMagnitudes:
     def test_get_magnitudes_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_magnitudes()
 
+    @pytest.mark.filterwarnings('ignore::FutureWarning') #deemed "safe enough"
     def test_get_magnitude_histogram_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
     def test_get_magnitudes_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_magnitudes()
 
+    @pytest.mark.filterwarnings('ignore::FutureWarning') #deemed "safe enough"
     def test_get_magnitude_histogram_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
