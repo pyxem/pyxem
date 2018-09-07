@@ -78,8 +78,8 @@ def vdf_generator(electron_diffraction, diffraction_vectors):
 class TestVDFGenerator:
 
     @pytest.mark.parametrize('radius, normalize', [
-        (1., False),
-        (1., True)
+        (4., False),
+        (4., True)
     ])
     def test_get_vdf_image(
             self,
