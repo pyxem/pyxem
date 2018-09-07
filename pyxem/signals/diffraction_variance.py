@@ -36,9 +36,9 @@ class DiffractionVariance(Signal2D):
 
         Returns
         -------
-        radial_profile: :obj:`hyperspy.signals.Signal1D`
-            The radial average profile of each diffraction pattern
-            in the ElectronDiffraction signal as a Signal1D.
+        radial_profile: :obj:`pyxem.signals.DiffractionVarianceProfile`
+            The radial profile of each diffraction variance pattern in the
+            DiffractionVariance signal.
 
         See also
         --------
@@ -56,6 +56,24 @@ class DiffractionVariance(Signal2D):
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
         return DiffractionVarianceProfile(radial_profiles.as_signal1D(signal_axis))
+
+    def renormalize(self, dqe):
+        """Renormalize the corrected variance for a new detective quantum
+        efficiency.
+
+        Parameters
+        ----------
+        dqe : float
+            Detective quantum efficiency for new normalization.
+
+        Returns
+        -------
+        vardps : :obj:`pyxem.signals.DiffractionVariance`
+            The DiffractionVariance object with the corrected variance pattern
+            updated for the new dqe.
+        """
+        self.data[1,1] = self.data[1,0] - (np.divide(dqe, self.data[0,1]))
+
 
 class ImageVariance(Signal2D):
     _signal_type = "image_variance"

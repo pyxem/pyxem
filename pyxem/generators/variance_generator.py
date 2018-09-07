@@ -66,7 +66,9 @@ class VarianceGenerator():
         var_dp = Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
         corr_var = Signal2D(((var_dp.data - (np.divide(dqe, mean_dp)))))
         vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
-        return DiffractionVariance(vardps)
+        sig_x = vardps.data.shape[2]
+        sig_y = vardps.data.shape[3]
+        return DiffractionVariance(vardps.data.((2, 2, sig_x, sig_y)))
 
     def get_image_variance(self):
         """Calculates the variance in scattered intensity as a function of
