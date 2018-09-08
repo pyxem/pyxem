@@ -215,7 +215,8 @@ class TestBackgroundMethods:
         ('median', {'footprint': 4, 'implementation': 'skimage'}),
         ('reference_pattern',{'bg':np.ones((8,8)),})
     ])
-    @pytest.mark.filterwarnings('ignore::UserWarning')
+    @pytest.mark.filterwarnings('ignore::FutureWarning') # skimage being warned by numpy, not for us
+    @pytest.mark.filterwarnings('ignore::UserWarning') #we don't care about precision loss
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
