@@ -39,16 +39,17 @@ class VDFGenerator():
         integration windows for VDF formation.
 
     """
-    def __init__(self, signal, vectors, *args, **kwargs):
+    def __init__(self, signal, vectors=None, *args, **kwargs):
         #If ragged the signal axes will not be defined
-        if len(vectors.axes_manager.signal_axes)==0:
-            unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
-
-        else:
-            unique_vectors = vectors
-
         self.signal = signal
-        self.vectors = unique_vectors
+
+        if self.vectors = None:
+            self.vectors = None
+        elif len(vectors.axes_manager.signal_axes)==0:
+            unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
+            self.vectors = unique_vectors
+        else:
+            self.vectors = vectors
 
     def get_vdf_images(self,
                        radius,
@@ -71,23 +72,30 @@ class VDFGenerator():
         vdfs : Signal2D
             Signal containing virtual dark field images for all unique vectors.
         """
-        vdfs = []
-        for v in self.vectors.data:
-            disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
-            vdf = disk(self.signal,
-                       axes=self.signal.axes_manager.signal_axes)
-            vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
+        if self.vectors:
+            vdfs = []
+            for v in self.vectors.data:
+                disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
+                vdf = disk(self.signal,
+                           axes=self.signal.axes_manager.signal_axes)
+                vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
 
-        vdfim = VDFImage(np.asarray(vdfs))
+            vdfim = VDFImage(np.asarray(vdfs))
 
-        if normalize==True:
-            vdfim.map(normalize_vdf)
+            if normalize==True:
+                vdfim.map(normalize_vdf)
+
+        else:
+            raise ValueError("DiffractionVectors non-specified by user. Please"
+                             "initialize VDFGenerator with some vectors. "
 
         return vdfim
 
-    def get_vdf_images(self,
-                       radius,
-                       normalize=False):
+    def get_concentric_vdf_images(self,
+                                  k_min,
+                                  k_max,
+                                  k_step,
+                                  normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction Signal by summation in a
         circular window of specified radius.
@@ -106,11 +114,16 @@ class VDFGenerator():
         vdfs : Signal2D
             Signal containing virtual dark field images for all unique vectors.
         """
+        k0s = np.linspace(k_min, k_max-k_step, k_step)
+        k1s = np.linspace(k_min+k_step, k_max, k_step)
+
+        ks = np.array((k0s, k1s)).T
+
         vdfs = []
-        for v in self.vectors.data:
-            disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
-            vdf = disk(self.signal,
-                       axes=self.signal.axes_manager.signal_axes)
+        for k in ks:
+            annulus = roi.CircleROI(cx=0, cy=0, r=k[1], r_inner=k[0])
+            vdf = annulus(self.signal,
+                          axes=self.signal.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
 
         vdfim = VDFImage(np.asarray(vdfs))
