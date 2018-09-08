@@ -17,8 +17,8 @@ before_install:
   - source activate test-environment
   - conda install -c diffpy/label/dev diffpy.structure
   - conda install pip sphinx
-  - conda install -c conda-forge sphinx_bootstrap_theme pytest-cov coveralls
-  - conda install -c anaconda ipywidgets pytest
+  - conda install -c conda-forge sphinx_bootstrap_theme #pytest-cov coveralls
+  - conda install -c anaconda ipywidgets #pytest
 
 install:
   - pip install . -r requirements.txt
