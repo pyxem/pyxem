@@ -43,7 +43,7 @@ class VDFGenerator():
         #If ragged the signal axes will not be defined
         self.signal = signal
 
-        if self.vectors = None:
+        if vectors==None:
             self.vectors = None
         elif len(vectors.axes_manager.signal_axes)==0:
             unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
@@ -86,15 +86,15 @@ class VDFGenerator():
                 vdfim.map(normalize_vdf)
 
         else:
-            raise ValueError("DiffractionVectors non-specified by user. Please"
-                             "initialize VDFGenerator with some vectors. "
+            raise ValueError("DiffractionVectors non-specified by user. Please "
+                             "initialize VDFGenerator with some vectors. ")
 
         return vdfim
 
     def get_concentric_vdf_images(self,
                                   k_min,
                                   k_max,
-                                  k_step,
+                                  k_steps,
                                   normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction Signal by summation in a
@@ -114,8 +114,9 @@ class VDFGenerator():
         vdfs : Signal2D
             Signal containing virtual dark field images for all unique vectors.
         """
-        k0s = np.linspace(k_min, k_max-k_step, k_step)
-        k1s = np.linspace(k_min+k_step, k_max, k_step)
+        k_step = (k_max - k_min) / k_steps
+        k0s = np.linspace(k_min, k_max-k_step, k_steps)
+        k1s = np.linspace(k_min+k_step, k_max, k_steps)
 
         ks = np.array((k0s, k1s)).T
 
