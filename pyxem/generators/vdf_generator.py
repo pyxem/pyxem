@@ -84,3 +84,38 @@ class VDFGenerator():
             vdfim.map(normalize_vdf)
 
         return vdfim
+
+    def get_vdf_images(self,
+                       radius,
+                       normalize=False):
+        """Obtain the intensity scattered to each diffraction vector at each
+        navigation position in an ElectronDiffraction Signal by summation in a
+        circular window of specified radius.
+
+        Parameters
+        ----------
+        radius : float
+            Radius of the integration window in reciprocal angstroms.
+
+        normalize : boolean
+            If True each VDF image is normalized so that the maximum intensity
+            in each VDF is 1.
+
+        Returns
+        -------
+        vdfs : Signal2D
+            Signal containing virtual dark field images for all unique vectors.
+        """
+        vdfs = []
+        for v in self.vectors.data:
+            disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
+            vdf = disk(self.signal,
+                       axes=self.signal.axes_manager.signal_axes)
+            vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
+
+        vdfim = VDFImage(np.asarray(vdfs))
+
+        if normalize==True:
+            vdfim.map(normalize_vdf)
+
+        return vdfim
