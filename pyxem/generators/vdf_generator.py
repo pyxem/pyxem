@@ -27,7 +27,7 @@ from hyperspy.api import roi
 import numpy as np
 
 class VDFGenerator():
-    """Generates an VDF images for a specified signal and set of aperture
+    """Generates a VDF images for a specified signal and set of aperture
     positions.
 
     Parameters
@@ -41,15 +41,16 @@ class VDFGenerator():
     """
     def __init__(self, signal, vectors=None, *args, **kwargs):
         #If ragged the signal axes will not be defined
-        self.signal = signal
 
-        if vectors==None:
-            self.vectors = None
+        if vectors is None:
+            unique_vectors = None
         elif len(vectors.axes_manager.signal_axes)==0:
             unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
-            self.vectors = unique_vectors
         else:
-            self.vectors = vectors
+            unique_vectors = vectors
+
+        self.signal = signal
+        self.vectors = unique_vectors
 
     def get_vdf_images(self,
                        radius,
@@ -96,23 +97,28 @@ class VDFGenerator():
                                   k_max,
                                   k_steps,
                                   normalize=False):
-        """Obtain the intensity scattered to each diffraction vector at each
-        navigation position in an ElectronDiffraction Signal by summation in a
-        circular window of specified radius.
+        """Obtain the intensity scattered at each navigation position in an
+        ElectronDiffraction Signal by summation in an
+        annlus of specified inner and outer radius.
 
         Parameters
         ----------
-        radius : float
-            Radius of the integration window in reciprocal angstroms.
+        k_min : float
+            Minimum radius of the annular integration window in reciprocal
+            angstroms.
 
-        normalize : boolean
-            If True each VDF image is normalized so that the maximum intensity
-            in each VDF is 1.
+        k_max : float
+            Maximum radius of the annular integration window in reciprocal
+            angstroms.
+
+        k_steps : int
+            Number of steps within the annular integration window
 
         Returns
         -------
         vdfs : Signal2D
-            Signal containing virtual dark field images for all unique vectors.
+            Signal containing virtual dark field images for all steps within
+            the annulus.
         """
         k_step = (k_max - k_min) / k_steps
         k0s = np.linspace(k_min, k_max-k_step, k_steps)
