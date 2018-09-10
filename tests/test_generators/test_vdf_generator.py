@@ -78,15 +78,28 @@ def vdf_generator(electron_diffraction, diffraction_vectors):
 class TestVDFGenerator:
 
     @pytest.mark.parametrize('radius, normalize', [
-        (1., False),
-        (1., True)
+        (4., False),
+        (4., True)
     ])
-    def test_get_vdf_image(
+    def test_get_vector_vdf_images(
             self,
             vdf_generator: VDFGenerator,
             radius, normalize
             ):
-        vdfs = vdf_generator.get_vdf_images(radius, normalize)
+        vdfs = vdf_generator.get_vector_vdf_images(radius, normalize)
+        assert isinstance(vdfs, VDFImage)
+
+    @pytest.mark.parametrize('k_min, k_max, k_steps, normalize', [
+        (0., 4., 2., False),
+        (0., 4., 2., True)
+    ])
+    def test_get_concentric_vdf_images(
+            self,
+            vdf_generator: VDFGenerator,
+            k_min, k_max, k_steps, normalize
+            ):
+        vdfs = vdf_generator.get_concentric_vdf_images(k_min, k_max, k_steps,
+                                                        normalize)
         assert isinstance(vdfs, VDFImage)
 
 def test_vdf_generator_from_map(electron_diffraction):

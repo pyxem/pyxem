@@ -34,7 +34,7 @@ class VDFGenerator():
     ----------
     signal : ElectronDiffraction
         The signal of electron diffraction patterns to be indexed.
-    vectors: DiffractionVectors
+    vectors: DiffractionVectors(optional)
         The vector positions, in calibrated units, at which to position
         integration windows for VDF formation.
 
@@ -52,9 +52,9 @@ class VDFGenerator():
         self.signal = signal
         self.vectors = unique_vectors
 
-    def get_vdf_images(self,
-                       radius,
-                       normalize=False):
+    def get_vector_vdf_images(self,
+                              radius,
+                              normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction Signal by summation in a
         circular window of specified radius.
@@ -70,8 +70,9 @@ class VDFGenerator():
 
         Returns
         -------
-        vdfs : Signal2D
-            Signal containing virtual dark field images for all unique vectors.
+        vdfs : VDFImage
+            VDFImage object containing virtual dark field images for all unique
+            vectors.
         """
         if self.vectors:
             vdfs = []
@@ -98,8 +99,9 @@ class VDFGenerator():
                                   k_steps,
                                   normalize=False):
         """Obtain the intensity scattered at each navigation position in an
-        ElectronDiffraction Signal by summation in an
-        annlus of specified inner and outer radius.
+        ElectronDiffraction Signal by summation over a series of concentric
+        in annuli between a specified inner and outer radius in a number of
+        steps.
 
         Parameters
         ----------
@@ -116,9 +118,9 @@ class VDFGenerator():
 
         Returns
         -------
-        vdfs : Signal2D
-            Signal containing virtual dark field images for all steps within
-            the annulus.
+        vdfs : VDFImage
+            VDFImage object containing virtual dark field images for all steps
+            within the annulus.
         """
         k_step = (k_max - k_min) / k_steps
         k0s = np.linspace(k_min, k_max-k_step, k_steps)
