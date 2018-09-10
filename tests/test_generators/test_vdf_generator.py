@@ -62,6 +62,7 @@ from pyxem.signals.vdf_image import VDFImage
 def electron_diffraction(request):
     return ElectronDiffraction(request.param)
 
+
 @pytest.fixture(params=[
     np.array([[1, 1],
               [2, 2]])
@@ -76,6 +77,33 @@ def vdf_generator(electron_diffraction, diffraction_vectors):
     return VDFGenerator(electron_diffraction, diffraction_vectors)
 
 class TestVDFGenerator:
+
+    def test_vdf_generator_init_with_vectors(self, electron_diffraction):
+        dvm = DiffractionVectors(np.array([[np.array([[1, 1],
+                         [2, 2]]),
+               np.array([[1, 1],
+                         [2, 2],
+                         [1, 2]])],
+              [np.array([[1, 1],
+                         [2, 2]]),
+               np.array([[1, 1],
+                         [2, 2]])]], dtype=object))
+        dvm.axes_manager.set_signal_dimension(0)
+
+        vdfgen = VDFGenerator(electron_diffraction, dvm)
+        assert isinstance(vdfgen.signal, ElectronDiffraction)
+        assert isinstance(vdfgen.vectors, DiffractionVectors)
+
+    def test_vdf_generator_init_without_vectors(self, electron_diffraction):
+
+        vdfgen = VDFGenerator(electron_diffraction)
+        assert isinstance(vdfgen.signal, ElectronDiffraction)
+        assert isinstance(vdfgen.vectors, type(None))
+
+    @pytest.mark.xfail(raises=ValueError)
+    def test_vector_vdfs_without_vectors(self, electron_diffraction):
+        vdfgen = VDFGenerator(electron_diffraction)
+        vdfgen.get_vector_vdf_images(radius=2.)
 
     @pytest.mark.parametrize('radius, normalize', [
         (4., False),
