@@ -17,8 +17,6 @@ before_install:
   - source activate test-environment
   - conda install -c diffpy/label/dev diffpy.structure
   - conda install pip #sphinx
- # - conda install -c conda-forge sphinx_bootstrap_theme #pytest-cov coveralls
-  - pip install ipywidgets
 
 install:
   - pip install . -r requirements.txt
@@ -28,11 +26,11 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - timeout 2m pytest #--cov=pyxem 
+  - timeout 2m pytest --cov=pyxem 
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 after_success:
-  #- coveralls
+  - coveralls
 
 deploy:
   provider: pages
