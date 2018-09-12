@@ -215,6 +215,8 @@ class TestBackgroundMethods:
         ('median', {'footprint': 4, 'implementation': 'skimage'}),
         ('reference_pattern',{'bg':np.ones((8,8)),})
     ])
+    @pytest.mark.filterwarnings('ignore::FutureWarning') # skimage being warned by numpy, not for us
+    @pytest.mark.filterwarnings('ignore::UserWarning') #we don't care about precision loss
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
@@ -246,7 +248,7 @@ class TestPeakFinding:
     @pytest.mark.parametrize('method', methods)
     @pytest.mark.parametrize('peak',[ragged_peak,nonragged_peak])
     def test_findpeaks_ragged(self,peak,method):
-        output = peak(self).find_peaks(method=method)
+        output = peak(self).find_peaks(method=method,show_progressbar=False)
         if method != 'difference_of_gaussians':
             # three methods return the expect peak
             assert output.inav[0,0].isig[1] == 2        #  correct number of dims (boring square)

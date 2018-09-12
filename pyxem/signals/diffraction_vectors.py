@@ -50,11 +50,13 @@ class DiffractionVectors(BaseSignal):
         #Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors()
         #Plot the gvector positions
-        plt.plot(unique_vectors.data.T[1], unique_vectors.data.T[0], 'ro')
-        plt.xlim(-xlim, xlim)
-        plt.ylim(-ylim, ylim)
-        plt.axes().set_aspect('equal')
-        return plt
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(unique_vectors.data.T[1], unique_vectors.data.T[0], 'ro')
+        ax.set_xlim(-xlim, xlim)
+        ax.set_ylim(-ylim, ylim)
+        ax.set_aspect('equal')
+        return fig
 
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
