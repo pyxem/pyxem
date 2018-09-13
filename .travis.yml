@@ -28,12 +28,10 @@ before_script:
 
 script:
   - export COVERAGE_FILE=alpha
-  - timeout 1m pytest --ignore='tests/test_signals' --cov=pyxem
+  - timeout 1m pytest --ignore='tests/test_signals/test_electron_diffraction.py' --cov=pyxem
   - export COVERAGE_FILE=beta
-  - timeout 1m pytest tests/test_signals --ignore='tests/test_signals/test_electron_diffraction.py' --cov=pyxem
-  - export COVERAGE_FILE=gamma
   - timeout 1m pytest tests/test_signals/test_electron_diffraction.py --cov=pyxem
-  - coverage combine alpha beta gamma
+  - coverage combine alpha beta 
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 after_success:
