@@ -47,7 +47,7 @@ PyWavelets==0.5.2
 Pygments==2.2.0          
 pyparsing==2.2.0           
 pytest-cov==2.5.1         
-pytest==3.7.1          
+pytest==3.8.0          
 python-dateutil==2.7.3       
 pytz==2018.5     
 pyzmq==17.1.2            
