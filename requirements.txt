@@ -5,6 +5,7 @@ certifi>=2018.8.13
 chardet==3.0.4
 cloudpickle==0.5.3
 coverage==4.5.1
+coveralls==1.5.0
 cycler==0.10.0
 cython==0.28.5
 dask==0.18.2
