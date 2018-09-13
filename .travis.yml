@@ -16,7 +16,7 @@ before_install:
   - conda create -q -n test-environment 
   - source activate test-environment
   - conda install -c diffpy/label/dev diffpy.structure
-  - conda install pip #sphinx
+  - conda install pip 
 
 install:
   - pip install . -r requirements.txt
@@ -25,8 +25,13 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
+
 script:
+  - export COVERAGE_FILE=alpha
   - timeout 1m pytest --ignore='tests/test_signals' --cov=pyxem
+  - export COVERAGE_FILE=beta
+  - timeout 1m pytest tests/test_signals --cov=pyxem
+  - coverage combine alpha beta
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 after_success:
