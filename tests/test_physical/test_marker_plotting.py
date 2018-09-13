@@ -28,7 +28,6 @@ When you run this the markers should land at the center of the peaks
 near the dots.
 """
 
-@pytest.fixture
 def generate_dp_cord_list():
     dp_cord_list = []
     for alpha in [0,1,2,3]:
