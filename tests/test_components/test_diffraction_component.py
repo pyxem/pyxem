@@ -30,31 +30,25 @@ from pyxem.components.diffraction_component import ElectronDiffractionForwardMod
 def diffraction_calculator(request):
     return DiffractionGenerator(*request.param)
 
-@pytest.fixture()
-def structure():
-    latt = diffpy.structure.lattice.Lattice(3,4,5,90,90,90)
-    atom = diffpy.structure.atom.Atom(atype='Zn',xyz=[0,0,0],lattice=latt)
-    return diffpy.structure.Structure(atoms=[atom],lattice=latt)
-
 def test_electron_diffraction_component_init(diffraction_calculator,
-                                             structure):
+                                             default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          structure,
+                                          default_structure,
                                           reciprocal_radius=1.,
                                           calibration=0.01)
     assert isinstance(ref, ElectronDiffractionForwardModel)
 
-def test_function(diffraction_calculator, structure):
+def test_function(diffraction_calculator, default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          structure,
+                                          default_structure,
                                           reciprocal_radius=1.,
                                           calibration=0.01)
     func = ref.function()
     np.testing.assert_almost_equal(func, 1)
 
-def test_simulate(diffraction_calculator, structure):
+def test_simulate(diffraction_calculator, default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          structure,
+                                          default_structure,
                                           reciprocal_radius=1.,
                                           calibration=0.01)
     sim = ref.simulate()

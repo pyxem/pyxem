@@ -30,21 +30,13 @@ from pyxem.libraries.structure_library import StructureLibrary
 def diffraction_calculator():
     return DiffractionGenerator(300., 0.02)
 
-
 @pytest.fixture
 def library_generator(diffraction_calculator):
     return DiffractionLibraryGenerator(diffraction_calculator)
 
 @pytest.fixture
-def structure():
-    latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
-    atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
-    hexagonal_structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
-    return hexagonal_structure
-
-@pytest.fixture
-def structure_library(structure):
-    return StructureLibrary(['Si'],[structure],[[(0, 0, 0),(0.1,0.1,0)]])
+def structure_library(default_structure):
+    return StructureLibrary(['Si'],[default_structure],[[(0, 0, 0),(0.1,0.1,0)]])
 
 class TestDiffractionLibraryGenerator:
 
