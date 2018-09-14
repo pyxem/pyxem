@@ -22,6 +22,9 @@ from hyperspy.signals import Signal1D, Signal2D
 from hyperspy.roi import CircleROI
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
+def test_init():
+    z = np.zeros((2,2,2,2))
+    dp = ElectronDiffraction(z,metadata={'Acquisition_instrument':{'SEM':'Expensive-SEM'}})
 
 @pytest.fixture(params=[
     np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],

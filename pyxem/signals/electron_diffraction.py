@@ -36,8 +36,8 @@ class ElectronDiffraction(Signal2D):
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
         # Set default attributes
-        if 'Acquisition_instrument.TEM' not in self.metadata:
-            if 'Acquisition_instrument.SEM' in self.metadata:
+        if 'Acquisition_instrument.TEM' not in self.metadata.as_dictionary():
+            if 'Acquisition_instrument.SEM' in self.metadata.as_dictionary():
                 self.metadata.set_item(
                     "Acquisition_instrument.TEM",
                     self.metadata.Acquisition_instrument.SEM)
@@ -551,7 +551,7 @@ class ElectronDiffraction(Signal2D):
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
-        
+
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
