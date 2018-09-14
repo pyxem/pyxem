@@ -108,3 +108,70 @@ def profile_simulation():
 
 def test_plot_profile_simulation(profile_simulation):
     profile_simulation.get_plot(g_max=1)
+
+class TestDiffractionSimulation:
+
+    @pytest.fixture
+    def diffraction_simulation(self):
+        return DiffractionSimulation()
+
+    def test_init(self,diffraction_simulation):
+        assert diffraction_simulation.coordinates is None
+        assert diffraction_simulation.indices is None
+        assert diffraction_simulation.intensities is None
+        assert diffraction_simulation.calibration == (1., 1.)
+
+
+    @pytest.mark.parametrize('calibration, expected', [
+        (5., (5., 5.)),
+        pytest.param(0, (0, 0), marks=pytest.mark.xfail(raises=ValueError)),
+        pytest.param((0, 0), (0, 0), marks=pytest.mark.xfail(raises=ValueError)),
+        ((1.5, 1.5), (1.5, 1.5)),
+        ((1.3, 1.5), (1.3, 1.5))
+        ])
+
+    def test_calibration(self,diffraction_simulation,
+            calibration, expected):
+        diffraction_simulation.calibration = calibration
+        assert diffraction_simulation.calibration == expected
+
+
+    @pytest.mark.parametrize('coordinates, with_direct_beam, expected', [
+        (
+            np.array([[-1, 0, 0], [0, 0, 0], [1, 0, 0]]),
+            False,
+            np.array([True, False, True])
+        ),
+        (
+            np.array([[-1, 0, 0], [0, 0, 0], [1, 0, 0]]),
+            True,
+            np.array([True, True, True])
+        ),
+        (
+            np.array([[-1, 0, 0], [1, 0, 0]]),
+            False,
+            np.array([True, True])
+        ),
+    ])
+
+    def test_direct_beam_mask(
+            self,diffraction_simulation,coordinates, with_direct_beam, expected):
+        diffraction_simulation.coordinates = coordinates
+        diffraction_simulation.with_direct_beam = with_direct_beam
+        mask = diffraction_simulation.direct_beam_mask
+        assert np.all(mask == expected)
+
+    @pytest.mark.parametrize('coordinates, calibration, offset, expected', [(
+            np.array([[1., 0., 0.], [1., 2., 0.]]),
+            1.,
+            (0., 0.),
+            np.array([[1., 0., 0.], [1., 2., 0.]]))])
+    def test_calibrated_coordinates(
+            self,
+            diffraction_simulation: DiffractionSimulation,
+            coordinates, calibration, offset, expected
+    ):
+        diffraction_simulation.coordinates = coordinates
+        diffraction_simulation.calibration = calibration
+        diffraction_simulation.offset = offset
+        assert np.allclose(diffraction_simulation.calibrated_coordinates, expected)
