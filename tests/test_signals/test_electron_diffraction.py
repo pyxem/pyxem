@@ -245,12 +245,22 @@ class TestPeakFinding:
     def test_findpeaks_ragged(self,ragged_peak,method):
         output = ragged_peak.find_peaks(method=method,show_progressbar=False)
 
-    @pytest.mark.xfail(raises=NotImplementedError)
-    def test_failing_run(self,ragged_peak):
-        ragged_peak.find_peaks(method='no_such_method_exists')
+class TestsAssertionless:
+
+    def test_decomposition(self,diffraction_pattern):
+        diffraction_pattern.decomposition()
+
+    def test_find_peaks_interactive(self,diffraction_pattern):
+        from matplotlib import pyplot as plt
+        plt.ion() #to make plotting non-blocking
+        diffraction_pattern.find_peaks_interactive()
+        plt.close('all')
+
 
 @pytest.mark.xfail(raises=NotImplementedError)
 class TestNotImplemented():
+    def test_failing_run(self,diffraction_pattern):
+        diffraction_pattern.find_peaks(method='no_such_method_exists')
 
     def test_remove_dead_pixels_failing(self,diffraction_pattern):
         dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',inplace=False,progress_bar=False)
