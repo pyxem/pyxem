@@ -407,7 +407,4 @@ def peaks_as_gvectors(z, center, calibration):
         peak positions in calibrated units.
     """
     g = (z - center) * calibration
-    try:    # ragged case
-        return np.array([g[0].T[1], g[0].T[0]]).T
-    except IndexError: # non-ragged case
-        return np.array([g[:,1], g[:,0]]).T
+    return np.array([g[0].T[1], g[0].T[0]]).T

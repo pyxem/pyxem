@@ -551,9 +551,7 @@ class ElectronDiffraction(Signal2D):
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
-        if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            peaks = peaks.transpose(navigation_axes=2)
-
+        
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):
