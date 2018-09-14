@@ -241,6 +241,7 @@ class TestPeakFinding:
     methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
 
     @pytest.mark.parametrize('method', methods)
+    @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
     def test_findpeaks_ragged(self,ragged_peak,method):
         output = ragged_peak.find_peaks(method=method,show_progressbar=False)
 
