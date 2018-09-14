@@ -279,13 +279,7 @@ def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
                      overlap=overlap)
 
     centers = blobs[:, :2]
-    clean_centers = []
-    for center in centers:
-        if len(np.intersect1d(center, (0, 1) + z.shape + tuple(
-                        c - 1 for c in z.shape))) > 0:
-            continue
-        clean_centers.append(center)
-    return np.array(clean_centers)
+    return centers
 
 
 def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
