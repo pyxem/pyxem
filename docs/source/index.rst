@@ -26,7 +26,7 @@ This approach may be illustrated schematically, as follows:
    :width: 600
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
-by the `HyperSpy <http://hyperspy.org>`__ library and draws on diffpy 
+by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__ 
 for atomic structure manipulation.
 
 pyXem is released under the GPL v3 license.

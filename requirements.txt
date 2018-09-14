@@ -5,6 +5,7 @@ certifi>=2018.8.13
 chardet==3.0.4
 cloudpickle==0.5.3
 coverage==4.5.1
+coveralls==1.5.0
 cycler==0.10.0
 cython==0.28.5
 dask==0.18.2
@@ -47,7 +48,7 @@ PyWavelets==0.5.2
 Pygments==2.2.0          
 pyparsing==2.2.0           
 pytest-cov==2.5.1         
-pytest==3.7.1          
+pytest==3.8.0          
 python-dateutil==2.7.3       
 pytz==2018.5     
 pyzmq==17.1.2            

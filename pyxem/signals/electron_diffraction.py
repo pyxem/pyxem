@@ -227,10 +227,6 @@ class ElectronDiffraction(Signal2D):
         ----------
         radius : float
             Radius for the circular mask in pixel units.
-        center : tuple, optional
-            User specified (x, y) position of the diffraction pattern center.
-            i.e. the direct beam position. If None (default) it is assumed that
-            the direct beam is at the center of the diffraction pattern.
 
         Return
         ------
@@ -370,8 +366,9 @@ class ElectronDiffraction(Signal2D):
 
         """
         shifts = self.map(find_beam_offset_cross_correlation,
-                              radius_start=radius_start,radius_finish=radius_finish,
-                              inplace=False,*args,**kwargs)
+                          radius_start=radius_start,
+			  radius_finish=radius_finish,
+                          inplace=False,*args,**kwargs)
         return shifts
 
     def center_direct_beam(self,
@@ -388,10 +385,8 @@ class ElectronDiffraction(Signal2D):
 
         radius_start : int
             The lower bound for the radius of the central disc to be used in the alignment
-
         radius_finish : int
             The upper bounds for the radius of the central disc to be used in the alignment
-
         square_width  : int
             Half the side length of square that captures the direct beam in all scans. Means
             that the centering algorithm is stable against diffracted spots brighter than
