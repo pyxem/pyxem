@@ -34,10 +34,9 @@ pockets==0.3
 prompt-toolkit==1.0.7
 ptyprocess==0.5.1
 pybtex==0.20.1
-pyxem==0.2
+pyxem==0.6
 pyface==5.1.0
 Pygments==2.1.3
-pymatgen==4.3.1
 pyparsing==2.1.9
 python-dateutil==2.5.3
 pytz==2016.6.1

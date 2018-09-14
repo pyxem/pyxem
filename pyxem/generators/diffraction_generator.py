@@ -28,7 +28,8 @@ from pyxem.signals.diffraction_simulation import ProfileSimulation
 
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.utils.sim_utils import get_electron_wavelength,\
-    get_kinematical_intensities, get_unique_families
+    get_kinematical_intensities, get_unique_families, get_points_in_sphere, \
+    get_vectorized_list_for_atomic_scattering_factors,is_lattice_hexagonal
 
 
 class DiffractionGenerator(object):
@@ -96,26 +97,21 @@ class DiffractionGenerator(object):
 
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
-        recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_pts, g_hkls = \
-            recip_latt.get_points_in_sphere([[0, 0, 0]], [0, 0, 0],
-                                            reciprocal_radius,
-                                            zip_results=False)[:2]
-        cartesian_coordinates = recip_latt.get_cartesian_coords(recip_pts)
+        recip_latt = latt.reciprocal()
+        spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
 
         # Identify points intersecting the Ewald sphere within maximum
         # excitation error and store the magnitude of their excitation error.
-        radius = 1 / wavelength
-        r = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
-        theta = np.arcsin(r / radius)
-        z_sphere = radius * (1 - np.cos(theta))
+        r_sphere = 1 / wavelength
+        r_spot = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
+        z_sphere = -np.sqrt(r_sphere**2-r_spot**2) + r_sphere
         proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
         intersection = proximity < max_excitation_error
         # Mask parameters corresponding to excited reflections.
         intersection_coordinates = cartesian_coordinates[intersection]
-        intersection_indices = recip_pts[intersection]
+        intersection_indices = spot_indicies[intersection]
         proximity = proximity[intersection]
-        g_hkls = g_hkls[intersection]
+        g_hkls = spot_distances[intersection]
 
         # Calculate diffracted intensities based on a kinematical model.
         intensities = get_kinematical_intensities(structure,
@@ -165,92 +161,60 @@ class DiffractionGenerator(object):
         """
         max_r = reciprocal_radius
         wavelength = self.wavelength
+
         latt = structure.lattice
-        is_hex = latt.is_hexagonal()
+        is_hex = is_lattice_hexagonal(latt)
+
+        coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,{})
 
         # Obtain crystallographic reciprocal lattice points within range
-        recip_latt = latt.reciprocal_lattice_crystallographic
-        recip_pts = recip_latt.get_points_in_sphere(
-            [[0, 0, 0]], [0, 0, 0], max_r)
+        recip_latt = latt.reciprocal()
+        spot_indicies, _ , spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
 
-        # Create a flattened array of zs, coeffs, fcoords and occus. This is
-        # used to perform vectorized computation of atomic scattering factors
-        # later. Note that these are not necessarily the same size as the
-        # structure as each partially occupied specie occupies its own
-        # position in the flattened array.
-        zs = []
-        coeffs = []
-        fcoords = []
-        occus = []
-        dwfactors = []
-
-        for site in structure:
-            for sp, occu in site.species_and_occu.items():
-                zs.append(sp.Z)
-                c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
-                coeffs.append(c)
-                dwfactors.append(self.debye_waller_factors.get(sp.symbol, 0))
-                fcoords.append(site.frac_coords)
-                occus.append(occu)
-
-        zs = np.array(zs)
-        coeffs = np.array(coeffs)
-        fcoords = np.array(fcoords)
-        occus = np.array(occus)
-        dwfactors = np.array(dwfactors)
         peaks = {}
-        gs = []
+        mask = np.logical_not((np.any(spot_indicies,axis=1) == 0))
 
-        for hkl, g_hkl, ind, _ in sorted(
-                recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])):
+        for hkl, g_hkl in zip(spot_indicies[mask],spot_distances[mask]):
             # Force miller indices to be integers.
             hkl = [int(round(i)) for i in hkl]
-            if g_hkl != 0:
 
-                d_hkl = 1 / g_hkl
+            d_hkl = 1 / g_hkl
 
-                # Bragg condition
-                #theta = asin(wavelength * g_hkl / 2)
+            # Bragg condition
+            #theta = asin(wavelength * g_hkl / 2)
 
-                # s = sin(theta) / wavelength = 1 / 2d = |ghkl| / 2 (d =
-                # 1/|ghkl|)
-                s = g_hkl / 2
+            # s = sin(theta) / wavelength = 1 / 2d = |ghkl| / 2 (d =
+            # 1/|ghkl|)
+            s = g_hkl / 2
 
-                # Store s^2 since we are using it a few times.
-                s2 = s ** 2
+            # Store s^2 since we are using it a few times.
+            s2 = s ** 2
 
-                # Vectorized computation of g.r for all fractional coords and
-                # hkl.
-                g_dot_r = np.dot(fcoords, np.transpose([hkl])).T[0]
+            # Vectorized computation of g.r for all fractional coords and
+            # hkl.
+            g_dot_r = np.dot(fcoords, np.transpose([hkl])).T[0]
 
-                # Highly vectorized computation of atomic scattering factors.
-                fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+            # Highly vectorized computation of atomic scattering factors.
+            fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
 
-                dw_correction = np.exp(-dwfactors * s2)
+            dw_correction = np.exp(-dwfactors * s2)
 
-                # Structure factor = sum of atomic scattering factors (with
-                # position factor exp(2j * pi * g.r and occupancies).
-                # Vectorized computation.
-                f_hkl = np.sum(fs * occus * np.exp(2j * pi * g_dot_r)
+            # Structure factor = sum of atomic scattering factors (with
+            # position factor exp(2j * pi * g.r and occupancies).
+            # Vectorized computation.
+            f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * g_dot_r)
                                * dw_correction)
 
-                # Intensity for hkl is modulus square of structure factor.
-                i_hkl = (f_hkl * f_hkl.conjugate()).real
+            # Intensity for hkl is modulus square of structure factor.
+            i_hkl = (f_hkl * f_hkl.conjugate()).real
 
-                #two_theta = degrees(2 * theta)
+            #two_theta = degrees(2 * theta)
 
-                if is_hex:
-                    # Use Miller-Bravais indices for hexagonal lattices.
-                    hkl = (hkl[0], hkl[1], - hkl[0] - hkl[1], hkl[2])
-                # Deal with floating point precision issues.
-                ind = np.where(np.abs(np.subtract(gs, g_hkl)) <
-                               magnitude_tolerance)
-                if len(ind[0]) > 0:
-                    peaks[gs[ind[0][0]]][0] += i_hkl
-                    peaks[gs[ind[0][0]]][1].append(tuple(hkl))
-                else:
-                    peaks[g_hkl] = [i_hkl, [tuple(hkl)], d_hkl]
-                    gs.append(g_hkl)
+            if is_hex:
+                # Use Miller-Bravais indices for hexagonal lattices.
+                hkl = (hkl[0], hkl[1], - hkl[0] - hkl[1], hkl[2])
+
+            peaks[g_hkl] = [i_hkl, [tuple(hkl)], d_hkl]
 
         # Scale intensities so that the max intensity is 100.
         max_intensity = max([v[0] for v in peaks.values()])

@@ -20,10 +20,7 @@
 
 """
 
-
-from pymatgen.transformations.standard_transformations \
-    import DeformStructureTransformation
-
+import numpy as np
 from hyperspy.component import Component
 
 
@@ -100,11 +97,12 @@ class ElectronDiffractionForwardModel(Component):
         d32 = self.d32.value
         d33 = self.d33.value
 
-        deformation = DeformStructureTransformation([[d11, d12, d13],
-                                                     [d21, d22, d23],
-                                                     [d31, d32, d33]])
-        deformed_structure = deformation.apply_transformation(structure)
-        simulation = diffractor.calculate_ed_data(deformed_structure,
+        deformation = np.asarray([[d11, d12, d13],
+                                  [d21, d22, d23],
+                                  [d31, d32, d33]])
+
+        structure.lattice.setLatPar(baserot=deformation)
+        simulation = diffractor.calculate_ed_data(structure,
                                                   reciprocal_radius)
         simulation.calibration = calibration
         return simulation

@@ -22,6 +22,8 @@ import numpy as np
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.expt_utils import _cart2polar, _polar2cart, _index_coords
 from pyxem.utils.expt_utils import *
+from scipy.ndimage.filters import gaussian_filter
+
 
 @pytest.fixture(params=[
     np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
@@ -57,6 +59,13 @@ def test_index_coords(diffraction_pattern):
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
+def test_index_coords_non_centeral(diffraction_pattern):
+    xc, yc = _index_coords(diffraction_pattern.data,origin=(0,0))
+    assert xc[0,0] == 0
+    assert yc[0,0] == 0
+    assert xc[0,5] == 5
+    assert yc[0,5] == 0
+
 @pytest.mark.parametrize('x, y, r, theta',[
     (2, 2, 2.8284271247461903, -0.78539816339744828),
     (1, -2, 2.2360679774997898, 1.1071487177940904),
@@ -88,3 +97,38 @@ def test_polar2cart(r, theta, x, y):
 def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
+
+
+methods = ['average','nan']
+@pytest.mark.parametrize('method', methods)
+def test_remove_dead_pixels(diffraction_pattern,method):
+    z = diffraction_pattern.data
+    dead_removed = remove_dead(z,[[3,3]],deadvalue=method)
+    assert z[3,3] != dead_removed[3,3]
+
+class TestCenteringAlgorithm:
+
+    @pytest.mark.parametrize("shifts_expected",[(0, 0)])
+    def test_perfectly_centered_spot(self,shifts_expected):
+        z = np.zeros((50,50))
+        z[24:26,24:26] = 1
+        z = gaussian_filter(z,sigma=2,truncate=3)
+        shifts =  find_beam_offset_cross_correlation(z,1,4)
+        assert np.allclose(shifts,shifts_expected,atol=0.2)
+
+    @pytest.mark.parametrize("shifts_expected",[(-3.5, +0.5)])
+    @pytest.mark.parametrize("sigma",[1,2,3])
+    def test_single_pixel_spot(self,shifts_expected,sigma):
+        z = np.zeros((50,50))
+        z[28,24] = 1
+        z = gaussian_filter(z,sigma=sigma,truncate=3)
+        shifts =  find_beam_offset_cross_correlation(z,1,6)
+        assert np.allclose(shifts,shifts_expected,atol=0.2)
+
+    @pytest.mark.parametrize("shifts_expected",[(-4.5, -0.5)])
+    def test_broader_starting_square_spot(self,shifts_expected):
+        z = np.zeros((50,50))
+        z[28:31,24:27] = 1
+        z = gaussian_filter(z,sigma=2,truncate=3)
+        shifts =  find_beam_offset_cross_correlation(z,1,4)
+        assert np.allclose(shifts,shifts_expected,atol=0.2)

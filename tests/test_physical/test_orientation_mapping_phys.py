@@ -19,10 +19,11 @@
 import numpy as np
 import pytest
 import pyxem as pxm
-import pymatgen as pmg
 import hyperspy.api as hs
+import diffpy.structure
 
 from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.utils.sim_utils import peaks_from_best_template
 
 """
@@ -32,23 +33,20 @@ rotation are considered.
 Specifically we test (for both an orthorhombic and hexagonal samples) that:
 
 - The algorithm can tell the difference between down a, down b and down c axes
-- The algorithm can tell that +0.2 is better than -0.4 etc for zone axis rotation
 """
 
 
 half_side_length = 72
 
-@pytest.fixture
 def create_Ortho():
-    Zn = pmg.Element("Zn")
-    lattice = pmg.Lattice.orthorhombic(4.5,4.3,5.7)
-    return pmg.Structure.from_spacegroup("P2",lattice, [Zn], [[0, 0, 0]])
+    latt = diffpy.structure.lattice.Lattice(3,4,5,90,90,90)
+    atom = diffpy.structure.atom.Atom(atype='Zn',xyz=[0,0,0],lattice=latt)
+    return diffpy.structure.Structure(atoms=[atom],lattice=latt)
 
-@pytest.fixture
 def create_Hex():
-    Ni = pmg.Element("Ni")
-    lattice = pmg.Lattice.hexagonal(3.5,5)
-    return pmg.Structure.from_spacegroup(162,lattice, [Ni], [[0, 0, 0]])
+    latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
+    atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
+    return diffpy.structure.Structure(atoms=[atom],lattice=latt)
 
 @pytest.fixture
 def edc():
@@ -57,24 +55,21 @@ def edc():
 @pytest.fixture()
 def rot_list():
     from itertools import product
-    # about the zone axis
-    a,b,c = np.arange(0,0.1,step=0.01),[0],[0]
-    rot_list_temp = list(product(a,b,c))
-    # to y direction
-    a,b,c = [0],[np.deg2rad(90)],np.arange(0,0.1,step=0.01)
-    rot_list_temp += list(product(a,b,c))
-    # to z direction
-    a,b,c = [np.deg2rad(90)],[np.deg2rad(90)],np.arange(0,0.1,step=0.01)
-    rot_list_temp += list(product(a,b,c))
+    a,b,c = np.arange(0,5,step=1),[0],[0]
+    rot_list_temp = list(product(a,b,c)) #rotations around A
+    a,b,c = [0],[90],np.arange(0,5,step=1)
+    rot_list_temp += list(product(a,b,c)) #rotations around B
+    a,b,c = [90],[90],np.arange(0,5,step=1)
+    rot_list_temp += list(product(a,b,c)) #rotations around C
     return rot_list_temp
 
-def pattern_rot_list():
-    return [(0,0,0.012)] #alpha and gamma are equiv if beta == 0
+@pytest.fixture
+def pattern_list():
+    return [(0,0,2)]
 
 def get_template_library(structure,rot_list,edc):
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
-    struc_lib = dict()
-    struc_lib['A'] = (structure,rot_list)
+    struc_lib = StructureLibrary(['A'],[structure],[rot_list])
     library = diff_gen.get_diffraction_library(struc_lib,
                                            calibration=1/half_side_length,
                                            reciprocal_radius=0.8,
@@ -84,8 +79,6 @@ def get_template_library(structure,rot_list,edc):
     return library
 
 @pytest.mark.parametrize("structure",[create_Ortho(),create_Hex()])
-@pytest.mark.parametrize("rot_list,edc,pattern_list",[[rot_list(),edc(),
-                                                       pattern_rot_list()]])
 def test_orientation_mapping_physical(structure,rot_list,pattern_list,edc):
     dp_library = get_template_library(structure,pattern_list,edc)
     for key in dp_library['A']:
@@ -94,19 +87,15 @@ def test_orientation_mapping_physical(structure,rot_list,pattern_list,edc):
     library = get_template_library(structure,rot_list,edc)
     indexer = IndexationGenerator(dp,library)
     M = indexer.correlate()
-    return pattern
     assert np.all(M.inav[0,0] == M.inav[1,0])
-    assert np.allclose(M.inav[0,0].isig[:,0].data,[0,0.01,0,0,2],atol=1e-3)
+    assert np.allclose(M.inav[0,0].isig[:4,0].data,[0,2,0,0],atol=1e-3)
 
-@pytest.mark.parametrize("structure,rot_list,edc,pattern_list",
-                         [[create_Ortho(),rot_list(),edc(),pattern_rot_list()]])
-
-def test_masked_OM(structure,rot_list,pattern_list,edc):
-    dp_library = get_template_library(structure,pattern_list,edc)
+def test_masked_OM(default_structure,rot_list,pattern_list,edc):
+    dp_library = get_template_library(default_structure,pattern_list,edc)
     for key in dp_library['A']:
         pattern = (dp_library['A'][key]['Sim'].as_signal(2*half_side_length,0.025,1).data)
     dp = pxm.ElectronDiffraction([[pattern,pattern],[pattern,pattern]])
-    library = get_template_library(structure,rot_list,edc)
+    library = get_template_library(default_structure,rot_list,edc)
     indexer = IndexationGenerator(dp,library)
     mask = hs.signals.Signal1D(([[[1],[1]],[[0],[1]]]))
     M = indexer.correlate(mask=mask)

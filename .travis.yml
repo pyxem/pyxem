@@ -2,24 +2,32 @@ language: python
 python:
   - "3.6"
 
-sudo: false
+sudo: True #for Miniconda 
 
 before_install:
-  - "pip install sphinx hyperspy pymatgen"
-  - "pip install Cython transforms3d lxml ipywidgets scikit-learn"
-  - "pip install sphinx_bootstrap_theme"
-  - "pip install pytest pytest-cov"
-  - "pip install coveralls"
+  # https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n test-environment 
+  - source activate test-environment
+  - conda install -c diffpy/label/dev diffpy.structure
+  - conda install pip 
 
 install:
-  - "python setup.py install"
+  - pip install . -r requirements.txt
 
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
+
 script:
-  - pytest --cov=pyxem tests
+  - timeout 2m pytest --cov=pyxem
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 after_success:
@@ -33,7 +41,3 @@ deploy:
   on:
     branch: master
 
-matrix:
-  allow_failures:
-    - script: sphinx-apidoc -fo docs/source pyxem
-    - script: sphinx-build -b html docs/source docs/build

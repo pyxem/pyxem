@@ -17,8 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pymatgen as pmg
 import numpy as np
+import diffpy.structure
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
@@ -30,43 +30,25 @@ from pyxem.components.diffraction_component import ElectronDiffractionForwardMod
 def diffraction_calculator(request):
     return DiffractionGenerator(*request.param)
 
-@pytest.fixture(params=[
-    "Si",
-])
-def element(request):
-    return pmg.Element(request.param)
-
-@pytest.fixture(params=[
-    5.431
-])
-def lattice(request):
-    return pmg.Lattice.cubic(request.param)
-
-@pytest.fixture(params=[
-    "Fd-3m"
-])
-def structure(request, lattice, element):
-    return pmg.Structure.from_spacegroup(request.param, lattice, [element], [[0, 0, 0]])
-
 def test_electron_diffraction_component_init(diffraction_calculator,
-                                             structure):
+                                             default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          structure,
+                                          default_structure,
                                           reciprocal_radius=1.,
                                           calibration=0.01)
     assert isinstance(ref, ElectronDiffractionForwardModel)
 
-def test_function(diffraction_calculator, structure):
+def test_function(diffraction_calculator, default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          structure,
+                                          default_structure,
                                           reciprocal_radius=1.,
                                           calibration=0.01)
     func = ref.function()
     np.testing.assert_almost_equal(func, 1)
 
-def test_simulate(diffraction_calculator, structure):
+def test_simulate(diffraction_calculator, default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          structure,
+                                          default_structure,
                                           reciprocal_radius=1.,
                                           calibration=0.01)
     sim = ref.simulate()

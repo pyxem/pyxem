@@ -107,6 +107,32 @@ def get_unique_families(hkls):
 
     return pretty_unique
 
+def get_vectorized_list_for_atomic_scattering_factors(structure,debye_waller_factors):
+    """
+    Create a flattened array of coeffs, fcoords and occus for vectorized
+    computation of atomic scattering factors later. Note that these are not
+    necessarily the same size as the structure as each partially occupied
+    specie occupies its own position in the flattened array.
+
+    For primarily for internal use
+    """
+
+    coeffs,fcoords,occus,dwfactors = [],[],[],[]
+
+    for site in structure:
+        c = ATOMIC_SCATTERING_PARAMS[site.element]
+        coeffs.append(c)
+        dwfactors.append(debye_waller_factors.get(site.element, 0))
+        fcoords.append(site.xyz)
+        occus.append(site.occupancy)
+
+    coeffs = np.array(coeffs)
+    fcoords = np.array(fcoords)
+    occus = np.array(occus)
+    dwfactors = np.array(dwfactors)
+
+    return coeffs,fcoords,occus,dwfactors
+
 
 def get_kinematical_intensities(structure,
                                 g_indices,
@@ -136,28 +162,7 @@ def get_kinematical_intensities(structure,
         The intensities of the peaks.
 
     """
-    # Create a flattened array of zs, coeffs, fcoords and occus for vectorized
-    # computation of atomic scattering factors later. Note that these are not
-    # necessarily the same size as the structure as each partially occupied
-    # specie occupies its own position in the flattened array.
-    zs = []
-    coeffs = []
-    fcoords = []
-    occus = []
-    dwfactors = []
-    for site in structure:
-        for sp, occu in site.species_and_occu.items():
-            zs.append(sp.Z)
-            c = ATOMIC_SCATTERING_PARAMS[sp.symbol]
-            coeffs.append(c)
-            dwfactors.append(debye_waller_factors.get(sp.symbol, 0))
-            fcoords.append(site.frac_coords)
-            occus.append(occu)
-    zs = np.array(zs)
-    coeffs = np.array(coeffs)
-    fcoords = np.array(fcoords)
-    occus = np.array(occus)
-    dwfactors = np.array(dwfactors)
+    coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure=structure,debye_waller_factors=debye_waller_factors)
 
     # Store array of s^2 values since used multiple times.
     s2s = (g_hkls / 2) ** 2
@@ -276,3 +281,45 @@ def peaks_from_best_template(single_match_result,phase,library):
     pattern = library.get_library_entry(phase=_phase,angle=(best_fit[1],best_fit[2],best_fit[3]))['Sim']
     peaks = pattern.coordinates[:,:2] #cut z
     return peaks
+
+def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
+    """
+    Finds all reciprocal lattice points inside a given reciprocal sphere. Utilised
+    within the DifractionGenerator.
+
+    Inputs:  reciprocal_lattice : Diffy Lattice Object
+             reciprocal_radius  : float
+
+    Returns: np.arrays(): spot_indicies, spot_coords, spot_distances
+             Note that spot_coords are the cartesian basis.
+
+    """
+
+    a,b,c = reciprocal_lattice.a,reciprocal_lattice.b,reciprocal_lattice.c
+    h_max = np.ceil(reciprocal_radius/a)
+    k_max = np.ceil(reciprocal_radius/b)
+    l_max = np.ceil(reciprocal_radius/c)
+    from itertools import product
+    h_list = np.arange(-h_max,h_max+1)
+    k_list = np.arange(-k_max,k_max+1)
+    l_list = np.arange(-l_max,l_max+1)
+    potential_points = np.asarray(list(product(h_list,k_list,l_list)))
+    in_sphere = np.abs(reciprocal_lattice.dist(potential_points,[0,0,0])) < reciprocal_radius
+    spot_indicies = potential_points[in_sphere]
+    spot_coords = reciprocal_lattice.cartesian(spot_indicies)
+    spot_distances = reciprocal_lattice.dist(spot_indicies,[0,0,0])
+
+    return spot_indicies,spot_coords,spot_distances
+
+def is_lattice_hexagonal(latt):
+    """
+    Attempts to determine if a lattice belongs
+    to a hexagonal crystal. Will also return true
+    for trigonal systems
+    """
+    truth_list = []
+    truth_list.append(latt.a==latt.b)
+    truth_list.append(latt.alpha == 90)
+    truth_list.append(latt.beta == 90)
+    truth_list.append(latt.gamma == 120)
+    return len(truth_list) == np.sum(truth_list)

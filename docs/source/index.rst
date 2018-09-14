@@ -26,7 +26,7 @@ This approach may be illustrated schematically, as follows:
    :width: 600
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
-by the `HyperSpy <http://hyperspy.org>`__ library and draws on `PyMatGen <http://pymatgen.org>`__
+by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__ 
 for atomic structure manipulation.
 
 pyXem is released under the GPL v3 license.
@@ -89,7 +89,7 @@ be entered into the terminal, or anaconda prompt terminal in Windows::
 
         conda install hyperspy -c conda-forge
 
-        conda install --channel matsci pymatgen Cython
+        conda install --channel matsci Cython
 
         pip install transforms3d
 
@@ -110,7 +110,6 @@ acknowledge that by citing the software. Until a specific publication is written
 about pyXem please site the github URL: www.github.com/pyxem/pyxem
 
 We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
-and `PyMatGen <http://pymatgen.org/#how-to-cite-pymatgen>`__
 
 
 Indices and tables
