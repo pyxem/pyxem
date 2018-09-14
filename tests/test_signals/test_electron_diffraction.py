@@ -22,6 +22,9 @@ from hyperspy.signals import Signal1D, Signal2D
 from hyperspy.roi import CircleROI
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
+def test_init():
+    z = np.zeros((2,2,2,2))
+    dp = ElectronDiffraction(z,metadata={'Acquisition_instrument':{'SEM':'Expensive-SEM'}})
 
 @pytest.fixture(params=[
     np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
@@ -228,7 +231,7 @@ class TestBackgroundMethods:
 
 #@pytest.mark.skip(reason="Uncommented for speed during development")
 class TestPeakFinding:
-    #This isn't testing the finding, that is done in test_peakfinders2D
+    #This is assertion free testing
 
     @pytest.fixture
     def ragged_peak(self):
@@ -238,50 +241,36 @@ class TestPeakFinding:
         pattern[1,0,71:73,21:23] = 1
         return ElectronDiffraction(pattern)
 
-    @pytest.fixture
-    def nonragged_peak(self):
-            pattern = np.zeros((2,2,128,128))
-            pattern[:,:,40:42,45] = 1
-            pattern[:,:,110,30:32] = 1
-            return ElectronDiffraction(pattern)
-
-
     methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
 
     @pytest.mark.parametrize('method', methods)
-    @pytest.mark.parametrize('peak',[ragged_peak,nonragged_peak])
-    def test_findpeaks_ragged(self,peak,method):
-        output = peak(self).find_peaks(method=method,show_progressbar=False)
-        if method != 'difference_of_gaussians':
-            # three methods return the expect peak
-            assert output.inav[0,0].isig[1] == 2        #  correct number of dims (boring square)
-            assert output.inav[0,0].isig[0] == 1        #   """ peaks """
-            if peak(self).data[1,0,72,22] == 1: # 3 peaks
-                assert output.inav[0,1].data.shape == (3,2)
-            else: #2 peaks
-                assert output.data.shape == (2,2,2,2)
-        else:
-            # DoG doesn't find the correct peaks, but runs without error
-            if peak(self).data[1,0,72,22] == 1: # 3 peaks
-                assert output.data.shape == (2,2) # tests we have a sensible ragged array
+    @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
+    def test_findpeaks_ragged(self,ragged_peak,method):
+        output = ragged_peak.find_peaks(method=method,show_progressbar=False)
 
-    @pytest.mark.xfail(raises=NotImplementedError)
-    def test_failing_run(self,ragged_peak):
-        ragged_peak.find_peaks(method='no_such_method_exists')
+class TestsAssertionless:
 
-#@pytest.mark.skip(reason="Raising not implemented errors was killing this")
+    def test_decomposition(self,diffraction_pattern):
+        diffraction_pattern.decomposition()
+
+    @pytest.mark.filterwarnings('ignore::DeprecationWarning')
+    def test_find_peaks_interactive(self,diffraction_pattern):
+        from matplotlib import pyplot as plt
+        plt.ion() #to make plotting non-blocking
+        diffraction_pattern.find_peaks_interactive()
+        plt.close('all')
+
+
+@pytest.mark.xfail(raises=NotImplementedError)
 class TestNotImplemented():
-    @pytest.mark.xfail(raises=NotImplementedError)
-    #@pytest.mark.skip(reason="Raising not implemented errors was killing this")
+    def test_failing_run(self,diffraction_pattern):
+        diffraction_pattern.find_peaks(method='no_such_method_exists')
+
     def test_remove_dead_pixels_failing(self,diffraction_pattern):
         dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',inplace=False,progress_bar=False)
 
-    @pytest.mark.xfail(raises=NotImplementedError)
-    #@pytest.mark.skip(reason="Raising not implemented errors was killing this")
     def test_remove_background_fake_method(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='fake_method')
 
-    @pytest.mark.xfail(raises=NotImplementedError)
-    @pytest.mark.skip(reason="Raising not implemented errors was killing this")
     def test_remove_background_fake_implementation(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='median',implementation='fake_implementation')

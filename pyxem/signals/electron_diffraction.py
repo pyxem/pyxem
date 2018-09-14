@@ -36,8 +36,8 @@ class ElectronDiffraction(Signal2D):
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
         # Set default attributes
-        if 'Acquisition_instrument.TEM' not in self.metadata:
-            if 'Acquisition_instrument.SEM' in self.metadata:
+        if 'Acquisition_instrument' in self.metadata.as_dictionary():
+            if 'SEM' in self.metadata.as_dictionary()['Acquisition_instrument']:
                 self.metadata.set_item(
                     "Acquisition_instrument.TEM",
                     self.metadata.Acquisition_instrument.SEM)
@@ -439,6 +439,11 @@ class ElectronDiffraction(Signal2D):
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
+
+        implementation: 'scipy' or 'skimage'
+            (median only) see expt_utils.subtract_background_median
+            for details, if not selected 'scipy' is used
+
         bg : array
             Background array extracted from vacuum. (subtract_reference only)
 
@@ -462,6 +467,10 @@ class ElectronDiffraction(Signal2D):
                                      inplace=False, *args, **kwargs)
 
         elif method == 'median':
+            if 'implementation' in kwargs.keys():
+                if kwargs['implementation'] != 'scipy' and kwargs['implementation'] != 'skimage':
+                    raise NotImplementedError("Unknown implementation `{}`".format(kwargs['implementation']))
+
             bg_subtracted = self.map(subtract_background_median,
                                      inplace=False, *args, **kwargs)
 
@@ -542,9 +551,7 @@ class ElectronDiffraction(Signal2D):
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
-        if peaks.axes_manager.navigation_dimension != self.axes_manager.navigation_dimension:
-            peaks = peaks.transpose(navigation_axes=2)
-        
+
         return peaks
 
     def find_peaks_interactive(self, imshow_kwargs={}):

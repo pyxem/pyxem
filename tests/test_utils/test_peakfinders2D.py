@@ -63,6 +63,7 @@ def test_no_peak_case(no_peak,method):
 
 methods = ['zaf','log', 'dog','stat']
 @pytest.mark.parametrize('method', methods)
+@pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
 def test_one_peak_case(single_peak,method):
     peaks = dispatcher[method](single_peak)
     assert peaks[0,0] > 39.5
@@ -72,6 +73,7 @@ def test_one_peak_case(single_peak,method):
 
 methods = ['zaf','log','stat']
 @pytest.mark.parametrize('method', methods)
+@pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
 def test_many_peak_case(many_peak,method):
     peaks = dispatcher[method](many_peak)
     assert np.max(peaks) > 2

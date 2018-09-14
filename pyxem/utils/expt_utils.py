@@ -270,8 +270,6 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
         selem = morphology.square(footprint)
         # skimage only accepts input image as uint16
         bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
-    else:
-        raise NotImplementedError("Unknown implementation `{}`".format(implementation))
 
     return np.maximum(bg_subtracted, 0)
 
@@ -409,10 +407,4 @@ def peaks_as_gvectors(z, center, calibration):
         peak positions in calibrated units.
     """
     g = (z - center) * calibration
-    try:    # ragged case
-        return np.array([g[0].T[1], g[0].T[0]]).T
-    except IndexError: # non-ragged case
-        try:
-            return np.array([g[:,1], g[:,0]]).T
-        except IndexError: # no peaks case
-            return np.array([np.nan,np.nan])
+    return np.array([g[0].T[1], g[0].T[0]]).T
