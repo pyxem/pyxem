@@ -41,6 +41,11 @@ def test_get_interaction_constant(accelerating_voltage, interaction_constant):
     val = get_interaction_constant(accelerating_voltage=accelerating_voltage)
     np.testing.assert_almost_equal(val, interaction_constant)
 
+def test_get_unique_families():
+    hkls = ((0,1,1),(1,1,0))
+    unique_families = get_unique_families(hkls)
+    assert unique_families == {(1, 1, 0): 2}
+
 def test_get_points_in_sphere():
     latt = diffpy.structure.lattice.Lattice(0.5,0.5,0.5,90,90,90)
     ind,cord,dist = get_points_in_sphere(latt,0.6)
