@@ -238,12 +238,23 @@ class TestPeakFinding:
         pattern[1,0,71:73,21:23] = 1
         return ElectronDiffraction(pattern)
 
+    @pytest.fixture
+    def non_ragged_peak(self):
+        pattern = np.zeros((2,2,128,128))
+        pattern[:,:,40,45] = 1
+        return ElectronDiffraction(pattern)
+
     methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
 
     @pytest.mark.parametrize('method', methods)
     @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
     def test_findpeaks_ragged(self,ragged_peak,method):
         output = ragged_peak.find_peaks(method=method,show_progressbar=False)
+
+    @pytest.mark.parametrize('method', ['zaefferer','laplacian_of_gaussians'])
+    @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
+    def test_findpeaks_nonragged(self,non_ragged_peak,method):
+        output = non_ragged_peak.find_peaks(method=method,show_progressbar=False)
 
     @pytest.mark.xfail(raises=NotImplementedError)
     def test_failing_run(self,ragged_peak):
