@@ -118,8 +118,8 @@ class TestVDFGenerator:
         assert isinstance(vdfs, VDFImage)
 
     @pytest.mark.parametrize('k_min, k_max, k_steps, normalize', [
-        (0., 4., 2., False),
-        (0., 4., 2., True)
+        (0., 4., 2, False),
+        (0., 4., 2, True)
     ])
     def test_get_concentric_vdf_images(
             self,
