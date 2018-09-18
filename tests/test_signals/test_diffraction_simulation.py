@@ -36,24 +36,24 @@ def test_wrong_calibration_setting():
                           calibration = [1,2,5])
 
 @pytest.fixture
-def get_signal():
+def get_signal(coords_intensity_simulation):
     size  = 144
     sigma = 0.03
     max_r = 1.5
-    return coords_intensity_simulation().as_signal(size,sigma,max_r)
+    return coords_intensity_simulation.as_signal(size,sigma,max_r)
 
-def test_typing():
-    assert type(get_signal()) is ElectronDiffraction
+def test_typing(get_signal):
+    assert type(get_signal) is ElectronDiffraction
 
-def test_correct_quadrant_np():
-    A = get_signal().data
+def test_correct_quadrant_np(get_signal):
+    A = get_signal.data
     assert (np.sum(A[:72,:72]) == 0)
     assert (np.sum(A[72:,:72]) == 0)
     assert (np.sum(A[:72,72:]) == 0)
     assert (np.sum(A[72:,72:])  > 0)
 
-def test_correct_quadrant_hs():
-    S = get_signal()
+def test_correct_quadrant_hs(get_signal):
+    S = get_signal
     assert (np.sum(S.isig[:72,:72].data) == 0)
     assert (np.sum(S.isig[72:,:72].data) == 0)
     assert (np.sum(S.isig[:72,72:].data) == 0)
