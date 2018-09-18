@@ -26,44 +26,6 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.vdf_image import VDFImage
 
 @pytest.fixture(params=[
-    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 2., 1., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 2.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 2., 2., 2., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
-])
-def electron_diffraction(request):
-    return ElectronDiffraction(request.param)
-
-
-@pytest.fixture(params=[
     np.array([[1, 1],
               [2, 2]])
 ])
@@ -73,12 +35,12 @@ def diffraction_vectors(request):
     return dvec
 
 @pytest.fixture
-def vdf_generator(electron_diffraction, diffraction_vectors):
-    return VDFGenerator(electron_diffraction, diffraction_vectors)
+def vdf_generator(diffraction_pattern, diffraction_vectors):
+    return VDFGenerator(diffraction_pattern, diffraction_vectors)
 
 class TestVDFGenerator:
 
-    def test_vdf_generator_init_with_vectors(self, electron_diffraction):
+    def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
         dvm = DiffractionVectors(np.array([[np.array([[1, 1],
                          [2, 2]]),
                np.array([[1, 1],
@@ -90,19 +52,19 @@ class TestVDFGenerator:
                          [2, 2]])]], dtype=object))
         dvm.axes_manager.set_signal_dimension(0)
 
-        vdfgen = VDFGenerator(electron_diffraction, dvm)
+        vdfgen = VDFGenerator(diffraction_pattern, dvm)
         assert isinstance(vdfgen.signal, ElectronDiffraction)
         assert isinstance(vdfgen.vectors, DiffractionVectors)
 
-    def test_vdf_generator_init_without_vectors(self, electron_diffraction):
+    def test_vdf_generator_init_without_vectors(self, diffraction_pattern):
 
-        vdfgen = VDFGenerator(electron_diffraction)
+        vdfgen = VDFGenerator(diffraction_pattern)
         assert isinstance(vdfgen.signal, ElectronDiffraction)
         assert isinstance(vdfgen.vectors, type(None))
 
     @pytest.mark.xfail(raises=ValueError)
-    def test_vector_vdfs_without_vectors(self, electron_diffraction):
-        vdfgen = VDFGenerator(electron_diffraction)
+    def test_vector_vdfs_without_vectors(self, diffraction_pattern):
+        vdfgen = VDFGenerator(diffraction_pattern)
         vdfgen.get_vector_vdf_images(radius=2.)
 
     @pytest.mark.parametrize('radius, normalize', [
@@ -118,8 +80,8 @@ class TestVDFGenerator:
         assert isinstance(vdfs, VDFImage)
 
     @pytest.mark.parametrize('k_min, k_max, k_steps, normalize', [
-        (0., 4., 2., False),
-        (0., 4., 2., True)
+        (0., 4., 2, False),
+        (0., 4., 2, True)
     ])
     def test_get_concentric_vdf_images(
             self,
@@ -130,7 +92,7 @@ class TestVDFGenerator:
                                                         normalize)
         assert isinstance(vdfs, VDFImage)
 
-def test_vdf_generator_from_map(electron_diffraction):
+def test_vdf_generator_from_map(diffraction_pattern):
     dvm = DiffractionVectors(np.array([[np.array([[1, 1],
                      [2, 2]]),
            np.array([[1, 1],
@@ -142,5 +104,5 @@ def test_vdf_generator_from_map(electron_diffraction):
                      [2, 2]])]], dtype=object))
     dvm.axes_manager.set_signal_dimension(0)
 
-    vdfgen = VDFGenerator(electron_diffraction, dvm)
+    vdfgen = VDFGenerator(diffraction_pattern, dvm)
     assert isinstance(vdfgen, VDFGenerator)

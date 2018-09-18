@@ -24,6 +24,13 @@ from transforms3d.euler import euler2quat,quat2axangle
 from transforms3d.quaternions import qmult,qinverse
 import os
 
+def worker_for_test_CrystallographicMap_io(mapp):
+    mapp.save_mtex_map('file_01.txt')
+    lmap = load_mtex_map('file_01.txt')
+    os.remove('file_01.txt')
+    # remember we've dropped reliability in saving
+    return mapp.data[:,:,:5],lmap.data
+
 def get_distance_between_two_angles_longform(angle_1,angle_2):
     """
     Using the long form to find the distance between two angles in euler form
@@ -98,13 +105,15 @@ class TestMapCreation:
 
 class TestMTEXIO:
 
-    @pytest.mark.parametrize('maps',[sp_cryst_map(),dp_cryst_map()])
-    def test_CrystallographicMap_io(self,maps):
-        maps.save_mtex_map('file_01.txt')
-        lmap = load_mtex_map('file_01.txt')
-        os.remove('file_01.txt')
-        # remember we've dropped reliability in saving
-        assert np.allclose(maps.data[:,:,:5],lmap.data)
+    #@pytest.mark.parametrize('maps',[sp_cryst_map,dp_cryst_map])
+
+    def test_Crystallographic_Map_io_single_phase(self,sp_cryst_map):
+        alpha,beta = worker_for_test_CrystallographicMap_io(sp_cryst_map)
+        assert np.allclose(alpha,beta)
+
+    def test_Crystallographic_Map_io_double_phase(self,dp_cryst_map):
+        alpha,beta = worker_for_test_CrystallographicMap_io(dp_cryst_map)
+        assert np.allclose(alpha,beta)
 
 class TestModalAngularFunctionality:
 
