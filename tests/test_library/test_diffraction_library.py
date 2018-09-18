@@ -27,40 +27,36 @@ from pyxem.libraries.diffraction_library import load_DiffractionLibrary
 from pyxem.libraries.structure_library import StructureLibrary
 
 @pytest.fixture
-def get_library():
+def get_library(default_structure):
         diffraction_calculator = pxm.DiffractionGenerator(300., 0.02)
         dfl = pxm.DiffractionLibraryGenerator(diffraction_calculator)
+        structure_library = StructureLibrary(['Phase'],[default_structure],[[(0, 0, 0),(0,0.2,0)]])
 
-        latt = diffpy.structure.lattice.Lattice(3,4,5,90,90,90)
-        atom = diffpy.structure.atom.Atom(atype='Si',xyz=[0,0,0],lattice=latt)
-        structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
+        return dfl.get_diffraction_library(structure_library, 0.017, 2.4, (72,72))
 
-        structure_library = StructureLibrary(['Si'],[structure],[[(0, 0, 0),(0,0.2,0)]])
-
-        return dfl.get_diffraction_library(
-            structure_library, 0.017, 2.4, (72,72) ,'euler')
-
-
-@pytest.mark.xfail(raises=ValueError)
-def test_unknown_library_entry(get_library):
-    # The angle we have asked for is not in the library
-    assert isinstance(get_library.get_library_entry(phase='Si',angle=(1e-3,0,0))['Sim'],DiffractionSimulation)
-
-@pytest.mark.xfail(raises=RuntimeError)
-def test_unsafe_loading(get_library):
-    get_library.pickle_library('file_01.pickle')
-    loaded_library = load_DiffractionLibrary('file_01.pickle')
-    return 0
-
-def test_get_library_entry(get_library):
+def test_get_library_entry_assertionless(get_library):
         assert isinstance(get_library.get_library_entry()['Sim'],DiffractionSimulation)
-        assert isinstance(get_library.get_library_entry(phase='Si')['Sim'],DiffractionSimulation)
-        assert isinstance(get_library.get_library_entry(phase='Si',angle=(0,0,0))['Sim'],DiffractionSimulation)
-        assert isinstance(get_library.get_library_entry(phase='Si',angle=(1e-8,0,0))['Sim'],DiffractionSimulation)
+        assert isinstance(get_library.get_library_entry(phase='Phase')['Sim'],DiffractionSimulation)
+
+def test_get_library_small_offeset(get_library):
+    alpha = get_library.get_library_entry(phase='Phase',angle=(0,0,0))['intensities']
+    beta  = get_library.get_library_entry(phase='Phase',angle=(1e-8,0,0))['intensities']
+    assert np.allclose(alpha,beta)
+
 
 def test_library_io(get_library):
     get_library.pickle_library('file_01.pickle')
     loaded_library = load_DiffractionLibrary('file_01.pickle',safety=True)
     os.remove('file_01.pickle')
-    # we can't check that the entire libraries are the same as the location of the 'Sim' changes
-    assert np.allclose(get_library['Si'][(0,0,0)]['intensities'],loaded_library['Si'][(0,0,0)]['intensities'])
+    # we can't check that the entire libraries are the same as the memory location of the 'Sim' changes
+    assert np.allclose(get_library['Phase'][(0,0,0)]['intensities'],loaded_library['Phase'][(0,0,0)]['intensities'])
+
+@pytest.mark.xfail(raises=ValueError)
+def test_unknown_library_entry(get_library):
+    # The angle we have asked for is not in the library
+    assert isinstance(get_library.get_library_entry(phase='Phase',angle=(1e-3,0,0))['Sim'],DiffractionSimulation)
+
+@pytest.mark.xfail(raises=RuntimeError)
+def test_unsafe_loading(get_library):
+    get_library.pickle_library('file_01.pickle')
+    loaded_library = load_DiffractionLibrary('file_01.pickle')
