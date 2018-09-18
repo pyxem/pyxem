@@ -26,45 +26,6 @@ def test_init():
     z = np.zeros((2,2,2,2))
     dp = ElectronDiffraction(z,metadata={'Acquisition_instrument':{'SEM':'Expensive-SEM'}})
 
-@pytest.fixture(params=[
-    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 2., 1., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 2.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 2., 2., 2., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
-])
-
-def diffraction_pattern(request):
-    return ElectronDiffraction(request.param)
-
-
 class TestSimpleMaps:
     #Confirms that maps run without error.
 
@@ -249,9 +210,8 @@ class TestPeakFinding:
         output = ragged_peak.find_peaks(method=method,show_progressbar=False)
 
 class TestsAssertionless:
-
     def test_decomposition(self,diffraction_pattern):
-        diffraction_pattern.decomposition()
+        storage = diffraction_pattern.decomposition()
 
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
     def test_find_peaks_interactive(self,diffraction_pattern):
