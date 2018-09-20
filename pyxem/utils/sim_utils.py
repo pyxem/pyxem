@@ -23,9 +23,8 @@ from scipy.constants import h, m_e, e, c, pi
 import collections
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
-
 from pyxem.signals.electron_diffraction import ElectronDiffraction
-
+from transforms3d.quaternions import mat2quat,rotate_vector
 
 def get_electron_wavelength(accelerating_voltage):
     """Calculates the (relativistic) electron wavelength in Angstroms
@@ -178,6 +177,8 @@ def get_kinematical_intensities(structure,
     f_hkls = []
     for n in np.arange(len(g_indices)):
         g = g_indices[n]
+        q3 = mat2quat(structure.lattice.baserot)
+        g = rotate_vector(g,q3)
         fs = fss[n]
         dw_correction = np.exp(-dwfactors * s2s[n])
         f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * np.dot(fcoords, g))
