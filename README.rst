@@ -23,8 +23,8 @@ Install
 
 pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - as such we suggest using `Miniconda <https://conda.io/miniconda.html>`__  (make sure to install the Python 3 version), which has extensive documentation. From a clean install (ideally an isolated environment) the following commands will install everything you need. They should be entered into the terminal (located in the pyxem directory)::
 
-    | $ conda install -c diffpy/label/dev diffpy.structure 
-    | $ pip install . -r requirements.txt
+      $ conda install -c diffpy/label/dev diffpy.structure 
+      $ pip install . -r requirements.txt
 
 NB: This will soon be much simpler once a version of pyXem is uploaded to PyPi and conda, please bear with us in the meantime.
 
