@@ -21,12 +21,9 @@ pyXem is released under the GPL v3 license.
 Install
 -------
 
-pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - as such we suggest using `Miniconda <https://conda.io/miniconda.html>`__  (make sure to install the Python 3 version), which has extensive documentation. From a clean install (ideally an isolated environment) the following commands will install everything you need. They should be entered into the terminal (located in the pyxem directory)
+pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - as such we suggest using `Miniconda <https://conda.io/miniconda.html>`__  (make sure to install the Python 3 version), which has extensive documentation. From a clean install (ideally an isolated environment) the following commands will install everything you need. They should be entered into the terminal (located in the pyxem directory)::
 
-```shell
-    $ conda install -c diffpy/label/dev diffpy.structure
-	$ pip install . -r requirements.txt
-```
+    $ conda install -c diffpy/label/dev diffpy.structure	$ pip install . -r requirements.txt
 
 NB: This will soon be much simpler once a version of pyXem is uploaded to PyPi and conda, please bear with us in the meantime.
 
@@ -42,8 +39,7 @@ Publication using pyXem
 
 A number of publications are appearing in the literature using pyXem. Please contact the developers if you wish to be included on this list
 
-`ChemRVix
-<https://s3-eu-west-1.amazonaws.com/itempdf74155353254prod/7093862/Metal-Organic_Framework_Crystal-Glass_Composites_v1.pdf> `_
+`ChemRVix<https://s3-eu-west-1.amazonaws.com/itempdf74155353254prod/7093862/Metal-Organic_Framework_Crystal-Glass_Composites_v1.pdf>`_
 
 https://www.sciencedirect.com/science/article/pii/S0022024818300617?via%3Dihub
 
