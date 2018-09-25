@@ -21,19 +21,12 @@ pyXem is released under the GPL v3 license.
 Install
 -------
 
-pyXem requires python 3 and can be installed by navigating to the directory containing the package and running the following command::
+pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - as such we suggest using `Miniconda <https://conda.io/miniconda.html>`__  (make sure to install the Python 3 version), which has extensive documentation. From a clean install (ideally an isolated environment) the following commands will install everything you need. They should be entered into the terminal (located in the pyxem directory)::
 
-	$ pip install .
+      $ conda install -c diffpy/label/dev diffpy.structure 
+      $ pip install . -r requirements.txt
 
-However we suggest using an isolated environment. A good option is to use
-`Miniconda <https://conda.io/miniconda.html>`__  ( make sure to install the
-Python 3 version), which has extensive documentation.
-
-From a clean install the following command will install everything you need. It should be entered into the terminal (located in the pyxem directory)::
-
-	$ pip install . -r requirements.txt
-
-NB: This will soon be much simpler once a version of pyXem is uploaded to PyPi, please bear with us in the meantime.
+NB: This will soon be much simpler once a version of pyXem is uploaded to PyPi and conda, please bear with us in the meantime.
 
 Citing pyXem
 ------------
@@ -41,3 +34,14 @@ Citing pyXem
 If pyXem has enabled significant parts of an academic publication, please acknowledge that by citing the software. Until a specific publication is written about pyXem please cite the github URL: www.github.com/pyxem/pyXem
 
 We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`_.
+
+Publication using pyXem
+------------
+
+A number of publications are appearing in the literature using pyXem. Please contact the developers if you wish to be included on this list
+
+Hou et al. (2018) on `ChemRVix <https://s3-eu-west-1.amazonaws.com/itempdf74155353254prod/7093862/Metal-Organic_Framework_Crystal-Glass_Composites_v1.pdf>`_
+
+Roberts et al. (2018) in `The Journal of Crystal Growth <https://www.sciencedirect.com/science/article/pii/S0022024818300617?via%3Dihub>`_
+
+Sunde et al. (2018) in `Materials Characterization <https://www.sciencedirect.com/science/article/pii/S1044580318304686?via%3Dihub>`_
