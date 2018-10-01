@@ -60,11 +60,12 @@ class VarianceGenerator():
             A DiffractionVariance object containing the mean DP, mean
             squared DP, and variance DP.
         """
+        alpha = 1/dqe
         dp = self.signal
         mean_dp = dp.mean((0,1))
         meansq_dp = Signal2D(np.square(dp.data)).mean((0,1))
         var_dp = Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
-        corr_var = Signal2D(((var_dp.data - (np.divide(dqe, mean_dp)))))
+        corr_var = Signal2D(((var_dp.data - (np.divide(alpha, mean_dp)))))
         vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
         sig_x = vardps.data.shape[2]
         sig_y = vardps.data.shape[3]

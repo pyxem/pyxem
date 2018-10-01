@@ -72,7 +72,8 @@ class DiffractionVariance(Signal2D):
             The DiffractionVariance object with the corrected variance pattern
             updated for the new dqe.
         """
-        self.data[1,1] = self.data[1,0] - (np.divide(dqe, self.data[0,1]))
+        alpha = 1/dqe
+        self.data[1,1] = self.data[1,0] - (np.divide(alpha, self.data[0,1]))
 
 
 class ImageVariance(Signal2D):
