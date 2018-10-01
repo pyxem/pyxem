@@ -23,8 +23,10 @@ import numpy as np
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
+
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+
 from pyxem.utils.expt_utils import *
 from pyxem.utils.peakfinders2D import *
 from pyxem.utils import peakfinder2D_gui
@@ -354,10 +356,12 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
         radius_start : int
-            The lower bound for the radius of the central disc to be used in the alignment
+            The lower bound for the radius of the central disc to be used in the
+            alignment.
 
         radius_finish : int
-            The upper bounds for the radius of the central disc to be used in the alignment
+            The upper bounds for the radius of the central disc to be used in
+            the alignment.
 
         Returns
         -------
@@ -367,7 +371,7 @@ class ElectronDiffraction(Signal2D):
         """
         shifts = self.map(find_beam_offset_cross_correlation,
                           radius_start=radius_start,
-			  radius_finish=radius_finish,
+                          radius_finish=radius_finish,
                           inplace=False,*args,**kwargs)
         return shifts
 
@@ -384,13 +388,15 @@ class ElectronDiffraction(Signal2D):
         ----------
 
         radius_start : int
-            The lower bound for the radius of the central disc to be used in the alignment
+            The lower bound for the radius of the central disc to be used in the
+            alignment
         radius_finish : int
-            The upper bounds for the radius of the central disc to be used in the alignment
+            The upper bounds for the radius of the central disc to be used in
+            the alignment
         square_width  : int
-            Half the side length of square that captures the direct beam in all scans. Means
-            that the centering algorithm is stable against diffracted spots brighter than
-            the direct beam.
+            Half the side length of square that captures the direct beam in all
+            scans. Means that the centering algorithm is stable against
+            diffracted spots brighter than the direct beam.
 
         Returns
         -------
@@ -399,19 +405,22 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
+        origin_coordinates = np.array((self.data.shape[2]/2-0.5, self.data.shape[3]/2-0.5))
 
         if square_width is not None:
             min_index = np.int(origin_coordinates[0]-(0.5+square_width))
-            max_index = np.int(origin_coordinates[0]+(1.5+square_width)) #fails if non-square dp
+            max_index = np.int(origin_coordinates[0]+(1.5+square_width))
+            #fails if non-square dp
             shifts = self.isig[min_index:max_index,min_index:max_index].get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
         else:
-            shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+            shifts = self.get_direct_beam_position(radius_start, radius_finish,
+                                                   *args, **kwargs)
 
         shifts = -1*shifts.data
         shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,*args,**kwargs)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0,
+                            *args, **kwargs)
 
     def remove_background(self, method, *args, **kwargs):
         """Perform background subtraction via multiple methods.
@@ -475,7 +484,8 @@ class ElectronDiffraction(Signal2D):
                                      inplace=False, *args, **kwargs)
 
         elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(subtract_reference,
+                                     inplace=False, *args, **kwargs)
 
         else:
             raise NotImplementedError(
