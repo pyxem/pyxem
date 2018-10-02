@@ -1,5 +1,5 @@
-Electron Diffraction - Signal Class
-===================================
+Basics
+======
 
 pyXem provides a library of tools primarily developed for the analysis of
 4D-S(P)ED data, although many methods are applicable to electron diffraction
@@ -36,13 +36,8 @@ providing these samples).
    :align: center
    :width: 600
 
-The methods described in this documentation are demonstrated in a series of
-[Jupyter Notebooks](http://jupyter.org/), which can be used as analysis
-templates on which to build. These are available `here <https://github.com/pyxem/pyxem-demos>`__.
-
 Experimental parameters associated with the data acquisition can be stored in
-metadata for future reference using the utility function
-:py:meth:`~.ElectronDiffraction.set_experimental_parameters`, for example:
+metadata using one of the methods of the ElectronDiffraction class, as shown below
 
 .. code-block:: python
 
@@ -79,10 +74,9 @@ diffraction patterns. This can be achieve with
 
 .. code-block:: python
 
-    >>> dp.center_direct_beam()
+    >>> dp.center_direct_beam(radius_start=3, radius_finish=5)
 
-This method has an argument (sigma) that should be smaller (in pixel terms) than the distance from the edge of
-the nearest diffraction spot to the direct beam. Furthermore, the code assumes the direct beam is brightest spot.
+This method has two mandatory arguments, you can find out more about these by inspecting the relevant docstrings.
 
 Intensity corrections most simply involve gain normalization based on
 dark-reference and bright-reference images. Such gain normalization may be
@@ -93,7 +87,7 @@ performed in pyXem using :py:meth:`~.ElectronDiffraction.apply_gain_normalisatio
     >>> dp.apply_gain_normalisation(bref=bright_reference, dref=dark_reference)
 
 Following alignment and the application of necessary corrections to the data (ESSENTIAL DO NOT SKIP!), one
-may be calibrate the signals. Utility functions exist to apply calibrations to the diffraction and scan axes respectively.
+may be calibrate the signals. Methods exist to apply calibrations to the diffraction and scan axes respectively.
 
 .. code-block:: python
 
@@ -108,7 +102,7 @@ Radial Integration
 ------------------
 
 The :py:meth:`~.ElectronDiffraction.get_radial_profile` method integrates every
-two-dimensional electron diffraction pattern about its and is applied as:
+two-dimensional electron diffraction pattern about its geometric center and is applied as:
 
 .. code-block:: python
 
