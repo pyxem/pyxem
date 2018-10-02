@@ -27,11 +27,10 @@ This approach may be illustrated schematically, as follows:
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
 by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__ 
-for atomic structure manipulation.
+for atomic structure manipulation. pyXem is released under the GPL v3 license.
 
-pyXem is released under the GPL v3 license.
-
-Tutorial notebooks are available `here <https://github.com/pyxem/pyxem-demos>`__.
+One can find citation information, installation instructions and credits at our github page `here <https://github.com/pyxem/pyxem>`__.
+Meanwhile, tutorial notebooks are available `here <https://github.com/pyxem/pyxem-demos>`__.
 
 .. warning::
 
@@ -39,8 +38,12 @@ Tutorial notebooks are available `here <https://github.com/pyxem/pyxem-demos>`__
     All methods must be used with care. The developers take no responsibility for
     inappropriate application of the code or incorrect conclusions drawn as a result. 
     We hope that by releasing the code at this stage the community can move forward more quickly.
-
-Installation, Credits and Citing
-================================
-
-At this time you are referred to the README.md on our github page.
+    
+Contents
+========
+.. toctree::
+    :maxdepth: 1
+    introduction
+    post_facto_imaging
+    bibliography
+ 
