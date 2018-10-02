@@ -40,43 +40,7 @@ Tutorial notebooks are available `here <https://github.com/pyxem/pyxem-demos>`__
     inappropriate application of the code or incorrect conclusions drawn as a result. 
     We hope that by releasing the code at this stage the community can move forward more quickly.
 
-Contents
-========
+Installation, Credits and Citing
+================================
 
-.. toctree::
-    :maxdepth: 2
-
-    introduction
-    post_facto_imaging
-    contributing
-    bibliography
-    modules
-
-
-Installation
-============
-
-Please see the README.md on our github page.
-
-Credits
-=======
-
-pyXem is developed by numerous `contributors <https://github.com/pyxem/pyxem/graphs/contributors>`__.
-
-
-Citing pyXem
-============
-
-If pyXem has enabled significant parts of an academic publication, please
-acknowledge that by citing the software. Until a specific publication is written
-about pyXem please site the github URL: www.github.com/pyxem/pyxem
-
-We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`__
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+At this time you are referred to the README.md on our github page.
