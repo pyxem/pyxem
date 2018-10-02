@@ -42,7 +42,8 @@ Meanwhile, tutorial notebooks are available `here <https://github.com/pyxem/pyxe
 Contents
 ========
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 0
+    
     introduction
     post_facto_imaging
     bibliography
