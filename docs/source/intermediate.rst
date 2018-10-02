@@ -1,5 +1,8 @@
+Intermediate
+============
+
 Post-facto Imaging
-==================
+------------------
 
 'Virtual' images are formed post-facto from scanning electron diffraction data
 by plotting the scattered intensity in a subset of pixels in the diffraction
@@ -28,6 +31,7 @@ diffracted beam. Examples of such virtual images are shown below.
 .. figure:: images/vdf_example.png
    :align: center
    :width: 600
+   
    
 Unsupervised Machine Learning
 -----------------------------
