@@ -132,10 +132,6 @@ these two cases are significantly different. Background subtraction may be
 achieved in pyXem via the :py:meth:`~.ElectronDiffraction.remove_background`
 method, which has multiple options.
 
-
-Background Modelling
-^^^^^^^^^^^^^^^^^^^^
-
 The background may be modelled by fitting a model to the radial profile of the
 diffraction data. The model may then be made ciruclarly symmetric and subtracted.
 Numerous models could in principle be used and one option that has been useful
@@ -153,10 +149,6 @@ Backgound modelling, as described above yields the following:
 .. figure:: images/background_model.png
    :align: center
    :width: 600
-
-
-Morphological Background Removal
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Background removal based on morphological operations provides a fast and
 versatile method for removing non-smooth background. A so-called h-dome method
@@ -187,9 +179,6 @@ number of algorithms for that achieve peak finding in electron diffraction
 patterns. The found peak positions are returned as
 The methods available are as follows:
 
-Zaeferrer peak finder
-^^^^^^^^^^^^^^^^^^^^^
-
 .. code-block:: python
 
     >>> dp.find_peaks(method='zaefferer')
@@ -200,9 +189,6 @@ based on a gradient threshold followed by a local maximum search within a square
 window, which is moved until it is centered on the brightest point, which is
 taken as a peak if it is within a certain distance of the starting point.
 
-Ball statistical peak finder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. code-block:: python
 
     >>> dp.find_peaks(method='stat')
@@ -212,9 +198,6 @@ White, this method is based on finding points which have a statistically
 higher value than the surrounding areas, then iterating between smoothing and
 binarising until the number of peaks has converged. This method is slow, but
 very robust to a variety of image types.
-
-Matrix based peak finding
-^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -229,8 +212,7 @@ Laplacian/difference of images convolved with Gaussian kernels of various
 standard deviations. Both are very rapid and relatively robust, given
 appropriate parameters.
 
-Interactive Parametrization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+One final option is interactive peak finding, initialised with
 
 .. code-block:: python
 
@@ -257,25 +239,3 @@ Several widgets are available:
 .. note:: Some methods take significantly longer than others, particularly
     where there are a large number of peaks to be found. The plotting window
     may be inactive during this time.
-
-
-Unsupervised Machine Learning
------------------------------
-
-Unsupervised machine learning algorithms may be applied to SED as a route to
-obtain representative "component diffraction patterns" and their respective
-"loadings" in real space. These methods involve unfolding each diffraction
-pattern into an image vector and stacking these vectors together to construct a
-data matrix, which is then factorized:
-
-.. figure::  images/ml_sed_scheme.png
-   :align: center
-   :width: 600
-
-Various matrix decomposition methods are available through the decomposition()
-method, which is inherited directy from HyperSpy and is documented
-`here <http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html>`__.
-
-.. code-block:: python
-
-    >>> dp.decomposition()

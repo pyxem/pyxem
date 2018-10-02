@@ -44,7 +44,7 @@ Contents
 .. toctree::
     :maxdepth: 0
     
-    introduction
-    post_facto_imaging
+    basics
+    intermediate
     bibliography
  
