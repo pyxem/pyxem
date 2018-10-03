@@ -142,10 +142,6 @@ todo_include_todos = True
 #
 html_theme = 'bootstrap'
 
-# Customising the colour scheme and absence of source links
-'bootswatch_theme': "united"
-'source_link_position': False
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
