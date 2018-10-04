@@ -48,5 +48,7 @@ Contents
     
     basics
     intermediate
+    advanced
     bibliography
+    conventions
  
