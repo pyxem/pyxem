@@ -27,10 +27,14 @@ this goal are summarized in the following schematic.
    :align: center
    :width: 600
 
+|
+
 To illustrate the data methods implemented in pyXem we will consider data from a
 model system of GaAs nanowires comprising a series of twinned regions along its
 length, as shown below. (We acknowledge Prof. Ton van Helvoort, NTNU, Norway, for
 providing these samples).
+
+|
 
 .. figure:: images/model_system.png
    :align: center
@@ -109,13 +113,7 @@ two-dimensional electron diffraction pattern about its geometric center and is a
     >>> dp.get_radial_profile()
 
 The result is a one-dimensional plot of diffracted intensity as a function of
-scattering angle.
-
-.. figure:: images/radial_profile.png
-   :align: center
-   :width: 400
-
-Again, this will not work if you fail to center all of the patterns in your S(P)ED scan.
+scattering angle. This will not work if you fail to center all of the patterns in your S(P)ED scan.
 
 Background Removal
 ------------------
@@ -230,6 +228,5 @@ Several widgets are available:
 * The parameter adjusters will update the parameters of the method and re-plot
   the new peaks.
 
-.. note:: Some methods take significantly longer than others, particularly
-    where there are a large number of peaks to be found. The plotting window
+.. note:: Some methods take significantly longer than others (the statistical method is particularly slow). The plotting window
     may be inactive during this time.
