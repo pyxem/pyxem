@@ -7,8 +7,8 @@
     :align: right
     :target: https://github.com/pyxem/pyxem
 
-pyXem - Pythonic Crystallographic Electron Microscopy
-=====================================================
+Introduction
+============
 
 .. image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
     :target: https://travis-ci.org/pyxem/pyxem
