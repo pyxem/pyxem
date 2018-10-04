@@ -147,8 +147,8 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'bootstrap_version': "3" #this is default, but added for clarity
-                      'bootswatch_theme': "sandstone"
+html_theme_options = {'bootstrap_version': "3", 
+                      'bootswatch_theme': "sandstone",
                       'source_link_position': False}
 
 # The name for this set of Sphinx documents.
