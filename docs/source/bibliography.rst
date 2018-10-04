@@ -1,6 +1,12 @@
 Bibliography
 ============
 
+Software pyxem depends on
+-------------------------
+
+Diffraction Literature
+----------------------
+
 .. _[Zaeferrer2010]:
 
 :ref:`[Zaeferrer2010] <[Zaeferrer2010]>`
