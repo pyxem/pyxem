@@ -149,7 +149,8 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # documentation.
 html_theme_options = {'bootstrap_version': "3", 
                       'bootswatch_theme': "sandstone",
-                      'source_link_position': False}
+                      'source_link_position': False,
+                      'nosidebar': True}
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
