@@ -10,7 +10,7 @@ def default_structure():
     hexagonal_structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
     return hexagonal_structure
 
-@pytest.fixture(scope="session",autouse=True)
+#@pytest.fixture(scope="session",autouse=True)
 @pytest.fixture(params=[
     np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
