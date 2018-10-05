@@ -28,5 +28,5 @@ def test_conventional_xc(SPR_generator):
     assert True
 
 def test_sobel_filtered_xc(SPR_generator):
-    diff_vect SPR_generator.sobel_filtered_xc()
+    diff_vect = SPR_generator.sobel_filtered_xc()
     assert True
