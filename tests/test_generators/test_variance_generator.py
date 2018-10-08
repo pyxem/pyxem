@@ -80,7 +80,8 @@ class TestVarianceGenerator:
         vardps = variance_generator.get_diffraction_variance(dqe)
         assert isinstance(vardps, DiffractionVariance)
 
-        # TEST answers as well
+        # TEST answers as well.
+        # This should be moved into parametrize and function input
         mean_dp = np.array(
         [[0., 0., 0., 0., 0., 0., 0., 0.5],
          [0., 0., 0., 0., 0., 0., 0., 0.],
@@ -115,6 +116,9 @@ class TestVarianceGenerator:
         assert np.allclose(vardps.data[1,0], var_dp,atol=1e-14,equal_nan=True)
         assert np.allclose(vardps.data[1,1], corr_var_dp,atol=1e-14,equal_nan=True)
 
+    def test_get_image_variance(self,variance_generator: VarianceGenerator,dqe):
+        var_im = variance_generator.get_diffraction_variance(dqe)
+        assert isinstance(var_im, ImageVariance)
     # Here's the non-normalised variance matrix to test against
     # [0.,0.,0.,0.,0.,0.,0.,0.75]
     # [0.,0.,0.,0.,0.,0.,0.,0.]
