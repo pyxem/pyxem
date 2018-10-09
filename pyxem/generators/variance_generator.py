@@ -42,6 +42,8 @@ class VarianceGenerator():
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
 
+        #add a check for calibration
+
     def get_diffraction_variance(self, dqe):
         """Calculates the variance in scattered intensity as a function of
         scattering vector.
@@ -68,9 +70,20 @@ class VarianceGenerator():
         vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
         sig_x = vardps.data.shape[1]
         sig_y = vardps.data.shape[2]
-        return DiffractionVariance(vardps.data.reshape((2, 2, sig_x, sig_y)))
 
-    def get_image_variance(self):
+        dv = DiffractionVariance(vardps.data.reshape((2, 2, sig_x, sig_y)))
+        dx = dv.axes_manager.signal_axes[0]
+        dx.scale = dp.axes_manager.signal_axes[0].scale
+        dx.units = dp.axes_manager.signal_axes[0].units
+        dx.name = dp.axes_manager.signal_axes[0].name
+        dy = dv.axes_manager.signal_axes[1]
+        dy.scale = dp.axes_manager.signal_axes[1].scale
+        dy.units = dp.axes_manager.signal_axes[1].units
+        dy.name = dp.axes_manager.signal_axes[1].name
+
+        return dv
+
+    def get_image_variance(self,dqe):
         """Calculates the variance in scattered intensity as a function of
         scattering vector.
 
@@ -92,5 +105,19 @@ class VarianceGenerator():
         mean_im = im.mean((0,1))
         meansq_im = Signal2D(np.square(im.data)).mean((0,1))
         var_im = Signal2D(((meansq_im.data / np.square(mean_im.data)) - 1.))
-        varims = stack((mean_im, meansq_im, var_im))
-        return ImageVariance(varims)
+        corr_var = Signal2D(((var_im.data - (np.divide(dqe, mean_im)))))
+        varims = stack((mean_im, meansq_im, var_im, corr_var))
+
+        sig_x = varims.data.shape[1]
+        sig_y = varims.data.shape[2]
+        iv = ImageVariance(varims.data.reshape((2,2,sig_x,sig_y)))
+        rx = iv.axes_manager.signal_axes[0]
+        rx.scale = im.axes_manager.signal_axes[0].scale
+        rx.units = im.axes_manager.signal_axes[0].units
+        rx.name = im.axes_manager.signal_axes[0].name
+        ry = iv.axes_manager.signal_axes[1]
+        ry.scale = im.axes_manager.signal_axes[1].scale
+        ry.units = im.axes_manager.signal_axes[1].units
+        ry.name = im.axes_manager.signal_axes[1].name
+
+        return iv

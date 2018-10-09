@@ -55,7 +55,14 @@ class DiffractionVariance(Signal2D):
 
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
-        return DiffractionVarianceProfile(radial_profiles.as_signal1D(signal_axis))
+
+        rp = DiffractionVarianceProfile(radial_profiles.as_signal1D(signal_axis))
+        rp_axis = rp.axes_manager.signal_axes[0]
+        rp_axis.name = 'q'
+        rp_axis.scale = self.axes_manager.signal_axes[0].scale
+        rp_axis.units = '$A^{-1}$'
+
+        return rp
 
     def renormalize(self, dqe):
         """Renormalize the corrected variance for a new detective quantum
