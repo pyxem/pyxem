@@ -18,6 +18,7 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+from skimage.feature import match_template,peak_local_max
 
 NO_PEAKS = np.array([[[np.nan, np.nan]]])
 
@@ -312,3 +313,11 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
 
     centers = blobs[:, :2]
     return centers
+
+def find_peaks_xc(z,disc_image,min_distance,max_num_peaks):
+    """
+    Docstrings TBC
+    """
+    response_image = match_template(z,disc_image,pad=True)
+    peaks = peak_local_max(response_image,min_distance=min_distance,num_peaks=max_num_peaks)
+    return peaks
