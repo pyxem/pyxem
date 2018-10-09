@@ -87,6 +87,7 @@ class TestXCmethods:
         pattern[50:52,80:82] = 0.75
         return pattern
 
+    @pytest.mark.filterwarnings('ignore::FutureWarning') #skimage not us
     def test_peaks_xc(self,peaks):
         peaks = find_peaks_xc(peaks,np.ones((2,2)),3,3)
         print(peaks)
