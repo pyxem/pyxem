@@ -344,7 +344,15 @@ class ElectronDiffraction(Signal2D):
 
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
-        return ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+
+        rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+        rp.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        rp_axis = rp.axes_manager.signal_axes[0]
+        rp_axis.name = 'q'
+        rp_axis.scale = self.axes_manager.signal_axes[0].scale
+        rp_axis.units = '$A^{-1}$'
+
+        return rp
 
     def get_direct_beam_position(self, radius_start,
                                  radius_finish,
