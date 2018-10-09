@@ -89,9 +89,11 @@ class TestXCmethods:
 
     @pytest.mark.filterwarnings('ignore::FutureWarning') #skimage not us
     def test_peaks_xc(self,peaks):
-        peaks = find_peaks_xc(peaks,np.ones((2,2)),3,3)
+        disc = np.zeros((4,4))
+        disc[1:3,1:3] = 1
+        peaks = find_peaks_xc(peaks,disc,3,3)
         assert peaks.shape == (2,2)
-        
+
 
 class TestUncoveredCodePaths:
     def test_zaf_continue(self,many_peak):
