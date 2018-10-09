@@ -78,6 +78,20 @@ def test_many_peak_case(many_peak,method):
     peaks = dispatcher[method](many_peak)
     assert np.max(peaks) > 2
 
+class TestXCmethods:
+
+    @pytest.fixture
+    def peaks():
+        pattern = np.zeros((128,128))
+        pattern[40:43,40:43] = 1 #index 40,41,42 are greater than zero
+        pattern[50:52,80:82] = 0.75
+        return pattern
+
+    def test_peaks_xc(self,peaks):
+        peaks = find_peaks_xc(peaks,np.ones((2,2)))
+        print(peaks)
+
+
 class TestUncoveredCodePaths:
     def test_zaf_continue(self,many_peak):
         peaks = find_peaks_zaefferer(many_peak,distance_cutoff=1e-5)
