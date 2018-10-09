@@ -81,14 +81,14 @@ def test_many_peak_case(many_peak,method):
 class TestXCmethods:
 
     @pytest.fixture
-    def peaks():
+    def peaks(self):
         pattern = np.zeros((128,128))
         pattern[40:43,40:43] = 1 #index 40,41,42 are greater than zero
         pattern[50:52,80:82] = 0.75
         return pattern
 
     def test_peaks_xc(self,peaks):
-        peaks = find_peaks_xc(peaks,np.ones((2,2)))
+        peaks = find_peaks_xc(peaks,np.ones((2,2)),3,3)
         print(peaks)
 
 
