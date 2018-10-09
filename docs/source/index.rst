@@ -42,3 +42,4 @@ Contents
     basics
     intermediate
     advanced
+    literature-use-cases
