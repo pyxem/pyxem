@@ -318,6 +318,6 @@ def find_peaks_xc(z,disc_image,min_distance,max_num_peaks):
     """
     Docstrings TBC
     """
-    response_image = match_template(z,disc_image,pad=True)
+    response_image = match_template(z,disc_image,pad_input=True)
     peaks = peak_local_max(response_image,min_distance=min_distance,num_peaks=max_num_peaks)
     return peaks
