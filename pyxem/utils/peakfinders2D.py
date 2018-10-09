@@ -314,10 +314,10 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
     centers = blobs[:, :2]
     return centers
 
-def find_peaks_xc(z,disc_image,min_distance,max_num_peaks):
+def find_peaks_xc(z,disc_image,min_distance,max_num_peaks,peak_threshold=0.2):
     """
     Docstrings TBC
     """
     response_image = match_template(z,disc_image,pad_input=True)
-    peaks = peak_local_max(response_image,min_distance=min_distance,num_peaks=max_num_peaks)
+    peaks = peak_local_max(response_image,min_distance=min_distance,num_peaks=max_num_peaks,threshold_rel=peak_threshold)
     return peaks
