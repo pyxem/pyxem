@@ -173,7 +173,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     return z_bar
 
-def affine_transformation(z,matrix,order,**kwargs):
+def affine_transformation(z,matrix,order,*args,**kwargs):
     """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
