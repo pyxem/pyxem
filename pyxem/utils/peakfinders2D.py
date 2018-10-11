@@ -314,7 +314,7 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
     centers = blobs[:, :2]
     return centers
 
-def find_peaks_xc(z,disc_image,min_distance,reciprocal_distance=None,peak_threshold=0.2):
+def find_peaks_xc(z,disc_image,min_distance,peak_threshold=0.2):
     """
     Find peaks using the the correlation between the image and a reference peaks
 
@@ -327,8 +327,6 @@ def find_peaks_xc(z,disc_image,min_distance,reciprocal_distance=None,peak_thresh
         Array containing a single bright disc, similar to those you seek to detect
     min_distance: int
         The minimum expected distance between peaks (in pixels)
-    reciprocal_distance: int or None (default)
-        Not yet Implemented
     peak_threshold: float between 0 and 1
         Internally passed argument, larger values will lead to fewer peaks in the output
 
@@ -343,7 +341,6 @@ def find_peaks_xc(z,disc_image,min_distance,reciprocal_distance=None,peak_thresh
     """
     response_image = match_template(z,disc_image,pad_input=True)
     peaks = peak_local_max(response_image,min_distance=min_distance,threshold_rel=peak_threshold)
-    if reciprocal_distance is not None:
-        pass
+    peaks -= 1 #this means the return format is the same as the other peak finders
     
     return peaks
