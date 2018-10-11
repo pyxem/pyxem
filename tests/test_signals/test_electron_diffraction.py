@@ -202,12 +202,17 @@ class TestPeakFinding:
         pattern[1,0,71:73,21:23] = 1
         return ElectronDiffraction(pattern)
 
-    methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat','xc']
+    methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
 
     @pytest.mark.parametrize('method', methods)
     @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
     def test_findpeaks_ragged(self,ragged_peak,method):
         output = ragged_peak.find_peaks(method=method,show_progressbar=False)
+
+    @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
+    def test_find_peaks_xc(self,ragged_peak):
+        disc = np.ones((4,4))
+        output = ragged_peak.find_peaks(method='xc',disc_image=disc,min_distance=3,show_progressbar=False) 
 
 class TestsAssertionless:
     def test_decomposition(self,diffraction_pattern):
