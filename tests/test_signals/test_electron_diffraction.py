@@ -202,7 +202,7 @@ class TestPeakFinding:
         pattern[1,0,71:73,21:23] = 1
         return ElectronDiffraction(pattern)
 
-    methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
+    methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat','xc']
 
     @pytest.mark.parametrize('method', methods)
     @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
