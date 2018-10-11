@@ -173,7 +173,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     return z_bar
 
-def affine_transformation(z,matrix,order,**kwargs):
+def affine_transformation(z,matrix,order,*args,**kwargs):
     """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
@@ -203,7 +203,7 @@ def affine_transformation(z,matrix,order,**kwargs):
     #skimage transforms can be added like this, actually matrix multiplication,
     #hence the need for the brackets. (Note tf.warp takes the inverse)
     trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order,**kwargs)
+                    order=order,*args,**kwargs)
 
     return trans
 
