@@ -91,7 +91,7 @@ class TestXCmethods:
     def test_peaks_xc(self,peaks):
         disc = np.zeros((4,4))
         disc[1:3,1:3] = 1
-        peaks = find_peaks_xc(peaks,disc,3,3)
+        peaks = find_peaks_xc(peaks,disc,3)
         assert peaks.shape == (2,2)
 
 
