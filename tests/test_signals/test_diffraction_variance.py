@@ -20,3 +20,40 @@ import pytest
 import numpy as np
 
 from pyxem.signals.diffraction_variance import DiffractionVariance
+from pyxem.signals.diffraction_variance import ImageVariance
+from pyxem.signals.variance_profile import DiffractionVarianceProfile
+
+@pytest.fixture
+def diffraction_variance(diffraction_pattern):
+    return DiffractionVariance(diffraction_pattern)
+
+class TestDiffractionVariance:
+
+    def test_get_diffraction_variance_signal(self,
+                        diffraction_pattern):
+        difvar = DiffractionVariance(diffraction_pattern)
+        assert isinstance(difvar,DiffractionVariance)
+
+    def test_get_radial_profile(self,
+                        diffraction_pattern):
+        rp = DiffractionVarianceProfile(diffraction_pattern)
+        assert isinstance(rp,DiffractionVarianceProfile)
+
+    @pytest.mark.parametrize('dqe', [
+        0.5,
+        0.6
+    ])
+    def test_renormalize(self,
+                        diffraction_pattern,
+                        dqe):
+        difvar = DiffractionVariance(diffraction_pattern)
+        difvar.renormalize(dqe)
+        assert isinstance(difvar,DiffractionVariance)
+
+
+class TestImageVariance:
+
+    def test_get_image_variance_signal(self,
+                        diffraction_pattern):
+        imvar = ImageVariance(diffraction_pattern)
+        assert isinstance(imvar,ImageVariance)

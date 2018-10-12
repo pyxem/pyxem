@@ -25,6 +25,8 @@ from pyxem.signals.variance_profile import DiffractionVarianceProfile
 
 from pyxem.utils.expt_utils import radial_average
 
+import numpy as np
+
 class DiffractionVariance(Signal2D):
     _signal_type = "diffraction_variance"
 

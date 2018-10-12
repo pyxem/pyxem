@@ -19,4 +19,13 @@
 import numpy as np
 import pytest
 
+from hyperspy.signals import Signal1D
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+
+class TestDiffractionProfile:
+
+    def test_get_electron_diffraction_profile(self,
+                        diffraction_profile = ElectronDiffractionProfile):
+        rad_signal = Signal1D(np.array([0,4,3,5,1,4,6,2]))
+        difprof = ElectronDiffractionProfile(rad_signal)
+        assert isinstance(difprof,ElectronDiffractionProfile)
