@@ -374,14 +374,6 @@ class ElectronDiffraction(Signal2D):
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
         rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
-        ax_x = rp.axes_manager.navigation_axes[0]
-        ax_y = rp.axes_manager.navigation_axes[1]
-        ax_x.name = self.axes_manager.navigation_axes[0].name
-        ax_x.scale = self.axes_manager.navigation_axes[0].scale
-        ax_x.units = self.axes_manager.navigation_axes[0].units
-        ax_y.name = self.axes_manager.navigation_axes[0].name
-        ax_y.scale = self.axes_manager.navigation_axes[0].scale
-        ax_y.units = self.axes_manager.navigation_axes[0].units
 
 
         rp_axis = rp.axes_manager.signal_axes[0]
