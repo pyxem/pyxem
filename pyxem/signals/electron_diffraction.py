@@ -545,7 +545,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        
+
         The results are stored in self.learning_results. For a full description
         of parameters see :meth:`hyperspy.learn.mva.MVA.decomposition`
 
@@ -576,8 +576,8 @@ class ElectronDiffraction(Signal2D):
             * 'difference_of_gaussians' - a blob finder implemented in
               `scikit-image` which uses the difference of Gaussian matrices
               approach.
-            * 'regionprops' - Uses regionprops to find islands of connected
-               pixels representing a peak
+            * 'xc' - A cross correlation peakfinder
+
 
         *args
             associated with above methods
@@ -597,6 +597,7 @@ class ElectronDiffraction(Signal2D):
             'stat': find_peaks_stat,
             'laplacian_of_gaussians':  find_peaks_log,
             'difference_of_gaussians': find_peaks_dog,
+            'xc': find_peaks_xc
         }
         if method in method_dict:
             method = method_dict[method]
