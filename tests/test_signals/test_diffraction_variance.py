@@ -36,8 +36,7 @@ class TestDiffractionVariance:
 
     def test_get_radial_profile(self,
                         diffraction_pattern):
-        difvar = DiffractionVariance(diffraction_pattern)
-        rp = DiffractionVarianceProfile(difvar)
+        rp = DiffractionVarianceProfile(diffraction_pattern)
         assert isinstance(rp,DiffractionVarianceProfile)
 
     @pytest.mark.parametrize('dqe', [
