@@ -24,47 +24,9 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 from pyxem.signals.diffraction_variance import DiffractionVariance
 
-@pytest.fixture(params=[
-    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 2., 1., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 2.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 2., 2., 2., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
-])
-
-def electron_diffraction(request):
-    return ElectronDiffraction(request.param)
-
 @pytest.fixture
-def variance_generator(electron_diffraction):
-    return VarianceGenerator(electron_diffraction)
+def variance_generator(diffraction_pattern):
+    return VarianceGenerator(diffraction_pattern)
 
 class TestVarianceGenerator:
 
