@@ -5,7 +5,6 @@
 
 .. toctree::
     :hidden:
-    :maxdepth: 0
         
     contents
     basics
