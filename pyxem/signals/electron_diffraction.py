@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Electron Diffraction data
+"""Signal class for Electron Diffraction data.
 
 
 """
@@ -108,10 +108,10 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
         calibration: float
-            Calibration in reciprocal Angstroms per pixel
+            Diffraction pattern calibration in reciprocal Angstroms per pixel.
         center: tuple
-            Position of the central beam, in pixels. If None the center of the
-            frame is assumed to be the center of the pattern.
+            Position of the direct beam center, in pixels. If None the center of
+            the data array is assumed to be the center of the pattern.
         """
         if center is None:
             center = np.array(self.axes_manager.signal_shape)/2 * calibration
@@ -135,7 +135,7 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ----------
         calibration: float
-            Calibration in nanometres per pixel
+            Scan calibration in nanometres per pixel.
         """
         x = self.axes_manager.navigation_axes[0]
         y = self.axes_manager.navigation_axes[1]
@@ -156,7 +156,7 @@ class ElectronDiffraction(Signal2D):
         ----------
         roi: :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
-        kwargs:
+        **kwargs:
             Keyword arguments to be passed to `ElectronDiffraction.plot`
 
         Examples
@@ -258,6 +258,10 @@ class ElectronDiffraction(Signal2D):
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
 
         Returns
         -------
@@ -274,7 +278,8 @@ class ElectronDiffraction(Signal2D):
     def apply_gain_normalisation(self,
                                  dark_reference,
                                  bright_reference,
-                                 inplace=True):
+                                 inplace=True,
+                                 *args, **kwargs):
         """Apply gain normalization to experimentally acquired electron
         diffraction patterns.
 
@@ -287,18 +292,24 @@ class ElectronDiffraction(Signal2D):
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
 
         """
         return self.map(gain_normalise,
                         dref=dark_reference,
                         bref=bright_reference,
-                        inplace=inplace)
+                        inplace=inplace,
+                        *args, **kwargs)
 
     def remove_deadpixels(self,
                           deadpixels,
                           deadvalue='average',
                           inplace=True,
-                          progress_bar=True):
+                          progress_bar=True,
+                          *args, **kwargs):
         """Remove deadpixels from experimentally acquired diffraction patterns.
 
         Parameters
@@ -312,16 +323,32 @@ class ElectronDiffraction(Signal2D):
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
 
         """
         return self.map(remove_dead,
                         deadpixels=deadpixels,
                         deadvalue=deadvalue,
                         inplace=inplace,
-                        show_progressbar=progress_bar)
+                        show_progressbar=progress_bar,
+                        *args, **kwargs)
 
-    def get_radial_profile(self,inplace=False,**kwargs):
+    def get_radial_profile(self,inplace=False,
+                           *args,**kwargs):
         """Return the radial profile of the diffraction pattern.
+
+        Parameters
+        ----------
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
 
         Returns
         -------
@@ -340,7 +367,8 @@ class ElectronDiffraction(Signal2D):
             profiles.plot()
         """
         radial_profiles = self.map(radial_average,
-                                   inplace=inplace,**kwargs)
+                                   inplace=inplace,
+                                   *args,**kwargs)
 
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
@@ -360,16 +388,18 @@ class ElectronDiffraction(Signal2D):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
-
         Parameters
         ----------
         radius_start : int
             The lower bound for the radius of the central disc to be used in the
             alignment.
-
         radius_finish : int
             The upper bounds for the radius of the central disc to be used in
             the alignment.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
 
         Returns
         -------
@@ -379,7 +409,7 @@ class ElectronDiffraction(Signal2D):
         """
         shifts = self.map(find_beam_offset_cross_correlation,
                           radius_start=radius_start,
-                          radius_finish=radius_finish,
+			              radius_finish=radius_finish,
                           inplace=False,*args,**kwargs)
         return shifts
 
@@ -397,14 +427,18 @@ class ElectronDiffraction(Signal2D):
 
         radius_start : int
             The lower bound for the radius of the central disc to be used in the
-            alignment
+            alignment.
         radius_finish : int
             The upper bounds for the radius of the central disc to be used in
-            the alignment
+            the alignment.
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
+        *args:
+            Arguments to be passed to align2D().
+        **kwargs:
+            Keyword arguments to be passed to align2D().
 
         Returns
         -------
@@ -430,7 +464,8 @@ class ElectronDiffraction(Signal2D):
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
 
-    def remove_background(self, method, *args, **kwargs):
+    def remove_background(self, method,
+                          *args, **kwargs):
         """Perform background subtraction via multiple methods.
 
         Parameters
@@ -456,13 +491,15 @@ class ElectronDiffraction(Signal2D):
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
-
         implementation: 'scipy' or 'skimage'
             (median only) see expt_utils.subtract_background_median
             for details, if not selected 'scipy' is used
-
         bg : array
             Background array extracted from vacuum. (subtract_reference only)
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
 
         Returns
         -------
@@ -505,8 +542,19 @@ class ElectronDiffraction(Signal2D):
     def decomposition(self, *args, **kwargs):
         """Decomposition with a choice of algorithms.
 
+        Parameters
+        ----------
+        *args:
+            Arguments to be passed to decomposition().
+        **kwargs:
+            Keyword arguments to be passed to decomposition().
+
+        Returns
+        -------
+
         The results are stored in self.learning_results. For a full description
         of parameters see :meth:`hyperspy.learn.mva.MVA.decomposition`
+
 
         """
         super(Signal2D, self).decomposition(*args, **kwargs)
@@ -534,8 +582,8 @@ class ElectronDiffraction(Signal2D):
             * 'difference_of_gaussians' - a blob finder implemented in
               `scikit-image` which uses the difference of Gaussian matrices
               approach.
-            * 'regionprops' - Uses regionprops to find islands of connected
-               pixels representing a peak
+            * 'xc' - A cross correlation peakfinder
+
 
         *args
             associated with above methods
@@ -555,6 +603,7 @@ class ElectronDiffraction(Signal2D):
             'stat': find_peaks_stat,
             'laplacian_of_gaussians':  find_peaks_log,
             'difference_of_gaussians': find_peaks_dog,
+            'xc': find_peaks_xc
         }
         if method in method_dict:
             method = method_dict[method]
