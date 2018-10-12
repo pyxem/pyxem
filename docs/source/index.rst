@@ -5,7 +5,8 @@
 
 .. toctree::
     :hidden:
-        
+    
+    self    
     contents
     basics
     intermediate
