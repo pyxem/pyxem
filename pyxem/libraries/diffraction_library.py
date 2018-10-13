@@ -43,7 +43,8 @@ def _get_library_from_angles(library,phase,angle):
     if np.abs(residual) < 1e-5:
         return library[phase][stored_key]
     else:
-        raise ValueError("It appears that no library entry lies with 1e-5 of the target angle")
+        raise ValueError("It appears that no library entry lies with 1e-5 of \
+        the target angle")
 
 
 

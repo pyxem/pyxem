@@ -35,12 +35,12 @@ class DiffractionLibraryGenerator(object):
     """
 
     def __init__(self, electron_diffraction_calculator):
-        """Initialises the library with a diffraction calculator.
+        """Initialises the library generator with a diffraction calculator.
 
         Parameters
         ----------
         electron_diffraction_calculator : :class:`DiffractionGenerator`
-            The calculator used for the diffraction patterns.
+            The calculator used to simulate diffraction patterns.
 
         """
         self.electron_diffraction_calculator = electron_diffraction_calculator
@@ -62,9 +62,9 @@ class DiffractionLibraryGenerator(object):
 
         Parameters
         ----------
-        structure_library : pyxem:StructureLibrary Object
-            Dictionary of structures and associated orientations for which electron diffraction
-            is to be simulated.
+        structure_library : class:`StructureLibrary`
+            Dictionary of structures and associated orientations for which
+            electron diffraction is to be simulated.
 
         calibration : float
             The calibration of experimental data to be correlated with the
@@ -118,4 +118,76 @@ class DiffractionLibraryGenerator(object):
                      'pixel_coords':pixel_coordinates, \
                      'pattern_norm': np.sqrt(np.dot(pattern_intensities,pattern_intensities))}
                     diffraction_library[key] = phase_diffraction_library
+        return diffraction_library
+
+
+class VectorLibraryGenerator(object):
+    """
+    Computes a library of diffraction vectors and pairwise inter-vector angles
+    for specified atomic structures.
+    """
+
+    def __init__(self, structure_library):
+        """Initialises the library with a diffraction calculator.
+
+        Parameters
+        ----------
+        electron_diffraction_calculator : :class:`DiffractionGenerator`
+            The calculator used for the diffraction patterns.
+
+        """
+        self.electron_diffraction_calculator = electron_diffraction_calculator
+
+    def get_vector_library(self,
+                           reciprocal_radius
+                           ):
+        """Calculates a library of diffraction vectors and pairwise inter-vector
+        angles for a library of crystal structures.
+
+        Each structure in the structure library is rotated to each associated
+        orientation and the diffraction pattern is calculated each time.
+
+        Parameters
+        ----------
+        reciprocal_radius : float
+            The maximum g-vector magnitude to be included in the simulations.
+
+        Returns
+        -------
+        vector_library : :class:`VectorLibrary`
+            Mapping of crystal structure and orientation to diffraction data
+            objects.
+
+        """
+        rl = structure.lattice.reciprocal_lattice_crystallographic
+        recip_pts = rl.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], max_length)
+        calc_peaks = np.asarray(sorted(recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])))
+        #convert array of unique vectors to polar coordinates
+        gpolar = np.array(_cart2polar(vectors.data.T[0], vectors.data.T[1]))
+        #assign empty list for
+        indexed_pairs = []
+        #iterate through all pairs calculating theoretical interplanar angle
+        for comb in itertools.combinations(np.arange(len(vectors)), 2):
+            i, j = comb[0], comb[1]
+            #get hkl values for all planes in indexed family
+            hkls1 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[i][1][1]))]
+            hkls2 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[j][1][1]))]
+            #assign empty array for indexation results
+            phis = np.zeros((len(hkls1), len(hkls2)))
+            #iterate through all pairs of indices
+            for prod in itertools.product(np.arange(len(hkls1)), np.arange(len(hkls2))):
+                m, n = prod[0], prod[1]
+                hkl1, hkl2 = hkls1[m], hkls2[n]
+                phis[m,n] = get_interplanar_angle(structure, hkl1, hkl2)
+            #calculate experimental interplanar angle
+            phi_expt = gpolar[1][j] - gpolar[1][i]
+            if np.absolute(phi_expt) > np.pi:
+                phi_expt = 2*np.pi - np.absolute(phi_expt)
+            #compare theory with experiment with threshold on mag of difference
+            phi_diffs = phis - np.absolute(phi_expt)
+            valid_pairs = np.array(np.where(np.abs(phi_diffs)<angle_threshold))
+            #obtain Miller indices corresponding to planes satisfying mag + angle.
+            indexed_pairs.append([vectors.data[i], hkls1[valid_pairs[0]], vectors.data[j], hkls2[valid_pairs[1]]])
+        #results give two arrays containing Miller indices for each reflection in pair that are self consistent.
+        indexation = np.array(indexed_pairs)
         return diffraction_library
