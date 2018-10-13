@@ -47,26 +47,21 @@ def _get_library_from_angles(library,phase,angle):
         the target angle")
 
 
-
 class DiffractionLibrary(dict):
     """Maps crystal structure (phase) and orientation (Euler angles or
     axis-angle pair) to simulated diffraction data.
     """
 
     def get_library_entry(self,phase=None,angle=None):
-        """ Extracts a single library entry for viewing,
-        unspecified layers of dict are selected randomly and so this method
-        is not entirely repeatable
-
+        """ Extracts a single library entry for viewing, unspecified layers of
+        dict are selected randomly and so this method is not entirely repeatable
 
         Parameters
         ----------
-
         Phase : Label for the Phase you are interested in. Randomly chosen
-        if False
+            if False
         Angle : Label for the Angle you are interested in. Randomly chosen
-        if False
-
+            if False
         """
 
         if phase is not None:
@@ -82,8 +77,6 @@ class DiffractionLibrary(dict):
             for phase in self.keys():
                 for rotation in self[phase].keys():
                     return self[phase][rotation]
-
-
 
     def pickle_library(self,filename):
         with open(filename, 'wb') as handle:
