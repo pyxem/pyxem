@@ -21,6 +21,8 @@
 """
 
 import numpy as np
+from pyxem.utils.subpixel_refinements_utils import *
+from pyxem.utils.subpixel_refinements_utils import _sobel_filtered_xc
 
 class SubpixelrefinementGenerator():
     """
@@ -38,24 +40,27 @@ class SubpixelrefinementGenerator():
 
     "xc" stands for cross correlation.
     Readers are refered to Pekin et al. Ultramicroscopy 176 (2017) 170-176 for a detailed comparision
+    of phase, cross and hybrid correlation schemes, as well as the use of a sobel filter.
 
     """
 
     def __init__(self, dp, vectors):
         self.dp = dp
         self.vectors_init = vectors
+        ### for keeping track of work
+        self.last_method = None
+
+
+    def sobel_filtered_xc(self,square_size,disc_radius,upsample_factor):
+        self.vector.out = np.zeroes_like(self.vectors_init)
+        sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
+        for i in np.arange():
+            vect = self.vectors_init[i]
+            expt_disc = dp.map(get_experimental_square,vector=vect,square_size=square_size,upsample_factor=upsample_factor,inplace=False)
+            self.vectors_out[i] = expt_disc.map(_sobel_filtered_xc,sim_disc=sim_disc,inplace=False)
+            
+        self.last_method = "sobel_filtered"
+        return "Solution stored in self.vectors_out"
 
     def conventional_xc(self):
         pass
-
-    def sobel_filtered_xc(self):
-        pass
-
-    """
-    #Potential addition methods
-    def hybrid_xc(self):
-        pass
-
-    def radial_gradient(self):
-        pass
-    """
