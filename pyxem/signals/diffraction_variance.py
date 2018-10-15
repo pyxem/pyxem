@@ -66,25 +66,6 @@ class DiffractionVariance(Signal2D):
 
         return rp
 
-    def renormalize(self, dqe):
-        """Renormalize the corrected variance for a new detective quantum
-        efficiency.
-
-        Parameters
-        ----------
-        dqe : float
-            Detective quantum efficiency for new normalization.
-
-        Returns
-        -------
-        vardps : :obj:`pyxem.signals.DiffractionVariance`
-            The DiffractionVariance object with the corrected variance pattern
-            updated for the new dqe.
-        """
-        alpha = 1/dqe
-        self.data[1,1] = self.data[1,0] - (np.divide(alpha, self.data[0,1]))
-
-
 class ImageVariance(Signal2D):
     _signal_type = "image_variance"
 
