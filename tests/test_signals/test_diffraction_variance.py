@@ -34,7 +34,7 @@ class TestDiffractionVariance:
         difvar = DiffractionVariance(diffraction_pattern)
         assert isinstance(difvar,DiffractionVariance)
 
-    def test_get_radial_profile(self,
+    def test_difvar_radial_profile(self,
                         diffraction_pattern):
         rp = DiffractionVarianceProfile(diffraction_pattern)
         assert isinstance(rp,DiffractionVarianceProfile)
