@@ -39,11 +39,6 @@ class TestDiffractionVariance:
         rp = DiffractionVarianceProfile(diffraction_pattern)
         assert isinstance(rp,DiffractionVarianceProfile)
 
-    @pytest.mark.parametrize('dqe', [
-        0.5,
-        0.6
-    ])
-
 
 class TestImageVariance:
 
