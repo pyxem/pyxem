@@ -22,6 +22,9 @@ utils to support SubpixelrefinementGenerator
 
 import numpy as np
 from skimage.filters import sobel
+from skimage.feature import register_translation
+from skimage import draw
+from skimage.transform import rescale
 
 def get_experimental_square(z,vector,square_size,upsample_factor):
     """
@@ -42,7 +45,7 @@ def get_experimental_square(z,vector,square_size,upsample_factor):
     _z = rescale(_z,upsample_factor)
     return _z
 
-def get_simulated_disc(square_size,disc_radius,up_sample_factor):
+def get_simulated_disc(square_size,disc_radius,upsample_factor):
     upsss = int(square_size*upsample_factor) #upsample square size
     arr = np.zeros((upsss,upsss))
     rr, cc = draw.circle(int(upsss/2), int(upsss/2), radius=disc_radius*upsample_factor, shape=arr.shape)
@@ -50,10 +53,10 @@ def get_simulated_disc(square_size,disc_radius,up_sample_factor):
     return arr
 
 def _sobel_filtered_xc(exp_disc,sim_disc):
-    # sobel filter exp_disc
-    # register translation
-    # return answer
-    pass
+    sobel_exp_disc = sobel(exp_disc)
+    shifts,error,_ = register_translation(sobel_exp_disc,sim_disc)
+    return shifts
 
-def _conventional_xc():
-    pass
+def _conventional_xc(exp_disc,sim_disc):
+    shifts,error,_ = register_translation(exp_disc,sim_disc)
+    return shifts

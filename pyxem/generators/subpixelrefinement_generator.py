@@ -16,13 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-""" Generating subpixel resolution on diffraction vectors
-
+"""
+Generating subpixel resolution on diffraction vectors
 """
 
 import numpy as np
 from pyxem.utils.subpixel_refinements_utils import *
-from pyxem.utils.subpixel_refinements_utils import _sobel_filtered_xc
+from pyxem.utils.subpixel_refinements_utils import _sobel_filtered_xc, _conventional_xc
 
 class SubpixelrefinementGenerator():
     """
@@ -52,15 +52,25 @@ class SubpixelrefinementGenerator():
 
 
     def sobel_filtered_xc(self,square_size,disc_radius,upsample_factor):
-        self.vector.out = np.zeroes_like(self.vectors_init)
+        self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
         sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
-        for i in np.arange():
+        for i in np.arange(0,len(self.vectors_init)):
             vect = self.vectors_init[i]
-            expt_disc = dp.map(get_experimental_square,vector=vect,square_size=square_size,upsample_factor=upsample_factor,inplace=False)
-            self.vectors_out[i] = expt_disc.map(_sobel_filtered_xc,sim_disc=sim_disc,inplace=False)
-            
+            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,upsample_factor=upsample_factor,inplace=False)
+            shifts = expt_disc.map(_sobel_filtered_xc,sim_disc=sim_disc,inplace=False)
+            self.vectors_out[:,:,i,:] = vect + shifts.data / upsample_factor
+
         self.last_method = "sobel_filtered"
         return "Solution stored in self.vectors_out"
 
-    def conventional_xc(self):
-        pass
+    def conventional_xc(self,square_size,disc_radius,upsample_factor):
+        self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
+        sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
+        for i in np.arange(0,len(self.vectors_init)):
+            vect = self.vectors_init[i]
+            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,upsample_factor=upsample_factor,inplace=False)
+            shifts = expt_disc.map(_conventional_xc,sim_disc=sim_disc,inplace=False)
+            self.vectors_out[:,:,i,:] = vect + shifts.data / upsample_factor
+
+        self.last_method = "conventional_xc"
+        return "Solution stored in self.vectors_out"
