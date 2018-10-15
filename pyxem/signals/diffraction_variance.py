@@ -37,7 +37,7 @@ class DiffractionVariance(Signal2D):
         """Return the radial profile of the diffraction variance signals.
 
         Returns
-        -------
+        -------DiffractionVariance
         radial_profile: :obj:`pyxem.signals.DiffractionVarianceProfile`
             The radial profile of each diffraction variance pattern in the
             DiffractionVariance signal.

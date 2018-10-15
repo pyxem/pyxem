@@ -23,9 +23,8 @@ from hyperspy.signals import Signal1D
 from pyxem.signals.variance_profile import DiffractionVarianceProfile
 
 class TestDiffractionProfile:
-
-    def test_get_electron_diffraction_profile(self,
-                        diffraction_profile = DiffractionVarianceProfile):
+    
+    def test_get_electron_diffraction_profile(self):
         rad_signal = Signal1D(np.array([0,4,3,5,1,4,6,2]))
         difprof = DiffractionVarianceProfile(rad_signal)
         assert isinstance(difprof,DiffractionVarianceProfile)
