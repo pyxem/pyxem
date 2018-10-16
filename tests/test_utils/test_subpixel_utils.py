@@ -27,8 +27,8 @@ from skimage.transform import rescale
 @pytest.fixture()
 def exp_disc():
     square_size = 60
-    disc_radius = 20 #note if these are different you get incorrect answers
-    upsample_factor = 10
+    disc_radius = 5 #note if these are different you get incorrect answers
+    upsample_factor = 50
 
     upsss = int(square_size*upsample_factor) #upsample square size
     arr = np.zeros((upsss,upsss))
@@ -38,7 +38,7 @@ def exp_disc():
 
 @pytest.fixture()
 def sim_disc():
-    return get_simulated_disc(60,20,upsample_factor=10)
+    return get_simulated_disc(60,5,upsample_factor=50)
 
 def test___sobel_filtered_xc(exp_disc,sim_disc):
     s = _sobel_filtered_xc(exp_disc,sim_disc)
