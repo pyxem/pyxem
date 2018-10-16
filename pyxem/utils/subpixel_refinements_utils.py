@@ -46,17 +46,22 @@ def get_experimental_square(z,vector,square_size,upsample_factor):
     return _z
 
 def get_simulated_disc(square_size,disc_radius,upsample_factor):
-    upsss = int(square_size*upsample_factor) #upsample square size
+    upsss = int(square_size)#*upsample_factor) #upsample square size
     arr = np.zeros((upsss,upsss))
-    rr, cc = draw.circle(int(upsss/2), int(upsss/2), radius=disc_radius*upsample_factor, shape=arr.shape)
+    rr, cc = draw.circle(int(upsss/2), int(upsss/2), radius=disc_radius*1, shape=arr.shape) #is the thin disc a good idea
     arr[rr, cc] = 1
+    arr = rescale(arr,upsample_factor)
     return arr
 
 def _sobel_filtered_xc(exp_disc,sim_disc):
     sobel_exp_disc = sobel(exp_disc)
-    shifts,error,_ = register_translation(sobel_exp_disc,sim_disc)
+    h0,h1= np.hanning(np.size(sim_disc,0)),np.hanning(np.size(sim_disc,1))
+    hann2d = np.sqrt(np.outer(h0,h1))
+    shifts,error,_ = register_translation(sobel_exp_disc*hann2d,sim_disc*hann2d)
     return shifts
 
 def _conventional_xc(exp_disc,sim_disc):
+    h0,h1= np.hanning(np.size(sim_disc,0)),np.hanning(np.size(sim_disc,1))
+    hann2d = np.sqrt(np.outer(h0,h1))
     shifts,error,_ = register_translation(exp_disc,sim_disc)
     return shifts
