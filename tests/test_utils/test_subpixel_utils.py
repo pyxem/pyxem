@@ -25,27 +25,25 @@ from pyxem.utils.subpixel_refinements_utils import _sobel_filtered_xc,_conventio
 from skimage.transform import rescale
 
 @pytest.fixture()
-def square_as_spot_proxy():
-    z = np.zeros((200,200))
-    z[120:160,40:80] = 1
-    return z
+def exp_disc():
+    square_size = 60
+    disc_radius = 20 #note if these are different you get incorrect answers
+    upsample_factor = 10
+
+    upsss = int(square_size*upsample_factor) #upsample square size
+    arr = np.zeros((upsss,upsss))
+    rr, cc = draw.circle(int(upsss/2)+20, int(upsss/2)-50, radius=disc_radius*upsample_factor, shape=arr.shape)
+    arr[rr, cc] = 0.9
+    return arr
 
 @pytest.fixture()
 def sim_disc():
     return get_simulated_disc(60,20,upsample_factor=10)
 
-@pytest.fixture()
-def fake_square():
-    z = np.zeros((60,60))
-    z[9:40,9:40] = 1
-    z = rescale(z,10)
-    return z
+def test___sobel_filtered_xc(exp_disc,sim_disc):
+    s = _sobel_filtered_xc(exp_disc,sim_disc)
+    assert np.all(s==[20,-50])
 
-def test___sobel_filtered_xc(square_as_spot_proxy,fake_square):
-    exp_disc = get_experimental_square(square_as_spot_proxy,[140,60],square_size=60,upsample_factor=10)
-    s = _sobel_filtered_xc(exp_disc,fake_square)
-
-def test___conventional_xc(square_as_spot_proxy,fake_square):
-    exp_disc = get_experimental_square(square_as_spot_proxy,[140,60],square_size=60,upsample_factor=10)
-    s = _conventional_xc(exp_disc,fake_square)
-    
+def test___conventional_xc(exp_disc,sim_disc):
+    s = _conventional_xc(exp_disc,sim_disc)
+    assert np.all(s==[20,-50])
