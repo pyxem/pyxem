@@ -27,27 +27,46 @@ from skimage.transform import rescale
 
 def get_experimental_square(z,vector,square_size,upsample_factor):
     """
-    'Cuts out' a a region around a given diffraction vector and returns and upsample_factor
-    copy.
+    'Cuts out' a region around a given diffraction vector and returns an upsampled copy.
 
     Args
     ----
 
     z: np.array() - Single diffraction pattern
-    vector: np.array() - Single vector to be cut out
-    square_size: The length of one side of the bounding square_size (must be even)
+
+    vector: np.array() - Single vector to be cut out, in pixels (int) [x,y] with top left as [0,0]
+
+    square_size: The length of one side of the bounding square (must be even)
+
     upsample_factor: The factor by which to up-sample (must be even)
 
+    Returns
+    -------
+
+    square: np.array of size (L,L) where L = square_size*upsample_factor
+
     """
+
+
     cx,cy,half_ss = vector[0], vector[1], int(square_size/2)
     _z = z[cx-half_ss:cx+half_ss,cy-half_ss:cy+half_ss]
     _z = rescale(_z,upsample_factor)
+
     return _z
 
 def get_simulated_disc(square_size,disc_radius,upsample_factor):
-    upsss = int(square_size)#*upsample_factor) #upsample square size
-    arr = np.zeros((upsss,upsss))
-    rr, cc = draw.circle(int(upsss/2), int(upsss/2), radius=disc_radius*1, shape=arr.shape) #is the thin disc a good idea
+    """
+    Create a uniform disc for correlating with the experimental square
+
+    Args:
+    square size: int (even) - size of the bounding box
+    disc_radius: int - radius of the disc
+    upsample_factor: int - The factor by which to upsample (must be even)
+    """
+
+    ss = int(square_size)#*upsample_factor) #upsample square size
+    arr = np.zeros((ss,ss))
+    rr, cc = draw.circle(int(ss/2), int(ss/2), radius=disc_radius, shape=arr.shape) #is the thin disc a good idea
     arr[rr, cc] = 1
     arr = rescale(arr,upsample_factor)
     return arr
