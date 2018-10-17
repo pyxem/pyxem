@@ -32,15 +32,13 @@ class SubpixelrefinementGenerator():
     ----------
     dp : ElectronDiffraction
         The electron diffraction patterns to be refined
-    vectors : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation
+    vectors : numpy.array()
+        An array containing the vectors (in pixels) to the locations of the spots to be refined
 
-    Notes
-    -----
+    References
+    ----------
 
-    "xc" stands for cross correlation.
-    Readers are refered to Pekin et al. Ultramicroscopy 176 (2017) 170-176 for a detailed comparision
-    of phase, cross and hybrid correlation schemes, as well as the use of a sobel filter.
+    [1] Pekin et al. Ultramicroscopy 176 (2017) 170-176
 
     """
 
@@ -51,6 +49,22 @@ class SubpixelrefinementGenerator():
         self.last_method = None
 
     def conventional_xc(self,square_size,disc_radius,upsample_factor):
+        """
+        Refines the peaks using a conventional form of cross correlation (COM registration)
+
+        Args
+        ----
+
+        square_size: Length (in pixels) of one side of a square the contains the target peak and no other peaks
+        disc_radius: Radius (in pixels) of the discs that you seek to detect
+        upsample_factor: Factor by which to upsample the patterns
+
+        Returns
+        -------
+
+        str "Solution stored in self.vectors_out"
+
+        """
         self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
         sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
         for i in np.arange(0,len(self.vectors_init)):

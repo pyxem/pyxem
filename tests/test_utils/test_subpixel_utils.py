@@ -26,13 +26,10 @@ from skimage.transform import rescale
 
 @pytest.fixture()
 def exp_disc():
-    square_size = 60
-    disc_radius = 6
-    upsample_factor = 10
+    ss,disc_radius,upsample_factor = int(60),6,10
 
-    upsss = int(square_size)#*upsample_factor) #upsample square size
-    arr = np.zeros((upsss,upsss))
-    rr, cc = draw.circle(int(upsss/2)+20, int(upsss/2)-10, radius=disc_radius*1, shape=arr.shape) #is the thin disc a good idea
+    arr = np.zeros((ss,ss))
+    rr, cc = draw.circle(int(ss/2)+20, int(ss/2)-10, radius=disc_radius, shape=arr.shape)
     arr[rr, cc] = 1
     arr = rescale(arr,upsample_factor)
     return arr
@@ -46,3 +43,8 @@ def test___conventional_xc(exp_disc,sim_disc):
     error = np.subtract(s,np.asarray([200,-100]))
     rms = np.sqrt(error[0]**2+error[1]**2)
     assert rms < 1 #which corresponds to a 10th of a pixel
+
+def test_get_experimental_square(exp_disc):
+    square = get_experimental_square(exp_disc,[17,19],6,10)
+    assert square.shape[0] == int(6*10)
+    assert square.shape[1] == int(6*10)
