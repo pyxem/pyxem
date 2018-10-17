@@ -20,30 +20,29 @@ import pytest
 import numpy as np
 
 from pyxem.utils.subpixel_refinements_utils import *
-from pyxem.utils.subpixel_refinements_utils import _sobel_filtered_xc,_conventional_xc
+from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 
 from skimage.transform import rescale
 
 @pytest.fixture()
 def exp_disc():
     square_size = 60
-    disc_radius = 5 #note if these are different you get incorrect answers
-    upsample_factor = 50
+    disc_radius = 6
+    upsample_factor = 10
 
-    upsss = int(square_size*upsample_factor) #upsample square size
+    upsss = int(square_size)#*upsample_factor) #upsample square size
     arr = np.zeros((upsss,upsss))
-    rr, cc = draw.circle(int(upsss/2)+20, int(upsss/2)-50, radius=disc_radius*upsample_factor, shape=arr.shape)
-    arr[rr, cc] = 0.9
+    rr, cc = draw.circle(int(upsss/2)+20, int(upsss/2)-10, radius=disc_radius*1, shape=arr.shape) #is the thin disc a good idea
+    arr[rr, cc] = 1
+    arr = rescale(arr,upsample_factor)
     return arr
 
 @pytest.fixture()
 def sim_disc():
-    return get_simulated_disc(60,5,upsample_factor=50)
-
-def test___sobel_filtered_xc(exp_disc,sim_disc):
-    s = _sobel_filtered_xc(exp_disc,sim_disc)
-    assert np.all(s==[20,-50])
+    return get_simulated_disc(60,5,upsample_factor=10)
 
 def test___conventional_xc(exp_disc,sim_disc):
     s = _conventional_xc(exp_disc,sim_disc)
-    assert np.all(s==[20,-50])
+    error = np.subtract(s,np.asarray([200,-100]))
+    rms = np.sqrt(error[0]**2+error[1]**2)
+    assert rms < 1 #which corresponds to a 10th of a pixel

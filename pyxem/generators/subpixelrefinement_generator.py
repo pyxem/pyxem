@@ -22,7 +22,7 @@ Generating subpixel resolution on diffraction vectors
 
 import numpy as np
 from pyxem.utils.subpixel_refinements_utils import *
-from pyxem.utils.subpixel_refinements_utils import _sobel_filtered_xc, _conventional_xc
+from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 
 class SubpixelrefinementGenerator():
     """
@@ -49,19 +49,6 @@ class SubpixelrefinementGenerator():
         self.vectors_init = vectors
         ### for keeping track of work
         self.last_method = None
-
-
-    def sobel_filtered_xc(self,square_size,disc_radius,upsample_factor):
-        self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
-        sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
-        for i in np.arange(0,len(self.vectors_init)):
-            vect = self.vectors_init[i]
-            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,upsample_factor=upsample_factor,inplace=False)
-            shifts = expt_disc.map(_sobel_filtered_xc,sim_disc=sim_disc,inplace=False)
-            self.vectors_out[:,:,i,:] = vect + shifts.data / upsample_factor
-
-        self.last_method = "sobel_filtered"
-        return "Solution stored in self.vectors_out"
 
     def conventional_xc(self,square_size,disc_radius,upsample_factor):
         self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))

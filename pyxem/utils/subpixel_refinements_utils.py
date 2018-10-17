@@ -21,7 +21,6 @@ utils to support SubpixelrefinementGenerator
 """
 
 import numpy as np
-from skimage.filters import sobel
 from skimage.feature import register_translation
 from skimage import draw
 from skimage.transform import rescale
@@ -52,13 +51,6 @@ def get_simulated_disc(square_size,disc_radius,upsample_factor):
     arr[rr, cc] = 1
     arr = rescale(arr,upsample_factor)
     return arr
-
-def _sobel_filtered_xc(exp_disc,sim_disc):
-    sobel_exp_disc = sobel(exp_disc)
-    h0,h1= np.hanning(np.size(sim_disc,0)),np.hanning(np.size(sim_disc,1))
-    hann2d = np.sqrt(np.outer(h0,h1))
-    shifts,error,_ = register_translation(sobel_exp_disc*hann2d,sim_disc*hann2d)
-    return shifts
 
 def _conventional_xc(exp_disc,sim_disc):
     h0,h1= np.hanning(np.size(sim_disc,0)),np.hanning(np.size(sim_disc,1))
