@@ -24,20 +24,19 @@ from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGene
 from skimage import draw
 
 
-@pytest.fixture
-def SPR_generator(diffraction_pattern,vect = np.asarray([[4,4]])):
-    return SubpixelrefinementGenerator(diffraction_pattern,vect)
-
 @pytest.fixture()
 def create_spot():
     z = np.zeros((128,128))
+
     for r in [4,3,2]:
         rr, cc = draw.circle(90,30,radius=r,shape=z.shape)
         z[rr, cc] = 1 / r
+
     dp = pxm.ElectronDiffraction(np.asarray([[z,z],[z,z]])) #this needs to be in 2x2
     return dp
 
-def test_conventional_xc(SPR_generator):
+def test_conventional_xc(diffraction_pattern):
+    SPR_generator = SubpixelrefinementGenerator(diffraction_pattern,np.asarray([[4,4]]))
     diff_vect = SPR_generator.conventional_xc(4,2,100)
     assert True
 
