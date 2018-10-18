@@ -37,7 +37,6 @@ class SubpixelrefinementGenerator():
 
     References
     ----------
-
     [1] Pekin et al. Ultramicroscopy 176 (2017) 170-176
 
     """
@@ -52,18 +51,19 @@ class SubpixelrefinementGenerator():
         """
         Refines the peaks using a conventional form of cross correlation (COM registration)
 
-        Args
-        ----
-
-        square_size: Length (in pixels) of one side of a square the contains the target peak and no other peaks
-        disc_radius: Radius (in pixels) of the discs that you seek to detect
-        upsample_factor: Factor by which to upsample the patterns
+        Parameters
+        ----------
+        square_size : int 
+            Length (in pixels) of one side of a square the contains the peak to be refined
+        disc_radius:  int 
+            Radius (in pixels) of the discs that you seek to refine
+        upsample_factor: int
+            Factor by which to upsample the patterns
 
         Returns
         -------
-
-        str "Solution stored in self.vectors_out"
-
+        vector_out: np.array()
+            array containing the refined vectors in pixel units
         """
         self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
         sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
@@ -74,4 +74,4 @@ class SubpixelrefinementGenerator():
             self.vectors_out[:,:,i,:] = vect + shifts.data / upsample_factor
 
         self.last_method = "conventional_xc"
-        return "Solution stored in self.vectors_out"
+        return self.vectors_out
