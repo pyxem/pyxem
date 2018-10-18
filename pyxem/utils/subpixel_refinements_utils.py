@@ -29,18 +29,21 @@ def get_experimental_square(z,vector,square_size,upsample_factor):
     """
     'Cuts out' a region around a given diffraction vector and returns an upsampled copy.
 
-    Args
-    ----
-
-    z: np.array() - Single diffraction pattern
-    vector: np.array() - Single vector to be cut out, in pixels (int) [x,y] with top left as [0,0]
-    square_size: The length of one side of the bounding square (must be even)
-    upsample_factor: The factor by which to up-sample (must be even)
+    Parameters
+    ----------
+    z : np.array() 
+        Single diffraction pattern
+    vector : np.array() 
+        Single vector to be cut out, in pixels (int) [x,y] with top left as [0,0]
+    square_size : int
+        The length of one side of the bounding square (must be even)
+    upsample_factor : int 
+        The factor by which to up-sample (must be even)
 
     Returns
     -------
-
-    square: np.array of size (L,L) where L = square_size*upsample_factor
+    square : np.array() 
+        Of size (L,L) where L = square_size*upsample_factor
 
     """
 
@@ -55,12 +58,21 @@ def get_simulated_disc(square_size,disc_radius,upsample_factor):
     """
     Create a uniform disc for correlating with the experimental square
 
-    Args
-    ----
-
-    square size: int (even) - size of the bounding box
-    disc_radius: int - radius of the disc
-    upsample_factor: int - The factor by which to upsample (must be even)
+    Parameters
+    ----------
+    square size : int
+        (even) - size of the bounding box
+    disc_radius : int
+        radius of the disc
+    upsample_factor : int 
+        The factor by which to upsample (must be even)
+        
+    Returns
+    -------
+    
+    arr: np.array()
+        Upsampled copy of the simulated disc as a numpy array
+        
     """
 
     ss = int(square_size)#*upsample_factor) #upsample square size
@@ -74,14 +86,17 @@ def _conventional_xc(exp_disc,sim_disc):
     """
     Takes two images of disc and finds the shift between them using conventional cross correlation
 
-    Args
-    ----
-    exp_disc - np.array() - A numpy array of the "experimental" disc
-    sim_disc - np.array() - A numpy array of the disc used a template
+    Parameters
+    ----------
+    exp_disc : np.array()
+        A numpy array of the "experimental" disc
+    sim_disc : np.array()
+        A numpy array of the disc used as a template
 
-    Return
+    Returns
     -------
-    shifts - Pixel shifts required to register the two images
+    shifts
+        Pixel shifts required to register the two images
     """
 
     shifts,error,_ = register_translation(exp_disc,sim_disc)
