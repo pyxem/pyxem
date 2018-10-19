@@ -38,12 +38,16 @@ def exp_disc():
 def sim_disc():
     return get_simulated_disc(60,5,upsample_factor=10)
 
+
+@pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
 def test___conventional_xc(exp_disc,sim_disc):
+    # this work (and measures) on the upsampled versions of the images
     s = _conventional_xc(exp_disc,sim_disc)
     error = np.subtract(s,np.asarray([200,-100]))
     rms = np.sqrt(error[0]**2+error[1]**2)
     assert rms < 1 #which corresponds to a 10th of a pixel
 
+@pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
 def test_get_experimental_square(exp_disc):
     square = get_experimental_square(exp_disc,[17,19],6,10)
     assert square.shape[0] == int(6*10)

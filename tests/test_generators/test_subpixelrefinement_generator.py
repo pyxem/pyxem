@@ -35,11 +35,13 @@ def create_spot():
     dp = pxm.ElectronDiffraction(np.asarray([[z,z],[z,z]])) #this needs to be in 2x2
     return dp
 
+@pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
 def test_conventional_xc(diffraction_pattern):
     SPR_generator = SubpixelrefinementGenerator(diffraction_pattern,np.asarray([[4,4]]))
     diff_vect = SPR_generator.conventional_xc(4,2,100)
     assert True
 
+@pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
 def test_assertioned_xc(create_spot):
     spr = SubpixelrefinementGenerator(create_spot,np.asarray([[90,30]]))
     s = spr.conventional_xc(12,4,8)
