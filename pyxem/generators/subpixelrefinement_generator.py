@@ -44,7 +44,6 @@ class SubpixelrefinementGenerator():
     def __init__(self, dp, vectors):
         self.dp = dp
         self.vectors_init = vectors
-        ### for keeping track of work
         self.last_method = None
 
     def conventional_xc(self,square_size,disc_radius,upsample_factor):
@@ -53,9 +52,9 @@ class SubpixelrefinementGenerator():
 
         Parameters
         ----------
-        square_size : int 
+        square_size : int
             Length (in pixels) of one side of a square the contains the peak to be refined
-        disc_radius:  int 
+        disc_radius:  int
             Radius (in pixels) of the discs that you seek to refine
         upsample_factor: int
             Factor by which to upsample the patterns
