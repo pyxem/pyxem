@@ -91,6 +91,18 @@ class VDFGenerator():
             raise ValueError("DiffractionVectors non-specified by user. Please "
                              "initialize VDFGenerator with some vectors. ")
 
+        #Set calibration to same as signal
+        x = vdfim.axes_manager.signal_axes[0]
+        y = vdfim.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
         return vdfim
 
     def get_concentric_vdf_images(self,
@@ -139,5 +151,19 @@ class VDFGenerator():
 
         if normalize==True:
             vdfim.map(normalize_vdf)
+
+        #Set calibration to same as signal
+        x = vdfim.axes_manager.signal_axes[0]
+        y = vdfim.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return vdfim
 
         return vdfim
