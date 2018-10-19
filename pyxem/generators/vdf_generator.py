@@ -165,5 +165,3 @@ class VDFGenerator():
         y.units = 'nm'
 
         return vdfim
-
-        return vdfim
