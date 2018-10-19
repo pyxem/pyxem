@@ -43,6 +43,6 @@ def test_conventional_xc(diffraction_pattern):
 def test_assertioned_xc(create_spot):
     spr = SubpixelrefinementGenerator(create_spot,np.asarray([[90,30]]))
     s = spr.conventional_xc(12,4,8)
-    error = np.subtract(spr.vectors_out[0,0],np.asarray([[90,30]]))
+    error = np.subtract(s[0,0],np.asarray([[90,30]]))
     rms_error = np.sqrt(error[0,0]**2+error[0,1]**2)
     assert rms_error < 0.2 #1/5th a pixel
