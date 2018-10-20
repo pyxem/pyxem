@@ -17,12 +17,14 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from hyperspy.signals import BaseSignal, Signal1D
+from hyperspy.api import markers
 
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
+from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
 Signal class for diffraction vectors.
@@ -57,6 +59,15 @@ class DiffractionVectors(BaseSignal):
         ax.set_ylim(-ylim, ylim)
         ax.set_aspect('equal')
         return fig
+
+    def plot_diffraction_vectors_on_signal(self, signal):
+        """Plot the diffraction vectors on a signal.
+        """
+        mmx,mmy = generate_marker_inputs_from_peaks(self)
+        signal.plot(cmap='viridis', vmax=50)
+        for mx,my in zip(mmx,mmy):
+            m = markers.point(x=mx, y=my, color='red', marker='x')
+            signal.add_marker(m, plot_marker=True, permanent=False)
 
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
