@@ -82,6 +82,7 @@ class IndexationGenerator():
                   n_largest=5,
                   keys=[],
                   mask=None,
+                  *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
@@ -97,9 +98,10 @@ class IndexationGenerator():
             for 'si' and 1 for 'ga'.
         mask : Array
             Array with the same size as signal (in navigation) True False
-
+        *args
+            Arguments passed to map().
         **kwargs
-            Keyword arguments passed to the HyperSpy map() function.
+            Keyword arguments passed map().
 
         Returns
         -------
@@ -117,14 +119,28 @@ class IndexationGenerator():
            sig_shape = signal.axes_manager.navigation_shape
            mask = hs.signals.Signal1D(np.ones((sig_shape[0],sig_shape[1],1)))
 
-        matching_results = signal.map(correlate_library,
-                                      library=library,
-                                      n_largest=n_largest,
-                                      keys=keys,
-                                      mask=mask,
-                                      inplace=False,
-                                      **kwargs)
-        return IndexationResults(matching_results)
+        matches = signal.map(correlate_library,
+                             library=library,
+                             n_largest=n_largest,
+                             keys=keys,
+                             mask=mask,
+                             inplace=False,
+                             **kwargs)
+        matching_results = IndexationResults(matching_results)
+
+        #Set calibration to same as signal
+        x = matching_results.axes_manager.navigation_axes[0]
+        y = matching_results.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return matching_results
 
 
 class ProfileIndexationGenerator():
