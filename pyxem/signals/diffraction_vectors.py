@@ -17,12 +17,14 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from hyperspy.signals import BaseSignal, Signal1D
+from hyperspy.api import markers
 
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
+from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
 Signal class for diffraction vectors.
@@ -44,22 +46,64 @@ class DiffractionVectors(BaseSignal):
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
-    def plot_diffraction_vectors(self, xlim, ylim):
+    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
         """Plot the unique diffraction vectors.
+
+        Parameters
+        ----------
+        xlim : float
+            The maximum x coordinate to be plotted.
+        ylim : float
+            The maximum y coordinate to be plotted.
+        distance_threshold : float
+            The minimum distance between diffraction vectors to be passed to
+            get_unique_vectors.
+
+        Returns
+        -------
+        fig : matplotlib figure
+            The plot as a matplot lib figure.
+
         """
         #Find the unique gvectors to plot.
-        unique_vectors = self.get_unique_vectors()
+        unique_vectors = self.get_unique_vectors(distance_threshold)
         #Plot the gvector positions
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(unique_vectors.data.T[1], unique_vectors.data.T[0], 'ro')
+        ax.plot(unique_vectors.data.T[0], -unique_vectors.data.T[1], 'ro')
         ax.set_xlim(-xlim, xlim)
         ax.set_ylim(-ylim, ylim)
         ax.set_aspect('equal')
         return fig
 
+    def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
+        """Plot the diffraction vectors on a signal.
+
+        Parameters
+        ----------
+        signal : ElectronDiffraction
+            The ElectronDiffraction signal object on which to plot the peaks.
+            This signal must have the same navigation dimensions as the peaks.
+        *args :
+            Arguments passed to signal.plot()
+        **kwargs :
+            Keyword arguments passed to signal.plot()
+        """
+        mmx,mmy = generate_marker_inputs_from_peaks(self)
+        signal.plot(*args, **kwargs)
+        for mx,my in zip(mmx,mmy):
+            m = markers.point(x=mx, y=my, color='red', marker='x')
+            signal.add_marker(m, plot_marker=True, permanent=False)
+
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
+
+        Parameters
+        ----------
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
 
         Returns
         -------
@@ -81,21 +125,25 @@ class DiffractionVectors(BaseSignal):
 
         return magnitudes
 
-    def get_magnitude_histogram(self, bins):
+    def get_magnitude_histogram(self, bins, *args, **kwargs):
         """Obtain a histogram of gvector magnitudes.
 
         Parameters
         ----------
         bins : numpy array
             The bins to be used to generate the histogram.
+        *args:
+            Arguments to get_magnitudes().
+        **kwargs:
+            Keyword arguments to get_magnitudes().
 
         Returns
         -------
-        ghist : Signal1D
+        ghis : Signal1D
             Histogram of gvector magnitudes.
 
         """
-        gmags = self.get_magnitudes()
+        gmags = self.get_magnitudes(*args, **kwargs)
 
         if len(self.axes_manager.signal_axes)==0:
             glist=[]
@@ -109,7 +157,7 @@ class DiffractionVectors(BaseSignal):
         else:
             ghis = gmags.get_histogram(bins=bins)
 
-        ghis.axes_manager.signal_axes[0].name = 'g-vector magnitude'
+        ghis.axes_manager.signal_axes[0].name = 'k'
         ghis.axes_manager.signal_axes[0].units = '$A^{-1}$'
 
         return ghis
@@ -179,4 +227,17 @@ class DiffractionVectors(BaseSignal):
             crystim = crystim == 1
 
         crystim.change_dtype('float')
+
+        #Set calibration to same as signal
+        x = crystim.axes_manager.signal_axes[0]
+        y = crystim.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
         return crystim
