@@ -126,7 +126,7 @@ class IndexationGenerator():
                              mask=mask,
                              inplace=False,
                              **kwargs)
-        matching_results = IndexationResults(matching_results)
+        matching_results = IndexationResults(matches)
 
         #Set calibration to same as signal
         x = matching_results.axes_manager.navigation_axes[0]
