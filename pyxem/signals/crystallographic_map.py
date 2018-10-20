@@ -18,7 +18,7 @@
 
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
-from transforms3d.euler import euler2quat, quat2axangle
+from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult,qinverse
 import numpy as np
 from tqdm import tqdm
@@ -39,6 +39,9 @@ def load_mtex_map(filename):
         cmap = Signal2D(array).transpose(navigation_axes=2)
         return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
 
+def _euler2axangle_signal(euler):
+    """ Find the magnitude of a rotation"""
+    return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 def _distance_from_fixed_angle(angle,fixed_angle):
     """
@@ -76,6 +79,19 @@ class CrystallographicMap(BaseSignal):
         """Obtain a map of the best matching phase at each navigation position.
         """
         return self.isig[0].as_signal2D((0,1))
+
+    def get_orientation_map(self):
+        """Obtain an orientation image of the rotational angle associated with
+        the crystal orientation at each navigation position.
+
+        Returns
+        -------
+        correlation_map : Signal2D
+            The highest correlation score at each navigation position.
+
+        """
+        eulers = self.isig[1:4]
+        return eulers.map(_euler2axangle_signal, inplace=False)
 
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
