@@ -85,11 +85,11 @@ class CrystallographicMap(BaseSignal):
         y = phase_map.axes_manager.signal_axes[1]
 
         x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
 
         y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.scale = self.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
         return phase_map
@@ -114,11 +114,11 @@ class CrystallographicMap(BaseSignal):
         y = orientation_map.axes_manager.signal_axes[1]
 
         x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
 
         y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.scale = self.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
         return orientation_map
@@ -140,11 +140,11 @@ class CrystallographicMap(BaseSignal):
         y = correlation_map.axes_manager.signal_axes[1]
 
         x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
 
         y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.scale = self.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
         return correlation_map
@@ -169,11 +169,11 @@ class CrystallographicMap(BaseSignal):
         y = reliability_map.axes_manager.signal_axes[1]
 
         x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
 
         y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.scale = self.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
         return reliability_map
@@ -198,11 +198,11 @@ class CrystallographicMap(BaseSignal):
         y = reliability_map.axes_manager.signal_axes[1]
 
         x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
 
         y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.scale = self.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
         return reliability_map
@@ -247,11 +247,11 @@ class CrystallographicMap(BaseSignal):
         y = mode_distance_map.axes_manager.signal_axes[1]
 
         x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
 
         y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.scale = self.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
         return mode_distance_map
