@@ -92,7 +92,8 @@ class CrystallographicMap(BaseSignal):
 
         """
         eulers = self.isig[1:4]
-        return eulers.map(_euler2axangle_signal, inplace=False)
+        eulers.map(_euler2axangle_signal, inplace=True)
+        return eulers.as_signal2D((0,1))
 
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
