@@ -41,10 +41,12 @@ def correlate_library(image, library,n_largest,mask,keys=[]):
         for key in library.keys():
             correlations = dict()
             for orientation, diffraction_pattern in library[key].items():
-                #diffraction_pattern here is in fact a library of diffraction_pattern_properties
+                #diffraction_pattern here is in fact a library of
+                #diffraction_pattern_properties
                 correlation = correlate(image, diffraction_pattern)
                 correlations[orientation] = correlation
-                res = nlargest(n_largest, correlations.items(), key=itemgetter(1))
+                res = nlargest(n_largest, correlations.items(),
+                               key=itemgetter(1))
             for j in np.arange(n_largest):
                 out_arr[j + i*n_largest][0] = i
                 out_arr[j + i*n_largest][1] = res[j][0][0]
@@ -102,10 +104,10 @@ class IndexationGenerator():
         Returns
         -------
         matching_results : pyxem.signals.indexation_results.IndexationResults
-            Navigation axes of the electron diffraction signal containing correlation
-            results for each diffraction pattern. As an example, the signal in
-            Euler reads ( Library Number , Z , X , Z , Correlation Score )
-
+            Navigation axes of the electron diffraction signal containing
+            correlation results for each diffraction pattern. As an example, the
+            signal in Euler reads:
+                    ( Library Number , Z , X , Z , Correlation Score)
 
         """
         signal = self.signal
@@ -160,10 +162,10 @@ class ProfileIndexationGenerator():
         Returns
         -------
         matching_results : pyxem.signals.indexation_results.IndexationResults
-            Navigation axes of the electron diffraction signal containing correlation
-            results for each diffraction pattern. As an example, the signal in
-            Euler reads ( Library Number , Z , X , Z , Correlation Score )
-
+            Navigation axes of the electron diffraction signal containing
+            correlation results for each diffraction pattern. As an example, the
+            signal in Euler reads:
+                    ( Library Number , Z , X , Z , Correlation Score)
 
         """
         mags = self.magnitudes
