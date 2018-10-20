@@ -179,4 +179,17 @@ class DiffractionVectors(BaseSignal):
             crystim = crystim == 1
 
         crystim.change_dtype('float')
+
+        #Set calibration to same as signal
+        x = crystim.axes_manager.signal_axes[0]
+        y = crystim.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
         return crystim
