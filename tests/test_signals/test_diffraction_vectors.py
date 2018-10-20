@@ -83,6 +83,10 @@ def test_plot_diffraction_vectors(diffraction_vectors_map):
     diffraction_vectors_map.plot_diffraction_vectors(xlim=1., ylim=1.,
                                                      distance_threshold=0)
 
+def test_plot_diffraction_vectors_on_signal(diffraction_vectors_map,
+                                            diffraction_pattern):
+    diffraction_vectors_map.plot_diffraction_vectors_on_signal(diffraction_pattern)
+
 
 class TestMagnitudes:
 
