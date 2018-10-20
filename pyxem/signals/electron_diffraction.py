@@ -52,15 +52,15 @@ class ElectronDiffraction(Signal2D):
                                     rocking_angle=None,
                                     rocking_frequency=None,
                                     exposure_time=None):
-        """Set the experimental parameters in metadata.
+        """Set experimental parameters in metadata.
 
         Parameters
         ----------
-        accelerating_voltage: float
+        accelerating_voltage : float
             Accelerating voltage in kV
         camera_length: float
             Camera length in cm
-        scan_rotation: float
+        scan_rotation : float
             Scan rotation in degrees
         convergence_angle : float
             Convergence angle in mrad
@@ -76,6 +76,10 @@ class ElectronDiffraction(Signal2D):
         if accelerating_voltage is not None:
             md.set_item("Acquisition_instrument.TEM.accelerating_voltage",
                         accelerating_voltage)
+        if camera_length is not None:
+            md.set_item(
+                "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
+                camera_length)
         if scan_rotation is not None:
             md.set_item("Acquisition_instrument.TEM.scan_rotation",
                         scan_rotation)
@@ -88,16 +92,10 @@ class ElectronDiffraction(Signal2D):
         if rocking_frequency is not None:
             md.set_item("Acquisition_instrument.TEM.rocking_frequency",
                         rocking_frequency)
-        if camera_length is not None:
-            md.set_item(
-                "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
-                camera_length
-            )
         if exposure_time is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
-                exposure_time
-            )
+                exposure_time)
 
     def set_diffraction_calibration(self, calibration, center=None):
         """Set diffraction pattern pixel size in reciprocal Angstroms and origin
@@ -105,9 +103,9 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        calibration: float
+        calibration : float
             Diffraction pattern calibration in reciprocal Angstroms per pixel.
-        center: tuple
+        center : tuple
             Position of the direct beam center, in pixels. If None the center of
             the data array is assumed to be the center of the pattern.
         """
