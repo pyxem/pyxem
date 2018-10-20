@@ -86,9 +86,9 @@ class IndexationResults(BaseSignal):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = match_results.map(peaks_from_best_template,
-                                        phase=phase, library=library,
-                                        inplace=False)
+        match_peaks = self.map(peaks_from_best_template,
+                               phase=phase, library=library,
+                               inplace=False)
         mmx,mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx,my in zip(mmx,mmy):
