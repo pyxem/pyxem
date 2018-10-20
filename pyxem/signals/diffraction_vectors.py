@@ -109,7 +109,7 @@ class DiffractionVectors(BaseSignal):
         else:
             ghis = gmags.get_histogram(bins=bins)
 
-        ghis.axes_manager.signal_axes[0].name = 'g-vector magnitude'
+        ghis.axes_manager.signal_axes[0].name = 'k'
         ghis.axes_manager.signal_axes[0].units = '$A^{-1}$'
 
         return ghis
