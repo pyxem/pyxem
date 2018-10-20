@@ -86,8 +86,9 @@ class CrystallographicMap(BaseSignal):
 
         Returns
         -------
-        correlation_map : Signal2D
-            The highest correlation score at each navigation position.
+        orientation_map : Signal2D
+            The rotation angle assocaiated with the orientation at each
+            navigation position.
 
         """
         eulers = self.isig[1:4]
