@@ -70,7 +70,7 @@ class DiffractionVectors(BaseSignal):
         #Plot the gvector positions
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(unique_vectors.data.T[1], unique_vectors.data.T[0], 'ro')
+        ax.plot(unique_vectors.data.T[0], unique_vectors.data.T[1], 'ro')
         ax.set_xlim(-xlim, xlim)
         ax.set_ylim(-ylim, ylim)
         ax.set_aspect('equal')
