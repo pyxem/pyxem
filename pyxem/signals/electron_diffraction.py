@@ -444,19 +444,22 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
+        origin_coordinates = np.array((self.data.shape[2]/2-0.5,
+                                       self.data.shape[3]/2-0.5))
 
         if square_width is not None:
             min_index = np.int(origin_coordinates[0]-(0.5+square_width))
             max_index = np.int(origin_coordinates[0]+(1.5+square_width)) #fails if non-square dp
             shifts = self.isig[min_index:max_index,min_index:max_index].get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
         else:
-            shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+            shifts = self.get_direct_beam_position(radius_start, radius_finish,
+                                                   *args, **kwargs)
 
         shifts = -1*shifts.data
-        shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
+        shifts = shifts.reshape(nav_shape_x*nav_shape_y, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,*args,**kwargs)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0,
+                            *args, **kwargs)
 
     def remove_background(self, method,
                           *args, **kwargs):
@@ -523,7 +526,8 @@ class ElectronDiffraction(Signal2D):
                                      inplace=False, *args, **kwargs)
 
         elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(subtract_reference, inplace=False,
+                                     *args, **kwargs)
 
         else:
             raise NotImplementedError(
@@ -605,7 +609,7 @@ class ElectronDiffraction(Signal2D):
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
         peaks.map(peaks_as_gvectors,
-                  center=np.array(self.axes_manager.signal_shape)/2 - 0.5,
+                  center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
