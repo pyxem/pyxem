@@ -238,23 +238,10 @@ class CrystallographicMap(BaseSignal):
             method: save_mtex_map
         """
         modal_angle = self.get_modal_angles()[0]
-        mode_distance_map = self.isig[1:4].map(_distance_from_fixed_angle,
-                                               fixed_angle=modal_angle,
-                                               inplace=False)
+        return self.isig[1:4].map(_distance_from_fixed_angle,
+                                  fixed_angle=modal_angle,
+                                  inplace=False)
 
-        #Set calibration to same as signal
-        x = mode_distance_map.axes_manager.signal_axes[0]
-        y = mode_distance_map.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
-
-        return mode_distance_map
 
     def save_mtex_map(self, filename):
         """
