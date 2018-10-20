@@ -105,7 +105,22 @@ class IndexationResults(BaseSignal):
         #TODO: Add alternative methods beyond highest correlation score at each
         #navigation position.
         #TODO Only keep a subset of the data for the map
-        cryst_map = self.map(crystal_from_matching_results,
-                             inplace=False,
-                             *args, **kwargs)
-        return CrystallographicMap(cryst_map)
+        crystal_map = self.map(crystal_from_matching_results,
+                               inplace=False,
+                               *args, **kwargs)
+
+        cryst_map = CrystallographicMap(cryst_map)
+
+        #Set calibration to same as signal
+        x = cryst_map.axes_manager.navigation_axes[0]
+        y = cryst_map.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = self.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return cryst_map
