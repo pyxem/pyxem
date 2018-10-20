@@ -78,7 +78,21 @@ class CrystallographicMap(BaseSignal):
     def get_phase_map(self):
         """Obtain a map of the best matching phase at each navigation position.
         """
-        return self.isig[0].as_signal2D((0,1))
+        phase_map =self.isig[0].as_signal2D((0,1))
+
+        #Set calibration to same as signal
+        x = phase_map.axes_manager.signal_axes[0]
+        y = phase_map.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return phase_map
 
     def get_orientation_map(self):
         """Obtain an orientation image of the rotational angle associated with
@@ -93,7 +107,21 @@ class CrystallographicMap(BaseSignal):
         """
         eulers = self.isig[1:4]
         eulers.map(_euler2axangle_signal, inplace=True)
-        return eulers.as_signal2D((0,1))
+        orientation_map = eulers.as_signal2D((0,1))
+
+        #Set calibration to same as signal
+        x = orientation_map.axes_manager.signal_axes[0]
+        y = orientation_map.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return orientation_map
 
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
@@ -105,7 +133,21 @@ class CrystallographicMap(BaseSignal):
             The highest correlation score at each navigation position.
 
         """
-        return self.isig[4].as_signal2D((0,1))
+        correlation_map = self.isig[4].as_signal2D((0,1))
+
+        #Set calibration to same as signal
+        x = correlation_map.axes_manager.signal_axes[0]
+        y = correlation_map.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return correlation_map
 
     def get_reliability_map_orientation(self):
         """Obtain an orientation reliability map showing the difference between
@@ -120,7 +162,21 @@ class CrystallographicMap(BaseSignal):
             each navigation position.
 
         """
-        return self.isig[5].as_signal2D((0,1))
+        reliability_map = self.isig[5].as_signal2D((0,1))
+
+        #Set calibration to same as signal
+        x = reliability_map.axes_manager.signal_axes[0]
+        y = reliability_map.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return reliability_map
 
     def get_reliability_map_phase(self):
         """Obtain a reliability map showing the difference between the highest
@@ -135,7 +191,21 @@ class CrystallographicMap(BaseSignal):
             best scoring phase at each navigation position.
 
         """
-        return self.isig[6].as_signal2D((0,1))
+        reliability_map = self.isig[6].as_signal2D((0,1))
+
+        #Set calibration to same as signal
+        x = reliability_map.axes_manager.signal_axes[0]
+        y = reliability_map.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return reliability_map
 
     def get_modal_angles(self):
         """Obtain the modal angles (and their fractional occurances).
@@ -159,16 +229,32 @@ class CrystallographicMap(BaseSignal):
 
         Returns
         -------
-        modal_angles : list
-            [modal_angles, fractional_occurance]
+        mode_distance_map : list
+            Misorientation with respect to the modal angle at each navigtion
+            position.
 
         See Also
         --------
             method: save_mtex_map
         """
         modal_angle = self.get_modal_angles()[0]
-        return self.isig[1:4].map(_distance_from_fixed_angle,
-                                  fixed_angle=modal_angle,inplace=False)
+        mode_distance_map = self.isig[1:4].map(_distance_from_fixed_angle,
+                                               fixed_angle=modal_angle,
+                                               inplace=False)
+
+        #Set calibration to same as signal
+        x = mode_distance_map.axes_manager.signal_axes[0]
+        y = mode_distance_map.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.signal.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return mode_distance_map
 
     def save_mtex_map(self, filename):
         """
