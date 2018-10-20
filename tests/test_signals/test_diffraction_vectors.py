@@ -80,7 +80,8 @@ def diffraction_vectors_map(request):
     return dvm
 
 def test_plot_diffraction_vectors(diffraction_vectors_map):
-    diffraction_vectors_map.plot_diffraction_vectors(xlim=1., ylim=1.)
+    diffraction_vectors_map.plot_diffraction_vectors(xlim=1., ylim=1.,
+                                                     distance_threshold=0)
 
 
 class TestMagnitudes:
