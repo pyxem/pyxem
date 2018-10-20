@@ -485,7 +485,7 @@ class ElectronDiffraction(Signal2D):
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
-        implementation: 'scipy' or 'skimage'
+        implementation : 'scipy' or 'skimage'
             (median only) see expt_utils.subtract_background_median
             for details, if not selected 'scipy' is used
         bg : array
@@ -609,6 +609,18 @@ class ElectronDiffraction(Signal2D):
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
+
+        #Set calibration to same as signal
+        x = peaks.axes_manager.navigation_axes[0]
+        y = peaks.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = self.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
 
         return peaks
 
