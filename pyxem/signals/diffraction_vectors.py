@@ -46,11 +46,27 @@ class DiffractionVectors(BaseSignal):
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
-    def plot_diffraction_vectors(self, xlim, ylim):
+    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
         """Plot the unique diffraction vectors.
+
+        Parameters
+        ----------
+        xlim : float
+            The maximum x coordinate to be plotted.
+        ylim : float
+            The maximum y coordinate to be plotted.
+        distance_threshold : float
+            The minimum distance between diffraction vectors to be passed to
+            get_unique_vectors.
+
+        Returns
+        -------
+        fig : matplotlib figure
+            The plot as a matplot lib figure.
+
         """
         #Find the unique gvectors to plot.
-        unique_vectors = self.get_unique_vectors()
+        unique_vectors = self.get_unique_vectors(distance_threshold)
         #Plot the gvector positions
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -72,6 +88,13 @@ class DiffractionVectors(BaseSignal):
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
 
+        Parameters
+        ----------
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
+
         Returns
         -------
         magnitudes : BaseSignal
@@ -92,21 +115,25 @@ class DiffractionVectors(BaseSignal):
 
         return magnitudes
 
-    def get_magnitude_histogram(self, bins):
+    def get_magnitude_histogram(self, bins, *args, **kwargs):
         """Obtain a histogram of gvector magnitudes.
 
         Parameters
         ----------
         bins : numpy array
             The bins to be used to generate the histogram.
+        *args:
+            Arguments to get_magnitudes().
+        **kwargs:
+            Keyword arguments to get_magnitudes().
 
         Returns
         -------
-        ghist : Signal1D
+        ghis : Signal1D
             Histogram of gvector magnitudes.
 
         """
-        gmags = self.get_magnitudes()
+        gmags = self.get_magnitudes(*args, **kwargs)
 
         if len(self.axes_manager.signal_axes)==0:
             glist=[]
