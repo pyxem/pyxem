@@ -101,6 +101,13 @@ class IndexationResults(BaseSignal):
         phase and orientation at each probe position with corresponding
         correlation and reliabilty scores.
 
+        Returns
+        -------
+        cryst_map : CrystallographicMap
+            Contains the best matching phase and orientation along with
+            corresponding correlation and reliability scores at all navigation
+            positions.
+
         """
         #TODO: Add alternative methods beyond highest correlation score at each
         #navigation position.
