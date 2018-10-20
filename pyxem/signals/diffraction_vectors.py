@@ -76,11 +76,21 @@ class DiffractionVectors(BaseSignal):
         ax.set_aspect('equal')
         return fig
 
-    def plot_diffraction_vectors_on_signal(self, signal):
+    def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
         """Plot the diffraction vectors on a signal.
+
+        Parameters
+        ----------
+        signal : ElectronDiffraction
+            The ElectronDiffraction signal object on which to plot the peaks.
+            This signal must have the same navigation dimensions as the peaks.
+        *args :
+            Arguments passed to signal.plot()
+        **kwargs :
+            Keyword arguments passed to signal.plot()
         """
         mmx,mmy = generate_marker_inputs_from_peaks(self)
-        signal.plot(cmap='viridis', vmax=50)
+        signal.plot(*args, **kwargs)
         for mx,my in zip(mmx,mmy):
             m = markers.point(x=mx, y=my, color='red', marker='x')
             signal.add_marker(m, plot_marker=True, permanent=False)
