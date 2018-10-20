@@ -116,7 +116,7 @@ class IndexationResults(BaseSignal):
                                inplace=False,
                                *args, **kwargs)
 
-        cryst_map = CrystallographicMap(cryst_map)
+        cryst_map = CrystallographicMap(crystal_map)
 
         #Set calibration to same as signal
         x = cryst_map.axes_manager.navigation_axes[0]
