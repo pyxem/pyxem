@@ -46,8 +46,10 @@ class TestDiffractionLibraryGenerator:
     def test_get_diffraction_library(
             self,
             library_generator: DiffractionLibraryGenerator,
-            structure_library, calibration, reciprocal_radius, half_shape, with_direct_beam
+            structure_library, calibration,
+            reciprocal_radius, half_shape, with_direct_beam
             ):
         library = library_generator.get_diffraction_library(
-            structure_library, calibration, reciprocal_radius,half_shape, with_direct_beam)
+            structure_library, calibration,
+            reciprocal_radius,half_shape, with_direct_beam)
         assert isinstance(library, DiffractionLibrary)

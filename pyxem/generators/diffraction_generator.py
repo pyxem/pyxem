@@ -169,7 +169,7 @@ class DiffractionGenerator(object):
 
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
-        spot_indicies, _ , spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
+        spot_indicies, _ , spot_distances = get_points_in_sphere(recip_latt, reciprocal_radius)
 
         peaks = {}
         mask = np.logical_not((np.any(spot_indicies,axis=1) == 0))

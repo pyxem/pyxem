@@ -94,8 +94,8 @@ class CrystallographicMap(BaseSignal):
 
     def get_reliability_map_phase(self):
         """Obtain a reliability map showing the difference between the highest
-        correlation score of the most suitable phase
-        and the next best score from a different phase at each navigation position.
+        correlation score of the most suitable phase and the next best score
+        from a different phase at each navigation position.
         """
         return self.isig[6].as_signal2D((0,1))
 
@@ -119,7 +119,8 @@ class CrystallographicMap(BaseSignal):
         see also: method: save_mtex_map
         """
         modal_angle = self.get_modal_angles()[0]
-        return self.isig[1:4].map(_distance_from_fixed_angle,fixed_angle=modal_angle,inplace=False)
+        return self.isig[1:4].map(_distance_from_fixed_angle,
+                                  fixed_angle=modal_angle,inplace=False)
 
 
     def save_mtex_map(self, filename):
