@@ -22,7 +22,7 @@ import numpy as np
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 class DiffractionSimulation:
-    """Holds the result of a given kinematic simulation of a diffraction pattern.
+    """Holds the result of a kinematic diffraction pattern simulation.
 
     Parameters
     ----------
@@ -137,7 +137,8 @@ class DiffractionSimulation:
 
         l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
 
-        mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,np.abs(self.coordinates[:,1])<max_r)
+        mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,
+                                        np.abs(self.coordinates[:,1])<max_r)
 
         coords = self.coordinates[mask_for_max_r]
         inten  = self.intensities[mask_for_max_r]
@@ -147,7 +148,8 @@ class DiffractionSimulation:
         if len(x) > 0: #avoiding problems in the peakless case
             num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
             dp_dat[num] = inten
-            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T #sigma in terms of pixels. transpose for Hyperspy
+            #sigma in terms of pixels. transpose for Hyperspy
+            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T
             dp_dat = dp_dat/np.max(dp_dat)
 
         dp = ElectronDiffraction(dp_dat)
@@ -178,7 +180,8 @@ class ProfileSimulation:
         self.intensities = intensities
         self.hkls = hkls
 
-    def get_plot(self, g_max, annotate_peaks=True, with_labels=True, fontsize=12):
+    def get_plot(self, g_max, annotate_peaks=True,
+                 with_labels=True, fontsize=12):
         """Plots the diffraction profile simulation.
 
         Parameters

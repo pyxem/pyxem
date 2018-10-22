@@ -8,7 +8,7 @@ potentially little experience with open-source code development. This guide is
 primarily aimed at this audience, helping to reduce the barrier to contribution.
 
 Start using pyXem
------------------
+=================
 
 The best way to start understanding how pyXem is to use it.
 
@@ -39,7 +39,7 @@ PS: If you choose to develop in Windows/Mac you may find `Github Desktop
 
 
 Got a problem? -- ask!
-----------------------
+======================
 
 Open source projects are all about community - we put in much effort to make
 good tools available to all and most people are happy to help others start out.
@@ -54,14 +54,14 @@ you want to work on.
 
 
 Good coding practice
---------------------
+====================
 
 The most important aspects of good coding practice are: (1) to work in managable
 branches, (2) develop good code style, (3) write tests for new functions, and (4)
 document what the code does. Tips on these points are provided below.
 
 Use git to work in managable branches
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------
 
 Git is an open source "version control" system that enables you to can separate out
 your modifications to the code into many versions (called branches) and switch between 
@@ -73,7 +73,7 @@ The most important thing to separate your contributions so that each branch is s
 advancement on the "master" code or on another branch. 
 
 Get the style right
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 pyXem follows the Style Guide for Python Code - these are just some rules for
 consistency that you can read all about in the `Python Style Guide
@@ -85,7 +85,7 @@ You can check your code with the `pep8 Code Checker
 .. _tests-label:
 
 Writing tests
-^^^^^^^^^^^^^
+-------------
 
 pyXem aims to have all of the functions within it tested, which involves writing
 short methods that call the functions and check output values agains known 
@@ -132,7 +132,7 @@ Useful hints on testing:
 
 
 Write documentation
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 Documentation comes in two parts docstrings and user-guide documentation.
 
@@ -153,7 +153,7 @@ command documentation for more details.
 
 
 Learn more
-----------
+==========
 
 1. HyperSpy's `contribution guide <http://hyperspy.org/hyperspy-doc/current/dev_guide.html#developer-guide>`__: a lot of nice information on how to contribute to a scientific Python project.
 2. The Python programming language, `for beginners <https://www.python.org/about/gettingstarted/>`__.
