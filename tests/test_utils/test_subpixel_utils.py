@@ -31,24 +31,27 @@ def exp_disc():
     arr = np.zeros((ss,ss))
     rr, cc = draw.circle(int(ss/2)+20, int(ss/2)-10, radius=disc_radius, shape=arr.shape)
     arr[rr, cc] = 1
-    arr = rescale(arr,upsample_factor)
     return arr
 
 @pytest.fixture()
 def sim_disc():
-    return get_simulated_disc(60,5,upsample_factor=10)
+    return get_simulated_disc(60,5)
+
+@pytest.fixture()
+def upsample_factor():
+    return int(10)
 
 
 @pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
-def test___conventional_xc(exp_disc,sim_disc):
+def test___conventional_xc(exp_disc,sim_disc,upsample_factor):
     # this work (and measures) on the upsampled versions of the images
-    s = _conventional_xc(exp_disc,sim_disc)
-    error = np.subtract(s,np.asarray([200,-100]))
+    s = _conventional_xc(exp_disc,sim_disc,upsample_factor)
+    error = np.subtract(s,np.asarray([20,-10]))
     rms = np.sqrt(error[0]**2+error[1]**2)
     assert rms < 1 #which corresponds to a 10th of a pixel
 
 @pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
 def test_get_experimental_square(exp_disc):
-    square = get_experimental_square(exp_disc,[17,19],6,10)
-    assert square.shape[0] == int(6*10)
-    assert square.shape[1] == int(6*10)
+    square = get_experimental_square(exp_disc,[17,19],6)
+    assert square.shape[0] == int(6)
+    assert square.shape[1] == int(6)

@@ -48,7 +48,7 @@ class SubpixelrefinementGenerator():
 
     def conventional_xc(self,square_size,disc_radius,upsample_factor):
         """
-        Refines the peaks using a conventional form of cross correlation (COM registration)
+        Refines the peaks using a conventional form of (phase) cross correlation
 
         Parameters
         ----------
@@ -65,12 +65,12 @@ class SubpixelrefinementGenerator():
             array containing the refined vectors in pixel units
         """
         self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
-        sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
+        sim_disc = get_simulated_disc(square_size,disc_radius)
         for i in np.arange(0,len(self.vectors_init)):
             vect = self.vectors_init[i]
-            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,upsample_factor=upsample_factor,inplace=False)
-            shifts = expt_disc.map(_conventional_xc,sim_disc=sim_disc,inplace=False)
-            self.vectors_out[:,:,i,:] = vect + shifts.data / upsample_factor
+            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,inplace=False)
+            shifts = expt_disc.map(_conventional_xc,sim_disc=sim_disc,upsample_factor=upsample_factor,inplace=False)
+            self.vectors_out[:,:,i,:] = vect + shifts.data
 
         self.last_method = "conventional_xc"
         return self.vectors_out
