@@ -37,14 +37,15 @@ def create_spot():
 
 @pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
 def test_conventional_xc(diffraction_pattern):
-    SPR_generator = SubpixelrefinementGenerator(diffraction_pattern,np.asarray([[4,4]]))
-    diff_vect = SPR_generator.conventional_xc(4,2,100)
-    assert True
+    SPR_generator = SubpixelrefinementGenerator(diffraction_pattern,np.asarray([[1,-1]]))
+    assert SPR_generator.calibration == 1
+    assert np.allclose(SPR_generator.center,4)
+    diff_vect = SPR_generator.conventional_xc(4,2,10)
 
 @pytest.mark.filterwarnings('ignore::UserWarning') #various skimage warnings
 def test_assertioned_xc(create_spot):
-    spr = SubpixelrefinementGenerator(create_spot,np.asarray([[90,30]]))
+    spr = SubpixelrefinementGenerator(create_spot,np.asarray([[90-64,30-64]]))
     s = spr.conventional_xc(12,4,8)
-    error = np.subtract(s[0,0],np.asarray([[90,30]]))
+    error = np.subtract(s[0,0],np.asarray([[90-64,30-64]]))
     rms_error = np.sqrt(error[0,0]**2+error[0,1]**2)
     assert rms_error < 0.2 #1/5th a pixel
