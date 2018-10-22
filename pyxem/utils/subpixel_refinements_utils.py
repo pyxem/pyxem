@@ -25,36 +25,31 @@ from skimage.feature import register_translation
 from skimage import draw
 from skimage.transform import rescale
 
-def get_experimental_square(z,vector,square_size,upsample_factor):
+def get_experimental_square(z,vector,square_size):
     """
     'Cuts out' a region around a given diffraction vector and returns an upsampled copy.
 
     Parameters
     ----------
-    z : np.array() 
+    z : np.array()
         Single diffraction pattern
-    vector : np.array() 
+    vector : np.array()
         Single vector to be cut out, in pixels (int) [x,y] with top left as [0,0]
     square_size : int
         The length of one side of the bounding square (must be even)
-    upsample_factor : int 
-        The factor by which to up-sample (must be even)
 
     Returns
     -------
-    square : np.array() 
-        Of size (L,L) where L = square_size*upsample_factor
+    square : np.array()
+        Of size (L,L) where L = square_size
 
     """
 
-
     cx,cy,half_ss = vector[0], vector[1], int(square_size/2)
     _z = z[cx-half_ss:cx+half_ss,cy-half_ss:cy+half_ss]
-    _z = rescale(_z,upsample_factor)
-
     return _z
 
-def get_simulated_disc(square_size,disc_radius,upsample_factor):
+def get_simulated_disc(square_size,disc_radius):
     """
     Create a uniform disc for correlating with the experimental square
 
@@ -64,27 +59,24 @@ def get_simulated_disc(square_size,disc_radius,upsample_factor):
         (even) - size of the bounding box
     disc_radius : int
         radius of the disc
-    upsample_factor : int 
-        The factor by which to upsample (must be even)
-        
+
     Returns
     -------
-    
+
     arr: np.array()
         Upsampled copy of the simulated disc as a numpy array
-        
+
     """
 
-    ss = int(square_size)#*upsample_factor) #upsample square size
+    ss = int(square_size)
     arr = np.zeros((ss,ss))
     rr, cc = draw.circle(int(ss/2), int(ss/2), radius=disc_radius, shape=arr.shape) #is the thin disc a good idea
     arr[rr, cc] = 1
-    arr = rescale(arr,upsample_factor)
     return arr
 
-def _conventional_xc(exp_disc,sim_disc):
+def _conventional_xc(exp_disc,sim_disc,upsample_factor):
     """
-    Takes two images of disc and finds the shift between them using conventional cross correlation
+    Takes two images of disc and finds the shift between them using conventional (phase) cross correlation
 
     Parameters
     ----------
@@ -92,6 +84,8 @@ def _conventional_xc(exp_disc,sim_disc):
         A numpy array of the "experimental" disc
     sim_disc : np.array()
         A numpy array of the disc used as a template
+    upsample_factor: int (must be even)
+        Factor to upsample by, reciprocal of the subpixel resolution (eg 10 ==> 1/10th of a pixel)
 
     Returns
     -------
@@ -99,5 +93,5 @@ def _conventional_xc(exp_disc,sim_disc):
         Pixel shifts required to register the two images
     """
 
-    shifts,error,_ = register_translation(exp_disc,sim_disc)
+    shifts,error,_ = register_translation(exp_disc,sim_disc,upsample_factor)
     return shifts

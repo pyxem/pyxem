@@ -23,6 +23,7 @@ Generating subpixel resolution on diffraction vectors
 import numpy as np
 from pyxem.utils.subpixel_refinements_utils import *
 from pyxem.utils.subpixel_refinements_utils import _conventional_xc
+from pyxem.utils.expt_utils import peaks_as_gvectors
 
 class SubpixelrefinementGenerator():
     """
@@ -33,7 +34,7 @@ class SubpixelrefinementGenerator():
     dp : ElectronDiffraction
         The electron diffraction patterns to be refined
     vectors : numpy.array()
-        An array containing the vectors (in pixels) to the locations of the spots to be refined
+        An array containing the vectors (in calibrated units) to the locations of the spots to be refined
 
     References
     ----------
@@ -45,10 +46,14 @@ class SubpixelrefinementGenerator():
         self.dp = dp
         self.vectors_init = vectors
         self.last_method = None
+        # this hard codes the squareness of patterns
+        self.calibration = dp.axes_manager.signal_axes[0].scale
+        self.center      = (dp.axes_manager.signal_axes[0].size)/2
+        self.vectors_pixels = ((vectors/self.calibration)+self.center).astype(int)
 
     def conventional_xc(self,square_size,disc_radius,upsample_factor):
         """
-        Refines the peaks using a conventional form of cross correlation (COM registration)
+        Refines the peaks using a conventional form of (phase) cross correlation
 
         Parameters
         ----------
@@ -62,15 +67,15 @@ class SubpixelrefinementGenerator():
         Returns
         -------
         vector_out: np.array()
-            array containing the refined vectors in pixel units
+            array containing the refined vectors in calibrated units
         """
         self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
-        sim_disc = get_simulated_disc(square_size,disc_radius,upsample_factor)
+        sim_disc = get_simulated_disc(square_size,disc_radius)
         for i in np.arange(0,len(self.vectors_init)):
-            vect = self.vectors_init[i]
-            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,upsample_factor=upsample_factor,inplace=False)
-            shifts = expt_disc.map(_conventional_xc,sim_disc=sim_disc,inplace=False)
-            self.vectors_out[:,:,i,:] = vect + shifts.data / upsample_factor
+            vect = self.vectors_pixels[i]
+            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,inplace=False)
+            shifts = expt_disc.map(_conventional_xc,sim_disc=sim_disc,upsample_factor=upsample_factor,inplace=False)
+            self.vectors_out[:,:,i,:] = (((vect + shifts.data) - self.center)*self.calibration)
 
         self.last_method = "conventional_xc"
         return self.vectors_out
