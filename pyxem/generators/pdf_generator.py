@@ -38,3 +38,46 @@ class PDFGenerator():
     """
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
+
+    def get_pdf(self,
+                    s_cutoff,
+                    r_cutoff = [0, 20],
+                    r_increment = 0.01
+                    ):
+        """ Calculates the pdf
+
+        Parameters
+        ----------
+        s_cutoff = a list with the format [<s_min>, <s_max>], which sets the
+        integration limits for the pdf calculation.
+        r_cutoff = a list with the format [<r_min>, <r_max>], which sets the
+        limits of the real space axis in
+        """
+        r_min, r_max = r_cutoff
+        s_min, s_max = s_cutoff
+
+        r_values = np.arange(r_min,r_max,r_increment)
+        r_values = r_values.reshape(1,r_values.size)
+        #turn to a row vector for integral
+
+        s_scale = self.signal.axes_manager.signal_axes[0].scale
+        #invert to find limits in terms of which values in the reduced Intensity
+        s_limits = [int(s_min/s_scale),int(s_max/s_scale)]
+        #write a check that these aren't out of bounds
+        s_values = np.arange(s_limits[0],s_limits[1],1)*s_scale
+        s_values = s_values.reshape(s_values.size,1) #column vector
+
+        limited_red_int = self.signal.data[:,:,s_limits[0]:s_limits[1]]
+
+        pdf_sine = np.sin(4*np.pi*s_values@r_values)
+        #creates a vector of the pdf
+        rpdf = PDFProfile(16*np.pi*s_scale*(limited_red_int@pdf_sine))
+
+        return rpdf
+
+'''
+r = np.linspace(0,20,R)
+    rvec = r.reshape(1,r.size)
+    sin = np.sin(np.vstack(s[cen:cut]*4*np.pi)@rvec)
+    rpdf = 4*(intensity[cen:cut]@sin)*4*np.pi*ds
+    return rpdf'''
