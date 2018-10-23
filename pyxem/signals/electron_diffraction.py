@@ -628,11 +628,11 @@ class ElectronDiffraction(Signal2D):
 
         return peaks
 
-    def find_peaks_interactive(self, imshow_kwargs={}):
+    def find_peaks_interactive(self,disc_image=None,imshow_kwargs={}):
         """Find peaks using an interactive tool.
 
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
-        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(disc_image=disc_image,imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
