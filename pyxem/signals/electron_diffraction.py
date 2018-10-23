@@ -28,6 +28,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import *
 from pyxem.utils.peakfinders2D import *
 from pyxem.utils import peakfinder2D_gui
+from warnings import warn
 
 
 class ElectronDiffraction(Signal2D):
@@ -634,5 +635,8 @@ class ElectronDiffraction(Signal2D):
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
+        if disc_image is None:
+            warn("You have no specified a disc image, as such you will not be able to use the xc method in this session")
+            
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(disc_image=disc_image,imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
