@@ -64,6 +64,10 @@ class PDFGenerator():
         #invert to find limits in terms of which values in the reduced Intensity
         s_limits = [int(s_min/s_scale),int(s_max/s_scale)]
         #write a check that these aren't out of bounds
+        if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
+            s_limits[1] = self.signal.axes_manager.signal_axes[0].size
+            print('s_max out of bounds for reduced intensity.',
+            'Setting to full signal')
         s_values = np.arange(s_limits[0],s_limits[1],1)*s_scale
         s_values = s_values.reshape(s_values.size,1) #column vector
 
@@ -73,11 +77,10 @@ class PDFGenerator():
         #creates a vector of the pdf
         rpdf = PDFProfile(16*np.pi*s_scale*(limited_red_int@pdf_sine))
 
-        return rpdf
+        signal_axis = rpdf.axes_manager.signal_axes[0]
+        pdf_scaling = r_increment
+        signal_axis.scale = pdf_scaling
+        signal_axis.name = 'Radius r'
+        signal_axis.units = '$A$'
 
-'''
-r = np.linspace(0,20,R)
-    rvec = r.reshape(1,r.size)
-    sin = np.sin(np.vstack(s[cen:cut]*4*np.pi)@rvec)
-    rpdf = 4*(intensity[cen:cut]@sin)*4*np.pi*ds
-    return rpdf'''
+        return rpdf

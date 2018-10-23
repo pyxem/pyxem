@@ -21,6 +21,7 @@
 
 """
 import numpy as np
+import matplotlib.pyplot as plt
 
 from hyperspy.signals import Signal1D
 
@@ -75,6 +76,7 @@ class ReducedIntensityGenerator():
         fracs: a list of fraction of the respective elements
         N = the "slope"
         C = an additive constant
+        fit_plot_max: the maximum y value in the fitting plot.
         """
 
         fit_model = self.signal.create_model()
