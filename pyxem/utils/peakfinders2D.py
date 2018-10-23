@@ -336,8 +336,6 @@ def find_peaks_xc(z,disc_image,min_distance=5,peak_threshold=0.2):
         (n_peaks, 2)
         Array of peak coordinates.
 
-
-
     """
     response_image = match_template(z,disc_image,pad_input=True)
     peaks = peak_local_max(response_image,min_distance=min_distance,threshold_rel=peak_threshold)

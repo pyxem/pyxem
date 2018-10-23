@@ -593,6 +593,7 @@ class ElectronDiffraction(Signal2D):
             the original ElectronDiffraction object. Each signal is a BaseSignal
             object contiaining the diffraction vectors found at each navigation
             position, in calibrated units.
+
         """
         method_dict = {
             'zaefferer': find_peaks_zaefferer,
@@ -632,11 +633,23 @@ class ElectronDiffraction(Signal2D):
     def find_peaks_interactive(self,disc_image=None,imshow_kwargs={}):
         """Find peaks using an interactive tool.
 
+        Parameters
+        ----------
+
+        disc_image : numpy.array (default:None)
+            see .utils.peakfinders2D.peak_finder_xc for details. If not
+            given a warning will be raised.
+
+        imshow_kwargs : (default:{})
+            kwargs to be passed to internal imshow statements
+
+        Notes
+        -----
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
         if disc_image is None:
             warn("You have no specified a disc image, as such you will not be able to use the xc method in this session")
-            
+
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(disc_image=disc_image,imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
