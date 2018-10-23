@@ -314,7 +314,7 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
     centers = blobs[:, :2]
     return centers
 
-def find_peaks_xc(z,disc_image,min_distance,peak_threshold=0.2):
+def find_peaks_xc(z,disc_image,min_distance=5,peak_threshold=0.2):
     """
     Find peaks using the the correlation between the image and a reference peaks
 
@@ -342,5 +342,5 @@ def find_peaks_xc(z,disc_image,min_distance,peak_threshold=0.2):
     response_image = match_template(z,disc_image,pad_input=True)
     peaks = peak_local_max(response_image,min_distance=min_distance,threshold_rel=peak_threshold)
     peaks -= 1 #this means the return format is the same as the other peak finders
-    
+
     return peaks
