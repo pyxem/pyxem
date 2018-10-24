@@ -138,6 +138,10 @@ class TestRadialProfile:
 
     @pytest.fixture
     def diffraction_pattern_for_radial(self):
+        """
+        Two diffraction patterns with easy to see radial profiles, wrapped
+        in ElectronDiffraction  <2|8,8>
+        """
         dp = ElectronDiffraction(np.zeros((2, 8, 8)))
         dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
                                [0., 2., 3., 3., 3., 3., 2., 0.],
@@ -196,6 +200,10 @@ class TestPeakFinding:
 
     @pytest.fixture
     def ragged_peak(self):
+        """
+        A small selection of peaks in an ElectronDiffraction, to allow flexibilty
+        of test building here.
+        """
         pattern = np.zeros((2,2,128,128))
         pattern[:,:,40:42,45] = 1
         pattern[:,:,110,30:32] = 1
@@ -204,24 +212,23 @@ class TestPeakFinding:
         dp.set_diffraction_calibration(1)
         return dp
 
-    methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
+    methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat','xc']
 
     @pytest.mark.parametrize('method', methods)
     @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
     def test_findpeaks_ragged(self,ragged_peak,method):
-        output = ragged_peak.find_peaks(method=method,show_progressbar=False)
-
-    @pytest.mark.skip(reason="This raises a traiterror at present")
-    @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
-    def test_find_peaks_xc(self,ragged_peak):
-        disc = np.ones((2,2))
-        output = ragged_peak.find_peaks(method='xc',disc_image=disc,min_distance=3)
+        if method == 'xc':
+            disc = np.ones((2,2))
+            output = ragged_peak.find_peaks(method='xc',disc_image=disc,min_distance=3)
+        else:
+            output = ragged_peak.find_peaks(method=method,show_progressbar=False)
 
 class TestsAssertionless:
     def test_decomposition(self,diffraction_pattern):
         storage = diffraction_pattern.decomposition()
 
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
+    @pytest.mark.filterwarnings('ignore::UserWarning') #we don't want to use xc in this bit
     def test_find_peaks_interactive(self,diffraction_pattern):
         from matplotlib import pyplot as plt
         plt.ion() #to make plotting non-blocking

@@ -625,7 +625,7 @@ class ElectronDiffraction(Signal2D):
         x.units = 'nm'
 
         y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
+        y.scale = self.axes_manager.navigation_axes[1].scale
         y.units = 'nm'
 
         return peaks

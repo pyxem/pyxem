@@ -35,10 +35,13 @@ from scipy.ndimage.filters import gaussian_filter
               [0., 0., 0., 0., 0., 1., 0., 0.],
               [0., 0., 0., 0., 0., 0., 0., 0.]])
 ])
-def diffraction_pattern(request):
+def diffraction_pattern_one_dimension(request):
+    """
+    1D (in navigation space) diffraction pattern <1|8,8>
+    """
     return ElectronDiffraction(request.param)
 
-def test_index_coords(diffraction_pattern):
+def test_index_coords(diffraction_pattern_one_dimension):
     x = np.array([[-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
                   [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
                   [-4., -3., -2., -1.,  0.,  1.,  2.,  3.],
@@ -55,12 +58,12 @@ def test_index_coords(diffraction_pattern):
                   [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
                   [ 2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.],
                   [ 3.,  3.,  3.,  3.,  3.,  3.,  3.,  3.]])
-    xc, yc = _index_coords(diffraction_pattern.data)
+    xc, yc = _index_coords(diffraction_pattern_one_dimension.data)
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
-def test_index_coords_non_centeral(diffraction_pattern):
-    xc, yc = _index_coords(diffraction_pattern.data,origin=(0,0))
+def test_index_coords_non_centeral(diffraction_pattern_one_dimension):
+    xc, yc = _index_coords(diffraction_pattern_one_dimension.data,origin=(0,0))
     assert xc[0,0] == 0
     assert yc[0,0] == 0
     assert xc[0,5] == 5
@@ -101,8 +104,8 @@ def test_peaks_as_gvectors(z, center, calibration, g):
 
 methods = ['average','nan']
 @pytest.mark.parametrize('method', methods)
-def test_remove_dead_pixels(diffraction_pattern,method):
-    z = diffraction_pattern.data
+def test_remove_dead_pixels(diffraction_pattern_one_dimension,method):
+    z = diffraction_pattern_one_dimension.data
     dead_removed = remove_dead(z,[[3,3]],deadvalue=method)
     assert z[3,3] != dead_removed[3,3]
 
