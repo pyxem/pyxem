@@ -341,4 +341,4 @@ def find_peaks_xc(z,disc_image,min_distance=5,peak_threshold=0.2):
     peaks = peak_local_max(response_image,min_distance=min_distance,threshold_rel=peak_threshold)
     peaks -= 1 #this means the return format is the same as the other peak finders
 
-    return peaks
+    return clean_peaks(peaks)
