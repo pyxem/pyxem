@@ -49,3 +49,10 @@ def test_assertioned_xc(create_spot):
     error = np.subtract(s[0,0],np.asarray([[90-64,30-64]]))
     rms_error = np.sqrt(error[0,0]**2+error[0,1]**2)
     assert rms_error < 0.2 #1/5th a pixel
+
+def test_assertioned_com(create_spot):
+    spr = SubpixelrefinementGenerator(create_spot,np.asarray([[90-64,30-64]]))
+    s = spr.center_of_mass_method(8)
+    error = np.subtract(s[0,0],np.asarray([[90-64,30-64]]))
+    rms_error = np.sqrt(error[0,0]**2+error[0,1]**2)
+    assert rms_error < 1e-5 #perfect detection for this trivial case
