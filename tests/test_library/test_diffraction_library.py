@@ -61,6 +61,11 @@ def test_library_io(get_library):
                        loaded_library['Phase'][(0,0,0)]['intensities'])
 
 @pytest.mark.xfail(raises=ValueError)
+def test_angle_but_no_phase(get_library):
+    # we have given an angle but no phase
+    assert isinstance(get_library.get_library_entry(angle=(0,0,0))['Sim'],
+                                                    DiffractionSimulation)
+@pytest.mark.xfail(raises=ValueError)
 def test_unknown_library_entry(get_library):
     # The angle we have asked for is not in the library
     assert isinstance(get_library.get_library_entry(phase='Phase',
