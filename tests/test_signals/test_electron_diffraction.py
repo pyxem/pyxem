@@ -228,6 +228,7 @@ class TestsAssertionless:
         storage = diffraction_pattern.decomposition()
 
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
+    @pytest.mark.filterwarnings('ignore::UserWarning') #we don't want to use xc in this bit
     def test_find_peaks_interactive(self,diffraction_pattern):
         from matplotlib import pyplot as plt
         plt.ion() #to make plotting non-blocking
