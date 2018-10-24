@@ -24,6 +24,7 @@ import numpy as np
 from pyxem.utils.subpixel_refinements_utils import *
 from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.expt_utils import peaks_as_gvectors
+from scipy.ndimage.measurements import center_of_mass
 
 class SubpixelrefinementGenerator():
     """
@@ -78,4 +79,33 @@ class SubpixelrefinementGenerator():
             self.vectors_out[:,:,i,:] = (((vect + shifts.data) - self.center)*self.calibration)
 
         self.last_method = "conventional_xc"
+        return self.vectors_out
+
+    def center_of_mass_method(self,square_size):
+        """
+        Find the subpixel refinement of a peak by assuming it lies at the center of intensity
+
+        Parameters
+        ----------
+        square_size : int
+            Length (in pixels) of one side of a square the contains the peak to be refined
+
+        Returns
+        -------
+        vector_out: np.array()
+            array containing the refined vectors in calibrated units
+
+        Notes
+        -----
+        This will work poorly on disks with strong dynamic contrast
+        """
+
+        self.vectors_out = np.zeros((self.dp.data.shape[0],self.dp.data.shape[1],self.vectors_init.shape[0],self.vectors_init.shape[1]))
+        for i in np.arange(0,len(self.vectors_init)):
+            vect = self.vectors_pixels[i]
+            expt_disc = self.dp.map(get_experimental_square,vector=vect,square_size=square_size,inplace=False)
+            shifts = expt_disc.map(center_of_mass,inplace=False) - (square_size/2)
+            self.vectors_out[:,:,i,:] = (((vect + shifts.data) - self.center)*self.calibration)
+
+        self.last_method = "center_of_mass_method"
         return self.vectors_out
