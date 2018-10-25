@@ -22,12 +22,13 @@ and going through the "boot camp" to get a feel for the terminology.
 
 In brief, to give you a hint on the terminology to search for, the contribution
 pattern is:
-    1. Setup git/github if you don't have it.
-    2. Fork pyXem on github.
-    3. Checkout your fork on your local machine.
-    4. Create a new branch locally where you will make your changes.
-    5. Push the local changes to your own github fork.
-    6. Create a pull request (PR) to the official pyXem repository.
+
+1. Setup git/github if you don't have it.
+2. Fork pyXem on github.
+3. Checkout your fork on your local machine.
+4. Create a new branch locally where you will make your changes.
+5. Push the local changes to your own github fork.
+6. Create a pull request (PR) to the official pyXem repository.
 
 Note: You cannot mess up the main pyXem project. So when you're starting out be confident to
 play, get it wrong, and if it all goes wrong you can always get a fresh install
