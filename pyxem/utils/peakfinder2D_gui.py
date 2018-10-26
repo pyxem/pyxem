@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from IPython.display import display
 from .peakfinders2D import *
 
-METHODS = [find_peaks_zaefferer,find_peaks_stat, find_peaks_dog, find_peaks_log]
+METHODS = [find_peaks_zaefferer,find_peaks_stat, find_peaks_dog, find_peaks_log,find_peaks_xc]
 
 
 class PeakFinderUIBase:
@@ -66,13 +66,16 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
     Find peaks using a Jupyter notebook-based user interface
     """
 
-    def __init__(self, imshow_kwargs={}):
+    def __init__(self,disc_image=None,imshow_kwargs={}):
         super(PeakFinderUIIPYW, self).__init__()
         self.ax = None
         self.image = None
         self.pts = None
         self.param_container = None
         self.imshow_kwargs = imshow_kwargs
+        # if you want to use xc
+        self.params[find_peaks_xc.__name__]['disc_image'] = disc_image
+
 
     def init_ui(self):
         self.create_choices_widget()

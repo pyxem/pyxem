@@ -28,6 +28,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import *
 from pyxem.utils.peakfinders2D import *
 from pyxem.utils import peakfinder2D_gui
+from warnings import warn
 
 
 class ElectronDiffraction(Signal2D):
@@ -52,15 +53,15 @@ class ElectronDiffraction(Signal2D):
                                     rocking_angle=None,
                                     rocking_frequency=None,
                                     exposure_time=None):
-        """Set the experimental parameters in metadata.
+        """Set experimental parameters in metadata.
 
         Parameters
         ----------
-        accelerating_voltage: float
+        accelerating_voltage : float
             Accelerating voltage in kV
         camera_length: float
             Camera length in cm
-        scan_rotation: float
+        scan_rotation : float
             Scan rotation in degrees
         convergence_angle : float
             Convergence angle in mrad
@@ -76,6 +77,10 @@ class ElectronDiffraction(Signal2D):
         if accelerating_voltage is not None:
             md.set_item("Acquisition_instrument.TEM.accelerating_voltage",
                         accelerating_voltage)
+        if camera_length is not None:
+            md.set_item(
+                "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
+                camera_length)
         if scan_rotation is not None:
             md.set_item("Acquisition_instrument.TEM.scan_rotation",
                         scan_rotation)
@@ -88,16 +93,10 @@ class ElectronDiffraction(Signal2D):
         if rocking_frequency is not None:
             md.set_item("Acquisition_instrument.TEM.rocking_frequency",
                         rocking_frequency)
-        if camera_length is not None:
-            md.set_item(
-                "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
-                camera_length
-            )
         if exposure_time is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
-                exposure_time
-            )
+                exposure_time)
 
     def set_diffraction_calibration(self, calibration, center=None):
         """Set diffraction pattern pixel size in reciprocal Angstroms and origin
@@ -105,9 +104,9 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        calibration: float
+        calibration : float
             Diffraction pattern calibration in reciprocal Angstroms per pixel.
-        center: tuple
+        center : tuple
             Position of the direct beam center, in pixels. If None the center of
             the data array is assumed to be the center of the pattern.
         """
@@ -200,7 +199,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        dark_field_sum: :obj:`hyperspy.signals.BaseSignal`
+        dark_field_sum : :obj:`hyperspy.signals.BaseSignal`
             The virtual image signal associated with the specified roi.
 
         Examples
@@ -217,8 +216,9 @@ class ElectronDiffraction(Signal2D):
             axis=dark_field.axes_manager.signal_axes
         )
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
-        vdf = dark_field_sum.as_signal2D((0,1))
-        return vdf
+        vdfim = dark_field_sum.as_signal2D((0,1))
+
+        return vdfim
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
@@ -374,7 +374,7 @@ class ElectronDiffraction(Signal2D):
         rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
         rp.axes_manager.navigation_axes = self.axes_manager.navigation_axes
         rp_axis = rp.axes_manager.signal_axes[0]
-        rp_axis.name = 'q'
+        rp_axis.name = 'k'
         rp_axis.scale = self.axes_manager.signal_axes[0].scale
         rp_axis.units = '$A^{-1}$'
 
@@ -445,19 +445,22 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2]/2-0.5,self.data.shape[3]/2-0.5))
+        origin_coordinates = np.array((self.data.shape[2]/2-0.5,
+                                       self.data.shape[3]/2-0.5))
 
         if square_width is not None:
             min_index = np.int(origin_coordinates[0]-(0.5+square_width))
             max_index = np.int(origin_coordinates[0]+(1.5+square_width)) #fails if non-square dp
             shifts = self.isig[min_index:max_index,min_index:max_index].get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
         else:
-            shifts = self.get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+            shifts = self.get_direct_beam_position(radius_start, radius_finish,
+                                                   *args, **kwargs)
 
         shifts = -1*shifts.data
-        shifts = shifts.reshape(nav_shape_x*nav_shape_y,2)
+        shifts = shifts.reshape(nav_shape_x*nav_shape_y, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,*args,**kwargs)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0,
+                            *args, **kwargs)
 
     def remove_background(self, method,
                           *args, **kwargs):
@@ -486,7 +489,7 @@ class ElectronDiffraction(Signal2D):
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
-        implementation: 'scipy' or 'skimage'
+        implementation : 'scipy' or 'skimage'
             (median only) see expt_utils.subtract_background_median
             for details, if not selected 'scipy' is used
         bg : array
@@ -524,7 +527,8 @@ class ElectronDiffraction(Signal2D):
                                      inplace=False, *args, **kwargs)
 
         elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(subtract_reference, inplace=False,
+                                     *args, **kwargs)
 
         else:
             raise NotImplementedError(
@@ -545,10 +549,8 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-
         The results are stored in self.learning_results. For a full description
         of parameters see :meth:`hyperspy.learn.mva.MVA.decomposition`
-
 
         """
         super(Signal2D, self).decomposition(*args, **kwargs)
@@ -579,10 +581,10 @@ class ElectronDiffraction(Signal2D):
             * 'xc' - A cross correlation peakfinder
 
 
-        *args
-            associated with above methods
-        **kwargs
-            associated with above methods.
+        *args:
+            Arguments to be passed to the peak finders.
+        **kwargs:
+            Keyword arguments to be passed to the peak finders.
 
         Returns
         -------
@@ -591,6 +593,7 @@ class ElectronDiffraction(Signal2D):
             the original ElectronDiffraction object. Each signal is a BaseSignal
             object contiaining the diffraction vectors found at each navigation
             position, in calibrated units.
+
         """
         method_dict = {
             'zaefferer': find_peaks_zaefferer,
@@ -608,18 +611,44 @@ class ElectronDiffraction(Signal2D):
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
         peaks.map(peaks_as_gvectors,
-                  center=np.array(self.axes_manager.signal_shape)/2 - 0.5,
+                  center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
 
+        #Set calibration to same as signal
+        x = peaks.axes_manager.navigation_axes[0]
+        y = peaks.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = self.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.axes_manager.navigation_axes[1].scale
+        y.units = 'nm'
+
         return peaks
 
-    def find_peaks_interactive(self, imshow_kwargs={}):
+    def find_peaks_interactive(self,disc_image=None,imshow_kwargs={}):
         """Find peaks using an interactive tool.
 
+        Parameters
+        ----------
+        disc_image : numpy.array (default:None)
+            see .utils.peakfinders2D.peak_finder_xc for details. If not
+            given a warning will be raised.
+
+        imshow_kwargs : (default:{})
+            kwargs to be passed to internal imshow statements
+
+        Notes
+        -----
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
-        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(imshow_kwargs=imshow_kwargs)
+        if disc_image is None:
+            warn("You have no specified a disc image, as such you will not be able to use the xc method in this session")
+
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(disc_image=disc_image,imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
