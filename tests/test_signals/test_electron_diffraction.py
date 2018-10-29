@@ -187,7 +187,7 @@ class TestRadialProfile:
                                         mask_for_radial):
         rp = diffraction_pattern_for_radial.get_radial_profile()
         rp_mask = diffraction_pattern_for_radial.get_radial_profile(
-            mask=mask_for_radial)
+            mask_array=mask_for_radial)
 
         assert isinstance(rp, Signal1D)
         assert isinstance(rp_mask, Signal1D)
@@ -206,7 +206,7 @@ class TestRadialProfile:
                             mask_for_radial, expected_mask):
         rp = diffraction_pattern_for_radial.get_radial_profile()
         rp_mask = diffraction_pattern_for_radial.get_radial_profile(
-            mask=mask_for_radial)
+            mask_array=mask_for_radial)
         assert np.allclose(rp.data, expected, atol=1e-3)
         assert np.allclose(rp_mask.data, expected_mask, atol=1e-3)
 
