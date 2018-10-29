@@ -90,11 +90,11 @@ class IndexationResults(BaseSignal):
         match_peaks = self.map(peaks_from_best_template,
                                phase=phase, library=library,
                                inplace=False)
-        mmx,mmy = generate_marker_inputs_from_peaks(match_peaks)
+        mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
-        for mx,my in zip(mmx,mmy):
-            m = hs.markers.point(x=mx,y=my,color='red',marker='x')
-            signal.add_marker(m,plot_marker=True,permanent=True)
+        for mx, my in zip(mmx, mmy):
+            m = hs.markers.point(x=mx, y=my, color='red', marker='x')
+            signal.add_marker(m, plot_marker=True, permanent=True)
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):
@@ -111,16 +111,16 @@ class IndexationResults(BaseSignal):
 
         """
 
-        #TODO: Add alternative methods beyond highest correlation score at each
-        #navigation position.
-        #TODO Only keep a subset of the data for the map
+        # TODO: Add alternative methods beyond highest correlation score at each
+        # navigation position.
+        # TODO Only keep a subset of the data for the map
         crystal_map = self.map(crystal_from_matching_results,
                                inplace=False,
                                *args, **kwargs)
 
         cryst_map = CrystallographicMap(crystal_map)
 
-        #Set calibration to same as signal for first navigation axis
+        # Set calibration to same as signal for first navigation axis
         try:
             x = cryst_map.axes_manager.signal_axes[0]
             x.name = 'x'
@@ -128,7 +128,7 @@ class IndexationResults(BaseSignal):
             x.units = 'nm'
         except IndexError:
             pass
-        #Set calibration to same as signal for second navigation axis if there
+        # Set calibration to same as signal for second navigation axis if there
         try:
             y = cryst_map.axes_manager.signal_axes[1]
             y.name = 'y'

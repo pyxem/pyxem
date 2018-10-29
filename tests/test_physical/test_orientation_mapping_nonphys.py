@@ -94,6 +94,7 @@ def test_visuals():
     # Hand checking again
     assert True
 
+
 def test_plot_best_matching_results_on_signal():
     match_results.plot_best_matching_results_on_signal(dp,
                                                        phase=["Phase"],

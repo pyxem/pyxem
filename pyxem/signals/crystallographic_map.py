@@ -19,7 +19,7 @@
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
 from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
-from transforms3d.quaternions import qmult,qinverse
+from transforms3d.quaternions import qmult, qinverse
 import numpy as np
 from tqdm import tqdm
 
@@ -40,9 +40,11 @@ def load_mtex_map(filename):
     cmap = Signal2D(array).transpose(navigation_axes=2)
     return CrystallographicMap(cmap.isig[:5])  # don't keep x/y
 
+
 def _euler2axangle_signal(euler):
     """ Find the magnitude of a rotation"""
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
+
 
 def _distance_from_fixed_angle(angle, fixed_angle):
     """
@@ -82,9 +84,9 @@ class CrystallographicMap(BaseSignal):
         """Obtain a map of the best matching phase at each navigation position.
         """
 
-        phase_map =self.isig[0].as_signal2D((0,1))
+        phase_map = self.isig[0].as_signal2D((0, 1))
 
-        #Set calibration to same as signal for first navigation axis
+        # Set calibration to same as signal for first navigation axis
         try:
             x = phase_map.axes_manager.signal_axes[0]
             x.name = 'x'
@@ -92,7 +94,7 @@ class CrystallographicMap(BaseSignal):
             x.units = 'nm'
         except IndexError:
             pass
-        #Set calibration to same as signal for second navigation axis if there
+        # Set calibration to same as signal for second navigation axis if there
         try:
             y = phase_map.axes_manager.signal_axes[1]
             y.name = 'y'
@@ -116,9 +118,9 @@ class CrystallographicMap(BaseSignal):
         """
         eulers = self.isig[1:4]
         eulers.map(_euler2axangle_signal, inplace=True)
-        orientation_map = eulers.as_signal2D((0,1))
+        orientation_map = eulers.as_signal2D((0, 1))
 
-        #Set calibration to same as signal for first navigation axis
+        # Set calibration to same as signal for first navigation axis
         try:
             x = orientation_map.axes_manager.signal_axes[0]
             x.name = 'x'
@@ -126,7 +128,7 @@ class CrystallographicMap(BaseSignal):
             x.units = 'nm'
         except IndexError:
             pass
-        #Set calibration to same as signal for second navigation axis if there
+        # Set calibration to same as signal for second navigation axis if there
         try:
             y = orientation_map.axes_manager.signal_axes[1]
             y.name = 'y'
@@ -136,7 +138,6 @@ class CrystallographicMap(BaseSignal):
             pass
 
         return orientation_map
-
 
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
@@ -148,9 +149,9 @@ class CrystallographicMap(BaseSignal):
             The highest correlation score at each navigation position.
 
         """
-        correlation_map = self.isig[4].as_signal2D((0,1))
+        correlation_map = self.isig[4].as_signal2D((0, 1))
 
-        #Set calibration to same as signal for first navigation axis
+        # Set calibration to same as signal for first navigation axis
         try:
             x = correlation_map.axes_manager.signal_axes[0]
             x.name = 'x'
@@ -158,7 +159,7 @@ class CrystallographicMap(BaseSignal):
             x.units = 'nm'
         except IndexError:
             pass
-        #Set calibration to same as signal for second navigation axis if there
+        # Set calibration to same as signal for second navigation axis if there
         try:
             y = correlation_map.axes_manager.signal_axes[1]
             y.name = 'y'
@@ -168,7 +169,6 @@ class CrystallographicMap(BaseSignal):
             pass
 
         return correlation_map
-
 
     def get_reliability_map_orientation(self):
         """Obtain an orientation reliability map showing the difference between
@@ -183,9 +183,9 @@ class CrystallographicMap(BaseSignal):
             each navigation position.
 
         """
-        reliability_map = self.isig[5].as_signal2D((0,1))
+        reliability_map = self.isig[5].as_signal2D((0, 1))
 
-        #Set calibration to same as signal for first navigation axis
+        # Set calibration to same as signal for first navigation axis
         try:
             x = reliability_map.axes_manager.signal_axes[0]
             x.name = 'x'
@@ -193,7 +193,7 @@ class CrystallographicMap(BaseSignal):
             x.units = 'nm'
         except IndexError:
             pass
-        #Set calibration to same as signal for second navigation axis if there
+        # Set calibration to same as signal for second navigation axis if there
         try:
             y = reliability_map.axes_manager.signal_axes[1]
             y.name = 'y'
@@ -203,7 +203,6 @@ class CrystallographicMap(BaseSignal):
             pass
 
         return reliability_map
-
 
     def get_reliability_map_phase(self):
         """Obtain a reliability map showing the difference between the highest
@@ -218,9 +217,9 @@ class CrystallographicMap(BaseSignal):
             best scoring phase at each navigation position.
 
         """
-        reliability_map = self.isig[6].as_signal2D((0,1))
+        reliability_map = self.isig[6].as_signal2D((0, 1))
 
-        #Set calibration to same as signal for first navigation axis
+        # Set calibration to same as signal for first navigation axis
         try:
             x = reliability_map.axes_manager.signal_axes[0]
             x.name = 'x'
@@ -228,7 +227,7 @@ class CrystallographicMap(BaseSignal):
             x.units = 'nm'
         except IndexError:
             pass
-        #Set calibration to same as signal for second navigation axis if there
+        # Set calibration to same as signal for second navigation axis if there
         try:
             y = reliability_map.axes_manager.signal_axes[1]
             y.name = 'y'
@@ -238,7 +237,6 @@ class CrystallographicMap(BaseSignal):
             pass
 
         return reliability_map
-
 
     def get_modal_angles(self):
         """Obtain the modal angles (and their fractional occurances).
