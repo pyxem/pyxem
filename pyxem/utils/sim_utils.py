@@ -324,3 +324,32 @@ def is_lattice_hexagonal(latt):
     truth_list.append(latt.beta == 90)
     truth_list.append(latt.gamma == 120)
     return len(truth_list) == np.sum(truth_list)
+
+def carry_through_navigation_calibration(new_signal,old_signal):
+    """
+    Carry a calibration through from an object to a derivative of it
+
+    Parameters
+    ----------
+    new_signal : Signal2D
+        The signal to be calibrated
+    old_signal : Signal2D
+        The signal from which to take calibration
+    """
+    try:
+        x = new_signal.axes_manager.signal_axes[0]
+        x.name = 'x'
+        x.scale = old_signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+    except IndexError:
+        pass
+        # Set calibration to same as signal for second navigation axis if there
+    try:
+        y = new_signal.axes_manager.signal_axes[1]
+        y.name = 'y'
+        y.scale = old_signal.axes_manager.navigation_axes[1].scale
+        y.units = 'nm'
+    except IndexError:
+        pass
+
+    return old_signal
