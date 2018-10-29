@@ -202,17 +202,19 @@ class CrystallographicMap(BaseSignal):
 
         reliability_map = self.isig[6].as_signal2D((0,1))
 
-        #Set calibration to same as signal
+        #Set calibration to same as signal for first navigation axis
         x = reliability_map.axes_manager.signal_axes[0]
-        y = reliability_map.axes_manager.signal_axes[1]
-
         x.name = 'x'
         x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        #Set calibration to same as signal for second navigation axis if there
+        try:
+            y = reliability_map.axes_manager.signal_axes[1]
+            y.name = 'y'
+            y.scale = self.axes_manager.navigation_axes[1].scale
+            y.units = 'nm'
+        except IndexError:
+            pass
 
         return reliability_map
 

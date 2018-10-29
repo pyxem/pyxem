@@ -130,17 +130,19 @@ class IndexationGenerator():
                              **kwargs)
         matching_results = IndexationResults(matches)
 
-        #Set calibration to same as signal
-        x = matching_results.axes_manager.navigation_axes[0]
-        y = matching_results.axes_manager.navigation_axes[1]
-
+        #Set calibration to same as signal for first navigation axis
+        x = matching_results.axes_manager.signal_axes[0]
         x.name = 'x'
-        x.scale = signal.axes_manager.navigation_axes[0].scale
+        x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = signal.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        #Set calibration to same as signal for second navigation axis if there
+        try:
+            y = matching_results.axes_manager.signal_axes[1]
+            y.name = 'y'
+            y.scale = self.axes_manager.navigation_axes[1].scale
+            y.units = 'nm'
+        except IndexError:
+            pass
 
         return matching_results
 
