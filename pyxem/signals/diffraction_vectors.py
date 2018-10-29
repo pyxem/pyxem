@@ -65,9 +65,9 @@ class DiffractionVectors(BaseSignal):
             The plot as a matplot lib figure.
 
         """
-        #Find the unique gvectors to plot.
+        # Find the unique gvectors to plot.
         unique_vectors = self.get_unique_vectors(distance_threshold)
-        #Plot the gvector positions
+        # Plot the gvector positions
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot(unique_vectors.data.T[0], -unique_vectors.data.T[1], 'ro')
@@ -89,9 +89,9 @@ class DiffractionVectors(BaseSignal):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        mmx,mmy = generate_marker_inputs_from_peaks(self)
+        mmx, mmy = generate_marker_inputs_from_peaks(self)
         signal.plot(*args, **kwargs)
-        for mx,my in zip(mmx,mmy):
+        for mx, my in zip(mmx, mmy):
             m = markers.point(x=mx, y=my, color='red', marker='x')
             signal.add_marker(m, plot_marker=True, permanent=False)
 
@@ -113,12 +113,12 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
-        #If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes)==0:
+        # If ragged the signal axes will not be defined
+        if len(self.axes_manager.signal_axes) == 0:
             magnitudes = self.map(calculate_norms_ragged,
                                   inplace=False,
                                   *args, **kwargs)
-        #Otherwise easier to calculate.
+        # Otherwise easier to calculate.
         else:
             magnitudes = BaseSignal(calculate_norms(self))
             magnitudes.axes_manager.set_signal_dimension(0)
@@ -145,8 +145,8 @@ class DiffractionVectors(BaseSignal):
         """
         gmags = self.get_magnitudes(*args, **kwargs)
 
-        if len(self.axes_manager.signal_axes)==0:
-            glist=[]
+        if len(self.axes_manager.signal_axes) == 0:
+            glist = []
             for i in gmags._iterate_signal():
                 for j in np.arange(len(i[0])):
                     glist.append(i[0][j])
@@ -179,7 +179,7 @@ class DiffractionVectors(BaseSignal):
             vectors in the original object.
         """
         if (self.axes_manager.navigation_dimension == 2):
-            gvlist = np.array([self.data[0,0][0]])
+            gvlist = np.array([self.data[0, 0][0]])
         else:
             raise ValueError("This method only works for ragged vector maps!")
 
@@ -190,18 +190,18 @@ class DiffractionVectors(BaseSignal):
                                                            distance_threshold)
             gvlist_new = vlist[new_indices]
             if gvlist_new.any():
-                gvlist=np.concatenate((gvlist, gvlist_new),axis=0)
+                gvlist = np.concatenate((gvlist, gvlist_new), axis=0)
 
-        #An internal check, just to be sure.
+        # An internal check, just to be sure.
         delete_indices = []
         l = np.shape(gvlist)[0]
-        distances = distance_matrix(gvlist,gvlist)
+        distances = distance_matrix(gvlist, gvlist)
         for i in range(np.shape(distances)[1]):
-            if (np.sum(distances[:,i] <= distance_threshold) > 1):
+            if (np.sum(distances[:, i] <= distance_threshold) > 1):
                 delete_indices = np.append(delete_indices, i)
-        gvecs = np.delete(gvlist, delete_indices,axis = 0)
+        gvecs = np.delete(gvlist, delete_indices, axis=0)
 
-        #Manipulate into DiffractionVectors class
+        # Manipulate into DiffractionVectors class
         unique_vectors = DiffractionVectors(gvecs)
         unique_vectors.axes_manager.set_signal_dimension(1)
 
@@ -221,14 +221,14 @@ class DiffractionVectors(BaseSignal):
         crystim : Signal2D
             2D map of diffracting pixels.
         """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0,1))
+        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
 
-        if binary==True:
+        if binary == True:
             crystim = crystim == 1
 
         crystim.change_dtype('float')
 
-        #Set calibration to same as signal
+        # Set calibration to same as signal
         x = crystim.axes_manager.signal_axes[0]
         y = crystim.axes_manager.signal_axes[1]
 

@@ -22,17 +22,17 @@ and going through the "boot camp" to get a feel for the terminology.
 
 In brief, to give you a hint on the terminology to search for, the contribution
 pattern is:
-    1. Setup git/github if you don't have it.
-    2. Fork pyXem on github.
-    3. Checkout your fork on your local machine.
-    4. Create a new branch locally where you will make your changes.
-    5. Push the local changes to your own github fork.
-    6. Create a pull request (PR) to the official pyXem repository.
 
-Note: You cannot mess up the main pyXem project unless you have been promoted
-to write access and the dev-team. So when you're starting out be confident to
+1. Setup git/github if you don't have it.
+2. Fork pyXem on github.
+3. Checkout your fork on your local machine.
+4. Create a new branch locally where you will make your changes.
+5. Push the local changes to your own github fork.
+6. Create a pull request (PR) to the official pyXem repository.
+
+Note: You cannot mess up the main pyXem project. So when you're starting out be confident to
 play, get it wrong, and if it all goes wrong you can always get a fresh install
-of pyXem!!
+of pyXem!
 
 PS: If you choose to develop in Windows/Mac you may find `Github Desktop
 <https://desktop.github.com>`_ useful.
@@ -79,10 +79,15 @@ pyXem follows the Style Guide for Python Code - these are just some rules for
 consistency that you can read all about in the `Python Style Guide
 <https://www.python.org/dev/peps/pep-0008/>`_.
 
-You can check your code with the `pep8 Code Checker
-<https://pypi.python.org/pypi/pep8>`_.
+To enforce this, we require that the following auto correction is applied at the end of pull request. The simplest
+option is to run (from the home directory of pyxem) 
 
-.. _tests-label:
+.. code:: bash
+
+    chmod +x pepstorm.sh	
+    ./pepstorm.sh
+    git add .
+    git commit -m "autopep8 corrections"
 
 Writing tests
 -------------
@@ -92,49 +97,34 @@ short methods that call the functions and check output values agains known
 answers. Good tests should depend on as few other features as possible so that when
 they break we know exactly what caused it. 
 
-pyXem uses the `py.test <http://doc.pytest.org/>`_ library for testing. The
-tests reside in the ``pyxem.tests`` module. To run them:
+pyXem uses the `pytest <http://doc.pytest.org/>`_ library for testing. The
+tests reside in the ``pyxem.tests`` module. To run them (from the pyXem project folder):
 
 .. code:: bash
 
-   py.test --pyargs pyxem
-
-Or, from pyXem's project folder simply:
-
-.. code:: bash
-
-   py.test
+   pytest
 
 
 Useful hints on testing:
 
-* When comparing integers, it's fine to use ``==``. When comparing floats, be
-  sure to use ``numpy.testing.assert_almost_equal()`` or
-  ``numpy.testing.assert_allclose()``.
-* ``numpy.testing.assert_equal()`` is convenient to compare numpy arrays.
+* When comparing integers, it's fine to use ``==``. When comparing floats use something like assert ``np.allclose(shifts,shifts_expected,atol=0.2)``
 * ``@pytest.mark.parametrize()`` is a very convenient decorator to test several
   parameters of the same function without having to write to much repetitive
   code, which is often error-prone. See `pytest documentation for more details
   <http://doc.pytest.org/en/latest/parametrize.html>`_.
-* It is good to check that the tests does not use too much of memory after
-  creating new tests. If you need to explicitely delete your objects and free memory, you can do the following to release the memory associated to the ``s`` object, for example:
-::
+* We test the code coverage on pull requests, you can check the coverage on a local branch using
 
-    del s
-    gc.collect()
+.. code:: bash
 
-
-* Once, you have pushed your PR to the official pyXem repository, it can be
-  useful to check the coverage of your tests using the coveralls.io check of
-  your PR. There should be a link to it at the bottom of your PR on the github
-  PR page. This service can help you to find how well your code is being tested
-  and exactly which part is not currently tested.
+   pytest --cov=pyxem
+   
+* Some useful fixtures (a basic diffraction pattern, a basic structure...) can be found in conftest.py, you can just call these directly in the test suite.
 
 
 Write documentation
 -------------------
 
-Documentation comes in two parts docstrings and user-guide documentation.
+Here we will focus on docstrings (rather than the user-guide documentation).
 
 Docstrings -- written at the start of a function and give essential information
 about how it should be used, such as which arguments can be passed to it and what
@@ -142,14 +132,6 @@ the syntax should be. The docstrings need to follow the `numpy specification
 <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`_, 
 as shown in `this example <https://github.com/numpy/numpy/blob/master/doc/example.py>`_.
 
-User-guide Documentation -- A description of the functionality of the code and how
-to use it with examples and links to the relevant code.
-
-Build the documentation -- To check the output of what you wrote, you can build
-the documentation, which requires python-sphinx and numpydoc to be installed.
-Run the make command in the ``doc`` to build the documentation. For example
-``make html`` will build the whole documentation in html format. See the make
-command documentation for more details.
 
 
 Learn more

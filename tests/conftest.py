@@ -5,6 +5,9 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 @pytest.fixture(scope="session",autouse=True)
 def default_structure():
+    """
+    An atomic structure represetned using diffpy
+    """
     latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
     atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
     hexagonal_structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
@@ -46,4 +49,7 @@ def default_structure():
 ])
 
 def diffraction_pattern(request):
+    """
+    A boring, multiuse dp, with signature: ElectronDiffraction <2,2|8,8>
+    """
     return ElectronDiffraction(request.param)
