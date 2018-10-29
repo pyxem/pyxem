@@ -85,10 +85,13 @@ class CrystallographicMap(BaseSignal):
         phase_map =self.isig[0].as_signal2D((0,1))
 
         #Set calibration to same as signal for first navigation axis
-        x = phase_map.axes_manager.signal_axes[0]
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
+        try:
+            x = phase_map.axes_manager.signal_axes[0]
+            x.name = 'x'
+            x.scale = self.axes_manager.navigation_axes[0].scale
+            x.units = 'nm'
+        except IndexError:
+            pass
         #Set calibration to same as signal for second navigation axis if there
         try:
             y = phase_map.axes_manager.signal_axes[1]
@@ -116,10 +119,13 @@ class CrystallographicMap(BaseSignal):
         orientation_map = eulers.as_signal2D((0,1))
 
         #Set calibration to same as signal for first navigation axis
-        x = orientation_map.axes_manager.signal_axes[0]
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
+        try:
+            x = orientation_map.axes_manager.signal_axes[0]
+            x.name = 'x'
+            x.scale = self.axes_manager.navigation_axes[0].scale
+            x.units = 'nm'
+        except IndexError:
+            pass
         #Set calibration to same as signal for second navigation axis if there
         try:
             y = orientation_map.axes_manager.signal_axes[1]
@@ -145,10 +151,13 @@ class CrystallographicMap(BaseSignal):
         correlation_map = self.isig[4].as_signal2D((0,1))
 
         #Set calibration to same as signal for first navigation axis
-        x = correlation_map.axes_manager.signal_axes[0]
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
+        try:
+            x = correlation_map.axes_manager.signal_axes[0]
+            x.name = 'x'
+            x.scale = self.axes_manager.navigation_axes[0].scale
+            x.units = 'nm'
+        except IndexError:
+            pass
         #Set calibration to same as signal for second navigation axis if there
         try:
             y = correlation_map.axes_manager.signal_axes[1]
@@ -176,12 +185,14 @@ class CrystallographicMap(BaseSignal):
         """
         reliability_map = self.isig[5].as_signal2D((0,1))
 
-
         #Set calibration to same as signal for first navigation axis
-        x = reliability_map.axes_manager.signal_axes[0]
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
+        try:
+            x = reliability_map.axes_manager.signal_axes[0]
+            x.name = 'x'
+            x.scale = self.axes_manager.navigation_axes[0].scale
+            x.units = 'nm'
+        except IndexError:
+            pass
         #Set calibration to same as signal for second navigation axis if there
         try:
             y = reliability_map.axes_manager.signal_axes[1]
@@ -207,14 +218,16 @@ class CrystallographicMap(BaseSignal):
             best scoring phase at each navigation position.
 
         """
-
         reliability_map = self.isig[6].as_signal2D((0,1))
 
         #Set calibration to same as signal for first navigation axis
-        x = reliability_map.axes_manager.signal_axes[0]
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
+        try:
+            x = reliability_map.axes_manager.signal_axes[0]
+            x.name = 'x'
+            x.scale = self.axes_manager.navigation_axes[0].scale
+            x.units = 'nm'
+        except IndexError:
+            pass
         #Set calibration to same as signal for second navigation axis if there
         try:
             y = reliability_map.axes_manager.signal_axes[1]
