@@ -26,46 +26,53 @@ from pyxem import ElectronDiffraction
 
 @pytest.fixture
 def coords_intensity_simulation():
-    return DiffractionSimulation(coordinates = np.asarray([[0.3,1.2,0]]),
-                                 intensities = np.ones(1))
+    return DiffractionSimulation(coordinates=np.asarray([[0.3, 1.2, 0]]),
+                                 intensities=np.ones(1))
+
 
 @pytest.mark.xfail(raises=ValueError)
 def test_wrong_calibration_setting():
-    DiffractionSimulation(coordinates = np.asarray([[0.3,1.2,0]]),
-                          intensities = np.ones(1),
-                          calibration = [1,2,5])
+    DiffractionSimulation(coordinates=np.asarray([[0.3, 1.2, 0]]),
+                          intensities=np.ones(1),
+                          calibration=[1, 2, 5])
+
 
 @pytest.fixture
 def get_signal(coords_intensity_simulation):
-    size  = 144
+    size = 144
     sigma = 0.03
     max_r = 1.5
-    return coords_intensity_simulation.as_signal(size,sigma,max_r)
+    return coords_intensity_simulation.as_signal(size, sigma, max_r)
+
 
 def test_typing(get_signal):
-    assert type(get_signal) is ElectronDiffraction
+    assert isinstance(get_signal, ElectronDiffraction)
+
 
 def test_correct_quadrant_np(get_signal):
     A = get_signal.data
-    assert (np.sum(A[:72,:72]) == 0)
-    assert (np.sum(A[72:,:72]) == 0)
-    assert (np.sum(A[:72,72:]) == 0)
-    assert (np.sum(A[72:,72:])  > 0)
+    assert (np.sum(A[:72, :72]) == 0)
+    assert (np.sum(A[72:, :72]) == 0)
+    assert (np.sum(A[:72, 72:]) == 0)
+    assert (np.sum(A[72:, 72:]) > 0)
+
 
 def test_correct_quadrant_hs(get_signal):
     S = get_signal
-    assert (np.sum(S.isig[:72,:72].data) == 0)
-    assert (np.sum(S.isig[72:,:72].data) == 0)
-    assert (np.sum(S.isig[:72,72:].data) == 0)
-    assert (np.sum(S.isig[72:,72:].data)  > 0)
+    assert (np.sum(S.isig[:72, :72].data) == 0)
+    assert (np.sum(S.isig[72:, :72].data) == 0)
+    assert (np.sum(S.isig[:72, 72:].data) == 0)
+    assert (np.sum(S.isig[72:, 72:].data) > 0)
 
 # Test Profile Simulation
+
 
 @pytest.fixture(params=[
     (300, 0.02, None),
 ])
 def diffraction_calculator(request):
     return DiffractionGenerator(*request.param)
+
 
 @pytest.fixture
 def profile_simulation():
@@ -81,33 +88,35 @@ def profile_simulation():
                                          1.1645286909108374,
                                          1.2074090451670043,
                                          1.2756772657476541],
-                             intensities = np.array([100.,
-                                                     99.34619104,
-                                                     64.1846346,
-                                                     18.57137199,
-                                                     28.84307971,
-                                                     41.31084268,
-                                                     23.42104951,
-                                                     13.996264,
-                                                     24.87559364,
-                                                     20.85636003,
-                                                     9.46737774,
-                                                     5.43222307]),
-                             hkls = [{(1, 1, 1): 8},
-                                     {(2, 2, 0): 12},
-                                     {(3, 1, 1): 24},
-                                     {(4, 0, 0): 6},
-                                     {(3, 3, 1): 24},
-                                     {(4, 2, 2): 24},
-                                     {(3, 3, 3): 8, (5, 1, 1): 24},
-                                     {(4, 4, 0): 12},
-                                     {(5, 3, 1): 48},
-                                     {(6, 2, 0): 24},
-                                     {(5, 3, 3): 24},
-                                     {(4, 4, 4): 8}])
+                             intensities=np.array([100.,
+                                                   99.34619104,
+                                                   64.1846346,
+                                                   18.57137199,
+                                                   28.84307971,
+                                                   41.31084268,
+                                                   23.42104951,
+                                                   13.996264,
+                                                   24.87559364,
+                                                   20.85636003,
+                                                   9.46737774,
+                                                   5.43222307]),
+                             hkls=[{(1, 1, 1): 8},
+                                   {(2, 2, 0): 12},
+                                   {(3, 1, 1): 24},
+                                   {(4, 0, 0): 6},
+                                   {(3, 3, 1): 24},
+                                   {(4, 2, 2): 24},
+                                   {(3, 3, 3): 8, (5, 1, 1): 24},
+                                   {(4, 4, 0): 12},
+                                   {(5, 3, 1): 48},
+                                   {(6, 2, 0): 24},
+                                   {(5, 3, 3): 24},
+                                   {(4, 4, 4): 8}])
+
 
 def test_plot_profile_simulation(profile_simulation):
     profile_simulation.get_plot(g_max=1)
+
 
 class TestDiffractionSimulation:
 
@@ -115,12 +124,11 @@ class TestDiffractionSimulation:
     def diffraction_simulation(self):
         return DiffractionSimulation()
 
-    def test_init(self,diffraction_simulation):
+    def test_init(self, diffraction_simulation):
         assert diffraction_simulation.coordinates is None
         assert diffraction_simulation.indices is None
         assert diffraction_simulation.intensities is None
         assert diffraction_simulation.calibration == (1., 1.)
-
 
     @pytest.mark.parametrize('calibration, expected', [
         (5., (5., 5.)),
@@ -128,13 +136,11 @@ class TestDiffractionSimulation:
         pytest.param((0, 0), (0, 0), marks=pytest.mark.xfail(raises=ValueError)),
         ((1.5, 1.5), (1.5, 1.5)),
         ((1.3, 1.5), (1.3, 1.5))
-        ])
-
-    def test_calibration(self,diffraction_simulation,
-            calibration, expected):
+    ])
+    def test_calibration(self, diffraction_simulation,
+                         calibration, expected):
         diffraction_simulation.calibration = calibration
         assert diffraction_simulation.calibration == expected
-
 
     @pytest.mark.parametrize('coordinates, with_direct_beam, expected', [
         (
@@ -153,19 +159,18 @@ class TestDiffractionSimulation:
             np.array([True, True])
         ),
     ])
-
     def test_direct_beam_mask(
-            self,diffraction_simulation,coordinates, with_direct_beam, expected):
+            self, diffraction_simulation, coordinates, with_direct_beam, expected):
         diffraction_simulation.coordinates = coordinates
         diffraction_simulation.with_direct_beam = with_direct_beam
         mask = diffraction_simulation.direct_beam_mask
         assert np.all(mask == expected)
 
     @pytest.mark.parametrize('coordinates, calibration, offset, expected', [(
-            np.array([[1., 0., 0.], [1., 2., 0.]]),
-            1.,
-            (0., 0.),
-            np.array([[1., 0., 0.], [1., 2., 0.]]))])
+        np.array([[1., 0., 0.], [1., 2., 0.]]),
+        1.,
+        (0., 0.),
+        np.array([[1., 0., 0.], [1., 2., 0.]]))])
     def test_calibrated_coordinates(
             self,
             diffraction_simulation: DiffractionSimulation,

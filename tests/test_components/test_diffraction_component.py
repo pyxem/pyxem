@@ -24,11 +24,13 @@ from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 from pyxem.components.diffraction_component import ElectronDiffractionForwardModel
 
+
 @pytest.fixture(params=[
     (300, 0.02, None),
 ])
 def diffraction_calculator(request):
     return DiffractionGenerator(*request.param)
+
 
 def test_electron_diffraction_component_init(diffraction_calculator,
                                              default_structure):
@@ -38,6 +40,7 @@ def test_electron_diffraction_component_init(diffraction_calculator,
                                           calibration=0.01)
     assert isinstance(ref, ElectronDiffractionForwardModel)
 
+
 def test_function(diffraction_calculator, default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
                                           default_structure,
@@ -45,6 +48,7 @@ def test_function(diffraction_calculator, default_structure):
                                           calibration=0.01)
     func = ref.function()
     np.testing.assert_almost_equal(func, 1)
+
 
 def test_simulate(diffraction_calculator, default_structure):
     ref = ElectronDiffractionForwardModel(diffraction_calculator,
