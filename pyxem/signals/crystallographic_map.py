@@ -22,6 +22,7 @@ from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 import numpy as np
 from tqdm import tqdm
+from pyxem.utils.sim_utils import carry_through_navigation_calibration
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -85,23 +86,7 @@ class CrystallographicMap(BaseSignal):
         """
 
         phase_map = self.isig[0].as_signal2D((0, 1))
-
-        # Set calibration to same as signal for first navigation axis
-        try:
-            x = phase_map.axes_manager.signal_axes[0]
-            x.name = 'x'
-            x.scale = self.axes_manager.navigation_axes[0].scale
-            x.units = 'nm'
-        except IndexError:
-            pass
-        # Set calibration to same as signal for second navigation axis if there
-        try:
-            y = phase_map.axes_manager.signal_axes[1]
-            y.name = 'y'
-            y.scale = self.axes_manager.navigation_axes[1].scale
-            y.units = 'nm'
-        except IndexError:
-            pass
+        phase_map = carry_through_navigation_calibration(phase_map,self)
 
         return phase_map
 
@@ -119,23 +104,7 @@ class CrystallographicMap(BaseSignal):
         eulers = self.isig[1:4]
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
-
-        # Set calibration to same as signal for first navigation axis
-        try:
-            x = orientation_map.axes_manager.signal_axes[0]
-            x.name = 'x'
-            x.scale = self.axes_manager.navigation_axes[0].scale
-            x.units = 'nm'
-        except IndexError:
-            pass
-        # Set calibration to same as signal for second navigation axis if there
-        try:
-            y = orientation_map.axes_manager.signal_axes[1]
-            y.name = 'y'
-            y.scale = self.axes_manager.navigation_axes[1].scale
-            y.units = 'nm'
-        except IndexError:
-            pass
+        orientation_map = carry_through_navigation_calibration(orientation_map,self)
 
         return orientation_map
 
@@ -150,23 +119,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         correlation_map = self.isig[4].as_signal2D((0, 1))
-
-        # Set calibration to same as signal for first navigation axis
-        try:
-            x = correlation_map.axes_manager.signal_axes[0]
-            x.name = 'x'
-            x.scale = self.axes_manager.navigation_axes[0].scale
-            x.units = 'nm'
-        except IndexError:
-            pass
-        # Set calibration to same as signal for second navigation axis if there
-        try:
-            y = correlation_map.axes_manager.signal_axes[1]
-            y.name = 'y'
-            y.scale = self.axes_manager.navigation_axes[1].scale
-            y.units = 'nm'
-        except IndexError:
-            pass
+        correlation_map = carry_through_navigation_calibration(correlation_map,self)
 
         return correlation_map
 
@@ -184,23 +137,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         reliability_map = self.isig[5].as_signal2D((0, 1))
-
-        # Set calibration to same as signal for first navigation axis
-        try:
-            x = reliability_map.axes_manager.signal_axes[0]
-            x.name = 'x'
-            x.scale = self.axes_manager.navigation_axes[0].scale
-            x.units = 'nm'
-        except IndexError:
-            pass
-        # Set calibration to same as signal for second navigation axis if there
-        try:
-            y = reliability_map.axes_manager.signal_axes[1]
-            y.name = 'y'
-            y.scale = self.axes_manager.navigation_axes[1].scale
-            y.units = 'nm'
-        except IndexError:
-            pass
+        reliability_map = carry_through_navigation_calibration(reliability_map,self)
 
         return reliability_map
 
@@ -218,23 +155,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         reliability_map = self.isig[6].as_signal2D((0, 1))
-
-        # Set calibration to same as signal for first navigation axis
-        try:
-            x = reliability_map.axes_manager.signal_axes[0]
-            x.name = 'x'
-            x.scale = self.axes_manager.navigation_axes[0].scale
-            x.units = 'nm'
-        except IndexError:
-            pass
-        # Set calibration to same as signal for second navigation axis if there
-        try:
-            y = reliability_map.axes_manager.signal_axes[1]
-            y.name = 'y'
-            y.scale = self.axes_manager.navigation_axes[1].scale
-            y.units = 'nm'
-        except IndexError:
-            pass
+        reliability_map = carry_through_navigation_calibration(reliability_map,self)
 
         return reliability_map
 

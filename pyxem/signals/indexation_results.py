@@ -119,22 +119,6 @@ class IndexationResults(BaseSignal):
                                *args, **kwargs)
 
         cryst_map = CrystallographicMap(crystal_map)
-
-        # Set calibration to same as signal for first navigation axis
-        try:
-            x = cryst_map.axes_manager.signal_axes[0]
-            x.name = 'x'
-            x.scale = self.axes_manager.navigation_axes[0].scale
-            x.units = 'nm'
-        except IndexError:
-            pass
-        # Set calibration to same as signal for second navigation axis if there
-        try:
-            y = cryst_map.axes_manager.signal_axes[1]
-            y.name = 'y'
-            y.scale = self.axes_manager.navigation_axes[1].scale
-            y.units = 'nm'
-        except IndexError:
-            pass
-
+        cryst_map = carry_through_navigation_calibration(cryst_map,self)
+        
         return cryst_map

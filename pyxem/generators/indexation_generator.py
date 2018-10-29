@@ -27,6 +27,7 @@ import numpy as np
 from pyxem.signals.indexation_results import IndexationResults
 
 from pyxem.utils import correlate
+from pyxem.utils.sim_utils import carry_through_navigation_calibration
 
 import hyperspy.api as hs
 
@@ -130,22 +131,7 @@ class IndexationGenerator():
                              **kwargs)
         matching_results = IndexationResults(matches)
 
-        # Set calibration to same as signal for first navigation axis
-        try:
-            x = matching_results.axes_manager.signal_axes[0]
-            x.name = 'x'
-            x.scale = signal.axes_manager.navigation_axes[0].scale
-            x.units = 'nm'
-        except IndexError:
-            pass
-        # Set calibration to same as signal for second navigation axis if there
-        try:
-            y = matching_results.axes_manager.signal_axes[1]
-            y.name = 'y'
-            y.scale = signal.axes_manager.navigation_axes[1].scale
-            y.units = 'nm'
-        except IndexError:
-            pass
+        matching_results = carry_through_navigation_calibration(matching_results,signal)
 
         return matching_results
 
