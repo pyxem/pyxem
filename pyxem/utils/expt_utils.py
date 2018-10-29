@@ -99,13 +99,13 @@ def _polar2cart(r, theta):
     y = -r * np.sin(theta)
     return x, y
 
-def radial_average(z, mask = None):
+def radial_average(z, mask=None):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
 
     Parameters
     ----------
-    Mask : array with the same dimensions as z
+    mask : array with the same dimensions as z
             Consists of 0s for excluded pixels and 1s for non-excluded pixels.
             The 0-pixels are excluded from the radial average.
 
