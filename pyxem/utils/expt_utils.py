@@ -102,6 +102,7 @@ def _polar2cart(r, theta):
     y = -r * np.sin(theta)
     return x, y
 
+
 def radial_average(z, mask=None):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.

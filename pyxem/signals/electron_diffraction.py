@@ -335,7 +335,7 @@ class ElectronDiffraction(Signal2D):
                         *args, **kwargs)
 
     def get_radial_profile(self, mask=None, inplace=False,
-                           *args,**kwargs):
+                           *args, **kwargs):
         """Return the radial profile of the diffraction pattern.
 
         Parameters
@@ -371,9 +371,9 @@ class ElectronDiffraction(Signal2D):
             profiles.plot()
         """
         radial_profiles = self.map(radial_average,
-                                    mask=None,
-                                    inplace=inplace,
-                                    *args,**kwargs)
+                                   mask=None,
+                                   inplace=inplace,
+                                   *args, **kwargs)
 
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
