@@ -33,30 +33,31 @@ def crystal_from_matching_results(z_matches):
     phase, angle,angle,angle, correlation, R_orientation,(R_phase)
     """
 
-    #count the phases
-    if np.unique(z_matches[:,0]).shape[0] == 1:
-        #these case is easier as output is correctly ordered
+    # count the phases
+    if np.unique(z_matches[:, 0]).shape[0] == 1:
+        # these case is easier as output is correctly ordered
         results_array = np.zeros(6)
-        results_array[:5] = z_matches[0,:5]
-        results_array[5]  = 100*(1 -
-                            z_matches[1,4]/results_array[4])
+        results_array[:5] = z_matches[0, :5]
+        results_array[5] = 100 * (1 -
+                                  z_matches[1, 4] / results_array[4])
     else:
         results_array = np.zeros(7)
-        index_best_match = np.argmax(z_matches[:,4])
+        index_best_match = np.argmax(z_matches[:, 4])
         # store phase,angle,angle,angle,correlation
-        results_array[:5] = z_matches[index_best_match,:5]
+        results_array[:5] = z_matches[index_best_match, :5]
         # do reliability_orientation
-        z = z_matches[z_matches[:,0]==results_array[0]]
-        second_score = np.partition(z[:,4],-2)[-2]
-        results_array[5]  = 100*(1 -
-                            second_score/results_array[4])
+        z = z_matches[z_matches[:, 0] == results_array[0]]
+        second_score = np.partition(z[:, 4], -2)[-2]
+        results_array[5] = 100 * (1 -
+                                  second_score / results_array[4])
         # and reliability phase
-        z = z_matches[z_matches[:,0]!=results_array[0]]
-        second_score = np.max(z[:,4])
-        results_array[6]  = 100*(1 -
-                            second_score/results_array[4])
+        z = z_matches[z_matches[:, 0] != results_array[0]]
+        second_score = np.max(z[:, 4])
+        results_array[6] = 100 * (1 -
+                                  second_score / results_array[4])
 
     return results_array
+
 
 class IndexationResults(BaseSignal):
     _signal_type = "matching_results"
@@ -73,9 +74,9 @@ class IndexationResults(BaseSignal):
         correlation and reliabilty scores.
 
         """
-        #TODO: Add alternative methods beyond highest correlation score at each
-        #navigation position.
-        #TODO Only keep a subset of the data for the map
+        # TODO: Add alternative methods beyond highest correlation score at each
+        # navigation position.
+        # TODO Only keep a subset of the data for the map
         cryst_map = self.map(crystal_from_matching_results,
                              inplace=False,
                              *args, **kwargs)

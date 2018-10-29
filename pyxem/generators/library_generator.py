@@ -115,7 +115,8 @@ class DiffractionLibraryGenerator(object):
                 # Calibrate simulation
                 data.calibration = calibration
                 pattern_intensities = data.intensities
-                pixel_coordinates = np.rint(data.calibrated_coordinates[:, :2] + half_shape).astype(int)
+                pixel_coordinates = np.rint(
+                    data.calibrated_coordinates[:, :2] + half_shape).astype(int)
                 # Construct diffraction simulation library, removing those that
                 # contain no peaks
                 if len(pattern_intensities) > 0:

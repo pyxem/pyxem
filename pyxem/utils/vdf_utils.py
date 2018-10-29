@@ -17,7 +17,5 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-
 def normalize_vdf(im):
     return im / im.max()

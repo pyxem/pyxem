@@ -111,7 +111,7 @@ class ElectronDiffraction(Signal2D):
             the data array is assumed to be the center of the pattern.
         """
         if center is None:
-            center = np.array(self.axes_manager.signal_shape)/2 * calibration
+            center = np.array(self.axes_manager.signal_shape) / 2 * calibration
 
         dx = self.axes_manager.signal_axes[0]
         dy = self.axes_manager.signal_axes[1]
@@ -216,7 +216,7 @@ class ElectronDiffraction(Signal2D):
             axis=dark_field.axes_manager.signal_axes
         )
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
-        vdfim = dark_field_sum.as_signal2D((0,1))
+        vdfim = dark_field_sum.as_signal2D((0, 1))
 
         return vdfim
 
@@ -271,7 +271,7 @@ class ElectronDiffraction(Signal2D):
                         matrix=D,
                         order=order,
                         inplace=inplace,
-                        *args,**kwargs)
+                        *args, **kwargs)
 
     def apply_gain_normalisation(self,
                                  dark_reference,
@@ -334,8 +334,8 @@ class ElectronDiffraction(Signal2D):
                         show_progressbar=progress_bar,
                         *args, **kwargs)
 
-    def get_radial_profile(self,inplace=False,
-                           *args,**kwargs):
+    def get_radial_profile(self, inplace=False,
+                           *args, **kwargs):
         """Return the radial profile of the diffraction pattern.
 
         Parameters
@@ -366,7 +366,7 @@ class ElectronDiffraction(Signal2D):
         """
         radial_profiles = self.map(radial_average,
                                    inplace=inplace,
-                                   *args,**kwargs)
+                                   *args, **kwargs)
 
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
@@ -407,15 +407,14 @@ class ElectronDiffraction(Signal2D):
         """
         shifts = self.map(find_beam_offset_cross_correlation,
                           radius_start=radius_start,
-			              radius_finish=radius_finish,
-                          inplace=False,*args,**kwargs)
+                          radius_finish=radius_finish,
+                          inplace=False, *args, **kwargs)
         return shifts
 
     def center_direct_beam(self,
                            radius_start, radius_finish,
                            square_width=None,
                            *args, **kwargs):
-
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
         image square.
@@ -445,19 +444,21 @@ class ElectronDiffraction(Signal2D):
         """
         nav_shape_x = self.data.shape[0]
         nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2]/2-0.5,
-                                       self.data.shape[3]/2-0.5))
+        origin_coordinates = np.array((self.data.shape[2] / 2 - 0.5,
+                                       self.data.shape[3] / 2 - 0.5))
 
         if square_width is not None:
-            min_index = np.int(origin_coordinates[0]-(0.5+square_width))
-            max_index = np.int(origin_coordinates[0]+(1.5+square_width)) #fails if non-square dp
-            shifts = self.isig[min_index:max_index,min_index:max_index].get_direct_beam_position(radius_start,radius_finish,*args,**kwargs)
+            min_index = np.int(origin_coordinates[0] - (0.5 + square_width))
+            # fails if non-square dp
+            max_index = np.int(origin_coordinates[0] + (1.5 + square_width))
+            shifts = self.isig[min_index:max_index, min_index:max_index].get_direct_beam_position(
+                radius_start, radius_finish, *args, **kwargs)
         else:
             shifts = self.get_direct_beam_position(radius_start, radius_finish,
                                                    *args, **kwargs)
 
-        shifts = -1*shifts.data
-        shifts = shifts.reshape(nav_shape_x*nav_shape_y, 2)
+        shifts = -1 * shifts.data
+        shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
@@ -473,8 +474,8 @@ class ElectronDiffraction(Signal2D):
 
             * 'h-dome' -
             * 'gaussian_difference' - Uses a difference between two gaussian
-				convolutions to determine where the peaks are, and sets
-				all other pixels to 0.
+                                convolutions to determine where the peaks are, and sets
+                                all other pixels to 0.
             * 'median' - Use a median filter for background removal
             * 'reference_pattern' - Subtract a user-defined reference patterns
                 from every diffraction pattern.
@@ -521,7 +522,9 @@ class ElectronDiffraction(Signal2D):
         elif method == 'median':
             if 'implementation' in kwargs.keys():
                 if kwargs['implementation'] != 'scipy' and kwargs['implementation'] != 'skimage':
-                    raise NotImplementedError("Unknown implementation `{}`".format(kwargs['implementation']))
+                    raise NotImplementedError(
+                        "Unknown implementation `{}`".format(
+                            kwargs['implementation']))
 
             bg_subtracted = self.map(subtract_background_median,
                                      inplace=False, *args, **kwargs)
@@ -598,7 +601,7 @@ class ElectronDiffraction(Signal2D):
         method_dict = {
             'zaefferer': find_peaks_zaefferer,
             'stat': find_peaks_stat,
-            'laplacian_of_gaussians':  find_peaks_log,
+            'laplacian_of_gaussians': find_peaks_log,
             'difference_of_gaussians': find_peaks_dog,
             'xc': find_peaks_xc
         }
@@ -616,7 +619,7 @@ class ElectronDiffraction(Signal2D):
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
 
-        #Set calibration to same as signal
+        # Set calibration to same as signal
         x = peaks.axes_manager.navigation_axes[0]
         y = peaks.axes_manager.navigation_axes[1]
 
@@ -630,7 +633,7 @@ class ElectronDiffraction(Signal2D):
 
         return peaks
 
-    def find_peaks_interactive(self,disc_image=None,imshow_kwargs={}):
+    def find_peaks_interactive(self, disc_image=None, imshow_kwargs={}):
         """Find peaks using an interactive tool.
 
         Parameters
@@ -650,5 +653,6 @@ class ElectronDiffraction(Signal2D):
         if disc_image is None:
             warn("You have no specified a disc image, as such you will not be able to use the xc method in this session")
 
-        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(disc_image=disc_image,imshow_kwargs=imshow_kwargs)
+        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
+            disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)

@@ -79,8 +79,16 @@ class SubpixelrefinementGenerator():
         sim_disc = get_simulated_disc(square_size, disc_radius)
         for i in np.arange(0, len(self.vectors_init)):
             vect = self.vectors_pixels[i]
-            expt_disc = self.dp.map(get_experimental_square, vector=vect, square_size=square_size, inplace=False)
-            shifts = expt_disc.map(_conventional_xc, sim_disc=sim_disc, upsample_factor=upsample_factor, inplace=False)
+            expt_disc = self.dp.map(
+                get_experimental_square,
+                vector=vect,
+                square_size=square_size,
+                inplace=False)
+            shifts = expt_disc.map(
+                _conventional_xc,
+                sim_disc=sim_disc,
+                upsample_factor=upsample_factor,
+                inplace=False)
             self.vectors_out[:, :, i, :] = (((vect + shifts.data) - self.center) * self.calibration)
 
         self.last_method = "conventional_xc"
@@ -112,7 +120,11 @@ class SubpixelrefinementGenerator():
              self.vectors_init.shape[1]))
         for i in np.arange(0, len(self.vectors_init)):
             vect = self.vectors_pixels[i]
-            expt_disc = self.dp.map(get_experimental_square, vector=vect, square_size=square_size, inplace=False)
+            expt_disc = self.dp.map(
+                get_experimental_square,
+                vector=vect,
+                square_size=square_size,
+                inplace=False)
             shifts = expt_disc.map(center_of_mass, inplace=False) - (square_size / 2)
             self.vectors_out[:, :, i, :] = (((vect + shifts.data) - self.center) * self.calibration)
 

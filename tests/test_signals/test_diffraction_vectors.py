@@ -24,15 +24,16 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 # all of equal length, and the ragged case. A fixture is defined for each of
 # these cases and all methods tested for it.
 
+
 @pytest.fixture(params=[
     np.array([[0.063776, 0.011958],
-             [-0.035874, 0.131538],
-             [0.035874, -0.131538],
-             [0.035874, 0.143496],
-             [-0.035874, -0.13951],
-             [-0.115594, 0.123566],
-             [0.103636, -0.11958],
-             [0.123566, 0.151468]])
+              [-0.035874, 0.131538],
+              [0.035874, -0.131538],
+              [0.035874, 0.143496],
+              [-0.035874, -0.13951],
+              [-0.115594, 0.123566],
+              [0.103636, -0.11958],
+              [0.123566, 0.151468]])
 ])
 def diffraction_vectors_single(request):
     dvs = DiffractionVectors(request.param)
@@ -41,47 +42,49 @@ def diffraction_vectors_single(request):
 
 
 @pytest.fixture(params=[
-    np.array([[np.array([[ 0.089685,  0.292971],
-             [ 0.017937,  0.277027],
-             [-0.069755,  0.257097],
-             [-0.165419,  0.241153],
-             [ 0.049825,  0.149475],
-             [-0.037867,  0.129545],
-             [-0.117587,  0.113601]]),
-            np.array([[ 0.089685,  0.292971],
-              [ 0.017937,  0.277027],
-              [-0.069755,  0.257097],
-              [-0.165419,  0.241153],
-              [ 0.049825,  0.149475],
-              [-0.037867,  0.129545],
-              [-0.117587,  0.113601],
-              [ 0.149475,  0.065769],
-              [ 0.229195,  0.045839],
-              [ 0.141503,  0.025909],
-              [ 0.073741,  0.013951],
-              [ 0.001993,  0.001993],
-              [-0.069755, -0.009965]])],
-              [np.array([[ 0.089685,  0.292971],
-              [ 0.017937,  0.277027],
-              [-0.069755,  0.257097],
-              [-0.165419,  0.241153],
-              [ 0.049825,  0.149475],
-              [-0.037867,  0.129545],
-              [-0.117587,  0.113601],
-              [ 0.149475,  0.065769],
-              [ 0.229195,  0.045839],
-              [ 0.141503,  0.025909],
-              [ 0.073741,  0.013951]]),
-            np.array([[ 0.001993,  0.001993]])]], dtype=object)
+    np.array([[np.array([[0.089685, 0.292971],
+                         [0.017937, 0.277027],
+                         [-0.069755, 0.257097],
+                         [-0.165419, 0.241153],
+                         [0.049825, 0.149475],
+                         [-0.037867, 0.129545],
+                         [-0.117587, 0.113601]]),
+               np.array([[0.089685, 0.292971],
+                         [0.017937, 0.277027],
+                         [-0.069755, 0.257097],
+                         [-0.165419, 0.241153],
+                         [0.049825, 0.149475],
+                         [-0.037867, 0.129545],
+                         [-0.117587, 0.113601],
+                         [0.149475, 0.065769],
+                         [0.229195, 0.045839],
+                         [0.141503, 0.025909],
+                         [0.073741, 0.013951],
+                         [0.001993, 0.001993],
+                         [-0.069755, -0.009965]])],
+              [np.array([[0.089685, 0.292971],
+                         [0.017937, 0.277027],
+                         [-0.069755, 0.257097],
+                         [-0.165419, 0.241153],
+                         [0.049825, 0.149475],
+                         [-0.037867, 0.129545],
+                         [-0.117587, 0.113601],
+                         [0.149475, 0.065769],
+                         [0.229195, 0.045839],
+                         [0.141503, 0.025909],
+                         [0.073741, 0.013951]]),
+               np.array([[0.001993, 0.001993]])]], dtype=object)
 ])
 def diffraction_vectors_map(request):
     dvm = DiffractionVectors(request.param)
     dvm.axes_manager.set_signal_dimension(0)
     return dvm
 
+
 def test_plot_diffraction_vectors(diffraction_vectors_map):
     diffraction_vectors_map.plot_diffraction_vectors(xlim=1., ylim=1.,
                                                      distance_threshold=0)
+
 
 def test_plot_diffraction_vectors_on_signal(diffraction_vectors_map,
                                             diffraction_pattern):
@@ -93,14 +96,14 @@ class TestMagnitudes:
     def test_get_magnitudes_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_magnitudes()
 
-    @pytest.mark.filterwarnings('ignore::FutureWarning') #deemed "safe enough"
+    @pytest.mark.filterwarnings('ignore::FutureWarning')  # deemed "safe enough"
     def test_get_magnitude_histogram_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
     def test_get_magnitudes_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_magnitudes()
 
-    @pytest.mark.filterwarnings('ignore::FutureWarning') #deemed "safe enough"
+    @pytest.mark.filterwarnings('ignore::FutureWarning')  # deemed "safe enough"
     def test_get_magnitude_histogram_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_magnitude_histogram(bins=np.arange(0, 0.5, 0.1))
 
@@ -109,31 +112,32 @@ class TestUniqueVectors:
 
     def test_get_unique_vectors_map_type(self, diffraction_vectors_map):
         unique_vectors = diffraction_vectors_map.get_unique_vectors()
-        assert isinstance(unique_vectors,DiffractionVectors)
+        assert isinstance(unique_vectors, DiffractionVectors)
 
     @pytest.mark.xfail(raises=ValueError)
     def test_get_unique_vectors_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_unique_vectors()
 
-    @pytest.mark.parametrize('distance_threshold, answer',[
-        (0.01, np.array([[ 0.089685,  0.292971],
-                        [ 0.017937,  0.277027],
-                        [-0.069755,  0.257097],
-                        [-0.165419,  0.241153],
-                        [ 0.049825,  0.149475],
-                        [-0.037867,  0.129545],
-                        [-0.117587,  0.113601],
-                        [ 0.149475,  0.065769],
-                        [ 0.229195,  0.045839],
-                        [ 0.141503,  0.025909],
-                        [ 0.073741,  0.013951],
-                        [ 0.001993,  0.001993],
-                        [-0.069755, -0.009965]])),
-        (0.1, np.array([[ 0.089685,  0.292971]])),
+    @pytest.mark.parametrize('distance_threshold, answer', [
+        (0.01, np.array([[0.089685, 0.292971],
+                         [0.017937, 0.277027],
+                         [-0.069755, 0.257097],
+                         [-0.165419, 0.241153],
+                         [0.049825, 0.149475],
+                         [-0.037867, 0.129545],
+                         [-0.117587, 0.113601],
+                         [0.149475, 0.065769],
+                         [0.229195, 0.045839],
+                         [0.141503, 0.025909],
+                         [0.073741, 0.013951],
+                         [0.001993, 0.001993],
+                         [-0.069755, -0.009965]])),
+        (0.1, np.array([[0.089685, 0.292971]])),
     ])
     def test_get_unique_vectors_map_values(self, diffraction_vectors_map,
                                            distance_threshold, answer):
-        unique_vectors = diffraction_vectors_map.get_unique_vectors(distance_threshold=distance_threshold)
+        unique_vectors = diffraction_vectors_map.get_unique_vectors(
+            distance_threshold=distance_threshold)
         np.testing.assert_almost_equal(unique_vectors.data, answer)
 
 

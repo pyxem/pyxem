@@ -98,7 +98,8 @@ class DiffractionGenerator(object):
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
         recip_latt = latt.reciprocal()
-        spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(recip_latt, reciprocal_radius)
+        spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
+            recip_latt, reciprocal_radius)
 
         # Identify points intersecting the Ewald sphere within maximum
         # excitation error and store the magnitude of their excitation error.
@@ -165,7 +166,8 @@ class DiffractionGenerator(object):
         latt = structure.lattice
         is_hex = is_lattice_hexagonal(latt)
 
-        coeffs, fcoords, occus, dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure, {})
+        coeffs, fcoords, occus, dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure, {
+        })
 
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()

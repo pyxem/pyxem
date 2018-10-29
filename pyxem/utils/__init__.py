@@ -18,6 +18,7 @@
 
 import numpy as np
 
+
 def correlate(image, pattern_dictionary):
     """The correlation between a diffraction pattern and a simulation.
 
@@ -26,9 +27,9 @@ def correlate(image, pattern_dictionary):
     .. math::
 
         \\frac{\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\sqrt{\sum_{j=1}^m T^2(x_j, y_j)}}
-    
+
     for T a template and P an experimental pattern
-    
+
     Parameters
     ----------
     image : :class:`numpy.ndarray`
@@ -50,12 +51,12 @@ def correlate(image, pattern_dictionary):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    
+
     pattern_intensities = pattern_dictionary['intensities']
-    pixel_coordinates   = pattern_dictionary['pixel_coords'] 
+    pixel_coordinates = pattern_dictionary['pixel_coords']
     pattern_normalization = pattern_dictionary['pattern_norm']
-    
+
     # The x,y choice here is correct. Basically the numpy/hyperspy conversion is a danger
     image_intensities = image[pixel_coordinates[:, 1], pixel_coordinates[:, 0]]
-    
-    return np.dot(image_intensities,pattern_intensities)/pattern_normalization
+
+    return np.dot(image_intensities, pattern_intensities) / pattern_normalization

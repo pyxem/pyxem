@@ -21,6 +21,7 @@
 
 from hyperspy.signals import Signal2D
 
+
 class VDFImage(Signal2D):
     _signal_type = "vdf_image"
 
