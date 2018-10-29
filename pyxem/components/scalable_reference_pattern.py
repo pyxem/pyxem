@@ -110,16 +110,16 @@ class ScalableReferencePattern(Component):
 
         """
         D = DisplacementGradientMap(np.ones(np.append(self.d11.map.shape,
-                                                      (3,3))))
+                                                      (3, 3))))
 
-        D.data[:,:,0,0] = self.d11.map['values']
-        D.data[:,:,1,0] = self.d12.map['values']
-        D.data[:,:,2,0] = 0.
-        D.data[:,:,0,1] = self.d21.map['values']
-        D.data[:,:,1,1] = self.d22.map['values']
-        D.data[:,:,2,1] = 0.
-        D.data[:,:,0,2] = 0.
-        D.data[:,:,1,2] = 0.
-        D.data[:,:,2,2] = 1.
+        D.data[:, :, 0, 0] = self.d11.map['values']
+        D.data[:, :, 1, 0] = self.d12.map['values']
+        D.data[:, :, 2, 0] = 0.
+        D.data[:, :, 0, 1] = self.d21.map['values']
+        D.data[:, :, 1, 1] = self.d22.map['values']
+        D.data[:, :, 2, 1] = 0.
+        D.data[:, :, 0, 2] = 0.
+        D.data[:, :, 1, 2] = 0.
+        D.data[:, :, 2, 2] = 1.
 
         return D
