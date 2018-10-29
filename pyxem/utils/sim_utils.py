@@ -363,4 +363,4 @@ def carry_through_navigation_calibration(new_signal,old_signal):
     except IndexError:
         pass
 
-    return old_signal
+    return new_signal

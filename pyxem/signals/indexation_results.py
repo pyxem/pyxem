@@ -20,9 +20,8 @@ import numpy as np
 import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 
-from pyxem.utils.sim_utils import peaks_from_best_template
+from pyxem.utils.sim_utils import peaks_from_best_template,carry_through_navigation_calibration
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
-
 
 from pyxem import CrystallographicMap
 
@@ -120,5 +119,5 @@ class IndexationResults(BaseSignal):
 
         cryst_map = CrystallographicMap(crystal_map)
         cryst_map = carry_through_navigation_calibration(cryst_map,self)
-        
+
         return cryst_map
