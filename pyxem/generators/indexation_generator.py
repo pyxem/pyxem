@@ -177,7 +177,7 @@ class ProfileIndexationGenerator():
             these are submitted. This allows a mapping from the number to the
             phase.  For example, keys = ['si','ga'] will have an output with 0
             for 'si' and 1 for 'ga'.
-        **kwargs
+        **kwargs : arguments
             Keyword arguments passed to the HyperSpy map() function.
 
         Returns
