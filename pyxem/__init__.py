@@ -516,6 +516,7 @@ def load_mib(filename, scan_size, sum_length=10):
         the right shape.
     sum_length : int
         Number of lines to sum over to determine scan fly back location.
+
     """
     dpt = load_with_reader(filename=filename, reader=mib_reader)
     dpt = ElectronDiffraction(dpt.data.reshape((scan_size, scan_size, 256, 256)))

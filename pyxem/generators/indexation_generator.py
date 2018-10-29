@@ -100,9 +100,9 @@ class IndexationGenerator():
             for 'si' and 1 for 'ga'.
         mask : Array
             Array with the same size as signal (in navigation) True False
-        *args
+        *args : arguments
             Arguments passed to map().
-        **kwargs
+        **kwargs : arguments
             Keyword arguments passed map().
 
         Returns
