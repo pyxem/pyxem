@@ -84,17 +84,19 @@ class CrystallographicMap(BaseSignal):
 
         phase_map =self.isig[0].as_signal2D((0,1))
 
-        #Set calibration to same as signal
+        #Set calibration to same as signal for first navigation axis
         x = phase_map.axes_manager.signal_axes[0]
-        y = phase_map.axes_manager.signal_axes[1]
-
         x.name = 'x'
         x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        #Set calibration to same as signal for second navigation axis if there
+        try:
+            y = phase_map.axes_manager.signal_axes[1]
+            y.name = 'y'
+            y.scale = self.axes_manager.navigation_axes[1].scale
+            y.units = 'nm'
+        except IndexError:
+            pass
 
         return phase_map
 
@@ -113,17 +115,19 @@ class CrystallographicMap(BaseSignal):
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0,1))
 
-        #Set calibration to same as signal
+        #Set calibration to same as signal for first navigation axis
         x = orientation_map.axes_manager.signal_axes[0]
-        y = orientation_map.axes_manager.signal_axes[1]
-
         x.name = 'x'
         x.scale = self.axes_manager.navigation_axes[0].scale
         x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        #Set calibration to same as signal for second navigation axis if there
+        try:
+            y = orientation_map.axes_manager.signal_axes[1]
+            y.name = 'y'
+            y.scale = self.axes_manager.navigation_axes[1].scale
+            y.units = 'nm'
+        except IndexError:
+            pass
 
         return orientation_map
 
