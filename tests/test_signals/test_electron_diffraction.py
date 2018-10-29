@@ -22,95 +22,99 @@ from hyperspy.signals import Signal1D, Signal2D
 from hyperspy.roi import CircleROI
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
+
 def test_init():
-    z = np.zeros((2,2,2,2))
-    dp = ElectronDiffraction(z,metadata={'Acquisition_instrument':{'SEM':'Expensive-SEM'}})
+    z = np.zeros((2, 2, 2, 2))
+    dp = ElectronDiffraction(z, metadata={'Acquisition_instrument': {'SEM': 'Expensive-SEM'}})
+
 
 class TestSimpleMaps:
-    #Confirms that maps run without error.
+    # Confirms that maps run without error.
 
-    def test_get_direct_beam_postion(self,diffraction_pattern):
-        shifts = diffraction_pattern.get_direct_beam_position(radius_start=1,radius_finish=3)
+    def test_get_direct_beam_postion(self, diffraction_pattern):
+        shifts = diffraction_pattern.get_direct_beam_position(radius_start=1, radius_finish=3)
 
-    def test_center_direct_beam(self,diffraction_pattern):
-        assert isinstance(diffraction_pattern,ElectronDiffraction) #before inplace transform applied
-        diffraction_pattern.center_direct_beam(radius_start=1,radius_finish=3)
-        assert isinstance(diffraction_pattern,ElectronDiffraction) #after inplace transform applied
+    def test_center_direct_beam(self, diffraction_pattern):
+        # before inplace transform applied
+        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        diffraction_pattern.center_direct_beam(radius_start=1, radius_finish=3)
+        # after inplace transform applied
+        assert isinstance(diffraction_pattern, ElectronDiffraction)
 
-    def test_center_direct_beam_in_small_region(self,diffraction_pattern):
-        assert isinstance(diffraction_pattern,ElectronDiffraction)
-        diffraction_pattern.center_direct_beam(radius_start=1,radius_finish=3,square_width=3)
-        assert isinstance(diffraction_pattern,ElectronDiffraction)
+    def test_center_direct_beam_in_small_region(self, diffraction_pattern):
+        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        diffraction_pattern.center_direct_beam(radius_start=1, radius_finish=3, square_width=3)
+        assert isinstance(diffraction_pattern, ElectronDiffraction)
 
     def test_apply_affine_transformation(self, diffraction_pattern):
         diffraction_pattern.apply_affine_transformation(
-                                                        D=np.array([[1., 0., 0.],
-                                                                    [0., 1., 0.],
-                                                                    [0., 0., 1.]]))
+            D=np.array([[1., 0., 0.],
+                        [0., 1., 0.],
+                        [0., 0., 1.]]))
         assert isinstance(diffraction_pattern, ElectronDiffraction)
 
-    methods = ['average','nan']
+    methods = ['average', 'nan']
+
     @pytest.mark.parametrize('method', methods)
-    def test_remove_dead_pixels(self,diffraction_pattern,method):
-        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],method,inplace=False)
+    def test_remove_dead_pixels(self, diffraction_pattern, method):
+        dpr = diffraction_pattern.remove_deadpixels([[1, 2], [5, 6]], method, inplace=False)
         assert isinstance(dpr, ElectronDiffraction)
 
 
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
-    def test_set_experimental_parameters(self,diffraction_pattern):
+    def test_set_experimental_parameters(self, diffraction_pattern):
         diffraction_pattern.set_experimental_parameters(accelerating_voltage=3,
-                                                             camera_length=3,
-                                                             scan_rotation=1,
-                                                             convergence_angle=1,
-                                                             rocking_angle=1,
-                                                             rocking_frequency=1,
-                                                             exposure_time=1)
-        assert isinstance(diffraction_pattern,ElectronDiffraction)
+                                                        camera_length=3,
+                                                        scan_rotation=1,
+                                                        convergence_angle=1,
+                                                        rocking_angle=1,
+                                                        rocking_frequency=1,
+                                                        exposure_time=1)
+        assert isinstance(diffraction_pattern, ElectronDiffraction)
 
-    def test_set_scan_calibration(self,diffraction_pattern):
+    def test_set_scan_calibration(self, diffraction_pattern):
         diffraction_pattern.set_scan_calibration(19)
-        assert isinstance(diffraction_pattern,ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction)
 
     @pytest.mark.parametrize('calibration, center', [
-                                (1, (4, 4),),
-                                (0.017, (3, 3)),
-                                (0.5, None,),])
-
-    def test_set_diffraction_calibration(self,diffraction_pattern, calibration, center):
+        (1, (4, 4),),
+        (0.017, (3, 3)),
+        (0.5, None,), ])
+    def test_set_diffraction_calibration(self, diffraction_pattern, calibration, center):
         calibrated_center = calibration * np.array(center) if center is not None else center
         diffraction_pattern.set_diffraction_calibration(calibration, center=calibrated_center)
         dx, dy = diffraction_pattern.axes_manager.signal_axes
         assert dx.scale == calibration and dy.scale == calibration
         if center is not None:
-            assert np.all(diffraction_pattern.isig[0., 0.].data == diffraction_pattern.isig[center[0], center[1]].data)
+            assert np.all(diffraction_pattern.isig[0., 0.].data ==
+                          diffraction_pattern.isig[center[0], center[1]].data)
 
 
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    def test_plot_interactive_virtual_image(self,diffraction_pattern):
-        roi = CircleROI(3,3,5)
+    def test_plot_interactive_virtual_image(self, diffraction_pattern):
+        roi = CircleROI(3, 3, 5)
         diffraction_pattern.plot_interactive_virtual_image(roi)
 
-    def test_get_virtual_image(self,diffraction_pattern):
-        roi = CircleROI(3,3,5)
+    def test_get_virtual_image(self, diffraction_pattern):
+        roi = CircleROI(3, 3, 5)
         diffraction_pattern.get_virtual_image(roi)
-
 
 
 class TestGainNormalisation:
 
     @pytest.mark.parametrize('dark_reference, bright_reference', [
-                                                                    (-1, 1),
-                                                                    (0, 1),
-                                                                    (0, 256),
-                                                                ])
+        (-1, 1),
+        (0, 1),
+        (0, 256),
+    ])
     def test_apply_gain_normalisation(self, diffraction_pattern,
-                                  dark_reference, bright_reference):
+                                      dark_reference, bright_reference):
         dpr = diffraction_pattern.apply_gain_normalisation(
-        dark_reference=dark_reference, bright_reference=bright_reference,inplace=False)
+            dark_reference=dark_reference, bright_reference=bright_reference, inplace=False)
         assert dpr.max() == bright_reference
         assert dpr.min() == dark_reference
 
@@ -121,13 +125,13 @@ class TestDirectBeamMethods:
         (np.array([
             [False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False],
-            [False, False, False,  True,  True, False, False, False],
-            [False, False,  True,  True,  True,  True, False, False],
-            [False, False,  True,  True,  True,  True, False, False],
-            [False, False, False,  True,  True, False, False, False],
+            [False, False, False, True, True, False, False, False],
+            [False, False, True, True, True, True, False, False],
+            [False, False, True, True, True, True, False, False],
+            [False, False, False, True, True, False, False, False],
             [False, False, False, False, False, False, False, False],
             [False, False, False, False, False, False, False, False]]),),
-                  ])
+    ])
     def test_get_direct_beam_mask(self, diffraction_pattern, mask_expected):
         mask_calculated = diffraction_pattern.get_direct_beam_mask(2)
         assert isinstance(mask_calculated, Signal2D)
@@ -138,6 +142,10 @@ class TestRadialProfile:
 
     @pytest.fixture
     def diffraction_pattern_for_radial(self):
+        """
+        Two diffraction patterns with easy to see radial profiles, wrapped
+        in ElectronDiffraction  <2|8,8>
+        """
         dp = ElectronDiffraction(np.zeros((2, 8, 8)))
         dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
                                [0., 2., 3., 3., 3., 3., 2., 0.],
@@ -163,82 +171,91 @@ class TestRadialProfile:
         rp = diffraction_pattern_for_radial.get_radial_profile()
         assert isinstance(rp, Signal1D)
 
-    @pytest.mark.parametrize('expected',[
+    @pytest.mark.parametrize('expected', [
         (np.array(
             [[5., 4., 3., 2., 0.],
              [1., 0., 0., 0., 0.]]
         ))])
-
-    def test_radial_profile(self, diffraction_pattern_for_radial,expected):
+    def test_radial_profile(self, diffraction_pattern_for_radial, expected):
         rp = diffraction_pattern_for_radial.get_radial_profile()
         assert np.allclose(rp.data, expected, atol=1e-3)
+
 
 class TestBackgroundMethods:
 
     @pytest.mark.parametrize('method, kwargs', [
-        ('h-dome', {'h': 1,}),
+        ('h-dome', {'h': 1, }),
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
-        ('median', {'footprint': 4,}),
+        ('median', {'footprint': 4, }),
         ('median', {'footprint': 4, 'implementation': 'skimage'}),
-        ('reference_pattern',{'bg':np.ones((8,8)),})
+        ('reference_pattern', {'bg': np.ones((8, 8)), })
     ])
-    @pytest.mark.filterwarnings('ignore::FutureWarning') # skimage being warned by numpy, not for us
-    @pytest.mark.filterwarnings('ignore::UserWarning') #we don't care about precision loss
+    # skimage being warned by numpy, not for us
+    @pytest.mark.filterwarnings('ignore::FutureWarning')
+    @pytest.mark.filterwarnings('ignore::UserWarning')  # we don't care about precision loss
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
-#@pytest.mark.skip(reason="Uncommented for speed during development")
+# @pytest.mark.skip(reason="Uncommented for speed during development")
+
+
 class TestPeakFinding:
-    #This is assertion free testing
+    # This is assertion free testing
 
     @pytest.fixture
     def ragged_peak(self):
-        pattern = np.zeros((2,2,128,128))
-        pattern[:,:,40:42,45] = 1
-        pattern[:,:,110,30:32] = 1
-        pattern[1,0,71:73,21:23] = 1
+        """
+        A small selection of peaks in an ElectronDiffraction, to allow flexibilty
+        of test building here.
+        """
+        pattern = np.zeros((2, 2, 128, 128))
+        pattern[:, :, 40:42, 45] = 1
+        pattern[:, :, 110, 30:32] = 1
+        pattern[1, 0, 71:73, 21:23] = 1
         dp = ElectronDiffraction(pattern)
         dp.set_diffraction_calibration(1)
         return dp
 
-    methods = ['zaefferer','laplacian_of_gaussians', 'difference_of_gaussians','stat']
+    methods = ['zaefferer', 'laplacian_of_gaussians', 'difference_of_gaussians', 'stat', 'xc']
 
     @pytest.mark.parametrize('method', methods)
-    @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
-    def test_findpeaks_ragged(self,ragged_peak,method):
-        output = ragged_peak.find_peaks(method=method,show_progressbar=False)
+    @pytest.mark.filterwarnings('ignore::DeprecationWarning')  # skimage internals
+    def test_findpeaks_ragged(self, ragged_peak, method):
+        if method == 'xc':
+            disc = np.ones((2, 2))
+            output = ragged_peak.find_peaks(method='xc', disc_image=disc, min_distance=3)
+        else:
+            output = ragged_peak.find_peaks(method=method, show_progressbar=False)
 
-    @pytest.mark.skip(reason="This raises a traiterror at present")
-    @pytest.mark.filterwarnings('ignore::DeprecationWarning') #skimage internals
-    def test_find_peaks_xc(self,ragged_peak):
-        disc = np.ones((2,2))
-        output = ragged_peak.find_peaks(method='xc',disc_image=disc,min_distance=3)
 
 class TestsAssertionless:
-    def test_decomposition(self,diffraction_pattern):
+    def test_decomposition(self, diffraction_pattern):
         storage = diffraction_pattern.decomposition()
 
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
-    def test_find_peaks_interactive(self,diffraction_pattern):
+    @pytest.mark.filterwarnings('ignore::UserWarning')  # we don't want to use xc in this bit
+    def test_find_peaks_interactive(self, diffraction_pattern):
         from matplotlib import pyplot as plt
-        plt.ion() #to make plotting non-blocking
+        plt.ion()  # to make plotting non-blocking
         diffraction_pattern.find_peaks_interactive()
         plt.close('all')
 
 
 @pytest.mark.xfail(raises=NotImplementedError)
 class TestNotImplemented():
-    def test_failing_run(self,diffraction_pattern):
+    def test_failing_run(self, diffraction_pattern):
         diffraction_pattern.find_peaks(method='no_such_method_exists')
 
-    def test_remove_dead_pixels_failing(self,diffraction_pattern):
-        dpr = diffraction_pattern.remove_deadpixels([[1,2],[5,6]],'fake_method',inplace=False,progress_bar=False)
+    def test_remove_dead_pixels_failing(self, diffraction_pattern):
+        dpr = diffraction_pattern.remove_deadpixels(
+            [[1, 2], [5, 6]], 'fake_method', inplace=False, progress_bar=False)
 
     def test_remove_background_fake_method(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='fake_method')
 
     def test_remove_background_fake_implementation(self, diffraction_pattern):
-        bgr = diffraction_pattern.remove_background(method='median',implementation='fake_implementation')
+        bgr = diffraction_pattern.remove_background(
+            method='median', implementation='fake_implementation')

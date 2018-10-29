@@ -18,6 +18,7 @@
 
 import pyxem as pxm
 
+
 class StructureLibrary(dict):
     """
     A dictionary containing all the structures and their associated rotations
@@ -39,9 +40,9 @@ class StructureLibrary(dict):
                  orientations):
 
         self.identifiers = identifiers
-        self.structures  = structures
+        self.structures = structures
         self.orientations = orientations
         # create the actual dictionary
         self.struct_lib = dict()
-        for ident,struct,ori in zip(identifiers,structures,orientations):
-                self.struct_lib[ident] = (struct,ori)
+        for ident, struct, ori in zip(identifiers, structures, orientations):
+            self.struct_lib[ident] = (struct, ori)

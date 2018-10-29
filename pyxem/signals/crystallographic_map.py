@@ -27,23 +27,24 @@ from tqdm import tqdm
 Signal class for crystallographic phase and orientation maps.
 """
 
+
 def load_mtex_map(filename):
-        """
-        Loads a crystallographic map saved by previously saved via .save_map()
-        """
-        load_array = np.loadtxt(filename,delimiter='\t')
-        x_max = np.max(load_array[:,5]).astype(int)
-        y_max = np.max(load_array[:,6]).astype(int)
-        # add one for zero indexing
-        array = load_array.reshape(x_max+1,y_max+1,7)
-        cmap = Signal2D(array).transpose(navigation_axes=2)
-        return CrystallographicMap(cmap.isig[:5]) #don't keep x/y
+    """
+    Loads a crystallographic map saved by previously saved via .save_map()
+    """
+    load_array = np.loadtxt(filename, delimiter='\t')
+    x_max = np.max(load_array[:, 5]).astype(int)
+    y_max = np.max(load_array[:, 6]).astype(int)
+    # add one for zero indexing
+    array = load_array.reshape(x_max + 1, y_max + 1, 7)
+    cmap = Signal2D(array).transpose(navigation_axes=2)
+    return CrystallographicMap(cmap.isig[:5])  # don't keep x/y
 
 def _euler2axangle_signal(euler):
     """ Find the magnitude of a rotation"""
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
-def _distance_from_fixed_angle(angle,fixed_angle):
+def _distance_from_fixed_angle(angle, fixed_angle):
     """
     Designed to be mapped, this function finds the smallest rotation between
     two rotations. It assumes a no-symmettry system.
@@ -53,17 +54,18 @@ def _distance_from_fixed_angle(angle,fixed_angle):
     version finding the joining rotation.
 
     """
-    q_data  = euler2quat(*np.deg2rad(angle),axes='rzxz')
-    q_fixed = euler2quat(*np.deg2rad(fixed_angle),axes='rzxz')
-    if np.abs(2*(np.dot(q_data,q_fixed))**2 - 1) < 1: #arcos will work
-        #https://math.stackexchange.com/questions/90081/quaternion-distance
-        theta = np.arccos(2*(np.dot(q_data,q_fixed))**2 - 1)
-    else: #slower, but also good
-        q_from_mode = qmult(qinverse(q_fixed),q_data)
-        axis,theta = quat2axangle(q_from_mode)
+    q_data = euler2quat(*np.deg2rad(angle), axes='rzxz')
+    q_fixed = euler2quat(*np.deg2rad(fixed_angle), axes='rzxz')
+    if np.abs(2 * (np.dot(q_data, q_fixed))**2 - 1) < 1:  # arcos will work
+        # https://math.stackexchange.com/questions/90081/quaternion-distance
+        theta = np.arccos(2 * (np.dot(q_data, q_fixed))**2 - 1)
+    else:  # slower, but also good
+        q_from_mode = qmult(qinverse(q_fixed), q_data)
+        axis, theta = quat2axangle(q_from_mode)
         theta = np.abs(theta)
 
     return np.rad2deg(theta)
+
 
 class CrystallographicMap(BaseSignal):
     """
@@ -71,6 +73,7 @@ class CrystallographicMap(BaseSignal):
     phase, three angles, a correlation index and 1/2 reliability scores. See
     the .get_crystallographic_maps() method
     """
+
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
@@ -78,6 +81,7 @@ class CrystallographicMap(BaseSignal):
     def get_phase_map(self):
         """Obtain a map of the best matching phase at each navigation position.
         """
+
         phase_map =self.isig[0].as_signal2D((0,1))
 
         #Set calibration to same as signal
@@ -123,6 +127,7 @@ class CrystallographicMap(BaseSignal):
 
         return orientation_map
 
+
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
         each navigation position.
@@ -149,6 +154,7 @@ class CrystallographicMap(BaseSignal):
 
         return correlation_map
 
+
     def get_reliability_map_orientation(self):
         """Obtain an orientation reliability map showing the difference between
         the highest correlation score and the second highest correlation score
@@ -164,6 +170,7 @@ class CrystallographicMap(BaseSignal):
         """
         reliability_map = self.isig[5].as_signal2D((0,1))
 
+
         #Set calibration to same as signal
         x = reliability_map.axes_manager.signal_axes[0]
         y = reliability_map.axes_manager.signal_axes[1]
@@ -178,6 +185,7 @@ class CrystallographicMap(BaseSignal):
 
         return reliability_map
 
+
     def get_reliability_map_phase(self):
         """Obtain a reliability map showing the difference between the highest
         correlation score of the most suitable phase and the next best score
@@ -191,6 +199,7 @@ class CrystallographicMap(BaseSignal):
             best scoring phase at each navigation position.
 
         """
+
         reliability_map = self.isig[6].as_signal2D((0,1))
 
         #Set calibration to same as signal
@@ -207,6 +216,7 @@ class CrystallographicMap(BaseSignal):
 
         return reliability_map
 
+
     def get_modal_angles(self):
         """Obtain the modal angles (and their fractional occurances).
 
@@ -215,10 +225,10 @@ class CrystallographicMap(BaseSignal):
         modal_angles : list
             [modal_angles, fractional_occurance]
         """
-        element_count = self.data.shape[0]*self.data.shape[1]
-        euler_array = self.isig[1:4].data.reshape(element_count,3)
+        element_count = self.data.shape[0] * self.data.shape[1]
+        euler_array = self.isig[1:4].data.reshape(element_count, 3)
         pairs, counts = np.unique(euler_array, axis=0, return_counts=True)
-        return [pairs[counts.argmax()],counts[counts.argmax()]/np.sum(counts)]
+        return [pairs[counts.argmax()], counts[counts.argmax()] / np.sum(counts)]
 
     def get_distance_from_modal_angle(self):
         """Obtain the misorinetation with respect to the modal angle for the
@@ -239,9 +249,7 @@ class CrystallographicMap(BaseSignal):
         """
         modal_angle = self.get_modal_angles()[0]
         return self.isig[1:4].map(_distance_from_fixed_angle,
-                                  fixed_angle=modal_angle,
-                                  inplace=False)
-
+                                  fixed_angle=modal_angle, inplace=False)
 
     def save_mtex_map(self, filename):
         """
@@ -257,8 +265,8 @@ class CrystallographicMap(BaseSignal):
         """
         x_size_nav = self.data.shape[1]
         y_size_nav = self.data.shape[0]
-        results_array = np.zeros((x_size_nav*y_size_nav,7))
-        for i in tqdm(range(0,x_size_nav),ascii=True):
-            for j in range (0, y_size_nav):
-                results_array[(j)*x_size_nav+i] = np.append(self.inav[i,j].data[0:5],[i,j])
-        np.savetxt(filename, results_array, delimiter = "\t", newline="\r\n")
+        results_array = np.zeros((x_size_nav * y_size_nav, 7))
+        for i in tqdm(range(0, x_size_nav), ascii=True):
+            for j in range(0, y_size_nav):
+                results_array[(j) * x_size_nav + i] = np.append(self.inav[i, j].data[0:5], [i, j])
+        np.savetxt(filename, results_array, delimiter="\t", newline="\r\n")
