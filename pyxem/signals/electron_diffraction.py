@@ -334,7 +334,7 @@ class ElectronDiffraction(Signal2D):
                         show_progressbar=progress_bar,
                         *args, **kwargs)
 
-    def get_radial_profile(self,mask=None, inplace=False,
+    def get_radial_profile(self, mask=None, inplace=False,
                            *args,**kwargs):
         """Return the radial profile of the diffraction pattern.
 
@@ -367,7 +367,7 @@ class ElectronDiffraction(Signal2D):
         Examples
         --------
         .. code-block:: python
-            profiles = ed.get_radial_profile(mask = mask_array)
+            profiles = ed.get_radial_profile(mask=mask_array)
             profiles.plot()
         """
         radial_profiles = self.map(radial_average,
