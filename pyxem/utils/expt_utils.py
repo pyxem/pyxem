@@ -103,9 +103,15 @@ def _polar2cart(r, theta):
     return x, y
 
 
-def radial_average(z):
+def radial_average(z, mask=None):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
+
+    Parameters
+    ----------
+    mask : array with the same dimensions as z
+            Consists of 0s for excluded pixels and 1s for non-excluded pixels.
+            The 0-pixels are excluded from the radial average.
 
     Returns
     -------
@@ -120,8 +126,16 @@ def radial_average(z):
     r = np.rint(r - 0.5).astype(np.int)
     # the subtraction of 0.5 gets the 0 in the correct place
 
-    tbin = np.bincount(r.ravel(), z.ravel())
-    nr = np.bincount(r.ravel())
+    if mask is None:
+        tbin = np.bincount(r.ravel(), z.ravel())
+        nr = np.bincount(r.ravel())
+
+    else:
+        # the mask is applied on the z array.
+        masked_array = z * mask
+        tbin = np.bincount(r.ravel(), masked_array.ravel())
+        nr = np.bincount(r.ravel(), mask.ravel())
+
     averaged = np.nan_to_num(tbin / nr)
 
     return averaged
