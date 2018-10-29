@@ -159,26 +159,56 @@ class TestRadialProfile:
         dp.data[1] = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
-                               [0., 0., 0., 1., 1., 0., 0., 0.],
-                               [0., 0., 0., 1., 1., 0., 0., 0.],
+                               [1., 1., 1., 1., 1., 1., 1., 1.],
+                               [1., 1., 1., 1., 1., 1., 1., 1.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.],
                                [0., 0., 0., 0., 0., 0., 0., 0.]])
 
         return dp
 
-    def test_radial_profile_signal_type(self, diffraction_pattern_for_radial):
+    @pytest.fixture
+    def mask_for_radial(self):
+        """
+        An 8x8 mask array, to test that part of the radial average code.
+        """
+        mask = np.array([[0., 0., 1., 1., 1., 1., 1., 1.],
+                         [0., 0., 1., 1., 1., 1., 1., 1.],
+                         [0., 0., 1., 1., 1., 1., 1., 1.],
+                         [1., 0., 1., 1., 1., 1., 1., 1.],
+                         [1., 0., 1., 1., 1., 1., 1., 1.],
+                         [0., 0., 1., 1., 1., 1., 1., 1.],
+                         [0., 0., 1., 1., 1., 1., 1., 1.],
+                         [0., 0., 1., 1., 1., 1., 1., 1.]])
+
+        return mask
+
+    def test_radial_profile_signal_type(self, diffraction_pattern_for_radial,
+                                        mask_for_radial):
         rp = diffraction_pattern_for_radial.get_radial_profile()
+        rp_mask = diffraction_pattern_for_radial.get_radial_profile(
+            mask_array=mask_for_radial)
+
         assert isinstance(rp, Signal1D)
+        assert isinstance(rp_mask, Signal1D)
 
     @pytest.mark.parametrize('expected', [
         (np.array(
             [[5., 4., 3., 2., 0.],
-             [1., 0., 0., 0., 0.]]
+             [1., 0.5, 0.2, 0.2, 0.]]
         ))])
-    def test_radial_profile(self, diffraction_pattern_for_radial, expected):
+    @pytest.mark.parametrize('expected_mask', [
+        (np.array(
+            [[5., 4., 3., 2., 0.],
+             [1., 0.5, 0.125, 0.25, 0.]]
+        ))])
+    def test_radial_profile(self, diffraction_pattern_for_radial, expected,
+                            mask_for_radial, expected_mask):
         rp = diffraction_pattern_for_radial.get_radial_profile()
+        rp_mask = diffraction_pattern_for_radial.get_radial_profile(
+            mask_array=mask_for_radial)
         assert np.allclose(rp.data, expected, atol=1e-3)
+        assert np.allclose(rp_mask.data, expected_mask, atol=1e-3)
 
 
 class TestBackgroundMethods:

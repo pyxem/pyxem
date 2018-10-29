@@ -334,7 +334,7 @@ class ElectronDiffraction(Signal2D):
                         show_progressbar=progress_bar,
                         *args, **kwargs)
 
-    def get_radial_profile(self, inplace=False,
+    def get_radial_profile(self, mask_array=None, inplace=False,
                            *args, **kwargs):
         """Return the radial profile of the diffraction pattern.
 
@@ -354,6 +354,12 @@ class ElectronDiffraction(Signal2D):
             The radial average profile of each diffraction pattern
             in the ElectronDiffraction signal as a Signal1D.
 
+        Parameters
+        -------
+        mask_array : optional array with the same dimensions as z
+                Consists of 0s for excluded pixels and 1s for non-excluded pixels.
+                The 0-pixels are excluded from the radial average.
+
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
@@ -361,10 +367,10 @@ class ElectronDiffraction(Signal2D):
         Examples
         --------
         .. code-block:: python
-            profiles = ed.get_radial_profile()
+            profiles = ed.get_radial_profile(mask_array=mask)
             profiles.plot()
         """
-        radial_profiles = self.map(radial_average,
+        radial_profiles = self.map(radial_average, mask=mask_array,
                                    inplace=inplace,
                                    *args, **kwargs)
 
