@@ -1,5 +1,6 @@
 atomicwrites==1.1.5
 attrs==18.1.0
+autopep8==1.4.2  
 backcall==0.1.0
 certifi>=2018.8.13
 chardet==3.0.4
@@ -42,7 +43,8 @@ pip==10.0.1
 pluggy==0.7.1               
 prompt-toolkit==1.0.15             
 ptyprocess==0.6.0             
-py==1.5.4            
+py==1.5.4 
+pycodestyle==2.4.0           
 PyDispatcher==2.0.5           
 PyWavelets==0.5.2     
 Pygments==2.2.0          
