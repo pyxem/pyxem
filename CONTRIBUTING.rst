@@ -79,12 +79,13 @@ pyXem follows the Style Guide for Python Code - these are just some rules for
 consistency that you can read all about in the `Python Style Guide
 <https://www.python.org/dev/peps/pep-0008/>`_.
 
-To enforce this, we require that the final commit on all pull requests is the result of 
-running
+To enforce this, we require that the following auto correction is applied at the end of pull request. The simplest
+option is to run (from the home directory of pyxem) 
 
 .. code:: bash
 
-    autopep8 --aggressive --select=E711,E712
+    chmod +x pepstorm.sh	
+    ./pepstorm.sh
     git add .
     git commit -m "autopep8 corrections"
 

@@ -33,6 +33,7 @@ This module contains utility functions for processing electron diffraction
 patterns.
 """
 
+
 def _index_coords(z, origin=None):
     """
     Creates x & y coords for the indicies in a numpy array
@@ -51,7 +52,7 @@ def _index_coords(z, origin=None):
     """
     ny, nx = z.shape[:2]
     if origin is None:
-        origin_x, origin_y = nx//2, ny//2
+        origin_x, origin_y = nx // 2, ny // 2
     else:
         origin_x, origin_y = origin
 
@@ -60,6 +61,7 @@ def _index_coords(z, origin=None):
     x -= origin_x
     y -= origin_y
     return x, y
+
 
 def _cart2polar(x, y):
     """
@@ -80,6 +82,7 @@ def _cart2polar(x, y):
     theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
+
 def _polar2cart(r, theta):
     """
     Transform polar coordinates to Cartesian
@@ -99,6 +102,7 @@ def _polar2cart(r, theta):
     y = -r * np.sin(theta)
     return x, y
 
+
 def radial_average(z):
     """Calculate the radial profile by azimuthal averaging about a specified
     center.
@@ -109,18 +113,19 @@ def radial_average(z):
         Radial profile of the diffraction pattern.
     """
 
-    center = ((z.shape[0]/2)-0.5,(z.shape[1]/2)-0.5) #geometric shape work, not 0 indexing
+    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)  # geometric shape work, not 0 indexing
 
     y, x = np.indices(z.shape)
     r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-    r = np.rint(r-0.5).astype(np.int)
-    #the subtraction of 0.5 gets the 0 in the correct place
+    r = np.rint(r - 0.5).astype(np.int)
+    # the subtraction of 0.5 gets the 0 in the correct place
 
     tbin = np.bincount(r.ravel(), z.ravel())
     nr = np.bincount(r.ravel())
     averaged = np.nan_to_num(tbin / nr)
 
     return averaged
+
 
 def gain_normalise(z, dref, bref):
     """Apply gain normalization to experimentally acquired electron
@@ -137,7 +142,8 @@ def gain_normalise(z, dref, bref):
     -------
         Gain normalized diffraction pattern
     """
-    return ((z- dref) / (bref - dref)) * np.mean((bref - dref))
+    return ((z - dref) / (bref - dref)) * np.mean((bref - dref))
+
 
 def remove_dead(z, deadpixels, deadvalue="average", d=1):
     """Remove dead pixels from experimental electron diffraction patterns.
@@ -159,13 +165,13 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     """
     z_bar = np.copy(z)
     if deadvalue == 'average':
-        for (i,j) in deadpixels:
-            neighbours = z[i-d:i+d+1, j-d:j+d+1].flatten()
-            z_bar[i,j] = np.mean(neighbours)
+        for (i, j) in deadpixels:
+            neighbours = z[i - d:i + d + 1, j - d:j + d + 1].flatten()
+            z_bar[i, j] = np.mean(neighbours)
 
     elif deadvalue == 'nan':
-        for (i,j) in deadpixels:
-            z_bar[i,j] = np.nan
+        for (i, j) in deadpixels:
+            z_bar[i, j] = np.nan
     else:
         raise NotImplementedError("The method specified is not implemented. "
                                   "See documentation for available "
@@ -173,7 +179,8 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     return z_bar
 
-def affine_transformation(z,matrix,order,*args,**kwargs):
+
+def affine_transformation(z, matrix, order, *args, **kwargs):
     """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
@@ -200,12 +207,13 @@ def affine_transformation(z,matrix,order,*args,**kwargs):
     # This defines the transform you want to perform
     transformation = tf.AffineTransform(matrix=matrix)
 
-    #skimage transforms can be added like this, actually matrix multiplication,
-    #hence the need for the brackets. (Note tf.warp takes the inverse)
+    # skimage transforms can be added like this, actually matrix multiplication,
+    # hence the need for the brackets. (Note tf.warp takes the inverse)
     trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order,*args,**kwargs)
+                    order=order, *args, **kwargs)
 
     return trans
+
 
 def regional_filter(z, h):
     """Perform a h-dome regional filtering of the an image for background
@@ -227,6 +235,7 @@ def regional_filter(z, h):
 
     return z - dilated
 
+
 def subtract_background_dog(z, sigma_min, sigma_max):
     """Difference of gaussians method for background removal.
 
@@ -245,6 +254,7 @@ def subtract_background_dog(z, sigma_min, sigma_max):
     blur_min = ndi.gaussian_filter(z, sigma_min)
 
     return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
+
 
 def subtract_background_median(z, footprint=19, implementation='scipy'):
     """Remove background using a median filter.
@@ -273,6 +283,7 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
 
     return np.maximum(bg_subtracted, 0)
 
+
 def subtract_reference(z, bg):
     """Subtracts background using a user-defined background pattern.
 
@@ -281,12 +292,13 @@ def subtract_reference(z, bg):
     bg: array
         User-defined diffraction pattern to be subtracted as background.
     """
-    im = z.astype(np.float64)-bg
-    for i in range (0,z.shape[0]):
-        for j in range (0,z.shape[1]):
-            if im[i,j]<0:
-                im[i,j]=0
+    im = z.astype(np.float64) - bg
+    for i in range(0, z.shape[0]):
+        for j in range(0, z.shape[1]):
+            if im[i, j] < 0:
+                im[i, j] = 0
     return im
+
 
 def circular_mask(shape, radius, center=None):
     """Produces a mask of radius 'r' centered on 'center' of shape 'shape'.
@@ -309,7 +321,8 @@ def circular_mask(shape, radius, center=None):
     mask = (X - x) ** 2 + (Y - y) ** 2 < radius ** 2
     return mask
 
-def reference_circle(coords, dimX, dimY,radius):
+
+def reference_circle(coords, dimX, dimY, radius):
     """Draw the perimeter of an circle at a given position
     in the diffraction pattern (e.g. to provide a reference for
     finding the direct beam center).
@@ -335,11 +348,12 @@ def reference_circle(coords, dimX, dimY,radius):
     """
     img = np.zeros((dimX, dimY))
 
-    for n in range(np.size(coords,0)):
-        rr, cc = ellipse_perimeter(coords[n,0],coords[n,1], radius, radius)
+    for n in range(np.size(coords, 0)):
+        rr, cc = ellipse_perimeter(coords[n, 0], coords[n, 1], radius, radius)
         img[rr, cc] = 1
 
     return img
+
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     """Method to centre the direct beam centre by a cross-correlation algorithm.
@@ -361,31 +375,32 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     shift: np.array
         np.array containing offset (from center) of the direct beam positon.
     """
-    radiusList = np.arange(radius_start,radius_finish)
-    errRecord = np.zeros_like(radiusList,dtype='single')
-    origin = np.array([[round(np.size(z,axis=-2)/2),round(np.size(z,axis=-1)/2)]])
+    radiusList = np.arange(radius_start, radius_finish)
+    errRecord = np.zeros_like(radiusList, dtype='single')
+    origin = np.array([[round(np.size(z, axis=-2) / 2), round(np.size(z, axis=-1) / 2)]])
 
-    for ind in np.arange(0,np.size(radiusList)):
+    for ind in np.arange(0, np.size(radiusList)):
         radius = radiusList[ind]
-        ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radius)
-        h0= np.hanning(np.size(ref,0))
-        h1= np.hanning(np.size(ref,1))
-        hann2d = np.sqrt(np.outer(h0,h1))
-        ref= hann2d*ref
-        im = hann2d*z
-        shift, error, diffphase = register_translation(ref,im, 10)
+        ref = reference_circle(origin, np.size(z, axis=-2), np.size(z, axis=-1), radius)
+        h0 = np.hanning(np.size(ref, 0))
+        h1 = np.hanning(np.size(ref, 1))
+        hann2d = np.sqrt(np.outer(h0, h1))
+        ref = hann2d * ref
+        im = hann2d * z
+        shift, error, diffphase = register_translation(ref, im, 10)
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
 
-    ref = reference_circle(origin,np.size(z,axis=-2),np.size(z,axis=-1),radiusList[index_min])
-    h0= np.hanning(np.size(ref,0))
-    h1= np.hanning(np.size(ref,1))
-    hann2d = np.sqrt(np.outer(h0,h1))
-    ref= hann2d*ref
-    im = hann2d*z
-    shift, error, diffphase = register_translation(ref,im, 100)
+    ref = reference_circle(origin, np.size(z, axis=-2), np.size(z, axis=-1), radiusList[index_min])
+    h0 = np.hanning(np.size(ref, 0))
+    h1 = np.hanning(np.size(ref, 1))
+    hann2d = np.sqrt(np.outer(h0, h1))
+    ref = hann2d * ref
+    im = hann2d * z
+    shift, error, diffphase = register_translation(ref, im, 100)
 
     return (shift - 0.5)
+
 
 def peaks_as_gvectors(z, center, calibration):
     """
