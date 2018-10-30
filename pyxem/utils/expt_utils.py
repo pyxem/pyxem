@@ -40,7 +40,7 @@ def _index_coords(z, origin=None):
     Parameters
     ----------
     z : np.array()
-        Two-dimensional data array.
+        Two-dimensional data array containing signal.
     origin : tuple
         (x,y) defaults to the center of the image. Specify origin=(0,0) to set
         the origin to the *top-left* corner of the image.
@@ -108,7 +108,7 @@ def radial_average(z, mask=None):
     Parameters
     ----------
     z : np.array()
-        Two-dimensional data array.
+        Two-dimensional data array containing signal.
     mask : np.array()
         Array with the same dimensions as z comprizing 0s for excluded pixels
         and 1s for non-excluded pixels.
@@ -166,7 +166,9 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     Parameters
     ----------
-    deadpixels : array
+    z : np.array()
+        Two-dimensional data array containing signal.
+    deadpixels : np.array()
         Array containing the array indices of dead pixels in the diffraction
         pattern.
     deadvalue : string
@@ -177,7 +179,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     Returns
     -------
     img : array
-        Array containing the diffraction pattern with dead pixels removed.
+        Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
     if deadvalue == 'average':
@@ -305,8 +307,15 @@ def subtract_reference(z, bg):
 
     Parameters
     ----------
-    bg: array
+    z : np.array()
+        Two-dimensional data array containing signal.
+    bg: array()
         User-defined diffraction pattern to be subtracted as background.
+
+    Returns
+    -------
+    im : np.array()
+        Two-dimensional data array containing signal with background removed.
     """
     im = z.astype(np.float64) - bg
     for i in range(0, z.shape[0]):
@@ -322,13 +331,16 @@ def circular_mask(shape, radius, center=None):
     Parameters
     ----------
     shape : tuple
+        The shape of the signal to be masked.
     radius : int
+        The radius of the circular mask.
     center : tuple (optional)
-        Default: (0, 0)
+        The center of the circular mask. Default: (0, 0)
 
     Returns
     -------
-    np.ndarray
+    mask : np.array()
+        The circular mask.
 
     """
     l_x, l_y = shape
