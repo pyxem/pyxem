@@ -39,7 +39,7 @@ pexpect==4.6.0
 pickleshare==0.7.4      
 Pillow==5.2.0     
 Pint==0.8.1    
-pip==10.0.1               
+pip==18.0.1               
 pluggy==0.7.1               
 prompt-toolkit==1.0.15             
 ptyprocess==0.6.0             
@@ -54,7 +54,7 @@ pytest==3.8.0
 python-dateutil==2.7.3       
 pytz==2018.5     
 pyzmq==17.1.2            
-requests==2.19.1          
+requests==2.20.0          
 ruamel.yaml==0.15.57          
 scikit-image==0.14.0          
 scikit-learn==0.19.2         
