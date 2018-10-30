@@ -115,11 +115,11 @@ def radial_average(z, mask=None):
 
     Returns
     -------
-    radial_profile : array
-        Radial profile of z.
+    radial_profile : np.array()
+        One-dimensional radial profile of z.
     """
-
-    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)  # geometric shape work, not 0 indexing
+    # geometric shape work, not 0 indexing
+    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
 
     y, x = np.indices(z.shape)
     r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
@@ -129,7 +129,6 @@ def radial_average(z, mask=None):
     if mask is None:
         tbin = np.bincount(r.ravel(), z.ravel())
         nr = np.bincount(r.ravel())
-
     else:
         # the mask is applied on the z array.
         masked_array = z * mask
@@ -147,14 +146,17 @@ def gain_normalise(z, dref, bref):
 
     Parameters
     ----------
+    z : np.array()
+        Two-dimensional data array containing signal.
     dref : ElectronDiffraction
-        Dark reference image.
+        Two-dimensional data array containing dark reference.
     bref : ElectronDiffraction
-        Flat-field bright reference image.
+        Two-dimensional data array containing bright reference.
 
     Returns
     -------
-        Gain normalized diffraction pattern
+    z1 : np.array()
+        Two dimensional data array of gain normalized z.
     """
     return ((z - dref) / (bref - dref)) * np.mean((bref - dref))
 
