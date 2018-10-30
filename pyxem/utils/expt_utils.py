@@ -368,7 +368,7 @@ def reference_circle(coords, dimX, dimY, radius):
     Returns
     -------
     img: np.array
-        np.array containing the circle drawn at the position given in the coordinates.
+        Array containing the circle at the position given in the coordinates.
     """
     img = np.zeros((dimX, dimY))
 
@@ -389,10 +389,11 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     Parameters
     ----------
     radius_start : int
-        The lower bound for the radius of the central disc to be used in the alignment
-
+        The lower bound for the radius of the central disc to be used in the
+        alignment.
     radius_finish : int
-        The upper bounds for the radius of the central disc to be used in the alignment
+        The upper bounds for the radius of the central disc to be used in the
+        alignment.
 
     Returns
     -------
