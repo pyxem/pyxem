@@ -274,14 +274,20 @@ def peaks_from_best_template(single_match_result, phase, library):
     """ Takes a match_result object and return the associated peaks, to be used
     in combination with map().
 
-    Example : peaks= match_results.map(peaks_from_best_template,phase=phase,library=library)
-
+    Parameters
+    ----------
+    single_match_result : matching_results
+        An entry in a matching_results object.
     phase : list
-        of keys to library, should be the same as passed to IndexationGenerator.correlate()
+        List of keys to library, as passed to IndexationGenerator.correlate()
+    library : dictionary
+        Nested dictionary containing keys of [phase][rotation]
 
-    library : nested dictionary containing keys of [phase][rotation]
+    Returns
+    -------
+    peaks : array
+        Coordinates of peaks in the matching results object in calibrated units.
     """
-
     best_fit = single_match_result[np.argmax(single_match_result[:, 4])]
     _phase = phase[int(best_fit[0])]
     pattern = library.get_library_entry(
