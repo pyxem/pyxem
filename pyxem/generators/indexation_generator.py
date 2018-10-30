@@ -131,7 +131,7 @@ class IndexationGenerator():
                              **kwargs)
         matching_results = IndexationResults(matches)
 
-        matching_results = carry_through_navigation_calibration(matching_results,signal)
+        matching_results = carry_through_navigation_calibration(matching_results, signal)
 
         return matching_results
 
