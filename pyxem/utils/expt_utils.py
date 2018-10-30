@@ -40,7 +40,7 @@ def _index_coords(z, origin=None):
     Parameters
     ----------
     z : np.array()
-        2D data
+        Two-dimensional data array.
     origin : tuple
         (x,y) defaults to the center of the image. Specify origin=(0,0) to set
         the origin to the *top-left* corner of the image.
@@ -83,16 +83,15 @@ def _cart2polar(x, y):
 
 
 def _polar2cart(r, theta):
-    """
-    Transform polar coordinates to Cartesian
+    """Transform polar coordinates to Cartesian coordinates.
 
     Parameters
-    -------
+    ----------
     r, theta : floats or arrays
         Polar coordinates
 
     Returns
-    ----------
+    -------
     x, y : floats or arrays
         Cartesian coordinates
     """
@@ -108,14 +107,16 @@ def radial_average(z, mask=None):
 
     Parameters
     ----------
-    mask : array with the same dimensions as z
-            Consists of 0s for excluded pixels and 1s for non-excluded pixels.
-            The 0-pixels are excluded from the radial average.
+    z : np.array()
+        Two-dimensional data array.
+    mask : np.array()
+        Array with the same dimensions as z comprizing 0s for excluded pixels
+        and 1s for non-excluded pixels.
 
     Returns
     -------
     radial_profile : array
-        Radial profile of the diffraction pattern.
+        Radial profile of z.
     """
 
     center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)  # geometric shape work, not 0 indexing
