@@ -97,7 +97,12 @@ class TestMapCreation:
         phasemap = sp_cryst_map.get_phase_map()
         assert phasemap.isig[0, 0] == 0
 
+    def test_get_orientation_map(self, sp_cryst_map):
+        orimap = sp_cryst_map.get_orientation_map()
+        assert orimap.isig[0, 0] == 0
+
     def test_get_correlation_map(self, sp_cryst_map):
+
         correlationmap = sp_cryst_map.get_correlation_map()
         assert correlationmap.isig[0, 0] == 3e-17
 

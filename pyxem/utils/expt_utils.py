@@ -35,20 +35,20 @@ patterns.
 
 
 def _index_coords(z, origin=None):
-    """
-    Creates x & y coords for the indicies in a numpy array
+    """Creates x & y coords for the indicies in a numpy array.
 
     Parameters
     ----------
-    data : numpy array
-        2D data
-    origin : (x,y) tuple
-        defaults to the center of the image. Specify origin=(0,0)
-        to set the origin to the *top-left* corner of the image.
+    z : np.array()
+        Two-dimensional data array containing signal.
+    origin : tuple
+        (x,y) defaults to the center of the image. Specify origin=(0,0) to set
+        the origin to the *top-left* corner of the image.
 
     Returns
     -------
-        x, y : arrays
+    x, y : arrays
+        Corrdinates for the indices of a numpy array.
     """
     ny, nx = z.shape[:2]
     if origin is None:
@@ -64,8 +64,7 @@ def _index_coords(z, origin=None):
 
 
 def _cart2polar(x, y):
-    """
-    Transform Cartesian coordinates to polar
+    """Transform Cartesian coordinates to polar coordinates.
 
     Parameters
     ----------
@@ -84,16 +83,15 @@ def _cart2polar(x, y):
 
 
 def _polar2cart(r, theta):
-    """
-    Transform polar coordinates to Cartesian
+    """Transform polar coordinates to Cartesian coordinates.
 
     Parameters
-    -------
+    ----------
     r, theta : floats or arrays
         Polar coordinates
 
     Returns
-    ----------
+    -------
     x, y : floats or arrays
         Cartesian coordinates
     """
@@ -109,17 +107,19 @@ def radial_average(z, mask=None):
 
     Parameters
     ----------
-    mask : array with the same dimensions as z
-            Consists of 0s for excluded pixels and 1s for non-excluded pixels.
-            The 0-pixels are excluded from the radial average.
+    z : np.array()
+        Two-dimensional data array containing signal.
+    mask : np.array()
+        Array with the same dimensions as z comprizing 0s for excluded pixels
+        and 1s for non-excluded pixels.
 
     Returns
     -------
-    radial_profile : array
-        Radial profile of the diffraction pattern.
+    radial_profile : np.array()
+        One-dimensional radial profile of z.
     """
-
-    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)  # geometric shape work, not 0 indexing
+    # geometric shape work, not 0 indexing
+    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
 
     y, x = np.indices(z.shape)
     r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
@@ -129,7 +129,6 @@ def radial_average(z, mask=None):
     if mask is None:
         tbin = np.bincount(r.ravel(), z.ravel())
         nr = np.bincount(r.ravel())
-
     else:
         # the mask is applied on the z array.
         masked_array = z * mask
@@ -147,14 +146,17 @@ def gain_normalise(z, dref, bref):
 
     Parameters
     ----------
+    z : np.array()
+        Two-dimensional data array containing signal.
     dref : ElectronDiffraction
-        Dark reference image.
+        Two-dimensional data array containing dark reference.
     bref : ElectronDiffraction
-        Flat-field bright reference image.
+        Two-dimensional data array containing bright reference.
 
     Returns
     -------
-        Gain normalized diffraction pattern
+    z1 : np.array()
+        Two dimensional data array of gain normalized z.
     """
     return ((z - dref) / (bref - dref)) * np.mean((bref - dref))
 
@@ -164,7 +166,9 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     Parameters
     ----------
-    deadpixels : array
+    z : np.array()
+        Two-dimensional data array containing signal.
+    deadpixels : np.array()
         Array containing the array indices of dead pixels in the diffraction
         pattern.
     deadvalue : string
@@ -175,7 +179,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     Returns
     -------
     img : array
-        Array containing the diffraction pattern with dead pixels removed.
+        Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
     if deadvalue == 'average':
@@ -303,8 +307,15 @@ def subtract_reference(z, bg):
 
     Parameters
     ----------
-    bg: array
+    z : np.array()
+        Two-dimensional data array containing signal.
+    bg: array()
         User-defined diffraction pattern to be subtracted as background.
+
+    Returns
+    -------
+    im : np.array()
+        Two-dimensional data array containing signal with background removed.
     """
     im = z.astype(np.float64) - bg
     for i in range(0, z.shape[0]):
@@ -320,13 +331,16 @@ def circular_mask(shape, radius, center=None):
     Parameters
     ----------
     shape : tuple
+        The shape of the signal to be masked.
     radius : int
+        The radius of the circular mask.
     center : tuple (optional)
-        Default: (0, 0)
+        The center of the circular mask. Default: (0, 0)
 
     Returns
     -------
-    np.ndarray
+    mask : np.array()
+        The circular mask.
 
     """
     l_x, l_y = shape
@@ -337,28 +351,24 @@ def circular_mask(shape, radius, center=None):
 
 
 def reference_circle(coords, dimX, dimY, radius):
-    """Draw the perimeter of an circle at a given position
-    in the diffraction pattern (e.g. to provide a reference for
-    finding the direct beam center).
+    """Draw the perimeter of an circle at a given position in the diffraction
+    pattern (e.g. to provide a reference for finding the direct beam center).
 
     Parameters
     ----------
     coords : np.array size n,2
         size n,2 array of coordinates to draw the circle.
-
     dimX : int
         first dimension of the diffraction pattern (size)
-
     dimY : int
         second dimension of the diffraction pattern (size)
-
     radius : int
         radius of the circle to be drawn
 
     Returns
     -------
     img: np.array
-        np.array containing the circle drawn at the position given in the coordinates.
+        Array containing the circle at the position given in the coordinates.
     """
     img = np.zeros((dimX, dimY))
 
@@ -379,10 +389,11 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     Parameters
     ----------
     radius_start : int
-        The lower bound for the radius of the central disc to be used in the alignment
-
+        The lower bound for the radius of the central disc to be used in the
+        alignment.
     radius_finish : int
-        The upper bounds for the radius of the central disc to be used in the alignment
+        The upper bounds for the radius of the central disc to be used in the
+        alignment.
 
     Returns
     -------

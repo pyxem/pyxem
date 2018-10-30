@@ -27,6 +27,7 @@ import numpy as np
 from pyxem.signals.indexation_results import IndexationResults
 
 from pyxem.utils import correlate
+from pyxem.utils.sim_utils import carry_through_navigation_calibration
 
 import hyperspy.api as hs
 
@@ -84,6 +85,7 @@ class IndexationGenerator():
                   n_largest=5,
                   keys=[],
                   mask=None,
+                  *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
@@ -99,9 +101,10 @@ class IndexationGenerator():
             for 'si' and 1 for 'ga'.
         mask : Array
             Array with the same size as signal (in navigation) True False
-
-        **kwargs
-            Keyword arguments passed to the HyperSpy map() function.
+        *args : arguments
+            Arguments passed to map().
+        **kwargs : arguments
+            Keyword arguments passed map().
 
         Returns
         -------
@@ -119,14 +122,18 @@ class IndexationGenerator():
             sig_shape = signal.axes_manager.navigation_shape
             mask = hs.signals.Signal1D(np.ones((sig_shape[0], sig_shape[1], 1)))
 
-        matching_results = signal.map(correlate_library,
-                                      library=library,
-                                      n_largest=n_largest,
-                                      keys=keys,
-                                      mask=mask,
-                                      inplace=False,
-                                      **kwargs)
-        return IndexationResults(matching_results)
+        matches = signal.map(correlate_library,
+                             library=library,
+                             n_largest=n_largest,
+                             keys=keys,
+                             mask=mask,
+                             inplace=False,
+                             **kwargs)
+        matching_results = IndexationResults(matches)
+
+        matching_results = carry_through_navigation_calibration(matching_results, signal)
+
+        return matching_results
 
 
 class ProfileIndexationGenerator():
@@ -159,7 +166,7 @@ class ProfileIndexationGenerator():
             these are submitted. This allows a mapping from the number to the
             phase.  For example, keys = ['si','ga'] will have an output with 0
             for 'si' and 1 for 'ga'.
-        **kwargs
+        **kwargs : arguments
             Keyword arguments passed to the HyperSpy map() function.
 
         Returns

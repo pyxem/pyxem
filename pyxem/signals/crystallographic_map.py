@@ -18,10 +18,11 @@
 
 from hyperspy.signals import BaseSignal
 from hyperspy.signals import Signal2D
-from transforms3d.euler import euler2quat, quat2axangle
+from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 import numpy as np
 from tqdm import tqdm
+from pyxem.utils.sim_utils import carry_through_navigation_calibration
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -39,6 +40,11 @@ def load_mtex_map(filename):
     array = load_array.reshape(x_max + 1, y_max + 1, 7)
     cmap = Signal2D(array).transpose(navigation_axes=2)
     return CrystallographicMap(cmap.isig[:5])  # don't keep x/y
+
+
+def _euler2axangle_signal(euler):
+    """ Find the magnitude of a rotation"""
+    return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 
 def _distance_from_fixed_angle(angle, fixed_angle):
@@ -66,9 +72,9 @@ def _distance_from_fixed_angle(angle, fixed_angle):
 
 class CrystallographicMap(BaseSignal):
     """
-    Stores a map of a SED scan. At each navigtion position there
-    will be a phase, three angles, a correlation index and 1/2 reliability
-    scores. See the .get_crystallographic_maps() method
+    Stores a map of a SED scan. At each navigtion position there will be a
+    phase, three angles, a correlation index and 1/2 reliability scores. See
+    the .get_crystallographic_maps() method
     """
 
     def __init__(self, *args, **kwargs):
@@ -78,36 +84,88 @@ class CrystallographicMap(BaseSignal):
     def get_phase_map(self):
         """Obtain a map of the best matching phase at each navigation position.
         """
-        return self.isig[0].as_signal2D((0, 1))
+
+        phase_map = self.isig[0].as_signal2D((0, 1))
+        phase_map = carry_through_navigation_calibration(phase_map, self)
+
+        return phase_map
+
+    def get_orientation_map(self):
+        """Obtain an orientation image of the rotational angle associated with
+        the crystal orientation at each navigation position.
+
+        Returns
+        -------
+        orientation_map : Signal2D
+            The rotation angle assocaiated with the orientation at each
+            navigation position.
+
+        """
+        eulers = self.isig[1:4]
+        eulers.map(_euler2axangle_signal, inplace=True)
+        orientation_map = eulers.as_signal2D((0, 1))
+        orientation_map = carry_through_navigation_calibration(orientation_map, self)
+
+        return orientation_map
 
     def get_correlation_map(self):
         """Obtain a correlation map showing the highest correlation score at
         each navigation position.
-        """
 
-        return self.isig[4].as_signal2D((0, 1))
+        Returns
+        -------
+        correlation_map : Signal2D
+            The highest correlation score at each navigation position.
+
+        """
+        correlation_map = self.isig[4].as_signal2D((0, 1))
+        correlation_map = carry_through_navigation_calibration(correlation_map, self)
+
+        return correlation_map
 
     def get_reliability_map_orientation(self):
-        """Obtain a reliability map showing the difference between the highest
-        correlation score of the most suitable phase
-        and the next best score (for the phase) at each navigation position.
-        """
+        """Obtain an orientation reliability map showing the difference between
+        the highest correlation score and the second highest correlation score
+        for the same phase oriented differently, at each navigation position.
 
-        return self.isig[5].as_signal2D((0, 1))
+        Returns
+        -------
+        reliability_map : Signal2D
+            The difference between the highest correlation score and the second
+            highest correlation score for the same phase oriented differently at
+            each navigation position.
+
+        """
+        reliability_map = self.isig[5].as_signal2D((0, 1))
+        reliability_map = carry_through_navigation_calibration(reliability_map, self)
+
+        return reliability_map
 
     def get_reliability_map_phase(self):
         """Obtain a reliability map showing the difference between the highest
         correlation score of the most suitable phase and the next best score
         from a different phase at each navigation position.
+
+        Returns
+        -------
+        reliability_map : Signal2D
+            The difference between the highest correlation score and the second
+            highest correlation score for the top scoring phase and the next
+            best scoring phase at each navigation position.
+
         """
-        return self.isig[6].as_signal2D((0, 1))
+        reliability_map = self.isig[6].as_signal2D((0, 1))
+        reliability_map = carry_through_navigation_calibration(reliability_map, self)
+
+        return reliability_map
 
     def get_modal_angles(self):
-        """ Obtain the modal angles (and their fractional occurances)
+        """Obtain the modal angles (and their fractional occurances).
 
-            Returns
-            ------
-            list: [modal_angles, fractional_occurance]
+        Returns
+        -------
+        modal_angles : list
+            [modal_angles, fractional_occurance]
         """
         element_count = self.data.shape[0] * self.data.shape[1]
         euler_array = self.isig[1:4].data.reshape(element_count, 3)
@@ -115,11 +173,21 @@ class CrystallographicMap(BaseSignal):
         return [pairs[counts.argmax()], counts[counts.argmax()] / np.sum(counts)]
 
     def get_distance_from_modal_angle(self):
-        """ Warning - This function is for early inspection, it will
-        only provide good answers when the sampling of orientation space is over
-        a small range. We would always recommend checking your results in MTEX
+        """Obtain the misorinetation with respect to the modal angle for the
+        scan region, at each navigation position.
 
-        see also: method: save_mtex_map
+        NB: This view of the data is typically only useful when the orientation
+        spread across the navigation axes is small.
+
+        Returns
+        -------
+        mode_distance_map : list
+            Misorientation with respect to the modal angle at each navigtion
+            position.
+
+        See Also
+        --------
+            method: save_mtex_map
         """
         modal_angle = self.get_modal_angles()[0]
         return self.isig[1:4].map(_distance_from_fixed_angle,
@@ -127,9 +195,8 @@ class CrystallographicMap(BaseSignal):
 
     def save_mtex_map(self, filename):
         """
-        Save map so that in a format such that it can be imported into MTEX
+        Save map in a format such that it can be imported into MTEX
         http://mtex-toolbox.github.io/
-        GOTCHA: This drops the reliability
 
         Columns:
         1 = phase id,

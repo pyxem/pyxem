@@ -28,10 +28,8 @@ from transforms3d.quaternions import mat2quat, rotate_vector
 
 
 def get_electron_wavelength(accelerating_voltage):
-    """Calculates the (relativistic) electron wavelength in Angstroms
-    for a given accelerating voltage in kV.
-
-    Evaluates
+    """Calculates the (relativistic) electron wavelength in Angstroms for a
+    given accelerating voltage in kV.
 
     Parameters
     ----------
@@ -75,15 +73,18 @@ def get_interaction_constant(accelerating_voltage):
 
 
 def get_unique_families(hkls):
-    """
-    Returns unique families of Miller indices, which must be permutations
-    of each other.
+    """Returns unique families of Miller indices, which must be permutations of
+    each other.
 
-    Args:
-        hkls ([h, k, l]): List of Miller indices.
+    Parameters
+    ----------
+    hkls : list
+        List of Miller indices ([h, k, l])
 
-    Returns:
-        {hkl: multiplicity}: A dict with unique hkl and multiplicity.
+    Returns
+    -------
+    pretty_unique : dictionary
+        A dict with unique hkl and multiplicity {hkl: multiplicity}.
     """
     def is_perm(hkl1, hkl2):
         h1 = np.abs(hkl1)
@@ -108,14 +109,33 @@ def get_unique_families(hkls):
     return pretty_unique
 
 
-def get_vectorized_list_for_atomic_scattering_factors(structure, debye_waller_factors):
-    """
-    Create a flattened array of coeffs, fcoords and occus for vectorized
-    computation of atomic scattering factors later. Note that these are not
-    necessarily the same size as the structure as each partially occupied
+def get_vectorized_list_for_atomic_scattering_factors(structure,
+                                                      debye_waller_factors):
+    """ Create a flattened array of coeffs, fcoords and occus for vectorized
+    computation of atomic scattering factors.
+
+    Note: The dimensions of the returned objects are not necessarily the same
+    size as the number of atoms in the structure as each partially occupied
     specie occupies its own position in the flattened array.
 
-    For primarily for internal use
+
+    Parameters
+    ----------
+    structure : diffpy.structure
+        The atomic structure for which scattering factors are required.
+    debye_waller_factors : list
+        List of Debye-Waller factors for atoms in structure.
+
+    Returns
+    -------
+    coeffs : np.array()
+        Coefficients of atomic scattering factor parameterization for each atom.
+    fcoords : np.array()
+        Fractional coordinates of each atom in structure.
+    occus : np.array()
+        Occupancy of each atomic site.
+    dwfactors : np.array()
+        Debye-Waller factors for each atom in the structure.
     """
 
     coeffs, fcoords, occus, dwfactors = [], [], [], []
@@ -270,17 +290,23 @@ def simulate_kinematic_scattering(atomic_coordinates,
 
 
 def peaks_from_best_template(single_match_result, phase, library):
-    """ Takes a match_result object and return the associated peaks, to be used with
-    in combination with map.
+    """ Takes a match_result object and return the associated peaks, to be used
+    in combination with map().
 
-    Example : peaks= match_results.map(peaks_from_best_template,phase=phase,library=library)
-
+    Parameters
+    ----------
+    single_match_result : matching_results
+        An entry in a matching_results object.
     phase : list
-        of keys to library, should be the same as passed to IndexationGenerator.correlate()
+        List of keys to library, as passed to IndexationGenerator.correlate()
+    library : dictionary
+        Nested dictionary containing keys of [phase][rotation]
 
-    library : nested dictionary containing keys of [phase][rotation]
+    Returns
+    -------
+    peaks : array
+        Coordinates of peaks in the matching results object in calibrated units.
     """
-
     best_fit = single_match_result[np.argmax(single_match_result[:, 4])]
     _phase = phase[int(best_fit[0])]
     pattern = library.get_library_entry(
@@ -294,18 +320,26 @@ def peaks_from_best_template(single_match_result, phase, library):
 
 
 def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
+    """Finds all reciprocal lattice points inside a given reciprocal sphere.
+    Utilised within the DifractionGenerator.
+
+    Parameters
+    ----------
+    reciprocal_lattice : diffpy.Structure.Lattice
+        The crystal lattice for the structure of interest.
+    reciprocal_radius  : float
+        The radius of the sphere in reciprocal space (units of reciprocal
+        Angstroms) within which reciprocal lattice points are returned.
+
+    Returns
+    -------
+    spot_indicies : numpy.array
+        Miller indices of reciprocal lattice points in sphere.
+    spot_coords : numpy.array
+        Cartesian coordinates of reciprocal lattice points in sphere.
+    spot_distances : numpy.array
+        Distance of reciprocal lattice points in sphere from the origin.
     """
-    Finds all reciprocal lattice points inside a given reciprocal sphere. Utilised
-    within the DifractionGenerator.
-
-    Inputs:  reciprocal_lattice : Diffy Lattice Object
-             reciprocal_radius  : float
-
-    Returns: np.arrays(): spot_indicies, spot_coords, spot_distances
-             Note that spot_coords are the cartesian basis.
-
-    """
-
     a, b, c = reciprocal_lattice.a, reciprocal_lattice.b, reciprocal_lattice.c
     h_max = np.ceil(reciprocal_radius / a)
     k_max = np.ceil(reciprocal_radius / b)
@@ -324,10 +358,17 @@ def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
 
 
 def is_lattice_hexagonal(latt):
-    """
-    Attempts to determine if a lattice belongs
-    to a hexagonal crystal. Will also return true
-    for trigonal systems
+    """Determines if a diffpy lattice is hexagonal or trigonal.
+
+    Parameters
+    ----------
+    latt : diffpy.Structure.lattice
+        The diffpy lattice object to be determined as hexagonal or not.
+
+    Returns
+    -------
+    is_true : bool
+        True if hexagonal or trigonal.
     """
     truth_list = []
     truth_list.append(latt.a == latt.b)
@@ -335,3 +376,39 @@ def is_lattice_hexagonal(latt):
     truth_list.append(latt.beta == 90)
     truth_list.append(latt.gamma == 120)
     return len(truth_list) == np.sum(truth_list)
+
+
+def carry_through_navigation_calibration(new_signal, old_signal):
+    """ Transfers navigation axis calibrations from an old signal to a new
+    signal produced from it by a method or a generator.
+
+    Parameters
+    ----------
+    new_signal : Signal
+        The product signal with undefined navigation axes.
+    old_signal : Signal
+        The parent signal with calibrated navigation axes.
+
+    Returns
+    -------
+    new_signal : Signal
+        The new signal with calibrated navigation axes.
+
+    """
+    try:
+        x = new_signal.axes_manager.signal_axes[0]
+        x.name = 'x'
+        x.scale = old_signal.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+    except IndexError:
+        pass
+        # Set calibration to same as signal for second navigation axis if there
+    try:
+        y = new_signal.axes_manager.signal_axes[1]
+        y.name = 'y'
+        y.scale = old_signal.axes_manager.navigation_axes[1].scale
+        y.units = 'nm'
+    except IndexError:
+        pass
+
+    return new_signal
