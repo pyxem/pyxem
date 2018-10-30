@@ -75,15 +75,18 @@ def get_interaction_constant(accelerating_voltage):
 
 
 def get_unique_families(hkls):
-    """
-    Returns unique families of Miller indices, which must be permutations
-    of each other.
+    """Returns unique families of Miller indices, which must be permutations of
+    each other.
 
-    Args:
-        hkls ([h, k, l]): List of Miller indices.
+    Parameters
+    ----------
+    hkls : list
+        List of Miller indices ([h, k, l])
 
-    Returns:
-        {hkl: multiplicity}: A dict with unique hkl and multiplicity.
+    Returns
+    -------
+    pretty_unique : dictionary
+        A dict with unique hkl and multiplicity {hkl: multiplicity}.
     """
     def is_perm(hkl1, hkl2):
         h1 = np.abs(hkl1)
