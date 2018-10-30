@@ -108,7 +108,8 @@ def get_unique_families(hkls):
     return pretty_unique
 
 
-def get_vectorized_list_for_atomic_scattering_factors(structure, debye_waller_factors):
+def get_vectorized_list_for_atomic_scattering_factors(structure,
+                                                      debye_waller_factors):
     """
     Create a flattened array of coeffs, fcoords and occus for vectorized
     computation of atomic scattering factors later. Note that these are not
@@ -270,8 +271,8 @@ def simulate_kinematic_scattering(atomic_coordinates,
 
 
 def peaks_from_best_template(single_match_result, phase, library):
-    """ Takes a match_result object and return the associated peaks, to be used with
-    in combination with map.
+    """ Takes a match_result object and return the associated peaks, to be used
+    in combination with map().
 
     Example : peaks= match_results.map(peaks_from_best_template,phase=phase,library=library)
 
@@ -294,18 +295,26 @@ def peaks_from_best_template(single_match_result, phase, library):
 
 
 def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
+    """Finds all reciprocal lattice points inside a given reciprocal sphere.
+    Utilised within the DifractionGenerator.
+
+    Parameters
+    ----------
+    reciprocal_lattice : diffpy.Structure.Lattice
+        The crystal lattice for the structure of interest.
+    reciprocal_radius  : float
+        The radius of the sphere in reciprocal space (units of reciprocal
+        Angstroms) within which reciprocal lattice points are returned.
+
+    Returns
+    -------
+    spot_indicies : numpy.array
+        Miller indices of reciprocal lattice points in sphere.
+    spot_coords : numpy.array
+        Cartesian coordinates of reciprocal lattice points in sphere.
+    spot_distances : numpy.array
+        Distance of reciprocal lattice points in sphere from the origin.
     """
-    Finds all reciprocal lattice points inside a given reciprocal sphere. Utilised
-    within the DifractionGenerator.
-
-    Inputs:  reciprocal_lattice : Diffy Lattice Object
-             reciprocal_radius  : float
-
-    Returns: np.arrays(): spot_indicies, spot_coords, spot_distances
-             Note that spot_coords are the cartesian basis.
-
-    """
-
     a, b, c = reciprocal_lattice.a, reciprocal_lattice.b, reciprocal_lattice.c
     h_max = np.ceil(reciprocal_radius / a)
     k_max = np.ceil(reciprocal_radius / b)
@@ -324,10 +333,8 @@ def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
 
 
 def is_lattice_hexagonal(latt):
-    """
-    Attempts to determine if a lattice belongs
-    to a hexagonal crystal. Will also return true
-    for trigonal systems
+    """Determines if a lattice is hexagonal or trigonal.
+    
     """
     truth_list = []
     truth_list.append(latt.a == latt.b)
