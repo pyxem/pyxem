@@ -43,7 +43,7 @@ def _get_rotation_angle(matrix):
     angle : float
 
     """
-    return np.array(-math.asin(matrix[1,0]))
+    return np.array(-math.asin(matrix[1, 0]))
 
 
 class DisplacementGradientMap(Signal2D):
@@ -71,7 +71,7 @@ class DisplacementGradientMap(Signal2D):
         RU = self.map(_polar_decomposition,
                       side='right',
                       inplace=False)
-        return RU.isig[:,:,0], RU.isig[:,:,1]
+        return RU.isig[:, :, 0], RU.isig[:, :, 1]
 
     def get_strain_maps(self):
         """Obtain strain maps from the displacement gradient tensor at each

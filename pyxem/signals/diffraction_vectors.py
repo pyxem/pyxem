@@ -17,12 +17,14 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 from hyperspy.signals import BaseSignal, Signal1D
+from hyperspy.api import markers
 
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.utils.expt_utils import *
 from pyxem.utils.vector_utils import *
+from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
 Signal class for diffraction vectors.
@@ -44,22 +46,64 @@ class DiffractionVectors(BaseSignal):
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
 
-    def plot_diffraction_vectors(self, xlim, ylim):
+    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
         """Plot the unique diffraction vectors.
+
+        Parameters
+        ----------
+        xlim : float
+            The maximum x coordinate to be plotted.
+        ylim : float
+            The maximum y coordinate to be plotted.
+        distance_threshold : float
+            The minimum distance between diffraction vectors to be passed to
+            get_unique_vectors.
+
+        Returns
+        -------
+        fig : matplotlib figure
+            The plot as a matplot lib figure.
+
         """
-        #Find the unique gvectors to plot.
-        unique_vectors = self.get_unique_vectors()
-        #Plot the gvector positions
+        # Find the unique gvectors to plot.
+        unique_vectors = self.get_unique_vectors(distance_threshold)
+        # Plot the gvector positions
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(unique_vectors.data.T[1], unique_vectors.data.T[0], 'ro')
+        ax.plot(unique_vectors.data.T[0], -unique_vectors.data.T[1], 'ro')
         ax.set_xlim(-xlim, xlim)
         ax.set_ylim(-ylim, ylim)
         ax.set_aspect('equal')
         return fig
 
+    def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
+        """Plot the diffraction vectors on a signal.
+
+        Parameters
+        ----------
+        signal : ElectronDiffraction
+            The ElectronDiffraction signal object on which to plot the peaks.
+            This signal must have the same navigation dimensions as the peaks.
+        *args :
+            Arguments passed to signal.plot()
+        **kwargs :
+            Keyword arguments passed to signal.plot()
+        """
+        mmx, mmy = generate_marker_inputs_from_peaks(self)
+        signal.plot(*args, **kwargs)
+        for mx, my in zip(mmx, mmy):
+            m = markers.point(x=mx, y=my, color='red', marker='x')
+            signal.add_marker(m, plot_marker=True, permanent=False)
+
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
+
+        Parameters
+        ----------
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
 
         Returns
         -------
@@ -69,36 +113,40 @@ class DiffractionVectors(BaseSignal):
             navigation position.
 
         """
-        #If ragged the signal axes will not be defined
-        if len(self.axes_manager.signal_axes)==0:
+        # If ragged the signal axes will not be defined
+        if len(self.axes_manager.signal_axes) == 0:
             magnitudes = self.map(calculate_norms_ragged,
                                   inplace=False,
                                   *args, **kwargs)
-        #Otherwise easier to calculate.
+        # Otherwise easier to calculate.
         else:
             magnitudes = BaseSignal(calculate_norms(self))
             magnitudes.axes_manager.set_signal_dimension(0)
 
         return magnitudes
 
-    def get_magnitude_histogram(self, bins):
+    def get_magnitude_histogram(self, bins, *args, **kwargs):
         """Obtain a histogram of gvector magnitudes.
 
         Parameters
         ----------
         bins : numpy array
             The bins to be used to generate the histogram.
+        *args:
+            Arguments to get_magnitudes().
+        **kwargs:
+            Keyword arguments to get_magnitudes().
 
         Returns
         -------
-        ghist : Signal1D
+        ghis : Signal1D
             Histogram of gvector magnitudes.
 
         """
-        gmags = self.get_magnitudes()
+        gmags = self.get_magnitudes(*args, **kwargs)
 
-        if len(self.axes_manager.signal_axes)==0:
-            glist=[]
+        if len(self.axes_manager.signal_axes) == 0:
+            glist = []
             for i in gmags._iterate_signal():
                 for j in np.arange(len(i[0])):
                     glist.append(i[0][j])
@@ -109,7 +157,7 @@ class DiffractionVectors(BaseSignal):
         else:
             ghis = gmags.get_histogram(bins=bins)
 
-        ghis.axes_manager.signal_axes[0].name = 'g-vector magnitude'
+        ghis.axes_manager.signal_axes[0].name = 'k'
         ghis.axes_manager.signal_axes[0].units = '$A^{-1}$'
 
         return ghis
@@ -131,7 +179,7 @@ class DiffractionVectors(BaseSignal):
             vectors in the original object.
         """
         if (self.axes_manager.navigation_dimension == 2):
-            gvlist = np.array([self.data[0,0][0]])
+            gvlist = np.array([self.data[0, 0][0]])
         else:
             raise ValueError("This method only works for ragged vector maps!")
 
@@ -142,18 +190,18 @@ class DiffractionVectors(BaseSignal):
                                                            distance_threshold)
             gvlist_new = vlist[new_indices]
             if gvlist_new.any():
-                gvlist=np.concatenate((gvlist, gvlist_new),axis=0)
+                gvlist = np.concatenate((gvlist, gvlist_new), axis=0)
 
-        #An internal check, just to be sure.
+        # An internal check, just to be sure.
         delete_indices = []
         l = np.shape(gvlist)[0]
-        distances = distance_matrix(gvlist,gvlist)
+        distances = distance_matrix(gvlist, gvlist)
         for i in range(np.shape(distances)[1]):
-            if (np.sum(distances[:,i] <= distance_threshold) > 1):
+            if (np.sum(distances[:, i] <= distance_threshold) > 1):
                 delete_indices = np.append(delete_indices, i)
-        gvecs = np.delete(gvlist, delete_indices,axis = 0)
+        gvecs = np.delete(gvlist, delete_indices, axis=0)
 
-        #Manipulate into DiffractionVectors class
+        # Manipulate into DiffractionVectors class
         unique_vectors = DiffractionVectors(gvecs)
         unique_vectors.axes_manager.set_signal_dimension(1)
 
@@ -173,10 +221,23 @@ class DiffractionVectors(BaseSignal):
         crystim : Signal2D
             2D map of diffracting pixels.
         """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0,1))
+        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
 
-        if binary==True:
+        if binary == True:
             crystim = crystim == 1
 
         crystim.change_dtype('float')
+
+        # Set calibration to same as signal
+        x = crystim.axes_manager.signal_axes[0]
+        y = crystim.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
         return crystim

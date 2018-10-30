@@ -29,7 +29,7 @@ from pyxem.signals.diffraction_simulation import ProfileSimulation
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.utils.sim_utils import get_electron_wavelength,\
     get_kinematical_intensities, get_unique_families, get_points_in_sphere, \
-    get_vectorized_list_for_atomic_scattering_factors,is_lattice_hexagonal
+    get_vectorized_list_for_atomic_scattering_factors, is_lattice_hexagonal
 
 
 class DiffractionGenerator(object):
@@ -98,13 +98,14 @@ class DiffractionGenerator(object):
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
         recip_latt = latt.reciprocal()
-        spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
+        spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
+            recip_latt, reciprocal_radius)
 
         # Identify points intersecting the Ewald sphere within maximum
         # excitation error and store the magnitude of their excitation error.
         r_sphere = 1 / wavelength
         r_spot = np.sqrt(np.sum(np.square(cartesian_coordinates[:, :2]), axis=1))
-        z_sphere = -np.sqrt(r_sphere**2-r_spot**2) + r_sphere
+        z_sphere = -np.sqrt(r_sphere**2 - r_spot**2) + r_sphere
         proximity = np.absolute(z_sphere - cartesian_coordinates[:, 2])
         intersection = proximity < max_excitation_error
         # Mask parameters corresponding to excited reflections.
@@ -165,16 +166,17 @@ class DiffractionGenerator(object):
         latt = structure.lattice
         is_hex = is_lattice_hexagonal(latt)
 
-        coeffs,fcoords,occus,dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure,{})
+        coeffs, fcoords, occus, dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure, {
+        })
 
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
-        spot_indicies, _ , spot_distances = get_points_in_sphere(recip_latt,reciprocal_radius)
+        spot_indicies, _, spot_distances = get_points_in_sphere(recip_latt, reciprocal_radius)
 
         peaks = {}
-        mask = np.logical_not((np.any(spot_indicies,axis=1) == 0))
+        mask = np.logical_not((np.any(spot_indicies, axis=1) == 0))
 
-        for hkl, g_hkl in zip(spot_indicies[mask],spot_distances[mask]):
+        for hkl, g_hkl in zip(spot_indicies[mask], spot_distances[mask]):
             # Force miller indices to be integers.
             hkl = [int(round(i)) for i in hkl]
 
@@ -203,7 +205,7 @@ class DiffractionGenerator(object):
             # position factor exp(2j * pi * g.r and occupancies).
             # Vectorized computation.
             f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * g_dot_r)
-                               * dw_correction)
+                           * dw_correction)
 
             # Intensity for hkl is modulus square of structure factor.
             i_hkl = (f_hkl * f_hkl.conjugate()).real

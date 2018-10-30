@@ -238,30 +238,9 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
 
 def file_reader(filename, hdr_info=None, encoding="latin-1",
                 mmap_mode='c', *args, **kwds):
-    """Parses a Lispix (http://www.nist.gov/lispix/) hdr (.hdr) file
-    and reads the data from the corresponding raw (.raw) file;
-    or, read a raw file if the dictionary hdr_info is provided.
-
-    This format is often uses in EDS/EDX experiments.
-
-    Images and spectral images or data cubes that are written in the
-    (Lispix) raw file format are just a continuous string of numbers.
-
-    Data cubes can be stored image by image, or spectrum by spectrum.
-    Single images are stored row by row, vector cubes are stored row by row
-    (each row spectrum by spectrum), image cubes are stored image by image.
-
-    All of the numbers are in the same format, such as 16 bit signed integer,
-    IEEE 8-byte real, 8-bit unsigned byte, etc.
-
-    The "raw" file should be accompanied by text file with the same name and
-    ".hdr" extension. This file lists the characteristics of the raw file so
-    that it can be loaded without human intervention.
-
-    Alternatively, dictionary 'hdr_info' containing the information can
-    be given.
-
-    Some keys are specific to HyperSpy and will be ignored by other software.
+    """Parses a Medipix hdr (.hdr) file and reads the data from the
+    corresponding raw (.mib) file; or, reads a raw file if the dictionary
+    hdr_info is provided.
 
     hdr stands for "Raw Parameter List", an ASCII text, tab delimited file in
     which HyperSpy reads the image parameters for a raw file.
@@ -299,6 +278,7 @@ def file_reader(filename, hdr_info=None, encoding="latin-1",
       title              str    # title of the signal to be stored
 
     NOTES
+    -----
 
     When 'data-length' is 1, the 'byte order' is not relevant as there is only
     one byte per datum, and 'byte-order' should be 'dont-care'.
