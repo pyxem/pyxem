@@ -351,21 +351,17 @@ def circular_mask(shape, radius, center=None):
 
 
 def reference_circle(coords, dimX, dimY, radius):
-    """Draw the perimeter of an circle at a given position
-    in the diffraction pattern (e.g. to provide a reference for
-    finding the direct beam center).
+    """Draw the perimeter of an circle at a given position in the diffraction
+    pattern (e.g. to provide a reference for finding the direct beam center).
 
     Parameters
     ----------
     coords : np.array size n,2
         size n,2 array of coordinates to draw the circle.
-
     dimX : int
         first dimension of the diffraction pattern (size)
-
     dimY : int
         second dimension of the diffraction pattern (size)
-
     radius : int
         radius of the circle to be drawn
 
