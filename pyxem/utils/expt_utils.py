@@ -35,20 +35,20 @@ patterns.
 
 
 def _index_coords(z, origin=None):
-    """
-    Creates x & y coords for the indicies in a numpy array
+    """Creates x & y coords for the indicies in a numpy array.
 
     Parameters
     ----------
-    data : numpy array
+    z : np.array()
         2D data
-    origin : (x,y) tuple
-        defaults to the center of the image. Specify origin=(0,0)
-        to set the origin to the *top-left* corner of the image.
+    origin : tuple
+        (x,y) defaults to the center of the image. Specify origin=(0,0) to set
+        the origin to the *top-left* corner of the image.
 
     Returns
     -------
-        x, y : arrays
+    x, y : arrays
+        Corrdinates for the indices of a numpy array.
     """
     ny, nx = z.shape[:2]
     if origin is None:
@@ -64,8 +64,7 @@ def _index_coords(z, origin=None):
 
 
 def _cart2polar(x, y):
-    """
-    Transform Cartesian coordinates to polar
+    """Transform Cartesian coordinates to polar coordinates.
 
     Parameters
     ----------
