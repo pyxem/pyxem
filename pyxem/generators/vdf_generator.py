@@ -26,6 +26,7 @@ from pyxem.utils.vdf_utils import normalize_vdf
 from hyperspy.api import roi
 import numpy as np
 
+
 class VDFGenerator():
     """Generates a VDF images for a specified signal and set of aperture
     positions.
@@ -39,12 +40,13 @@ class VDFGenerator():
         integration windows for VDF formation.
 
     """
+
     def __init__(self, signal, vectors=None, *args, **kwargs):
-        #If ragged the signal axes will not be defined
+        # If ragged the signal axes will not be defined
 
         if vectors is None:
             unique_vectors = None
-        elif len(vectors.axes_manager.signal_axes)==0:
+        elif len(vectors.axes_manager.signal_axes) == 0:
             unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
         else:
             unique_vectors = vectors
@@ -80,18 +82,18 @@ class VDFGenerator():
                 disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
                 vdf = disk(self.signal,
                            axes=self.signal.axes_manager.signal_axes)
-                vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
+                vdfs.append(vdf.sum((2, 3)).as_signal2D((0, 1)).data)
 
             vdfim = VDFImage(np.asarray(vdfs))
 
-            if normalize==True:
+            if normalize == True:
                 vdfim.map(normalize_vdf)
 
         else:
             raise ValueError("DiffractionVectors non-specified by user. Please "
                              "initialize VDFGenerator with some vectors. ")
 
-        #Set calibration to same as signal
+        # Set calibration to same as signal
         x = vdfim.axes_manager.signal_axes[0]
         y = vdfim.axes_manager.signal_axes[1]
 
@@ -135,8 +137,8 @@ class VDFGenerator():
             within the annulus.
         """
         k_step = (k_max - k_min) / k_steps
-        k0s = np.linspace(k_min, k_max-k_step, k_steps)
-        k1s = np.linspace(k_min+k_step, k_max, k_steps)
+        k0s = np.linspace(k_min, k_max - k_step, k_steps)
+        k1s = np.linspace(k_min + k_step, k_max, k_steps)
 
         ks = np.array((k0s, k1s)).T
 
@@ -145,14 +147,14 @@ class VDFGenerator():
             annulus = roi.CircleROI(cx=0, cy=0, r=k[1], r_inner=k[0])
             vdf = annulus(self.signal,
                           axes=self.signal.axes_manager.signal_axes)
-            vdfs.append(vdf.sum((2,3)).as_signal2D((0,1)).data)
+            vdfs.append(vdf.sum((2, 3)).as_signal2D((0, 1)).data)
 
         vdfim = VDFImage(np.asarray(vdfs))
 
-        if normalize==True:
+        if normalize == True:
             vdfim.map(normalize_vdf)
 
-        #Set calibration to same as signal
+        # Set calibration to same as signal
         x = vdfim.axes_manager.signal_axes[0]
         y = vdfim.axes_manager.signal_axes[1]
 

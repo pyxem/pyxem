@@ -18,38 +18,43 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.indexation_results import * #import both objects
+from pyxem.signals.indexation_results import *  # import both objects
+
 
 @pytest.fixture
 def sp_match_result():
-    row_1 = np.array([0,2,3,4,0.7])
-    row_2 = np.array([0,2,3,5,0.6])
+    row_1 = np.array([0, 2, 3, 4, 0.7])
+    row_2 = np.array([0, 2, 3, 5, 0.6])
     # note we require (correlation of row_1 > correlation row_2)
-    return np.vstack((row_1,row_2))
+    return np.vstack((row_1, row_2))
+
 
 @pytest.fixture
 def dp_match_result():
-    row_1 = np.array([0,2,3,4,0.7])
-    row_2 = np.array([0,2,3,5,0.8])
-    row_3 = np.array([1,2,3,4,0.5])
-    row_4 = np.array([1,2,3,5,0.3])
-    return np.vstack((row_1,row_2,row_3,row_4))
+    row_1 = np.array([0, 2, 3, 4, 0.7])
+    row_2 = np.array([0, 2, 3, 5, 0.8])
+    row_3 = np.array([1, 2, 3, 4, 0.5])
+    row_4 = np.array([1, 2, 3, 5, 0.3])
+    return np.vstack((row_1, row_2, row_3, row_4))
+
 
 def test_crystal_from_matching_results_sp(sp_match_result):
-    #branch single phase
+    # branch single phase
     cmap = crystal_from_matching_results(sp_match_result)
-    assert np.allclose(cmap,np.array([0,2,3,4,0.7,100*(1-(0.6/0.7))]))
+    assert np.allclose(cmap, np.array([0, 2, 3, 4, 0.7, 100 * (1 - (0.6 / 0.7))]))
+
 
 def test_crystal_from_matching_results_dp(dp_match_result):
     # branch double phase
     cmap = crystal_from_matching_results(dp_match_result)
-    r_or = 100*(1-(0.7/0.8))
-    r_ph = 100*(1-(0.5/0.8))
-    assert np.allclose(cmap,np.array([0,2,3,5,0.8,r_or,r_ph]))
+    r_or = 100 * (1 - (0.7 / 0.8))
+    r_ph = 100 * (1 - (0.5 / 0.8))
+    assert np.allclose(cmap, np.array([0, 2, 3, 5, 0.8, r_or, r_ph]))
 
-def test_get_crystalographic_map(dp_match_result,sp_match_result):
-    #Assertion free test, as the tests above do the heavy lifting
-    results = np.vstack((dp_match_result,sp_match_result))
+
+def test_get_crystalographic_map(dp_match_result, sp_match_result):
+    # Assertion free test, as the tests above do the heavy lifting
+    results = np.vstack((dp_match_result, sp_match_result))
     results = IndexationResults(results)
     results.get_crystallographic_map()
     return 0

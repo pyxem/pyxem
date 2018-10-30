@@ -21,6 +21,7 @@ import numpy as np
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
+
 class DiffractionSimulation:
     """Holds the result of a kinematic diffraction pattern simulation.
 
@@ -116,7 +117,6 @@ class DiffractionSimulation:
     def intensities(self, intensities):
         self._intensities = intensities
 
-
     def as_signal(self, size, sigma, max_r):
         """Returns the diffraction data as an ElectronDiffraction signal with
         two-dimensional Gaussians representing each diffracted peak. Should only
@@ -135,25 +135,25 @@ class DiffractionSimulation:
         """
         from skimage.filters import gaussian as point_spread
 
-        l,delta_l = np.linspace(-max_r, max_r, size,retstep=True)
+        l, delta_l = np.linspace(-max_r, max_r, size, retstep=True)
 
-        mask_for_max_r = np.logical_and(np.abs(self.coordinates[:,0])<max_r,
-                                        np.abs(self.coordinates[:,1])<max_r)
+        mask_for_max_r = np.logical_and(np.abs(self.coordinates[:, 0]) < max_r,
+                                        np.abs(self.coordinates[:, 1]) < max_r)
 
         coords = self.coordinates[mask_for_max_r]
-        inten  = self.intensities[mask_for_max_r]
+        inten = self.intensities[mask_for_max_r]
 
-        dp_dat = np.zeros([size,size])
-        x,y = (coords)[:,0] , (coords)[:,1]
-        if len(x) > 0: #avoiding problems in the peakless case
-            num = np.digitize(x,l,right=True),np.digitize(y,l,right=True)
+        dp_dat = np.zeros([size, size])
+        x, y = (coords)[:, 0], (coords)[:, 1]
+        if len(x) > 0:  # avoiding problems in the peakless case
+            num = np.digitize(x, l, right=True), np.digitize(y, l, right=True)
             dp_dat[num] = inten
-            #sigma in terms of pixels. transpose for Hyperspy
-            dp_dat = point_spread(dp_dat,sigma=sigma/delta_l).T
-            dp_dat = dp_dat/np.max(dp_dat)
+            # sigma in terms of pixels. transpose for Hyperspy
+            dp_dat = point_spread(dp_dat, sigma=sigma / delta_l).T
+            dp_dat = dp_dat / np.max(dp_dat)
 
         dp = ElectronDiffraction(dp_dat)
-        dp.set_diffraction_calibration(2*max_r/size)
+        dp.set_diffraction_calibration(2 * max_r / size)
 
         return dp
 
@@ -195,12 +195,12 @@ class ProfileSimulation:
         fontsize : integer
             Fontsize for peak labels.
         """
-        ax=plt.gca()
+        ax = plt.gca()
         for g, i, hkls in zip(self.magnitudes, self.intensities, self.hkls):
             if g <= g_max:
                 label = ", ".join([str(hkl) for hkl in hkls.keys()])
                 ax.plot([g, g], [0, i], color='k',
-                         linewidth=3, label=label)
+                        linewidth=3, label=label)
                 if annotate_peaks:
                     ax.annotate(label, xy=[g, i],
                                 xytext=[g, i], fontsize=fontsize)

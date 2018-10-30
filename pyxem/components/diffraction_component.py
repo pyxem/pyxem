@@ -46,6 +46,7 @@ class ElectronDiffractionForwardModel(Component):
         Defaults to the identity matrix.
 
     """
+
     def __init__(self, electron_diffraction_calculator,
                  structure,
                  calibration,
@@ -55,7 +56,7 @@ class ElectronDiffractionForwardModel(Component):
                  d31=0., d32=0., d33=1.):
         Component.__init__(self, ['d11', 'd12', 'd13',
                                   'd21', 'd22', 'd23',
-                                  'd31', 'd32', 'd33',])
+                                  'd31', 'd32', 'd33', ])
         self.electron_diffraction_calculator = electron_diffraction_calculator
         self.structure = structure
         self.reciprocal_radius = reciprocal_radius

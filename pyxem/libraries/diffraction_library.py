@@ -19,7 +19,8 @@
 import pickle
 import numpy as np
 
-def load_DiffractionLibrary(filename,safety=False):
+
+def load_DiffractionLibrary(filename, safety=False):
     """
     Loads a previously saved diffraction library
 
@@ -46,7 +47,8 @@ def load_DiffractionLibrary(filename,safety=False):
         raise RuntimeError('Unpickling is risky, turn safety to True if \
         trust the author of this content')
 
-def _get_library_from_angles(library,phase,angle):
+
+def _get_library_from_angles(library, phase, angle):
     """
     Finds an element that is 'basically' the same as the rotation asked for.
 
@@ -72,7 +74,7 @@ def _get_library_from_angles(library,phase,angle):
     """
 
     for key in library[phase]:
-        if np.abs(np.sum(np.subtract(list(key),angle))) < 1e-5:
+        if np.abs(np.sum(np.subtract(list(key), angle))) < 1e-5:
             return library[phase][key]
 
     # we haven't found a suitable key
@@ -84,7 +86,7 @@ class DiffractionLibrary(dict):
     Maps crystal structure (phase) and orientation to simulated diffraction data.
     """
 
-    def get_library_entry(self,phase=None,angle=None):
+    def get_library_entry(self, phase=None, angle=None):
         """
         Extracts a single library entry for viewing
 
@@ -105,7 +107,7 @@ class DiffractionLibrary(dict):
                 try:
                     return self[phase][angle]
                 except KeyError:
-                    return _get_library_from_angles(self,phase,angle)
+                    return _get_library_from_angles(self, phase, angle)
             else:
                 for rotation in self[phase].keys():
                     return self[phase][rotation]
@@ -116,7 +118,7 @@ class DiffractionLibrary(dict):
                 for rotation in self[phase].keys():
                     return self[phase][rotation]
 
-    def pickle_library(self,filename):
+    def pickle_library(self, filename):
         """
         Saves a diffraction library in the pickle format
 

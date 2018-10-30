@@ -27,13 +27,13 @@ def _find_max_length_peaks(peaks):
     """
     Worker function for generate_marker_inputs_from_peaks
     """
-    #FIX ME
-    x_size,y_size = peaks.axes_manager.navigation_shape[0],peaks.axes_manager.navigation_shape[1]
+    # FIX ME
+    x_size, y_size = peaks.axes_manager.navigation_shape[0], peaks.axes_manager.navigation_shape[1]
     length_of_longest_peaks_list = 0
-    for x in np.arange(0,x_size):
-            for y in np.arange(0,y_size):
-                if peaks.data[y,x].shape[0] > length_of_longest_peaks_list:
-                    length_of_longest_peaks_list = peaks.data[y,x].shape[0]
+    for x in np.arange(0, x_size):
+        for y in np.arange(0, y_size):
+            if peaks.data[y, x].shape[0] > length_of_longest_peaks_list:
+                length_of_longest_peaks_list = peaks.data[y, x].shape[0]
     return length_of_longest_peaks_list
 
 
@@ -57,12 +57,12 @@ def generate_marker_inputs_from_peaks(peaks):
             dp.add_marker(m,plot_marker=True,permanent=False)
 
     """
-    ### XXX: non-square signals
+    # XXX: non-square signals
     max_peak_len = _find_max_length_peaks(peaks)
-    pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data),fillvalue=[np.nan,np.nan])))
-    pad = pad.reshape((max_peak_len),peaks.data.shape[0],peaks.data.shape[1],2)
-    xy_cords = np.transpose(pad,[3,0,1,2]) #move the x,y pairs to the front
+    pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data), fillvalue=[np.nan, np.nan])))
+    pad = pad.reshape((max_peak_len), peaks.data.shape[0], peaks.data.shape[1], 2)
+    xy_cords = np.transpose(pad, [3, 0, 1, 2])  # move the x,y pairs to the front
     x = xy_cords[0]
     y = xy_cords[1]
 
-    return x,y
+    return x, y
