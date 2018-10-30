@@ -28,10 +28,8 @@ from transforms3d.quaternions import mat2quat, rotate_vector
 
 
 def get_electron_wavelength(accelerating_voltage):
-    """Calculates the (relativistic) electron wavelength in Angstroms
-    for a given accelerating voltage in kV.
-
-    Evaluates
+    """Calculates the (relativistic) electron wavelength in Angstroms for a
+    given accelerating voltage in kV.
 
     Parameters
     ----------
