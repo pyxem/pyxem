@@ -334,7 +334,7 @@ def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
 
 def is_lattice_hexagonal(latt):
     """Determines if a lattice is hexagonal or trigonal.
-    
+
     """
     truth_list = []
     truth_list.append(latt.a == latt.b)
@@ -343,16 +343,22 @@ def is_lattice_hexagonal(latt):
     truth_list.append(latt.gamma == 120)
     return len(truth_list) == np.sum(truth_list)
 
-def carry_through_navigation_calibration(new_signal,old_signal):
-    """
-    Carry a calibration through from an object to a derivative of it
+def carry_through_navigation_calibration(new_signal, old_signal):
+    """ Transfers navigation axis calibrations from an old signal to a new
+    signal produced from it by a method or a generator.
 
     Parameters
     ----------
-    new_signal : Signal2D
-        The signal to be calibrated
-    old_signal : Signal2D
-        The signal from which to take calibration
+    new_signal : Signal
+        The product signal with undefined navigation axes.
+    old_signal : Signal
+        The parent signal with calibrated navigation axes.
+
+    Returns
+    -------
+    new_signal : Signal
+        The new signal with calibrated navigation axes.
+
     """
     try:
         x = new_signal.axes_manager.signal_axes[0]
