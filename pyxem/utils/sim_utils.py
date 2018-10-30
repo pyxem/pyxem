@@ -333,8 +333,17 @@ def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
 
 
 def is_lattice_hexagonal(latt):
-    """Determines if a lattice is hexagonal or trigonal.
+    """Determines if a diffpy lattice is hexagonal or trigonal.
 
+    Parameters
+    ----------
+    latt : diffpy.Structure.lattice
+        The diffpy lattice object to be determined as hexagonal or not.
+
+    Returns
+    -------
+    is_true : bool
+        True if hexagonal or trigonal.
     """
     truth_list = []
     truth_list.append(latt.a == latt.b)
