@@ -110,13 +110,31 @@ def get_unique_families(hkls):
 
 def get_vectorized_list_for_atomic_scattering_factors(structure,
                                                       debye_waller_factors):
-    """
-    Create a flattened array of coeffs, fcoords and occus for vectorized
-    computation of atomic scattering factors later. Note that these are not
-    necessarily the same size as the structure as each partially occupied
+    """ Create a flattened array of coeffs, fcoords and occus for vectorized
+    computation of atomic scattering factors.
+
+    Note: The dimensions of the returned objects are not necessarily the same
+    size as the number of atoms in the structure as each partially occupied
     specie occupies its own position in the flattened array.
 
-    For primarily for internal use
+
+    Parameters
+    ----------
+    structure : diffpy.structure
+        The atomic structure for which scattering factors are required.
+    debye_waller_factors : list
+        List of Debye-Waller factors for atoms in structure.
+
+    Returns
+    -------
+    coeffs : np.array()
+        Coefficients of atomic scattering factor parameterization for each atom.
+    fcoords : np.array()
+        Fractional coordinates of each atom in structure.
+    occus : np.array()
+        Occupancy of each atomic site.
+    dwfactors : np.array()
+        Debye-Waller factors for each atom in the structure.
     """
 
     coeffs, fcoords, occus, dwfactors = [], [], [], []
