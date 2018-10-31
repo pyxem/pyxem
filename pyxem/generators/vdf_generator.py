@@ -106,7 +106,7 @@ class VDFGenerator():
         y.units = 'nm'
 
         # Assign vectors used to generate images to vdfim property
-        vdfim.vectors = vectors.data
+        vdfim.vectors = self.vectors.data
 
         return vdfim
 
