@@ -702,7 +702,7 @@ class PixelatedSTEM(Signal2D):
         ...     centre_x=128,
         ...     centre_y=128,
         ...     show_progressbar=False)
-        >>> fem_results['V-OmegaK'].plot()
+        >>> fem_results['V-Omegak'].plot()
         """
 
         results = femt.fem_calc(self, centre_x=centre_x, centre_y=centre_y,

@@ -13,7 +13,8 @@ class TestRadialIntegrationDaskArray:
         centre_x, centre_y = np.ones((2, 100))*7.5
         data = pst._radial_integration_dask_array(
                 dask_array, return_sig_size=11,
-                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+                centre_x=centre_x, centre_y=centre_y, normalize=False,
+                show_progressbar=False)
         assert data.shape == (10, 10, 11)
         assert (data == 0.0).all()
 
@@ -22,7 +23,8 @@ class TestRadialIntegrationDaskArray:
         centre_x, centre_y = np.ones((2, 100))*7.5
         data = pst._radial_integration_dask_array(
                 dask_array, return_sig_size=11,
-                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+                centre_x=centre_x, centre_y=centre_y, normalize=False,
+                show_progressbar=False)
         assert data.shape == (5, 10, 11)
         assert (data == 0.0).all()
 
@@ -34,14 +36,15 @@ class TestRadialIntegrationDaskArray:
         centre_x, centre_y = np.ones((2, 100))*15
         data = pst._radial_integration_dask_array(
                 dask_array, return_sig_size=22,
-                centre_x=centre_x, centre_y=centre_y, show_progressbar=False)
+                centre_x=centre_x, centre_y=centre_y, normalize=False,
+                show_progressbar=False)
         assert data.shape == (10, 10, 22)
         assert (data != 0.0).any()
         mask = pst._make_circular_mask(15, 15, 30, 30, 15)
         data = pst._radial_integration_dask_array(
                 dask_array, return_sig_size=22,
-                centre_x=centre_x, centre_y=centre_y, mask_array=mask,
-                show_progressbar=False)
+                centre_x=centre_x, centre_y=centre_y, normalize=False,
+                mask_array=mask, show_progressbar=False)
         assert data.shape == (10, 10, 22)
         assert (data == 0.0).all()
 
