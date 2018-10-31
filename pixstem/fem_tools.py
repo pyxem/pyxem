@@ -1,10 +1,10 @@
 import matplotlib.pylab as plt
 import numpy as np
 import hyperspy.api as hspy
-from pixstem.pixelated_stem_class import PixelatedSTEM
 from dask import delayed
 from tqdm import tqdm
 import hyperspy.api as hs
+import pixstem
 
 '''
 Plotting function used to display output of FEM calculations
@@ -34,7 +34,7 @@ def fem_calc(s, centre_x, centre_y, show_progressbar):
     if s._lazy:
         results['Omega-Vi'] = ((s ** 2).mean() / (s.mean()) ** 2) - 1
         results['Omega-Vi'].compute(progressbar=show_progressbar)
-        results['Omega-Vi'] = PixelatedSTEM(results['Omega-Vi'])
+        results['Omega-Vi'] = pixstem.pixelated_stem_class.PixelatedSTEM(results['Omega-Vi'])
 
         results['Omega-Vk'] = results['Omega-Vi'].radial_integration(
             centre_x=centre_x, centre_y=centre_y, normalize=True,
