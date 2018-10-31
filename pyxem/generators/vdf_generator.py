@@ -105,7 +105,7 @@ class VDFGenerator():
         y.scale = self.signal.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
-        # Assign vectors used to generate images to vdfim property
+        # Assign vectors used to generate images to vdfim attribute.
         vdfim.vectors = self.vectors.data
 
         return vdfim
