@@ -1,13 +1,114 @@
 import matplotlib.pylab as plt
 import numpy as np
 import hyperspy.api as hspy
+from pixstem.pixelated_stem_class import PixelatedSTEM
+from dask import delayed
+from tqdm import tqdm
+import hyperspy.api as hs
 
 '''
 Plotting function used to display output of FEM calculations
 '''
 
 
-def plotFEM(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
+def fem_calc(s, centre_x, centre_y, show_progressbar):
+    offset = False
+
+    if s.data.min() == 0:
+        s.data += 1  # To avoid division by 0
+        offset = True
+    results = {}
+
+    results['RadialInt'] = (
+        s.radial_integration(centre_x=centre_x, centre_y=centre_y,
+                             normalize=False,
+                             show_progressbar=show_progressbar))
+
+    radialavgs = s.radial_integration(centre_x=centre_x, centre_y=centre_y,
+                                      normalize=True,
+                                      show_progressbar=show_progressbar)
+    results['V-Omegak'] = ((radialavgs ** 2).mean() /
+                           (radialavgs.mean()) ** 2) - 1
+    results['RadialAvg'] = radialavgs.mean()
+
+    if s._lazy:
+        results['Omega-Vi'] = ((s ** 2).mean() / (s.mean()) ** 2) - 1
+        results['Omega-Vi'].compute(progressbar=show_progressbar)
+        results['Omega-Vi'] = PixelatedSTEM(results['Omega-Vi'])
+
+        results['Omega-Vk'] = results['Omega-Vi'].radial_integration(
+            centre_x=centre_x, centre_y=centre_y, normalize=True,
+            show_progressbar=show_progressbar)
+
+        oldshape = None
+        if len(s.data.shape) == 4:
+            oldshape = s.data.shape
+            s.data = s.data.reshape(
+                s.data.shape[0] * s.data.shape[1],
+                s.data.shape[2], s.data.shape[3])
+        y, x = np.indices(s.data.shape[-2:])
+        r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
+        r = r.astype(np.int)
+
+        nr = np.bincount(r.ravel())
+        Vrklist = []
+        Vreklist = []
+
+        for k in tqdm(range(0, len(nr)), disable=(not show_progressbar)):
+            locs = np.where(r == k)
+            vals = s.data.vindex[:, locs[0], locs[1]].T
+            Vrklist.append(np.mean((np.mean(vals ** 2, 1) /
+                                    np.mean(vals, 1) ** 2) - 1))
+            Vreklist.append(np.mean(vals.ravel() ** 2) /
+                            np.mean(vals.ravel()) ** 2 - 1)
+
+        Vrkdask = delayed(Vrklist)
+        Vrekdask = delayed(Vreklist)
+
+        results['Vrk'] = hs.signals.Signal1D(
+            Vrkdask.compute(progressbar=show_progressbar))
+        results['Vrek'] = hs.signals.Signal1D(
+            Vrekdask.compute(progressbar=show_progressbar))
+    else:
+        results['Omega-Vi'] = ((s ** 2).mean() / (s.mean()) ** 2) - 1
+        results['Omega-Vk'] = results['Omega-Vi'].radial_integration(
+            centre_x=centre_x, centre_y=centre_y, normalize=True,
+            show_progressbar=show_progressbar)
+        oldshape = None
+        if len(s.data.shape) == 4:
+            oldshape = s.data.shape
+            s.data = s.data.reshape(
+                s.data.shape[0] * s.data.shape[1],
+                s.data.shape[2],
+                s.data.shape[3])
+        y, x = np.indices(s.data.shape[-2:])
+        r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
+        r = r.astype(np.int)
+
+        nr = np.bincount(r.ravel())
+        results['Vrk'] = np.zeros(len(nr))
+        results['Vrek'] = np.zeros(len(nr))
+
+        for k in tqdm(range(0, len(nr)), disable=(not show_progressbar)):
+            locs = np.where(r == k)
+            vals = s.data[:, locs[0], locs[1]]
+            results['Vrk'][k] = np.mean(
+                (np.mean(vals ** 2, 1) / np.mean(vals, 1) ** 2) - 1)
+            results['Vrek'][k] = np.mean(
+                vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1
+
+        results['Vrk'] = hs.signals.Signal1D(results['Vrk'])
+        results['Vrek'] = hs.signals.Signal1D(results['Vrek'])
+
+    if oldshape:
+        s.data = s.data.reshape(oldshape)
+    if offset:
+        s.data -= 1  # Undo previous addition of 1 to input data
+
+    return results
+
+
+def plot_fem(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
     """Produce a summary plot of all calculated FEM parameters
 
     Parameters
@@ -15,7 +116,8 @@ def plotFEM(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
     s : PixelatedSTEM
         Signal on which FEM analysis was performed
     results : Dictionary
-        Series of Hyperspy Signals containing results of FEM analysis performed on s
+        Series of Hyperspy Signals containing results of FEM analysis performed
+        on s
     lowcutoff : integer
         Position of low-q cutoff for plots
     highcutoff : integer
@@ -27,14 +129,20 @@ def plotFEM(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
 
     Examples
     --------
-    >>> import fpd_data_processing.fem_tools as femt
-    >>> fig = femt(s,results,10,120)
-    >>> fig.savefig('Output.png')
+    >>> import pixstem.dummy_data as dd
+    >>> import pixstem.fem_tools as femt
+    >>> s = dd.get_fem_signal()
+    >>> fem_results = s.fem_analysis(
+    ...     centre_x=128,
+    ...     centre_y=128,
+    ...     show_progressbar=False)
+    >>> fig = femt.plot_fem(s,fem_results,10,120)
 
     """
 
     if k_cal:
-        xaxis = 2 * np.pi * k_cal * np.arange(0, len(results['RadialAvg'].data))
+        xaxis = 2 * np.pi * k_cal * \
+                np.arange(0, len(results['RadialAvg'].data))
     else:
         xaxis = np.arange(0, len(results['RadialAvg'].data))
 
@@ -45,20 +153,25 @@ def plotFEM(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
     axes[0, 0].set_yticks([])
     axes[0, 0].set_xticks([])
 
-    axes[0, 1].plot(xaxis[lowcutoff:highcutoff], results['RadialAvg'].data[lowcutoff:highcutoff], linestyle='',
-                    marker='o')
+    axes[0, 1].plot(xaxis[lowcutoff:highcutoff],
+                    results['RadialAvg'].data[lowcutoff:highcutoff],
+                    linestyle='', marker='o')
     axes[0, 1].set_title('Mean Radial Profile', size=15)
     axes[0, 1].set_ylabel('Integrated Intensity (counts)')
     axes[0, 1].set_xlabel(r'k ($\AA^{-1}$)')
 
-    axes[1, 0].plot(xaxis[lowcutoff:highcutoff], results['V-Omegak'].data[lowcutoff:highcutoff], linestyle='',
-                    marker='o')
+    axes[1, 0].plot(xaxis[lowcutoff:highcutoff],
+                    results['V-Omegak'].data[lowcutoff:highcutoff],
+                    linestyle='', marker='o')
     axes[1, 0].set_ylabel(r'V$_\Omega$(k)', size=15)
     axes[1, 0].set_xlabel(r'k ($\AA^{-1}$)')
 
-    axes[1, 1].plot(xaxis[lowcutoff:highcutoff], results['Vrk'].data[lowcutoff:highcutoff],
+    axes[1, 1].plot(xaxis[lowcutoff:highcutoff],
+                    results['Vrk'].data[lowcutoff:highcutoff],
                     linestyle='', marker='o', label=r'$\overline{V}_r$(k)')
-    axes[1, 1].plot(xaxis[lowcutoff:highcutoff], results['Vrek'].data[lowcutoff:highcutoff],
+
+    axes[1, 1].plot(xaxis[lowcutoff:highcutoff],
+                    results['Vrek'].data[lowcutoff:highcutoff],
                     linestyle='', marker='o', label=r'V$_{re}$(k)')
     axes[1, 1].legend()
     axes[1, 1].set_ylabel(r'$\overline{V}_r$(k),V$_{re}$(k)', size=15)
@@ -69,15 +182,16 @@ def plotFEM(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
     axes[2, 0].set_yticks([])
     axes[2, 0].set_xticks([])
 
-    axes[2, 1].plot(xaxis[lowcutoff:highcutoff], results['Omega-Vk'].data[lowcutoff:highcutoff], linestyle='',
-                    marker='o')
+    axes[2, 1].plot(xaxis[lowcutoff:highcutoff],
+                    results['Omega-Vk'].data[lowcutoff:highcutoff],
+                    linestyle='', marker='o')
 
-    plt.tight_layout()
+    fig.tight_layout()
 
-    return (fig)
+    return fig
 
 
-def saveFEM(results, rootname):
+def save_fem(results, rootname):
     """Save dictionary of FEM results to individual HDF5 files.
 
     Parameters
@@ -87,15 +201,26 @@ def saveFEM(results, rootname):
     rootname : str
         Root name for output files. '_FEM_Parameter.hdf5' will be appended
 
+    Examples
+    --------
+    >>> import pixstem.dummy_data as dd
+    >>> import pixstem.fem_tools as femt
+    >>> s = dd.get_fem_signal()
+    >>> fem_results = s.fem_analysis(
+    ...     centre_x=128,
+    ...     centre_y=128,
+    ...     show_progressbar=False)
+    >>> femt.save_fem(fem_results,'TestData')
+
     """
 
     for i in results:
         results[i].save(rootname + '_FEM_' + i + '.hdf5')
-    return
 
 
-def loadFEM(rootname):
-    """Load individual HDF5 files containing previously saved FEM parameters to dictionary.
+def load_fem(rootname):
+    """Load individual HDF5 files containing previously saved FEM parameters to
+     dictionary.
 
     Parameters
     ----------
@@ -106,11 +231,29 @@ def loadFEM(rootname):
     ---------
     results : Dictionary
         Series of Hyperspy signals previously saved using saveFEM
+
+    Examples
+    --------
+    >>> import pixstem.dummy_data as dd
+    >>> import pixstem.fem_tools as femt
+    >>> s = dd.get_fem_signal()
+    >>> fem_results = s.fem_analysis(
+    ...     centre_x=128,
+    ...     centre_y=128,
+    ...     show_progressbar=False)
+    >>> femt.save_fem(fem_results,'TestData')
+    >>> new_results = femt.load_fem('TestData')
     """
 
     results = {}
-    keys = ['Omega-Vi', 'Omega-Vk', 'RadialAvg', 'RadialInt', 'V-Omegak', 'Vrek', 'Vrk']
+    keys = ['Omega-Vi',
+            'Omega-Vk',
+            'RadialAvg',
+            'RadialInt',
+            'V-Omegak',
+            'Vrek',
+            'Vrk']
+
     for i in keys:
         results[i] = hspy.load(rootname + '_FEM_' + i + '.hdf5')
     return results
-

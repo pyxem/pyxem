@@ -11,9 +11,9 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
 import pixstem.pixelated_stem_tools as pst
+import pixstem.fem_tools as femt
 import pixstem.dask_tools as dt
 from tqdm import tqdm
-from dask import delayed
 
 
 class PixelatedSTEM(Signal2D):
@@ -468,8 +468,8 @@ class PixelatedSTEM(Signal2D):
         mask_array : Boolean NumPy array, optional
             Mask with the same shape as the signal.
         normalize : bool, default True
-            If true, the returned radial profile will be normalized by the number
-            of bins used for each integration.
+            If true, the returned radial profile will be normalized by the
+            number of bins used for each integration.
         parallel : bool, default True
             If True, run the processing on several cores.
             In most cases this should be True, but for debugging False can be
@@ -525,12 +525,13 @@ class PixelatedSTEM(Signal2D):
             data = pst._radial_integration_dask_array(
                     self.data, return_sig_size=radial_array_size,
                     centre_x=centre_x, centre_y=centre_y,
-                    mask_array=mask_array, normalize=normalize, show_progressbar=show_progressbar)
+                    mask_array=mask_array, normalize=normalize,
+                    show_progressbar=show_progressbar)
             s_radial = hs.signals.Signal1D(data)
         else:
             s_radial = self._map_iterate(
                     pst._get_radial_profile_of_diff_image,
-                    normalize = normalize,
+                    normalize=normalize,
                     iterating_kwargs=iterating_kwargs,
                     inplace=False, ragged=False,
                     parallel=parallel,
@@ -667,7 +668,8 @@ class PixelatedSTEM(Signal2D):
         signal.axes_manager[-1].name = 'Scattering angle'
         return(signal)
 
-    def fem_analysis(self, centre_x=None, centre_y=None, show_progressbar=True):
+    def fem_analysis(self, centre_x=None, centre_y=None,
+                     show_progressbar=True):
         """Perform analysis of fluctuation electron microscopy (FEM) data
         as outlined in:
 
@@ -692,116 +694,20 @@ class PixelatedSTEM(Signal2D):
             the normalized variance image (Omega-Vi), and annular mean of
             the variance image (Omega-Vk).
 
-
-
         Examples
         --------
-        >>> import fpd_data_processing fpd
-        >>> s = fpd.load_fpd_signal('data.hdf5')
-        >>> s_com = s.center_of_mass(show_progressbar=False)
-        >>> s_shifted = s.shift_diffraction(shift_x=s_com.inav[0].data-128,
-        ...     shift_y=s_com.inav[1].data-128, show_progressbar=False)
-        >>> femresults = s_shifted.fem_analysis(
+        >>> import pixstem.dummy_data as dd
+        >>> s = dd.get_fem_signal()
+        >>> fem_results = s.fem_analysis(
         ...     centre_x=128,
         ...     centre_y=128,
         ...     show_progressbar=False)
-        >>> femresults['V-OmegaK'].plot()
+        >>> fem_results['V-OmegaK'].plot()
         """
 
-        offset = False
+        results = femt.fem_calc(self, centre_x=centre_x, centre_y=centre_y,
+                                show_progressbar=show_progressbar)
 
-        if self.data.min() == 0:
-            self.data += 1  # To avoid division by 0
-            offset = True
-        results = {}
-
-        print('Calculating Radial Profile')
-        results['RadialInt'] = (self.radial_integration(centre_x=centre_x, centre_y=centre_y,
-                                                        normalize=False, show_progressbar=show_progressbar))
-        print('Calculating V-OmegaK')
-        radialavgs = self.radial_integration(centre_x=centre_x, centre_y=centre_y,
-                                             normalize=True, show_progressbar=show_progressbar)
-        results['V-Omegak'] = ((radialavgs ** 2).mean() / (radialavgs.mean()) ** 2) - 1
-        results['RadialAvg'] = radialavgs.mean()
-
-        if self._lazy:
-            print('Calculating Omega-Vi')
-            results['Omega-Vi'] = ((self ** 2).mean() / (self.mean()) ** 2) - 1
-            results['Omega-Vi'].compute()
-            results['Omega-Vi'] = PixelatedSTEM(results['Omega-Vi'])
-            results['Omega-Vk'] = results['Omega-Vi'].radial_integration(centre_x=centre_x, centre_y=centre_y,
-                                                                         normalize=True, show_progressbar=show_progressbar)
-
-            oldshape = None
-            if len(self.data.shape) == 4:
-                oldshape = self.data.shape
-                self.data = self.data.reshape(self.data.shape[0] * self.data.shape[1], self.data.shape[2],
-                                              self.data.shape[3])
-            y, x = np.indices(self.data.shape[-2:])
-            r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
-            r = r.astype(np.int)
-
-            nr = np.bincount(r.ravel())
-            Vrklist = []
-            Vreklist = []
-            print('Calculating Vrk and Vrek')
-            if show_progressbar:
-                for k in tqdm(range(0, len(nr))):
-                    locs = np.where(r == k)
-                    vals = (self.data.vindex[:, locs[0], locs[1]].T)
-                    Vrklist.append(np.mean((np.mean(vals ** 2, 1) / np.mean(vals, 1) ** 2) - 1))
-                    Vreklist.append(np.mean(vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1)
-            else:
-                for k in range(0, len(nr)):
-                    locs = np.where(r == k)
-                    vals = (self.data.vindex[:, locs[0], locs[1]].T)
-                    Vrklist.append(np.mean((np.mean(vals ** 2, 1) / np.mean(vals, 1) ** 2) - 1))
-                    Vreklist.append(np.mean(vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1)
-            print('Computing FEM parameters...')
-            Vrkdask = delayed(Vrklist)
-            Vrekdask = delayed(Vreklist)
-
-            results['Vrk'] = hs.signals.Signal1D(Vrkdask.compute())
-            results['Vrek'] = hs.signals.Signal1D(Vrekdask.compute())
-            print('Complete')
-        else:
-            print('Calculating Omega-Vi')
-            results['Omega-Vi'] = ((self ** 2).mean() / (self.mean()) ** 2) - 1
-            results['Omega-Vk'] = results['Omega-Vi'].radial_integration(centre_x=centre_x, centre_y=centre_y,
-                                                                         normalize=True,show_progressbar=show_progressbar)
-            oldshape = None
-            if len(self.data.shape) == 4:
-                oldshape = self.data.shape
-                self.data = self.data.reshape(self.data.shape[0] * self.data.shape[1], self.data.shape[2],
-                                              self.data.shape[3])
-            y, x = np.indices(self.data.shape[-2:])
-            r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
-            r = r.astype(np.int)
-
-            nr = np.bincount(r.ravel())
-            results['Vrk'] = np.zeros(len(nr))
-            results['Vrek'] = np.zeros(len(nr))
-            print('Calculating Vrk and Vrek')
-            if show_progressbar:
-                for k in tqdm(range(0, len(nr))):
-                    locs = np.where(r == k)
-                    vals = self.data[:, locs[0], locs[1]]
-                    results['Vrk'][k] = np.mean((np.mean(vals ** 2, 1) / np.mean(vals, 1) ** 2) - 1)
-                    results['Vrek'][k] = np.mean(vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1
-            else:
-                for k in range(0, len(nr)):
-                    locs = np.where(r == k)
-                    vals = self.data[:, locs[0], locs[1]]
-                    results['Vrk'][k] = np.mean((np.mean(vals ** 2, 1) / np.mean(vals, 1) ** 2) - 1)
-                    results['Vrek'][k] = np.mean(vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1
-
-            results['Vrk'] = hs.signals.Signal1D(results['Vrk'])
-            results['Vrek'] = hs.signals.Signal1D(results['Vrek'])
-
-        if oldshape:
-            self.data = self.data.reshape(oldshape)
-        if offset:
-            self.data -= 1  # Undo previous addition of 1 to input data
         return results
 
     def find_dead_pixels(

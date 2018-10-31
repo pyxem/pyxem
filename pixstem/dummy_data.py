@@ -276,3 +276,47 @@ def get_square_dpc_signal(add_ramp=False):
     s.axes_manager.signal_axes[0].units = "nm"
     s.axes_manager.signal_axes[1].units = "nm"
     return s
+
+
+def get_fem_signal(lazy=False):
+    """Get a 2D signal that approximates a fluctuation electron microscopy
+    (FEM) dataset.
+
+    Returns
+    -------
+    fem_signal : PixelatedSTEM
+
+    Examples
+    --------
+    >>> s = ps.dummy_data.get_fem_signal()
+    >>> s.plot()
+
+    """
+
+    radii1 = 20 * np.random.randint(0, 2, size=(10, 10))
+    intensities1 = np.random.randint(0, 30, size=(10, 10))
+
+    radii2 = 35 * np.random.randint(0, 2, size=(10, 10))
+    intensities2 = np.random.randint(0, 30, size=(10, 10))
+
+    test1 = mdtd.generate_4d_data(probe_size_x=10, probe_size_y=10,
+                                  image_size_x=100, image_size_y=100,
+                                  disk_x=50, disk_y=50, disk_r=5, disk_I=100,
+                                  ring_x=50, ring_y=50, ring_r=radii1,
+                                  ring_I=intensities1, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    test2 = mdtd.generate_4d_data(probe_size_x=10, probe_size_y=10,
+                                  image_size_x=100, image_size_y=100,
+                                  disk_x=50, disk_y=50, disk_r=5, disk_I=100,
+                                  ring_x=50, ring_y=50, ring_r=radii2,
+                                  ring_I=intensities2, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    fem_signal = (test1 + test2)
+
+    return fem_signal
