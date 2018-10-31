@@ -78,7 +78,7 @@ class VDFImage(Signal2D):
                                             plot_on=False),
                                             dtype=np.object))
 
-class SepsStack(BaseSignal):
+class VDFSegmentation(BaseSignal):
     """Stack of separated grains, made from applying the function separate_stack
        on a stack of VDF images. """
     _signal_type = "separated_image_stack"
@@ -88,29 +88,29 @@ class SepsStack(BaseSignal):
 
     def get_VDFgvectorStack(self,unique_vectors):
 
-            """Makes a image_vector_stack class instance,
-             holding all the separated grains images and corresponding g-vectors.
+        """Makes a image_vector_stack class instance,
+         holding all the separated grains images and corresponding g-vectors.
 
-            Parameters
-            ----------
-            unique_vectors : ndarray
-                Array of unique vectors that corresponds to the VDF images that
-                seps_temp originates from.
+        Parameters
+        ----------
+        unique_vectors : ndarray
+            Array of unique vectors that corresponds to the VDF images that
+            seps_temp originates from.
 
-            Returns
-            -------
-            image_vector_stack
-            """
-            images = self.data[0].T
-            vectors=np.array(np.empty((1)),dtype='object')
-            vectors[0]=unique_vectors[0]
-            for i in range(1,np.shape(self)[0]):
-                images = np.append(images, self.data[i].T,axis = 0)
-                repeats=np.array(np.empty((np.shape(self.data[i])[2])),dtype='object')
-                for n in range(np.shape(self.data[i])[2]):
-                    repeats[n] = unique_vectors[i]
-                vectors = np.append(vectors,repeats,axis=0)
-            return VDFgvectorStack(images,vectors)
+        Returns
+        -------
+        image_vector_stack
+        """
+        images = self.data[0].T
+        vectors=np.array(np.empty((1)),dtype='object')
+        vectors[0]=unique_vectors[0]
+        for i in range(1,np.shape(self)[0]):
+            images = np.append(images, self.data[i].T,axis = 0)
+            repeats=np.array(np.empty((np.shape(self.data[i])[2])),dtype='object')
+            for n in range(np.shape(self.data[i])[2]):
+                repeats[n] = unique_vectors[i]
+            vectors = np.append(vectors,repeats,axis=0)
+        return VDFgvectorStack(images,vectors)
 
 
 class VDFgvectorStack():
