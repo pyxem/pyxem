@@ -61,8 +61,6 @@ class VDFImage(Signal2D):
         References
         ----------
         [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html
-
-        TODO: Enable plot of separate stack as in separate!
         """
         return SepsStack(np.array((self).map(separate,
                                             show_progressbar=True,
