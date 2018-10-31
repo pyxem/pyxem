@@ -18,6 +18,7 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+from skimage.feature import match_template, peak_local_max
 
 NO_PEAKS = np.array([[[np.nan, np.nan]]])
 
@@ -96,7 +97,7 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
         """
         gradient_of_image = np.gradient(image)
         gradient_of_image = gradient_of_image[0] ** 2 + gradient_of_image[
-                                                            1] ** 2
+            1] ** 2
         return gradient_of_image
 
     # Generate an ordered list of matrix coordinates.
@@ -312,3 +313,33 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
 
     centers = blobs[:, :2]
     return centers
+
+
+def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
+    """
+    Find peaks using the the correlation between the image and a reference peaks
+
+    Parameters
+    ----------
+
+    z: numpy.ndarray
+        Array of image intensities.
+    disc_image: numpy.ndarray (square)
+        Array containing a single bright disc, similar to those you seek to detect
+    min_distance: int
+        The minimum expected distance between peaks (in pixels)
+    peak_threshold: float between 0 and 1
+        Internally passed argument, larger values will lead to fewer peaks in the output
+
+    Returns
+    -------
+    numpy.ndarray
+        (n_peaks, 2)
+        Array of peak coordinates.
+
+    """
+    response_image = match_template(z, disc_image, pad_input=True)
+    peaks = peak_local_max(response_image, min_distance=min_distance, threshold_rel=peak_threshold)
+    peaks -= 1  # this means the return format is the same as the other peak finders
+
+    return clean_peaks(peaks)
