@@ -105,6 +105,9 @@ class VDFGenerator():
         y.scale = self.signal.axes_manager.navigation_axes[0].scale
         y.units = 'nm'
 
+        # Assign vectors used to generate images to vdfim property
+        vdfim.vectors = vectors.data
+
         return vdfim
 
     def get_concentric_vdf_images(self,
