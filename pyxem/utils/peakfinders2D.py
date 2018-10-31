@@ -325,11 +325,11 @@ def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
     z: numpy.ndarray
         Array of image intensities.
     disc_image: numpy.ndarray (square)
-        Array containing a single bright disc, similar to those you seek to detect
+        Array containing a single bright disc, similar to those to detect.
     min_distance: int
         The minimum expected distance between peaks (in pixels)
     peak_threshold: float between 0 and 1
-        Internally passed argument, larger values will lead to fewer peaks in the output
+        Larger values will lead to fewer peaks in the output.
 
     Returns
     -------
@@ -339,7 +339,10 @@ def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
 
     """
     response_image = match_template(z, disc_image, pad_input=True)
-    peaks = peak_local_max(response_image, min_distance=min_distance, threshold_rel=peak_threshold)
-    peaks -= 1  # this means the return format is the same as the other peak finders
+    peaks = peak_local_max(response_image,
+                           min_distance=min_distance,
+                           threshold_rel=peak_threshold)
+    # make return format the same as the other peak finders
+    peaks -= 1
 
     return clean_peaks(peaks)
