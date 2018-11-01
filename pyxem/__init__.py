@@ -37,13 +37,18 @@ from .components.diffraction_component import ElectronDiffractionForwardModel
 
 from .generators.diffraction_generator import DiffractionGenerator
 from .generators.library_generator import DiffractionLibraryGenerator
+from .generators.red_intensity_generator import ReducedIntensityGenerator
+from .generators.pdf_generator import PDFGenerator
 
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_profile import ElectronDiffractionProfile
 from .signals.electron_diffraction import ElectronDiffraction
+
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.vdf_image import VDFImage
+from .signals.pdf_profile import PDFProfile
+from .signals.reduced_intensity_profile import ReducedIntensityProfile
 
 from .io_plugins import io_plugins, default_write_ext
 from .io_plugins import mib as mib_reader
