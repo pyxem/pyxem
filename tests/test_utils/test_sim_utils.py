@@ -20,8 +20,6 @@ import pytest
 import numpy as np
 import diffpy
 
-from transforms3d.euler import euler2mat
-
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import *
 
@@ -58,47 +56,6 @@ def test_get_points_in_sphere():
     assert len(ind) == len(cord)
     assert len(ind) == len(dist)
     assert len(dist) == 1 + 6
-
-
-def make_structure_hexagonal(rotation=None):
-    """Construct a hexagonal P63mc GaAs Wurtzite structure. """
-    if rotation is None:
-        rotation = np.eye(3)
-    a = 4.053
-    c = 6.680
-    lattice = diffpy.structure.lattice.Lattice(a, a, c, 90, 90, 120)
-    atom_list = []
-    for x, y, z in [(1/3, 2/3, 0), (2/3, 1/3, 1/2)]:
-        atom_list.append(
-                diffpy.structure.atom.Atom(
-                    atype='Ga',
-                    xyz=[x, y, z],
-                    lattice=lattice))
-        atom_list.append(
-                diffpy.structure.atom.Atom(
-                    atype='As',
-                    xyz=[x + 3/8, y + 3/8, z + 3/8],
-                    lattice=lattice))
-    return diffpy.structure.Structure(atoms=atom_list, lattice=lattice)
-
-
-def test_kinematic_intensities_rotation():
-    """Test that kinematically forbidden diffraction spots gets zero intensity also after rotation."""
-    rotation = euler2mat(0, np.pi/2, 0, 'rzxz')
-    structure = make_structure_hexagonal(rotation)
-    reciprocal_lattice = structure.lattice.reciprocal()
-    g_indices = [(0, 0, 1)]
-    g_hkls = np.array([reciprocal_lattice.dist(g_indices, [0, 0, 0])])
-
-    intensities = get_kinematical_intensities(
-            structure,
-            g_indices,
-            g_hkls,
-            excitation_error=0,
-            maximum_excitation_error=1,
-            debye_waller_factors={})
-
-    np.testing.assert_almost_equal(intensities, [0])
 
 
 def test_kinematic_simulator_plane_wave():
