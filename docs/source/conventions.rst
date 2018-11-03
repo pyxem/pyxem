@@ -47,8 +47,8 @@ Rotations
 ---------
 
 These are in the rzxz convention, as defined in transform3d. This means that we
-rotate about z, then x and then z again but the axes of rotation follow the
-sample, as illustrated below:
+rotate about z (by alpha), then x (by beta) and then the new z (by gamma), as
+illustrated below:
 
 .. figure:: images/euler_angles.png
    :align: center
