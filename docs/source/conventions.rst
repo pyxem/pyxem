@@ -13,19 +13,15 @@ ElectronDiffraction class, i.e.
 
     >>> dp.set_diffraction_calibration(0.01)
 
-Coordinates in the two-dimensional diffraction pattern are referred to an origin
-at the center of the diffraction pattern and the positive quadrant is the lower
-right hand quadrant.
+Coordinates in the two-dimensional diffraction pattern are typically Cartesian
+coordinates referred to an origin at the center of the diffraction pattern with
+ the lower right hand quadrant positive. Coordinates may also be expressed as
+ polar coordinates with the positive rotation an anticlockwise rotation. These
+ conventions are depicted below:
 
-.. figure:: images/cartesian_coordinates.png
+.. figure:: images/axis_conventions_pyxem.png
    :align: center
    :width: 600
-
-
-
-.. figure:: images/polar_coordinates.png
-  :align: center
-  :width: 600
 
 
 Physical Units
@@ -40,6 +36,11 @@ When physical units are used it is anticipated that we have:
 
 Crystallographic Axes
 ---------------------
+
+Atomic structures are manipulated in pyXem using the diffpy.Structure module and
+crystallographic conventions are therefore primarily inherited from there.
+
+
 
 
 Rotations
