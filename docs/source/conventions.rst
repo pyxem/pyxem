@@ -39,8 +39,15 @@ Crystallographic Axes
 
 Atomic structures are manipulated in pyXem using the diffpy.Structure module and
 crystallographic conventions are therefore primarily inherited from there.
+Unless otherwise stated it will be assumed that a crystal structures is
+described in the standard setting as defined in the International Tables of
+Crystallography. [IUCr]
 
-
+Crystal orientations/rotations are typically described with respect to an
+orthonormal basis, which must be related to the crystallographic basis in a
+consistent manner [Rowenhorst]. In pyXem it is assumed that these axes are
+related according to the metric tensor defined in a diffpy.structure.lattice
+object.
 
 
 Rotations
@@ -53,15 +60,3 @@ illustrated below:
 .. figure:: images/euler_angles.png
    :align: center
    :width: 600
-
-
-References
-----------
-
-.. _[Zaeferrer2010]:
-
-:ref:`[Zaeferrer2010] <[Zaeferrer2010]>`
-  S. Zaefferer, “New developments of computer-aided crystallographic analysis
-  in transmission electron microscopy research” J. Appl. Crystallogr., vol. 33,
-  no. v, pp. 10–25, 2000.
-  [`link <https://journals.iucr.org/j/issues/2000/01/00/hz0046/hz0046.pdf`_].
