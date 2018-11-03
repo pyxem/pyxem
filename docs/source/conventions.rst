@@ -3,6 +3,7 @@ Conventions
 
 Various conventions are adopted within pyXem, as detailed here.
 
+
 Diffraction Pattern Coordinates
 -------------------------------
 
