@@ -117,6 +117,7 @@ structure_hexagonal_rotations = [
     [159.89609064, 90, 0],
 ]
 
+
 @pytest.mark.parametrize('structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list', [
     (create_structure_cubic(), (0, 0, 1), (1, 0, 1), (1, 1, 1), [0], np.deg2rad(10), structure_cubic_rotations),
     (create_structure_hexagonal(), (0, 0, 0, 1), (1, 1, -2, 0), (1, 0, -1, 0), [0], np.deg2rad(10), structure_hexagonal_rotations)
@@ -134,5 +135,6 @@ def test_rotation_list_stereographic(structure, corner_a, corner_b, corner_c, in
     (create_structure_cubic(), (0, 0, 1), (0, 0, 1), (1, 1, 1), [0], np.deg2rad(10), structure_cubic_rotations),
     (create_structure_cubic(), (0, 0, 1), (1, 0, 1), (0, 0, 1), [0], np.deg2rad(10), structure_cubic_rotations)
 ])
-def test_rotation_list_stereographic_raises_invalid_corners(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list):
+def test_rotation_list_stereographic_raises_invalid_corners(
+        structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list):
     rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution)
