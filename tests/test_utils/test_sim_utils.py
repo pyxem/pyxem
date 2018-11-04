@@ -127,3 +127,12 @@ def test_rotation_list_stereographic(structure, corner_a, corner_b, corner_c, in
     for expected in rotation_list:
         print(expected)
         assert any((np.allclose(expected, actual) for actual in val))
+
+
+@pytest.mark.xfail(raises=ValueError)
+@pytest.mark.parametrize('structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list', [
+    (create_structure_cubic(), (0, 0, 1), (0, 0, 1), (1, 1, 1), [0], np.deg2rad(10), structure_cubic_rotations),
+    (create_structure_cubic(), (0, 0, 1), (1, 0, 1), (0, 0, 1), [0], np.deg2rad(10), structure_cubic_rotations)
+])
+def test_rotation_list_stereographic_raises_invalid_corners(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list):
+    rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution)
