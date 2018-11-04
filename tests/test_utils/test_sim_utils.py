@@ -24,6 +24,18 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import *
 
 
+def create_structure_cubic():
+    lattice = diffpy.structure.lattice.Lattice(1, 1, 1, 90, 90, 90)
+    atom = diffpy.structure.atom.Atom(atype='Si', xyz=[0, 0, 0], lattice=lattice)
+    return diffpy.structure.Structure(atoms=[atom], lattice=lattice)
+
+
+def create_structure_hexagonal():
+    lattice = diffpy.structure.lattice.Lattice(1, 1, 1, 90, 90, 120)
+    atom = diffpy.structure.atom.Atom(atype='Si', xyz=[0, 0, 0], lattice=lattice)
+    return diffpy.structure.Structure(atoms=[atom], lattice=lattice)
+
+
 @pytest.mark.parametrize('accelerating_voltage, wavelength', [
     (100, 0.0370143659),
     (200, 0.0250793403),
@@ -80,3 +92,38 @@ def test_kinematic_simulator_invalid_illumination():
                                         simulation_size=32,
                                         illumination='gaussian')
     assert isinstance(sim, ElectronDiffraction)
+
+
+@pytest.mark.parametrize('uvtw, uvw', [
+    ((0, 0, 0, 1), (0, 0, 1)),
+    ((1, 0, 0, 1), (2, 1, 1)),
+    ((2, 2, 0, 0), (1, 1, 0)),
+])
+def test_uvtw_to_uvw(uvtw, uvw):
+    val = uvtw_to_uvw(uvtw)
+    np.testing.assert_almost_equal(val, uvw)
+
+
+# Three corners of the rotation lists, for comparison
+structure_cubic_rotations = [
+    [0, 0, 0],
+    [90, 45, 0],
+    [135, 54.73561032, 0]
+]
+
+structure_hexagonal_rotations = [
+    [0, 0, 0],
+    [129.06467839, 90, 0],
+    [159.89609064, 90, 0],
+]
+
+@pytest.mark.parametrize('structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list', [
+    (create_structure_cubic(), (0, 0, 1), (1, 0, 1), (1, 1, 1), [0], np.deg2rad(10), structure_cubic_rotations),
+    (create_structure_hexagonal(), (0, 0, 0, 1), (1, 1, -2, 0), (1, 0, -1, 0), [0], np.deg2rad(10), structure_hexagonal_rotations)
+])
+def test_rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list):
+    val = rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution)
+    print(val)
+    for expected in rotation_list:
+        print(expected)
+        assert any((np.allclose(expected, actual) for actual in val))
