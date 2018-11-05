@@ -35,7 +35,6 @@ class StructureLibrary(dict):
                  identifiers,
                  structures,
                  orientations):
-
         self.identifiers = identifiers
         self.structures  = structures
         self.orientations = orientations

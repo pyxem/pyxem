@@ -31,7 +31,7 @@ diffracted beam. Examples of such virtual images are shown below.
 .. figure:: images/vdf_example.png
    :align: center
    :width: 600
-   
+
    
 Unsupervised Machine Learning
 -----------------------------
@@ -53,4 +53,3 @@ method, which is inherited directy from HyperSpy and is documented
 .. code-block:: python
 
     >>> dp.decomposition()
-

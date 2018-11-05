@@ -309,33 +309,54 @@ def simulate_kinematic_scattering(atomic_coordinates,
     return ElectronDiffraction(intensity)
 
 
-def peaks_from_best_template(single_match_result,phase,library):
-    """ Takes a match_result object and return the associated peaks, to be used with
+def peaks_from_best_template(single_match_result, phase, library):
+    """ Takes a match_result object and return the associated peaks, to be used
     in combination with map.
 
-    Example : peaks= match_results.map(peaks_from_best_template,phase=phase,library=library)
-
+    Parameters
+    ----------
+    single_match_result : match_result
+        A match result object.
     phase : list
-        of keys to library, should be the same as passed to IndexationGenerator.correlate()
+        A list of keys to library, should be the same as passed to
+        IndexationGenerator.correlate()
+    library : StructureLibrary
+        A nested dictionary containing keys of [phase][rotation]
 
-    library : nested dictionary containing keys of [phase][rotation]
+    Returns
+    -------
+    peaks : np.array()
+        The peaks from the best matching template.
+
+    Examples
+    --------
+    peaks= match_results.map(peaks_from_best_template,
+                             phase=phase,library=library)
     """
-
+    #Get the best matching result, for the phase, from the match result
     best_fit = single_match_result[np.argmax(single_match_result[:,4])]
     _phase = phase[int(best_fit[0])]
-    pattern = library.get_library_entry(phase=_phase,angle=(best_fit[1],best_fit[2],best_fit[3]))['Sim']
+    #Get the corresponding library entry
+    pattern = library.get_library_entry(phase=_phase, angle=(best_fit[1],
+                                        best_fit[2],best_fit[3]))['Sim']
+    #Get the x,y coordinates for peaks in the best matching result
     peaks = pattern.coordinates[:,:2] #cut z
+
     return peaks
 
-def get_points_in_sphere(reciprocal_lattice,reciprocal_radius):
-    """
-    Finds all reciprocal lattice points inside a given reciprocal sphere. Utilised
-    within the DifractionGenerator.
+def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
+    """Finds all reciprocal lattice points inside a given reciprocal sphere.
+    Used within the DifractionGenerator.
 
-    Inputs:  reciprocal_lattice : Diffy Lattice Object
-             reciprocal_radius  : float
+    Parameters
+    ----------
+    reciprocal_lattice : Diffy Lattice Object
 
-    Returns: np.arrays(): spot_indicies, spot_coords, spot_distances
+    reciprocal_radius : float
+
+    Returns
+    -------
+    np.arrays(): spot_indicies, spot_coords, spot_distances
              Note that spot_coords are the cartesian basis.
 
     """
