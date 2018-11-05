@@ -28,7 +28,7 @@ def load_VectorLibrary(filename,safety=False):
         trust the author of this content')
 
 
-class VectorLibrary(dict):
+class DiffractionVectorLibrary(dict):
     """Maps crystal structure (phase) and orientation (Euler angles or
     axis-angle pair) to simulated diffraction data.
     """

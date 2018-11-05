@@ -241,7 +241,8 @@ def get_kinematical_intensities(structure,
     fss = np.array(fss)
 
     # Change the coordinate system of fcoords to align with that of g_indices
-    fcoords = np.dot(fcoords, np.linalg.inv(np.dot(structure.lattice.stdbase, structure.lattice.recbase)))
+    fcoords = np.dot(fcoords, np.linalg.inv(np.dot(structure.lattice.stdbase,
+                                                   structure.lattice.recbase)))
 
     # Calculate structure factors for all excited g-vectors.
     f_hkls = []
@@ -438,7 +439,6 @@ def carry_through_navigation_calibration(new_signal, old_signal):
     -------
     new_signal : Signal
         The new signal with calibrated navigation axes.
-
     """
     try:
         x = new_signal.axes_manager.signal_axes[0]
