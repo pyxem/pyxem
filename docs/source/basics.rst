@@ -168,43 +168,8 @@ Peak Finding
 
 The :py:meth:`~.ElectronDiffraction.find_peaks` method provides access to a
 number of algorithms for that achieve peak finding in electron diffraction
-patterns. The found peak positions are returned as
-The methods available are as follows:
-
-.. code-block:: python
-
-    >>> dp.find_peaks(method='zaefferer')
-
-This algorithm was developed by Zaefferer and the implementation here is after
-the description of the algorithm in the Ph.D. thesis of Thomas A. White. It is
-based on a gradient threshold followed by a local maximum search within a square
-window, which is moved until it is centered on the brightest point, which is
-taken as a peak if it is within a certain distance of the starting point.
-
-.. code-block:: python
-
-    >>> dp.find_peaks(method='stat')
-
-Developed by Gordon Ball, and described in the Ph.D. thesis of Thomas A.
-White, this method is based on finding points which have a statistically
-higher value than the surrounding areas, then iterating between smoothing and
-binarising until the number of peaks has converged. This method is slow, but
-very robust to a variety of image types.
-
-.. code-block:: python
-
-    >>> dp.find_peaks(method='laplacian_of_gaussians')
-    >>> dp.find_peaks(method='difference_of_gaussians')
-
-These methods are essentially wrappers around the
-`scikit-image <http://scikit-image
-.org/docs/dev/auto_examples/plot_blob.html>`_ Laplacian
-of Gaussian and Difference of Gaussian methods, based on stacking the
-Laplacian/difference of images convolved with Gaussian kernels of various
-standard deviations. Both are very rapid and relatively robust, given
-appropriate parameters.
-
-One final option is interactive peak finding, initialised with
+patterns. There are currently five methods avaliable, a good place to start
+though is to run the interactive peakfinder in a Jupyter Notebook
 
 .. code-block:: python
 
@@ -230,3 +195,58 @@ Several widgets are available:
 
 .. note:: Some methods take significantly longer than others (the statistical method is particularly slow). The plotting window
     may be inactive during this time.
+
+Running in a script is then simple.
+
+Zaefferer
+`````````
+
+.. code-block:: python
+
+    >>> dp.find_peaks(method='zaefferer')
+
+This algorithm was developed by Zaefferer and the implementation here is after
+the description of the algorithm in the Ph.D. thesis of Thomas A. White. It is
+based on a gradient threshold followed by a local maximum search within a square
+window, which is moved until it is centered on the brightest point, which is
+taken as a peak if it is within a certain distance of the starting point.
+
+Stat
+````
+.. code-block:: python
+
+    >>> dp.find_peaks(method='stat')
+
+Developed by Gordon Ball, and described in the Ph.D. thesis of Thomas A.
+White, this method is based on finding points which have a statistically
+higher value than the surrounding areas, then iterating between smoothing and
+binarising until the number of peaks has converged. This method is slow, but
+very robust to a variety of image types.
+
+Matrix Methods
+``````````````
+
+.. code-block:: python
+
+    >>> dp.find_peaks(method='laplacian_of_gaussians')
+    >>> dp.find_peaks(method='difference_of_gaussians')
+
+These methods are essentially wrappers around the
+`scikit-image <http://scikit-image
+.org/docs/dev/auto_examples/plot_blob.html>`_ Laplacian
+of Gaussian and Difference of Gaussian methods, based on stacking the
+Laplacian/difference of images convolved with Gaussian kernels of various
+standard deviations. Both are very rapid and relatively robust, given
+appropriate parameters.
+
+Cross Correlation
+`````````````````
+
+.. code-block:: python
+
+    >>> disc = np.ones((2,2))
+    >>> dp.find_peaks(method='xc',disc_image=disc)
+
+The final method is based on cross correlation, forming a thin wrapper over
+the template matching code avaliable in scikit-image `<http://scikit-image
+.org/docs/dev/auto_examples/features_detection/plot_template.html>`_

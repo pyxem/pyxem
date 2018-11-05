@@ -18,17 +18,20 @@
 
 import pyxem as pxm
 
+
 class StructureLibrary(dict):
     """
     A dictionary containing all the structures and their associated rotations
     in the .struct_lib attribute.
 
-    identifiers: list of strings/ints
-
-    structures: list of diffpy.structure.Structures
-
-    orientations: a list (over identifiers)
-    of lists of euler angles (as tuples) in rzxz conventions
+    identifiers : list of strings/ints
+        A list of phase identifiers referring to different atomic structures.
+    structures : list of diffpy.structure.Structure objects.
+        A list of diffpy.structure.Structure objects describing the atomic
+        structure associated with each phase in the library.
+    orientations : list
+        A list over identifiers of lists of euler angles (as tuples) in the rzxz
+        convention and in degrees.
     """
 
     def __init__(self,
@@ -36,9 +39,9 @@ class StructureLibrary(dict):
                  structures,
                  orientations):
         self.identifiers = identifiers
-        self.structures  = structures
+        self.structures = structures
         self.orientations = orientations
         # create the actual dictionary
         self.struct_lib = dict()
-        for ident,struct,ori in zip(identifiers,structures,orientations):
-                self.struct_lib[ident] = (struct,ori)
+        for ident, struct, ori in zip(identifiers, structures, orientations):
+            self.struct_lib[ident] = (struct, ori)

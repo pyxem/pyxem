@@ -503,20 +503,24 @@ def save(filename, signal, overwrite=None, **kwds):
             signal.tmp_parameters.set_item('extension', extension)
 
 
-def load_mib(filename, scan_size):
+def load_mib(filename, scan_size, sum_length=10):
     """
-    Load medipix file.
-    Paramters:
-        filename : string
-            File path and name
-        scan_size : int
-            Scan size in pixels, allows the function to reshape the array into
-            the right shape.
+    Load a medipix hdr/mib file.
+
+    Parameters:
+    -----------
+    filename : string
+        File path and name to .hdr file.
+    scan_size : int
+        Scan size in pixels, allows the function to reshape the array into
+        the right shape.
+    sum_length : int
+        Number of lines to sum over to determine scan fly back location.
 
     """
     dpt = load_with_reader(filename=filename, reader=mib_reader)
     dpt = ElectronDiffraction(dpt.data.reshape((scan_size, scan_size, 256, 256)))
-    trace = dpt.inav[:,0:5].sum((1,2,3))
+    trace = dpt.inav[:,0:sum_length].sum((1,2,3))
     edge = np.where(trace==max(trace.data))[0][0]
     if edge==scan_size - 1:
         dp = ElectronDiffraction(dpt.inav[0:edge, 1:])
