@@ -175,8 +175,9 @@ class VectorLibraryGenerator(object):
         spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
             recip_latt, reciprocal_radius)
 
-        #convert array of unique vectors to polar coordinates
+        # convert array of unique vectors to polar coordinates
         gpolar = np.array(_cart2polar(vectors.data.T[0], vectors.data.T[1]))
+
         #iterate through all pairs calculating theoretical interplanar angle
         for comb in itertools.combinations(np.arange(len(vectors)), 2):
             i, j = comb[0], comb[1]
