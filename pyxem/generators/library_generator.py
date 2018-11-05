@@ -28,6 +28,8 @@ import diffpy.structure
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
+from pyxem.utils.sim_utils import get_angle_between_cartesian_vectors
+
 
 class DiffractionLibraryGenerator(object):
     """Computes a library of electron diffraction patterns for specified atomic
@@ -178,20 +180,19 @@ class VectorLibraryGenerator(object):
         # convert array of unique vectors to polar coordinates
         gpolar = np.array(_cart2polar(vectors.data.T[0], vectors.data.T[1]))
 
+        vector_lib = []
         #iterate through all pairs calculating theoretical interplanar angle
         for comb in itertools.combinations(np.arange(len(vectors)), 2):
             i, j = comb[0], comb[1]
-            #get hkl values for all planes in indexed family
-            hkls1 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[i][1][1]))]
-            hkls2 = calc_peaks.T[0][np.where(np.isin(calc_peaks.T[1], indexation[j][1][1]))]
-            #assign empty array for inter-vector angles
-            phis = np.zeros((len(hkls1), len(hkls2)))
-            #iterate through all pairs of indices
-            for prod in itertools.product(np.arange(len(hkls1)), np.arange(len(hkls2))):
-                m, n = prod[0], prod[1]
-                hkl1, hkl2 = hkls1[m], hkls2[n]
-                phis[m,n] = get_interplanar_angle(structure, hkl1, hkl2)
+            # specify hkls and lengths
+            hkl1 = spot_indices[i]
+            hkl2 = spot_indices[j]
+            len1 = spot_distances[i]
+            len2 = spot_distances[j]
+            angle = get_angle_between_cartesian_vectors(cartesian_coordinates[i],
+                                                        cartesian_coordinates[j])
+            vector_lib.append(np.array([hkl1, hkl2, len1, len2, angle]))
 
-        vector_library = DiffractionVectorLibrary([gpolar,phis])
+        vector_library = DiffractionVectorLibrary(np.array(vector_lib))
 
         return vector_library
