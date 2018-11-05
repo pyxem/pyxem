@@ -166,9 +166,15 @@ class VectorLibraryGenerator(object):
             objects.
 
         """
-        rl = structure.lattice.reciprocal_lattice_crystallographic
-        recip_pts = rl.get_points_in_sphere([[0, 0, 0]], [0, 0, 0], max_length)
-        calc_peaks = np.asarray(sorted(recip_pts, key=lambda i: (i[1], -i[0][0], -i[0][1], -i[0][2])))
+        # Specify variables used in calculation
+        latt = structure.lattice
+
+        # Obtain crystallographic reciprocal lattice points within `max_r` and
+        # g-vector magnitudes for intensity calculations.
+        recip_latt = latt.reciprocal()
+        spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
+            recip_latt, reciprocal_radius)
+
         #convert array of unique vectors to polar coordinates
         gpolar = np.array(_cart2polar(vectors.data.T[0], vectors.data.T[1]))
         #iterate through all pairs calculating theoretical interplanar angle
