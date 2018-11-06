@@ -19,9 +19,6 @@
 """Indexation generator and associated tools.
 """
 
-from heapq import nlargest
-from operator import itemgetter
-
 import numpy as np
 import hyperspy.api as hs
 from math import acos, cos, sin, pi, radians, degrees
@@ -29,45 +26,12 @@ import itertools
 
 from pyxem.signals.indexation_results import IndexationResults
 
-from pyxem.utils import correlate
 from pyxem.utils.sim_utils import carry_through_navigation_calibration
-from pyxem.utils.indexation_utils import index_magnitudes
 
+from pyxem.utils.indexation_utils import index_magnitudes
+from pyxem.utils.indexation_utils import correlate_library
 
 import hyperspy.api as hs
-
-
-def correlate_library(image, library, n_largest, mask, keys=[]):
-    """Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image) stored as a
-    numpy array. See the correlate method of IndexationGenerator for details.
-    """
-    i = 0
-    out_arr = np.zeros((n_largest * len(library), 5))
-    if mask == 1:
-        for key in library.keys():
-            correlations = dict()
-            for orientation, diffraction_pattern in library[key].items():
-                # diffraction_pattern here is in fact a library of
-                # diffraction_pattern_properties
-                correlation = correlate(image, diffraction_pattern)
-                correlations[orientation] = correlation
-                res = nlargest(n_largest, correlations.items(),
-                               key=itemgetter(1))
-            for j in np.arange(n_largest):
-                out_arr[j + i * n_largest][0] = i
-                out_arr[j + i * n_largest][1] = res[j][0][0]
-                out_arr[j + i * n_largest][2] = res[j][0][1]
-                out_arr[j + i * n_largest][3] = res[j][0][2]
-                out_arr[j + i * n_largest][4] = res[j][1]
-            i = i + 1
-
-    else:
-        for j in np.arange(n_largest):
-            for k in [0, 1, 2, 3, 4]:
-                out_arr[j + i * n_largest][k] = np.nan
-        i = i + 1
-    return out_arr
 
 
 class IndexationGenerator():
