@@ -51,8 +51,7 @@ class DiffractionLibraryGenerator(object):
                                 calibration,
                                 reciprocal_radius,
                                 half_shape,
-                                with_direct_beam=True
-                                ):
+                                with_direct_beam=True):
         """Calculates a dictionary of diffraction data for a library of crystal
         structures and orientations.
 
@@ -148,8 +147,7 @@ class VectorLibraryGenerator(object):
         self.structures = structure_library
 
     def get_vector_library(self,
-                           reciprocal_radius
-                           ):
+                           reciprocal_radius):
         """Calculates a library of diffraction vectors and pairwise inter-vector
         angles for a library of crystal structures.
 
@@ -174,16 +172,16 @@ class VectorLibraryGenerator(object):
         structure_library = structure_library.struct_lib
         # Iterate through phases in library.
         for key in structure_library.keys():
-            phase_diffraction_library = dict()
             # Get diffpy.structure object associated with phase
             structure = structure_library[key][0]
             # Get reciprocal lattice points within reciprocal_radius
             latt = structure.lattice
             recip_latt = latt.reciprocal()
             spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
-                recip_latt, reciprocal_radius)
-
-            vector_lib = []
+                                                             recip_latt,
+                                                             reciprocal_radius)
+            # Define an empty list to store phase vector pairs
+            phase_vectors = []
             #iterate through all pairs calculating theoretical interplanar angle
             for comb in itertools.combinations(np.arange(len(vectors)), 2):
                 i, j = comb[0], comb[1]
@@ -194,8 +192,7 @@ class VectorLibraryGenerator(object):
                 len2 = spot_distances[j]
                 angle = get_angle_between_cartesian_vectors(cartesian_coordinates[i],
                                                             cartesian_coordinates[j])
-                vector_lib.append(np.array([hkl1, hkl2, len1, len2, angle]))
-
-        vector_library = DiffractionVectorLibrary(np.array(vector_lib))
+                phase_vectors.append(np.array([hkl1, hkl2, len1, len2, angle]))
+            vector_library[key] = np.array(phase_vectors)
 
         return vector_library
