@@ -488,9 +488,9 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
 
     lattice = structure.lattice
 
-    corner_a = np.dot(lattice.stdbase, corner_a)
-    corner_b = np.dot(lattice.stdbase, corner_b)
-    corner_c = np.dot(lattice.stdbase, corner_c)
+    corner_a = corner_a @ lattice.stdbase
+    corner_b = corner_b @ lattice.stdbase
+    corner_c = corner_c @ lattice.stdbase
 
     corner_a /= np.linalg.norm(corner_a)
     corner_b /= np.linalg.norm(corner_b)
