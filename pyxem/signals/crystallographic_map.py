@@ -22,7 +22,7 @@ from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 import numpy as np
 from tqdm import tqdm
-from pyxem.utils.sim_utils import carry_through_navigation_calibration
+from pyxem.utils.sim_utils import transfer_navigation_axes
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -86,7 +86,7 @@ class CrystallographicMap(BaseSignal):
         """
 
         phase_map = self.isig[0].as_signal2D((0, 1))
-        phase_map = carry_through_navigation_calibration(phase_map, self)
+        phase_map = transfer_navigation_axes(phase_map, self)
 
         return phase_map
 
@@ -104,7 +104,7 @@ class CrystallographicMap(BaseSignal):
         eulers = self.isig[1:4]
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
-        orientation_map = carry_through_navigation_calibration(orientation_map, self)
+        orientation_map = transfer_navigation_axes(orientation_map, self)
 
         return orientation_map
 
@@ -119,7 +119,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         correlation_map = self.isig[4].as_signal2D((0, 1))
-        correlation_map = carry_through_navigation_calibration(correlation_map, self)
+        correlation_map = transfer_navigation_axes(correlation_map, self)
 
         return correlation_map
 
@@ -137,7 +137,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         reliability_map = self.isig[5].as_signal2D((0, 1))
-        reliability_map = carry_through_navigation_calibration(reliability_map, self)
+        reliability_map = transfer_navigation_axes(reliability_map, self)
 
         return reliability_map
 
@@ -155,7 +155,7 @@ class CrystallographicMap(BaseSignal):
 
         """
         reliability_map = self.isig[6].as_signal2D((0, 1))
-        reliability_map = carry_through_navigation_calibration(reliability_map, self)
+        reliability_map = transfer_navigation_axes(reliability_map, self)
 
         return reliability_map
 

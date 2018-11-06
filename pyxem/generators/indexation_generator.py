@@ -26,7 +26,7 @@ import itertools
 
 from pyxem.signals.indexation_results import IndexationResults
 
-from pyxem.utils.sim_utils import carry_through_navigation_calibration
+from pyxem.utils.sim_utils import transfer_navigation_axes
 
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import correlate_library
@@ -101,7 +101,7 @@ class IndexationGenerator():
                              **kwargs)
         matching_results = IndexationResults(matches)
 
-        matching_results = carry_through_navigation_calibration(matching_results, signal)
+        matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
 
@@ -223,39 +223,17 @@ class VectorIndexationGenerator():
             Navigation axes of the diffraction vectors signal containing vector
             indexation results for each probe position.
         """
-        mapping = self.map
         vectors = self.vectors
-        structure = self.strucutre
-        edc = self.edc
+        library = self.library
 
-        # set up simulator
-        sim_prof = edc.calculate_profile_data(structure=structure,
-                                              reciprocal_radius=max_length)
-        # get theoretical g-vector magnitudes from family indexation
-        magnitudes = np.array(sim_prof.magnitudes)
-        # assign possible indices based on magnitude alone
-        mags = vectors.get_magnitudes()
-        mag_index = ProfileIndexationGenerator(mags, sim_prof, mapping=False)
-        indexation = mag_index.index_peaks(tolerance=mag_threshold)
+        indexation = vectors.map(get_vector_pair_indexation,
+                                 structure=structure,
+                                 edc=edc,
+                                 magnitudes=magnitudes,
+                                 indexation=indexation,
+                                 max_length=max_length,
+                                 mag_threshold=mag_threshold,
+                                 angle_threshold=angle_threshold,
+                                 **kwargs)
 
-        if mapping == True:
-            indexation = vectors.map(get_vector_pair_indexation,
-                                     structure=structure,
-                                     edc=edc,
-                                     magnitudes=magnitudes,
-                                     indexation=indexation,
-                                     max_length=max_length,
-                                     mag_threshold=mag_threshold,
-                                     angle_threshold=angle_threshold,
-                                     **kwargs)
-
-        else:
-            # compare theory with experiment with threshold on mag of difference
-            phi_diffs = phis - np.absolute(phi_expt)
-            valid_pairs = np.array(np.where(np.abs(phi_diffs) < angle_threshold))
-            # obtain Miller indices corresponding to planes satisfying mag + angle.
-            indexed_pairs.append([vectors.data[i], hkls1[valid_pairs[0]], vectors.data[j], hkls2[valid_pairs[1]]])
-            # results give two arrays containing Miller indices for each reflection in pair that are self consistent.
-            indexation = np.array(indexed_pairs)
-
-        return indexation
+        return indexation_results

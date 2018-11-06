@@ -380,7 +380,7 @@ def is_lattice_hexagonal(latt):
     return len(truth_list) == np.sum(truth_list)
 
 
-def carry_through_navigation_calibration(new_signal, old_signal):
+def transfer_navigation_axes(new_signal, old_signal):
     """ Transfers navigation axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
