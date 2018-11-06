@@ -46,9 +46,11 @@ class IndexationGenerator():
 
     """
 
-    def __init__(self, signal, library):
+    def __init__(self,
+                 signal,
+                 diffraction_library):
         self.signal = signal
-        self.library = library
+        self.library = diffraction_library
 
     def correlate(self,
                   n_largest=5,
@@ -117,7 +119,8 @@ class ProfileIndexationGenerator():
 
     """
 
-    def __init__(self, magnitudes, simulation):
+    def __init__(self, magnitudes, simulation, mapping=True):
+        self.map = mapping
         self.magnitudes = magnitudes
         self.simulation = simulation
 
@@ -148,7 +151,7 @@ class ProfileIndexationGenerator():
                     ( Library Number , Z , X , Z , Correlation Score)
 
         """
-        #mapping = self.map
+        mapping = self.map
         mags = self.magnitudes
         simulation = self.simulation
 
@@ -177,10 +180,12 @@ class VectorsIndexationGenerator():
         DiffractionVectors to be indexed.
     structure : Structure
         Structure against which to perform indexation.
-    edc : DiffractionGenerator
     """
 
-    def __init__(self, vectors, structure, edc, mapping=True):
+    def __init__(self,
+                 vectors,
+                 vector_library,
+                 mapping=True):
         self.map = mapping
         self.vectors = vectors
         self.strucutre = structure
