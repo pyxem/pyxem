@@ -29,8 +29,7 @@ def load_VectorLibrary(filename,safety=False):
 
 
 class DiffractionVectorLibrary(dict):
-    """Maps crystal structure (phase) and orientation (Euler angles or
-    axis-angle pair) to simulated diffraction data.
+    """Maps crystal structure to simulated diffraction data.
     """
 
     def pickle_library(self,filename):

@@ -168,30 +168,33 @@ class VectorLibraryGenerator(object):
             objects.
 
         """
-        # Specify variables used in calculation
-        latt = structure.lattice
+        # Define DiffractionVectorLibrary object to contain results
+        vector_library = DiffractionVectorLibrary()
+        # Get structures from structure library
+        structure_library = structure_library.struct_lib
+        # Iterate through phases in library.
+        for key in structure_library.keys():
+            phase_diffraction_library = dict()
+            # Get diffpy.structure object associated with phase
+            structure = structure_library[key][0]
+            # Get reciprocal lattice points within reciprocal_radius
+            latt = structure.lattice
+            recip_latt = latt.reciprocal()
+            spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
+                recip_latt, reciprocal_radius)
 
-        # Obtain crystallographic reciprocal lattice points within `max_r` and
-        # g-vector magnitudes for intensity calculations.
-        recip_latt = latt.reciprocal()
-        spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
-            recip_latt, reciprocal_radius)
-
-        # convert array of unique vectors to polar coordinates
-        gpolar = np.array(_cart2polar(vectors.data.T[0], vectors.data.T[1]))
-
-        vector_lib = []
-        #iterate through all pairs calculating theoretical interplanar angle
-        for comb in itertools.combinations(np.arange(len(vectors)), 2):
-            i, j = comb[0], comb[1]
-            # specify hkls and lengths
-            hkl1 = spot_indices[i]
-            hkl2 = spot_indices[j]
-            len1 = spot_distances[i]
-            len2 = spot_distances[j]
-            angle = get_angle_between_cartesian_vectors(cartesian_coordinates[i],
-                                                        cartesian_coordinates[j])
-            vector_lib.append(np.array([hkl1, hkl2, len1, len2, angle]))
+            vector_lib = []
+            #iterate through all pairs calculating theoretical interplanar angle
+            for comb in itertools.combinations(np.arange(len(vectors)), 2):
+                i, j = comb[0], comb[1]
+                # specify hkls and lengths
+                hkl1 = spot_indices[i]
+                hkl2 = spot_indices[j]
+                len1 = spot_distances[i]
+                len2 = spot_distances[j]
+                angle = get_angle_between_cartesian_vectors(cartesian_coordinates[i],
+                                                            cartesian_coordinates[j])
+                vector_lib.append(np.array([hkl1, hkl2, len1, len2, angle]))
 
         vector_library = DiffractionVectorLibrary(np.array(vector_lib))
 

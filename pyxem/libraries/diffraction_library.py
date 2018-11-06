@@ -49,28 +49,25 @@ def load_DiffractionLibrary(filename, safety=False):
 
 
 def _get_library_from_angles(library, phase, angle):
-    """
-    Finds an element that is 'basically' the same as the rotation asked for.
+    """Finds an element that is orientation within 1e-5 of that specified.
+
+    This is necessary because of floating point round off / hashability. If
+    multiple entries satisfy the above criterion a random selection is made.
 
     Parameters
     ----------
     library : DiffractionLibrary
         The library to be searched
     phase : str
-        The phase to be searched
+        The phase of interest.
     angle : tuple
-        The target angle, in the same format as the library angle keys
+        The orientation of interest in the same format as library angle keys.
 
     Returns
     -------
-    dict
+    library_entries : dict
         Dictionary containing the simulation and associated properties
 
-    Notes
-    -----
-    This is needed because of floating point round off/hashability.
-    'basically' in this context means to within 1e-5
-    If more than one angle satisfies this criterion a random solution is returned
     """
 
     for key in library[phase]:
@@ -82,24 +79,26 @@ def _get_library_from_angles(library, phase, angle):
 
 
 class DiffractionLibrary(dict):
-    """
-    Maps crystal structure (phase) and orientation to simulated diffraction data.
+    """Maps crystal structure (phase) and orientation to simulated diffraction
+    data.
     """
 
     def get_library_entry(self, phase=None, angle=None):
-        """
-        Extracts a single library entry for viewing
+        """Extracts a single DiffractionLibrary entry.
 
         Parameters
         ----------
-        Phase : str (default is a random choice)
-            label for the phase you are interested in
-        Angle : tuple (default is a random choice)
-            label for the angle you are interested in.
+        phase : str
+            Key for the phase of interest. If unspecified the choice is random.
+        angle : tuple
+            Key for the orientation of interest. If unspecified the chois is
+            random.
+
         Returns
         -------
-        dict
-            Dictionary containing the simulation and associated properties
+        library_entries : dict
+            Dictionary containing the simulation associated with the specified
+            phase and orientation with associated properties.
         """
 
         if phase is not None:
@@ -119,17 +118,12 @@ class DiffractionLibrary(dict):
                     return self[phase][rotation]
 
     def pickle_library(self, filename):
-        """
-        Saves a diffraction library in the pickle format
+        """Saves a diffraction library in the pickle format.
 
         Parameters
         ----------
         filename : str
             The location in which to save the file
-
-        Returns
-        -------
-        None
 
         See Also
         --------
