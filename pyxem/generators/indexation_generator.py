@@ -138,8 +138,10 @@ class ProfileIndexationGenerator():
             these are submitted. This allows a mapping from the number to the
             phase.  For example, keys = ['si','ga'] will have an output with 0
             for 'si' and 1 for 'ga'.
+        *args : arguments
+            Arguments passed to the map() function.
         **kwargs : arguments
-            Keyword arguments passed to the HyperSpy map() function.
+            Keyword arguments passed to the map() function.
 
         Returns
         -------
@@ -173,12 +175,14 @@ class ProfileIndexationGenerator():
 
 class VectorIndexationGenerator():
     """Generates an indexer for DiffractionVectors using a number of methods.
+
     Parameters
     ----------
     vectors : DiffractionVectors
         DiffractionVectors to be indexed.
     vector_library : DiffractionVectorLibrary
-        The library of simulated diffraction patterns for indexation.
+        Library of theoretical diffraction vector magnitudes and inter-vector
+        angles for indexation.
     """
 
     def __init__(self,
@@ -188,29 +192,36 @@ class VectorIndexationGenerator():
         self.library = vector_library
 
     def index_vectors(self,
-                      max_length,
                       mag_threshold,
                       angle_threshold,
+                      keys=[],
+                      *args,
                       **kwargs):
-        """Assigns hkl indices to peaks in the diffraction profile.
+        """Assigns hkl indices to diffraction vectors.
 
         Parameters
         ----------
-        tolerance : float
-            The n orientations with the highest correlation values are returned.
+        mag_threshold : float
+            The maximum absolute error in diffraction vector magnitude, in units
+            of reciprocal Angstroms, allowed for indexation.
+        angle_threshold : float
+            The maximum absolute error in inter-vector angle, in units of
+            degrees, allowed for indexation.
         keys : list
             If more than one phase present in library it is recommended that
             these are submitted. This allows a mapping from the number to the
             phase.  For example, keys = ['si','ga'] will have an output with 0
             for 'si' and 1 for 'ga'.
-        **kwargs
-            Keyword arguments passed to the HyperSpy map() function.
+        *args : arguments
+            Arguments passed to the map() function.
+        **kwargs : arguments
+            Keyword arguments passed to the map() function.
 
         Returns
         -------
-        matching_results : pyxem.signals.indexation_results.IndexationResults
-            Navigation axes of the electron diffraction signal containing vector
-            indexation results for each diffraction pattern.
+        indexation_results : IndexationResults
+            Navigation axes of the diffraction vectors signal containing vector
+            indexation results for each probe position.
         """
         mapping = self.map
         vectors = self.vectors
