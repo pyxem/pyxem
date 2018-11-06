@@ -83,16 +83,29 @@ def get_indices_from_distance_matrix(distances, distance_threshold):
 
 
 def get_npeaks(found_peaks):
+    """Returns the number of entries in a list. For use with map().
 
+    Parameters
+    ----------
+    found_peaks : np.array()
+        Array of found peaks.
+
+    Returns
+    -------
+    len : int
+        The number of peaks in the array.
+    """
     return len(found_peaks[0])
 
 
 def get_angle_cartesian(a, b):
     """Compute the angle between two vectors in a cartesian coordinate system.
+
     Parameters
     ----------
     a, b : array-like with 3 floats
         The two directions to compute the angle between.
+
     Returns
     -------
     angle : float
