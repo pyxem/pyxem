@@ -26,8 +26,30 @@ from pyxem.utils import correlate
 
 def correlate_library(image, library, n_largest, mask, keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image) stored as a
-    numpy array. See the correlate method of IndexationGenerator for details.
+    with a particular experimental diffraction pattern (image).
+
+    Parameters
+    ----------
+    image : np.array()
+        The experimental diffraction pattern of interest.
+    library : DiffractionLibrary
+        The library of diffraction simulations to be correlated with the
+        experimental data.
+    n_largest : int
+        The number of well correlated simulations to be retained.
+    mask : bool array
+        A mask for navigation axes 1 indicates positions to be indexed.
+
+    Returns
+    -------
+    out_arr : np.array()
+        A numpy array containing the top n correlated simulations for the
+        experimental pattern of interest.
+
+    See also
+    --------
+    pyxem.utils.correlate and the correlate method of IndexationGenerator.
+    
     """
     i = 0
     out_arr = np.zeros((n_largest * len(library), 5))
