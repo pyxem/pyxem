@@ -289,4 +289,4 @@ class VectorsIndexationGenerator():
             #results give two arrays containing Miller indices for each reflection in pair that are self consistent.
             indexation = np.array(indexed_pairs)
 
-return indexation
+        return indexation
