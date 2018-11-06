@@ -4,7 +4,7 @@ import os
 import numpy as np
 import diffpy.structure
 
-from pyxem.libraries.diffraction_library import load_VectorLibrary
+from pyxem.libraries.vector_library import load_VectorLibrary
 from pyxem.libraries.structure_library import StructureLibrary
 
 @pytest.fixture
