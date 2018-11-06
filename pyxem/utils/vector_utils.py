@@ -28,6 +28,7 @@ def calculate_norms(z):
         Array of cartesian vectors.
 
     Returns
+    -------
     norms : np.array()
         Array of vector norms.
     """
@@ -38,6 +39,19 @@ def calculate_norms(z):
 
 
 def calculate_norms_ragged(z):
+    """Calculates the norm of an array of cartesian vectors. For use with map()
+    when applied to a ragged array.
+
+    Parameters
+    ----------
+    z : np.array()
+        Array of cartesian vectors.
+
+    Returns
+    -------
+    norms : np.array()
+        Array of vector norms.
+    """
     norms = []
     for i in z[0]:
         norms.append(np.linalg.norm(i))
