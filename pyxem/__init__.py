@@ -37,6 +37,7 @@ from .components.diffraction_component import ElectronDiffractionForwardModel
 
 from .generators.diffraction_generator import DiffractionGenerator
 from .generators.library_generator import DiffractionLibraryGenerator
+from .generators.library_generator import VectorLibraryGenerator
 
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_profile import ElectronDiffractionProfile
