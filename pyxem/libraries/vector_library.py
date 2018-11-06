@@ -19,7 +19,8 @@
 import pickle
 import numpy as np
 
-def load_VectorLibrary(filename,safety=False):
+
+def load_VectorLibrary(filename, safety=False):
     if safety:
         with open(filename, 'rb') as handle:
             return pickle.load(handle)
@@ -32,6 +33,6 @@ class DiffractionVectorLibrary(dict):
     """Maps crystal structure to simulated diffraction data.
     """
 
-    def pickle_library(self,filename):
+    def pickle_library(self, filename):
         with open(filename, 'wb') as handle:
             pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)

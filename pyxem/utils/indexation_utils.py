@@ -18,6 +18,7 @@
 
 import numpy as np
 
+
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
 

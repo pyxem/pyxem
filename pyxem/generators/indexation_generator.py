@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Indexation generator and associated tools.
-
 """
 
 from heapq import nlargest
@@ -216,6 +215,7 @@ class VectorsIndexationGenerator():
         Structure against which to perform indexation.
     edc : DiffractionGenerator
     """
+
     def __init__(self, vectors, structure, edc, mapping=True):
         self.map = mapping
         self.vectors = vectors
@@ -252,17 +252,17 @@ class VectorsIndexationGenerator():
         structure = self.strucutre
         edc = self.edc
 
-        #set up simulator
+        # set up simulator
         sim_prof = edc.calculate_profile_data(structure=structure,
                                               reciprocal_radius=max_length)
-        #get theoretical g-vector magnitudes from family indexation
+        # get theoretical g-vector magnitudes from family indexation
         magnitudes = np.array(sim_prof.magnitudes)
-        #assign possible indices based on magnitude alone
+        # assign possible indices based on magnitude alone
         mags = vectors.get_magnitudes()
         mag_index = ProfileIndexationGenerator(mags, sim_prof, mapping=False)
         indexation = mag_index.index_peaks(tolerance=mag_threshold)
 
-        if mapping==True:
+        if mapping == True:
             indexation = vectors.map(get_vector_pair_indexation,
                                      structure=structure,
                                      edc=edc,
@@ -274,12 +274,12 @@ class VectorsIndexationGenerator():
                                      **kwargs)
 
         else:
-            #compare theory with experiment with threshold on mag of difference
+            # compare theory with experiment with threshold on mag of difference
             phi_diffs = phis - np.absolute(phi_expt)
-            valid_pairs = np.array(np.where(np.abs(phi_diffs)<angle_threshold))
-            #obtain Miller indices corresponding to planes satisfying mag + angle.
+            valid_pairs = np.array(np.where(np.abs(phi_diffs) < angle_threshold))
+            # obtain Miller indices corresponding to planes satisfying mag + angle.
             indexed_pairs.append([vectors.data[i], hkls1[valid_pairs[0]], vectors.data[j], hkls2[valid_pairs[1]]])
-            #results give two arrays containing Miller indices for each reflection in pair that are self consistent.
+            # results give two arrays containing Miller indices for each reflection in pair that are self consistent.
             indexation = np.array(indexed_pairs)
 
         return indexation

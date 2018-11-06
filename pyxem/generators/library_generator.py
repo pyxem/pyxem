@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Diffraction pattern library generator and associated tools.
-
 """
 
 import numpy as np
@@ -177,11 +176,11 @@ class VectorLibraryGenerator(object):
             latt = structure.lattice
             recip_latt = latt.reciprocal()
             indices, coordinates, distances = get_points_in_sphere(
-                                                              recip_latt,
-                                                              reciprocal_radius)
+                recip_latt,
+                reciprocal_radius)
             # Define an empty list to store phase vector pairs
             phase_vectors = []
-            #iterate through all pairs calculating theoretical interplanar angle
+            # iterate through all pairs calculating theoretical interplanar angle
             for comb in itertools.combinations(np.arange(len(indices)), 2):
                 i, j = comb[0], comb[1]
                 # specify hkls and lengths
