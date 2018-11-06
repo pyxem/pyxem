@@ -29,8 +29,9 @@ import diffpy.structure
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
-from pyxem.utils.sim_utils import get_angle_between_cartesian_vectors
 from pyxem.utils.sim_utils import get_points_in_sphere
+from pyxem.utils.vector_utils import get_angle_cartesian
+
 
 class DiffractionLibraryGenerator(object):
     """Computes a library of electron diffraction patterns for specified atomic
@@ -188,8 +189,7 @@ class VectorLibraryGenerator(object):
                 hkl2 = indices[j]
                 len1 = distances[i]
                 len2 = distances[j]
-                angle = get_angle_between_cartesian_vectors(coordinates[i],
-                                                            coordinates[j])
+                angle = get_angle_cartesian(coordinates[i], coordinates[j])
                 phase_vectors.append(np.array([hkl1, hkl2, len1, len2, angle]))
             vector_library[key] = np.array(phase_vectors)
 

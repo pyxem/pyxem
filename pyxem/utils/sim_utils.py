@@ -321,25 +321,6 @@ def peaks_from_best_template(single_match_result, phase, library):
     return peaks
 
 
-def get_angle_between_cartesian_vectors(a, b):
-    """Compute the angle between two vectors in a cartesian coordinate system.
-    Parameters
-    ----------
-    a, b : array-like with 3 floats
-        The two directions to compute the angle between.
-    Returns
-    -------
-    angle : float
-        Angle between `a` and `b` in radians.
-    """
-    try:
-        angle = math.acos(min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
-    except:
-        angle = math.acos(max(-1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
-
-    return angle
-
-
 def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
     """Finds all reciprocal lattice points inside a given reciprocal sphere.
     Utilised within the DifractionGenerator.

@@ -46,3 +46,22 @@ def get_indices_from_distance_matrix(distances, distance_threshold):
 
 def get_npeaks(found_peaks):
     return len(found_peaks[0])
+
+
+def get_angle_cartesian(a, b):
+    """Compute the angle between two vectors in a cartesian coordinate system.
+    Parameters
+    ----------
+    a, b : array-like with 3 floats
+        The two directions to compute the angle between.
+    Returns
+    -------
+    angle : float
+        Angle between `a` and `b` in radians.
+    """
+    try:
+        angle = math.acos(min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
+    except:
+        angle = math.acos(max(-1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
+
+    return angle
