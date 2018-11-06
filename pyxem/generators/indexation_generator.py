@@ -28,8 +28,9 @@ from pyxem.signals.indexation_results import IndexationResults
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
 
-from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import correlate_library
+from pyxem.utils.indexation_utils import index_magnitudes
+from pyxem.utils.indexation_utils import match_vectors
 
 import hyperspy.api as hs
 
@@ -226,14 +227,18 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        indexation = vectors.map(get_vector_pair_indexation,
-                                 structure=structure,
-                                 edc=edc,
-                                 magnitudes=magnitudes,
-                                 indexation=indexation,
-                                 max_length=max_length,
+        indexation = vectors.map(match_vectors,
+                                 library=library,
                                  mag_threshold=mag_threshold,
                                  angle_threshold=angle_threshold,
+                                 keys=keys,
+                                 inplace=False,
+                                 *args,
                                  **kwargs)
+
+        indexation_results = VectorIndexationResults(indexation)
+
+        indexation_results = transfer_navigation_axes(indexation_results,
+                                                      vectors)
 
         return indexation_results

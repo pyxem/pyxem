@@ -49,7 +49,7 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
     See also
     --------
     pyxem.utils.correlate and the correlate method of IndexationGenerator.
-    
+
     """
     i = 0
     out_arr = np.zeros((n_largest * len(library), 5))
@@ -81,6 +81,45 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
 
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
+
+    Parameters
+    ----------
+    simulation : DiffractionProfileSimulation
+        Simulation of the diffraction profile.
+    tolerance : float
+        The n orientations with the highest correlation values are returned.
+
+    Returns
+    -------
+    indexation : np.array()
+        indexation results.
+
+    """
+    mags = z
+    sim_mags = np.array(simulation.magnitudes)
+    sim_hkls = np.array(simulation.hkls)
+    indexation = np.zeros(len(mags), dtype=object)
+
+    for i in np.arange(len(mags)):
+        diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
+
+        hkls = sim_hkls[np.where(diff < tolerance)]
+        diffs = diff[np.where(diff < tolerance)]
+
+        indices = np.array((hkls, diffs))
+        indexation[i] = np.array((mags.data[i], indices))
+
+    return indexation
+
+
+def match_vectors(vectors,
+                  library,
+                  mag_threshold,
+                  angle_threshold,
+                  keys=[],
+                  *args,
+                  **kwargs):
+    """Assigns hkl indices to pairs of diffraction vectors.
 
     Parameters
     ----------
