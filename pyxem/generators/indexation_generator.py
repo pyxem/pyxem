@@ -160,6 +160,7 @@ class ProfileIndexationGenerator():
 
     def index_peaks(self,
                     tolerance=0.1,
+                    *args,
                     **kwargs):
         """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -184,30 +185,23 @@ class ProfileIndexationGenerator():
                     ( Library Number , Z , X , Z , Correlation Score)
 
         """
-        mapping = self.map
+        #mapping = self.map
         mags = self.magnitudes
         simulation = self.simulation
 
-        if mapping==True:
-            indexation = mags.map(index_magnitudes,
-                                  simulation=simulation,
-                                  tolerance=tolerance,
-                                  **kwargs)
+        mags = np.array(mags)
+        sim_mags = np.array(simulation.magnitudes)
+        sim_hkls = np.array(simulation.hkls)
+        indexation = np.zeros(len(mags), dtype=object)
 
-        else:
-            mags = np.array(mags)
-            sim_mags = np.array(simulation.magnitudes)
-            sim_hkls = np.array(simulation.hkls)
-            indexation = np.zeros(len(mags), dtype=object)
+        for i in np.arange(len(mags)):
+            diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
 
-            for i in np.arange(len(mags)):
-                diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
+            hkls = sim_hkls[np.where(diff < tolerance)]
+            diffs = diff[np.where(diff < tolerance)]
 
-                hkls = sim_hkls[np.where(diff < tolerance)]
-                diffs = diff[np.where(diff < tolerance)]
-
-                indices = np.array((hkls, diffs))
-                indexation[i] = np.array((mags.data[i], indices))
+            indices = np.array((hkls, diffs))
+            indexation[i] = np.array((mags.data[i], indices))
 
         return indexation
 
