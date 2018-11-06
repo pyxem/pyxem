@@ -41,9 +41,8 @@ class IndexationGenerator():
     ----------
     signal : ElectronDiffraction
         The signal of electron diffraction patterns to be indexed.
-    library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation
-
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
     """
 
     def __init__(self,
@@ -172,24 +171,21 @@ class ProfileIndexationGenerator():
         return indexation
 
 
-class VectorsIndexationGenerator():
+class VectorIndexationGenerator():
     """Generates an indexer for DiffractionVectors using a number of methods.
     Parameters
     ----------
     vectors : DiffractionVectors
         DiffractionVectors to be indexed.
-    structure : Structure
-        Structure against which to perform indexation.
+    vector_library : DiffractionVectorLibrary
+        The library of simulated diffraction patterns for indexation.
     """
 
     def __init__(self,
                  vectors,
-                 vector_library,
-                 mapping=True):
-        self.map = mapping
+                 vector_library):
         self.vectors = vectors
-        self.strucutre = structure
-        self.edc = edc
+        self.library = vector_library
 
     def index_vectors(self,
                       max_length,

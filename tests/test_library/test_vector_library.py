@@ -12,7 +12,7 @@ from pyxem.libraries.structure_library import StructureLibrary
 def get_library(default_structure):
     structure_library = StructureLibrary(['Phase'], [default_structure], [[(0, 0, 0), (0, 0.2, 0)]])
     vlg = pxm.VectorLibraryGenerator(structure_library)
-    return vlg.get_vector_library(0.5)
+    return vlg.get_vector_library(0.7)
 
 
 def test_library_io(get_library):
