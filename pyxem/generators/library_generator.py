@@ -21,6 +21,7 @@
 """
 
 import numpy as np
+import itertools
 from tqdm import tqdm
 from transforms3d.euler import euler2mat
 import diffpy.structure
@@ -29,7 +30,7 @@ from pyxem.libraries.diffraction_library import DiffractionLibrary
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
 from pyxem.utils.sim_utils import get_angle_between_cartesian_vectors
-
+from pyxem.utils.sim_utils import get_points_in_sphere
 
 class DiffractionLibraryGenerator(object):
     """Computes a library of electron diffraction patterns for specified atomic
@@ -169,7 +170,7 @@ class VectorLibraryGenerator(object):
         # Define DiffractionVectorLibrary object to contain results
         vector_library = DiffractionVectorLibrary()
         # Get structures from structure library
-        structure_library = structure_library.struct_lib
+        structure_library = self.structures.struct_lib
         # Iterate through phases in library.
         for key in structure_library.keys():
             # Get diffpy.structure object associated with phase
@@ -177,21 +178,21 @@ class VectorLibraryGenerator(object):
             # Get reciprocal lattice points within reciprocal_radius
             latt = structure.lattice
             recip_latt = latt.reciprocal()
-            spot_indicies, cartesian_coordinates, spot_distances = get_points_in_sphere(
-                                                             recip_latt,
-                                                             reciprocal_radius)
+            indices, coordinates, distances = get_points_in_sphere(
+                                                              recip_latt,
+                                                              reciprocal_radius)
             # Define an empty list to store phase vector pairs
             phase_vectors = []
             #iterate through all pairs calculating theoretical interplanar angle
-            for comb in itertools.combinations(np.arange(len(vectors)), 2):
+            for comb in itertools.combinations(np.arange(len(indices)), 2):
                 i, j = comb[0], comb[1]
                 # specify hkls and lengths
-                hkl1 = spot_indices[i]
-                hkl2 = spot_indices[j]
-                len1 = spot_distances[i]
-                len2 = spot_distances[j]
-                angle = get_angle_between_cartesian_vectors(cartesian_coordinates[i],
-                                                            cartesian_coordinates[j])
+                hkl1 = indices[i]
+                hkl2 = indices[j]
+                len1 = distances[i]
+                len2 = distances[j]
+                angle = get_angle_between_cartesian_vectors(coordinates[i],
+                                                            coordinates[j])
                 phase_vectors.append(np.array([hkl1, hkl2, len1, len2, angle]))
             vector_library[key] = np.array(phase_vectors)
 

@@ -251,9 +251,8 @@ class VectorsIndexationGenerator():
         Returns
         -------
         matching_results : pyxem.signals.indexation_results.IndexationResults
-            Navigation axes of the electron diffraction signal containing correlation
-            results for each diffraction pattern. As an example, the signal in
-            Euler reads ( Library Number , Z , X , Z , Correlation Score )
+            Navigation axes of the electron diffraction signal containing vector
+            indexation results for each diffraction pattern.
         """
         mapping = self.map
         vectors = self.vectors
