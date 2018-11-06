@@ -59,8 +59,21 @@ def calculate_norms_ragged(z):
 
 
 def get_indices_from_distance_matrix(distances, distance_threshold):
-    # Checks if the distances from one vector in vlist to all other vectors in
-    # gvlist are larger than distance_threshold.
+    """Checks if the distances from one vector in vlist to all other vectors in
+    vlist are larger than distance_threshold.
+
+    Parameters
+    ----------
+    distances : np.array()
+        Array of distances between vectors.
+    distance_threshold : float
+        The distance threshold for a vector to be retained.
+
+    Returns
+    -------
+    new_indices : np.array()
+        Array of vectors with distances greater than the threshold.
+    """
     new_indices = []
     l = np.shape(distances)[0]
     for i in range(np.shape(distances)[1]):
@@ -70,6 +83,7 @@ def get_indices_from_distance_matrix(distances, distance_threshold):
 
 
 def get_npeaks(found_peaks):
+
     return len(found_peaks[0])
 
 
