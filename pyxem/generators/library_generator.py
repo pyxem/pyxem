@@ -79,7 +79,7 @@ class DiffractionLibraryGenerator(object):
 
         Returns
         -------
-        diffraction_library : dict of :class:`DiffractionSimulation`
+        diffraction_library : :class:`DiffractionLibrary`
             Mapping of crystal structure and orientation to diffraction data
             objects.
 
@@ -152,19 +152,16 @@ class VectorLibraryGenerator(object):
         """Calculates a library of diffraction vectors and pairwise inter-vector
         angles for a library of crystal structures.
 
-        Each structure in the structure library is rotated to each associated
-        orientation and the diffraction pattern is calculated each time.
-
         Parameters
         ----------
         reciprocal_radius : float
-            The maximum g-vector magnitude to be included in the simulations.
+            The maximum g-vector magnitude to be included in the library.
 
         Returns
         -------
         vector_library : :class:`DiffractionVectorLibrary`
-            Mapping of crystal structure and orientation to diffraction data
-            objects.
+            Mapping of phase identifier to a numpy array with entries in the
+            form: [hkl1, hkl2, len1, len2, angle]
 
         """
         # Define DiffractionVectorLibrary object to contain results
