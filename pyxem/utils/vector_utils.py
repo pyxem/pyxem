@@ -20,6 +20,17 @@ import numpy as np
 
 
 def calculate_norms(z):
+    """Calculates the norm of an array of cartesian vectors. For use with map().
+
+    Parameters
+    ----------
+    z : np.array()
+        Array of cartesian vectors.
+
+    Returns
+    norms : np.array()
+        Array of vector norms.
+    """
     norms = []
     for i in z:
         norms.append(np.linalg.norm(i))
