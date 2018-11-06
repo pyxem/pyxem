@@ -33,7 +33,6 @@ from pyxem.signals.indexation_results import IndexationResults
 from pyxem.utils import correlate
 from pyxem.utils.sim_utils import carry_through_navigation_calibration
 from pyxem.utils.indexation_utils import index_magnitudes
-from pyxem.utils.sim_utils import get_interplanar_angle
 
 
 import hyperspy.api as hs
