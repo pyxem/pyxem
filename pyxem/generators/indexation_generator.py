@@ -24,7 +24,7 @@ import hyperspy.api as hs
 from math import acos, cos, sin, pi, radians, degrees
 import itertools
 
-from pyxem.signals.indexation_results import IndexationResults
+from pyxem.signals.indexation_results import TemplateMatchingResults
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
 
@@ -79,7 +79,7 @@ class IndexationGenerator():
 
         Returns
         -------
-        matching_results : pyxem.signals.indexation_results.IndexationResults
+        matching_results : TemplateMatchingResults
             Navigation axes of the electron diffraction signal containing
             correlation results for each diffraction pattern. As an example, the
             signal in Euler reads:
@@ -100,7 +100,7 @@ class IndexationGenerator():
                              mask=mask,
                              inplace=False,
                              **kwargs)
-        matching_results = IndexationResults(matches)
+        matching_results = TemplateMatchingResults(matches)
 
         matching_results = transfer_navigation_axes(matching_results, signal)
 
@@ -146,7 +146,7 @@ class ProfileIndexationGenerator():
 
         Returns
         -------
-        matching_results : pyxem.signals.indexation_results.IndexationResults
+        matching_results : pyxem.signals.indexation_results.TemplateMatchingResults
             Navigation axes of the electron diffraction signal containing
             correlation results for each diffraction pattern. As an example, the
             signal in Euler reads:
@@ -220,7 +220,7 @@ class VectorIndexationGenerator():
 
         Returns
         -------
-        indexation_results : IndexationResults
+        indexation_results : TemplateMatchingResults
             Navigation axes of the diffraction vectors signal containing vector
             indexation results for each probe position.
         """
@@ -236,7 +236,7 @@ class VectorIndexationGenerator():
                                  *args,
                                  **kwargs)
 
-        indexation_results = VectorIndexationResults(indexation)
+        indexation_results = VectorMatchingResults(indexation)
 
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors)

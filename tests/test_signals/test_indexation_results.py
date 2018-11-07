@@ -55,6 +55,6 @@ def test_crystal_from_matching_results_dp(dp_match_result):
 def test_get_crystalographic_map(dp_match_result, sp_match_result):
     # Assertion free test, as the tests above do the heavy lifting
     results = np.vstack((dp_match_result, sp_match_result))
-    results = IndexationResults(results)
+    results = TemplateMatchingResults(results)
     results.get_crystallographic_map()
     return 0

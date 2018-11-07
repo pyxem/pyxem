@@ -63,7 +63,7 @@ def crystal_from_matching_results(z_matches):
     return results_array
 
 
-class IndexationResults(BaseSignal):
+class TemplateMatchingResults(BaseSignal):
     _signal_type = "matching_results"
     _signal_dimension = 2
 
