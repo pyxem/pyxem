@@ -153,6 +153,7 @@ def _eval_solution(solution, qs, A0_inv,
     pair_ids = np.where(np.max(ehkls, axis=1) < eval_tol)[0]
     pair_ids = list(set(pair_ids) - set(indexed_peak_ids))
 
+    # calculate match_rate as fraction of peaks indexed
     nb_pairs = len(pair_ids)
     nb_peaks = len(qs)
     match_rate = float(nb_pairs) / float(nb_peaks)
@@ -162,12 +163,11 @@ def _eval_solution(solution, qs, A0_inv,
     solution.rhkls = rhkls
     solution.ehkls = ehkls
     solution.pair_ids = pair_ids
-    solution.match_rate = match_rate
     solution.nb_pairs = nb_pairs
 
-    # evaluate indexation metrics
+    # evaluate / store indexation metrics
     solution.seed_error = ehkls[seed,:].max()
-    solution.total_score = match_rate
+    solution.match_rate = match_rate
     if len(pair_ids) == 0:
         # no matching peaks, set error to 1
         solution.total_error = 1.
@@ -315,9 +315,9 @@ def match_vectors(ks,
         # pick up best solution
         if len(good_solutions) > 0:
             # best solution has highest total score and lowest total error
-            good_solutions.sort(key=lambda x: x.total_score, reverse=True)
-            best_score = good_solutions[0].total_score
-            best_solutions = [solution for solution in good_solutions if solution.total_score==best_score]
+            good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
+            best_score = good_solutions[0].match_rate
+            best_solutions = [solution for solution in good_solutions if solution.match_rate==best_score]
             best_solutions.sort(key=lambda x: x.total_error, reverse=False)
             best_solution = best_solutions[0]
         else:
