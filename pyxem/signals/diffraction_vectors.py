@@ -45,6 +45,7 @@ class DiffractionVectors(BaseSignal):
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
+        self.recip_coords = None
 
     def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
         """Plot the unique diffraction vectors.

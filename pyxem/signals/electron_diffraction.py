@@ -636,7 +636,7 @@ class ElectronDiffraction(Signal2D):
         y.name = 'y'
         y.scale = self.axes_manager.navigation_axes[1].scale
         y.units = 'nm'
-
+        
         return peaks
 
     def find_peaks_interactive(self, disc_image=None, imshow_kwargs={}):
