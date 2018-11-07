@@ -120,7 +120,6 @@ class Solution(object):
 
 def _eval_solution(solution, qs, A0_inv,
                    eval_tol=0.25,
-                   miller_set=None,
                    seed=None,
                    seed_hkl_tol=0.1,
                    indexed_peak_ids=[]):
@@ -149,28 +148,24 @@ def _eval_solution(solution, qs, A0_inv,
     hkls = A0_inv.dot(R_inv.dot(qs.T)).T
     rhkls = np.rint(hkls)
     ehkls = np.abs(hkls - rhkls)
-    solution.hkls = hkls
-    solution.rhkls = rhkls
-    solution.ehkls = ehkls
 
-    if miller_set is None:
-        pair_ids = np.where(np.max(ehkls, axis=1) < eval_tol)[0]  # indices of matched peaks
-    else:
-        _pair_ids = np.where(np.max(ehkls, axis=1) < eval_tol)[0]
-        pair_ids = []
-        for _pair_id in _pair_ids:
-            abs_hkl = np.abs(rhkls[_pair_id])
-            if norm(miller_set - abs_hkl, axis=1).min() < epsilon:
-                pair_ids.append(_pair_id)
+    # indices of matched peaks
+    pair_ids = np.where(np.max(ehkls, axis=1) < eval_tol)[0]
     pair_ids = list(set(pair_ids) - set(indexed_peak_ids))
 
     nb_pairs = len(pair_ids)
     nb_peaks = len(qs)
     match_rate = float(nb_pairs) / float(nb_peaks)
+
+    # set solution attributes
+    solution.hkls = hkls
+    solution.rhkls = rhkls
+    solution.ehkls = ehkls
     solution.pair_ids = pair_ids
     solution.match_rate = match_rate
     solution.nb_pairs = nb_pairs
-    # evaluation metrics
+
+    # evaluate indexation metrics
     solution.seed_error = ehkls[seed,:].max()
     solution.total_score = match_rate
     if len(pair_ids) == 0:
@@ -309,8 +304,9 @@ def match_vectors(ks,
                 ref_q1, ref_q2 = A0.dot(hkl1), A0.dot(hkl2)
                 solution = Solution()
                 solution.R = calc_rotation_matrix(q1, q2, ref_q1, ref_q2)
-                solution = eval_solution(solution, qs, A0_inv, eval_tol=eval_tol,
-                                         miller_set=miller_set, seed=seed,
+                solution = eval_solution(solution, qs, A0_inv,
+                                         eval_tol=eval_tol,
+                                         seed=seed,
                                          seed_hkl_tol=seed_hkl_tol,
                                          indexed_peak_ids=indexed_peak_ids)
                 # only keep solution from good seed
