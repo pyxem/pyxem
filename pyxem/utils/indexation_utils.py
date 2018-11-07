@@ -357,16 +357,21 @@ def match_vectors(ks,
 
 
 def crystal_from_matching_results(z_matches):
-    """Takes matching results for a single navigation position
+    """Takes template matching results for a single navigation position
     and returns the best matching phase and orientation with correlation
     and reliability/ies to define a crystallographic map.
 
-    inputs: z_matches a numpy.array (m,5)
+    Parameters
+    ----------
+    z_matches : np.array()
+        Template matching results in an array of shape (m,5)
 
-    outputs: np.array of shape (6) or (7)
-    phase, angle,angle,angle, correlation, R_orientation,(R_phase)
+    Returns
+    -------
+    results_array : np.array
+        Crystallographic mapping results in an array of shape (6) or (7), with
+        [phase, angle, angle, angle, correlation, R_orientation, (R_phase)]
     """
-
     # count the phases
     if np.unique(z_matches[:, 0]).shape[0] == 1:
         # these case is easier as output is correctly ordered
@@ -391,3 +396,22 @@ def crystal_from_matching_results(z_matches):
                                   second_score / results_array[4])
 
     return results_array
+
+
+def crystal_from_vector_matching(z_matches):
+    """Takes vector matching results for a single navigation position
+    and returns the best matching phase and orientation with correlation
+    and reliability/ies to define a crystallographic map.
+
+    Parameters
+    ----------
+    z_matches : np.array()
+        (m,5)
+
+    Returns
+    -------
+    results_array : np.array
+        Crystallographic mapping results in an array of shape (6) or (7), with
+        [phase, angle, angle, angle, correlation, R_orientation, (R_phase)]
+    """
+    pass
