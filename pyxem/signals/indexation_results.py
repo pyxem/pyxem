@@ -109,7 +109,6 @@ class IndexationResults(BaseSignal):
             positions.
 
         """
-
         # TODO: Add alternative methods beyond highest correlation score at each
         # navigation position.
         # TODO Only keep a subset of the data for the map

@@ -23,6 +23,7 @@ from operator import itemgetter
 
 from pyxem.utils import correlate
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
+from pyxem.utils.vector_utils import get_angle_cartesian
 
 
 def correlate_library(image, library, n_largest, mask, keys=[]):
@@ -253,8 +254,8 @@ def refine(solution, qs, refine_cycle):
 
 def match_vectors(ks,
                   library,
-                  mag_threshold,
-                  angle_threshold,
+                  mag_tol,
+                  angle_tol,
                   keys=[],
                   *args,
                   **kwargs):
@@ -267,9 +268,9 @@ def match_vectors(ks,
         particular probe position, to be indexed.
     library : DiffractionLibrary
         Library of reciprocal space vectors to be matched to the vectors.
-    mag_threshold : float
+    mag_tol : float
         The number of well correlated simulations to be retained.
-    angle_threshold : bool array
+    angle_tol : float
         A mask for navigation axes 1 indicates positions to be indexed.
 
     Returns
@@ -278,32 +279,44 @@ def match_vectors(ks,
         A numpy array containing the indexation results.
 
     """
+    # Initialise for loop with first entry & assign empty array to hold
+    # indexation results.
     i = 0
     indexation = np.zeros((n_largest * len(library), 5))
+
+    # Iterate over phases in DiffractionVectorLibrary and perform indexation
+    # with respect to each phase.
     for key in library.keys():
         correlations = dict()
-        qs = peaks[:, 4:7]
+        qs = ks
         unindexed_peak_ids = list(set(range(min(qs.shape[0], seed_pool_size))) - set(indexed_peak_ids))
         seed_pool = list(combinations(unindexed_peak_ids, 2))
+
+        # Determine overall solutions associated with each
         good_solutions = []
-        # collect good solutions
         for i in tqdm(range(len(seed_pool))):
             seed = seed_pool[i]
             q1, q2 = qs[seed,:]
             q1_len, q2_len = norm(q1), norm(q2)
+            # Ensure q1 is shorter than q2 so cominations in correct order.
             if q1_len < q2_len:
                 q1, q2 = q2, q1
                 q1_len, q2_len = q2_len, q1_len
-            angle = calc_angle(q1, q2)
-            match_ids = np.where((np.abs(q1_len - table['LA'][:,0]) < seed_len_tol) *
-                            (np.abs(q2_len - table['LA'][:,1]) < seed_len_tol) *
-                            (np.abs(angle - table['LA'][:,2]) < seed_angle_tol))[0]
+            # Calculate the angle between experimental scattering vectors.
+            angle = get_angle_cartesian(q1, q2)
+            # Get array indices for peaks within tolerances.
+            match_ids = np.where((np.abs(q1_len - table['LA'][:,0]) < mag_tol) *
+                            (np.abs(q2_len - table['LA'][:,1]) < mag_tol) *
+                            (np.abs(angle - table['LA'][:,2]) < angle_tol))[0]
             for match_id in match_ids:
                 hkl1 = table['hkl1'][match_id]
                 hkl2 = table['hkl2'][match_id]
+                # reference vectors are cartesian coordinates of hkls
+                # TODO: could put this in the library?
                 ref_q1, ref_q2 = A0.dot(hkl1), A0.dot(hkl2)
-                solution = Solution()
-                solution.R = calc_rotation_matrix(q1, q2, ref_q1, ref_q2)
+                R = get_rotation_matrix_between_vectors(q1, q2,
+                                                        ref_q1, ref_q2)
+                # Evaluate error on seed point, total error & match rate
                 solution = eval_solution(solution, qs, A0_inv,
                                          eval_tol=eval_tol,
                                          seed=seed,
@@ -312,7 +325,8 @@ def match_vectors(ks,
                 # only keep solution from good seed
                 if solution.seed_error <= seed_hkl_tol:
                     good_solutions.append(solution)
-        # pick up best solution
+
+        # determine best solution
         if len(good_solutions) > 0:
             # best solution has highest total score and lowest total error
             good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
@@ -322,7 +336,8 @@ def match_vectors(ks,
             best_solution = best_solutions[0]
         else:
             best_solution = None
-        # refine best solution if exists
+
+        # refine best solution
         if best_solution is None:
             final_solution = Solution()
             final_solution.R = np.identity(3)
@@ -332,7 +347,7 @@ def match_vectors(ks,
             # Fourier space error between peaks and predicted spots
             eXYZs = np.abs(best_solution.A.dot(best_solution.rhkls.T) - qs.T).T
             dists = norm(eXYZs, axis=1)
-            # average distance between matched peaks and the correspoding predicted spots
+            # mean distance between matched peaks and associated predicted spots
             best_solution.pair_dist = dists[best_solution.pair_ids].mean()
             best_solution.A = best_solution.R.dot(A0)
             # refine A matrix with matched pairs to minimize norm(AH-q)
