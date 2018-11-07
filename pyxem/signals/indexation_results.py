@@ -21,46 +21,10 @@ import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 
 from pyxem.utils.sim_utils import peaks_from_best_template, transfer_navigation_axes
+from pyxem.utils.indexation_utils import crystal_from_matching_results
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 from pyxem import CrystallographicMap
-
-
-def crystal_from_matching_results(z_matches):
-    """Takes matching results for a single navigation position
-    and returns the best matching phase and orientation with correlation
-    and reliability/ies to define a crystallographic map.
-
-    inputs: z_matches a numpy.array (m,5)
-
-    outputs: np.array of shape (6) or (7)
-    phase, angle,angle,angle, correlation, R_orientation,(R_phase)
-    """
-
-    # count the phases
-    if np.unique(z_matches[:, 0]).shape[0] == 1:
-        # these case is easier as output is correctly ordered
-        results_array = np.zeros(6)
-        results_array[:5] = z_matches[0, :5]
-        results_array[5] = 100 * (1 -
-                                  z_matches[1, 4] / results_array[4])
-    else:
-        results_array = np.zeros(7)
-        index_best_match = np.argmax(z_matches[:, 4])
-        # store phase,angle,angle,angle,correlation
-        results_array[:5] = z_matches[index_best_match, :5]
-        # do reliability_orientation
-        z = z_matches[z_matches[:, 0] == results_array[0]]
-        second_score = np.partition(z[:, 4], -2)[-2]
-        results_array[5] = 100 * (1 -
-                                  second_score / results_array[4])
-        # and reliability phase
-        z = z_matches[z_matches[:, 0] != results_array[0]]
-        second_score = np.max(z[:, 4])
-        results_array[6] = 100 * (1 -
-                                  second_score / results_array[4])
-
-    return results_array
 
 
 class TemplateMatchingResults(BaseSignal):
@@ -94,6 +58,39 @@ class TemplateMatchingResults(BaseSignal):
         for mx, my in zip(mmx, mmy):
             m = hs.markers.point(x=mx, y=my, color='red', marker='x')
             signal.add_marker(m, plot_marker=True, permanent=True)
+
+    def get_crystallographic_map(self,
+                                 *args, **kwargs):
+        """Obtain a crystallographic map specifying the best matching
+        phase and orientation at each probe position with corresponding
+        correlation and reliabilty scores.
+
+        Returns
+        -------
+        cryst_map : CrystallographicMap
+            Contains the best matching phase and orientation along with
+            corresponding correlation and reliability scores at all navigation
+            positions.
+
+        """
+        # TODO: Add alternative methods beyond highest correlation score at each
+        # navigation position.
+        # TODO Only keep a subset of the data for the map
+        crystal_map = self.map(crystal_from_matching_results,
+                               inplace=False,
+                               *args, **kwargs)
+
+        cryst_map = CrystallographicMap(crystal_map)
+        cryst_map = transfer_navigation_axes(cryst_map, self)
+
+        return cryst_map
+
+
+class VectorMatchingResults(BaseSignal):
+    _signal_type = "matching_results"
+
+    def __init__(self, *args, **kwargs):
+        BaseSignal.__init__(self, *args, **kwargs)
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):

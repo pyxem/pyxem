@@ -16,12 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import BaseSignal
-from hyperspy.signals import Signal2D
-from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
-from transforms3d.quaternions import qmult, qinverse
 import numpy as np
 from tqdm import tqdm
+
+from hyperspy.signals import BaseSignal
+from hyperspy.signals import Signal2D
+
+from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
+from transforms3d.quaternions import qmult, qinverse
+
 from pyxem.utils.sim_utils import transfer_navigation_axes
 
 """

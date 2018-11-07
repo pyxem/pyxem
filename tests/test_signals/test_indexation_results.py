@@ -19,7 +19,7 @@
 import numpy as np
 import pytest
 from pyxem.signals.indexation_results import *  # import both objects
-
+from pyxem.utils.indexation_utils import crystal_from_matching_results
 
 @pytest.fixture
 def sp_match_result():

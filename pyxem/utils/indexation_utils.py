@@ -354,3 +354,40 @@ def match_vectors(ks,
             final_solution = refine(best_solution, qs, refine_cycles)
 
     return final_solution
+
+
+def crystal_from_matching_results(z_matches):
+    """Takes matching results for a single navigation position
+    and returns the best matching phase and orientation with correlation
+    and reliability/ies to define a crystallographic map.
+
+    inputs: z_matches a numpy.array (m,5)
+
+    outputs: np.array of shape (6) or (7)
+    phase, angle,angle,angle, correlation, R_orientation,(R_phase)
+    """
+
+    # count the phases
+    if np.unique(z_matches[:, 0]).shape[0] == 1:
+        # these case is easier as output is correctly ordered
+        results_array = np.zeros(6)
+        results_array[:5] = z_matches[0, :5]
+        results_array[5] = 100 * (1 -
+                                  z_matches[1, 4] / results_array[4])
+    else:
+        results_array = np.zeros(7)
+        index_best_match = np.argmax(z_matches[:, 4])
+        # store phase,angle,angle,angle,correlation
+        results_array[:5] = z_matches[index_best_match, :5]
+        # do reliability_orientation
+        z = z_matches[z_matches[:, 0] == results_array[0]]
+        second_score = np.partition(z[:, 4], -2)[-2]
+        results_array[5] = 100 * (1 -
+                                  second_score / results_array[4])
+        # and reliability phase
+        z = z_matches[z_matches[:, 0] != results_array[0]]
+        second_score = np.max(z[:, 4])
+        results_array[6] = 100 * (1 -
+                                  second_score / results_array[4])
+
+    return results_array
