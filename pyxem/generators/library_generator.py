@@ -66,14 +66,11 @@ class DiffractionLibraryGenerator(object):
         structure_library : pyxem:StructureLibrary Object
             Dictionary of structures and associated orientations for which
             electron diffraction is to be simulated.
-
         calibration : float
             The calibration of experimental data to be correlated with the
             library, in reciprocal Angstroms per pixel.
-
         reciprocal_radius : float
             The maximum g-vector magnitude to be included in the simulations.
-
         half_shape: tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
 
@@ -161,7 +158,8 @@ class VectorLibraryGenerator(object):
         -------
         vector_library : :class:`DiffractionVectorLibrary`
             Mapping of phase identifier to a numpy array with entries in the
-            form: [hkl1, hkl2, len1, len2, angle]
+            form: [hkl1, hkl2, len1, len2, angle] ; lengths are in reciprocal
+            Angstroms and angles are in radians.
 
         """
         # Define DiffractionVectorLibrary object to contain results
@@ -184,6 +182,8 @@ class VectorLibraryGenerator(object):
             for comb in itertools.combinations(np.arange(len(indices)), 2):
                 i, j = comb[0], comb[1]
                 # specify hkls and lengths
+                # TODO: This should be updated to reflect systematic absences
+                # associated with the crystal structure.
                 hkl1 = indices[i]
                 hkl2 = indices[j]
                 len1 = distances[i]

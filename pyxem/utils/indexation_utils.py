@@ -134,6 +134,27 @@ def match_vectors(vectors,
         indexation results.
 
     """
+    i = 0
+    indexation = np.zeros((n_largest * len(library), 5))
+    for key in library.keys():
+        correlations = dict()
+        for orientation, diffraction_pattern in library[key].items():
+            # diffraction_pattern here is in fact a library of
+            # diffraction_pattern_properties
+            correlation = correlate(image, diffraction_pattern)
+            correlations[orientation] = correlation
+            res = nlargest(n_largest, correlations.items(),
+                           key=itemgetter(1))
+        for j in np.arange(n_largest):
+            out_arr[j + i * n_largest][0] = i
+            out_arr[j + i * n_largest][1] = res[j][0][0]
+            out_arr[j + i * n_largest][2] = res[j][0][1]
+            out_arr[j + i * n_largest][3] = res[j][0][2]
+            out_arr[j + i * n_largest][4] = res[j][1]
+        i = i + 1
+
+
+
     mags = z
     sim_mags = np.array(simulation.magnitudes)
     sim_hkls = np.array(simulation.hkls)
