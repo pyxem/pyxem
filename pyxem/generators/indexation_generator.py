@@ -25,6 +25,7 @@ from math import acos, cos, sin, pi, radians, degrees
 import itertools
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
+from pyxem.signals.indexation_results import VectorMatchingResults
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
 
@@ -146,11 +147,7 @@ class ProfileIndexationGenerator():
 
         Returns
         -------
-        matching_results : pyxem.signals.indexation_results.TemplateMatchingResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern. As an example, the
-            signal in Euler reads:
-                    ( Library Number , Z , X , Z , Correlation Score)
+        matching_results : ProfileIndexation
 
         """
         mapping = self.map
@@ -193,8 +190,9 @@ class VectorIndexationGenerator():
         self.library = vector_library
 
     def index_vectors(self,
-                      mag_threshold,
-                      angle_threshold,
+                      mag_tol,
+                      angle_tol,
+                      n_best,
                       keys=[],
                       *args,
                       **kwargs):
@@ -202,12 +200,14 @@ class VectorIndexationGenerator():
 
         Parameters
         ----------
-        mag_threshold : float
+        mag_tol : float
             The maximum absolute error in diffraction vector magnitude, in units
             of reciprocal Angstroms, allowed for indexation.
-        angle_threshold : float
+        angle_tol : float
             The maximum absolute error in inter-vector angle, in units of
             degrees, allowed for indexation.
+        n_best : int
+            The maximum number of good solutions to be retained.
         keys : list
             If more than one phase present in library it is recommended that
             these are submitted. This allows a mapping from the number to the
@@ -220,7 +220,7 @@ class VectorIndexationGenerator():
 
         Returns
         -------
-        indexation_results : TemplateMatchingResults
+        indexation_results : VectorMatchingResults
             Navigation axes of the diffraction vectors signal containing vector
             indexation results for each probe position.
         """
@@ -229,8 +229,9 @@ class VectorIndexationGenerator():
 
         indexation = vectors.map(match_vectors,
                                  library=library,
-                                 mag_threshold=mag_threshold,
-                                 angle_threshold=angle_threshold,
+                                 mag_tol=mag_tol,
+                                 angle_tol=angle_tol,
+                                 n_best=n_best,
                                  keys=keys,
                                  inplace=False,
                                  *args,
