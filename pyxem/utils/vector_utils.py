@@ -19,10 +19,8 @@
 import numpy as np
 import math
 
-from pyxem.utils.sim_utils import get_electron_wavelength
 
-
-def detector_to_fourier(z, accelerating_voltage, camera_length):
+def detector_to_fourier(z, wavelength, camera_length):
     """Maps two-dimensional Cartesian coordinates in the detector plane to
     three-dimensional coordinates in reciprocal space.
 
@@ -30,8 +28,8 @@ def detector_to_fourier(z, accelerating_voltage, camera_length):
     ----------
     z : np.array()
         Array of Cartesian coordinates in the detector plane.
-    accelerating_voltage : float
-        Electron accelerating_voltage in kV.
+    wavelength : float
+        Electron wavelength in Angstroms.
     camera_length : float
         Camera length in metres.
 
@@ -42,7 +40,6 @@ def detector_to_fourier(z, accelerating_voltage, camera_length):
 
     """
     # specify experimental parameters
-    wavelength = get_electron_wavelength(accelerating_voltage)
     camera_length = np.ones(len(z)) * camera_length
     camera_length = np.reshape(camera_length, (-1, 1))
     # reshape and scale 2D vectors
