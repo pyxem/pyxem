@@ -22,6 +22,7 @@ from hyperspy.signal import BaseSignal
 
 from pyxem.utils.sim_utils import peaks_from_best_template, transfer_navigation_axes
 from pyxem.utils.indexation_utils import crystal_from_matching_results
+from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 from pyxem import CrystallographicMap
@@ -106,10 +107,7 @@ class VectorMatchingResults(BaseSignal):
             positions.
 
         """
-        # TODO: Add alternative methods beyond highest correlation score at each
-        # navigation position.
-        # TODO Only keep a subset of the data for the map
-        crystal_map = self.map(crystal_from_matching_results,
+        crystal_map = self.map(crystal_from_vector_matching,
                                inplace=False,
                                *args, **kwargs)
 
