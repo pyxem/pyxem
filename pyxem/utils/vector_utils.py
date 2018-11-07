@@ -20,6 +20,38 @@ import numpy as np
 import math
 
 
+def detector_to_fourier(z, wavelength, camera_length):
+    """Maps two-dimensional Cartesian coordinates in the detector plane to
+    three-dimensional coordinates in reciprocal space.
+
+    Parameters
+    ----------
+    z : np.array()
+        Array of Cartesian coordinates in the detector plane.
+    wavelength : float
+        Electron wavelength in Angstroms.
+    camera_length : float
+        Camera length in metres.
+
+    Returns
+    -------
+    k : np.array()
+        Array of Cartesian coordinates in reciprocal space.
+
+    """
+    camera_length = np.ones(len(z)) * camera_length
+    camera_length = np.reshape(camera_length, (-1, 1))
+    k1 = np.hstack((z, camera_length))
+    k1_norm = np.sqrt(np.diag(k1.dot(k1.T)))
+    k1_norm = k1_norm.reshape((-1, 1)).repeat(3, axis=1)
+    k1 = k1 / k1_norm
+    k0 = np.asarray([0., 0., 1.])
+    k0 = k0.reshape((1,-1)).repeat(z, axis=0)
+    k = 1. / wavelength * (k1 - k0)
+
+    return k
+
+
 def calculate_norms(z):
     """Calculates the norm of an array of cartesian vectors. For use with map().
 
