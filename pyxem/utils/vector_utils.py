@@ -19,6 +19,8 @@
 import numpy as np
 import math
 
+from transforms3d.axangles import axangle2mat
+
 
 def detector_to_fourier(z, wavelength, camera_length):
     """Maps two-dimensional Cartesian coordinates in the detector plane to
@@ -92,6 +94,51 @@ def calculate_norms_ragged(z):
     for i in z[0]:
         norms.append(np.linalg.norm(i))
     return np.asarray(norms)
+
+
+def get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2):
+    """Calculates the rotation matrix between two experimentally measured
+    diffraction vectors and the corresponding vectors in a reference structure.
+
+    Parameters
+    ----------
+    k1 : np.array()
+        Experimentally measured scattering vector 1.
+    k2 : np.array()
+        Experimentally measured scattering vector 2.
+    ref_k1 : np.array()
+        Reference scattering vector 1.
+    ref_k2 : np.array()
+        Reference scattering vector 2.
+
+    Returns
+    -------
+    R : np.array()
+        Rotation matrix describing transformation from experimentally measured
+        scattering vectors to equivalent reference vectors.
+    """
+    ref_nv = np.cross(ref_k1, ref_k2)
+    k_nv = np.cross(k1, k2)
+    # avoid 0 degree including angle
+    if min(norm(ref_nv), norm(k_nv)) == 0.:
+        R = np.identity(3)
+    else:
+        axis = np.cross(ref_nv, k_nv)
+        angle = np.rad2deg(acos(ref_nv.dot(k_nv) / (norm(ref_nv) * norm(k_nv))))
+        R1 = axangle2mat(axis, angle)
+        # rotate ref_q1,2 plane to q1,2 plane
+        rot_ref_k1, rot_ref_k2 = R1.dot(ref_k1), R1.dot(ref_k2)
+        # avoid math domain error
+        cos1 = max(min(k1.dot(rot_ref_k1) / (np.linalg.norm(rot_ref_k1) * np.linalg.norm(k1)), 1.), -1.)
+        cos2 = max(min(k2.dot(rot_ref_k2) / (np.linalg.norm(rot_ref_k2) * np.linalg.norm(k2)), 1.), -1.)
+        angle1 = np.rad2deg(acos(cos1))
+        angle2 = np.rad2deg(acos(cos2))
+        angle = (angle1 + angle2) / 2.
+        axis = np.cross(rot_ref_k1, k1)
+        R2 = axangle2mat(axis, angle)
+        R = R2.dot(R1)
+
+    return R
 
 
 def get_indices_from_distance_matrix(distances, distance_threshold):
