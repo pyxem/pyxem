@@ -51,7 +51,7 @@ def detector_to_fourier(z, wavelength, camera_length):
     k1 = k1 / k1_norm
     # Sort third component
     k0 = np.asarray([0., 0., 1.])
-    k0 = k0.reshape((1,-1)).repeat(z, axis=0)
+    k0 = k0.reshape((1, -1)).repeat(z, axis=0)
     k = 1. / wavelength * (k1 - k0)
 
     return k

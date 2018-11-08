@@ -114,11 +114,6 @@ def index_magnitudes(z, simulation, tolerance):
     return indexation
 
 
-class Solution(object):
-    def __str__(self):
-        return str(self.__dict__)
-
-
 def _eval_solution(solution, qs, A0_inv,
                    eval_tol=0.25,
                    seed=None,
@@ -167,7 +162,7 @@ def _eval_solution(solution, qs, A0_inv,
     solution.nb_pairs = nb_pairs
 
     # evaluate / store indexation metrics
-    solution.seed_error = ehkls[seed,:].max()
+    solution.seed_error = ehkls[seed, :].max()
     solution.match_rate = match_rate
     if len(pair_ids) == 0:
         # no matching peaks, set error to 1
@@ -201,23 +196,24 @@ def refine(solution, qs, refine_cycle):
 
     """
     A_refined = solution.A.copy()
+
     def _fun(x, *argv):
         asx, bsx, csx, asy, bsy, csy, asz, bsz, csz = x
         h, k, l, qx, qy, qz = argv
-        r1 = (asx*h + bsx*k + csx*l - qx)
-        r2 = (asy*h + bsy*k + csy*l - qy)
-        r3 = (asz*h + bsz*k + csz*l - qz)
+        r1 = (asx * h + bsx * k + csx * l - qx)
+        r2 = (asy * h + bsy * k + csy * l - qy)
+        r3 = (asz * h + bsz * k + csz * l - qz)
         return r1**2. + r2**2. + r3**2.
 
     def _gradient(x, *argv):
         asx, bsx, csx, asy, bsy, csy, asz, bsz, csz = x
         h, k, l, qx, qy, qz = argv
-        r1 = (asx*h + bsx*k + csx*l - qx)
-        r2 = (asy*h + bsy*k + csy*l - qy)
-        r3 = (asz*h + bsz*k + csz*l - qz)
-        g_asx, g_bsx, g_csx = 2.*h*r1, 2.*k*r1, 2.*l*r1
-        g_asy, g_bsy, g_csy = 2.*h*r2, 2.*k*r2, 2.*l*r2
-        g_asz, g_bsz, g_csz = 2.*h*r3, 2.*k*r3, 2.*l*r3
+        r1 = (asx * h + bsx * k + csx * l - qx)
+        r2 = (asy * h + bsy * k + csy * l - qy)
+        r3 = (asz * h + bsz * k + csz * l - qz)
+        g_asx, g_bsx, g_csx = 2. * h * r1, 2. * k * r1, 2. * l * r1
+        g_asy, g_bsy, g_csy = 2. * h * r2, 2. * k * r2, 2. * l * r2
+        g_asz, g_bsz, g_csz = 2. * h * r3, 2. * k * r3, 2. * l * r3
         return np.asarray((g_asx, g_bsx, g_csx,
                            g_asy, g_bsy, g_csy,
                            g_asz, g_bsz, g_csz))
@@ -227,11 +223,11 @@ def refine(solution, qs, refine_cycle):
         for j in range(len(pair_ids)):  # refine by each reflection
             pair_id = pair_ids[j]
             x0 = A_refined.reshape((-1))
-            rhkl = rhkls[pair_id,:]
-            q = qs[pair_id,:]
+            rhkl = rhkls[pair_id, :]
+            q = qs[pair_id, :]
             args = (rhkl[0], rhkl[1], rhkl[2], q[0], q[1], q[2])
             res = fmin_cg(_fun, x0, fprime=_gradient, args=args, disp=0)
-            A_refined = res.reshape((3,3))
+            A_refined = res.reshape((3, 3))
     eXYZs = np.abs(A_refined.dot(rhkls.T) - qs.T).T
     dists = norm(eXYZs, axis=1)
     pair_dist = dists[pair_ids].mean()
@@ -256,6 +252,8 @@ def match_vectors(ks,
                   library,
                   mag_tol,
                   angle_tol,
+                  seed_pool_size,
+                  n_best,
                   keys=[],
                   *args,
                   **kwargs):
@@ -289,14 +287,15 @@ def match_vectors(ks,
     for key in library.keys():
         correlations = dict()
         qs = ks
-        unindexed_peak_ids = list(set(range(min(qs.shape[0], seed_pool_size))) - set(indexed_peak_ids))
+        #
+        unindexed_peak_ids = list(set(range(min(qs.shape[0], seed_pool_size))))
         seed_pool = list(combinations(unindexed_peak_ids, 2))
 
         # Determine overall solutions associated with each
         good_solutions = []
         for i in tqdm(range(len(seed_pool))):
             seed = seed_pool[i]
-            q1, q2 = qs[seed,:]
+            q1, q2 = qs[seed, :]
             q1_len, q2_len = norm(q1), norm(q2)
             # Ensure q1 is shorter than q2 so cominations in correct order.
             if q1_len < q2_len:
@@ -305,9 +304,9 @@ def match_vectors(ks,
             # Calculate the angle between experimental scattering vectors.
             angle = get_angle_cartesian(q1, q2)
             # Get array indices for peaks within tolerances.
-            match_ids = np.where((np.abs(q1_len - table['LA'][:,0]) < mag_tol) *
-                            (np.abs(q2_len - table['LA'][:,1]) < mag_tol) *
-                            (np.abs(angle - table['LA'][:,2]) < angle_tol))[0]
+            match_ids = np.where((np.abs(q1_len - table['LA'][:, 0]) < mag_tol) *
+                                 (np.abs(q2_len - table['LA'][:, 1]) < mag_tol) *
+                                 (np.abs(angle - table['LA'][:, 2]) < angle_tol))[0]
             for match_id in match_ids:
                 hkl1 = table['hkl1'][match_id]
                 hkl2 = table['hkl2'][match_id]
@@ -331,7 +330,7 @@ def match_vectors(ks,
             # best solution has highest total score and lowest total error
             good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
             best_score = good_solutions[0].match_rate
-            best_solutions = [solution for solution in good_solutions if solution.match_rate==best_score]
+            best_solutions = [solution for solution in good_solutions if solution.match_rate == best_score]
             best_solutions.sort(key=lambda x: x.total_error, reverse=False)
             best_solution = best_solutions[0]
         else:
@@ -357,9 +356,9 @@ def match_vectors(ks,
 
 
 def crystal_from_matching_results(z_matches):
-    """Takes template matching results for a single navigation position
-    and returns the best matching phase and orientation with correlation
-    and reliability/ies to define a crystallographic map.
+    """Takes template matching results for a single navigation position and
+    returns the best matching phase and orientation with correlation and
+    reliability/ies to define a crystallographic map.
 
     Parameters
     ----------
@@ -399,9 +398,9 @@ def crystal_from_matching_results(z_matches):
 
 
 def crystal_from_vector_matching(z_matches):
-    """Takes vector matching results for a single navigation position
-    and returns the best matching phase and orientation with correlation
-    and reliability/ies to define a crystallographic map.
+    """Takes vector matching results for a single navigation position and
+    returns the best matching phase and orientation with correlation and
+    reliability/ies to define a crystallographic map.
 
     Parameters
     ----------

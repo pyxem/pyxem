@@ -21,6 +21,7 @@ import pytest
 from pyxem.signals.indexation_results import *  # import both objects
 from pyxem.utils.indexation_utils import crystal_from_matching_results
 
+
 @pytest.fixture
 def sp_match_result():
     row_1 = np.array([0, 2, 3, 4, 0.7])
