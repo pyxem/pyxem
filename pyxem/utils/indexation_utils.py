@@ -242,8 +242,7 @@ def crystal_from_matching_results(z_matches):
         # these case is easier as output is correctly ordered
         results_array = np.zeros(6)
         results_array[:5] = z_matches[0, :5]
-        results_array[5] = 100 * (1 -
-                                  z_matches[1, 4] / results_array[4])
+        results_array[5] = 100 * (1 - z_matches[1, 4] / results_array[4])
     else:
         results_array = np.zeros(7)
         index_best_match = np.argmax(z_matches[:, 4])
@@ -257,8 +256,7 @@ def crystal_from_matching_results(z_matches):
         # and reliability phase
         z = z_matches[z_matches[:, 0] != results_array[0]]
         second_score = np.max(z[:, 4])
-        results_array[6] = 100 * (1 -
-                                  second_score / results_array[4])
+        results_array[6] = 100 * (1 - second_score / results_array[4])
 
     return results_array
 
@@ -315,7 +313,8 @@ def _gradient(x, *argv):
                        g_asy, g_bsy, g_csy,
                        g_asz, g_bsz, g_csz))
 
-def refine_crystal_matrix(vector_match):
+
+def refine_crystal_vector_matrix(vector_match):
     """Takes vector matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
     reliability/ies to define a crystallographic map.
@@ -331,7 +330,6 @@ def refine_crystal_matrix(vector_match):
         Crystallographic mapping results in an array of shape (6) or (7), with
         [phase, angle, angle, angle, correlation, R_orientation, (R_phase)]
     """
-    # refine best solution
     if best_solution is None:
         final_solution = Solution()
         final_solution.R = np.identity(3)
