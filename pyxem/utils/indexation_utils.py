@@ -114,140 +114,6 @@ def index_magnitudes(z, simulation, tolerance):
     return indexation
 
 
-def _eval_solution(solution, qs, A0_inv,
-                   eval_tol=0.25,
-                   seed=None,
-                   seed_hkl_tol=0.1,
-                   indexed_peak_ids=[]):
-    """Assigns hkl indices to pairs of diffraction vectors.
-
-    Parameters
-    ----------
-    ks : np.array()
-        The experimentally measured diffraction vectors, associated with a
-        particular probe position, to be indexed.
-    library : DiffractionLibrary
-        Library of reciprocal space vectors to be matched to the vectors.
-    mag_threshold : float
-        The number of well correlated simulations to be retained.
-    angle_threshold : bool array
-        A mask for navigation axes 1 indicates positions to be indexed.
-
-    Returns
-    -------
-    indexation : np.array()
-        A numpy array containing the indexation results.
-
-    """
-    R = solution.R
-    R_inv = np.linalg.inv(R)
-    hkls = A0_inv.dot(R_inv.dot(qs.T)).T
-    rhkls = np.rint(hkls)
-    ehkls = np.abs(hkls - rhkls)
-
-    # indices of matched peaks
-    pair_ids = np.where(np.max(ehkls, axis=1) < eval_tol)[0]
-    pair_ids = list(set(pair_ids) - set(indexed_peak_ids))
-
-    # calculate match_rate as fraction of peaks indexed
-    nb_pairs = len(pair_ids)
-    nb_peaks = len(qs)
-    match_rate = float(nb_pairs) / float(nb_peaks)
-
-    # set solution attributes
-    solution.hkls = hkls
-    solution.rhkls = rhkls
-    solution.ehkls = ehkls
-    solution.pair_ids = pair_ids
-    solution.nb_pairs = nb_pairs
-
-    # evaluate / store indexation metrics
-    solution.seed_error = ehkls[seed, :].max()
-    solution.match_rate = match_rate
-    if len(pair_ids) == 0:
-        # no matching peaks, set error to 1
-        solution.total_error = 1.
-    else:
-        # naive error of matching peaks
-        solution.total_error = ehkls[pair_ids].mean()
-
-    return solution
-
-
-def refine(solution, qs, refine_cycle):
-    """Assigns hkl indices to pairs of diffraction vectors.
-
-    Parameters
-    ----------
-    ks : np.array()
-        The experimentally measured diffraction vectors, associated with a
-        particular probe position, to be indexed.
-    library : DiffractionLibrary
-        Library of reciprocal space vectors to be matched to the vectors.
-    mag_threshold : float
-        The number of well correlated simulations to be retained.
-    angle_threshold : bool array
-        A mask for navigation axes 1 indicates positions to be indexed.
-
-    Returns
-    -------
-    indexation : np.array()
-        A numpy array containing the indexation results.
-
-    """
-    A_refined = solution.A.copy()
-
-    def _fun(x, *argv):
-        asx, bsx, csx, asy, bsy, csy, asz, bsz, csz = x
-        h, k, l, qx, qy, qz = argv
-        r1 = (asx * h + bsx * k + csx * l - qx)
-        r2 = (asy * h + bsy * k + csy * l - qy)
-        r3 = (asz * h + bsz * k + csz * l - qz)
-        return r1**2. + r2**2. + r3**2.
-
-    def _gradient(x, *argv):
-        asx, bsx, csx, asy, bsy, csy, asz, bsz, csz = x
-        h, k, l, qx, qy, qz = argv
-        r1 = (asx * h + bsx * k + csx * l - qx)
-        r2 = (asy * h + bsy * k + csy * l - qy)
-        r3 = (asz * h + bsz * k + csz * l - qz)
-        g_asx, g_bsx, g_csx = 2. * h * r1, 2. * k * r1, 2. * l * r1
-        g_asy, g_bsy, g_csy = 2. * h * r2, 2. * k * r2, 2. * l * r2
-        g_asz, g_bsz, g_csz = 2. * h * r3, 2. * k * r3, 2. * l * r3
-        return np.asarray((g_asx, g_bsx, g_csx,
-                           g_asy, g_bsy, g_csy,
-                           g_asz, g_bsz, g_csz))
-    rhkls = solution.rhkls
-    pair_ids = solution.pair_ids
-    for i in range(refine_cycle):
-        for j in range(len(pair_ids)):  # refine by each reflection
-            pair_id = pair_ids[j]
-            x0 = A_refined.reshape((-1))
-            rhkl = rhkls[pair_id, :]
-            q = qs[pair_id, :]
-            args = (rhkl[0], rhkl[1], rhkl[2], q[0], q[1], q[2])
-            res = fmin_cg(_fun, x0, fprime=_gradient, args=args, disp=0)
-            A_refined = res.reshape((3, 3))
-    eXYZs = np.abs(A_refined.dot(rhkls.T) - qs.T).T
-    dists = norm(eXYZs, axis=1)
-    pair_dist = dists[pair_ids].mean()
-
-    if pair_dist < solution.pair_dist:
-        solution.A_refined = A_refined
-        solution.pair_dist_refined = pair_dist
-        solution.hkls_refined = np.linalg.inv(A_refined).dot(qs.T).T
-        solution.rhkls_refined = np.rint(solution.hkls_refined)
-        solution.ehkls_refined = np.abs(solution.hkls_refined - solution.rhkls_refined)
-    else:
-        solution.A_refined = solution.A.copy()
-        solution.pair_dist_refined = solution.pair_dist
-        solution.hkls_refined = solution.hkls.copy()
-        solution.rhkls_refined = solution.rhkls.copy()
-        solution.ehkls_refined = solution.ehkls.copy()
-
-    return solution
-
-
 def match_vectors(ks,
                   library,
                   mag_tol,
@@ -264,7 +130,7 @@ def match_vectors(ks,
     ks : np.array()
         The experimentally measured diffraction vectors, associated with a
         particular probe position, to be indexed.
-    library : DiffractionLibrary
+    library : VectorLibrary
         Library of reciprocal space vectors to be matched to the vectors.
     mag_tol : float
         The number of well correlated simulations to be retained.
@@ -281,76 +147,76 @@ def match_vectors(ks,
     # indexation results.
     i = 0
     indexation = np.zeros((n_largest * len(library), 5))
-
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
     # with respect to each phase.
     for key in library.keys():
-        correlations = dict()
         qs = ks
-        #
+        # pair unindexed peaks into combinations inluding up to seed_pool_size
+        # many peaks to define the seed_pool
         unindexed_peak_ids = list(set(range(min(qs.shape[0], seed_pool_size))))
         seed_pool = list(combinations(unindexed_peak_ids, 2))
-
-        # Determine overall solutions associated with each
-        good_solutions = []
+        # Determine overall indexations associated with each seed in the
+        # seed_pool to generate a solution pool.
+        solution_pool = []
         for i in tqdm(range(len(seed_pool))):
             seed = seed_pool[i]
+            # Consider a seed pair of vectors.
             q1, q2 = qs[seed, :]
             q1_len, q2_len = norm(q1), norm(q2)
-            # Ensure q1 is shorter than q2 so cominations in correct order.
+            # Ensure q1 is longer than q2 so cominations in correct order.
             if q1_len < q2_len:
                 q1, q2 = q2, q1
                 q1_len, q2_len = q2_len, q1_len
             # Calculate the angle between experimental scattering vectors.
             angle = get_angle_cartesian(q1, q2)
-            # Get array indices for peaks within tolerances.
-            match_ids = np.where((np.abs(q1_len - table['LA'][:, 0]) < mag_tol) *
-                                 (np.abs(q2_len - table['LA'][:, 1]) < mag_tol) *
-                                 (np.abs(angle - table['LA'][:, 2]) < angle_tol))[0]
+            # Get library indices for hkls matching peaks within tolerances.
+            match_ids = np.where((np.abs(q1_len - library[key][:, 2]) < mag_tol) *
+                                 (np.abs(q2_len - library[key][:, 3]) < mag_tol) *
+                                 (np.abs(angle - library[key][:, 4]) < angle_tol))[0]
+            # Iterate over matched seed vectors determining the error in the
+            # associated indexation and finding the minimum error cases.
             for match_id in match_ids:
-                hkl1 = table['hkl1'][match_id]
-                hkl2 = table['hkl2'][match_id]
+                #
+                hkl1 = library[key][:, 0][match_id]
+                hkl2 = library[key][:, 0][match_id]
                 # reference vectors are cartesian coordinates of hkls
                 # TODO: could put this in the library?
                 ref_q1, ref_q2 = A0.dot(hkl1), A0.dot(hkl2)
                 R = get_rotation_matrix_between_vectors(q1, q2,
                                                         ref_q1, ref_q2)
                 # Evaluate error on seed point, total error & match rate
-                solution = eval_solution(solution, qs, A0_inv,
-                                         eval_tol=eval_tol,
-                                         seed=seed,
-                                         seed_hkl_tol=seed_hkl_tol,
-                                         indexed_peak_ids=indexed_peak_ids)
-                # only keep solution from good seed
-                if solution.seed_error <= seed_hkl_tol:
-                    good_solutions.append(solution)
+                R_inv = np.linalg.inv(R)
+                hkls = A0_inv.dot(R_inv.dot(qs.T)).T
+                rhkls = np.rint(hkls)
+                ehkls = np.abs(hkls - rhkls)
 
-        # determine best solution
-        if len(good_solutions) > 0:
-            # best solution has highest total score and lowest total error
-            good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
-            best_score = good_solutions[0].match_rate
-            best_solutions = [solution for solution in good_solutions if solution.match_rate == best_score]
-            best_solutions.sort(key=lambda x: x.total_error, reverse=False)
-            best_solution = best_solutions[0]
-        else:
-            best_solution = None
+                # indices of matched peaks
+                pair_ids = np.where(np.max(ehkls, axis=1) < eval_tol)[0]
+                pair_ids = list(set(pair_ids) - set(indexed_peak_ids))
 
-        # refine best solution
-        if best_solution is None:
-            final_solution = Solution()
-            final_solution.R = np.identity(3)
-            final_solution.match_rate = 0.
-        else:
-            best_solution.A = best_solution.R.dot(A0)
-            # Fourier space error between peaks and predicted spots
-            eXYZs = np.abs(best_solution.A.dot(best_solution.rhkls.T) - qs.T).T
-            dists = norm(eXYZs, axis=1)
-            # mean distance between matched peaks and associated predicted spots
-            best_solution.pair_dist = dists[best_solution.pair_ids].mean()
-            best_solution.A = best_solution.R.dot(A0)
-            # refine A matrix with matched pairs to minimize norm(AH-q)
-            final_solution = refine(best_solution, qs, refine_cycles)
+                # calculate match_rate as fraction of peaks indexed
+                nb_pairs = len(pair_ids)
+                nb_peaks = len(qs)
+                match_rate = float(nb_pairs) / float(nb_peaks)
+
+                # set solution attributes
+                solution.hkls = hkls
+                solution.rhkls = rhkls
+                solution.ehkls = ehkls
+                solution.pair_ids = pair_ids
+                solution.nb_pairs = nb_pairs
+
+                # evaluate / store indexation metrics
+                solution.seed_error = ehkls[seed, :].max()
+                solution.match_rate = match_rate
+                if len(pair_ids) == 0:
+                    # no matching peaks, set error to 1
+                    solution.total_error = 1.
+                else:
+                    # naive error of matching peaks
+                    solution.total_error = ehkls[pair_ids].mean()
+                # Put solutions in the solution_pool
+                solution_pool.append(solution)
 
     return final_solution
 
@@ -413,4 +279,100 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array of shape (6) or (7), with
         [phase, angle, angle, angle, correlation, R_orientation, (R_phase)]
     """
-    pass
+    # Determine best solution in the solution_pool
+    if len(solution_pool) > 0:
+        # best solution has highest total score and lowest total error
+        good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
+        best_score = good_solutions[0].match_rate
+        best_solutions = [solution for solution in solution_pool if solution.match_rate == best_score]
+        best_solutions.sort(key=lambda x: x.total_error, reverse=False)
+        best_solution = best_solutions[0]
+    else:
+        best_solution = None
+
+    return best_solution
+
+
+def _fun(x, *argv):
+    asx, bsx, csx, asy, bsy, csy, asz, bsz, csz = x
+    h, k, l, qx, qy, qz = argv
+    r1 = (asx * h + bsx * k + csx * l - qx)
+    r2 = (asy * h + bsy * k + csy * l - qy)
+    r3 = (asz * h + bsz * k + csz * l - qz)
+    return r1**2. + r2**2. + r3**2.
+
+
+def _gradient(x, *argv):
+    asx, bsx, csx, asy, bsy, csy, asz, bsz, csz = x
+    h, k, l, qx, qy, qz = argv
+    r1 = (asx * h + bsx * k + csx * l - qx)
+    r2 = (asy * h + bsy * k + csy * l - qy)
+    r3 = (asz * h + bsz * k + csz * l - qz)
+    g_asx, g_bsx, g_csx = 2. * h * r1, 2. * k * r1, 2. * l * r1
+    g_asy, g_bsy, g_csy = 2. * h * r2, 2. * k * r2, 2. * l * r2
+    g_asz, g_bsz, g_csz = 2. * h * r3, 2. * k * r3, 2. * l * r3
+    return np.asarray((g_asx, g_bsx, g_csx,
+                       g_asy, g_bsy, g_csy,
+                       g_asz, g_bsz, g_csz))
+
+def refine_crystal_matrix(vector_match):
+    """Takes vector matching results for a single navigation position and
+    returns the best matching phase and orientation with correlation and
+    reliability/ies to define a crystallographic map.
+
+    Parameters
+    ----------
+    z_matches : np.array()
+        (m,5)
+
+    Returns
+    -------
+    results_array : np.array
+        Crystallographic mapping results in an array of shape (6) or (7), with
+        [phase, angle, angle, angle, correlation, R_orientation, (R_phase)]
+    """
+    # refine best solution
+    if best_solution is None:
+        final_solution = Solution()
+        final_solution.R = np.identity(3)
+        final_solution.match_rate = 0.
+    else:
+        best_solution.A = best_solution.R.dot(A0)
+        # Fourier space error between peaks and predicted spots
+        eXYZs = np.abs(best_solution.A.dot(best_solution.rhkls.T) - qs.T).T
+        dists = norm(eXYZs, axis=1)
+        # mean distance between matched peaks and associated predicted spots
+        best_solution.pair_dist = dists[best_solution.pair_ids].mean()
+        best_solution.A = best_solution.R.dot(A0)
+        # refine A matrix with matched pairs to minimize norm(AH-q)
+        A_refined = solution.A.copy()
+
+        rhkls = solution.rhkls
+        pair_ids = solution.pair_ids
+        for i in range(refine_cycle):
+            for j in range(len(pair_ids)):  # refine by each reflection
+                pair_id = pair_ids[j]
+                x0 = A_refined.reshape((-1))
+                rhkl = rhkls[pair_id, :]
+                q = qs[pair_id, :]
+                args = (rhkl[0], rhkl[1], rhkl[2], q[0], q[1], q[2])
+                res = fmin_cg(_fun, x0, fprime=_gradient, args=args, disp=0)
+                A_refined = res.reshape((3, 3))
+        eXYZs = np.abs(A_refined.dot(rhkls.T) - qs.T).T
+        dists = norm(eXYZs, axis=1)
+        pair_dist = dists[pair_ids].mean()
+
+        if pair_dist < solution.pair_dist:
+            solution.A_refined = A_refined
+            solution.pair_dist_refined = pair_dist
+            solution.hkls_refined = np.linalg.inv(A_refined).dot(qs.T).T
+            solution.rhkls_refined = np.rint(solution.hkls_refined)
+            solution.ehkls_refined = np.abs(solution.hkls_refined - solution.rhkls_refined)
+        else:
+            solution.A_refined = solution.A.copy()
+            solution.pair_dist_refined = solution.pair_dist
+            solution.hkls_refined = solution.hkls.copy()
+            solution.rhkls_refined = solution.rhkls.copy()
+            solution.ehkls_refined = solution.ehkls.copy()
+
+    return solution
