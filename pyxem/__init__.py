@@ -44,7 +44,7 @@ from .generators.variance_generator import VarianceGenerator
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_profile import ElectronDiffractionProfile
 from .signals.electron_diffraction import ElectronDiffraction
-from .signals.variance_profile import VarianceProfile
+from .signals.variance_profile import DiffractionVarianceProfile
 
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
