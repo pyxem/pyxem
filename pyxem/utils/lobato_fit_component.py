@@ -25,7 +25,7 @@ import numpy as np
 from hyperspy.component import Component
 from pyxem.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS
 
-class ScatteringFitComponent(Component):
+class ScatteringFitComponentLobato(Component):
 
     def __init__(self, elements, fracs, N = 1., C = 0.):
         """
