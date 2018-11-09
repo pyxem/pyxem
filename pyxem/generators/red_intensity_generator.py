@@ -29,6 +29,7 @@ from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
 
 from pyxem.utils.scattering_fit_component import ScatteringFitComponent
+from pyxem.utils.lobato_fit_component import ScatteringFitComponentLobato
 
 class ReducedIntensityGenerator():
     """Generates a reduced intensity profile for a specified diffraction radial
@@ -63,7 +64,7 @@ class ReducedIntensityGenerator():
         return
 
     def fit_atomic_scattering(self, elements, fracs,
-                                N = 1., C = 0.):
+                                N = 1., C = 0.,lobato = True):
         """Fits a diffraction intensity profile to the background using
         FIT = N * sum(ci * (fi^2) + C)
 
@@ -76,11 +77,16 @@ class ReducedIntensityGenerator():
         fracs: a list of fraction of the respective elements
         N = the "slope"
         C = an additive constant
+        lobato = a bool that decides whether to use the lobato scatter params
         fit_plot_max: the maximum y value in the fitting plot.
         """
 
         fit_model = self.signal.create_model()
-        background = ScatteringFitComponent(elements, fracs, N, C)
+        if lobato == True:
+            background = ScatteringFitComponentLobato(elements, fracs, N, C)
+        else:
+            background = ScatteringFitComponent(elements, fracs, N, C)
+
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
         fit_model.fit()
