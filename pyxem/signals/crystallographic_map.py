@@ -75,7 +75,7 @@ def _distance_from_fixed_angle(angle, fixed_angle):
 
 class CrystallographicMap(BaseSignal):
     """Crystallographic mapping results containing the best matching crystal
-    phase and orientation at each navigation position.
+    phase and orientation at each navigation position with associated metrics.
 
     The Signal at each navigation position is an array of,
 

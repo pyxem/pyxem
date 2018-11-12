@@ -62,20 +62,30 @@ class TemplateMatchingResults(BaseSignal):
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):
-        """Obtain a crystallographic map specifying the best matching
-        phase and orientation at each probe position with corresponding
-        correlation and reliabilty scores.
+        """Obtain a crystallographic map specifying the best matching phase and
+        orientation at each probe position with corresponding metrics.
 
         Returns
         -------
         cryst_map : CrystallographicMap
-            Contains the best matching phase and orientation along with
-            corresponding correlation and reliability scores at all navigation
-            positions.
+            Crystallographic mapping results containing the best matching phase
+            and orientation at each navigation position with associated metrics.
+
+            The Signal at each navigation position is an array of,
+
+                            [phase, np.array((z,x,z)), dict(metrics)]
+
+            which defines the phase, orientation as Euler angles in the zxz
+            convention and metrics associated with the matching.
+
+            Metrics for template matching results are
+                'correlation'
+                'orientation_reliability'
+                'phase_reliability'
 
         """
         # TODO: Add alternative methods beyond highest correlation score.
-        crystal_map = self.map(crystal_from_matching_results,
+        crystal_map = self.map(crystal_from_template_matching,
                                inplace=False,
                                *args, **kwargs)
 
@@ -93,17 +103,28 @@ class VectorMatchingResults(BaseSignal):
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):
-        """Obtain a crystallographic map specifying the best matching
-        phase and orientation at each probe position with corresponding
-        correlation and reliabilty scores.
+        """Obtain a crystallographic map specifying the best matching phase and
+        orientation at each probe position with corresponding metrics.
 
         Returns
         -------
         cryst_map : CrystallographicMap
-            Contains the best matching phase and orientation along with
-            corresponding correlation and reliability scores at all navigation
-            positions.
+            Crystallographic mapping results containing the best matching phase
+            and orientation at each navigation position with associated metrics.
 
+            The Signal at each navigation position is an array of,
+
+                            [phase, np.array((z,x,z)), dict(metrics)]
+
+            which defines the phase, orientation as Euler angles in the zxz
+            convention and metrics associated with the matching.
+
+            Metrics for template matching results are
+                'match_rate'
+                'ehkls'
+                'total_error'
+                'orientation_reliability'
+                'phase_reliability'
         """
         crystal_map = self.map(crystal_from_vector_matching,
                                inplace=False,
