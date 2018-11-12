@@ -156,7 +156,7 @@ class CrystallographicMap(BaseSignal):
             A map of the specified metric at each navigation position.
 
         """
-        if self.method = 'template_matching':
+        if self.method=='template_matching':
             template_metrics = {
                 'correlation': correlation,
                 'orientation_reliability': orientation_reliability,
@@ -169,7 +169,7 @@ class CrystallographicMap(BaseSignal):
                 raise ValueError("The metric `{}` is not valid for template "
                                  "matching results. ")
 
-        elif self.method = 'vector_matching':
+        elif self.method=='vector_matching':
             vector_metrics = {
                 'match_rate': match_rate,
                 'ehkls': ehkls,

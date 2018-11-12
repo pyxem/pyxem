@@ -19,7 +19,7 @@
 import numpy as np
 import pytest
 from pyxem.signals.indexation_results import *  # import both objects
-from pyxem.utils.indexation_utils import crystal_from_matching_results
+from pyxem.utils.indexation_utils import crystal_from_template_matching
 
 
 @pytest.fixture
@@ -41,13 +41,13 @@ def dp_match_result():
 
 def test_crystal_from_matching_results_sp(sp_match_result):
     # branch single phase
-    cmap = crystal_from_matching_results(sp_match_result)
+    cmap = crystal_from_template_matching(sp_match_result)
     assert np.allclose(cmap, np.array([0, 2, 3, 4, 0.7, 100 * (1 - (0.6 / 0.7))]))
 
 
 def test_crystal_from_matching_results_dp(dp_match_result):
     # branch double phase
-    cmap = crystal_from_matching_results(dp_match_result)
+    cmap = crystal_from_template_matching(dp_match_result)
     r_or = 100 * (1 - (0.7 / 0.8))
     r_ph = 100 * (1 - (0.5 / 0.8))
     assert np.allclose(cmap, np.array([0, 2, 3, 5, 0.8, r_or, r_ph]))

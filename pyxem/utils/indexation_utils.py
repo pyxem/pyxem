@@ -269,9 +269,10 @@ def crystal_from_template_matching(z_matches):
         # get best matching orientation Euler angles
         results_array[1] = np.array(z_matches[0, 1:4])
         # get template matching metrics
-        results_array[2] = dict('correlation' : z_matches[0, 4],
-                                'orientation_reliability' : 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
-                                )
+        metrics = dict()
+        mectrics['correlation'] = z_matches[0, 4]
+        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
+        results_array[2] = metrics
     else:
         # get best matching result
         index_best_match = np.argmax(z_matches[:, 4])
@@ -286,10 +287,11 @@ def crystal_from_template_matching(z_matches):
         z = z_matches[z_matches[:, 0] != results_array[0]]
         second_phase = np.max(z[:, 4])
         # get template matching metrics
-        results_array[2] = dict('correlation' : z_matches[index_best_match, 4],
-                                'orientation_reliability' : 100 * (1 - second_orienation / z_matches[index_best_match, 4]),
-                                'phase_reliability' : 100 * (1 - second_phase / z_matches[index_best_match, 4])
-                                )
+        metrics = dict()
+        mectrics['correlation'] = z_matches[0, 4]
+        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
+        metrics['phase_reliability'] = 100 * (1 - second_phase / z_matches[index_best_match, 4])
+        results_array[2] = metrics
 
     return results_array
 
@@ -320,18 +322,20 @@ def crystal_from_vector_matching(z_matches):
         # get best matching orientation Euler angles
         results_array[1] = mat2euler(z_matches[0, 1])
         # get template matching metrics
-        results_array[2] = dict('match_rate' : z_matches[0, 2],
-                                'ehkls' : z_matches[0, 3],
-                                'total_error' z_matches[0, 4],
-                                'orientation_reliability' : 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
-                                )
+        metrics = dict()
+        mectrics['match_rate'] = z_matches[0, 2]
+        metrics['ehkls'] = z_matches[0, 3]
+        metrics['total_error'] = z_matches[0, 4]
+        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
+        results_array[2] = metrics
+
     else:
         # get best matching result
         index_best_match = np.argmax(z_matches[:, 4])
         # get best matching phase
         results_array[0] = z_matches[index_best_match, 0]
         #get best matching orientation Euler angles.
-        results_array[1] = mat2euler(z_matches[index_best_match, 1]))
+        results_array[1] = mat2euler(z_matches[index_best_match, 1])
         # get second highest correlation orientation for orientation_reliability
         z = z_matches[z_matches[:, 0] == results_array[0]]
         second_orientation = np.partition(z[:, 4], -2)[-2]
@@ -339,11 +343,12 @@ def crystal_from_vector_matching(z_matches):
         z = z_matches[z_matches[:, 0] != results_array[0]]
         second_phase = np.max(z[:, 4])
         # get template matching metrics
-        results_array[2] = dict('match_rate' : z_matches[index_best_match, 2],
-                                'ehkls' : z_matches[index_best_match, 3],
-                                'total_error' z_matches[index_best_match, 4],
-                                'orientation_reliability' : 100 * (1 - second_orienation / z_matches[index_best_match, 4]),
-                                'phase_reliability' : 100 * (1 - second_phase / z_matches[index_best_match, 4])
-                                )
+        metrics = dict()
+        mectrics['match_rate'] = z_matches[index_best_match, 2]
+        metrics['ehkls'] = z_matches[index_best_match, 3]
+        metrics['total_error'] = z_matches[index_best_match, 4]
+        metrics['orientation_reliability'] = 100 * (1 - second_orienation / z_matches[index_best_match, 4])
+        metrics['phase_reliability'] = 100 * (1 - second_phase / z_matches[index_best_match, 4])
+        results_array[2] = metrics
 
     return best_solution
