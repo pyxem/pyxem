@@ -134,3 +134,15 @@ class VectorMatchingResults(BaseSignal):
         cryst_map = transfer_navigation_axes(cryst_map, self)
 
         return cryst_map
+
+    def get_indexed_diffraction_vectors(self,
+                                        vectors,
+                                        *args, **kwargs):
+        """Obtain an indexed diffraction vectors object.
+
+        Returns
+        -------
+        indexed_vectors : DiffractionVectors
+            An indexed diffraction vectors object.
+        """
+        pass
