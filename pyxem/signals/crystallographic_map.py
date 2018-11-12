@@ -119,7 +119,7 @@ class CrystallographicMap(BaseSignal):
             navigation position.
 
         """
-        eulers = self.isig[1:4]
+        eulers = self.isig[1]
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
         orientation_map = transfer_navigation_axes(orientation_map, self)
@@ -197,7 +197,7 @@ class CrystallographicMap(BaseSignal):
             [modal_angles, fractional_occurance]
         """
         element_count = self.data.shape[0] * self.data.shape[1]
-        euler_array = self.isig[1:4].data.reshape(element_count, 3)
+        euler_array = self.isig[1]
 
         pairs, counts = np.unique(euler_array, axis=0, return_counts=True)
 
@@ -221,8 +221,8 @@ class CrystallographicMap(BaseSignal):
             method: save_mtex_map
         """
         modal_angle = self.get_modal_angles()[0]
-        return self.isig[1:4].map(_distance_from_fixed_angle,
-                                  fixed_angle=modal_angle, inplace=False)
+        return self.isig[1].map(_distance_from_fixed_angle,
+                                fixed_angle=modal_angle, inplace=False)
 
     def save_mtex_map(self, filename):
         """Save map in a format such that it can be imported into MTEX
