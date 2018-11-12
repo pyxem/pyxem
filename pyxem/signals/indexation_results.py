@@ -74,9 +74,7 @@ class TemplateMatchingResults(BaseSignal):
             positions.
 
         """
-        # TODO: Add alternative methods beyond highest correlation score at each
-        # navigation position.
-        # TODO Only keep a subset of the data for the map
+        # TODO: Add alternative methods beyond highest correlation score.
         crystal_map = self.map(crystal_from_matching_results,
                                inplace=False,
                                *args, **kwargs)

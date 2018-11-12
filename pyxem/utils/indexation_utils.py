@@ -229,7 +229,7 @@ def match_vectors(ks,
     return out_arr
 
 
-def crystal_from_matching_results(z_matches):
+def crystal_from_template_matching(z_matches):
     """Takes template matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
     reliability/ies to define a crystallographic map.
@@ -237,34 +237,45 @@ def crystal_from_matching_results(z_matches):
     Parameters
     ----------
     z_matches : np.array()
-        Template matching results in an array of shape (m,5)
+        Template matching results in an array of shape (m,5) with entries
+        [phase, z, x, z, correlation]
 
     Returns
     -------
-    results_array : np.array
-        Crystallographic mapping results in an array of shape (6) or (7), with
-        [phase, angle, angle, angle, correlation, R_orientation, (R_phase)]
+    results_array : np.array()
+        Crystallographic mapping results in an array (3) with entries
+        [phase, np.array((z,x,z)), dict(metrics)]
     """
-    # count the phases
+    # Create empty array for results.
+    results_array = np.zeros(3)
+    # Consider single phase and multi-phase matching cases separately
     if np.unique(z_matches[:, 0]).shape[0] == 1:
-        # these case is easier as output is correctly ordered
-        results_array = np.zeros(6)
-        results_array[:5] = z_matches[0, :5]
-        results_array[5] = 100 * (1 - z_matches[1, 4] / results_array[4])
+        # get best matching phase (there is only one here)
+        results_array[0] = z_matches[0, 0]
+        # get best matching orientation Euler angles
+        results_array[1] = np.array(z_matches[0, 1:4])
+        # get template matching metrics
+        results_array[2] = dict('correlation' : z_matches[0, 4],
+                                'orientation_reliability' : 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
+                                )
     else:
-        results_array = np.zeros(7)
+        # get best matching result
         index_best_match = np.argmax(z_matches[:, 4])
-        # store phase,angle,angle,angle,correlation
-        results_array[:5] = z_matches[index_best_match, :5]
-        # do reliability_orientation
+        # get best matching phase
+        results_array[0] = z_matches[index_best_match, 0]
+        #get best matching orientation Euler angles.
+        results_array[1] = np.array(z_matches[index_best_match, 1:4])
+        # get second highest correlation orientation for orientation_reliability
         z = z_matches[z_matches[:, 0] == results_array[0]]
-        second_score = np.partition(z[:, 4], -2)[-2]
-        results_array[5] = 100 * (1 -
-                                  second_score / results_array[4])
-        # and reliability phase
+        second_orientation = np.partition(z[:, 4], -2)[-2]
+        # get second highest correlation phase for phase_reliability
         z = z_matches[z_matches[:, 0] != results_array[0]]
-        second_score = np.max(z[:, 4])
-        results_array[6] = 100 * (1 - second_score / results_array[4])
+        second_phase = np.max(z[:, 4])
+        # get template matching metrics
+        results_array[2] = dict('correlation' : z_matches[index_best_match, 4],
+                                'orientation_reliability' : 100 * (1 - second_orienation / z_matches[index_best_match, 4]),
+                                'phase_reliability' : 100 * (1 - second_phase / z_matches[index_best_match, 4])
+                                )
 
     return results_array
 
@@ -281,9 +292,9 @@ def crystal_from_vector_matching(z_matches):
 
     Returns
     -------
-    results_array : np.array
-        Crystallographic mapping results in an array of shape (6) or (7), with
-        [phase, angle, angle, angle, correlation, R_orientation, (R_phase)]
+    results_array : np.array()
+        Crystallographic mapping results in an array (3) with entries
+        [phase, np.array((z,x,z)), dict(metrics)]
     """
     # Determine best solution in the solution_pool
     if len(solution_pool) > 0:
