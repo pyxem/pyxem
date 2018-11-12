@@ -74,28 +74,43 @@ def _distance_from_fixed_angle(angle, fixed_angle):
 
 
 class CrystallographicMap(BaseSignal):
-    """
-    Stores a map of a SED scan. At each navigtion position there will be a
-    phase, three angles, a correlation index and 1/2 reliability scores. See
-    the .get_crystallographic_maps() method
-    """
+    """Crystallographic mapping results containing the best matching crystal
+    phase and orientation at each navigation position.
 
+    The Signal at each navigation position is an array of,
+
+                    [phase, np.array((z,x,z)), dict(metrics)]
+
+    which defines the phase, orientation as Euler angles in the zxz convention
+    and metrics associated with the indexation / matching.
+
+    Metrics depend on the method used (template matching vs. vector matching) to
+    obtain the crystallographic map.
+
+        'correlation'
+        'match_rate'
+        'ehkls'
+        'total_error'
+        'orientation_reliability'
+        'phase_reliability'
+
+    """
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
+        self.method = None
 
     def get_phase_map(self):
         """Obtain a map of the best matching phase at each navigation position.
         """
-
         phase_map = self.isig[0].as_signal2D((0, 1))
         phase_map = transfer_navigation_axes(phase_map, self)
 
         return phase_map
 
     def get_orientation_map(self):
-        """Obtain an orientation image of the rotational angle associated with
-        the crystal orientation at each navigation position.
+        """Obtain a map of the rotational angle associated with the best
+        matching crystal orientation at each navigation position.
 
         Returns
         -------
@@ -111,56 +126,67 @@ class CrystallographicMap(BaseSignal):
 
         return orientation_map
 
-    def get_correlation_map(self):
-        """Obtain a correlation map showing the highest correlation score at
-        each navigation position.
+    def get_metric_map(self, metric):
+        """Obtain a map of an indexation / matching metric at each navigation
+        position.
+
+        Parameters
+        ----------
+        metric : string
+            String identifier for the indexation / matching metric to be
+            mapped, for template_matching valid metrics are
+                'correlation'
+                'orientation_reliability'
+                'phase_reliability'
+            For vector_matching, valid metrics are;
+                'match_rate'
+                'ehkls'
+                'total_error'
+                'orientation_reliability'
+                'phase_reliability'
 
         Returns
         -------
-        correlation_map : Signal2D
-            The highest correlation score at each navigation position.
+        metric_map : Signal2D
+            A map of the specified metric at each navigation position.
 
         """
-        correlation_map = self.isig[4].as_signal2D((0, 1))
-        correlation_map = transfer_navigation_axes(correlation_map, self)
+        if self.method = 'template_matching':
+            template_metrics = {
+                'correlation': correlation,
+                'orientation_reliability': orientation_reliability,
+                'phase_reliability' : phase_reliability
+            }
+            if metric in metric_dict:
+                metric_map = self.isig[2][metric].as_signal2D((0, 1))
 
-        return correlation_map
+            else:
+                raise ValueError("The metric `{}` is not valid for template "
+                                 "matching results. ")
 
-    def get_reliability_map_orientation(self):
-        """Obtain an orientation reliability map showing the difference between
-        the highest correlation score and the second highest correlation score
-        for the same phase oriented differently, at each navigation position.
+        elif self.method = 'vector_matching':
+            vector_metrics = {
+                'match_rate': match_rate,
+                'ehkls': ehkls,
+                'total_error': total_error,
+                'orientation_reliability': orientation_reliability,
+                'phase_reliability' : phase_reliability
+            }
+            if metric in metric_dict:
+                metric_map = self.isig[2][metric].as_signal2D((0, 1))
 
-        Returns
-        -------
-        reliability_map : Signal2D
-            The difference between the highest correlation score and the second
-            highest correlation score for the same phase oriented differently at
-            each navigation position.
+            else:
+                raise ValueError("The metric `{}` is not valid for vector "
+                                 "matching results. ")
 
-        """
-        reliability_map = self.isig[5].as_signal2D((0, 1))
-        reliability_map = transfer_navigation_axes(reliability_map, self)
+        else:
+            raise ValueError("The crystallographic mapping method must be "
+                             "specified, as an attribute, as either "
+                             "template_matching or vector_matching.")
 
-        return reliability_map
+        metric_map = transfer_navigation_axes(metric_map, self)
 
-    def get_reliability_map_phase(self):
-        """Obtain a reliability map showing the difference between the highest
-        correlation score of the most suitable phase and the next best score
-        from a different phase at each navigation position.
-
-        Returns
-        -------
-        reliability_map : Signal2D
-            The difference between the highest correlation score and the second
-            highest correlation score for the top scoring phase and the next
-            best scoring phase at each navigation position.
-
-        """
-        reliability_map = self.isig[6].as_signal2D((0, 1))
-        reliability_map = transfer_navigation_axes(reliability_map, self)
-
-        return reliability_map
+        return metric_map
 
     def get_modal_angles(self):
         """Obtain the modal angles (and their fractional occurances).
@@ -172,7 +198,9 @@ class CrystallographicMap(BaseSignal):
         """
         element_count = self.data.shape[0] * self.data.shape[1]
         euler_array = self.isig[1:4].data.reshape(element_count, 3)
+
         pairs, counts = np.unique(euler_array, axis=0, return_counts=True)
+
         return [pairs[counts.argmax()], counts[counts.argmax()] / np.sum(counts)]
 
     def get_distance_from_modal_angle(self):
@@ -197,8 +225,7 @@ class CrystallographicMap(BaseSignal):
                                   fixed_angle=modal_angle, inplace=False)
 
     def save_mtex_map(self, filename):
-        """
-        Save map in a format such that it can be imported into MTEX
+        """Save map in a format such that it can be imported into MTEX
         http://mtex-toolbox.github.io/
 
         Columns:
