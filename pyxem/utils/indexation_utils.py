@@ -25,6 +25,8 @@ from pyxem.utils import correlate
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
+from transforms3d.euler import mat2euler
+
 
 def correlate_library(image, library, n_largest, mask, keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -217,6 +219,18 @@ def match_vectors(ks,
                     solution.total_error = ehkls[pair_ids].mean()
                 # Put solutions in the solution_pool
                 solution_pool.append(solution)
+
+            # Sort solutions in the solution_pool
+            if len(solution_pool) > 0:
+                # best solution has highest total score and lowest total error
+                good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
+                best_score = good_solutions[0].match_rate
+                best_solutions = [solution for solution in solution_pool if solution.match_rate == best_score]
+                best_solutions.sort(key=lambda x: x.total_error, reverse=False)
+                best_solution = best_solutions[0]
+            else:
+                best_solution = None
+
             # Put the solutions in the output array
             for j in np.arange(n_largest):
                 out_arr[j + i * n_largest][0] = i
@@ -288,7 +302,8 @@ def crystal_from_vector_matching(z_matches):
     Parameters
     ----------
     z_matches : np.array()
-        (m,5)
+        Template matching results in an array of shape (m,5) with entries
+        [phase, R, match_rate, ehkls, total_error]
 
     Returns
     -------
@@ -296,15 +311,39 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z,x,z)), dict(metrics)]
     """
-    # Determine best solution in the solution_pool
-    if len(solution_pool) > 0:
-        # best solution has highest total score and lowest total error
-        good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
-        best_score = good_solutions[0].match_rate
-        best_solutions = [solution for solution in solution_pool if solution.match_rate == best_score]
-        best_solutions.sort(key=lambda x: x.total_error, reverse=False)
-        best_solution = best_solutions[0]
+    # Create empty array for results.
+    results_array = np.zeros(3)
+    # Consider single phase and multi-phase matching cases separately
+    if np.unique(z_matches[:, 0]).shape[0] == 1:
+        # get best matching phase (there is only one here)
+        results_array[0] = z_matches[0, 0]
+        # get best matching orientation Euler angles
+        results_array[1] = mat2euler(z_matches[0, 1])
+        # get template matching metrics
+        results_array[2] = dict('match_rate' : z_matches[0, 2],
+                                'ehkls' : z_matches[0, 3],
+                                'total_error' z_matches[0, 4],
+                                'orientation_reliability' : 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
+                                )
     else:
-        best_solution = None
+        # get best matching result
+        index_best_match = np.argmax(z_matches[:, 4])
+        # get best matching phase
+        results_array[0] = z_matches[index_best_match, 0]
+        #get best matching orientation Euler angles.
+        results_array[1] = mat2euler(z_matches[index_best_match, 1]))
+        # get second highest correlation orientation for orientation_reliability
+        z = z_matches[z_matches[:, 0] == results_array[0]]
+        second_orientation = np.partition(z[:, 4], -2)[-2]
+        # get second highest correlation phase for phase_reliability
+        z = z_matches[z_matches[:, 0] != results_array[0]]
+        second_phase = np.max(z[:, 4])
+        # get template matching metrics
+        results_array[2] = dict('match_rate' : z_matches[index_best_match, 2],
+                                'ehkls' : z_matches[index_best_match, 3],
+                                'total_error' z_matches[index_best_match, 4],
+                                'orientation_reliability' : 100 * (1 - second_orienation / z_matches[index_best_match, 4]),
+                                'phase_reliability' : 100 * (1 - second_phase / z_matches[index_best_match, 4])
+                                )
 
     return best_solution
