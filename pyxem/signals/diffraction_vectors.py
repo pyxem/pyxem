@@ -41,11 +41,24 @@ number of peaks.
 
 
 class DiffractionVectors(BaseSignal):
+    """Crystallographic mapping results containing the best matching crystal
+    phase and orientation at each navigation position with associated metrics.
+
+    Attributes
+    ----------
+    cartesian : np.array()
+        Array of 3-vectors describing Cartesian coordinates associated with
+        each diffraction vector.
+    hkls : np.array()
+        Array of Miller indices associated with each diffraction vector.
+    
+    """
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
-        self.recip_coords = None
+        self.cartesian = None
+        self.hkls = None
 
     def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
         """Plot the unique diffraction vectors.
@@ -242,4 +255,3 @@ class DiffractionVectors(BaseSignal):
         y.units = 'nm'
 
         return crystim
-        

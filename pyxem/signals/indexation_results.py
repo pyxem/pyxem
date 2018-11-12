@@ -19,6 +19,7 @@
 import numpy as np
 import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
+from warnings import warn
 
 from pyxem.utils.sim_utils import peaks_from_best_template, transfer_navigation_axes
 from pyxem.utils.indexation_utils import crystal_from_matching_results
@@ -100,6 +101,7 @@ class VectorMatchingResults(BaseSignal):
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
+        self.hkls = None
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):
@@ -137,12 +139,26 @@ class VectorMatchingResults(BaseSignal):
 
     def get_indexed_diffraction_vectors(self,
                                         vectors,
+                                        overwrite=False,
                                         *args, **kwargs):
         """Obtain an indexed diffraction vectors object.
+
+        Parameters
+        ----------
+        vectors : DiffractionVectors
+            A diffraction vectors object to be indexed.
 
         Returns
         -------
         indexed_vectors : DiffractionVectors
             An indexed diffraction vectors object.
         """
-        pass
+        if overwrite==False:
+            if vectors.hkls is not None:
+                warn("The vectors supplied are already associated with hkls set "
+                     "overwrite=True to replace these hkls.")
+            else:
+                vectors.hkls = self.hkls
+
+        elif overwrite==True:
+            vectors.hkls = self.hkls

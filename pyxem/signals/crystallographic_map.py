@@ -94,6 +94,11 @@ class CrystallographicMap(BaseSignal):
         'orientation_reliability'
         'phase_reliability'
 
+    Parameters
+    ----------
+    method : string
+        Method used to obtain crystallographic mapping results, may be
+        'template_matching' or 'vector_matching'.
     """
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)

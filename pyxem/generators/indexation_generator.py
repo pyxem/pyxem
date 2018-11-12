@@ -240,7 +240,7 @@ class VectorIndexationGenerator():
                                  **kwargs)
 
         indexation_results = VectorMatchingResults(indexation)
-
+        indexation_results.vectors = self.vectors
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors)
 
