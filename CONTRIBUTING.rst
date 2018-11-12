@@ -80,12 +80,22 @@ consistency that you can read all about in the `Python Style Guide
 <https://www.python.org/dev/peps/pep-0008/>`_.
 
 To enforce this, we require that the following auto correction is applied at the end of pull request. The simplest
-option is to run (from the home directory of pyxem) 
+option is to run (from the home directory of pyxem)
+
+Linux:
 
 .. code:: bash
 
     chmod +x pepstorm.sh	
     ./pepstorm.sh
+    git add .
+    git commit -m "autopep8 corrections"
+
+Windows:
+
+.. code:: batch
+
+    pepstorm.bat
     git add .
     git commit -m "autopep8 corrections"
 
