@@ -194,8 +194,13 @@ class VectorIndexationGenerator():
     def __init__(self,
                  vectors,
                  vector_library):
-        self.vectors = vectors
-        self.library = vector_library
+        if vectors.cartesian is None:
+            ValueError("Cartesian coordinates are required in order to index "
+                       "diffraction vectors. Use the get_cartesian_coordinates "
+                       "method of DiffractionVectors to obtain these.")
+        else:
+            self.vectors = vectors
+            self.library = vector_library
 
     def index_vectors(self,
                       mag_tol,
@@ -235,7 +240,6 @@ class VectorIndexationGenerator():
         """
         vectors = self.vectors
         library = self.library
-
 
         indexation, rhkls = vectors.map(match_vectors,
                                         library=library,

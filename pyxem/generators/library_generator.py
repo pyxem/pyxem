@@ -182,7 +182,7 @@ class VectorLibraryGenerator(object):
                 reciprocal_radius)
             # Define an empty list to store phase vector pairs
             phase_vectors = []
-            # iterate through all pairs calculating theoretical interplanar angle
+            # iterate through all pairs calculating interplanar angle
             for comb in itertools.combinations(np.arange(len(indices)), 2):
                 i, j = comb[0], comb[1]
                 # specify hkls and lengths
