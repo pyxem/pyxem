@@ -97,10 +97,22 @@ class TemplateMatchingResults(BaseSignal):
 
 
 class VectorMatchingResults(BaseSignal):
+    """Vector matching results containing the top n best matching crystal
+    phase and orientation at each navigation position with associated metrics.
+
+    Atrributes
+    ----------
+    vectors : DiffractionVectors
+        Diffraction vectors indexed.
+
+    hkls : BaseSignal
+        Miller indices associated with each diffraction vector.
+    """
     _signal_type = "matching_results"
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
+        self.vectors = None
         self.hkls = None
 
     def get_crystallographic_map(self,
@@ -123,7 +135,6 @@ class VectorMatchingResults(BaseSignal):
 
             Metrics for template matching results are
                 'match_rate'
-                'ehkls'
                 'total_error'
                 'orientation_reliability'
                 'phase_reliability'

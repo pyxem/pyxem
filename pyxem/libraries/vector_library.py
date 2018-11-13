@@ -30,8 +30,19 @@ def load_VectorLibrary(filename, safety=False):
 
 
 class DiffractionVectorLibrary(dict):
-    """Maps crystal structure to simulated diffraction data.
+    """Maps crystal structure (phase) to diffraction vectors.
+
+    Attributes
+    ----------
+    keys : list of string
+        Ordered list of string identifiers for phases.
+    structures : list of diffpy.Structure
+        Ordered list of diffpy.Structure objects associated with each phase.
     """
+
+    def __init__(self, *args, **kwargs):
+        self.keys = None
+        self.structures = None
 
     def pickle_library(self, filename):
         with open(filename, 'wb') as handle:

@@ -174,6 +174,14 @@ class ProfileIndexationGenerator():
 class VectorIndexationGenerator():
     """Generates an indexer for DiffractionVectors using a number of methods.
 
+    Attributes
+    ----------
+    vectors : DiffractionVectors
+        DiffractionVectors to be indexed.
+    vector_library : DiffractionVectorLibrary
+        Library of theoretical diffraction vector magnitudes and inter-vector
+        angles for indexation.
+
     Parameters
     ----------
     vectors : DiffractionVectors
@@ -228,20 +236,23 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        indexation = vectors.map(match_vectors,
-                                 library=library,
-                                 mag_tol=mag_tol,
-                                 angle_tol=angle_tol,
-                                 seed_pool_size=seed_pool_size,
-                                 n_best=n_best,
-                                 keys=keys,
-                                 inplace=False,
-                                 *args,
-                                 **kwargs)
+
+        indexation, rhkls = vectors.map(match_vectors,
+                                        library=library,
+                                        mag_tol=mag_tol,
+                                        angle_tol=angle_tol,
+                                        seed_pool_size=seed_pool_size,
+                                        n_best=n_best,
+                                        keys=keys,
+                                        inplace=False,
+                                        *args,
+                                        **kwargs)
 
         indexation_results = VectorMatchingResults(indexation)
-        indexation_results.vectors = self.vectors
+        indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors)
+
+        vectors.hkls = rhkls
 
         return indexation_results

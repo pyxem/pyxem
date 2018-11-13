@@ -89,17 +89,17 @@ class CrystallographicMap(BaseSignal):
 
         'correlation'
         'match_rate'
-        'ehkls'
         'total_error'
         'orientation_reliability'
         'phase_reliability'
 
-    Parameters
+    Atrributes
     ----------
     method : string
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
+    
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
         self.axes_manager.set_signal_dimension(1)

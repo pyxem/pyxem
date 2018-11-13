@@ -81,7 +81,18 @@ def _get_library_from_angles(library, phase, angle):
 class DiffractionLibrary(dict):
     """Maps crystal structure (phase) and orientation to simulated diffraction
     data.
+
+    Attributes
+    ----------
+    keys : list of string
+        Ordered list of string identifiers for phases.
+    structures : list of diffpy.Structure
+        Ordered list of diffpy.Structure objects associated with each phase.
     """
+
+    def __init__(self, *args, **kwargs):
+        self.keys = None
+        self.structures = None
 
     def get_library_entry(self, phase=None, angle=None):
         """Extracts a single DiffractionLibrary entry.

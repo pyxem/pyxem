@@ -67,11 +67,15 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
                 correlations[orientation] = correlation
                 res = nlargest(n_largest, correlations.items(),
                                key=itemgetter(1))
+            # put top n results in output array
             for j in np.arange(n_largest):
+                # get phase identifying integer
                 out_arr[j + i * n_largest][0] = i
+                # get Euler angles z, x, z
                 out_arr[j + i * n_largest][1] = res[j][0][0]
                 out_arr[j + i * n_largest][2] = res[j][0][1]
                 out_arr[j + i * n_largest][3] = res[j][0][2]
+                # get correlation score
                 out_arr[j + i * n_largest][4] = res[j][1]
             i = i + 1
 
@@ -131,7 +135,7 @@ def match_vectors(ks,
     ----------
     ks : np.array()
         The experimentally measured diffraction vectors, associated with a
-        particular probe position, to be indexed.
+        particular probe position, to be indexed. In Cartesian coordinates.
     library : VectorLibrary
         Library of reciprocal space vectors to be matched to the vectors.
     mag_tol : float
@@ -152,10 +156,10 @@ def match_vectors(ks,
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
     # with respect to each phase.
     for key in library.keys():
-        qs = ks
+        strucure = library[key][0]
         # pair unindexed peaks into combinations inluding up to seed_pool_size
-        # many peaks to define the seed_pool
-        unindexed_peak_ids = list(set(range(min(qs.shape[0], seed_pool_size))))
+        # many pairs to define the seed_pool
+        unindexed_peak_ids = list(set(range(min(ks.shape[0], seed_pool_size))))
         seed_pool = list(combinations(unindexed_peak_ids, 2))
         # Determine overall indexations associated with each seed in the
         # seed_pool to generate a solution pool.
@@ -163,7 +167,7 @@ def match_vectors(ks,
         for i in tqdm(range(len(seed_pool))):
             seed = seed_pool[i]
             # Consider a seed pair of vectors.
-            q1, q2 = qs[seed, :]
+            q1, q2 = ks[seed, :]
             q1_len, q2_len = norm(q1), norm(q2)
             # Ensure q1 is longer than q2 so cominations in correct order.
             if q1_len < q2_len:
@@ -172,9 +176,9 @@ def match_vectors(ks,
             # Calculate the angle between experimental scattering vectors.
             angle = get_angle_cartesian(q1, q2)
             # Get library indices for hkls matching peaks within tolerances.
-            match_ids = np.where((np.abs(q1_len - library[key][:, 2]) < mag_tol) *
-                                 (np.abs(q2_len - library[key][:, 3]) < mag_tol) *
-                                 (np.abs(angle - library[key][:, 4]) < angle_tol))[0]
+            match_ids = np.where((np.abs(q1_len - library[key][1][:, 2]) < mag_tol) *
+                                 (np.abs(q2_len - library[key][1][:, 3]) < mag_tol) *
+                                 (np.abs(angle - library[key][1][:, 4]) < angle_tol))[0]
             # Iterate over matched seed vectors determining the error in the
             # associated indexation and finding the minimum error cases.
             for match_id in match_ids:
@@ -188,7 +192,7 @@ def match_vectors(ks,
                                                         ref_q1, ref_q2)
                 # Evaluate error on seed point, total error & match rate
                 R_inv = np.linalg.inv(R)
-                hkls = A0_inv.dot(R_inv.dot(qs.T)).T
+                hkls = A0_inv.dot(R_inv.dot(ks.T)).T
                 rhkls = np.rint(hkls)
                 ehkls = np.abs(hkls - rhkls)
 
@@ -198,7 +202,7 @@ def match_vectors(ks,
 
                 # calculate match_rate as fraction of peaks indexed
                 nb_pairs = len(pair_ids)
-                nb_peaks = len(qs)
+                nb_peaks = len(ks)
                 match_rate = float(nb_pairs) / float(nb_peaks)
 
                 # set solution attributes
@@ -231,16 +235,21 @@ def match_vectors(ks,
             else:
                 best_solution = None
 
-            # Put the solutions in the output array
+            # Put the top n ranked solutions in the output array
             for j in np.arange(n_largest):
+                # store phase identifying integer
                 out_arr[j + i * n_largest][0] = i
-                out_arr[j + i * n_largest][1] = res[j][0][0]
-                out_arr[j + i * n_largest][2] = res[j][0][1]
+                # store rotation matrix
+                out_arr[j + i * n_largest][1] = ranked_solutions[j][0][0]
+                # store match_rate
+                out_arr[j + i * n_largest][2] = ranked_solutions[j][0][1]
+                # store ehkls
                 out_arr[j + i * n_largest][3] = res[j][0][2]
+                # store total_error
                 out_arr[j + i * n_largest][4] = res[j][1]
             i = i + 1
 
-    return out_arr
+    return out_arr, rhkls
 
 
 def crystal_from_template_matching(z_matches):
@@ -278,7 +287,7 @@ def crystal_from_template_matching(z_matches):
         index_best_match = np.argmax(z_matches[:, 4])
         # get best matching phase
         results_array[0] = z_matches[index_best_match, 0]
-        #get best matching orientation Euler angles.
+        # get best matching orientation Euler angles.
         results_array[1] = np.array(z_matches[index_best_match, 1:4])
         # get second highest correlation orientation for orientation_reliability
         z = z_matches[z_matches[:, 0] == results_array[0]]
