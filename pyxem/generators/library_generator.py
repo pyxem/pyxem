@@ -126,6 +126,10 @@ class DiffractionLibraryGenerator(object):
                                                         pattern_intensities))}
                     diffraction_library[key] = phase_diffraction_library
 
+        # Pass attributes to diffraction library from structure library.
+        diffraction_library.identifiers = structure_library.indentifiers
+        diffraction_library.structures = structure_library.structures
+
         return diffraction_library
 
 
@@ -191,5 +195,9 @@ class VectorLibraryGenerator(object):
                 angle = get_angle_cartesian(coordinates[i], coordinates[j])
                 phase_vectors.append(np.array([hkl1, hkl2, len1, len2, angle]))
             vector_library[key] = np.array(phase_vectors)
+
+        # Pass attributes to diffraction library from structure library.
+        vector_library.identifiers = structure_library.indentifiers
+        vector_library.structures = structure_library.structures
 
         return vector_library

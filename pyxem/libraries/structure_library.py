@@ -24,6 +24,8 @@ class StructureLibrary(dict):
     A dictionary containing all the structures and their associated rotations
     in the .struct_lib attribute.
 
+    Attributes
+    ----------
     identifiers : list of strings/ints
         A list of phase identifiers referring to different atomic structures.
     structures : list of diffpy.structure.Structure objects.

@@ -34,14 +34,15 @@ class DiffractionVectorLibrary(dict):
 
     Attributes
     ----------
-    keys : list of string
-        Ordered list of string identifiers for phases.
-    structures : list of diffpy.Structure
-        Ordered list of diffpy.Structure objects associated with each phase.
+    identifiers : list of strings/ints
+        A list of phase identifiers referring to different atomic structures.
+    structures : list of diffpy.structure.Structure objects.
+        A list of diffpy.structure.Structure objects describing the atomic
+        structure associated with each phase in the library.
     """
 
     def __init__(self, *args, **kwargs):
-        self.keys = None
+        self.identifiers = None
         self.structures = None
 
     def pickle_library(self, filename):
