@@ -22,8 +22,11 @@ from hyperspy.api import markers
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
-from pyxem.utils.expt_utils import *
-from pyxem.utils.vector_utils import *
+from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
+from pyxem.utils.vector_utils import get_indices_from_distance_matrix
+from pyxem.utils.vector_utils import get_npeaks
+
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
@@ -50,8 +53,8 @@ class DiffractionVectors(BaseSignal):
         Array of 3-vectors describing Cartesian coordinates associated with
         each diffraction vector.
     hkls : np.array()
-        Array of Miller indices associated with each diffraction vector.
-    
+        Array of Miller indices associated with each diffraction vector
+        following indexation.
     """
     _signal_type = "diffraction_vectors"
 
@@ -255,3 +258,16 @@ class DiffractionVectors(BaseSignal):
         y.units = 'nm'
 
         return crystim
+
+    def get_cartesian_coordinates(self, accelerating_voltage,
+                                  *args, **kwargs):
+        """Get cartesian coordinates of the diffraction vectors.
+
+        Parameters
+        ----------
+        accelerating_voltage : float
+            The electron accelerating voltage at which the data was acquired.
+        """
+        self.cartesian = self.map(detector_to_fourier,
+                                  accelerating_voltage=accelerating_voltage,
+                                  *args, **kwargs)
