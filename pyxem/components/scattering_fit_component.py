@@ -1,4 +1,4 @@
-        # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Copyright 2017-2018 The pyXem developers
 #
 # This file is part of pyXem.
@@ -23,9 +23,9 @@ background to a radial profile.
 import numpy as np
 
 from hyperspy.component import Component
-from pyxem.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS
+from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 
-class ScatteringFitComponentLobato(Component):
+class ScatteringFitComponent(Component):
 
     def __init__(self, elements, fracs, N = 1., C = 0.):
         """
@@ -46,6 +46,7 @@ class ScatteringFitComponentLobato(Component):
         params = []
         for e in elements:
             params.append(ATOMIC_SCATTERING_PARAMS[e])
+            # As in International Tables for Crystallography, 2006, 4.3.2
         self.params = params
 
     def function(self, x):
@@ -60,13 +61,11 @@ class ScatteringFitComponentLobato(Component):
         for i, element in enumerate(params):
             fi = np.zeros(x.size)
             for n in range(len(element)): #5 parameters per element
-                fi += (element[n][0] * (2 + element[n][1] * np.square(2*x))
-                    * np.divide(1,np.square(1 + element[n][1] *
-                    np.square(2*x))))
+                fi += element[n][0] * np.exp(-element[n][1] * (np.square(x)))
             elem_frac = fracs[i]
             sum_squares += np.square(fi)*elem_frac
             square_sum += fi*elem_frac
 
-        self.square_sum = np.square(square_sum)
+        self.square_sum = N * np.square(square_sum)
         #square sum is kept for normalisation.
         return N * sum_squares + C

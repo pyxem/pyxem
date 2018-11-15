@@ -28,8 +28,8 @@ from hyperspy.signals import Signal1D
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
 
-from pyxem.utils.scattering_fit_component import ScatteringFitComponent
-from pyxem.utils.lobato_fit_component import ScatteringFitComponentLobato
+from pyxem.components.scattering_fit_component import ScatteringFitComponent
+from pyxem.components.lobato_fit_component import ScatteringFitComponentLobato
 
 class ReducedIntensityGenerator():
     """Generates a reduced intensity profile for a specified diffraction radial
@@ -89,14 +89,12 @@ class ReducedIntensityGenerator():
 
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
-        fit_model.fit()
+        fit_model.multifit()
         fit_model.plot()
-
         fit = fit_model.as_signal()
 
         self.normalisation = background.square_sum
         self.background_fit = fit
-        self.N_val = background.N.value
         return
 
 
@@ -128,7 +126,7 @@ class ReducedIntensityGenerator():
         #remember axes scale and size!
         reduced_intensity = (4 * np.pi * s *
                             np.divide((self.signal.data - self.background_fit),
-                            self.N_val * self.normalisation))
+                            self.normalisation))
 
         #ri = ReducedIntensityProfile(reduced_intensity.data[:,:,num_min:num_max])
         ri = ReducedIntensityProfile(reduced_intensity)
