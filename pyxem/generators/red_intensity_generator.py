@@ -64,7 +64,7 @@ class ReducedIntensityGenerator():
         return
 
     def fit_atomic_scattering(self, elements, fracs,
-                                N = 1., C = 0.,lobato = True):
+                                N = 1., C = 0.,type = 'lobato'):
         """Fits a diffraction intensity profile to the background using
         FIT = N * sum(ci * (fi^2) + C)
 
@@ -77,21 +77,20 @@ class ReducedIntensityGenerator():
         fracs: a list of fraction of the respective elements
         N = the "slope"
         C = an additive constant
-        lobato = a bool that decides whether to use the lobato scatter params
+        type = type of scattering parameters fitted. Default is lobato.
+                See scattering_fit_component for more.
         fit_plot_max: the maximum y value in the fitting plot.
         """
 
         fit_model = self.signal.create_model()
-        if lobato == True:
-            background = ScatteringFitComponentLobato(elements, fracs, N, C)
-        else:
-            background = ScatteringFitComponent(elements, fracs, N, C)
+        background = ScatteringFitComponent(elements, fracs, N, C, type)
 
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
         fit_model.multifit()
         fit_model.plot()
-        fit = fit_model.as_signal()
+        #fit = fit_model.as_signal()
+        fit = backgroundself.get_fit_as_signal()
 
         self.normalisation = background.square_sum
         self.background_fit = fit

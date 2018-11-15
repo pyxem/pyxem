@@ -24,10 +24,11 @@ import numpy as np
 
 from hyperspy.component import Component
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
+from pyxem.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 
 class ScatteringFitComponent(Component):
 
-    def __init__(self, elements, fracs, N = 1., C = 0.):
+    def __init__(self, elements, fracs, N=1., C=0., type='lobato'):
         """
         N and C are fitting parameters for the Component class.
 
@@ -35,12 +36,17 @@ class ScatteringFitComponent(Component):
         ----------
         N = the "slope"
         C = an additive constant
+        type = the type of scattering parameter fit done.
+                Options are:
+                    - lobato: Fit to Lobato & Van Dyck (2014)
+                    - inter: Fit to International Tables Vol. C, table 4.3.2.3
 
         sum_squares = sum (ci * fi**2 )
         square_sum = (sum(ci * fi))**2 for atomic fraction ci with
         electron scattering factor fi. Used for normalisation.
         """
         Component.__init__(self, ['N', 'C'])
+        self.type = type
         self.elements = elements
         self.fracs = fracs
         params = []
@@ -58,14 +64,35 @@ class ScatteringFitComponent(Component):
         sum_squares = np.zeros(x.size)
         square_sum = np.zeros(x.size)
 
-        for i, element in enumerate(params):
-            fi = np.zeros(x.size)
-            for n in range(len(element)): #5 parameters per element
-                fi += element[n][0] * np.exp(-element[n][1] * (np.square(x)))
-            elem_frac = fracs[i]
-            sum_squares += np.square(fi)*elem_frac
-            square_sum += fi*elem_frac
+        if self.type == 'lobato':
+            for i, element in enumerate(params):
+                fi = np.zeros(x.size)
+                for n in range(len(element)): #5 parameters per element
+                    fi += (element[n][0] * (2 + element[n][1] * np.square(2*x))
+                        * np.divide(1,np.square(1 + element[n][1] *
+                        np.square(2*x))))
+                elem_frac = fracs[i]
+                sum_squares += np.square(fi)*elem_frac
+                square_sum += fi*elem_frac
+
+        elif self.type == 'inter':
+            for i, element in enumerate(params):
+                fi = np.zeros(x.size)
+                for n in range(len(element)): #5 parameters per element
+                    fi += element[n][0] * np.exp(-element[n][1] * (np.square(x)))
+                elem_frac = fracs[i]
+                sum_squares += np.square(fi)*elem_frac
+                square_sum += fi*elem_frac
+
+        else:
+            print('Error. Specified type does not exist.')
+            return
 
         self.square_sum = N * np.square(square_sum)
+        self.fitted_signal = N * sum_squares + C
         #square sum is kept for normalisation.
         return N * sum_squares + C
+
+    def get_fit_as_signal():
+
+        return
