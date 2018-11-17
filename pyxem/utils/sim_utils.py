@@ -198,12 +198,13 @@ def get_kinematical_intensities(structure,
         fss.append(fs)
     fss = np.array(fss)
 
+    # Change the coordinate system of fcoords to align with that of g_indices
+    fcoords = np.dot(fcoords, np.linalg.inv(np.dot(structure.lattice.stdbase, structure.lattice.recbase)))
+
     # Calculate structure factors for all excited g-vectors.
     f_hkls = []
     for n in np.arange(len(g_indices)):
         g = g_indices[n]
-        q3 = mat2quat(structure.lattice.baserot)
-        g = rotate_vector(g, q3)
         fs = fss[n]
         dw_correction = np.exp(-dwfactors * s2s[n])
         f_hkl = np.sum(fs * occus * np.exp(2j * np.pi * np.dot(fcoords, g))
