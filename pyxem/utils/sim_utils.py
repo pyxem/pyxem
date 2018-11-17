@@ -446,7 +446,7 @@ def angle_between_cartesian(a, b):
     angle : float
         Angle between `a` and `b` in radians.
     """
-    return math.acos(min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
+    return math.acos(max(-1.0, min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))))
 
 
 def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution):
