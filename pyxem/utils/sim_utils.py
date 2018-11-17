@@ -477,8 +477,7 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
         Rotations covering the inverse pole figure given as a of Euler
             angles in degress. This `np.array` can be passed directly to pyxem.
     """
-    # Convert the crystal directions to cartesian vectors, and then normalize
-    # to get the directions.
+    # Convert the crystal directions to cartesian vectors
     if len(corner_a) == 4:
         corner_a = uvtw_to_uvw(corner_a)
     if len(corner_b) == 4:
@@ -491,6 +490,15 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
     corner_a = corner_a @ lattice.stdbase
     corner_b = corner_b @ lattice.stdbase
     corner_c = corner_c @ lattice.stdbase
+
+    # Rotate the list such that corner_a parallel (0, 0, 1)
+    angle_corner_a = angle_between_cartesian(corner_a, (0, 0, 1))
+    if not np.allclose(angle_corner_a, 0):
+        axis_corner_a_to_up = np.cross(corner_a, (0, 0, 1))
+        rotation_corner_a_to_up = axangle2mat(axis_corner_a_to_up, angle_corner_a)
+        corner_a = rotation_corner_a_to_up @ corner_a
+        corner_b = rotation_corner_a_to_up @ corner_b
+        corner_c = rotation_corner_a_to_up @ corner_c
 
     corner_a /= np.linalg.norm(corner_a)
     corner_b /= np.linalg.norm(corner_b)
@@ -508,14 +516,14 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
     if np.count_nonzero(axis_a_to_c) == 0:
         raise ValueError('Directions a and c are parallel')
 
-    # Ensure that we keep the resolution also along the direction to the corner
-    # b or c farthest away from a.
-    theta_count = math.ceil(max(angle_a_to_b, angle_a_to_c) / resolution)
     rotations = []
 
     # Generate a list of theta_count evenly spaced angles theta_b in the range
     # [0, angle_a_to_b] and an equally long list of evenly spaced angles
     # theta_c in the range[0, angle_a_to_c].
+    # Ensure that we keep the resolution also along the direction to the corner
+    # b or c farthest away from a.
+    theta_count = math.ceil(max(angle_a_to_b, angle_a_to_c) / resolution)
     for i, (theta_b, theta_c) in enumerate(
             zip(np.linspace(0, angle_a_to_b, theta_count),
                 np.linspace(0, angle_a_to_c, theta_count))):
