@@ -477,7 +477,7 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
         Rotations covering the inverse pole figure given as a of Euler
             angles in degress. This `np.array` can be passed directly to pyxem.
     """
-    # Convert the crystal directions to cartesian vectors
+    # Convert the crystal directions to cartesian vectors and normalize
     if len(corner_a) == 4:
         corner_a = uvtw_to_uvw(corner_a)
     if len(corner_b) == 4:
@@ -487,18 +487,9 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
 
     lattice = structure.lattice
 
-    corner_a = corner_a @ lattice.stdbase
-    corner_b = corner_b @ lattice.stdbase
-    corner_c = corner_c @ lattice.stdbase
-
-    # Rotate the list such that corner_a parallel (0, 0, 1)
-    angle_corner_a = angle_between_cartesian(corner_a, (0, 0, 1))
-    if not np.allclose(angle_corner_a, 0):
-        axis_corner_a_to_up = np.cross(corner_a, (0, 0, 1))
-        rotation_corner_a_to_up = axangle2mat(axis_corner_a_to_up, angle_corner_a)
-        corner_a = rotation_corner_a_to_up @ corner_a
-        corner_b = rotation_corner_a_to_up @ corner_b
-        corner_c = rotation_corner_a_to_up @ corner_c
+    corner_a = np.dot(corner_a, lattice.stdbase)
+    corner_b = np.dot(corner_b, lattice.stdbase)
+    corner_c = np.dot(corner_c, lattice.stdbase)
 
     corner_a /= np.linalg.norm(corner_a)
     corner_b /= np.linalg.norm(corner_b)
