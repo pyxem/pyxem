@@ -24,16 +24,34 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import *
 
 
-def create_structure_cubic():
-    lattice = diffpy.structure.lattice.Lattice(1, 1, 1, 90, 90, 90)
+def create_lattice_structure(a, b, c, alpha, beta, gamma):
+    lattice = diffpy.structure.lattice.Lattice(a, b, c, alpha, beta, gamma)
     atom = diffpy.structure.atom.Atom(atype='Si', xyz=[0, 0, 0], lattice=lattice)
     return diffpy.structure.Structure(atoms=[atom], lattice=lattice)
+
+
+def create_structure_cubic():
+    return create_lattice_structure(1, 1, 1, 90, 90, 90)
 
 
 def create_structure_hexagonal():
-    lattice = diffpy.structure.lattice.Lattice(1, 1, 1, 90, 90, 120)
-    atom = diffpy.structure.atom.Atom(atype='Si', xyz=[0, 0, 0], lattice=lattice)
-    return diffpy.structure.Structure(atoms=[atom], lattice=lattice)
+    return create_lattice_structure(1, 1, 1, 90, 90, 120)
+
+
+def create_structure_orthorombic():
+    return create_lattice_structure(1, 2, 3, 90, 90, 90)
+
+
+def create_structure_tetragonal():
+    return create_lattice_structure(1, 1, 2, 90, 90, 90)
+
+
+def create_structure_trigonal():
+    return create_lattice_structure(1, 1, 1, 100, 100, 100)
+
+
+def create_structure_monoclinic():
+    return create_lattice_structure(1, 2, 3, 90, 100, 90)
 
 
 @pytest.mark.parametrize('accelerating_voltage, wavelength', [
@@ -113,20 +131,46 @@ structure_cubic_rotations = [
 
 structure_hexagonal_rotations = [
     [0, 0, 0],
-    [129.06467839, 90, 0],
-    [159.89609064, 90, 0],
+    [90, 90, 0],
+    [120, 90, 0]
+]
+
+structure_orthogonal_rotations = [
+    [0, 0, 0],
+    [90, 90, 0],
+    [180, 90, 0]
+]
+
+structure_tetragonal_rotations = [
+    [0, 0, 0],
+    [90, 90, 0],
+    [135, 90, 0]
+]
+
+structure_trigonal_rotations = [
+    [0, 0, 0],
+    [-28.64458044, 75.45951959, 0],
+    [ 38.93477108, 90, 0]
+]
+
+structure_monoclinic_rotations = [
+    [0, 0, 0],
+    [0, 90, 0],
+    [180, 90, 0]
 ]
 
 
-@pytest.mark.parametrize('structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list', [
-    (create_structure_cubic(), (0, 0, 1), (1, 0, 1), (1, 1, 1), [0], np.deg2rad(10), structure_cubic_rotations),
-    (create_structure_hexagonal(), (0, 0, 0, 1), (1, 1, -2, 0), (1, 0, -1, 0), [0], np.deg2rad(10), structure_hexagonal_rotations)
+@pytest.mark.parametrize('structure, corner_a, corner_b, corner_c, rotation_list', [
+    (create_structure_cubic(), (0, 0, 1), (1, 0, 1), (1, 1, 1), structure_cubic_rotations),
+    (create_structure_hexagonal(), (0, 0, 0, 1), (1, 0, -1, 0), (1, 1, -2, 0), structure_hexagonal_rotations),
+    (create_structure_orthorombic(), (0, 0, 1), (1, 0, 0), (0, 1, 0), structure_orthogonal_rotations),
+    (create_structure_tetragonal(), (0, 0, 1), (1, 0, 0), (1, 1, 0), structure_tetragonal_rotations),
+    (create_structure_trigonal(), (0, 0, 0, 1), (0, -1, 1, 0), (1, -1, 0, 0), structure_trigonal_rotations),
+    (create_structure_monoclinic(), (0, 0, 1), (0, 1, 0), (0, -1, 0), structure_monoclinic_rotations),
 ])
-def test_rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution, rotation_list):
-    val = rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution)
-    print(val)
+def test_rotation_list_stereographic(structure, corner_a, corner_b, corner_c, rotation_list):
+    val = rotation_list_stereographic(structure, corner_a, corner_b, corner_c, [0], np.deg2rad(10))
     for expected in rotation_list:
-        print(expected)
         assert any((np.allclose(expected, actual) for actual in val))
 
 
