@@ -31,25 +31,48 @@ import hyperspy.api as hs
 
 def correlate_library(image, library, n_largest, mask, keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image) stored as a
-    numpy array. See the correlate method of IndexationGenerator for details.
+    with a particular experimental diffraction pattern (image).
+
+    Parameters
+    ----------
+    image : np.array()
+        The experimental diffraction pattern of interest.
+    library : DiffractionLibrary
+        The library of diffraction simulations to be correlated with the
+        experimental data.
+    n_largest : int
+        The number of well correlated simulations to be retained.
+    mask : bool array
+        A mask for navigation axes 1 indicates positions to be indexed.
+
+    Returns
+    -------
+    top_matches : (<num phases>*n_largest, 5), np.array()
+        A numpy array containing the top n correlated simulations for the
+        experimental pattern of interest.
+
+    See also
+    --------
+    pyxem.utils.correlate and the correlate method of IndexationGenerator.
     """
-    out_arr = np.zeros((len(library), n_largest, 5))
+    top_matches = np.zeros((len(library), n_largest, 5))
     if mask == 1:
         for phase_index, key in enumerate(library.keys()):
             correlations = np.empty((len(library[key]), 4))
             for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
-                # diffraction_pattern here is in fact a library of
-                # diffraction_pattern_properties
                 correlation = correlate(image, diffraction_pattern)
                 correlations[i, :] = *orientation, correlation
-            res = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
-            res = res[res[:, 3].argsort()][::-1]
-            out_arr[phase_index, :, 0] = phase_index
-            out_arr[phase_index, :, 1:] = res
+
+            # Partition to get the n_largest best matches
+            top_n = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
+            # Sort the matches by correlation score, descending
+            top_n = top_n[top_n[:, 3].argsort()][::-1]
+
+            top_matches[phase_index, :, 0] = phase_index
+            top_matches[phase_index, :, 1:] = top_n
     else:
-        out_arr.fill(np.nan)
-    return out_arr.reshape((len(library) * n_largest, 5))
+        top_matches.fill(np.nan)
+    return top_matches.reshape((len(library) * n_largest, 5))
 
 
 class IndexationGenerator():
