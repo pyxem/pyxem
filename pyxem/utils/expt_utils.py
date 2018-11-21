@@ -461,49 +461,6 @@ def ring_pattern(pts,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rota
 
     return amplitude*(v0+v1+v2+v3+v4+v5+v6+v7+v8).ravel()
 
-def fit_ring_pattern(pattern, mask_radius,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
-    """
-    pattern : Electron Diffraction Signal
-    mask_radius : radius in pixels of mask for direct beam
-    """
-    image_size=np.size(pattern,0)
-    xi = np.linspace(0, image_size-1, image_size)
-    yi = np.linspace(0, image_size-1, image_size)
-    x, y = np.meshgrid(xi, yi)
-
-    mask = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
-    mask[mask>mask_radius]=0
-    pattern.data[mask>0] *=0
-    
-    pts = np.array([x.ravel(),y.ravel()]).ravel()
-    ref = pattern.data[pattern.data>0]
-    ref = ref.ravel()
-    pts = np.array([x[exp.data>0].ravel(),y[exp.data>0].ravel()]).ravel()
-    x0=[scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation]
-    xf,cov = curve_fit(ring_pattern,pts,ref,p0=x0)
-
-    return xf
-
-def generate_ring_pattern(image_size, mask=False,mask_radius=10,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
-    """
-    pattern : Electron Diffraction Signal
-    mask_radius : radius in pixels of mask for direct beam
-    """
-    xi = np.linspace(0, image_size-1, image_size)
-    yi = np.linspace(0, image_size-1, image_size)
-    x, y = np.meshgrid(xi, yi)
-        
-    ptsFull = np.array([x.ravel(),y.ravel()]).ravel()
-    generated_pattern = ring_pattern(ptsFull,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation)
-    generated_pattern = np.reshape(refined,(256,256))
-
-    if mask==True:
-        mask = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
-        mask[mask>mask_radius]=0
-        generated_pattern[mask>0] *=0
-
-    return generated_pattern
-
 def peaks_as_gvectors(z, center, calibration):
     """
     Converts peaks found as array indices to calibrated units, for use in a

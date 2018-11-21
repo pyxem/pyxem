@@ -469,6 +469,48 @@ class ElectronDiffraction(Signal2D):
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
 
+    def fit_ring_pattern(self, mask_radius,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
+        """
+        mask_radius : radius in pixels of mask for direct beam
+        """
+        image_size = self.data.shape[0]
+        xi = np.linspace(0, image_size-1, image_size)
+        yi = np.linspace(0, image_size-1, image_size)
+        x, y = np.meshgrid(xi, yi)
+
+        mask = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
+        mask[mask>mask_radius]=0
+        self.data[mask>0] *=0
+    
+        pts = np.array([x.ravel(),y.ravel()]).ravel()
+        ref = self.data[self.data>0]
+        ref = ref.ravel()
+        pts = np.array([x[self.data>0].ravel(),y[self.data>0].ravel()]).ravel()
+        x0=[scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation]
+        xf,cov = curve_fit(ring_pattern,pts,ref,p0=x0)
+
+        return xf
+
+    def generate_ring_pattern(self, mask=False,mask_radius=10,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
+        """
+        mask_radius : radius in pixels of mask for direct beam
+        """
+        image_size = self.data.shape[0]
+        xi = np.linspace(0, image_size-1, image_size)
+        yi = np.linspace(0, image_size-1, image_size)
+        x, y = np.meshgrid(xi, yi)
+        
+        ptsFull = np.array([x.ravel(),y.ravel()]).ravel()
+        generated_pattern = ring_pattern(ptsFull,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation)
+        generated_pattern = np.reshape(generated_pattern,(image_size,image_size))
+
+        if mask==True:
+            mask = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
+            mask[mask>mask_radius]=0
+            generated_pattern[mask>0] *=0
+
+        return generated_pattern
+
     def remove_background(self, method,
                           *args, **kwargs):
         """Perform background subtraction via multiple methods.
