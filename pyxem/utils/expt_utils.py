@@ -26,6 +26,7 @@ from skimage.morphology import square, opening
 from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
+from scipy.optimize import curve_fit
 
 
 """
@@ -428,6 +429,80 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
 
     return (shift - 0.5)
 
+def calc_radius_with_distortion(x,y,xc, yc,asym,rot):
+    """ calculate the distance of each 2D points from the center (xc, yc) """
+    xp = x*np.cos(rot) - y*np.sin(rot)
+    yp = x*np.sin(rot) + y*np.cos(rot)
+    xcp = xc*np.cos(rot) - yc*np.sin(rot)
+    ycp = xc*np.sin(rot) + yc*np.cos(rot)
+
+    return np.sqrt((xp-xcp)**2 + asym*(yp-ycp)**2)
+
+def ring_pattern(pts,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation):
+    ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, 0.4904, 0.6935, 0.8132, 0.8494, 0.9808,1.0688,1.0966
+    ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1*scale, ring2*scale, ring3*scale, ring4*scale, ring5*scale, ring6*scale, ring7*scale, ring8*scale
+    amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 =1,0.44,0.19,0.16,0.04,0.014, 0.038,0.036 
+    xcentre = (image_size-1)/2
+    ycentre = (image_size-1)/2
+    x = pts[:round(np.size(pts,0)/2)]
+    y = pts[round(np.size(pts,0)/2):]
+    Ri = calc_radius_with_distortion(x,y,xcentre,ycentre,asymmetry,rotation)
+    
+    denom = 2*spread**2
+    v0 = direct_beam_amplitude*Ri**-2#np.exp((-1*(Ri)*(Ri))/d0)
+    v1 = amp1*np.exp((-1*(Ri-ring1)*(Ri-ring1))/denom)
+    v2 = amp2*np.exp((-1*(Ri-ring2)*(Ri-ring2))/denom)
+    v3 = amp3*np.exp((-1*(Ri-ring3)*(Ri-ring3))/denom)
+    v4 = amp4*np.exp((-1*(Ri-ring4)*(Ri-ring4))/denom)
+    v5 = amp5*np.exp((-1*(Ri-ring5)*(Ri-ring5))/denom)
+    v6 = amp6*np.exp((-1*(Ri-ring6)*(Ri-ring6))/denom)
+    v7 = amp7*np.exp((-1*(Ri-ring7)*(Ri-ring7))/denom)
+    v8 = amp8*np.exp((-1*(Ri-ring8)*(Ri-ring8))/denom)
+
+    return amplitude*(v0+v1+v2+v3+v4+v5+v6+v7+v8).ravel()
+
+def fit_ring_pattern(pattern, mask_radius,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
+    """
+    pattern : Electron Diffraction Signal
+    mask_radius : radius in pixels of mask for direct beam
+    """
+    image_size=np.size(pattern,0)
+    xi = np.linspace(0, image_size-1, image_size)
+    yi = np.linspace(0, image_size-1, image_size)
+    x, y = np.meshgrid(xi, yi)
+
+    mask = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
+    mask[mask>mask_radius]=0
+    pattern.data[mask>0] *=0
+    
+    pts = np.array([x.ravel(),y.ravel()]).ravel()
+    ref = pattern.data[pattern.data>0]
+    ref = ref.ravel()
+    pts = np.array([x[exp.data>0].ravel(),y[exp.data>0].ravel()]).ravel()
+    x0=[scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation]
+    xf,cov = curve_fit(ring_pattern,pts,ref,p0=x0)
+
+    return xf
+
+def generate_ring_pattern(image_size, mask=False,mask_radius=10,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
+    """
+    pattern : Electron Diffraction Signal
+    mask_radius : radius in pixels of mask for direct beam
+    """
+    xi = np.linspace(0, image_size-1, image_size)
+    yi = np.linspace(0, image_size-1, image_size)
+    x, y = np.meshgrid(xi, yi)
+        
+    ptsFull = np.array([x.ravel(),y.ravel()]).ravel()
+    generated_pattern = ring_pattern(ptsFull,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation)
+    generated_pattern = np.reshape(refined,(256,256))
+
+    if mask==True:
+        mask = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
+        mask[mask>mask_radius]=0
+        generated_pattern[mask>0] *=0
+
+    return generated_pattern
 
 def peaks_as_gvectors(z, center, calibration):
     """
