@@ -20,9 +20,6 @@
 
 """
 
-from heapq import nlargest
-from operator import itemgetter
-
 import numpy as np
 from pyxem.signals.indexation_results import IndexationResults
 
@@ -37,32 +34,22 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
     with a particular experimental diffraction pattern (image) stored as a
     numpy array. See the correlate method of IndexationGenerator for details.
     """
-    i = 0
-    out_arr = np.zeros((n_largest * len(library), 5))
+    out_arr = np.zeros((len(library), n_largest, 5))
     if mask == 1:
-        for key in library.keys():
-            correlations = dict()
-            for orientation, diffraction_pattern in library[key].items():
+        for phase_index, key in enumerate(library.keys()):
+            correlations = np.empty((len(library[key]), 4))
+            for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
                 # diffraction_pattern here is in fact a library of
                 # diffraction_pattern_properties
                 correlation = correlate(image, diffraction_pattern)
-                correlations[orientation] = correlation
-                res = nlargest(n_largest, correlations.items(),
-                               key=itemgetter(1))
-            for j in np.arange(n_largest):
-                out_arr[j + i * n_largest][0] = i
-                out_arr[j + i * n_largest][1] = res[j][0][0]
-                out_arr[j + i * n_largest][2] = res[j][0][1]
-                out_arr[j + i * n_largest][3] = res[j][0][2]
-                out_arr[j + i * n_largest][4] = res[j][1]
-            i = i + 1
-
+                correlations[i, :] = *orientation, correlation
+            res = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
+            res = res[res[:, 3].argsort()][::-1]
+            out_arr[phase_index, :, 0] = phase_index
+            out_arr[phase_index, :, 1:] = res
     else:
-        for j in np.arange(n_largest):
-            for k in [0, 1, 2, 3, 4]:
-                out_arr[j + i * n_largest][k] = np.nan
-        i = i + 1
-    return out_arr
+        out_arr.fill(np.nan)
+    return out_arr.reshape((len(library) * n_largest, 5))
 
 
 class IndexationGenerator():
