@@ -471,7 +471,34 @@ class ElectronDiffraction(Signal2D):
 
     def fit_ring_pattern(self, mask_radius,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
         """
-        mask_radius : radius in pixels of mask for direct beam
+        Determine diffraction pattern calibration and distortions from by fitting a polycrystalline gold diffraction pattern to a set of rings.
+        It is suggested that the function generate_ring_pattern is used to find initial values (initial guess) for the parameters used in the fit.
+
+        This function is written expecting a single 2D diffraction pattern with equal dimensions (e.g. 256x256).
+        
+        Parameters
+        ----------
+
+        mask_radius : int
+            The radius in pixels for a mask over the direct beam disc (the direct beam disc within given radius will be excluded from the fit)
+        scale : float
+            An initial guess for the diffraction calibration in 1/Angstrom units
+        amplitude : float
+            An initial guess for the amplitude of the polycrystalline rings in arbitrary units
+        spread : float
+            An initial guess for the spread within each ring (Gaussian width)
+        direct_beam_amplitude : float
+            An initial guess for the background intensity from the direct beam disc in arbitrary units
+        asymmetry : float
+            An initial guess for any elliptical asymmetry in the pattern (for a perfectly circular pattern asymmetry=1)
+        rotation : float
+            An initial guess for the rotation of the (elliptical) pattern in radians.
+
+        Returns
+        ----------
+  
+        Array of refined fitting parameters [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation].
+
         """
         image_size = self.data.shape[0]
         xi = np.linspace(0, image_size-1, image_size)
@@ -495,8 +522,38 @@ class ElectronDiffraction(Signal2D):
         return xf
 
     def generate_ring_pattern(self, mask=False,mask_radius=10,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
-        """
-        mask_radius : radius in pixels of mask for direct beam
+       """
+        Calculate a set of rings to model a polycrystalline gold diffraction pattern for use in fitting for diffraction pattern calibration.
+        It is suggested that the function generate_ring_pattern is used to find initial values (initial guess) for the parameters used in 
+        the function fit_ring_pattern. 
+
+        This function is written expecting a single 2D diffraction pattern with equal dimensions (e.g. 256x256).
+        
+        Parameters
+        ----------
+
+        mask : bool
+            Choice of whether to use mask or not (mask=True will return a specified circular mask setting a region around the direct beam to zero)
+        mask_radius : int
+            The radius in pixels for a mask over the direct beam disc (the direct beam disc within given radius will be excluded from the fit)
+        scale : float
+            An initial guess for the diffraction calibration in 1/Angstrom units
+        amplitude : float
+            An initial guess for the amplitude of the polycrystalline rings in arbitrary units
+        spread : float
+            An initial guess for the spread within each ring (Gaussian width)
+        direct_beam_amplitude : float
+            An initial guess for the background intensity from the direct beam disc in arbitrary units
+        asymmetry : float
+            An initial guess for any elliptical asymmetry in the pattern (for a perfectly circular pattern asymmetry=1)
+        rotation : float
+            An initial guess for the rotation of the (elliptical) pattern in radians.
+
+        Returns
+        ----------
+  
+        2D array with the same dimensions and orientation as self.data (the input diffraction pattern data)
+
         """
         image_size = self.data.shape[0]
         xi = np.linspace(0, image_size-1, image_size)
