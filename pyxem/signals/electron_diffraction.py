@@ -511,9 +511,9 @@ class ElectronDiffraction(Signal2D):
         generated_pattern = np.reshape(generated_pattern,(image_size,image_size))
 
         if mask==True:
-            mask = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
-            mask[mask>mask_radius]=0
-            generated_pattern[mask>0] *=0
+            maskROI = calc_radius_with_distortion(x,y,(image_size-1)/2,(image_size-1)/2,1,0)
+            maskROI[maskROI>mask_radius]=0
+            generated_pattern[maskROI>0] *=0
 
         return generated_pattern
 
