@@ -522,7 +522,7 @@ class ElectronDiffraction(Signal2D):
         return xf
 
     def generate_ring_pattern(self, mask=False,mask_radius=10,scale=100,amplitude=1000,spread=2, direct_beam_amplitude=500,asymmetry=1,rotation=0):
-       """
+        """
         Calculate a set of rings to model a polycrystalline gold diffraction pattern for use in fitting for diffraction pattern calibration.
         It is suggested that the function generate_ring_pattern is used to find initial values (initial guess) for the parameters used in 
         the function fit_ring_pattern. 
