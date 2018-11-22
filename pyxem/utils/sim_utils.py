@@ -23,6 +23,7 @@ from scipy.constants import h, m_e, e, c, pi
 import collections
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
+from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from transforms3d.quaternions import mat2quat, rotate_vector
 
@@ -110,7 +111,8 @@ def get_unique_families(hkls):
 
 
 def get_vectorized_list_for_atomic_scattering_factors(structure,
-                                                      debye_waller_factors):
+                                                      debye_waller_factors,
+                                                      scattering_params):
     """ Create a flattened array of coeffs, fcoords and occus for vectorized
     computation of atomic scattering factors.
 
@@ -140,8 +142,17 @@ def get_vectorized_list_for_atomic_scattering_factors(structure,
 
     coeffs, fcoords, occus, dwfactors = [], [], [], []
 
+    if scattering_params == 'lobato':
+        scattering_params_dict = ATOMIC_SCATTERING_PARAMS_LOBATO
+    elif scattering_params == 'xtables':
+        scattering_params_dict = ATOMIC_SCATTERING_PARAMS
+    else:
+        raise NotImplementedError("The scattering parameters `{}` are not implemented. "
+                                  "See documentation for available "
+                                  "implementations.".format(scattering_params))
+
     for site in structure:
-        c = ATOMIC_SCATTERING_PARAMS[site.element]
+        c = scattering_params_dict[site.element]
         coeffs.append(c)
         dwfactors.append(debye_waller_factors.get(site.element, 0))
         fcoords.append(site.xyz)
@@ -160,7 +171,8 @@ def get_kinematical_intensities(structure,
                                 g_hkls,
                                 excitation_error,
                                 maximum_excitation_error,
-                                debye_waller_factors):
+                                debye_waller_factors,
+                                scattering_params='lobato'):
     """Calculates peak intensities.
 
     The peak intensity is a combination of the structure factor for a given
@@ -184,17 +196,27 @@ def get_kinematical_intensities(structure,
 
     """
     coeffs, fcoords, occus, dwfactors = get_vectorized_list_for_atomic_scattering_factors(
-        structure=structure, debye_waller_factors=debye_waller_factors)
+        structure=structure, debye_waller_factors=debye_waller_factors,
+        scattering_params=scattering_params)
 
     # Store array of s^2 values since used multiple times.
     s2s = (g_hkls / 2) ** 2
 
     # Create array containing atomic scattering factors.
     fss = []
-    for s2 in s2s:
-        fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
-        fss.append(fs)
-    fss = np.array(fss)
+    if scattering_params == 'lobato':
+        for g in g_hkls:
+            fs = np.sum(coeffs[:,:,0] * (2 + coeffs[:,:,1] * g**2) *
+                        np.divide(1,np.square(1 + coeffs[:,:,1] * g**2)), axis=1)
+            fss.append(fs)
+        fss = np.array(fss)
+    elif scattering_params == 'xtables':
+        for s2 in s2s:
+            fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
+            fss.append(fs)
+        fss = np.array(fss)
+    else:
+        raise ValueError("User specified scattering parameters not defined.")
 
     # Change the coordinate system of fcoords to align with that of g_indices
     fcoords = np.dot(fcoords, np.linalg.inv(np.dot(structure.lattice.stdbase, structure.lattice.recbase)))
@@ -226,7 +248,8 @@ def simulate_kinematic_scattering(atomic_coordinates,
                                   simulation_size=256,
                                   max_k=1.5,
                                   illumination='plane_wave',
-                                  sigma=20):
+                                  sigma=20,
+                                  scattering_params='lobato'):
     """Simulate electron scattering from arrangement of atoms comprising one
     elemental species.
 
@@ -252,7 +275,12 @@ def simulate_kinematic_scattering(atomic_coordinates,
         ElectronDiffraction simulation.
     """
     # Get atomic scattering parameters for specified element.
-    c = np.array(ATOMIC_SCATTERING_PARAMS[element])
+    if scattering_params == 'lobato':
+        c = np.array(ATOMIC_SCATTERING_PARAMS_LOBATO[element])
+    elif scattering_params == 'xtables':
+        c = np.array(ATOMIC_SCATTERING_PARAMS[element])
+    else:
+        raise ValueError("User specified scattering parameters not defined.")
     # Calculate electron wavelength for given keV.
     wavelength = get_electron_wavelength(accelerating_voltage)
 
@@ -265,11 +293,18 @@ def simulate_kinematic_scattering(atomic_coordinates,
 
     # Calculate scatering angle squared for each k-vector.
     s2s = (np.linalg.norm(k, axis=0) / 2) ** 2
+    gs = (np.linalg.norm(k, axis=0))
 
     # Evaluate atomic scattering factor.
-    fs = np.zeros_like(s2s)
-    for i in np.arange(4):
-        fs = fs + (c[i][0] * np.exp(-c[i][1] * s2s))
+    if scattering_params == 'lobato':
+        fs = np.zeros_like(s2s)
+        for i in np.arange(5):
+            fs = fs + c[i,0] * (2 + c[i,1] * g**2) *
+                        np.divide(1,np.square(1 + c[i,1] * g**2))
+    elif scattering_params == 'xtables':
+        fs = np.zeros_like(s2s)
+        for i in np.arange(5):
+            fs = fs + (c[i][0] * np.exp(-c[i][1] * s2s))
 
     # Evaluate scattering from all atoms
     scattering = np.zeros_like(s2s)

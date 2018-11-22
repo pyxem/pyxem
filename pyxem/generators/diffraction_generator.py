@@ -62,10 +62,22 @@ class DiffractionGenerator(object):
     def __init__(self,
                  accelerating_voltage,
                  max_excitation_error,
-                 debye_waller_factors=None):
+                 debye_waller_factors=None,
+                 scattering_params='lobato'):
         self.wavelength = get_electron_wavelength(accelerating_voltage)
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
+
+        scattering_params_dict = {
+            'lobato' = 'lobato',
+            'xtables' = 'xtables'
+        }
+        if params in scattering_params_dict:
+            self.scattering_params = scattering_params_dict[scattering_params]
+        else:
+            raise NotImplementedError("The scattering parameters `{}` is not implemented. "
+                                      "See documentation for available "
+                                      "implementations.".format(method))
 
     def calculate_ed_data(self,
                           structure,
@@ -94,6 +106,7 @@ class DiffractionGenerator(object):
         max_excitation_error = self.max_excitation_error
         debye_waller_factors = self.debye_waller_factors
         latt = structure.lattice
+        scattering_params=self.scattering_params
 
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
@@ -120,7 +133,8 @@ class DiffractionGenerator(object):
                                                   g_hkls,
                                                   proximity,
                                                   max_excitation_error,
-                                                  debye_waller_factors)
+                                                  debye_waller_factors,
+                                                  scattering_params)
 
         # Threshold peaks included in simulation based on minimum intensity.
         peak_mask = intensities > 1e-20
@@ -136,7 +150,8 @@ class DiffractionGenerator(object):
     def calculate_profile_data(self, structure,
                                reciprocal_radius=1.0,
                                magnitude_tolerance=1e-5,
-                               minimum_intensity=1e-3):
+                               minimum_intensity=1e-3,
+                               scattering_params='lobato'):
         """
         Calculates a one dimensional diffraction profile for a structure.
 
@@ -167,7 +182,7 @@ class DiffractionGenerator(object):
         is_hex = is_lattice_hexagonal(latt)
 
         coeffs, fcoords, occus, dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure, {
-        })
+        },scattering_params='lobato')
 
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
