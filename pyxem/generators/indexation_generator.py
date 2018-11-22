@@ -59,6 +59,7 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
     if mask == 1:
         for phase_index, key in enumerate(library.keys()):
             correlations = np.empty((len(library[key]), 4))
+            # Use enumerate to index, i, each (orientation, diffraction_pattern) in list
             for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
                 correlation = correlate(image, diffraction_pattern)
                 correlations[i, :] = *orientation, correlation
