@@ -29,7 +29,6 @@ from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
 
 from pyxem.components.scattering_fit_component import ScatteringFitComponent
-from pyxem.components.lobato_fit_component import ScatteringFitComponentLobato
 
 class ReducedIntensityGenerator():
     """Generates a reduced intensity profile for a specified diffraction radial
@@ -44,6 +43,9 @@ class ReducedIntensityGenerator():
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
         self.cutoff = [0,signal.axes_manager.signal_axes[0].size - 1]
+        self.nav_size = [signal.axes_manager.navigation_axes[0].size,
+                             signal.axes_manager.navigation_axes[1].size]
+        self.sig_size = [signal.axes_manager.signal_axes[0].size]
         self.background_fit = None #added in one of the fits below.
         self.normalisation = None
 
@@ -64,7 +66,8 @@ class ReducedIntensityGenerator():
         return
 
     def fit_atomic_scattering(self, elements, fracs,
-                                N = 1., C = 0.,type = 'lobato'):
+                                N = 1., C = 0.,type = 'lobato',
+                                plot_fit=True):
         """Fits a diffraction intensity profile to the background using
         FIT = N * sum(ci * (fi^2) + C)
 
@@ -79,7 +82,7 @@ class ReducedIntensityGenerator():
         C = an additive constant
         type = type of scattering parameters fitted. Default is lobato.
                 See scattering_fit_component for more.
-        fit_plot_max: the maximum y value in the fitting plot.
+        plot_fit: a bool to decide if the fit from scattering is plotted
         """
 
         fit_model = self.signal.create_model()
@@ -88,9 +91,13 @@ class ReducedIntensityGenerator():
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
         fit_model.multifit()
-        fit_model.plot()
-        #fit = fit_model.as_signal()
-        fit = backgroundself.get_fit_as_signal()
+        fit_model.reset_signal_range()
+        if plot_fit == True:
+            fit_model.plot()
+        fit = fit_model.as_signal()
+        #self.fit = np.array(background.sum_squares).reshape(
+        #            self.nav_size[0],self.nav_size[1],self.sig_size[0])
+
 
         self.normalisation = background.square_sum
         self.background_fit = fit

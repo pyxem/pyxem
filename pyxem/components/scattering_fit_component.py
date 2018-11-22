@@ -89,10 +89,8 @@ class ScatteringFitComponent(Component):
             return
 
         self.square_sum = N * np.square(square_sum)
-        self.fitted_signal = N * sum_squares + C
         #square sum is kept for normalisation.
         return N * sum_squares + C
 
-    def get_fit_as_signal():
-
+    def get_fit_as_signal(self):
         return
