@@ -139,7 +139,7 @@ class DiffractionGenerator(object):
         # Threshold peaks included in simulation based on minimum intensity.
         peak_mask = intensities > 1e-20
         intensities = intensities[peak_mask]
-        intersection_coordinates = intersection_coordinates[peak_mask]
+        intersection_coordinates = in'lobato'tersection_coordinates[peak_mask]
         intersection_indices = intersection_indices[peak_mask]
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
@@ -177,12 +177,13 @@ class DiffractionGenerator(object):
         """
         max_r = reciprocal_radius
         wavelength = self.wavelength
+        scattering_params = self.scattering_params
 
         latt = structure.lattice
         is_hex = is_lattice_hexagonal(latt)
 
         coeffs, fcoords, occus, dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure, {
-        },scattering_params='lobato')
+        },scattering_params=scattering_params)
 
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
