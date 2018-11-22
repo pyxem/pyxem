@@ -438,23 +438,29 @@ def calc_radius_with_distortion(x,y,xc, yc,asym,rot):
 
     return np.sqrt((xp-xcp)**2 + asym*(yp-ycp)**2)
 
-def ring_pattern(Ri,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation):
-    ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, 0.4904, 0.6935, 0.8132, 0.8494, 0.9808,1.0688,1.0966
-    ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1*scale, ring2*scale, ring3*scale, ring4*scale, ring5*scale, ring6*scale, ring7*scale, ring8*scale
-    amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 =1,0.44,0.19,0.16,0.04,0.014, 0.038,0.036 
-    
-    denom = 2*spread**2
-    v0 = direct_beam_amplitude*Ri**-2#np.exp((-1*(Ri)*(Ri))/d0)
-    v1 = amp1*np.exp((-1*(Ri-ring1)*(Ri-ring1))/denom)
-    v2 = amp2*np.exp((-1*(Ri-ring2)*(Ri-ring2))/denom)
-    v3 = amp3*np.exp((-1*(Ri-ring3)*(Ri-ring3))/denom)
-    v4 = amp4*np.exp((-1*(Ri-ring4)*(Ri-ring4))/denom)
-    v5 = amp5*np.exp((-1*(Ri-ring5)*(Ri-ring5))/denom)
-    v6 = amp6*np.exp((-1*(Ri-ring6)*(Ri-ring6))/denom)
-    v7 = amp7*np.exp((-1*(Ri-ring7)*(Ri-ring7))/denom)
-    v8 = amp8*np.exp((-1*(Ri-ring8)*(Ri-ring8))/denom)
+def call_ring_pattern(xcentre,ycentre):
+    def ring_pattern(pts,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation):
+        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, 0.4904, 0.6935, 0.8132, 0.8494, 0.9808,1.0688,1.0966
+        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1*scale, ring2*scale, ring3*scale, ring4*scale, ring5*scale, ring6*scale, ring7*scale, ring8*scale
+        amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 =1,0.44,0.19,0.16,0.04,0.014, 0.038,0.036 
 
-    return amplitude*(v0+v1+v2+v3+v4+v5+v6+v7+v8).ravel()
+        x = pts[:round(np.size(pts,0)/2)]
+        y = pts[round(np.size(pts,0)/2):]
+        Ri = calc_radius_with_distortion(x,y,xcentre,ycentre,asymmetry,rotation)
+    
+        denom = 2*spread**2
+        v0 = direct_beam_amplitude*Ri**-2#np.exp((-1*(Ri)*(Ri))/d0)
+        v1 = amp1*np.exp((-1*(Ri-ring1)*(Ri-ring1))/denom)
+        v2 = amp2*np.exp((-1*(Ri-ring2)*(Ri-ring2))/denom)
+        v3 = amp3*np.exp((-1*(Ri-ring3)*(Ri-ring3))/denom)
+        v4 = amp4*np.exp((-1*(Ri-ring4)*(Ri-ring4))/denom)
+        v5 = amp5*np.exp((-1*(Ri-ring5)*(Ri-ring5))/denom)
+        v6 = amp6*np.exp((-1*(Ri-ring6)*(Ri-ring6))/denom)
+        v7 = amp7*np.exp((-1*(Ri-ring7)*(Ri-ring7))/denom)
+        v8 = amp8*np.exp((-1*(Ri-ring8)*(Ri-ring8))/denom)
+
+        return amplitude*(v0+v1+v2+v3+v4+v5+v6+v7+v8).ravel()
+    return ring_pattern
 
 def peaks_as_gvectors(z, center, calibration):
     """
