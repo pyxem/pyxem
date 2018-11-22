@@ -535,6 +535,21 @@ class PixelatedSTEM(Signal2D):
         s_radial = hs.signals.Signal1D(data)
         return(s_radial)
 
+    def template_match_disk(
+            self, disk_r=4, lazy_result=True, show_progressbar=True):
+        output_array = dt._template_match_disk(self.data, disk_r=disk_r)
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+            s = PixelatedSTEM(output_array)
+        else:
+            s = LazyPixelatedSTEM(output_array)
+        return s
+
     def angular_mask(
             self, angle0, angle1,
             centre_x_array=None, centre_y_array=None):
