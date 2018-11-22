@@ -206,8 +206,8 @@ def get_kinematical_intensities(structure,
     fss = []
     if scattering_params == 'lobato':
         for g in g_hkls:
-            fs = np.sum(coeffs[:,:,0] * (2 + coeffs[:,:,1] * g**2) *
-                        np.divide(1,np.square(1 + coeffs[:,:,1] * g**2)), axis=1)
+            fs = np.sum((coeffs[:,:,0] * (2 + coeffs[:,:,1] * g**2) *
+                        np.divide(1,np.square(1 + coeffs[:,:,1] * g**2))), axis=1)
             fss.append(fs)
         fss = np.array(fss)
     elif scattering_params == 'xtables':
