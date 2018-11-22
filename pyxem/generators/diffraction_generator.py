@@ -139,7 +139,7 @@ class DiffractionGenerator(object):
         # Threshold peaks included in simulation based on minimum intensity.
         peak_mask = intensities > 1e-20
         intensities = intensities[peak_mask]
-        intersection_coordinates = in'lobato'tersection_coordinates[peak_mask]
+        intersection_coordinates = intersection_coordinates[peak_mask]
         intersection_indices = intersection_indices[peak_mask]
 
         return DiffractionSimulation(coordinates=intersection_coordinates,
