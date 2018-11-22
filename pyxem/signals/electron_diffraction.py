@@ -490,7 +490,7 @@ class ElectronDiffraction(Signal2D):
         ycentre = (image_size-1)/2
        
         x0=[scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation]
-        xf,cov = curve_fit(call_ring_pattern(xcente,ycentre),pts,ref,p0=x0)
+        xf,cov = curve_fit(call_ring_pattern(xcentre,ycentre),pts,ref,p0=x0)
 
         return xf
 
