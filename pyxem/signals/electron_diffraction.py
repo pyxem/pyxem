@@ -482,12 +482,16 @@ class ElectronDiffraction(Signal2D):
         mask[mask>mask_radius]=0
         self.data[mask>0] *=0
     
-        pts = np.array([x.ravel(),y.ravel()]).ravel()
         ref = self.data[self.data>0]
         ref = ref.ravel()
         pts = np.array([x[self.data>0].ravel(),y[self.data>0].ravel()]).ravel()
+
+        xcentre = (image_size-1)/2
+        ycentre = (image_size-1)/2
+        Ri = calc_radius_with_distortion(x[self.data>0].ravel(),y[self.data>0].ravel(),xcentre,ycentre,asymmetry,rotation)
+
         x0=[scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation]
-        xf,cov = curve_fit(ring_pattern,pts,ref,p0=x0)
+        xf,cov = curve_fit(ring_pattern,Ri,ref,p0=x0)
 
         return xf
 
@@ -500,8 +504,11 @@ class ElectronDiffraction(Signal2D):
         yi = np.linspace(0, image_size-1, image_size)
         x, y = np.meshgrid(xi, yi)
         
-        ptsFull = np.array([x.ravel(),y.ravel()]).ravel()
-        generated_pattern = ring_pattern(ptsFull,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation)
+        xcentre = (image_size-1)/2
+        ycentre = (image_size-1)/2
+        Ri = calc_radius_with_distortion(x.ravel(),y.ravel(),xcentre,ycentre,asymmetry,rotation)
+
+        generated_pattern = ring_pattern(Ri,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation)
         generated_pattern = np.reshape(generated_pattern,(image_size,image_size))
 
         if mask==True:
