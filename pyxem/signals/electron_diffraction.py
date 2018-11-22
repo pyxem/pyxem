@@ -507,7 +507,8 @@ class ElectronDiffraction(Signal2D):
         xcentre = (image_size-1)/2
         ycentre = (image_size-1)/2
         
-        generated_pattern = call_ring_pattern(xcentre,ycentre,pts,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation)
+        ring_pattern = call_ring_pattern(xcentre,ycentre)
+	generated_pattern = ring_pattern(pts,scale,amplitude,spread,direct_beam_amplitude,asymmetry,rotation)
         generated_pattern = np.reshape(generated_pattern,(image_size,image_size))
 
         if mask==True:
