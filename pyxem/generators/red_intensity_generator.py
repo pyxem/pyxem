@@ -81,7 +81,7 @@ class ReducedIntensityGenerator():
         N = the "slope"
         C = an additive constant
         type = type of scattering parameters fitted. Default is lobato.
-                See scattering_fit_component for more.
+                See scattering_fit_component for more details.
         plot_fit: a bool to decide if the fit from scattering is plotted
         """
 

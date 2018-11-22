@@ -39,7 +39,7 @@ class ScatteringFitComponent(Component):
         type = the type of scattering parameter fit done.
                 Options are:
                     - lobato: Fit to Lobato & Van Dyck (2014)
-                    - inter: Fit to International Tables Vol. C, table 4.3.2.3
+                    - xtables: Fit to International Tables Vol. C, table 4.3.2.3
 
         sum_squares = sum (ci * fi**2 )
         square_sum = (sum(ci * fi))**2 for atomic fraction ci with
@@ -50,8 +50,16 @@ class ScatteringFitComponent(Component):
         self.elements = elements
         self.fracs = fracs
         params = []
-        for e in elements:
-            params.append(ATOMIC_SCATTERING_PARAMS[e])
+        if self.type == 'lobato':
+            for e in elements:
+                params.append(ATOMIC_SCATTERING_PARAMS_LOBATO[e])
+        elif self.type == 'xtables':
+            for e in elements:
+                params.append(ATOMIC_SCATTERING_PARAMS[e])
+        else:
+            raise NotImplementedError("The parameters `{}` are not implemented."
+                                      "See documentation for available "
+                                      "implementations.".format(type))
             # As in International Tables for Crystallography, 2006, 4.3.2
         self.params = params
 
@@ -75,7 +83,7 @@ class ScatteringFitComponent(Component):
                 sum_squares += np.square(fi)*elem_frac
                 square_sum += fi*elem_frac
 
-        elif self.type == 'inter':
+        elif self.type == 'xtables':
             for i, element in enumerate(params):
                 fi = np.zeros(x.size)
                 for n in range(len(element)): #5 parameters per element
