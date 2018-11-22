@@ -69,8 +69,8 @@ class DiffractionGenerator(object):
         self.debye_waller_factors = debye_waller_factors or {}
 
         scattering_params_dict = {
-            'lobato' = 'lobato',
-            'xtables' = 'xtables'
+            'lobato' : 'lobato',
+            'xtables' : 'xtables'
         }
         if params in scattering_params_dict:
             self.scattering_params = scattering_params_dict[scattering_params]
