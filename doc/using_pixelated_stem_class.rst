@@ -138,13 +138,13 @@ Template matching with a disk
 :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.template_match_disk`
 
 Doing template matching over the signal (diffraction) dimensions with a disk.
-Useful for preprocessing for finding the position of the diffraction disks in 
+Useful for preprocessing for finding the position of the diffraction disks in
 convergent beam electron diffraction data.
 
 .. code-block:: python
 
     >>> s = ps.dummy_data.get_cbed_signal()
-    >>> s_template = s.template_match_disk(disk_r=5, lazy_result=False)
+    >>> s_template = s.template_match_disk(disk_r=5, lazy_result=False, show_progressbar=False)
     >>> s_template.plot()
 
 
