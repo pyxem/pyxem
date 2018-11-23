@@ -130,3 +130,26 @@ Or both at the same time:
 
 :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels` returns a lazy signal
 by default, to avoid large datasets using up excessive amount of memory.
+
+
+Template matching with a disk
+-----------------------------
+
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.template_match_disk`
+
+Doing template matching over the signal (diffraction) dimensions with a disk.
+Useful for preprocessing for finding the position of the diffraction disks in 
+convergent beam electron diffraction data.
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s_template = s.template_match_disk(disk_r=5, lazy_result=False)
+    >>> s_template.plot()
+
+
+.. image:: images/template_match/cbed_diff.jpg
+    :scale: 49 %
+
+.. image:: images/template_match/cbed_template.jpg
+    :scale: 49 %
