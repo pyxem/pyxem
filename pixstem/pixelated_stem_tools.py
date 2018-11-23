@@ -497,6 +497,19 @@ def _copy_axes_object_metadata(axes_original, axes_new):
     axes_new.units = axes_original.units
 
 
+def _copy_signal_all_axes_metadata(signal_original, signal_new):
+    if signal_original.axes_manager.shape != signal_new.axes_manager.shape:
+        raise ValueError(
+                "signal_original and signal_new must have the same shape, not "
+                "{0} and {1}".format(
+                    signal_original.axes_manager.shape,
+                    signal_new.axes_manager.shape))
+    for iax in range(len(signal_original.axes_manager.shape)):
+        ax_o = signal_original.axes_manager[iax]
+        ax_n = signal_new.axes_manager[iax]
+        _copy_axes_object_metadata(ax_o, ax_n)
+
+
 def find_and_remove_dead_pixels(s):
     """Find and remove zero values from a signal.
 

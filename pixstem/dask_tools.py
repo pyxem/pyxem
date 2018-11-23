@@ -1,6 +1,8 @@
 import copy
 import numpy as np
 import dask.array as da
+from skimage import morphology
+from skimage.feature import match_template
 
 
 def _mask_array(dask_array, mask_array, fill_value=None):
@@ -112,6 +114,103 @@ def _threshold_array(dask_array, threshold_value=1, mask_array=None):
                 "The input has {0} dimensions".format(len(dask_array.shape)))
     thresholded_array = da.ma.getdata(thresholded_array)
     return thresholded_array
+
+
+def _template_match_disk_single_frame(image, disk):
+    """Template match a circular disk with a single image.
+
+    Parameters
+    ----------
+    image : NumPy 2D array
+    disk : NumPy 2D array
+        Must be smaller than image
+
+    Returns
+    -------
+    template_match : NumPy 2D array
+        Same size as image
+
+    Examples
+    --------
+    >>> image = np.random.randint(1000, size=(256, 256))
+    >>> disk = morphology.disk(4, np.uint16)
+    >>> import pixstem.dask_tools as dt
+    >>> template_match = dt._template_match_disk_single_frame(image, disk)
+
+    """
+    template_match = match_template(image, disk, pad_input=True)
+    return template_match
+
+
+def _template_match_disk_chunk(data, disk):
+    """Template match a circular disk with a 4D dataset.
+
+    Parameters
+    ----------
+    data : NumPy 4D array
+    disk : NumPy 2D array
+        Must be smaller than image
+
+    Returns
+    -------
+    template_match : NumPy 4D array
+        Same size as inpt data
+
+    Examples
+    --------
+    >>> data = np.random.randint(1000, size=(10, 10, 256, 256))
+    >>> disk = morphology.disk(4, np.uint16)
+    >>> import pixstem.dask_tools as dt
+    >>> template_match = dt._template_match_disk_chunk(data, disk)
+
+    """
+    output_array = np.zeros_like(data, dtype=np.float32)
+    image = np.zeros_like(data[0, 0])
+    for ix, iy in np.ndindex(data.shape[:2]):
+        image[:] = data[ix, iy]
+        output_array[ix, iy] = _template_match_disk_single_frame(image, disk)
+    return output_array
+
+
+def _template_match_disk(dask_array, disk_r=None):
+    """Template match a circular disk with a 4D dataset.
+
+    Parameters
+    ----------
+    dask_array : Dask 4D array
+        Two first dimensions are navigation dimensions, two last
+        dimensions are the signal dimensions.
+    disk_r : scalar, optional
+        Radius of the disk. 2 * disk_r + 1 must be smaller than
+        the two last signal dimensions.
+
+    Returns
+    -------
+    template_match : NumPy 4D array
+        Same size as input data
+
+    Examples
+    --------
+    >>> data = np.random.randint(1000, size=(20, 20, 256, 256))
+    >>> import dask.array as da
+    >>> dask_array = da.from_array(data, chunks=(5, 5, 128, 128))
+    >>> import pixstem.dask_tools as dt
+    >>> template_match = dt._template_match_disk(dask_array, disk_r=4)
+
+    """
+
+    array_dims = len(dask_array.shape)
+    if array_dims != 4:
+        raise ValueError(
+                "dask_array need to have 4-dimensions, not {0}".format(
+                    array_dims))
+    detx, dety = dask_array.shape[-2:]
+    dask_array_rechunked = dask_array.rechunk(chunks=(None, None, detx, dety))
+    disk = morphology.disk(disk_r, dask_array_rechunked.dtype)
+    output_array = da.map_blocks(
+            _template_match_disk_chunk, dask_array_rechunked, disk,
+            dtype=np.float32)
+    return output_array
 
 
 def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):

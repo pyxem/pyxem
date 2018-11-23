@@ -49,3 +49,7 @@ class TestDummyDataModule:
         s = dd.get_dead_pixel_signal()
         s.plot()
         assert (s.data == 0).any()
+
+    def test_get_cbed_signal(self):
+        s = dd.get_cbed_signal()
+        s.plot()

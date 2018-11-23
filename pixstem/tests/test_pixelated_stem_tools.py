@@ -378,6 +378,34 @@ class TestAxesManagerMetadataCopying:
         assert ax_o.name == ax_n.name
         assert ax_o.units == ax_n.units
 
+    def test_copy_all_axes_manager(self):
+        s = Signal2D(np.zeros((5, 40, 50)))
+        s_new = Signal2D(np.zeros_like(s.data))
+        sa_ori = s.axes_manager
+        sa_ori[0].scale = 0.2
+        sa_ori[1].scale = 2.2
+        sa_ori[2].scale = 0.02
+        sa_ori[0].offset = 321
+        sa_ori[1].offset = -232
+        sa_ori[2].offset = 32
+        pst._copy_signal_all_axes_metadata(s, s_new)
+        sa_new = s_new.axes_manager
+        assert sa_ori[0].scale == sa_new[0].scale
+        assert sa_ori[1].scale == sa_new[1].scale
+        assert sa_ori[2].scale == sa_new[2].scale
+        assert sa_ori[0].offset == sa_new[0].offset
+        assert sa_ori[1].offset == sa_new[1].offset
+        assert sa_ori[2].offset == sa_new[2].offset
+
+    def test_copy_all_axes_manager_wrong_shape(self):
+        s0 = Signal2D(np.zeros((5, 40, 50)))
+        s1 = Signal2D(np.zeros((6, 40, 50)))
+        s2 = Signal2D(np.zeros((2, 5, 40, 50)))
+        with pytest.raises(ValueError):
+            pst._copy_signal_all_axes_metadata(s0, s1)
+        with pytest.raises(ValueError):
+            pst._copy_signal_all_axes_metadata(s0, s2)
+
 
 class TestFindAndRemoveDeadPixels:
 

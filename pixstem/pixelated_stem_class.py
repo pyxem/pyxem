@@ -535,6 +535,55 @@ class PixelatedSTEM(Signal2D):
         s_radial = hs.signals.Signal1D(data)
         return(s_radial)
 
+    def template_match_disk(
+            self, disk_r=4, lazy_result=True, show_progressbar=True):
+        """Template match the signal dimensions with a disk.
+
+        Used to find diffraction disks in convergent beam electron
+        diffraction data.
+
+        Parameter
+        ---------
+        disk_r : scalar, optional
+            Radius of the disk. Default 4.
+        lazy_result : bool, default True
+            If True, will return a LazyPixelatedSTEM object. If False,
+            will compute the result and return a PixelatedSTEM object.
+        show_progressbar : bool, default True
+
+        Returns
+        -------
+        template_match : PixelatedSTEM object
+
+        Examples
+        --------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s_template = s.template_match_disk(
+        ...     disk_r=5, show_progressbar=False)
+        >>> s.plot()
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        output_array = dt._template_match_disk(dask_array, disk_r=disk_r)
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+            s = PixelatedSTEM(output_array)
+        else:
+            s = LazyPixelatedSTEM(output_array)
+        pst._copy_signal_all_axes_metadata(self, s)
+        return s
+
     def angular_mask(
             self, angle0, angle1,
             centre_x_array=None, centre_y_array=None):

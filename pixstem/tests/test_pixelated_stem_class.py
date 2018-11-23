@@ -940,6 +940,71 @@ class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
         assert s_out._lazy
 
 
+class TestPixelatedStemTemplateMatchDisk:
+
+    def test_simple(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        s_template = s.template_match_disk()
+        assert s.data.shape == s_template.data.shape
+        assert s_template._lazy is True
+
+    def test_axes_manager_copy(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        ax_sa = s.axes_manager.signal_axes
+        ax_na = s.axes_manager.navigation_axes
+        ax_sa[0].name, ax_sa[1].name = 'Detector x', 'Detector y'
+        ax_sa[0].scale, ax_sa[1].scale = 0.2, 0.2
+        ax_sa[0].offset, ax_sa[1].offset = 10, 20
+        ax_sa[0].units, ax_sa[1].units = 'mrad', 'mrad'
+        ax_na[0].name, ax_na[1].name = 'Probe x', 'Probe y'
+        ax_na[0].scale, ax_na[1].scale = 35, 35
+        ax_na[0].offset, ax_na[1].offset = 54, 12
+        ax_na[0].units, ax_na[1].units = 'nm', 'nm'
+        s_temp = s.template_match_disk()
+        assert s.data.shape == s_temp.data.shape
+        ax_sa_t = s_temp.axes_manager.signal_axes
+        ax_na_t = s_temp.axes_manager.navigation_axes
+        assert ax_sa[0].name == ax_sa_t[0].name
+        assert ax_sa[1].name == ax_sa_t[1].name
+        assert ax_sa[0].scale == ax_sa_t[0].scale
+        assert ax_sa[1].scale == ax_sa_t[1].scale
+        assert ax_sa[0].offset == ax_sa_t[0].offset
+        assert ax_sa[1].offset == ax_sa_t[1].offset
+        assert ax_sa[0].units == ax_sa_t[0].units
+        assert ax_sa[1].units == ax_sa_t[1].units
+
+        assert ax_na[0].name == ax_na_t[0].name
+        assert ax_na[1].name == ax_na_t[1].name
+        assert ax_na[0].scale == ax_na_t[0].scale
+        assert ax_na[1].scale == ax_na_t[1].scale
+        assert ax_na[0].offset == ax_na_t[0].offset
+        assert ax_na[1].offset == ax_na_t[1].offset
+        assert ax_na[0].units == ax_na_t[0].units
+        assert ax_na[1].units == ax_na_t[1].units
+
+    def test_non_lazy(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        s_template = s.template_match_disk(lazy_result=False)
+        assert s.data.shape == s_template.data.shape
+        assert s._lazy is False
+
+    def test_lazy_input(self):
+        s = LazyPixelatedSTEM(da.random.randint(
+            100, size=(5, 5, 20, 20), chunks=(1, 1, 10, 10)))
+        s_template = s.template_match_disk()
+        assert s.data.shape == s_template.data.shape
+        assert s._lazy is True
+
+    def test_disk_radius(self):
+        s = LazyPixelatedSTEM(da.random.randint(
+            100, size=(5, 5, 30, 30), chunks=(1, 1, 10, 10)))
+        s_template0 = s.template_match_disk(disk_r=2, lazy_result=False)
+        s_template1 = s.template_match_disk(disk_r=4, lazy_result=False)
+        assert s.data.shape == s_template0.data.shape
+        assert s.data.shape == s_template1.data.shape
+        assert not (s_template0.data == s_template1.data).all()
+
+
 class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
 
     def test_rotate_diffraction_keep_shape(self):
