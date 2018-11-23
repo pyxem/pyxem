@@ -165,8 +165,9 @@ def _template_match_disk_chunk(data, disk):
 
     """
     output_array = np.zeros_like(data, dtype=np.float32)
+    image = np.zeros_like(data[0, 0])
     for ix, iy in np.ndindex(data.shape[:2]):
-        image = data[ix, iy]
+        image[:] = data[ix, iy]
         output_array[ix, iy] = _template_match_disk_single_frame(image, disk)
     return output_array
 
@@ -208,7 +209,7 @@ def _template_match_disk(dask_array, disk_r=None):
     disk = morphology.disk(disk_r, dask_array_rechunked.dtype)
     output_array = da.map_blocks(
             _template_match_disk_chunk, dask_array_rechunked, disk,
-            dtype=np.float64)
+            dtype=np.float32)
     return output_array
 
 
