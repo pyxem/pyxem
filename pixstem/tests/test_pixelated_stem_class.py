@@ -940,6 +940,37 @@ class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
         assert s_out._lazy
 
 
+class test_pixelated_stem_template_match_disk:
+
+    def test_simple(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        s_template = s.template_match_disk()
+        assert s.data.shape == s_template.data.shape
+        assert s._lazy is True
+
+    def test_non_lazy(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        s_template = s.template_match_disk(lazy_result=False)
+        assert s.data.shape == s_template.data.shape
+        assert s._lazy is False
+
+    def test_lazy_input(self):
+        s = LazyPixelatedSTEM(da.random.randint(
+            100, size=(5, 5, 20, 20), chunks=(1, 1, 10, 10)))
+        s_template = s.template_match_disk()
+        assert s.data.shape == s_template.data.shape
+        assert s._lazy is True
+
+    def test_disk_radius(self):
+        s = LazyPixelatedSTEM(da.random.randint(
+            100, size=(5, 5, 30, 30), chunks=(1, 1, 10, 10)))
+        s_template0 = s.template_match_disk(disk_r=2, lazy_result=False)
+        s_template1 = s.template_match_disk(disk_r=4, lazy_result=False)
+        assert s.data.shape == s_template0.data.shape
+        assert s.data.shape == s_template1.data.shape
+        assert (s_template0.data == s_template1.data).all()
+
+
 class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
 
     def test_rotate_diffraction_keep_shape(self):
