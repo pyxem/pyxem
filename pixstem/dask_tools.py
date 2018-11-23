@@ -215,15 +215,67 @@ def _template_match_disk(dask_array, disk_r=None):
 def _peak_find_dog_single_frame(
         image, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76, threshold=0.36,
         overlap=0.81):
-        peaks = blob_dog(image / np.max(image), min_sigma=min_sigma,
-                         max_sigma=max_sigma, sigma_ratio=sigma_ratio,
-                         threshold=threshold, overlap=overlap)
-        return peaks[:, :2]
+    """Find peaks in a single frame using skimage's blob_dog function.
+
+    Parameters
+    ----------
+    image : NumPy 2D array
+    min_sigma : float, optional
+    max_sigma : float, optional
+    sigma_ratio : float, optional
+    threshold : float, optional
+    overlap : float, optional
+
+    Returns
+    -------
+    peaks : NumPy 2D array
+        In the form [[x0, y0], [x1, y1], [x2, y2], ...]
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.dask_tools as dt
+    >>> peaks = _peak_find_dog_single_frame(s.data[0, 0])
+
+    """
+    peaks = blob_dog(image / np.max(image), min_sigma=min_sigma,
+                     max_sigma=max_sigma, sigma_ratio=sigma_ratio,
+                     threshold=threshold, overlap=overlap)
+    return peaks[:, :2]
 
 
 def _peak_find_dog_chunk(
         data, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76, threshold=0.36,
         overlap=0.81):
+    """Find peaks in a chunk using skimage's blob_dog function.
+
+    Parameters
+    ----------
+    data : NumPy 4D array
+    min_sigma : float, optional
+    max_sigma : float, optional
+    sigma_ratio : float, optional
+    threshold : float, optional
+    overlap : float, optional
+
+    Returns
+    -------
+    peak_array : NumPy 2D object array
+        Same size as the two last dimensions in data.
+        The peak positions themselves are stored in 2D NumPy arrays
+        inside each position in peak_array. This is done instead of
+        making a 4D NumPy array, since the number of found peaks can
+        vary in each position.
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.dask_tools as dt
+    >>> peak_array = _peak_find_dog_chunk(s.data)
+    >>> peaks00 = peak_array[0, 0]
+    >>> peaks23 = peak_array[2, 3]
+
+    """
     output_array = np.empty(data.shape[:2], dtype='object')
     for ix, iy in np.ndindex(data.shape[:2]):
         output_array[ix, iy] = _peak_find_dog_single_frame(
@@ -236,6 +288,36 @@ def _peak_find_dog_chunk(
 def _peak_find_dog(
         dask_array, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
         threshold=0.36, overlap=0.81):
+    """Find peaks in a dask array using skimage's blob_dog function.
+
+    Parameters
+    ----------
+    dask_array : 4D dask array
+    min_sigma : float, optional
+    max_sigma : float, optional
+    sigma_ratio : float, optional
+    threshold : float, optional
+    overlap : float, optional
+
+    Returns
+    -------
+    peak_array : dask 2D object array
+        Same size as the two last dimensions in data.
+        The peak positions themselves are stored in 2D NumPy arrays
+        inside each position in peak_array. This is done instead of
+        making a 4D NumPy array, since the number of found peaks can
+        vary in each position.
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import dask.array as da
+    >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
+    >>> import pixstem.dask_tools as dt
+    >>> peak_array = _peak_find_dog(dask_array)
+    >>> peak_array_computed = peak_array.compute()
+
+    """
     array_dims = len(dask_array.shape)
     if array_dims != 4:
         raise ValueError(
