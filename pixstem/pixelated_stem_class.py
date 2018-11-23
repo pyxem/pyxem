@@ -581,6 +581,7 @@ class PixelatedSTEM(Signal2D):
             s = PixelatedSTEM(output_array)
         else:
             s = LazyPixelatedSTEM(output_array)
+        pst._copy_signal_all_axes_metadata(self, s)
         return s
 
     def angular_mask(
