@@ -132,8 +132,10 @@ def _template_match_disk_single_frame(image, disk):
 
     Examples
     --------
-    >>> image = np.random.randint(size=(256, 256))
+    >>> image = np.random.randint(1000, size=(256, 256))
     >>> disk = morphology.disk(4, np.uint16)
+    >>> import pixstem.dask_tools as dt
+    >>> template_match = dt._template_match_disk_single_frame(image, disk)
 
     """
     template_match = match_template(image, disk, pad_input=True)
