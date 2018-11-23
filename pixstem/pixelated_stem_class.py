@@ -584,6 +584,28 @@ class PixelatedSTEM(Signal2D):
         pst._copy_signal_all_axes_metadata(self, s)
         return s
 
+    def peakfinding_dog(self, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
+                        threshold=0.36, overlap=0.81, lazy_result=True,
+                        show_progressbar=True):
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        output_array = dt._peak_find_dog(
+                dask_array, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
+                threshold=0.36, overlap=0.81)
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+        return output_array
+
     def angular_mask(
             self, angle0, angle1,
             centre_x_array=None, centre_y_array=None):
