@@ -940,7 +940,7 @@ class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
         assert s_out._lazy
 
 
-class test_pixelated_stem_template_match_disk:
+class TestPixelatedStemTemplateMatchDisk:
 
     def test_simple(self):
         s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
