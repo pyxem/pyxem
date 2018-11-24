@@ -150,7 +150,7 @@ structure_tetragonal_rotations = [
 structure_trigonal_rotations = [
     [0, 0, 0],
     [-28.64458044, 75.45951959, 0],
-    [ 38.93477108, 90, 0]
+    [38.93477108, 90, 0]
 ]
 
 structure_monoclinic_rotations = [

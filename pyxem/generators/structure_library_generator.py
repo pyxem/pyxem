@@ -23,12 +23,12 @@ from pyxem.utils.sim_utils import rotation_list_stereographic
 
 # Inverse pole figure corners for crystal systems
 stereographic_corners = {
-        'cubic': [ (0, 0, 1), (1, 0, 1), (1, 1, 1) ],
-        'hexagonal': [ (0, 0, 0, 1), (1, 0, -1, 0), (1, 1, -2, 0) ],
-        'orthorombic': [ (0, 0, 1), (1, 0, 0), (0, 1, 0) ],
-        'tetragonal': [ (0, 0, 1), (1, 0, 0), (1, 1, 0) ],
-        'trigonal': [ (0, 0, 0, 1), (0, -1, 1, 0), (1, -1, 0, 0) ],
-        'monoclinic': [ (0, 0, 1), (0, 1, 0), (0, -1, 0) ]
+    'cubic': [(0, 0, 1), (1, 0, 1), (1, 1, 1)],
+    'hexagonal': [(0, 0, 0, 1), (1, 0, -1, 0), (1, 1, -2, 0)],
+    'orthorombic': [(0, 0, 1), (1, 0, 0), (0, 1, 0)],
+    'tetragonal': [(0, 0, 1), (1, 0, 0), (1, 1, 0)],
+    'trigonal': [(0, 0, 0, 1), (0, -1, 1, 0), (1, -1, 0, 0)],
+    'monoclinic': [(0, 0, 1), (0, 1, 0), (0, -1, 0)]
 }
 
 
@@ -65,7 +65,6 @@ class StructureLibraryGenerator:
         self.structures = [phase[1] for phase in phases]
         self.systems = [phase[2] for phase in phases]
 
-
     def get_orientations_from_list(self, orientations):
         """Create a structure library from a list of rotations.
 
@@ -81,7 +80,6 @@ class StructureLibraryGenerator:
             Structure library for the given phase names, structures and orientations.
         """
         return StructureLibrary(self.phase_names, self.structures, orientations)
-
 
     def get_orientations_from_stereographic_triangle(self, inplane_rotations, resolution):
         """
@@ -102,7 +100,7 @@ class StructureLibraryGenerator:
             Structure library for the given phase names, structures and crystal system.
         """
         rotation_lists = [
-                rotation_list_stereographic(structure, *stereographic_corners[system], inplane_rotation, resolution)
-                    for phase_name, structure, system, inplane_rotation in
-                        zip(self.phase_names, self.structures, self.systems, inplane_rotations)]
+            rotation_list_stereographic(structure, *stereographic_corners[system], inplane_rotation, resolution)
+            for phase_name, structure, system, inplane_rotation in
+            zip(self.phase_names, self.structures, self.systems, inplane_rotations)]
         return StructureLibrary(self.phase_names, self.structures, rotation_lists)
