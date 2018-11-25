@@ -24,6 +24,8 @@ import collections
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.signals.electron_diffraction import ElectronDiffraction
+from transforms3d.axangles import axangle2mat
+from transforms3d.euler import mat2euler
 from transforms3d.quaternions import mat2quat, rotate_vector
 
 
@@ -413,3 +415,142 @@ def carry_through_navigation_calibration(new_signal, old_signal):
         pass
 
     return new_signal
+
+
+def uvtw_to_uvw(uvtw):
+    """Convert 4-index direction to a 3-index direction.
+
+    Parameters
+    ----------
+    uvtw : array-like with 4 floats
+
+    Returns
+    -------
+    uvw : tuple of 4 floats
+    """
+    u, v, t, w = uvtw
+    u, v, w = 2 * u + v, 2 * v + u, w
+    common_factor = math.gcd(math.gcd(u, v), w)
+    return tuple((int(x / common_factor)) for x in (u, v, w))
+
+
+def angle_between_cartesian(a, b):
+    """Compute the angle between two vectors in a cartesian coordinate system.
+
+    Parameters
+    ----------
+    a, b : array-like with 3 floats
+        The two directions to compute the angle between.
+
+    Returns
+    -------
+    angle : float
+        Angle between `a` and `b` in radians.
+    """
+    return math.acos(max(-1.0, min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))))
+
+
+def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution):
+    """Generate a rotation list covering the inverse pole figure specified by three
+        corners in cartesian coordinates.
+
+    Parameters
+    ----------
+    structure : diffpy.structure.Structure
+        Structure for which to calculate the rotation list
+    corner_a, corner_b, corner_c : tuple
+        The three corners of the inverse pole figure, each given by three
+        coordinates. The coordinate system is given by the structure lattice.
+    resolution : float
+        Angular resolution in radians of the generated rotation list.
+    inplane_rotations : list
+        List of angles in degrees for in-plane rotation of the diffraction
+        pattern. This corresponds to the third Euler angle rotation. The
+        rotation list will be generated for each of these angles, and combined.
+        This should be done automatically, but by including all possible
+        rotations in the rotation list, it becomes too large.
+
+        To cover all inplane rotations, use e.g. np.linspace(0, 2*np.pi, 360)
+
+    Returns
+    -------
+    rotation_list : numpy.array
+        Rotations covering the inverse pole figure given as a of Euler
+            angles in degress. This `np.array` can be passed directly to pyxem.
+    """
+    # Convert the crystal directions to cartesian vectors and normalize
+    if len(corner_a) == 4:
+        corner_a = uvtw_to_uvw(corner_a)
+    if len(corner_b) == 4:
+        corner_b = uvtw_to_uvw(corner_b)
+    if len(corner_c) == 4:
+        corner_c = uvtw_to_uvw(corner_c)
+
+    lattice = structure.lattice
+
+    corner_a = np.dot(corner_a, lattice.stdbase)
+    corner_b = np.dot(corner_b, lattice.stdbase)
+    corner_c = np.dot(corner_c, lattice.stdbase)
+
+    corner_a /= np.linalg.norm(corner_a)
+    corner_b /= np.linalg.norm(corner_b)
+    corner_c /= np.linalg.norm(corner_c)
+
+    angle_a_to_b = angle_between_cartesian(corner_a, corner_b)
+    angle_a_to_c = angle_between_cartesian(corner_a, corner_c)
+    angle_b_to_c = angle_between_cartesian(corner_b, corner_c)
+    axis_a_to_b = np.cross(corner_a, corner_b)
+    axis_a_to_c = np.cross(corner_a, corner_c)
+
+    # Input validation. The corners have to define a non-degenerate triangle
+    if np.count_nonzero(axis_a_to_b) == 0:
+        raise ValueError('Directions a and b are parallel')
+    if np.count_nonzero(axis_a_to_c) == 0:
+        raise ValueError('Directions a and c are parallel')
+
+    rotations = []
+
+    # Generate a list of theta_count evenly spaced angles theta_b in the range
+    # [0, angle_a_to_b] and an equally long list of evenly spaced angles
+    # theta_c in the range[0, angle_a_to_c].
+    # Ensure that we keep the resolution also along the direction to the corner
+    # b or c farthest away from a.
+    theta_count = math.ceil(max(angle_a_to_b, angle_a_to_c) / resolution)
+    for i, (theta_b, theta_c) in enumerate(
+            zip(np.linspace(0, angle_a_to_b, theta_count),
+                np.linspace(0, angle_a_to_c, theta_count))):
+        # Define the corner local_b at a rotation theta_b from corner_a toward
+        # corner_b on the circle surface. Similarly, define the corner local_c
+        # at a rotation theta_c from corner_a toward corner_c.
+
+        rotation_a_to_b = axangle2mat(axis_a_to_b, theta_b)
+        rotation_a_to_c = axangle2mat(axis_a_to_c, theta_c)
+        local_b = np.dot(rotation_a_to_b, corner_a)
+        local_c = np.dot(rotation_a_to_c, corner_a)
+
+        # Then define an axis and a maximum rotation to create a great cicle
+        # arc between local_b and local_c. Ensure that this is not a degenerate
+        # case where local_b and local_c are coincident.
+        angle_local_b_to_c = angle_between_cartesian(local_b, local_c)
+        axis_local_b_to_c = np.cross(local_b, local_c)
+        if np.count_nonzero(axis_local_b_to_c) == 0:
+            # Theta rotation ended at the same position. First position, might
+            # be other cases?
+            axis_local_b_to_c = corner_a
+        axis_local_b_to_c /= np.linalg.norm(axis_local_b_to_c)
+
+        # Generate points along the great circle arc with a distance defined by
+        # resolution.
+        phi_count_local = max(math.ceil(angle_local_b_to_c / resolution), 1)
+        for j, phi in enumerate(
+                np.linspace(0, angle_local_b_to_c, phi_count_local)):
+            rotation_phi = axangle2mat(axis_local_b_to_c, phi)
+
+            for k, psi in enumerate(inplane_rotations):
+                # Combine the rotations. Order is important. The matrix is
+                # applied from the left, and we rotate by theta first toward
+                # local_b, then across the triangle toward local_c
+                rotation = list(mat2euler(rotation_phi @ rotation_a_to_b, 'rzxz'))
+                rotations.append(np.rad2deg([rotation[0], rotation[1], psi]))
+
+    return np.unique(rotations, axis=0)
