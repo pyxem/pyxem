@@ -284,7 +284,9 @@ def simulate_kinematic_scattering(atomic_coordinates,
     elif scattering_params == 'xtables':
         c = np.array(ATOMIC_SCATTERING_PARAMS[element])
     else:
-        raise ValueError("User specified scattering parameters not defined.")
+        raise NotImplementedError("The scattering parameters `{}` are not implemented. "
+                                  "See documentation for available "
+                                  "implementations.".format(scattering_params))
     # Calculate electron wavelength for given keV.
     wavelength = get_electron_wavelength(accelerating_voltage)
 
