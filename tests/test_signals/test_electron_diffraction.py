@@ -237,85 +237,82 @@ class TestRingPatternFitting:
 
     @pytest.fixture
     def input_parameters(self):
-        x0 = [95,1200,2.8,450,1.5,10]
+        x0 = [95, 1200, 2.8, 450, 1.5, 10]
         return x0
 
     @pytest.fixture
-    def pattern_for_fit_ring(self,input_parameters):
-        dp = ElectronDiffraction(np.zeros((256,256)))
+    def pattern_for_fit_ring(self, input_parameters):
+        dp = ElectronDiffraction(np.zeros((256, 256)))
         x0 = input_parameters
-        dp.data = dp.generate_ring_pattern(mask=True, mask_radius=10, 
-                               scale=x0[0], amplitude=x0[1], spread=x0[2], 
-                               direct_beam_amplitude=x0[3], asymmetry=x0[4], 
-                               rotation=x0[5])
+        dp.data = dp.generate_ring_pattern(mask=True, mask_radius=10,
+                                           scale=x0[0], amplitude=x0[1], spread=x0[2],
+                                           direct_beam_amplitude=x0[3], asymmetry=x0[4],
+                                           rotation=x0[5])
         return dp
 
-        
-    def test_fit_ring_pattern(self,pattern_for_fit_ring,input_parameters):
+    def test_fit_ring_pattern(self, pattern_for_fit_ring, input_parameters):
         x0 = input_parameters
         xf = pattern_for_fit_ring.fit_ring_pattern(10)
         # Need to re-phase the rotation angle
-        mod0 = x0[-1] % (2*np.pi)
-        modf = xf[-1] % (2*np.pi)
-        if mod0 > 3*np.pi/2:
-            x0[-1] = 2*np.pi-mod0
-        elif mod0 > np.pi/2:
-            x0[-1] = mod0-np.pi
+        mod0 = x0[-1] % (2 * np.pi)
+        modf = xf[-1] % (2 * np.pi)
+        if mod0 > 3 * np.pi / 2:
+            x0[-1] = 2 * np.pi - mod0
+        elif mod0 > np.pi / 2:
+            x0[-1] = mod0 - np.pi
         else:
             x0[-1] = mod0
-        if modf > 3*np.pi/2:
-            xf[-1] = 2*np.pi-modf
-        elif modf > np.pi/2:
-            xf[-1] = modf-np.pi
+        if modf > 3 * np.pi / 2:
+            xf[-1] = 2 * np.pi - modf
+        elif modf > np.pi / 2:
+            xf[-1] = modf - np.pi
         else:
             xf[-1] = modf
-        assert np.allclose(x0,xf)
+        assert np.allclose(x0, xf)
 
     @pytest.mark.parametrize('known_values', [
         (np.array(
-            [124.05909278, 25.85258647, 39.09906246, 
-             173.75469207, 79.48046629, 533.72925614,  
-             36.23521052, 29.58603406, 21.83270633,  
+            [124.05909278, 25.85258647, 39.09906246,
+             173.75469207, 79.48046629, 533.72925614,
+             36.23521052, 29.58603406, 21.83270633,
              75.89239623, 40.04732689, 14.52041808,
-             35.82637996, 75.33666451, 21.21751965, 
-             38.97731538, 19.64631964, 161.72783637, 
-             23.6894442, 282.3126376 ]
+             35.82637996, 75.33666451, 21.21751965,
+             38.97731538, 19.64631964, 161.72783637,
+             23.6894442, 282.3126376]
         ))])
-
     @pytest.mark.parametrize('reference_indices', [
         (np.array(
             [[205, 158],
-             [197,   1],
+             [197, 1],
              [105, 239],
-             [ 64, 148],
-             [ 61,  84],
+             [64, 148],
+             [61, 84],
              [136, 155],
-             [ 37,  85],
-             [ 21,  94],
-             [247,  31],
+             [37, 85],
+             [21, 94],
+             [247, 31],
              [171, 195],
-             [202,  39],
+             [202, 39],
              [225, 255],
              [233, 128],
-             [ 56, 107],
-             [ 22,  51],
-             [ 28, 119],
-             [ 20,  45],
-             [164,  65],
+             [56, 107],
+             [22, 51],
+             [28, 119],
+             [20, 45],
+             [164, 65],
              [235, 188],
-             [ 75, 186]]
+             [75, 186]]
         ))])
-
-    def test_generate_ring_pattern(self,pattern_for_fit_ring,input_parameters,
-                                   known_values,reference_indices):
+    def test_generate_ring_pattern(self, pattern_for_fit_ring, input_parameters,
+                                   known_values, reference_indices):
         x0 = input_parameters
-        generated_ring = pattern_for_fit_ring.generate_ring_pattern(mask=True, 
-                               mask_radius=10, scale=x0[0], amplitude=x0[1], spread=x0[2], 
-                               direct_beam_amplitude=x0[3], asymmetry=x0[4], 
-                               rotation=x0[5])
+        generated_ring = pattern_for_fit_ring.generate_ring_pattern(mask=True,
+                                                                    mask_radius=10, scale=x0[0], amplitude=x0[1], spread=x0[2],
+                                                                    direct_beam_amplitude=x0[3], asymmetry=x0[4],
+                                                                    rotation=x0[5])
         assert np.allclose(known_values,
-                           generated_ring[reference_indices[:,0],reference_indices[:,1]])
-	
+                           generated_ring[reference_indices[:, 0], reference_indices[:, 1]])
+
 
 class TestPeakFinding:
     # This is assertion free testing
