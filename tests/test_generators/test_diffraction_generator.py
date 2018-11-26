@@ -110,15 +110,13 @@ class TestDiffractionCalculator:
                                                                           reciprocal_radius=1.)
         assert isinstance(hexagonal_profile, ProfileSimulation)
 
-class TestDiffractionScatteringParams:
 
-    scattering_params = ['lobato','xtables']
-    @pytest.mark.parametrize('scattering_param', scattering_params)
+scattering_params = ['lobato','xtables']
+@pytest.mark.parametrize('scattering_param', scattering_params)
+def test_param_check(self, params, scattering_param):
+    generator = DiffractionGenerator(params,scattering_params=scattering_param)
 
-    @pytest.mark.xfail(raises=NotImplementedError)
-    def test_invalid_scattering_params(self,params):
-        scattering_param == '_empty'
-        DiffractionGenerator(params,scattering_params=scattering_param)
-
-    def test_param_check(self, params, scattering_param):
-        generator = DiffractionGenerator(params,scattering_params=scattering_param)
+@pytest.mark.xfail(raises=NotImplementedError)
+def test_invalid_scattering_params(self,params):
+    scattering_param == '_empty'
+    DiffractionGenerator(params,scattering_params=scattering_param)
