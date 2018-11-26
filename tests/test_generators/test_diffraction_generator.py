@@ -75,7 +75,7 @@ class TestDiffractionCalculator:
     def test_appropriate_scaling(self, diffraction_calculator: DiffractionGenerator):
         """Tests that doubling the unit cell halves the pattern spacing."""
         silicon = make_structure(5)
-        big_silicon = make_structure(10)
+        big_silicon = make_strclass TestDiffractionCalculator:ucture(10)
         diffraction = diffraction_calculator.calculate_ed_data(
             structure=silicon, reciprocal_radius=5.)
         big_diffraction = diffraction_calculator.calculate_ed_data(
@@ -109,3 +109,16 @@ class TestDiffractionCalculator:
         hexagonal_profile = diffraction_calculator.calculate_profile_data(structure=hexagonal_structure,
                                                                           reciprocal_radius=1.)
         assert isinstance(hexagonal_profile, ProfileSimulation)
+
+class TestDiffractionScatteringParams:
+
+    scattering_params = ['lobato','xtables']
+    @pytest.mark.parametrize('scattering_param', scattering_params)
+
+    @pytest.mark.xfail(raises=NotImplementedError)
+    def test_invalid_scattering_params(self,params):
+        scattering_param == '_empty'
+        DiffractionGenerator(params,scattering_params=scattering_param)
+
+    def test_param_check(self, params, scattering_param):
+        generator = DiffractionGenerator(params,scattering_params=scattering_param)

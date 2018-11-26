@@ -72,6 +72,23 @@ def test_kinematic_simulator_gaussian_probe():
                                         illumination='gaussian_probe')
     assert isinstance(sim, ElectronDiffraction)
 
+def test_kinematic_simulator_xtables_scattering_params():
+    atomic_coordinates = np.asarray([[0, 0, 0]])  # structure.cart_coords
+    sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
+                                        simulation_size=32,
+                                        illumination='gaussian_probe',
+                                        scattering_params='xtables')
+    assert isinstance(sim, ElectronDiffraction)
+
+@pytest.mark.xfail(raises=NotImplementedError)
+def test_kinematic_simulator_invalid_scattering_params():
+    atomic_coordinates = np.asarray([[0, 0, 0]])  # structure.cart_coords
+    sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
+                                        simulation_size=32,
+                                        illumination='gaussian_probe',
+                                        scattering_params='_empty')
+    assert isinstance(sim, ElectronDiffraction)
+
 
 @pytest.mark.xfail(raises=ValueError)
 def test_kinematic_simulator_invalid_illumination():
