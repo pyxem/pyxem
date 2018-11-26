@@ -350,3 +350,117 @@ class TestTemplateMatchDisk:
         assert (25, 75) == match11
         match12 = np.unravel_index(np.argmax(out[1, 2]), out[1, 2].shape)
         assert (75, 55) == match12
+
+
+class TestPeakFindDog:
+
+    @pytest.mark.parametrize(
+            "x, y", [(112, 32), (170, 92), (54, 76), (10, 15)])
+    def test_single_frame_one_peak(self, x, y):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[x, y] = 654
+        min_sigma, max_sigma, sigma_ratio = 2, 5, 5
+        threshold, overlap = 0.01, 1
+        peaks = dt._peak_find_dog_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        assert (x, y) == (peaks[0, 0], peaks[0, 1])
+
+    def test_single_frame_multiple_peak(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        peak_list = [[120, 76], [23, 54], [32, 78], [10, 15]]
+        for x, y in peak_list:
+            image[x, y] = 654
+        min_sigma, max_sigma, sigma_ratio = 2, 5, 5
+        threshold, overlap = 0.01, 1
+        peaks = dt._peak_find_dog_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        assert len(peaks) == len(peak_list)
+        for peak in peaks.tolist():
+            assert peak in peak_list
+
+    def test_single_frame_threshold(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[54, 29] = 100
+        image[123, 54] = 20
+        min_sigma, max_sigma, sigma_ratio, overlap = 2, 5, 5, 1
+        peaks0 = dt._peak_find_dog_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=0.01, overlap=overlap)
+        assert len(peaks0) == 2
+        peaks1 = dt._peak_find_dog_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=0.05, overlap=overlap)
+        assert len(peaks1) == 1
+
+    def test_single_frame_min_sigma(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[54, 29] = 100
+        image[54, 32] = 100
+        max_sigma, sigma_ratio = 5, 5
+        threshold, overlap = 0.1, 0.1
+        peaks0 = dt._peak_find_dog_single_frame(
+                image, min_sigma=1, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        assert len(peaks0) == 2
+        peaks1 = dt._peak_find_dog_single_frame(
+                image, min_sigma=2, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        assert len(peaks1) == 1
+
+    def test_single_frame_max_sigma(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[52:58, 22:28] = 100
+        min_sigma, sigma_ratio = 0.1, 5
+        threshold, overlap = 0.1, 0.01
+        peaks = dt._peak_find_dog_single_frame(
+                image, min_sigma=min_sigma, max_sigma=1.0,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        assert len(peaks) > 1
+        peaks = dt._peak_find_dog_single_frame(
+                image, min_sigma=min_sigma, max_sigma=5.0,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        assert len(peaks) == 1
+
+    def test_chunk(self):
+        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
+        data[0, 0, 50, 20] = 100
+        data[0, 1, 51, 21] = 100
+        data[0, 2, 52, 22] = 100
+        data[1, 0, 53, 23] = 100
+        data[1, 1, 54, 24] = 100
+        data[1, 2, 55, 25] = 100
+        min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
+        threshold, overlap = 0.06, 0.01
+        peaks = dt._peak_find_dog_chunk(
+                data, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        assert peaks[0, 0][0].tolist() == [50, 20]
+        assert peaks[0, 1][0].tolist() == [51, 21]
+        assert peaks[0, 2][0].tolist() == [52, 22]
+        assert peaks[1, 0][0].tolist() == [53, 23]
+        assert peaks[1, 1][0].tolist() == [54, 24]
+        assert peaks[1, 2][0].tolist() == [55, 25]
+
+    def test_dask_array(self):
+        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
+        data[0, 0, 50, 20] = 100
+        data[0, 1, 51, 21] = 100
+        data[0, 2, 52, 22] = 100
+        data[1, 0, 53, 23] = 100
+        data[1, 1, 54, 24] = 100
+        data[1, 2, 55, 25] = 100
+        dask_array = da.from_array(data, chunks=(1, 1, 200, 100))
+        min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
+        threshold, overlap = 0.06, 0.01
+        peaks = dt._peak_find_dog(
+            dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
+            sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        peaks = peaks.compute()
+        assert peaks[0, 0][0].tolist() == [50, 20]
+        assert peaks[0, 1][0].tolist() == [51, 21]
+        assert peaks[0, 2][0].tolist() == [52, 22]
+        assert peaks[1, 0][0].tolist() == [53, 23]
+        assert peaks[1, 1][0].tolist() == [54, 24]
+        assert peaks[1, 2][0].tolist() == [55, 25]
