@@ -241,7 +241,7 @@ def _peak_find_dog_single_frame(
     peaks = blob_dog(image / np.max(image), min_sigma=min_sigma,
                      max_sigma=max_sigma, sigma_ratio=sigma_ratio,
                      threshold=threshold, overlap=overlap)
-    return peaks[:, :2]
+    return peaks[:, :2].astype(np.uint16)
 
 
 def _peak_find_dog_chunk(

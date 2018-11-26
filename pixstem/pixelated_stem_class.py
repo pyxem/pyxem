@@ -632,8 +632,8 @@ class PixelatedSTEM(Signal2D):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
         output_array = dt._peak_find_dog(
-                dask_array, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
-                threshold=0.36, overlap=0.81)
+                dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
         if not lazy_result:
             if show_progressbar:
                 pbar = ProgressBar()
