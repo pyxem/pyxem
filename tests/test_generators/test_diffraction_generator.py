@@ -113,10 +113,10 @@ class TestDiffractionCalculator:
 
 scattering_params = ['lobato','xtables']
 @pytest.mark.parametrize('scattering_param', scattering_params)
-def test_param_check(self, params, scattering_param):
+def test_param_check(params, scattering_param):
     generator = DiffractionGenerator(params,scattering_params=scattering_param)
 
 @pytest.mark.xfail(raises=NotImplementedError)
-def test_invalid_scattering_params(self,params):
+def test_invalid_scattering_params(params):
     scattering_param == '_empty'
     DiffractionGenerator(params,scattering_params=scattering_param)
