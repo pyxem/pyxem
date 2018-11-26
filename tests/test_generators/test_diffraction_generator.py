@@ -118,5 +118,5 @@ def test_param_check(scattering_param):
 
 @pytest.mark.xfail(raises=NotImplementedError)
 def test_invalid_scattering_params():
-    scattering_param == '_empty'
+    scattering_param = '_empty'
     generator = DiffractionGenerator(300,0.2,None,scattering_params=scattering_param)
