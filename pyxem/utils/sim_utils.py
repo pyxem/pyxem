@@ -299,8 +299,8 @@ def simulate_kinematic_scattering(atomic_coordinates,
     if scattering_params == 'lobato':
         fs = np.zeros_like(s2s)
         for i in np.arange(5):
-            fs = (fs + c[i,0] * (2 + c[i,1] * g**2) *
-                        np.divide(1,np.square(1 + c[i,1] * g**2)))
+            fs = (fs + c[i,0] * (2 + c[i,1] * gs**2) *
+                        np.divide(1,np.square(1 + c[i,1] * gs**2)))
     elif scattering_params == 'xtables':
         fs = np.zeros_like(s2s)
         for i in np.arange(5):

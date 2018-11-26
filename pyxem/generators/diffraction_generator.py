@@ -72,7 +72,7 @@ class DiffractionGenerator(object):
             'lobato' : 'lobato',
             'xtables' : 'xtables'
         }
-        if params in scattering_params_dict:
+        if scattering_params in scattering_params_dict:
             self.scattering_params = scattering_params_dict[scattering_params]
         else:
             raise NotImplementedError("The scattering parameters `{}` is not implemented. "
