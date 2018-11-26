@@ -69,8 +69,8 @@ class DiffractionGenerator(object):
         self.debye_waller_factors = debye_waller_factors or {}
 
         scattering_params_dict = {
-            'lobato' : 'lobato',
-            'xtables' : 'xtables'
+            'lobato': 'lobato',
+            'xtables': 'xtables'
         }
         if scattering_params in scattering_params_dict:
             self.scattering_params = scattering_params_dict[scattering_params]
@@ -106,7 +106,7 @@ class DiffractionGenerator(object):
         max_excitation_error = self.max_excitation_error
         debye_waller_factors = self.debye_waller_factors
         latt = structure.lattice
-        scattering_params=self.scattering_params
+        scattering_params = self.scattering_params
 
         # Obtain crystallographic reciprocal lattice points within `max_r` and
         # g-vector magnitudes for intensity calculations.
@@ -183,7 +183,7 @@ class DiffractionGenerator(object):
         is_hex = is_lattice_hexagonal(latt)
 
         coeffs, fcoords, occus, dwfactors = get_vectorized_list_for_atomic_scattering_factors(structure, {
-        },scattering_params=scattering_params)
+        }, scattering_params=scattering_params)
 
         # Obtain crystallographic reciprocal lattice points within range
         recip_latt = latt.reciprocal()
