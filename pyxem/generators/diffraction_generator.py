@@ -77,7 +77,7 @@ class DiffractionGenerator(object):
         else:
             raise NotImplementedError("The scattering parameters `{}` is not implemented. "
                                       "See documentation for available "
-                                      "implementations.".format(method))
+                                      "implementations.".format(scattering_params))
 
     def calculate_ed_data(self,
                           structure,
