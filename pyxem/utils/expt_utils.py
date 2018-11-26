@@ -442,60 +442,89 @@ def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
 
 def call_ring_pattern(xcentre, ycentre):
     """
-    Function to make a call to the function ring_pattern without passing the variables directly (necessary for using scipy.optimize.curve_fit).
+    Function to make a call to the function ring_pattern without passing the 
+    variables directly (necessary for using scipy.optimize.curve_fit).
 
     Parameters
     -----------
 
     xcentre : float
-        The coordinate (fractional pixel units) of the diffraction pattern centre in the first dimension
+        The coordinate (fractional pixel units) of the diffraction 
+        pattern centre in the first dimension
     ycentre : float
-        The coordinate (fractional pixel units) of the diffraction pattern centre in the second dimension
+        The coordinate (fractional pixel units) of the diffraction 
+        pattern centre in the second dimension
 
     Returns
     ----------
 
-    ring_pattern function, a function that calculates a ring pattern given a set of points and parameters
+    ring_pattern function, a function that calculates a ring pattern
+    given a set of points and parameters
 
     """
-    def ring_pattern(pts, scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation):
+    def ring_pattern(pts, scale, amplitude, spread, direct_beam_amplitude, 
+                     asymmetry, rotation):
         """
-        Calculats a polycrystalline gold diffraction pattern given a set of pixel coordinates (points).
-        It uses tabulated values of the spacings (in reciprocal Angstroms) and relative intensities of rings
-        derived from X-ray scattering factors.
+        Calculats a polycrystalline gold diffraction pattern given a set of 
+        pixel coordinates (points).
+        It uses tabulated values of the spacings (in reciprocal Angstroms) 
+        and relative intensities of rings derived from X-ray scattering factors.
 
         Parameters
         -----------
 
         pts : 1D array
-            One-dimensional array of points (first half as first-dimension coordinates, second half as second-dimension coordinates)
+            One-dimensional array of points (first half as first-dimension 
+            coordinates, second half as second-dimension coordinates)
         scale : float
-            An initial guess for the diffraction calibration in 1/Angstrom units
+            An initial guess for the diffraction calibration 
+            in 1/Angstrom units
         amplitude : float
-            An initial guess for the amplitude of the polycrystalline rings in arbitrary units
+            An initial guess for the amplitude of the polycrystalline rings 
+            in arbitrary units
         spread : float
             An initial guess for the spread within each ring (Gaussian width)
         direct_beam_amplitude : float
-            An initial guess for the background intensity from the direct beam disc in arbitrary units
+            An initial guess for the background intensity from
+            the direct beam disc in arbitrary units
         asymmetry : float
-            An initial guess for any elliptical asymmetry in the pattern (for a perfectly circular pattern asymmetry=1)
+            An initial guess for any elliptical asymmetry in the pattern 
+            (for a perfectly circular pattern asymmetry=1)
         rotation : float
-            An initial guess for the rotation of the (elliptical) pattern in radians.
+            An initial guess for the rotation of the (elliptical) pattern 
+            in radians.
 
         Returns
         ----------
 
-        A one-dimensional array of the intensities of the ring pattern at the supplied points.
+        A one-dimensional array of the intensities of the ring pattern
+        at the supplied points.
 
         """
-        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, 0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966
-        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1 * scale, ring2 * scale, ring3 * \
-            scale, ring4 * scale, ring5 * scale, ring6 * scale, ring7 * scale, ring8 * scale
-        amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 = 1, 0.44, 0.19, 0.16, 0.04, 0.014, 0.038, 0.036
+        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247,
+                                                                 0.4904, 
+                                                                 0.6935, 
+                                                                 0.8132, 
+                                                                 0.8494, 
+                                                                 0.9808, 
+                                                                 1.0688, 
+                                                                 1.0966
+        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1 * scale, 
+                                                                 ring2 * scale, 
+                                                                 ring3 * scale,        
+                                                                 ring4 * scale, 
+                                                                 ring5 * scale, 
+                                                                 ring6 * scale, 
+                                                                 ring7 * scale, 
+                                                                 ring8 * scale
+        amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 = 1, 0.44, 0.19, 
+                                                         0.16, 0.04, 0.014, 
+                                                         0.038, 0.036
 
         x = pts[:round(np.size(pts, 0) / 2)]
         y = pts[round(np.size(pts, 0) / 2):]
-        Ri = calc_radius_with_distortion(x, y, xcentre, ycentre, asymmetry, rotation)
+        Ri = calc_radius_with_distortion(x, y, xcentre, ycentre, 
+                                         asymmetry, rotation)
 
         denom = 2 * spread**2
         v0 = direct_beam_amplitude * Ri**-2  # np.exp((-1*(Ri)*(Ri))/d0)
