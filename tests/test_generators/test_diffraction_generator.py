@@ -75,7 +75,7 @@ class TestDiffractionCalculator:
     def test_appropriate_scaling(self, diffraction_calculator: DiffractionGenerator):
         """Tests that doubling the unit cell halves the pattern spacing."""
         silicon = make_structure(5)
-        big_silicon = make_strclass TestDiffractionCalculator:ucture(10)
+        big_silicon = make_structure(10)
         diffraction = diffraction_calculator.calculate_ed_data(
             structure=silicon, reciprocal_radius=5.)
         big_diffraction = diffraction_calculator.calculate_ed_data(
