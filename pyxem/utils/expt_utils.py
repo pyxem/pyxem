@@ -502,12 +502,12 @@ def call_ring_pattern(xcentre, ycentre):
 
         """
         ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, \
-        0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966
+            0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966
         ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1 * scale, \
-        ring2 * scale, ring3 * scale, ring4 * scale, ring5 * scale, \
-        ring6 * scale, ring7 * scale, ring8 * scale
+            ring2 * scale, ring3 * scale, ring4 * scale, ring5 * scale, \
+            ring6 * scale, ring7 * scale, ring8 * scale
         amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 = 1, 0.44, 0.19, \
-        0.16, 0.04, 0.014,0.038, 0.036
+            0.16, 0.04, 0.014, 0.038, 0.036
 
         x = pts[:round(np.size(pts, 0) / 2)]
         y = pts[round(np.size(pts, 0) / 2):]
