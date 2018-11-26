@@ -584,6 +584,65 @@ class PixelatedSTEM(Signal2D):
         pst._copy_signal_all_axes_metadata(self, s)
         return s
 
+    def find_peaks(self, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
+                   threshold=0.36, overlap=0.81, lazy_result=True,
+                   show_progressbar=True):
+        """Find peaks in the signal dimensions using skimage's blob_dog.
+
+        Parameters
+        ----------
+        min_sigma : float, optional
+        max_sigma : float, optional
+        sigma_ratio : float, optional
+        threshold : float, optional
+        overlap : float, optional
+        lazy_result : bool, optional
+            Default True
+        show_progressbar : bool, optional
+            Default True
+
+        Returns
+        -------
+        peak_array : dask 2D object array
+            Same size as the two last dimensions in data.
+            The peak positions themselves are stored in 2D NumPy arrays
+            inside each position in peak_array. This is done instead of
+            making a 4D NumPy array, since the number of found peaks can
+            vary in each position.
+
+        Example
+        -------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> peak_array = s.find_peaks()
+        >>> peak_array_computed = peak_array.compute(show_progressbar=False)
+        >>> peak02 = peak_array_computed[0, 2]
+
+        Change parameters
+
+        >>> peak_array = s.find_peaks(
+        ...     min_sigma=1.2, max_sigma=27, sigma_ratio=2.2, threshold=0.6,
+        ...     overlap=0.6, lazy_result=False, show_progressbar=False)
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        output_array = dt._peak_find_dog(
+                dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+        return output_array
+
     def angular_mask(
             self, angle0, angle1,
             centre_x_array=None, centre_y_array=None):

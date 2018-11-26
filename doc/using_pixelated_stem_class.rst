@@ -153,3 +153,30 @@ convergent beam electron diffraction data.
 
 .. image:: images/template_match/cbed_template.jpg
     :scale: 49 %
+
+Peak finding
+------------
+
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_peaks`
+
+Use scikit-image's `Difference of Gaussian (DoG) <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_ function to find features in the signal dimensions.
+For more information about the different parameters, see `scikit's documentation <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_.
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
+    >>> peaks11 = peak_array[1, 1]
+
+
+For some data types, especially convergent beam electron diffraction, using template matching can improve the peak finding:
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s_template = s.template_match_disk(disk_r=5, show_progressbar=False)
+    >>> peak_array = s_template.find_peaks(show_progressbar=False)
+    >>> peak_array_computed = peak_array.compute()
+
+
+Note: this might add extra peaks at the edges of the images.
