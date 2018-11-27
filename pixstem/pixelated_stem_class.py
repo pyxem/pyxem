@@ -616,6 +616,9 @@ class PixelatedSTEM(Signal2D):
         >>> peak_array = s.find_peaks()
         >>> peak_array_computed = peak_array.compute(show_progressbar=False)
         >>> peak02 = peak_array_computed[0, 2]
+        >>> import pixstem.marker_tools as mt
+        >>> mt.add_peak_array_to_signal_as_markers(s, peak_array_computed)
+        >>> s.plot()
 
         Change parameters
 

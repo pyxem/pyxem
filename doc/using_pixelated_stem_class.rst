@@ -32,7 +32,7 @@ Using the navigator slider:
 
 .. code-block:: python
 
-    >>> s.plot(navigator='slider')
+    >>> s.plot(navigator='slider') # doctest: +SKIP
 
 Using another signal as navigator, generated using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.virtual_annular_dark_field` or :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.virtual_bright_field`:
 
@@ -168,6 +168,18 @@ For more information about the different parameters, see `scikit's documentation
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> peaks11 = peak_array[1, 1]
 
+
+To visualize this, the peaks can be added to a signal as `HyperSpy markers <http://hyperspy.org/hyperspy-doc/current/user_guide/visualisation.html#markers>`_.
+For this, use :py:func:`~pixstem.marker_tools.add_peak_array_to_signal_as_markers`.
+
+.. code-block:: python
+
+    >>> import pixstem.marker_tools as mt
+    >>> mt.add_peak_array_to_signal_as_markers(s, peak_array, color='blue', size=15)
+    >>> s.plot()
+
+.. image:: images/peak_finding/cbed_with_peaks.jpg
+    :scale: 49 %
 
 For some data types, especially convergent beam electron diffraction, using template matching can improve the peak finding:
 

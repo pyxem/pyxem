@@ -38,6 +38,8 @@ pages_development_branch:
     - xvfb-run -a python3 testdata.py
     - cd ../analysing_dpc_data/
     - xvfb-run -a python3 make_dpc_analysis_images.py
+    - cd ../peak_finding/
+    - xvfb-run -a python3 make_peak_finding_images.py
     - cd ../template_match/
     - xvfb-run -a python3 make_template_match_images.py
     - cd ../frontpage/
@@ -65,6 +67,10 @@ pages:
     - xvfb-run -a python3 testdata.py
     - cd ../analysing_dpc_data/
     - xvfb-run -a python3 make_dpc_analysis_images.py
+    - cd ../peak_finding/
+    - xvfb-run -a python3 make_peak_finding_images.py
+    - cd ../template_match/
+    - xvfb-run -a python3 make_template_match_images.py
     - cd ../frontpage/
     - xvfb-run -a python3 make_frontpage_images.py
     - cd ../../
