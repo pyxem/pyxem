@@ -217,10 +217,6 @@ def get_kinematical_intensities(structure,
             fs = np.sum(coeffs[:, :, 0] * np.exp(-coeffs[:, :, 1] * s2), axis=1)
             fss.append(fs)
         fss = np.array(fss)
-    else:
-        raise NotImplementedError("The scattering parameters `{}` are not implemented. "
-                                  "See documentation for available "
-                                  "implementations.".format(scattering_params))
 
     # Change the coordinate system of fcoords to align with that of g_indices
     fcoords = np.dot(fcoords, np.linalg.inv(np.dot(structure.lattice.stdbase, structure.lattice.recbase)))
