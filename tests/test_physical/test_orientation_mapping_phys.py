@@ -152,7 +152,7 @@ def test_kinematic_intensities_rotation(structure, rotation):
     g_indices = [(0, 0, 1)]
     g_hkls = np.array([reciprocal_lattice.dist(g_indices, [0, 0, 0])])
 
-    scattering_params_list = ['lobato','xtables']
+    scattering_params_list = ['lobato', 'xtables']
     for scattering_params in scattering_params_list:
         intensities = get_kinematical_intensities(
             structure,
@@ -164,6 +164,7 @@ def test_kinematic_intensities_rotation(structure, rotation):
             scattering_params=scattering_params)
 
         np.testing.assert_almost_equal(intensities, [0])
+
 
 @pytest.mark.parametrize("structure, rotation", [(create_wurtzite(), euler2mat(0, np.pi / 2, 0, 'rzxz'))])
 @pytest.mark.xfail(raises=NotImplementedError)
