@@ -150,8 +150,7 @@ class DiffractionGenerator(object):
     def calculate_profile_data(self, structure,
                                reciprocal_radius=1.0,
                                magnitude_tolerance=1e-5,
-                               minimum_intensity=1e-3,
-                               scattering_params='lobato'):
+                               minimum_intensity=1e-3):
         """
         Calculates a one dimensional diffraction profile for a structure.
 
