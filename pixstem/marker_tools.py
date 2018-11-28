@@ -2,15 +2,19 @@ import numpy as np
 import hyperspy.utils.markers as hm
 
 
-def _get_4d_marker_list(signal_axes, peaks_list, color='red', size=20):
+def _get_4d_marker_list(peaks_list, signal_axes=None, color='red', size=20):
     """Get a list of 4 dimensional point markers.
 
     The markers will be displayed on the signal dimensions.
 
-    Paremeters
+    Parameters
     ----------
-    signal_axes : HyperSpy axes_manager object
     peaks_list : 4D NumPy array
+    signal_axes : HyperSpy axes_manager object
+    color : string, optional
+        Color of point marker. Default 'red'.
+    size : scalar, optional
+        Size of the point marker. Default 20.
 
     Returns
     -------
@@ -22,7 +26,7 @@ def _get_4d_marker_list(signal_axes, peaks_list, color='red', size=20):
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pixstem.marker_tools as mt
     >>> marker_list = mt._get_4d_marker_list(
-    ...     s.axes_manager.signal_axes, peak_array)
+    ...     peak_array, s.axes_manager.signal_axes)
 
     """
     max_peaks = 0
@@ -39,15 +43,20 @@ def _get_4d_marker_list(signal_axes, peaks_list, color='red', size=20):
     for ix, iy in np.ndindex(marker_x_array.shape[:2]):
         peak_list = peaks_list[ix, iy]
         if peak_list is not None:
-            for i_peak, peak in enumerate(peak_list):
-                marker_x_array[ix, iy, i_peak] = signal_axes[0].index2value(
-                        int(peak[1]))
-                marker_y_array[ix, iy, i_peak] = signal_axes[1].index2value(
-                        int(peak[0]))
+            for i_p, peak in enumerate(peak_list):
+                if signal_axes is None:
+                    marker_x_array[ix, iy, i_p] = peak[1]
+                    marker_y_array[ix, iy, i_p] = peak[0]
+                else:
+                    marker_x_array[ix, iy, i_p] = signal_axes[0].index2value(
+                            int(peak[1]))
+                    marker_y_array[ix, iy, i_p] = signal_axes[1].index2value(
+                            int(peak[0]))
+
     marker_list = []
-    for i_peak in range(max_peaks):
+    for i_p in range(max_peaks):
         marker = hm.point(
-                marker_x_array[..., i_peak], marker_y_array[..., i_peak],
+                marker_x_array[..., i_p], marker_y_array[..., i_p],
                 color=color, size=size)
         marker_list.append(marker)
     return marker_list
@@ -67,7 +76,7 @@ def _add_permanent_markers_to_signal(signal, marker_list):
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pixstem.marker_tools as mt
     >>> marker_list = mt._get_4d_marker_list(
-    ...     s.axes_manager.signal_axes, peak_array)
+    ...     peak_array, s.axes_manager.signal_axes)
     >>> mt._add_permanent_markers_to_signal(s, marker_list)
     >>> s.plot()
 
@@ -98,6 +107,6 @@ def add_peak_array_to_signal_as_markers(
 
     """
     marker_list = _get_4d_marker_list(
-            signal.axes_manager.signal_axes, peak_array, color=color,
+            peak_array, signal.axes_manager.signal_axes, color=color,
             size=size)
     _add_permanent_markers_to_signal(signal, marker_list)
