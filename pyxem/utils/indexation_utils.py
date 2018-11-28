@@ -46,45 +46,33 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
 
     Returns
     -------
-    out_arr : np.array()
+    top_matches : (<num phases>*n_largest, 5), np.array()
         A numpy array containing the top n correlated simulations for the
         experimental pattern of interest.
 
     See also
     --------
     pyxem.utils.correlate and the correlate method of IndexationGenerator.
-
     """
-    i = 0
-    out_arr = np.zeros((n_largest * len(library), 5))
+    top_matches = np.zeros((len(library), n_largest, 5))
     if mask == 1:
-        for key in library.keys():
-            correlations = dict()
-            for orientation, diffraction_pattern in library[key].items():
-                # diffraction_pattern here is in fact a library of
-                # diffraction_pattern_properties
+        for phase_index, key in enumerate(library.keys()):
+            correlations = np.empty((len(library[key]), 4))
+            # Use enumerate to index, i, each (orientation, diffraction_pattern) in list
+            for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
                 correlation = correlate(image, diffraction_pattern)
-                correlations[orientation] = correlation
-                res = nlargest(n_largest, correlations.items(),
-                               key=itemgetter(1))
-            # put top n results in output array
-            for j in np.arange(n_largest):
-                # get phase identifying integer
-                out_arr[j + i * n_largest][0] = i
-                # get Euler angles z, x, z
-                out_arr[j + i * n_largest][1] = res[j][0][0]
-                out_arr[j + i * n_largest][2] = res[j][0][1]
-                out_arr[j + i * n_largest][3] = res[j][0][2]
-                # get correlation score
-                out_arr[j + i * n_largest][4] = res[j][1]
-            i = i + 1
+                correlations[i, :] = *orientation, correlation
 
+            # Partition to get the n_largest best matches
+            top_n = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
+            # Sort the matches by correlation score, descending
+            top_n = top_n[top_n[:, 3].argsort()][::-1]
+
+            top_matches[phase_index, :, 0] = phase_index
+            top_matches[phase_index, :, 1:] = top_n
     else:
-        for j in np.arange(n_largest):
-            for k in [0, 1, 2, 3, 4]:
-                out_arr[j + i * n_largest][k] = np.nan
-        i = i + 1
-    return out_arr
+        top_matches.fill(np.nan)
+    return top_matches.reshape((len(library) * n_largest, 5))
 
 
 def index_magnitudes(z, simulation, tolerance):

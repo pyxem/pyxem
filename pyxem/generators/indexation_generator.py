@@ -17,7 +17,11 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Indexation generator and associated tools.
+
 """
+
+from heapq import nlargest
+from operator import itemgetter
 
 import numpy as np
 import hyperspy.api as hs
