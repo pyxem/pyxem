@@ -83,8 +83,9 @@ def _add_permanent_markers_to_signal(signal, marker_list):
     """
     if not hasattr(signal.metadata, 'Markers'):
         signal.metadata.add_node('Markers')
+    marker_extra = len(signal.metadata.Markers)
     for imarker, marker in enumerate(marker_list):
-        marker_name = 'marker{0}'.format(imarker)
+        marker_name = 'marker{0}'.format(imarker + marker_extra)
         signal.metadata.Markers[marker_name] = marker
 
 

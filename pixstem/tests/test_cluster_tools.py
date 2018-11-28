@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.random import randint
+from pixstem.pixelated_stem_class import PixelatedSTEM
 import pixstem.cluster_tools as ct
 
 
@@ -59,6 +60,63 @@ class TestSortClusterDict:
         assert len(sorted_cluster_dict1['centre']) == n_rest
         assert len(sorted_cluster_dict1['rest']) == n_centre
         assert len(sorted_cluster_dict1['none']) == 1
+
+
+class TestClusterAndSortPeakArray:
+
+    def test_simple(self):
+        peak_array0 = randint(124, 132, size=(3, 4, 10, 2))
+        peak_array1 = randint(24, 32, size=(3, 4, 5, 2))
+        peak_array2 = randint(201, 203, size=(3, 4, 1, 2))
+        peak_array = np.concatenate(
+                (peak_array0, peak_array1, peak_array2), axis=2)
+        peak_dict = ct._cluster_and_sort_peak_array(peak_array)
+        assert len(peak_dict['centre'][0, 0]) == 10
+        assert len(peak_dict['rest'][0, 0]) == 5
+        assert len(peak_dict['none'][0, 0]) == 1
+
+    def test_eps(self):
+        peak_array0 = randint(124, 132, size=(3, 4, 10, 2))
+        peak_array1 = randint(24, 32, size=(3, 4, 5, 2))
+        peak_array = np.concatenate((peak_array0, peak_array1), axis=2)
+        peak_dict0 = ct._cluster_and_sort_peak_array(peak_array, eps=30)
+        peak_dict1 = ct._cluster_and_sort_peak_array(peak_array, eps=300)
+        assert len(peak_dict0['centre'][0, 0]) == 10
+        assert len(peak_dict1['centre'][0, 0]) == 15
+
+    def test_min_samples(self):
+        peak_array0 = randint(124, 132, size=(3, 4, 10, 2))
+        peak_array1 = randint(204, 208, size=(3, 4, 3, 2))
+        peak_array = np.concatenate((peak_array0, peak_array1), axis=2)
+        peak_dict0 = ct._cluster_and_sort_peak_array(peak_array, min_samples=4)
+        peak_dict1 = ct._cluster_and_sort_peak_array(peak_array, min_samples=2)
+        assert len(peak_dict0['none'][0, 0]) == 3
+        assert len(peak_dict1['none'][0, 0]) == 0
+        assert len(peak_dict1['rest'][0, 0]) == 3
+
+    def test_different_centre(self):
+        peak_array0 = randint(124, 132, size=(3, 4, 10, 2))
+        peak_array1 = randint(24, 32, size=(3, 4, 5, 2))
+        peak_array = np.concatenate((peak_array0, peak_array1), axis=2)
+        peak_dict0 = ct._cluster_and_sort_peak_array(
+                peak_array, centre_x=128, centre_y=128)
+        peak_dict1 = ct._cluster_and_sort_peak_array(
+                peak_array, centre_x=28, centre_y=28)
+        assert len(peak_dict0['centre'][0, 0]) == 10
+        assert len(peak_dict0['rest'][0, 0]) == 5
+        assert len(peak_dict1['centre'][0, 0]) == 5
+        assert len(peak_dict1['rest'][0, 0]) == 10
+
+
+class TestAddPeakDictsToSignal:
+
+    def test_simple(self):
+        peak_dicts = {}
+        peak_dicts['centre'] = randint(124, 132, size=(3, 4, 10, 2))
+        peak_dicts['rest'] = randint(204, 212, size=(3, 4, 5, 2))
+        peak_dicts['none'] = randint(10, 13, size=(3, 4, 2, 2))
+        s = PixelatedSTEM(np.zeros((3, 4, 256, 256)))
+        ct._add_peak_dicts_to_signal(s, peak_dicts)
 
 
 class TestSortedClusterDictToMarkerList:

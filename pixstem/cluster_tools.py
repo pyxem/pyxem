@@ -38,6 +38,8 @@ def _get_cluster_dict(peak_array, eps=30, min_samples=2):
     >>> cluster0 = cluster_dict[0]
 
     """
+    if len(peak_array.shape) != 2:
+        raise ValueError("peak_array must have 2 dimensions")
     dbscan = cluster.DBSCAN(eps=eps, min_samples=min_samples)
     dbscan.fit(peak_array)
     label_list = dbscan.labels_
@@ -110,6 +112,47 @@ def _sort_cluster_dict(cluster_dict, centre_x=128, centre_y=128):
     return sorted_cluster_dict
 
 
+def _cluster_and_sort_peak_array(
+        peak_array, eps=30, min_samples=2, centre_x=128, centre_y=128):
+    peak_centre_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
+    peak_rest_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
+    peak_none_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
+    for ix, iy in np.ndindex(peak_array.shape[:2]):
+        cluster_dict = _get_cluster_dict(
+                peak_array[ix, iy], eps=eps, min_samples=min_samples)
+        sorted_cluster_dict = _sort_cluster_dict(
+                cluster_dict, centre_x=centre_x, centre_y=centre_y)
+        if 'centre' in sorted_cluster_dict:
+            peak_centre_array[ix, iy] = sorted_cluster_dict['centre']
+        else:
+            peak_centre_array[ix, iy] = []
+        if 'rest' in sorted_cluster_dict:
+            peak_rest_array[ix, iy] = sorted_cluster_dict['rest']
+        else:
+            peak_rest_array[ix, iy] = []
+        if 'none' in sorted_cluster_dict:
+            peak_none_array[ix, iy] = sorted_cluster_dict['none']
+        else:
+            peak_rest_array[ix, iy] = []
+
+    peak_dicts = {}
+    peak_dicts['centre'] = peak_centre_array
+    peak_dicts['rest'] = peak_rest_array
+    peak_dicts['none'] = peak_none_array
+    return peak_dicts
+
+
+def _add_peak_dicts_to_signal(
+        signal, peak_dicts, color_centre='red', color_rest='blue',
+        color_none='cyan', size=20):
+    mt.add_peak_array_to_signal_as_markers(
+            signal, peak_dicts['centre'], color=color_centre, size=size)
+    mt.add_peak_array_to_signal_as_markers(
+            signal, peak_dicts['rest'], color=color_rest, size=size)
+    mt.add_peak_array_to_signal_as_markers(
+            signal, peak_dicts['none'], color=color_none, size=size)
+
+
 def _sorted_cluster_dict_to_marker_list(
         sorted_cluster_dict, signal_axes=None,
         color_centre='blue', color_rest='red', color_none='green', size=20):
@@ -162,6 +205,6 @@ def _sorted_cluster_dict_to_marker_list(
         else:
             color = 'cyan'
         temp_markers = mt._get_4d_marker_list(
-                cluster_list, signal_axes=signal_axes, color=color, size=20)
+                cluster_list, signal_axes=signal_axes, color=color, size=size)
         marker_list.extend(temp_markers)
     return marker_list
