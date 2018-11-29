@@ -4,6 +4,78 @@ from pixstem.pixelated_stem_class import PixelatedSTEM
 import pixstem.cluster_tools as ct
 
 
+class TestFilterPeakList:
+
+    def test_simple(self):
+        peak_list = [[128, 129], [10, 0], [0, 120], [255, 123], [123, 255],
+                     [255, 255], [0, 0]]
+        peak_list_filtered = ct._filter_peak_list(peak_list)
+        assert [[128, 129]] == peak_list_filtered
+
+    def test_max_x_index(self):
+        peak_list = [[128, 129], [10, 0], [0, 120], [256, 123], [123, 256],
+                     [256, 256], [0, 0]]
+        peak_list_filtered = ct._filter_peak_list(peak_list, max_x_index=256)
+        assert [[128, 129], [123, 256]] == peak_list_filtered
+
+    def test_max_y_index(self):
+        peak_list = [[128, 129], [10, 0], [0, 120], [256, 123], [123, 256],
+                     [256, 256], [0, 0]]
+        peak_list_filtered = ct._filter_peak_list(peak_list, max_y_index=256)
+        assert [[128, 129], [256, 123]] == peak_list_filtered
+
+
+class TestFilter4DPeakArray:
+
+    def test_simple(self):
+        peak_array0 = randint(124, 132, size=(3, 4, 10, 2))
+        peak_array1 = np.ones(shape=(3, 4, 3, 2)) * 255
+        peak_array2 = np.zeros(shape=(3, 4, 3, 2))
+        peak_array = np.concatenate(
+                (peak_array0, peak_array1, peak_array2), axis=2)
+        peak_array_filtered = ct._filter_4D_peak_array(peak_array)
+        for ix, iy in np.ndindex(peak_array_filtered.shape[:2]):
+            peak_list = peak_array_filtered[ix, iy]
+            for x, y in peak_list:
+                assert x != 0
+                assert x != 255
+                assert y != 0
+                assert y != 255
+
+    def test_max_x_index_max_y_index(self):
+        peak_array0 = randint(124, 132, size=(3, 4, 10, 2))
+        peak_array1 = np.ones(shape=(3, 4, 3, 2)) * 256
+        peak_array2 = np.zeros(shape=(3, 4, 3, 2))
+        peak_array = np.concatenate(
+                (peak_array0, peak_array1, peak_array2), axis=2)
+        peak_array_filtered = ct._filter_4D_peak_array(
+                peak_array, max_x_index=256, max_y_index=256)
+        for ix, iy in np.ndindex(peak_array_filtered.shape[:2]):
+            peak_list = peak_array_filtered[ix, iy]
+            for x, y in peak_list:
+                assert x != 0
+                assert x != 256
+                assert y != 0
+                assert y != 256
+
+    def test_signal_axes(self):
+        s = PixelatedSTEM(np.zeros(shape=(3, 4, 128, 128)))
+        peak_array0 = randint(62, 67, size=(3, 4, 10, 2))
+        peak_array1 = np.ones(shape=(3, 4, 3, 2)) * 127
+        peak_array2 = np.zeros(shape=(3, 4, 3, 2))
+        peak_array = np.concatenate(
+                (peak_array0, peak_array1, peak_array2), axis=2)
+        peak_array_filtered = ct._filter_4D_peak_array(
+                peak_array, signal_axes=s.axes_manager.signal_axes)
+        for ix, iy in np.ndindex(peak_array_filtered.shape[:2]):
+            peak_list = peak_array_filtered[ix, iy]
+            for x, y in peak_list:
+                assert x != 0
+                assert x != 127
+                assert y != 0
+                assert y != 127
+
+
 class TestGetClusterDict:
 
     def test_simple(self):

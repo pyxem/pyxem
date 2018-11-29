@@ -9,6 +9,73 @@ def _find_nearest(array, value):
     return array[idx]
 
 
+def _filter_4D_peak_array(peak_array, signal_axes=None,
+                          max_x_index=255, max_y_index=255):
+    """Remove false positives at the outer edges.
+
+    Parameters
+    ----------
+    peak_array : 4D NumPy array
+    signal_axes : HyperSpy signal axes axes_manager, optional
+    max_x_index, max_y_index : scalar, optional
+        Default 255.
+
+    Examples
+    --------
+    >>> import pixstem.cluster_tools as ct
+    >>> peak_array = np.random.randint(0, 255, size=(3, 4, 100, 2))
+    >>> peak_array_filtered = ct._filter_4D_peak_array(peak_array)
+
+    """
+    if signal_axes is not None:
+        max_x_index = signal_axes[0].high_index
+        max_y_index = signal_axes[1].high_index
+    peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
+    for iy, ix in np.ndindex(peak_array.shape[:2]):
+        peak_list_filtered = _filter_peak_list(
+                peak_array[iy, ix],
+                max_x_index=max_x_index, max_y_index=max_y_index)
+        peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
+    return peak_array_filtered
+
+
+def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
+    """Remove false positive peaks at the outer edges.
+
+    Parameters
+    ----------
+    peak_list : 2D NumPy or 2D list
+        [[x0, y0], [x1, y1], ...]
+    max_x_index, max_y_index : int, optional
+        Default 255.
+
+    Returns
+    -------
+    peak_list_filtered : 2D NumPy array or 2D list
+
+    Examples
+    --------
+    >>> import pixstem.cluster_tools as ct
+    >>> peak_list = [[128, 129], [10, 52], [0, 120], [255, 123], [123, 255]]
+    >>> ct._filter_peak_list(peak_list)
+    [[128, 129], [10, 52]]
+
+    """
+    peak_list_filtered = []
+    for x, y in peak_list:
+        if x == 0:
+            pass
+        elif y == 0:
+            pass
+        elif x == max_x_index:
+            pass
+        elif y == max_y_index:
+            pass
+        else:
+            peak_list_filtered.append([x, y])
+    return peak_list_filtered
+
+
 def _get_cluster_dict(peak_array, eps=30, min_samples=2):
     """Sort peaks into cluster using sklearn's DBSCAN.
 
