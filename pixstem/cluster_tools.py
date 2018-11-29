@@ -215,6 +215,36 @@ def _sort_cluster_dict(cluster_dict, centre_x=128, centre_y=128):
 
 def _cluster_and_sort_peak_array(
         peak_array, eps=30, min_samples=2, centre_x=128, centre_y=128):
+    """Cluster and sort a 4D peak array into centre, rest and unclustered.
+
+    Parameters
+    ----------
+    peak_array : 4D NumPy array
+    eps : scalar, optional
+        Default 30, passed to sklearn's DBSCAN
+    min_sample : scalar, optional
+        Default 2, passed to sklearn's DBSCAN
+    centre_x, centre_y : scalar, optional
+        Default 128
+
+    Returns
+    -------
+    peak_dicts : dict
+        Different peaks sorted into either peak_dicts['centre'],
+        peak_dicts['rest'], peak_dicts['none'] (for the unclustered points).
+
+    Example
+    -------
+    >>> peak_array0 = np.random.randint(124, 132, size=(2, 4, 10, 2))
+    >>> peak_array1 = np.random.randint(204, 208, size=(2, 4, 10, 2))
+    >>> peak_array = np.concatenate((peak_array0, peak_array1), axis=2)
+    >>> import pixstem.cluster_tools as ct
+    >>> peak_dicts = ct._cluster_and_sort_peak_array(peak_array)
+    >>> peak_array_centre = peak_dicts['centre']
+    >>> peak_array_rest = peak_dicts['rest']
+    >>> peak_array_none = peak_dicts['none']
+
+    """
     peak_centre_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
     peak_rest_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
     peak_none_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
