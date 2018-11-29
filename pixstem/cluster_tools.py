@@ -9,6 +9,40 @@ def _find_nearest(array, value):
     return array[idx]
 
 
+def _find_max_indices_4D_peak_array(peak_array):
+    """Find maximum indices in a 4D peak array.
+
+    Parameters
+    ----------
+    peak_array : 4D NumPy array
+
+    Returns
+    -------
+    max_indices : tuple
+        (max_x_index, max_y_index)
+
+    Examples
+    --------
+    >>> import pixstem.cluster_tools as ct
+    >>> peak_array0 = np.random.randint(10, 255, size=(3, 4, 5000, 1))
+    >>> peak_array1 = np.random.randint(5, 127, size=(3, 4, 5000, 1))
+    >>> peak_array = np.concatenate((peak_array0, peak_array1), axis=3)
+    >>> max_x_index, max_y_index = ct._find_max_indices_4D_peak_array(
+    ...     peak_array)
+
+    """
+    max_x_index, max_y_index = 0, 0
+    for ix, iy in np.ndindex(peak_array.shape[:2]):
+        temp_peak_array = peak_array[ix, iy]
+        x_max = int(temp_peak_array[:, 0].max())
+        y_max = int(temp_peak_array[:, 1].max())
+        if x_max > max_x_index:
+            max_x_index = x_max
+        if y_max > max_y_index:
+            max_y_index = y_max
+    return max_x_index, max_y_index
+
+
 def _filter_4D_peak_array(peak_array, signal_axes=None,
                           max_x_index=255, max_y_index=255):
     """Remove false positives at the outer edges.

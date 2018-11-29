@@ -25,6 +25,19 @@ class TestFilterPeakList:
         assert [[128, 129], [256, 123]] == peak_list_filtered
 
 
+class TestFindMaxIndices4DPeakArray:
+
+    def test_simple(self):
+        max_x, max_y = 255, 127
+        peak_array0 = np.random.randint(10, max_x, size=(3, 4, 5000, 1))
+        peak_array1 = np.random.randint(5, max_y, size=(3, 4, 5000, 1))
+        peak_array = np.concatenate((peak_array0, peak_array1), axis=3)
+        max_x_index, max_y_index = ct._find_max_indices_4D_peak_array(
+                peak_array)
+        assert max_x_index == max_x - 1
+        assert max_y_index == max_y - 1
+
+
 class TestFilter4DPeakArray:
 
     def test_simple(self):
