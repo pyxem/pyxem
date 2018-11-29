@@ -276,6 +276,29 @@ def _cluster_and_sort_peak_array(
 def _add_peak_dicts_to_signal(
         signal, peak_dicts, color_centre='red', color_rest='blue',
         color_none='cyan', size=20):
+    """Visualize the results of peak_dicts through markers in a Signal.
+
+    Parameters
+    ----------
+    signal : HyperSpy Signal2D, PixelatedSTEM
+    peak_dicts : dicts
+    color_centre, color_rest, color_none : string, optional
+        Color of the markers. Default 'red', 'blue', 'cyan'.
+    size : scalar, optional
+        Size of the markers. Default 20
+
+    Example
+    -------
+    >>> peak_dicts = {}
+    >>> peak_dicts['centre'] = np.random.randint(99, size=(2, 3, 10, 2))
+    >>> peak_dicts['rest'] = np.random.randint(99, size=(2, 3, 3, 2))
+    >>> peak_dicts['none'] = np.random.randint(99, size=(2, 3, 2, 2))
+    >>> s = ps.PixelatedSTEM(np.random.random((2, 3, 100, 100)))
+    >>> import pixstem.cluster_tools as ct
+    >>> ct._add_peak_dicts_to_signal(s, peak_dicts)
+    >>> s.plot()
+
+    """
     mt.add_peak_array_to_signal_as_markers(
             signal, peak_dicts['centre'], color=color_centre, size=size)
     mt.add_peak_array_to_signal_as_markers(
