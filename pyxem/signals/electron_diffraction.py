@@ -427,7 +427,6 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-
         radius_start : int
             The lower bound for the radius of the central disc to be used in the
             alignment.
@@ -482,7 +481,6 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-
         mask_radius : int
             The radius in pixels for a mask over the direct beam disc
             (the direct beam disc within given radius will be excluded
@@ -507,7 +505,6 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         ----------
-
         Array of refined fitting parameters
            [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation].
 
@@ -550,7 +547,6 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-
         mask : bool
             Choice of whether to use mask or not (mask=True will return a
             specified circular mask setting a region around
@@ -579,7 +575,6 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         ----------
-
         2D array with the same dimensions and orientation as self.data
         (the input diffraction pattern data)
 
