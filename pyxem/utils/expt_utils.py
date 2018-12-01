@@ -446,8 +446,7 @@ def call_ring_pattern(xcentre, ycentre):
     variables directly (necessary for using scipy.optimize.curve_fit).
 
     Parameters
-    -----------
-
+    ----------
     xcentre : float
         The coordinate (fractional pixel units) of the diffraction
         pattern centre in the first dimension
@@ -456,10 +455,10 @@ def call_ring_pattern(xcentre, ycentre):
         pattern centre in the second dimension
 
     Returns
-    ----------
-
-    ring_pattern function, a function that calculates a ring pattern
-    given a set of points and parameters
+    -------
+    ring_pattern : function
+        A function that calculates a ring pattern given a set of points and 
+        parameters.
 
     """
     def ring_pattern(pts, scale, amplitude, spread, direct_beam_amplitude,
@@ -472,7 +471,6 @@ def call_ring_pattern(xcentre, ycentre):
 
         Parameters
         -----------
-
         pts : 1D array
             One-dimensional array of points (first half as first-dimension
             coordinates, second half as second-dimension coordinates)
@@ -495,10 +493,10 @@ def call_ring_pattern(xcentre, ycentre):
             in radians.
 
         Returns
-        ----------
-
-        A one-dimensional array of the intensities of the ring pattern
-        at the supplied points.
+        -------
+        ring_pattern : np.array()
+            A one-dimensional array of the intensities of the ring pattern
+            at the supplied points.
 
         """
         ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, \
