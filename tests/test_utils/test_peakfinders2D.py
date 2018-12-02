@@ -18,15 +18,8 @@
 
 import pytest
 import numpy as np
-from pyxem.utils.peakfinders2D import *
-
-"""
-A philosophical note:
-    It's very dificult to prove that a peakfinder with many parameters couldn't
-    find the peaks you have 'defined' if you just picked better parameters.
-    These tests are designed to show that when the peakfinders find 0,1,x (x>1)
-    peaks the results are of the style - if not the value - that we expect.
-"""
+from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
+    find_peaks_dog, find_peaks_log
 
 # see https://stackoverflow.com/questions/9205081/
 dispatcher = {

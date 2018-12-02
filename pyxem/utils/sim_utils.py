@@ -485,9 +485,10 @@ def angle_between_cartesian(a, b):
     return math.acos(max(-1.0, min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))))
 
 
-def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution):
-    """Generate a rotation list covering the inverse pole figure specified by three
-        corners in cartesian coordinates.
+def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
+                                inplane_rotations, resolution):
+    """Generate a rotation list covering the inverse pole figure specified by
+    three corners in cartesian coordinates.
 
     Parameters
     ----------
@@ -510,8 +511,8 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
     Returns
     -------
     rotation_list : numpy.array
-        Rotations covering the inverse pole figure given as a of Euler
-            angles in degress. This `np.array` can be passed directly to pyxem.
+        Rotations covering the inverse pole figure given as a of Euler angles in
+        degrees. This `np.array` can be passed directly to pyxem.
     """
     # Convert the crystal directions to cartesian vectors and normalize
     if len(corner_a) == 4:
