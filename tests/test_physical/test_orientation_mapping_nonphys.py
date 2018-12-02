@@ -58,7 +58,7 @@ for alpha in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
                 0.075,
                 1).data)  # stores a numpy array of pattern
 
-    # this add a new entry to the library
+    # add a new entry to the library
     library = create_library_entry(library, (alpha, alpha, alpha), dp_sim)
 
 dp = pxm.ElectronDiffraction([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns

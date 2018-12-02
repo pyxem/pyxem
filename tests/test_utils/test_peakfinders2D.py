@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
-    find_peaks_dog, find_peaks_log
+    find_peaks_dog, find_peaks_log, find_peaks_xc
 
 # see https://stackoverflow.com/questions/9205081/
 dispatcher = {
