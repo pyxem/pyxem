@@ -19,8 +19,9 @@
 import pytest
 import numpy as np
 
-from pyxem.utils.subpixel_refinements_utils import *
 from pyxem.utils.subpixel_refinements_utils import _conventional_xc
+from pyxem.utils.subpixel_refinements_utils import get_experimental_square
+from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 
 from skimage.transform import rescale
 
