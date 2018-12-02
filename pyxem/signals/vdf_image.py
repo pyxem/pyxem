@@ -29,6 +29,7 @@ class VDFImage(Signal2D):
 
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
+	self.vectors = None
 
     def separate_stack(self,
                        min_distance,

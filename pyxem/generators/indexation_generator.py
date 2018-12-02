@@ -20,9 +20,6 @@
 
 """
 
-from heapq import nlargest
-from operator import itemgetter
-
 import numpy as np
 from pyxem.signals.indexation_results import IndexationResults
 
@@ -34,35 +31,49 @@ import hyperspy.api as hs
 
 def correlate_library(image, library, n_largest, mask, keys=[]):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image) stored as a
-    numpy array. See the correlate method of IndexationGenerator for details.
-    """
-    i = 0
-    out_arr = np.zeros((n_largest * len(library), 5))
-    if mask == 1:
-        for key in library.keys():
-            correlations = dict()
-            for orientation, diffraction_pattern in library[key].items():
-                # diffraction_pattern here is in fact a library of
-                # diffraction_pattern_properties
-                correlation = correlate(image, diffraction_pattern)
-                correlations[orientation] = correlation
-                res = nlargest(n_largest, correlations.items(),
-                               key=itemgetter(1))
-            for j in np.arange(n_largest):
-                out_arr[j + i * n_largest][0] = i
-                out_arr[j + i * n_largest][1] = res[j][0][0]
-                out_arr[j + i * n_largest][2] = res[j][0][1]
-                out_arr[j + i * n_largest][3] = res[j][0][2]
-                out_arr[j + i * n_largest][4] = res[j][1]
-            i = i + 1
+    with a particular experimental diffraction pattern (image).
 
+    Parameters
+    ----------
+    image : np.array()
+        The experimental diffraction pattern of interest.
+    library : DiffractionLibrary
+        The library of diffraction simulations to be correlated with the
+        experimental data.
+    n_largest : int
+        The number of well correlated simulations to be retained.
+    mask : bool array
+        A mask for navigation axes 1 indicates positions to be indexed.
+
+    Returns
+    -------
+    top_matches : (<num phases>*n_largest, 5), np.array()
+        A numpy array containing the top n correlated simulations for the
+        experimental pattern of interest.
+
+    See also
+    --------
+    pyxem.utils.correlate and the correlate method of IndexationGenerator.
+    """
+    top_matches = np.zeros((len(library), n_largest, 5))
+    if mask == 1:
+        for phase_index, key in enumerate(library.keys()):
+            correlations = np.empty((len(library[key]), 4))
+            # Use enumerate to index, i, each (orientation, diffraction_pattern) in list
+            for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
+                correlation = correlate(image, diffraction_pattern)
+                correlations[i, :] = *orientation, correlation
+
+            # Partition to get the n_largest best matches
+            top_n = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
+            # Sort the matches by correlation score, descending
+            top_n = top_n[top_n[:, 3].argsort()][::-1]
+
+            top_matches[phase_index, :, 0] = phase_index
+            top_matches[phase_index, :, 1:] = top_n
     else:
-        for j in np.arange(n_largest):
-            for k in [0, 1, 2, 3, 4]:
-                out_arr[j + i * n_largest][k] = np.nan
-        i = i + 1
-    return out_arr
+        top_matches.fill(np.nan)
+    return top_matches.reshape((len(library) * n_largest, 5))
 
 
 class IndexationGenerator():

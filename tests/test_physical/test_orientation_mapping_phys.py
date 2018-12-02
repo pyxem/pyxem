@@ -22,9 +22,11 @@ import pyxem as pxm
 import hyperspy.api as hs
 import diffpy.structure
 
+from transforms3d.euler import euler2mat
+
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.libraries.structure_library import StructureLibrary
-from pyxem.utils.sim_utils import peaks_from_best_template
+from pyxem.utils.sim_utils import peaks_from_best_template, get_kinematical_intensities
 
 """
 The test are designed to make sure orientation mapping works when actual
@@ -49,6 +51,28 @@ def create_Hex():
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
     atom = diffpy.structure.atom.Atom(atype='Ni', xyz=[0, 0, 0], lattice=latt)
     return diffpy.structure.Structure(atoms=[atom], lattice=latt)
+
+
+def create_wurtzite(rotation=None):
+    """Construct a hexagonal P63mc GaAs Wurtzite structure. """
+    if rotation is None:
+        rotation = np.eye(3)
+    a = 4.053
+    c = 6.680
+    lattice = diffpy.structure.lattice.Lattice(a, a, c, 90, 90, 120)
+    atom_list = []
+    for x, y, z in [(1 / 3, 2 / 3, 0), (2 / 3, 1 / 3, 1 / 2)]:
+        atom_list.append(
+            diffpy.structure.atom.Atom(
+                atype='Ga',
+                xyz=[x, y, z],
+                lattice=lattice))
+        atom_list.append(
+            diffpy.structure.atom.Atom(
+                atype='As',
+                xyz=[x + 3 / 8, y + 3 / 8, z + 3 / 8],
+                lattice=lattice))
+    return diffpy.structure.Structure(atoms=atom_list, lattice=lattice)
 
 
 @pytest.fixture
@@ -116,3 +140,48 @@ def test_generate_peaks_from_best_template():
     peaks = M.map(peaks_from_best_template,
                   phase=["A"], library=library, inplace=False)
     assert peaks.inav[0, 0] == library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
+
+
+@pytest.mark.parametrize("structure, rotation", [(create_wurtzite(), euler2mat(0, np.pi / 2, 0, 'rzxz'))])
+def test_kinematic_intensities_rotation(structure, rotation):
+    """Test that kinematically forbidden diffraction spots gets zero intensity also after rotation."""
+    rotated_lattice = diffpy.structure.lattice.Lattice(structure.lattice)
+    rotated_lattice.setLatPar(baserot=rotation)
+    structure.placeInLattice(rotated_lattice)
+    reciprocal_lattice = structure.lattice.reciprocal()
+    g_indices = [(0, 0, 1)]
+    g_hkls = np.array([reciprocal_lattice.dist(g_indices, [0, 0, 0])])
+
+    scattering_params_list = ['lobato', 'xtables']
+    for scattering_params in scattering_params_list:
+        intensities = get_kinematical_intensities(
+            structure,
+            g_indices,
+            g_hkls,
+            excitation_error=0,
+            maximum_excitation_error=1,
+            debye_waller_factors={},
+            scattering_params=scattering_params)
+
+        np.testing.assert_almost_equal(intensities, [0])
+
+
+@pytest.mark.parametrize("structure, rotation", [(create_wurtzite(), euler2mat(0, np.pi / 2, 0, 'rzxz'))])
+@pytest.mark.xfail(raises=NotImplementedError)
+def test_kinematic_intensities_error_raise(structure, rotation):
+    """Test that kinematically forbidden diffraction spots gets zero intensity also after rotation."""
+    rotated_lattice = diffpy.structure.lattice.Lattice(structure.lattice)
+    rotated_lattice.setLatPar(baserot=rotation)
+    structure.placeInLattice(rotated_lattice)
+    reciprocal_lattice = structure.lattice.reciprocal()
+    g_indices = [(0, 0, 1)]
+    g_hkls = np.array([reciprocal_lattice.dist(g_indices, [0, 0, 0])])
+
+    intensities = get_kinematical_intensities(
+        structure,
+        g_indices,
+        g_hkls,
+        excitation_error=0,
+        maximum_excitation_error=1,
+        debye_waller_factors={},
+        scattering_params='_empty')
