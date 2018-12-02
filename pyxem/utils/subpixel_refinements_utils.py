@@ -27,15 +27,15 @@ from skimage.transform import rescale
 
 
 def get_experimental_square(z, vector, square_size):
-    """
-    'Cuts out' a region around a given diffraction vector and returns an upsampled copy.
+    """Defines a square region around a given diffraction vector and returns an
+    upsampled copy.
 
     Parameters
     ----------
     z : np.array()
         Single diffraction pattern
     vector : np.array()
-        Single vector to be cut out, in pixels (int) [x,y] with top left as [0,0]
+        Single vector in pixels (int) [x,y] with top left as [0,0]
     square_size : int
         The length of one side of the bounding square (must be even)
 
@@ -52,8 +52,7 @@ def get_experimental_square(z, vector, square_size):
 
 
 def get_simulated_disc(square_size, disc_radius):
-    """
-    Create a uniform disc for correlating with the experimental square
+    """Create a uniform disc for correlating with the experimental square.
 
     Parameters
     ----------
@@ -64,7 +63,6 @@ def get_simulated_disc(square_size, disc_radius):
 
     Returns
     -------
-
     arr: np.array()
         Upsampled copy of the simulated disc as a numpy array
 
@@ -79,8 +77,8 @@ def get_simulated_disc(square_size, disc_radius):
 
 
 def _conventional_xc(exp_disc, sim_disc, upsample_factor):
-    """
-    Takes two images of disc and finds the shift between them using conventional (phase) cross correlation
+    """Takes two images of disc and finds the shift between them using
+    conventional (phase) cross correlation.
 
     Parameters
     ----------
@@ -89,12 +87,14 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     sim_disc : np.array()
         A numpy array of the disc used as a template
     upsample_factor: int (must be even)
-        Factor to upsample by, reciprocal of the subpixel resolution (eg 10 ==> 1/10th of a pixel)
+        Factor to upsample by, reciprocal of the subpixel resolution
+        (eg 10 ==> 1/10th of a pixel)
 
     Returns
     -------
     shifts
         Pixel shifts required to register the two images
+
     """
 
     shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)

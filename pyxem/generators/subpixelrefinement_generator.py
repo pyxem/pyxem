@@ -17,26 +17,28 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Generating subpixel resolution on diffraction vectors
+Generating subpixel resolution on diffraction vectors.
 """
 
 import numpy as np
-from pyxem.utils.subpixel_refinements_utils import *
-from pyxem.utils.subpixel_refinements_utils import _conventional_xc
-from pyxem.utils.expt_utils import peaks_as_gvectors
 from scipy.ndimage.measurements import center_of_mass
+
+from pyxem.utils.expt_utils import peaks_as_gvectors
+from pyxem.utils.subpixel_refinements_utils import _conventional_xc
+from pyxem.utils.subpixel_refinements_utils import get_experimental_square
+from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 
 
 class SubpixelrefinementGenerator():
-    """
-    Generates subpixel refinement of DiffractionVectors through a range of methods.
+    """Generates subpixel refinement of DiffractionVectors.
 
     Parameters
     ----------
     dp : ElectronDiffraction
         The electron diffraction patterns to be refined
     vectors : numpy.array()
-        An array containing the vectors (in calibrated units) to the locations of the spots to be refined
+        An array containing the vectors (in calibrated units) to the locations
+        of the spots to be refined.
 
     References
     ----------
@@ -54,13 +56,13 @@ class SubpixelrefinementGenerator():
         self.vectors_pixels = ((vectors / self.calibration) + self.center).astype(int)
 
     def conventional_xc(self, square_size, disc_radius, upsample_factor):
-        """
-        Refines the peaks using a conventional form of (phase) cross correlation
+        """Refines the peaks using (phase) cross correlation.
 
         Parameters
         ----------
         square_size : int
-            Length (in pixels) of one side of a square the contains the peak to be refined
+            Length (in pixels) of one side of a square the contains the peak to
+            be refined.
         disc_radius:  int
             Radius (in pixels) of the discs that you seek to refine
         upsample_factor: int
@@ -95,22 +97,19 @@ class SubpixelrefinementGenerator():
         return self.vectors_out
 
     def center_of_mass_method(self, square_size):
-        """
-        Find the subpixel refinement of a peak by assuming it lies at the center of intensity
+        """Find the subpixel refinement of a peak by assuming it lies at the
+        center of intensity.
 
         Parameters
         ----------
         square_size : int
-            Length (in pixels) of one side of a square the contains the peak to be refined
+            Length (in pixels) of one side of a square the contains the peak to
+            be refined.
 
         Returns
         -------
         vector_out: np.array()
             array containing the refined vectors in calibrated units
-
-        Notes
-        -----
-        This will work poorly on disks with strong dynamic contrast
         """
 
         self.vectors_out = np.zeros(
