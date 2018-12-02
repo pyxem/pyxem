@@ -8,11 +8,13 @@
 
     self
     contents
-    basics
-    intermediate
-    advanced
-    conventions
-    literature_use_cases
+    architecture
+    pre_processing
+    imaging
+    unsupervised_learning
+    phase_orientation_mapping
+    strain_mapping
+    literature
 
 
 .. figure:: images/forkme_right_orange_ff7600.png
