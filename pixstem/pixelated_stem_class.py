@@ -781,9 +781,9 @@ class PixelatedSTEM(Signal2D):
 
     def fem_analysis(self, centre_x=None, centre_y=None,
                      show_progressbar=True):
-        """Perform analysis of fluctuation electron microscopy (FEM) data
-        as outlined in:
+        """Perform analysis of fluctuation electron microscopy (FEM) data.
 
+        This is outlined in:
         T. L. Daulton, et al., Ultramicroscopy 110 (2010) 1279-1289.
         doi:10.1016/j.ultramic.2010.05.010
 
@@ -792,8 +792,7 @@ class PixelatedSTEM(Signal2D):
         centre_x, centre_y : int, optional
             All the diffraction patterns assumed to have the same
             centre position.
-
-        show_progressbar : bool
+        show_progressbar : bool, optional
             Default True
 
         Returns
@@ -807,18 +806,15 @@ class PixelatedSTEM(Signal2D):
 
         Examples
         --------
-        >>> import pixstem.dummy_data as dd
-        >>> s = dd.get_fem_signal()
+        >>> s = ps.dummy_data.get_fem_signal()
         >>> fem_results = s.fem_analysis(
-        ...     centre_x=128,
-        ...     centre_y=128,
+        ...     centre_x=50, centre_y=50,
         ...     show_progressbar=False)
         >>> fem_results['V-Omegak'].plot()
-        """
 
+        """
         results = femt.fem_calc(self, centre_x=centre_x, centre_y=centre_y,
                                 show_progressbar=show_progressbar)
-
         return results
 
     def find_dead_pixels(

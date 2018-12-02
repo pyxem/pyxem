@@ -338,7 +338,9 @@ def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y,
 
     Returns
     -------
-    1-D numpy array of the radial profile."""
+    1-D numpy array of the radial profile.
+
+    """
     radial_array = np.zeros(shape=radial_array_size, dtype=np.float64)
     y, x = np.indices((diff_image.shape))
     r = np.sqrt((x - centre_x)**2 + (y - centre_y)**2)
