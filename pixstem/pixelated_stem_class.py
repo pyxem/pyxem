@@ -181,7 +181,7 @@ class PixelatedSTEM(Signal2D):
         The function returns a new signal, but the data itself
         is a view of the original signal. So changing the returned signal
         will also change the original signal (and visa versa). To avoid
-        changing the orignal signal, use the deepcopy method afterwards,
+        changing the original signal, use the deepcopy method afterwards,
         but note that this requires double the amount of memory.
         See below for an example of this.
 
@@ -541,6 +541,117 @@ class PixelatedSTEM(Signal2D):
         s_radial = hs.signals.Signal1D(data)
         return(s_radial)
 
+    def template_match_disk(
+            self, disk_r=4, lazy_result=True, show_progressbar=True):
+        """Template match the signal dimensions with a disk.
+
+        Used to find diffraction disks in convergent beam electron
+        diffraction data.
+
+        Parameter
+        ---------
+        disk_r : scalar, optional
+            Radius of the disk. Default 4.
+        lazy_result : bool, default True
+            If True, will return a LazyPixelatedSTEM object. If False,
+            will compute the result and return a PixelatedSTEM object.
+        show_progressbar : bool, default True
+
+        Returns
+        -------
+        template_match : PixelatedSTEM object
+
+        Examples
+        --------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s_template = s.template_match_disk(
+        ...     disk_r=5, show_progressbar=False)
+        >>> s.plot()
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        output_array = dt._template_match_disk(dask_array, disk_r=disk_r)
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+            s = PixelatedSTEM(output_array)
+        else:
+            s = LazyPixelatedSTEM(output_array)
+        pst._copy_signal_all_axes_metadata(self, s)
+        return s
+
+    def find_peaks(self, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
+                   threshold=0.36, overlap=0.81, lazy_result=True,
+                   show_progressbar=True):
+        """Find peaks in the signal dimensions using skimage's blob_dog.
+
+        Parameters
+        ----------
+        min_sigma : float, optional
+        max_sigma : float, optional
+        sigma_ratio : float, optional
+        threshold : float, optional
+        overlap : float, optional
+        lazy_result : bool, optional
+            Default True
+        show_progressbar : bool, optional
+            Default True
+
+        Returns
+        -------
+        peak_array : dask 2D object array
+            Same size as the two last dimensions in data.
+            The peak positions themselves are stored in 2D NumPy arrays
+            inside each position in peak_array. This is done instead of
+            making a 4D NumPy array, since the number of found peaks can
+            vary in each position.
+
+        Example
+        -------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> peak_array = s.find_peaks()
+        >>> peak_array_computed = peak_array.compute(show_progressbar=False)
+        >>> peak02 = peak_array_computed[0, 2]
+        >>> import pixstem.marker_tools as mt
+        >>> mt.add_peak_array_to_signal_as_markers(s, peak_array_computed)
+        >>> s.plot()
+
+        Change parameters
+
+        >>> peak_array = s.find_peaks(
+        ...     min_sigma=1.2, max_sigma=27, sigma_ratio=2.2, threshold=0.6,
+        ...     overlap=0.6, lazy_result=False, show_progressbar=False)
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+        output_array = dt._peak_find_dog(
+                dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+        return output_array
+
     def angular_mask(
             self, angle0, angle1,
             centre_x_array=None, centre_y_array=None):
@@ -558,7 +669,7 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        mask_array : Numpy array
+        mask_array : NumPy array
             The True values will be the region between angle0 and angle1.
             The array will have the same dimensions as the signal.
 
@@ -788,7 +899,7 @@ class PixelatedSTEM(Signal2D):
         ----------
         threshold_multiplier : scalar
             Default 500
-        mask_array : Boolean Numpy array
+        mask_array : Boolean NumPy array
         lazy_result : bool
             If True, return a lazy signal. If False, compute
             the result and return a non-lazy signal. Default True.
@@ -872,7 +983,7 @@ class PixelatedSTEM(Signal2D):
         Combine both dead pixels and hot pixels
 
         >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
-        >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
+        >>> s_corr = s.correct_bad_pixels(s_bad_pixels)
 
         See also
         --------
@@ -941,7 +1052,7 @@ class DPCSignal1D(Signal1D):
         histogram_range : tuple, optional
             Set the minimum and maximum of the histogram range.
             Default is setting it automatically.
-        masked : 1-D numpy bool array, optional
+        masked : 1-D NumPy bool array, optional
             Mask parts of the data. The array must be the same
             size as the signal. The True values are masked.
             Default is not masking anything.
@@ -1208,6 +1319,8 @@ class DPCSignal2D(Signal2D):
             If None, generate a new subplot for the indicator.
             If False, do not include an indicator
 
+        Examples
+        --------
         >>> s = ps.dummy_data.get_simple_dpc_signal()
         >>> fig = s.get_color_image_with_indicator()
         >>> fig.savefig("simple_dpc_test_signal.png")
@@ -1241,7 +1354,9 @@ class DPCSignal2D(Signal2D):
                     autolim_sigma=autolim_sigma)
         s.change_dtype('uint16')
         s.change_dtype('float64')
-        ax.imshow(s.data/65536., extent=self.axes_manager.signal_extent)
+        extent = self.axes_manager.signal_extent
+        extent = [extent[0], extent[1], extent[3], extent[2]]
+        ax.imshow(s.data/65536., extent=extent)
         if ax_indicator is not False:
             if ax_indicator is None:
                 ax_indicator = fig.add_subplot(331)
@@ -1273,7 +1388,7 @@ class DPCSignal2D(Signal2D):
         histogram_range : tuple, optional
             Set the minimum and maximum of the histogram range.
             Default is setting it automatically.
-        masked : 2-D numpy bool array, optional
+        masked : 2-D NumPy bool array, optional
             Mask parts of the data. The array must be the same
             size as the signal. The True values are masked.
             Default is not masking anything.
@@ -1412,7 +1527,7 @@ class DPCSignal2D(Signal2D):
 
         Parameters
         ----------
-        sigma : scalar, default 5
+        sigma : scalar, default 2
         output : HyperSpy signal
 
         Returns

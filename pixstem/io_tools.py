@@ -210,6 +210,26 @@ def _load_other_file(filename, lazy=False):
     return s_new
 
 
+def _copy_axes_ps_to_dpc(s_ps, s_dpc):
+    if s_ps.axes_manager.navigation_dimension > 2:
+        raise ValueError(
+                "s_ps can not have more than 2 navigation dimensions, "
+                "not {0}".format(s_ps.axes_manager.navigation_dimension))
+    if s_ps.axes_manager.navigation_shape != s_dpc.axes_manager.signal_shape:
+        raise ValueError(
+                "s_ps navigation shape {0}, must be the same "
+                "as s_dpc signal shape {1}".format(
+                    s_ps.axes_manager.navigation_shape,
+                    s_dpc.axes_manager.signal_shape))
+    ps_a_list = s_ps.axes_manager.navigation_axes
+    dp_a_list = s_dpc.axes_manager.signal_axes
+    for ps_a, dp_a in zip(ps_a_list, dp_a_list):
+        dp_a.offset = ps_a.offset
+        dp_a.scale = ps_a.scale
+        dp_a.units = ps_a.units
+        dp_a.name = ps_a.name
+
+
 def signal_to_pixelated_stem(s):
     """Make a PixelatedSTEM object from a HyperSpy signal.
 

@@ -2,6 +2,8 @@ import numpy as np
 import dask.array as da
 from hyperspy.components1d import Gaussian
 from scipy.ndimage.filters import gaussian_filter
+from scipy.signal import convolve2d
+from skimage import morphology
 import pixstem.make_diffraction_test_data as mdtd
 from pixstem.pixelated_stem_class import (
         DPCSignal2D, LazyPixelatedSTEM, PixelatedSTEM)
@@ -282,6 +284,11 @@ def get_fem_signal(lazy=False):
     """Get a 2D signal that approximates a fluctuation electron microscopy
     (FEM) dataset.
 
+    Parameters
+    ----------
+    lazy : optional
+        Default False
+
     Returns
     -------
     fem_signal : PixelatedSTEM
@@ -292,10 +299,8 @@ def get_fem_signal(lazy=False):
     >>> s.plot()
 
     """
-
     radii1 = 20 * np.random.randint(0, 2, size=(10, 10))
     intensities1 = np.random.randint(0, 30, size=(10, 10))
-
     radii2 = 35 * np.random.randint(0, 2, size=(10, 10))
     intensities2 = np.random.randint(0, 30, size=(10, 10))
 
@@ -318,5 +323,44 @@ def get_fem_signal(lazy=False):
                                   lazy=lazy)
 
     fem_signal = (test1 + test2)
-
     return fem_signal
+
+
+def get_cbed_signal():
+    """Get artificial pixelated STEM signal similar to CBED data.
+
+    Returns
+    -------
+    cbed_signal : PixelatedSTEM signal
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s.plot()
+
+    """
+    data = np.zeros(shape=(10, 10, 100, 100), dtype=np.uint16)
+    diff_point_list = [
+            [50, 50, 1000], [25, 25, 500], [50, 25, 500], [25, 50, 500],
+            [75, 75, 500], [75, 50, 500], [50, 75, 500], [75, 25, 500],
+            [25, 75, 500],
+            ]
+    disk = morphology.disk(5, np.uint16)
+    for x, y, intensity in diff_point_list:
+        for ix, iy in np.ndindex(data.shape[:2]):
+            temp_x = x
+            temp_y = y
+            temp_intensity = intensity
+            if iy < 5:
+                if y < 40:
+                    temp_y = y + 2
+                    temp_intensity = intensity + 20
+                elif y > 60:
+                    temp_y = y - 2
+
+            data[iy, ix, temp_y, temp_x] = temp_intensity
+    for ix, iy in np.ndindex(data.shape[:2]):
+        noise = np.random.randint(10, size=(100, 100))
+        data[iy, ix] = convolve2d(data[iy, ix], disk, mode='same') + noise
+    s_cbed = PixelatedSTEM(data)
+    return s_cbed

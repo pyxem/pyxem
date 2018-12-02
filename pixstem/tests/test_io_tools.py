@@ -183,3 +183,102 @@ class TestSignalToPixelatedStem:
         assert s1.axes_manager[1].units == y_nav_unit
         assert s1.axes_manager[2].units == x_sig_unit
         assert s1.axes_manager[3].units == y_sig_unit
+
+
+class TestCopyAxesPsToDpc:
+
+    def test_simple(self):
+        s_ps = ps.PixelatedSTEM(np.zeros((10, 13, 5, 4)))
+        s_dp = ps.DPCSignal2D(np.zeros((2, 10, 13)))
+        it._copy_axes_ps_to_dpc(s_ps, s_dp)
+
+    def test_copy_value(self):
+        dpc_nav_name = 'q'
+        dpc_nav_units = 'x'
+        dpc_nav_offse = 32
+        dpc_nav_scale = 0.2
+
+        ps_sig0_scale, ps_sig1_scale = 1.3, 5.2
+        ps_sig0_offse, ps_sig1_offse = -40, 52
+        ps_sig0_units, ps_sig1_units = 'sa', 'sb'
+        ps_sig0_name, ps_sig1_name = 'sc', 'sd'
+        ps_nav0_scale, ps_nav1_scale = 0.2, 4
+        ps_nav0_offse, ps_nav1_offse = 20, -12
+        ps_nav0_units, ps_nav1_units = 'na', 'nb'
+        ps_nav0_name, ps_nav1_name = 'nc', 'nd'
+
+        s_ps = ps.PixelatedSTEM(np.zeros((10, 13, 5, 4)))
+        s_ps.axes_manager.navigation_axes[0].scale = ps_nav0_scale
+        s_ps.axes_manager.navigation_axes[1].scale = ps_nav1_scale
+        s_ps.axes_manager.navigation_axes[0].offset = ps_nav0_offse
+        s_ps.axes_manager.navigation_axes[1].offset = ps_nav1_offse
+        s_ps.axes_manager.navigation_axes[0].units = ps_nav0_units
+        s_ps.axes_manager.navigation_axes[1].units = ps_nav1_units
+        s_ps.axes_manager.navigation_axes[0].name = ps_nav0_name
+        s_ps.axes_manager.navigation_axes[1].name = ps_nav1_name
+        s_ps.axes_manager.signal_axes[0].scale = ps_sig0_scale
+        s_ps.axes_manager.signal_axes[1].scale = ps_sig1_scale
+        s_ps.axes_manager.signal_axes[0].offset = ps_sig0_offse
+        s_ps.axes_manager.signal_axes[1].offset = ps_sig1_offse
+        s_ps.axes_manager.signal_axes[0].units = ps_sig0_units
+        s_ps.axes_manager.signal_axes[1].units = ps_sig1_units
+        s_ps.axes_manager.signal_axes[0].name = ps_sig0_name
+        s_ps.axes_manager.signal_axes[1].name = ps_sig1_name
+
+        s_dp = ps.DPCSignal2D(np.zeros((2, 10, 13)))
+        s_dp.axes_manager.navigation_axes[0].scale = dpc_nav_scale
+        s_dp.axes_manager.navigation_axes[0].offset = dpc_nav_offse
+        s_dp.axes_manager.navigation_axes[0].name = dpc_nav_name
+        s_dp.axes_manager.navigation_axes[0].units = dpc_nav_units
+        it._copy_axes_ps_to_dpc(s_ps, s_dp)
+
+        # Check everything is copied to the dpc signal
+        assert s_dp.axes_manager.signal_axes[0].scale == ps_nav0_scale
+        assert s_dp.axes_manager.signal_axes[1].scale == ps_nav1_scale
+        assert s_dp.axes_manager.signal_axes[0].offset == ps_nav0_offse
+        assert s_dp.axes_manager.signal_axes[1].offset == ps_nav1_offse
+        assert s_dp.axes_manager.signal_axes[0].units == ps_nav0_units
+        assert s_dp.axes_manager.signal_axes[1].units == ps_nav1_units
+        assert s_dp.axes_manager.signal_axes[0].name == ps_nav0_name
+        assert s_dp.axes_manager.signal_axes[1].name == ps_nav1_name
+
+        # Check that s_ps is not changed
+        assert s_ps.axes_manager.signal_axes[0].scale == ps_sig0_scale
+        assert s_ps.axes_manager.signal_axes[1].scale == ps_sig1_scale
+        assert s_ps.axes_manager.signal_axes[0].offset == ps_sig0_offse
+        assert s_ps.axes_manager.signal_axes[1].offset == ps_sig1_offse
+        assert s_ps.axes_manager.signal_axes[0].units == ps_sig0_units
+        assert s_ps.axes_manager.signal_axes[1].units == ps_sig1_units
+        assert s_ps.axes_manager.signal_axes[0].name == ps_sig0_name
+        assert s_ps.axes_manager.signal_axes[1].name == ps_sig1_name
+        assert s_ps.axes_manager.navigation_axes[0].scale == ps_nav0_scale
+        assert s_ps.axes_manager.navigation_axes[1].scale == ps_nav1_scale
+        assert s_ps.axes_manager.navigation_axes[0].offset == ps_nav0_offse
+        assert s_ps.axes_manager.navigation_axes[1].offset == ps_nav1_offse
+        assert s_ps.axes_manager.navigation_axes[0].units == ps_nav0_units
+        assert s_ps.axes_manager.navigation_axes[1].units == ps_nav1_units
+        assert s_ps.axes_manager.navigation_axes[0].name == ps_nav0_name
+        assert s_ps.axes_manager.navigation_axes[1].name == ps_nav1_name
+
+        # Check s_dp is not changed
+        assert s_dp.axes_manager.navigation_axes[0].scale == dpc_nav_scale
+        assert s_dp.axes_manager.navigation_axes[0].offset == dpc_nav_offse
+        assert s_dp.axes_manager.navigation_axes[0].units == dpc_nav_units
+        assert s_dp.axes_manager.navigation_axes[0].name == dpc_nav_name
+
+    def test_1d_input(self):
+        s_dp = ps.DPCSignal1D(np.zeros((2, 10)))
+        s_ps = ps.PixelatedSTEM(np.zeros((10, 5, 4)))
+        it._copy_axes_ps_to_dpc(s_ps, s_dp)
+
+    def test_wrong_input(self):
+        s_dp = ps.DPCSignal2D(np.zeros((2, 10, 13)))
+        s_ps = ps.PixelatedSTEM(np.zeros((3, 10, 13, 5, 4)))
+        with pytest.raises(ValueError):
+            it._copy_axes_ps_to_dpc(s_ps, s_dp)
+
+    def test_wrong_nav_shape(self):
+        s_dp = ps.DPCSignal2D(np.zeros((2, 16, 13)))
+        s_ps = ps.PixelatedSTEM(np.zeros((10, 13, 5, 4)))
+        with pytest.raises(ValueError):
+            it._copy_axes_ps_to_dpc(s_ps, s_dp)

@@ -32,7 +32,7 @@ Using the navigator slider:
 
 .. code-block:: python
 
-    >>> s.plot(navigator='slider')
+    >>> s.plot(navigator='slider') # doctest: +SKIP
 
 Using another signal as navigator, generated using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.virtual_annular_dark_field` or :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.virtual_bright_field`:
 
@@ -130,3 +130,65 @@ Or both at the same time:
 
 :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels` returns a lazy signal
 by default, to avoid large datasets using up excessive amount of memory.
+
+
+Template matching with a disk
+-----------------------------
+
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.template_match_disk`
+
+Doing template matching over the signal (diffraction) dimensions with a disk.
+Useful for preprocessing for finding the position of the diffraction disks in
+convergent beam electron diffraction data.
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s_template = s.template_match_disk(disk_r=5, lazy_result=False, show_progressbar=False)
+    >>> s_template.plot()
+
+
+.. image:: images/template_match/cbed_diff.jpg
+    :scale: 49 %
+
+.. image:: images/template_match/cbed_template.jpg
+    :scale: 49 %
+
+Peak finding
+------------
+
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_peaks`
+
+Use scikit-image's `Difference of Gaussian (DoG) <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_ function to find features in the signal dimensions.
+For more information about the different parameters, see `scikit's documentation <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_.
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
+    >>> peaks11 = peak_array[1, 1]
+
+
+To visualize this, the peaks can be added to a signal as `HyperSpy markers <http://hyperspy.org/hyperspy-doc/current/user_guide/visualisation.html#markers>`_.
+For this, use :py:func:`~pixstem.marker_tools.add_peak_array_to_signal_as_markers`.
+
+.. code-block:: python
+
+    >>> import pixstem.marker_tools as mt
+    >>> mt.add_peak_array_to_signal_as_markers(s, peak_array, color='blue', size=15)
+    >>> s.plot()
+
+.. image:: images/peak_finding/cbed_with_peaks.jpg
+    :scale: 49 %
+
+For some data types, especially convergent beam electron diffraction, using template matching can improve the peak finding:
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s_template = s.template_match_disk(disk_r=5, show_progressbar=False)
+    >>> peak_array = s_template.find_peaks(show_progressbar=False)
+    >>> peak_array_computed = peak_array.compute()
+
+
+Note: this might add extra peaks at the edges of the images.

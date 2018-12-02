@@ -1,6 +1,8 @@
 import copy
 import numpy as np
 import dask.array as da
+from skimage import morphology
+from skimage.feature import match_template, blob_dog
 
 
 def _mask_array(dask_array, mask_array, fill_value=None):
@@ -112,6 +114,225 @@ def _threshold_array(dask_array, threshold_value=1, mask_array=None):
                 "The input has {0} dimensions".format(len(dask_array.shape)))
     thresholded_array = da.ma.getdata(thresholded_array)
     return thresholded_array
+
+
+def _template_match_disk_single_frame(image, disk):
+    """Template match a circular disk with a single image.
+
+    Parameters
+    ----------
+    image : NumPy 2D array
+    disk : NumPy 2D array
+        Must be smaller than image
+
+    Returns
+    -------
+    template_match : NumPy 2D array
+        Same size as image
+
+    Examples
+    --------
+    >>> image = np.random.randint(1000, size=(256, 256))
+    >>> disk = morphology.disk(4, np.uint16)
+    >>> import pixstem.dask_tools as dt
+    >>> template_match = dt._template_match_disk_single_frame(image, disk)
+
+    """
+    template_match = match_template(image, disk, pad_input=True)
+    return template_match
+
+
+def _template_match_disk_chunk(data, disk):
+    """Template match a circular disk with a 4D dataset.
+
+    Parameters
+    ----------
+    data : NumPy 4D array
+    disk : NumPy 2D array
+        Must be smaller than image
+
+    Returns
+    -------
+    template_match : NumPy 4D array
+        Same size as inpt data
+
+    Examples
+    --------
+    >>> data = np.random.randint(1000, size=(10, 10, 256, 256))
+    >>> disk = morphology.disk(4, np.uint16)
+    >>> import pixstem.dask_tools as dt
+    >>> template_match = dt._template_match_disk_chunk(data, disk)
+
+    """
+    output_array = np.zeros_like(data, dtype=np.float32)
+    image = np.zeros_like(data[0, 0])
+    for ix, iy in np.ndindex(data.shape[:2]):
+        image[:] = data[ix, iy]
+        output_array[ix, iy] = _template_match_disk_single_frame(image, disk)
+    return output_array
+
+
+def _template_match_disk(dask_array, disk_r=None):
+    """Template match a circular disk with a 4D dataset.
+
+    Parameters
+    ----------
+    dask_array : Dask 4D array
+        Two first dimensions are navigation dimensions, two last
+        dimensions are the signal dimensions.
+    disk_r : scalar, optional
+        Radius of the disk. 2 * disk_r + 1 must be smaller than
+        the two last signal dimensions.
+
+    Returns
+    -------
+    template_match : NumPy 4D array
+        Same size as input data
+
+    Examples
+    --------
+    >>> data = np.random.randint(1000, size=(20, 20, 256, 256))
+    >>> import dask.array as da
+    >>> dask_array = da.from_array(data, chunks=(5, 5, 128, 128))
+    >>> import pixstem.dask_tools as dt
+    >>> template_match = dt._template_match_disk(dask_array, disk_r=4)
+
+    """
+    array_dims = len(dask_array.shape)
+    if array_dims != 4:
+        raise ValueError(
+                "dask_array need to have 4-dimensions, not {0}".format(
+                    array_dims))
+    detx, dety = dask_array.shape[-2:]
+    dask_array_rechunked = dask_array.rechunk(chunks=(None, None, detx, dety))
+    disk = morphology.disk(disk_r, dask_array_rechunked.dtype)
+    output_array = da.map_blocks(
+            _template_match_disk_chunk, dask_array_rechunked, disk,
+            dtype=np.float32)
+    return output_array
+
+
+def _peak_find_dog_single_frame(
+        image, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76, threshold=0.36,
+        overlap=0.81):
+    """Find peaks in a single frame using skimage's blob_dog function.
+
+    Parameters
+    ----------
+    image : NumPy 2D array
+    min_sigma : float, optional
+    max_sigma : float, optional
+    sigma_ratio : float, optional
+    threshold : float, optional
+    overlap : float, optional
+
+    Returns
+    -------
+    peaks : NumPy 2D array
+        In the form [[x0, y0], [x1, y1], [x2, y2], ...]
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.dask_tools as dt
+    >>> peaks = _peak_find_dog_single_frame(s.data[0, 0])
+
+    """
+    peaks = blob_dog(image / np.max(image), min_sigma=min_sigma,
+                     max_sigma=max_sigma, sigma_ratio=sigma_ratio,
+                     threshold=threshold, overlap=overlap)
+    return peaks[:, :2].astype(np.uint16)
+
+
+def _peak_find_dog_chunk(
+        data, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76, threshold=0.36,
+        overlap=0.81):
+    """Find peaks in a chunk using skimage's blob_dog function.
+
+    Parameters
+    ----------
+    data : NumPy 4D array
+    min_sigma : float, optional
+    max_sigma : float, optional
+    sigma_ratio : float, optional
+    threshold : float, optional
+    overlap : float, optional
+
+    Returns
+    -------
+    peak_array : NumPy 2D object array
+        Same size as the two last dimensions in data.
+        The peak positions themselves are stored in 2D NumPy arrays
+        inside each position in peak_array. This is done instead of
+        making a 4D NumPy array, since the number of found peaks can
+        vary in each position.
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.dask_tools as dt
+    >>> peak_array = _peak_find_dog_chunk(s.data)
+    >>> peaks00 = peak_array[0, 0]
+    >>> peaks23 = peak_array[2, 3]
+
+    """
+    output_array = np.empty(data.shape[:2], dtype='object')
+    for ix, iy in np.ndindex(data.shape[:2]):
+        output_array[ix, iy] = _peak_find_dog_single_frame(
+                image=data[ix, iy], min_sigma=min_sigma,
+                max_sigma=max_sigma, sigma_ratio=sigma_ratio,
+                threshold=threshold, overlap=overlap)
+    return output_array
+
+
+def _peak_find_dog(
+        dask_array, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
+        threshold=0.36, overlap=0.81):
+    """Find peaks in a dask array using skimage's blob_dog function.
+
+    Parameters
+    ----------
+    dask_array : 4D dask array
+    min_sigma : float, optional
+    max_sigma : float, optional
+    sigma_ratio : float, optional
+    threshold : float, optional
+    overlap : float, optional
+
+    Returns
+    -------
+    peak_array : dask 2D object array
+        Same size as the two last dimensions in data.
+        The peak positions themselves are stored in 2D NumPy arrays
+        inside each position in peak_array. This is done instead of
+        making a 4D NumPy array, since the number of found peaks can
+        vary in each position.
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import dask.array as da
+    >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
+    >>> import pixstem.dask_tools as dt
+    >>> peak_array = _peak_find_dog(dask_array)
+    >>> peak_array_computed = peak_array.compute()
+
+    """
+    array_dims = len(dask_array.shape)
+    if array_dims != 4:
+        raise ValueError(
+                "dask_array need to have 4-dimensions, not {0}".format(
+                    array_dims))
+    detx, dety = dask_array.shape[-2:]
+    dask_array_rechunked = dask_array.rechunk(chunks=(None, None, detx, dety))
+    kwargs_template_dog = {
+            'min_sigma': min_sigma, 'max_sigma': max_sigma,
+            'sigma_ratio': sigma_ratio, 'threshold': threshold,
+            'overlap': overlap}
+    output_array = da.map_blocks(
+            _peak_find_dog_chunk, dask_array_rechunked, drop_axis=(2, 3),
+            dtype=np.object, **kwargs_template_dog)
+    return output_array
 
 
 def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):

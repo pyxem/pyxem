@@ -26,6 +26,8 @@ For information on how to load your own data, see `:ref:load_dpc_data`.
 Correcting d-scan
 -----------------
 
+:py:meth:`~pixstem.pixelated_stem_class.DPCSignal2D.correct_ramp`
+
 The first step is the remove the effects of the d-scan:
 
 .. code-block:: python
