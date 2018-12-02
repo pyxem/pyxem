@@ -33,7 +33,7 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     call_ring_pattern, peaks_as_gvectors
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
-    find_peaks_dog, find_peaks_log
+    find_peaks_dog, find_peaks_log, find_peaks_xc
 
 from pyxem.utils import peakfinder2D_gui
 
