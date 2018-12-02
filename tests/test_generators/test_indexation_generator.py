@@ -19,7 +19,10 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.indexation_generator import *
+from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.generators.indexation_generator import ProfileIndexationGenerator
+from pyxem.generators.indexation_generator import VectorIndexationGenerator
+
 from pyxem.signals.diffraction_simulation import ProfileSimulation
 
 
