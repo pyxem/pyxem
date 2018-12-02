@@ -22,7 +22,8 @@ from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 
-# This test suite is aimed at checking the basic functionality of the Omapping process, obviously to have a succesful OM process
+# This test suite is aimed at checking the basic functionality of the
+# orientation mapping process, obviously to have a succesful OM process
 # many other components will also need to be correct
 
 
