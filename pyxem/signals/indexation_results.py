@@ -21,7 +21,8 @@ import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 from warnings import warn
 
-from pyxem.utils.sim_utils import peaks_from_best_template, transfer_navigation_axes
+from pyxem.utils.sim_utils import peaks_from_best_template
+from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
