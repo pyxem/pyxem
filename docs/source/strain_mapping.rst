@@ -1,4 +1,4 @@
-Advanced Usage
+Strain Mapping
 ==============
 
 .. warning::
