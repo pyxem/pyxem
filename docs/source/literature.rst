@@ -1,5 +1,5 @@
-Use Cases in the Literature
-===========================
+Citing Literature
+=================
 
 We are currently aware of the following publications using pyxem. If you would
 like your publication to appear in this list, please contact the developers.
