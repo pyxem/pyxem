@@ -9,12 +9,11 @@
     self
     contents
     architecture
-    pre-processing
+    pre_processing
     imaging
     unsupervised_learning
     phase_orientation_mapping
     strain_mapping
-    conventions
     literature
 
 
