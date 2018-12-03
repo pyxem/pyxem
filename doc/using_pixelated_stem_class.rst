@@ -132,6 +132,8 @@ Or both at the same time:
 by default, to avoid large datasets using up excessive amount of memory.
 
 
+.. _template_match_disk:
+
 Template matching with a disk
 -----------------------------
 
@@ -153,6 +155,9 @@ convergent beam electron diffraction data.
 
 .. image:: images/template_match/cbed_template.jpg
     :scale: 49 %
+
+
+.. _peak_finding:
 
 Peak finding
 ------------

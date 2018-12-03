@@ -3,20 +3,23 @@ Welcome to pixStem's documentation!
 
 News
 ----
-**2018-6-28: pixStem 0.3.1 released!**
+
+**2018-12-3: pixStem 0.3.2 released!**
+
+This release includes:
+
+* Data analysis functionality for analysing :ref:`fluctuation electron microscopy data <fem_analysis>`, thanks to Andrew Herzing for the contribution!
+* A new method in the ``PixelatedSTEM`` class for template matching a disk with STEM diffraction data: :ref:`template_match_disk`
+* Another method for locating diffraction spots in STEM diffraction data, using peak finding functionality from ``skimage``: :ref:`peak_finding`
+
+All these rely on the ``dask`` library, so they can be performed on very large datasets.
+
+
+*2018-6-28: pixStem 0.3.1 released!*
 
 This is a minor release which includes functionality for correcting both dead and hot pixels through :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_dead_pixels`, :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_hot_pixels` and :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels`.
 Featurewise it also includes a simple function for loading binary signals: :py:func:`pixstem.io_tools.load_binary_merlin_signal`.
 Unit testing of docstrings has been improved, with a combined setup and teardown function, and introduction of pixstem and numpy into the docstring's namespace.
-
-*2018-6-13: pixStem 0.3.0 released!*
-
-fpd_data_processing has been renamed pixStem!
-This release also includes greatly improved center of mass, virtual annular dark field and virtual bright field functions, which now uses only `dask <https://dask.pydata.org/en/latest/>`_ array operations.
-This means they can return lazy signal, which makes it much easier to work with large datasets on computers with limited memory.
-It also includes several backend improvements to `DPCSignal.correct_ramp` and utility functions for getting diffraction values.
-A Jupyter Notebook giving a basic introduction to pixStem's features is available at `pixStem demos <https://gitlab.com/pixstem/pixstem_demos/blob/master/introduction_to_pixstem.ipynb>`_.
-
 
 
 About pixStem
@@ -52,6 +55,15 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
 
 Old news
 --------
+
+*2018-6-13: pixStem 0.3.0 released!*
+
+fpd_data_processing has been renamed pixStem!
+This release also includes greatly improved center of mass, virtual annular dark field and virtual bright field functions, which now uses only `dask <https://dask.pydata.org/en/latest/>`_ array operations.
+This means they can return lazy signal, which makes it much easier to work with large datasets on computers with limited memory.
+It also includes several backend improvements to ``DPCSignal.correct_ramp`` and utility functions for getting diffraction values.
+A Jupyter Notebook giving a basic introduction to pixStem's features is available at `pixStem demos <https://gitlab.com/pixstem/pixstem_demos/blob/master/introduction_to_pixstem.ipynb>`_.
+
 
 *2018-2-18: fpd_data_processing 0.2.1 released!*
 
