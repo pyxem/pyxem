@@ -548,8 +548,8 @@ class PixelatedSTEM(Signal2D):
         Used to find diffraction disks in convergent beam electron
         diffraction data.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         disk_r : scalar, optional
             Radius of the disk. Default 4.
         lazy_result : bool, default True
