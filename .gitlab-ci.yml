@@ -42,6 +42,8 @@ pages_development_branch:
     - xvfb-run -a python3 make_peak_finding_images.py
     - cd ../template_match/
     - xvfb-run -a python3 make_template_match_images.py
+    - cd ../fem_analysis/
+    - xvfb-run -a python3 make_fem_analysis_image.py
     - cd ../frontpage/
     - xvfb-run -a python3 make_frontpage_images.py
     - cd ../../

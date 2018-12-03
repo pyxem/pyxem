@@ -41,6 +41,7 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
    using_pixelated_stem_class
    analysing_holz_datasets
    analysing_dpc_datasets
+   fem_analysis
    generate_test_data
    misc_functions
    related_projects

@@ -46,6 +46,14 @@ Radial
     :members:
     :undoc-members:
 
+
+Fluctuation electron microscopy analysis
+========================================
+.. automodule:: pixstem.fem_tools
+    :members:
+    :undoc-members:
+
+
 Dummy data
 ==========
 .. automodule:: pixstem.dummy_data
