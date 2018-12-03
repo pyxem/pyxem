@@ -108,4 +108,4 @@ pixStem demos
 ^^^^^^^^^^^^
 
 In addition to the guides on this webpage, another good resource is the `Introduction to pixStem notebook <https://gitlab.com/pixstem/pixstem_demos/blob/release/introduction_to_pixstem.ipynb>`_.
-This is a pre-filled Jupyter Notebooks showing various aspects of pixStem’s functionality.
+This is a pre-filled Jupyter Notebooks showing various aspects of pixStem's functionality.
