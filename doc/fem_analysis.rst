@@ -23,7 +23,7 @@ Plotting function: :py:func:`pixstem.fem_tools.plot_fem`.
 
 .. code-block:: python
 
-    >>> import pixstem.fem_tools at ft
+    >>> import pixstem.fem_tools as ft
     >>> fig = ft.plot_fem(s, fem_results)
 
 .. image:: images/fem_analysis/fem_full_results.png
