@@ -4,6 +4,8 @@
 Installing
 ==========
 
+.. _install_windows:
+
 Installing in Windows
 ---------------------
 
@@ -11,25 +13,16 @@ Anaconda Python environment
 ***************************
 
 Currently, the easiest way to install pixStem is using the Anaconda python environment `Anaconda environment <https://www.continuum.io/downloads>`_,
-Install HyperSpy, then pixStem via the `Anaconda prompt` (Start menu - Anaconda3), this will open a command line prompt.
+Install HyperSpy, then pixStem via the ``Anaconda prompt`` (Start menu - Anaconda3), this will open a command line prompt.
 In this prompt run:
 
 .. code-block:: bash
 
     $ conda install hyperspy -c conda-forge
-    $ pip install hyperspy_gui_traitsui
     $ pip install pixstem
 
-To check everything is working correctly, go to "Anaconda3" in the start menu, and start "Jupyter Notebook".
-This will open a browser window (or a new browser tab).
-Start a new Python 3 notebook, and run in the first cell:
-
-.. code-block:: python
-
-    %matplotlib qt
-    import pixstem.api as ps
-
-If this works, continue with the :ref:`using_pixelated_stem_class`.
+If everything installed, continue to :ref:`starting pixStem in Windows <start_pixstem_windows>`.
+If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
 
 WinPython HyperSpy installer
@@ -38,7 +31,7 @@ WinPython HyperSpy installer
 Alternatively, the WinPython HyperSpy bundle can be used.
 Firstly download and install the `WinPython HyperSpy bundle <https://github.com/hyperspy/hyperspy-bundle/releases>`_:
 
-After installing the bundle, there should be a folder in the start menu called "HyperSpy WinPython Bundle", and this
+After installing the bundle, there should be a folder in the start menu called "HyperSpy Bundle", and this
 folder should contain the "WinPython prompt". Start the "WinPython prompt". This will open a terminal window called
 "WinPython prompt", in this window type and run:
 
@@ -46,75 +39,52 @@ folder should contain the "WinPython prompt". Start the "WinPython prompt". This
 
     pip install pixstem
 
-To check everything is working correctly, go to the "HyperSpy WinPython Bundle" and start "Jupyter QtConsole".
-This will open a new window. In this window, run:
+If everything installed, continue to :ref:`starting pixStem in Windows <start_pixstem_windows>`.
+If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
-.. code-block:: python
 
-    %matplotlib qt
-    import pixstem.api as ps
+Installing in MacOS
+-------------------
 
-If this works, continue with the :ref:`using_pixelated_stem_class`.
+Install the Anaconda python environment: `Anaconda environment <https://www.continuum.io/downloads>`_, and through the ``Anaconda prompt`` install HyperSpy and pixStem:
+
+.. code-block:: bash
+
+    $ conda install hyperspy -c conda-forge
+    $ pip install pixstem
+
+If everything installed, continue to :ref:`starting pixStem in MacOS <start_pixstem_macos>`.
+If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
 
 Installing in Linux
 -------------------
 
-The recommended way to install is using PIP, which is a package manager for python.
+The recommended way to install pixStem is using PIP, which is a package manager for python.
 It is recommended to first install the precompiled dependencies using the system package manager.
 
 `HyperSpy <http://hyperspy.org/>`_ is also included as pixStem relies heavily on the modelling and visualization functionality in HyperSpy.
 
-Ubuntu 17.10
+Ubuntu 18.04
 ************
 
 .. code-block:: bash
 
-    $ sudo apt-get install ipython3 python3-pip python3-numpy python3-scipy python3-matplotlib python3-sklearn python3-skimage python3-h5py python3-dask python3-traits python3-tqdm python3-pint python3-dask python3-pyqt5 python3-lxml
-    $ sudo apt-get install python3-sympy --no-install-recommends
-    $ pip3 install --upgrade pip
+    $ sudo apt-get install ipython3 python3-pip python3-numpy python3-scipy python3-matplotlib python3-sklearn python3-skimage python3-h5py python3-dask python3-traits python3-tqdm python3-pint python3-dask python3-pyqt5 python3-lxml python3-sympy python3-sparse python3-statsmodels python3-numexpr python3-ipykernel python3-jupyter-client python3-requests python3-dill python3-natsort
     $ pip3 install --user pixstem
 
-
-Ubuntu 16.04
-************
-
-Due to the old version of matplotlib in the repository, the system matplotlib has to be removed.
-This is due to conflicts between the newer 2.x version in PIP and the older 1.5.x version in the repository.
-
-In addition, due to a recent bug with HyperSpy and matplotlib 2.1.x, matplotlib 2.0.2 has to be installed.
-
-.. code-block:: bash
-
-    $ sudo apt-get install python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-pyqt5
-    $ sudo apt-get install python3-sympy --no-install-recommends
-    $ sudo apt-get remove python3-matplotlib
-    $ pip3 install --user --upgrade pip
-    $ pip3 install --user matplotlib==2.0.2
-    $ pip3 install --user pixstem
-
-
-Starting pixStem
-****************
-
-To check that everything is working, open a terminal and run :code:`ipython3 --matplotlib qt5`. In the ipython terminal run:
-
-.. code-block:: python
-
-    import pixstem.api as ps
-
-If this works, continue with the :ref:`using_pixelated_stem_class`.
-If you get some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
+If everything installed, continue to :ref:`starting pixStem in Linux <start_pixstem_linux>`.
+If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
 
 Development version
 -------------------
 
-Grab the development version using the version control system git:
+Grab the development version using the version control system git (see :ref:`contribute`):
 
 .. code-block:: bash
 
-    $ git clone git@gitlab.com:pixstem/pixstem.git
+    $ git clone https://gitlab.com/pixstem/pixstem.git
 
 Then install it using pip:
 

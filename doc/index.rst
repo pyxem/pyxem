@@ -37,6 +37,7 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
 
 .. toctree::
    install
+   start_pixstem
    loading_data
    using_pixelated_stem_class
    analysing_holz_datasets
