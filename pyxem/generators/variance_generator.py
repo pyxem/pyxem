@@ -64,7 +64,7 @@ class VarianceGenerator():
         """
         dp = self.signal
         mean_dp = dp.mean((0,1))
-        meansq_dp = Signal2D(np.square(dp.data),dtype=np.uint16).mean((0,1))
+        meansq_dp = Signal2D(np.square(dp.data,dtype=np.uint16)).mean((0,1))
         var_dp = Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
         corr_var = Signal2D(((var_dp.data - (np.divide(dqe, mean_dp)))))
         vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
