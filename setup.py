@@ -31,7 +31,7 @@ setup(
             'hyperspy>=1.4',
             'dask',
             'tqdm',
-            'scikit-image',
+            'scikit-image>=0.13',
             'scikit-learn',
             ],
 )
