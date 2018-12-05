@@ -53,6 +53,12 @@ Fluctuation electron microscopy analysis
     :members:
     :undoc-members:
 
+Marker tools
+============
+.. automodule:: pixstem.marker_tools
+    :members:
+    :undoc-members:
+
 
 Dummy data
 ==========
