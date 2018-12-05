@@ -222,7 +222,7 @@ def _cluster_and_sort_peak_array(
     peak_array : 4D NumPy array
     eps : scalar, optional
         Default 30, passed to sklearn's DBSCAN
-    min_sample : scalar, optional
+    min_samples : scalar, optional
         Default 2, passed to sklearn's DBSCAN
     centre_x, centre_y : scalar, optional
         Default 128
