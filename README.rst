@@ -21,7 +21,7 @@ pyXem is released under the GPL v3 license.
 Install
 -------
 
-pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - we suggest using the python 3 version of `Miniconda <https://conda.io/miniconda.html>`__. From a clean install (ideally an isolated anaconda environment) the following commands will install everything you need. They should be entered into the terminal when located in the pyxem directory:
+pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - we suggest using the python 3 version of `Miniconda <https://conda.io/miniconda.html>`__. From a clean install (ideally an isolated anaconda environment) the following commands will install everything you need. They should be entered into the terminal when located in the pyxem directory:::
 
       $ conda install -c conda-forge diffpy.structure
       $ conda install -c anaconda cython
