@@ -65,8 +65,12 @@ class VarianceGenerator():
         dp = self.signal
         mean_dp = dp.mean((0,1))
         meansq_dp = Signal2D(np.square(dp.data,dtype=np.uint16)).mean((0,1))
-        var_dp = Signal2D(((meansq_dp.data / np.square(mean_dp.data)) - 1.))
-        corr_var = Signal2D(((var_dp.data - (np.divide(dqe, mean_dp)))))
+        normvar = (meansq_dp.data / np.square(mean_dp.data)) - 1.
+        var_dp = Signal2D(normvar)
+        corr_var_array = var_dp.data - (np.divide(dqe, mean_dp.data))
+        corr_var_array[np.isinf(corr_var_array)]=0
+        corr_var_array[np.isnan(corr_var_array)]=0
+        corr_var = Signal2D(corr_var_array)
         vardps = stack((mean_dp, meansq_dp, var_dp, corr_var))
         sig_x = vardps.data.shape[1]
         sig_y = vardps.data.shape[2]
@@ -103,9 +107,13 @@ class VarianceGenerator():
         """
         im = self.signal.T
         mean_im = im.mean((0,1))
-        meansq_im = Signal2D(np.square(im.data)).mean((0,1))
-        var_im = Signal2D(((meansq_im.data / np.square(mean_im.data)) - 1.))
-        corr_var = Signal2D(((var_im.data - (np.divide(dqe, mean_im)))))
+        meansq_im = Signal2D(np.square(im.data,dtype=np.uint16)).mean((0,1))
+        normvar = (meansq_im.data / np.square(mean_im.data)) - 1.
+        var_im = Signal2D(normvar)
+        corr_var_array = var_im.data - (np.divide(dqe, mean_im.data))
+        corr_var_array[np.isinf(corr_var_array)]=0
+        corr_var_array[np.isnan(corr_var_array)]=0
+        corr_var = Signal2D(corr_var_array)
         varims = stack((mean_im, meansq_im, var_im, corr_var))
 
         sig_x = varims.data.shape[1]
