@@ -6,10 +6,6 @@ from tqdm import tqdm
 import hyperspy.api as hs
 import pixstem
 
-'''
-Plotting function used to display output of FEM calculations
-'''
-
 
 def fem_calc(s, centre_x, centre_y, show_progressbar):
     offset = False
@@ -17,7 +13,7 @@ def fem_calc(s, centre_x, centre_y, show_progressbar):
     if s.data.min() == 0:
         s.data += 1  # To avoid division by 0
         offset = True
-    results = {}
+    results = dict()
 
     results['RadialInt'] = (
         s.radial_integration(centre_x=centre_x, centre_y=centre_y,
@@ -123,6 +119,8 @@ def plot_fem(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
         Position of low-q cutoff for plots
     highcutoff : integer
         Position of high-q cutoff for plots
+    k_cal : float or None
+        Reciprocal space unit of length per pixel in inverse Angstroms
 
     Returns
     -------
