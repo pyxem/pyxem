@@ -209,7 +209,9 @@ def affine_transformation(z, matrix, order, *args, **kwargs):
         3x3 numpy array specifying the affine transformation to be applied.
     order : int
         Interpolation order.
-    kwargs :
+    *args :
+        To be passed to skimage.warp
+    **kwargs :
         To be passed to skimage.warp
 
     Returns

@@ -21,6 +21,7 @@ vector.
 """
 
 from hyperspy.signals import Signal1D
+#??from hyperspy.component import Polynomial
 import numpy as np
 
 
@@ -47,7 +48,7 @@ class ReducedIntensityProfile(Signal1D):
         self.data = self.data * damping_term
         return
 
-    def damp_lorch(self,q_max=None):
+    def damp_lorch(self,s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -60,9 +61,9 @@ class ReducedIntensityProfile(Signal1D):
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
-        if not q_max:
-            q_max = s_scale*s_size
-        delta = np.pi / q_max
+        if not s_max:
+            s_max = s_scale*s_size
+        delta = np.pi / s_max
 
         scattering_axis = s_scale * np.arange(s_size,dtype='float64')
         damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
@@ -70,7 +71,7 @@ class ReducedIntensityProfile(Signal1D):
         self.data = self.data * damping_term
         return
 
-    def damp_updated_lorch(self,q_max=None):
+    def damp_updated_lorch(self,s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -85,9 +86,9 @@ class ReducedIntensityProfile(Signal1D):
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
-        if not q_max:
-            q_max = s_scale*s_size
-        delta = np.pi / q_max
+        if not s_max:
+            s_max = s_scale*s_size
+        delta = np.pi / s_max
 
         scattering_axis = s_scale * np.arange(s_size,dtype='float64')
         exponent_array = 3*np.ones(scattering_axis.shape)
@@ -99,4 +100,42 @@ class ReducedIntensityProfile(Signal1D):
         damping_term = multiplicative_term*sine_term
         damping_term = np.nan_to_num(damping_term)
         self.data = self.data * damping_term
+        return
+
+    def fit_thermal_multiple_scattering_correction(self, s_max):
+        """ Fits a 4th order polynomial function to the reduced intensity.
+        This is used to calculate the error in the reduced intensity due to
+        the effects of multiple and thermally diffuse scattering, which
+        results in the earlier background fit being incorrect for either
+        low or high angle scattering (or both). A correction is then applied,
+        making the reduced intensity oscillate around zero as it should. This
+        will distort peak shape. For more detail see Mu et al (2014):
+        "Evolution of order in amorphous-to-crystalline phase transformation
+        of MgF2".
+
+        To use this correction, the fitted data should be fitted to high
+        scattering vector, so that the intensity goes to zero at q_max
+        (to prevent FFT artifacts).
+
+        Parameters
+        ----------
+        s_max : maximum range of fit. The reduced intensity should go to zero
+                at this value.
+        """
+        s_scale = self.axes_manager.signal_axes[0].scale
+        s_size = self.axes_manager.signal_axes[0].size
+        if not s_max:
+            s_max = s_scale*s_size
+
+        #scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+        fit_model = self.signal.create_model()
+        fit_model.append(Polynomial(4))
+        fit_model.set_signal_range([0,s_max])
+        fit_model.multifit()
+        fit_value = fit_model.as_signal()
+        fit_model.plot()
+
+
+        self.data = self.data - fit_value
+
         return
