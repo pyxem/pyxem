@@ -1068,6 +1068,17 @@ class TestPixelatedStemFindPeaks:
         for ix, iy in np.ndindex(peaks1.shape):
             assert len(peaks1[ix, iy]) == 1
 
+    def test_normalize_value(self):
+        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
+        data[:, :, 49:52, 49:52] = 100
+        data[:, :, 19:22, 9:12] = 10
+        s = PixelatedSTEM(data)
+        peak_array0 = s.find_peaks(normalize_value=100, lazy_result=False)
+        peak_array1 = s.find_peaks(normalize_value=10, lazy_result=False)
+        for ix, iy in np.ndindex(peak_array0.shape):
+            assert (peak_array0[ix, iy] == [[50, 50]]).all()
+            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
+
 
 class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
 

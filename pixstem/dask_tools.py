@@ -214,7 +214,7 @@ def _template_match_disk(dask_array, disk_r=None):
 
 def _peak_find_dog_single_frame(
         image, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76, threshold=0.36,
-        overlap=0.81):
+        overlap=0.81, normalize_value=None):
     """Find peaks in a single frame using skimage's blob_dog function.
 
     Parameters
@@ -225,6 +225,9 @@ def _peak_find_dog_single_frame(
     sigma_ratio : float, optional
     threshold : float, optional
     overlap : float, optional
+    normalize_value : float, optional
+        All the values in image will be divided by this value.
+        If no value is specified, the max value in the image will be used.
 
     Returns
     -------
@@ -238,7 +241,9 @@ def _peak_find_dog_single_frame(
     >>> peaks = _peak_find_dog_single_frame(s.data[0, 0])
 
     """
-    peaks = blob_dog(image / np.max(image), min_sigma=min_sigma,
+    if normalize_value is None:
+        normalize_value = np.max(image)
+    peaks = blob_dog(image / normalize_value, min_sigma=min_sigma,
                      max_sigma=max_sigma, sigma_ratio=sigma_ratio,
                      threshold=threshold, overlap=overlap)
     return peaks[:, :2].astype(np.uint16)
@@ -246,7 +251,7 @@ def _peak_find_dog_single_frame(
 
 def _peak_find_dog_chunk(
         data, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76, threshold=0.36,
-        overlap=0.81):
+        overlap=0.81, normalize_value=None):
     """Find peaks in a chunk using skimage's blob_dog function.
 
     Parameters
@@ -257,6 +262,10 @@ def _peak_find_dog_chunk(
     sigma_ratio : float, optional
     threshold : float, optional
     overlap : float, optional
+    normalize_value : float, optional
+        All the values in data will be divided by this value.
+        If no value is specified, the max value in each individual image will
+        be used.
 
     Returns
     -------
@@ -281,13 +290,14 @@ def _peak_find_dog_chunk(
         output_array[ix, iy] = _peak_find_dog_single_frame(
                 image=data[ix, iy], min_sigma=min_sigma,
                 max_sigma=max_sigma, sigma_ratio=sigma_ratio,
-                threshold=threshold, overlap=overlap)
+                threshold=threshold, overlap=overlap,
+                normalize_value=normalize_value)
     return output_array
 
 
 def _peak_find_dog(
         dask_array, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
-        threshold=0.36, overlap=0.81):
+        threshold=0.36, overlap=0.81, normalize_value=None):
     """Find peaks in a dask array using skimage's blob_dog function.
 
     Parameters
@@ -298,6 +308,10 @@ def _peak_find_dog(
     sigma_ratio : float, optional
     threshold : float, optional
     overlap : float, optional
+    normalize_value : float, optional
+        All the values in dask_array will be divided by this value.
+        If no value is specified, the max value in each individual image will
+        be used.
 
     Returns
     -------
@@ -328,7 +342,7 @@ def _peak_find_dog(
     kwargs_template_dog = {
             'min_sigma': min_sigma, 'max_sigma': max_sigma,
             'sigma_ratio': sigma_ratio, 'threshold': threshold,
-            'overlap': overlap}
+            'overlap': overlap, 'normalize_value': normalize_value}
     output_array = da.map_blocks(
             _peak_find_dog_chunk, dask_array_rechunked, drop_axis=(2, 3),
             dtype=np.object, **kwargs_template_dog)

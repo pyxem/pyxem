@@ -423,6 +423,15 @@ class TestPeakFindDog:
                 sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
         assert len(peaks) == 1
 
+    def test_single_frame_normalize_value(self):
+        image = np.zeros((100, 100), dtype=np.uint16)
+        image[49:52, 49:52] = 100
+        image[19:22, 9:12] = 10
+        peaks0 = dt._peak_find_dog_single_frame(image, normalize_value=100)
+        peaks1 = dt._peak_find_dog_single_frame(image, normalize_value=10)
+        assert (peaks0 == [[50, 50]]).all()
+        assert (peaks1 == [[50, 50], [20, 10]]).all()
+
     def test_chunk(self):
         data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
         data[0, 0, 50, 20] = 100
@@ -442,6 +451,17 @@ class TestPeakFindDog:
         assert peaks[1, 0][0].tolist() == [53, 23]
         assert peaks[1, 1][0].tolist() == [54, 24]
         assert peaks[1, 2][0].tolist() == [55, 25]
+
+    def test_chunk_normalize_value(self):
+        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
+        data[:, :, 49:52, 49:52] = 100
+        data[:, :, 19:22, 9:12] = 10
+
+        peak_array0 = dt._peak_find_dog_chunk(data, normalize_value=100)
+        peak_array1 = dt._peak_find_dog_chunk(data, normalize_value=10)
+        for ix, iy in np.ndindex(peak_array0.shape):
+            assert (peak_array0[ix, iy] == [[50, 50]]).all()
+            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
 
     def test_dask_array(self):
         data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
@@ -464,3 +484,14 @@ class TestPeakFindDog:
         assert peaks[1, 0][0].tolist() == [53, 23]
         assert peaks[1, 1][0].tolist() == [54, 24]
         assert peaks[1, 2][0].tolist() == [55, 25]
+
+    def test_dask_array_normalize_value(self):
+        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
+        data[:, :, 49:52, 49:52] = 100
+        data[:, :, 19:22, 9:12] = 10
+        dask_array = da.from_array(data, chunks=(1, 1, 100, 100))
+        peak_array0 = dt._peak_find_dog(dask_array, normalize_value=100)
+        peak_array1 = dt._peak_find_dog(dask_array, normalize_value=10)
+        for ix, iy in np.ndindex(peak_array0.shape):
+            assert (peak_array0[ix, iy] == [[50, 50]]).all()
+            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()

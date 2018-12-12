@@ -591,8 +591,8 @@ class PixelatedSTEM(Signal2D):
         return s
 
     def find_peaks(self, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
-                   threshold=0.36, overlap=0.81, lazy_result=True,
-                   show_progressbar=True):
+                   threshold=0.36, overlap=0.81, normalize_value=None,
+                   lazy_result=True, show_progressbar=True):
         """Find peaks in the signal dimensions using skimage's blob_dog.
 
         Parameters
@@ -602,6 +602,10 @@ class PixelatedSTEM(Signal2D):
         sigma_ratio : float, optional
         threshold : float, optional
         overlap : float, optional
+        normalize_value : float, optional
+            All the values in the signal will be divided by this value.
+            If no value is specified, the max value in each individual image
+            will be used.
         lazy_result : bool, optional
             Default True
         show_progressbar : bool, optional
@@ -642,7 +646,8 @@ class PixelatedSTEM(Signal2D):
             dask_array = da.from_array(self.data, chunks=chunks)
         output_array = dt._peak_find_dog(
                 dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
-                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap,
+                normalize_value=normalize_value)
         if not lazy_result:
             if show_progressbar:
                 pbar = ProgressBar()
