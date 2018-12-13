@@ -320,3 +320,46 @@ def get_fem_signal(lazy=False):
     fem_signal = (test1 + test2)
 
     return fem_signal
+
+def get_simple_fem_signal(lazy=False):
+    """Get a 2D signal that approximates a very small fluctuation electron
+    microscopy (FEM) dataset.
+
+    Returns
+    -------
+    fem_signal : PixelatedSTEM
+
+    Examples
+    --------
+    >>> s = ps.dummy_data.get_simple_fem_signal()
+    >>> s.plot()
+
+    """
+
+    radii1 = 10 * np.random.randint(0, 2, size=(2, 2))
+    intensities1 = np.random.randint(0, 5, size=(2, 2))
+
+    radii2 = 20 * np.random.randint(0, 2, size=(2, 2))
+    intensities2 = np.random.randint(0, 15, size=(2, 2))
+
+    test1 = mdtd.generate_4d_data(probe_size_x=2, probe_size_y=2,
+                                  image_size_x=50, image_size_y=50,
+                                  disk_x=25, disk_y=25, disk_r=5, disk_I=100,
+                                  ring_x=25, ring_y=25, ring_r=radii1,
+                                  ring_I=intensities1, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    test2 = mdtd.generate_4d_data(probe_size_x=2, probe_size_y=2,
+                                  image_size_x=50, image_size_y=50,
+                                  disk_x=25, disk_y=25, disk_r=5, disk_I=100,
+                                  ring_x=25, ring_y=25, ring_r=radii2,
+                                  ring_I=intensities2, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    fem_signal = (test1 + test2)
+
+    return fem_signal
