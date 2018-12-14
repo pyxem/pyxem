@@ -10,6 +10,12 @@ import pixstem
 def fem_calc(s, centre_x, centre_y, show_progressbar):
     offset = False
 
+    if centre_x is None:
+        centre_x = np.int(s.axes_manager.signal_shape[0]/2)
+
+    if centre_y is None:
+        centre_y = np.int(s.axes_manager.signal_shape[1]/2)
+
     if s.data.min() == 0:
         s.data += 1  # To avoid division by 0
         offset = True
@@ -23,6 +29,9 @@ def fem_calc(s, centre_x, centre_y, show_progressbar):
     radialavgs = s.radial_integration(centre_x=centre_x, centre_y=centre_y,
                                       normalize=True,
                                       show_progressbar=show_progressbar)
+    if radialavgs.data.min() == 0:
+        radialavgs.data += 1
+
     results['V-Omegak'] = ((radialavgs ** 2).mean() /
                            (radialavgs.mean()) ** 2) - 1
     results['RadialAvg'] = radialavgs.mean()
@@ -144,6 +153,9 @@ def plot_fem(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
                 np.arange(0, len(results['RadialAvg'].data))
     else:
         xaxis = np.arange(0, len(results['RadialAvg'].data))
+
+    if highcutoff > len(results['RadialAvg'].data):
+        highcutoff = len(results['RadialAvg'].data) - 1
 
     fig, axes = plt.subplots(3, 2, figsize=(9, 12))
 

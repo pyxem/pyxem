@@ -364,3 +364,62 @@ def get_simple_fem_signal(lazy=False):
     fem_signal = (test1 + test2)
 
     return fem_signal
+
+
+def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50,
+                           lazy=False):
+    """Get a 2D signal that approximates a very small fluctuation electron
+    microscopy (FEM) dataset.
+
+    Returns
+    -------
+    fem_signal : PixelatedSTEM
+
+    Examples
+    --------
+    >>> s = ps.dummy_data.get_simple_fem_signal()
+    >>> s.plot()
+
+    """
+    image_center = [np.int(image_x/2), np.int(image_y/2)]
+
+    radii1 = 10 * np.random.randint(0, 2, size=(probe_y, probe_x))
+    intensities1 = np.random.randint(0, 5, size=(probe_y, probe_x))
+
+    radii2 = 20 * np.random.randint(0, 2, size=(probe_y, probe_x))
+    intensities2 = np.random.randint(0, 15, size=(probe_y, probe_x))
+
+    test1 = mdtd.generate_4d_data(probe_size_x=probe_x,
+                                  probe_size_y=probe_y,
+                                  image_size_x=image_x,
+                                  image_size_y=image_y,
+                                  disk_x=image_center[0],
+                                  disk_y=image_center[1],
+                                  disk_r=5, disk_I=100,
+                                  ring_x=image_center[0],
+                                  ring_y=image_center[1],
+                                  ring_r=radii1, ring_I=intensities1,
+                                  ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    test2 = mdtd.generate_4d_data(probe_size_x=probe_x,
+                                  probe_size_y=probe_y,
+                                  image_size_x=image_x,
+                                  image_size_y=image_y,
+                                  disk_x=image_center[0],
+                                  disk_y=image_center[1],
+                                  disk_r=5,
+                                  disk_I=100,
+                                  ring_x=image_center[0],
+                                  ring_y=image_center[1],
+                                  ring_r=radii2,
+                                  ring_I=intensities2, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    fem_signal = (test1 + test2)
+
+    return fem_signal
