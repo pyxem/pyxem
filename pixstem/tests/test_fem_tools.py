@@ -9,13 +9,14 @@ class TestFemResultIo:
         tmpdir = TemporaryDirectory()
 
         s = dd.get_fem_signal()
-        femresult = femt.fem_calc(s, centre_x=50, centre_y=50, show_progressbar=False)
+        femresult = femt.fem_calc(s, centre_x=50, centre_y=50,
+                                  show_progressbar=False)
 
         femt.save_fem(femresult, tmpdir.name)
 
         femresult1 = femt.load_fem(tmpdir.name)
-        assert type(femresult) is dict
-        assert len(femresult.keys()) == 7
+        assert type(femresult1) is dict
+        assert len(femresult1.keys()) == 7
         assert 'RadialInt' in femresult1.keys()
         assert 'V-Omegak' in femresult1.keys()
         assert 'RadialAvg' in femresult1.keys()
@@ -30,7 +31,8 @@ class TestFemCalc:
 
     def test_full_calc(self):
         s = dd.get_fem_signal()
-        femresult = femt.fem_calc(s, centre_x=50, centre_y=50, show_progressbar=False)
+        femresult = femt.fem_calc(s, centre_x=50, centre_y=50,
+                                  show_progressbar=False)
         assert type(femresult) is dict
         assert len(femresult.keys()) == 7
         assert 'RadialInt' in femresult.keys()
@@ -43,7 +45,8 @@ class TestFemCalc:
 
     def test_simple_calc(self):
         s = dd.get_simple_fem_signal()
-        femresult = femt.fem_calc(s, centre_x=25, centre_y=25, show_progressbar=False)
+        femresult = femt.fem_calc(s, centre_x=25, centre_y=25,
+                                  show_progressbar=False)
         assert type(femresult) is dict
         assert len(femresult.keys()) == 7
         assert 'RadialInt' in femresult.keys()

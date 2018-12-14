@@ -321,6 +321,7 @@ def get_fem_signal(lazy=False):
 
     return fem_signal
 
+
 def get_simple_fem_signal(lazy=False):
     """Get a 2D signal that approximates a very small fluctuation electron
     microscopy (FEM) dataset.

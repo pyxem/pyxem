@@ -30,5 +30,6 @@ setup(
             'matplotlib>=2.0',
             'hyperspy>=1.3',
             'dask',
+            'tqdm',
             ],
 )
