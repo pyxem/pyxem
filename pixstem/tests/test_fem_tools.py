@@ -1,6 +1,7 @@
 import pixstem.fem_tools as femt
 import pixstem.dummy_data as dd
 from tempfile import TemporaryDirectory
+import matplotlib
 
 
 class TestFemResultIo:
@@ -57,5 +58,13 @@ class TestFemCalc:
         assert 'Vrk' in femresult.keys()
         assert 'Vrek' in femresult.keys()
 
-    def testplot(self):
-        pass
+
+class TestFemPlot:
+
+    def test_plot_fem(self):
+        s = dd.get_simple_fem_signal()
+        femresult = femt.fem_calc(s, centre_x=25, centre_y=25,
+                                  show_progressbar=False)
+        fig = femt.plot_fem(s, femresult, lowcutoff=10, highcutoff=120,
+                            k_cal=None)
+        assert type(fig) is matplotlib.figure.Figure
