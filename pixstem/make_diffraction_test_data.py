@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.filters import gaussian_filter
+from skimage.measure import EllipseModel
 import dask.array as da
 from hyperspy.misc.utils import isiterable
 from pixstem.pixelated_stem_class import PixelatedSTEM
@@ -751,3 +752,45 @@ def generate_4d_data(
         data_lazy = da.from_array(s.data, lazy_chunks)
         s = LazyPixelatedSTEM(data_lazy)
     return s
+
+
+def _make_4d_peak_array_test_data(xc, yc, semi0, semi1, rot, nr=20):
+    """Get a 4D NumPy array with peak_array test data.
+
+    Parameters
+    ----------
+    xc, yc : scalar, 2D NumPy array
+        Centre position of the ellipse.
+    semi0, semi1 : scalar, 2D NumPy array
+        Semi length of the ellipse, of rot is 0 semi0 is the x-direction
+        semi length, and semi1 the y-direction.
+    rot : scalar, 2D NumPy array
+        Rotation in radians.
+
+    Returns
+    -------
+    peak_array : NumPy 4D array
+
+    Examples
+    --------
+    >>> import pixstem.make_diffraction_test_data as mdtd
+    >>> xc = np.random.randint(65, 70, size=(4, 5))
+    >>> yc = np.random.randint(115, 120, size=(4, 5))
+    >>> semi0 = np.random.randint(35, 40, size=(4, 5))
+    >>> semi1 = np.random.randint(45, 50, size=(4, 5))
+    >>> rot = np.random.random(size=(4, 5)) * 0.2
+    >>> peak_array = mdtd._make_4d_peak_array_test_data(
+    ...        xc, yc, semi0, semi1, rot)
+    >>> s = ps.PixelatedSTEM(np.zeros(shape=(4, 5, 200, 210)))
+    >>> import pixstem.marker_tools as mt
+    >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)
+
+    """
+    phi_array = np.linspace(0, 2*np.pi, nr)
+    peak_array = np.empty_like(xc, dtype=np.object)
+    for iy, ix in np.ndindex(peak_array.shape):
+        params = (yc[iy, ix], xc[iy, ix],
+                  semi1[iy, ix], semi0[iy, ix], rot[iy, ix])
+        ellipse_points = EllipseModel().predict_xy(phi_array, params=params)
+        peak_array[iy, ix] = ellipse_points
+    return peak_array

@@ -1,3 +1,4 @@
+from pytest import approx
 import numpy as np
 from hyperspy.signals import Signal2D
 import pixstem.make_diffraction_test_data as mdtd
@@ -611,3 +612,61 @@ class TestGetEllipticalMask:
         ellipse_image = mdtd._get_elliptical_disk(
                 xx, yy, x, y, semi_len0, semi_len1, rotation)
         assert not ellipse_image.any()
+
+
+class TestMake4dPeakArrayTestData:
+
+    def test_simple(self):
+        xc, yc = np.ones((2, 3)), np.ones((2, 3))
+        semi0, semi1, rot = np.ones((2, 3)), np.ones((2, 3)), np.ones((2, 3))
+        peak_array = mdtd._make_4d_peak_array_test_data(
+                xc, yc, semi0, semi1, rot)
+        assert peak_array.shape == xc.shape
+
+    def test_xc_yc(self):
+        xc = np.random.randint(10, 20, size=(2, 3))
+        yc = np.random.randint(39, 60, size=(2, 3))
+        semi0, semi1, rot = np.ones((2, 3)), np.ones((2, 3)), np.ones((2, 3))
+        peak_array = mdtd._make_4d_peak_array_test_data(
+                xc, yc, semi0, semi1, rot, nr=1000)
+        for iy, ix in np.ndindex(xc.shape):
+            x_pos_mean = peak_array[iy, ix][:, 1].mean()
+            assert approx(x_pos_mean, abs=0.01) == xc[iy, ix]
+            y_pos_mean = peak_array[iy, ix][:, 0].mean()
+            assert approx(y_pos_mean, abs=0.01) == yc[iy, ix]
+
+    def test_semi_lengths(self):
+        semi0 = np.random.randint(10, 20, size=(2, 3))
+        semi1 = np.random.randint(10, 20, size=(2, 3))
+        xc, yc, rot = np.ones((2, 3)) * 10, np.ones((2, 3)), np.zeros((2, 3))
+        peak_array = mdtd._make_4d_peak_array_test_data(
+                xc, yc, semi0, semi1, rot, nr=1000)
+        for iy, ix in np.ndindex(xc.shape):
+            semi0_max = semi0[iy, ix] + xc[iy, ix]
+            assert approx(peak_array[iy, ix][:, 1].max()) == semi0_max
+            semi1_max = semi1[iy, ix] + yc[iy, ix]
+            assert approx(peak_array[iy, ix][:, 0].max()) == semi1_max
+
+    def test_rotation(self):
+        rot0, rot1 = np.zeros((2, 3)), np.ones((2, 3)) * np.pi/2
+        xc, yc = np.ones((2, 3)), np.ones((2, 3))
+        semi0, semi1 = np.ones((2, 3))*5, np.ones((2, 3))
+        pa0 = mdtd._make_4d_peak_array_test_data(
+                xc, yc, semi0, semi1, rot0, nr=1000)
+        pa1 = mdtd._make_4d_peak_array_test_data(
+                xc, yc, semi0, semi1, rot1, nr=1000)
+        semi_max = semi0[0, 0] + xc[0, 0]
+        semi_min = semi1[0, 0] + xc[0, 0]
+        for iy, ix in np.ndindex(xc.shape):
+            assert approx(pa0[iy, ix][:, 1].max(), rel=0.001) == semi_max
+            assert approx(pa0[iy, ix][:, 0].max(), rel=0.001) == semi_min
+            assert approx(pa1[iy, ix][:, 0].max(), rel=0.001) == semi_max
+            assert approx(pa1[iy, ix][:, 1].max(), rel=0.001) == semi_min
+
+    def test_nr(self):
+        p = np.ones((2, 3))
+        nr0, nr1 = 100, 200
+        pa0 = mdtd._make_4d_peak_array_test_data(p, p, p, p, p, nr=nr0)
+        pa1 = mdtd._make_4d_peak_array_test_data(p, p, p, p, p, nr=nr1)
+        assert len(pa0[0, 0][:, 0]) == nr0
+        assert len(pa1[0, 0][:, 0]) == nr1
