@@ -6,6 +6,7 @@ import dask.array as da
 from hyperspy.signals import Signal2D
 from pixstem.pixelated_stem_class import PixelatedSTEM
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
+import pixstem.ransac_ellipse_tools as ret
 import pixstem.make_diffraction_test_data as mdtd
 import pixstem.dummy_data as dd
 import pixstem.dask_test_data as dtd
@@ -66,6 +67,56 @@ class TestPixelatedStemFlipDiffraction:
         s_flip = s.flip_diffraction_y()
         assert (s_flip.data[:, :, 3:, :] == 0).all()
         assert (s_flip.data[:, :, :3, :] == 1).all()
+
+
+class TestAddPeakArrayAsMarkers:
+
+    def test_simple(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
+        peak_array = np.random.randint(20, 80, (2, 3, 100, 2))
+        s.add_peak_array_as_markers(peak_array)
+
+    def test_color(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
+        peak_array = np.random.randint(20, 80, (2, 3, 100, 2))
+        s.add_peak_array_as_markers(peak_array, color='blue')
+        marker0 = list(s.metadata.Markers)[9][1]
+        assert marker0.marker_properties['color'] == 'blue'
+
+    def test_size(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
+        peak_array = np.random.randint(20, 80, (2, 3, 100, 2))
+        s.add_peak_array_as_markers(peak_array, size=13)
+        marker0 = list(s.metadata.Markers)[9][1]
+        assert marker0.get_data_position('size') == 13
+
+    def test_wrong_dimensions(self):
+        s = PixelatedSTEM(np.zeros((3, 100, 100)))
+        peak_array = np.random.randint(20, 80, (3, 100, 2))
+        with pytest.raises(ValueError):
+            s.add_peak_array_as_markers(peak_array)
+
+
+class TestAddEllipseArrayAsMarkers:
+
+    def test_simple(self):
+        s, parray = dd.get_simple_ellipse_signal_peak_array()
+        ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
+                parray, xc=95, yc=95, r_elli_lim=20, semi_len_min=40,
+                semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
+        s.add_ellipse_array_as_markers(
+                ellipse_array, inlier_array=inlier_array, peak_array=parray)
+
+    def test_only_ellipse_array(self):
+        s, parray = dd.get_simple_ellipse_signal_peak_array()
+        s1 = s.deepcopy()
+        ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
+                parray, xc=95, yc=95, r_elli_lim=20, semi_len_min=40,
+                semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
+        s.add_ellipse_array_as_markers(ellipse_array)
+        s1.add_ellipse_array_as_markers(
+                ellipse_array, inlier_array=inlier_array, peak_array=parray)
+        assert len(list(s.metadata.Markers)) < len(list(s1.metadata.Markers))
 
 
 class TestPixelatedSTEMThresholdAndMask:
