@@ -87,6 +87,45 @@ class TestFemCalc:
         assert 'Vrk' in femresult.keys()
         assert 'Vrek' in femresult.keys()
 
+    def test_result_shapes(self):
+        s = dd.get_generic_fem_signal(probe_x=5, probe_y=2,
+                                      image_x=49, image_y=50)
+
+        femresult = femt.fem_calc(s, centre_x=25, centre_y=25,
+                                  show_progressbar=False)
+
+        assert femresult['RadialInt'].data.shape == (2, 5, 36)
+        assert femresult['V-Omegak'].data.shape == (36,)
+        assert femresult['RadialAvg'].data.shape == (36,)
+        assert femresult['Omega-Vi'].data.shape == (50, 49)
+        assert femresult['Omega-Vk'].data.shape == (36,)
+        assert femresult['Vrk'].data.shape == (36,)
+        assert femresult['Vrek'].data.shape == (36,)
+
+    def test_result_values(self):
+        s = dd.get_generic_fem_signal(probe_x=5, probe_y=2,
+                                      image_x=49, image_y=50)
+
+        femresult = femt.fem_calc(s, centre_x=25, centre_y=25,
+                                  show_progressbar=False)
+        assert femresult['RadialInt'].data.min() > 0
+        assert femresult['RadialInt'].data.max() < 5000
+        assert (femresult['RadialInt'].data.sum() - s.data.sum()) < 0.1
+        assert femresult['RadialInt'].data.sum() > \
+            femresult['RadialAvg'].data.sum()
+        assert femresult['V-Omegak'].data.min() > 0
+        assert femresult['V-Omegak'].data.max() < 1
+        assert femresult['RadialAvg'].data.min() > 0
+        assert femresult['RadialAvg'].data.max() < 500
+        assert femresult['Omega-Vi'].data.min() > 0
+        assert femresult['Omega-Vi'].data.max() < 1
+        assert femresult['Omega-Vk'].data.min() > 0
+        assert femresult['Omega-Vk'].data.max() < 1
+        assert femresult['Vrk'].data.min() >= 0
+        assert femresult['Vrk'].data.max() < 2
+        assert femresult['Vrek'].data.min() > 0
+        assert femresult['Vrek'].data.max() < 2
+
 
 class TestFemPlot:
 
