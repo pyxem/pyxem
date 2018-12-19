@@ -14,7 +14,7 @@ class TestGet4DMarkerList:
         peak_array[1, 1] = [[9, 1]]
         peak_array[1, 2] = [[6, 3]]
         s = ps.PixelatedSTEM(np.zeros(shape=(2, 3, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, color='red')
         mt._add_permanent_markers_to_signal(s, marker_list)
         assert len(marker_list) == 1
@@ -32,7 +32,7 @@ class TestGet4DMarkerList:
         color = 'blue'
         peak_array = np.zeros(shape=(3, 2, 1, 2))
         s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, color=color)
         assert marker_list[0].marker_properties['color'] == 'blue'
 
@@ -40,14 +40,14 @@ class TestGet4DMarkerList:
         size = 12
         peak_array = np.zeros(shape=(3, 2, 1, 2))
         s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, size=size)
         assert marker_list[0].get_data_position('size') == size
 
     def test_several_markers(self):
         peak_array = np.zeros(shape=(3, 2, 3, 2))
         s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes)
         assert len(marker_list) == 3
 
@@ -56,7 +56,7 @@ class TestGet4DMarkerList:
         peak_array[0, 0] = [[2, 4], [1, 9]]
         peak_array[0, 1] = [[8, 2]]
         s = ps.PixelatedSTEM(np.zeros(shape=(2, 3, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, color='red')
         assert len(marker_list) == 2
 
@@ -97,7 +97,7 @@ def test_peak_finding_to_marker():
     s = ps.PixelatedSTEM(data)
     peak_array = s.find_peaks(min_sigma=0.1, max_sigma=2,
                               threshold=0.01, lazy_result=False)
-    marker_list = mt._get_4d_marker_list(
+    marker_list = mt._get_4d_points_marker_list(
             peak_array, s.axes_manager.signal_axes)
     assert len(marker_list) == 1
     marker = marker_list[0]
