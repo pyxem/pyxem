@@ -416,7 +416,7 @@ def _sorted_cluster_dict_to_marker_list(
             color = color_none
         else:
             color = 'cyan'
-        temp_markers = mt._get_4d_marker_list(
+        temp_markers = mt._get_4d_points_marker_list(
                 cluster_list, signal_axes=signal_axes, color=color, size=size)
         marker_list.extend(temp_markers)
     return marker_list

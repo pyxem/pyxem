@@ -2,7 +2,8 @@ import numpy as np
 import hyperspy.utils.markers as hm
 
 
-def _get_4d_marker_list(peaks_list, signal_axes=None, color='red', size=20):
+def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
+                               size=20):
     """Get a list of 4 dimensional point markers.
 
     The markers will be displayed on the signal dimensions.
@@ -25,7 +26,7 @@ def _get_4d_marker_list(peaks_list, signal_axes=None, color='red', size=20):
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pixstem.marker_tools as mt
-    >>> marker_list = mt._get_4d_marker_list(
+    >>> marker_list = mt._get_4d_points_marker_list(
     ...     peak_array, s.axes_manager.signal_axes)
 
     """
@@ -75,7 +76,7 @@ def _add_permanent_markers_to_signal(signal, marker_list):
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pixstem.marker_tools as mt
-    >>> marker_list = mt._get_4d_marker_list(
+    >>> marker_list = mt._get_4d_points_marker_list(
     ...     peak_array, s.axes_manager.signal_axes)
     >>> mt._add_permanent_markers_to_signal(s, marker_list)
     >>> s.plot()
@@ -107,7 +108,7 @@ def add_peak_array_to_signal_as_markers(
     >>> s.plot()
 
     """
-    marker_list = _get_4d_marker_list(
+    marker_list = _get_4d_points_marker_list(
             peak_array, signal.axes_manager.signal_axes, color=color,
             size=size)
     _add_permanent_markers_to_signal(signal, marker_list)
