@@ -53,3 +53,8 @@ class TestDummyDataModule:
     def test_get_cbed_signal(self):
         s = dd.get_cbed_signal()
         s.plot()
+
+    def test_get_simple_ellipse_signal_peak_array():
+        s, peak_array = dd.get_simple_ellipse_signal_peak_array()
+        assert hasattr(s, 'axes_manager')
+        assert s.axes_manager.navigation_shape == peak_array.shape
