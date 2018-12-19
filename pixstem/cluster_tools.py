@@ -110,6 +110,64 @@ def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
     return peak_list_filtered
 
 
+def _filter_peak_array_radius(peak_array, xC, yC, r_min):
+    """Remove peaks from a peak_array, based on distance from a point.
+
+    Parameters
+    ----------
+    peak_array : NumPy array
+        In the form [[[[y0, x0], [y1, x1]]]]
+    xC, yC : scalars
+        Centre position
+    r_min : scalar
+        Remove peaks which are within r_min distance from the centre.
+
+    Returns
+    -------
+    peak_array_filtered : NumPy array
+        Similar to peak_array input, but with the too-close peaks
+        removed.
+
+    """
+    peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
+    for iy, ix in np.ndindex(peak_array.shape[:2]):
+        peak_list_filtered = _filter_peak_list_radius(
+                peak_array[iy, ix], xC=xC, yC=yC, r_min=r_min)
+        peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
+    return peak_array_filtered
+
+
+def _filter_peak_list_radius(peak_list, xC, yC, r_min):
+    """Remove peaks based on distance to some point.
+
+    Parameters
+    ----------
+    peak_list : NumPy array
+        In the form [[y0, x0], [y1, x1], ...]
+    xC, yC : scalars
+        Centre position
+    r_min : scalar
+        Remove peaks which are within r_min distance from the centre.
+
+    Returns
+    -------
+    peak_filtered_list : NumPy array
+        Similar to peak_list input, but with the too-close peaks
+        removed.
+
+    Examples
+    --------
+    >>> import pixstem.cluster_tools as ct
+    >>> peak_list = np.array([[128, 32], [128, 127]])
+    >>> ct._filter_peak_list_radius(peak_list, 128, 128, 10)
+    array([[128,  32]])
+
+    """
+    dist = np.hypot(peak_list[:, 1] - xC, peak_list[:, 0] - yC)
+    peak_filtered_list = peak_list[dist > r_min]
+    return peak_filtered_list
+
+
 def _get_cluster_dict(peak_array, eps=30, min_samples=2):
     """Sort peaks into cluster using sklearn's DBSCAN.
 
