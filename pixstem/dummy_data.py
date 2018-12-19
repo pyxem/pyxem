@@ -282,6 +282,11 @@ def get_fem_signal(lazy=False):
     """Get a 2D signal that approximates a fluctuation electron microscopy
     (FEM) dataset.
 
+    Parameters
+    ----------
+    lazy : bool, default False
+        If True, resulting signal will be lazy.
+
     Returns
     -------
     fem_signal : PixelatedSTEM
@@ -319,12 +324,37 @@ def get_fem_signal(lazy=False):
 
     fem_signal = (test1 + test2)
 
+    fem_signal.axes_manager.navigation_axes[0].name = "Probe position x"
+    fem_signal.axes_manager.navigation_axes[0].units = "nm"
+    fem_signal.axes_manager.navigation_axes[0].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[0].offset = 0
+
+    fem_signal.axes_manager.navigation_axes[1].name = "Probe position y"
+    fem_signal.axes_manager.navigation_axes[1].units = "nm"
+    fem_signal.axes_manager.navigation_axes[1].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[1].offset = 0
+
+    fem_signal.axes_manager.signal_axes[0].name = 'Signal x'
+    fem_signal.axes_manager.signal_axes[0].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[0].scale = 0.25
+    fem_signal.axes_manager.signal_axes[0].offset = 0
+
+    fem_signal.axes_manager.signal_axes[1].name = 'Signal y'
+    fem_signal.axes_manager.signal_axes[1].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[1].scale = 0.25
+    fem_signal.axes_manager.signal_axes[1].offset = 0
+
     return fem_signal
 
 
 def get_simple_fem_signal(lazy=False):
     """Get a 2D signal that approximates a very small fluctuation electron
     microscopy (FEM) dataset.
+
+    Parameters
+    ----------
+    lazy : bool, default False
+        If True, resulting signal will be lazy.
 
     Returns
     -------
@@ -363,13 +393,46 @@ def get_simple_fem_signal(lazy=False):
 
     fem_signal = (test1 + test2)
 
+    fem_signal.axes_manager.navigation_axes[0].name = "Probe position x"
+    fem_signal.axes_manager.navigation_axes[0].units = "nm"
+    fem_signal.axes_manager.navigation_axes[0].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[0].offset = 0
+
+    fem_signal.axes_manager.navigation_axes[1].name = "Probe position y"
+    fem_signal.axes_manager.navigation_axes[1].units = "nm"
+    fem_signal.axes_manager.navigation_axes[1].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[1].offset = 0
+
+    fem_signal.axes_manager.signal_axes[0].name = 'Signal x'
+    fem_signal.axes_manager.signal_axes[0].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[0].scale = 0.25
+    fem_signal.axes_manager.signal_axes[0].offset = 0
+
+    fem_signal.axes_manager.signal_axes[1].name = 'Signal y'
+    fem_signal.axes_manager.signal_axes[1].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[1].scale = 0.25
+    fem_signal.axes_manager.signal_axes[1].offset = 0
+
     return fem_signal
 
 
 def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50,
                            lazy=False):
-    """Get a 2D signal that approximates a very small fluctuation electron
-    microscopy (FEM) dataset.
+    """Get a 2D signal that approximates a fluctuation electron
+    microscopy (FEM) dataset with user defined dimensions.
+
+    Parameters
+    ----------
+    probe_x : int, default 2
+        Horizontal dimension of the navigation axes
+    probe_y : int, default 2
+        Vertical dimension of the navigation axes
+    image_x : int, default 2
+        Horizontal dimension of the signal axes
+    image_y : int, default 2
+        Vertical dimension of the signal axes
+    lazy : bool, default False
+        If True, resulting signal will be lazy.
 
     Returns
     -------
@@ -377,7 +440,8 @@ def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50,
 
     Examples
     --------
-    >>> s = ps.dummy_data.get_simple_fem_signal()
+    >>> s = ps.dummy_data.get_generic_fem_signal(probe_x=5, probe_y=10,
+    ...     image_x=25, image_y=30, lazy=False)
     >>> s.plot()
 
     """
@@ -421,5 +485,25 @@ def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50,
                                   lazy=lazy)
 
     fem_signal = (test1 + test2)
+
+    fem_signal.axes_manager.navigation_axes[0].name = "Probe position x"
+    fem_signal.axes_manager.navigation_axes[0].units = "nm"
+    fem_signal.axes_manager.navigation_axes[0].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[0].offset = 0
+
+    fem_signal.axes_manager.navigation_axes[1].name = "Probe position y"
+    fem_signal.axes_manager.navigation_axes[1].units = "nm"
+    fem_signal.axes_manager.navigation_axes[1].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[1].offset = 0
+
+    fem_signal.axes_manager.signal_axes[0].name = 'Signal x'
+    fem_signal.axes_manager.signal_axes[0].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[0].scale = 0.25
+    fem_signal.axes_manager.signal_axes[0].offset = 0
+
+    fem_signal.axes_manager.signal_axes[1].name = 'Signal y'
+    fem_signal.axes_manager.signal_axes[1].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[1].scale = 0.25
+    fem_signal.axes_manager.signal_axes[1].offset = 0
 
     return fem_signal

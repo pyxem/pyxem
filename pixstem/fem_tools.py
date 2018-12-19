@@ -7,7 +7,47 @@ import hyperspy.api as hs
 import pixstem
 
 
-def fem_calc(s, centre_x, centre_y, show_progressbar):
+def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
+    """Perform analysis of fluctuation electron microscopy (FEM) data
+    as outlined in:
+
+    T. L. Daulton, et al., Ultramicroscopy 110 (2010) 1279-1289.
+    doi:10.1016/j.ultramic.2010.05.010
+
+    Parameters
+    ----------
+    s : PixelatedSTEM
+        Signal on which FEM analysis was performed
+    centre_x, centre_y : int, optional
+        All the diffraction patterns assumed to have the same
+        centre position.
+
+    show_progressbar : bool
+        Default True
+
+    Returns
+    -------
+    results : Python dictionary
+        Results of FEM data analysis, including the normalized variance
+        of the annular mean (V-Omegak), mean of normalized variances of
+        rings (V-rk), normalized variance of ring ensemble (Vrek),
+        the normalized variance image (Omega-Vi), and annular mean of
+        the variance image (Omega-Vk).
+
+    Examples
+    --------
+    >>> import pixstem.dummy_data as dd
+    >>> import pixstem.fem_tools as femt
+    >>> s = dd.get_fem_signal()
+    >>> fem_results = femt.fem_calc(
+    ...     s,
+    ...     centre_x=128,
+    ...     centre_y=128,
+    ...     show_progressbar=False)
+    >>> fem_results['V-Omegak'].plot()
+
+    """
+
     offset = False
 
     if centre_x is None:
