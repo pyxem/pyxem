@@ -349,8 +349,9 @@ class PixelatedSTEM(Signal2D):
         """
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
-        mt.add_peak_array_to_signal_as_markers(self, peak_array, color=color,
-                                               size=size)
+        mt.add_peak_array_to_signal_as_markers(
+                self, peak_array, color=color, size=size,
+                signal_axes=self.axes_manager.signal_axes)
 
     def add_ellipse_array_as_markers(
             self, ellipse_array, inlier_array=None, peak_array=None,
@@ -396,7 +397,9 @@ class PixelatedSTEM(Signal2D):
         marker_list = ret._get_ellipse_markers(
                 ellipse_array, inlier_array, peak_array, nr=20,
                 color_ellipse='blue', linewidth=1, linestyle='solid',
-                color_inlier='blue', color_outlier='red', point_size=20)
+                color_inlier='blue', color_outlier='red', point_size=20,
+                signal_axes=self.axes_manager.signal_axes)
+
         mt._add_permanent_markers_to_signal(self, marker_list)
 
     def virtual_bright_field(
