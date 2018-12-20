@@ -109,12 +109,13 @@ def _get_4d_line_segment_list(lines_array, signal_axes=None, color='red',
                     marker_x2_array[ix, iy, i_p] = line[3]
                     marker_y2_array[ix, iy, i_p] = line[2]
                 else:
-                    sa0iv = signal_axes[0].index2value
-                    sa1iv = signal_axes[1].index2value
-                    marker_x1_array[ix, iy, i_p] = sa0iv(int(line[1]))
-                    marker_y1_array[ix, iy, i_p] = sa1iv(int(line[0]))
-                    marker_x2_array[ix, iy, i_p] = sa0iv(int(line[3]))
-                    marker_y2_array[ix, iy, i_p] = sa1iv(int(line[2]))
+                    if _check_line_segment_inside(signal_axes, line):
+                        sa0iv = signal_axes[0].index2value
+                        sa1iv = signal_axes[1].index2value
+                        marker_x1_array[ix, iy, i_p] = sa0iv(int(line[1]))
+                        marker_y1_array[ix, iy, i_p] = sa1iv(int(line[0]))
+                        marker_x2_array[ix, iy, i_p] = sa0iv(int(line[3]))
+                        marker_y2_array[ix, iy, i_p] = sa1iv(int(line[2]))
 
     marker_list = []
     for i_p in range(max_lines):
@@ -124,6 +125,32 @@ def _get_4d_line_segment_list(lines_array, signal_axes=None, color='red',
                 color=color, linewidth=linewidth, linestyle=linestyle)
         marker_list.append(marker)
     return marker_list
+
+
+def _check_line_segment_inside(signal_axes, line):
+    sa0iv = signal_axes[0].index2value
+    sa1iv = signal_axes[1].index2value
+    sa0_li = signal_axes[0].low_index
+    sa0_hi = signal_axes[0].high_index
+    sa1_li = signal_axes[1].low_index
+    sa1_hi = signal_axes[1].high_index
+    if line[1] > sa0_hi:
+        return False
+    if line[1] < sa0_li:
+        return False
+    if line[3] > sa0_hi:
+        return False
+    if line[3] < sa0_li:
+        return False
+    if line[0] > sa1_hi:
+        return False
+    if line[0] < sa1_li:
+        return False
+    if line[2] > sa1_hi:
+        return False
+    if line[2] < sa1_li:
+        return False
+    return True
 
 
 def _get_2d_line_segment_list(lines_list, signal_axes=None, color='red',
