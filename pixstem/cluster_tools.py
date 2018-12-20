@@ -60,6 +60,12 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
     >>> peak_array = np.random.randint(0, 255, size=(3, 4, 100, 2))
     >>> peak_array_filtered = ct._filter_4D_peak_array(peak_array)
 
+    See Also
+    --------
+    _filter_peak_array_radius
+    _filter_peak_list
+    _filter_peak_list_radius
+
     """
     if signal_axes is not None:
         max_x_index = signal_axes[0].high_index
@@ -93,6 +99,12 @@ def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
     >>> peak_list = [[128, 129], [10, 52], [0, 120], [255, 123], [123, 255]]
     >>> ct._filter_peak_list(peak_list)
     [[128, 129], [10, 52]]
+
+    See Also
+    --------
+    _filter_peak_array_radius
+    _filter_4D_peak_array
+    _filter_peak_list_radius
 
     """
     peak_list_filtered = []
@@ -128,6 +140,12 @@ def _filter_peak_array_radius(peak_array, xC, yC, r_min):
         Similar to peak_array input, but with the too-close peaks
         removed.
 
+    See Also
+    --------
+    _filter_peak_list
+    _filter_4D_peak_array
+    _filter_peak_list_radius
+
     """
     peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
     for iy, ix in np.ndindex(peak_array.shape[:2]):
@@ -161,6 +179,12 @@ def _filter_peak_list_radius(peak_list, xC, yC, r_min):
     >>> peak_list = np.array([[128, 32], [128, 127]])
     >>> ct._filter_peak_list_radius(peak_list, 128, 128, 10)
     array([[128,  32]])
+
+    See Also
+    --------
+    _filter_peak_array_radius
+    _filter_peak_list
+    _filter_4D_peak_array
 
     """
     dist = np.hypot(peak_list[:, 1] - xC, peak_list[:, 0] - yC)
