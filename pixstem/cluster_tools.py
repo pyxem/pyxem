@@ -122,14 +122,14 @@ def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
     return peak_list_filtered
 
 
-def _filter_peak_array_radius(peak_array, xC, yC, r_min):
+def _filter_peak_array_radius(peak_array, xc, yc, r_min):
     """Remove peaks from a peak_array, based on distance from a point.
 
     Parameters
     ----------
     peak_array : NumPy array
         In the form [[[[y0, x0], [y1, x1]]]]
-    xC, yC : scalars
+    xc, yc : scalars
         Centre position
     r_min : scalar
         Remove peaks which are within r_min distance from the centre.
@@ -150,19 +150,19 @@ def _filter_peak_array_radius(peak_array, xC, yC, r_min):
     peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
     for iy, ix in np.ndindex(peak_array.shape[:2]):
         peak_list_filtered = _filter_peak_list_radius(
-                peak_array[iy, ix], xC=xC, yC=yC, r_min=r_min)
+                peak_array[iy, ix], xc=xc, yc=yc, r_min=r_min)
         peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
     return peak_array_filtered
 
 
-def _filter_peak_list_radius(peak_list, xC, yC, r_min):
+def _filter_peak_list_radius(peak_list, xc, yc, r_min):
     """Remove peaks based on distance to some point.
 
     Parameters
     ----------
     peak_list : NumPy array
         In the form [[y0, x0], [y1, x1], ...]
-    xC, yC : scalars
+    xc, yc : scalars
         Centre position
     r_min : scalar
         Remove peaks which are within r_min distance from the centre.
@@ -187,7 +187,7 @@ def _filter_peak_list_radius(peak_list, xC, yC, r_min):
     _filter_4D_peak_array
 
     """
-    dist = np.hypot(peak_list[:, 1] - xC, peak_list[:, 0] - yC)
+    dist = np.hypot(peak_list[:, 1] - xc, peak_list[:, 0] - yc)
     peak_filtered_list = peak_list[dist > r_min]
     return peak_filtered_list
 

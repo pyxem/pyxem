@@ -30,25 +30,25 @@ class TestFilterPeakListRadius:
     def test_simple(self):
         peak_list = np.random.randint(100, size=(1000, 2))
         peak_filtered_list0 = ct._filter_peak_list_radius(
-                peak_list, xC=50, yC=50, r_min=30)
+                peak_list, xc=50, yc=50, r_min=30)
         assert len(peak_list) != len(peak_filtered_list0)
         peak_filtered_list1 = ct._filter_peak_list_radius(
-                peak_list, xC=50, yC=50, r_min=1000)
+                peak_list, xc=50, yc=50, r_min=1000)
         assert len(peak_filtered_list1) == 0
 
     def test_r_lim(self):
         peak_list = np.array([[50, 50], [50, 30]])
         peak_filtered_list0 = ct._filter_peak_list_radius(
-                peak_list, xC=50, yC=50, r_min=19)
+                peak_list, xc=50, yc=50, r_min=19)
         assert (peak_filtered_list0 == np.array([[50, 30]])).all()
         peak_filtered_list1 = ct._filter_peak_list_radius(
-                peak_list, xC=50, yC=50, r_min=21)
+                peak_list, xc=50, yc=50, r_min=21)
         assert len(peak_filtered_list1) == 0
 
-    def test_xC_yC(self):
+    def test_xc_yc(self):
         peak_list = np.array([[50, 10], [50, 50]])
         peak_filtered_list0 = ct._filter_peak_list_radius(
-                peak_list, xC=10, yC=50, r_min=10)
+                peak_list, xc=10, yc=50, r_min=10)
         assert (peak_filtered_list0 == np.array([[50, 50]])).all()
 
 
@@ -73,7 +73,7 @@ class TestFilterPeakArrayRadius:
         for ix, iy in np.ndindex(peak_array_filtered.shape):
             assert len(peak_array_filtered[ix, iy]) == 0
 
-    def test_xC(self):
+    def test_xc(self):
         peak_array = np.empty(shape=(2, 3), dtype=np.object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
@@ -82,7 +82,7 @@ class TestFilterPeakArrayRadius:
         for ix, iy in np.ndindex(peak_array_filtered.shape):
             assert len(peak_array_filtered[ix, iy]) == 1000
 
-    def test_yC(self):
+    def test_yc(self):
         peak_array = np.empty(shape=(2, 3), dtype=np.object)
         for ix, iy in np.ndindex(peak_array.shape):
             peak_list = np.random.randint(30, 70, size=(999, 2)).tolist()
