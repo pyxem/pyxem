@@ -2,6 +2,7 @@ import pytest
 from pytest import approx
 import math
 import numpy as np
+from numpy.testing import assert_allclose
 from scipy.signal import convolve2d
 from skimage import morphology
 import pixstem.make_diffraction_test_data as mdtd
@@ -572,25 +573,25 @@ class TestGetEllipseMarkerListFromEllipseArray:
             assert marker.data['x1'][()].shape == xc_array.shape
 
         m0, m1, m2, m3 = marker_list
-        assert approx(m0.data['x1'][()]) == xc_array
-        assert approx(m0.data['y1'][()]) == yc_array + sy_array
-        assert approx(m0.data['x2'][()]) == xc_array + sx_array
-        assert approx(m0.data['y2'][()]) == yc_array
+        assert_allclose(m0.data['x1'][()], xc_array)
+        assert_allclose(m0.data['y1'][()], yc_array + sy_array)
+        assert_allclose(m0.data['x2'][()], xc_array + sx_array)
+        assert_allclose(m0.data['y2'][()], yc_array)
 
-        assert approx(m1.data['x1'][()]) == xc_array + sx_array
-        assert approx(m1.data['y1'][()]) == yc_array
-        assert approx(m1.data['x2'][()]) == xc_array
-        assert approx(m1.data['y2'][()]) == yc_array - sy_array
+        assert_allclose(m1.data['x1'][()], xc_array + sx_array)
+        assert_allclose(m1.data['y1'][()], yc_array)
+        assert_allclose(m1.data['x2'][()], xc_array)
+        assert_allclose(m1.data['y2'][()], yc_array - sy_array)
 
-        assert approx(m2.data['x1'][()]) == xc_array
-        assert approx(m2.data['y1'][()]) == yc_array - sy_array
-        assert approx(m2.data['x2'][()]) == xc_array - sx_array
-        assert approx(m2.data['y2'][()]) == yc_array
+        assert_allclose(m2.data['x1'][()], xc_array)
+        assert_allclose(m2.data['y1'][()], yc_array - sy_array)
+        assert_allclose(m2.data['x2'][()], xc_array - sx_array)
+        assert_allclose(m2.data['y2'][()], yc_array)
 
-        assert approx(m3.data['x1'][()]) == xc_array - sx_array
-        assert approx(m3.data['y1'][()]) == yc_array
-        assert approx(m3.data['x2'][()]) == xc_array
-        assert approx(m3.data['y2'][()]) == yc_array + sy_array
+        assert_allclose(m3.data['x1'][()], xc_array - sx_array)
+        assert_allclose(m3.data['y1'][()], yc_array)
+        assert_allclose(m3.data['x2'][()], xc_array)
+        assert_allclose(m3.data['y2'][()], yc_array + sy_array)
 
 
 def test_full_ellipse_ransac_processing():
