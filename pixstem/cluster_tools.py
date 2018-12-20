@@ -122,7 +122,7 @@ def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
     return peak_list_filtered
 
 
-def _filter_peak_array_radius(peak_array, xc, yc, r_min):
+def _filter_peak_array_radius(peak_array, xc, yc, r_min=None, r_max=None):
     """Remove peaks from a peak_array, based on distance from a point.
 
     Parameters
@@ -131,8 +131,9 @@ def _filter_peak_array_radius(peak_array, xc, yc, r_min):
         In the form [[[[y0, x0], [y1, x1]]]]
     xc, yc : scalars
         Centre position
-    r_min : scalar
-        Remove peaks which are within r_min distance from the centre.
+    r_min, r_max : scalar
+        Remove peaks which are within r_min and r_max distance from the centre.
+        One of them must be specified.
 
     Returns
     -------
@@ -150,12 +151,12 @@ def _filter_peak_array_radius(peak_array, xc, yc, r_min):
     peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
     for iy, ix in np.ndindex(peak_array.shape[:2]):
         peak_list_filtered = _filter_peak_list_radius(
-                peak_array[iy, ix], xc=xc, yc=yc, r_min=r_min)
+                peak_array[iy, ix], xc=xc, yc=yc, r_min=r_min, r_max=r_max)
         peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
     return peak_array_filtered
 
 
-def _filter_peak_list_radius(peak_list, xc, yc, r_min):
+def _filter_peak_list_radius(peak_list, xc, yc, r_min=None, r_max=None):
     """Remove peaks based on distance to some point.
 
     Parameters
@@ -164,8 +165,9 @@ def _filter_peak_list_radius(peak_list, xc, yc, r_min):
         In the form [[y0, x0], [y1, x1], ...]
     xc, yc : scalars
         Centre position
-    r_min : scalar
-        Remove peaks which are within r_min distance from the centre.
+    r_min, r_max : scalar
+        Remove peaks which are within r_min and r_max distance from the centre.
+        One of them must be specified.
 
     Returns
     -------
@@ -177,7 +179,7 @@ def _filter_peak_list_radius(peak_list, xc, yc, r_min):
     --------
     >>> import pixstem.cluster_tools as ct
     >>> peak_list = np.array([[128, 32], [128, 127]])
-    >>> ct._filter_peak_list_radius(peak_list, 128, 128, 10)
+    >>> ct._filter_peak_list_radius(peak_list, 128, 128, r_min=10)
     array([[128,  32]])
 
     See Also
@@ -188,7 +190,21 @@ def _filter_peak_list_radius(peak_list, xc, yc, r_min):
 
     """
     dist = np.hypot(peak_list[:, 1] - xc, peak_list[:, 0] - yc)
-    peak_filtered_list = peak_list[dist > r_min]
+    if (r_min is None) and (r_max is None):
+        raise ValueError("Either r_min or r_max must be specified")
+    if (r_min is not None) and (r_max is not None):
+        if r_max < r_min:
+            raise ValueError(
+                    "r_min ({0}) must be smaller than r_max ({1})".format(
+                        r_min, r_max))
+    filter_list = np.ones_like(dist, dtype=np.bool)
+    if r_min is not None:
+        temp_filter_list = dist > r_min
+        filter_list[:] = np.logical_and(filter_list, temp_filter_list)
+    if r_max is not None:
+        temp_filter_list = dist < r_max
+        filter_list[:] = np.logical_and(filter_list, temp_filter_list)
+    peak_filtered_list = peak_list[filter_list]
     return peak_filtered_list
 
 
