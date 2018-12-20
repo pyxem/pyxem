@@ -350,8 +350,7 @@ class PixelatedSTEM(Signal2D):
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
         mt.add_peak_array_to_signal_as_markers(
-                self, peak_array, color=color, size=size,
-                signal_axes=self.axes_manager.signal_axes)
+                self, peak_array, color=color, size=size)
 
     def add_ellipse_array_as_markers(
             self, ellipse_array, inlier_array=None, peak_array=None,
