@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import cluster
+from hyperspy.misc.utils import isiterable
 import pixstem.marker_tools as mt
 
 
@@ -129,7 +130,7 @@ def _filter_peak_array_radius(peak_array, xc, yc, r_min=None, r_max=None):
     ----------
     peak_array : NumPy array
         In the form [[[[y0, x0], [y1, x1]]]]
-    xc, yc : scalars
+    xc, yc : scalars, NumPy array
         Centre position
     r_min, r_max : scalar
         Remove peaks which are within r_min and r_max distance from the centre.
@@ -148,10 +149,16 @@ def _filter_peak_array_radius(peak_array, xc, yc, r_min=None, r_max=None):
     _filter_peak_list_radius
 
     """
+    if not isiterable(xc):
+        xc = np.ones(peak_array.shape[:2]) * xc
+    if not isiterable(yc):
+        yc = np.ones(peak_array.shape[:2]) * yc
     peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
     for iy, ix in np.ndindex(peak_array.shape[:2]):
+        temp_xc, temp_yc = xc[iy, ix], yc[iy, ix]
         peak_list_filtered = _filter_peak_list_radius(
-                peak_array[iy, ix], xc=xc, yc=yc, r_min=r_min, r_max=r_max)
+                peak_array[iy, ix], xc=temp_xc, yc=temp_yc,
+                r_min=r_min, r_max=r_max)
         peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
     return peak_array_filtered
 

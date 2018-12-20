@@ -3,6 +3,7 @@ import math
 from functools import partial
 import numpy as np
 from skimage.measure import EllipseModel, ransac
+from hyperspy.misc.utils import isiterable
 import pixstem.marker_tools as mt
 
 
@@ -212,14 +213,20 @@ def get_ellipse_model_ransac(
         this is None.
 
     """
+    if not isiterable(xc):
+        xc = np.ones(data.shape[:2]) * xc
+    if not isiterable(yc):
+        yc = np.ones(data.shape[:2]) * yc
+
     ellipse_array = np.zeros(data.shape[:2], dtype=np.object)
     inlier_array = np.zeros(data.shape[:2], dtype=np.object)
     num_total = data.shape[0] * data.shape[1]
     t = tqdm(np.ndindex(data.shape[:2]), disable=not show_progressbar,
              total=num_total)
-    for ix, iy in t:
+    for iy, ix in t:
+        temp_xc, temp_yc = xc[iy, ix], yc[iy, ix]
         ellipse_model, inliers = get_ellipse_model_ransac_single_frame(
-                data[ix, iy], xc=xc, yc=yc, r_elli_lim=r_elli_lim,
+                data[iy, ix], xc=temp_xc, yc=temp_yc, r_elli_lim=r_elli_lim,
                 r_peak_lim=r_peak_lim,
                 semi_len_min=semi_len_min, semi_len_max=semi_len_max,
                 semi_len_ratio_lim=semi_len_ratio_lim,
@@ -229,8 +236,8 @@ def get_ellipse_model_ransac(
             params = ellipse_model.params
         else:
             params = None
-        ellipse_array[ix, iy] = params
-        inlier_array[ix, iy] = inliers
+        ellipse_array[iy, ix] = params
+        inlier_array[iy, ix] = inliers
     return ellipse_array, inlier_array
 
 
