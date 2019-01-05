@@ -53,6 +53,7 @@ pytest-cov==2.5.1
 pytest==3.8.0
 python-dateutil==2.7.3
 pytz==2018.5
+pyyaml>=4.2b1
 pyzmq==17.1.2
 requests>=2.20.0
 ruamel.yaml==0.15.57
