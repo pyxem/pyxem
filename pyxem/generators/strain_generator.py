@@ -17,29 +17,39 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Low level interface for generating strain results from diffraction vectors
+Low level interface for generating DisplacementGradientMaps from diffraction vectors
 """
 
-def get_strain_field():
+import numpy as np
+
+def get_DisplacementGradientMap(strained_vectors, Vu):
     """
     Vectors Strained : Signal2D
     Vector Unstrained : np.array(2x2)
     kwargs: To be passed to the hyperspy map function
 
-    returns Signal2D of [exx,eyy,theta,exy]
+    returns DisplacementGradientMap
     """
+
     if 'inplace' in kwargs:
         raise ValueError
-    #return vectors_strained.map(_get_single_strain_field(),vector_unstrained=vector_unstrained,kwargs)
 
+    D = strained_vectors.map(_get_single_DisplacementGradientTensor,Vu=Vu,kwargs)
+    #return DisplacementGradientMap(D)
     pass
 
-def _get_single_strain_field():
+def _get_single_DisplacementGradientTensor(Vs,Vu=None):
     """
-    Vector Strained:   (2x2) np.array
-    Vector Unstrained: (2x2) np.array
+    Vector Strained:   Vs : (2x2) np.array [vax,vbx] [vay,vby]
+    Vector Unstrained: Vu :(2x2) np.array
 
-    returns [exx eyy theta exy]
+    X = d11*x + d12*y
+    Y = d21*x + d22*y
 
-    raises: error if either vector moves by way to much
+    where X and Y are the strained answers. 4 equation 4 unknowns.
     """
+    if Vu is None:
+        raise ValueError
+    #check that none-of the vectors move too much
+    L = np.matmult(Vs,np.linalg.inv(Vu))
+    return L
