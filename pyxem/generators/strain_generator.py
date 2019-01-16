@@ -17,28 +17,42 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Low level interface for generating DisplacementGradientMaps from diffraction vectors
+Generating DisplacementGradientMaps from diffraction vectors
 """
 
 import numpy as np
 
-def get_DisplacementGradientMap(strained_vectors, Vu):
+def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     """
-    Vectors Strained : Signal2D
-    Vector Unstrained : np.array(2x2)
-    kwargs: To be passed to the hyperspy map function
+    Calculates the displacement gradient by comparing vectors with linear algebra
 
-    returns DisplacementGradientMap
+    Parameters
+    ----------
+    strained_vectors : Signal2D
+
+    unstrained_vectors : numpy.array with shape (2,2)
+        For two vectors: V and U measured in x and y the components should fill the array as
+        >>> array([[Vx, Vy],
+                   [Ux, Uy]])
+    Returns
+    -------
+    D : DisplacementGradientMap
+        The 3x3 displacement gradient tensor (measured in reciprocal space)
+        at every navigation position
+
+    See Also
+    --------
+    get_single_DisplacementGradientTensor()
+
+    Notes
+    -----
+    This function does not currently support keyword arguments to the underlying map function.
     """
 
-    if 'inplace' in kwargs:
-        raise ValueError
+    D = strained_vectors.map(get_single_DisplacementGradientTensor,Vu=unstrained_vectors,inplace=False)
+    return DisplacementGradientMap(D)
 
-    D = strained_vectors.map(_get_single_DisplacementGradientTensor,Vu=Vu,kwargs)
-    #return DisplacementGradientMap(D)
-    pass
-
-def _get_single_DisplacementGradientTensor(Vs,Vu=None):
+def get_single_DisplacementGradientTensor(Vs,Vu=None):
     """
     Vector Strained:   Vs : (2x2) np.array [vax,vbx] [vay,vby]
     Vector Unstrained: Vu :(2x2) np.array
@@ -47,9 +61,33 @@ def _get_single_DisplacementGradientTensor(Vs,Vu=None):
     Y = d21*x + d22*y
 
     where X and Y are the strained answers. 4 equation 4 unknowns.
+
+    Parameters
+    ----------
+    Vs :
+
+    Vu :
+
+    Returns
+    -------
+    D : numpy.array of shape (3x3)
+        Components are [[],[],[]]
+
+    Notes
+    -----
+    This routine is based on the equation
+
+    Vs = L Vu
+
+    Where L is a (2x2) transform matrix that takes Vu (unstrained) onto Vs (strained).
+    L has components
+    [[ , ],
+     [ , ]]
+
+    and can be found by finding the inverse matrix to Vu.
     """
-    if Vu is None:
-        raise ValueError
-    #check that none-of the vectors move too much
-    L = np.matmult(Vs,np.linalg.inv(Vu))
-    return L
+
+    L = np.matmul(Vs,np.linalg.inv(Vu))
+    D = np.eye(3)
+    D[0:2,0:2] = L
+    return D
