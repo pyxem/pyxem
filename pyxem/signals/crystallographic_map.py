@@ -47,6 +47,7 @@ def load_mtex_map(filename):
 
 def _euler2axangle_signal(euler):
     """ Find the magnitude of a rotation"""
+    euler = euler[0]  # TODO: euler is a 1-element ndarray(dtype=object) with a tuple
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 
@@ -110,6 +111,9 @@ class CrystallographicMap(BaseSignal):
         """
         phase_map = self.isig[0].as_signal2D((0, 1))
         phase_map = transfer_navigation_axes(phase_map, self)
+        # TODO: Since vector matching results (and template in the future?) returns
+        # in object form, the isigs inherit it, even though this column is an index
+        phase_map.change_dtype('float')
 
         return phase_map
 
@@ -128,6 +132,9 @@ class CrystallographicMap(BaseSignal):
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
         orientation_map = transfer_navigation_axes(orientation_map, self)
+        # TODO: Since vector matching results (and template in the future?) returns
+        # in object form, eulers inherits it
+        orientation_map.change_dtype('float')
 
         return orientation_map
 
