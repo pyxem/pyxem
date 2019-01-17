@@ -199,7 +199,7 @@ class VectorIndexationGenerator():
                  vectors,
                  vector_library):
         if vectors.cartesian is None:
-            ValueError("Cartesian coordinates are required in order to index "
+            raise ValueError("Cartesian coordinates are required in order to index "
                        "diffraction vectors. Use the get_cartesian_coordinates "
                        "method of DiffractionVectors to obtain these.")
         else:
