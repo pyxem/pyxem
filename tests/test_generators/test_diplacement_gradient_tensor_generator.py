@@ -39,16 +39,19 @@ def generate_test_vectors(v):
     return np.asarray([[v,rotation(v)],
                        [uniform_expansion(v),stretch_in_x(v)]])
 
+def generate_strain_map(vectors):
+    dp = hs.signals.Signal2D(generate_test_vectors(vectors))
+    st = get_DisplacementGradientMap(dp,vectors).get_strain_maps()
+    return st
 
 def test_strain_mapping():
-    # this could be rephrased in terms of fixtures
     xy = np.asarray([[1,0],[0,2]])
     oo = np.asarray(([1,2],[3,-4]))
-    dp_xy = hs.signals.Signal2D(generate_test_vectors(xy))
-    dp_oo = hs.signals.Signal2D(generate_test_vectors(oo))
-    s_xy = get_DisplacementGradientMap(dp_xy,[[1,0],[0,2]]).get_strain_maps()
-    s_oo = get_DisplacementGradientMap(dp_oo,[[1,2],[3,-4]]).get_strain_maps()
+    s_xy = generate_strain_map(xy)
+    s_oo = generate_strain_map(oo)
     np.testing.assert_almost_equal(s_xy.data,s_oo.data)
-    ### ALERT to the minus sign we have had to drop in
-    np.testing.assert_almost_equal(np.sum(s_xy.inav[3].data),-1*np.deg2rad(3)) #only one rotations occurs so you can use sum
-    np.testing.assert_almost_equal(np.sum(s_oo.inav[3].data),-1*np.deg2rad(3))
+    for s in [s_xy,s_oo]:
+        # ALERT to the minus sign we have had to drop in
+        #only one rotations occurs so you can use sum
+        np.testing.assert_almost_equal(np.sum(s.inav[3].data),-1*np.deg2rad(3))
+    return None

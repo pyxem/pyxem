@@ -71,7 +71,6 @@ def get_single_DisplacementGradientTensor(Vs,Vu=None):
     Returns
     -------
     D : numpy.array of shape (3x3)
-        Components are [[,,0],[,,0],[0,0,1]]
 
     Notes
     -----
