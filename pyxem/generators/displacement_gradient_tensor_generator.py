@@ -54,24 +54,23 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
 
 def get_single_DisplacementGradientTensor(Vs,Vu=None):
     """
-    Vector Strained:   Vs : (2x2) np.array [vax,vbx] [vay,vby]
-    Vector Unstrained: Vu :(2x2) np.array
-
-    X = d11*x + d12*y
-    Y = d21*x + d22*y
-
-    where X and Y are the strained answers. 4 equation 4 unknowns.
+    Calculates the displacement gradient tensor by relating two pairs of vectors
 
     Parameters
     ----------
-    Vs :
-
-    Vu :
+    Vs : numpy.array with shape (2,2)
+        For two vectors V and U measured in x and y the components should fill the array as
+        >>> array([[Vx, Vy],
+                   [Ux, Uy]])
+    Vu : numpy.array with shape (2,2)
+        For two vectors V and U measured in x and y the components should fill the array as
+        >>> array([[Vx, Vy],
+                   [Ux, Uy]])
 
     Returns
     -------
     D : numpy.array of shape (3x3)
-        Components are [[],[],[]]
+        Components are [[,,0],[,,0],[0,0,1]]
 
     Notes
     -----
@@ -80,11 +79,7 @@ def get_single_DisplacementGradientTensor(Vs,Vu=None):
     Vs = L Vu
 
     Where L is a (2x2) transform matrix that takes Vu (unstrained) onto Vs (strained).
-    L has components
-    [[ , ],
-     [ , ]]
-
-    and can be found by finding the inverse matrix to Vu.
+    We find L by using the np.linalg.inv() function
     """
 
     L = np.matmul(Vs,np.linalg.inv(Vu))
