@@ -127,7 +127,7 @@ class DiffractionLibraryGenerator(object):
                     diffraction_library[key] = phase_diffraction_library
 
         # Pass attributes to diffraction library from structure library.
-        diffraction_library.identifiers = structure_library.indentifiers
+        diffraction_library.identifiers = structure_library.identifiers
         diffraction_library.structures = structure_library.structures
 
         return diffraction_library
@@ -197,7 +197,7 @@ class VectorLibraryGenerator(object):
             vector_library[key] = np.array(phase_vectors)
 
         # Pass attributes to diffraction library from structure library.
-        vector_library.identifiers = structure_library.indentifiers
-        vector_library.structures = structure_library.structures
+        vector_library.identifiers = self.structures.identifiers
+        vector_library.structures = self.structures.structures
 
         return vector_library
