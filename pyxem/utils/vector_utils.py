@@ -42,18 +42,18 @@ def detector_to_fourier(z, wavelength, camera_length):
 
     """
     # specify experimental parameters
+    # TODO: z is a 1-element ndarray(dtype='object') containing the coordinates
+    z = z[0]
     camera_length = np.ones(len(z)) * camera_length
     camera_length = np.reshape(camera_length, (-1, 1))
     # reshape and scale 2D vectors
-    k1 = np.hstack((z, camera_length))
-    k1_norm = np.sqrt(np.diag(k1.dot(k1.T)))
-    k1_norm = k1_norm.reshape((-1, 1)).repeat(3, axis=1)
-    k1 = k1 / k1_norm
-    # Sort third component
-    k0 = np.asarray([0., 0., 1.])
-    k0 = k0.reshape((1, -1)).repeat(z, axis=0)
-    k = 1. / wavelength * (k1 - k0)
-
+    k = np.hstack((z, camera_length))
+    # Compute norm of each row in k1
+    k_norm = np.sqrt(np.sum(k * k, 1))
+    k /= k_norm[:, np.newaxis]
+    # TODO: Why do we subtract 1 (or k_norm before normalizing) from the camera length component (correct?)
+    k[:, 2] -= 1
+    k *= 1 / wavelength
     return k
 
 
