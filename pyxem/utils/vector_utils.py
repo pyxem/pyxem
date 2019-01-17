@@ -194,9 +194,7 @@ def get_angle_cartesian(a, b):
     angle : float
         Angle between `a` and `b` in radians.
     """
-    try:
-        angle = math.acos(min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
-    except BaseException:
-        angle = math.acos(max(-1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
-
-    return angle
+    determinant = np.linalg.norm(a) * np.linalg.norm(b)
+    if determinant == 0:
+        return 0.0
+    return math.acos(max(-1.0, min(1.0, np.dot(a, b) / determinant)))
