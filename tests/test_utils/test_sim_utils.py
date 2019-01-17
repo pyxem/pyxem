@@ -26,7 +26,7 @@ from pyxem.utils.sim_utils import get_electron_wavelength, \
     get_vectorized_list_for_atomic_scattering_factors, get_points_in_sphere, \
     simulate_kinematic_scattering, peaks_from_best_template, \
     is_lattice_hexagonal, transfer_navigation_axes, uvtw_to_uvw, \
-    angle_between_cartesian, rotation_list_stereographic
+    rotation_list_stereographic
 
 
 def create_lattice_structure(a, b, c, alpha, beta, gamma):
