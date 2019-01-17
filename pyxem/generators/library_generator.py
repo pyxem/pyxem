@@ -188,6 +188,8 @@ class VectorLibraryGenerator(object):
                 # specify hkls and lengths
                 # TODO: This should be updated to reflect systematic absences
                 # associated with the crystal structure.
+                if np.count_nonzero(coordinates[i]) == 0 or np.count_nonzero(coordinates[j]) == 0:
+                    continue
                 hkl1 = indices[i]
                 hkl2 = indices[j]
                 len1 = distances[i]
