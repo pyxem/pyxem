@@ -117,23 +117,21 @@ def get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2):
         Rotation matrix describing transformation from experimentally measured
         scattering vectors to equivalent reference vectors.
     """
-    ref_nv = np.cross(ref_k1, ref_k2)
-    k_nv = np.cross(k1, k2)
+    ref_plane_normal = np.cross(ref_k1, ref_k2)
+    k_plane_normal = np.cross(k1, k2)
     # avoid 0 degree including angle
-    if min(norm(ref_nv), norm(k_nv)) == 0.:
+    if np.linalg.norm(k_plane_normal) or np.linalg.norm(ref_plane_normal):
         R = np.identity(3)
     else:
-        axis = np.cross(ref_nv, k_nv)
-        angle = np.rad2deg(acos(ref_nv.dot(k_nv) / (norm(ref_nv) * norm(k_nv))))
+        axis = np.cross(ref_plane_normal, k_plane_normal)
+        angle = get_angle_cartesian(ref_plane_normal, k_plane_normal)
         R1 = axangle2mat(axis, angle)
-        # rotate ref_q1,2 plane to q1,2 plane
+        # rotate ref_k1,2 plane to k1,2 plane
         rot_ref_k1, rot_ref_k2 = R1.dot(ref_k1), R1.dot(ref_k2)
-        # avoid math domain error
-        cos1 = max(min(k1.dot(rot_ref_k1) / (np.linalg.norm(rot_ref_k1) * np.linalg.norm(k1)), 1.), -1.)
-        cos2 = max(min(k2.dot(rot_ref_k2) / (np.linalg.norm(rot_ref_k2) * np.linalg.norm(k2)), 1.), -1.)
-        angle1 = np.rad2deg(acos(cos1))
-        angle2 = np.rad2deg(acos(cos2))
-        angle = (angle1 + angle2) / 2.
+        # TODO: can one of the vectors be zero vectors?
+        angle1 = get_angle_cartesian(k1, rot_ref_k1)
+        angle2 = get_angle_cartesian(k2, rot_ref_k2)
+        angle = 0.5 * (angle1 + angle2)
         axis = np.cross(rot_ref_k1, k1)
         R2 = axangle2mat(axis, angle)
         R = R2.dot(R1)
