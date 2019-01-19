@@ -1,8 +1,5 @@
-Intermediate
-============
-
 Post-facto Imaging
-------------------
+==================
 
 'Virtual' images are formed post-facto from scanning electron diffraction data
 by plotting the scattered intensity in a subset of pixels in the diffraction
@@ -31,26 +28,3 @@ diffracted beam. Examples of such virtual images are shown below.
 .. figure:: images/vdf_example.png
    :align: center
    :width: 600
-   
-   
-Unsupervised Machine Learning
------------------------------
-
-Unsupervised machine learning algorithms may be applied to SED as a route to
-obtain representative "component diffraction patterns" and their respective
-"loadings" in real space. These methods involve unfolding each diffraction
-pattern into an image vector and stacking these vectors together to construct a
-data matrix, which is then factorized:
-
-.. figure::  images/ml_sed_scheme.png
-   :align: center
-   :width: 600
-
-Various matrix decomposition methods are available through the decomposition()
-method, which is inherited directy from HyperSpy and is documented
-`here <http://hyperspy.org/hyperspy-doc/current/user_guide/mva.html>`__.
-
-.. code-block:: python
-
-    >>> dp.decomposition()
-
