@@ -3,12 +3,13 @@ Contents
 
 .. toctree::
     :maxdepth: 2
-    
-    introduction    
+
+    introduction
     self
-    basics
-    intermediate
-    advanced
-    literature_use_cases
-
-
+    architecture
+    pre_processing
+    imaging
+    unsupervised_learning
+    phase_orientation_mapping
+    strain_mapping
+    literature
