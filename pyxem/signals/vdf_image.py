@@ -36,7 +36,6 @@ class VDFImage(Signal2D):
         super().__init__(*args, **kwargs)
         self.vectors = None
 
-
 class VDFSegment:
     _signal_type = "vdf_segment"
 
