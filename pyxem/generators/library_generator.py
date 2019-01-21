@@ -85,16 +85,15 @@ class DiffractionLibraryGenerator(object):
         diffraction_library = DiffractionLibrary()
         # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
-        structure_library = structure_library.struct_lib
         # Iterate through phases in library.
-        for key in structure_library.keys():
+        for key in structure_library.struct_lib.keys():
             phase_diffraction_library = dict()
-            structure = structure_library[key][0]
+            structure = structure_library.struct_lib[key][0]
             a, b, c = structure.lattice.a, structure.lattice.b, structure.lattice.c
             alpha = structure.lattice.alpha
             beta = structure.lattice.beta
             gamma = structure.lattice.gamma
-            orientations = structure_library[key][1]
+            orientations = structure_library.struct_lib[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
                 _orientation = np.deg2rad(orientation)
