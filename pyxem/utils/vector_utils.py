@@ -42,18 +42,18 @@ def detector_to_fourier(z, wavelength, camera_length):
 
     """
     # specify experimental parameters
+    # TODO: z is a 1-element ndarray(dtype='object') containing the coordinates
+    z = z[0]
     camera_length = np.ones(len(z)) * camera_length
     camera_length = np.reshape(camera_length, (-1, 1))
     # reshape and scale 2D vectors
-    k1 = np.hstack((z, camera_length))
-    k1_norm = np.sqrt(np.diag(k1.dot(k1.T)))
-    k1_norm = k1_norm.reshape((-1, 1)).repeat(3, axis=1)
-    k1 = k1 / k1_norm
-    # Sort third component
-    k0 = np.asarray([0., 0., 1.])
-    k0 = k0.reshape((1, -1)).repeat(z, axis=0)
-    k = 1. / wavelength * (k1 - k0)
-
+    k = np.hstack((z, camera_length))
+    # Compute norm of each row in k1
+    k_norm = np.sqrt(np.sum(k * k, 1))
+    k /= k_norm[:, np.newaxis]
+    # TODO: Why do we subtract 1 (or k_norm before normalizing) from the camera length component (correct?)
+    k[:, 2] -= 1
+    k *= 1 / wavelength
     return k
 
 
@@ -117,23 +117,21 @@ def get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2):
         Rotation matrix describing transformation from experimentally measured
         scattering vectors to equivalent reference vectors.
     """
-    ref_nv = np.cross(ref_k1, ref_k2)
-    k_nv = np.cross(k1, k2)
+    ref_plane_normal = np.cross(ref_k1, ref_k2)
+    k_plane_normal = np.cross(k1, k2)
     # avoid 0 degree including angle
-    if min(norm(ref_nv), norm(k_nv)) == 0.:
+    if np.linalg.norm(k_plane_normal) or np.linalg.norm(ref_plane_normal):
         R = np.identity(3)
     else:
-        axis = np.cross(ref_nv, k_nv)
-        angle = np.rad2deg(acos(ref_nv.dot(k_nv) / (norm(ref_nv) * norm(k_nv))))
+        axis = np.cross(ref_plane_normal, k_plane_normal)
+        angle = get_angle_cartesian(ref_plane_normal, k_plane_normal)
         R1 = axangle2mat(axis, angle)
-        # rotate ref_q1,2 plane to q1,2 plane
+        # rotate ref_k1,2 plane to k1,2 plane
         rot_ref_k1, rot_ref_k2 = R1.dot(ref_k1), R1.dot(ref_k2)
-        # avoid math domain error
-        cos1 = max(min(k1.dot(rot_ref_k1) / (np.linalg.norm(rot_ref_k1) * np.linalg.norm(k1)), 1.), -1.)
-        cos2 = max(min(k2.dot(rot_ref_k2) / (np.linalg.norm(rot_ref_k2) * np.linalg.norm(k2)), 1.), -1.)
-        angle1 = np.rad2deg(acos(cos1))
-        angle2 = np.rad2deg(acos(cos2))
-        angle = (angle1 + angle2) / 2.
+        # TODO: can one of the vectors be zero vectors?
+        angle1 = get_angle_cartesian(k1, rot_ref_k1)
+        angle2 = get_angle_cartesian(k2, rot_ref_k2)
+        angle = 0.5 * (angle1 + angle2)
         axis = np.cross(rot_ref_k1, k1)
         R2 = axangle2mat(axis, angle)
         R = R2.dot(R1)
@@ -194,9 +192,7 @@ def get_angle_cartesian(a, b):
     angle : float
         Angle between `a` and `b` in radians.
     """
-    try:
-        angle = math.acos(min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
-    except BaseException:
-        angle = math.acos(max(-1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))))
-
-    return angle
+    determinant = np.linalg.norm(a) * np.linalg.norm(b)
+    if determinant == 0:
+        return 0.0
+    return math.acos(max(-1.0, min(1.0, np.dot(a, b) / determinant)))

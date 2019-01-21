@@ -25,6 +25,7 @@ import collections
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
 from transforms3d.quaternions import mat2quat, rotate_vector
@@ -469,22 +470,6 @@ def uvtw_to_uvw(uvtw):
     return tuple((int(x / common_factor)) for x in (u, v, w))
 
 
-def angle_between_cartesian(a, b):
-    """Compute the angle between two vectors in a cartesian coordinate system.
-
-    Parameters
-    ----------
-    a, b : array-like with 3 floats
-        The two directions to compute the angle between.
-
-    Returns
-    -------
-    angle : float
-        Angle between `a` and `b` in radians.
-    """
-    return math.acos(max(-1.0, min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))))
-
-
 def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
                                 inplane_rotations, resolution):
     """Generate a rotation list covering the inverse pole figure specified by
@@ -532,9 +517,9 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
     corner_b /= np.linalg.norm(corner_b)
     corner_c /= np.linalg.norm(corner_c)
 
-    angle_a_to_b = angle_between_cartesian(corner_a, corner_b)
-    angle_a_to_c = angle_between_cartesian(corner_a, corner_c)
-    angle_b_to_c = angle_between_cartesian(corner_b, corner_c)
+    angle_a_to_b = get_angle_cartesian(corner_a, corner_b)
+    angle_a_to_c = get_angle_cartesian(corner_a, corner_c)
+    angle_b_to_c = get_angle_cartesian(corner_b, corner_c)
     axis_a_to_b = np.cross(corner_a, corner_b)
     axis_a_to_c = np.cross(corner_a, corner_c)
 
@@ -567,7 +552,7 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
         # Then define an axis and a maximum rotation to create a great cicle
         # arc between local_b and local_c. Ensure that this is not a degenerate
         # case where local_b and local_c are coincident.
-        angle_local_b_to_c = angle_between_cartesian(local_b, local_c)
+        angle_local_b_to_c = get_angle_cartesian(local_b, local_c)
         axis_local_b_to_c = np.cross(local_b, local_c)
         if np.count_nonzero(axis_local_b_to_c) == 0:
             # Theta rotation ended at the same position. First position, might

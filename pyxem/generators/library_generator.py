@@ -85,16 +85,15 @@ class DiffractionLibraryGenerator(object):
         diffraction_library = DiffractionLibrary()
         # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
-        structure_library = structure_library.struct_lib
         # Iterate through phases in library.
-        for key in structure_library.keys():
+        for key in structure_library.struct_lib.keys():
             phase_diffraction_library = dict()
-            structure = structure_library[key][0]
+            structure = structure_library.struct_lib[key][0]
             a, b, c = structure.lattice.a, structure.lattice.b, structure.lattice.c
             alpha = structure.lattice.alpha
             beta = structure.lattice.beta
             gamma = structure.lattice.gamma
-            orientations = structure_library[key][1]
+            orientations = structure_library.struct_lib[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
                 _orientation = np.deg2rad(orientation)
@@ -127,7 +126,7 @@ class DiffractionLibraryGenerator(object):
                     diffraction_library[key] = phase_diffraction_library
 
         # Pass attributes to diffraction library from structure library.
-        diffraction_library.identifiers = structure_library.indentifiers
+        diffraction_library.identifiers = structure_library.identifiers
         diffraction_library.structures = structure_library.structures
 
         return diffraction_library
@@ -188,6 +187,8 @@ class VectorLibraryGenerator(object):
                 # specify hkls and lengths
                 # TODO: This should be updated to reflect systematic absences
                 # associated with the crystal structure.
+                if np.count_nonzero(coordinates[i]) == 0 or np.count_nonzero(coordinates[j]) == 0:
+                    continue
                 hkl1 = indices[i]
                 hkl2 = indices[j]
                 len1 = distances[i]
@@ -197,7 +198,7 @@ class VectorLibraryGenerator(object):
             vector_library[key] = np.array(phase_vectors)
 
         # Pass attributes to diffraction library from structure library.
-        vector_library.identifiers = structure_library.indentifiers
-        vector_library.structures = structure_library.structures
+        vector_library.identifiers = self.structures.identifiers
+        vector_library.structures = self.structures.structures
 
         return vector_library

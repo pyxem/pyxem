@@ -199,7 +199,7 @@ class VectorIndexationGenerator():
                  vectors,
                  vector_library):
         if vectors.cartesian is None:
-            ValueError("Cartesian coordinates are required in order to index "
+            raise ValueError("Cartesian coordinates are required in order to index "
                        "diffraction vectors. Use the get_cartesian_coordinates "
                        "method of DiffractionVectors to obtain these.")
         else:
@@ -224,6 +224,8 @@ class VectorIndexationGenerator():
         angle_tol : float
             The maximum absolute error in inter-vector angle, in units of
             degrees, allowed for indexation.
+        seed_pool_size : int
+            The maximum number of peak pairs to check.
         n_best : int
             The maximum number of good solutions to be retained.
         keys : list
@@ -245,7 +247,7 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        indexation, rhkls = vectors.map(match_vectors,
+        matched = vectors.cartesian.map(match_vectors,
                                         library=library,
                                         mag_tol=mag_tol,
                                         angle_tol=angle_tol,
@@ -254,7 +256,9 @@ class VectorIndexationGenerator():
                                         keys=keys,
                                         inplace=False,
                                         *args,
-                                        **kwargs)
+                                        **kwargs).data
+        indexation = matched[:, :, 0]
+        rhkls = matched[:, :, 1]
 
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.hkls = rhkls

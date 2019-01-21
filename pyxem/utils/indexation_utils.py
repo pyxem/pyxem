@@ -19,6 +19,7 @@
 import numpy as np
 
 from heapq import nlargest
+from itertools import combinations
 from operator import itemgetter
 
 from pyxem.utils import correlate
@@ -130,114 +131,110 @@ def match_vectors(ks,
         The number of well correlated simulations to be retained.
     angle_tol : float
         A mask for navigation axes 1 indicates positions to be indexed.
+    seed_pool_size : int
+        The maximum number of peak pairs to check.
+    n_best : int
+        The maximum number of good solutions to be retained.
 
     Returns
     -------
     indexation : np.array()
-        A numpy array containing the indexation results.
+        A numpy array containing the indexation results, each result consisting of 5 entries:
+            [phase index, rotation matrix, match rate, error hkls, total error]
 
     """
     # Initialise for loop with first entry & assign empty array to hold
     # indexation results.
-    i = 0
-    out_arr = np.zeros((n_largest * len(library), 5))
+    top_matches = np.empty((len(library), n_best, 5), dtype='object')
+    res_rhkls = []  # TODO: Correct format?
+    peaks = ks[0]
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
     # with respect to each phase.
-    for key in library.keys():
-        strucure = library[key][0]
-        # pair unindexed peaks into combinations inluding up to seed_pool_size
-        # many pairs to define the seed_pool
-        unindexed_peak_ids = list(set(range(min(ks.shape[0], seed_pool_size))))
+    for phase_index, (key, structure) in enumerate(zip(library.keys(), library.structures)):
+        solutions = []
+        # TODO: Testing, think this is what SPIND calculates. What is the physical meaning of the matrix transformations?
+        recip_lattice = structure.lattice.recbase
+        recip_lattice_inv = np.linalg.inv(recip_lattice)
+        # Pair unindexed peaks into combinations inluding up to seed_pool_size
+        # many peak pairs to define the seed_pool
+        unindexed_peak_ids = list(range(min(peaks.shape[0], seed_pool_size)))
         seed_pool = list(combinations(unindexed_peak_ids, 2))
         # Determine overall indexations associated with each seed in the
         # seed_pool to generate a solution pool.
-        solution_pool = []
-        for i in tqdm(range(len(seed_pool))):
-            seed = seed_pool[i]
+        # TODO: Do we include the [0, 0, 0] vector?
+        for seed in seed_pool:
             # Consider a seed pair of vectors.
-            q1, q2 = ks[seed, :]
-            q1_len, q2_len = norm(q1), norm(q2)
+            q1, q2 = peaks[seed, :]
+            q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
             # Ensure q1 is longer than q2 so cominations in correct order.
             if q1_len < q2_len:
                 q1, q2 = q2, q1
                 q1_len, q2_len = q2_len, q1_len
             # Calculate the angle between experimental scattering vectors.
             angle = get_angle_cartesian(q1, q2)
+
             # Get library indices for hkls matching peaks within tolerances.
-            match_ids = np.where((np.abs(q1_len - library[key][1][:, 2]) < mag_tol) *
-                                 (np.abs(q2_len - library[key][1][:, 3]) < mag_tol) *
-                                 (np.abs(angle - library[key][1][:, 4]) < angle_tol))[0]
+            match_ids = np.where((np.abs(q1_len - library[key][:, 2]) < mag_tol) &
+                                 (np.abs(q2_len - library[key][:, 3]) < mag_tol) &
+                                 (np.abs(angle - library[key][:, 4]) < angle_tol))[0]
             # Iterate over matched seed vectors determining the error in the
             # associated indexation and finding the minimum error cases.
             for match_id in match_ids:
-                #
                 hkl1 = library[key][:, 0][match_id]
-                hkl2 = library[key][:, 0][match_id]
-                # reference vectors are cartesian coordinates of hkls
-                # TODO: could put this in the library?
-                ref_q1, ref_q2 = A0.dot(hkl1), A0.dot(hkl2)
+                hkl2 = library[key][:, 1][match_id]
+                # Reference vectors are cartesian coordinates of hkls
+                ref_q1, ref_q2 = recip_lattice.dot(hkl1), recip_lattice.dot(hkl2)
                 R = get_rotation_matrix_between_vectors(q1, q2,
                                                         ref_q1, ref_q2)
                 # Evaluate error on seed point, total error & match rate
-                R_inv = np.linalg.inv(R)
-                hkls = A0_inv.dot(R_inv.dot(ks.T)).T
+                # hkls are the peak positions converted to Miller indices
+                R_inv = R.T  # Inverse rotation from tranposed matrix
+                hkls = recip_lattice_inv.dot(R_inv.dot(peaks.T)).T
                 rhkls = np.rint(hkls)
                 ehkls = np.abs(hkls - rhkls)
+                res_rhkls.append(rhkls)
 
                 # indices of matched peaks
+                eval_tol = 0.25  # TODO: Parameter, better name
                 pair_ids = np.where(np.max(ehkls, axis=1) < eval_tol)[0]
-                pair_ids = list(set(pair_ids) - set(indexed_peak_ids))
+                # TODO: SPIND allows trying to match multiple crystals
+                # (until) match_rate == 0 by filtering already in indexed peaks
+                # pair_ids = list(set(pair_ids) - set(indexed_peak_ids))
 
                 # calculate match_rate as fraction of peaks indexed
-                nb_pairs = len(pair_ids)
-                nb_peaks = len(ks)
-                match_rate = float(nb_pairs) / float(nb_peaks)
+                num_pairs = len(pair_ids)
+                num_peaks = len(peaks)
+                match_rate = num_pairs / num_peaks
 
-                # set solution attributes
-                solution.hkls = hkls
-                solution.rhkls = rhkls
-                solution.ehkls = ehkls
-                solution.pair_ids = pair_ids
-                solution.nb_pairs = nb_pairs
-
-                # evaluate / store indexation metrics
-                solution.seed_error = ehkls[seed, :].max()
-                solution.match_rate = match_rate
                 if len(pair_ids) == 0:
                     # no matching peaks, set error to 1
-                    solution.total_error = 1.
+                    total_error = 1.0
                 else:
                     # naive error of matching peaks
-                    solution.total_error = ehkls[pair_ids].mean()
-                # Put solutions in the solution_pool
-                solution_pool.append(solution)
+                    total_error = ehkls[pair_ids].mean()
 
-            # Sort solutions in the solution_pool
-            if len(solution_pool) > 0:
-                # best solution has highest total score and lowest total error
-                good_solutions.sort(key=lambda x: x.match_rate, reverse=True)
-                best_score = good_solutions[0].match_rate
-                best_solutions = [solution for solution in solution_pool if solution.match_rate == best_score]
-                best_solutions.sort(key=lambda x: x.total_error, reverse=False)
-                best_solution = best_solutions[0]
-            else:
-                best_solution = None
+                solutions.append([
+                    R,
+                    match_rate,
+                    ehkls,
+                    total_error
+                ])
+
+        solutions = np.array(solutions)
+        # TODO: SPIND sorts by highest match rate then lowest total error and
+        # returns the single best solution. Here, we instead return the n best
+        # solutions. Correct approach for pyXem?
+        # best_match_rate_solutions = solutions[solutions[6].argmax()]
+        if solutions.shape[0] > n_best:
+            match_rate_index = 1
+            top_n = solutions[solutions[:, match_rate_index].argpartition(-n_best)[-n_best:]]
 
             # Put the top n ranked solutions in the output array
-            for j in np.arange(n_largest):
-                # store phase identifying integer
-                out_arr[j + i * n_largest][0] = i
-                # store rotation matrix
-                out_arr[j + i * n_largest][1] = ranked_solutions[j][0][0]
-                # store match_rate
-                out_arr[j + i * n_largest][2] = ranked_solutions[j][0][1]
-                # store ehkls
-                out_arr[j + i * n_largest][3] = res[j][0][2]
-                # store total_error
-                out_arr[j + i * n_largest][4] = res[j][1]
-            i = i + 1
+            top_matches[phase_index, :, 0] = phase_index
+            top_matches[phase_index, :, 1:] = top_n
+        # TODO: Refine?
 
-    return out_arr, rhkls
+    return top_matches.reshape((len(library) * n_best, 5)), res_rhkls
 
 
 def crystal_from_template_matching(z_matches):
@@ -267,7 +264,7 @@ def crystal_from_template_matching(z_matches):
         results_array[1] = np.array(z_matches[0, 1:4])
         # get template matching metrics
         metrics = dict()
-        mectrics['correlation'] = z_matches[0, 4]
+        metrics['correlation'] = z_matches[0, 4]
         metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
         results_array[2] = metrics
     else:
@@ -285,7 +282,7 @@ def crystal_from_template_matching(z_matches):
         second_phase = np.max(z[:, 4])
         # get template matching metrics
         metrics = dict()
-        mectrics['correlation'] = z_matches[0, 4]
+        metrics['correlation'] = z_matches[0, 4]
         metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
         metrics['phase_reliability'] = 100 * (1 - second_phase / z_matches[index_best_match, 4])
         results_array[2] = metrics
@@ -311,8 +308,10 @@ def crystal_from_vector_matching(z_matches):
         [phase, np.array((z,x,z)), dict(metrics)]
     """
     # Create empty array for results.
-    results_array = np.zeros(3)
+    results_array = np.empty(3, dtype='object')
     # Consider single phase and multi-phase matching cases separately
+    # TODO: z_matches is a 1-element ndarray(dtype=object)
+    z_matches = z_matches[0]
     if np.unique(z_matches[:, 0]).shape[0] == 1:
         # get best matching phase (there is only one here)
         results_array[0] = z_matches[0, 0]
@@ -320,7 +319,7 @@ def crystal_from_vector_matching(z_matches):
         results_array[1] = mat2euler(z_matches[0, 1])
         # get template matching metrics
         metrics = dict()
-        mectrics['match_rate'] = z_matches[0, 2]
+        metrics['match_rate'] = z_matches[0, 2]
         metrics['ehkls'] = z_matches[0, 3]
         metrics['total_error'] = z_matches[0, 4]
         metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
@@ -341,11 +340,11 @@ def crystal_from_vector_matching(z_matches):
         second_phase = np.max(z[:, 4])
         # get template matching metrics
         metrics = dict()
-        mectrics['match_rate'] = z_matches[index_best_match, 2]
+        metrics['match_rate'] = z_matches[index_best_match, 2]
         metrics['ehkls'] = z_matches[index_best_match, 3]
         metrics['total_error'] = z_matches[index_best_match, 4]
-        metrics['orientation_reliability'] = 100 * (1 - second_orienation / z_matches[index_best_match, 4])
+        metrics['orientation_reliability'] = 100 * (1 - second_orientation / z_matches[index_best_match, 4])
         metrics['phase_reliability'] = 100 * (1 - second_phase / z_matches[index_best_match, 4])
         results_array[2] = metrics
 
-    return best_solution
+    return results_array

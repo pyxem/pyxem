@@ -259,15 +259,21 @@ class DiffractionVectors(BaseSignal):
 
         return crystim
 
-    def get_cartesian_coordinates(self, accelerating_voltage,
+    def get_cartesian_coordinates(self, wavelength, camera_length,
                                   *args, **kwargs):
         """Get cartesian coordinates of the diffraction vectors.
 
         Parameters
         ----------
-        accelerating_voltage : float
-            The electron accelerating voltage at which the data was acquired.
+        wavelength : float
+            The electron wavelength at which the data was acquired.
+        camera_length : float
+            The camera length in meters.
         """
+        # TODO: Might be more consistent to ask for accelerating_voltage,
+        # but that requires importing sim_utils, which creates a circular dependency
         self.cartesian = self.map(detector_to_fourier,
-                                  accelerating_voltage=accelerating_voltage,
+                                  wavelength=wavelength,
+                                  camera_length=camera_length,
+                                  inplace=False,
                                   *args, **kwargs)
