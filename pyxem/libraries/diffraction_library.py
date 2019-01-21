@@ -91,9 +91,9 @@ class DiffractionLibrary(dict):
         structure associated with each phase in the library.
     """
 
-    #def __init__(self, *args, **kwargs):
-    #    self.indentifiers = None
-    #    self.structures = None
+    def __init__(self, *args, **kwargs):
+        self.identifiers = None
+        self.structures = None
 
     def get_library_entry(self, phase=None, angle=None):
         """Extracts a single DiffractionLibrary entry.
