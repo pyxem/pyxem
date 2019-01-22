@@ -61,6 +61,7 @@ def _distance_from_fixed_angle(angle, fixed_angle):
     version finding the joining rotation.
 
     """
+    angle = angle[0]
     q_data = euler2quat(*np.deg2rad(angle), axes='rzxz')
     q_fixed = euler2quat(*np.deg2rad(fixed_angle), axes='rzxz')
     if np.abs(2 * (np.dot(q_data, q_fixed))**2 - 1) < 1:  # arcos will work
@@ -234,8 +235,9 @@ class CrystallographicMap(BaseSignal):
         modal_angles : list
             [modal_angles, fractional_occurance]
         """
-        element_count = self.data.shape[0] * self.data.shape[1]
-        euler_array = self.isig[1]
+        # Extract the euler arrays by flattening, creating a continuous list
+        # and converting it to an array again
+        euler_array = np.array(self.isig[1].data.ravel().tolist())
 
         pairs, counts = np.unique(euler_array, axis=0, return_counts=True)
 
