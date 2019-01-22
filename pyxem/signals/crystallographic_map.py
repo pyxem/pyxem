@@ -35,14 +35,38 @@ Signal class for crystallographic phase and orientation maps.
 def load_mtex_map(filename):
     """
     Loads a crystallographic map saved by previously saved via .save_map()
+
+    Columns:
+    1 = phase id,
+    2-4 = Euler angles in the zxz convention (radians),
+    5 = Correlation score (only the best match is saved),
+    6 = x co-ord in navigation space,
+    7 = y co-ord in navigation space.
+
+    Parameters
+    ----------
+    filename : string
+        Path to the file to be loaded.
+
+    Returns
+    -------
+    crystallographic_map : CrystallographicMap
+        Crystallographic map loaded from the specified file.
+
     """
     load_array = np.loadtxt(filename, delimiter='\t')
-    x_max = np.max(load_array[:, 5]).astype(int)
-    y_max = np.max(load_array[:, 6]).astype(int)
-    # add one for zero indexing
-    array = load_array.reshape(x_max + 1, y_max + 1, 7)
-    cmap = Signal2D(array).transpose(navigation_axes=2)
-    return CrystallographicMap(cmap.isig[:5])  # don't keep x/y
+    # Add one for zero indexing
+    x_max = np.max(load_array[:, 5]).astype(int) + 1
+    y_max = np.max(load_array[:, 6]).astype(int) + 1
+    crystal_data = np.empty((y_max, x_max, 3), dtype='object')
+    for y in range(y_max):
+        for x in range(x_max):
+            load_index = y * x_max + x
+            crystal_data[y, x] = [
+                load_array[load_index, 0],
+                load_array[load_index, 1:4],
+                { 'correlation': load_array[load_index, 4] }]
+    return CrystallographicMap(crystal_data)
 
 
 def _euler2axangle_signal(euler):
@@ -278,7 +302,10 @@ class CrystallographicMap(BaseSignal):
         x_size_nav = self.data.shape[1]
         y_size_nav = self.data.shape[0]
         results_array = np.zeros((x_size_nav * y_size_nav, 7))
-        for i in tqdm(range(0, x_size_nav), ascii=True):
-            for j in range(0, y_size_nav):
-                results_array[(j) * x_size_nav + i] = np.append(self.inav[i, j].data[0:5], [i, j])
+        results_array[:, 0] = self.isig[0].data.ravel()
+        results_array[:, 1:4] = np.array(self.isig[1].data.tolist()).reshape(-1, 3)
+        results_array[:, 4] = self.get_metric_map('correlation').data.ravel()
+        x_indices = np.arange(x_size_nav)
+        y_indices = np.arange(y_size_nav)
+        results_array[:, 5:7] = np.array(np.meshgrid(x_indices, y_indices)).T.reshape(-1, 2)
         np.savetxt(filename, results_array, delimiter="\t", newline="\r\n")
