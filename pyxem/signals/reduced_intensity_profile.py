@@ -23,6 +23,7 @@ vector.
 from hyperspy.signals import Signal1D
 #??from hyperspy.component import Polynomial
 import numpy as np
+from scipy import special
 
 
 class ReducedIntensityProfile(Signal1D):
@@ -99,6 +100,24 @@ class ReducedIntensityProfile(Signal1D):
 
         damping_term = multiplicative_term*sine_term
         damping_term = np.nan_to_num(damping_term)
+        self.data = self.data * damping_term
+        return
+
+    def damp_low_q_region_erfc(self, scale=20, offset=1.3):
+        """ Damps the reduced intensity signal in the low q region as a
+        correction to central beam effects
+
+        Parameters
+        ----------
+        scale : a scalar affecting the error function
+        offset : a scalar offset affecting the error function
+        """
+        s_scale = self.axes_manager.signal_axes[0].scale
+        s_size = self.axes_manager.signal_axes[0].size
+
+        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+
+        damping_term = (special.erf(scattering_axis * scale - offset)+1)/2
         self.data = self.data * damping_term
         return
 
