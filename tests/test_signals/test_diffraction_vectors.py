@@ -91,6 +91,15 @@ def test_plot_diffraction_vectors_on_signal(diffraction_vectors_map,
     diffraction_vectors_map.plot_diffraction_vectors_on_signal(diffraction_pattern)
 
 
+def test_get_cartesian_coordinates(diffraction_vectors_map):
+    accelerating_volage = 200
+    camera_length = 0.2
+    diffraction_vectors_map.calculate_cartesian_coordinates(accelerating_volage, camera_length)
+    # Coordinate conversion is tested in vector_utils. Just test that the
+    # result is stored correctly
+    assert diffraction_vectors_map.cartesian is not None
+
+
 class TestMagnitudes:
 
     def test_get_magnitudes_single(self, diffraction_vectors_single):
