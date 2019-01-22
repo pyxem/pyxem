@@ -25,6 +25,8 @@ from hyperspy.signals import Signal1D
 import numpy as np
 from scipy import special
 
+from pyxem.components.reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
+
 
 class ReducedIntensityProfile(Signal1D):
     _signal_type = "reduced_intensity_profile"
@@ -121,10 +123,10 @@ class ReducedIntensityProfile(Signal1D):
         self.data = self.data * damping_term
         return
 
-    def fit_thermal_multiple_scattering_correction(self, s_max):
+    def fit_thermal_multiple_scattering_correction(self, s_max, plot=True):
         """ Fits a 4th order polynomial function to the reduced intensity.
         This is used to calculate the error in the reduced intensity due to
-        the effects of multiple and thermally diffuse scattering, which
+        the effects of multiple and thermal diffuse scattering, which
         results in the earlier background fit being incorrect for either
         low or high angle scattering (or both). A correction is then applied,
         making the reduced intensity oscillate around zero as it should. This
@@ -148,12 +150,12 @@ class ReducedIntensityProfile(Signal1D):
 
         #scattering_axis = s_scale * np.arange(s_size,dtype='float64')
         fit_model = self.signal.create_model()
-        fit_model.append(Polynomial(4))
+        fit_model.append(ReducedIntensityCorrectionComponent())
         fit_model.set_signal_range([0,s_max])
         fit_model.multifit()
         fit_value = fit_model.as_signal()
-        fit_model.plot()
-
+        if plot:
+            fit_model.plot()
 
         self.data = self.data - fit_value
 
