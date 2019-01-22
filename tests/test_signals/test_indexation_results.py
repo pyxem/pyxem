@@ -18,51 +18,14 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.indexation_results import *  # import both objects
-from pyxem.utils.indexation_utils import crystal_from_template_matching
+from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
+from tests.test_utils.test_indexation_utils import sp_vector_match_result, dp_vector_match_result
 
 
-@pytest.fixture
-def sp_match_result():
-    row_1 = np.array([0, 2, 3, 4, 0.7])
-    row_2 = np.array([0, 2, 3, 5, 0.6])
-    # note we require (correlation of row_1 > correlation row_2)
-    return np.vstack((row_1, row_2))
-
-
-@pytest.fixture
-def dp_match_result():
-    row_1 = np.array([0, 2, 3, 4, 0.7])
-    row_2 = np.array([0, 2, 3, 5, 0.8])
-    row_3 = np.array([1, 2, 3, 4, 0.5])
-    row_4 = np.array([1, 2, 3, 5, 0.3])
-    return np.vstack((row_1, row_2, row_3, row_4))
-
-
-def test_crystal_from_matching_results_sp(sp_match_result):
-    # branch single phase
-    cmap = crystal_from_template_matching(sp_match_result)
-    assert cmap[0] == 0
-    assert np.allclose(cmap[1], [2, 3, 4])
-    assert np.isclose(cmap[2]['correlation'], 0.7)
-    assert np.isclose(cmap[2]['orientation_reliability'], 100 * (1 - (0.6 / 0.7)))
-
-
-def test_crystal_from_matching_results_dp(dp_match_result):
-    # branch double phase
-    cmap = crystal_from_template_matching(dp_match_result)
-    r_or = 100 * (1 - (0.7 / 0.8))
-    r_ph = 100 * (1 - (0.5 / 0.8))
-    assert cmap[0] == 0
-    assert np.allclose(cmap[1], [2, 3, 5])
-    assert np.isclose(cmap[2]['correlation'], 0.8)
-    assert np.isclose(cmap[2]['orientation_reliability'], r_or)
-    assert np.isclose(cmap[2]['phase_reliability'], r_ph)
-
-
-def test_get_crystalographic_map(dp_match_result, sp_match_result):
-    # Assertion free test, as the tests above do the heavy lifting
-    results = np.vstack((dp_match_result, sp_match_result))
+def test_get_crystalographic_map(dp_vector_match_result, sp_vector_match_result):
+    # Assertion free test, as the tests in test_indexation_utils do the heavy
+    # lifting
+    results = np.vstack((dp_vector_match_result, sp_vector_match_result))
     results = TemplateMatchingResults(results)
     results.get_crystallographic_map()
     return 0
