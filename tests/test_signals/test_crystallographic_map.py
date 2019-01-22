@@ -93,6 +93,33 @@ def mod_cryst_map():
     return crystal_map
 
 
+@pytest.fixture()
+def dp_cryst_map_vector():
+    """
+    Generates a Crystallographic Map with two phases from vector matching
+    """
+    base = np.empty((4, 3), dtype='object')
+    base[0] = [0, np.array([5, 17, 6]), {
+        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
+        'total_error': 0.1, 'orientation_reliability': 13.2,
+        'phase_reliability': 42.0 }]
+    base[1] = [1, np.array([6, 17, 6]), {
+        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
+        'total_error': 0.1, 'orientation_reliability': 13.2,
+        'phase_reliability': 42.0 }]
+    base[2] = [0, np.array([12, 3, 6]), {
+        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
+        'total_error': 0.1, 'orientation_reliability': 13.2,
+        'phase_reliability': 42.0 }]
+    base[3] = [0, np.array([12, 3, 5]), {
+        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
+        'total_error': 0.1, 'orientation_reliability': 13.2,
+        'phase_reliability': 42.0 }]
+    crystal_map = CrystallographicMap(base.reshape((2, 2, 3)))
+    crystal_map.method = 'vector_matching'
+    return crystal_map
+
+
 class TestMapCreation:
 
     def test_get_phase_map(self, sp_cryst_map):
@@ -103,18 +130,38 @@ class TestMapCreation:
         orimap = sp_cryst_map.get_orientation_map()
         assert orimap.isig[0, 0] == 0
 
-    def test_get_correlation_map(self, sp_cryst_map):
-        correlationmap = sp_cryst_map.get_metric_map('correlation')
-        assert correlationmap.isig[0, 0] == 3e-17
+    @pytest.mark.parametrize('metric, value', [
+        ('correlation', 3e-17),
+        ('orientation_reliability', 0.5),
+        ('phase_reliability', 0.6)
+    ])
+    def test_get_metric_map_template_match(self, dp_cryst_map, metric, value):
+        metric_map = dp_cryst_map.get_metric_map(metric)
+        assert metric_map.isig[0, 0] == value
 
-    def test_get_reliability_map_orientation(self, sp_cryst_map):
-        reliabilitymap_orientation = sp_cryst_map.get_metric_map('orientation_reliability')
-        assert reliabilitymap_orientation.isig[0, 0] == 0.5
+    @pytest.mark.parametrize('metric, value', [
+        ('match_rate', 0.5),
+        ('ehkls', np.array([0.1, 0.05, 0.2])),
+        ('total_error', 0.1),
+        ('orientation_reliability', 13.2),
+        ('phase_reliability', 42.0)
+    ])
+    def test_get_metric_map_vector_match(self, dp_cryst_map_vector, metric, value):
+        metric_map = dp_cryst_map_vector.get_metric_map(metric)
+        assert np.allclose(metric_map.isig[0, 0], value)
 
-    def test_get_reliability_map_phase(self, dp_cryst_map):
-        reliabilitymap_phase = dp_cryst_map.get_metric_map('phase_reliability')
-        assert reliabilitymap_phase.isig[0, 0] == 0.6
+    @pytest.mark.xfail(raises=ValueError)
+    def test_get_metric_map_template_match_bad_metric(self, sp_cryst_map):
+        metric_map = sp_cryst_map.get_metric_map('no metric')
 
+    @pytest.mark.xfail(raises=ValueError)
+    def test_get_metric_map_vector_match_bad_metric(self, dp_cryst_map_vector):
+        metric_map = dp_cryst_map_vector.get_metric_map('no metric')
+
+    @pytest.mark.xfail(raises=ValueError)
+    def test_get_metric_map_no_method(self):
+        crystal_map = CrystallographicMap(np.array([[1]]))
+        metric_map = crystal_map.get_metric_map('no metric')
 
 class TestMTEXIO:
     def test_Crystallographic_Map_io(self, sp_cryst_map):
