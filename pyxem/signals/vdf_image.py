@@ -296,4 +296,5 @@ class VDFgvectorStack():
         if not np.any(image_stack):
             print('No stack left after thresholding. Check thresholds.')
             return 0 
-return VDFgvectorStack(image_stack,gvectors)
+		return VDFgvectorStack(image_stack,gvectors)
+		
