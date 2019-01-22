@@ -255,7 +255,7 @@ def crystal_from_template_matching(z_matches):
         [phase, np.array((z,x,z)), dict(metrics)]
     """
     # Create empty array for results.
-    results_array = np.zeros(3)
+    results_array = np.empty(3, dtype='object')
     # Consider single phase and multi-phase matching cases separately
     if np.unique(z_matches[:, 0]).shape[0] == 1:
         # get best matching phase (there is only one here)
@@ -282,8 +282,8 @@ def crystal_from_template_matching(z_matches):
         second_phase = np.max(z[:, 4])
         # get template matching metrics
         metrics = dict()
-        metrics['correlation'] = z_matches[0, 4]
-        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
+        metrics['correlation'] = z_matches[index_best_match, 4]
+        metrics['orientation_reliability'] = 100 * (1 - second_orientation / z_matches[index_best_match, 4])
         metrics['phase_reliability'] = 100 * (1 - second_phase / z_matches[index_best_match, 4])
         results_array[2] = metrics
 
