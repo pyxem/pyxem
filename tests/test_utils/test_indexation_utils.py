@@ -26,18 +26,18 @@ from pyxem.utils.indexation_utils import crystal_from_template_matching, crystal
 
 @pytest.fixture
 def sp_template_match_result():
-    row_1 = np.array([0, 2, 3, 4, 0.7])
-    row_2 = np.array([0, 2, 3, 5, 0.6])
+    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype='object')
+    row_2 = np.array([0, np.array([2, 3, 5]), 0.6], dtype='object')
     # note we require (correlation of row_1 > correlation row_2)
     return np.vstack((row_1, row_2))
 
 
 @pytest.fixture
 def dp_template_match_result():
-    row_1 = np.array([0, 2, 3, 4, 0.7])
-    row_2 = np.array([0, 2, 3, 5, 0.8])
-    row_3 = np.array([1, 2, 3, 4, 0.5])
-    row_4 = np.array([1, 2, 3, 5, 0.3])
+    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype='object')
+    row_2 = np.array([0, np.array([2, 3, 5]), 0.8], dtype='object')
+    row_3 = np.array([1, np.array([2, 3, 4]), 0.5], dtype='object')
+    row_4 = np.array([1, np.array([2, 3, 5]), 0.3], dtype='object')
     return np.vstack((row_1, row_2, row_3, row_4))
 
 
@@ -52,10 +52,10 @@ def sp_vector_match_result():
 
 @pytest.fixture
 def dp_vector_match_result():
-    row_1 = np.array([0, euler2mat(*np.deg2rad([0, 10, 20]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.4], dtype='object')
-    row_2 = np.array([0, euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz'),  0.6, np.array([0.1, 0.1, 0.2]), 0.3], dtype='object')
-    row_3 = np.array([1, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.7, np.array([0.1, 0.05, 0.1]), 0.2], dtype='object')
-    row_4 = np.array([1, euler2mat(*np.deg2rad([0, 45, 45]), 'rzxz'),  0.8, np.array([0.1, 0.3, 0.2]), 0.1], dtype='object')
+    row_1 = np.array([0, euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz'),  0.6, np.array([0.1, 0.1, 0.2]), 0.3], dtype='object')
+    row_2 = np.array([0, euler2mat(*np.deg2rad([0, 10, 20]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.4], dtype='object')
+    row_3 = np.array([1, euler2mat(*np.deg2rad([0, 45, 45]), 'rzxz'),  0.8, np.array([0.1, 0.3, 0.2]), 0.1], dtype='object')
+    row_4 = np.array([1, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.7, np.array([0.1, 0.05, 0.1]), 0.2], dtype='object')
     return np.vstack((row_1, row_2, row_3, row_4))
 
 

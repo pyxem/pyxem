@@ -145,7 +145,7 @@ class CrystallographicMap(BaseSignal):
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
-    
+
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
@@ -195,12 +195,21 @@ class CrystallographicMap(BaseSignal):
                 'correlation'
                 'orientation_reliability'
                 'phase_reliability'
+            Here, orientation reliability is given by
+                100 * (1 - second_best_correlation/best_correlation)
+            and phase reliability is given by
+                100 * (1 - second_best_correlation_of_other_phase/best_correlation)
+
             For vector_matching, valid metrics are;
                 'match_rate'
                 'ehkls'
                 'total_error'
                 'orientation_reliability'
                 'phase_reliability'
+            Here, orientation reliability is given by
+                100 * (1 - lowest_error/second_lowest_error)
+            and phase reliability is given by
+                100 * (1 - lowest_error/lowest_error_of_other_phase)
 
         Returns
         -------

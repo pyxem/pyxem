@@ -47,15 +47,16 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
 
     Returns
     -------
-    top_matches : (<num phases>*n_largest, 5), np.array()
+    top_matches : (<num phases>*n_largest, 3), np.array()
         A numpy array containing the top n correlated simulations for the
-        experimental pattern of interest.
+        experimental pattern of interest, where each entry is on the form
+            [phase index, [z, x, z], correlation]
 
     See also
     --------
     pyxem.utils.correlate and the correlate method of IndexationGenerator.
     """
-    top_matches = np.zeros((len(library), n_largest, 5))
+    top_matches = np.empty((len(library), n_largest, 3), dtype='object')
     if mask == 1:
         for phase_index, key in enumerate(library.keys()):
             correlations = np.empty((len(library[key]), 4))
@@ -70,10 +71,11 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
             top_n = top_n[top_n[:, 3].argsort()][::-1]
 
             top_matches[phase_index, :, 0] = phase_index
-            top_matches[phase_index, :, 1:] = top_n
-    else:
-        top_matches.fill(np.nan)
-    return top_matches.reshape((len(library) * n_largest, 5))
+            for i in range(n_largest):
+                top_matches[phase_index, i, 1] = top_n[i, :3]
+            top_matches[phase_index, :, 2] = top_n[:, 3]
+
+    return top_matches.reshape((len(library) * n_largest, 3))
 
 
 def index_magnitudes(z, simulation, tolerance):
@@ -245,14 +247,15 @@ def crystal_from_template_matching(z_matches):
     Parameters
     ----------
     z_matches : np.array()
-        Template matching results in an array of shape (m,5) with entries
-        [phase, z, x, z, correlation]
+        Template matching results in an array of shape (m,3) with entries
+            [phase, [z, x, z], correlation],
+        sorted by correlation (descending) within each phase.
 
     Returns
     -------
     results_array : np.array()
         Crystallographic mapping results in an array (3) with entries
-        [phase, np.array((z,x,z)), dict(metrics)]
+        [phase, np.array((z, x, z)), dict(metrics)]
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
@@ -261,30 +264,30 @@ def crystal_from_template_matching(z_matches):
         # get best matching phase (there is only one here)
         results_array[0] = z_matches[0, 0]
         # get best matching orientation Euler angles
-        results_array[1] = np.array(z_matches[0, 1:4])
+        results_array[1] = z_matches[0, 1]
         # get template matching metrics
         metrics = dict()
-        metrics['correlation'] = z_matches[0, 4]
-        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 4] / z_matches[0, 4])
+        metrics['correlation'] = z_matches[0, 2]
+        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 2] / z_matches[0, 2])
         results_array[2] = metrics
     else:
         # get best matching result
-        index_best_match = np.argmax(z_matches[:, 4])
+        index_best_match = np.argmax(z_matches[:, 2])
         # get best matching phase
         results_array[0] = z_matches[index_best_match, 0]
         # get best matching orientation Euler angles.
-        results_array[1] = np.array(z_matches[index_best_match, 1:4])
+        results_array[1] = z_matches[index_best_match, 1]
         # get second highest correlation orientation for orientation_reliability
         z = z_matches[z_matches[:, 0] == results_array[0]]
-        second_orientation = np.partition(z[:, 4], -2)[-2]
+        second_orientation = np.partition(z[:, 2], -2)[-2]
         # get second highest correlation phase for phase_reliability
         z = z_matches[z_matches[:, 0] != results_array[0]]
-        second_phase = np.max(z[:, 4])
+        second_phase = np.max(z[:, 2])
         # get template matching metrics
         metrics = dict()
-        metrics['correlation'] = z_matches[index_best_match, 4]
-        metrics['orientation_reliability'] = 100 * (1 - second_orientation / z_matches[index_best_match, 4])
-        metrics['phase_reliability'] = 100 * (1 - second_phase / z_matches[index_best_match, 4])
+        metrics['correlation'] = z_matches[index_best_match, 2]
+        metrics['orientation_reliability'] = 100 * (1 - second_orientation / z_matches[index_best_match, 2])
+        metrics['phase_reliability'] = 100 * (1 - second_phase / z_matches[index_best_match, 2])
         results_array[2] = metrics
 
     return results_array
@@ -299,7 +302,8 @@ def crystal_from_vector_matching(z_matches):
     ----------
     z_matches : np.array()
         Template matching results in an array of shape (m,5) with entries
-        [phase, R, match_rate, ehkls, total_error]
+            [phase, R, match_rate, ehkls, total_error],
+        sorted by total_error (ascending) within each phase.
 
     Returns
     -------
