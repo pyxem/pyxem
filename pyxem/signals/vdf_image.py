@@ -223,54 +223,6 @@ class VDFgvectorStack():
             
         return gvec_sig
 
-    def manage_images_and_gvectors_at_indices(self,
-                                              image_add_indices = None,
-                                              gvectors_add_indices = None,
-                                              delete_indices = None):
-        """Sums or deletes images, or adds gvectors, with the given indices, 
-            from a merge stack (stack of images and corresponding gvectors that are found in the first 
-            and second column respectively). 
-        Parameters
-        ----------
-        image_add_indices: int
-            Indices for the images to be summed. Corresponding gvectors will also be added. 
-            Example: To sum the images at 1 and 2: [[1,2]]. To sum the images at 1 and 2, and 
-            those at 5 and 6: [[1,2],[5,6]]
-        gvectors_add_indices: int
-            Indices for the gvectors that will be added. Corresponding images will not be added.
-        delete_indices: int
-            Indices for the images and gvectors to be deleted. Example: To delete 2 and 3: [2,3]
-            
-        Returns
-        -------
-        VDFgvectorStack
-            The VDFgvectorStack class instance updated according to the addition and/or deletion.
-        """
-        image_stack=self.images.data.copy()
-        gvectors=self.vectors.data.copy()
-        
-        if np.any(image_add_indices):
-            for i in image_add_indices:
-                image_stack[i[0]]=np.sum(list(map(lambda x: np.sum([x, image_stack[i[0]]], axis=0), 
-                                            image_stack[i[1:]])),
-                                            axis=0)
-                gvectors[i[0]] = make_g_of_i(gvectors[i], i, gvectors[i[0]])
-                    
-        if np.any(gvectors_add_indices):      
-            for i in gvectors_add_indices: 
-                gvectors[i[0]] = make_g_of_i(gvectors[i], i, gvectors[i[0]])
-                
-        if delete_indices is not None:
-            image_stack=np.delete(image_stack, delete_indices, axis=0)
-            gvectors=np.delete(gvectors, delete_indices, axis=0)
-            if not np.shape(image_stack)[0]:
-                print('No stack left after deletion. Check delete_indices.')
-        
-        if not np.any(delete_indices) and not np.any(gvectors_add_indices) and not np.any(image_add_indices):
-            print('Specify indices for addition or deletion.')
-        
-        return VDFgvectorStack(image_stack,gvectors)
-
     def threshold_VDFgvectorStack(self,
                                   image_threshold=None,
                                   gvector_threshold=None):
