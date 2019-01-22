@@ -74,6 +74,26 @@ def _distance_from_fixed_angle(angle, fixed_angle):
     return np.rad2deg(theta)
 
 
+def _metric_from_dict(metric_dict, metric):
+    """ Utility function for retrieving an entry in a dictionary. Used to map
+    over dicts in signal space.
+
+    Parameters
+    ----------
+    metric_dict : dict
+        Dictionary to retrieve entry from
+    metrics : string
+        Name of the entry
+
+    Returns
+    -------
+    entry
+        Dictionary entry specified by metric.
+
+    """
+    return metric_dict[0][metric]
+
+
 class CrystallographicMap(BaseSignal):
     """Crystallographic mapping results containing the best matching crystal
     phase and orientation at each navigation position with associated metrics.
@@ -163,29 +183,35 @@ class CrystallographicMap(BaseSignal):
             A map of the specified metric at each navigation position.
 
         """
-        if self.method=='template_matching':
-            template_metrics = {
-                'correlation': correlation,
-                'orientation_reliability': orientation_reliability,
-                'phase_reliability' : phase_reliability
-            }
-            if metric in metric_dict:
-                metric_map = self.isig[2][metric].as_signal2D((0, 1))
+        if self.method == 'template_matching':
+            template_metrics = [
+                'correlation',
+                'orientation_reliability',
+                'phase_reliability',
+            ]
+            if metric in template_metrics:
+                metric_map = self.isig[2].map(
+                        _metric_from_dict,
+                        metric=metric,
+                        inplace=False).as_signal2D((0, 1))
 
             else:
                 raise ValueError("The metric `{}` is not valid for template "
                                  "matching results. ")
 
-        elif self.method=='vector_matching':
-            vector_metrics = {
-                'match_rate': match_rate,
-                'ehkls': ehkls,
-                'total_error': total_error,
-                'orientation_reliability': orientation_reliability,
-                'phase_reliability' : phase_reliability
-            }
-            if metric in metric_dict:
-                metric_map = self.isig[2][metric].as_signal2D((0, 1))
+        elif self.method == 'vector_matching':
+            vector_metrics = [
+                'match_rate',
+                'ehkls',
+                'total_error',
+                'orientation_reliability',
+                'phase_reliability',
+            ]
+            if metric in vector_metrics:
+                metric_map = self.isig[2].map(
+                        _metric_from_dict,
+                        metric=metric,
+                        inplace=False).as_signal2D((0, 1))
 
             else:
                 raise ValueError("The metric `{}` is not valid for vector "
