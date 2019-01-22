@@ -42,7 +42,10 @@ def dp_match_result():
 def test_crystal_from_matching_results_sp(sp_match_result):
     # branch single phase
     cmap = crystal_from_template_matching(sp_match_result)
-    assert np.allclose(cmap, np.array([0, 2, 3, 4, 0.7, 100 * (1 - (0.6 / 0.7))]))
+    assert cmap[0] == 0
+    assert np.allclose(cmap[1], [2, 3, 4])
+    assert np.isclose(cmap[2]['correlation'], 0.7)
+    assert np.isclose(cmap[2]['orientation_reliability'], 100 * (1 - (0.6 / 0.7)))
 
 
 def test_crystal_from_matching_results_dp(dp_match_result):
@@ -50,7 +53,11 @@ def test_crystal_from_matching_results_dp(dp_match_result):
     cmap = crystal_from_template_matching(dp_match_result)
     r_or = 100 * (1 - (0.7 / 0.8))
     r_ph = 100 * (1 - (0.5 / 0.8))
-    assert np.allclose(cmap, np.array([0, 2, 3, 5, 0.8, r_or, r_ph]))
+    assert cmap[0] == 0
+    assert np.allclose(cmap[1], [2, 3, 5])
+    assert np.isclose(cmap[2]['correlation'], 0.8)
+    assert np.isclose(cmap[2]['orientation_reliability'], r_or)
+    assert np.isclose(cmap[2]['phase_reliability'], r_ph)
 
 
 def test_get_crystalographic_map(dp_match_result, sp_match_result):
