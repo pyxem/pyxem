@@ -37,6 +37,10 @@ from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
 
 from pyxem.utils import peakfinder2D_gui
 
+from skimage import filters
+from skimage.morphology import square
+from scipy.optimize import curve_fit
+
 
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
