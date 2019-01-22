@@ -24,6 +24,7 @@ from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 
 from skimage.transform import rescale
+from skimage import draw
 
 
 @pytest.fixture()
