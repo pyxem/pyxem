@@ -123,7 +123,7 @@ class ReducedIntensityProfile(Signal1D):
         self.data = self.data * damping_term
         return
 
-    def fit_thermal_multiple_scattering_correction(self, s_max, plot=True):
+    def fit_thermal_multiple_scattering_correction(self, s_max=None, plot=False):
         """ Fits a 4th order polynomial function to the reduced intensity.
         This is used to calculate the error in the reduced intensity due to
         the effects of multiple and thermal diffuse scattering, which
@@ -149,7 +149,7 @@ class ReducedIntensityProfile(Signal1D):
             s_max = s_scale*s_size
 
         #scattering_axis = s_scale * np.arange(s_size,dtype='float64')
-        fit_model = self.signal.create_model()
+        fit_model = self.create_model()
         fit_model.append(ReducedIntensityCorrectionComponent())
         fit_model.set_signal_range([0,s_max])
         fit_model.multifit()
