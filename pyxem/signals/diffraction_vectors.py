@@ -267,8 +267,8 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        wavelength : float
-            The electron wavelength at which the data was acquired.
+        accelerating_voltage : float
+            The acceleration voltage with which the data was acquired.
         camera_length : float
             The camera length in meters.
         """
