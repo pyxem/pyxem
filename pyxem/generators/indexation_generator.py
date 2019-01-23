@@ -154,25 +154,7 @@ class ProfileIndexationGenerator():
         matching_results : ProfileIndexation
 
         """
-        mapping = self.map
-        mags = self.magnitudes
-        simulation = self.simulation
-
-        mags = np.array(mags)
-        sim_mags = np.array(simulation.magnitudes)
-        sim_hkls = np.array(simulation.hkls)
-        indexation = np.zeros(len(mags), dtype=object)
-
-        for i in np.arange(len(mags)):
-            diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
-
-            hkls = sim_hkls[np.where(diff < tolerance)]
-            diffs = diff[np.where(diff < tolerance)]
-
-            indices = np.array((hkls, diffs))
-            indexation[i] = np.array((mags.data[i], indices))
-
-        return indexation
+        return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
 
 
 class VectorIndexationGenerator():
