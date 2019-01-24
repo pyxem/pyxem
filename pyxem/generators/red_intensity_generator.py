@@ -29,6 +29,7 @@ from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
 
 from pyxem.components.scattering_fit_component import ScatteringFitComponent
+from pyxem.utils.ri_utils import scattering_to_signal
 
 class ReducedIntensityGenerator():
     """Generates a reduced intensity profile for a specified diffraction radial
@@ -94,12 +95,21 @@ class ReducedIntensityGenerator():
         fit_model.reset_signal_range()
         if plot_fit == True:
             fit_model.plot()
-        fit = fit_model.as_signal()
+        try:
+            fit = fit_model.as_signal()
+            normalisation = background.square_sum #change this
+        except TypeError: #problem with translating elements and fracs to as signal
+            C_values = background.C.as_signal()
+            N_values = background.N.as_signal()
+            s_size = self.signal.axes_manager.signal_axes[0].size
+            s_scale = self.signal.axes_manager.signal_axes[0].scale
+            fit, normalisation = scattering_to_signal(elements, fracs, N_values,
+                                            C_values, s_size, s_scale, type)
         #self.fit = np.array(background.sum_squares).reshape(
         #            self.nav_size[0],self.nav_size[1],self.sig_size[0])
 
 
-        self.normalisation = background.square_sum
+        self.normalisation = normalisation #change this
         self.background_fit = fit
         return
 
@@ -139,7 +149,14 @@ class ReducedIntensityGenerator():
 
         #ri = ReducedIntensityProfile(reduced_intensity.data[:,:,num_min:num_max])
         ri = ReducedIntensityProfile(reduced_intensity)
-        ri.axes_manager.navigation_axes = self.signal.axes_manager.navigation_axes
+        ax_old =  self.signal.axes_manager.navigation_axes
+        ri.axes_manager.navigation_axes[0].scale = ax_old[0].scale
+        ri.axes_manager.navigation_axes[0].units = ax_old[0].units
+        ri.axes_manager.navigation_axes[0].name = ax_old[0].name
+        ri.axes_manager.navigation_axes[1].scale = ax_old[1].scale
+        ri.axes_manager.navigation_axes[1].units = ax_old[1].units
+        ri.axes_manager.navigation_axes[1].name = ax_old[1].name
+
         ri_axis = ri.axes_manager.signal_axes[0]
         ri_axis.name = 's'
         ri_axis.scale = self.signal.axes_manager.signal_axes[0].scale
