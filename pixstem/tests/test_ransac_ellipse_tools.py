@@ -96,6 +96,57 @@ class TestIsEllipseGood:
                     semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=0.9)
 
 
+class TestEllipseCentreToFocus:
+
+    def test_circle(self):
+        x, y, a, b, r = 10, 20, 10, 10, 0
+        f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
+        assert f0 == (x, y)
+        assert f1 == (x, y)
+
+    def test_horizontal_ellipse(self):
+        x, y, a, b, r = 10, 20, 20, 10, 0
+        f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
+        c = math.sqrt(a**2 - b**2)
+        assert f0 == (x + c, y)
+        assert f1 == (x - c, y)
+
+    def test_vertical_ellipse(self):
+        x, y, a, b, r = 10, 20, 10, 5, math.pi/2
+        f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
+        c = math.sqrt(a**2 - b**2)
+        assert f0 == (x, y + c)
+        assert f1 == (x, y - c)
+
+    def test_rotated45_ellipse(self):
+        x, y, a, b, r = 10, 20, 10, 5, math.pi/4
+        f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
+        c = math.sqrt(a**2 - b**2)
+        assert approx(f0) == (x + c * math.sin(r), y + c * math.cos(r))
+        assert approx(f1) == (x - c * math.sin(r), y - c * math.cos(r))
+
+    def test_rotated_negative45_ellipse(self):
+        x, y, a, b, r = 10, 20, 10, 5, -math.pi/4
+        f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
+        c = math.sqrt(a**2 - b**2)
+        assert approx(f0) == (x - c * math.sin(r), y - c * math.cos(r))
+        assert approx(f1) == (x + c * math.sin(r), y + c * math.cos(r))
+
+    def test_horizontal_negative(self):
+        x, y, a, b, r = 5, 20, 20, 10, 0
+        f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
+        c = math.sqrt(a**2 - b**2)
+        assert approx(f0) == (x + c, y)
+        assert approx(f1) == (x - c, y)
+
+    def test_vertical_negative(self):
+        x, y, a, b, r = 10, 5, 10, 20, 0
+        f0, f1 = ret._ellipse_centre_to_focus(x, y, a, b, r)
+        c = math.sqrt(b**2 - a**2)
+        assert approx(f0) == (x, y + c)
+        assert approx(f1) == (x, y - c)
+
+
 class TestIsDataGood:
 
     def test_simple(self):

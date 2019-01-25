@@ -52,6 +52,38 @@ def is_ellipse_good(
     return True
 
 
+def _ellipse_centre_to_focus(x, y, a, b, r):
+    """Get focus for an ellipse from EllipseModel.params
+
+    Parameters
+    ----------
+    x, y : scalars
+        Centre position of the ellipse.
+    a, b : scalars
+        Semi lengths
+    r : scalar
+        Rotation, in theta
+
+    Returns
+    -------
+    foci : tuple of tuples
+        (x focus 0, y focus 0), (x focus 1, y focus 1)
+
+    Examples
+    --------
+    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> f0, f1 = ret._ellipse_centre_to_focus(20, 32, 12, 9, 0.2)
+
+    """
+    if a < b:
+        r += math.pi/2
+        a, b = b, a
+    c = math.sqrt(a**2 - b**2)
+    xf0, yf0 = x + c * math.cos(r), y + c * math.sin(r)
+    xf1, yf1 = x - c * math.cos(r), y - c * math.sin(r)
+    return((xf0, yf0), (xf1, yf1))
+
+
 def is_data_good(data, xc, yc, r_peak_lim):
     """Returns False if any values in an array has points close to the centre.
 
