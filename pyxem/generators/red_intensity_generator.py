@@ -95,13 +95,13 @@ class ReducedIntensityGenerator():
         fit_model.reset_signal_range()
         if plot_fit == True:
             fit_model.plot()
-        try:
+        if self.nav_size[0] == 1 and self.nav_size[1] == 1:
             fit = fit_model.as_signal()
             normalisation = background.square_sum #change this
-        except TypeError: #problem with translating elements and fracs to as signal
+        else:
             C_values = background.C.as_signal()
             N_values = background.N.as_signal()
-            s_size = self.signal.axes_manager.signal_axes[0].size
+            s_size = self.sig_size
             s_scale = self.signal.axes_manager.signal_axes[0].scale
             fit, normalisation = scattering_to_signal(elements, fracs, N_values,
                                             C_values, s_size, s_scale, type)
