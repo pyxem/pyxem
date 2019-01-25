@@ -1,5 +1,5 @@
-Advanced Usage
-==============
+Phase & Orientation Mapping
+===========================
 
 .. warning::
 
