@@ -101,7 +101,7 @@ class ReducedIntensityGenerator():
         else:
             C_values = background.C.as_signal()
             N_values = background.N.as_signal()
-            s_size = self.sig_size
+            s_size = self.sig_size[0]
             s_scale = self.signal.axes_manager.signal_axes[0].scale
             fit, normalisation = scattering_to_signal(elements, fracs, N_values,
                                             C_values, s_size, s_scale, type)
