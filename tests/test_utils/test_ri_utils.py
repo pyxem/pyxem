@@ -18,7 +18,30 @@
 
 import pytest
 import numpy as np
+from pyxem.utils.ri_utils import *
 
-@pytest.mark.skip(reason="Test not yet implemented.")
 def test_as_signal_generation():
+
+    N = 1.
+    C = 0.
+    elements = ['Cu']
+    fracs = [1]
+    s_size = 10
+    s_scale = 0.1
+    types = ['lobato','xtables','not_implemented']
+
+    for type in types:
+        signal, normalisation = scattering_to_signal(elements,fracs,N,C,s_size,
+                                                        s_scale,type)
+        if type == 'lobato':
+            expected = np.array([])
+            assert_almost_equal(signal,expected)
+        elif type == 'xtables':
+            expected = np.array([])
+            assert_almost_equal(signal,expected)
+        else:
+            #expect error
+            continue
+
+
     return
