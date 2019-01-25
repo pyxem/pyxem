@@ -128,8 +128,6 @@ def _get_4d_line_segment_list(lines_array, signal_axes=None, color='red',
 
 
 def _check_line_segment_inside(signal_axes, line):
-    sa0iv = signal_axes[0].index2value
-    sa1iv = signal_axes[1].index2value
     sa0_li = signal_axes[0].low_index
     sa0_hi = signal_axes[0].high_index
     sa1_li = signal_axes[1].low_index
