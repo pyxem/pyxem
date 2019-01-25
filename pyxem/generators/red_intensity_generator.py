@@ -153,9 +153,10 @@ class ReducedIntensityGenerator():
         ri.axes_manager.navigation_axes[0].scale = ax_old[0].scale
         ri.axes_manager.navigation_axes[0].units = ax_old[0].units
         ri.axes_manager.navigation_axes[0].name = ax_old[0].name
-        ri.axes_manager.navigation_axes[1].scale = ax_old[1].scale
-        ri.axes_manager.navigation_axes[1].units = ax_old[1].units
-        ri.axes_manager.navigation_axes[1].name = ax_old[1].name
+        if len(ax_old) > 1:
+            ri.axes_manager.navigation_axes[1].scale = ax_old[1].scale
+            ri.axes_manager.navigation_axes[1].units = ax_old[1].units
+            ri.axes_manager.navigation_axes[1].name = ax_old[1].name
 
         ri_axis = ri.axes_manager.signal_axes[0]
         ri_axis.name = 's'
