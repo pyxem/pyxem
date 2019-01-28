@@ -10,7 +10,8 @@ import pixstem.marker_tools as mt
 def is_ellipse_good(
         ellipse_model, data,
         xc, yc, r_elli_lim,
-        semi_len_min, semi_len_max, semi_len_ratio_lim):
+        semi_len_min, semi_len_max, semi_len_ratio_lim,
+        use_focus=True):
     """Check if an ellipse model is within parameters.
 
     Parameters
@@ -27,6 +28,9 @@ def is_ellipse_good(
     semi_len_ratio_lim : scalar
         If the ratio between the largest and smallest semi length is larger
         than semi_len_ratio_lim, False is returned
+    use_focus : bool
+        If True, will see if the closest focus to (xc, yc) is within
+        r_elli_lim. Default True.
 
     Returns
     -------
@@ -37,6 +41,8 @@ def is_ellipse_good(
         raise ValueError("semi_len_ratio_lim must be equal or larger than 1, "
                          "not {0}.".format(semi_len_ratio_lim))
     y, x, semi0, semi1, rot = ellipse_model.params
+    if use_focus:
+        x, y = _get_closest_focus(xc, yc, x, y, semi0, semi1, rot)
     rC = math.hypot(x - xc, y - yc)
     if rC > r_elli_lim:
         return False
@@ -47,8 +53,6 @@ def is_ellipse_good(
     semi_len_ratio = max(semi0, semi1)/min(semi0, semi1)
     if semi_len_ratio > semi_len_ratio_lim:
         return False
-    if semi_len_ratio > semi_len_ratio_lim:
-        print(semi_len_ratio)
     return True
 
 
@@ -145,7 +149,7 @@ def is_data_good(data, xc, yc, r_peak_lim):
 def get_ellipse_model_ransac_single_frame(
         data, xc=128, yc=128, r_elli_lim=30, r_peak_lim=40,
         semi_len_min=50, semi_len_max=90, semi_len_ratio_lim=1.2,
-        min_samples=6, residual_threshold=10, max_trails=500):
+        min_samples=6, residual_threshold=10, max_trails=500, use_focus=True):
     """Pick a random number of data points to fit an ellipse to.
 
     The ellipse's constraints can be specified.
@@ -180,6 +184,9 @@ def get_ellipse_model_ransac_single_frame(
         Maximum distance for a data point to be considered an inlier.
     max_trails : scalar, optional
         Maximum number of tries for the ransac algorithm.
+    use_focus : bool
+        If True, will see if the closest focus to (xc, yc) is within
+        r_elli_lim. Default True.
 
     Returns
     -------
@@ -202,7 +209,7 @@ def get_ellipse_model_ransac_single_frame(
             is_ellipse_good,
             xc=xc, yc=yc, r_elli_lim=r_elli_lim,
             semi_len_min=semi_len_min, semi_len_max=semi_len_max,
-            semi_len_ratio_lim=semi_len_ratio_lim)
+            semi_len_ratio_lim=semi_len_ratio_lim, use_focus=use_focus)
     is_data_valid = partial(
             is_data_good,
             xc=xc, yc=yc, r_peak_lim=r_peak_lim)
@@ -233,7 +240,7 @@ def get_ellipse_model_ransac(
         data, xc=128, yc=128, r_elli_lim=30, r_peak_lim=40,
         semi_len_min=70, semi_len_max=90, semi_len_ratio_lim=1.2,
         min_samples=6, residual_threshold=10, max_trails=500,
-        show_progressbar=True):
+        show_progressbar=True, use_focus=True):
     """Pick a random number of data points to fit an ellipse to.
 
     The ellipse's constraints can be specified.
@@ -268,6 +275,9 @@ def get_ellipse_model_ransac(
         Maximum distance for a data point to be considered an inlier.
     max_trails : scalar, optional
         Maximum number of tries for the ransac algorithm.
+    use_focus : bool
+        If True, will see if the closest focus to (xc, yc) is within
+        r_elli_lim. Default True.
     show_progressbar : bool, optional
         Default True
 
@@ -298,7 +308,7 @@ def get_ellipse_model_ransac(
                 semi_len_min=semi_len_min, semi_len_max=semi_len_max,
                 semi_len_ratio_lim=semi_len_ratio_lim,
                 min_samples=min_samples, residual_threshold=residual_threshold,
-                max_trails=max_trails)
+                max_trails=max_trails, use_focus=use_focus)
         if ellipse_model is not None:
             params = ellipse_model.params
         else:

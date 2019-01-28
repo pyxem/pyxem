@@ -18,7 +18,8 @@ class TestIsEllipseGood:
         is_good = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=30, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert is_good
 
     def test_xc(self):
@@ -27,12 +28,14 @@ class TestIsEllipseGood:
         is_good0 = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=56, yc=30, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert not is_good0
         is_good1 = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=44, yc=30, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert not is_good1
 
     def test_yc(self):
@@ -41,12 +44,14 @@ class TestIsEllipseGood:
         is_good0 = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=36, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert not is_good0
         is_good1 = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=24, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert not is_good1
 
     def test_r_elli_lim(self):
@@ -55,12 +60,14 @@ class TestIsEllipseGood:
         is_good0 = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=33, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert is_good0
         is_good1 = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=33, r_elli_lim=2,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert not is_good1
 
     def test_semi_len_min(self):
@@ -69,7 +76,8 @@ class TestIsEllipseGood:
         is_good = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=30, r_elli_lim=5,
-                semi_len_min=105, semi_len_max=130, semi_len_ratio_lim=1.5)
+                semi_len_min=105, semi_len_max=130, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert not is_good
 
     def test_semi_len_max(self):
@@ -78,7 +86,8 @@ class TestIsEllipseGood:
         is_good = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=30, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=115, semi_len_ratio_lim=1.5)
+                semi_len_min=90, semi_len_max=115, semi_len_ratio_lim=1.5,
+                use_focus=False)
         assert not is_good
 
     def test_semi_len_ratio_lim(self):
@@ -87,13 +96,18 @@ class TestIsEllipseGood:
         is_good = ret.is_ellipse_good(
                 ellipse_model=ellipse_model, data=None,
                 xc=50, yc=30, r_elli_lim=5,
-                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.01)
+                semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=1.01,
+                use_focus=False)
         assert not is_good
         with pytest.raises(ValueError):
             ret.is_ellipse_good(
                     ellipse_model=ellipse_model, data=None,
                     xc=50, yc=30, r_elli_lim=5,
-                    semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=0.9)
+                    semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=0.9,
+                    use_focus=False)
+
+    def test_use_focus(self):
+        pass
 
 
 class TestGetClosestFocus:
@@ -206,7 +220,8 @@ class TestGetEllipseModelRansacSingleFrame:
                 np.arange(0, 2*np.pi, 0.5), params=(y, x, r, r, 0))
         ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x, yc=y, r_elli_lim=30, r_peak_lim=40,
-                semi_len_min=r-10, semi_len_max=r+10, max_trails=100)
+                semi_len_min=r-10, semi_len_max=r+10, max_trails=100,
+                use_focus=False)
         assert inliers.all()
         assert approx(ellipse_model.params[1], abs=0.01) == x
         assert approx(ellipse_model.params[0], abs=0.01) == y
@@ -220,7 +235,8 @@ class TestGetEllipseModelRansacSingleFrame:
         data = np.append(data, np.array([[10, 10], [250, 250]]), axis=0)
         ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x, yc=y, r_elli_lim=30, r_peak_lim=40,
-                semi_len_min=r-10, semi_len_max=r+10, max_trails=100)
+                semi_len_min=r-10, semi_len_max=r+10, max_trails=100,
+                use_focus=False)
         assert inliers[:-2].all()
         assert (np.invert(inliers[-2:])).all()
         assert approx(ellipse_model.params[1], abs=0.01) == x
@@ -238,7 +254,7 @@ class TestGetEllipseModelRansacSingleFrame:
         ellipse_model0, inliers0 = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x, yc=y, r_elli_lim=10, r_peak_lim=10,
                 semi_len_min=55, semi_len_max=65, semi_len_ratio_lim=1.01,
-                max_trails=400)
+                max_trails=400, use_focus=False)
         assert inliers0[len(data0):].all()
         assert np.invert(inliers0[:len(data0)]).all()
         assert approx(ellipse_model0.params[1], abs=0.01) == x
@@ -249,7 +265,7 @@ class TestGetEllipseModelRansacSingleFrame:
         ellipse_model1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x, yc=y, r_elli_lim=10, r_peak_lim=10,
                 semi_len_min=35, semi_len_max=45, semi_len_ratio_lim=1.01,
-                max_trails=400)
+                max_trails=400, use_focus=False)
         assert inliers1[:-len(data0)].all()
         assert np.invert(inliers1[len(data0):]).all()
         assert approx(ellipse_model1.params[1], abs=0.01) == x
@@ -260,7 +276,7 @@ class TestGetEllipseModelRansacSingleFrame:
         ellipse_model2, inliers2 = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x, yc=y, r_elli_lim=10, r_peak_lim=10,
                 semi_len_min=80, semi_len_max=90, semi_len_ratio_lim=1.01,
-                max_trails=400)
+                max_trails=400, use_focus=False)
         assert ellipse_model2 is None
         assert inliers2 is None
 
@@ -274,14 +290,14 @@ class TestGetEllipseModelRansacSingleFrame:
         ellipse_model0, inliers = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x0, yc=y0, r_elli_lim=10, r_peak_lim=10,
                 semi_len_min=35, semi_len_max=45, semi_len_ratio_lim=1.01,
-                max_trails=400)
+                max_trails=400, use_focus=False)
         assert approx(ellipse_model0.params[1], abs=0.01) == x0
         assert approx(ellipse_model0.params[0], abs=0.01) == y0
 
         ellipse_model1, inliers = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x1, yc=y1, r_elli_lim=10, r_peak_lim=10,
                 semi_len_min=35, semi_len_max=45, semi_len_ratio_lim=1.01,
-                max_trails=400)
+                max_trails=400, use_focus=False)
         assert approx(ellipse_model1.params[1], abs=0.01) == x1
         assert approx(ellipse_model1.params[0], abs=0.01) == y1
 
@@ -292,7 +308,7 @@ class TestGetEllipseModelRansacSingleFrame:
         ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x, yc=y, r_elli_lim=10, r_peak_lim=10,
                 semi_len_min=25, semi_len_max=65, semi_len_ratio_lim=2.5,
-                max_trails=400)
+                max_trails=400, use_focus=False)
         semi0, semi1 = ellipse_model.params[2], ellipse_model.params[3]
         assert inliers.all()
         assert approx(ellipse_model.params[1], abs=0.01) == x
@@ -303,7 +319,7 @@ class TestGetEllipseModelRansacSingleFrame:
         ellipse_model1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
                 data, xc=x, yc=y, r_elli_lim=10, r_peak_lim=10,
                 semi_len_min=25, semi_len_max=65, semi_len_ratio_lim=1.01,
-                max_trails=400)
+                max_trails=400, use_focus=False)
         assert ellipse_model1 is None
 
 
@@ -331,11 +347,11 @@ class TestGetEllipseModelRansac:
         ellipse_array0, inlier_array0 = ret.get_ellipse_model_ransac(
                 peak_array, xc=95, yc=115, r_elli_lim=20, r_peak_lim=10,
                 semi_len_min=55, semi_len_max=76, semi_len_ratio_lim=1.2,
-                min_samples=15, max_trails=20)
+                min_samples=15, max_trails=20, use_focus=False)
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
                 peak_array, xc=10, yc=12, r_elli_lim=20, r_peak_lim=10,
                 semi_len_min=55, semi_len_max=76, semi_len_ratio_lim=1.2,
-                min_samples=15, max_trails=20)
+                min_samples=15, max_trails=20, use_focus=False)
         for iy, ix in np.ndindex(xc.shape):
             assert approx(xc[iy, ix]) == ellipse_array0[iy, ix][1]
             assert approx(yc[iy, ix]) == ellipse_array0[iy, ix][0]
@@ -354,7 +370,7 @@ class TestGetEllipseModelRansac:
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
                 peak_array, xc=200, yc=210, r_elli_lim=20, r_peak_lim=10,
                 semi_len_min=80, semi_len_max=150, semi_len_ratio_lim=1.7,
-                min_samples=15, max_trails=20)
+                min_samples=15, max_trails=20, use_focus=False)
         for iy, ix in np.ndindex(xc.shape):
             semi_min = min(ellipse_array[iy, ix][2], ellipse_array[iy, ix][3])
             semi_max = max(ellipse_array[iy, ix][2], ellipse_array[iy, ix][3])
@@ -372,11 +388,11 @@ class TestGetEllipseModelRansac:
         ellipse_array0, inlier_array0 = ret.get_ellipse_model_ransac(
                 peak_array, xc=200, yc=210, r_elli_lim=20, r_peak_lim=10,
                 semi_len_min=80, semi_len_max=150, semi_len_ratio_lim=1.7,
-                min_samples=15, max_trails=20)
+                min_samples=15, max_trails=20, use_focus=False)
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
                 peak_array, xc=200, yc=210, r_elli_lim=20, r_peak_lim=10,
                 semi_len_min=80, semi_len_max=150, semi_len_ratio_lim=1.01,
-                min_samples=15, max_trails=20)
+                min_samples=15, max_trails=20, use_focus=False)
         for iy, ix in np.ndindex(xc.shape):
             ellipse_params0 = ellipse_array0[iy, ix]
             ellipse_params1 = ellipse_array1[iy, ix]
@@ -395,11 +411,11 @@ class TestGetEllipseModelRansac:
         ellipse_array0, inlier_array0 = ret.get_ellipse_model_ransac(
                 peak_array, xc=200, yc=210, r_elli_lim=200, r_peak_lim=60,
                 semi_len_min=5, semi_len_max=250, semi_len_ratio_lim=14.01,
-                min_samples=10, max_trails=30)
+                min_samples=10, max_trails=30, use_focus=False)
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
                 peak_array, xc=200, yc=210, r_elli_lim=200, r_peak_lim=0.5,
                 semi_len_min=5, semi_len_max=250, semi_len_ratio_lim=14.01,
-                min_samples=10, max_trails=30)
+                min_samples=10, max_trails=30, use_focus=False)
         for iy, ix in np.ndindex(xc.shape):
             inlier0, inlier1 = inlier_array0[iy, ix], inlier_array1[iy, ix]
             if inlier0 is not None:
@@ -422,11 +438,11 @@ class TestGetEllipseModelRansac:
         ellipse_array0, inlier_array0 = ret.get_ellipse_model_ransac(
                 peak_array, xc=200, yc=210, r_elli_lim=20, r_peak_lim=20,
                 semi_len_min=95, semi_len_max=195, semi_len_ratio_lim=1.11,
-                min_samples=15, max_trails=200)
+                min_samples=15, max_trails=200, use_focus=False)
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
                 peak_array, xc=200, yc=210, r_elli_lim=20, r_peak_lim=20,
                 semi_len_min=95, semi_len_max=195, semi_len_ratio_lim=2.,
-                min_samples=15, max_trails=200)
+                min_samples=15, max_trails=200, use_focus=False)
         for iy, ix in np.ndindex(xc.shape):
             if ellipse_array0[iy, ix] is not None:
                 semi0, semi1 = ellipse_array0[iy, ix][2:4]
@@ -450,11 +466,11 @@ class TestGetEllipseModelRansac:
         ellipse_array0, inlier_array0 = ret.get_ellipse_model_ransac(
                 peak_array, xc=100, yc=100, semi_len_min=85, semi_len_max=95,
                 semi_len_ratio_lim=1.1, residual_threshold=1, max_trails=100,
-                min_samples=15)
+                min_samples=15, use_focus=False)
         ellipse_array1, inlier_array1 = ret.get_ellipse_model_ransac(
                 peak_array, xc=100, yc=100, semi_len_min=85, semi_len_max=95,
                 semi_len_ratio_lim=1.1, residual_threshold=5, max_trails=100,
-                min_samples=15)
+                min_samples=15, use_focus=False)
 
         for iy, ix in np.ndindex(xyc.shape):
             inlier0 = inlier_array0[iy, ix]
@@ -471,7 +487,7 @@ class TestGetEllipseModelRansac:
                 peak_array, xc=xc, yc=yc, r_elli_lim=r_elli_lim, r_peak_lim=20,
                 semi_len_min=semi_len_min, semi_len_max=semi_len_max,
                 semi_len_ratio_lim=semi_len_ratio_lim,
-                min_samples=15, max_trails=5)
+                min_samples=15, max_trails=5, use_focus=False)
         for iy, ix in np.ndindex(peak_array.shape[:2]):
             if ellipse_array[iy, ix] is not None:
                 x, y, semi0, semi1, rot = ellipse_array[iy, ix]
@@ -699,7 +715,7 @@ def test_full_ellipse_ransac_processing():
             peak_array, xc=xc, yc=yc, r_elli_lim=15, r_peak_lim=15,
             semi_len_min=min(sx, sy) - 5, semi_len_max=max(sx, sy) + 5,
             semi_len_ratio_lim=5, max_trails=50,
-            min_samples=10)
+            min_samples=10, use_focus=False)
 
     for iy, ix in np.ndindex(ellipse_array.shape):
         assert approx(ellipse_array[iy, ix], abs=0.1) == [yc, xc, sy, sx, rot]
