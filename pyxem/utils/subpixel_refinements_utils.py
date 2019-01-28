@@ -26,9 +26,9 @@ from skimage import draw
 from skimage.transform import rescale
 
 
-def get_experimental_square(z, vector, square_size):
+def get_experimental_square(z, vector, half_square_size):
     """
-    'Cuts out' a region around a given diffraction vector and returns an upsampled copy.
+    'Cuts out' a region around a given diffraction vector and returns it.
 
     Parameters
     ----------
@@ -36,19 +36,19 @@ def get_experimental_square(z, vector, square_size):
         Single diffraction pattern
     vector : np.array()
         Single vector to be cut out, in pixels (int) [x,y] with top left as [0,0]
-    square_size : int
-        The length of one side of the bounding square (must be even)
+    half_square_size : int
+        The length of half of one side of the bounding square. eg 1 will return 3x3
 
     Returns
     -------
     square : np.array()
-        Of size (L,L) where L = square_size
+        Of size (2L+1,2L+1) where L = square_size
 
     """
 
-    cx, cy, half_ss = vector[0], vector[1], int(square_size / 2)
+    cx, cy, r= vector[0], vector[1], int(half_square_size)
     # select square with correct x,y see PR for details
-    _z = z[cy - half_ss:cy + half_ss, cx - half_ss:cx + half_ss]
+    _z = z[cy - r :cy + r + 1, cx - r:cx + r + 1]
     return _z
 
 
