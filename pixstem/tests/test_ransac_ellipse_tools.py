@@ -96,6 +96,31 @@ class TestIsEllipseGood:
                     semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=0.9)
 
 
+class TestGetClosestFocus:
+
+    def test_circle(self):
+        xc, yc = 10, 20
+        x, y, a, b, r = 10, 20, 10, 10, 0
+        xf, yf = ret._get_closest_focus(xc, yc, x, y, a, b, r)
+        assert (xf, yf) == (10, 20)
+
+    def test_horizontal_ellipse(self):
+        x, y, a, b, r = 10, 20, 20, 10, 0
+        c = math.sqrt(a**2 - b**2)
+        xf0, yf0 = ret._get_closest_focus(20, 20, x, y, a, b, r)
+        assert (xf0, yf0) == (x + c, y)
+        xf1, yf1 = ret._get_closest_focus(5, 20, x, y, a, b, r)
+        assert (xf1, yf1) == (x - c, y)
+
+    def test_vertical_ellipse(self):
+        x, y, a, b, r = 10, 20, 15, 10, math.pi/2
+        c = math.sqrt(a**2 - b**2)
+        xf0, yf0 = ret._get_closest_focus(10, 30, x, y, a, b, r)
+        assert (xf0, yf0) == (x, y + c)
+        xf1, yf1 = ret._get_closest_focus(10, 10, x, y, a, b, r)
+        assert (xf1, yf1) == (x, y - c)
+
+
 class TestEllipseCentreToFocus:
 
     def test_circle(self):

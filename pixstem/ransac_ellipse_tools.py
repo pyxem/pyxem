@@ -78,10 +78,45 @@ def _ellipse_centre_to_focus(x, y, a, b, r):
     if a < b:
         r += math.pi/2
         a, b = b, a
-    c = math.sqrt(a**2 - b**2)
+    c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xf0, yf0 = x + c * math.cos(r), y + c * math.sin(r)
     xf1, yf1 = x - c * math.cos(r), y - c * math.sin(r)
     return((xf0, yf0), (xf1, yf1))
+
+
+def _get_closest_focus(xc, yc, x, y, a, b, r):
+    """Get the focus closest to the centre from EllipseModel parameters
+
+    Parameters
+    ----------
+    xc, yc : scalar
+        Centre position of the diffraction pattern.
+    x, y : scalars
+        Centre position of the ellipse.
+    a, b : scalars
+        Semi lengths
+    r : scalar
+        Rotation, in theta
+
+    Returns
+    -------
+    xf, yf : tuple
+        Ellipse focus closest to the diffraction centre
+
+    Examples
+    --------
+    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> fx, fy = ret._get_closest_focus(25, 30, 20, 32, 12, 9, 0.2)
+
+    """
+    (xf0, yf0), (xf1, yf1) = _ellipse_centre_to_focus(x, y, a, b, r)
+    rf0 = math.hypot(xc - xf0, yc - yf0)
+    rf1 = math.hypot(xc - xf1, yc - yf1)
+    if rf0 <= rf1:
+        xf, yf = xf0, yf0
+    else:
+        xf, yf = xf1, yf1
+    return (xf, yf)
 
 
 def is_data_good(data, xc, yc, r_peak_lim):
