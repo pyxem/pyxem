@@ -57,5 +57,5 @@ def test___conventional_xc(exp_disc, sim_disc, upsample_factor):
 @pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
 def test_get_experimental_square(exp_disc):
     square = get_experimental_square(exp_disc, [17, 19], 6)
-    assert square.shape[0] == int(6)
-    assert square.shape[1] == int(6)
+    assert square.shape[0] == int(2*6+1) #as per docstring
+    assert square.shape[1] == int(2*6+1)
