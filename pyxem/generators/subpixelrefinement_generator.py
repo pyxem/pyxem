@@ -101,7 +101,7 @@ class SubpixelrefinementGenerator():
         Parameters
         ----------
         square_size : int
-            Length (in pixels) of one side of a square the contains the peak to be refined
+            Length (in pixels) of half of one side of a square the contains the peak to be refined
 
         Returns
         -------
@@ -113,6 +113,12 @@ class SubpixelrefinementGenerator():
         This will work poorly on disks with strong dynamic contrast
         """
 
+        def _center_of_mass_hs(z):
+            t = center_of_mass(z)
+            x = t[1]
+            y = t[0]
+            return (x,y)
+
         self.vectors_out = np.zeros(
             (self.dp.data.shape[0],
              self.dp.data.shape[1],
@@ -123,9 +129,9 @@ class SubpixelrefinementGenerator():
             expt_disc = self.dp.map(
                 get_experimental_square,
                 vector=vect,
-                square_size=square_size,
+                half_square_size=square_size,
                 inplace=False)
-            shifts = expt_disc.map(center_of_mass, inplace=False) - (square_size / 2)
+            shifts = expt_disc.map(_center_of_mass_hs, inplace=False) - square_size
             self.vectors_out[:, :, i, :] = (((vect + shifts.data) - self.center) * self.calibration)
 
         self.last_method = "center_of_mass_method"
