@@ -170,32 +170,33 @@ class VectorLibraryGenerator(object):
         # Get structures from structure library
         structure_library = self.structures.struct_lib
         # Iterate through phases in library.
-        for key in structure_library.keys():
+        for phase_name in structure_library.keys():
             # Get diffpy.structure object associated with phase
-            structure = structure_library[key][0]
+            structure = structure_library[phase_name][0]
             # Get reciprocal lattice points within reciprocal_radius
-            latt = structure.lattice
-            recip_latt = latt.reciprocal()
+            recip_latt = structure.lattice.reciprocal()
             indices, coordinates, distances = get_points_in_sphere(
                 recip_latt,
                 reciprocal_radius)
-            # Define an empty list to store phase vector pairs
-            phase_vectors = []
-            # iterate through all pairs calculating interplanar angle
+
+            # Iterate through all pairs calculating interplanar angle
+            phase_vector_pairs = []
             for comb in itertools.combinations(np.arange(len(indices)), 2):
                 i, j = comb[0], comb[1]
-                # specify hkls and lengths
+                # Specify hkls and lengths associated with the crystal structure.
                 # TODO: This should be updated to reflect systematic absences
-                # associated with the crystal structure.
                 if np.count_nonzero(coordinates[i]) == 0 or np.count_nonzero(coordinates[j]) == 0:
-                    continue
+                    continue  # Ignore combinations including [000]
                 hkl1 = indices[i]
                 hkl2 = indices[j]
                 len1 = distances[i]
                 len2 = distances[j]
+                if len1 < len2:  # Keep the longest first
+                    hkl1, hkl2 = hkl2, hkl1
+                    len1, len2 = len1, len2
                 angle = get_angle_cartesian(coordinates[i], coordinates[j])
-                phase_vectors.append(np.array([hkl1, hkl2, len1, len2, angle]))
-            vector_library[key] = np.array(phase_vectors)
+                phase_vector_pairs.append(np.array([hkl1, hkl2, len1, len2, angle]))
+            vector_library[phase_name] = np.array(phase_vector_pairs)
 
         # Pass attributes to diffraction library from structure library.
         vector_library.identifiers = self.structures.identifiers
