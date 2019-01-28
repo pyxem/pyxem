@@ -18,4 +18,18 @@
 
 import pytest
 import numpy as np
-import diffpy.structure
+
+from pyxem.signals.pdf_profile import PDFProfile
+
+def test_generate_signal():
+    data = np.ones((1,10))*np.arange(4).reshape(4,1)
+    data = data.reshape(2,2,10)
+    pdf = PDFProfile(data)
+    assert isinstance(pdf,PDFProfile)
+
+def test_generate_signal():
+    data = np.ones((1,10))*np.arange(4).reshape(4,1)
+    data = data.reshape(2,2,10)
+    pdf = PDFProfile(data)
+    pdf.normalise_signal()
+    assert np.equal(pdf,np.ones((2,2,10)))

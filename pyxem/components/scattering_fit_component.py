@@ -92,9 +92,6 @@ class ScatteringFitComponent(Component):
                 sum_squares += np.square(fi)*elem_frac
                 square_sum += fi*elem_frac
 
-        else:
-            print('Error. Specified type does not exist.')
-            return
 
         self.square_sum = N * np.square(square_sum)
         #square sum is kept for normalisation.

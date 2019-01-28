@@ -176,7 +176,7 @@ class ReducedIntensityProfile(Signal1D):
         """
         raise NotImplementedError("Not implemented yet!")
         return
-
+        '''
         if n_points%2 != 1 or n_points < 1:
             raise ValueError("N must be a positive odd integer.")
             return
@@ -185,3 +185,4 @@ class ReducedIntensityProfile(Signal1D):
 
         self.data = smoothed_data
         return
+        '''

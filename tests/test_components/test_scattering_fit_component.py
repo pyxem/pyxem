@@ -18,4 +18,50 @@
 
 import pytest
 import numpy as np
-import diffpy.structure
+from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
+from pyxem.components.scattering_fit_component import ScatteringFitComponent
+
+def test_scattering_component_init_lobato():
+    elements = ['Cu']
+    fracs = [1]
+    ref = ScatteringFitComponent(elements,fracs,N=1.,C=0.,type='lobato')
+    assert isinstance(ref, ScatteringFitComponent)
+    return
+
+def test_scattering_component_init_xtables():
+    elements = ['Cu']
+    fracs = [1]
+    ref = ScatteringFitComponent(elements,fracs,N=1.,C=0.,type='xtables')
+    assert isinstance(ref, ScatteringFitComponent)
+    return
+
+@pytest.mark.xfail
+def test_scattering_component_init_not_implemented():
+    elements = ['Cu']
+    fracs = [1]
+    ref = ScatteringFitComponent(elements,fracs,N=1.,C=0.,type='nope')
+    return
+
+@pytest.fixture(params=[
+    np.array([4., 3., 2., 2., 1., 1., 1., 0.])
+])
+def ri_model(request):
+    ri = ReducedIntensityProfile(request.param)
+    m = ri.create_model()
+    return m
+
+def test_function_lobato(ri_model):
+    elements = ['Cu']
+    fracs = [1]
+    sc_component = ScatteringFitComponent(elements,fracs,N=1.,C=0.,type='lobato')
+    ri_model.append(sc_component)
+    ri_model.fit()
+    return
+
+def test_function_xtables(ri_model):
+    elements = ['Cu']
+    fracs = [1]
+    sc_component = ScatteringFitComponent(elements,fracs,N=1.,C=0.,type='xtables')
+    ri_model.append(sc_component)
+    ri_model.fit()
+    return
