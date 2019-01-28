@@ -20,8 +20,11 @@ import numpy as np
 import pytest
 
 from transforms3d.euler import euler2mat
+import diffpy.structure
 
-from pyxem.utils.indexation_utils import crystal_from_template_matching, crystal_from_vector_matching
+from pyxem.libraries.vector_library import DiffractionVectorLibrary
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.utils.indexation_utils import crystal_from_template_matching, crystal_from_vector_matching, match_vectors
 
 
 @pytest.fixture
@@ -103,3 +106,62 @@ def test_crystal_from_vector_matching_dp(dp_vector_match_result):
     np.testing.assert_allclose(cmap[2]['total_error'], 0.1)
     np.testing.assert_allclose(cmap[2]['orientation_reliability'], r_or)
     np.testing.assert_allclose(cmap[2]['phase_reliability'], r_ph)
+
+
+@pytest.fixture
+def vector_match_peaks():
+    return np.array([[
+        [1, 0.1, 0],
+        [0, 2, 0],
+        [1, 2, 3],
+    ]])
+
+
+@pytest.fixture
+def vector_library():
+    library = DiffractionVectorLibrary()
+    library['A'] = np.array([
+        [np.array([1, 0, 0]), np.array([0, 2, 0]), 2, 1, np.pi/2],
+        [np.array([0, 0, 1]), np.array([2, 0, 0]), 1, 2, np.pi/2],
+    ])
+    lattice = diffpy.structure.Lattice(1, 1, 1, 90, 90, 90)
+    library.structures = [
+        diffpy.structure.Structure(lattice=lattice)
+    ]
+    return library
+
+
+def test_match_vectors(vector_match_peaks, vector_library):
+    matches, rhkls = match_vectors(
+            vector_match_peaks,
+            vector_library,
+            mag_tol = 0.1,
+            angle_tol = 0.1,
+            index_error_tol = 0.3,
+            n_peaks_to_index = 2,
+            n_best = 1)
+    assert len(matches) == 1
+    np.testing.assert_allclose(matches[0][2], 1.0)  # match rate
+    np.testing.assert_allclose(matches[0][1], np.identity(3))
+    np.testing.assert_allclose(matches[0][4], 0.01, atol=0.01)  # total error
+
+    np.testing.assert_allclose(rhkls[0][0], [1, 0, 0])
+    np.testing.assert_allclose(rhkls[0][1], [0, 2, 0])
+
+
+def test_match_vector_total_error_default(vector_match_peaks, vector_library):
+    matches, rhkls = match_vectors(
+            vector_match_peaks,
+            vector_library,
+            mag_tol = 0.1,
+            angle_tol = 0.1,
+            index_error_tol = 0.0,
+            n_peaks_to_index = 2,
+            n_best = 5)
+    assert len(matches) == 5
+    np.testing.assert_allclose(matches[0][2], 0.0)  # match rate
+    np.testing.assert_allclose(matches[0][1], np.identity(3))
+    np.testing.assert_allclose(matches[0][4], 1.0)  # total error
+
+    np.testing.assert_allclose(rhkls[0][0], [1, 0, 0])
+    np.testing.assert_allclose(rhkls[0][1], [0, 2, 0])
