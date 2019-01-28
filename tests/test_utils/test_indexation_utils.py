@@ -46,20 +46,23 @@ def dp_template_match_result():
 
 @pytest.fixture
 def sp_vector_match_result():
-    # [phase, R, match_rate, ehkls, total_error]
-    row_1 = np.array([0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.1], dtype='object')
-    row_2 = np.array([0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.6, np.array([0.1, 0.1, 0.2]), 0.2], dtype='object')
     # We require (total_error of row_1 > correlation row_2)
-    return np.vstack((row_1, row_2))
+    return np.array([[
+        # [phase, R, match_rate, ehkls, total_error]
+        np.array([0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.1], dtype='object'),
+        np.array([0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.6, np.array([0.1, 0.1, 0.2]), 0.2], dtype='object')
+    ]], dtype='object')
 
 
 @pytest.fixture
 def dp_vector_match_result():
-    row_1 = np.array([0, euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz'),  0.6, np.array([0.1, 0.1, 0.2]), 0.3], dtype='object')
-    row_2 = np.array([0, euler2mat(*np.deg2rad([0, 10, 20]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.4], dtype='object')
-    row_3 = np.array([1, euler2mat(*np.deg2rad([0, 45, 45]), 'rzxz'),  0.8, np.array([0.1, 0.3, 0.2]), 0.1], dtype='object')
-    row_4 = np.array([1, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.7, np.array([0.1, 0.05, 0.1]), 0.2], dtype='object')
-    return np.vstack((row_1, row_2, row_3, row_4))
+    return np.array([[
+        # [phase, R, match_rate, ehkls, total_error]
+        np.array([0, euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz'),  0.6, np.array([0.1, 0.1, 0.2]), 0.3], dtype='object'),
+        np.array([0, euler2mat(*np.deg2rad([0, 10, 20]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.4], dtype='object'),
+        np.array([1, euler2mat(*np.deg2rad([0, 45, 45]), 'rzxz'),  0.8, np.array([0.1, 0.3, 0.2]), 0.1], dtype='object'),
+        np.array([1, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.7, np.array([0.1, 0.05, 0.1]), 0.2], dtype='object')
+    ]], dtype='object')
 
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):

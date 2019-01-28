@@ -25,7 +25,7 @@ from tests.test_utils.test_indexation_utils import sp_vector_match_result, dp_ve
 def test_get_crystalographic_map(dp_vector_match_result, sp_vector_match_result):
     # Assertion free test, as the tests in test_indexation_utils do the heavy
     # lifting
-    results = np.vstack((dp_vector_match_result, sp_vector_match_result))
+    results = np.vstack((dp_vector_match_result[0], sp_vector_match_result[0]))
     results = TemplateMatchingResults(results)
     results.get_crystallographic_map()
     return 0
