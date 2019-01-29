@@ -61,9 +61,9 @@ def test_get_experimental_square(exp_disc):
 
 
 @pytest.mark.xfail(strict=True)
-class Test_even_sized_squares():
-    def test_non_even_errors_get_simulated_disc():
-        disc = get_simulated_disc(61,5)
+def test_non_even_errors_get_simulated_disc():
+    disc = get_simulated_disc(61,5)
 
-    def test_non_even_errors_get_experimental_errors(exp_disc):
-        square = get_experimental_square(exp_disc, [17, 19], 7)
+@pytest.mark.xfail(strict=True)
+def test_non_even_errors_get_experimental_errors(exp_disc):
+    square = get_experimental_square(exp_disc, [17, 19], 7)
