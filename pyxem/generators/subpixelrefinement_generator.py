@@ -119,6 +119,17 @@ class SubpixelrefinementGenerator():
             y = t[0]
             return (x,y)
 
+        def _com_experimental_square(z,vector,square_size):
+            """
+            Wrapper for get_experimental_square that makes the non-zero elements
+            symmettrical around the 'unsubpixeled' peak symmetrical by zeroing a
+            'spare' row and column (top and left)
+            """
+            z_adpt = np.copy(get_experimental_square(z,vector=vect,square_size=square_size)) # to make sure we don't change the dp
+            z_adpt[:,0] = 0
+            z_adpt[0,:] = 0
+            return z_adpt
+
         self.vectors_out = np.zeros(
             (self.dp.data.shape[0],
              self.dp.data.shape[1],
@@ -127,7 +138,7 @@ class SubpixelrefinementGenerator():
         for i in np.arange(0, len(self.vectors_init)):
             vect = self.vectors_pixels[i]
             expt_disc = self.dp.map(
-                get_experimental_square,
+                _com_experimental_square,
                 vector=vect,
                 square_size=square_size,
                 inplace=False)
