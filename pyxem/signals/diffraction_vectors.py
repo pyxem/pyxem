@@ -280,3 +280,4 @@ class DiffractionVectors(BaseSignal):
                                   camera_length=camera_length,
                                   inplace=False,
                                   *args, **kwargs)
+        self.cartesian.axes_manager.set_signal_dimension(0)
