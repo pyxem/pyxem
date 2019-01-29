@@ -120,12 +120,12 @@ def get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2):
     """
     ref_plane_normal = np.cross(ref_k1, ref_k2)
     k_plane_normal = np.cross(k1, k2)
+    axis = np.cross(ref_plane_normal, k_plane_normal)
     # Avoid 0 degree including angle
-    if np.linalg.norm(k_plane_normal) == 0 or np.linalg.norm(ref_plane_normal) == 0:
+    if np.linalg.norm(axis) == 0:
         R = np.identity(3)
     else:
         # Rotate ref plane into k plane
-        axis = np.cross(ref_plane_normal, k_plane_normal)
         angle = get_angle_cartesian(ref_plane_normal, k_plane_normal)
         R1 = axangle2mat(axis, angle)
         rot_ref_k1, rot_ref_k2 = R1.dot(ref_k1), R1.dot(ref_k2)
