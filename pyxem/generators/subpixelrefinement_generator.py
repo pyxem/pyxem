@@ -60,7 +60,7 @@ class SubpixelrefinementGenerator():
         Parameters
         ----------
         square_size : int
-            Length (in pixels) of one side of a square the contains the peak to be refined
+            Length (in pixels) of one half of the side of a square the contains the peak to be refined
         disc_radius:  int
             Radius (in pixels) of the discs that you seek to refine
         upsample_factor: int
@@ -82,7 +82,7 @@ class SubpixelrefinementGenerator():
             expt_disc = self.dp.map(
                 get_experimental_square,
                 vector=vect,
-                square_size=square_size,
+                half_square_size=square_size,
                 inplace=False)
             shifts = expt_disc.map(
                 _conventional_xc,

@@ -52,14 +52,14 @@ def get_experimental_square(z, vector, half_square_size):
     return _z
 
 
-def get_simulated_disc(square_size, disc_radius):
+def get_simulated_disc(half_square_size, disc_radius):
     """
     Create a uniform disc for correlating with the experimental square
 
     Parameters
     ----------
-    square size : int
-        (even) - size of the bounding box
+    half_square_size : int
+        The length of half of one side of the bounding square. eg 1 will return 3x3
     disc_radius : int
         radius of the disc
 
@@ -71,7 +71,7 @@ def get_simulated_disc(square_size, disc_radius):
 
     """
 
-    ss = int(square_size)
+    ss = int(2*half_square_size+1)
     arr = np.zeros((ss, ss))
     rr, cc = draw.circle(int(ss / 2), int(ss / 2), radius=disc_radius,
                          shape=arr.shape)  # is the thin disc a good idea
