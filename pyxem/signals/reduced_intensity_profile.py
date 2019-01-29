@@ -21,7 +21,7 @@ vector.
 """
 
 from hyperspy.signals import Signal1D
-#??from hyperspy.component import Polynomial
+# ??from hyperspy.component import Polynomial
 import numpy as np
 from scipy import special
 from scipy.signal import savgol_filter
@@ -35,7 +35,7 @@ class ReducedIntensityProfile(Signal1D):
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
 
-    def damp_exponential(self,b):
+    def damp_exponential(self, b):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -46,13 +46,13 @@ class ReducedIntensityProfile(Signal1D):
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
-        #should include offset
-        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+        # should include offset
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
         damping_term = np.exp(-b * np.square(scattering_axis))
         self.data = self.data * damping_term
         return
 
-    def damp_lorch(self,s_max=None):
+    def damp_lorch(self, s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -66,16 +66,16 @@ class ReducedIntensityProfile(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
-            s_max = s_scale*s_size
+            s_max = s_scale * s_size
         delta = np.pi / s_max
 
-        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
         damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
         damping_term = np.nan_to_num(damping_term)
         self.data = self.data * damping_term
         return
 
-    def damp_updated_lorch(self,s_max=None):
+    def damp_updated_lorch(self, s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -91,17 +91,17 @@ class ReducedIntensityProfile(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
-            s_max = s_scale*s_size
+            s_max = s_scale * s_size
         delta = np.pi / s_max
 
-        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
-        exponent_array = 3*np.ones(scattering_axis.shape)
-        cubic_array = np.power(scattering_axis,exponent_array)
-        multiplicative_term = np.divide(3/(delta**3),cubic_array)
-        sine_term = (np.sin(delta*scattering_axis)
-                    -delta*scattering_axis*np.cos(delta*scattering_axis))
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+        exponent_array = 3 * np.ones(scattering_axis.shape)
+        cubic_array = np.power(scattering_axis, exponent_array)
+        multiplicative_term = np.divide(3 / (delta**3), cubic_array)
+        sine_term = (np.sin(delta * scattering_axis)
+                     - delta * scattering_axis * np.cos(delta * scattering_axis))
 
-        damping_term = multiplicative_term*sine_term
+        damping_term = multiplicative_term * sine_term
         damping_term = np.nan_to_num(damping_term)
         self.data = self.data * damping_term
         return
@@ -118,9 +118,9 @@ class ReducedIntensityProfile(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
 
-        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
 
-        damping_term = (special.erf(scattering_axis * scale - offset)+1)/2
+        damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
         self.data = self.data * damping_term
         return
 
@@ -147,12 +147,12 @@ class ReducedIntensityProfile(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
-            s_max = s_scale*(s_size+1)
+            s_max = s_scale * (s_size + 1)
 
         #scattering_axis = s_scale * np.arange(s_size,dtype='float64')
         fit_model = self.create_model()
         fit_model.append(ReducedIntensityCorrectionComponent())
-        fit_model.set_signal_range([0,s_max])
+        fit_model.set_signal_range([0, s_max])
         fit_model.multifit()
         fit_value = fit_model.as_signal()
         if plot:

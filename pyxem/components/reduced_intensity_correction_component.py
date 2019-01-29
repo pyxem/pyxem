@@ -25,10 +25,10 @@ import numpy as np
 
 from hyperspy.component import Component
 
+
 class ReducedIntensityCorrectionComponent(Component):
 
     def __init__(self, a=0, b=0, c=0, d=0):
-
         '''
         Parameters
         ----------
@@ -38,11 +38,10 @@ class ReducedIntensityCorrectionComponent(Component):
 
         Component.__init__(self, ('a', 'b', 'c', 'd'))
 
-
     def function(self, x):
         a = self.a.value
         b = self.b.value
         c = self.c.value
         d = self.d.value
 
-        return a*x + b*(x**2) + c*(x**3) + d*(x**4)
+        return a * x + b * (x**2) + c * (x**3) + d * (x**4)

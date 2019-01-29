@@ -457,7 +457,7 @@ def call_ring_pattern(xcentre, ycentre):
     Returns
     -------
     ring_pattern : function
-        A function that calculates a ring pattern given a set of points and 
+        A function that calculates a ring pattern given a set of points and
         parameters.
 
     """

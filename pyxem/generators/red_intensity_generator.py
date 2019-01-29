@@ -31,6 +31,7 @@ from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
 from pyxem.components.scattering_fit_component import ScatteringFitComponent
 from pyxem.utils.ri_utils import scattering_to_signal
 
+
 class ReducedIntensityGenerator():
     """Generates a reduced intensity profile for a specified diffraction radial
     profile.
@@ -41,16 +42,17 @@ class ReducedIntensityGenerator():
     signal : ElectronDiffractionProfile
         An electron diffraction radial average profile.
     """
+
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
-        self.cutoff = [0,signal.axes_manager.signal_axes[0].size - 1]
+        self.cutoff = [0, signal.axes_manager.signal_axes[0].size - 1]
         self.nav_size = [signal.axes_manager.navigation_axes[0].size,
-                             signal.axes_manager.navigation_axes[1].size]
+                         signal.axes_manager.navigation_axes[1].size]
         self.sig_size = [signal.axes_manager.signal_axes[0].size]
-        self.background_fit = None #added in one of the fits below.
+        self.background_fit = None  # added in one of the fits below.
         self.normalisation = None
 
-    def specify_scattering_calibration(self,calibration):
+    def specify_scattering_calibration(self, calibration):
         """
         Defines calibration for the signal axis variable s in terms of
         A^-1 per pixel.
@@ -58,17 +60,17 @@ class ReducedIntensityGenerator():
         self.signal.axes_manager.signal_axes[0].scale = calibration
         return
 
-    def specify_cutoff_vector(self,s_min, s_max):
+    def specify_cutoff_vector(self, s_min, s_max):
         """
         Specified in terms of s (in inverse angstroms).
         """
         #s_scale = self.signal.axes_manager.signal_axes[0].scale
-        self.cutoff = [s_min,s_max]
+        self.cutoff = [s_min, s_max]
         return
 
     def fit_atomic_scattering(self, elements, fracs,
-                                N = 1., C = 0.,type = 'lobato',
-                                plot_fit=True):
+                              N=1., C=0., type='lobato',
+                              plot_fit=True):
         """Fits a diffraction intensity profile to the background using
         FIT = N * sum(ci * (fi^2) + C)
 
@@ -97,24 +99,22 @@ class ReducedIntensityGenerator():
             fit_model.plot()
         if self.nav_size[0] == 1 and self.nav_size[1] == 1:
             fit = fit_model.as_signal()
-            normalisation = background.square_sum #change this
+            normalisation = background.square_sum  # change this
         else:
             C_values = background.C.as_signal()
             N_values = background.N.as_signal()
             s_size = self.sig_size[0]
             s_scale = self.signal.axes_manager.signal_axes[0].scale
             fit, normalisation = scattering_to_signal(elements, fracs, N_values,
-                                            C_values, s_size, s_scale, type)
-        #self.fit = np.array(background.sum_squares).reshape(
+                                                      C_values, s_size, s_scale, type)
+        # self.fit = np.array(background.sum_squares).reshape(
         #            self.nav_size[0],self.nav_size[1],self.sig_size[0])
 
-
-        self.normalisation = normalisation #change this
+        self.normalisation = normalisation  # change this
         self.background_fit = fit
         return
 
-
-    def subtract_bkgd_pattern(self,bkgd_pattern):
+    def subtract_bkgd_pattern(self, bkgd_pattern):
         """Fits a diffraction intensity profile to the signal by using a
         diffraction pattern from an area with no sample in it. This is to
         reduce the effects of the central beam. This method will edit
@@ -129,27 +129,27 @@ class ReducedIntensityGenerator():
 
         return
 
-    def get_reduced_intensity(self,cutoff=None):
+    def get_reduced_intensity(self, cutoff=None):
         if cutoff:
             self.cutoff = cutoff
         else:
             cutoff = self.cutoff
 
-        #define numerical cutoff to remove certain data parts
+        # define numerical cutoff to remove certain data parts
         s_scale = self.signal.axes_manager.signal_axes[0].scale
-        num_min, num_max = int(cutoff[0]/s_scale),int(cutoff[1]/s_scale)
+        num_min, num_max = int(cutoff[0] / s_scale), int(cutoff[1] / s_scale)
 
         s = np.arange(self.signal.axes_manager.signal_axes[0].size,
-                        dtype='float64')
+                      dtype='float64')
         s *= self.signal.axes_manager.signal_axes[0].scale
-        #remember axes scale and size!
+        # remember axes scale and size!
         reduced_intensity = (4 * np.pi * s *
-                            np.divide((self.signal.data - self.background_fit),
-                            self.normalisation))
+                             np.divide((self.signal.data - self.background_fit),
+                                       self.normalisation))
 
         #ri = ReducedIntensityProfile(reduced_intensity.data[:,:,num_min:num_max])
         ri = ReducedIntensityProfile(reduced_intensity)
-        ax_old =  self.signal.axes_manager.navigation_axes
+        ax_old = self.signal.axes_manager.navigation_axes
         ri.axes_manager.navigation_axes[0].scale = ax_old[0].scale
         ri.axes_manager.navigation_axes[0].units = ax_old[0].units
         ri.axes_manager.navigation_axes[0].name = ax_old[0].name
