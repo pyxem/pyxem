@@ -113,6 +113,12 @@ class SubpixelrefinementGenerator():
         This will work poorly on disks with strong dynamic contrast
         """
 
+        def _center_of_mass_hs(z):
+            t = center_of_mass(z)
+            x = t[1]
+            y = t[0]
+            return (x,y)
+
         self.vectors_out = np.zeros(
             (self.dp.data.shape[0],
              self.dp.data.shape[1],
@@ -125,7 +131,7 @@ class SubpixelrefinementGenerator():
                 vector=vect,
                 square_size=square_size,
                 inplace=False)
-            shifts = expt_disc.map(center_of_mass, inplace=False) - (square_size / 2)
+            shifts = expt_disc.map(_center_of_mass_hs, inplace=False) - (square_size / 2)
             self.vectors_out[:, :, i, :] = (((vect + shifts.data) - self.center) * self.calibration)
 
         self.last_method = "center_of_mass_method"
