@@ -97,15 +97,11 @@ class ReducedIntensityGenerator():
         fit_model.reset_signal_range()
         if plot_fit == True:
             fit_model.plot()
-        if self.nav_size[0] == 1 and self.nav_size[1] == 1:
-            fit = fit_model.as_signal()
-            normalisation = background.square_sum  # change this
-        else:
-            C_values = background.C.as_signal()
-            N_values = background.N.as_signal()
-            s_size = self.sig_size[0]
-            s_scale = self.signal.axes_manager.signal_axes[0].scale
-            fit, normalisation = scattering_to_signal(elements, fracs, N_values,
+        C_values = background.C.as_signal()
+        N_values = background.N.as_signal()
+        s_size = self.sig_size[0]
+        s_scale = self.signal.axes_manager.signal_axes[0].scale
+        fit, normalisation = scattering_to_signal(elements, fracs, N_values,
                                                       C_values, s_size, s_scale, type)
         # self.fit = np.array(background.sum_squares).reshape(
         #            self.nav_size[0],self.nav_size[1],self.sig_size[0])
