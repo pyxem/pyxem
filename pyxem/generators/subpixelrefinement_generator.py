@@ -114,6 +114,19 @@ class SubpixelrefinementGenerator():
         """
 
         def _center_of_mass_hs(z):
+            """
+            Return the center of mass of an array with coordinates in the hyperspy convention
+
+            Parameters
+            ----------
+            z : np.array
+
+            Returns
+            -------
+            (x,y) : tuple of floats
+                The x and y locations of the center of mass of the parsed square
+            """
+
             t = center_of_mass(z)
             x = t[1]
             y = t[0]
@@ -121,9 +134,21 @@ class SubpixelrefinementGenerator():
 
         def _com_experimental_square(z,vector,square_size):
             """
-            Wrapper for get_experimental_square that makes the non-zero elements
-            symmettrical around the 'unsubpixeled' peak symmetrical by zeroing a
-            'spare' row and column (top and left)
+            Wrapper for get_experimental_square that makes the non-zero elements symmetrical
+            around the 'unsubpixeled' peak by zeroing a 'spare' row and column (top and left)
+
+            Parameters
+            ----------
+            z : np.array
+
+            vector : np.array([x,y])
+
+            square_size : int (even)
+
+            Returns
+            -------
+            z_adpt : np.array
+                z, but with row and column zero set to 0
             """
             z_adpt = np.copy(get_experimental_square(z,vector=vect,square_size=square_size)) # to make sure we don't change the dp
             z_adpt[:,0] = 0
