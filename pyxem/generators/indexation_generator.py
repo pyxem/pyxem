@@ -191,7 +191,8 @@ class VectorIndexationGenerator():
     def index_vectors(self,
                       mag_tol,
                       angle_tol,
-                      seed_pool_size,
+                      index_error_tol,
+                      n_peaks_to_index,
                       n_best,
                       keys=[],
                       *args,
@@ -206,8 +207,11 @@ class VectorIndexationGenerator():
         angle_tol : float
             The maximum absolute error in inter-vector angle, in units of
             degrees, allowed for indexation.
-        seed_pool_size : int
-            The maximum number of peak pairs to check.
+        index_error_tol : float
+            Max allowed error in peak indexation for classifying it as indexed,
+            calculated as |hkl_calculated - round(hkl_calculated)|.
+        n_peaks_to_index : int
+            The maximum number of peak to index.
         n_best : int
             The maximum number of good solutions to be retained.
         keys : list
@@ -233,16 +237,19 @@ class VectorIndexationGenerator():
                                         library=library,
                                         mag_tol=mag_tol,
                                         angle_tol=angle_tol,
-                                        seed_pool_size=seed_pool_size,
+                                        index_error_tol=index_error_tol,
+                                        n_peaks_to_index=n_peaks_to_index,
                                         n_best=n_best,
                                         keys=keys,
                                         inplace=False,
+                                        parallel=False,  # TODO: For testing
                                         *args,
                                         **kwargs).data
         indexation = matched[:, :, 0]
         rhkls = matched[:, :, 1]
 
         indexation_results = VectorMatchingResults(indexation)
+        indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors)

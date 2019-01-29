@@ -152,12 +152,11 @@ def match_vectors(peaks,
     # Initialise for loop with first entry & assign empty array to hold
     # indexation results.
     top_matches = np.empty((len(library), n_best, 5), dtype='object')
-    res_rhkls = []  # TODO: Correct format?
+    res_rhkls = []
     # TODO: Sort these by intensity or SNR
 
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
     # with respect to each phase.
-    peaks = peaks[0]
     for phase_index, (key, structure) in enumerate(zip(library.keys(), library.structures)):
         solutions = []
         lattice_recip = structure.lattice.reciprocal()
@@ -344,8 +343,6 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z,x,z)), dict(metrics)]
     """
-    z_matches = z_matches[0]
-
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
     # Consider single phase and multi-phase matching cases separately

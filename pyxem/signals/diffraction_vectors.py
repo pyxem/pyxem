@@ -279,5 +279,6 @@ class DiffractionVectors(BaseSignal):
                                   wavelength=wavelength,
                                   camera_length=camera_length,
                                   inplace=False,
+                                  parallel=False,  # TODO: For testing
                                   *args, **kwargs)
-        self.cartesian.axes_manager.set_signal_dimension(0)
+        self.cartesian.axes_manager.set_signal_dimension(2)
