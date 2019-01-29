@@ -106,8 +106,71 @@ class TestIsEllipseGood:
                     semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=0.9,
                     use_focus=False)
 
+
+class TestMakeEllipseDataPointse:
+
+    def test_simple(self):
+        data = ret.make_ellipse_data_points(5, 2, 9, 5, 0)
+        assert data.size > 0
+
+    def test_nt(self):
+        data0 = ret.make_ellipse_data_points(5, 2, 9, 5, 0, nt=10)
+        assert data0.shape == (10, 2)
+        data1 = ret.make_ellipse_data_points(5, 2, 9, 5, 0, nt=29)
+        assert data1.shape == (29, 2)
+
     def test_use_focus(self):
-        pass
+        x, y, a, b, r = 5, 9, 10, 8, 0
+        data0 = ret.make_ellipse_data_points(
+                x, y, a, b, r, nt=99, use_focus=False)
+        assert approx(data0.mean(axis=0)) == [x, y]
+        data1 = ret.make_ellipse_data_points(
+                x, y, a, b, r, nt=99, use_focus=True)
+        assert approx(data1.mean(axis=0)) != [x, y]
+
+    def test_xy_use_focus_false(self):
+        x0, y0, x1, y1 = 10, -5, -20, 30
+        a, b, r = 10, 8, 0
+        data0 = ret.make_ellipse_data_points(
+                x0, y0, a, b, r, nt=99, use_focus=False)
+        assert approx(data0.mean(axis=0)) == [x0, y0]
+        data1 = ret.make_ellipse_data_points(
+                x1, y1, a, b, r, nt=99, use_focus=False)
+        assert approx(data1.mean(axis=0)) == [x1, y1]
+
+    def test_xy_use_focus_true(self):
+        x0, y0, x1, y1 = 10, -5, -20, 30
+        a, b, r = 10, 8, 0
+        data0 = ret.make_ellipse_data_points(
+                x0, y0, a, b, r, nt=99, use_focus=True)
+        xc0, yc0 = data0.mean(axis=0)
+        f0 = ret._get_closest_focus(x0, y0, xc0, yc0, a, b, r)
+        assert approx(f0) == (x0, y0)
+        data1 = ret.make_ellipse_data_points(
+                x1, y1, a, b, r, nt=99, use_focus=True)
+        xc1, yc1 = data1.mean(axis=0)
+        f1 = ret._get_closest_focus(x1, y1, xc1, yc1, a, b, r)
+        assert approx(f1) == (x1, y1)
+
+    def test_ab(self):
+        x, y, r, nt = 10, 20, 0, 9999
+        a0, b0, a1, b1 = 10, 5, 8, 15
+        data0 = ret.make_ellipse_data_points(
+                x, y, a0, b0, r, nt=nt, use_focus=False)
+        assert approx(data0.min(axis=0), abs=10e-5) == (x - a0, y - b0)
+        data1 = ret.make_ellipse_data_points(
+                x, y, a1, b1, r, nt=nt, use_focus=False)
+        assert approx(data1.min(axis=0), abs=10e-5) == (x - a1, y - b1)
+
+    def test_r(self):
+        x, y, a, b, nt = 10, 20, 15, 5, 9999
+        r0, r1 = 0, math.pi/2
+        data0 = ret.make_ellipse_data_points(
+                x, y, a, b, r0, nt=nt, use_focus=False)
+        assert approx(data0.min(axis=0), abs=10e-5) == (x - a, y - b)
+        data1 = ret.make_ellipse_data_points(
+                x, y, a, b, r1, nt=nt, use_focus=False)
+        assert approx(data1.min(axis=0), abs=10e-5) == (x - b, y - a)
 
 
 class TestGetClosestFocus:

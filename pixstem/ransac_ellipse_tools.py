@@ -123,6 +123,52 @@ def _get_closest_focus(xc, yc, x, y, a, b, r):
     return (xf, yf)
 
 
+def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
+    """Get an ellipse position list.
+
+    Parameters
+    ----------
+    x, y : scalars
+        Centre position of the ellipse.
+    a, b : scalars
+        Semi lengths
+    r : scalar
+        Rotation, in theta
+    nt : int, optional
+        Number of data positions, default 20
+    use_focus : bool
+        If True, (x, y) will be the focus. If False,
+        (x, y) will be centre of the ellipse.
+
+    Returns
+    -------
+    data : NumPy array
+        [[x0, y0], [x1, y1], ...]
+
+    Examples
+    --------
+    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> data = ret.make_ellipse_data_points(5, 9, 8, 4, np.pi/3)
+
+    Using all the arguments
+
+    >>> data = ret.make_ellipse_data_points(5, 9, 8, 4, 0, nt=40,
+    ...                                     use_focus=False)
+
+    """
+    theta_array = np.arange(0, 2*np.pi, 2*np.pi/nt)
+    params = (x, y, a, b, r)
+    data = EllipseModel().predict_xy(theta_array, params=params)
+    if a < b:
+        r += math.pi/2
+        a, b = b, a
+    c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
+    if use_focus:
+        xf, yf = x + c * math.cos(r), y + c * math.sin(r)
+        data -= [xf - x, yf - y]
+    return data
+
+
 def is_data_good(data, xc, yc, r_peak_lim):
     """Returns False if any values in an array has points close to the centre.
 
