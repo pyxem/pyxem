@@ -124,8 +124,8 @@ def vector_match_peaks():
 def vector_library():
     library = DiffractionVectorLibrary()
     library['A'] = np.array([
-        [np.array([1, 0, 0]), np.array([0, 2, 0]), 2, 1, np.pi/2],
-        [np.array([0, 0, 1]), np.array([2, 0, 0]), 1, 2, np.pi/2],
+        [np.array([1, 0, 0]), np.array([0, 2, 0]), 2, 1, np.pi / 2],
+        [np.array([0, 0, 1]), np.array([2, 0, 0]), 1, 2, np.pi / 2],
     ])
     lattice = diffpy.structure.Lattice(1, 1, 1, 90, 90, 90)
     library.structures = [
@@ -136,13 +136,13 @@ def vector_library():
 
 def test_match_vectors(vector_match_peaks, vector_library):
     matches, rhkls = match_vectors(
-            vector_match_peaks,
-            vector_library,
-            mag_tol = 0.1,
-            angle_tol = 0.1,
-            index_error_tol = 0.3,
-            n_peaks_to_index = 2,
-            n_best = 1)
+        vector_match_peaks,
+        vector_library,
+        mag_tol=0.1,
+        angle_tol=0.1,
+        index_error_tol=0.3,
+        n_peaks_to_index=2,
+        n_best=1)
     assert len(matches) == 1
     np.testing.assert_allclose(matches[0][2], 1.0)  # match rate
     np.testing.assert_allclose(matches[0][1], np.identity(3))
@@ -154,13 +154,13 @@ def test_match_vectors(vector_match_peaks, vector_library):
 
 def test_match_vector_total_error_default(vector_match_peaks, vector_library):
     matches, rhkls = match_vectors(
-            vector_match_peaks,
-            vector_library,
-            mag_tol = 0.1,
-            angle_tol = 0.1,
-            index_error_tol = 0.0,
-            n_peaks_to_index = 2,
-            n_best = 5)
+        vector_match_peaks,
+        vector_library,
+        mag_tol=0.1,
+        angle_tol=0.1,
+        index_error_tol=0.0,
+        n_peaks_to_index=2,
+        n_best=5)
     assert len(matches) == 5
     np.testing.assert_allclose(matches[0][2], 0.0)  # match rate
     np.testing.assert_allclose(matches[0][1], np.identity(3))

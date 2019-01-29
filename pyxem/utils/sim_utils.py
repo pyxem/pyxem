@@ -349,7 +349,6 @@ def peaks_from_best_template(single_match_result, phase, library):
     """
     best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
     _phase = phase[int(best_fit[0])]
-    print(best_fit[1])
     pattern = library.get_library_entry(
         phase=_phase,
         angle=tuple(best_fit[1]))['Sim']

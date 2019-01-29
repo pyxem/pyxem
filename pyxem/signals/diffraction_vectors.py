@@ -262,7 +262,7 @@ class DiffractionVectors(BaseSignal):
         return crystim
 
     def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length,
-                                  *args, **kwargs):
+                                        *args, **kwargs):
         """Get cartesian coordinates of the diffraction vectors.
 
         Parameters

@@ -65,7 +65,7 @@ def load_mtex_map(filename):
             crystal_data[y, x] = [
                 load_array[load_index, 0],
                 load_array[load_index, 1:4],
-                { 'correlation': load_array[load_index, 4] }]
+                {'correlation': load_array[load_index, 4]}]
     return CrystallographicMap(crystal_data)
 
 
@@ -177,8 +177,8 @@ class CrystallographicMap(BaseSignal):
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
         orientation_map = transfer_navigation_axes(orientation_map, self)
-        # TODO: Since vector matching results (and template in the future?) returns
-        # in object form, eulers inherits it
+        # TODO: Since vector matching results returns in object form, eulers
+        # inherits it
         orientation_map.change_dtype('float')
 
         return orientation_map
@@ -225,9 +225,9 @@ class CrystallographicMap(BaseSignal):
             ]
             if metric in template_metrics:
                 metric_map = self.isig[2].map(
-                        _metric_from_dict,
-                        metric=metric,
-                        inplace=False).as_signal2D((0, 1))
+                    _metric_from_dict,
+                    metric=metric,
+                    inplace=False).as_signal2D((0, 1))
 
             else:
                 raise ValueError("The metric `{}` is not valid for template "
@@ -243,9 +243,9 @@ class CrystallographicMap(BaseSignal):
             ]
             if metric in vector_metrics:
                 metric_map = self.isig[2].map(
-                        _metric_from_dict,
-                        metric=metric,
-                        inplace=False).as_signal2D((0, 1))
+                    _metric_from_dict,
+                    metric=metric,
+                    inplace=False).as_signal2D((0, 1))
 
             else:
                 raise ValueError("The metric `{}` is not valid for vector "

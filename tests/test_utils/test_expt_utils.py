@@ -29,7 +29,6 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     call_ring_pattern, peaks_as_gvectors
 
 
-
 @pytest.fixture(params=[
     np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
               [0., 0., 1., 0., 0., 0., 0., 0.],

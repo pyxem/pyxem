@@ -86,9 +86,8 @@ class IndexationGenerator():
         -------
         matching_results : TemplateMatchingResults
             Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern. As an example, the
-            signal in Euler reads:
-                    ( Library Number , Z , X , Z , Correlation Score)
+            correlation results for each diffraction pattern, in the form
+                [Library Number , [z, x, z], Correlation Score]
 
         """
         signal = self.signal
@@ -182,8 +181,8 @@ class VectorIndexationGenerator():
                  vector_library):
         if vectors.cartesian is None:
             raise ValueError("Cartesian coordinates are required in order to index "
-                       "diffraction vectors. Use the get_cartesian_coordinates "
-                       "method of DiffractionVectors to obtain these.")
+                             "diffraction vectors. Use the calculate_cartesian_coordinates "
+                             "method of DiffractionVectors to obtain these.")
         else:
             self.vectors = vectors
             self.library = vector_library

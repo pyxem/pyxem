@@ -24,7 +24,7 @@ from transforms3d.axangles import axangle2mat
 
 def detector_to_fourier(k_xy, wavelength, camera_length):
     """Maps two-dimensional Cartesian coordinates in the detector plane to
-    three-dimensional coordinates in reciprocal space.
+    three-dimensional coordinates in reciprocal space, with origo in [000].
 
     Parameters
     ----------
@@ -38,15 +38,23 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     Returns
     -------
     k : np.array()
-        Array of Cartesian coordinates in reciprocal space.
+        Array of Cartesian coordinates in reciprocal space relative to [000].
 
     """
 
-    # The calibrated positions of the diffraction spots are already the x and y
-    # coordinates of the k vector on the Ewald sphere. The radius is given by
-    # the wavelength. k_z is calculated courtesy of Pythagoras.
-    k_xy = k_xy[0]  # TODO: Why is this needed?
-    k_z = np.sqrt(1/(wavelength**2) - np.sum(k_xy**2, axis=1))
+    k_xy = k_xy[0]
+    # # The calibrated positions of the diffraction spots are already the x and y
+    # # coordinates of the k vector on the Ewald sphere. The radius is given by
+    # # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
+    # # the Ewald sphere radius.
+    # TODO: Actual projection to Ewald sphere (below). For now, just use the
+    # direct, calibrated detector coordinates in 2D, and set the z
+    # coordinate to zero
+
+    k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
+
+    # For now, just set k_z = 0
+    # k_z = np.zeros((k_xy.shape[0]))
 
     # Stack the xy-vector and the z vector to get the full k
     k = np.hstack((k_xy, k_z[:, np.newaxis]))
