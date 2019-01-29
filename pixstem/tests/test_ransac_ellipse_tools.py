@@ -106,8 +106,19 @@ class TestIsEllipseGood:
                     semi_len_min=90, semi_len_max=130, semi_len_ratio_lim=0.9,
                     use_focus=False)
 
+    def test_use_focus_true(self):
+        params = ret._make_ellipse_model_params_focus(35, 15, 20, 10, 0)
+        ellipse_model = ret.EllipseModel()
+        ellipse_model.params = params
+        is_good = ret.is_ellipse_good(
+                ellipse_model=ellipse_model, data=None,
+                xc=35, yc=15, r_elli_lim=5,
+                semi_len_min=5, semi_len_max=30, semi_len_ratio_lim=3,
+                use_focus=True)
+        assert is_good
 
-class TestMakeEllipseDataPointse:
+
+class TestMakeEllipseDataPoints:
 
     def test_simple(self):
         data = ret.make_ellipse_data_points(5, 2, 9, 5, 0)
