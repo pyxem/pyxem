@@ -47,7 +47,8 @@ def get_experimental_square(z, vector, square_size):
     """
 
     cx, cy, half_ss = vector[0], vector[1], int(square_size / 2)
-    _z = z[cx - half_ss:cx + half_ss, cy - half_ss:cy + half_ss]
+    # select square with correct x,y see PR for details
+    _z = z[cy - half_ss:cy + half_ss, cx - half_ss:cx + half_ss]
     return _z
 
 
