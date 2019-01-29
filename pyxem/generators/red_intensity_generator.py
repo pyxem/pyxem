@@ -114,7 +114,7 @@ class ReducedIntensityGenerator():
         return
 
 
-    def fit_scattering_from_pattern(self,bkgd_pattern):
+    def subtract_bkgd_pattern(self,bkgd_pattern):
         """Fits a diffraction intensity profile to the signal by using a
         diffraction pattern from an area with no sample in it. This is to
         reduce the effects of the central beam. This method will edit

@@ -18,4 +18,50 @@
 
 import pytest
 import numpy as np
-import diffpy.structure
+from pyxem.generators.pdf_generator import PDFGenerator
+from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
+from pyxem.signals.pdf_profile import PDFProfile
+
+@pytest.fixture
+def reduced_intensity_profile():
+    data = np.ones((1,10))*np.arange(4).reshape(4,1)
+    data = data.reshape(2,2,10)
+    ri = ReducedIntensityProfile(data)
+    return ri
+
+def test_pdf_gen_init(reduced_intensity_profile):
+    pdfgen = PDFGenerator(reduced_intensity_profile)
+    assert isinstance(pdfgen,PDFGenerator)
+
+def test_get_pdf(reduced_intensity_profile):
+    pdfgen = PDFGenerator(reduced_intensity_profile)
+    pdf = pdfgen.get_pdf(s_cutoff=[0,9])
+    assert isinstance(pdf,PDFProfile)
+
+def test_s_limits(reduced_intensity_profile):
+    pdfgen = PDFGenerator(reduced_intensity_profile)
+    pdf = pdfgen.get_pdf(s_cutoff=[0,12])
+    pdf2 = pdfgen.get_pdf(s_cutoff=[0,10])
+    assert np.array_equal(pdf.data,pdf2.data)
+
+def test_signal_size():
+    spectrum = np.array([5.,4.,3.,2.,2.,1.,1.,1.,0.,0.])
+    ri = ReducedIntensityProfile(spectrum)
+    pdfgen = PDFGenerator(ri)
+    pdf = pdfgen.get_pdf(s_cutoff=[0,10])
+    assert isinstance(pdf,PDFProfile)
+
+    ri = ReducedIntensityProfile([spectrum])
+    pdfgen = PDFGenerator(ri)
+    pdf = pdfgen.get_pdf(s_cutoff=[0,10])
+    assert isinstance(pdf,PDFProfile)
+
+    ri = ReducedIntensityProfile([[spectrum]])
+    pdfgen = PDFGenerator(ri)
+    pdf = pdfgen.get_pdf(s_cutoff=[0,10])
+    assert isinstance(pdf,PDFProfile)
+
+    ri = ReducedIntensityProfile([[[spectrum]]])
+    pdfgen = PDFGenerator(ri)
+    pdf = pdfgen.get_pdf(s_cutoff=[0,10])
+    assert pdf == None
