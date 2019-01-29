@@ -24,7 +24,6 @@ from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 
 from skimage.transform import rescale
 
-
 @pytest.fixture()
 def exp_disc():
     ss, disc_radius, upsample_factor = int(60), 6, 10
@@ -59,3 +58,12 @@ def test_get_experimental_square(exp_disc):
     square = get_experimental_square(exp_disc, [17, 19], 6)
     assert square.shape[0] == int(6)
     assert square.shape[1] == int(6)
+
+
+@pytest.mark.xfail(strict=True)
+class Test_even_sized_squares():
+    def test_non_even_errors_get_simulated_disc():
+        get_simulated_disc(61,5)
+
+    def test_non_even_errors_get_experimental_errors(exp_disc):
+        square = get_experimental_square(exp_disc, [17, 19], 7)
