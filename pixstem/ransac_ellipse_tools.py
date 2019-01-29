@@ -156,17 +156,24 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
     ...                                     use_focus=False)
 
     """
+    if use_focus:
+        params = _make_ellipse_model_params_focus(x, y, a, b, r)
+    else:
+        params = (x, y, a, b, r)
     theta_array = np.arange(0, 2*np.pi, 2*np.pi/nt)
-    params = (x, y, a, b, r)
     data = EllipseModel().predict_xy(theta_array, params=params)
+    return data
+
+
+def _make_ellipse_model_params_focus(x, y, a, b, r):
     if a < b:
         r += math.pi/2
         a, b = b, a
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
-    if use_focus:
-        xf, yf = x + c * math.cos(r), y + c * math.sin(r)
-        data -= [xf - x, yf - y]
-    return data
+    xf = x - c * math.cos(r)
+    yf = y - c * math.sin(r)
+    params = (xf, yf, a, b, r)
+    return params
 
 
 def is_data_good(data, xc, yc, r_peak_lim):
