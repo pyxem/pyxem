@@ -24,7 +24,8 @@ import diffpy.structure
 
 from transforms3d.euler import euler2mat
 
-from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.generators.indexation_generator import IndexationGenerator, VectorIndexationGenerator
+from pyxem.generators.library_generator import VectorLibraryGenerator
 from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.utils.sim_utils import peaks_from_best_template, get_kinematical_intensities
 
@@ -119,7 +120,9 @@ def test_orientation_mapping_physical(structure, rot_list, pattern_list, edc):
     indexer = IndexationGenerator(dp, library)
     M = indexer.correlate()
     assert np.all(M.inav[0, 0] == M.inav[1, 0])
-    assert np.allclose(M.inav[0, 0].isig[:4, 0].data, [0, 2, 0, 0], atol=1e-3)
+    match_data = M.inav[0, 0].isig[:4, 0].data
+    assert match_data[0] == 0
+    assert np.allclose(match_data[1], [2, 0, 0])
 
 
 def test_masked_OM(default_structure, rot_list, pattern_list, edc):
@@ -131,7 +134,7 @@ def test_masked_OM(default_structure, rot_list, pattern_list, edc):
     indexer = IndexationGenerator(dp, library)
     mask = hs.signals.Signal1D(([[[1], [1]], [[0], [1]]]))
     M = indexer.correlate(mask=mask)
-    assert np.all(np.isnan(M.inav[0, 1].data))
+    assert np.all(np.equal(M.inav[0, 1].data, None))
 
 
 @pytest.mark.skip()

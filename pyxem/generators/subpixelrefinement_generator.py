@@ -112,6 +112,48 @@ class SubpixelrefinementGenerator():
             array containing the refined vectors in calibrated units
         """
 
+        def _center_of_mass_hs(z):
+            """
+            Return the center of mass of an array with coordinates in the hyperspy convention
+
+            Parameters
+            ----------
+            z : np.array
+
+            Returns
+            -------
+            (x,y) : tuple of floats
+                The x and y locations of the center of mass of the parsed square
+            """
+
+            t = center_of_mass(z)
+            x = t[1]
+            y = t[0]
+            return (x,y)
+
+        def _com_experimental_square(z,vector,square_size):
+            """
+            Wrapper for get_experimental_square that makes the non-zero elements symmetrical
+            around the 'unsubpixeled' peak by zeroing a 'spare' row and column (top and left)
+
+            Parameters
+            ----------
+            z : np.array
+
+            vector : np.array([x,y])
+
+            square_size : int (even)
+
+            Returns
+            -------
+            z_adpt : np.array
+                z, but with row and column zero set to 0
+            """
+            z_adpt = np.copy(get_experimental_square(z,vector=vect,square_size=square_size)) # to make sure we don't change the dp
+            z_adpt[:,0] = 0
+            z_adpt[0,:] = 0
+            return z_adpt
+
         self.vectors_out = np.zeros(
             (self.dp.data.shape[0],
              self.dp.data.shape[1],
@@ -120,11 +162,11 @@ class SubpixelrefinementGenerator():
         for i in np.arange(0, len(self.vectors_init)):
             vect = self.vectors_pixels[i]
             expt_disc = self.dp.map(
-                get_experimental_square,
+                _com_experimental_square,
                 vector=vect,
                 square_size=square_size,
                 inplace=False)
-            shifts = expt_disc.map(center_of_mass, inplace=False) - (square_size / 2)
+            shifts = expt_disc.map(_center_of_mass_hs, inplace=False) - (square_size / 2)
             self.vectors_out[:, :, i, :] = (((vect + shifts.data) - self.center) * self.calibration)
 
         self.last_method = "center_of_mass_method"

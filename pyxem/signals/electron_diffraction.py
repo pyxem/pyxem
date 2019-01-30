@@ -37,6 +37,10 @@ from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
 
 from pyxem.utils import peakfinder2D_gui
 
+from skimage import filters
+from skimage.morphology import square
+from scipy.optimize import curve_fit
+
 
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
@@ -385,7 +389,14 @@ class ElectronDiffraction(Signal2D):
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
         rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
-        rp.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        ax_old = self.axes_manager.navigation_axes
+        rp.axes_manager.navigation_axes[0].scale = ax_old[0].scale
+        rp.axes_manager.navigation_axes[0].units = ax_old[0].units
+        rp.axes_manager.navigation_axes[0].name = ax_old[0].name
+        if len(ax_old) > 1:
+            rp.axes_manager.navigation_axes[1].scale = ax_old[1].scale
+            rp.axes_manager.navigation_axes[1].units = ax_old[1].units
+            rp.axes_manager.navigation_axes[1].name = ax_old[1].name
         rp_axis = rp.axes_manager.signal_axes[0]
         rp_axis.name = 'k'
         rp_axis.scale = self.axes_manager.signal_axes[0].scale

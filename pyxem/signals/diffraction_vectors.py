@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import numpy as np
+
 from hyperspy.signals import BaseSignal, Signal1D
 from hyperspy.api import markers
 
@@ -259,21 +261,24 @@ class DiffractionVectors(BaseSignal):
 
         return crystim
 
-    def get_cartesian_coordinates(self, wavelength, camera_length,
-                                  *args, **kwargs):
+    def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length,
+                                        *args, **kwargs):
         """Get cartesian coordinates of the diffraction vectors.
 
         Parameters
         ----------
-        wavelength : float
-            The electron wavelength at which the data was acquired.
+        accelerating_voltage : float
+            The acceleration voltage with which the data was acquired.
         camera_length : float
             The camera length in meters.
         """
-        # TODO: Might be more consistent to ask for accelerating_voltage,
-        # but that requires importing sim_utils, which creates a circular dependency
+        # Imported here to avoid circular dependency
+        from pyxem.utils.sim_utils import get_electron_wavelength
+        wavelength = get_electron_wavelength(accelerating_voltage)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,
                                   camera_length=camera_length,
                                   inplace=False,
+                                  parallel=False,  # TODO: For testing
                                   *args, **kwargs)
+        self.cartesian.axes_manager.set_signal_dimension(0)

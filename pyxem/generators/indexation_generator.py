@@ -86,9 +86,8 @@ class IndexationGenerator():
         -------
         matching_results : TemplateMatchingResults
             Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern. As an example, the
-            signal in Euler reads:
-                    ( Library Number , Z , X , Z , Correlation Score)
+            correlation results for each diffraction pattern, in the form
+                [Library Number , [z, x, z], Correlation Score]
 
         """
         signal = self.signal
@@ -154,25 +153,7 @@ class ProfileIndexationGenerator():
         matching_results : ProfileIndexation
 
         """
-        mapping = self.map
-        mags = self.magnitudes
-        simulation = self.simulation
-
-        mags = np.array(mags)
-        sim_mags = np.array(simulation.magnitudes)
-        sim_hkls = np.array(simulation.hkls)
-        indexation = np.zeros(len(mags), dtype=object)
-
-        for i in np.arange(len(mags)):
-            diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
-
-            hkls = sim_hkls[np.where(diff < tolerance)]
-            diffs = diff[np.where(diff < tolerance)]
-
-            indices = np.array((hkls, diffs))
-            indexation[i] = np.array((mags.data[i], indices))
-
-        return indexation
+        return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
 
 
 class VectorIndexationGenerator():
@@ -200,8 +181,8 @@ class VectorIndexationGenerator():
                  vector_library):
         if vectors.cartesian is None:
             raise ValueError("Cartesian coordinates are required in order to index "
-                       "diffraction vectors. Use the get_cartesian_coordinates "
-                       "method of DiffractionVectors to obtain these.")
+                             "diffraction vectors. Use the calculate_cartesian_coordinates "
+                             "method of DiffractionVectors to obtain these.")
         else:
             self.vectors = vectors
             self.library = vector_library
@@ -209,7 +190,8 @@ class VectorIndexationGenerator():
     def index_vectors(self,
                       mag_tol,
                       angle_tol,
-                      seed_pool_size,
+                      index_error_tol,
+                      n_peaks_to_index,
                       n_best,
                       keys=[],
                       *args,
@@ -224,8 +206,11 @@ class VectorIndexationGenerator():
         angle_tol : float
             The maximum absolute error in inter-vector angle, in units of
             degrees, allowed for indexation.
-        seed_pool_size : int
-            The maximum number of peak pairs to check.
+        index_error_tol : float
+            Max allowed error in peak indexation for classifying it as indexed,
+            calculated as |hkl_calculated - round(hkl_calculated)|.
+        n_peaks_to_index : int
+            The maximum number of peak to index.
         n_best : int
             The maximum number of good solutions to be retained.
         keys : list
@@ -251,19 +236,26 @@ class VectorIndexationGenerator():
                                         library=library,
                                         mag_tol=mag_tol,
                                         angle_tol=angle_tol,
-                                        seed_pool_size=seed_pool_size,
+                                        index_error_tol=index_error_tol,
+                                        n_peaks_to_index=n_peaks_to_index,
                                         n_best=n_best,
                                         keys=keys,
                                         inplace=False,
+                                        parallel=False,  # TODO: For testing
                                         *args,
                                         **kwargs).data
+        # Ensure consistent dimensionality, in case only one peak was indexed
+        if matched.ndim == 2:
+            matched = matched[np.newaxis, :, :]
         indexation = matched[:, :, 0]
         rhkls = matched[:, :, 1]
 
         indexation_results = VectorMatchingResults(indexation)
+        indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors)
+        indexation_results.axes_manager.set_signal_dimension(0)
 
         vectors.hkls = rhkls
 

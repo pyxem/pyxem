@@ -70,10 +70,10 @@ match_results = indexer.correlate()
 def test_match_results():
     # Note the random number generator may give a different assertion failure
     # This should always work regardless of the RNG.
-    assert match_results.inav[0, 0].data[0][1] == 0
-    assert match_results.inav[1, 0].data[0][1] == 1
-    assert match_results.inav[0, 1].data[0][1] == 2
-    assert match_results.inav[1, 1].data[0][1] == 3
+    assert match_results.inav[0, 0].data[0][1][0] == 0
+    assert match_results.inav[1, 0].data[0][1][0] == 1
+    assert match_results.inav[0, 1].data[0][1][0] == 2
+    assert match_results.inav[1, 1].data[0][1][0] == 3
 
 
 def test_visuals():

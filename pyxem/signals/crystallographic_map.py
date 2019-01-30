@@ -35,14 +35,38 @@ Signal class for crystallographic phase and orientation maps.
 def load_mtex_map(filename):
     """
     Loads a crystallographic map saved by previously saved via .save_map()
+
+    Columns:
+    1 = phase id,
+    2-4 = Euler angles in the zxz convention (radians),
+    5 = Correlation score (only the best match is saved),
+    6 = x co-ord in navigation space,
+    7 = y co-ord in navigation space.
+
+    Parameters
+    ----------
+    filename : string
+        Path to the file to be loaded.
+
+    Returns
+    -------
+    crystallographic_map : CrystallographicMap
+        Crystallographic map loaded from the specified file.
+
     """
     load_array = np.loadtxt(filename, delimiter='\t')
-    x_max = np.max(load_array[:, 5]).astype(int)
-    y_max = np.max(load_array[:, 6]).astype(int)
-    # add one for zero indexing
-    array = load_array.reshape(x_max + 1, y_max + 1, 7)
-    cmap = Signal2D(array).transpose(navigation_axes=2)
-    return CrystallographicMap(cmap.isig[:5])  # don't keep x/y
+    # Add one for zero indexing
+    x_max = np.max(load_array[:, 5]).astype(int) + 1
+    y_max = np.max(load_array[:, 6]).astype(int) + 1
+    crystal_data = np.empty((y_max, x_max, 3), dtype='object')
+    for y in range(y_max):
+        for x in range(x_max):
+            load_index = y * x_max + x
+            crystal_data[y, x] = [
+                load_array[load_index, 0],
+                load_array[load_index, 1:4],
+                {'correlation': load_array[load_index, 4]}]
+    return CrystallographicMap(crystal_data)
 
 
 def _euler2axangle_signal(euler):
@@ -61,6 +85,7 @@ def _distance_from_fixed_angle(angle, fixed_angle):
     version finding the joining rotation.
 
     """
+    angle = angle[0]
     q_data = euler2quat(*np.deg2rad(angle), axes='rzxz')
     q_fixed = euler2quat(*np.deg2rad(fixed_angle), axes='rzxz')
     if np.abs(2 * (np.dot(q_data, q_fixed))**2 - 1) < 1:  # arcos will work
@@ -72,6 +97,26 @@ def _distance_from_fixed_angle(angle, fixed_angle):
         theta = np.abs(theta)
 
     return np.rad2deg(theta)
+
+
+def _metric_from_dict(metric_dict, metric):
+    """ Utility function for retrieving an entry in a dictionary. Used to map
+    over dicts in signal space.
+
+    Parameters
+    ----------
+    metric_dict : dict
+        Dictionary to retrieve entry from
+    metrics : string
+        Name of the entry
+
+    Returns
+    -------
+    entry
+        Dictionary entry specified by metric.
+
+    """
+    return metric_dict[0][metric]
 
 
 class CrystallographicMap(BaseSignal):
@@ -100,7 +145,7 @@ class CrystallographicMap(BaseSignal):
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
-    
+
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
@@ -132,8 +177,8 @@ class CrystallographicMap(BaseSignal):
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
         orientation_map = transfer_navigation_axes(orientation_map, self)
-        # TODO: Since vector matching results (and template in the future?) returns
-        # in object form, eulers inherits it
+        # TODO: Since vector matching results returns in object form, eulers
+        # inherits it
         orientation_map.change_dtype('float')
 
         return orientation_map
@@ -150,12 +195,21 @@ class CrystallographicMap(BaseSignal):
                 'correlation'
                 'orientation_reliability'
                 'phase_reliability'
+            Here, orientation reliability is given by
+                100 * (1 - second_best_correlation/best_correlation)
+            and phase reliability is given by
+                100 * (1 - second_best_correlation_of_other_phase/best_correlation)
+
             For vector_matching, valid metrics are;
                 'match_rate'
                 'ehkls'
                 'total_error'
                 'orientation_reliability'
                 'phase_reliability'
+            Here, orientation reliability is given by
+                100 * (1 - lowest_error/second_lowest_error)
+            and phase reliability is given by
+                100 * (1 - lowest_error/lowest_error_of_other_phase)
 
         Returns
         -------
@@ -163,29 +217,35 @@ class CrystallographicMap(BaseSignal):
             A map of the specified metric at each navigation position.
 
         """
-        if self.method=='template_matching':
-            template_metrics = {
-                'correlation': correlation,
-                'orientation_reliability': orientation_reliability,
-                'phase_reliability' : phase_reliability
-            }
-            if metric in metric_dict:
-                metric_map = self.isig[2][metric].as_signal2D((0, 1))
+        if self.method == 'template_matching':
+            template_metrics = [
+                'correlation',
+                'orientation_reliability',
+                'phase_reliability',
+            ]
+            if metric in template_metrics:
+                metric_map = self.isig[2].map(
+                    _metric_from_dict,
+                    metric=metric,
+                    inplace=False).as_signal2D((0, 1))
 
             else:
                 raise ValueError("The metric `{}` is not valid for template "
                                  "matching results. ")
 
-        elif self.method=='vector_matching':
-            vector_metrics = {
-                'match_rate': match_rate,
-                'ehkls': ehkls,
-                'total_error': total_error,
-                'orientation_reliability': orientation_reliability,
-                'phase_reliability' : phase_reliability
-            }
-            if metric in metric_dict:
-                metric_map = self.isig[2][metric].as_signal2D((0, 1))
+        elif self.method == 'vector_matching':
+            vector_metrics = [
+                'match_rate',
+                'ehkls',
+                'total_error',
+                'orientation_reliability',
+                'phase_reliability',
+            ]
+            if metric in vector_metrics:
+                metric_map = self.isig[2].map(
+                    _metric_from_dict,
+                    metric=metric,
+                    inplace=False).as_signal2D((0, 1))
 
             else:
                 raise ValueError("The metric `{}` is not valid for vector "
@@ -208,8 +268,9 @@ class CrystallographicMap(BaseSignal):
         modal_angles : list
             [modal_angles, fractional_occurance]
         """
-        element_count = self.data.shape[0] * self.data.shape[1]
-        euler_array = self.isig[1]
+        # Extract the euler arrays by flattening, creating a continuous list
+        # and converting it to an array again
+        euler_array = np.array(self.isig[1].data.ravel().tolist())
 
         pairs, counts = np.unique(euler_array, axis=0, return_counts=True)
 
@@ -250,7 +311,10 @@ class CrystallographicMap(BaseSignal):
         x_size_nav = self.data.shape[1]
         y_size_nav = self.data.shape[0]
         results_array = np.zeros((x_size_nav * y_size_nav, 7))
-        for i in tqdm(range(0, x_size_nav), ascii=True):
-            for j in range(0, y_size_nav):
-                results_array[(j) * x_size_nav + i] = np.append(self.inav[i, j].data[0:5], [i, j])
+        results_array[:, 0] = self.isig[0].data.ravel()
+        results_array[:, 1:4] = np.array(self.isig[1].data.tolist()).reshape(-1, 3)
+        results_array[:, 4] = self.get_metric_map('correlation').data.ravel()
+        x_indices = np.arange(x_size_nav)
+        y_indices = np.arange(y_size_nav)
+        results_array[:, 5:7] = np.array(np.meshgrid(x_indices, y_indices)).T.reshape(-1, 2)
         np.savetxt(filename, results_array, delimiter="\t", newline="\r\n")

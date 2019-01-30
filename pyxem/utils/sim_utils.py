@@ -335,8 +335,8 @@ def peaks_from_best_template(single_match_result, phase, library):
 
     Parameters
     ----------
-    single_match_result : matching_results
-        An entry in a matching_results object.
+    single_match_result : TemplateMatchingResults
+        An entry in a TemplateMatchingResults
     phase : list
         List of keys to library, as passed to IndexationGenerator.correlate()
     library : dictionary
@@ -347,26 +347,24 @@ def peaks_from_best_template(single_match_result, phase, library):
     peaks : array
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    best_fit = single_match_result[np.argmax(single_match_result[:, 4])]
+    best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
     _phase = phase[int(best_fit[0])]
     pattern = library.get_library_entry(
         phase=_phase,
-        angle=(
-            best_fit[1],
-            best_fit[2],
-            best_fit[3]))['Sim']
+        angle=tuple(best_fit[1]))['Sim']
     peaks = pattern.coordinates[:, :2]  # cut z
     return peaks
 
 
 def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
     """Finds all reciprocal lattice points inside a given reciprocal sphere.
-    Utilised within the DifractionGenerator.
+    Utilised within the DiffractionGenerator.
 
     Parameters
     ----------
     reciprocal_lattice : diffpy.Structure.Lattice
         The crystal lattice for the structure of interest.
+        TODO: Mention that it is the reciprocal lattice. Just take the structure and calculate from there?
     reciprocal_radius  : float
         The radius of the sphere in reciprocal space (units of reciprocal
         Angstroms) within which reciprocal lattice points are returned.

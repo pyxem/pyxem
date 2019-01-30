@@ -103,6 +103,7 @@ class TemplateMatchingResults(BaseSignal):
 
         cryst_map = CrystallographicMap(crystal_map)
         cryst_map = transfer_navigation_axes(cryst_map, self)
+        cryst_map.method = 'template_matching'
 
         return cryst_map
 
@@ -122,7 +123,7 @@ class VectorMatchingResults(BaseSignal):
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
-        self.axes_manager.set_signal_dimension(0)  # TODO: Correct? The data is dtype object...
+        self.axes_manager.set_signal_dimension(2)
         self.vectors = None
         self.hkls = None
 
@@ -156,6 +157,7 @@ class VectorMatchingResults(BaseSignal):
 
         cryst_map = CrystallographicMap(crystal_map)
         cryst_map = transfer_navigation_axes(cryst_map, self)
+        cryst_map.method = 'vector_matching'
 
         return cryst_map
 
@@ -175,12 +177,14 @@ class VectorMatchingResults(BaseSignal):
         indexed_vectors : DiffractionVectors
             An indexed diffraction vectors object.
         """
-        if overwrite==False:
+        if overwrite == False:
             if vectors.hkls is not None:
                 warn("The vectors supplied are already associated with hkls set "
                      "overwrite=True to replace these hkls.")
             else:
                 vectors.hkls = self.hkls
 
-        elif overwrite==True:
+        elif overwrite == True:
             vectors.hkls = self.hkls
+
+        return vectors

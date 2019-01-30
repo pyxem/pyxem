@@ -22,38 +22,42 @@ import math
 from transforms3d.axangles import axangle2mat
 
 
-def detector_to_fourier(z, wavelength, camera_length):
+def detector_to_fourier(k_xy, wavelength, camera_length):
     """Maps two-dimensional Cartesian coordinates in the detector plane to
-    three-dimensional coordinates in reciprocal space.
+    three-dimensional coordinates in reciprocal space, with origo in [000].
 
     Parameters
     ----------
-    z : np.array()
-        Array of Cartesian coordinates in the detector plane.
+    k_xy : np.array()
+        Array of Cartesian coordinates in the detector plane, in reciprocal Ångström.
     wavelength : float
-        Electron wavelength in Angstroms.
+        Electron wavelength in Ångström.
     camera_length : float
         Camera length in metres.
 
     Returns
     -------
     k : np.array()
-        Array of Cartesian coordinates in reciprocal space.
+        Array of Cartesian coordinates in reciprocal space relative to [000].
 
     """
-    # specify experimental parameters
-    # TODO: z is a 1-element ndarray(dtype='object') containing the coordinates
-    z = z[0]
-    camera_length = np.ones(len(z)) * camera_length
-    camera_length = np.reshape(camera_length, (-1, 1))
-    # reshape and scale 2D vectors
-    k = np.hstack((z, camera_length))
-    # Compute norm of each row in k1
-    k_norm = np.sqrt(np.sum(k * k, 1))
-    k /= k_norm[:, np.newaxis]
-    # TODO: Why do we subtract 1 (or k_norm before normalizing) from the camera length component (correct?)
-    k[:, 2] -= 1
-    k *= 1 / wavelength
+
+    k_xy = k_xy[0]
+    # # The calibrated positions of the diffraction spots are already the x and y
+    # # coordinates of the k vector on the Ewald sphere. The radius is given by
+    # # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
+    # # the Ewald sphere radius.
+    # TODO: Actual projection to Ewald sphere (below). For now, just use the
+    # direct, calibrated detector coordinates in 2D, and set the z
+    # coordinate to zero
+
+    k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
+
+    # For now, just set k_z = 0
+    # k_z = np.zeros((k_xy.shape[0]))
+
+    # Stack the xy-vector and the z vector to get the full k
+    k = np.hstack((k_xy, k_z[:, np.newaxis]))
     return k
 
 
@@ -70,10 +74,7 @@ def calculate_norms(z):
     norms : np.array()
         Array of vector norms.
     """
-    norms = []
-    for i in z:
-        norms.append(np.linalg.norm(i))
-    return np.asarray(norms)
+    return np.linalg.norm(z, axis=1)
 
 
 def calculate_norms_ragged(z):
@@ -97,8 +98,8 @@ def calculate_norms_ragged(z):
 
 
 def get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2):
-    """Calculates the rotation matrix between two experimentally measured
-    diffraction vectors and the corresponding vectors in a reference structure.
+    """Calculates the rotation matrix to two experimentally measured
+    diffraction vectors from the corresponding vectors in a reference structure.
 
     Parameters
     ----------
@@ -119,21 +120,24 @@ def get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2):
     """
     ref_plane_normal = np.cross(ref_k1, ref_k2)
     k_plane_normal = np.cross(k1, k2)
-    # avoid 0 degree including angle
-    if np.linalg.norm(k_plane_normal) or np.linalg.norm(ref_plane_normal):
+    axis = np.cross(ref_plane_normal, k_plane_normal)
+    # Avoid 0 degree including angle
+    if np.linalg.norm(axis) == 0:
         R = np.identity(3)
     else:
-        axis = np.cross(ref_plane_normal, k_plane_normal)
+        # Rotate ref plane into k plane
         angle = get_angle_cartesian(ref_plane_normal, k_plane_normal)
         R1 = axangle2mat(axis, angle)
-        # rotate ref_k1,2 plane to k1,2 plane
         rot_ref_k1, rot_ref_k2 = R1.dot(ref_k1), R1.dot(ref_k2)
-        # TODO: can one of the vectors be zero vectors?
+
+        # Rotate ref vectors in plane
         angle1 = get_angle_cartesian(k1, rot_ref_k1)
         angle2 = get_angle_cartesian(k2, rot_ref_k2)
         angle = 0.5 * (angle1 + angle2)
-        axis = np.cross(rot_ref_k1, k1)
-        R2 = axangle2mat(axis, angle)
+        # k plane normal still the same
+        R2 = axangle2mat(k_plane_normal, angle)
+
+        # Total rotation is the combination of to plane R1 and in plane R2
         R = R2.dot(R1)
 
     return R
