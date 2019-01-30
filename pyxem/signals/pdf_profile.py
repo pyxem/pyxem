@@ -20,6 +20,7 @@ as a function of distance r.
 """
 
 from hyperspy.signals import Signal1D
+import numpy as np
 
 
 class PDFProfile(Signal1D):
@@ -27,3 +28,23 @@ class PDFProfile(Signal1D):
 
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
+
+    def normalise_signal(self):
+        """
+        Normalises the Reduced PDF signal to having a maximum of 1.
+        This is applied to each pdf separately in a multidimensional signal.
+
+        """
+        size_x = self.data.shape[0]
+        size_y = self.data.shape[1]
+        size_s = self.data.shape[2]
+
+        shaped_signal = self.data.reshape(size_x * size_y, 1, size_s)
+
+        max_values = np.array(list(map(lambda x: np.max(x), shaped_signal)))
+        norm_fac = np.divide(1, max_values)
+        norm_fac = norm_fac.reshape(size_x, size_y, 1)
+
+        normalised_data = self.data * norm_fac
+        self.data = normalised_data
+        return

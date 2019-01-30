@@ -26,6 +26,7 @@ from hyperspy.component import Component
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from pyxem.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 
+
 class ScatteringFitComponent(Component):
 
     def __init__(self, elements, fracs, N=1., C=0., type='lobato'):
@@ -75,30 +76,23 @@ class ScatteringFitComponent(Component):
         if self.type == 'lobato':
             for i, element in enumerate(params):
                 fi = np.zeros(x.size)
-                for n in range(len(element)): #5 parameters per element
-                    fi += (element[n][0] * (2 + element[n][1] * np.square(2*x))
-                        * np.divide(1,np.square(1 + element[n][1] *
-                        np.square(2*x))))
+                for n in range(len(element)):  # 5 parameters per element
+                    fi += (element[n][0] * (2 + element[n][1] * np.square(2 * x))
+                           * np.divide(1, np.square(1 + element[n][1] *
+                                                    np.square(2 * x))))
                 elem_frac = fracs[i]
-                sum_squares += np.square(fi)*elem_frac
-                square_sum += fi*elem_frac
+                sum_squares += np.square(fi) * elem_frac
+                square_sum += fi * elem_frac
 
         elif self.type == 'xtables':
             for i, element in enumerate(params):
                 fi = np.zeros(x.size)
-                for n in range(len(element)): #5 parameters per element
+                for n in range(len(element)):  # 5 parameters per element
                     fi += element[n][0] * np.exp(-element[n][1] * (np.square(x)))
                 elem_frac = fracs[i]
-                sum_squares += np.square(fi)*elem_frac
-                square_sum += fi*elem_frac
-
-        else:
-            print('Error. Specified type does not exist.')
-            return
+                sum_squares += np.square(fi) * elem_frac
+                square_sum += fi * elem_frac
 
         self.square_sum = N * np.square(square_sum)
-        #square sum is kept for normalisation.
+        # square sum is kept for normalisation.
         return N * sum_squares + C
-
-    def get_fit_as_signal(self):
-        return

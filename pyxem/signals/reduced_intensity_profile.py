@@ -21,8 +21,12 @@ vector.
 """
 
 from hyperspy.signals import Signal1D
-#??from hyperspy.component import Polynomial
+# ??from hyperspy.component import Polynomial
 import numpy as np
+from scipy import special
+from scipy.signal import savgol_filter
+
+from pyxem.components.reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
 
 
 class ReducedIntensityProfile(Signal1D):
@@ -31,7 +35,7 @@ class ReducedIntensityProfile(Signal1D):
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
 
-    def damp_exponential(self,b):
+    def damp_exponential(self, b):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -42,13 +46,13 @@ class ReducedIntensityProfile(Signal1D):
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
-        #should include offset
-        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+        # should include offset
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
         damping_term = np.exp(-b * np.square(scattering_axis))
         self.data = self.data * damping_term
         return
 
-    def damp_lorch(self,s_max=None):
+    def damp_lorch(self, s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -62,16 +66,16 @@ class ReducedIntensityProfile(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
-            s_max = s_scale*s_size
+            s_max = s_scale * s_size
         delta = np.pi / s_max
 
-        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
         damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
         damping_term = np.nan_to_num(damping_term)
         self.data = self.data * damping_term
         return
 
-    def damp_updated_lorch(self,s_max=None):
+    def damp_updated_lorch(self, s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region.
 
@@ -87,25 +91,43 @@ class ReducedIntensityProfile(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
-            s_max = s_scale*s_size
+            s_max = s_scale * s_size
         delta = np.pi / s_max
 
-        scattering_axis = s_scale * np.arange(s_size,dtype='float64')
-        exponent_array = 3*np.ones(scattering_axis.shape)
-        cubic_array = np.power(scattering_axis,exponent_array)
-        multiplicative_term = np.divide(3/(delta**3),cubic_array)
-        sine_term = (np.sin(delta*scattering_axis)
-                    -delta*scattering_axis*np.cos(delta*scattering_axis))
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+        exponent_array = 3 * np.ones(scattering_axis.shape)
+        cubic_array = np.power(scattering_axis, exponent_array)
+        multiplicative_term = np.divide(3 / (delta**3), cubic_array)
+        sine_term = (np.sin(delta * scattering_axis)
+                     - delta * scattering_axis * np.cos(delta * scattering_axis))
 
-        damping_term = multiplicative_term*sine_term
+        damping_term = multiplicative_term * sine_term
         damping_term = np.nan_to_num(damping_term)
         self.data = self.data * damping_term
         return
 
-    def fit_thermal_multiple_scattering_correction(self, s_max):
+    def damp_low_q_region_erfc(self, scale=20, offset=1.3):
+        """ Damps the reduced intensity signal in the low q region as a
+        correction to central beam effects
+
+        Parameters
+        ----------
+        scale : a scalar affecting the error function
+        offset : a scalar offset affecting the error function
+        """
+        s_scale = self.axes_manager.signal_axes[0].scale
+        s_size = self.axes_manager.signal_axes[0].size
+
+        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+
+        damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
+        self.data = self.data * damping_term
+        return
+
+    def fit_thermal_multiple_scattering_correction(self, s_max=None, plot=False):
         """ Fits a 4th order polynomial function to the reduced intensity.
         This is used to calculate the error in the reduced intensity due to
-        the effects of multiple and thermally diffuse scattering, which
+        the effects of multiple and thermal diffuse scattering, which
         results in the earlier background fit being incorrect for either
         low or high angle scattering (or both). A correction is then applied,
         making the reduced intensity oscillate around zero as it should. This
@@ -125,17 +147,41 @@ class ReducedIntensityProfile(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
-            s_max = s_scale*s_size
+            s_max = s_scale * (s_size + 1)
 
         #scattering_axis = s_scale * np.arange(s_size,dtype='float64')
-        fit_model = self.signal.create_model()
-        fit_model.append(Polynomial(4))
-        fit_model.set_signal_range([0,s_max])
+        fit_model = self.create_model()
+        fit_model.append(ReducedIntensityCorrectionComponent())
+        fit_model.set_signal_range([0, s_max])
         fit_model.multifit()
         fit_value = fit_model.as_signal()
-        fit_model.plot()
-
+        if plot:
+            fit_model.plot()
 
         self.data = self.data - fit_value
 
         return
+
+    def smooth_moving_average_filter(self, n_points=5):
+        """
+        Smooths the reduced intensity signal using a moving average filter.
+        The signal at each point is replaced by an average of the nearest
+        n points. This operation is done via a convolution with a moving box.
+
+        Parameters
+        ----------
+        n_points : the number of points over which the signal is averaged over.
+                    This is the total number, and must be odd so that the
+                    smoothing is symmetric.
+        """
+        raise NotImplementedError("Not implemented yet!")
+        '''
+        if n_points%2 != 1 or n_points < 1:
+            raise ValueError("N must be a positive odd integer.")
+            return
+        box = np.ones(n_points)/n_points
+        smoothed_data = np.convolve(self.data,box,mode='same')
+
+        self.data = smoothed_data
+        return
+        '''
