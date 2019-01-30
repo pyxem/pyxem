@@ -16,14 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import numpy as np
+
 from hyperspy.signals import BaseSignal, Signal1D
 from hyperspy.api import markers
 
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
-from pyxem.utils.expt_utils import *
-from pyxem.utils.vector_utils import *
+from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
+from pyxem.utils.vector_utils import get_indices_from_distance_matrix
+from pyxem.utils.vector_utils import get_npeaks
+
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
@@ -41,10 +46,24 @@ number of peaks.
 
 
 class DiffractionVectors(BaseSignal):
+    """Crystallographic mapping results containing the best matching crystal
+    phase and orientation at each navigation position with associated metrics.
+
+    Attributes
+    ----------
+    cartesian : np.array()
+        Array of 3-vectors describing Cartesian coordinates associated with
+        each diffraction vector.
+    hkls : np.array()
+        Array of Miller indices associated with each diffraction vector
+        following indexation.
+    """
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
+        self.cartesian = None
+        self.hkls = None
 
     def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
         """Plot the unique diffraction vectors.
@@ -241,3 +260,25 @@ class DiffractionVectors(BaseSignal):
         y.units = 'nm'
 
         return crystim
+
+    def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length,
+                                        *args, **kwargs):
+        """Get cartesian coordinates of the diffraction vectors.
+
+        Parameters
+        ----------
+        accelerating_voltage : float
+            The acceleration voltage with which the data was acquired.
+        camera_length : float
+            The camera length in meters.
+        """
+        # Imported here to avoid circular dependency
+        from pyxem.utils.sim_utils import get_electron_wavelength
+        wavelength = get_electron_wavelength(accelerating_voltage)
+        self.cartesian = self.map(detector_to_fourier,
+                                  wavelength=wavelength,
+                                  camera_length=camera_length,
+                                  inplace=False,
+                                  parallel=False,  # TODO: For testing
+                                  *args, **kwargs)
+        self.cartesian.axes_manager.set_signal_dimension(0)

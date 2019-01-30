@@ -21,7 +21,9 @@ from collections import OrderedDict
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import display
-from .peakfinders2D import *
+
+from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
+    find_peaks_dog, find_peaks_log, find_peaks_xc
 
 METHODS = [find_peaks_zaefferer, find_peaks_stat, find_peaks_dog, find_peaks_log, find_peaks_xc]
 

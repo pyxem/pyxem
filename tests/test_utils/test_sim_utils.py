@@ -21,7 +21,12 @@ import numpy as np
 import diffpy
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.utils.sim_utils import *
+from pyxem.utils.sim_utils import get_electron_wavelength, \
+    get_interaction_constant, get_unique_families, get_kinematical_intensities,\
+    get_vectorized_list_for_atomic_scattering_factors, get_points_in_sphere, \
+    simulate_kinematic_scattering, peaks_from_best_template, \
+    is_lattice_hexagonal, transfer_navigation_axes, uvtw_to_uvw, \
+    rotation_list_stereographic
 
 
 def create_lattice_structure(a, b, c, alpha, beta, gamma):
