@@ -244,6 +244,9 @@ class VectorIndexationGenerator():
                                         parallel=False,  # TODO: For testing
                                         *args,
                                         **kwargs).data
+        # Ensure consistent dimensionality, in case only one peak was indexed
+        if matched.ndim == 2:
+            matched = matched[np.newaxis, :, :]
         indexation = matched[:, :, 0]
         rhkls = matched[:, :, 1]
 

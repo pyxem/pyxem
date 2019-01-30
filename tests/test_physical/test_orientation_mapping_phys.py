@@ -24,7 +24,8 @@ import diffpy.structure
 
 from transforms3d.euler import euler2mat
 
-from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.generators.indexation_generator import IndexationGenerator, VectorIndexationGenerator
+from pyxem.generators.library_generator import VectorLibraryGenerator
 from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.utils.sim_utils import peaks_from_best_template, get_kinematical_intensities
 

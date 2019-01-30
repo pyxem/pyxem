@@ -269,7 +269,15 @@ def match_vectors(peaks,
 
         # TODO: Refine?
 
-    return top_matches.reshape((len(library) * n_best, 5)), res_rhkls
+    # Because of a bug in numpy (https://github.com/numpy/numpy/issues/7453),
+    # triggered by the way HyperSpy reads results (np.asarray(res), which fails
+    # when the two tuple values have the same first dimension), we cannot
+    # return a tuple directly, but instead have to format the result as an
+    # array ourselves.
+    res = np.empty(2, dtype='object')
+    res[0] = top_matches.reshape((len(library) * n_best, 5))
+    res[1] = np.asarray(res_rhkls)
+    return res
 
 
 def crystal_from_template_matching(z_matches):

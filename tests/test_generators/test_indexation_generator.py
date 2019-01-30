@@ -123,9 +123,9 @@ def test_vector_indexation_generator_cartesian_check():
 
 
 def test_vector_indexation_generator_index_vectors(vector_match_peaks, vector_library):
-    vectors = DiffractionVectors(np.array([vector_match_peaks], dtype='object'))
-    vectors.cartesian = DiffractionVectors(np.array([vector_match_peaks], dtype='object'))
-    vectors.cartesian.axes_manager.set_signal_dimension(0)
+    vectors = DiffractionVectors(np.array([vector_match_peaks[:, :, :2]]))  # vectors not used directly
+    vectors.cartesian = DiffractionVectors(np.array([vector_match_peaks]))
+    vectors.cartesian.axes_manager.set_signal_dimension(3)  # Overcome object array mapping
     gen = VectorIndexationGenerator(vectors, vector_library)
     indexation = gen.index_vectors(
         mag_tol=0.1,
@@ -137,4 +137,5 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks, vector_li
 
     # Values are tested directly on the match_vector in the util tests
     assert isinstance(indexation.vectors, DiffractionVectors)
-    np.testing.assert_equal(indexation.hkls.shape, (1, 3, 2))
+    np.testing.assert_equal(indexation.data[0, 0].shape, (1, 5))  # (n_best=1, 5 result values from each)
+    np.testing.assert_equal(indexation.hkls[0, 0].shape, (1, 3, 3))  # n_best=1, 3 peaks with hkl)
