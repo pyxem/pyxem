@@ -252,6 +252,7 @@ class VectorIndexationGenerator():
         indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors)
+        indexation_results.axes_manager.set_signal_dimension(0)
 
         vectors.hkls = rhkls
 
