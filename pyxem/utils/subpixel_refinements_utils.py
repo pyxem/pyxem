@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017-2018 The pyXem developers
+# -*- coding: utf-8 -*-
 #
 # This file is part of pyXem.
 #
@@ -45,9 +45,12 @@ def get_experimental_square(z, vector, square_size):
         Of size (L,L) where L = square_size
 
     """
+    if square_size %2 != 0:
+        raise ValueError("'square_size' must be an even number")
 
     cx, cy, half_ss = vector[0], vector[1], int(square_size / 2)
-    _z = z[cx - half_ss:cx + half_ss, cy - half_ss:cy + half_ss]
+    # select square with correct x,y see PR for details
+    _z = z[cy - half_ss:cy + half_ss, cx - half_ss:cx + half_ss]
     return _z
 
 
@@ -67,6 +70,9 @@ def get_simulated_disc(square_size, disc_radius):
         Upsampled copy of the simulated disc as a numpy array
 
     """
+
+    if square_size %2 != 0:
+        raise ValueError("'square_size' must be an even number")
 
     ss = int(square_size)
     arr = np.zeros((ss, ss))
