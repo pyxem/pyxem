@@ -462,7 +462,8 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        Diffraction Pattern, centered.
+        centered : ElectronDiffraction
+            The centered diffraction data.
 
         """
         nav_shape_x = self.data.shape[0]
@@ -488,8 +489,7 @@ class ElectronDiffraction(Signal2D):
 
     def fit_ring_pattern(self, mask_radius, scale=100, amplitude=1000, spread=2,
                          direct_beam_amplitude=500, asymmetry=1, rotation=0):
-        """
-        Determine diffraction pattern calibration and distortions from by
+        """Determine diffraction pattern calibration and distortions from by
         fitting a polycrystalline gold diffraction pattern to a set of rings.
         It is suggested that the function generate_ring_pattern is used to
         find initial values (initial guess) for the parameters used in the fit.
@@ -523,7 +523,8 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         ----------
-        Array of refined fitting parameters
+        params : np.array()
+            Array of fitting parameters.
            [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation].
 
         """
@@ -553,8 +554,7 @@ class ElectronDiffraction(Signal2D):
     def generate_ring_pattern(self, mask=False, mask_radius=10, scale=100,
                               amplitude=1000, spread=2, direct_beam_amplitude=500,
                               asymmetry=1, rotation=0):
-        """
-        Calculate a set of rings to model a polycrystalline gold diffraction
+        """Calculate a set of rings to model a polycrystalline gold diffraction
         pattern for use in fitting for diffraction pattern calibration.
         It is suggested that the function generate_ring_pattern is used to
         find initial values (initial guess) for the parameters used in
@@ -592,9 +592,9 @@ class ElectronDiffraction(Signal2D):
             in radians.
 
         Returns
-        ----------
-        2D array with the same dimensions and orientation as self.data
-        (the input diffraction pattern data)
+        -------
+        image : np.array()
+            Simulated ring pattern with the same dimensions as self.data
 
         """
         image_size = self.data.shape[0]
@@ -703,9 +703,9 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        *args:
+        *args :
             Arguments to be passed to decomposition().
-        **kwargs:
+        **kwargs :
             Keyword arguments to be passed to decomposition().
 
         Returns
