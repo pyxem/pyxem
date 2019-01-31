@@ -21,15 +21,14 @@ import numpy as np
 
 
 def load_DiffractionLibrary(filename, safety=False):
-    """
-    Loads a previously saved diffraction library
+    """Loads a previously saved diffraction library.
 
     Parameters
     ----------
     filename : str
         The location of the file to be loaded
     safety : bool (defaults to False)
-        Unpickling is risky, this variable requires you to acknowledge those risks
+        Unpickling is risky, this variable requires you to acknowledge this.
 
     Returns
     -------
@@ -39,6 +38,7 @@ def load_DiffractionLibrary(filename, safety=False):
     See Also
     --------
     DiffractionLibrary.pickle_library()
+
     """
     if safety:
         with open(filename, 'rb') as handle:
@@ -89,6 +89,7 @@ class DiffractionLibrary(dict):
     structures : list of diffpy.structure.Structure objects.
         A list of diffpy.structure.Structure objects describing the atomic
         structure associated with each phase in the library.
+
     """
 
     def __init__(self, *args, **kwargs):
@@ -112,6 +113,7 @@ class DiffractionLibrary(dict):
         library_entries : dict
             Dictionary containing the simulation associated with the specified
             phase and orientation with associated properties.
+
         """
 
         if phase is not None:
@@ -141,6 +143,7 @@ class DiffractionLibrary(dict):
         See Also
         --------
         load_DiffractionLibrary()
+
         """
         with open(filename, 'wb') as handle:
             pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
