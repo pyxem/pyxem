@@ -24,8 +24,18 @@ from mpl_toolkits.axisartist.floating_axes import GridHelperCurveLinear, \
 
 
 def _find_max_length_peaks(peaks):
-    """
-    Worker function for generate_marker_inputs_from_peaks
+    """Worker function for generate_marker_inputs_from_peaks.
+
+    Parameters
+    ----------
+    peaks : :class:`pyxem.diffraction_vectors.DiffractionVectors`
+        Identified peaks in a diffraction signal.
+
+    Returns
+    -------
+    longest_length : int
+        The length of the longest peak list.
+
     """
     # FIX ME
     x_size, y_size = peaks.axes_manager.navigation_shape[0], peaks.axes_manager.navigation_shape[1]
