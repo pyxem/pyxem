@@ -184,21 +184,20 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
-    def get_unique_vectors(self,
-                           distance_threshold=0):
+    def get_unique_vectors(self, distance_threshold=0):
         """Obtain the unique diffraction vectors.
 
         Parameters
         ----------
         distance_threshold : float
-            The minimum distance between diffraction vectors for them to be
-            considered unique diffraction vectors.
+            The minimum distance between diffraction vectors for them to
+            be considered unique diffraction vectors.
 
         Returns
         -------
         unique_vectors : DiffractionVectors
-            A DiffractionVectors object containing only the unique diffraction
-            vectors in the original object.
+            A DiffractionVectors object containing only the unique
+            diffraction vectors of the original object.
         """
         if self.axes_manager.navigation_dimension == 2:
             gvlist = np.array([self.data[0, 0][0]])
@@ -219,7 +218,7 @@ class DiffractionVectors(BaseSignal):
         l = np.shape(gvlist)[0]
         distances = distance_matrix(gvlist, gvlist)
         for i in range(np.shape(distances)[1]):
-            if (np.sum(distances[:, i] <= distance_threshold) > 1):
+            if np.sum(distances[:, i] <= distance_threshold) > 1:
                 delete_indices = np.append(delete_indices, i)
         gvecs = np.delete(gvlist, delete_indices, axis=0)
 
@@ -245,7 +244,7 @@ class DiffractionVectors(BaseSignal):
         """
         crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
 
-        if binary == True:
+        if binary is True:
             crystim = crystim == 1
 
         crystim.change_dtype('float')

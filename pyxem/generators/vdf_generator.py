@@ -16,19 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""VDF generator and associated tools.
+"""VDF generator, VDF segment generator and associated tools.
 
 """
 
-from pyxem.signals.vdf_image import VDFImage
-from pyxem.utils.vdf_utils import normalize_vdf
+from pyxem.signals.vdf_image import VDFImage, VDFSegment
+from pyxem.utils.vdf_utils import normalize_vdf, separate
 
 from hyperspy.api import roi
 import numpy as np
 
 
-class VDFGenerator():
-    """Generates a VDF images for a specified signal and set of aperture
+class VDFGenerator:
+    """Generates VDF images for a specified signal and set of aperture
     positions.
 
     Parameters
@@ -86,7 +86,7 @@ class VDFGenerator():
 
             vdfim = VDFImage(np.asarray(vdfs))
 
-            if normalize == True:
+            if normalize is True:
                 vdfim.map(normalize_vdf)
 
         else:
@@ -170,3 +170,99 @@ class VDFGenerator():
         y.units = 'nm'
 
         return vdfim
+
+
+class VDFSegmentGenerator:
+    """Generates VDF segments for specified VDFImages and corresponding
+    set of aperture positions (i.e. unique vectors).
+
+    Parameters
+    ----------
+    vdfs : VDFImage
+        The VDF images to be segmented.
+    vectors: DiffractionVectors
+        The vector positions corresponding to the VDF images.
+
+    """
+
+    def __init__(self, vdfs, *args, **kwargs):
+        # If ragged the signal axes will not be defined
+
+        self.vdf_images = vdfs
+        self.vectors = vdfs.vectors
+
+    def get_vdf_segments(self, min_distance=min_distance,
+                         threshold=threshold, min_size=min_size,
+                         max_size=max_size,
+                         max_number_of_grains=max_number_of_grains,
+                         exclude_border=exclude_border,):
+        """Separate out different segments (grains) for each VDF of
+        VDFImage. Obtain a VDFSegment, similar to VDFImage, but where
+        each image is a segment of a VDF and the vectors correspond to
+        each segment and are not unique. Current segmentation method is
+        the watershed segmentation implemented in scikit-image [1].
+
+        Parameters
+        ----------
+        vdf_temp : np.array
+            One VDF image.
+        min_distance: int
+            Minimum distance (in pixels) between grains required for
+            them to be considered as separate grains.
+        threshold : float
+            Threshold value between 0-1 for the VDF image. Pixels with
+            values below (threshold*max intensity in VDF) are discarded.
+        min_size : float
+            Grains with size (i.e. total number of pixels) below
+            min_size are discarded.
+        max_size : float
+            Grains with size (i.e. total number of pixels) above
+            max_size are discarded.
+        max_number_of_grains : int
+            Maximum number of grains included in the returned separated
+            grains. If it is exceeded, those with highest peak
+            intensities will be returned.
+        exclude_border : int or True, optional
+            If non-zero integer, peaks within a distance of
+            exclude_border from the boarder will be discarded. If True,
+            peaks at or closer than min_distance of the boarder, will be
+            discarded.
+
+        References
+        ----------
+        [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/
+            plot_watershed.html
+
+        Returns
+        -------
+        vdfsegs : VDFSegment
+            VDFSegment object containing segments (i.e. grains) of single
+            virtual dark field images with corresponding vectors.
+        """
+        # TODO Add axes attributes as for VDFImage.
+        vdfs = self.vdf_images
+        vectors = self.vectors
+
+        # Create an array of length equal to the number of vectors where each
+        # element is a np.object with shape (number of segments for this
+        # VDFImage, VDFImage size x, VDFImage size y).
+        vdfsegs = np.array(vdfs.map(separate, show_progressbar=True,
+                                    inplace=False, min_distance=min_distance,
+                                    threshold=threshold, min_size=min_size,
+                                    max_size=max_size,
+                                    max_number_of_grains=max_number_of_grains,
+                                    exclude_border=exclude_border,
+                                    plot_on=False), dtype=np.object)
+
+        segments, vectors_of_segments = [], []
+        for i, vector in zip(np.arange(vectors.size), vectors):
+            segments = np.append(segments, vdfsegs[i].T, axis=0)
+            num_segs = np.shape(vdfsegs[i])[0]
+            vectors_of_segments = np.append(vectors_of_segments,
+                                            np.broadcast_to(vector,
+                                                            (num_segs, 2)),
+                                            axis=0)
+        vectors_of_segments = vectors_of_segments.reshape((-1, 2))
+        vdfsegs = VDFSegment(segments, vectors_of_segments)
+
+        return vdfsegs

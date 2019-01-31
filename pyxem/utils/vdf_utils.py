@@ -148,7 +148,7 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
         Minimum distance (in pixels) between grains required for them to
         be considered as separate grains.
     threshold : float
-        Threhsold value between 0-1 for the VDF image. Pixels with
+        Threshold value between 0-1 for the VDF image. Pixels with
         values below (threshold*max intensity in VDF) are discarded.
     min_size : float
         Grains with size (i.e. total number of pixels) below min_size
@@ -165,14 +165,14 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
         from the boarder will be discarded. If True, peaks at or closer
         than min_distance of the boarder, will be discarded.
     plot_on : bool
-        If Ture, the VDF, the thresholded VDF, the distance transform
+        If True, the VDF, the thresholded VDF, the distance transform
         and the separated grains will be plotted in one figure window.
 
     Returns
     -------
-    sep : ndarray
-        Array containing boolean images of separated grains.
-        Shape: (image size, image size, number of grains)
+    sep : np.array
+        Array containing segments from VDF images (i.e. separated
+        grains). Shape: (image size, image size, number of grains)
 
     References
     ----------

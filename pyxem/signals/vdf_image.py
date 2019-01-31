@@ -23,8 +23,9 @@ from pyxem.signals import push_metadata_through
 
 import numpy as np
 from hyperspy.signals import BaseSignal, Signal2D
-from pyxem.utils.vdf_utils import normalize_vdf, norm_cross_corr, corr_check, \
-make_g_of_i, separate
+from pyxem.utils.vdf_utils import (normalize_vdf, norm_cross_corr, corr_check,
+                                   make_g_of_i, separate)
+
 
 class VDFImage(Signal2D):
     _signal_type = "vdf_image"
@@ -34,91 +35,16 @@ class VDFImage(Signal2D):
         super().__init__(*args, **kwargs)
         self.vectors = None
 
-    def separate_stack(self,
-                       min_distance,
-                       threshold,
-                       min_size,
-                       max_size,
-                       max_number_of_grains = np.inf,
-                       exclude_border=0):
-        """Separate grains from a stack of images using the watershed segmentation implemented in skimage [1], 
-        by mapping the function separate onto the stack. 
-        Parameters
-        ----------
-        min_distance: int
-            Minimum distance (in pixels) between features, e.g. grains, in order to consider them as separate. 
-        threshold : float
-            Threhsold value between 0-1 for each image. Pixels with values below 
-            (threshold*max intensity in the image) are discarded and not considered in the separation. 
-        discard_size : float
-            Grains (features) with length below discard_size are discarded.
-            
-        Returns
-        -------
-        seps_stack : ndarray
-            Stack of boolean images of separated grains from each VDF image.
-            
-        References
-        ----------
-        [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html
-        TODO: Enable plot of separate stack as in separate!
-        """
-        return SepsStack(np.array((self).map(separate, 
-                                            show_progressbar=True, 
-                                            parallel=None, 
-                                            inplace=False, 
-                                            ragged=None, 
-                                            min_distance=min_distance,
-                                            threshold=threshold,
-                                            min_size=min_size,
-                                            max_size=max_size,
-                                            max_number_of_grains=max_number_of_grains,
-                                            exclude_border=exclude_border,
-                                            plot_on=False),
-                                            dtype=np.object))
 
-class SepsStack(BaseSignal):
-    """Stack of separated grains, made from applying the function separate_stack 
-       on a stack of VDF images. """
-    _signal_type = "separated_image_stack"
-
-    def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
-
-    def get_VDFgvectorStack(self,unique_vectors):
-          
-            """Makes a image_vector_stack class instance,
-             holding all the separated grains images and corresponding g-vectors. 
-            Parameters
-            ----------
-            unique_vectors : ndarray
-                Array of unique vectors that corresponds to the VDF images that seps_temp originates from. 
-                
-            Returns
-            -------
-            image_vector_stack
-            """               
-            images = self.data[0].T
-            vectors=np.array(np.empty((1)),dtype='object')
-            vectors[0]=unique_vectors[0]
-            for i in range(1,np.shape(self)[0]):
-                images = np.append(images, self.data[i].T,axis = 0)
-                repeats=np.array(np.empty((np.shape(self.data[i])[2])),dtype='object')
-                for n in range(np.shape(self.data[i])[2]):
-                    repeats[n] = unique_vectors[i]
-                vectors = np.append(vectors,repeats,axis=0)               
-            return VDFgvectorStack(images,vectors)
-
-
-class VDFgvectorStack():
+class VDFSegment:
     '''Class for which VDFgvectorStack.images holds all the VDF images of the separated grains,
     and VDFgvectorStack.vectors the corresponding g-vector for each image.'''
     _signal_type = "image_vector_stack"
 
-    def __init__(self, images, vectors, *args,**kwargs):
-        self.images = Signal2D(images)
-        self.vectors = DiffractionVectors(vectors)
-        self.vectors.axes_manager.set_signal_dimension(0)
+    def __init__(self, segments, vectors_of_segments, *args,**kwargs):
+        self.segments = Signal2D(segments)
+        self.vectors_of_segments = DiffractionVectors(vectors_of_segments)
+        self.vectors_of_segments.axes_manager.set_signal_dimension(0)
 
     def image_correlate_stack(self,corr_threshold=0.9):
         """Iterates through VDFgvectorStack, and sums those that are associated with the same grains. 
