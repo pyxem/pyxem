@@ -15,8 +15,8 @@
     :align: right
     :target: https://github.com/pyxem/pyxem
 
-Introduction
-============
+pyXem - Crystallographic Electron Microscopy in Python
+======================================================
 
 .. image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
     :target: https://travis-ci.org/pyxem/pyxem
@@ -35,7 +35,9 @@ This approach may be illustrated schematically, as follows:
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
 by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__
-for atomic structure manipulation. pyXem is released under the GPL v3 license.
+for atomic structure manipulation. pyXem is released under the GPL v3 license. If analysis using pyxem
+forms a part of published work please consider recognising the code development by citing the github
+repository.
 
 
 Installation
@@ -46,7 +48,7 @@ pyXem requires python 3 and conda (to install a Py3 compatitble version of diffp
       $ conda create -n pyxem
       $ conda activate pyxem
 
-The following commands will install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
+The following commands will then install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
 
       $ conda install -c conda-forge diffpy.structure
       $ conda install -c anaconda cython
@@ -58,12 +60,12 @@ The following commands will install everything you need if entered into the anac
 Getting Started
 ---------------
 
-To get started using pyxem, especially if you are unfamiliar with python, we recommend you use jupyter notebooks. Having installed pyxem as above a jupyter notebook can be opened using the following commands entered into an anaconda prompt or terminal:::
+To get started using pyxem, especially if you are unfamiliar with python, we recommend using jupyter notebooks. Having installed pyxem as above, a jupyter notebook can be opened using the following commands entered into an anaconda prompt or terminal:::
 
       $ conda activate pyxem
       $ jupyter notebook
 
-`Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ are curated as a series of jupyter notebooks that you can work through and then modify to perform many common analyses.
+`Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ have been curated as a series of jupyter notebooks that you can work through and modify to perform many common analyses.
 
 
 Documentation
@@ -83,25 +85,22 @@ Documentation
 4D-SED Analysis Workflows
 -------------------------
 
-pyXem provides numerous tools for the analysis of 4D-S(P)ED data comprising many 
-thousands of electron diffraction patterns. The :py:class:`~.ElectronDiffraction` class 
-is a specialized class for this data. If the data array is imagined
-as a tensor, D, of rank n then entries are addressed by n indices, D_{i,j,...,n}.
-The HyperSpy Signal() class allows some indices, or equivalently some axes, to
-be defined as navigation axes and others to be defined as signal axes. In the
-context of a 4D-S(P)ED data, the two axes corresponding to the real-space scan
-dimensions (i, j) are set as navigation axes and the two axes corresponding to
-the diffraction pattern plane (a, b) are set as signal axes, which can be
-written:
+Pyxem is an extension of the `HyperSpy <http://hyperspy.org>`__ library, specialized for the analysis of 
+multi-dimensional electron diffraction data. The hyperspy platform provides easy access to a plethora of 
+scientific python libraries with a syntax designed for multi-dimensional data based on the :py:class:`hyperspy.signals.Signal2D` class, which is sub-classed by :py:class:`~.ElectronDiffraction`.
+
+In this scheme, real space coordinates (x, y) are considered “navigation axes” and reciprocal
+space coordinates (kx, ky) are considered “signal axes”, which may be easily addressed separately. 
+4DSED data may then be denoted,
 
 .. code-block:: python
 
     >>> <i, j | a, b>
 
-There are numerous ways to obtain physical insight from 4D-S(P)ED data all of which 
-ultimately require the assignment of an atomic arrangement to each probe position that 
-explains the observed diffraction. Different approaches to achieve this goal are 
-summarized in the following schematic.
+to make the separation of axes clear.
+
+Objects defined in the various `pyxem modules <http://pyxem.github.io/pyxem/pyxem>`__  may be processed together 
+in to construct a wide range of different analysis workflows, as illustrated below.
 
 .. figure:: images/pyxem-flow.png
   :align: center
