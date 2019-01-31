@@ -72,6 +72,7 @@ class SubpixelrefinementGenerator():
         -------
         vector_out: np.array()
             array containing the refined vectors in calibrated units
+
         """
         self.vectors_out = np.zeros(
             (self.dp.data.shape[0],
@@ -113,8 +114,8 @@ class SubpixelrefinementGenerator():
         """
 
         def _center_of_mass_hs(z):
-            """
-            Return the center of mass of an array with coordinates in the hyperspy convention
+            """Return the center of mass of an array with coordinates in the
+            hyperspy convention
 
             Parameters
             ----------
@@ -132,9 +133,9 @@ class SubpixelrefinementGenerator():
             return (x, y)
 
         def _com_experimental_square(z, vector, square_size):
-            """
-            Wrapper for get_experimental_square that makes the non-zero elements symmetrical
-            around the 'unsubpixeled' peak by zeroing a 'spare' row and column (top and left)
+            """Wrapper for get_experimental_square that makes the non-zero
+            elements symmetrical around the 'unsubpixeled' peak by zeroing a
+            'spare' row and column (top and left).
 
             Parameters
             ----------
