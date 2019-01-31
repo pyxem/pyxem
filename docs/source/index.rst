@@ -55,16 +55,12 @@ written:
 
     <i, j | a, b>
 
-.. figure:: images/model_system.png
-   :align: center
-   :width: 600
-
  There are numerous ways to obtain physical insight from 4D-S(P)ED data all of
  which ultimately require the assignment of an atomic arrangement to each probe
  position that explains the observed diffraction. Different approaches to achieve
  this goal are summarized in the following schematic.
 
-.. figure:: images/sed_analysis_scheme.png
+.. figure:: images/pyxem-flow.png
   :align: center
   :width: 600
 
