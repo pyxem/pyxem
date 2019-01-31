@@ -20,7 +20,8 @@ import numpy as np
 import pytest
 import hyperspy.api as hs
 
-from pyxem.generators.displacement_gradient_tensor_generator import *
+from pyxem.generators.displacement_gradient_tensor_generator import \
+    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
 
 def rotation(z):
      theta = np.deg2rad(3)
