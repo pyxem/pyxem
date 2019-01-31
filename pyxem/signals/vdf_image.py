@@ -24,8 +24,8 @@ from pyxem.signals import push_metadata_through
 import numpy as np
 from hyperspy.signals import BaseSignal, Signal2D
 from pyxem.utils.vdf_utils import (normalize_vdf, norm_cross_corr, corr_check,
-                                   make_g_of_i, separate)
-
+                                   make_g_of_i)
+from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 class VDFImage(Signal2D):
     _signal_type = "vdf_image"
@@ -42,8 +42,8 @@ class VDFSegment:
     _signal_type = "image_vector_stack"
 
     def __init__(self, segments, vectors_of_segments, *args,**kwargs):
-        self.segments = Signal2D(segments)
-        self.vectors_of_segments = DiffractionVectors(vectors_of_segments)
+        self.segments = segments
+        self.vectors_of_segments = vectors_of_segments
         self.vectors_of_segments.axes_manager.set_signal_dimension(0)
 
     def image_correlate_stack(self,corr_threshold=0.9):

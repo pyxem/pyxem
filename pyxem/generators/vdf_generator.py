@@ -21,9 +21,11 @@
 """
 
 from pyxem.signals.vdf_image import VDFImage, VDFSegment
+from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.vdf_utils import normalize_vdf, separate
 
 from hyperspy.api import roi
+from hyperspy.signals import Signal2D
 import numpy as np
 
 
@@ -191,11 +193,10 @@ class VDFSegmentGenerator:
         self.vdf_images = vdfs
         self.vectors = vdfs.vectors
 
-    def get_vdf_segments(self, min_distance=min_distance,
-                         threshold=threshold, min_size=min_size,
-                         max_size=max_size,
-                         max_number_of_grains=max_number_of_grains,
-                         exclude_border=exclude_border,):
+    def get_vdf_segments(self, min_distance=1, threshold=0.1,
+                         min_size=10, max_size=100,
+                         max_number_of_grains=np.inf,
+                         exclude_border=False):
         """Separate out different segments (grains) for each VDF of
         VDFImage. Obtain a VDFSegment, similar to VDFImage, but where
         each image is a segment of a VDF and the vectors correspond to
@@ -204,8 +205,6 @@ class VDFSegmentGenerator:
 
         Parameters
         ----------
-        vdf_temp : np.array
-            One VDF image.
         min_distance: int
             Minimum distance (in pixels) between grains required for
             them to be considered as separate grains.
@@ -236,8 +235,8 @@ class VDFSegmentGenerator:
         Returns
         -------
         vdfsegs : VDFSegment
-            VDFSegment object containing segments (i.e. grains) of single
-            virtual dark field images with corresponding vectors.
+            VDFSegment object containing segments (i.e. grains) of
+            single virtual dark field images with corresponding vectors.
         """
         # TODO Add axes attributes as for VDFImage.
         vdfs = self.vdf_images
@@ -256,13 +255,18 @@ class VDFSegmentGenerator:
 
         segments, vectors_of_segments = [], []
         for i, vector in zip(np.arange(vectors.size), vectors):
-            segments = np.append(segments, vdfsegs[i].T, axis=0)
+            segments = np.append(segments, vdfsegs[i])
             num_segs = np.shape(vdfsegs[i])[0]
             vectors_of_segments = np.append(vectors_of_segments,
                                             np.broadcast_to(vector,
-                                                            (num_segs, 2)),
-                                            axis=0)
+                                                            (num_segs, 2)))
         vectors_of_segments = vectors_of_segments.reshape((-1, 2))
+        segments = segments.reshape((np.shape(vectors_of_segments)[0],
+                                     vdfs.axes_manager.signal_shape[0],
+                                     vdfs.axes_manager.signal_shape[1]))
+
+        segments = Signal2D(segments).transpose(navigation_axes=[0], signal_axes=[2, 1])
+        vectors_of_segments = DiffractionVectors(vectors_of_segments)
         vdfsegs = VDFSegment(segments, vectors_of_segments)
 
         return vdfsegs
