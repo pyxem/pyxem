@@ -809,7 +809,7 @@ class ElectronDiffraction(Signal2D):
 
         """
         if disc_image is None:
-            warn("You have no specified a disc image, as such you will not be able to use the xc method in this session")
+            warn("You have not specified a disc image, as such you will not be able to use the xc method in this session")
 
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
