@@ -23,6 +23,7 @@ Generating DisplacementGradientMaps from diffraction vectors
 import numpy as np
 from pyxem.signals.tensor_field import DisplacementGradientMap
 
+
 def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     """
     Calculates the displacement gradient by comparing vectors with linear algebra
@@ -50,10 +51,11 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     This function does not currently support keyword arguments to the underlying map function.
     """
 
-    D = strained_vectors.map(get_single_DisplacementGradientTensor,Vu=unstrained_vectors,inplace=False)
+    D = strained_vectors.map(get_single_DisplacementGradientTensor, Vu=unstrained_vectors, inplace=False)
     return DisplacementGradientMap(D)
 
-def get_single_DisplacementGradientTensor(Vs,Vu=None):
+
+def get_single_DisplacementGradientTensor(Vs, Vu=None):
     """
     Calculates the displacement gradient tensor by relating two pairs of vectors
 
@@ -82,7 +84,7 @@ def get_single_DisplacementGradientTensor(Vs,Vu=None):
     We find L by using the np.linalg.inv() function
     """
 
-    L = np.matmul(Vs,np.linalg.inv(Vu))
+    L = np.matmul(Vs, np.linalg.inv(Vu))
     D = np.eye(3)
-    D[0:2,0:2] = L
+    D[0:2, 0:2] = L
     return D

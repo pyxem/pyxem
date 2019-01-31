@@ -18,4 +18,18 @@
 
 
 def normalize_vdf(im):
-    return im / im.max()
+    """Normalizes image intensity by dividing by maximum value.
+
+    Parameters
+    ----------
+    im : np.array()
+        Array of image intensities
+
+    Returns
+    -------
+    imn : np.array()
+        Array of normalized image intensities
+
+    """
+    imn = im / im.max()
+    return imn

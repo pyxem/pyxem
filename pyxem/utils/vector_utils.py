@@ -29,7 +29,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     Parameters
     ----------
     k_xy : np.array()
-        Array of Cartesian coordinates in the detector plane, in reciprocal Ångström.
+        Cartesian coordinates in detector plane, in reciprocal Ångström.
     wavelength : float
         Electron wavelength in Ångström.
     camera_length : float

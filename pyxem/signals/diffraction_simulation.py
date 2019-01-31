@@ -132,6 +132,12 @@ class DiffractionSimulation:
             Half the side length in reciprocal Angstroms. Defines the signal's
             calibration
 
+        Returns
+        -------
+
+        dp : ElectronDiffraction
+            Simulated electron diffraction pattern.
+
         """
         from skimage.filters import gaussian as point_spread
 

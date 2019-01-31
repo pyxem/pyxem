@@ -21,9 +21,9 @@ import pytest
 
 from transforms3d.euler import euler2mat
 
-from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged, detector_to_fourier, get_rotation_matrix_between_vectors, get_angle_cartesian
-
-# 46-57
+from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged, \
+    detector_to_fourier, get_rotation_matrix_between_vectors, \
+    get_angle_cartesian
 
 
 def test_calculate_norms():
@@ -50,7 +50,10 @@ def test_calculate_norms_ragged():
         ])
      )
 ])
-def test_detector_to_fourier(wavelength, camera_length, detector_coords, k_expected):
+def test_detector_to_fourier(wavelength,
+                             camera_length,
+                             detector_coords,
+                             k_expected):
     k = detector_to_fourier(detector_coords, wavelength, camera_length)
     np.testing.assert_allclose(k, k_expected)
 
@@ -61,7 +64,8 @@ def test_detector_to_fourier(wavelength, camera_length, detector_coords, k_expec
     ([0.5, -0.5, 1 / np.sqrt(2)], [1 / np.sqrt(2), 1 / np.sqrt(2), 0], [0, 0, 1], [1, 0, 0],
         euler2mat(np.deg2rad(45), np.deg2rad(45), 0, 'rzxz'))
 ])
-def test_get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2, expected_rotation):
+def test_get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2,
+                                             expected_rotation):
     rotation_matrix = get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2)
     assert np.allclose(rotation_matrix, expected_rotation)
 

@@ -57,8 +57,6 @@ def get_interaction_constant(accelerating_voltage):
     """Calculates the interaction constant, sigma, for a given
     acelerating voltage.
 
-    Evaluates
-
     Parameters
     ----------
     accelerating_voltage : float
