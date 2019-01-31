@@ -96,6 +96,16 @@ def _distance_from_fixed_angle(angle, fixed_angle):
     version finding the joining rotation.
 
     Parameters
+    ----------
+    angle : np.array()
+        Euler angles representing rotation of interest.
+    fixed_angle : np.array()
+        Euler angles representing fixed reference rotation.
+
+    Returns
+    -------
+    theta : np.array()
+        Rotation angle between angle and fixed_angle.
 
     """
     angle = angle[0]
