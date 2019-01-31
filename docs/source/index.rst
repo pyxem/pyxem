@@ -41,7 +41,7 @@ for atomic structure manipulation. pyXem is released under the GPL v3 license.
 Installation
 ------------
 
-pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - we suggest using the python 3 version of `Miniconda <https://conda.io/miniconda.html>`__. and creating a new environment for pyxem using the following commands in the anaconda prompt:
+pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - we suggest using the python 3 version of `Miniconda <https://conda.io/miniconda.html>`__. and creating a new environment for pyxem using the following commands in the anaconda prompt:::
 
       $ conda create -n pyxem
       $ conda activate pyxem
@@ -58,7 +58,7 @@ The following commands will install everything you need if entered into the anac
 Getting Started
 ---------------
 
-To get started using pyxem, especially if you are unfamiliar with python, we recommend you use jupyter notebooks. Having installed pyxem as above a jupyter notebook can be opened using the following commands entered into an anaconda prompt or terminal:
+To get started using pyxem, especially if you are unfamiliar with python, we recommend you use jupyter notebooks. Having installed pyxem as above a jupyter notebook can be opened using the following commands entered into an anaconda prompt or terminal:::
 
       $ conda activate pyxem
       $ jupyter notebook
@@ -69,7 +69,7 @@ To get started using pyxem, especially if you are unfamiliar with python, we rec
 Documentation
 -------------
 
-`Documentation <http://pyxem.github.io/pyxem/pyxem>`__is available for all pyxem modules at the following links:
+`Documentation <http://pyxem.github.io/pyxem/pyxem>`__ is available for all pyxem modules at the following links:
 
 - `pyxem.signals <http://pyxem.github.io/pyxem/pyxem.signals>`__ - for manipulating raw data and analysis results.
 
