@@ -22,6 +22,7 @@
 from pyxem.signals import push_metadata_through
 
 import numpy as np
+from tqdm import tqdm
 from hyperspy.signals import BaseSignal, Signal2D
 from pyxem.utils.vdf_utils import (normalize_vdf, norm_cross_corr, corr_check,
                                    make_g_of_i)
@@ -37,53 +38,66 @@ class VDFImage(Signal2D):
 
 
 class VDFSegment:
-    '''Class for which VDFgvectorStack.images holds all the VDF images of the separated grains,
-    and VDFgvectorStack.vectors the corresponding g-vector for each image.'''
-    _signal_type = "image_vector_stack"
+    _signal_type = "vdf_segment"
 
     def __init__(self, segments, vectors_of_segments, *args,**kwargs):
         self.segments = segments
         self.vectors_of_segments = vectors_of_segments
-        self.vectors_of_segments.axes_manager.set_signal_dimension(0)
 
-    def image_correlate_stack(self,corr_threshold=0.9):
-        """Iterates through VDFgvectorStack, and sums those that are associated with the same grains. 
-            Summation will be done for those images that has a normalised cross correlation above the threshold. 
-            The gvectors of each grain will be updated accordingly. 
+    def correlate_segments(self, corr_threshold=0.9):
+        """Iterates through VDF segments and sums those that are
+        associated with the same segment. Summation will be done for
+        those segments that have a normalised cross correlation above
+        corr_threshold. The vectors of each segment sum will be updated
+        accordingly, so that the vectors of each resulting segment sum
+        are all the vectors of the original individual segments.
+
         Parameters
         ----------
         corr_threshold: float
-            Threshold value for the image cross correlation value for images to be added together, 
-            e.g. to be considered the same grain. 
+            Segments will be summed if they have a normalized cross-
+            correlation above corr_threshold. Must be between 0 and 1.
+
         Returns
         -------
-        VDFgvectorStack
-            The VDFgvectorStack class instance updated according to the image correlation results.
+        VDFSegment
+            The VDFSegment instance updated according to the image
+            correlation results.
         """
-        image_stack=self.images.data
-        gvectors=self.vectors.data
-        
-        i=0
+        image_stack = self.segments.data
+        vectors = self.vectors_of_segments.data
+
+        if np.shape(np.shape(vectors))[0] > 1:
+            num_vectors = np.shape(vectors)[0]
+            gvectors = np.array(np.empty(num_vectors, dtype=object))
+
+            for i in np.arange(num_vectors):
+                gvectors[i] = np.array(vectors[i])
+
+        i = 0
         pbar = tqdm(total=np.shape(image_stack)[0])
-        while np.shape(image_stack)[0]>i: 
-            corr_list=list(map(lambda x: norm_cross_corr(x, template=image_stack[i]), image_stack))
-            corr_add=list(map(lambda x: corr_check(x,corr_threshold=corr_threshold), corr_list))
-            add_indices=np.where(corr_add)   
+
+        while np.shape(image_stack)[0] > i:
+            corr_list = list(map(lambda x: norm_cross_corr(x,
+                template=image_stack[i]), image_stack))
+            corr_add = list(map(lambda x: corr_check(x,
+                corr_threshold=corr_threshold), corr_list))
+            add_indices = np.where(corr_add)
 
             if np.shape(add_indices[0])[0] > 1:
-                image_stack[i]=np.sum(list(map(lambda x: np.sum([x,image_stack[i]],axis=0), 
-                                               image_stack[add_indices])),
-                                                axis=0)
-                
-                add_indices=add_indices[0]
+                image_stack[i] = np.sum(list(map(lambda x: np.sum([x,
+                    image_stack[i]], axis=0), image_stack[add_indices])),
+                                        axis=0)
+                add_indices = add_indices[0]
+                gvectors[i] = make_g_of_i(gvectors[add_indices], add_indices,
+                                          gvectors[i])
+                add_indices_noi = np.delete(add_indices,
+                                            np.where(add_indices == i), axis=0)
+                image_stack = np.delete(image_stack, add_indices_noi, axis=0)
+                gvectors = np.delete(gvectors, add_indices_noi, axis=0)
 
-                gvectors[i] = make_g_of_i(gvectors[add_indices],add_indices,gvectors[i])
-                
-                add_indices_noi=np.delete(add_indices,np.where(add_indices==i),axis=0)
-                image_stack=np.delete(image_stack, add_indices_noi, axis=0)
-                gvectors=np.delete(gvectors, add_indices_noi, axis=0)
             else:
-                add_indices_noi=add_indices
+                add_indices_noi = add_indices
 
             if np.where(add_indices == i) != np.array([0]):
                 i = i+1 - (np.shape(np.where(add_indices < i))[1])
@@ -91,10 +105,13 @@ class VDFSegment:
                 i=i+1
                 
             if len(np.shape(gvectors[i-1])) == 1:
-                gvectors[i-1]=np.array([gvectors[i-1]])
+                gvectors[i-1] = np.array([gvectors[i-1]])
+
             pbar.update(np.shape(add_indices_noi)[0])
-        pbar.close()  
-        return VDFgvectorStack(image_stack,gvectors)
+
+        pbar.close()
+
+        return VDFSegment(Signal2D(image_stack), DiffractionVectors(gvectors).T)
 
     def get_virtual_electron_diffraction_signal(self,
                                                 electron_diffraction,

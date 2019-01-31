@@ -265,8 +265,10 @@ class VDFSegmentGenerator:
                                      vdfs.axes_manager.signal_shape[0],
                                      vdfs.axes_manager.signal_shape[1]))
 
-        segments = Signal2D(segments).transpose(navigation_axes=[0], signal_axes=[2, 1])
+        segments = Signal2D(segments).transpose(navigation_axes=[0],
+                                                signal_axes=[2, 1])
         vectors_of_segments = DiffractionVectors(vectors_of_segments)
         vdfsegs = VDFSegment(segments, vectors_of_segments)
+        vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(0)
 
         return vdfsegs

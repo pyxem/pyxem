@@ -44,94 +44,99 @@ def normalize_vdf(im):
     return imn
 
 def norm_cross_corr(image, template):
-    """Calculates the normalised cross-correlation between an image and a template. 
+    """Calculates the normalised cross-correlation between an image
+    and a template using match_template from skimage.feature.
+
     Parameters
     ----------
-    image: ndarray
-        A 2D array object.   
-    template: ndarray
-        Another 2D array object.
+    image: np.array
+        Image
+    template: np.array
+        Reference image
         
     Returns
     -------
     corr : float
-        Normalised cross-correlation between image and template at zero displacement.
+        Normalised cross-correlation between image and template at zero
+        displacement.
     """
-    #If image and template are alike, 1 will be returned.
+    # If image and template are alike, 1 will be returned.
     if np.array_equal(image,template):
-        corr=1.
+        corr = 1.
     else: 
-        #Return only the value in the middle, i.e. at zero displcement
-        corr = match_template(image=image, 
-                              template=template, 
-                              pad_input=True, 
-                              mode='constant', 
-                              constant_values=0)[int(np.shape(image)[0]/2),int(np.shape(image)[1]/2)]
+        # Return only the value in the middle, i.e. at zero displcement
+        corr = match_template(image=image, template=template, pad_input=True,
+                              mode='constant', constant_values=0) \
+            [int(np.shape(image)[0]/2), int(np.shape(image)[1]/2)]
     return corr
 
 def corr_check(corr,corr_threshold):
-    """Checks if a value is above a threshold. 
-    
+    """Checks if a value is above a threshold.
+
     Parameters
     ----------
     corr: float
         Value to be checked.
     corr_threshold: float
-        Threshold value. 
+        Threshold value.
     Returns
     -------
     add : bool
         True if corr is above corr_threhsold.
     """
+    # TODO Remove this - integrate...
     if corr>corr_threshold:
         add=True
-    else: 
+    else:
         add=False
-    return add   
+    return add
 
 
-def make_g_of_i(gvectors_of_add_indices,add_indices,gvector_i):
-    """Makes an array containing the gvectors to be placed at position i
-    in an image correlated merge stack.
+def make_g_of_i(gvectors_of_add_indices, add_indices, gvector_i):
+    """Makes an array of shape (1) containing the vectors found in
+    gvectors_of_add_indices, which itself may contain objects with
+    several vectors.
+
     Parameters
     ----------
-    gvectors_of_add_indices: ndarray
-        All gvectors that should be found at position i in the image correlated merge stack.
-    add_indices: ndarray
-        Indices in the merge stack corresponding to the vectors in gvectors_of_add_indices. 
-    gvector_i: ndarray
-        Array of gvectors formerly at position i. 
+    gvectors_of_add_indices : np.array of object
+        All vectors that should be found in the returned g. Should be
+        equal to gvector_i[add_indices].
+    add_indices : np.array of int
+        Indices for the vectors from gvector_i found in
+        gvectors_of_add_indices.
+    gvector_i : ndarray
+        Array of gvectors.
         
     Returns
     -------
-    g : ndarray
-        Gvectors to be placed at position i in the image correlated merge stack.
+    g : np.array of object
+        Vectors in the form of an object of shape (1) with all the
+        n vectors found in gvectors_of_add_indices.
     """
-    if len(np.shape(gvector_i))==1:
-        g=np.array([gvector_i])
+    # TODO Simplify function / Check if all checks in this function are needed..
+    if len(np.shape(gvector_i)) == 1:
+        g = np.array([gvector_i])
     else: 
-        g=gvector_i
+        g = gvector_i
     
     for i in range(np.shape(add_indices)[0]):
-        if len(np.shape(gvectors_of_add_indices[i]))==1:
-            g=np.append(g,np.array([gvectors_of_add_indices[i]]),axis=0)
+        if len(np.shape(gvectors_of_add_indices[i])) == 1:
+            g = np.append(g, np.array([gvectors_of_add_indices[i]]), axis=0)
             
         elif len(np.shape(gvectors_of_add_indices[i])) == 2:
-            g=np.append(g,gvectors_of_add_indices[i],axis=0)
+            g = np.append(g, gvectors_of_add_indices[i], axis=0)
 
         elif len(np.shape(gvectors_of_add_indices[i])) == 3:
             for n in range(np.shape(gvectors_of_add_indices[i][0])[0]):
-                g=np.append(g,gvectors_of_add_indices[i][n])
+                g = np.append(g, gvectors_of_add_indices[i][n])
             
-    g_delete=[]
-    
+    g_delete = []
     for i in range(np.shape(g)[0]):
-        
-        g_in_list = sum(map(lambda x: np.array_equal(g[i],x), 
-                           g[i+1:]))
+        g_in_list = sum(map(lambda x: np.array_equal(g[i], x), g[i+1:]))
         if g_in_list:
-            g_delete = np.append(g_delete,i)
-    g = np.delete(g, g_delete,axis=0)
+            g_delete = np.append(g_delete, i)
+    g = np.delete(g, g_delete, axis=0)
     return g
 
 
