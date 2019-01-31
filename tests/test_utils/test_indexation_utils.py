@@ -89,7 +89,7 @@ def test_crystal_from_template_matching_dp(dp_template_match_result):
 
 def test_crystal_from_vector_matching_sp(sp_vector_match_result):
     # branch single phase
-    cmap = crystal_from_vector_matching([sp_vector_match_result])
+    cmap = crystal_from_vector_matching(sp_vector_match_result)
     assert cmap[0] == 0
     np.testing.assert_allclose(cmap[1], np.deg2rad([0, 0, 90]))
     np.testing.assert_allclose(cmap[2]['match_rate'], 0.5)
@@ -100,7 +100,7 @@ def test_crystal_from_vector_matching_sp(sp_vector_match_result):
 
 def test_crystal_from_vector_matching_dp(dp_vector_match_result):
     # branch double phase
-    cmap = crystal_from_vector_matching([dp_vector_match_result])
+    cmap = crystal_from_vector_matching(dp_vector_match_result)
     r_or = 100 * (1 - (0.1 / 0.2))
     r_ph = 100 * (1 - (0.1 / 0.3))
     assert cmap[0] == 1

@@ -133,7 +133,7 @@ def match_vectors(peaks,
     mag_tol : float
         Max allowed magnitude difference when comparing vectors.
     angle_tol : float
-        Max allowed angle difference when comparing vector pairs.
+        Max allowed angle difference in radians when comparing vector pairs.
     index_error_tol : float
         Max allowed error in peak indexation for classifying it as indexed,
         calculated as |hkl_calculated - round(hkl_calculated)|.
@@ -158,7 +158,7 @@ def match_vectors(peaks,
 
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
     # with respect to each phase.
-    for phase_index, (key, structure) in enumerate(zip(library.keys(), library.structures)):
+    for phase_index, (phase_name, structure) in enumerate(zip(library.keys(), library.structures)):
         solutions = []
         lattice_recip = structure.lattice.reciprocal()
 
@@ -184,15 +184,15 @@ def match_vectors(peaks,
             # Get library indices for hkls matching peaks within tolerances.
             # TODO: Library[key] are object arrays. Test performance of direct float arrays
             # TODO: Test performance with short circuiting (np.where for each step)
-            match_ids = np.where((np.abs(q1_len - library[key][:, 2]) < mag_tol) &
-                                 (np.abs(q2_len - library[key][:, 3]) < mag_tol) &
-                                 (np.abs(angle - library[key][:, 4]) < angle_tol))[0]
+            match_ids = np.where((np.abs(q1_len - library[phase_name][:, 2]) < mag_tol) &
+                                 (np.abs(q2_len - library[phase_name][:, 3]) < mag_tol) &
+                                 (np.abs(angle - library[phase_name][:, 4]) < angle_tol))[0]
 
             # Iterate over matched library vectors determining the error in the
             # associated indexation and finding the minimum error cases.
             peak_pair_solutions = []
             for i, match_id in enumerate(match_ids):
-                hkl1, hkl2 = library[key][:, :2][match_id]
+                hkl1, hkl2 = library[phase_name][:, :2][match_id]
                 # Reference vectors are cartesian coordinates of hkls
                 ref_q1, ref_q2 = lattice_recip.cartesian(hkl1), lattice_recip.cartesian(hkl2)
 
@@ -352,7 +352,6 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z,x,z)), dict(metrics)]
     """
-    z_matches = z_matches[0]
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
     # Consider single phase and multi-phase matching cases separately
