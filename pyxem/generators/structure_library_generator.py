@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import numpy as np
+
 from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.utils.sim_utils import rotation_list_stereographic
 
@@ -100,7 +102,8 @@ class StructureLibraryGenerator:
             Structure library for the given phase names, structures and crystal system.
         """
         rotation_lists = [
-            rotation_list_stereographic(structure, *stereographic_corners[system], inplane_rotation, resolution)
+            rotation_list_stereographic(structure, *stereographic_corners[system],
+                                        np.deg2rad(inplane_rotation), np.deg2rad(resolution))
             for phase_name, structure, system, inplane_rotation in
             zip(self.phase_names, self.structures, self.systems, inplane_rotations)]
         return StructureLibrary(self.phase_names, self.structures, rotation_lists)

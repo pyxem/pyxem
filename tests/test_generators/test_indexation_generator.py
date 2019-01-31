@@ -129,7 +129,7 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks, vector_li
     gen = VectorIndexationGenerator(vectors, vector_library)
     indexation = gen.index_vectors(
         mag_tol=0.1,
-        angle_tol=0.1,
+        angle_tol=6,
         index_error_tol=0.3,
         keys=list(vector_library.keys()),
         n_peaks_to_index=2,

@@ -235,7 +235,7 @@ class VectorIndexationGenerator():
         matched = vectors.cartesian.map(match_vectors,
                                         library=library,
                                         mag_tol=mag_tol,
-                                        angle_tol=angle_tol,
+                                        angle_tol=np.deg2rad(angle_tol),
                                         index_error_tol=index_error_tol,
                                         n_peaks_to_index=n_peaks_to_index,
                                         n_best=n_best,
