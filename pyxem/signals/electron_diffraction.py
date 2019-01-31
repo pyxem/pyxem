@@ -16,19 +16,30 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 """Signal class for Electron Diffraction data.
-
-
 """
 import numpy as np
+from warnings import warn
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.expt_utils import *
-from pyxem.utils.peakfinders2D import *
+
+from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
+    radial_average, gain_normalise, remove_dead, affine_transformation, \
+    regional_filter, subtract_background_dog, subtract_background_median, \
+    subtract_reference, circular_mask, reference_circle, \
+    find_beam_offset_cross_correlation, calc_radius_with_distortion, \
+    call_ring_pattern, peaks_as_gvectors
+
+from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
+    find_peaks_dog, find_peaks_log, find_peaks_xc
+
 from pyxem.utils import peakfinder2D_gui
-from warnings import warn
+
+from skimage import filters
+from skimage.morphology import square
+from scipy.optimize import curve_fit
 
 
 class ElectronDiffraction(Signal2D):
@@ -378,7 +389,14 @@ class ElectronDiffraction(Signal2D):
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
         rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
-        rp.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        ax_old = self.axes_manager.navigation_axes
+        rp.axes_manager.navigation_axes[0].scale = ax_old[0].scale
+        rp.axes_manager.navigation_axes[0].units = ax_old[0].units
+        rp.axes_manager.navigation_axes[0].name = ax_old[0].name
+        if len(ax_old) > 1:
+            rp.axes_manager.navigation_axes[1].scale = ax_old[1].scale
+            rp.axes_manager.navigation_axes[1].units = ax_old[1].units
+            rp.axes_manager.navigation_axes[1].name = ax_old[1].name
         rp_axis = rp.axes_manager.signal_axes[0]
         rp_axis.name = 'k'
         rp_axis.scale = self.axes_manager.signal_axes[0].scale

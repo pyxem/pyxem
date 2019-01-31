@@ -18,43 +18,50 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.indexation_results import *  # import both objects
+
+from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+from tests.test_utils.test_indexation_utils import sp_template_match_result, dp_template_match_result
+from tests.test_utils.test_indexation_utils import sp_vector_match_result, dp_vector_match_result
 
 
-@pytest.fixture
-def sp_match_result():
-    row_1 = np.array([0, 2, 3, 4, 0.7])
-    row_2 = np.array([0, 2, 3, 5, 0.6])
-    # note we require (correlation of row_1 > correlation row_2)
-    return np.vstack((row_1, row_2))
+def test_template_get_crystallographic_map(dp_template_match_result, sp_template_match_result):
+    # Assertion free test, as the tests in test_indexation_utils do the heavy
+    # lifting
+    match_results = np.array(np.vstack((dp_template_match_result[0], sp_template_match_result[0])))
+    match_results = TemplateMatchingResults(match_results)
+    cryst_map = match_results.get_crystallographic_map()
+    assert cryst_map.method == 'template_matching'
 
 
-@pytest.fixture
-def dp_match_result():
-    row_1 = np.array([0, 2, 3, 4, 0.7])
-    row_2 = np.array([0, 2, 3, 5, 0.8])
-    row_3 = np.array([1, 2, 3, 4, 0.5])
-    row_4 = np.array([1, 2, 3, 5, 0.3])
-    return np.vstack((row_1, row_2, row_3, row_4))
+def test_vector_get_crystallographic_map(dp_vector_match_result, sp_vector_match_result):
+    # Assertion free test, as the tests in test_indexation_utils do the heavy
+    # lifting
+    match_results = np.array([[np.vstack((dp_vector_match_result, sp_vector_match_result))]])
+    match_results = VectorMatchingResults(match_results)
+    match_results.axes_manager.set_signal_dimension(3)  # To overcome object array mapping
+    cryst_map = match_results.get_crystallographic_map()
+    assert cryst_map.method == 'vector_matching'
 
 
-def test_crystal_from_matching_results_sp(sp_match_result):
-    # branch single phase
-    cmap = crystal_from_matching_results(sp_match_result)
-    assert np.allclose(cmap, np.array([0, 2, 3, 4, 0.7, 100 * (1 - (0.6 / 0.7))]))
+@pytest.mark.parametrize('overwrite, result_hkl, current_hkl, expected_hkl', [
+    (True, [0, 0, 1], None, [0, 0, 1]),
+    (False, [0, 0, 1], None, [0, 0, 1]),
+])
+def test_vector_get_indexed_diffraction_vectors(overwrite, result_hkl, current_hkl, expected_hkl):
+    match_results = VectorMatchingResults(np.array([[1], [2]]))
+    match_results.hkls = result_hkl
+    vectors = DiffractionVectors(np.array([[1], [2]]))
+    vectors.hkls = current_hkl
+    match_results.get_indexed_diffraction_vectors(vectors, overwrite)
+    np.testing.assert_allclose(vectors.hkls, expected_hkl)
 
 
-def test_crystal_from_matching_results_dp(dp_match_result):
-    # branch double phase
-    cmap = crystal_from_matching_results(dp_match_result)
-    r_or = 100 * (1 - (0.7 / 0.8))
-    r_ph = 100 * (1 - (0.5 / 0.8))
-    assert np.allclose(cmap, np.array([0, 2, 3, 5, 0.8, r_or, r_ph]))
-
-
-def test_get_crystalographic_map(dp_match_result, sp_match_result):
-    # Assertion free test, as the tests above do the heavy lifting
-    results = np.vstack((dp_match_result, sp_match_result))
-    results = IndexationResults(results)
-    results.get_crystallographic_map()
-    return 0
+def test_vector_get_indexed_diffraction_vectors_warn():
+    match_results = VectorMatchingResults(np.array([[1], [2]]))
+    match_results.hkls = [0, 0, 1]
+    vectors = DiffractionVectors(np.array([[1], [2]]))
+    vectors.hkls = [0, 0, 0]
+    with pytest.warns(Warning):
+        match_results.get_indexed_diffraction_vectors(vectors)
+    np.testing.assert_allclose(vectors.hkls, [0, 0, 0])

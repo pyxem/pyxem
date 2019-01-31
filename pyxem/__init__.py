@@ -37,6 +37,7 @@ from .components.diffraction_component import ElectronDiffractionForwardModel
 
 from .generators.diffraction_generator import DiffractionGenerator
 from .generators.library_generator import DiffractionLibraryGenerator
+from .generators.library_generator import VectorLibraryGenerator
 
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_profile import ElectronDiffractionProfile
@@ -65,8 +66,7 @@ def load(filenames=None,
          new_axis_name="stack_element",
          lazy=False,
          **kwds):
-    """
-    Load supported files into a pyxem structure.
+    """Load supported files into a pyxem structure.
 
     Supported formats: hspy (HDF5), Medipix (hdr + mib), blockfile, Gatan dm3,
     tif, msa, Bruker bcf, FEI ser and emi, SEMPER unf, EMD, EDAX spd/spc, tif,

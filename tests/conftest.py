@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2018 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import pytest
 import diffpy.structure
 import numpy as np
@@ -5,8 +23,7 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 @pytest.fixture(scope="session",autouse=True)
 def default_structure():
-    """
-    An atomic structure represetned using diffpy
+    """An atomic structure represetned using diffpy
     """
     latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
     atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
@@ -49,7 +66,6 @@ def default_structure():
 ])
 
 def diffraction_pattern(request):
-    """
-    A boring, multiuse dp, with signature: ElectronDiffraction <2,2|8,8>
+    """A simple, multiuse dp, with dimensions: ElectronDiffraction <2,2|8,8>
     """
     return ElectronDiffraction(request.param)

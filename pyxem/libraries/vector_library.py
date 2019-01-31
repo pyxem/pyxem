@@ -16,13 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pyxem as pxm
+import pickle
+import numpy as np
 
 
-class StructureLibrary(dict):
-    """
-    A dictionary containing all the structures and their associated rotations
-    in the .struct_lib attribute.
+def load_VectorLibrary(filename, safety=False):
+    if safety:
+        with open(filename, 'rb') as handle:
+            return pickle.load(handle)
+    else:
+        raise RuntimeError('Unpickling is risky, turn safety to True if \
+        trust the author of this content')
+
+
+class DiffractionVectorLibrary(dict):
+    """Maps crystal structure (phase) to diffraction vectors.
 
     Attributes
     ----------
@@ -31,19 +39,12 @@ class StructureLibrary(dict):
     structures : list of diffpy.structure.Structure objects.
         A list of diffpy.structure.Structure objects describing the atomic
         structure associated with each phase in the library.
-    orientations : list
-        A list over identifiers of lists of euler angles (as tuples) in the rzxz
-        convention and in degrees.
     """
 
-    def __init__(self,
-                 identifiers,
-                 structures,
-                 orientations):
-        self.identifiers = identifiers
-        self.structures = structures
-        self.orientations = orientations
-        # create the actual dictionary
-        self.struct_lib = dict()
-        for ident, struct, ori in zip(identifiers, structures, orientations):
-            self.struct_lib[ident] = (struct, ori)
+    def __init__(self, *args, **kwargs):
+        self.identifiers = None
+        self.structures = None
+
+    def pickle_library(self, filename):
+        with open(filename, 'wb') as handle:
+            pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)

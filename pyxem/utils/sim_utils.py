@@ -25,6 +25,7 @@ import collections
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
 from transforms3d.quaternions import mat2quat, rotate_vector
@@ -219,7 +220,8 @@ def get_kinematical_intensities(structure,
         fss = np.array(fss)
 
     # Change the coordinate system of fcoords to align with that of g_indices
-    fcoords = np.dot(fcoords, np.linalg.inv(np.dot(structure.lattice.stdbase, structure.lattice.recbase)))
+    fcoords = np.dot(fcoords, np.linalg.inv(np.dot(structure.lattice.stdbase,
+                                                   structure.lattice.recbase)))
 
     # Calculate structure factors for all excited g-vectors.
     f_hkls = []
@@ -333,8 +335,8 @@ def peaks_from_best_template(single_match_result, phase, library):
 
     Parameters
     ----------
-    single_match_result : matching_results
-        An entry in a matching_results object.
+    single_match_result : TemplateMatchingResults
+        An entry in a TemplateMatchingResults
     phase : list
         List of keys to library, as passed to IndexationGenerator.correlate()
     library : dictionary
@@ -345,26 +347,24 @@ def peaks_from_best_template(single_match_result, phase, library):
     peaks : array
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    best_fit = single_match_result[np.argmax(single_match_result[:, 4])]
+    best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
     _phase = phase[int(best_fit[0])]
     pattern = library.get_library_entry(
         phase=_phase,
-        angle=(
-            best_fit[1],
-            best_fit[2],
-            best_fit[3]))['Sim']
+        angle=tuple(best_fit[1]))['Sim']
     peaks = pattern.coordinates[:, :2]  # cut z
     return peaks
 
 
 def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
     """Finds all reciprocal lattice points inside a given reciprocal sphere.
-    Utilised within the DifractionGenerator.
+    Utilised within the DiffractionGenerator.
 
     Parameters
     ----------
     reciprocal_lattice : diffpy.Structure.Lattice
         The crystal lattice for the structure of interest.
+        TODO: Mention that it is the reciprocal lattice. Just take the structure and calculate from there?
     reciprocal_radius  : float
         The radius of the sphere in reciprocal space (units of reciprocal
         Angstroms) within which reciprocal lattice points are returned.
@@ -416,7 +416,7 @@ def is_lattice_hexagonal(latt):
     return len(truth_list) == np.sum(truth_list)
 
 
-def carry_through_navigation_calibration(new_signal, old_signal):
+def transfer_navigation_axes(new_signal, old_signal):
     """ Transfers navigation axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
@@ -431,7 +431,6 @@ def carry_through_navigation_calibration(new_signal, old_signal):
     -------
     new_signal : Signal
         The new signal with calibrated navigation axes.
-
     """
     try:
         x = new_signal.axes_manager.signal_axes[0]
@@ -469,25 +468,10 @@ def uvtw_to_uvw(uvtw):
     return tuple((int(x / common_factor)) for x in (u, v, w))
 
 
-def angle_between_cartesian(a, b):
-    """Compute the angle between two vectors in a cartesian coordinate system.
-
-    Parameters
-    ----------
-    a, b : array-like with 3 floats
-        The two directions to compute the angle between.
-
-    Returns
-    -------
-    angle : float
-        Angle between `a` and `b` in radians.
-    """
-    return math.acos(max(-1.0, min(1.0, np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))))
-
-
-def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane_rotations, resolution):
-    """Generate a rotation list covering the inverse pole figure specified by three
-        corners in cartesian coordinates.
+def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
+                                inplane_rotations, resolution):
+    """Generate a rotation list covering the inverse pole figure specified by
+    three corners in cartesian coordinates.
 
     Parameters
     ----------
@@ -510,8 +494,8 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
     Returns
     -------
     rotation_list : numpy.array
-        Rotations covering the inverse pole figure given as a of Euler
-            angles in degress. This `np.array` can be passed directly to pyxem.
+        Rotations covering the inverse pole figure given as a of Euler angles in
+        degrees. This `np.array` can be passed directly to pyxem.
     """
     # Convert the crystal directions to cartesian vectors and normalize
     if len(corner_a) == 4:
@@ -531,9 +515,9 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
     corner_b /= np.linalg.norm(corner_b)
     corner_c /= np.linalg.norm(corner_c)
 
-    angle_a_to_b = angle_between_cartesian(corner_a, corner_b)
-    angle_a_to_c = angle_between_cartesian(corner_a, corner_c)
-    angle_b_to_c = angle_between_cartesian(corner_b, corner_c)
+    angle_a_to_b = get_angle_cartesian(corner_a, corner_b)
+    angle_a_to_c = get_angle_cartesian(corner_a, corner_c)
+    angle_b_to_c = get_angle_cartesian(corner_b, corner_c)
     axis_a_to_b = np.cross(corner_a, corner_b)
     axis_a_to_c = np.cross(corner_a, corner_c)
 
@@ -566,7 +550,7 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c, inplane
         # Then define an axis and a maximum rotation to create a great cicle
         # arc between local_b and local_c. Ensure that this is not a degenerate
         # case where local_b and local_c are coincident.
-        angle_local_b_to_c = angle_between_cartesian(local_b, local_c)
+        angle_local_b_to_c = get_angle_cartesian(local_b, local_c)
         axis_local_b_to_c = np.cross(local_b, local_c)
         if np.count_nonzero(axis_local_b_to_c) == 0:
             # Theta rotation ended at the same position. First position, might

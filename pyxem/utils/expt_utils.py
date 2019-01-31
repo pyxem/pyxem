@@ -532,17 +532,16 @@ def call_ring_pattern(xcentre, ycentre):
     Returns
     -------
     ring_pattern : function
-        A function that calculates a ring pattern given a set of points and 
+        A function that calculates a ring pattern given a set of points and
         parameters.
 
     """
     def ring_pattern(pts, scale, amplitude, spread, direct_beam_amplitude,
                      asymmetry, rotation):
-        """
-        Calculats a polycrystalline gold diffraction pattern given a set of
-        pixel coordinates (points).
-        It uses tabulated values of the spacings (in reciprocal Angstroms)
-        and relative intensities of rings derived from X-ray scattering factors.
+        """Calculats a polycrystalline gold diffraction pattern given a set of
+        pixel coordinates (points). It uses tabulated values of the spacings
+        (in reciprocal Angstroms) and relative intensities of rings derived from
+        X-ray scattering factors.
 
         Parameters
         -----------
@@ -603,8 +602,7 @@ def call_ring_pattern(xcentre, ycentre):
 
 
 def peaks_as_gvectors(z, center, calibration):
-    """
-    Converts peaks found as array indices to calibrated units, for use in a
+    """Converts peaks found as array indices to calibrated units, for use in a
     hyperspy map function.
 
     Parameters
@@ -620,6 +618,7 @@ def peaks_as_gvectors(z, center, calibration):
     -------
     g : numpy array
         peak positions in calibrated units.
+
     """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T

@@ -192,6 +192,38 @@ class TestRadialProfile:
         assert isinstance(rp, Signal1D)
         assert isinstance(rp_mask, Signal1D)
 
+    @pytest.fixture
+    def axes_test_dp(self):
+        dp_data = np.random.randint(0, 10, (2, 2, 10, 10))
+        dp = ElectronDiffraction(dp_data)
+        return dp
+
+    def test_radial_profile_axes(self, axes_test_dp):
+        n_scale = 0.5
+        axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
+        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
+        name = 'real_space'
+        axes_test_dp.axes_manager.navigation_axes[0].name = name
+        axes_test_dp.axes_manager.navigation_axes[1].units = name
+        units = 'um'
+        axes_test_dp.axes_manager.navigation_axes[1].name = units
+        axes_test_dp.axes_manager.navigation_axes[0].units = units
+
+        rp = axes_test_dp.get_radial_profile()
+        rp_scale_x = rp.axes_manager.navigation_axes[0].scale
+        rp_scale_y = rp.axes_manager.navigation_axes[1].scale
+        rp_units_x = rp.axes_manager.navigation_axes[0].units
+        rp_name_x = rp.axes_manager.navigation_axes[0].name
+        rp_units_y = rp.axes_manager.navigation_axes[1].units
+        rp_name_y = rp.axes_manager.navigation_axes[1].name
+
+        assert n_scale == rp_scale_x
+        assert 2 * n_scale == rp_scale_y
+        assert units == rp_units_x
+        assert name == rp_name_x
+        assert name == rp_units_y
+        assert units == rp_name_y
+
     @pytest.mark.parametrize('expected', [
         (np.array(
             [[5., 4., 3., 2., 0.],
