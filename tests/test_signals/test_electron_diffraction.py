@@ -261,7 +261,7 @@ class TestBackgroundMethods:
     ])
     # skimage being warned by numpy, not for us
     @pytest.mark.filterwarnings('ignore::FutureWarning')
-     # we don't care about precision loss here
+    # we don't care about precision loss here
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):

@@ -23,36 +23,42 @@ import hyperspy.api as hs
 from pyxem.generators.displacement_gradient_tensor_generator import \
     get_DisplacementGradientMap, get_single_DisplacementGradientTensor
 
+
 def rotation(z):
-     theta = np.deg2rad(3)
-     c,s = np.cos(theta),np.sin(theta)
-     R = np.asarray(([c,-s],[s,c]))
-     return np.matmul(R,z)
+    theta = np.deg2rad(3)
+    c, s = np.cos(theta), np.sin(theta)
+    R = np.asarray(([c, -s], [s, c]))
+    return np.matmul(R, z)
+
 
 def uniform_expansion(z):
     return (1.1 * z)
 
+
 def stretch_in_x(z):
-    M = np.asarray([[1.1,0],[0,1]])
-    return np.matmul(M,z)
+    M = np.asarray([[1.1, 0], [0, 1]])
+    return np.matmul(M, z)
+
 
 def generate_test_vectors(v):
-    return np.asarray([[v,rotation(v)],
-                       [uniform_expansion(v),stretch_in_x(v)]])
+    return np.asarray([[v, rotation(v)],
+                       [uniform_expansion(v), stretch_in_x(v)]])
+
 
 def generate_strain_map(vectors):
     dp = hs.signals.Signal2D(generate_test_vectors(vectors))
-    st = get_DisplacementGradientMap(dp,vectors).get_strain_maps()
+    st = get_DisplacementGradientMap(dp, vectors).get_strain_maps()
     return st
 
+
 def test_strain_mapping():
-    xy = np.asarray([[1,0],[0,2]])
-    oo = np.asarray(([1,2],[3,-4]))
+    xy = np.asarray([[1, 0], [0, 2]])
+    oo = np.asarray(([1, 2], [3, -4]))
     s_xy = generate_strain_map(xy)
     s_oo = generate_strain_map(oo)
-    np.testing.assert_almost_equal(s_xy.data,s_oo.data)
-    for s in [s_xy,s_oo]:
+    np.testing.assert_almost_equal(s_xy.data, s_oo.data)
+    for s in [s_xy, s_oo]:
         # ALERT to the minus sign we have had to drop in
-        #only one rotations occurs so you can use sum
-        np.testing.assert_almost_equal(np.sum(s.inav[3].data),-1*np.deg2rad(3))
+        # only one rotations occurs so you can use sum
+        np.testing.assert_almost_equal(np.sum(s.inav[3].data), -1 * np.deg2rad(3))
     return None
