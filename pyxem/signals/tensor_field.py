@@ -35,12 +35,17 @@ def _polar_decomposition(image, side):
 
 
 def _get_rotation_angle(matrix):
-    """Return the rotation angle corresponding to a
+    """Find the rotation angle associated with a given rotation matrix.
+
+    Parameters
+    ----------
+    matrix : np.array()
+        A rotation matrix.
 
     Returns
     -------
-
-    angle : float
+    angle :  np.array()
+        Rotation angle associated with matrix.
 
     """
     return np.array(-math.asin(matrix[1, 0]))
