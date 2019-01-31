@@ -74,7 +74,7 @@ class DiffractionVectorLibrary(dict):
         See Also
         --------
             load_VectorLibrary()
-        
+
         """
         with open(filename, 'wb') as handle:
             pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
