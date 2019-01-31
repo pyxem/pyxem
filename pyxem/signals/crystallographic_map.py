@@ -70,19 +70,32 @@ def load_mtex_map(filename):
 
 
 def _euler2axangle_signal(euler):
-    """ Find the magnitude of a rotation"""
+    """Converts an Euler triple into the axis-angle representation.
+
+    Parameters
+    ----------
+    euler : np.array()
+        Euler angles for a rotation.
+
+    Returns
+    -------
+    asangle : np.array()
+        Axis-angle representation of the rotation.
+
+    """
     euler = euler[0]  # TODO: euler is a 1-element ndarray(dtype=object) with a tuple
     return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 
 def _distance_from_fixed_angle(angle, fixed_angle):
-    """
-    Designed to be mapped, this function finds the smallest rotation between
+    """Designed to be mapped, this function finds the smallest rotation between
     two rotations. It assumes a no-symmettry system.
 
     The algorithm involves converting angles to quarternions, then finding the
     appropriate misorientation. It is tested against the slower more complete
     version finding the joining rotation.
+
+    Parameters
 
     """
     angle = angle[0]
