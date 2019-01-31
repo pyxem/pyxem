@@ -35,7 +35,7 @@ This approach may be illustrated schematically, as follows:
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
 by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__
-for atomic structure manipulation. pyXem is released under the GPL v3 license. One can find citation information, installation instructions and credits at our github page `here <https://github.com/pyxem/pyxem>`__. This website outlines some of the basic functionality avaliable in pyxem.
+for atomic structure manipulation. pyXem is released under the GPL v3 license. Citation information, installation instructions and credits can be found at our `github page <https://github.com/pyxem/pyxem>`__. Example analysis workflows and tutorials are available `here <https://github.com/pyxem/pyxem-demos>`__.
 
 pyXem provides a library of tools primarily developed for the analysis of
 4D-S(P)ED data, although many methods are applicable to electron diffraction
