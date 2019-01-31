@@ -37,10 +37,34 @@ pyXem builds heavily on the tools for multi-dimensional data analysis provided
 by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__
 for atomic structure manipulation. pyXem is released under the GPL v3 license.
 
+
+Installation
+------------
+
+pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - we suggest using the python 3 version of `Miniconda <https://conda.io/miniconda.html>`__. and creating a new environment for pyxem using the following commands in the anaconda prompt:
+
+      $ conda create -n pyxem
+      $ conda activate pyxem
+
+The following commands will install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
+
+      $ conda install -c conda-forge diffpy.structure
+      $ conda install -c anaconda cython
+      $ conda install -c conda-forge spglib
+      $ conda install -c conda-forge traits
+      $ pip install . -r requirements.txt
+
+
 Getting Started
 ---------------
 
-`Installation and Citation <https://github.com/pyxem/pyxem>`__ information is provided on the project's Github page and a number of `Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ are curated to help you get started.
+To get started using pyxem, especially if you are unfamiliar with python, we recommend you use jupyter notebooks. Having installed pyxem as above a jupyter notebook can be opened using the following commands entered into an anaconda prompt or terminal:
+
+      $ conda activate pyxem
+      $ jupyter notebook
+
+`Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ are curated as a series of jupyter notebooks that you can work through and then modify to perform many common analyses.
+
 
 Documentation
 -------------
@@ -72,7 +96,7 @@ written:
 
 .. code-block:: python
 
-    <i, j | a, b>
+    >>> <i, j | a, b>
 
 There are numerous ways to obtain physical insight from 4D-S(P)ED data all of which 
 ultimately require the assignment of an atomic arrangement to each probe position that 
