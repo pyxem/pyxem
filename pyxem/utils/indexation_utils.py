@@ -352,7 +352,6 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z,x,z)), dict(metrics)]
     """
-    z_matches = z_matches[0]
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
     # Consider single phase and multi-phase matching cases separately

@@ -247,7 +247,7 @@ class VectorIndexationGenerator():
         # Ensure consistent dimensionality, in case only one peak was indexed
         if matched.ndim == 2:
             matched = matched[np.newaxis, :, :]
-        indexation = matched[:, :, 0]
+        indexation = np.array(matched[:, :, 0].tolist())
         rhkls = matched[:, :, 1]
 
         indexation_results = VectorMatchingResults(indexation)
@@ -255,7 +255,7 @@ class VectorIndexationGenerator():
         indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors)
-        indexation_results.axes_manager.set_signal_dimension(0)
+        indexation_results.axes_manager.set_signal_dimension(2)
 
         vectors.hkls = rhkls
 
