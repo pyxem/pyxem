@@ -20,7 +20,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from skimage.feature import match_template, peak_local_max
 
-NO_PEAKS = np.array([[[np.nan, np.nan]]])
+NO_PEAKS = np.array([[np.nan, np.nan]])
 
 
 def clean_peaks(peaks):
