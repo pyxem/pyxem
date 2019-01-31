@@ -19,13 +19,17 @@
 import numpy as np
 import pytest
 
-from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
+from pyxem.signals.indexation_results import TemplateMatchingResults
+from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from tests.test_utils.test_indexation_utils import sp_template_match_result, dp_template_match_result
-from tests.test_utils.test_indexation_utils import sp_vector_match_result, dp_vector_match_result
+from tests.test_utils.test_indexation_utils import sp_template_match_result
+from tests.test_utils.test_indexation_utils import dp_template_match_result
+from tests.test_utils.test_indexation_utils import sp_vector_match_result
+from tests.test_utils.test_indexation_utils import dp_vector_match_result
 
 
-def test_template_get_crystallographic_map(dp_template_match_result, sp_template_match_result):
+def test_template_get_crystallographic_map(dp_template_match_result,
+                                           sp_template_match_result):
     # Assertion free test, as the tests in test_indexation_utils do the heavy
     # lifting
     match_results = np.array(np.vstack((dp_template_match_result[0], sp_template_match_result[0])))
@@ -34,7 +38,8 @@ def test_template_get_crystallographic_map(dp_template_match_result, sp_template
     assert cryst_map.method == 'template_matching'
 
 
-def test_vector_get_crystallographic_map(dp_vector_match_result, sp_vector_match_result):
+def test_vector_get_crystallographic_map(dp_vector_match_result,
+                                         sp_vector_match_result):
     # Assertion free test, as the tests in test_indexation_utils do the heavy
     # lifting
     match_results = np.array([[np.vstack((dp_vector_match_result, sp_vector_match_result))]])
@@ -48,7 +53,10 @@ def test_vector_get_crystallographic_map(dp_vector_match_result, sp_vector_match
     (True, [0, 0, 1], None, [0, 0, 1]),
     (False, [0, 0, 1], None, [0, 0, 1]),
 ])
-def test_vector_get_indexed_diffraction_vectors(overwrite, result_hkl, current_hkl, expected_hkl):
+def test_vector_get_indexed_diffraction_vectors(overwrite,
+                                                result_hkl,
+                                                current_hkl,
+                                                expected_hkl):
     match_results = VectorMatchingResults(np.array([[1], [2]]))
     match_results.hkls = result_hkl
     vectors = DiffractionVectors(np.array([[1], [2]]))

@@ -24,7 +24,8 @@ import diffpy.structure
 
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.indexation_utils import crystal_from_template_matching, crystal_from_vector_matching, match_vectors
+from pyxem.utils.indexation_utils import crystal_from_template_matching, \
+    crystal_from_vector_matching, match_vectors
 
 
 @pytest.fixture
