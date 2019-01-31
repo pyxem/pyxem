@@ -519,26 +519,27 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
     Parameters
     ----------
     structure : diffpy.structure.Structure
-        Structure for which to calculate the rotation list
+        Structure for which to calculate the rotation list.
     corner_a, corner_b, corner_c : tuple
-        The three corners of the inverse pole figure, each given by three
-        coordinates. The coordinate system is given by the structure lattice.
+        The three corners of the inverse pole figure, each given by a
+        three-dimensional coordinate. The coordinate system is given by the
+        structure lattice.
     resolution : float
         Angular resolution in radians of the generated rotation list.
     inplane_rotations : list
-        List of angles in degrees for in-plane rotation of the diffraction
+        List of angles in radians for in-plane rotation of the diffraction
         pattern. This corresponds to the third Euler angle rotation. The
         rotation list will be generated for each of these angles, and combined.
         This should be done automatically, but by including all possible
         rotations in the rotation list, it becomes too large.
 
-        To cover all inplane rotations, use e.g. np.linspace(0, 2*np.pi, 360)
+        To cover all inplane rotations, use e.g. np.linspace(0, 2*np.pi, 360).
 
     Returns
     -------
     rotation_list : numpy.array
-        Rotations covering the inverse pole figure given as a of Euler angles in
-        degrees. This `np.array` can be passed directly to pyxem.
+        Rotations covering the inverse pole figure given as an array of Euler
+        angles in degrees.
     """
     # Convert the crystal directions to cartesian vectors and normalize
     if len(corner_a) == 4:
