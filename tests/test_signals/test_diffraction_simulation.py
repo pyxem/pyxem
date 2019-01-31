@@ -159,8 +159,8 @@ class TestDiffractionSimulation:
             np.array([True, True])
         ),
     ])
-    def test_direct_beam_mask(
-            self, diffraction_simulation, coordinates, with_direct_beam, expected):
+    def test_direct_beam_mask(self, diffraction_simulation, coordinates,
+                              with_direct_beam, expected):
         diffraction_simulation.coordinates = coordinates
         diffraction_simulation.with_direct_beam = with_direct_beam
         mask = diffraction_simulation.direct_beam_mask

@@ -45,7 +45,7 @@ def get_experimental_square(z, vector, square_size):
         Of size (L,L) where L = square_size
 
     """
-    if square_size %2 != 0:
+    if square_size % 2 != 0:
         raise ValueError("'square_size' must be an even number")
 
     cx, cy, half_ss = vector[0], vector[1], int(square_size / 2)
@@ -71,7 +71,7 @@ def get_simulated_disc(square_size, disc_radius):
 
     """
 
-    if square_size %2 != 0:
+    if square_size % 2 != 0:
         raise ValueError("'square_size' must be an even number")
 
     ss = int(square_size)

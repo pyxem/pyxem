@@ -81,7 +81,7 @@ class DisplacementGradientMap(Signal2D):
         -------
 
         strain_results : BaseSignal
-            Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta 
+            Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta
         """
         R, U = self.polar_decomposition()
 

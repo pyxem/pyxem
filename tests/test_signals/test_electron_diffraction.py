@@ -32,7 +32,8 @@ class TestSimpleMaps:
     # Confirms that maps run without error.
 
     def test_get_direct_beam_postion(self, diffraction_pattern):
-        shifts = diffraction_pattern.get_direct_beam_position(radius_start=1, radius_finish=3)
+        shifts = diffraction_pattern.get_direct_beam_position(radius_start=1,
+                                                              radius_finish=3)
 
     def test_center_direct_beam(self, diffraction_pattern):
         # before inplace transform applied
@@ -43,7 +44,9 @@ class TestSimpleMaps:
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction)
-        diffraction_pattern.center_direct_beam(radius_start=1, radius_finish=3, square_width=3)
+        diffraction_pattern.center_direct_beam(radius_start=1,
+                                               radius_finish=3,
+                                               square_width=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction)
 
     def test_apply_affine_transformation(self, diffraction_pattern):
@@ -57,7 +60,8 @@ class TestSimpleMaps:
 
     @pytest.mark.parametrize('method', methods)
     def test_remove_dead_pixels(self, diffraction_pattern, method):
-        dpr = diffraction_pattern.remove_deadpixels([[1, 2], [5, 6]], method, inplace=False)
+        dpr = diffraction_pattern.remove_deadpixels([[1, 2], [5, 6]], method,
+                                                    inplace=False)
         assert isinstance(dpr, ElectronDiffraction)
 
 
@@ -82,7 +86,9 @@ class TestSimpleHyperspy:
         (1, (4, 4),),
         (0.017, (3, 3)),
         (0.5, None,), ])
-    def test_set_diffraction_calibration(self, diffraction_pattern, calibration, center):
+    def test_set_diffraction_calibration(self,
+                                         diffraction_pattern,
+                                         calibration, center):
         calibrated_center = calibration * np.array(center) if center is not None else center
         diffraction_pattern.set_diffraction_calibration(calibration, center=calibrated_center)
         dx, dy = diffraction_pattern.axes_manager.signal_axes
@@ -114,7 +120,8 @@ class TestGainNormalisation:
     def test_apply_gain_normalisation(self, diffraction_pattern,
                                       dark_reference, bright_reference):
         dpr = diffraction_pattern.apply_gain_normalisation(
-            dark_reference=dark_reference, bright_reference=bright_reference, inplace=False)
+            dark_reference=dark_reference, bright_reference=bright_reference,
+            inplace=False)
         assert dpr.max() == bright_reference
         assert dpr.min() == dark_reference
 
@@ -254,7 +261,8 @@ class TestBackgroundMethods:
     ])
     # skimage being warned by numpy, not for us
     @pytest.mark.filterwarnings('ignore::FutureWarning')
-    @pytest.mark.filterwarnings('ignore::UserWarning')  # we don't care about precision loss
+    # we don't care about precision loss here
+    @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
@@ -277,8 +285,10 @@ class TestRingPatternFitting:
         dp = ElectronDiffraction(np.zeros((256, 256)))
         x0 = input_parameters
         dp.data = dp.generate_ring_pattern(mask=True, mask_radius=10,
-                                           scale=x0[0], amplitude=x0[1], spread=x0[2],
-                                           direct_beam_amplitude=x0[3], asymmetry=x0[4],
+                                           scale=x0[0], amplitude=x0[1],
+                                           spread=x0[2],
+                                           direct_beam_amplitude=x0[3],
+                                           asymmetry=x0[4],
                                            rotation=x0[5])
         return dp
 
@@ -366,13 +376,17 @@ class TestPeakFinding:
     methods = ['zaefferer', 'laplacian_of_gaussians', 'difference_of_gaussians', 'stat', 'xc']
 
     @pytest.mark.parametrize('method', methods)
-    @pytest.mark.filterwarnings('ignore::DeprecationWarning')  # skimage internals
+    # skimage internals
+    @pytest.mark.filterwarnings('ignore::DeprecationWarning')
     def test_findpeaks_ragged(self, ragged_peak, method):
         if method == 'xc':
             disc = np.ones((2, 2))
-            output = ragged_peak.find_peaks(method='xc', disc_image=disc, min_distance=3)
+            output = ragged_peak.find_peaks(method='xc',
+                                            disc_image=disc,
+                                            min_distance=3)
         else:
-            output = ragged_peak.find_peaks(method=method, show_progressbar=False)
+            output = ragged_peak.find_peaks(method=method,
+                                            show_progressbar=False)
 
 
 class TestsAssertionless:
@@ -380,7 +394,8 @@ class TestsAssertionless:
         storage = diffraction_pattern.decomposition()
 
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
-    @pytest.mark.filterwarnings('ignore::UserWarning')  # we don't want to use xc in this bit
+    # we don't want to use xc in this bit
+    @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_find_peaks_interactive(self, diffraction_pattern):
         from matplotlib import pyplot as plt
         plt.ion()  # to make plotting non-blocking
