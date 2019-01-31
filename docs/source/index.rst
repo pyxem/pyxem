@@ -91,13 +91,11 @@ scientific python libraries with a syntax designed for multi-dimensional data ba
 
 In this scheme, real space coordinates (x, y) are considered “navigation axes” and reciprocal
 space coordinates (kx, ky) are considered “signal axes”, which may be easily addressed separately. 
-4DSED data may then be denoted,
+4DSED data may then be denoted to make this separation clear as follows.
 
 .. code-block:: python
 
     >>> <i, j | a, b>
-
-to make the separation of axes clear.
 
 Objects defined in the various `pyxem modules <http://pyxem.github.io/pyxem/pyxem>`__  may be processed together 
 in to construct a wide range of different analysis workflows, as illustrated below.
