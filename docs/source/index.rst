@@ -28,7 +28,6 @@ pyXem is an open-source Python library for crystallographic electron microscopy.
 The code is primarily developed as a platform for hybrid diffraction-imaging
 microscopy based on scanning (precession) electron diffraction (S(P)ED) data.
 This approach may be illustrated schematically, as follows:
-|
 
 .. figure:: images/sped_scheme.png
    :align: center
@@ -55,10 +54,10 @@ written:
 
     <i, j | a, b>
 
- There are numerous ways to obtain physical insight from 4D-S(P)ED data all of
- which ultimately require the assignment of an atomic arrangement to each probe
- position that explains the observed diffraction. Different approaches to achieve
- this goal are summarized in the following schematic.
+There are numerous ways to obtain physical insight from 4D-S(P)ED data all of which 
+ultimately require the assignment of an atomic arrangement to each probe position that 
+explains the observed diffraction. Different approaches to achieve this goal are 
+summarized in the following schematic.
 
 .. figure:: images/pyxem-flow.png
   :align: center
@@ -66,4 +65,4 @@ written:
 
 .. warning::
 
-    The pyXem project is under development and there will be bugs. All methods must be used with care.
+    The pyXem project is under continual development and there may be bugs. All methods must be used with care.
