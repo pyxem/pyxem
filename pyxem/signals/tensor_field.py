@@ -28,8 +28,20 @@ Signal class for Tensor Fields
 
 
 def _polar_decomposition(image, side):
-    """Perform a polar decomposition of a second rank tensor and return the
-    results as a numpy array.
+    """Perform a polar decomposition of a second rank tensor.
+
+    Parameters
+    ----------
+    image : np.array()
+        Matrix on which to form polar decomposition.
+    side : string
+        'left' or 'right' the side on which to perform polar decomposition.
+
+    Returns
+    -------
+    U, R : np.array()
+        Stretch and rotation matrices obtained by polar decomposition.
+
     """
     return np.array(polar(image, side=side))
 
