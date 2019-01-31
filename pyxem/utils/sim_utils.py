@@ -21,6 +21,7 @@ import math
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
 import collections
+import diffpy.structure
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
@@ -329,18 +330,18 @@ def simulate_kinematic_scattering(atomic_coordinates,
     return ElectronDiffraction(intensity)
 
 
-def peaks_from_best_template(single_match_result, phase, library):
-    """ Takes a match_result object and return the associated peaks, to be used
-    in combination with map().
+def peaks_from_best_template(single_match_result, phase_names, library):
+    """ Takes a TemplateMatchingResults object and return the associated peaks,
+    to be used in combination with map().
 
     Parameters
     ----------
-    single_match_result : TemplateMatchingResults
+    single_match_result : ndarray
         An entry in a TemplateMatchingResults
-    phase : list
+    phase_names : list
         List of keys to library, as passed to IndexationGenerator.correlate()
-    library : dictionary
-        Nested dictionary containing keys of [phase][rotation]
+    library : DiffractionLibrary
+        Diffraction library containing the phases and rotations
 
     Returns
     -------
@@ -348,11 +349,53 @@ def peaks_from_best_template(single_match_result, phase, library):
         Coordinates of peaks in the matching results object in calibrated units.
     """
     best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
-    _phase = phase[int(best_fit[0])]
+    phase = phase_names[int(best_fit[0])]
     pattern = library.get_library_entry(
-        phase=_phase,
+        phase=phase,
         angle=tuple(best_fit[1]))['Sim']
     peaks = pattern.coordinates[:, :2]  # cut z
+    return peaks
+
+
+def peaks_from_best_vector_match(single_match_result, phase_names, library, diffraction_generator, reciprocal_radius):
+    """ Takes a VectorMatchingResults object and return the associated peaks,
+    to be used in combination with map().
+
+    Parameters
+    ----------
+    single_match_result : ndarray
+        An entry in a VectorMatchingResults
+    phase_names : list
+        List of keys to library, as passed to IndexationGenerator.correlate()
+    library : DiffractionLibrary
+        Diffraction library containing the phases and rotations
+    diffraction_generator : DiffractionGenerator
+        Diffraction generator used to generate the patterns
+    reciprocal_radius : float
+        The maximum radius of the sphere of reciprocal space to sample, in
+        reciprocal angstroms.
+
+    Returns
+    -------
+    peaks : ndarray
+        Coordinates of peaks in the matching results object in calibrated units.
+    """
+    best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
+    best_index = best_fit[0]
+    phase = phase_names[best_index]
+
+    # Don't change the original
+    structure_rotation = best_fit[1].T
+    structure = library.structures[best_index]
+    lattice = structure.lattice
+    lattice_rotated = diffpy.structure.lattice.Lattice(
+        *lattice.abcABG(),
+        baserot=structure_rotation)
+    structure_rotated = diffpy.structure.Structure(structure)
+    structure_rotated.placeInLattice(lattice_rotated)
+
+    sim = diffraction_generator.calculate_ed_data(structure_rotated, reciprocal_radius, with_direct_beam=False)
+    peaks = sim.coordinates[:, :2]  # Cut z
     return peaks
 
 
