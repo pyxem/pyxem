@@ -89,10 +89,7 @@ class DiffractionLibraryGenerator(object):
         for key in structure_library.struct_lib.keys():
             phase_diffraction_library = dict()
             structure = structure_library.struct_lib[key][0]
-            a, b, c = structure.lattice.a, structure.lattice.b, structure.lattice.c
-            alpha = structure.lattice.alpha
-            beta = structure.lattice.beta
-            gamma = structure.lattice.gamma
+            a, b, c, alpha, beta, gamma = structure.lattice.abcABG()
             orientations = structure_library.struct_lib[key][1]
             # Iterate through orientations of each phase.
             for orientation in tqdm(orientations, leave=False):
@@ -104,10 +101,13 @@ class DiffractionLibraryGenerator(object):
                 latt_rot = diffpy.structure.lattice.Lattice(a, b, c,
                                                             alpha, beta, gamma,
                                                             baserot=matrix)
-                structure.placeInLattice(latt_rot)
+
+                # Don't change the original structure
+                structure_rotated = diffpy.structure.Structure(structure)
+                structure_rotated.placeInLattice(latt_rot)
 
                 # Calculate electron diffraction for rotated structure
-                data = diffractor.calculate_ed_data(structure,
+                data = diffractor.calculate_ed_data(structure_rotated,
                                                     reciprocal_radius,
                                                     with_direct_beam)
                 # Calibrate simulation
