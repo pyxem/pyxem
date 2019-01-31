@@ -84,7 +84,7 @@ def test_visuals():
     import hyperspy.api as hs
 
     peaks = match_results.map(peaks_from_best_template,
-                              phase=["Phase"], library=library, inplace=False)
+                              phase_names=["Phase"], library=library, inplace=False)
     mmx, mmy = generate_marker_inputs_from_peaks(peaks)
     dp.set_diffraction_calibration(2 / 144)
     dp.plot(cmap='viridis')
@@ -98,5 +98,5 @@ def test_visuals():
 
 def test_plot_best_matching_results_on_signal():
     match_results.plot_best_matching_results_on_signal(dp,
-                                                       phase=["Phase"],
+                                                       phase_names=["Phase"],
                                                        library=library)
