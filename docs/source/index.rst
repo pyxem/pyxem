@@ -35,13 +35,33 @@ This approach may be illustrated schematically, as follows:
 
 pyXem builds heavily on the tools for multi-dimensional data analysis provided
 by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__
-for atomic structure manipulation. pyXem is released under the GPL v3 license. Citation information, installation instructions and credits can be found at our `github page <https://github.com/pyxem/pyxem>`__. Example analysis workflows and tutorials are available `here <https://github.com/pyxem/pyxem-demos>`__.
+for atomic structure manipulation. pyXem is released under the GPL v3 license.
 
-pyXem provides a library of tools primarily developed for the analysis of
-4D-S(P)ED data, although many methods are applicable to electron diffraction
-data in general. 4D-S(P)ED datasets comprise many thousands of electron
-diffraction patterns and the :py:class:`~.ElectronDiffraction` class provides a
-specialized HyperSpy Signal() class for this data. If the data array is imagined
+Getting Started
+---------------
+
+`Installation and Citation <https://github.com/pyxem/pyxem>`__ information is provided on the project's Github page and a number of `Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ are curated to help you get started.
+
+Documentation
+-------------
+
+`Documentation <http://pyxem.github.io/pyxem/pyxem>`__is available for all pyxem modules at the following links:
+
+- `pyxem.signals <http://pyxem.github.io/pyxem/pyxem.signals>`__ - for manipulating raw data and analysis results.
+
+- `pyxem.generators <http://pyxem.github.io/pyxem/pyxem.generators>`__ - for establishing simulation and analysis conditions.
+
+- `pyxem.components <http://pyxem.github.io/pyxem/pyxem.components>`__ - for fitting in model based analyses.
+
+- `pyxem.libraries <http://pyxem.github.io/pyxem/pyxem.libraries>`__ - that store simulation results needed for analysis.
+
+
+4D-SED Analysis Workflows
+-------------------------
+
+pyXem provides numerous tools for the analysis of 4D-S(P)ED data comprising many 
+thousands of electron diffraction patterns. The :py:class:`~.ElectronDiffraction` class 
+is a specialized class for this data. If the data array is imagined
 as a tensor, D, of rank n then entries are addressed by n indices, D_{i,j,...,n}.
 The HyperSpy Signal() class allows some indices, or equivalently some axes, to
 be defined as navigation axes and others to be defined as signal axes. In the
