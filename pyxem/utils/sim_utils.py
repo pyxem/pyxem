@@ -573,3 +573,85 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
                 rotations.append(np.rad2deg([rotation[0], rotation[1], psi]))
 
     return np.unique(rotations, axis=0)
+
+def _addnoise(x, alpha, mu, sigma):
+    """Add Poisson-Gaussian noise to the data x
+
+    Parameters
+    ----------
+    x : float
+        The original data
+
+    alpha : float
+        Level of noise gain
+
+    mu : float
+        Level of noise offset
+
+    sigma : float
+        Level of Gaussian noise
+
+    Returns
+    -------
+    y : float
+        The corrupted data
+
+    """
+    y = alpha * np.random.poisson(x / alpha) + mu + sigma * np.random.randn()
+    return y
+
+def add_poisson_gaussian_noise(X, alpha, mu, sigma):
+    """Add Poisson-Gaussian noise to the data X
+
+    Parameters
+    ----------
+    X : array
+        The data to be corrupted
+
+    alpha : float
+        Level of noise gain
+
+    mu : float
+        Level of noise offset
+
+    sigma : float
+        Level of Gaussian noise
+
+    Returns
+    -------
+    Y : array
+        The corrupted data
+
+    """
+    # Do some error checking
+    if alpha < 0. or alpha > 1.:
+        raise ValueError("alpha should be in range [0,1]")
+    # Vectorize noise function
+    addnoise = np.vectorize(_addnoise, otypes=[np.float])
+
+    # Rescale to [0,1] range
+    Xmax = np.amax(X)
+    X = X / Xmax
+
+    # Add noise
+    Y = addnoise(X, alpha, mu, sigma)
+
+    # Rescale to [0,1] range
+    Y = Y + np.abs(np.amin(Y))
+
+    # Rescale to X range
+    Y = Xmax * Y / np.amax(Y)
+    return Y
+
+    def _gamma_noise_model(x, a, mu):
+        """Calculates the expected variance of a pixel based on its value `x`"""
+        return a * (x / mu) * np.exp(- x / mu)
+
+    def add_parameterized_gamma_noise(self, a=75., mu=10.):
+        """Adds noise based on a custom model to the data."""
+        noise = np.random.normal(0., self._gamma_noise_model(self.data, a, mu)**0.5)
+        original_dtype = self.data.dtype
+        self.data = (
+            self.data.astype(noise.dtype) + noise
+        ).astype(original_dtype)
+        self.events.data_changed.trigger(obj=self)
