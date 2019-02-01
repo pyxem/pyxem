@@ -20,52 +20,33 @@
 
 """
 
-class DiffractionGenerator(object):
-    """Computes electron diffraction patterns for a crystal structure.
-
-    1. Calculate reciprocal lattice of structure. Find all reciprocal points
-       within the limiting sphere given by :math:`\\frac{2}{\\lambda}`.
-
-    2. For each reciprocal point :math:`\\mathbf{g_{hkl}}` corresponding to
-       lattice plane :math:`(hkl)`, compute the Bragg condition
-       :math:`\\sin(\\theta) = \\frac{\\lambda}{2d_{hkl}}`
-
-    3. The intensity of each reflection is then given in the kinematic
-       approximation as the modulus square of the structure factor.
-       :math:`I_{hkl} = F_{hkl}F_{hkl}^*`
+class CalibrationGenerator(object):
+    """Obtains calibration information from common reference standards.
 
     Parameters
     ----------
-    accelerating_voltage : float
-        The accelerating voltage of the microscope in kV.
-    max_excitation_error : float
-        The maximum extent of the relrods in reciprocal angstroms. Typically
-        equal to 1/{specimen thickness}.
-    debye_waller_factors : dict of str : float
-        Maps element names to their temperature-dependent Debye-Waller factors.
+    signal : ElectronDiffraction
+        The signal of electron diffraction patterns to be indexed.
+    standard : string
+        Identifier for calibration standard used. At present only "au-x-grating"
+        is supported.
 
     """
-    # TODO: Refactor the excitation error to a structure property.
-
     def __init__(self,
-                 accelerating_voltage,
-                 max_excitation_error,
-                 debye_waller_factors=None,
-                 scattering_params='lobato'):
-        self.wavelength = get_electron_wavelength(accelerating_voltage)
-        self.max_excitation_error = max_excitation_error
-        self.debye_waller_factors = debye_waller_factors or {}
+                 signal,
+                 standard='au-x-grating'):
 
-        scattering_params_dict = {
-            'lobato': 'lobato',
-            'xtables': 'xtables'
+        self.signal = signal
+
+        standard_dict = {
+            'au-x-grating': 'au-x-grating',
         }
-        if scattering_params in scattering_params_dict:
-            self.scattering_params = scattering_params_dict[scattering_params]
+        if standard in standard_dict:
+            self.standard = standard_dict[standard]
         else:
-            raise NotImplementedError("The scattering parameters `{}` is not implemented. "
+            raise NotImplementedError("The standard `{}` is not recognized. "
                                       "See documentation for available "
-                                      "implementations.".format(scattering_params))
+                                      "implementations.".format(standard))
 
     def fit_ring_pattern(self, mask_radius, scale=100, amplitude=1000, spread=2,
                          direct_beam_amplitude=500, asymmetry=1, rotation=0):
@@ -108,7 +89,8 @@ class DiffractionGenerator(object):
            [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation].
 
         """
-        image_size = self.data.shape[0]
+        standard_dp = self.signal
+        image_size = standard_dp.data.shape[0]
         xi = np.linspace(0, image_size - 1, image_size)
         yi = np.linspace(0, image_size - 1, image_size)
         x, y = np.meshgrid(xi, yi)
@@ -116,13 +98,13 @@ class DiffractionGenerator(object):
         mask = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
                                            (image_size - 1) / 2, 1, 0)
         mask[mask > mask_radius] = 0
-        self.data[mask > 0] *= 0
+        standard_dp.data[mask > 0] *= 0
 
-        ref = self.data[self.data > 0]
+        ref = standard_dp.data[standard_dp.data > 0]
         ref = ref.ravel()
 
-        pts = np.array([x[self.data > 0].ravel(),
-                        y[self.data > 0].ravel()]).ravel()
+        pts = np.array([x[standard_dp.data > 0].ravel(),
+                        y[standard_dp.data > 0].ravel()]).ravel()
         xcentre = (image_size - 1) / 2
         ycentre = (image_size - 1) / 2
 
@@ -132,8 +114,9 @@ class DiffractionGenerator(object):
         return xf
 
     def generate_ring_pattern(self, mask=False, mask_radius=10, scale=100,
-                              amplitude=1000, spread=2, direct_beam_amplitude=500,
-                              asymmetry=1, rotation=0):
+                              size=256, amplitude=1000, spread=2,
+                              direct_beam_amplitude=500, asymmetry=1,
+                              rotation=0):
         """Calculate a set of rings to model a polycrystalline gold diffraction
         pattern for use in fitting for diffraction pattern calibration.
         It is suggested that the function generate_ring_pattern is used to
@@ -156,6 +139,8 @@ class DiffractionGenerator(object):
         scale : float
             An initial guess for the diffraction calibration
             in 1/Angstrom units
+        size : int
+            Size of the diffraction pattern to be generated in pixels.
         amplitude : float
             An initial guess for the amplitude of the polycrystalline rings
             in arbitrary units
@@ -177,7 +162,7 @@ class DiffractionGenerator(object):
             Simulated ring pattern with the same dimensions as self.data
 
         """
-        image_size = self.data.shape[0]
+        image_size = (size, size)
         xi = np.linspace(0, image_size - 1, image_size)
         yi = np.linspace(0, image_size - 1, image_size)
         x, y = np.meshgrid(xi, yi)
