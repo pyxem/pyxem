@@ -19,7 +19,7 @@
 import pyxem as pxm
 
 
-class StructureLibrary(dict):
+class StructureLibrary():
     """
     A dictionary containing all the structures and their associated rotations
     in the .struct_lib attribute.
