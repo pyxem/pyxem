@@ -29,8 +29,7 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead, affine_transformation, \
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, reference_circle, \
-    find_beam_offset_cross_correlation, calc_radius_with_distortion, \
-    call_ring_pattern, peaks_as_gvectors
+    find_beam_offset_cross_correlation, peaks_as_gvectors
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -39,7 +38,6 @@ from pyxem.utils import peakfinder2D_gui
 
 from skimage import filters
 from skimage.morphology import square
-from scipy.optimize import curve_fit
 
 
 class ElectronDiffraction(Signal2D):

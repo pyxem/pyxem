@@ -21,6 +21,9 @@
 """
 
 import numpy as np
+from scipy.optimize import curve_fit
+
+from pyxem.utils.expt_utils import call_ring_pattern, calc_radius_with_distortion
 
 class CalibrationGenerator(object):
     """Obtains calibration information from common reference standards.
@@ -116,7 +119,7 @@ class CalibrationGenerator(object):
         return xf
 
     def generate_ring_pattern(self, mask=False, mask_radius=10, scale=100,
-                              size=256, amplitude=1000, spread=2,
+                              image_size=256, amplitude=1000, spread=2,
                               direct_beam_amplitude=500, asymmetry=1,
                               rotation=0):
         """Calculate a set of rings to model a polycrystalline gold diffraction
@@ -141,7 +144,7 @@ class CalibrationGenerator(object):
         scale : float
             An initial guess for the diffraction calibration
             in 1/Angstrom units
-        size : int
+        image_size : int
             Size of the diffraction pattern to be generated in pixels.
         amplitude : float
             An initial guess for the amplitude of the polycrystalline rings
@@ -164,7 +167,6 @@ class CalibrationGenerator(object):
             Simulated ring pattern with the same dimensions as self.data
 
         """
-        image_size = (size, size)
         xi = np.linspace(0, image_size - 1, image_size)
         yi = np.linspace(0, image_size - 1, image_size)
         x, y = np.meshgrid(xi, yi)

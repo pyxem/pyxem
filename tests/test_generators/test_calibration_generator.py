@@ -77,7 +77,7 @@ class TestCalibrationGenerator:
         rings = cal_generator.generate_ring_pattern(mask=True,
                                                     mask_radius=10,
                                                     scale=x0[0],
-                                                    size=x0[1],
+                                                    image_size=x0[1],
                                                     amplitude=x0[2],
                                                     spread=x0[3],
                                                     direct_beam_amplitude=x0[4],
@@ -97,7 +97,7 @@ class TestCalibrationGenerator:
                                                         direct_beam_amplitude=x0[3],
                                                         asymmetry=x0[4],
                                                         rotation=x0[5])
-        dp = ElectronDiffraction(data)
+        dp = ElectronDiffraction(ring_data)
         return CalibrationGenerator(dp)
 
     def test_fit_ring_pattern(self, cal_generator_wt_data,
