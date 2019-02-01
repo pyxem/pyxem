@@ -20,6 +20,8 @@
 
 """
 
+import numpy as np
+
 class CalibrationGenerator(object):
     """Obtains calibration information from common reference standards.
 
