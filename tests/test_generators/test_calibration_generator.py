@@ -16,10 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 import pytest
-from hyperspy.signals import Signal1D, Signal2D
-from hyperspy.roi import CircleROI
+import numpy as np
+
+from pyxem.generators.calibration_generator import CalibrationGenerator
+
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 class TestRingPatternFitting:
