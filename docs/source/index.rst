@@ -33,8 +33,10 @@ This approach may be illustrated schematically, as follows:
    :align: center
    :width: 600
 
-pyXem is released under the GPL v3 license. If analysis using pyxem forms a part of published work 
-please consider recognising the code development by citing the github repository.
+pyXem is released under the GPL v3 license.
+
+If analysis using pyxem forms a part of published work please consider recognizing the 
+code development by citing the github repository.
 
 
 Installation
