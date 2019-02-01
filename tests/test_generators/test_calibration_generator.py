@@ -71,7 +71,7 @@ def calibration_generator(pattern_for_fit_ring):
          [235, 188],
          [75, 186]]
     ))])
-def test_generate_ring_pattern(self, calibration_generator, input_parameters,
+def test_generate_ring_pattern(calibration_generator, input_parameters,
                                known_values, reference_indices):
     x0 = generate_parameters
     rings = calibration_generator.generate_ring_pattern(mask=True,
@@ -93,7 +93,7 @@ def calibration_generator(pattern_for_fit_ring):
 
 
 @pytest.fixture
-def cal_generator_wt_data(self, calibration_generator, input_parameters):
+def cal_generator_wt_data(calibration_generator, input_parameters):
     x0 = input_parameters
     ring_data = calibration_generator.generate_ring_pattern(mask=True,
                                                             mask_radius=10,
@@ -106,7 +106,7 @@ def cal_generator_wt_data(self, calibration_generator, input_parameters):
     dp = ElectronDiffraction(data)
     return CalibrationGenerator(dp)
 
-def test_fit_ring_pattern(self, cal_generator_wt_data,
+def test_fit_ring_pattern(cal_generator_wt_data,
                           fit_parameters):
     x0 = input_parameters
     xf = pattern_for_fit_ring.fit_ring_pattern(10)
