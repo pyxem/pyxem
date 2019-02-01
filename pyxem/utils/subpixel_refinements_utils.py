@@ -1,4 +1,4 @@
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 # -*- coding: utf-8 -*-
 #
 # This file is part of pyXem.
