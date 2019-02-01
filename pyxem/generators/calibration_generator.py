@@ -25,7 +25,7 @@ from scipy.optimize import curve_fit
 
 from pyxem.utils.expt_utils import call_ring_pattern, calc_radius_with_distortion
 
-class CalibrationGenerator(object):
+class CalibrationGenerator():
     """Obtains calibration information from common reference standards.
 
     Parameters
