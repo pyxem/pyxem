@@ -33,11 +33,8 @@ This approach may be illustrated schematically, as follows:
    :align: center
    :width: 600
 
-pyXem builds heavily on the tools for multi-dimensional data analysis provided
-by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__
-for atomic structure manipulation. pyXem is released under the GPL v3 license. If analysis using pyxem
-forms a part of published work please consider recognising the code development by citing the github
-repository.
+pyXem is released under the GPL v3 license. If analysis using pyxem forms a part of published work 
+please consider recognising the code development by citing the github repository.
 
 
 Installation
@@ -103,6 +100,22 @@ in to construct a wide range of different analysis workflows, as illustrated bel
 .. figure:: images/pyxem-flow.png
   :align: center
   :width: 600
+
+
+Related Packages
+----------------
+
+The following packages are developed by the pyXem team:
+
+- `texpy <http://pyxem.github.io/pyxem/texpy>`__- for quaternion, rotation, and orientation handling in Python.
+
+
+These packages are central to the scientific functionality of pyXem:
+
+- `HyperSpy <http://hyperspy.org>`__ for multi-dimensional data handling.
+
+- `DiffPy <http://diffpy.org>`__ - for atomic structure manipulation. 
+
 
 .. warning::
 
