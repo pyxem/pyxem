@@ -40,7 +40,9 @@ class VDFSegment:
     _signal_type = "vdf_segment"
 
     def __init__(self, segments, vectors_of_segments, *args,**kwargs):
+        # Segments as Signal2D
         self.segments = segments
+        # DiffractionVectors
         self.vectors_of_segments = vectors_of_segments
 
     def correlate_segments(self, corr_threshold=0.9):
@@ -165,29 +167,36 @@ class VDFSegment:
             
         return gvec_sig
 
-    def threshold_VDFgvectorStack(self,
-                                  image_threshold=None,
-                                  gvector_threshold=None):
-        image_stack = self.images.data.copy()
-        gvectors = self.vectors.data.copy()
-        
-        if image_threshold is not None: 
-            n=0
+    def threshold_segments(self, image_number_threshold=None,
+                           vector_number_threshold=None):
+
+        if image_number_threshold is None and vector_number_threshold is None:
+            raise ValueError("Specify image number and/or vector number \
+             threshold.")
+
+        image_stack = self.segments.data.copy()
+        vectors = self.vectors_of_segments.data.copy()
+
+        if image_number_threshold is not None:
+            n = 0
             while np.shape(image_stack)[0] > n:
-                if np.max(image_stack[n]) < image_threshold:
-                    image_stack = np.delete(image_stack,n,axis=0)
-                    gvectors = np.delete(gvectors,n,axis=0)
+                if np.max(image_stack[n]) < image_number_threshold:
+                    image_stack = np.delete(image_stack, n, axis=0)
+                    vectors = np.delete(vectors, n, axis=0)
                 else:
                     n=n+1
-        if gvector_threshold is not None:
-            n=0
+
+        if vector_number_threshold is not None:
+            n = 0
             while np.shape(image_stack)[0] > n:
-                if np.shape(gvectors[n])[0] < gvector_threshold:
-                    image_stack = np.delete(image_stack,n,axis=0)
-                    gvectors = np.delete(gvectors,n,axis=0)
+                if np.shape(vectors[n])[0] < vector_number_threshold:
+                    image_stack = np.delete(image_stack, n, axis=0)
+                    vectors = np.delete(vectors, n, axis=0)
                 else:
-                    n=n+1
+                    n = n+1
+
         if not np.any(image_stack):
             print('No stack left after thresholding. Check thresholds.')
             return 0
-        return VDFgvectorStack(image_stack,gvectors)
+
+        return VDFSegment(Signal2D(image_stack), DiffractionVectors(vectors))
