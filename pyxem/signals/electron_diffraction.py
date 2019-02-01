@@ -498,8 +498,8 @@ class ElectronDiffraction(Signal2D):
 
             * 'h-dome' -
             * 'gaussian_difference' - Uses a difference between two gaussian
-                                convolutions to determine where the peaks are, and sets
-                                all other pixels to 0.
+                                convolutions to determine where the peaks are,
+                                and sets all other pixels to 0.
             * 'median' - Use a median filter for background removal
             * 'reference_pattern' - Subtract a user-defined reference patterns
                 from every diffraction pattern.
