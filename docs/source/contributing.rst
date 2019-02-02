@@ -1,5 +1,5 @@
-Contributor Guide
-=================
+Contributing
+============
 
 This guide is intended to get new developers started with contributing to pyxem.
 
