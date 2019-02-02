@@ -7,8 +7,9 @@
     :hidden:
 
     self
-    conventions
     literature
+    conventions
+    contributing
 
 
 .. figure:: images/forkme_right_orange_ff7600.png
