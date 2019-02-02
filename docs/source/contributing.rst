@@ -39,21 +39,6 @@ PS: If you choose to develop in Windows/Mac you may find `Github Desktop
 <https://desktop.github.com>`_ useful.
 
 
-Questions?
-----------
-
-Open source projects are all about community - we put in much effort to make
-good tools available to all and most people are happy to help others start out.
-Everyone had to start at some point and the philosophy of these projects
-centres around the fact that we can do better by working together.
-
-Much of the conversation happens in 'public' using the 'issues' pages on
-`Github <https://github.com/pyxem/pyxem/issues>`_ -- doing things in public can
-be scary but it ensures that issues are identified and logged until dealt with.
-This is also a good place to make a proposal for some new feature or tool that
-you want to work on.
-
-
 Good coding practice
 --------------------
 
@@ -152,7 +137,6 @@ about how it should be used, such as which arguments can be passed to it and
 what the syntax should be. The docstrings need to follow the `numpy specification
 <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`_,
 as shown in `this example <https://github.com/numpy/numpy/blob/master/doc/example.py>`_.
-
 
 
 Learn more
