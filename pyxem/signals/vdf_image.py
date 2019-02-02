@@ -24,8 +24,7 @@ from pyxem.signals import push_metadata_through
 import numpy as np
 from tqdm import tqdm
 from hyperspy.signals import BaseSignal, Signal2D
-from pyxem.utils.vdf_utils import (normalize_vdf, norm_cross_corr, corr_check,
-                                   make_g_of_i)
+from pyxem.utils.vdf_utils import (normalize_vdf, norm_cross_corr, get_vector_i)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 class VDFImage(Signal2D):
@@ -39,19 +38,20 @@ class VDFImage(Signal2D):
 class VDFSegment:
     _signal_type = "vdf_segment"
 
-    def __init__(self, segments, vectors_of_segments, *args,**kwargs):
+    def __init__(self, segments, vectors_of_segments,
+                 intensities_of_segments=None, *args,**kwargs):
         # Segments as Signal2D
         self.segments = segments
         # DiffractionVectors
         self.vectors_of_segments = vectors_of_segments
 
     def correlate_segments(self, corr_threshold=0.9):
-        """Iterates through VDF segments and sums those that are
-        associated with the same segment. Summation will be done for
-        those segments that have a normalised cross correlation above
-        corr_threshold. The vectors of each segment sum will be updated
-        accordingly, so that the vectors of each resulting segment sum
-        are all the vectors of the original individual segments.
+        """Iterates through VDF segments and sums those two segments
+        that have the higest normalised cross correlation, if it is
+        above the threshold corr_threshold. The vectors of each segment
+        sum will be updated accordingly, so that the vectors of each
+        resulting segment sum are all the vectors of the original
+        individual segments.
 
         Parameters
         ----------
@@ -65,50 +65,46 @@ class VDFSegment:
             The VDFSegment instance updated according to the image
             correlation results.
         """
-        image_stack = self.segments.data
+        image_stack = self.segments.data.copy()
         vectors = self.vectors_of_segments.data
 
-        if np.shape(np.shape(vectors))[0] > 1:
-            num_vectors = np.shape(vectors)[0]
-            gvectors = np.array(np.empty(num_vectors, dtype=object))
+        if len(np.shape(vectors)) <= 1:
+            raise ValueError("Input vectors are not of correct shape. Try to "
+                             "rerun correlate_segments on original VDFSegment "
+                             "resulting from get_vdf_segments.")
 
-            for i in np.arange(num_vectors):
-                gvectors[i] = np.array(vectors[i])
+        num_vectors = np.shape(vectors)[0]
+        gvectors = np.array(np.empty(num_vectors, dtype=object))
+        for i in np.arange(num_vectors):
+            gvectors[i] = np.array(vectors[i].copy())
 
         i = 0
         pbar = tqdm(total=np.shape(image_stack)[0])
-
         while np.shape(image_stack)[0] > i:
-            corr_list = list(map(lambda x: norm_cross_corr(x,
-                template=image_stack[i]), image_stack))
-            corr_add = list(map(lambda x: corr_check(x,
-                corr_threshold=corr_threshold), corr_list))
-            add_indices = np.where(corr_add)
+            # For each segment, calculate the normalized cross-correlation to
+            # all other segments, and define add_index referring to that with
+            # the largest correlation.
+            corr_list = list(map(
+                lambda x: norm_cross_corr(x, template=image_stack[i]),
+                image_stack))
+            corr_max = np.max(corr_list)
+            add_index = np.where(corr_list == corr_max)
 
-            if np.shape(add_indices[0])[0] > 1:
-                image_stack[i] = np.sum(list(map(lambda x: np.sum([x,
-                    image_stack[i]], axis=0), image_stack[add_indices])),
+            # If the largest correlation value is above the threshold, add
+            # current segment to the segment with the largest correlation.
+            if corr_max > corr_threshold:
+                image_stack[i] = np.sum(image_stack[i], image_stack[add_index],
                                         axis=0)
-                add_indices = add_indices[0]
-                gvectors[i] = make_g_of_i(gvectors[add_indices], add_indices,
-                                          gvectors[i])
-                add_indices_noi = np.delete(add_indices,
-                                            np.where(add_indices == i), axis=0)
-                image_stack = np.delete(image_stack, add_indices_noi, axis=0)
-                gvectors = np.delete(gvectors, add_indices_noi, axis=0)
+                gvectors[i] = get_vector_i(gvectors[add_index], add_index,
+                                           gvectors[i])
+                # Delete the segment and vectors that were added to those at i.
+                image_stack = np.delete(image_stack, add_index, axis=0)
+                gvectors = np.delete(gvectors, add_index, axis=0)
 
-            else:
-                add_indices_noi = add_indices
+            if add_index > i:
+                i = i + 1
 
-            if np.where(add_indices == i) != np.array([0]):
-                i = i+1 - (np.shape(np.where(add_indices < i))[1])
-            else:
-                i=i+1
-                
-            if len(np.shape(gvectors[i-1])) == 1:
-                gvectors[i-1] = np.array([gvectors[i-1]])
-
-            pbar.update(np.shape(add_indices_noi)[0])
+            pbar.update(1)
 
         pbar.close()
 

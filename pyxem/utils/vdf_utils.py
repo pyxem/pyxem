@@ -26,6 +26,7 @@ from skimage.morphology import watershed
 from hyperspy.signals import Signal2D
 from hyperspy.drawing.utils import plot_images
 
+
 def normalize_vdf(im):
     """Normalizes image intensity by dividing by maximum value.
 
@@ -42,6 +43,7 @@ def normalize_vdf(im):
     """
     imn = im / im.max()
     return imn
+
 
 def norm_cross_corr(image, template):
     """Calculates the normalised cross-correlation between an image
@@ -70,32 +72,11 @@ def norm_cross_corr(image, template):
             [int(np.shape(image)[0]/2), int(np.shape(image)[1]/2)]
     return corr
 
-def corr_check(corr,corr_threshold):
-    """Checks if a value is above a threshold.
 
-    Parameters
-    ----------
-    corr: float
-        Value to be checked.
-    corr_threshold: float
-        Threshold value.
-    Returns
-    -------
-    add : bool
-        True if corr is above corr_threhsold.
-    """
-    # TODO Remove this - integrate...
-    if corr>corr_threshold:
-        add=True
-    else:
-        add=False
-    return add
-
-
-def make_g_of_i(gvectors_of_add_indices, add_indices, gvector_i):
-    """Makes an array of shape (1) containing the vectors found in
+def get_vector_i(gvectors_of_add_indices, add_indices, gvector_i):
+    """Obtain an array of shape (n, 2) containing the vectors found in
     gvectors_of_add_indices, which itself may contain objects with
-    several vectors.
+    different shapes.
 
     Parameters
     ----------
@@ -111,32 +92,32 @@ def make_g_of_i(gvectors_of_add_indices, add_indices, gvector_i):
     Returns
     -------
     g : np.array of object
-        Vectors in the form of an object of shape (1) with all the
+        Vectors in the form of an object of shape (n, 2) with all the
         n vectors found in gvectors_of_add_indices.
     """
-    # TODO Simplify function / Check if all checks in this function are needed..
     if len(np.shape(gvector_i)) == 1:
         g = np.array([gvector_i])
-    else: 
+    else:
         g = gvector_i
-    
+
     for i in range(np.shape(add_indices)[0]):
+
         if len(np.shape(gvectors_of_add_indices[i])) == 1:
             g = np.append(g, np.array([gvectors_of_add_indices[i]]), axis=0)
             
         elif len(np.shape(gvectors_of_add_indices[i])) == 2:
             g = np.append(g, gvectors_of_add_indices[i], axis=0)
 
-        elif len(np.shape(gvectors_of_add_indices[i])) == 3:
-            for n in range(np.shape(gvectors_of_add_indices[i][0])[0]):
-                g = np.append(g, gvectors_of_add_indices[i][n])
-            
+    # Delete vectors that are equal:
     g_delete = []
     for i in range(np.shape(g)[0]):
         g_in_list = sum(map(lambda x: np.array_equal(g[i], x), g[i+1:]))
+
         if g_in_list:
             g_delete = np.append(g_delete, i)
+
     g = np.delete(g, g_delete, axis=0)
+
     return g
 
 
