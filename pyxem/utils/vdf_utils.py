@@ -19,9 +19,9 @@ import numpy as np
 
 from scipy.ndimage import distance_transform_edt, label
 
+from skimage.feature import peak_local_max, match_template
+from skimage.filters import sobel
 from skimage.morphology import watershed
-from skimage.feature import peak_local_max
-from skimage.feature import match_template
 
 from hyperspy.signals import Signal2D
 from hyperspy.drawing.utils import plot_images
@@ -142,8 +142,9 @@ def make_g_of_i(gvectors_of_add_indices, add_indices, gvector_i):
 
 def separate(vdf_temp, min_distance, threshold, min_size, max_size,
              max_number_of_grains, exclude_border=False, plot_on=False):
-    """Separate grains from one VDF image using the watershed
-    segmentation implemented in scikit-image [1].
+    """Separate segments from one VDF image using edge-detection by the
+    sobel transform and the watershed segmentation implemented in
+    scikit-image. See [1,2] for examples from scikit-image.
 
     Parameters
     ----------
@@ -177,17 +178,16 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
     -------
     sep : np.array
         Array containing segments from VDF images (i.e. separated
-        grains). Shape: (image size, image size, number of grains)
+        grains). Shape: (image size x, image size y, number of grains)
 
     References
     ----------
     [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/
         plot_watershed.html
+    [2] http://scikit-image.org/docs/dev/auto_examples/xx_applications/
+        plot_coins_segmentation.html#sphx-glr-auto-examples-xx-
+        applications-plot-coins-segmentation-py
     """
-
-    # TODO Clustering instead to do intensity grouping, and then a separation
-    # by watershed for each intensity group?
-    # TODO Enable different methods
 
     # Create a mask by thresholding the input VDF
     mask = vdf_temp > (threshold * np.max(vdf_temp))
@@ -204,13 +204,15 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
                                 num_peaks=max_number_of_grains,
                                 exclude_border=exclude_border, labels=mask)
 
-    # 'Flood' the negative distance image (where larger pixel values are
-    # treated as local elevation) from basins at the marker positions.
-    # The marker positions are the local maxima of the distance.
-    # Find the locations where different basins meet, i.e. the watershed
-    # lines (grain boundaries). Only search for grains (labels) in the
-    # area defined by mask (thresholded input VDF).
-    labels = watershed(-distance, markers=label(local_maxi)[0], mask=mask)
+    # Find the edges using the sobel transform.
+    elevation = sobel(vdf_temp)
+
+    # 'Flood' the elevation (i.e. edge) image from basins at the marker
+    # positions. The marker positions are the local maxima of the
+    # distance. Find the locations where different basins meet, i.e. the
+    # watershed lines (segment boundaries). Only search for segments
+    # (labels) in the area defined by mask (thresholded input VDF).
+    labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
 
     if not np.max(labels):
         print('No labels were found. Check input parameters.')
@@ -221,34 +223,34 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
     while (np.max(labels)) > n - 1:
         sep_temp = labels * (labels == n) / n
         sep_temp = np.nan_to_num(sep_temp)
-        sep[:, :, (n - i) - 1] = sep_temp
+        # Discard segment if it is too small, or add it to separated segments.
         if ((np.sum(sep_temp, axis=(0, 1)) < min_size)
                 or (max_size is not None
                     and np.sum(sep_temp, axis=(0, 1)) > max_size)):
-            # TODO Instead of delete, do not add if condition is True?
             sep = np.delete(sep, ((n - i) - 1), axis=2)
             i = i + 1
+        else:
+            sep[:, :, (n - i) - 1] = sep_temp
         n = n + 1
-
+    # Put the intensity from the input VDF image into each segment area.
     vdf_sep = np.broadcast_to(vdf_temp.T, np.shape(sep.T)) * (sep.T == 1)
 
     if plot_on:
-        # If particles have been discarded, make new labels that do not
-        # include these
+        # If segments have been discarded, make new labels that do not
+        # include the discarded segments.
         if np.max(labels) != (np.shape(sep)[2]) and (np.shape(sep)[2] != 0):
             print('in if')
-            # if np.shape(sep[0,0])[0] > 1:
             labels = sep[:, :, 0]
             for i in range(1, np.shape(sep)[2]):
                 labels = labels + sep[..., i] * (i + 1)
-            labels = labels.T
         # If no separated particles were found, set all elements in labels to 0.
         elif np.shape(sep)[2] == 0:
             labels = np.zeros(np.shape(labels))
             print('No separate particles were found.')
         plot_images([Signal2D(vdf_temp), Signal2D(mask), Signal2D(distance),
-                     Signal2D(labels), Signal2D(np.sum(vdf_sep, axis=0).T)],
+                     Signal2D(labels), Signal2D(elevation),
+                     Signal2D(np.sum(vdf_sep, axis=0).T)],
                     axes_decor='off', per_row=3, colorbar=True, cmap='gnuplot2',
-                    label=['VDF', 'Mask', 'Distances', 'Labels',
+                    label=['VDF', 'Mask', 'Distances', 'Labels', 'Elevation',
                            'Separated particles'])
     return vdf_sep

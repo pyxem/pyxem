@@ -197,11 +197,12 @@ class VDFSegmentGenerator:
                          min_size=10, max_size=100,
                          max_number_of_grains=np.inf,
                          exclude_border=False):
-        """Separate out different segments (grains) for each VDF of
-        VDFImage. Obtain a VDFSegment, similar to VDFImage, but where
-        each image is a segment of a VDF and the vectors correspond to
-        each segment and are not unique. Current segmentation method is
-        the watershed segmentation implemented in scikit-image [1].
+        """Separate segments (grains) from each of the VDF images using
+        edge-detection by the sobel transform and the watershed
+        segmentation method implemented in scikit-image [1,2]. Obtain a
+        VDFSegment, similar to VDFImage, but where each image is a
+        segment of a VDF and the vectors correspond to each segment and
+        are not unique.
 
         Parameters
         ----------
@@ -231,6 +232,9 @@ class VDFSegmentGenerator:
         ----------
         [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/
             plot_watershed.html
+        [2] http://scikit-image.org/docs/dev/auto_examples/xx_applications/
+            plot_coins_segmentation.html#sphx-glr-auto-examples-xx-
+            applications-plot-coins-segmentation-py
 
         Returns
         -------
