@@ -55,7 +55,7 @@ you want to work on.
 
 
 Good coding practice
-====================
+--------------------
 
 The most important aspects of good coding practice are: (1) to work in managable
 branches, (2) develop good code style, (3) write tests for new functions, and (4)
@@ -63,7 +63,7 @@ document what the code does. Tips on these points are provided below.
 
 
 Use git to work in managable branches
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Git is an open source "version control" system that enables you to can separate
 out your modifications to the code into many versions (called branches) and
@@ -77,7 +77,7 @@ small advancement on the "master" code or on another branch.
 
 
 Get the style right
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 pyXem follows the Style Guide for Python Code - these are just some rules for
 consistency that you can read all about in the `Python Style Guide
@@ -110,7 +110,7 @@ Windows:
 
 
 Writing tests
--------------
+^^^^^^^^^^^^^
 
 pyXem aims to have all of the functions within it tested, which involves writing
 short methods that call the functions and check output values agains known
@@ -145,7 +145,7 @@ Useful hints on testing:
 
 
 Write documentation
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Docstrings -- written at the start of a function and give essential information
 about how it should be used, such as which arguments can be passed to it and
@@ -156,7 +156,7 @@ as shown in `this example <https://github.com/numpy/numpy/blob/master/doc/exampl
 
 
 Learn more
-==========
+----------
 
 1. HyperSpy's `contribution guide <http://hyperspy.org/hyperspy-doc/current/dev_guide.html#developer-guide>`__: a lot of nice information on how to contribute to a scientific Python project.
 2. The Python programming language, `for beginners <https://www.python.org/about/gettingstarted/>`__.
