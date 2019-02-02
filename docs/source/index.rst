@@ -67,18 +67,6 @@ To get started using pyxem, especially if you are unfamiliar with python, we rec
 `Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ have been curated as a series of jupyter notebooks that you can work through and modify to perform many common analyses.
 
 
-Questions and Issues
---------------------
-
-If you have a question about pyxem, an issue using the code, or find a bug - we want to know!
-
-We prefer if you let us know by `raising an issue <https://github.com/pyxem/pyxem/issues>`_ 
-on our Github page so that we can answer in "public" and potentially help someone else who has
-the same question. You can also e-mail the development team via: pyxem.team@gmail.com
-
-Answers may sometimes also be found in our `documentation <http://pyxem.github.io/pyxem/pyxem>`__.
-
-
 Documentation
 -------------
 
@@ -91,6 +79,18 @@ Documentation
 - `pyxem.components <http://pyxem.github.io/pyxem/pyxem.components>`__ - for fitting in model based analyses.
 
 - `pyxem.libraries <http://pyxem.github.io/pyxem/pyxem.libraries>`__ - that store simulation results needed for analysis.
+
+
+Questions
+---------
+
+If you have a question about pyxem, an issue using the code, or find a bug - we want to know!
+
+We prefer if you let us know by `raising an issue <https://github.com/pyxem/pyxem/issues>`_ 
+on our Github page so that we can answer in "public" and potentially help someone else who has
+the same question. You can also e-mail the development team via: pyxem.team@gmail.com
+
+Answers may sometimes also be found in our `documentation <http://pyxem.github.io/pyxem/pyxem>`__.
 
 
 Contributing and Feature Requests
