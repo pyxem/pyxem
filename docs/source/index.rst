@@ -106,29 +106,6 @@ a `contributing guide <http://pyxem.github.io/pyxem/contributing.html>`_ particu
 this audience.
 
 
-4D-SED Analysis Workflows
--------------------------
-
-Pyxem is an extension of the `HyperSpy <http://hyperspy.org>`__ library, specialized for the analysis of 
-multi-dimensional electron diffraction data. The hyperspy platform provides easy access to a plethora of 
-scientific python libraries with a syntax designed for multi-dimensional data based on the :py:class:`hyperspy.signals.Signal2D` class, which is sub-classed by :py:class:`~.ElectronDiffraction`.
-
-In this scheme, real space coordinates (x, y) are considered “navigation axes” and reciprocal
-space coordinates (kx, ky) are considered “signal axes”, which may be easily addressed separately. 
-To make this distinction clear, 4D-SED data may be denoted:
-
-.. code-block:: python
-
-    >>> <x, y | kx, ky>
-
-Objects defined in the various `pyxem modules <http://pyxem.github.io/pyxem/pyxem>`__  may be processed together 
-in to construct a wide range of different analysis workflows, as illustrated below.
-
-.. figure:: images/pyxem-flow.png
-  :align: center
-  :width: 600
-
-
 Related Packages
 ----------------
 
