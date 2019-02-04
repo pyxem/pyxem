@@ -2,6 +2,8 @@ import os
 from tempfile import TemporaryDirectory
 import pytest
 import numpy
+import matplotlib
+matplotlib.use('Qt5Agg')
 import pixstem.api as ps
 import matplotlib.pyplot as plt
 
