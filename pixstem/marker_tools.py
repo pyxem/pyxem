@@ -3,7 +3,7 @@ import hyperspy.utils.markers as hm
 
 
 def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
-                               size=20):
+                               size=20, bool_array=None, bool_invert=False):
     """Get a list of 4 dimensional point markers.
 
     The markers will be displayed on the signal dimensions.
@@ -16,6 +16,10 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
         Color of point marker. Default 'red'.
     size : scalar, optional
         Size of the point marker. Default 20.
+    bool_array : NumPy array, optional
+        Same shape as peaks_list.
+    bool_invert : bool, optional
+        Default False.
 
     Returns
     -------
@@ -30,6 +34,9 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
     ...     peak_array, s.axes_manager.signal_axes)
 
     """
+    if bool_array is not None:
+        peaks_list = _filter_peak_array_with_bool_array(
+                peaks_list, bool_array, bool_invert=bool_invert)
     max_peaks = 0
     for ix, iy in np.ndindex(peaks_list.shape[:2]):
         peak_list = peaks_list[ix, iy]
@@ -67,6 +74,27 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
                 color=color, size=size)
         marker_list.append(marker)
     return marker_list
+
+
+def _filter_peak_array_with_bool_array(
+        peak_array, bool_array, bool_invert=False):
+    if bool_array.shape != peak_array.shape:
+        raise ValueError(
+                "bool_array {0} and peak_array {1} must have the"
+                " same shape".format(bool_array.shape, peak_array.shape))
+    peak_array_filter = np.empty(shape=(peak_array.shape[:2]), dtype=np.object)
+    for ix, iy in np.ndindex(peak_array.shape[:2]):
+        peak_list = np.array(peak_array[ix, iy])
+        bool_list = np.array(bool_array[ix, iy], dtype=np.bool)
+        if bool_list is None:
+            if bool_invert:
+                peak_list = []
+        else:
+            if bool_invert:
+                bool_list = ~bool_list
+            peak_list = peak_list[bool_list]
+        peak_array_filter[ix, iy] = peak_list
+    return peak_array_filter
 
 
 def _get_4d_line_segment_list(lines_array, signal_axes=None, color='red',
@@ -216,13 +244,22 @@ def _add_permanent_markers_to_signal(signal, marker_list):
 
 
 def add_peak_array_to_signal_as_markers(
-        signal, peak_array, color='red', size=20):
+        signal, peak_array, color='red', size=20, bool_array=None,
+        bool_invert=False):
     """Add an array of points to a signal as HyperSpy markers.
 
     Parameters
     ----------
     signal : PixelatedSTEM or Signal2D
     peak_array : 4D NumPy array
+    color : string, optional
+        Default 'red'
+    size : scalar, optional
+        Default 20
+    bool_array : NumPy array, optional
+        Same shape as peaks_list.
+    bool_invert : bool, optional
+        Default False.
 
     Example
     -------
@@ -235,5 +272,5 @@ def add_peak_array_to_signal_as_markers(
     """
     marker_list = _get_4d_points_marker_list(
             peak_array, signal.axes_manager.signal_axes, color=color,
-            size=size)
+            size=size, bool_array=bool_array, bool_invert=bool_invert)
     _add_permanent_markers_to_signal(signal, marker_list)

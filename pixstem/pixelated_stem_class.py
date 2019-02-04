@@ -329,7 +329,9 @@ class PixelatedSTEM(Signal2D):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return(s_com)
 
-    def add_peak_array_as_markers(self, peak_array, color='red', size=20):
+    def add_peak_array_as_markers(
+            self, peak_array, color='red', size=20, bool_array=None,
+            bool_invert=False):
         """Add a peak array to the signal as HyperSpy markers.
 
         Parameters
@@ -339,6 +341,9 @@ class PixelatedSTEM(Signal2D):
             Default 'red'
         size : scalar, optional
             Default 20
+        bool_array : NumPy array
+            Must be the same size as peak_array
+        bool_invert : bool
 
         Examples
         --------
@@ -350,7 +355,8 @@ class PixelatedSTEM(Signal2D):
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
         mt.add_peak_array_to_signal_as_markers(
-                self, peak_array, color=color, size=size)
+                self, peak_array, color=color, size=size,
+                bool_array=bool_array, bool_invert=bool_invert)
 
     def add_ellipse_array_as_markers(
             self, ellipse_array, inlier_array=None, peak_array=None,
