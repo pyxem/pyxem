@@ -102,7 +102,7 @@ class TestAddEllipseArrayAsMarkers:
     def test_simple(self):
         s, parray = dd.get_simple_ellipse_signal_peak_array()
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
-                parray, xc=95, yc=95, r_elli_lim=20, semi_len_min=40,
+                parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
                 semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
         s.add_ellipse_array_as_markers(
                 ellipse_array, inlier_array=inlier_array, peak_array=parray)
@@ -111,7 +111,7 @@ class TestAddEllipseArrayAsMarkers:
         s, parray = dd.get_simple_ellipse_signal_peak_array()
         s1 = s.deepcopy()
         ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
-                parray, xc=95, yc=95, r_elli_lim=20, semi_len_min=40,
+                parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
                 semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
         s.add_ellipse_array_as_markers(ellipse_array)
         s1.add_ellipse_array_as_markers(

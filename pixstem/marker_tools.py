@@ -49,11 +49,17 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
                     marker_x_array[ix, iy, i_p] = peak[1]
                     marker_y_array[ix, iy, i_p] = peak[0]
                 else:
-                    marker_x_array[ix, iy, i_p] = signal_axes[0].index2value(
-                            int(peak[1]))
-                    marker_y_array[ix, iy, i_p] = signal_axes[1].index2value(
-                            int(peak[0]))
-
+                    i0min = signal_axes[0].low_index
+                    i0max = signal_axes[0].high_index
+                    i1min = signal_axes[1].low_index
+                    i1max = signal_axes[1].high_index
+                    bool0 = i0min <= peak[1] <= i0max
+                    bool1 = i1min <= peak[0] <= i1max
+                    if bool0 and bool1:
+                        vx = signal_axes[0].index2value(int(peak[1]))
+                        vy = signal_axes[1].index2value(int(peak[0]))
+                        marker_x_array[ix, iy, i_p] = vx
+                        marker_y_array[ix, iy, i_p] = vy
     marker_list = []
     for i_p in range(max_peaks):
         marker = hm.point(

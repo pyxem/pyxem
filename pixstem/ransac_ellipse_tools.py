@@ -8,51 +8,58 @@ import pixstem.marker_tools as mt
 
 
 def is_ellipse_good(
-        ellipse_model, data,
-        xc, yc, r_elli_lim,
-        semi_len_min, semi_len_max, semi_len_ratio_lim,
-        use_focus=True):
+        ellipse_model, data, xf, yf, rf_lim,
+        semi_len_min=None, semi_len_max=None, semi_len_ratio_lim=None):
     """Check if an ellipse model is within parameters.
 
     Parameters
     ----------
     ellipse_model : skimage EllipseModel
     data : Not used
-    xc, yc : scalar
-    r_elli_lim : scalar
-        If the distance from (xc, yc) and the centre of the
-        ellipse is larger than r_elli_lim, False is returned.
+    xf, yf : scalar
+        Focus of the ellipse
+    rf_lim : scalar
+        If the distance from (xf, yf) and the centre of the
+        ellipse is larger than rf_lim, False is returned.
     semi_len_min, semi_len_max : scalar
         Minimum and maximum semi length values for the ellipse, if any
         of the two semi lengths are outside this range, False is returned.
     semi_len_ratio_lim : scalar
         If the ratio between the largest and smallest semi length is larger
         than semi_len_ratio_lim, False is returned
-    use_focus : bool
-        If True, will see if the closest focus to (xc, yc) is within
-        r_elli_lim. Default True.
 
     Returns
     -------
     is_good : bool
 
+    Examples
+    --------
+    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> model = ret.EllipseModel()
+    >>> model.params = ret._make_ellipse_model_params_focus(30, 50, 30, 20, 0)
+    >>> is_good = ret.is_ellipse_good(
+    ...         ellipse_model=model, data=None, xf=30, yf=50, rf_lim=5)
+
     """
-    if semi_len_ratio_lim < 1:
-        raise ValueError("semi_len_ratio_lim must be equal or larger than 1, "
-                         "not {0}.".format(semi_len_ratio_lim))
-    y, x, semi0, semi1, rot = ellipse_model.params
-    if use_focus:
-        x, y = _get_closest_focus(xc, yc, x, y, semi0, semi1, rot)
-    rC = math.hypot(x - xc, y - yc)
-    if rC > r_elli_lim:
+    xc, yc, a, b, r = ellipse_model.params
+    x, y = _get_closest_focus(xf, yf, xc, yc, a, b, r)
+    rf = math.hypot(x - xf, y - yf)
+    if rf > rf_lim:
         return False
-    if not(semi_len_min < semi0 < semi_len_max):
-        return False
-    if not(semi_len_min < semi1 < semi_len_max):
-        return False
-    semi_len_ratio = max(semi0, semi1)/min(semi0, semi1)
-    if semi_len_ratio > semi_len_ratio_lim:
-        return False
+    if semi_len_min is not None:
+        if a < semi_len_min:
+            return False
+        if b < semi_len_min:
+            return False
+    if semi_len_max is not None:
+        if a > semi_len_max:
+            return False
+        if b > semi_len_max:
+            return False
+    if semi_len_ratio_lim is not None:
+        semi_len_ratio = max(a, b)/min(a, b)
+        if semi_len_ratio > semi_len_ratio_lim:
+            return False
     return True
 
 
@@ -88,14 +95,14 @@ def _ellipse_centre_to_focus(x, y, a, b, r):
     return((xf0, yf0), (xf1, yf1))
 
 
-def _get_closest_focus(xc, yc, x, y, a, b, r):
+def _get_closest_focus(x, y, xc, yc, a, b, r):
     """Get the focus closest to the centre from EllipseModel parameters
 
     Parameters
     ----------
-    xc, yc : scalar
+    x, y : scalar
         Centre position of the diffraction pattern.
-    x, y : scalars
+    xc, yc : scalars
         Centre position of the ellipse.
     a, b : scalars
         Semi lengths
@@ -110,12 +117,12 @@ def _get_closest_focus(xc, yc, x, y, a, b, r):
     Examples
     --------
     >>> import pixstem.ransac_ellipse_tools as ret
-    >>> fx, fy = ret._get_closest_focus(25, 30, 20, 32, 12, 9, 0.2)
+    >>> xf, yf = ret._get_closest_focus(25, 30, 20, 32, 12, 9, 0.2)
 
     """
-    (xf0, yf0), (xf1, yf1) = _ellipse_centre_to_focus(x, y, a, b, r)
-    rf0 = math.hypot(xc - xf0, yc - yf0)
-    rf1 = math.hypot(xc - xf1, yc - yf1)
+    (xf0, yf0), (xf1, yf1) = _ellipse_centre_to_focus(xc, yc, a, b, r)
+    rf0 = math.hypot(x - xf0, y - yf0)
+    rf1 = math.hypot(x - xf1, y - yf1)
     if rf0 <= rf1:
         xf, yf = xf0, yf0
     else:
@@ -165,44 +172,64 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
     return data
 
 
-def _make_ellipse_model_params_focus(x, y, a, b, r):
-    if a < b:
-        r += math.pi/2
-        a, b = b, a
-    c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
-    xf = x - c * math.cos(r)
-    yf = y - c * math.sin(r)
+def _ellipse_model_centre_to_focus(xc, yc, a, b, r, x, y):
+    """Get focus params from centre params
+
+    There are two different focuses, the one closest to
+    (x, y) is returned.
+
+    Parameters
+    ----------
+    xc, yc : scalar
+        x and y position of the ellipse centre
+    a, b : scalar
+        Semi lengths
+    r : scalar
+        Rotation
+    x, y : scalar
+
+    Returns
+    -------
+    params : tuple
+        (xf, yf, a, b, r)
+
+    """
+    xf, yf = _get_closest_focus(x, y, xc, yc, a, b, r)
     params = (xf, yf, a, b, r)
     return params
 
 
-def is_data_good(data, xc, yc, r_peak_lim):
-    """Returns False if any values in an array has points close to the centre.
-
+def _make_ellipse_model_params_focus(xf, yf, a, b, r):
+    """
     Parameters
     ----------
-    data : NumPy array
-        In the form [[y0, x0], [y1, x1], ...].
-    xc, yc : scalar
-    r_peak_lim : scalar
-        If any of the data points are within r_peak_lim from (xc, yc),
-        return False.
+    xf, yf : scalar
+        x and y position of the focus
+    a, b : scalar
+        Semi lengths
+    r : scalar
+        Rotation
 
     Returns
     -------
-    is_good : bool
+    params : tuple
+        (xc, yc, a, b, r)
 
     """
-    dist = np.hypot(data[:, 1] - xc, data[:, 0] - yc)
-    if not (dist > r_peak_lim).all():
-        return False
-    return True
+    if a < b:
+        r += math.pi/2
+        a, b = b, a
+    c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
+    xc = xf - c * math.cos(r)
+    yc = yf - c * math.sin(r)
+    params = (xc, yc, a, b, r)
+    return params
 
 
 def get_ellipse_model_ransac_single_frame(
-        data, xc=128, yc=128, r_elli_lim=30, r_peak_lim=40,
-        semi_len_min=50, semi_len_max=90, semi_len_ratio_lim=1.2,
-        min_samples=6, residual_threshold=10, max_trails=500, use_focus=True):
+        data, xf=128, yf=128, rf_lim=30, semi_len_min=50, semi_len_max=90,
+        semi_len_ratio_lim=1.2, min_samples=6, residual_threshold=10,
+        max_trails=500):
     """Pick a random number of data points to fit an ellipse to.
 
     The ellipse's constraints can be specified.
@@ -213,16 +240,10 @@ def get_ellipse_model_ransac_single_frame(
     ----------
     data : NumPy array
         In the form [[x0, y0], [x1, y1], ...]
-    xc, yc : scalar, optional
+    xf, yf : scalar, optional
         Default 128
-    r_elli_lim : scalar, optional
-        How far the ellipse centre can be from (xc, yc)
-    r_peak_lim : scalar, optional
-        How close the individual data points can be from (xc, yc)
-        So if any of the data points are too close to (xc, yc), that
-        random selection will be rejected. Note, this will increase
-        the max_trails counter, so in some situations it might be better
-        to remove these data point before running this function.
+    rf_lim : scalar, optional
+        How far the ellipse centre can be from (xf, yf)
     semi_len_min, semi_len_max : scalar, optional
         Limits of the semi lengths
     semi_len_ratio_lim : scalar, optional
@@ -237,15 +258,12 @@ def get_ellipse_model_ransac_single_frame(
         Maximum distance for a data point to be considered an inlier.
     max_trails : scalar, optional
         Maximum number of tries for the ransac algorithm.
-    use_focus : bool
-        If True, will see if the closest focus to (xc, yc) is within
-        r_elli_lim. Default True.
 
     Returns
     -------
     model_ransac, inliers
         Model data is accessed in model_ransac.params:
-        [y, x, semi_len0, semi_len1, rotation]
+        [x, y, semi_len0, semi_len1, rotation]
 
     Examples
     --------
@@ -253,19 +271,14 @@ def get_ellipse_model_ransac_single_frame(
     >>> data = ret.EllipseModel().predict_xy(
     ...        np.arange(0, 2*np.pi, 0.5), params=(128, 130, 50, 60, 0.2))
     >>> ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
-    ...        data, xc=128, yc=128, r_elli_lim=5, r_peak_lim=5,
-    ...        semi_len_min=45, semi_len_max=65, semi_len_ratio_lim=1.4,
-    ...        max_trails=1000)
+    ...        data, xf=128, yf=128, rf_lim=5, semi_len_min=45,
+    ...        semi_len_max=65, semi_len_ratio_lim=1.4, max_trails=1000)
 
     """
     is_model_valid = partial(
-            is_ellipse_good,
-            xc=xc, yc=yc, r_elli_lim=r_elli_lim,
+            is_ellipse_good, xf=xf, yf=yf, rf_lim=rf_lim,
             semi_len_min=semi_len_min, semi_len_max=semi_len_max,
-            semi_len_ratio_lim=semi_len_ratio_lim, use_focus=use_focus)
-    is_data_valid = partial(
-            is_data_good,
-            xc=xc, yc=yc, r_peak_lim=r_peak_lim)
+            semi_len_ratio_lim=semi_len_ratio_lim)
 
     # This for loop is here to avoid the returned model being outside the
     # specified limits especially semi_len_ratio_lim.
@@ -277,10 +290,9 @@ def get_ellipse_model_ransac_single_frame(
                 data.astype(np.float32), EllipseModel, min_samples=min_samples,
                 residual_threshold=residual_threshold, max_trials=max_trails,
                 is_model_valid=is_model_valid,
-                is_data_valid=is_data_valid,
                 )
         if model_ransac is not None:
-            if is_model_valid(model_ransac, inliers):
+            if is_model_valid(model_ransac, None):
                 break
             else:
                 model_ransac, inliers = None, None
@@ -290,10 +302,9 @@ def get_ellipse_model_ransac_single_frame(
 
 
 def get_ellipse_model_ransac(
-        data, xc=128, yc=128, r_elli_lim=30, r_peak_lim=40,
-        semi_len_min=70, semi_len_max=90, semi_len_ratio_lim=1.2,
-        min_samples=6, residual_threshold=10, max_trails=500,
-        show_progressbar=True, use_focus=True):
+        data, xf=128, yf=128, rf_lim=30, semi_len_min=70, semi_len_max=90,
+        semi_len_ratio_lim=1.2, min_samples=6, residual_threshold=10,
+        max_trails=500, show_progressbar=True):
     """Pick a random number of data points to fit an ellipse to.
 
     The ellipse's constraints can be specified.
@@ -304,16 +315,10 @@ def get_ellipse_model_ransac(
     ----------
     data : NumPy array
         In the form [[[[x0, y0], [x1, y1], ...]]]
-    xc, yc : scalar, optional
+    xf, yf : scalar, optional
         Default 128
-    r_elli_lim : scalar, optional
-        How far the ellipse centre can be from (xc, yc)
-    r_peak_lim : scalar, optional
-        How close the individual data points can be from (xc, yc)
-        So if any of the data points are too close to (xc, yc), that
-        random selection will be rejected. Note, this will increase
-        the max_trails counter, so in some situations it might be better
-        to remove these data point before running this function.
+    rf_lim : scalar, optional
+        How far the ellipse centre can be from (xf, yf)
     semi_len_min, semi_len_max : scalar, optional
         Limits of the semi lengths
     semi_len_ratio_lim : scalar, optional
@@ -328,9 +333,6 @@ def get_ellipse_model_ransac(
         Maximum distance for a data point to be considered an inlier.
     max_trails : scalar, optional
         Maximum number of tries for the ransac algorithm.
-    use_focus : bool
-        If True, will see if the closest focus to (xc, yc) is within
-        r_elli_lim. Default True.
     show_progressbar : bool, optional
         Default True
 
@@ -343,10 +345,10 @@ def get_ellipse_model_ransac(
         this is None.
 
     """
-    if not isiterable(xc):
-        xc = np.ones(data.shape[:2]) * xc
-    if not isiterable(yc):
-        yc = np.ones(data.shape[:2]) * yc
+    if not isiterable(xf):
+        xf = np.ones(data.shape[:2]) * xf
+    if not isiterable(yf):
+        yf = np.ones(data.shape[:2]) * yf
 
     ellipse_array = np.zeros(data.shape[:2], dtype=np.object)
     inlier_array = np.zeros(data.shape[:2], dtype=np.object)
@@ -354,14 +356,13 @@ def get_ellipse_model_ransac(
     t = tqdm(np.ndindex(data.shape[:2]), disable=not show_progressbar,
              total=num_total)
     for iy, ix in t:
-        temp_xc, temp_yc = xc[iy, ix], yc[iy, ix]
+        temp_xf, temp_yf = xf[iy, ix], yf[iy, ix]
         ellipse_model, inliers = get_ellipse_model_ransac_single_frame(
-                data[iy, ix], xc=temp_xc, yc=temp_yc, r_elli_lim=r_elli_lim,
-                r_peak_lim=r_peak_lim,
+                data[iy, ix], xf=temp_yf, yf=temp_xf, rf_lim=rf_lim,
                 semi_len_min=semi_len_min, semi_len_max=semi_len_max,
                 semi_len_ratio_lim=semi_len_ratio_lim,
                 min_samples=min_samples, residual_threshold=residual_threshold,
-                max_trails=max_trails, use_focus=use_focus)
+                max_trails=max_trails)
         if ellipse_model is not None:
             params = ellipse_model.params
         else:
@@ -369,37 +370,6 @@ def get_ellipse_model_ransac(
         ellipse_array[iy, ix] = params
         inlier_array[iy, ix] = inliers
     return ellipse_array, inlier_array
-
-
-def _get_ellipse_model_data(ellipse_params, nr=20):
-    """Get points along an ellipse from ellipse_params.
-
-    Parameters
-    ----------
-    ellipse_params : tuple
-        (y, x, semi1, semi0, rotation)
-    nr : scalar, optional
-        Number of data points in the ellipse, default 20.
-
-    Returns
-    -------
-    ellipse_data : NumPy array
-        In the form [[x0, y0], [x1, y1], ...]
-
-    Examples
-    --------
-    >>> import pixstem.ransac_ellipse_tools as ret
-    >>> ellipse_data = ret._get_ellipse_model_data((30, 70, 10, 20, 0.5))
-
-    Different number of points
-
-    >>> ellipse_data = ret._get_ellipse_model_data((7, 9, 10, 20, 0.5), nr=30)
-
-    """
-    phi_array = np.linspace(0, 2 * np.pi, nr+1)[:-1]
-    ellipse_data = EllipseModel().predict_xy(
-            phi_array, params=ellipse_params)
-    return ellipse_data
 
 
 def _get_lines_list_from_ellipse_params(ellipse_params, nr=20):
@@ -426,7 +396,8 @@ def _get_lines_list_from_ellipse_params(ellipse_params, nr=20):
     >>> lines_list = ret._get_lines_list_from_ellipse_params(ellipse_params)
 
     """
-    ellipse_data_array = _get_ellipse_model_data(ellipse_params, nr=nr)
+    ellipse_data_array = make_ellipse_data_points(
+            *ellipse_params, nt=nr, use_focus=False)
     lines_list = []
     for i in range(len(ellipse_data_array)-1):
         pos0 = ellipse_data_array[i]
