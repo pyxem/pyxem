@@ -26,7 +26,6 @@ from skimage.morphology import watershed
 from hyperspy.signals import Signal2D
 from hyperspy.drawing.utils import plot_images
 
-
 def normalize_vdf(im):
     """Normalizes image intensity by dividing by maximum value.
 
@@ -73,52 +72,93 @@ def norm_cross_corr(image, template):
     return corr
 
 
-def get_vector_i(gvectors_of_add_indices, add_indices, gvector_i):
-    """Obtain an array of shape (n, 2) containing the vectors found in
-    gvectors_of_add_indices, which itself may contain objects with
-    different shapes.
+def corr_check(corr,corr_threshold):
+    """Checks if a value is above a threshold.
 
     Parameters
     ----------
-    gvectors_of_add_indices : np.array of object
-        All vectors that should be found in the returned g. Should be
-        equal to gvector_i[add_indices].
-    add_indices : np.array of int
-        Indices for the vectors from gvector_i found in
-        gvectors_of_add_indices.
-    gvector_i : ndarray
-        Array of gvectors.
-        
+    corr: float
+        Value to be checked.
+    corr_threshold: float
+        Threshold value.
     Returns
     -------
-    g : np.array of object
-        Vectors in the form of an object of shape (n, 2) with all the
-        n vectors found in gvectors_of_add_indices.
+    add : bool
+        True if corr is above corr_threhsold.
     """
-    if len(np.shape(gvector_i)) == 1:
-        g = np.array([gvector_i])
+    # TODO Remove this - integrate...
+    if corr>corr_threshold:
+        add=True
     else:
-        g = gvector_i
+        add=False
+    return add
 
-    for i in range(np.shape(add_indices)[0]):
 
-        if len(np.shape(gvectors_of_add_indices[i])) == 1:
-            g = np.append(g, np.array([gvectors_of_add_indices[i]]), axis=0)
-            
-        elif len(np.shape(gvectors_of_add_indices[i])) == 2:
-            g = np.append(g, gvectors_of_add_indices[i], axis=0)
+def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
+    """ Obtain an array of vectors resulting from merging the vectors in
+    vectors_i and vectors_add and removing duplicates. Also, an array of
+    indices corresponding to the vectors will be obtained.
 
-    # Delete vectors that are equal:
-    g_delete = []
+    Parameters
+    ----------
+    vectors_add : ndarray
+        Array of vectors.
+    vectors_i : ndarray
+        Array of vectors.
+    indices_add : ndarray
+        Array of arrays of integers corresponding to the indices of the
+        vectors in vectors_add, referring to the indices in the original
+        VDFSegment.
+    indices_i : ndarray
+        Indices corresponding to the vectors in vectors_i.
+    Returns
+    -------
+    g : ndarray
+        Vectors in the form of an object of shape (n, 2) with all the
+        unique n vectors found in vectors_i and vectors_add. '
+    indices : ndarray
+        Indices corresponding to the vectors in g.
+    """
+    # TODO Is it possible to simplify further?
+
+    if len(np.shape(vectors_i)) == 1:
+        g = np.array([vectors_i])
+    else:
+        g = vectors_i.copy()
+
+    if len(np.shape(indices_i)) > 1:
+        indices = np.array([], dtype=int)
+        for index in indices_i:
+            indices = np.append(indices_i_array, index).astype(int)
+    else:
+        indices = indices_i.copy()
+
+    for i, index in zip(range(np.shape(vectors_add)[0]), indices_add):
+        indices = np.append(indices, index)
+        if len(np.shape(vectors_add[i])) == 1:
+            g = np.append(g, np.array([vectors_add[i]]), axis=0)
+        else:
+            g = np.append(g, vectors_add[i], axis=0)
+
+    # Check if there are any duplicates.
+    g_delete = np.array([]).astype(int)
     for i in range(np.shape(g)[0]):
-        g_in_list = sum(map(lambda x: np.array_equal(g[i], x), g[i+1:]))
-
-        if g_in_list:
+        g_is_equal = list(map(lambda x: np.array_equal(g[i], x), g[i + 1:]))
+        if sum(g_is_equal):
             g_delete = np.append(g_delete, i)
 
-    g = np.delete(g, g_delete, axis=0)
+            # If the equal vectors do not have the same indices, make sure that
+            # all required indices are added to the correct element.
+            if indices[int(np.where(g_is_equal)[0]+i+1)] != indices[i]:
+                indices[int(np.where(g_is_equal)[0]+i+1)] = np.append(
+                    indices[int(np.where(g_is_equal)[0]+i+1)],
+                    indices[i]).astype(int)
 
-    return g
+    # Delete duplicates.
+    g = np.delete(g, g_delete, axis=0)
+    indices = np.delete(indices, g_delete, axis=0)
+
+    return g, indices
 
 
 def separate(vdf_temp, min_distance, threshold, min_size, max_size,
