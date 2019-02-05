@@ -24,8 +24,8 @@ from pyxem.signals import push_metadata_through
 import numpy as np
 from tqdm import tqdm
 from hyperspy.signals import Signal2D
-from pyxem.utils.vdf_utils import (norm_cross_corr, corr_check,
-                                   get_vectors_and_indices_i, get_gaussian2d)
+from pyxem.utils.vdf_utils import (norm_cross_corr, get_vectors_and_indices_i,
+                                   get_gaussian2d)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
@@ -72,7 +72,7 @@ class VDFSegment:
             The VDFSegment instance updated according to the image
             correlation results.
         """
-
+        # TODO Update axes_manager!
         vectors = self.vectors_of_segments.data
         if len(np.shape(vectors)) <= 1:
             raise ValueError("Input vectors are not of correct shape. Try to "
@@ -98,9 +98,8 @@ class VDFSegment:
             corr_list = list(map(
                 lambda x: norm_cross_corr(x, template=image_stack[i]),
                 image_stack))
-            corr_add = list(map(
-                lambda x: corr_check(x, corr_threshold=corr_threshold),
-                corr_list))
+            corr_add = list(map(lambda x: x > corr_threshold, corr_list))
+
             add_indices = np.where(corr_add)
 
             # If there are more add_indices than 1 (i.e. more segments should be
@@ -147,24 +146,43 @@ class VDFSegment:
         return VDFSegment(Signal2D(image_stack), DiffractionVectors(gvectors).T,
                           gvector_intensities)
 
-    def threshold_segments(self, image_number_threshold=None,
+    def threshold_segments(self, min_intensity_threshold=None,
                            vector_number_threshold=None):
+        """Obtain a VDFSegment where the segments with a lower number of
+        vectors than that defined by vector_number_threshold or with a
+        smaller maximum intensity than that defined by
+        min_intensity_threshold have been removed.
 
-        if image_number_threshold is None and vector_number_threshold is None:
-            raise ValueError("Specify image number and/or vector number \
-             threshold.")
+        Parameters
+        ----------
+        min_intensity_threshold : int
+            Threshold for the minimum intensity (in a single pixel) in a
+            segment for it to not be discarded.
+        vector_number_threshold : int
+            Threshold for the minimum number of vectors a segment should
+            contain for it to not be removed.
+
+        Returns
+        -------
+        vdfseg : VDFSegment
+            As input, except that segments might have been removed after
+            thresholds based on min intensity and/or number of vectors.
+        """
+
+        if min_intensity_threshold is None and vector_number_threshold is None:
+            raise ValueError("Specify input threshold.")
 
         image_stack = self.segments.data.copy()
         vectors = self.vectors_of_segments.data.copy()
 
-        if image_number_threshold is not None:
+        if min_intensity_threshold is not None:
             n = 0
             while np.shape(image_stack)[0] > n:
-                if np.max(image_stack[n]) < image_number_threshold:
+                if np.max(image_stack[n]) < min_intensity_threshold:
                     image_stack = np.delete(image_stack, n, axis=0)
                     vectors = np.delete(vectors, n, axis=0)
                 else:
-                    n=n+1
+                    n = n+1
 
         if vector_number_threshold is not None:
             n = 0
@@ -176,10 +194,13 @@ class VDFSegment:
                     n = n+1
 
         if not np.any(image_stack):
-            print('No stack left after thresholding. Check thresholds.')
+            print('No segments left. Check the input thresholds.')
             return 0
 
-        return VDFSegment(Signal2D(image_stack), DiffractionVectors(vectors))
+        vdfseg = VDFSegment(Signal2D(image_stack), DiffractionVectors(vectors),
+                            self.intensities)
+
+        return vdfseg
 
     def get_virtual_electron_diffraction(self, calibration, shape, sigma=None):
         """ Obtain a virtual electron diffraction signal that consists
@@ -225,15 +246,15 @@ class VDFSegment:
 
         size_x, size_y = shape[0], shape[1]
         cx, cy = -size_x/2*calibration, -size_y/2*calibration
-        X, Y = np.indices((size_x, size_y))
-        X, Y = X * calibration + cx, Y * calibration + cy
+        x, y = np.indices((size_x, size_y))
+        x, y = x * calibration + cx, y * calibration + cy
         virtual_ed = np.zeros((size_x, size_y, num_segments))
 
         for i in range(num_segments):
             virtual_ed[..., i] = sum(list(map(
-                lambda a, xo, yo: get_gaussian2d(a, xo, yo, x=X, y=Y,
-                                               sigma=sigma),
-                intensities[i], vectors[i][:,0], vectors[i][:,1])))
+                lambda a, xo, yo: get_gaussian2d(
+                    a, xo, yo, x=x, y=y, sigma=sigma),
+                intensities[i], vectors[i][:, 0], vectors[i][:, 1])))
 
         virtual_ed = ElectronDiffraction(virtual_ed.T)
 

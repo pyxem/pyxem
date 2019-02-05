@@ -26,6 +26,7 @@ from skimage.morphology import watershed
 from hyperspy.signals import Signal2D
 from hyperspy.drawing.utils import plot_images
 
+
 def normalize_vdf(im):
     """Normalizes image intensity by dividing by maximum value.
 
@@ -70,28 +71,6 @@ def norm_cross_corr(image, template):
                               mode='constant', constant_values=0) \
             [int(np.shape(image)[0]/2), int(np.shape(image)[1]/2)]
     return corr
-
-
-def corr_check(corr,corr_threshold):
-    """Checks if a value is above a threshold.
-
-    Parameters
-    ----------
-    corr: float
-        Value to be checked.
-    corr_threshold: float
-        Threshold value.
-    Returns
-    -------
-    add : bool
-        True if corr is above corr_threhsold.
-    """
-    # TODO Remove this - integrate...
-    if corr>corr_threshold:
-        add=True
-    else:
-        add=False
-    return add
 
 
 def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
@@ -278,4 +257,33 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
 
 
 def get_gaussian2d(a, xo, yo, x, y, sigma):
-    return a/(2*np.pi*sigma**2)*np.exp(-((x-xo)**2+(y-yo)**2)/(2*sigma**2))
+    """ Obtain a 2D Gaussian of amplitude a and standard deviation
+    sigma, centred at (xo, yo), on a grid given by x and y.
+
+    Parameters
+    ----------
+    a : float
+        Amplitude. The Gaussian is simply multiplied by a.
+    xo : float
+        Center of Gaussian on x-axis.
+    yo : float
+        Center of Gaussian on y-axis.
+    x : array
+        Array representing the row indices of the grid the Gaussian
+        should be placed on (x-axis).
+    y : array
+        Array representing the column indices of the grid the Gaussian
+        should be placed on (y-axis).
+    sigma : float
+        Standard deviation of Gaussian.
+
+    Returns
+    -------
+    gaussian : array
+        Array with the 2D Gaussian.
+    """
+
+    gaussian = a / (2 * np.pi * sigma ** 2) * np.exp(
+        -((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
+
+    return gaussian
