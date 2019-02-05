@@ -129,7 +129,7 @@ def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
     if len(np.shape(indices_i)) > 1:
         indices = np.array([], dtype=int)
         for index in indices_i:
-            indices = np.append(indices_i_array, index).astype(int)
+            indices = np.append(indices, index).astype(int)
     else:
         indices = indices_i.copy()
 
@@ -275,3 +275,7 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
                     label=['VDF', 'Mask', 'Distances', 'Labels', 'Elevation',
                            'Separated particles'])
     return vdf_sep
+
+
+def get_gaussian2d(a, xo, yo, x, y, sigma):
+    return a/(2*np.pi*sigma**2)*np.exp(-((x-xo)**2+(y-yo)**2)/(2*sigma**2))

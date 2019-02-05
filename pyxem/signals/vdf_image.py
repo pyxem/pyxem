@@ -23,10 +23,12 @@ from pyxem.signals import push_metadata_through
 
 import numpy as np
 from tqdm import tqdm
-from hyperspy.signals import BaseSignal, Signal2D
-from pyxem.utils.vdf_utils import (normalize_vdf, norm_cross_corr, corr_check,
-                                   get_vectors_and_indices_i)
+from hyperspy.signals import Signal2D
+from pyxem.utils.vdf_utils import (norm_cross_corr, corr_check,
+                                   get_vectors_and_indices_i, get_gaussian2d)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.electron_diffraction import ElectronDiffraction
+
 
 class VDFImage(Signal2D):
     _signal_type = "vdf_image"
@@ -145,59 +147,6 @@ class VDFSegment:
         return VDFSegment(Signal2D(image_stack), DiffractionVectors(gvectors).T,
                           gvector_intensities)
 
-    def get_virtual_electron_diffraction_signal(self,
-                                                electron_diffraction,
-                                                distance_threshold=None,
-                                                A = 255):
-        """ Created an ElectronDiffraction signal consisting of Gaussians at all the gvectors.
-        Parameters
-        ---------- 
-        electron_diffraction: ElectronDiffraction
-            ElectronDiffraction signal that the merge_stack_corr originates from.  
-        distance_threshold : float
-            The FWHM in the 2D Gaussians that will be calculated for each g-vector,
-            in order to create the virtual DPs. It is reasonable to choose this value equal to
-            the distance_threshold that was used to find the unique g-vectors, and thus the name. 
-            
-        Returns
-        -------
-        gvec_sig: ElectronDiffraction
-            ElectronDiffraction signal based on the gvectors.
-        """
-        from pycrystem.diffraction_signal import ElectronDiffraction
-
-        gvector_stack=self.vectors.data
-        num_of_im=np.shape(gvector_stack)[0]
-        
-        size_x = electron_diffraction.axes_manager[2].size
-        size_y = electron_diffraction.axes_manager[3].size
-        cx = electron_diffraction.axes_manager[2].offset
-        cy = electron_diffraction.axes_manager[3].offset
-        scale_x = electron_diffraction.axes_manager[2].scale
-        scale_y = electron_diffraction.axes_manager[3].scale
-
-        DP_sig = np.zeros((size_x, size_y, num_of_im))
-        X,Y=np.indices((size_x,size_y))
-        X=X*scale_x + cx
-        Y=Y*scale_y + cy
-        
-        if distance_threshold == None:
-            distance_threshold = np.max((scale_x,scale_y))
-        
-        for i in range(num_of_im):
-            if len(np.shape(gvector_stack[i]))>1:
-                for n in gvector_stack[i]:
-                    DP_sig[...,i] = DP_sig[...,i] + A * np.exp(-4*np.log(2) * ((X-n[1])**2 +(Y-n[0])**2)/distance_threshold**2)
-            else: 
-                DP_sig[...,i] = DP_sig[...,i] + A * np.exp(-4*np.log(2) * ((X-gvector_stack[i][1])**2 +(Y-gvector_stack[i][0])**2)/distance_threshold**2)
-        gvec_sig = ElectronDiffraction(DP_sig.T)
-        gvec_sig.axes_manager[1].scale=electron_diffraction.axes_manager[2].scale
-        gvec_sig.axes_manager[1].units=electron_diffraction.axes_manager[2].units
-        gvec_sig.axes_manager[2].scale=electron_diffraction.axes_manager[2].scale
-        gvec_sig.axes_manager[2].units=electron_diffraction.axes_manager[2].units
-            
-        return gvec_sig
-
     def threshold_segments(self, image_number_threshold=None,
                            vector_number_threshold=None):
 
@@ -231,3 +180,61 @@ class VDFSegment:
             return 0
 
         return VDFSegment(Signal2D(image_stack), DiffractionVectors(vectors))
+
+    def get_virtual_electron_diffraction(self, calibration, shape, sigma=None):
+        """ Obtain a virtual electron diffraction signal that consists
+        of one virtual diffraction pattern for each segment. The virtual
+        diffraction pattern is composed of Gaussians centered at each
+        vector position. If given, the integrated intensities of each
+        vector will be taken into account by multiplication with the
+        Gaussians.
+
+        Parameters
+        ----------
+        calibration : float
+            Reciprocal space calibration in inverse Angstrom per pixel.
+        shape : tuple
+            Shape of the signal, (shape_x, shape_y) in pixels, where
+            shape_x and shape_y are integers.
+        sigma : float
+            The standard deviation of the Gaussians in inverse Angstrom
+            per pixel.
+
+        Returns
+        -------
+        virtual_ed : ElectronDiffraction
+            Virtual electron diffraction signal consisting of one
+            virtual diffraction pattern for each segment.
+        """
+        # TODO : Update all axes, scales, offsets etc.
+
+        vectors = self.vectors_of_segments.data
+        segments = self.segments.data
+        num_segments = np.shape(segments)[0]
+
+        if self.intensities is None:
+            print("The VDFSegment does not have the attribute intensities."
+                  "All intensities will be set to ones.")
+            intensities = np.ones_like(vectors)
+            print(np.shape(intensities), 'np.shape(intensities)')
+        else:
+            intensities = self.intensities
+
+        if sigma is None:
+            sigma = calibration
+
+        size_x, size_y = shape[0], shape[1]
+        cx, cy = -size_x/2*calibration, -size_y/2*calibration
+        X, Y = np.indices((size_x, size_y))
+        X, Y = X * calibration + cx, Y * calibration + cy
+        virtual_ed = np.zeros((size_x, size_y, num_segments))
+
+        for i in range(num_segments):
+            virtual_ed[..., i] = sum(list(map(
+                lambda a, xo, yo: get_gaussian2d(a, xo, yo, x=X, y=Y,
+                                               sigma=sigma),
+                intensities[i], vectors[i][:,0], vectors[i][:,1])))
+
+        virtual_ed = ElectronDiffraction(virtual_ed.T)
+
+        return virtual_ed
