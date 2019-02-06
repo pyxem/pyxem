@@ -354,6 +354,7 @@ def peaks_from_best_template(single_match_result, phase_names, library):
         phase=phase,
         angle=tuple(best_fit[1]))['Sim']
     peaks = pattern.coordinates[:, :2]  # cut z
+    peaks[:, 1] = -peaks[:, 1]
     return peaks
 
 
@@ -380,6 +381,7 @@ def peaks_from_best_vector_match(single_match_result, phase_names, library, diff
     peaks : ndarray
         Coordinates of peaks in the matching results object in calibrated units.
     """
+    print('smr.s', single_match_result.shape)
     best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
     best_index = best_fit[0]
     phase = phase_names[best_index]
@@ -387,15 +389,15 @@ def peaks_from_best_vector_match(single_match_result, phase_names, library, diff
     # Don't change the original
     structure_rotation = best_fit[1].T
     structure = library.structures[best_index]
-    lattice = structure.lattice
     lattice_rotated = diffpy.structure.lattice.Lattice(
-        *lattice.abcABG(),
+        *structure.lattice.abcABG(),
         baserot=structure_rotation)
     structure_rotated = diffpy.structure.Structure(structure)
     structure_rotated.placeInLattice(lattice_rotated)
 
     sim = diffraction_generator.calculate_ed_data(structure_rotated, reciprocal_radius, with_direct_beam=False)
     peaks = sim.coordinates[:, :2]  # Cut z
+    peaks[:, 1] = -peaks[:, 1]
     return peaks
 
 

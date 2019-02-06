@@ -165,7 +165,9 @@ def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_
     M = get_template_match_results(default_structure, pattern_list, edc, rot_list)
     peaks = M.map(peaks_from_best_template,
                   phase_names=["A"], library=library, inplace=False)
-    np.testing.assert_allclose(peaks.inav[0, 0], library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2], atol=0.1)
+    expected_peaks = library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
+    expected_peaks[:, 1] = -expected_peaks[:, 1]
+    np.testing.assert_allclose(peaks.inav[0, 0], expected_peaks, atol=0.1)
 
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
