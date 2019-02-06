@@ -43,6 +43,10 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     """
 
     k_xy = k_xy[0]
+    # Convert from left-handed coordinate system on the detector to
+    # right-handed used in reciprocal space
+    np.negative(k_xy[:, 1], out=k_xy[:, 1])
+
     # # The calibrated positions of the diffraction spots are already the x and y
     # # coordinates of the k vector on the Ewald sphere. The radius is given by
     # # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
