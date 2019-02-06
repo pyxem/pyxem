@@ -127,11 +127,11 @@ def get_vector_match_results(structure, rot_list, edc):
     diffraction_library = get_template_library(structure, rot_list, edc)
     peak_lists = []
     for simulation in diffraction_library['A'].values():
-        peak_lists.append([[simulation['pixel_coords']]])
+        peak_lists.append(simulation['pixel_coords'])
     peaks = DiffractionVectors((np.array([peak_lists, peak_lists]) - half_side_length) / half_side_length)
-    peaks.axes_manager.set_signal_dimension(3)
+    peaks.axes_manager.set_signal_dimension(2)
     peaks.calculate_cartesian_coordinates(200, 0.2)
-    peaks.cartesian.axes_manager.set_signal_dimension(3)
+    peaks.cartesian.axes_manager.set_signal_dimension(2)
     structure_library = StructureLibrary(['A'], [structure], [[]])
     library_generator = VectorLibraryGenerator(structure_library)
     vector_library = library_generator.get_vector_library(1)

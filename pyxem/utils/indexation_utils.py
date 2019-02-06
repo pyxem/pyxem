@@ -149,7 +149,8 @@ def match_vectors(peaks,
             [phase index, rotation matrix, match rate, error hkls, total error]
 
     """
-    peaks = peaks[0]
+    if peaks.shape == (1,) and peaks.dtype == 'object':
+        peaks = peaks[0]
     # Initialise for loop with first entry & assign empty array to hold
     # indexation results.
     top_matches = np.empty((len(library), n_best, 5), dtype='object')

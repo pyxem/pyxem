@@ -114,11 +114,11 @@ def test_crystal_from_vector_matching_dp(dp_vector_match_result):
 
 @pytest.fixture
 def vector_match_peaks():
-    return np.array([[
+    return np.array([
         [1, 0.1, 0],
         [0, 2, 0],
         [1, 2, 3],
-    ]])
+    ])
 
 
 @pytest.fixture
