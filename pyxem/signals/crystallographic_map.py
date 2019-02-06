@@ -85,7 +85,7 @@ def _euler2axangle_signal(euler):
 
     """
     euler = euler[0]  # TODO: euler is a 1-element ndarray(dtype=object) with a tuple
-    return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
+    return np.rad2deg(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 
 def _distance_from_fixed_angle(angle, fixed_angle):
