@@ -20,7 +20,7 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt, label
 
 from skimage.feature import peak_local_max, match_template
-from skimage.filters import sobel
+from skimage.filters import sobel, threshold_li
 from skimage.morphology import watershed
 
 from hyperspy.signals import Signal2D
@@ -62,14 +62,16 @@ def norm_cross_corr(image, template):
         Normalised cross-correlation between image and template at zero
         displacement.
     """
-    # If image and template are alike, 1 will be returned.
-    if np.array_equal(image,template):
+    # If image and template are alike, 1 will be returned directly.
+    if np.array_equal(image, template):
         corr = 1.
     else: 
-        # Return only the value in the middle, i.e. at zero displcement
-        corr = match_template(image=image, template=template, pad_input=True,
-                              mode='constant', constant_values=0) \
-            [int(np.shape(image)[0]/2), int(np.shape(image)[1]/2)]
+        # Return only the value in the middle, i.e. at zero displacement
+        corr = match_template(
+            image=image, template=template, pad_input=True, mode='constant',
+            constant_values=0)[int(np.shape(image)[0]/2),
+                               int(np.shape(image)[1]/2)]
+
     return corr
 
 
@@ -140,8 +142,8 @@ def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
     return g, indices
 
 
-def separate(vdf_temp, min_distance, threshold, min_size, max_size,
-             max_number_of_grains, exclude_border=False, plot_on=False):
+def separate(vdf_temp, min_distance, min_size, max_size, max_number_of_grains,
+             exclude_border=False, plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
     scikit-image. See [1,2] for examples from scikit-image.
@@ -153,9 +155,6 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
     min_distance: int
         Minimum distance (in pixels) between grains required for them to
         be considered as separate grains.
-    threshold : float
-        Threshold value between 0-1 for the VDF image. Pixels with
-        values below (threshold*max intensity in VDF) are discarded.
     min_size : float
         Grains with size (i.e. total number of pixels) below min_size
         are discarded.
@@ -189,8 +188,11 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
         applications-plot-coins-segmentation-py
     """
 
-    # Create a mask by thresholding the input VDF
-    mask = vdf_temp > (threshold * np.max(vdf_temp))
+    # Create a mask by thresholding the input VDF. The threshold value is
+    # determined by the Li threshold method, see skimage.filters.threshold_li
+    # for details.
+    threshold = threshold_li(vdf_temp)
+    mask = vdf_temp > threshold
 
     # Calculate the eucledian distance from each point in a binary image to the
     # background point of value 0, that has the smallest distance to all input
@@ -248,10 +250,10 @@ def separate(vdf_temp, min_distance, threshold, min_size, max_size,
             labels = np.zeros(np.shape(labels))
             print('No separate particles were found.')
         plot_images([Signal2D(vdf_temp), Signal2D(mask), Signal2D(distance),
-                     Signal2D(labels), Signal2D(elevation),
+                     Signal2D(elevation), Signal2D(labels),
                      Signal2D(np.sum(vdf_sep, axis=0).T)],
                     axes_decor='off', per_row=3, colorbar=True, cmap='gnuplot2',
-                    label=['VDF', 'Mask', 'Distances', 'Labels', 'Elevation',
+                    label=['VDF', 'Mask', 'Distances', 'Elevation', 'Labels',
                            'Separated particles'])
     return vdf_sep
 

@@ -112,11 +112,7 @@ class VDFGenerator:
 
         return vdfim
 
-    def get_concentric_vdf_images(self,
-                                  k_min,
-                                  k_max,
-                                  k_steps,
-                                  normalize=False):
+    def get_concentric_vdf_images(self, k_min, k_max, k_steps, normalize=False):
         """Obtain the intensity scattered at each navigation position in an
         ElectronDiffraction2D Signal by summation over a series of concentric
         in annuli between a specified inner and outer radius in a number of
@@ -156,7 +152,7 @@ class VDFGenerator:
 
         vdfim = VDFImage(np.asarray(vdfs))
 
-        if normalize == True:
+        if normalize is True:
             vdfim.map(normalize_vdf)
 
         # Set calibration to same as signal
@@ -193,10 +189,8 @@ class VDFSegmentGenerator:
         self.vdf_images = vdfs
         self.vectors = vdfs.vectors
 
-    def get_vdf_segments(self, min_distance=1, threshold=0.1,
-                         min_size=10, max_size=100,
-                         max_number_of_grains=np.inf,
-                         exclude_border=False):
+    def get_vdf_segments(self, min_distance=1, min_size=10, max_size=100,
+                         max_number_of_grains=np.inf, exclude_border=False):
         """Separate segments (grains) from each of the VDF images using
         edge-detection by the sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a
@@ -209,9 +203,6 @@ class VDFSegmentGenerator:
         min_distance: int
             Minimum distance (in pixels) between grains required for
             them to be considered as separate grains.
-        threshold : float
-            Threshold value between 0-1 for the VDF image. Pixels with
-            values below (threshold*max intensity in VDF) are discarded.
         min_size : float
             Grains with size (i.e. total number of pixels) below
             min_size are discarded.
@@ -249,13 +240,11 @@ class VDFSegmentGenerator:
         # Create an array of length equal to the number of vectors where each
         # element is a np.object with shape (number of segments for this
         # VDFImage, VDFImage size x, VDFImage size y).
-        vdfsegs = np.array(vdfs.map(separate, show_progressbar=True,
-                                    inplace=False, min_distance=min_distance,
-                                    threshold=threshold, min_size=min_size,
-                                    max_size=max_size,
-                                    max_number_of_grains=max_number_of_grains,
-                                    exclude_border=exclude_border,
-                                    plot_on=False), dtype=np.object)
+        vdfsegs = np.array(vdfs.map(
+            separate, show_progressbar=True, inplace=False,
+            min_distance=min_distance, min_size=min_size, max_size=max_size,
+            max_number_of_grains=max_number_of_grains,
+            exclude_border=exclude_border, plot_on=False), dtype=np.object)
 
         segments, vectors_of_segments = [], []
         for i, vector in zip(np.arange(vectors.size), vectors):
