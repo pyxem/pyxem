@@ -42,7 +42,10 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     """
 
-    k_xy = k_xy[0]
+    if k_xy.shape == (1,) and k_xy.dtype == 'object':
+        # From ragged array
+        k_xy = k_xy[0]
+
     # Convert from left-handed coordinate system on the detector to
     # right-handed used in reciprocal space
     np.negative(k_xy[:, 1], out=k_xy[:, 1])
