@@ -255,7 +255,7 @@ class CrystallographicMap(BaseSignal):
 
             else:
                 raise ValueError("The metric `{}` is not valid for template "
-                                 "matching results. ")
+                                 "matching results.".format(metric))
 
         elif self.method == 'vector_matching':
             vector_metrics = [
@@ -273,7 +273,7 @@ class CrystallographicMap(BaseSignal):
 
             else:
                 raise ValueError("The metric `{}` is not valid for vector "
-                                 "matching results. ")
+                                 "matching results.".format(metric))
 
         else:
             raise ValueError("The crystallographic mapping method must be "
