@@ -136,8 +136,11 @@ def vector_library():
 
 
 def test_match_vectors(vector_match_peaks, vector_library):
+    # Wrap to test handling of ragged arrays
+    peaks = np.empty(1, dtype='object')
+    peaks[0] = vector_match_peaks
     matches, rhkls = match_vectors(
-        vector_match_peaks,
+        peaks,
         vector_library,
         mag_tol=0.1,
         angle_tol=0.1,
