@@ -169,7 +169,6 @@ def match_vectors(peaks,
 
         # Determine overall indexations associated with each peak pair
         for peak_pair_indices in combinations(unindexed_peak_ids, 2):
-            # print('—'*80)
             # Consider a pair of experimental scattering vectors.
             q1, q2 = peaks[peak_pair_indices, :]
             q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
@@ -250,8 +249,6 @@ def match_vectors(peaks,
         if n_solutions > 0:
             match_rate_index = 1
             solutions = np.array(solutions)
-            # match_rates = np.array([sol[match_rate_index][1] for sol in solutions])
-            # print('n_sol', n_solutions)
             top_n = solutions[solutions[:, match_rate_index].argpartition(-n_solutions)[-n_solutions:]]
 
             # Put the top n ranked solutions in the output array
