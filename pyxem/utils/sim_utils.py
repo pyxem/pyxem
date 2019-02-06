@@ -492,7 +492,7 @@ def transfer_navigation_axes(new_signal, old_signal):
 def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
     """ Transfers navigation axis calibrations from an old signal to the signal
     axes of a new signal produced from it by a method or a generator.
-    
+
     Used from methods that generate a signal with a single value at each
     navigation position.
 

@@ -278,7 +278,7 @@ class DiffractionVectors(BaseSignal):
         wavelength = get_electron_wavelength(accelerating_voltage)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,
-                                  camera_length=camera_length*1e10,
+                                  camera_length=camera_length * 1e10,
                                   inplace=False,
                                   parallel=False,  # TODO: For testing
                                   *args, **kwargs)

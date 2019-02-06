@@ -30,7 +30,7 @@ from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.sim_utils import peaks_from_best_template, peaks_from_best_vector_match, \
-        get_kinematical_intensities
+    get_kinematical_intensities
 
 """
 The test are designed to make sure orientation mapping works when actual
@@ -180,17 +180,16 @@ def test_vector_matching_physical(structure, rot_list, edc):
 def test_peaks_from_best_vector_match(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     peaks = match_results.map(peaks_from_best_vector_match,
-        phase_names=['A'],
-        library=library,
-        diffraction_generator=edc,
-        reciprocal_radius=0.8,
-        inplace=False)
+                              phase_names=['A'],
+                              library=library,
+                              diffraction_generator=edc,
+                              reciprocal_radius=0.8,
+                              inplace=False)
     # Unordered compare within absolute tolerance
     for i in range(2):
         lib = library['A'][rot_list[i]]['Sim'].coordinates[:, :2]
-        found = peaks.data[0, i]
-        for f in found:
-            assert np.isclose(f[0], lib[:, 0], atol=0.1).any() and np.isclose(f[1], lib[:, 1], atol=0.1).any()
+        for p in peaks.data[0, i]:
+            assert np.isclose(p[0], lib[:, 0], atol=0.1).any() and np.isclose(p[1], lib[:, 1], atol=0.1).any()
 
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
@@ -199,7 +198,7 @@ def test_plot_best_matching_results_on_signal_vector(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     # Hyperspy can only add markers to square signals
     match_results.data = np.vstack((match_results.data, match_results.data))
-    dp = ElectronDiffraction(2*[2*[np.zeros((144, 144))]])
+    dp = ElectronDiffraction(2 * [2 * [np.zeros((144, 144))]])
     match_results.plot_best_matching_results_on_signal(dp,
                                                        phase_names=["A"],
                                                        library=library,
