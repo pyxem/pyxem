@@ -25,7 +25,6 @@ import diffpy.structure
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
-from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
@@ -275,6 +274,9 @@ def simulate_kinematic_scattering(atomic_coordinates,
     simulation : ElectronDiffraction
         ElectronDiffraction simulation.
     """
+    # Delayed loading to prevent circular dependencies.
+    from pyxem.signals.electron_diffraction import ElectronDiffraction
+
     # Get atomic scattering parameters for specified element.
     if scattering_params == 'lobato':
         c = np.array(ATOMIC_SCATTERING_PARAMS_LOBATO[element])
@@ -473,21 +475,46 @@ def transfer_navigation_axes(new_signal, old_signal):
     new_signal : Signal
         The new signal with calibrated navigation axes.
     """
-    try:
-        x = new_signal.axes_manager.signal_axes[0]
-        x.name = 'x'
-        x.scale = old_signal.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-    except IndexError:
-        pass
-        # Set calibration to same as signal for second navigation axis if there
-    try:
-        y = new_signal.axes_manager.signal_axes[1]
-        y.name = 'y'
-        y.scale = old_signal.axes_manager.navigation_axes[1].scale
-        y.units = 'nm'
-    except IndexError:
-        pass
+    new_signal.axes_manager.set_signal_dimension(
+        len(new_signal.data.shape) - old_signal.axes_manager.navigation_dimension)
+
+    for i in range(min(new_signal.axes_manager.navigation_dimension,
+                       old_signal.axes_manager.navigation_dimension)):
+        ax_new = new_signal.axes_manager.navigation_axes[i]
+        ax_old = old_signal.axes_manager.navigation_axes[i]
+        ax_new.name = ax_old.name
+        ax_new.scale = ax_old.scale
+        ax_new.units = ax_old.units
+
+    return new_signal
+
+
+def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
+    """ Transfers navigation axis calibrations from an old signal to the signal
+    axes of a new signal produced from it by a method or a generator.
+    
+    Used from methods that generate a signal with a single value at each
+    navigation position.
+
+    Parameters
+    ----------
+    new_signal : Signal
+        The product signal with undefined navigation axes.
+    old_signal : Signal
+        The parent signal with calibrated navigation axes.
+
+    Returns
+    -------
+    new_signal : Signal
+        The new signal with calibrated signal axes.
+    """
+    for i in range(min(new_signal.axes_manager.signal_dimension,
+                       old_signal.axes_manager.navigation_dimension)):
+        ax_new = new_signal.axes_manager.signal_axes[i]
+        ax_old = old_signal.axes_manager.navigation_axes[i]
+        ax_new.name = ax_old.name
+        ax_new.scale = ax_old.scale
+        ax_new.units = ax_old.units
 
     return new_signal
 

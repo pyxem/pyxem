@@ -24,6 +24,7 @@ from hyperspy.api import markers
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
+from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
@@ -281,4 +282,4 @@ class DiffractionVectors(BaseSignal):
                                   inplace=False,
                                   parallel=False,  # TODO: For testing
                                   *args, **kwargs)
-        self.cartesian.axes_manager.set_signal_dimension(0)
+        transfer_navigation_axes(self.cartesian, self)

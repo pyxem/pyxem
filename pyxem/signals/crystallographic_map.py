@@ -26,6 +26,7 @@ from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
+from pyxem.utils.sim_utils import transfer_navigation_axes_to_signal_axes
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -178,7 +179,7 @@ class CrystallographicMap(BaseSignal):
         """Obtain a map of the best matching phase at each navigation position.
         """
         phase_map = self.isig[0].as_signal2D((0, 1))
-        phase_map = transfer_navigation_axes(phase_map, self)
+        phase_map = transfer_navigation_axes_to_signal_axes(phase_map, self)
         # TODO: Since vector matching results (and template in the future?) returns
         # in object form, the isigs inherit it, even though this column is an index
         phase_map.change_dtype('float')
@@ -199,9 +200,9 @@ class CrystallographicMap(BaseSignal):
         eulers = self.isig[1]
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
-        orientation_map = transfer_navigation_axes(orientation_map, self)
-        # TODO: Since vector matching results returns in object form, eulers
-        # inherits it
+        orientation_map = transfer_navigation_axes_to_signal_axes(orientation_map, self)
+        # Since vector matching results returns in object form, eulers inherits
+        # it.
         orientation_map.change_dtype('float')
 
         return orientation_map
@@ -279,7 +280,7 @@ class CrystallographicMap(BaseSignal):
                              "specified, as an attribute, as either "
                              "template_matching or vector_matching.")
 
-        metric_map = transfer_navigation_axes(metric_map, self)
+        metric_map = transfer_navigation_axes_to_signal_axes(metric_map, self)
 
         return metric_map
 
