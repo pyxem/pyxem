@@ -337,7 +337,8 @@ class CrystallographicMap(BaseSignal):
         results_array = np.zeros((x_size_nav * y_size_nav, 7))
         results_array[:, 0] = self.isig[0].data.ravel()
         results_array[:, 1:4] = np.array(self.isig[1].data.tolist()).reshape(-1, 3)
-        results_array[:, 4] = self.get_metric_map('correlation').data.ravel()
+        score_metric = 'correlation' if self.method == 'template_matching' else 'match_rate'
+        results_array[:, 4] = self.get_metric_map(score_metric).data.ravel()
         x_indices = np.arange(x_size_nav)
         y_indices = np.arange(y_size_nav)
         results_array[:, 5:7] = np.array(np.meshgrid(x_indices, y_indices)).T.reshape(-1, 2)
