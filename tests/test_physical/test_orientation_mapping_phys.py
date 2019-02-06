@@ -173,7 +173,7 @@ def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
     _, match_results = get_vector_match_results(structure, rot_list, edc)
-    assert match_results.data.shape == (2, 2, 2, 5)  # 1x2 rotations, 2 best peaks, 5 values
+    assert match_results.data.shape == (2, 2, 2, 5)  # 2x2 rotations, 2 best peaks, 5 values
     np.testing.assert_allclose(match_results.data[0, 0, 0, 2], 1.0)  # match rate for best orientation
     np.testing.assert_allclose(match_results.data[0, 1, 0, 2], 1.0)  # match rate for best orientation
 
