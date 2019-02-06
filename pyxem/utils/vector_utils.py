@@ -56,10 +56,8 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
 
-    # Stack the xy-vector and the z vector to get the full k. y is negated to
-    # convert from left-handed coordinate system on the detector to
-    # right-handed used in reciprocal space.
-    k = np.vstack((k_xy[:, 0], -k_xy[:, 1], k_z)).T
+    # Stack the xy-vector and the z vector to get the full k
+    k = np.hstack((k_xy, k_z[:, np.newaxis]))
     return k
 
 

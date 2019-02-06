@@ -354,7 +354,6 @@ def peaks_from_best_template(single_match_result, phase_names, library):
         phase=phase,
         angle=tuple(best_fit[1]))['Sim']
     peaks = pattern.coordinates[:, :2]  # cut z
-    peaks[:, 1] = -peaks[:, 1]
     return peaks
 
 
@@ -396,7 +395,6 @@ def peaks_from_best_vector_match(single_match_result, phase_names, library, diff
 
     sim = diffraction_generator.calculate_ed_data(structure_rotated, reciprocal_radius, with_direct_beam=False)
     peaks = sim.coordinates[:, :2]  # Cut z
-    peaks[:, 1] = -peaks[:, 1]
     return peaks
 
 

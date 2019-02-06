@@ -166,7 +166,6 @@ def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_
     peaks = M.map(peaks_from_best_template,
                   phase_names=["A"], library=library, inplace=False)
     expected_peaks = library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
-    expected_peaks[:, 1] = -expected_peaks[:, 1]
     np.testing.assert_allclose(peaks.inav[0, 0], expected_peaks, atol=0.1)
 
 
