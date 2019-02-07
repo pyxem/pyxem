@@ -68,7 +68,7 @@ class VDFSegment:
 
         Returns
         -------
-        VDFSegment
+        vdfseg : VDFSegment
             The VDFSegment instance updated according to the image
             correlation results.
         """
@@ -143,8 +143,9 @@ class VDFSegment:
         for i in range(len(gvectors)):
             gvector_intensities[i] = segment_intensities[vector_indices[i]]
 
-        return VDFSegment(Signal2D(image_stack), DiffractionVectors(gvectors).T,
-                          gvector_intensities)
+        vdfseg = VDFSegment(Signal2D(image_stack),
+                            DiffractionVectors(gvectors).T, gvector_intensities)
+        return vdfseg
 
     def threshold_segments(self, min_intensity_threshold=None,
                            vector_number_threshold=None):
@@ -168,7 +169,7 @@ class VDFSegment:
             As input, except that segments might have been removed after
             thresholds based on min intensity and/or number of vectors.
         """
-
+        # TODO Update axes_manager!
         if min_intensity_threshold is None and vector_number_threshold is None:
             raise ValueError("Specify input threshold.")
 
@@ -227,8 +228,6 @@ class VDFSegment:
             Virtual electron diffraction signal consisting of one
             virtual diffraction pattern for each segment.
         """
-        # TODO : Update all axes, scales, offsets etc.
-
         vectors = self.vectors_of_segments.data
         segments = self.segments.data
         num_segments = np.shape(segments)[0]

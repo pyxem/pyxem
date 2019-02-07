@@ -233,7 +233,6 @@ class VDFSegmentGenerator:
             VDFSegment object containing segments (i.e. grains) of
             single virtual dark field images with corresponding vectors.
         """
-        # TODO Add axes attributes as for VDFImage.
         vdfs = self.vdf_images
         vectors = self.vectors
 
@@ -263,5 +262,17 @@ class VDFSegmentGenerator:
         vectors_of_segments = DiffractionVectors(vectors_of_segments)
         vdfsegs = VDFSegment(segments, vectors_of_segments)
         vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(0)
+
+        # Set calibration:
+        x = vdfsegs.segments.axes_manager.signal_axes[0]
+        y = vdfsegs.segments.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.vdf_images.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.vdf_images.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
 
         return vdfsegs

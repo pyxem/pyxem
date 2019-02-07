@@ -217,7 +217,7 @@ def separate(vdf_temp, min_distance, min_size, max_size, max_number_of_grains,
     labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
 
     if not np.max(labels):
-        print('No labels were found. Check input parameters.')
+        print('No labels were found. Check input parameters.\n')
 
     sep = np.zeros((np.shape(vdf_temp)[0], np.shape(vdf_temp)[1],
                     (np.max(labels))), dtype='int32')
@@ -248,7 +248,7 @@ def separate(vdf_temp, min_distance, min_size, max_size, max_number_of_grains,
         # If no separated particles were found, set all elements in labels to 0.
         elif np.shape(sep)[2] == 0:
             labels = np.zeros(np.shape(labels))
-            print('No separate particles were found.')
+            print('No separate particles were found.\n')
         plot_images([Signal2D(vdf_temp), Signal2D(mask), Signal2D(distance),
                      Signal2D(elevation), Signal2D(labels),
                      Signal2D(np.sum(vdf_sep, axis=0).T)],
