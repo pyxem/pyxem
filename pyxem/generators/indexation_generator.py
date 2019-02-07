@@ -243,19 +243,15 @@ class VectorIndexationGenerator():
                                         inplace=False,
                                         parallel=False,  # TODO: For testing
                                         *args,
-                                        **kwargs).data
-        # Ensure consistent dimensionality, in case only one peak was indexed
-        if matched.ndim == 2:
-            matched = matched[np.newaxis, :, :]
-        indexation = np.array(matched[:, :, 0].tolist())
-        rhkls = matched[:, :, 1]
+                                        **kwargs)
+        indexation = np.array(matched.isig[0].data.tolist(), dtype='object')
+        rhkls = matched.isig[1].data
 
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
-                                                      vectors)
-        indexation_results.axes_manager.set_signal_dimension(2)
+                                                      vectors.cartesian)
 
         vectors.hkls = rhkls
 

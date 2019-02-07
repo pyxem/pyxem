@@ -30,7 +30,7 @@ from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.sim_utils import peaks_from_best_template, peaks_from_best_vector_match, \
-        get_kinematical_intensities
+    get_kinematical_intensities
 
 """
 The test are designed to make sure orientation mapping works when actual
@@ -127,11 +127,11 @@ def get_vector_match_results(structure, rot_list, edc):
     diffraction_library = get_template_library(structure, rot_list, edc)
     peak_lists = []
     for simulation in diffraction_library['A'].values():
-        peak_lists.append([[simulation['pixel_coords']]])
+        peak_lists.append(simulation['pixel_coords'])
     peaks = DiffractionVectors((np.array([peak_lists, peak_lists]) - half_side_length) / half_side_length)
-    peaks.axes_manager.set_signal_dimension(3)
+    peaks.axes_manager.set_signal_dimension(2)
     peaks.calculate_cartesian_coordinates(200, 0.2)
-    peaks.cartesian.axes_manager.set_signal_dimension(3)
+    peaks.cartesian.axes_manager.set_signal_dimension(2)
     structure_library = StructureLibrary(['A'], [structure], [[]])
     library_generator = VectorLibraryGenerator(structure_library)
     vector_library = library_generator.get_vector_library(1)
@@ -165,13 +165,14 @@ def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_
     M = get_template_match_results(default_structure, pattern_list, edc, rot_list)
     peaks = M.map(peaks_from_best_template,
                   phase_names=["A"], library=library, inplace=False)
-    np.testing.assert_allclose(peaks.inav[0, 0], library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2], atol=0.1)
+    expected_peaks = library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
+    np.testing.assert_allclose(peaks.inav[0, 0], expected_peaks, atol=0.1)
 
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
     _, match_results = get_vector_match_results(structure, rot_list, edc)
-    assert match_results.data.shape == (2, 2, 2, 5)  # 1x2 rotations, 2 best peaks, 5 values
+    assert match_results.data.shape == (2, 2, 2, 5)  # 2x2 rotations, 2 best peaks, 5 values
     np.testing.assert_allclose(match_results.data[0, 0, 0, 2], 1.0)  # match rate for best orientation
     np.testing.assert_allclose(match_results.data[0, 1, 0, 2], 1.0)  # match rate for best orientation
 
@@ -180,17 +181,16 @@ def test_vector_matching_physical(structure, rot_list, edc):
 def test_peaks_from_best_vector_match(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     peaks = match_results.map(peaks_from_best_vector_match,
-        phase_names=['A'],
-        library=library,
-        diffraction_generator=edc,
-        reciprocal_radius=0.8,
-        inplace=False)
+                              phase_names=['A'],
+                              library=library,
+                              diffraction_generator=edc,
+                              reciprocal_radius=0.8,
+                              inplace=False)
     # Unordered compare within absolute tolerance
     for i in range(2):
         lib = library['A'][rot_list[i]]['Sim'].coordinates[:, :2]
-        found = peaks.data[0, i]
-        for f in found:
-            assert np.isclose(f[0], lib[:, 0], atol=0.1).any() and np.isclose(f[1], lib[:, 1], atol=0.1).any()
+        for p in peaks.data[0, i]:
+            assert np.isclose(p[0], lib[:, 0], atol=0.1).any() and np.isclose(p[1], lib[:, 1], atol=0.1).any()
 
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
@@ -199,7 +199,7 @@ def test_plot_best_matching_results_on_signal_vector(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     # Hyperspy can only add markers to square signals
     match_results.data = np.vstack((match_results.data, match_results.data))
-    dp = ElectronDiffraction(2*[2*[np.zeros((144, 144))]])
+    dp = ElectronDiffraction(2 * [2 * [np.zeros((144, 144))]])
     match_results.plot_best_matching_results_on_signal(dp,
                                                        phase_names=["A"],
                                                        library=library,

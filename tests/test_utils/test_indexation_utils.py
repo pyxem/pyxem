@@ -114,11 +114,11 @@ def test_crystal_from_vector_matching_dp(dp_vector_match_result):
 
 @pytest.fixture
 def vector_match_peaks():
-    return np.array([[
+    return np.array([
         [1, 0.1, 0],
         [0, 2, 0],
         [1, 2, 3],
-    ]])
+    ])
 
 
 @pytest.fixture
@@ -136,8 +136,11 @@ def vector_library():
 
 
 def test_match_vectors(vector_match_peaks, vector_library):
+    # Wrap to test handling of ragged arrays
+    peaks = np.empty(1, dtype='object')
+    peaks[0] = vector_match_peaks
     matches, rhkls = match_vectors(
-        vector_match_peaks,
+        peaks,
         vector_library,
         mag_tol=0.1,
         angle_tol=0.1,

@@ -26,6 +26,7 @@ from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
+from pyxem.utils.sim_utils import transfer_navigation_axes_to_signal_axes
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -84,7 +85,7 @@ def _euler2axangle_signal(euler):
 
     """
     euler = euler[0]  # TODO: euler is a 1-element ndarray(dtype=object) with a tuple
-    return np.array(euler2axangle(euler[0], euler[1], euler[2])[1])
+    return np.rad2deg(euler2axangle(euler[0], euler[1], euler[2])[1])
 
 
 def _distance_from_fixed_angle(angle, fixed_angle):
@@ -178,7 +179,7 @@ class CrystallographicMap(BaseSignal):
         """Obtain a map of the best matching phase at each navigation position.
         """
         phase_map = self.isig[0].as_signal2D((0, 1))
-        phase_map = transfer_navigation_axes(phase_map, self)
+        phase_map = transfer_navigation_axes_to_signal_axes(phase_map, self)
         # TODO: Since vector matching results (and template in the future?) returns
         # in object form, the isigs inherit it, even though this column is an index
         phase_map.change_dtype('float')
@@ -199,9 +200,9 @@ class CrystallographicMap(BaseSignal):
         eulers = self.isig[1]
         eulers.map(_euler2axangle_signal, inplace=True)
         orientation_map = eulers.as_signal2D((0, 1))
-        orientation_map = transfer_navigation_axes(orientation_map, self)
-        # TODO: Since vector matching results returns in object form, eulers
-        # inherits it
+        orientation_map = transfer_navigation_axes_to_signal_axes(orientation_map, self)
+        # Since vector matching results returns in object form, eulers inherits
+        # it.
         orientation_map.change_dtype('float')
 
         return orientation_map
@@ -254,7 +255,7 @@ class CrystallographicMap(BaseSignal):
 
             else:
                 raise ValueError("The metric `{}` is not valid for template "
-                                 "matching results. ")
+                                 "matching results.".format(metric))
 
         elif self.method == 'vector_matching':
             vector_metrics = [
@@ -272,14 +273,14 @@ class CrystallographicMap(BaseSignal):
 
             else:
                 raise ValueError("The metric `{}` is not valid for vector "
-                                 "matching results. ")
+                                 "matching results.".format(metric))
 
         else:
             raise ValueError("The crystallographic mapping method must be "
                              "specified, as an attribute, as either "
                              "template_matching or vector_matching.")
 
-        metric_map = transfer_navigation_axes(metric_map, self)
+        metric_map = transfer_navigation_axes_to_signal_axes(metric_map, self)
 
         return metric_map
 
@@ -336,7 +337,8 @@ class CrystallographicMap(BaseSignal):
         results_array = np.zeros((x_size_nav * y_size_nav, 7))
         results_array[:, 0] = self.isig[0].data.ravel()
         results_array[:, 1:4] = np.array(self.isig[1].data.tolist()).reshape(-1, 3)
-        results_array[:, 4] = self.get_metric_map('correlation').data.ravel()
+        score_metric = 'correlation' if self.method == 'template_matching' else 'match_rate'
+        results_array[:, 4] = self.get_metric_map(score_metric).data.ravel()
         x_indices = np.arange(x_size_nav)
         y_indices = np.arange(y_size_nav)
         results_array[:, 5:7] = np.array(np.meshgrid(x_indices, y_indices)).T.reshape(-1, 2)

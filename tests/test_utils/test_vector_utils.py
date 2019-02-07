@@ -38,11 +38,11 @@ def test_calculate_norms_ragged():
 
 @pytest.mark.parametrize('wavelength, camera_length, detector_coords, k_expected', [
     (0.025, 0.2,
-        np.array([[
+        np.array([
             [0, 0],
             [0, 1],
             [1, 1]
-        ]]),
+        ]),
         np.array([
             [0, 0, 1 / 0.025 - 40],
             [0, 1, np.sqrt(1 / (0.025**2) - 1) - 40],
