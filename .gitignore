@@ -1,7 +1,13 @@
+# Test files
+file_01.pickle
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Pytest
+.pytest_cache/
 
 # C extensions
 *.so
@@ -100,3 +106,6 @@ ENV/
 #auto changing files
 build/
 src/
+
+# VScode project settings
+.vscode/

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -49,7 +49,7 @@ setup(
     install_requires=[
     	'hyperspy >= 1.3',
         'transforms3d',
-	'scikit-learn >= 0.19'
+	    'scikit-learn >= 0.19'
       ],
 
     package_data={

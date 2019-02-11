@@ -22,7 +22,8 @@ from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 
-# This test suite is aimed at checking the basic functionality of the Omapping process, obviously to have a succesful OM process
+# This test suite is aimed at checking the basic functionality of the
+# orientation mapping process, obviously to have a succesful OM process
 # many other components will also need to be correct
 
 
@@ -57,7 +58,7 @@ for alpha in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
                 0.075,
                 1).data)  # stores a numpy array of pattern
 
-    # this add a new entry to the library
+    # add a new entry to the library
     library = create_library_entry(library, (alpha, alpha, alpha), dp_sim)
 
 dp = pxm.ElectronDiffraction([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
@@ -69,10 +70,10 @@ match_results = indexer.correlate()
 def test_match_results():
     # Note the random number generator may give a different assertion failure
     # This should always work regardless of the RNG.
-    assert match_results.inav[0, 0].data[0][1] == 0
-    assert match_results.inav[1, 0].data[0][1] == 1
-    assert match_results.inav[0, 1].data[0][1] == 2
-    assert match_results.inav[1, 1].data[0][1] == 3
+    assert match_results.inav[0, 0].data[0][1][0] == 0
+    assert match_results.inav[1, 0].data[0][1][0] == 1
+    assert match_results.inav[0, 1].data[0][1][0] == 2
+    assert match_results.inav[1, 1].data[0][1][0] == 3
 
 
 def test_visuals():
@@ -83,7 +84,7 @@ def test_visuals():
     import hyperspy.api as hs
 
     peaks = match_results.map(peaks_from_best_template,
-                              phase=["Phase"], library=library, inplace=False)
+                              phase_names=["Phase"], library=library, inplace=False)
     mmx, mmy = generate_marker_inputs_from_peaks(peaks)
     dp.set_diffraction_calibration(2 / 144)
     dp.plot(cmap='viridis')
@@ -97,5 +98,5 @@ def test_visuals():
 
 def test_plot_best_matching_results_on_signal():
     match_results.plot_best_matching_results_on_signal(dp,
-                                                       phase=["Phase"],
+                                                       phase_names=["Phase"],
                                                        library=library)

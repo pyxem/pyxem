@@ -4,34 +4,48 @@
 .. image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
     :target: https://coveralls.io/github/pyxem/pyxem?branch=master
 
-.. image:: https://landscape.io/github/pyxem/pyxem/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/pyxem/pyxem/master
-   :alt: Code Health
-
 .. https://github.com/lemurheavy/coveralls-public/issues/971
 
 
 Introduction
 ------------
 
-pyXem (Python Crystallographic Electron Microscopy) is an open-source Python library for crystallographic electron microscopy. It builds on the tools for multi-dimensional data analysis provided by the hyperspy library for treatment of experimental electron diffraction data and tools for atomic structure manipulation provided by the diffpy.Structure library.
+pyXem builds heavily on the tools for multi-dimensional data analysis provided
+by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__
+for atomic structure manipulation.
 
-pyXem is released under the GPL v3 license.
+pyXem is released under the GPL v3 license. 
 
-Install
--------
+If analysis using pyxem forms a part of published work please consider recognising the code 
+development by citing the github repository www.github.com/pyxem/pyXem.
 
-pyXem requires python 3 and conda (to install a Py3 compatitble version of diffpy) - as such we suggest using `Miniconda <https://conda.io/miniconda.html>`__  (make sure to install the Python 3 version), which has extensive documentation. From a clean install (ideally an isolated environment) the following commands will install everything you need. They should be entered into the terminal (located in the pyxem directory)::
-
-      $ conda install -c diffpy/label/dev diffpy.structure 
-      $ pip install . -r requirements.txt
-
-NB: This will soon be much simpler once a version of pyXem is uploaded to PyPi and conda, please bear with us in the meantime.
-
-Citing pyXem
+Installation
 ------------
 
-If pyXem has enabled significant parts of an academic publication, please acknowledge that by citing the software. Until a specific publication is written about pyXem please cite the github URL: www.github.com/pyxem/pyXem
+pyXem requires python 3 and conda - we suggest using the python 3 version of `Miniconda <https://conda.io/miniconda.html>`__. and creating a new environment for pyxem using the following commands in the anaconda prompt:::
 
-We also recommend that you cite `HyperSpy <http://hyperspy.org/hyperspy-doc/current/citing.html>`_.
+      $ conda create -n pyxem
+      $ conda activate pyxem
+
+Download the `source code <https://github.com/pyxem/pyxem>`__ and put it in a directory on your computer. The following commands will then install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
+
+      $ conda install -c conda-forge diffpy.structure
+      $ conda install -c anaconda cython
+      $ conda install -c conda-forge spglib
+      $ conda install -c conda-forge traits
+      $ pip install . -r requirements.txt
+
+
+Getting Started
+---------------
+
+To get started using pyxem, especially if you are unfamiliar with python, we recommend using jupyter notebooks. Having installed pyxem as above, a jupyter notebook can be opened using the following commands entered into an anaconda prompt or terminal:::
+
+      $ conda activate pyxem
+      $ jupyter notebook
+
+`Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ have been curated as a series of jupyter notebooks that you can work through and modify to perform many common analyses.
+
+
+`Documentation <http://pyxem.github.io/pyxem>`__ is available via the website.
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,7 +18,8 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.diffraction_simulation import DiffractionSimulation, ProfileSimulation
+from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from pyxem.signals.diffraction_simulation import ProfileSimulation
 from pyxem.generators.diffraction_generator import DiffractionGenerator
 import diffpy.structure
 
@@ -109,3 +110,19 @@ class TestDiffractionCalculator:
         hexagonal_profile = diffraction_calculator.calculate_profile_data(structure=hexagonal_structure,
                                                                           reciprocal_radius=1.)
         assert isinstance(hexagonal_profile, ProfileSimulation)
+
+
+scattering_params = ['lobato', 'xtables']
+
+
+@pytest.mark.parametrize('scattering_param', scattering_params)
+def test_param_check(scattering_param):
+    generator = DiffractionGenerator(300, 0.2, None,
+                                     scattering_params=scattering_param)
+
+
+@pytest.mark.xfail(raises=NotImplementedError)
+def test_invalid_scattering_params():
+    scattering_param = '_empty'
+    generator = DiffractionGenerator(300, 0.2, None,
+                                     scattering_params=scattering_param)

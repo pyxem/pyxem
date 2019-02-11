@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,19 +16,30 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 """Signal class for Electron Diffraction data.
-
-
 """
 import numpy as np
+from warnings import warn
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.expt_utils import *
-from pyxem.utils.peakfinders2D import *
+
+from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
+    radial_average, gain_normalise, remove_dead, affine_transformation, \
+    regional_filter, subtract_background_dog, subtract_background_median, \
+    subtract_reference, circular_mask, reference_circle, \
+    find_beam_offset_cross_correlation, calc_radius_with_distortion, \
+    call_ring_pattern, peaks_as_gvectors
+
+from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
+    find_peaks_dog, find_peaks_log, find_peaks_xc
+
 from pyxem.utils import peakfinder2D_gui
-from warnings import warn
+
+from skimage import filters
+from skimage.morphology import square
+from scipy.optimize import curve_fit
 
 
 class ElectronDiffraction(Signal2D):
@@ -378,7 +389,14 @@ class ElectronDiffraction(Signal2D):
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
         rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
-        rp.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        ax_old = self.axes_manager.navigation_axes
+        rp.axes_manager.navigation_axes[0].scale = ax_old[0].scale
+        rp.axes_manager.navigation_axes[0].units = ax_old[0].units
+        rp.axes_manager.navigation_axes[0].name = ax_old[0].name
+        if len(ax_old) > 1:
+            rp.axes_manager.navigation_axes[1].scale = ax_old[1].scale
+            rp.axes_manager.navigation_axes[1].units = ax_old[1].units
+            rp.axes_manager.navigation_axes[1].name = ax_old[1].name
         rp_axis = rp.axes_manager.signal_axes[0]
         rp_axis.name = 'k'
         rp_axis.scale = self.axes_manager.signal_axes[0].scale
@@ -427,7 +445,6 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-
         radius_start : int
             The lower bound for the radius of the central disc to be used in the
             alignment.
@@ -445,7 +462,8 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        Diffraction Pattern, centered.
+        centered : ElectronDiffraction
+            The centered diffraction data.
 
         """
         nav_shape_x = self.data.shape[0]
@@ -468,6 +486,140 @@ class ElectronDiffraction(Signal2D):
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
+
+    def fit_ring_pattern(self, mask_radius, scale=100, amplitude=1000, spread=2,
+                         direct_beam_amplitude=500, asymmetry=1, rotation=0):
+        """Determine diffraction pattern calibration and distortions from by
+        fitting a polycrystalline gold diffraction pattern to a set of rings.
+        It is suggested that the function generate_ring_pattern is used to
+        find initial values (initial guess) for the parameters used in the fit.
+
+        This function is written expecting a single 2D diffraction pattern
+        with equal dimensions (e.g. 256x256).
+
+        Parameters
+        ----------
+        mask_radius : int
+            The radius in pixels for a mask over the direct beam disc
+            (the direct beam disc within given radius will be excluded
+            from the fit)
+        scale : float
+            An initial guess for the diffraction calibration
+            in 1/Angstrom units
+        amplitude : float
+            An initial guess for the amplitude of the polycrystalline rings
+            in arbitrary units
+        spread : float
+            An initial guess for the spread within each ring (Gaussian width)
+        direct_beam_amplitude : float
+            An initial guess for the background intensity from the direct
+            beam disc in arbitrary units
+        asymmetry : float
+            An initial guess for any elliptical asymmetry in the
+            pattern (for a perfectly circular pattern asymmetry=1)
+        rotation : float
+            An initial guess for the rotation of the (elliptical) pattern
+            in radians.
+
+        Returns
+        ----------
+        params : np.array()
+            Array of fitting parameters.
+           [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation].
+
+        """
+        image_size = self.data.shape[0]
+        xi = np.linspace(0, image_size - 1, image_size)
+        yi = np.linspace(0, image_size - 1, image_size)
+        x, y = np.meshgrid(xi, yi)
+
+        mask = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
+                                           (image_size - 1) / 2, 1, 0)
+        mask[mask > mask_radius] = 0
+        self.data[mask > 0] *= 0
+
+        ref = self.data[self.data > 0]
+        ref = ref.ravel()
+
+        pts = np.array([x[self.data > 0].ravel(),
+                        y[self.data > 0].ravel()]).ravel()
+        xcentre = (image_size - 1) / 2
+        ycentre = (image_size - 1) / 2
+
+        x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
+        xf, cov = curve_fit(call_ring_pattern(xcentre, ycentre), pts, ref, p0=x0)
+
+        return xf
+
+    def generate_ring_pattern(self, mask=False, mask_radius=10, scale=100,
+                              amplitude=1000, spread=2, direct_beam_amplitude=500,
+                              asymmetry=1, rotation=0):
+        """Calculate a set of rings to model a polycrystalline gold diffraction
+        pattern for use in fitting for diffraction pattern calibration.
+        It is suggested that the function generate_ring_pattern is used to
+        find initial values (initial guess) for the parameters used in
+        the function fit_ring_pattern.
+
+        This function is written expecting a single 2D diffraction pattern
+        with equal dimensions (e.g. 256x256).
+
+        Parameters
+        ----------
+        mask : bool
+            Choice of whether to use mask or not (mask=True will return a
+            specified circular mask setting a region around
+            the direct beam to zero)
+        mask_radius : int
+            The radius in pixels for a mask over the direct beam disc
+            (the direct beam disc within given radius will be excluded
+            from the fit)
+        scale : float
+            An initial guess for the diffraction calibration
+            in 1/Angstrom units
+        amplitude : float
+            An initial guess for the amplitude of the polycrystalline rings
+            in arbitrary units
+        spread : float
+            An initial guess for the spread within each ring (Gaussian width)
+        direct_beam_amplitude : float
+            An initial guess for the background intensity from the
+            direct beam disc in arbitrary units
+        asymmetry : float
+            An initial guess for any elliptical asymmetry in the pattern
+            (for a perfectly circular pattern asymmetry=1)
+        rotation : float
+            An initial guess for the rotation of the (elliptical) pattern
+            in radians.
+
+        Returns
+        -------
+        image : np.array()
+            Simulated ring pattern with the same dimensions as self.data
+
+        """
+        image_size = self.data.shape[0]
+        xi = np.linspace(0, image_size - 1, image_size)
+        yi = np.linspace(0, image_size - 1, image_size)
+        x, y = np.meshgrid(xi, yi)
+
+        pts = np.array([x.ravel(), y.ravel()]).ravel()
+        xcentre = (image_size - 1) / 2
+        ycentre = (image_size - 1) / 2
+
+        ring_pattern = call_ring_pattern(xcentre, ycentre)
+        generated_pattern = ring_pattern(pts, scale, amplitude, spread,
+                                         direct_beam_amplitude, asymmetry,
+                                         rotation)
+        generated_pattern = np.reshape(generated_pattern,
+                                       (image_size, image_size))
+
+        if mask == True:
+            maskROI = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
+                                                  (image_size - 1) / 2, 1, 0)
+            maskROI[maskROI > mask_radius] = 0
+            generated_pattern[maskROI > 0] *= 0
+
+        return generated_pattern
 
     def remove_background(self, method,
                           *args, **kwargs):
@@ -551,9 +703,9 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        *args:
+        *args :
             Arguments to be passed to decomposition().
-        **kwargs:
+        **kwargs :
             Keyword arguments to be passed to decomposition().
 
         Returns
@@ -657,7 +809,7 @@ class ElectronDiffraction(Signal2D):
 
         """
         if disc_image is None:
-            warn("You have no specified a disc image, as such you will not be able to use the xc method in this session")
+            warn("You have not specified a disc image, as such you will not be able to use the xc method in this session")
 
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)

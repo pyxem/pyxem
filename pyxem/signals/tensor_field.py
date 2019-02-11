@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -28,19 +28,36 @@ Signal class for Tensor Fields
 
 
 def _polar_decomposition(image, side):
-    """Perform a polar decomposition of a second rank tensor and return the
-    results as a numpy array.
+    """Perform a polar decomposition of a second rank tensor.
+
+    Parameters
+    ----------
+    image : np.array()
+        Matrix on which to form polar decomposition.
+    side : string
+        'left' or 'right' the side on which to perform polar decomposition.
+
+    Returns
+    -------
+    U, R : np.array()
+        Stretch and rotation matrices obtained by polar decomposition.
+
     """
     return np.array(polar(image, side=side))
 
 
 def _get_rotation_angle(matrix):
-    """Return the rotation angle corresponding to a
+    """Find the rotation angle associated with a given rotation matrix.
+
+    Parameters
+    ----------
+    matrix : np.array()
+        A rotation matrix.
 
     Returns
     -------
-
-    angle : float
+    angle :  np.array()
+        Rotation angle associated with matrix.
 
     """
     return np.array(-math.asin(matrix[1, 0]))
@@ -81,7 +98,7 @@ class DisplacementGradientMap(Signal2D):
         -------
 
         strain_results : BaseSignal
-            Signal
+            Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta
         """
         R, U = self.polar_decomposition()
 

@@ -3,12 +3,9 @@ Contents
 
 .. toctree::
     :maxdepth: 2
-    
-    introduction    
+
+    introduction
     self
-    basics
-    intermediate
-    advanced
-    literature_use_cases
-
-
+    literature
+    conventions
+    contributing
