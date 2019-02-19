@@ -66,3 +66,4 @@ class TestDummyDataModule:
         s = dd.get_generic_fem_signal(probe_x=2, probe_y=3, image_x=20,
                                       image_y=25)
         s.plot()
+        assert s.axes_manager.shape == (2, 3, 20, 25)
