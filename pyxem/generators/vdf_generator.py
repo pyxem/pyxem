@@ -23,6 +23,7 @@
 from pyxem.signals.vdf_image import VDFImage, VDFSegment
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.vdf_utils import normalize_vdf, separate
+from pyxem.utils.sim_utils import transfer_signal_axes
 
 from hyperspy.api import roi
 from hyperspy.signals import Signal2D
@@ -237,7 +238,7 @@ class VDFSegmentGenerator:
         vectors = self.vectors
 
         # Create an array of length equal to the number of vectors where each
-        # element is a np.object with shape (number of segments for this
+        # element is a np.object with shape (n: number of segments for this
         # VDFImage, VDFImage size x, VDFImage size y).
         vdfsegs = np.array(vdfs.map(
             separate, show_progressbar=True, inplace=False,
@@ -262,17 +263,10 @@ class VDFSegmentGenerator:
         vectors_of_segments = DiffractionVectors(vectors_of_segments)
         vdfsegs = VDFSegment(segments, vectors_of_segments)
         vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(0)
-
-        # Set calibration:
-        x = vdfsegs.segments.axes_manager.signal_axes[0]
-        y = vdfsegs.segments.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.vdf_images.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.vdf_images.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        vdfsegs.segments = transfer_signal_axes(vdfsegs.segments,
+                                                self.vdf_images)
+        n = vdfsegs.segments.axes_manager.navigation_axes[0]
+        n.name = 'n'
+        n.units = 'number'
 
         return vdfsegs
