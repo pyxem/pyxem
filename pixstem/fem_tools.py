@@ -1,23 +1,27 @@
+import matplotlib.pylab as plt
 import numpy as np
 from dask import delayed
 from tqdm import tqdm
-from matplotlib.pyplot import subplots as pltsubplots
-from hyperspy.signals import Signal1D
-from hyperspy.io import load as hsload
+import hyperspy.api as hs
 import pixstem
 
-'''
-Plotting function used to display output of FEM calculations
-'''
 
+def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
+    """Perform analysis of fluctuation electron microscopy (FEM) data
+    as outlined in:
 
-def fem_calc(s, centre_x, centre_y, show_progressbar=True):
-    """
+    T. L. Daulton, et al., Ultramicroscopy 110 (2010) 1279-1289.
+    doi:10.1016/j.ultramic.2010.05.010
+
     Parameters
     ----------
-    s : PixelatedSTEM signal
-    centre_x, centre_y : scalar
-    show_progressbar : bool, optional
+    s : PixelatedSTEM
+        Signal on which FEM analysis was performed
+    centre_x, centre_y : int, optional
+        All the diffraction patterns assumed to have the same
+        centre position.
+
+    show_progressbar : bool
         Default True
 
     Returns
@@ -29,21 +33,31 @@ def fem_calc(s, centre_x, centre_y, show_progressbar=True):
         the normalized variance image (Omega-Vi), and annular mean of
         the variance image (Omega-Vk).
 
-    Example
-    -------
-    >>> s = ps.dummy_data.get_fem_signal()
-    >>> fem_results = s.fem_analysis(
-    ...     centre_x=50, centre_y=50,
+    Examples
+    --------
+    >>> import pixstem.dummy_data as dd
+    >>> import pixstem.fem_tools as femt
+    >>> s = dd.get_fem_signal()
+    >>> fem_results = femt.fem_calc(
+    ...     s,
+    ...     centre_x=128,
+    ...     centre_y=128,
     ...     show_progressbar=False)
     >>> fem_results['V-Omegak'].plot()
 
     """
     offset = False
 
+    if centre_x is None:
+        centre_x = np.int(s.axes_manager.signal_shape[0]/2)
+
+    if centre_y is None:
+        centre_y = np.int(s.axes_manager.signal_shape[1]/2)
+
     if s.data.min() == 0:
         s.data += 1  # To avoid division by 0
         offset = True
-    results = {}
+    results = dict()
 
     results['RadialInt'] = (
         s.radial_integration(centre_x=centre_x, centre_y=centre_y,
@@ -53,6 +67,9 @@ def fem_calc(s, centre_x, centre_y, show_progressbar=True):
     radialavgs = s.radial_integration(centre_x=centre_x, centre_y=centre_y,
                                       normalize=True,
                                       show_progressbar=show_progressbar)
+    if radialavgs.data.min() == 0:
+        radialavgs.data += 1
+
     results['V-Omegak'] = ((radialavgs ** 2).mean() /
                            (radialavgs.mean()) ** 2) - 1
     results['RadialAvg'] = radialavgs.mean()
@@ -92,9 +109,9 @@ def fem_calc(s, centre_x, centre_y, show_progressbar=True):
         Vrkdask = delayed(Vrklist)
         Vrekdask = delayed(Vreklist)
 
-        results['Vrk'] = Signal1D(
+        results['Vrk'] = hs.signals.Signal1D(
                 Vrkdask.compute(progressbar=show_progressbar))
-        results['Vrek'] = Signal1D(
+        results['Vrek'] = hs.signals.Signal1D(
                 Vrekdask.compute(progressbar=show_progressbar))
     else:
         results['Omega-Vi'] = ((s ** 2).mean() / (s.mean()) ** 2) - 1
@@ -124,8 +141,8 @@ def fem_calc(s, centre_x, centre_y, show_progressbar=True):
             results['Vrek'][k] = np.mean(
                 vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1
 
-        results['Vrk'] = Signal1D(results['Vrk'])
-        results['Vrek'] = Signal1D(results['Vrek'])
+        results['Vrk'] = hs.signals.Signal1D(results['Vrk'])
+        results['Vrek'] = hs.signals.Signal1D(results['Vrek'])
 
     if oldshape:
         s.data = s.data.reshape(oldshape)
@@ -148,6 +165,8 @@ def plot_fem(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
         Position of low-q cutoff for plots
     highcutoff : integer
         Position of high-q cutoff for plots
+    k_cal : float or None
+        Reciprocal space unit of length per pixel in inverse Angstroms
 
     Returns
     -------
@@ -170,7 +189,10 @@ def plot_fem(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
     else:
         xaxis = np.arange(0, len(results['RadialAvg'].data))
 
-    fig, axes = pltsubplots(3, 2, figsize=(9, 12))
+    if highcutoff > len(results['RadialAvg'].data):
+        highcutoff = len(results['RadialAvg'].data) - 1
+
+    fig, axes = plt.subplots(3, 2, figsize=(9, 12))
 
     axes[0, 0].imshow(np.log(s.mean().data + 1), cmap='viridis')
     axes[0, 0].set_title('Mean Pattern', size=15)
@@ -274,5 +296,5 @@ def load_fem(rootname):
             'Vrek',
             'Vrk']
     for i in keys:
-        results[i] = hsload(rootname + '_FEM_' + i + '.hdf5')
+        results[i] = hs.load(rootname + '_FEM_' + i + '.hdf5')
     return results
