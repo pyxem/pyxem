@@ -23,7 +23,8 @@
 from pyxem.signals.vdf_image import VDFImage, VDFSegment
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.vdf_utils import normalize_vdf, separate
-from pyxem.utils.sim_utils import transfer_signal_axes
+from pyxem.utils.sim_utils import (transfer_signal_axes,
+                                   transfer_navigation_axes_to_signal_axes)
 
 from hyperspy.api import roi
 from hyperspy.signals import Signal2D
@@ -97,16 +98,7 @@ class VDFGenerator:
                              "initialize VDFGenerator with some vectors. ")
 
         # Set calibration to same as signal
-        x = vdfim.axes_manager.signal_axes[0]
-        y = vdfim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
 
         # Assign vectors used to generate images to vdfim attribute.
         vdfim.vectors = self.vectors.data
