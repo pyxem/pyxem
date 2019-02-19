@@ -23,11 +23,12 @@ from pyxem.signals import push_metadata_through
 
 import numpy as np
 from tqdm import tqdm
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 from pyxem.utils.vdf_utils import (norm_cross_corr, get_vectors_and_indices_i,
-                                   get_gaussian2d)
+                                   get_gaussian2d, transfer_vdfsegment_axes)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.utils.sim_utils import transfer_signal_axes
 
 
 class VDFImage(Signal2D):
@@ -38,11 +39,12 @@ class VDFImage(Signal2D):
         super().__init__(*args, **kwargs)
         self.vectors = None
 
+
 class VDFSegment:
     _signal_type = "vdf_segment"
 
-    def __init__(self, segments, vectors_of_segments, intensities=None,
-                 *args,**kwargs):
+    def __init__(self, segments, vectors_of_segments, intensities=None, *args,
+                 **kwargs):
         # Segments as Signal2D
         self.segments = segments
         # DiffractionVectors
@@ -72,7 +74,6 @@ class VDFSegment:
             The VDFSegment instance updated according to the image
             correlation results.
         """
-        # TODO Update axes_manager!
         vectors = self.vectors_of_segments.data
         if len(np.shape(vectors)) <= 1:
             raise ValueError("Input vectors are not of correct shape. Try to "
@@ -142,9 +143,15 @@ class VDFSegment:
         gvector_intensities = np.array(np.empty(len(gvectors)), dtype=object)
         for i in range(len(gvectors)):
             gvector_intensities[i] = segment_intensities[vector_indices[i]]
+        vdfseg = VDFSegment(Signal2D(image_stack), DiffractionVectors(gvectors),
+                            gvector_intensities)
 
-        vdfseg = VDFSegment(Signal2D(image_stack),
-                            DiffractionVectors(gvectors).T, gvector_intensities)
+        # Transfer axes properties of segments
+        vdfseg.segments = transfer_signal_axes(vdfseg.segments, self.segments)
+        n = vdfseg.segments.axes_manager.navigation_axes[0]
+        n.name = 'n'
+        n.units = 'number'
+
         return vdfseg
 
     def threshold_segments(self, min_intensity_threshold=None,
@@ -169,7 +176,6 @@ class VDFSegment:
             As input, except that segments might have been removed after
             thresholds based on min intensity and/or number of vectors.
         """
-        # TODO Update axes_manager!
         if min_intensity_threshold is None and vector_number_threshold is None:
             raise ValueError("Specify input threshold.")
 
@@ -200,6 +206,11 @@ class VDFSegment:
 
         vdfseg = VDFSegment(Signal2D(image_stack), DiffractionVectors(vectors),
                             self.intensities)
+        # Transfer axes properties of segments
+        vdfseg.segments = transfer_signal_axes(vdfseg.segments, self.segments)
+        n = vdfseg.segments.axes_manager.navigation_axes[0]
+        n.name = 'n'
+        n.units = 'number'
 
         return vdfseg
 

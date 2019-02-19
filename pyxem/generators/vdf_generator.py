@@ -57,6 +57,7 @@ class VDFGenerator:
 
         self.signal = signal
         self.vectors = unique_vectors
+        self.vectors = transfer_signal_axes(self.vectors, self.signal)
 
     def get_vector_vdf_images(self,
                               radius,
@@ -101,7 +102,8 @@ class VDFGenerator:
         vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
 
         # Assign vectors used to generate images to vdfim attribute.
-        vdfim.vectors = self.vectors.data
+        vdfim.vectors = self.vectors
+        vdfim.vectors = transfer_signal_axes(vdfim.vectors, self.vectors)
 
         return vdfim
 
@@ -149,16 +151,7 @@ class VDFGenerator:
             vdfim.map(normalize_vdf)
 
         # Set calibration to same as signal
-        x = vdfim.axes_manager.signal_axes[0]
-        y = vdfim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
 
         return vdfim
 
@@ -177,7 +170,6 @@ class VDFSegmentGenerator:
     """
 
     def __init__(self, vdfs, *args, **kwargs):
-        # If ragged the signal axes will not be defined
 
         self.vdf_images = vdfs
         self.vectors = vdfs.vectors
@@ -227,7 +219,7 @@ class VDFSegmentGenerator:
             single virtual dark field images with corresponding vectors.
         """
         vdfs = self.vdf_images
-        vectors = self.vectors
+        vectors = self.vectors.data
 
         # Create an array of length equal to the number of vectors where each
         # element is a np.object with shape (n: number of segments for this
@@ -252,12 +244,18 @@ class VDFSegmentGenerator:
 
         segments = Signal2D(segments).transpose(navigation_axes=[0],
                                                 signal_axes=[2, 1])
-        vectors_of_segments = DiffractionVectors(vectors_of_segments)
-        vdfsegs = VDFSegment(segments, vectors_of_segments)
-        vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(0)
+
+        # Create VDFSegment and transfer axes calibrations
+        vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments))
         vdfsegs.segments = transfer_signal_axes(vdfsegs.segments,
                                                 self.vdf_images)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
+        n.name = 'n'
+        n.units = 'number'
+        vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(1)
+        vdfsegs.vectors_of_segments = transfer_signal_axes(
+            vdfsegs.vectors_of_segments, self.vectors)
+        n = vdfsegs.vectors_of_segments.axes_manager.navigation_axes[0]
         n.name = 'n'
         n.units = 'number'
 

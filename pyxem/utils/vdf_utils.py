@@ -289,3 +289,4 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
         -((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
 
     return gaussian
+
