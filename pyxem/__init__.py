@@ -44,6 +44,7 @@ from .signals.diffraction_profile import ElectronDiffractionProfile
 from .signals.electron_diffraction import ElectronDiffraction
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
+from .signals.diffraction_peaks import DiffractionPeaks
 from .signals.vdf_image import VDFImage
 
 from .io_plugins import io_plugins, default_write_ext
