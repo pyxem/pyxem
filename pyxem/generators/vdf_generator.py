@@ -59,9 +59,7 @@ class VDFGenerator:
         self.vectors = unique_vectors
         self.vectors = transfer_signal_axes(self.vectors, self.signal)
 
-    def get_vector_vdf_images(self,
-                              radius,
-                              normalize=False):
+    def get_vector_vdf_images(self, radius, normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction2D Signal by summation in a
         circular window of specified radius.

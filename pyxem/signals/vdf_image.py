@@ -25,7 +25,7 @@ import numpy as np
 from tqdm import tqdm
 from hyperspy.signals import Signal2D, BaseSignal
 from pyxem.utils.vdf_utils import (norm_cross_corr, get_vectors_and_indices_i,
-                                   get_gaussian2d, transfer_vdfsegment_axes)
+                                   get_gaussian2d)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import transfer_signal_axes
@@ -269,3 +269,87 @@ class VDFSegment:
         virtual_ed = ElectronDiffraction(virtual_ed.T)
 
         return virtual_ed
+
+    def get_separated_electron_diffraction_signals(self, original_signal,
+                                                   radius):
+        """Obtain electron diffraction signals based on an original
+        electron diffraction signal and its separated vdf segments and
+        vectors, so that each output signal contains segments that do
+        not overlap. The intensities of each vector in the output
+        signals are collected directly from the original signal inside a
+        circle defined by radius.
+
+        Parameters
+        ----------
+        original_signal : ElectronDiffraction
+            Electron diffraction signal that the VDFSegment originates
+            from.
+        radius : float
+            Radius of the integration window in reciprocal Angstroms.
+            Similar to the radius used for VDF images.
+
+        Returns
+        -------
+        separated_signals : list of ElectronDiffraction
+            A list of electron diffraction signals corresponding to the
+            original signal, but where overlapping grains are found in
+            separate signals. The number of signals will reflect the max
+            number of grains that overlap with one grain.
+        """
+        vectors = self.vectors_of_segments.data
+        segments = self.segments.data
+        num_segments = np.shape(segments)[0]
+
+        segment_masks = (segments > 0).choose(segments, 1.).astype('int')
+        tot_segment_masks_sum = np.sum(segment_masks, axis=0)
+
+        assigned_num = np.zeros(num_segments)
+        segment_masks_sum = [np.zeros_like(tot_segment_masks_sum)]
+        for i, segment_mask in zip(range(num_segments), segment_masks):
+            if np.max(tot_segment_masks_sum[np.where(segment_mask)]) > 1:
+                n, finished = 0, False
+                while n < np.shape(segment_masks_sum)[0] and finished is False:
+                    if np.max(segment_masks_sum[n] + segment_mask) > 1:
+                        n = n+1
+                    else:
+                        finished = True
+                assigned_num[i] = n
+                if n+1 > np.shape(segment_masks_sum)[0]:
+                    segment_masks_sum.append(np.zeros_like(
+                        tot_segment_masks_sum))
+                segment_masks_sum[n] += segment_mask
+            else:
+                assigned_num[i] = 0
+                segment_masks_sum[0] += segment_mask
+
+        dp_shape_y, dp_shape_x = original_signal.axes_manager.signal_shape
+        nav_shape_y, nav_shape_x = original_signal.axes_manager.navigation_shape
+        scale_y = original_signal.axes_manager.signal_axes[0].scale
+        scale_x = original_signal.axes_manager.signal_axes[1].scale
+        cy = original_signal.axes_manager.signal_axes[0].offset
+        cx = original_signal.axes_manager.signal_axes[1].offset
+
+        y, x = np.indices((dp_shape_x, dp_shape_y))
+        x, y = x*scale_x, y*scale_y
+
+        def get_circular_mask(vec):
+            radial_grid = np.sqrt((x - (vec[0]-cx))**2 + (y - (vec[1]-cy))**2)
+            mask = (radial_grid > radius).choose(radius, 0)
+            mask = (radial_grid <= radius).choose(mask, 1)
+            return mask.astype('bool')
+
+        separated_signals = []
+        for j in range(int(np.max(assigned_num)+1)):
+            segment_masks_j = segment_masks[np.where(assigned_num == j)]
+            vectors_j = vectors[np.where(assigned_num == j)]
+            signal_j = np.zeros((nav_shape_x, nav_shape_y, dp_shape_x,
+                                 dp_shape_y))
+            for i in range(np.shape(vectors_j)[0]):
+                vector_mask_i = np.sum(list(map(
+                    get_circular_mask, vectors_j[i])), axis=0)
+                signal_j[np.where(segment_masks_j[i])] = \
+                    original_signal.data[np.where(segment_masks_j[i])] \
+                    * vector_mask_i
+            separated_signals.append(ElectronDiffraction(signal_j))
+
+        return separated_signals
