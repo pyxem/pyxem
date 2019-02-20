@@ -30,7 +30,7 @@ class ElectronDiffractionProfile(Signal1D):
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
 
-    def detector_axes_to_1D_kspace(self, beam_wavelen, det2sample_len, pixel_len):
+    def detector_px_to_1D_kspace(self, beam_wavelen, det2sample_len, pixel_len):
         """Converts the detector 1D coordinates in px, to the respective 1D coordinates in the kspace, in Angstom^-1, using purely geometrical arguments. 
         Only use for DiffractionProfile class. 2D version of the detector_to_3D_kspace from the class DiffractionVectors.
         Args:
@@ -38,7 +38,7 @@ class ElectronDiffractionProfile(Signal1D):
             beam_wavelen (float):
                 Wavelength of the scanning beam, in Amstrong.
             det2sample_len (float): 
-                Distance from detector to sample, in Amstrong. IMPORTANT: Exact distance obtained from the calibration file.
+                Distance from detector to sample, in Amstrong. IMPORTANT: Distance obtained from the calibration file.
             pixel_len (float):
                 Length of the pixel in the detector, in micrometres
         Returns:
