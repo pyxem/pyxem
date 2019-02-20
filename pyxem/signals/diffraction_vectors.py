@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
-from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import detector_to_fourier, detector_px_to_3D_kspace
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
@@ -285,8 +285,8 @@ class DiffractionVectors(BaseSignal):
         transfer_navigation_axes(self.cartesian, self)
 
     def calculate_detector_px_to_cartesian_diffraction_coordinates(self, beam_wavelen, det2sample_len, pixel_len, *args, **kwargs):
-        """It takes a DiffractionVector object with peaks expressed in pixels in the detector. It maps the function detector_px_to_3D_kspace along the pixels of the DiffractionVector class.
-        It stores in the DiffractionVector.cartesian attribute, the gx, gy and gz cartesian coordinates of the diffraction vector, in Angstoms^-1, using purely geometrical arguments..
+        """It takes a DiffractionVector object with peaks expressed in pixels in the detector. It maps the function detector_px_to_3D_kspace along the scanning pixels of the DiffractionVector class.
+        It stores in the DiffractionVector.cartesian attribute, the gx, gy and gz cartesian coordinates of the diffraction vector, in Angstoms^-1, using purely geometrical arguments.
         Args:
         ----------
         self :DiffractionVector
@@ -302,52 +302,6 @@ class DiffractionVectors(BaseSignal):
         self: DiffractionVector
             DiffractionProfile.cartesian attribute has stored the respective transformed px cordinates to angstrom^-1, in the form of an array containing [g_x, g_y, g_z] for each scanning coordinate.
         """
-        def detector_px_to_3D_kspace(peak_coord, beam_wavelen, det2sample_len, pixel_len):
-            """Converts the detector 2d coordinate, in px, to the respective 3D coordinate in the kspace
-            Args:
-            ----------
-            peak_coord: np.array
-                An array with the diffraction vectors of a single scanning coordinate, in pixel units of the detector.
-            beam_wavelen: float
-                Wavelength of the scanning beam, in Amstrong.
-            det2sample_len: float
-                Distance from detector to sample, in Amstrong. IMPORTANT: Distance obtained from the calibration file.
-            pixel_len: float
-                Length of the pixel in the detector, in micrometres.
-            Returns
-            ----------
-            g_xyz: np.array
-                Array composed of [g_x, g_y, g_z] values for the peaks in the scanning coordinate, changed from px to angstrom^-1.
-
-            """
-            #Convert each pixel to the actual disctance in Angstrom
-            if peak_coord.shape == (1,) and peak_coord.dtype == 'object':
-                # From ragged array
-                peak_coord = peak_coord[0]
-
-            xy = peak_coord*pixel_len*10000
-
-            #Extract the pixel-coordinates of x and y axes as an array
-            x = xy[:,0]
-            y = xy[:,1]
-
-            #Get the polar coordinate angles, in a 3D Edwald circunference:
-            #Vector moduli 'r' from the beam centre to the coordinate at the detector for each peak.
-            r = np.sqrt(x**2 + y**2)
-            #Phi angles (from z axis) for each peak:
-            phi = np.arctan(r/det2sample_len)
-            #Theta angles (between x and y axis) for each peak:
-            theta = np.arctan(y/x)
-
-            #Convert each x and y to the respective gx, gy and gz values, using 3D geometry:
-            gx = (1/beam_wavelen)*np.sin(phi)*np.cos(theta)
-            gy = (1/beam_wavelen)*np.sin(phi)*np.sin(theta)
-            gz = (1/beam_wavelen)*(1-np.cos(phi))
-
-            #Append the reciprocal vectors in one single array, while flipping the vector form, resembling the input array:
-            g_xyz = np.hstack((gx[:,np.newaxis], gy[:,np.newaxis], gz[:,np.newaxis]))
-
-            return g_xyz
 
         self.cartesian = self.map(detector_px_to_3D_kspace, 
                                   beam_wavelen=beam_wavelen, 
