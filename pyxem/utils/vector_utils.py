@@ -95,13 +95,13 @@ def detector_px_to_3D_kspace(peak_coord, beam_wavelen, det2sample_len, pixel_len
     r = np.sqrt(x**2 + y**2)
     #Phi angles (from z axis) for each peak:
     phi = np.arctan(r/det2sample_len)
-    #Theta angles (between x and y axis) for each peak:
-    theta = np.arctan(y/x)
-
-    #Convert each x and y to the respective gx, gy and gz values, using 3D geometry:
-    gx = (1/beam_wavelen)*np.sin(phi)*np.cos(theta)
-    gy = (1/beam_wavelen)*np.sin(phi)*np.sin(theta)
-    gz = (1/beam_wavelen)*(1-np.cos(phi))
+    #Theta angles (between x and y axis) for each peak. Use arctan2 to get the right quadrant sign:
+    theta = np.arctan2(y,x)
+    #Convert each x and y to the respective gx, gy and gz values, using 3D geometry. Multiply by the pixel sign:
+    sin_phi = np.sin(phi) #For memory saving
+    gx = (1/beam_wavelen)*sin_phi*np.cos(theta)
+    gy = (1/beam_wavelen)*sin_phi*np.sin(theta)
+    gz = (1/beam_wavelen)*(np.cos(phi) - 1)
 
     #Append the reciprocal vectors in one single array, while flipping the vector form, resembling the input array:
     g_xyz = np.hstack((gx[:,np.newaxis], gy[:,np.newaxis], gz[:,np.newaxis]))
