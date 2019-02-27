@@ -261,7 +261,7 @@ def _peak_find_dog_chunk(
 
     Parameters
     ----------
-    data : NumPy 4D array
+    data : NumPy array
     min_sigma : float, optional
     max_sigma : float, optional
     sigma_ratio : float, optional
@@ -290,10 +290,11 @@ def _peak_find_dog_chunk(
     >>> peaks23 = peak_array[2, 3]
 
     """
-    output_array = np.empty(data.shape[:2], dtype='object')
-    for ix, iy in np.ndindex(data.shape[:2]):
-        output_array[ix, iy] = _peak_find_dog_single_frame(
-                image=data[ix, iy], min_sigma=min_sigma,
+    output_array = np.empty(data.shape[:-2], dtype='object')
+    for index in np.ndindex(data.shape[:-2]):
+        islice = np.s_[index]
+        output_array[islice] = _peak_find_dog_single_frame(
+                image=data[islice], min_sigma=min_sigma,
                 max_sigma=max_sigma, sigma_ratio=sigma_ratio,
                 threshold=threshold, overlap=overlap,
                 normalize_value=normalize_value)
@@ -307,7 +308,8 @@ def _peak_find_dog(
 
     Parameters
     ----------
-    dask_array : 4D dask array
+    dask_array : Dask array
+        Must be at least 2 dimensions.
     min_sigma : float, optional
     max_sigma : float, optional
     sigma_ratio : float, optional
@@ -320,7 +322,7 @@ def _peak_find_dog(
 
     Returns
     -------
-    peak_array : dask 2D object array
+    peak_array : dask object array
         Same size as the two last dimensions in data.
         The peak positions themselves are stored in 2D NumPy arrays
         inside each position in peak_array. This is done instead of
@@ -338,18 +340,23 @@ def _peak_find_dog(
 
     """
     array_dims = len(dask_array.shape)
-    if array_dims != 4:
+    if array_dims < 2:
         raise ValueError(
-                "dask_array need to have 4-dimensions, not {0}".format(
+                "dask_array must be at least 2-dimensions, not {0}".format(
                     array_dims))
     detx, dety = dask_array.shape[-2:]
-    dask_array_rechunked = dask_array.rechunk(chunks=(None, None, detx, dety))
+    chunks = [None] * array_dims
+    chunks[-2] = detx
+    chunks[-1] = dety
+    chunks = tuple(chunks)
+    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
     kwargs_template_dog = {
             'min_sigma': min_sigma, 'max_sigma': max_sigma,
             'sigma_ratio': sigma_ratio, 'threshold': threshold,
             'overlap': overlap, 'normalize_value': normalize_value}
+    drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     output_array = da.map_blocks(
-            _peak_find_dog_chunk, dask_array_rechunked, drop_axis=(2, 3),
+            _peak_find_dog_chunk, dask_array_rechunked, drop_axis=drop_axis,
             dtype=np.object, **kwargs_template_dog)
     return output_array
 
