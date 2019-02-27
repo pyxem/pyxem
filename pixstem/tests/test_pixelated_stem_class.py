@@ -1138,6 +1138,14 @@ class TestPixelatedStemFindPeaks:
             assert (peak_array0[ix, iy] == [[50, 50]]).all()
             assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
 
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = PixelatedSTEM(np.random.random(size=shape))
+        peak_array = s.find_peaks(lazy_result=False)
+        assert peak_array.shape == tuple(shape[:-2])
+
 
 class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
 
