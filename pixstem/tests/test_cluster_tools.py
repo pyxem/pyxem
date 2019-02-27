@@ -232,6 +232,16 @@ class TestFilter4DPeakArray:
                 assert y != 0
                 assert y != 127
 
+    def test_1d_nav(self):
+        peak_array = randint(124, 132, size=(4, 10, 2))
+        peak_array_filtered = ct._filter_4D_peak_array(peak_array)
+        assert peak_array_filtered.shape == (4, )
+
+    def test_3d_nav(self):
+        peak_array = randint(124, 132, size=(2, 3, 4, 10, 2))
+        peak_array_filtered = ct._filter_4D_peak_array(peak_array)
+        assert peak_array_filtered.shape == (2, 3, 4)
+
 
 class TestGetClusterDict:
 

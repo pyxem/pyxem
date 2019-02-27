@@ -50,7 +50,7 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
 
     Parameters
     ----------
-    peak_array : 4D NumPy array
+    peak_array : NumPy array
     signal_axes : HyperSpy signal axes axes_manager, optional
     max_x_index, max_y_index : scalar, optional
         Default 255.
@@ -71,12 +71,17 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
     if signal_axes is not None:
         max_x_index = signal_axes[0].high_index
         max_y_index = signal_axes[1].high_index
-    peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    for iy, ix in np.ndindex(peak_array.shape[:2]):
+    if peak_array.dtype == np.object:
+        peak_array_shape = peak_array.shape
+    else:
+        peak_array_shape = peak_array.shape[:-2]
+    peak_array_filtered = np.empty(shape=peak_array_shape, dtype=np.object)
+    for index in np.ndindex(peak_array_shape):
+        islice = np.s_[index]
         peak_list_filtered = _filter_peak_list(
-                peak_array[iy, ix],
+                peak_array[islice],
                 max_x_index=max_x_index, max_y_index=max_y_index)
-        peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
+        peak_array_filtered[islice] = np.array(peak_list_filtered)
     return peak_array_filtered
 
 
