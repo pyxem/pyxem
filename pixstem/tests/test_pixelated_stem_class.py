@@ -73,28 +73,59 @@ class TestAddPeakArrayAsMarkers:
 
     def test_simple(self):
         s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
-        peak_array = np.random.randint(20, 80, (2, 3, 100, 2))
+        peak_array = np.empty((2, 3), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
         s.add_peak_array_as_markers(peak_array)
 
     def test_color(self):
         s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
-        peak_array = np.random.randint(20, 80, (2, 3, 100, 2))
+        peak_array = np.empty((2, 3), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
         s.add_peak_array_as_markers(peak_array, color='blue')
         marker0 = list(s.metadata.Markers)[9][1]
         assert marker0.marker_properties['color'] == 'blue'
 
     def test_size(self):
         s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
-        peak_array = np.random.randint(20, 80, (2, 3, 100, 2))
+        peak_array = np.empty((2, 3), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
         s.add_peak_array_as_markers(peak_array, size=13)
         marker0 = list(s.metadata.Markers)[9][1]
         assert marker0.get_data_position('size') == 13
 
-    def test_wrong_dimensions(self):
-        s = PixelatedSTEM(np.zeros((3, 100, 100)))
-        peak_array = np.random.randint(20, 80, (3, 100, 2))
-        with pytest.raises(ValueError):
-            s.add_peak_array_as_markers(peak_array)
+    def test_3d_nav_dims(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 4, 100, 100)))
+        peak_array = np.empty((2, 3, 4), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        s.add_peak_array_as_markers(peak_array)
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.data['x1'][()].shape == (2, 3, 4)
+
+    def test_1d_nav_dims(self):
+        nav_dim = 3
+        s = PixelatedSTEM(np.zeros((nav_dim, 100, 100)))
+        peak_array = np.empty(nav_dim, dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        s.add_peak_array_as_markers(peak_array)
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.data['x1'][()].shape == (3, )
+
+    def test_0d_nav_dims(self):
+        s = PixelatedSTEM(np.zeros((100, 100)))
+        peak_array = np.random.randint(20, 80, size=(1, 1, 100, 2))
+        s.add_peak_array_as_markers(peak_array)
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.data['x1'].shape == ()
 
 
 class TestAddEllipseArrayAsMarkers:

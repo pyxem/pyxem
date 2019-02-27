@@ -352,8 +352,6 @@ class PixelatedSTEM(Signal2D):
         >>> s.plot()
 
         """
-        if len(self.data.shape) != 4:
-            raise ValueError("Signal must be 4 dims to use this function")
         mt.add_peak_array_to_signal_as_markers(
                 self, peak_array, color=color, size=size,
                 bool_array=bool_array, bool_invert=bool_invert)

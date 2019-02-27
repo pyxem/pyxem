@@ -38,23 +38,33 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
         peaks_list = _filter_peak_array_with_bool_array(
                 peaks_list, bool_array, bool_invert=bool_invert)
     max_peaks = 0
-    for ix, iy in np.ndindex(peaks_list.shape[:2]):
-        peak_list = peaks_list[ix, iy]
+    if peaks_list.dtype == np.object:
+        peaks_list_shape = peaks_list.shape
+    else:
+        peaks_list_shape = peaks_list.shape[:-2]
+    for index in np.ndindex(peaks_list_shape):
+        islice = np.s_[index]
+        peak_list = peaks_list[islice]
         if peak_list is not None:
             n_peaks = len(peak_list)
             if n_peaks > max_peaks:
                 max_peaks = n_peaks
 
-    marker_array_shape = (peaks_list.shape[0], peaks_list.shape[1], max_peaks)
+    marker_array_shape = list(peaks_list_shape)
+    marker_array_shape.append(max_peaks)
     marker_x_array = np.ones(marker_array_shape) * -1000
     marker_y_array = np.ones(marker_array_shape) * -1000
-    for ix, iy in np.ndindex(marker_x_array.shape[:2]):
-        peak_list = peaks_list[ix, iy]
+    for index in np.ndindex(peaks_list_shape):
+        islice = np.s_[index]
+        peak_list = peaks_list[islice]
         if peak_list is not None:
             for i_p, peak in enumerate(peak_list):
+                i2slice = list(islice)
+                i2slice.append(i_p)
+                i2slice = tuple(i2slice)
                 if signal_axes is None:
-                    marker_x_array[ix, iy, i_p] = peak[1]
-                    marker_y_array[ix, iy, i_p] = peak[0]
+                    marker_x_array[i2slice] = peak[1]
+                    marker_y_array[i2slice] = peak[0]
                 else:
                     i0min = signal_axes[0].low_index
                     i0max = signal_axes[0].high_index
@@ -65,8 +75,8 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
                     if bool0 and bool1:
                         vx = signal_axes[0].index2value(int(peak[1]))
                         vy = signal_axes[1].index2value(int(peak[0]))
-                        marker_x_array[ix, iy, i_p] = vx
-                        marker_y_array[ix, iy, i_p] = vy
+                        marker_x_array[i2slice] = vx
+                        marker_y_array[i2slice] = vy
     marker_list = []
     for i_p in range(max_peaks):
         marker = hm.point(
