@@ -6,8 +6,8 @@ all_tests_debian:
     - apt-get install -qy python3-sympy --no-install-recommends
     - apt-get install -qy python3-pytest python3-pytest-cov xvfb
     - pip3 install .
-    - xvfb-run -a python3 -m pytest --doctest-modules --cov=pixstem pixstem/
-    - xvfb-run -a python3 -m pytest --doctest-glob="*.rst" doc/
+    - xvfb-run -a --server-args="-screen 0, 1024x768x24" python3 -m pytest --doctest-modules --cov=pixstem pixstem/
+    - xvfb-run -a --server-args="-screen 0, 1024x768x24" python3 -m pytest --doctest-glob="*.rst" doc/
 
 flake8_checks:
     image: debian:stable
