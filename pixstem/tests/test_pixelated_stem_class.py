@@ -1055,6 +1055,14 @@ class TestPixelatedStemTemplateMatchDisk:
         assert s.data.shape == s_template1.data.shape
         assert not (s_template0.data == s_template1.data).all()
 
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = PixelatedSTEM(np.random.random(size=shape))
+        st = s.template_match_disk(disk_r=4, lazy_result=False)
+        assert st.data.shape == tuple(shape)
+
 
 class TestPixelatedStemFindPeaks:
 

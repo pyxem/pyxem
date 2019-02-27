@@ -165,28 +165,29 @@ def _template_match_disk_chunk(data, disk):
 
     """
     output_array = np.zeros_like(data, dtype=np.float32)
-    image = np.zeros_like(data[0, 0])
-    for ix, iy in np.ndindex(data.shape[:2]):
-        image[:] = data[ix, iy]
-        output_array[ix, iy] = _template_match_disk_single_frame(image, disk)
+    image = np.zeros(data.shape[-2:])
+    for index in np.ndindex(data.shape[:-2]):
+        islice = np.s_[index]
+        image[:] = data[islice]
+        output_array[islice] = _template_match_disk_single_frame(image, disk)
     return output_array
 
 
 def _template_match_disk(dask_array, disk_r=None):
-    """Template match a circular disk with a 4D dataset.
+    """Template match a circular disk.
 
     Parameters
     ----------
-    dask_array : Dask 4D array
-        Two first dimensions are navigation dimensions, two last
-        dimensions are the signal dimensions.
+    dask_array : Dask array
+        The two last dimensions are the signal dimensions. Must have at least
+        2 dimensions.
     disk_r : scalar, optional
         Radius of the disk. 2 * disk_r + 1 must be smaller than
-        the two last signal dimensions.
+        the two signal dimensions.
 
     Returns
     -------
-    template_match : NumPy 4D array
+    template_match : Dask array
         Same size as input data
 
     Examples
@@ -199,13 +200,17 @@ def _template_match_disk(dask_array, disk_r=None):
 
     """
     array_dims = len(dask_array.shape)
-    if array_dims != 4:
+    if array_dims < 2:
         raise ValueError(
-                "dask_array need to have 4-dimensions, not {0}".format(
+                "dask_array must be at least 2-dimensions, not {0}".format(
                     array_dims))
+    disk = morphology.disk(disk_r, dask_array.dtype)
     detx, dety = dask_array.shape[-2:]
-    dask_array_rechunked = dask_array.rechunk(chunks=(None, None, detx, dety))
-    disk = morphology.disk(disk_r, dask_array_rechunked.dtype)
+    chunks = [None] * array_dims
+    chunks[-2] = detx
+    chunks[-1] = dety
+    chunks = tuple(chunks)
+    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
     output_array = da.map_blocks(
             _template_match_disk_chunk, dask_array_rechunked, disk,
             dtype=np.float32)

@@ -351,6 +351,24 @@ class TestTemplateMatchDisk:
         match12 = np.unravel_index(np.argmax(out[1, 2]), out[1, 2].shape)
         assert (75, 55) == match12
 
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_array_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        chunks = [1] * nav_dims
+        chunks.extend([25, 25])
+        dask_array = da.random.random(size=shape, chunks=chunks)
+        match_array_dask = dt._template_match_disk(dask_array, disk_r=5)
+        assert len(dask_array.shape) == nav_dims + 2
+        assert dask_array.shape == match_array_dask.shape
+        match_array = match_array_dask.compute()
+        assert dask_array.shape == match_array.shape
+
+    def test_1d_dask_array_error(self):
+        dask_array = da.random.random(size=50, chunks=10)
+        with pytest.raises(ValueError):
+            dt._template_match_disk(dask_array, disk_r=5)
+
 
 class TestPeakFindDog:
 
