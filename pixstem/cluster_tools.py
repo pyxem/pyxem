@@ -71,10 +71,7 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
     if signal_axes is not None:
         max_x_index = signal_axes[0].high_index
         max_y_index = signal_axes[1].high_index
-    if peak_array.dtype == np.object:
-        peak_array_shape = peak_array.shape
-    else:
-        peak_array_shape = peak_array.shape[:-2]
+    peak_array_shape = _get_peak_array_shape(peak_array)
     peak_array_filtered = np.empty(shape=peak_array_shape, dtype=np.object)
     for index in np.ndindex(peak_array_shape):
         islice = np.s_[index]
@@ -321,6 +318,29 @@ def _sort_cluster_dict(cluster_dict, centre_x=128, centre_y=128):
         else:
             sorted_cluster_dict['rest'].extend(cluster_list)
     return sorted_cluster_dict
+
+
+def _get_peak_array_shape(peak_array):
+    """Find the navigation shape of a peak array
+
+    This is necessary due to the peak_array.shape will be different
+    depending if the array is the more common object dtype, or
+    something else.
+
+    Parameters
+    ----------
+    peak_array : NumPy array
+
+    Returns
+    -------
+    peak_array_shape : tuple
+
+    """
+    if peak_array.dtype == np.object:
+        peak_array_shape = peak_array.shape
+    else:
+        peak_array_shape = peak_array.shape[:-2]
+    return peak_array_shape
 
 
 def _cluster_and_sort_peak_array(

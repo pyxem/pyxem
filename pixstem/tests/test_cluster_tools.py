@@ -358,6 +358,24 @@ class TestAddPeakDictsToSignal:
         ct._add_peak_dicts_to_signal(s, peak_dicts)
 
 
+class TestGetPeakArrayShape:
+
+    @pytest.mark.parametrize("ndim", [0, 1, 2, 3, 4, 5, 6])
+    def test_dtype_object(self, ndim):
+        shape = tuple(np.random.randint(2, 5, size=ndim))
+        peak_array = np.empty(shape, dtype=np.object)
+        shape_output = ct._get_peak_array_shape(peak_array)
+        assert shape == shape_output
+
+    @pytest.mark.parametrize("ndim", [0, 1, 2, 3, 4, 5, 6])
+    def test_not_dtype_object(self, ndim):
+        nav_shape = tuple(np.random.randint(2, 5, size=ndim))
+        shape = nav_shape + (23, 2)
+        peak_array = np.random.randint(99, size=shape)
+        shape_output = ct._get_peak_array_shape(peak_array)
+        assert nav_shape == shape_output
+
+
 class TestSortedClusterDictToMarkerList:
 
     def test_simple(self):
