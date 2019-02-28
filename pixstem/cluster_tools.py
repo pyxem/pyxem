@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import cluster
+from hyperspy.misc.utils import isiterable
 import pixstem.marker_tools as mt
 
 
@@ -49,7 +50,7 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
 
     Parameters
     ----------
-    peak_array : 4D NumPy array
+    peak_array : NumPy array
     signal_axes : HyperSpy signal axes axes_manager, optional
     max_x_index, max_y_index : scalar, optional
         Default 255.
@@ -60,16 +61,27 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
     >>> peak_array = np.random.randint(0, 255, size=(3, 4, 100, 2))
     >>> peak_array_filtered = ct._filter_4D_peak_array(peak_array)
 
+    See Also
+    --------
+    _filter_peak_array_radius
+    _filter_peak_list
+    _filter_peak_list_radius
+
     """
     if signal_axes is not None:
         max_x_index = signal_axes[0].high_index
         max_y_index = signal_axes[1].high_index
-    peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    for iy, ix in np.ndindex(peak_array.shape[:2]):
+    if peak_array.dtype == np.object:
+        peak_array_shape = peak_array.shape
+    else:
+        peak_array_shape = peak_array.shape[:-2]
+    peak_array_filtered = np.empty(shape=peak_array_shape, dtype=np.object)
+    for index in np.ndindex(peak_array_shape):
+        islice = np.s_[index]
         peak_list_filtered = _filter_peak_list(
-                peak_array[iy, ix],
+                peak_array[islice],
                 max_x_index=max_x_index, max_y_index=max_y_index)
-        peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
+        peak_array_filtered[islice] = np.array(peak_list_filtered)
     return peak_array_filtered
 
 
@@ -94,6 +106,12 @@ def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
     >>> ct._filter_peak_list(peak_list)
     [[128, 129], [10, 52]]
 
+    See Also
+    --------
+    _filter_peak_array_radius
+    _filter_4D_peak_array
+    _filter_peak_list_radius
+
     """
     peak_list_filtered = []
     for x, y in peak_list:
@@ -108,6 +126,98 @@ def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
         else:
             peak_list_filtered.append([x, y])
     return peak_list_filtered
+
+
+def _filter_peak_array_radius(peak_array, xc, yc, r_min=None, r_max=None):
+    """Remove peaks from a peak_array, based on distance from a point.
+
+    Parameters
+    ----------
+    peak_array : NumPy array
+        In the form [[[[y0, x0], [y1, x1]]]]
+    xc, yc : scalars, NumPy array
+        Centre position
+    r_min, r_max : scalar
+        Remove peaks which are within r_min and r_max distance from the centre.
+        One of them must be specified.
+
+    Returns
+    -------
+    peak_array_filtered : NumPy array
+        Similar to peak_array input, but with the too-close peaks
+        removed.
+
+    See Also
+    --------
+    _filter_peak_list
+    _filter_4D_peak_array
+    _filter_peak_list_radius
+
+    """
+    if not isiterable(xc):
+        xc = np.ones(peak_array.shape[:2]) * xc
+    if not isiterable(yc):
+        yc = np.ones(peak_array.shape[:2]) * yc
+    peak_array_filtered = np.empty(shape=peak_array.shape[:2], dtype=np.object)
+    for iy, ix in np.ndindex(peak_array.shape[:2]):
+        temp_xc, temp_yc = xc[iy, ix], yc[iy, ix]
+        peak_list_filtered = _filter_peak_list_radius(
+                peak_array[iy, ix], xc=temp_xc, yc=temp_yc,
+                r_min=r_min, r_max=r_max)
+        peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
+    return peak_array_filtered
+
+
+def _filter_peak_list_radius(peak_list, xc, yc, r_min=None, r_max=None):
+    """Remove peaks based on distance to some point.
+
+    Parameters
+    ----------
+    peak_list : NumPy array
+        In the form [[y0, x0], [y1, x1], ...]
+    xc, yc : scalars
+        Centre position
+    r_min, r_max : scalar
+        Remove peaks which are within r_min and r_max distance from the centre.
+        One of them must be specified.
+
+    Returns
+    -------
+    peak_filtered_list : NumPy array
+        Similar to peak_list input, but with the too-close peaks
+        removed.
+
+    Examples
+    --------
+    >>> import pixstem.cluster_tools as ct
+    >>> peak_list = np.array([[128, 32], [128, 127]])
+    >>> ct._filter_peak_list_radius(peak_list, 128, 128, r_min=10)
+    array([[128,  32]])
+
+    See Also
+    --------
+    _filter_peak_array_radius
+    _filter_peak_list
+    _filter_4D_peak_array
+
+    """
+    dist = np.hypot(peak_list[:, 1] - xc, peak_list[:, 0] - yc)
+    if (r_min is None) and (r_max is None):
+        raise ValueError("Either r_min or r_max must be specified")
+    if (r_min is not None) and (r_max is not None):
+        if r_max < r_min:
+            raise ValueError(
+                    "r_min ({0}) must be smaller than r_max ({1})".format(
+                        r_min, r_max))
+    filter_list = np.ones_like(dist, dtype=np.bool)
+    if r_min is not None:
+        temp_filter_list = dist > r_min
+        filter_list[:] = np.logical_and(filter_list, temp_filter_list)
+    if r_max is not None:
+        temp_filter_list = dist < r_max
+        filter_list[:] = np.logical_and(filter_list, temp_filter_list)
+    peak_filtered_list = peak_list[filter_list]
+    return peak_filtered_list
 
 
 def _get_cluster_dict(peak_array, eps=30, min_samples=2):
@@ -358,7 +468,7 @@ def _sorted_cluster_dict_to_marker_list(
             color = color_none
         else:
             color = 'cyan'
-        temp_markers = mt._get_4d_marker_list(
+        temp_markers = mt._get_4d_points_marker_list(
                 cluster_list, signal_axes=signal_axes, color=color, size=size)
         marker_list.extend(temp_markers)
     return marker_list

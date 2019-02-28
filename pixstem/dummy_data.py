@@ -546,3 +546,27 @@ def get_cbed_signal():
         data[iy, ix] = convolve2d(data[iy, ix], disk, mode='same') + noise
     s_cbed = PixelatedSTEM(data)
     return s_cbed
+
+
+def get_simple_ellipse_signal_peak_array():
+    """Get a signal and peak array of an ellipse.
+
+    Returns
+    -------
+    signal, peak_array : HyperSpy Signal2D, NumPy array
+
+    Examples
+    --------
+    >>> s, peak_array = ps.dummy_data.get_simple_ellipse_signal_peak_array()
+    >>> s.add_peak_array_as_markers(peak_array, color='blue', size=30)
+
+    """
+    xc = np.random.randint(95, 105, size=(4, 5))
+    yc = np.random.randint(95, 105, size=(4, 5))
+    semi0 = np.random.randint(55, 60, size=(4, 5))
+    semi1 = np.random.randint(75, 80, size=(4, 5))
+    rot = np.random.random(size=(4, 5)) * np.pi
+    peak_array = mdtd._make_4d_peak_array_test_data(
+           xc, yc, semi0, semi1, rot)
+    s = PixelatedSTEM(np.zeros((4, 5, 200, 200)))
+    return s, peak_array
