@@ -20,19 +20,19 @@ Briefly, the input data set consists of a series of 2-D nanobeam elecron
 diffraction patterns which is used to determine several measures of structural
 variance.  These measures are:
 
-V-Omegak: normalized variance of the annular mean
+- V-Omegak: normalized variance of the annular mean
 
-V-rk: mean of normalized variances of rings
+- V-rk: mean of normalized variances of rings
 
-Vrek: normalized variance of ring ensemble
+- Vrek: normalized variance of ring ensemble
 
-Omega-Vi: normalized variance image
+- Omega-Vi: normalized variance image
 
-Omega-Vk: Annular mean of the variance image
+- Omega-Vk: Annular mean of the variance image
 
-========================================
+----------------------------------------
 Performing the analysis
-========================================
+----------------------------------------
 
 This example will use a test dataset that approximates a FEM-style signal.
 The dataset is a PixelatedSTEM signals that consists of a 10x10 array of
@@ -46,9 +46,9 @@ data is loaded using :py:func:`pixstem.dummy_data.get_fem_signal()`.
     >>> s = ps.dummy_data.get_fem_signal()
     >>> fem_results = s.fem_analysis(centre_x=50, centre_y=50, show_progressbar=False)
 
-========================================
+----------------------------------------
 Visualizing the results
-========================================
+----------------------------------------
 
 Each calculated statistical measure is stored as an independent signal in the
 results dictionary and can easilyt be plotted for visual inspection.  For
@@ -74,9 +74,9 @@ available to plot all calculated measures in a single Matplotlib figure.
     :scale: 49 %
 
 
-========================================
+----------------------------------------
 Storing and recalling the results
-========================================
+----------------------------------------
 
 Since each of the calculated statistical measures is a distinct PixelatedSTEM
 signal, they can each be saved manually the same as any other signal.
