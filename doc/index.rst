@@ -12,7 +12,7 @@ This release includes:
 * A new method in the ``PixelatedSTEM`` class for template matching a disk with STEM diffraction data: :ref:`template_match_disk`
 * Another method for locating diffraction spots in STEM diffraction data, using peak finding functionality from ``skimage``: :ref:`peak_finding`
 
-All these rely on the ``dask`` library, so they can be performed on very large datasets.
+All these rely on the `dask <https://dask.org/>`_ library, so they can be performed on very large datasets.
 
 
 *2018-6-28: pixStem 0.3.1 released!*
