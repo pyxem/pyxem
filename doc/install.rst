@@ -80,7 +80,7 @@ If you got some kind of error, please report it as a New issue on the `pixStem G
 Development version
 -------------------
 
-Grab the development version using the version control system git (see :ref:`contribute`):
+Grab the development version using the version control system git:
 
 .. code-block:: bash
 
