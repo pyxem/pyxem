@@ -8,7 +8,7 @@ setup(
         packages = [
             'pixstem',
             ],
-        version = '0.3.3.dev1',
+        version = '0.3.3',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a pixelated detector',
         long_description=long_description,
         long_description_content_type='text/markdown',
@@ -16,7 +16,7 @@ setup(
         author_email = 'magnunor@gmail.com',
         license = 'GPL v3',
         url = 'http://pixstem.org/',
-        download_url = 'https://gitlab.com/pixstem/pixstem/repository/archive.tar?ref=0.3.2',
+        download_url = 'https://gitlab.com/pixstem/pixstem/repository/archive.tar?ref=0.3.3',
         keywords = [
             'STEM',
             'data analysis',

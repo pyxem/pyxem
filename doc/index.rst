@@ -4,7 +4,16 @@ Welcome to pixStem's documentation!
 News
 ----
 
-**2018-12-3: pixStem 0.3.2 released!**
+**2019-3-5: pixStem 0.3.3 released!**
+
+This release includes:
+
+* Improvements to :ref:`template_match_disk` and :ref:`peak_finding`, so they now work with any number of navigation dimensions, from single diffraction images, line scans and larger. This will be expanded to the other functions in the future, so they will allow for any data dimensionality.
+* Improved documentation for the :ref:`fluctuation electron microscopy analysis <fem_analysis>`. Thanks to `Andrew Herzing <https://gitlab.com/aaherzing>`_ for this contribution!
+* Several minor bug-fixes.
+
+
+*2018-12-3: pixStem 0.3.2 released!*
 
 This release includes:
 
@@ -13,13 +22,6 @@ This release includes:
 * Another method for locating diffraction spots in STEM diffraction data, using peak finding functionality from ``skimage``: :ref:`peak_finding`
 
 All these rely on the `dask <https://dask.org/>`_ library, so they can be performed on very large datasets.
-
-
-*2018-6-28: pixStem 0.3.1 released!*
-
-This is a minor release which includes functionality for correcting both dead and hot pixels through :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_dead_pixels`, :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_hot_pixels` and :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels`.
-Featurewise it also includes a simple function for loading binary signals: :py:func:`pixstem.io_tools.load_binary_merlin_signal`.
-Unit testing of docstrings has been improved, with a combined setup and teardown function, and introduction of pixstem and numpy into the docstring's namespace.
 
 
 About pixStem
@@ -55,6 +57,13 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
 
 Old news
 --------
+
+*2018-6-28: pixStem 0.3.1 released!*
+
+This is a minor release which includes functionality for correcting both dead and hot pixels through :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_dead_pixels`, :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_hot_pixels` and :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels`.
+Featurewise it also includes a simple function for loading binary signals: :py:func:`pixstem.io_tools.load_binary_merlin_signal`.
+Unit testing of docstrings has been improved, with a combined setup and teardown function, and introduction of pixstem and numpy into the docstring's namespace.
+
 
 *2018-6-13: pixStem 0.3.0 released!*
 
