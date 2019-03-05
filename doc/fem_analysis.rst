@@ -7,18 +7,18 @@ Fluctuation electron microscopy analysis
 :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.fem_analysis`
 
 Pixelated STEM can be used as a basis for fluctuation electron microscopy (FEM)
-measurements.  By analyzing the variance amongst a large set of electron
+measurements. By analyzing the variance amongst a large set of electron
 diffraction patterns, the medium-range order present in highly disordered
 materials can be statistically assessed. Pixstem's FEM
 functionality is based on the methods outlined in:
 
     T L Daulton, et al., Ultramicroscopy 110 (2010) 1279-1289.
-    
+
     https://doi.org/10.1016/j.ultramic.2010.05.010
 
-Briefly, the input data set consists of a series of 2-D nanobeam elecron
+Briefly, the input data set consists of a series of 2-D nanobeam electron
 diffraction patterns which is used to determine several measures of structural
-variance.  These measures are:
+variance. These measures are:
 
 - V-Omegak: normalized variance of the annular mean
 
@@ -30,9 +30,9 @@ variance.  These measures are:
 
 - Omega-Vk: Annular mean of the variance image
 
-----------------------------------------
+
 Performing the analysis
-----------------------------------------
+-----------------------
 
 This example will use a test dataset that approximates a FEM-style signal.
 The dataset is a PixelatedSTEM signals that consists of a 10x10 array of
@@ -46,15 +46,16 @@ data is loaded using :py:func:`pixstem.dummy_data.get_fem_signal()`.
     >>> s = ps.dummy_data.get_fem_signal()
     >>> fem_results = s.fem_analysis(centre_x=50, centre_y=50, show_progressbar=False)
 
-----------------------------------------
+
 Visualizing the results
-----------------------------------------
+-----------------------
 
 Each calculated statistical measure is stored as an independent signal in the
-results dictionary and can easilyt be plotted for visual inspection.  For
+results dictionary and can easily be plotted for visual inspection. For
 example:
 
 .. code-block:: python
+
     >>> fem_results['V-Omegak'].plot()
 
 .. image:: images/fem_analysis/fem_v_omegak.png
@@ -74,9 +75,8 @@ available to plot all calculated measures in a single Matplotlib figure.
     :scale: 49 %
 
 
-----------------------------------------
 Storing and recalling the results
-----------------------------------------
+---------------------------------
 
 Since each of the calculated statistical measures is a distinct PixelatedSTEM
 signal, they can each be saved manually the same as any other signal.
@@ -85,9 +85,11 @@ signal, they can each be saved manually the same as any other signal.
 
     >>> fem_results['V-Omegak'].save('V-Omegak.hdf5')
 
+
 For convenience, a dedicated function is also available: :py:func:`pixstem.fem_tools.save_fem`.
 This will create a separate folder and save all of the calculated measures
 in separate HDF5 files with a common root name.
+
 
 .. code-block:: python
 
