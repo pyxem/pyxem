@@ -1,4 +1,6 @@
+import pytest
 import numpy as np
+from numpy.testing import assert_equal
 import pixstem.api as ps
 import pixstem.marker_tools as mt
 
@@ -14,7 +16,7 @@ class TestGet4DMarkerList:
         peak_array[1, 1] = [[9, 1]]
         peak_array[1, 2] = [[6, 3]]
         s = ps.PixelatedSTEM(np.zeros(shape=(2, 3, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, color='red')
         mt._add_permanent_markers_to_signal(s, marker_list)
         assert len(marker_list) == 1
@@ -32,7 +34,7 @@ class TestGet4DMarkerList:
         color = 'blue'
         peak_array = np.zeros(shape=(3, 2, 1, 2))
         s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, color=color)
         assert marker_list[0].marker_properties['color'] == 'blue'
 
@@ -40,14 +42,14 @@ class TestGet4DMarkerList:
         size = 12
         peak_array = np.zeros(shape=(3, 2, 1, 2))
         s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, size=size)
         assert marker_list[0].get_data_position('size') == size
 
     def test_several_markers(self):
         peak_array = np.zeros(shape=(3, 2, 3, 2))
         s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes)
         assert len(marker_list) == 3
 
@@ -56,9 +58,43 @@ class TestGet4DMarkerList:
         peak_array[0, 0] = [[2, 4], [1, 9]]
         peak_array[0, 1] = [[8, 2]]
         s = ps.PixelatedSTEM(np.zeros(shape=(2, 3, 10, 10)))
-        marker_list = mt._get_4d_marker_list(
+        marker_list = mt._get_4d_points_marker_list(
                 peak_array, s.axes_manager.signal_axes, color='red')
         assert len(marker_list) == 2
+
+
+class TestFilterPeakArrayListBoolArray:
+
+    def test_wrong_size_input(self):
+        peak_array, bool_array = np.empty((2, 4)), np.empty((2, 3))
+        with pytest.raises(ValueError):
+            mt._filter_peak_array_with_bool_array(peak_array, bool_array)
+
+    def test_filter(self):
+        peak_array = np.empty((2, 3), dtype=np.object)
+        bool_array = np.empty((2, 3), dtype=np.object)
+        peak_array[0, 0] = [[2, 4], [1, 9], [4, 5]]
+        peak_array[0, 1] = [[8, 2]]
+        bool_array[0, 0] = [True, False, True]
+        bool_array[0, 1] = [True]
+        peak_array_filter = mt._filter_peak_array_with_bool_array(
+                peak_array, bool_array)
+        assert len(peak_array_filter[0, 0]) == 2
+        assert_equal(peak_array_filter[0, 0], [[2, 4], [4, 5]])
+        assert_equal(peak_array_filter[0, 1], [[8, 2]])
+
+    def test_bool_invert(self):
+        peak_array = np.empty((2, 3), dtype=np.object)
+        bool_array = np.empty((2, 3), dtype=np.object)
+        peak_array[0, 0] = [[2, 4], [1, 9], [4, 5]]
+        peak_array[0, 1] = [[8, 2]]
+        bool_array[0, 0] = [True, False, True]
+        bool_array[0, 1] = [True]
+        peak_array_filter = mt._filter_peak_array_with_bool_array(
+                peak_array, bool_array, bool_invert=True)
+        assert len(peak_array_filter[0, 0]) == 1
+        assert_equal(peak_array_filter[0, 0], [[1, 9]])
+        assert len(peak_array_filter[0, 1]) == 0
 
 
 class TestAddPeakArrayToSignalAsMarkers:
@@ -97,7 +133,7 @@ def test_peak_finding_to_marker():
     s = ps.PixelatedSTEM(data)
     peak_array = s.find_peaks(min_sigma=0.1, max_sigma=2,
                               threshold=0.01, lazy_result=False)
-    marker_list = mt._get_4d_marker_list(
+    marker_list = mt._get_4d_points_marker_list(
             peak_array, s.axes_manager.signal_axes)
     assert len(marker_list) == 1
     marker = marker_list[0]

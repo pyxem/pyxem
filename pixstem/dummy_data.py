@@ -286,8 +286,8 @@ def get_fem_signal(lazy=False):
 
     Parameters
     ----------
-    lazy : optional
-        Default False
+    lazy : bool, default False
+        If True, resulting signal will be lazy.
 
     Returns
     -------
@@ -323,6 +323,188 @@ def get_fem_signal(lazy=False):
                                   lazy=lazy)
 
     fem_signal = (test1 + test2)
+
+    fem_signal.axes_manager.navigation_axes[0].name = "Probe position x"
+    fem_signal.axes_manager.navigation_axes[0].units = "nm"
+    fem_signal.axes_manager.navigation_axes[0].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[0].offset = 0
+
+    fem_signal.axes_manager.navigation_axes[1].name = "Probe position y"
+    fem_signal.axes_manager.navigation_axes[1].units = "nm"
+    fem_signal.axes_manager.navigation_axes[1].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[1].offset = 0
+
+    fem_signal.axes_manager.signal_axes[0].name = 'Signal x'
+    fem_signal.axes_manager.signal_axes[0].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[0].scale = 0.25
+    fem_signal.axes_manager.signal_axes[0].offset = 0
+
+    fem_signal.axes_manager.signal_axes[1].name = 'Signal y'
+    fem_signal.axes_manager.signal_axes[1].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[1].scale = 0.25
+    fem_signal.axes_manager.signal_axes[1].offset = 0
+
+    return fem_signal
+
+
+def get_simple_fem_signal(lazy=False):
+    """Get a 2D signal that approximates a very small fluctuation electron
+    microscopy (FEM) dataset.
+
+    Parameters
+    ----------
+    lazy : bool, default False
+        If True, resulting signal will be lazy.
+
+    Returns
+    -------
+    fem_signal : PixelatedSTEM
+
+    Examples
+    --------
+    >>> s = ps.dummy_data.get_simple_fem_signal()
+    >>> s.plot()
+
+    """
+
+    radii1 = 10 * np.random.randint(0, 2, size=(2, 2))
+    intensities1 = np.random.randint(0, 5, size=(2, 2))
+
+    radii2 = 20 * np.random.randint(0, 2, size=(2, 2))
+    intensities2 = np.random.randint(0, 15, size=(2, 2))
+
+    test1 = mdtd.generate_4d_data(probe_size_x=2, probe_size_y=2,
+                                  image_size_x=50, image_size_y=50,
+                                  disk_x=25, disk_y=25, disk_r=5, disk_I=100,
+                                  ring_x=25, ring_y=25, ring_r=radii1,
+                                  ring_I=intensities1, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    test2 = mdtd.generate_4d_data(probe_size_x=2, probe_size_y=2,
+                                  image_size_x=50, image_size_y=50,
+                                  disk_x=25, disk_y=25, disk_r=5, disk_I=100,
+                                  ring_x=25, ring_y=25, ring_r=radii2,
+                                  ring_I=intensities2, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    fem_signal = (test1 + test2)
+
+    fem_signal.axes_manager.navigation_axes[0].name = "Probe position x"
+    fem_signal.axes_manager.navigation_axes[0].units = "nm"
+    fem_signal.axes_manager.navigation_axes[0].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[0].offset = 0
+
+    fem_signal.axes_manager.navigation_axes[1].name = "Probe position y"
+    fem_signal.axes_manager.navigation_axes[1].units = "nm"
+    fem_signal.axes_manager.navigation_axes[1].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[1].offset = 0
+
+    fem_signal.axes_manager.signal_axes[0].name = 'Signal x'
+    fem_signal.axes_manager.signal_axes[0].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[0].scale = 0.25
+    fem_signal.axes_manager.signal_axes[0].offset = 0
+
+    fem_signal.axes_manager.signal_axes[1].name = 'Signal y'
+    fem_signal.axes_manager.signal_axes[1].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[1].scale = 0.25
+    fem_signal.axes_manager.signal_axes[1].offset = 0
+
+    return fem_signal
+
+
+def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50,
+                           lazy=False):
+    """Get a 2D signal that approximates a fluctuation electron
+    microscopy (FEM) dataset with user defined dimensions.
+
+    Parameters
+    ----------
+    probe_x : int, default 2
+        Horizontal dimension of the navigation axes
+    probe_y : int, default 2
+        Vertical dimension of the navigation axes
+    image_x : int, default 2
+        Horizontal dimension of the signal axes
+    image_y : int, default 2
+        Vertical dimension of the signal axes
+    lazy : bool, default False
+        If True, resulting signal will be lazy.
+
+    Returns
+    -------
+    fem_signal : PixelatedSTEM
+
+    Examples
+    --------
+    >>> s = ps.dummy_data.get_generic_fem_signal(probe_x=5, probe_y=10,
+    ...     image_x=25, image_y=30, lazy=False)
+    >>> s.plot()
+
+    """
+    image_center = [np.int(image_x/2), np.int(image_y/2)]
+
+    radii1 = 10 * np.random.randint(0, 2, size=(probe_y, probe_x))
+    intensities1 = np.random.randint(0, 5, size=(probe_y, probe_x))
+
+    radii2 = 20 * np.random.randint(0, 2, size=(probe_y, probe_x))
+    intensities2 = np.random.randint(0, 15, size=(probe_y, probe_x))
+
+    test1 = mdtd.generate_4d_data(probe_size_x=probe_x,
+                                  probe_size_y=probe_y,
+                                  image_size_x=image_x,
+                                  image_size_y=image_y,
+                                  disk_x=image_center[0],
+                                  disk_y=image_center[1],
+                                  disk_r=5, disk_I=100,
+                                  ring_x=image_center[0],
+                                  ring_y=image_center[1],
+                                  ring_r=radii1, ring_I=intensities1,
+                                  ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    test2 = mdtd.generate_4d_data(probe_size_x=probe_x,
+                                  probe_size_y=probe_y,
+                                  image_size_x=image_x,
+                                  image_size_y=image_y,
+                                  disk_x=image_center[0],
+                                  disk_y=image_center[1],
+                                  disk_r=5,
+                                  disk_I=100,
+                                  ring_x=image_center[0],
+                                  ring_y=image_center[1],
+                                  ring_r=radii2,
+                                  ring_I=intensities2, ring_lw=0, blur=True,
+                                  blur_sigma=1, downscale=True,
+                                  add_noise=True, show_progressbar=False,
+                                  lazy=lazy)
+
+    fem_signal = (test1 + test2)
+
+    fem_signal.axes_manager.navigation_axes[0].name = "Probe position x"
+    fem_signal.axes_manager.navigation_axes[0].units = "nm"
+    fem_signal.axes_manager.navigation_axes[0].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[0].offset = 0
+
+    fem_signal.axes_manager.navigation_axes[1].name = "Probe position y"
+    fem_signal.axes_manager.navigation_axes[1].units = "nm"
+    fem_signal.axes_manager.navigation_axes[1].scale = 1.0
+    fem_signal.axes_manager.navigation_axes[1].offset = 0
+
+    fem_signal.axes_manager.signal_axes[0].name = 'Signal x'
+    fem_signal.axes_manager.signal_axes[0].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[0].scale = 0.25
+    fem_signal.axes_manager.signal_axes[0].offset = 0
+
+    fem_signal.axes_manager.signal_axes[1].name = 'Signal y'
+    fem_signal.axes_manager.signal_axes[1].units = 'mrads'
+    fem_signal.axes_manager.signal_axes[1].scale = 0.25
+    fem_signal.axes_manager.signal_axes[1].offset = 0
     return fem_signal
 
 
@@ -364,3 +546,27 @@ def get_cbed_signal():
         data[iy, ix] = convolve2d(data[iy, ix], disk, mode='same') + noise
     s_cbed = PixelatedSTEM(data)
     return s_cbed
+
+
+def get_simple_ellipse_signal_peak_array():
+    """Get a signal and peak array of an ellipse.
+
+    Returns
+    -------
+    signal, peak_array : HyperSpy Signal2D, NumPy array
+
+    Examples
+    --------
+    >>> s, peak_array = ps.dummy_data.get_simple_ellipse_signal_peak_array()
+    >>> s.add_peak_array_as_markers(peak_array, color='blue', size=30)
+
+    """
+    xc = np.random.randint(95, 105, size=(4, 5))
+    yc = np.random.randint(95, 105, size=(4, 5))
+    semi0 = np.random.randint(55, 60, size=(4, 5))
+    semi1 = np.random.randint(75, 80, size=(4, 5))
+    rot = np.random.random(size=(4, 5)) * np.pi
+    peak_array = mdtd._make_4d_peak_array_test_data(
+           xc, yc, semi0, semi1, rot)
+    s = PixelatedSTEM(np.zeros((4, 5, 200, 200)))
+    return s, peak_array

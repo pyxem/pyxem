@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from numpy.random import randint
 from pixstem.pixelated_stem_class import PixelatedSTEM
@@ -23,6 +24,149 @@ class TestFilterPeakList:
                      [256, 256], [0, 0]]
         peak_list_filtered = ct._filter_peak_list(peak_list, max_y_index=256)
         assert [[128, 129], [256, 123]] == peak_list_filtered
+
+
+class TestFilterPeakListRadius:
+
+    def test_simple(self):
+        peak_list = np.random.randint(100, size=(1000, 2))
+        peak_filtered_list0 = ct._filter_peak_list_radius(
+                peak_list, xc=50, yc=50, r_min=30)
+        assert len(peak_list) != len(peak_filtered_list0)
+        peak_filtered_list1 = ct._filter_peak_list_radius(
+                peak_list, xc=50, yc=50, r_min=1000)
+        assert len(peak_filtered_list1) == 0
+
+    def test_r_lim(self):
+        peak_list = np.array([[50, 50], [50, 30]])
+        peak_filtered_list0 = ct._filter_peak_list_radius(
+                peak_list, xc=50, yc=50, r_min=19)
+        assert (peak_filtered_list0 == np.array([[50, 30]])).all()
+        peak_filtered_list1 = ct._filter_peak_list_radius(
+                peak_list, xc=50, yc=50, r_min=21)
+        assert len(peak_filtered_list1) == 0
+
+    def test_r_max(self):
+        peak_list = np.array([[50, 0], [0, 30]])
+        peak_filtered_list0 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_max=40)
+        assert (peak_filtered_list0 == np.array([[0, 30]])).all()
+        peak_filtered_list1 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_max=52)
+        assert (peak_filtered_list1 == np.array([[50, 0], [0, 30]])).all()
+        peak_filtered_list2 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_max=81)
+        assert len(peak_filtered_list2) == 2
+        peak_filtered_list3 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_max=11)
+        assert len(peak_filtered_list3) == 0
+
+    def test_r_min_and_r_max(self):
+        peak_list = np.array([[50, 0], [0, 30]])
+        peak_filtered_list0 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_min=20, r_max=40)
+        assert (peak_filtered_list0 == np.array([[0, 30]])).all()
+        peak_filtered_list1 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_min=20, r_max=60)
+        assert (peak_filtered_list1 == np.array([[50, 0], [0, 30]])).all()
+        peak_filtered_list2 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_min=40, r_max=60)
+        assert (peak_filtered_list2 == np.array([[50, 0]])).all()
+        peak_filtered_list3 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_min=10, r_max=20)
+        assert len(peak_filtered_list3) == 0
+        peak_filtered_list4 = ct._filter_peak_list_radius(
+                peak_list, xc=0, yc=0, r_min=90, r_max=99)
+        assert len(peak_filtered_list4) == 0
+
+    def test_xc_yc(self):
+        peak_list = np.array([[50, 10], [50, 50]])
+        peak_filtered_list = ct._filter_peak_list_radius(
+                peak_list, xc=10, yc=50, r_min=10)
+        assert (peak_filtered_list == np.array([[50, 50]])).all()
+
+    def test_wrong_input_no_r_min_or_r_max(self):
+        peak_list = np.array([[50, 10], [50, 50]])
+        with pytest.raises(ValueError):
+            ct._filter_peak_list_radius(peak_list, xc=10, yc=50)
+
+    def test_r_min_larger_than_r_max(self):
+        peak_list = np.array([[50, 10], [50, 50]])
+        with pytest.raises(ValueError):
+            ct._filter_peak_list_radius(peak_list, xc=10, yc=50,
+                                        r_min=50, r_max=30)
+
+
+class TestFilterPeakArrayRadius:
+
+    def test_simple(self):
+        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(peak_array.shape):
+            peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
+        peak_array_filtered = ct._filter_peak_array_radius(
+                peak_array, 50, 50, r_min=10)
+        assert peak_array_filtered.shape == (2, 3)
+        for ix, iy in np.ndindex(peak_array_filtered.shape):
+            assert len(peak_array_filtered[ix, iy]) != 1000
+
+    def test_r_lim(self):
+        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(peak_array.shape):
+            peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
+        peak_array_filtered = ct._filter_peak_array_radius(
+                peak_array, 50, 50, r_min=50)
+        for ix, iy in np.ndindex(peak_array_filtered.shape):
+            assert len(peak_array_filtered[ix, iy]) == 0
+
+    def test_r_max(self):
+        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(peak_array.shape):
+            peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
+        peak_array_filtered0 = ct._filter_peak_array_radius(
+                peak_array, 0, 0, r_max=20)
+        for ix, iy in np.ndindex(peak_array_filtered0.shape):
+            assert len(peak_array_filtered0[ix, iy]) == 0
+        peak_array_filtered1 = ct._filter_peak_array_radius(
+                peak_array, 0, 0, r_max=100)
+        for ix, iy in np.ndindex(peak_array_filtered1.shape):
+            assert len(peak_array_filtered1[ix, iy]) == 1000
+
+    def test_r_min_and_r_max(self):
+        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(peak_array.shape):
+            peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
+        peak_array_filtered0 = ct._filter_peak_array_radius(
+                peak_array, 0, 0, r_min=20, r_max=25)
+        for ix, iy in np.ndindex(peak_array_filtered0.shape):
+            assert len(peak_array_filtered0[ix, iy]) == 0
+        peak_array_filtered1 = ct._filter_peak_array_radius(
+                peak_array, 0, 0, r_min=20, r_max=100)
+        for ix, iy in np.ndindex(peak_array_filtered1.shape):
+            assert len(peak_array_filtered1[ix, iy]) == 1000
+        peak_array_filtered2 = ct._filter_peak_array_radius(
+                peak_array, 0, 0, r_min=110, r_max=130)
+        for ix, iy in np.ndindex(peak_array_filtered2.shape):
+            assert len(peak_array_filtered2[ix, iy]) == 0
+
+    def test_xc(self):
+        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(peak_array.shape):
+            peak_array[ix, iy] = np.random.randint(30, 70, size=(1000, 2))
+        peak_array_filtered = ct._filter_peak_array_radius(
+                peak_array, 10, 50, r_min=10)
+        for ix, iy in np.ndindex(peak_array_filtered.shape):
+            assert len(peak_array_filtered[ix, iy]) == 1000
+
+    def test_yc(self):
+        peak_array = np.empty(shape=(2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(peak_array.shape):
+            peak_list = np.random.randint(30, 70, size=(999, 2)).tolist()
+            peak_list.append([10, 50])
+            peak_array[ix, iy] = np.array(peak_list)
+        peak_array_filtered = ct._filter_peak_array_radius(
+                peak_array, 50, 10, r_min=10)
+        for ix, iy in np.ndindex(peak_array_filtered.shape):
+            assert len(peak_array_filtered[ix, iy]) == 999
 
 
 class TestFindMaxIndices4DPeakArray:
@@ -87,6 +231,16 @@ class TestFilter4DPeakArray:
                 assert x != 127
                 assert y != 0
                 assert y != 127
+
+    def test_1d_nav(self):
+        peak_array = randint(124, 132, size=(4, 10, 2))
+        peak_array_filtered = ct._filter_4D_peak_array(peak_array)
+        assert peak_array_filtered.shape == (4, )
+
+    def test_3d_nav(self):
+        peak_array = randint(124, 132, size=(2, 3, 4, 10, 2))
+        peak_array_filtered = ct._filter_4D_peak_array(peak_array)
+        assert peak_array_filtered.shape == (2, 3, 4)
 
 
 class TestGetClusterDict:

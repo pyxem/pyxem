@@ -179,8 +179,7 @@ For this, use :py:func:`~pixstem.marker_tools.add_peak_array_to_signal_as_marker
 
 .. code-block:: python
 
-    >>> import pixstem.marker_tools as mt
-    >>> mt.add_peak_array_to_signal_as_markers(s, peak_array, color='blue', size=15)
+    >>> s.add_peak_array_as_markers(peak_array, color='purple', size=18)
     >>> s.plot()
 
 .. image:: images/peak_finding/cbed_with_peaks.jpg

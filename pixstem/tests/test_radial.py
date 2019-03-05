@@ -197,7 +197,7 @@ class TestFitEllipse:
         s_ra = ra.get_radius_vs_angle(s, (30., 80.), angleN=20)
         x, y = ra._get_xy_points_from_radius_angle_plot(s_ra)
         ellipse_parameters = ra._fit_ellipse_to_xy_points(x, y)
-        ra._get_marker_list(s, ellipse_parameters, x_list=x, y_list=y)
+        ra._get_marker_list(ellipse_parameters, x_list=x, y_list=y)
 
     def test_fit_single_ellipse_to_signal(self):
         s = ps.PixelatedSTEM(np.zeros((200, 220)))

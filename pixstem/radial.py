@@ -558,14 +558,20 @@ def _get_ellipse_parameters(g):
     return(xC, yC, semi_len0, semi_len1, rot, eccen)
 
 
+def _get_ellipse_from_parameters(
+        x, y, semi_len0, semi_len1, rot, r_scale=0.05):
+    R = np.arange(0, 2*np.pi, r_scale)
+    xx = x + semi_len0*np.cos(R)*np.cos(rot) - semi_len1*np.sin(R)*np.sin(rot)
+    yy = y + semi_len0*np.cos(R)*np.sin(rot) + semi_len1*np.sin(R)*np.cos(rot)
+    return(xx, yy)
+
+
 def _get_marker_list(
-        signal, ellipse_parameters, x_list=None, y_list=None,
-        name=None, r_scale=0.05):
+        ellipse_parameters, x_list=None, y_list=None, name=None, r_scale=0.05):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
             ellipse_parameters)
-    R = np.arange(0, 2*np.pi, 0.1)
-    xx = xC + semi_len0*np.cos(R)*np.cos(rot) - semi_len1*np.sin(R)*np.sin(rot)
-    yy = yC + semi_len0*np.cos(R)*np.sin(rot) + semi_len1*np.sin(R)*np.cos(rot)
+    xx, yy = _get_ellipse_from_parameters(
+            xC, yC, semi_len0, semi_len1, rot, r_scale=r_scale)
     marker_list = []
     if x_list is not None:
         for x, y in zip(x_list, y_list):
@@ -638,8 +644,7 @@ def fit_single_ellipse_to_signal(
     ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
     xC, yC, semi0, semi1, rot, ecc = _get_ellipse_parameters(
             ellipse_parameters)
-    marker_list = _get_marker_list(
-            s, ellipse_parameters, x_list=x, y_list=y)
+    marker_list = _get_marker_list(ellipse_parameters, x_list=x, y_list=y)
     s_m = s.deepcopy()
     s_m.add_marker(marker_list, permanent=True, plot_marker=False)
     return s_m, xC, yC, semi0, semi1, rot, ecc
@@ -710,7 +715,7 @@ def fit_ellipses_to_signal(
         output = _get_ellipse_parameters(ellipse_parameters)
         ellipse_list.append(output)
         marker_list.extend(_get_marker_list(
-                s, ellipse_parameters, x_list=x, y_list=y,
+                ellipse_parameters, x_list=x, y_list=y,
                 name='circle' + str(i)))
     s_m = s.deepcopy()
     s_m.add_marker(marker_list, permanent=True, plot_marker=False)

@@ -6,6 +6,7 @@ import dask.array as da
 from hyperspy.signals import Signal2D
 from pixstem.pixelated_stem_class import PixelatedSTEM
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
+import pixstem.ransac_ellipse_tools as ret
 import pixstem.make_diffraction_test_data as mdtd
 import pixstem.dummy_data as dd
 import pixstem.dask_test_data as dtd
@@ -66,6 +67,87 @@ class TestPixelatedStemFlipDiffraction:
         s_flip = s.flip_diffraction_y()
         assert (s_flip.data[:, :, 3:, :] == 0).all()
         assert (s_flip.data[:, :, :3, :] == 1).all()
+
+
+class TestAddPeakArrayAsMarkers:
+
+    def test_simple(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
+        peak_array = np.empty((2, 3), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        s.add_peak_array_as_markers(peak_array)
+
+    def test_color(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
+        peak_array = np.empty((2, 3), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        s.add_peak_array_as_markers(peak_array, color='blue')
+        marker0 = list(s.metadata.Markers)[9][1]
+        assert marker0.marker_properties['color'] == 'blue'
+
+    def test_size(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 100, 100)))
+        peak_array = np.empty((2, 3), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        s.add_peak_array_as_markers(peak_array, size=13)
+        marker0 = list(s.metadata.Markers)[9][1]
+        assert marker0.get_data_position('size') == 13
+
+    def test_3d_nav_dims(self):
+        s = PixelatedSTEM(np.zeros((2, 3, 4, 100, 100)))
+        peak_array = np.empty((2, 3, 4), dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        s.add_peak_array_as_markers(peak_array)
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.data['x1'][()].shape == (2, 3, 4)
+
+    def test_1d_nav_dims(self):
+        nav_dim = 3
+        s = PixelatedSTEM(np.zeros((nav_dim, 100, 100)))
+        peak_array = np.empty(nav_dim, dtype=np.object)
+        for index in np.ndindex(peak_array.shape):
+            islice = np.s_[index]
+            peak_array[islice] = np.random.randint(20, 80, (100, 2))
+        s.add_peak_array_as_markers(peak_array)
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.data['x1'][()].shape == (3, )
+
+    def test_0d_nav_dims(self):
+        s = PixelatedSTEM(np.zeros((100, 100)))
+        peak_array = np.random.randint(20, 80, size=(1, 1, 100, 2))
+        s.add_peak_array_as_markers(peak_array)
+        marker = list(s.metadata.Markers)[0][1]
+        assert marker.data['x1'].shape == ()
+
+
+class TestAddEllipseArrayAsMarkers:
+
+    def test_simple(self):
+        s, parray = dd.get_simple_ellipse_signal_peak_array()
+        ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
+                parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
+                semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
+        s.add_ellipse_array_as_markers(
+                ellipse_array, inlier_array=inlier_array, peak_array=parray)
+
+    def test_only_ellipse_array(self):
+        s, parray = dd.get_simple_ellipse_signal_peak_array()
+        s1 = s.deepcopy()
+        ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
+                parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
+                semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
+        s.add_ellipse_array_as_markers(ellipse_array)
+        s1.add_ellipse_array_as_markers(
+                ellipse_array, inlier_array=inlier_array, peak_array=parray)
+        assert len(list(s.metadata.Markers)) < len(list(s1.metadata.Markers))
 
 
 class TestPixelatedSTEMThresholdAndMask:
@@ -1004,6 +1086,14 @@ class TestPixelatedStemTemplateMatchDisk:
         assert s.data.shape == s_template1.data.shape
         assert not (s_template0.data == s_template1.data).all()
 
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = PixelatedSTEM(np.random.random(size=shape))
+        st = s.template_match_disk(disk_r=4, lazy_result=False)
+        assert st.data.shape == tuple(shape)
+
 
 class TestPixelatedStemFindPeaks:
 
@@ -1067,6 +1157,25 @@ class TestPixelatedStemFindPeaks:
                 lazy_result=False)
         for ix, iy in np.ndindex(peaks1.shape):
             assert len(peaks1[ix, iy]) == 1
+
+    def test_normalize_value(self):
+        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
+        data[:, :, 49:52, 49:52] = 100
+        data[:, :, 19:22, 9:12] = 10
+        s = PixelatedSTEM(data)
+        peak_array0 = s.find_peaks(normalize_value=100, lazy_result=False)
+        peak_array1 = s.find_peaks(normalize_value=10, lazy_result=False)
+        for ix, iy in np.ndindex(peak_array0.shape):
+            assert (peak_array0[ix, iy] == [[50, 50]]).all()
+            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = PixelatedSTEM(np.random.random(size=shape))
+        peak_array = s.find_peaks(lazy_result=False)
+        assert peak_array.shape == tuple(shape[:-2])
 
 
 class test_pixelated_stem_rotate_diffraction(unittest.TestCase):

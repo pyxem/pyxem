@@ -13,6 +13,8 @@ from hyperspy.misc.utils import isiterable
 import pixstem.pixelated_stem_tools as pst
 import pixstem.fem_tools as femt
 import pixstem.dask_tools as dt
+import pixstem.marker_tools as mt
+import pixstem.ransac_ellipse_tools as ret
 from tqdm import tqdm
 
 
@@ -327,6 +329,82 @@ class PixelatedSTEM(Signal2D):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return(s_com)
 
+    def add_peak_array_as_markers(
+            self, peak_array, color='red', size=20, bool_array=None,
+            bool_invert=False):
+        """Add a peak array to the signal as HyperSpy markers.
+
+        Parameters
+        ----------
+        peak_array : NumPy 4D array
+        color : string, optional
+            Default 'red'
+        size : scalar, optional
+            Default 20
+        bool_array : NumPy array
+            Must be the same size as peak_array
+        bool_invert : bool
+
+        Examples
+        --------
+        >>> s, parray = ps.dummy_data.get_simple_ellipse_signal_peak_array()
+        >>> s.add_peak_array_as_markers(parray)
+        >>> s.plot()
+
+        """
+        mt.add_peak_array_to_signal_as_markers(
+                self, peak_array, color=color, size=size,
+                bool_array=bool_array, bool_invert=bool_invert)
+
+    def add_ellipse_array_as_markers(
+            self, ellipse_array, inlier_array=None, peak_array=None,
+            nr=20, color_ellipse='blue', linewidth=1, linestyle='solid',
+            color_inlier='blue', color_outlier='red', point_size=20):
+        """Add a ellipse parameters array to a signal as HyperSpy markers.
+
+        Useful to visualize the ellipse results.
+
+        Parameters
+        ----------
+        ellipse_array : NumPy array
+        inlier_array : NumPy array, optional
+        peak_array : NumPy array, optional
+        nr : scalar, optional
+            Default 20
+        color_ellipse : string, optional
+            Default 'blue'
+        linewidth : scalar, optional
+            Default 1
+        linestyle : string, optional
+            Default 'solid'
+        color_inlier : string, optional
+            Default 'blue'
+        color_outlier : string, optional
+            Default 'red'
+        point_size : scalar, optional
+
+        Examples
+        --------
+        >>> s, parray = ps.dummy_data.get_simple_ellipse_signal_peak_array()
+        >>> import pixstem.ransac_ellipse_tools as ret
+        >>> ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
+        ...     parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
+        ...     semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
+        >>> s.add_ellipse_array_as_markers(
+        ...     ellipse_array, inlier_array=inlier_array, peak_array=parray)
+        >>> s.plot()
+
+        """
+        if len(self.data.shape) != 4:
+            raise ValueError("Signal must be 4 dims to use this function")
+        marker_list = ret._get_ellipse_markers(
+                ellipse_array, inlier_array, peak_array, nr=20,
+                color_ellipse='blue', linewidth=1, linestyle='solid',
+                color_inlier='blue', color_outlier='red', point_size=20,
+                signal_axes=self.axes_manager.signal_axes)
+
+        mt._add_permanent_markers_to_signal(self, marker_list)
+
     def virtual_bright_field(
             self, cx=None, cy=None, r=None,
             lazy_result=False, show_progressbar=True):
@@ -591,8 +669,8 @@ class PixelatedSTEM(Signal2D):
         return s
 
     def find_peaks(self, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
-                   threshold=0.36, overlap=0.81, lazy_result=True,
-                   show_progressbar=True):
+                   threshold=0.36, overlap=0.81, normalize_value=None,
+                   lazy_result=True, show_progressbar=True):
         """Find peaks in the signal dimensions using skimage's blob_dog.
 
         Parameters
@@ -602,6 +680,10 @@ class PixelatedSTEM(Signal2D):
         sigma_ratio : float, optional
         threshold : float, optional
         overlap : float, optional
+        normalize_value : float, optional
+            All the values in the signal will be divided by this value.
+            If no value is specified, the max value in each individual image
+            will be used.
         lazy_result : bool, optional
             Default True
         show_progressbar : bool, optional
@@ -610,7 +692,8 @@ class PixelatedSTEM(Signal2D):
         Returns
         -------
         peak_array : dask 2D object array
-            Same size as the two last dimensions in data.
+            Same size as the two last dimensions in data, in the form
+            [[y0, x0], [y1, x1], ...].
             The peak positions themselves are stored in 2D NumPy arrays
             inside each position in peak_array. This is done instead of
             making a 4D NumPy array, since the number of found peaks can
@@ -642,7 +725,8 @@ class PixelatedSTEM(Signal2D):
             dask_array = da.from_array(self.data, chunks=chunks)
         output_array = dt._peak_find_dog(
                 dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
-                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap,
+                normalize_value=normalize_value)
         if not lazy_result:
             if show_progressbar:
                 pbar = ProgressBar()

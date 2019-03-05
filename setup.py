@@ -8,7 +8,7 @@ setup(
         packages = [
             'pixstem',
             ],
-        version = '0.3.2',
+        version = '0.3.3.dev1',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a pixelated detector',
         long_description=long_description,
         long_description_content_type='text/markdown',
