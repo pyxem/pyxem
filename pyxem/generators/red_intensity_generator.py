@@ -111,9 +111,7 @@ class ReducedIntensityGenerator():
         return
 
     def subtract_bkgd_pattern(self, bkgd_pattern):
-        """Fits a diffraction intensity profile to the signal by using a
-        diffraction pattern from an area with no sample in it. This is to
-        reduce the effects of the central beam. This method will edit
+        """Subtracts a background pattern from the signal. This method will edit
         self.signal.
 
         Parameters
@@ -122,6 +120,26 @@ class ReducedIntensityGenerator():
         as the radial profile
         """
         self.signal = self.signal - bkgd_pattern
+
+        return
+
+    def mask_from_bkgd_pattern(self, mask_pattern, mask_threshold = 1):
+        """Uses a background pattern with a threshold, and sets that part of
+        the signal to zero, effectively adding a mask. This is to deal with the
+        edges of the central beam. This method will edit self.signal.
+
+        Parameters
+        ----------
+        mask_pattern : A numpy array line profile of the same resolution
+                        as the radial profile
+        mask_threshold : An integer or float threshold. Any pixel in the
+                            mask_pattern with lower intensity is kept, any with
+                            higher or equal is set to zero.
+        """
+
+        mask_array = mask_pattern < mask_threshold
+
+        self.signal = self.signal * mask_array.astype(float)
 
         return
 
