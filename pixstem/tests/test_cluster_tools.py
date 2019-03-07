@@ -346,6 +346,16 @@ class TestClusterAndSortPeakArray:
         assert len(peak_dict1['centre'][0, 0]) == 5
         assert len(peak_dict1['rest'][0, 0]) == 10
 
+    @pytest.mark.parametrize("ndim", [0, 1, 2, 3, 4, 5, 6])
+    def test_ndim(self, ndim):
+        nav_shape = tuple(np.random.randint(2, 5, size=ndim))
+        shape = nav_shape + (23, 2)
+        peak_array = np.random.randint(99, size=shape)
+        peak_dict = ct._cluster_and_sort_peak_array(peak_array)
+        assert peak_dict['centre'].shape == nav_shape
+        assert peak_dict['rest'].shape == nav_shape
+        assert peak_dict['none'].shape == nav_shape
+
 
 class TestAddPeakDictsToSignal:
 
