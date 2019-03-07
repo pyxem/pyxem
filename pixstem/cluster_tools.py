@@ -349,7 +349,7 @@ def _cluster_and_sort_peak_array(
 
     Parameters
     ----------
-    peak_array : 4D NumPy array
+    peak_array : NumPy array
     eps : scalar, optional
         Default 30, passed to sklearn's DBSCAN
     min_samples : scalar, optional
@@ -375,26 +375,28 @@ def _cluster_and_sort_peak_array(
     >>> peak_array_none = peak_dicts['none']
 
     """
-    peak_centre_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    peak_rest_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    peak_none_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    for ix, iy in np.ndindex(peak_array.shape[:2]):
+    peak_array_shape = _get_peak_array_shape(peak_array)
+    peak_centre_array = np.empty(shape=peak_array_shape, dtype=np.object)
+    peak_rest_array = np.empty(shape=peak_array_shape, dtype=np.object)
+    peak_none_array = np.empty(shape=peak_array_shape, dtype=np.object)
+    for index in np.ndindex(peak_array_shape):
+        islice = np.s_[index]
         cluster_dict = _get_cluster_dict(
-                peak_array[ix, iy], eps=eps, min_samples=min_samples)
+                peak_array[islice], eps=eps, min_samples=min_samples)
         sorted_cluster_dict = _sort_cluster_dict(
                 cluster_dict, centre_x=centre_x, centre_y=centre_y)
         if 'centre' in sorted_cluster_dict:
-            peak_centre_array[ix, iy] = sorted_cluster_dict['centre']
+            peak_centre_array[islice] = sorted_cluster_dict['centre']
         else:
-            peak_centre_array[ix, iy] = []
+            peak_centre_array[islice] = []
         if 'rest' in sorted_cluster_dict:
-            peak_rest_array[ix, iy] = sorted_cluster_dict['rest']
+            peak_rest_array[islice] = sorted_cluster_dict['rest']
         else:
-            peak_rest_array[ix, iy] = []
+            peak_rest_array[islice] = []
         if 'none' in sorted_cluster_dict:
-            peak_none_array[ix, iy] = sorted_cluster_dict['none']
+            peak_none_array[islice] = sorted_cluster_dict['none']
         else:
-            peak_rest_array[ix, iy] = []
+            peak_rest_array[islice] = []
 
     peak_dicts = {}
     peak_dicts['centre'] = peak_centre_array
