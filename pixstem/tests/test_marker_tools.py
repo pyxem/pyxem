@@ -143,3 +143,34 @@ def test_peak_finding_to_marker():
         px, py = marker.get_data_position('x1'), marker.get_data_position('y1')
         value = s.inav[ix, iy].isig[int(px), int(py)].data[0]
         assert value == 1.
+
+
+class TestPixelToScaledValue:
+
+    def test_simple(self):
+        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        axis = s.axes_manager[-1]
+        value = mt._pixel_to_scaled_value(axis, 4.5)
+        assert value == 4.5
+
+    def test_scale(self):
+        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        axis = s.axes_manager[-1]
+        axis.scale = 0.5
+        value = mt._pixel_to_scaled_value(axis, 4.5)
+        assert value == 2.25
+
+    def test_offset(self):
+        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        axis = s.axes_manager[-1]
+        axis.offset = 6
+        value = mt._pixel_to_scaled_value(axis, 4.5)
+        assert value == 10.5
+
+    def test_scale_offset(self):
+        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        axis = s.axes_manager[-1]
+        axis.scale = 0.5
+        axis.offset = 6
+        value = mt._pixel_to_scaled_value(axis, 4.5)
+        assert value == 8.25

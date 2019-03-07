@@ -73,8 +73,8 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
                     bool0 = i0min <= peak[1] <= i0max
                     bool1 = i1min <= peak[0] <= i1max
                     if bool0 and bool1:
-                        vx = signal_axes[0].index2value(int(peak[1]))
-                        vy = signal_axes[1].index2value(int(peak[0]))
+                        vx = _pixel_to_scaled_value(signal_axes[0], peak[1])
+                        vy = _pixel_to_scaled_value(signal_axes[1], peak[0])
                         marker_x_array[i2slice] = vx
                         marker_y_array[i2slice] = vy
     marker_list = []
@@ -84,6 +84,13 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
                 color=color, size=size)
         marker_list.append(marker)
     return marker_list
+
+
+def _pixel_to_scaled_value(axis, pixel_value):
+    offset = axis.offset
+    scale = axis.scale
+    scaled_value = (pixel_value * scale) + offset
+    return scaled_value
 
 
 def _filter_peak_array_with_bool_array(
