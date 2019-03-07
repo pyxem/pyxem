@@ -231,6 +231,8 @@ def plot_fem(s, results, lowcutoff=10, highcutoff=120, k_cal=None):
     axes[2, 1].plot(xaxis[lowcutoff:highcutoff],
                     results['Omega-Vk'].data[lowcutoff:highcutoff],
                     linestyle='', marker='o')
+    axes[2, 1].set_ylabel(r'$\Omega_V$(k)', size=15)
+    axes[2, 1].set_xlabel(r'k ($\AA^{-1}$)')
 
     fig.tight_layout()
     return fig

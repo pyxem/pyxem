@@ -821,7 +821,7 @@ class PixelatedSTEM(Signal2D):
         ...     angleN=10, centre_x=s_com.inav[0].data,
         ...     centre_y=s_com.inav[1].data, slice_overlap=0.2,
         ...     show_progressbar=False)
-        >>> s_ar.plot()
+        >>> s_ar.plot() # doctest: +SKIP
 
         """
         signal_list = []
