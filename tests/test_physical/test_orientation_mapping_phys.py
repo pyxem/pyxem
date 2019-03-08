@@ -113,14 +113,14 @@ def get_template_library(structure, rot_list, edc):
     return library
 
 
-def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None):
+def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None, inplane_rotations=[0]):
     dp_library = get_template_library(structure, pattern_list, edc)
     for key in dp_library['A']:
         pattern = (dp_library['A'][key]['Sim'].as_signal(2 * half_side_length, 0.025, 1).data)
     dp = pxm.ElectronDiffraction([[pattern, pattern], [pattern, pattern]])
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
-    return indexer.correlate(mask=mask)
+    return indexer.correlate(mask=mask, inplane_rotations=inplane_rotations, parallel=False)
 
 
 def get_vector_match_results(structure, rot_list, edc):
@@ -151,7 +151,7 @@ def test_orientation_mapping_physical(structure, rot_list, pattern_list, edc):
     assert np.all(M.inav[0, 0] == M.inav[1, 0])
     match_data = M.inav[0, 0].isig[:4, 0].data
     assert match_data[0] == 0
-    assert np.allclose(match_data[1], [2, 0, 0])
+    np.testing.assert_allclose(match_data[1], [2, 0, 0])
 
 
 def test_masked_OM(default_structure, rot_list, pattern_list, edc):
@@ -160,13 +160,35 @@ def test_masked_OM(default_structure, rot_list, pattern_list, edc):
     assert np.all(np.equal(M.inav[0, 1].data, None))
 
 
-def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_list, edc):
+def expected_best_peaks_pattern_list(library, _):
+    return library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
+
+
+def expected_best_peaks_rotated(library, rotation_euler):
+    angle = np.deg2rad(rotation_euler[0][2])
+    rotation = np.array([
+        [ np.cos(angle), np.sin(angle)],
+        [-np.sin(angle), np.cos(angle)]])
+    coords = library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
+    return (rotation @ coords.T).T
+
+
+@pytest.mark.parametrize('pattern_list, inplane_rotations, get_expected_peaks', [
+    ([(0, 0, 2)], [0], expected_best_peaks_pattern_list),
+    ([(0, 0, 45)], np.arange(0, 360, 1), expected_best_peaks_rotated),
+])
+def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_list, edc, get_expected_peaks, inplane_rotations):
     library = get_template_library(default_structure, rot_list, edc)
-    M = get_template_match_results(default_structure, pattern_list, edc, rot_list)
+    M = get_template_match_results(default_structure, pattern_list, edc, rot_list, inplane_rotations=inplane_rotations)
     peaks = M.map(peaks_from_best_template,
-                  phase_names=["A"], library=library, inplace=False)
-    expected_peaks = library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
-    np.testing.assert_allclose(peaks.inav[0, 0], expected_peaks, atol=0.1)
+                  diffraction_generator=edc,
+                  library=library,
+                  reciprocal_radius=0.8,
+                  parallel=False,
+                  inplace=False)
+    expected_peaks = get_expected_peaks(library, pattern_list)
+    for expected_peak in expected_peaks:
+        assert np.any(np.isclose(np.linalg.norm(peaks.inav[0, 0] - expected_peak, axis=1), 0, atol=0.03))
 
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])

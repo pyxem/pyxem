@@ -64,7 +64,7 @@ for alpha in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
 dp = pxm.ElectronDiffraction([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
 
 indexer = IndexationGenerator(dp, library)
-match_results = indexer.correlate()
+match_results = indexer.correlate(inplane_rotations=[0])
 
 
 def test_match_results():
@@ -85,6 +85,8 @@ def test_visuals():
 
     peaks = match_results.map(peaks_from_best_template,
                               library=library,
+                              diffraction_generator=None,
+                              inplace=False)
     mmx, mmy = generate_marker_inputs_from_peaks(peaks)
     dp.set_diffraction_calibration(2 / 144)
     dp.plot(cmap='viridis')

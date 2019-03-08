@@ -28,7 +28,7 @@ from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
-from transforms3d.quaternions import mat2quat, rotate_vector
+from transforms3d.euler import euler2mat
 
 
 def get_electron_wavelength(accelerating_voltage):
@@ -359,7 +359,8 @@ def simulate_rotated_structure(diffraction_generator, structure, rotation_matrix
         with_direct_beam)
 
 
-def peaks_from_best_template(single_match_result, phase_names, library):
+def peaks_from_best_template(single_match_result, library,
+                             diffraction_generator=None, reciprocal_radius=0, with_direct_beam=False):
     """ Takes a TemplateMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
@@ -368,7 +369,17 @@ def peaks_from_best_template(single_match_result, phase_names, library):
     single_match_result : ndarray
         An entry in a TemplateMatchingResults.
     library : DiffractionLibrary
-        Diffraction library containing the phases and rotations
+        Diffraction library containing the phases and rotations.
+    # TODO: Store these parameters in the library?
+    diffraction_generator : DiffractionGenerator
+        Diffraction generator for generating orientations not present in the
+        library.
+    reciprocal_radius : float
+        Reciprocal radius for generating orientations not present in the
+        library.
+    with_direct_beak : bool
+        Include direct beam whene generating orientations not present in the
+        library.
 
     Returns
     -------
@@ -379,10 +390,16 @@ def peaks_from_best_template(single_match_result, phase_names, library):
     phase_names = list(library.keys())
     best_index = int(best_fit[0])
     phase = phase_names[best_index]
-    pattern = library.get_library_entry(
-        phase=phase,
-        angle=tuple(best_fit[1]))['Sim']
-    peaks = pattern.coordinates[:, :2]  # cut z
+    try:
+        simulation = library.get_library_entry(
+            phase=phase,
+            angle=tuple(best_fit[1]))['Sim']
+    except ValueError:
+        structure = library.structures[best_index]
+        rotation_matrix = euler2mat(*np.deg2rad(best_fit[1]), 'rzxz')
+        simulation = simulate_rotated_structure(diffraction_generator, structure, rotation_matrix, reciprocal_radius, with_direct_beam)
+
+    peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
 

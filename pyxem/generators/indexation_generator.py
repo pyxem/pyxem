@@ -60,6 +60,7 @@ class IndexationGenerator():
     def correlate(self,
                   n_largest=5,
                   mask=None,
+                  inplane_rotations=np.arange(0, 360, 1),
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -71,6 +72,9 @@ class IndexationGenerator():
             The n orientations with the highest correlation values are returned.
         mask : Array
             Array with the same size as signal (in navigation) True False
+        inplane_rotations : ndarray
+            Array of inplane rotations in degrees. Defaults to 0-360 degrees at
+            1 degree resolution.
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -86,15 +90,46 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
+        sig_shape = signal.axes_manager.signal_shape
+        signal_half_width = sig_shape[0] / 2
         if mask is None:
             # index at all real space pixels
-            sig_shape = signal.axes_manager.navigation_shape
-            mask = hs.signals.Signal1D(np.ones((sig_shape[0], sig_shape[1], 1)))
+            mask = 1
+
+        inplane_rotations = np.deg2rad(inplane_rotations)
+        num_inplane_rotations = len(inplane_rotations)
+        rotation_matrices_2d = np.array([[[np.cos(t), np.sin(t)], [-np.sin(t), np.cos(t)]] for t in inplane_rotations])
+        library_entries = []
+        for phase_name in library.keys():
+            num_orientations = len(library[phase_name])
+
+            max_peaks = 100  # TODO: Configurable
+            template_intensities = np.zeros((num_orientations, max_peaks))
+            pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
+            pattern_normalizations = np.zeros(num_orientations)
+            for i, sim_vals in enumerate(library[phase_name].values()):
+                n_peaks = min(max_peaks, len(sim_vals['intensities']))
+                highest_intensities = np.argpartition(sim_vals['intensities'], -n_peaks)[-n_peaks:]
+                template_intensities[i, :n_peaks] = sim_vals['intensities'][highest_intensities]
+                pattern_normalizations[i] = sim_vals['pattern_norm']
+                highest_intensity_coords = sim_vals['pixel_coords'][highest_intensities]
+                pixel_coords[:, i, :n_peaks, :] = np.clip((
+                        signal_half_width + rotation_matrices_2d @ (highest_intensity_coords.T - signal_half_width)
+                    ).transpose(0, 2, 1),
+                    a_min=0,
+                    a_max=np.array(sig_shape) - 1)
+            np.rint(pixel_coords, out=pixel_coords)
+
+            library_entries.append({
+                'orientations': np.array(list(library[phase_name].keys())),
+                'pixel_coords': pixel_coords.astype('int'),
+                'intensities': template_intensities,
+                'pattern_norms': pattern_normalizations,
+            })
 
         matches = signal.map(correlate_library,
-                             library=library,
+                             library_entries=library_entries,
                              n_largest=n_largest,
-                             keys=keys,
                              mask=mask,
                              inplace=False,
                              **kwargs)
