@@ -100,19 +100,19 @@ class IndexationGenerator():
         num_inplane_rotations = len(inplane_rotations)
         rotation_matrices_2d = np.array([[[np.cos(t), np.sin(t)], [-np.sin(t), np.cos(t)]] for t in inplane_rotations])
         library_entries = []
-        for phase_name in library.keys():
-            num_orientations = len(library[phase_name])
+        for library_phase_info in library.values():
+            num_orientations = len(library_phase_info)
 
             max_peaks = 100  # TODO: Configurable
             template_intensities = np.zeros((num_orientations, max_peaks))
             pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
             pattern_normalizations = np.zeros(num_orientations)
-            for i, sim_vals in enumerate(library[phase_name].values()):
-                n_peaks = min(max_peaks, len(sim_vals['intensities']))
-                highest_intensities = np.argpartition(sim_vals['intensities'], -n_peaks)[-n_peaks:]
-                template_intensities[i, :n_peaks] = sim_vals['intensities'][highest_intensities]
-                pattern_normalizations[i] = sim_vals['pattern_norm']
-                highest_intensity_coords = sim_vals['pixel_coords'][highest_intensities]
+            for i, sim_info in enumerate(library_phase_info.values()):
+                n_peaks = min(max_peaks, len(sim_info['intensities']))
+                highest_intensities = np.argpartition(sim_info['intensities'], -n_peaks)[-n_peaks:]
+                template_intensities[i, :n_peaks] = sim_info['intensities'][highest_intensities]
+                pattern_normalizations[i] = sim_info['pattern_norm']
+                highest_intensity_coords = sim_info['pixel_coords'][highest_intensities]
                 pixel_coords[:, i, :n_peaks, :] = np.clip((
                         signal_half_width + rotation_matrices_2d @ (highest_intensity_coords.T - signal_half_width)
                     ).transpose(0, 2, 1),
@@ -121,7 +121,7 @@ class IndexationGenerator():
             np.rint(pixel_coords, out=pixel_coords)
 
             library_entries.append({
-                'orientations': np.array(list(library[phase_name].keys())),
+                'orientations': np.array(list(library_phase_info.keys())),
                 'pixel_coords': pixel_coords.astype('int'),
                 'intensities': template_intensities,
                 'pattern_norms': pattern_normalizations,
