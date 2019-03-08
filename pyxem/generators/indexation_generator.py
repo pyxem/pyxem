@@ -90,28 +90,34 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
-        sig_shape = signal.axes_manager.signal_shape
-        signal_half_width = sig_shape[0] / 2
+
         if mask is None:
-            # index at all real space pixels
+            # Index at all real space pixels
             mask = 1
 
+        sig_shape = signal.axes_manager.signal_shape
+        signal_half_width = sig_shape[0] / 2
         inplane_rotations = np.deg2rad(inplane_rotations)
         num_inplane_rotations = len(inplane_rotations)
         rotation_matrices_2d = np.array([[[np.cos(t), np.sin(t)], [-np.sin(t), np.cos(t)]] for t in inplane_rotations])
         library_entries = []
         for library_phase_info in library.values():
+            # Parameters and storage
             num_orientations = len(library_phase_info)
-
             max_peaks = 100  # TODO: Configurable
             template_intensities = np.zeros((num_orientations, max_peaks))
             pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
-            pattern_normalizations = np.zeros(num_orientations)
+            pattern_norms = np.zeros(num_orientations)
+            # Prepare each simulation for this phase
             for i, sim_info in enumerate(library_phase_info.values()):
+                # Select the strongest peaks
                 n_peaks = min(max_peaks, len(sim_info['intensities']))
                 highest_intensities = np.argpartition(sim_info['intensities'], -n_peaks)[-n_peaks:]
                 template_intensities[i, :n_peaks] = sim_info['intensities'][highest_intensities]
-                pattern_normalizations[i] = sim_info['pattern_norm']
+                # Extract pattern norms
+                pattern_norms[i] = sim_info['pattern_norm']
+                # Get and compute pixel coordinates for all rotations about the
+                # centre, clipped to the detector size
                 highest_intensity_coords = sim_info['pixel_coords'][highest_intensities]
                 pixel_coords[:, i, :n_peaks, :] = np.clip((
                     signal_half_width + rotation_matrices_2d @ (highest_intensity_coords.T - signal_half_width)
@@ -124,7 +130,7 @@ class IndexationGenerator():
                 'orientations': np.array(list(library_phase_info.keys())),
                 'pixel_coords': pixel_coords.astype('int'),
                 'intensities': template_intensities,
-                'pattern_norms': pattern_normalizations,
+                'pattern_norms': pattern_norms,
             })
 
         matches = signal.map(correlate_library,

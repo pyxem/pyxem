@@ -64,19 +64,23 @@ def correlate_library(image, library_entries, n_largest, mask):
             intensities = library_entry['intensities']
             pattern_norms = library_entry['pattern_norms']
 
+            # Extract experimental intensities from the diffraction image
             image_intensities = image[pixel_coords[:, :, :, 1], pixel_coords[:, :, :, 0]]
+            # Correlation is the normalized dot product
             correlations = np.sum(image_intensities * intensities, axis=2) / pattern_norms
 
+            # Find the top n correlations in sorted order
             top_n_indices = correlations.argpartition(-n_largest, axis=None)[-n_largest:]
             top_n_correlations = correlations.ravel()[top_n_indices]
             top_n_indices = top_n_indices[top_n_correlations.argsort()[::-1]]
 
+            # Store the results in top_matches
             top_matches[phase_index, :, 0] = phase_index
-            num_inplane_rotations = pixel_coords.shape[0]
+            inplane_rotation_angle = 360 / pixel_coords.shape[0]
             for i in range(n_largest):
                 inplane_index, orientation_index = np.unravel_index(top_n_indices[i], correlations.shape)
                 top_matches[phase_index, i, 1] = orientations[orientation_index] + np.array(
-                    [0, 0, inplane_index * (360 / num_inplane_rotations)])
+                    [0, 0, inplane_index * inplane_rotation_angle])
             top_matches[phase_index, :, 2] = correlations.ravel()[top_n_indices]
 
     return top_matches.reshape(-1, 3)
