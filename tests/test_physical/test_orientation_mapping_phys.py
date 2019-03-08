@@ -181,7 +181,6 @@ def test_vector_matching_physical(structure, rot_list, edc):
 def test_peaks_from_best_vector_match(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     peaks = match_results.map(peaks_from_best_vector_match,
-                              phase_names=['A'],
                               library=library,
                               diffraction_generator=edc,
                               reciprocal_radius=0.8,
@@ -201,7 +200,6 @@ def test_plot_best_matching_results_on_signal_vector(structure, rot_list, edc):
     match_results.data = np.vstack((match_results.data, match_results.data))
     dp = ElectronDiffraction(2 * [2 * [np.zeros((144, 144))]])
     match_results.plot_best_matching_results_on_signal(dp,
-                                                       phase_names=["A"],
                                                        library=library,
                                                        diffraction_generator=edc,
                                                        reciprocal_radius=0.8)

@@ -29,7 +29,7 @@ from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.euler import mat2euler
 
 
-def correlate_library(image, library, n_largest, mask, keys=[]):
+def correlate_library(image, library, n_largest, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 

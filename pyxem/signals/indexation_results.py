@@ -50,7 +50,7 @@ class TemplateMatchingResults(BaseSignal):
         self.axes_manager.set_signal_dimension(2)
 
     def plot_best_matching_results_on_signal(self, signal,
-                                             phase_names, library,
+                                             library,
                                              permanent_markers=True,
                                              *args, **kwargs):
         """Plot the best matching diffraction vectors on a signal.
@@ -60,8 +60,6 @@ class TemplateMatchingResults(BaseSignal):
         signal : ElectronDiffraction
             The ElectronDiffraction signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
-        phase_names : list
-            List of phase names used as keys to the library
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
         permanent_markers : bool
@@ -72,7 +70,7 @@ class TemplateMatchingResults(BaseSignal):
             Keyword arguments passed to signal.plot()
         """
         match_peaks = self.map(peaks_from_best_template,
-                               phase_names=phase_names, library=library,
+                               library=library,
                                inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
@@ -198,7 +196,6 @@ class VectorMatchingResults(BaseSignal):
         return vectors
 
     def plot_best_matching_results_on_signal(self, signal,
-                                             phase_names,
                                              library,
                                              diffraction_generator,
                                              reciprocal_radius,
@@ -211,8 +208,6 @@ class VectorMatchingResults(BaseSignal):
         signal : ElectronDiffraction
             The ElectronDiffraction signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
-        phase_names : list
-            List of phase names used as keys to the library
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
         diffraction_generator : DiffractionGenerator
@@ -228,7 +223,6 @@ class VectorMatchingResults(BaseSignal):
             Keyword arguments passed to signal.plot()
         """
         match_peaks = self.map(peaks_from_best_vector_match,
-                               phase_names=phase_names,
                                library=library,
                                diffraction_generator=diffraction_generator,
                                reciprocal_radius=reciprocal_radius,

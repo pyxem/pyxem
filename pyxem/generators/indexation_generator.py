@@ -59,7 +59,6 @@ class IndexationGenerator():
 
     def correlate(self,
                   n_largest=5,
-                  keys=[],
                   mask=None,
                   *args,
                   **kwargs):
@@ -70,11 +69,6 @@ class IndexationGenerator():
         ----------
         n_largest : int
             The n orientations with the highest correlation values are returned.
-        keys : list
-            If more than one phase present in library it is recommended that
-            these are submitted. This allows a mapping from the number to the
-            phase.  For example, keys = ['si','ga'] will have an output with 0
-            for 'si' and 1 for 'ga'.
         mask : Array
             Array with the same size as signal (in navigation) True False
         *args : arguments

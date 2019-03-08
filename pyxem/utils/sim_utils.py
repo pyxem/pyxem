@@ -366,9 +366,7 @@ def peaks_from_best_template(single_match_result, phase_names, library):
     Parameters
     ----------
     single_match_result : ndarray
-        An entry in a TemplateMatchingResults
-    phase_names : list
-        List of keys to library, as passed to IndexationGenerator.correlate()
+        An entry in a TemplateMatchingResults.
     library : DiffractionLibrary
         Diffraction library containing the phases and rotations
 
@@ -378,7 +376,9 @@ def peaks_from_best_template(single_match_result, phase_names, library):
         Coordinates of peaks in the matching results object in calibrated units.
     """
     best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
-    phase = phase_names[int(best_fit[0])]
+    phase_names = list(library.keys())
+    best_index = int(best_fit[0])
+    phase = phase_names[best_index]
     pattern = library.get_library_entry(
         phase=phase,
         angle=tuple(best_fit[1]))['Sim']
@@ -386,7 +386,7 @@ def peaks_from_best_template(single_match_result, phase_names, library):
     return peaks
 
 
-def peaks_from_best_vector_match(single_match_result, phase_names, library, diffraction_generator, reciprocal_radius):
+def peaks_from_best_vector_match(single_match_result, library, diffraction_generator, reciprocal_radius):
     """ Takes a VectorMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
@@ -394,8 +394,6 @@ def peaks_from_best_vector_match(single_match_result, phase_names, library, diff
     ----------
     single_match_result : ndarray
         An entry in a VectorMatchingResults
-    phase_names : list
-        List of keys to library, as passed to IndexationGenerator.correlate()
     library : DiffractionLibrary
         Diffraction library containing the phases and rotations
     diffraction_generator : DiffractionGenerator
