@@ -120,7 +120,7 @@ def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None
     dp = pxm.ElectronDiffraction([[pattern, pattern], [pattern, pattern]])
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
-    return indexer.correlate(mask=mask, inplane_rotations=inplane_rotations, parallel=False)
+    return indexer.correlate(mask=mask, inplane_rotations=inplane_rotations)
 
 
 def get_vector_match_results(structure, rot_list, edc):
@@ -184,7 +184,6 @@ def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_
                   diffraction_generator=edc,
                   library=library,
                   reciprocal_radius=0.8,
-                  parallel=False,
                   inplace=False)
     expected_peaks = get_expected_peaks(library, pattern_list)
     for expected_peak in expected_peaks:
