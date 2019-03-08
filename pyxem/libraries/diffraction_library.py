@@ -118,9 +118,9 @@ class DiffractionLibrary(dict):
 
         if phase is not None:
             if angle is not None:
-                try:
+                if angle in self[phase]:
                     return self[phase][angle]
-                except KeyError:
+                else:
                     return _get_library_from_angles(self, phase, angle)
             else:
                 for rotation in self[phase].keys():
