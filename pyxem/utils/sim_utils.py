@@ -330,6 +330,35 @@ def simulate_kinematic_scattering(atomic_coordinates,
     return ElectronDiffraction(intensity)
 
 
+def simulate_rotated_structure(diffraction_generator, structure, rotation_matrix, reciprocal_radius, with_direct_beam):
+    """Calculate electron diffraction data for a structure after rotating it.
+
+    Parameters
+    ----------
+    diffraction_generator : DiffractionGenerator
+        Diffraction generator used to simulate diffraction patterns
+    structure : diffpy.structure.Structure
+        Structure object to simulate
+    rotation_matrix : ndarray
+        3x3 matrix describing the base rotation to apply to the structure
+    reciprocal_radius : float
+        The maximum g-vector magnitude to be included in the simulations.
+    with_direct_beam : bool
+        Include the direct beam peak
+    """
+    lattice_rotated = diffpy.structure.lattice.Lattice(
+        *structure.lattice.abcABG(),
+        baserot=rotation_matrix)
+    # Don't change the original
+    structure_rotated = diffpy.structure.Structure(structure)
+    structure_rotated.placeInLattice(lattice_rotated)
+
+    return diffraction_generator.calculate_ed_data(
+        structure_rotated,
+        reciprocal_radius,
+        with_direct_beam)
+
+
 def peaks_from_best_template(single_match_result, phase_names, library):
     """ Takes a TemplateMatchingResults object and return the associated peaks,
     to be used in combination with map().
@@ -382,20 +411,14 @@ def peaks_from_best_vector_match(single_match_result, phase_names, library, diff
     """
     best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
     best_index = best_fit[0]
-    phase = phase_names[best_index]
 
+    rotation_matrix = best_fit[1].T
     # Don't change the original
-    structure_rotation = best_fit[1].T
     structure = library.structures[best_index]
-    lattice_rotated = diffpy.structure.lattice.Lattice(
-        *structure.lattice.abcABG(),
-        baserot=structure_rotation)
-    structure_rotated = diffpy.structure.Structure(structure)
-    structure_rotated.placeInLattice(lattice_rotated)
+    sim = simulate_rotated_structure(diffraction_generator, structure, rotation_matrix, reciprocal_radius, with_direct_beam=False)
 
-    sim = diffraction_generator.calculate_ed_data(structure_rotated, reciprocal_radius, with_direct_beam=False)
-    peaks = sim.coordinates[:, :2]  # Cut z
-    return peaks
+    # Cut z
+    return sim.coordinates[:, :2]
 
 
 def get_points_in_sphere(reciprocal_lattice, reciprocal_radius):
