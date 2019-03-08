@@ -22,7 +22,6 @@ from heapq import nlargest
 from itertools import combinations
 from operator import itemgetter
 
-from pyxem.utils import correlate
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
