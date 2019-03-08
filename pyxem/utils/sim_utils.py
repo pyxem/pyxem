@@ -397,7 +397,12 @@ def peaks_from_best_template(single_match_result, library,
     except ValueError:
         structure = library.structures[best_index]
         rotation_matrix = euler2mat(*np.deg2rad(best_fit[1]), 'rzxz')
-        simulation = simulate_rotated_structure(diffraction_generator, structure, rotation_matrix, reciprocal_radius, with_direct_beam)
+        simulation = simulate_rotated_structure(
+            diffraction_generator,
+            structure,
+            rotation_matrix,
+            reciprocal_radius,
+            with_direct_beam)
 
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks

@@ -114,8 +114,8 @@ class IndexationGenerator():
                 pattern_normalizations[i] = sim_info['pattern_norm']
                 highest_intensity_coords = sim_info['pixel_coords'][highest_intensities]
                 pixel_coords[:, i, :n_peaks, :] = np.clip((
-                        signal_half_width + rotation_matrices_2d @ (highest_intensity_coords.T - signal_half_width)
-                    ).transpose(0, 2, 1),
+                    signal_half_width + rotation_matrices_2d @ (highest_intensity_coords.T - signal_half_width)
+                ).transpose(0, 2, 1),
                     a_min=0,
                     a_max=np.array(sig_shape) - 1)
             np.rint(pixel_coords, out=pixel_coords)

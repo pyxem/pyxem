@@ -167,7 +167,7 @@ def expected_best_peaks_pattern_list(library, _):
 def expected_best_peaks_rotated(library, rotation_euler):
     angle = np.deg2rad(rotation_euler[0][2])
     rotation = np.array([
-        [ np.cos(angle), np.sin(angle)],
+        [np.cos(angle), np.sin(angle)],
         [-np.sin(angle), np.cos(angle)]])
     coords = library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
     return (rotation @ coords.T).T

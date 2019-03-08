@@ -76,7 +76,7 @@ def correlate_library(image, library_entries, n_largest, mask):
             for i in range(n_largest):
                 inplane_index, orientation_index = np.unravel_index(top_n_indices[i], correlations.shape)
                 top_matches[phase_index, i, 1] = orientations[orientation_index] + np.array(
-                        [0, 0, inplane_index * (360 / num_inplane_rotations)])
+                    [0, 0, inplane_index * (360 / num_inplane_rotations)])
             top_matches[phase_index, :, 2] = correlations.ravel()[top_n_indices]
 
     return top_matches.reshape(-1, 3)
