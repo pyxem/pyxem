@@ -42,8 +42,8 @@ def correlate_library(image, library, n_largest, mask):
         experimental data.
     n_largest : int
         The number of well correlated simulations to be retained.
-    mask : bool array
-        A mask for navigation axes 1 indicates positions to be indexed.
+    mask : bool
+        A mask for navigation axes. 1 indicates positions to be indexed.
 
     Returns
     -------
