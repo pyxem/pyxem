@@ -61,6 +61,7 @@ class IndexationGenerator():
                   n_largest=5,
                   mask=None,
                   inplane_rotations=np.arange(0, 360, 1),
+                  max_peaks=100,
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -75,6 +76,9 @@ class IndexationGenerator():
         inplane_rotations : ndarray
             Array of inplane rotations in degrees. Defaults to 0-360 degrees at
             1 degree resolution.
+        max_peaks : int
+            Maximum number of peaks to consider when comparing a template to
+            the diffraction pattern. The strongest peaks are kept.
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -104,7 +108,6 @@ class IndexationGenerator():
         for library_phase_info in library.values():
             # Parameters and storage
             num_orientations = len(library_phase_info)
-            max_peaks = 100  # TODO: Configurable
             template_intensities = np.zeros((num_orientations, max_peaks))
             pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
             pattern_norms = np.zeros(num_orientations)
