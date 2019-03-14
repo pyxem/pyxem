@@ -32,6 +32,14 @@ def correlate_library(image, library_entries, n_largest, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
+    Calculated using the normalised (see return type documentation) dot
+    product, or cosine distance,
+
+    .. math::
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    for a template T and an experimental pattern P.
+
     Parameters
     ----------
     image : np.array()
@@ -50,10 +58,24 @@ def correlate_library(image, library_entries, n_largest, mask):
         A numpy array containing the top n correlated simulations for the
         experimental pattern of interest, where each entry is on the form
             [phase index, [z, x, z], correlation]
+        where
+            phase_index : int
+                Index of the phase, following the ordering of the library keys
+            [z, x, z] : ndarray
+                numpy array of three floats, specifying the orientation in the
+                Bunge convention, in degrees.
+            correlation : float
+                A coefficient of correlation, only normalised to the template
+                intensity. This is in contrast to the reference work.
 
     See also
     --------
-    pyxem.utils.correlate and the correlate method of IndexationGenerator.
+    IndexationGenerator.correlate
+
+    References
+    ----------
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
     top_matches = np.empty((len(library_entries), n_largest, 3), dtype='object')
 
