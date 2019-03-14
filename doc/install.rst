@@ -18,8 +18,7 @@ In this prompt run:
 
 .. code-block:: bash
 
-    $ conda install hyperspy -c conda-forge
-    $ pip install pixstem
+    $ conda install pixstem hyperspy-gui-traitsui hyperspy-gui-ipywidgets -c conda-forge
 
 If everything installed, continue to :ref:`starting pixStem in Windows <start_pixstem_windows>`.
 If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
@@ -50,8 +49,7 @@ Install the Anaconda python environment: `Anaconda environment <https://www.cont
 
 .. code-block:: bash
 
-    $ conda install hyperspy -c conda-forge
-    $ pip install pixstem
+    $ conda install pixstem hyperspy-gui-traitsui hyperspy-gui-ipywidgets -c conda-forge
 
 If everything installed, continue to :ref:`starting pixStem in MacOS <start_pixstem_macos>`.
 If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
