@@ -90,7 +90,6 @@ def test_visuals():
 
     peaks = match_results.map(peaks_from_best_template,
                               library=library,
-                              diffraction_generator=None,
                               inplace=False)
     mmx, mmy = generate_marker_inputs_from_peaks(peaks)
     dp.set_diffraction_calibration(2 / 144)

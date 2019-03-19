@@ -359,8 +359,7 @@ def simulate_rotated_structure(diffraction_generator, structure, rotation_matrix
         with_direct_beam)
 
 
-def peaks_from_best_template(single_match_result, library,
-                             diffraction_generator=None, reciprocal_radius=0, with_direct_beam=False):
+def peaks_from_best_template(single_match_result, library):
     """ Takes a TemplateMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
@@ -398,17 +397,17 @@ def peaks_from_best_template(single_match_result, library,
         structure = library.structures[best_index]
         rotation_matrix = euler2mat(*np.deg2rad(best_fit[1]), 'rzxz')
         simulation = simulate_rotated_structure(
-            diffraction_generator,
+            library.diffraction_generator,
             structure,
             rotation_matrix,
-            reciprocal_radius,
-            with_direct_beam)
+            library.reciprocal_radius,
+            library.with_direct_beam)
 
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
 
-def peaks_from_best_vector_match(single_match_result, library, diffraction_generator, reciprocal_radius):
+def peaks_from_best_vector_match(single_match_result, library):
     """ Takes a VectorMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
@@ -418,11 +417,6 @@ def peaks_from_best_vector_match(single_match_result, library, diffraction_gener
         An entry in a VectorMatchingResults
     library : DiffractionLibrary
         Diffraction library containing the phases and rotations
-    diffraction_generator : DiffractionGenerator
-        Diffraction generator used to generate the patterns
-    reciprocal_radius : float
-        The maximum radius of the sphere of reciprocal space to sample, in
-        reciprocal angstroms.
 
     Returns
     -------
@@ -435,7 +429,12 @@ def peaks_from_best_vector_match(single_match_result, library, diffraction_gener
     rotation_matrix = best_fit[1].T
     # Don't change the original
     structure = library.structures[best_index]
-    sim = simulate_rotated_structure(diffraction_generator, structure, rotation_matrix, reciprocal_radius, with_direct_beam=False)
+    sim = simulate_rotated_structure(
+        library.diffraction_generator,
+        structure,
+        rotation_matrix,
+        library.reciprocal_radius,
+        with_direct_beam=False)
 
     # Cut z
     return sim.coordinates[:, :2]

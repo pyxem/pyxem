@@ -51,9 +51,6 @@ class TemplateMatchingResults(BaseSignal):
 
     def plot_best_matching_results_on_signal(self, signal,
                                              library,
-                                             diffraction_generator=None,
-                                             reciprocal_radius=0.0,
-                                             with_direct_beam=False,
                                              permanent_markers=True,
                                              *args, **kwargs):
         """Plot the best matching diffraction vectors on a signal.
@@ -65,15 +62,6 @@ class TemplateMatchingResults(BaseSignal):
             This signal must have the same navigation dimensions as the peaks.
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
-        diffraction_generator : DiffractionGenerator
-            Diffraction generator for generating missing library entries.
-            Default None if all expected orientations are in the library.
-        reciprocal_radius : float
-            Reciprocal radius for generating orientations not present in the
-            library.
-        with_direct_beak : bool
-            Include direct beam whene generating orientations not present in the
-            library.
         permanent_markers : bool
             Permanently save the peaks as markers on the signal
         *args :
@@ -83,9 +71,6 @@ class TemplateMatchingResults(BaseSignal):
         """
         match_peaks = self.map(peaks_from_best_template,
                                library=library,
-                               diffraction_generator=diffraction_generator,
-                               reciprocal_radius=reciprocal_radius,
-                               with_direct_beam=with_direct_beam,
                                inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
@@ -212,8 +197,6 @@ class VectorMatchingResults(BaseSignal):
 
     def plot_best_matching_results_on_signal(self, signal,
                                              library,
-                                             diffraction_generator,
-                                             reciprocal_radius,
                                              permanent_markers=True,
                                              *args, **kwargs):
         """Plot the best matching diffraction vectors on a signal.
@@ -225,11 +208,6 @@ class VectorMatchingResults(BaseSignal):
             This signal must have the same navigation dimensions as the peaks.
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
-        diffraction_generator : DiffractionGenerator
-            Diffraction generator used to generate the patterns
-        reciprocal_radius : float
-            The maximum radius of the sphere of reciprocal space to sample, in
-            reciprocal angstroms.
         permanent_markers : bool
             Permanently save the peaks as markers on the signal. Default True.
         *args :
@@ -239,8 +217,6 @@ class VectorMatchingResults(BaseSignal):
         """
         match_peaks = self.map(peaks_from_best_vector_match,
                                library=library,
-                               diffraction_generator=diffraction_generator,
-                               reciprocal_radius=reciprocal_radius,
                                inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)

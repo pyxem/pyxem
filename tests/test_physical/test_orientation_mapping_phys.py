@@ -110,6 +110,9 @@ def get_template_library(structure, rot_list, edc):
                                                half_shape=(half_side_length,
                                                            half_side_length),
                                                with_direct_beam=False)
+    library.diffraction_generator = edc
+    library.reciprocal_radius = 0.8
+    library.with_direct_beam = False
     return library
 
 
@@ -136,14 +139,14 @@ def get_vector_match_results(structure, rot_list, edc):
     library_generator = VectorLibraryGenerator(structure_library)
     vector_library = library_generator.get_vector_library(1)
     indexation_generator = VectorIndexationGenerator(peaks, vector_library)
-    return diffraction_library, indexation_generator.index_vectors(
+    indexation = indexation_generator.index_vectors(
         mag_tol=1.5 / half_side_length,
         angle_tol=1,
         index_error_tol=0.2,
         n_peaks_to_index=5,
         n_best=2,
         keys=['A'])
-
+    return diffraction_library, indexation
 
 @pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
 def test_orientation_mapping_physical(structure, rot_list, pattern_list, edc):
@@ -181,9 +184,7 @@ def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_
     library = get_template_library(default_structure, rot_list, edc)
     M = get_template_match_results(default_structure, pattern_list, edc, rot_list, inplane_rotations=inplane_rotations)
     peaks = M.map(peaks_from_best_template,
-                  diffraction_generator=edc,
                   library=library,
-                  reciprocal_radius=0.8,
                   inplace=False)
     expected_peaks = get_expected_peaks(library, pattern_list)
     for expected_peak in expected_peaks:
@@ -203,8 +204,6 @@ def test_peaks_from_best_vector_match(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     peaks = match_results.map(peaks_from_best_vector_match,
                               library=library,
-                              diffraction_generator=edc,
-                              reciprocal_radius=0.8,
                               inplace=False)
     # Unordered compare within absolute tolerance
     for i in range(2):
@@ -221,9 +220,7 @@ def test_plot_best_matching_results_on_signal_vector(structure, rot_list, edc):
     match_results.data = np.vstack((match_results.data, match_results.data))
     dp = ElectronDiffraction(2 * [2 * [np.zeros((144, 144))]])
     match_results.plot_best_matching_results_on_signal(dp,
-                                                       library=library,
-                                                       diffraction_generator=edc,
-                                                       reciprocal_radius=0.8)
+                                                       library=library)
 
 
 @pytest.mark.parametrize("structure, rotation", [(create_wurtzite(), euler2mat(0, np.pi / 2, 0, 'rzxz'))])
