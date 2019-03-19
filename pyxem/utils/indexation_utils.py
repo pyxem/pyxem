@@ -28,7 +28,7 @@ from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.euler import mat2euler
 
 
-def correlate_library(image, library_entries, n_largest, mask):
+def correlate_library(image, library, n_largest, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
@@ -77,10 +77,10 @@ def correlate_library(image, library_entries, n_largest, mask):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    top_matches = np.empty((len(library_entries), n_largest, 3), dtype='object')
+    top_matches = np.empty((len(library), n_largest, 3), dtype='object')
 
     if mask == 1:
-        for phase_index, library_entry in enumerate(library_entries):
+        for phase_index, library_entry in enumerate(library.values()):
             orientations = library_entry['orientations']
             pixel_coords = library_entry['pixel_coords']
             intensities = library_entry['intensities']
