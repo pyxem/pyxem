@@ -92,6 +92,12 @@ class DiffractionLibrary(dict):
     structures : list of diffpy.structure.Structure objects.
         A list of diffpy.structure.Structure objects describing the atomic
         structure associated with each phase in the library.
+    diffraction_generator : DiffractionGenerator
+        Diffraction generator used to generate this library.
+    reciprocal_radius : float
+        Maximum g-vector magnitude for peaks in the library.
+    with_direct_beam : bool
+        Whether the direct beam included in the library or not.
 
     """
 
@@ -99,6 +105,9 @@ class DiffractionLibrary(dict):
         super().__init__(*args, **kwargs)
         self.identifiers = None
         self.structures = None
+        self.diffraction_generator = None
+        self.reciprocal_radius = 0.0
+        self.with_direct_beam = False
 
     def get_library_entry(self, phase=None, angle=None):
         """Extracts a single DiffractionLibrary entry.

@@ -74,6 +74,8 @@ class DiffractionLibraryGenerator(object):
             The maximum g-vector magnitude to be included in the simulations.
         half_shape : tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
+        with_direct_beam : bool
+            Include the direct beam in the library.
 
         Returns
         -------
@@ -121,6 +123,9 @@ class DiffractionLibraryGenerator(object):
         # Pass attributes to diffraction library from structure library.
         diffraction_library.identifiers = structure_library.identifiers
         diffraction_library.structures = structure_library.structures
+        diffraction_library.diffraction_generator = diffractor
+        diffraction_library.reciprocal_radius = reciprocal_radius
+        diffraction_library.with_direct_beam = with_direct_beam
 
         return diffraction_library
 
