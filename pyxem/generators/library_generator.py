@@ -91,26 +91,32 @@ class DiffractionLibraryGenerator(object):
             phase_diffraction_library = dict()
             structure = structure_library.struct_lib[phase_name][0]
             orientations = structure_library.struct_lib[phase_name][1]
+
+            num_orientations = len(orientations)
+            simulations = np.empty(num_orientations, dtype='object')
+            pixel_coords = np.empty(num_orientations, dtype='object')
+            intensities = np.empty(num_orientations, dtype='object')
             # Iterate through orientations of each phase.
-            for orientation in tqdm(orientations, leave=False):
+            for i, orientation in enumerate(tqdm(orientations, leave=False)):
                 matrix = euler2mat(*np.deg2rad(orientation), 'rzxz')
                 simulation = simulate_rotated_structure(diffractor, structure, matrix, reciprocal_radius, with_direct_beam)
 
                 # Calibrate simulation
                 simulation.calibration = calibration
-                pattern_intensities = simulation.intensities
                 pixel_coordinates = np.rint(
                     simulation.calibrated_coordinates[:, :2] + half_shape).astype(int)
-                # Construct diffraction simulation library, removing those that
-                # contain no peaks
-                if len(pattern_intensities) > 0:
-                    phase_diffraction_library[tuple(orientation)] = {
-                        'Sim': simulation,
-                        'intensities': pattern_intensities,
-                        'pixel_coords': pixel_coordinates,
-                        'pattern_norm': np.linalg.norm(pattern_intensities)
-                    }
-            diffraction_library[phase_name] = phase_diffraction_library
+
+                # Construct diffraction simulation library
+                simulations[i] = simulation
+                pixel_coords[i] = pixel_coordinates
+                intensities[i] = simulation.intensities
+
+            diffraction_library[phase_name] = {
+                'simulations': simulations,
+                'orientations': orientations,
+                'pixel_coords': pixel_coords,
+                'intensities': intensities,
+            }
 
         # Pass attributes to diffraction library from structure library.
         diffraction_library.identifiers = structure_library.identifiers
