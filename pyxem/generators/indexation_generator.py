@@ -94,56 +94,54 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
+        inplane_rotations = np.deg2rad(inplane_rotations)
+        num_inplane_rotations = inplane_rotations.shape[0]
+        sig_shape = signal.axes_manager.signal_shape
+        signal_half_width = sig_shape[0] / 2
 
         if mask is None:
             # Index at all real space pixels
             mask = 1
 
-        sig_shape = signal.axes_manager.signal_shape
-        signal_half_width = sig_shape[0] / 2
-        inplane_rotations = np.deg2rad(inplane_rotations)
-        num_inplane_rotations = len(inplane_rotations)
+        # Create a copy of the library, cropping and padding the peaks to match
+        # max_peaks. Also create rotated pixel coordinates according to
+        # inplane_rotations
         rotation_matrices_2d = np.array([[[np.cos(t), np.sin(t)], [-np.sin(t), np.cos(t)]] for t in inplane_rotations])
-        library_entries = []
-        for library_phase_info in library.values():
-            # Parameters and storage
-            num_orientations = len(library_phase_info)
-            template_intensities = np.zeros((num_orientations, max_peaks))
+        cropped_library = {}
+
+        for phase_name, phase_entry in library.items():
+            num_orientations = len(phase_entry['orientations'])
+            intensities_jagged = phase_entry['intensities']
+            intensities = np.zeros((num_orientations, max_peaks))
+            pixel_coords_jagged = phase_entry['pixel_coords']
             pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
-            pattern_norms = np.zeros(num_orientations)
-            # Prepare each simulation for this phase
-            for i, sim_info in enumerate(library_phase_info.values()):
-                # Select the strongest peaks
-                n_peaks = min(max_peaks, len(sim_info['intensities']))
-                highest_intensities = np.argpartition(sim_info['intensities'], -n_peaks)[-n_peaks:]
-                template_intensities[i, :n_peaks] = sim_info['intensities'][highest_intensities]
-                # Extract pattern norms
-                pattern_norms[i] = sim_info['pattern_norm']
+            for i in range(num_orientations):
+                num_peaks = min(pixel_coords_jagged[i].shape[0], max_peaks)
+                intensities[i, :num_peaks] = intensities_jagged[i][:num_peaks]
                 # Get and compute pixel coordinates for all rotations about the
-                # centre, clipped to the detector size
-                highest_intensity_coords = sim_info['pixel_coords'][highest_intensities]
-                pixel_coords[:, i, :n_peaks, :] = np.clip((
-                    signal_half_width + rotation_matrices_2d @ (highest_intensity_coords.T - signal_half_width)
-                ).transpose(0, 2, 1),
+                # centre, clipped to the detector size and rounded to integer positions.
+                pixel_coords[:, i, :num_peaks] = np.clip(
+                    (signal_half_width + rotation_matrices_2d @ (
+                        pixel_coords_jagged[i][:num_peaks].T - signal_half_width)).transpose(0, 2, 1),
                     a_min=0,
                     a_max=np.array(sig_shape) - 1)
-            np.rint(pixel_coords, out=pixel_coords)
 
-            library_entries.append({
-                'orientations': np.array(list(library_phase_info.keys())),
+            np.rint(pixel_coords, out=pixel_coords)
+            cropped_library[phase_name] = {
+                'orientations': phase_entry['orientations'],
                 'pixel_coords': pixel_coords.astype('int'),
-                'intensities': template_intensities,
-                'pattern_norms': pattern_norms,
-            })
+                'intensities': intensities,
+                'pattern_norms': np.linalg.norm(intensities, axis=1),
+            }
 
         matches = signal.map(correlate_library,
-                             library_entries=library_entries,
+                             library=cropped_library,
                              n_largest=n_largest,
                              mask=mask,
                              inplace=False,
                              **kwargs)
-        matching_results = TemplateMatchingResults(matches)
 
+        matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
@@ -279,7 +277,6 @@ class VectorIndexationGenerator():
                                         n_best=n_best,
                                         keys=keys,
                                         inplace=False,
-                                        parallel=False,  # TODO: For testing
                                         *args,
                                         **kwargs)
         indexation = np.array(matched.isig[0].data.tolist(), dtype='object')
