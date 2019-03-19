@@ -115,8 +115,8 @@ def get_template_library(structure, rot_list, edc):
 
 def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None, inplane_rotations=[0]):
     dp_library = get_template_library(structure, pattern_list, edc)
-    for key in dp_library['A']:
-        pattern = (dp_library['A'][key]['Sim'].as_signal(2 * half_side_length, 0.025, 1).data)
+    for sim in dp_library['A']['simulations']:
+        pattern = (sim.as_signal(2 * half_side_length, 0.025, 1).data)
     dp = pxm.ElectronDiffraction([[pattern, pattern], [pattern, pattern]])
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
@@ -126,8 +126,8 @@ def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None
 def get_vector_match_results(structure, rot_list, edc):
     diffraction_library = get_template_library(structure, rot_list, edc)
     peak_lists = []
-    for simulation in diffraction_library['A'].values():
-        peak_lists.append(simulation['pixel_coords'])
+    for pixel_coords in diffraction_library['A']['pixel_coords']:
+        peak_lists.append(pixel_coords)
     peaks = DiffractionVectors((np.array([peak_lists, peak_lists]) - half_side_length) / half_side_length)
     peaks.axes_manager.set_signal_dimension(2)
     peaks.calculate_cartesian_coordinates(200, 0.2)
@@ -161,7 +161,7 @@ def test_masked_OM(default_structure, rot_list, pattern_list, edc):
 
 
 def expected_best_peaks_pattern_list(library, _):
-    return library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
+    return library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
 
 
 def expected_best_peaks_rotated(library, rotation_euler):
@@ -169,7 +169,7 @@ def expected_best_peaks_rotated(library, rotation_euler):
     rotation = np.array([
         [np.cos(angle), np.sin(angle)],
         [-np.sin(angle), np.cos(angle)]])
-    coords = library["A"][(0, 0, 0)]['Sim'].coordinates[:, :2]
+    coords = library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
     return (rotation @ coords.T).T
 
 
@@ -208,7 +208,7 @@ def test_peaks_from_best_vector_match(structure, rot_list, edc):
                               inplace=False)
     # Unordered compare within absolute tolerance
     for i in range(2):
-        lib = library['A'][rot_list[i]]['Sim'].coordinates[:, :2]
+        lib = library['A']['simulations'][i].coordinates[:, :2]
         for p in peaks.data[0, i]:
             assert np.isclose(p[0], lib[:, 0], atol=0.1).any() and np.isclose(p[1], lib[:, 1], atol=0.1).any()
 
