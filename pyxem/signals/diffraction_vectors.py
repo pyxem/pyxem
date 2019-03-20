@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
-from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import detector_to_fourier, detector_px_to_3D_kspace
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
@@ -283,3 +283,22 @@ class DiffractionVectors(BaseSignal):
                                   parallel=False,  # TODO: For testing
                                   *args, **kwargs)
         transfer_navigation_axes(self.cartesian, self)
+
+    def calculate_detector_px_to_cartesian_diffraction_coordinates(self, azimuthal_integrator, *args, **kwargs):
+        """It takes a DiffractionVector object with peaks expressed in pixels in the detector. It maps the function detector_px_to_3D_kspace along the scanning pixels of the DiffractionVector class.
+        It stores in the DiffractionVector.cartesian attribute, the gx, gy and gz cartesian coordinates of the diffraction vector, in Angstoms^-1, using purely geometrical arguments.
+        Args:
+        ----------
+        self :DiffractionVector
+            A DiffractionVector object with the diffraction vectors in pixel units of the detector.
+        azimuthal_integrator: pyFAI.azimuthalIntegrator.AzimuthalIntegrator object
+            A pyFAI Geometry object, containing all the detector geometry parameters.
+        Returns
+        ----------
+        self: DiffractionVector
+            DiffractionProfile.cartesian attribute has stored the respective transformed px cordinates to angstrom^-1, in the form of an array containing [g_x, g_y, g_z] for each scanning coordinate.
+        """
+
+        self.cartesian = self.map(detector_px_to_3D_kspace,
+            ai=azimuthal_integrator, 
+            show_progressbar=True, inplace=False, parallel=False)
