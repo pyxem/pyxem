@@ -84,7 +84,7 @@ def detector_px_to_3D_kspace(peak_coord, beam_wavelen, det2sample_len, pixel_siz
         # From ragged array
         peak_coord = peak_coord[0]
 
-    xy = peak_coord*pixel_size*10000
+    xy = peak_coord*pixel_size*1e4
 
     #Extract the pixel-coordinates of x and y axes as an array
     x = xy[:,0]
@@ -249,27 +249,34 @@ def get_angle_cartesian(a, b):
         return 0.0
     return math.acos(max(-1.0, min(1.0, np.dot(a, b) / determinant)))
 
-def get_detector_to_sample_calibrated_distance(d_hkl_calc, actual_px_len, beam_wavelen, pixel_size):
+def get_detector_to_sample_calibrated_distance(d_hkl_calc, peak_distance,
+                                               wavelength, pixel_size):
     """
-    Get the calibrated detector to sample distance from a basic geometrical transformation, using a d_hkl_calc diffraction vector length and the actual pixel length. The center of
-    the data array is assumed to be the center of the pattern.
+    Get the calibrated detector to sample distance from a basic geometrical 
+    transformation, using a d_hkl_calc diffraction vector length and the actual 
+    pixel length. The center of the data array is assumed to be the center of the 
+    pattern.
+
     Parameters
     ----------
     d_hkl_calc : float
         Calculated diffraction vector (hkl) magnitude in reciprocal Angstroms.
-    actual_px_len
-        The actual pixel detecting the diffraction event (hkl), from the calibration standard, in pixel units.
-    beam_wavelen: float
-        Wavelength of the scanning beam, in Angstroms.
-    pixel_size: float
+    peak_distance : int
+        The measured distance from the direct beam to the peak used for calibration, in pixel units.
+    wavelength : float
+        Wavelength radiation used as probe, in Angstroms.
+    pixel_size : float
         Size of each pixel in the detector, in micrometres.
+    
     Returns
     -------
     sample2det_len : float
         Calibrated sample to detector distance, in Angstroms.
     """
+
     #Calculate the diffraction theta angle from the calculated diffraction vector magnitude.
-    theta = 2*np.arcsin(d_hkl_calc / (2* 1 / beam_wavelen))
+    two_theta = 2 * np.arcsin( (d_hkl_calc * wavelength) / 2 )
     #Calculate, using basic trigonometry, the det2sample_len from the theta angle and the actual pixel detected length:
-    det2sample_len = (actual_px_len * pixel_size * 10000) / np.tan(theta)
+    det2sample_len = (peak_distance * pixel_size * 1e4) / np.tan(two_theta)
+
     return det2sample_len
