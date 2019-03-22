@@ -66,7 +66,7 @@ class DiffractionVectors(BaseSignal):
         self.cartesian = None
         self.hkls = None
 
-    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
+    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold, center = True):
         """Plot the unique diffraction vectors.
 
         Parameters
@@ -78,6 +78,9 @@ class DiffractionVectors(BaseSignal):
         distance_threshold : float
             The minimum distance between diffraction vectors to be passed to
             get_unique_vectors.
+        center: bool
+            If True (default), the centre of the detector is set as origin.
+            If False, no centering applied.
 
         Returns
         -------
@@ -90,10 +93,19 @@ class DiffractionVectors(BaseSignal):
         # Plot the gvector positions
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(unique_vectors.data.T[0], -unique_vectors.data.T[1], 'ro')
-        ax.set_xlim(-xlim, xlim)
-        ax.set_ylim(-ylim, ylim)
-        ax.set_aspect('equal')
+        if center == True:
+            ax.plot(unique_vectors.data.T[0], -unique_vectors.data.T[1], 'ro')
+            ax.set_xlim(-xlim, xlim)
+            ax.set_ylim(-ylim, ylim)
+            ax.set_aspect('equal')
+        else:
+            ax.plot(unique_vectors.data.T[0], unique_vectors.data.T[1], 'ro')
+            ax.set_xlim(0, xlim)
+            ax.set_ylim(0, ylim)
+            #Invert the y-axis so it goes from top->bottom
+            ax = plt.gca()
+            ax.invert_yaxis()
+
         return fig
 
     def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
@@ -302,3 +314,4 @@ class DiffractionVectors(BaseSignal):
         self.cartesian = self.map(detector_px_to_3D_kspace,
             ai=azimuthal_integrator, 
             show_progressbar=True, inplace=False, parallel=False)
+        transfer_navigation_axes(self.cartesian, self)

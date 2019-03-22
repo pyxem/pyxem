@@ -771,9 +771,17 @@ class ElectronDiffraction(Signal2D):
                                       "implementations.".format(method))
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-        peaks.map(peaks_as_gvectors,
-                  center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
-                  calibration=self.axes_manager.signal_axes[0].scale)
+
+        #If signal_axes units are pixels, do NOT centre the peaks:
+        if self.axes_manager.signal_axes[0].units == 'px':
+            peaks.map(peaks_as_gvectors, 
+                center=np.array([0,0]),
+                calibration=self.axes_manager.signal_axes[0].scale)
+        else:
+            peaks.map(peaks_as_gvectors, 
+                center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
+                calibration=self.axes_manager.signal_axes[0].scale)
+
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
 
