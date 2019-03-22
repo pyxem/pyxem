@@ -369,16 +369,6 @@ def peaks_from_best_template(single_match_result, library):
         An entry in a TemplateMatchingResults.
     library : DiffractionLibrary
         Diffraction library containing the phases and rotations.
-    # TODO: Store these parameters in the library?
-    diffraction_generator : DiffractionGenerator
-        Diffraction generator for generating orientations not present in the
-        library.
-    reciprocal_radius : float
-        Reciprocal radius for generating orientations not present in the
-        library.
-    with_direct_beak : bool
-        Include direct beam whene generating orientations not present in the
-        library.
 
     Returns
     -------
