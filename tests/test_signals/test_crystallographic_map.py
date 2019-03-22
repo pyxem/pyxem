@@ -19,7 +19,8 @@
 import numpy as np
 import pytest
 from pyxem.signals.crystallographic_map import CrystallographicMap
-from pyxem.signals.crystallographic_map import load_mtex_map, _distance_from_fixed_angle
+from pyxem.signals.crystallographic_map import load_mtex_map
+from pyxem.signals.crystallographic_map import _distance_from_fixed_angle
 from transforms3d.euler import euler2quat, quat2axangle
 from transforms3d.quaternions import qmult, qinverse
 import os

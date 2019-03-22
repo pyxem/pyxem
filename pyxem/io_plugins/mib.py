@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -226,10 +226,8 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
         width_height = width * height
         #a_width, a_height = round(np.sqrt(depth)), depth/ (round(np.sqrt(depth)))
         size = (depth, height, width)
-        #print(size)
         #remove headers at the beginning of each frame and reshape
         data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(size)
-        #print()
     elif record_by == 'dont-care':  # stack of images
         size = (height, width)
         data = data.reshape(size)

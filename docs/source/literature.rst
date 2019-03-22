@@ -1,8 +1,7 @@
-Citing Literature
-=================
+Publications
+============
 
-We are currently aware of the following publications using pyxem. If you would
-like your publication to appear in this list, please contact the developers.
+The following publications made use of pyxem for data analysis.
 
 [4] `Sunde, J.K. et al <https://doi.org/10.1016/j.actamat.2018.12.036>`_ ,
 "Crystallographic relationships of T-/S-phase aggregates in an Al–Cu–Mg–Ag alloy", Acta Materialia, 166, 587-596 (2019).

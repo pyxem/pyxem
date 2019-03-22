@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -133,7 +133,7 @@ def match_vectors(peaks,
     mag_tol : float
         Max allowed magnitude difference when comparing vectors.
     angle_tol : float
-        Max allowed angle difference when comparing vector pairs.
+        Max allowed angle difference in radians when comparing vector pairs.
     index_error_tol : float
         Max allowed error in peak indexation for classifying it as indexed,
         calculated as |hkl_calculated - round(hkl_calculated)|.
@@ -149,7 +149,8 @@ def match_vectors(peaks,
             [phase index, rotation matrix, match rate, error hkls, total error]
 
     """
-    peaks = peaks[0]
+    if peaks.shape == (1,) and peaks.dtype == 'object':
+        peaks = peaks[0]
     # Initialise for loop with first entry & assign empty array to hold
     # indexation results.
     top_matches = np.empty((len(library), n_best, 5), dtype='object')
@@ -158,7 +159,7 @@ def match_vectors(peaks,
 
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
     # with respect to each phase.
-    for phase_index, (key, structure) in enumerate(zip(library.keys(), library.structures)):
+    for phase_index, (phase_name, structure) in enumerate(zip(library.keys(), library.structures)):
         solutions = []
         lattice_recip = structure.lattice.reciprocal()
 
@@ -168,7 +169,6 @@ def match_vectors(peaks,
 
         # Determine overall indexations associated with each peak pair
         for peak_pair_indices in combinations(unindexed_peak_ids, 2):
-            # print('—'*80)
             # Consider a pair of experimental scattering vectors.
             q1, q2 = peaks[peak_pair_indices, :]
             q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
@@ -184,15 +184,15 @@ def match_vectors(peaks,
             # Get library indices for hkls matching peaks within tolerances.
             # TODO: Library[key] are object arrays. Test performance of direct float arrays
             # TODO: Test performance with short circuiting (np.where for each step)
-            match_ids = np.where((np.abs(q1_len - library[key][:, 2]) < mag_tol) &
-                                 (np.abs(q2_len - library[key][:, 3]) < mag_tol) &
-                                 (np.abs(angle - library[key][:, 4]) < angle_tol))[0]
+            match_ids = np.where((np.abs(q1_len - library[phase_name][:, 2]) < mag_tol) &
+                                 (np.abs(q2_len - library[phase_name][:, 3]) < mag_tol) &
+                                 (np.abs(angle - library[phase_name][:, 4]) < angle_tol))[0]
 
             # Iterate over matched library vectors determining the error in the
             # associated indexation and finding the minimum error cases.
             peak_pair_solutions = []
             for i, match_id in enumerate(match_ids):
-                hkl1, hkl2 = library[key][:, :2][match_id]
+                hkl1, hkl2 = library[phase_name][:, :2][match_id]
                 # Reference vectors are cartesian coordinates of hkls
                 ref_q1, ref_q2 = lattice_recip.cartesian(hkl1), lattice_recip.cartesian(hkl2)
 
@@ -249,8 +249,6 @@ def match_vectors(peaks,
         if n_solutions > 0:
             match_rate_index = 1
             solutions = np.array(solutions)
-            # match_rates = np.array([sol[match_rate_index][1] for sol in solutions])
-            # print('n_sol', n_solutions)
             top_n = solutions[solutions[:, match_rate_index].argpartition(-n_solutions)[-n_solutions:]]
 
             # Put the top n ranked solutions in the output array
@@ -352,7 +350,6 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z,x,z)), dict(metrics)]
     """
-    z_matches = z_matches[0]
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
     # Consider single phase and multi-phase matching cases separately

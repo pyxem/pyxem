@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -72,6 +72,7 @@ class SubpixelrefinementGenerator():
         -------
         vector_out: np.array()
             array containing the refined vectors in calibrated units
+
         """
         self.vectors_out = np.zeros(
             (self.dp.data.shape[0],
@@ -160,8 +161,8 @@ class SubpixelrefinementGenerator():
         """
 
         def _center_of_mass_hs(z):
-            """
-            Return the center of mass of an array with coordinates in the hyperspy convention
+            """Return the center of mass of an array with coordinates in the
+            hyperspy convention
 
             Parameters
             ----------
@@ -176,12 +177,12 @@ class SubpixelrefinementGenerator():
             t = center_of_mass(z)
             x = t[1]
             y = t[0]
-            return (x,y)
+            return (x, y)
 
-        def _com_experimental_square(z,vector,square_size):
-            """
-            Wrapper for get_experimental_square that makes the non-zero elements symmetrical
-            around the 'unsubpixeled' peak by zeroing a 'spare' row and column (top and left)
+        def _com_experimental_square(z, vector, square_size):
+            """Wrapper for get_experimental_square that makes the non-zero
+            elements symmetrical around the 'unsubpixeled' peak by zeroing a
+            'spare' row and column (top and left).
 
             Parameters
             ----------
@@ -196,9 +197,10 @@ class SubpixelrefinementGenerator():
             z_adpt : np.array
                 z, but with row and column zero set to 0
             """
-            z_adpt = np.copy(get_experimental_square(z,vector=vect,square_size=square_size)) # to make sure we don't change the dp
-            z_adpt[:,0] = 0
-            z_adpt[0,:] = 0
+            z_adpt = np.copy(get_experimental_square(z, vector=vect, square_size=square_size)
+                             )  # to make sure we don't change the dp
+            z_adpt[:, 0] = 0
+            z_adpt[0, :] = 0
             return z_adpt
 
         self.vectors_out = np.zeros(

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,10 +21,10 @@ import math
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
 import collections
+import diffpy.structure
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
-from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
@@ -55,8 +55,6 @@ def get_electron_wavelength(accelerating_voltage):
 def get_interaction_constant(accelerating_voltage):
     """Calculates the interaction constant, sigma, for a given
     acelerating voltage.
-
-    Evaluates
 
     Parameters
     ----------
@@ -276,6 +274,9 @@ def simulate_kinematic_scattering(atomic_coordinates,
     simulation : ElectronDiffraction
         ElectronDiffraction simulation.
     """
+    # Delayed loading to prevent circular dependencies.
+    from pyxem.signals.electron_diffraction import ElectronDiffraction
+
     # Get atomic scattering parameters for specified element.
     if scattering_params == 'lobato':
         c = np.array(ATOMIC_SCATTERING_PARAMS_LOBATO[element])
@@ -329,18 +330,18 @@ def simulate_kinematic_scattering(atomic_coordinates,
     return ElectronDiffraction(intensity)
 
 
-def peaks_from_best_template(single_match_result, phase, library):
-    """ Takes a match_result object and return the associated peaks, to be used
-    in combination with map().
+def peaks_from_best_template(single_match_result, phase_names, library):
+    """ Takes a TemplateMatchingResults object and return the associated peaks,
+    to be used in combination with map().
 
     Parameters
     ----------
-    single_match_result : TemplateMatchingResults
+    single_match_result : ndarray
         An entry in a TemplateMatchingResults
-    phase : list
+    phase_names : list
         List of keys to library, as passed to IndexationGenerator.correlate()
-    library : dictionary
-        Nested dictionary containing keys of [phase][rotation]
+    library : DiffractionLibrary
+        Diffraction library containing the phases and rotations
 
     Returns
     -------
@@ -348,11 +349,52 @@ def peaks_from_best_template(single_match_result, phase, library):
         Coordinates of peaks in the matching results object in calibrated units.
     """
     best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
-    _phase = phase[int(best_fit[0])]
+    phase = phase_names[int(best_fit[0])]
     pattern = library.get_library_entry(
-        phase=_phase,
+        phase=phase,
         angle=tuple(best_fit[1]))['Sim']
     peaks = pattern.coordinates[:, :2]  # cut z
+    return peaks
+
+
+def peaks_from_best_vector_match(single_match_result, phase_names, library, diffraction_generator, reciprocal_radius):
+    """ Takes a VectorMatchingResults object and return the associated peaks,
+    to be used in combination with map().
+
+    Parameters
+    ----------
+    single_match_result : ndarray
+        An entry in a VectorMatchingResults
+    phase_names : list
+        List of keys to library, as passed to IndexationGenerator.correlate()
+    library : DiffractionLibrary
+        Diffraction library containing the phases and rotations
+    diffraction_generator : DiffractionGenerator
+        Diffraction generator used to generate the patterns
+    reciprocal_radius : float
+        The maximum radius of the sphere of reciprocal space to sample, in
+        reciprocal angstroms.
+
+    Returns
+    -------
+    peaks : ndarray
+        Coordinates of peaks in the matching results object in calibrated units.
+    """
+    best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
+    best_index = best_fit[0]
+    phase = phase_names[best_index]
+
+    # Don't change the original
+    structure_rotation = best_fit[1].T
+    structure = library.structures[best_index]
+    lattice_rotated = diffpy.structure.lattice.Lattice(
+        *structure.lattice.abcABG(),
+        baserot=structure_rotation)
+    structure_rotated = diffpy.structure.Structure(structure)
+    structure_rotated.placeInLattice(lattice_rotated)
+
+    sim = diffraction_generator.calculate_ed_data(structure_rotated, reciprocal_radius, with_direct_beam=False)
+    peaks = sim.coordinates[:, :2]  # Cut z
     return peaks
 
 
@@ -432,21 +474,46 @@ def transfer_navigation_axes(new_signal, old_signal):
     new_signal : Signal
         The new signal with calibrated navigation axes.
     """
-    try:
-        x = new_signal.axes_manager.signal_axes[0]
-        x.name = 'x'
-        x.scale = old_signal.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-    except IndexError:
-        pass
-        # Set calibration to same as signal for second navigation axis if there
-    try:
-        y = new_signal.axes_manager.signal_axes[1]
-        y.name = 'y'
-        y.scale = old_signal.axes_manager.navigation_axes[1].scale
-        y.units = 'nm'
-    except IndexError:
-        pass
+    new_signal.axes_manager.set_signal_dimension(
+        len(new_signal.data.shape) - old_signal.axes_manager.navigation_dimension)
+
+    for i in range(min(new_signal.axes_manager.navigation_dimension,
+                       old_signal.axes_manager.navigation_dimension)):
+        ax_new = new_signal.axes_manager.navigation_axes[i]
+        ax_old = old_signal.axes_manager.navigation_axes[i]
+        ax_new.name = ax_old.name
+        ax_new.scale = ax_old.scale
+        ax_new.units = ax_old.units
+
+    return new_signal
+
+
+def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
+    """ Transfers navigation axis calibrations from an old signal to the signal
+    axes of a new signal produced from it by a method or a generator.
+
+    Used from methods that generate a signal with a single value at each
+    navigation position.
+
+    Parameters
+    ----------
+    new_signal : Signal
+        The product signal with undefined navigation axes.
+    old_signal : Signal
+        The parent signal with calibrated navigation axes.
+
+    Returns
+    -------
+    new_signal : Signal
+        The new signal with calibrated signal axes.
+    """
+    for i in range(min(new_signal.axes_manager.signal_dimension,
+                       old_signal.axes_manager.navigation_dimension)):
+        ax_new = new_signal.axes_manager.signal_axes[i]
+        ax_old = old_signal.axes_manager.navigation_axes[i]
+        ax_new.name = ax_old.name
+        ax_new.scale = ax_old.scale
+        ax_new.units = ax_old.units
 
     return new_signal
 
@@ -476,26 +543,27 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
     Parameters
     ----------
     structure : diffpy.structure.Structure
-        Structure for which to calculate the rotation list
+        Structure for which to calculate the rotation list.
     corner_a, corner_b, corner_c : tuple
-        The three corners of the inverse pole figure, each given by three
-        coordinates. The coordinate system is given by the structure lattice.
+        The three corners of the inverse pole figure, each given by a
+        three-dimensional coordinate. The coordinate system is given by the
+        structure lattice.
     resolution : float
         Angular resolution in radians of the generated rotation list.
     inplane_rotations : list
-        List of angles in degrees for in-plane rotation of the diffraction
+        List of angles in radians for in-plane rotation of the diffraction
         pattern. This corresponds to the third Euler angle rotation. The
         rotation list will be generated for each of these angles, and combined.
         This should be done automatically, but by including all possible
         rotations in the rotation list, it becomes too large.
 
-        To cover all inplane rotations, use e.g. np.linspace(0, 2*np.pi, 360)
+        To cover all inplane rotations, use e.g. np.linspace(0, 2*np.pi, 360).
 
     Returns
     -------
     rotation_list : numpy.array
-        Rotations covering the inverse pole figure given as a of Euler angles in
-        degrees. This `np.array` can be passed directly to pyxem.
+        Rotations covering the inverse pole figure given as an array of Euler
+        angles in degrees.
     """
     # Convert the crystal directions to cartesian vectors and normalize
     if len(corner_a) == 4:

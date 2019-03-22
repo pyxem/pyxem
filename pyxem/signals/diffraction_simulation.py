@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -131,6 +131,12 @@ class DiffractionSimulation:
         max_r : float
             Half the side length in reciprocal Angstroms. Defines the signal's
             calibration
+
+        Returns
+        -------
+
+        dp : ElectronDiffraction
+            Simulated electron diffraction pattern.
 
         """
         from skimage.filters import gaussian as point_spread

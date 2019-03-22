@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -25,6 +25,7 @@ from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 
 from skimage.transform import rescale
 from skimage import draw
+
 
 @pytest.fixture()
 def exp_disc():
@@ -64,7 +65,8 @@ def test_get_experimental_square(exp_disc):
 
 @pytest.mark.xfail(strict=True)
 def test_non_even_errors_get_simulated_disc():
-    disc = get_simulated_disc(61,5)
+    disc = get_simulated_disc(61, 5)
+
 
 @pytest.mark.xfail(strict=True)
 def test_non_even_errors_get_experimental_errors(exp_disc):

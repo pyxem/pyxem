@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -29,7 +29,7 @@ def create_spot():
     z = np.zeros((128, 128))
 
     for r in [4, 3, 2]:
-        rr, cc = draw.circle(30, 90,radius=r, shape=z.shape)
+        rr, cc = draw.circle(30, 90, radius=r, shape=z.shape)
         z[rr, cc] = 1 / r
 
     dp = pxm.ElectronDiffraction(np.asarray([[z, z], [z, z]]))  # this needs to be in 2x2

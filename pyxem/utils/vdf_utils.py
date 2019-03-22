@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,4 +18,18 @@
 
 
 def normalize_vdf(im):
-    return im / im.max()
+    """Normalizes image intensity by dividing by maximum value.
+
+    Parameters
+    ----------
+    im : np.array()
+        Array of image intensities
+
+    Returns
+    -------
+    imn : np.array()
+        Array of normalized image intensities
+
+    """
+    imn = im / im.max()
+    return imn

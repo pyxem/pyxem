@@ -24,7 +24,8 @@ import diffpy.structure
 
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.indexation_utils import crystal_from_template_matching, crystal_from_vector_matching, match_vectors
+from pyxem.utils.indexation_utils import crystal_from_template_matching, \
+    crystal_from_vector_matching, match_vectors
 
 
 @pytest.fixture
@@ -88,7 +89,7 @@ def test_crystal_from_template_matching_dp(dp_template_match_result):
 
 def test_crystal_from_vector_matching_sp(sp_vector_match_result):
     # branch single phase
-    cmap = crystal_from_vector_matching([sp_vector_match_result])
+    cmap = crystal_from_vector_matching(sp_vector_match_result)
     assert cmap[0] == 0
     np.testing.assert_allclose(cmap[1], np.deg2rad([0, 0, 90]))
     np.testing.assert_allclose(cmap[2]['match_rate'], 0.5)
@@ -99,7 +100,7 @@ def test_crystal_from_vector_matching_sp(sp_vector_match_result):
 
 def test_crystal_from_vector_matching_dp(dp_vector_match_result):
     # branch double phase
-    cmap = crystal_from_vector_matching([dp_vector_match_result])
+    cmap = crystal_from_vector_matching(dp_vector_match_result)
     r_or = 100 * (1 - (0.1 / 0.2))
     r_ph = 100 * (1 - (0.1 / 0.3))
     assert cmap[0] == 1
@@ -113,11 +114,11 @@ def test_crystal_from_vector_matching_dp(dp_vector_match_result):
 
 @pytest.fixture
 def vector_match_peaks():
-    return np.array([[
+    return np.array([
         [1, 0.1, 0],
         [0, 2, 0],
         [1, 2, 3],
-    ]])
+    ])
 
 
 @pytest.fixture
@@ -135,8 +136,11 @@ def vector_library():
 
 
 def test_match_vectors(vector_match_peaks, vector_library):
+    # Wrap to test handling of ragged arrays
+    peaks = np.empty(1, dtype='object')
+    peaks[0] = vector_match_peaks
     matches, rhkls = match_vectors(
-        vector_match_peaks,
+        peaks,
         vector_library,
         mag_tol=0.1,
         angle_tol=0.1,

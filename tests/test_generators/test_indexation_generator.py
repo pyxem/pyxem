@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,7 +27,8 @@ from pyxem.libraries.vector_library import DiffractionVectorLibrary
 from pyxem.signals.diffraction_simulation import ProfileSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
-from tests.test_utils.test_indexation_utils import vector_library, vector_match_peaks
+from tests.test_utils.test_indexation_utils import vector_library
+from tests.test_utils.test_indexation_utils import vector_match_peaks
 
 
 @pytest.fixture
@@ -122,14 +123,15 @@ def test_vector_indexation_generator_cartesian_check():
     vector_indexation_generator = VectorIndexationGenerator(vectors, vector_library)
 
 
-def test_vector_indexation_generator_index_vectors(vector_match_peaks, vector_library):
-    vectors = DiffractionVectors(np.array([vector_match_peaks[:, :, :2]]))  # vectors not used directly
-    vectors.cartesian = DiffractionVectors(np.array([vector_match_peaks]))
-    vectors.cartesian.axes_manager.set_signal_dimension(3)  # Overcome object array mapping
+def test_vector_indexation_generator_index_vectors(vector_match_peaks,
+                                                   vector_library):
+    # vectors not used directly
+    vectors = DiffractionVectors(np.array(vector_match_peaks[:, :2]))
+    vectors.cartesian = DiffractionVectors(np.array(vector_match_peaks))
     gen = VectorIndexationGenerator(vectors, vector_library)
     indexation = gen.index_vectors(
         mag_tol=0.1,
-        angle_tol=0.1,
+        angle_tol=6,
         index_error_tol=0.3,
         keys=list(vector_library.keys()),
         n_peaks_to_index=2,
@@ -137,5 +139,7 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks, vector_li
 
     # Values are tested directly on the match_vector in the util tests
     assert isinstance(indexation.vectors, DiffractionVectors)
-    np.testing.assert_equal(indexation.data[0, 0].shape, (1, 5))  # (n_best=1, 5 result values from each)
-    np.testing.assert_equal(indexation.hkls[0, 0].shape, (1, 3, 3))  # n_best=1, 3 peaks with hkl)
+    # (n_best=1, 5 result values from each)
+    np.testing.assert_equal(indexation.data.shape, (1, 5))
+    # n_best=1, 3 peaks with hkl)
+    np.testing.assert_equal(indexation.hkls.shape, (1, 3, 3))
