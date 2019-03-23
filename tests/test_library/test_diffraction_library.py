@@ -60,8 +60,13 @@ def test_library_io(get_library):
     os.remove('file_01.pickle')
     # We can't check that the entire libraries are the same as the memory
     # location of the 'Sim' changes
-    assert np.allclose(get_library['Phase'][(0, 0, 0)]['intensities'],
-                       loaded_library['Phase'][(0, 0, 0)]['intensities'])
+    for i in range(len(get_library['Phase']['orientations'])):
+        np.testing.assert_allclose(get_library['Phase']['orientations'][i],
+                                   loaded_library['Phase']['orientations'][i])
+        np.testing.assert_allclose(get_library['Phase']['intensities'][i],
+                                   loaded_library['Phase']['intensities'][i])
+        np.testing.assert_allclose(get_library['Phase']['pixel_coords'][i],
+                                   loaded_library['Phase']['pixel_coords'][i])
 
 
 @pytest.mark.xfail(raises=ValueError)
