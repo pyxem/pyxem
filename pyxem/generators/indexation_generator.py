@@ -74,8 +74,8 @@ class IndexationGenerator():
         mask : Array
             Array with the same size as signal (in navigation) True False
         inplane_rotations : ndarray
-            Array of inplane rotations in degrees. Defaults to 0-360 degrees at
-            1 degree resolution.
+            Array of inplane rotation angles in degrees. Defaults to 0-360 degrees
+            at 1 degree resolution.
         max_peaks : int
             Maximum number of peaks to consider when comparing a template to
             the diffraction pattern. The strongest peaks are kept.
