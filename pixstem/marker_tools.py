@@ -287,6 +287,9 @@ def add_peak_array_to_signal_as_markers(
     >>> s.plot()
 
     """
+    if hasattr(peak_array, 'chunks'):
+        raise ValueError("peak_array must be a NumPy array, not dask array. "
+                         "Run peak_array_computed = peak_array.compute()")
     marker_list = _get_4d_points_marker_list(
             peak_array, signal.axes_manager.signal_axes, color=color,
             size=size, bool_array=bool_array, bool_invert=bool_invert)

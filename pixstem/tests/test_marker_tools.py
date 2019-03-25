@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 from numpy.testing import assert_equal
+import dask.array as da
 import pixstem.api as ps
 import pixstem.marker_tools as mt
 
@@ -120,6 +121,14 @@ class TestAddPeakArrayToSignalAsMarkers:
         mt.add_peak_array_to_signal_as_markers(s, peak_array, size=size)
         marker = list(s.metadata.Markers)[0][1]
         assert marker.get_data_position('size') == size
+
+    def test_dask_input(self):
+        s = ps.PixelatedSTEM(np.zeros((2, 3, 20, 20)))
+        peak_array = da.zeros((2, 3, 10, 2), chunks=(1, 1, 10, 2))
+        with pytest.raises(ValueError):
+            s.add_peak_array_as_markers(peak_array)
+        peak_array_computed = peak_array.compute()
+        s.add_peak_array_as_markers(peak_array_computed)
 
 
 def test_peak_finding_to_marker():
