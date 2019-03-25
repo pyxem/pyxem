@@ -102,8 +102,8 @@ def detector_px_to_3D_kspace(peak_coord, ai):
     gy = (1/wavelength)*sin_phi*np.sin(two_theta)
     gz = (1/wavelength)*(np.cos(phi) - 1)
 
-    #Append the reciprocal vectors in one single array, while flipping the vector form, resembling the input array:
-    g_xyz = np.hstack((gx[:,np.newaxis], gy[:,np.newaxis], gz[:,np.newaxis]))
+    #Append the reciprocal vectors in one single array, while flipping the vector form, resembling the input array. Convert from m-1 to A-1:
+    g_xyz = np.hstack((gx[:,np.newaxis], gy[:,np.newaxis], gz[:,np.newaxis])) * 1e-10
 
     return g_xyz
 
