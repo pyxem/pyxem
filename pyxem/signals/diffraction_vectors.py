@@ -274,7 +274,7 @@ class DiffractionVectors(BaseSignal):
 
         return crystim
 
-    def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length,
+    def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length, xray=False,
                                         *args, **kwargs):
         """Get cartesian coordinates of the diffraction vectors.
 
@@ -284,10 +284,13 @@ class DiffractionVectors(BaseSignal):
             The acceleration voltage with which the data was acquired.
         camera_length : float
             The camera length in meters.
+        xray: boolean
+            If True, it calculates the wavelength for an x-ray (EM wave).
+            If False, it calculates the wavelength for a relativistic electron.
         """
         # Imported here to avoid circular dependency
-        from pyxem.utils.sim_utils import get_electron_wavelength
-        wavelength = get_electron_wavelength(accelerating_voltage)
+        from pyxem.utils.sim_utils import get_wavelength
+        wavelength = get_wavelength(accelerating_voltage, xray=xray)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,
                                   camera_length=camera_length * 1e10,

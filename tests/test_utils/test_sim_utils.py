@@ -21,7 +21,7 @@ import numpy as np
 import diffpy
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.utils.sim_utils import get_electron_wavelength, \
+from pyxem.utils.sim_utils import get_wavelength, \
     get_interaction_constant, get_unique_families, get_kinematical_intensities,\
     get_vectorized_list_for_atomic_scattering_factors, get_points_in_sphere, \
     simulate_kinematic_scattering, peaks_from_best_template, \
@@ -64,8 +64,8 @@ def create_structure_monoclinic():
     (200, 0.0250793403),
     (300, 0.0196874888),
 ])
-def test_get_electron_wavelength(accelerating_voltage, wavelength):
-    val = get_electron_wavelength(accelerating_voltage=accelerating_voltage)
+def test_get_wavelength(accelerating_voltage, wavelength):
+    val = get_wavelength(accelerating_voltage=accelerating_voltage)
     np.testing.assert_almost_equal(val, wavelength)
 
 

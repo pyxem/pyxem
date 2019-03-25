@@ -27,7 +27,7 @@ from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.signals.diffraction_simulation import ProfileSimulation
 
 from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
-from pyxem.utils.sim_utils import get_electron_wavelength,\
+from pyxem.utils.sim_utils import get_wavelength,\
     get_kinematical_intensities, get_unique_families, get_points_in_sphere, \
     get_vectorized_list_for_atomic_scattering_factors, is_lattice_hexagonal
 
@@ -55,6 +55,9 @@ class DiffractionGenerator(object):
         equal to 1/{specimen thickness}.
     debye_waller_factors : dict of str : float
         Maps element names to their temperature-dependent Debye-Waller factors.
+    xray: boolean
+        If True, it calculates the wavelength for an x-ray (EM wave).
+        If False, it calculates the wavelength for a relativistic electron.
 
     """
     # TODO: Refactor the excitation error to a structure property.
@@ -63,8 +66,9 @@ class DiffractionGenerator(object):
                  accelerating_voltage,
                  max_excitation_error,
                  debye_waller_factors=None,
-                 scattering_params='lobato'):
-        self.wavelength = get_electron_wavelength(accelerating_voltage)
+                 scattering_params='lobato',
+                 xray=False):
+        self.wavelength = get_wavelength(accelerating_voltage, xray=xray)
         self.max_excitation_error = max_excitation_error
         self.debye_waller_factors = debye_waller_factors or {}
 
