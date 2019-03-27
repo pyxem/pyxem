@@ -33,7 +33,7 @@ def get_library(default_structure):
     dfl = pxm.DiffractionLibraryGenerator(diffraction_calculator)
     structure_library = StructureLibrary(['Phase'],
                                          [default_structure],
-                                         [[(0, 0, 0), (0, 0.2, 0)]])
+                                         [np.array([(0, 0, 0), (0, 0.2, 0)])])
 
     return dfl.get_diffraction_library(structure_library,
                                        0.017, 2.4, (72, 72))
@@ -43,6 +43,8 @@ def test_get_library_entry_assertionless(get_library):
     assert isinstance(get_library.get_library_entry()['Sim'],
                       DiffractionSimulation)
     assert isinstance(get_library.get_library_entry(phase='Phase')['Sim'],
+                      DiffractionSimulation)
+    assert isinstance(get_library.get_library_entry(phase='Phase', angle=(0, 0, 0))['Sim'],
                       DiffractionSimulation)
 
 
