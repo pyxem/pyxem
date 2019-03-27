@@ -23,7 +23,7 @@ from skimage.feature import peak_local_max, match_template
 from skimage.filters import sobel, threshold_li
 from skimage.morphology import watershed
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import BaseSignal, Signal2D
 from hyperspy.drawing.utils import plot_images
 
 
@@ -289,4 +289,94 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
         -((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
 
     return gaussian
+
+
+def get_circular_mask(vec, radius, cx, cy, x, y):
+    # TODO Check if centered!!
+    radial_grid_temp = np.sqrt((x - (vec[0] - cx)) ** 2 +
+                               (y - (vec[1] - cy)) ** 2)
+    mask_temp = (radial_grid_temp > radius).choose(radius, 0)
+    mask_temp = (radial_grid_temp <= radius).choose(mask_temp, 1)
+    return mask_temp.astype('bool')
+
+
+def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
+                                   navigation_size, plot_on):
+    """ Obtain an array of the background intensities for VDFs resulting
+    from the vectors in unique_vectors. The background intensities are
+    calculated by radially integrating a sum_signal where all the
+    vectors in unique_vectors are masked out by virtual apertures of
+    the given radius. The integrated intensity is then divided by
+    navigation_size to give an average value, and then it is convolved
+    with a virtual aperture function in 1D to give the average background
+    intensity for each VDF image.
+
+    Parameters
+    ----------
+    unique_vectors : DiffractionVector
+        A DiffractionVector with shape (n, 2) with n unique vectors
+        corresponding to n VDFs.
+    radius : float
+        Radius of the virtual aperture used to mask away all the unique
+        vectors. Given in reciprocal Angstroms.
+    sum_signal : Signal2D
+        The image to calculate the background intensities from.
+        To obtain the average background intensities, this should be the
+        sum of all signals. For VDFs resulting from an
+        ElectronDiffraction signal s, this is given by s.sum().
+    navigation_size : int
+        The total number of pixels in each VDF. For VDFs resulting from
+        an ElectronDiffraction signal s, this is given by
+        s.axes_manager.navigation_size.
+    plot_on : bool
+        If True, the masked sum_signal, integrated masked sum_signal in
+        1D and the background intensities in 1D are plotted.
+
+    Returns
+    -------
+    bkg_values : np.array
+        The (average) background intensities for VDFs created with a
+        virtual aperture of the given radius, corresponding to each
+        vector in unique_vector.
+    """
+    gmags = unique_vectors.get_magnitudes().data
+    scale = sum_signal.axes_manager.signal_axes[0].scale
+    dp_shape_y, dp_shape_x = sum_signal.axes_manager.signal_shape
+    cy = sum_signal.axes_manager.signal_axes[0].offset
+    cx = sum_signal.axes_manager.signal_axes[1].offset
+    y, x = np.indices((dp_shape_x, dp_shape_y))
+    x, y = x * scale, y * scale
+
+    vector_mask = np.sum(list(map(
+        lambda b: get_circular_mask(b, radius, cx, cy, x, y),
+        unique_vectors.data)), axis=0).astype('bool')
+    sum_signal_masked = sum_signal.data.copy().astype('float32')
+    sum_signal_masked[np.where(vector_mask == 1)] = np.nan
+    radial_grid = (np.sqrt((x / scale + cx / scale + 0.5) ** 2 + (
+                y / scale + cy / scale + 0.5) ** 2) - 0.5).astype('int')
+
+    mask = ~np.isnan(sum_signal_masked)
+
+    sum_masked_1d = np.bincount(radial_grid[mask].ravel(),
+                                weights=sum_signal_masked[mask].ravel()) \
+                    / np.bincount(radial_grid[mask].ravel())
+    aperture = get_circular_mask([0, 0])
+    aperture_1d = np.sum(aperture, axis=0)
+    aperture_1d = aperture_1d[aperture_1d > 0]
+
+    bkg_1d = np.convolve(aperture_1d, sum_masked_1d, mode='same') \
+             / navigation_size
+
+    axis = np.arange(np.max(radial_grid) + 1) * scale
+
+    bkg_values = np.array(
+        list(map(lambda a: bkg_1d[(np.abs(axis - a)).argmin()], gmags)))
+    bkg_values = bkg_values.astype('int')
+
+    if plot_on:
+        BaseSignal(sum_signal_masked).plot(cmap='magma_r', vmax=30000)
+        BaseSignal(sum_masked_1d).plot()
+        BaseSignal(bkg_1d).plot()
+
+    return bkg_values
 
