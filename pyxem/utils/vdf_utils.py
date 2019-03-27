@@ -142,8 +142,9 @@ def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
     return g, indices
 
 
-def separate(vdf_temp, min_distance, min_size, max_size, max_number_of_grains,
-             exclude_border=False, plot_on=False):
+def separate(vdf_temp, background_value, min_distance, min_size,
+             max_size, max_number_of_grains, exclude_border=False,
+             plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
     scikit-image. See [1,2] for examples from scikit-image.
@@ -152,6 +153,10 @@ def separate(vdf_temp, min_distance, min_size, max_size, max_number_of_grains,
     ----------
     vdf_temp : np.array
         One VDF image.
+    background_value : int
+        The value of the background intensity for vdf_temp. Can be found
+        by using get_vdf_background_intensities. Only VDF intensities
+        above background_value are considered signal.
     min_distance: int
         Minimum distance (in pixels) between grains required for them to
         be considered as separate grains.
@@ -188,12 +193,13 @@ def separate(vdf_temp, min_distance, min_size, max_size, max_number_of_grains,
         applications-plot-coins-segmentation-py
     """
 
-    # Create a mask by thresholding the input VDF. The threshold value is
-    # determined by the Li threshold method, see skimage.filters.threshold_li
-    # for details.
-    threshold = threshold_li(vdf_temp)
-    mask = vdf_temp > threshold
-
+    # Create a mask that is True where the VDF intensity is larger than a
+    # background value.
+    mask = (vdf_temp > background_value).astype('bool')
+    if np.any(np.nonzero(mask)) is False:
+        print('All VDF intensities are below the background value of ' +
+              str(background_value) + ', so no segments were found.\n')
+        return None
     # Calculate the eucledian distance from each point in a binary image to the
     # background point of value 0, that has the smallest distance to all input
     # points.
@@ -217,7 +223,7 @@ def separate(vdf_temp, min_distance, min_size, max_size, max_number_of_grains,
     labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
 
     if not np.max(labels):
-        print('No labels were found. Check input parameters.\n')
+        print('No segments were found. Check input parameters.\n')
 
     sep = np.zeros((np.shape(vdf_temp)[0], np.shape(vdf_temp)[1],
                     (np.max(labels))), dtype='int32')
@@ -301,7 +307,7 @@ def get_circular_mask(vec, radius, cx, cy, x, y):
 
 
 def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
-                                   navigation_size, plot_on):
+                                   navigation_size, plot_background):
     """ Obtain an array of the background intensities for VDFs resulting
     from the vectors in unique_vectors. The background intensities are
     calculated by radially integrating a sum_signal where all the
@@ -328,7 +334,7 @@ def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
         The total number of pixels in each VDF. For VDFs resulting from
         an ElectronDiffraction signal s, this is given by
         s.axes_manager.navigation_size.
-    plot_on : bool
+    plot_background : bool
         If True, the masked sum_signal, integrated masked sum_signal in
         1D and the background intensities in 1D are plotted.
 
@@ -360,7 +366,7 @@ def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
     sum_masked_1d = np.bincount(radial_grid[mask].ravel(),
                                 weights=sum_signal_masked[mask].ravel()) \
                     / np.bincount(radial_grid[mask].ravel())
-    aperture = get_circular_mask([0, 0])
+    aperture = get_circular_mask([0, 0], radius, cx, cy, x, y)
     aperture_1d = np.sum(aperture, axis=0)
     aperture_1d = aperture_1d[aperture_1d > 0]
 
@@ -373,7 +379,7 @@ def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
         list(map(lambda a: bkg_1d[(np.abs(axis - a)).argmin()], gmags)))
     bkg_values = bkg_values.astype('int')
 
-    if plot_on:
+    if plot_background:
         BaseSignal(sum_signal_masked).plot(cmap='magma_r', vmax=30000)
         BaseSignal(sum_masked_1d).plot()
         BaseSignal(bkg_1d).plot()
