@@ -247,7 +247,6 @@ class VDFSegment:
             print("The VDFSegment does not have the attribute intensities."
                   "All intensities will be set to ones.")
             intensities = np.ones_like(vectors)
-            print(np.shape(intensities), 'np.shape(intensities)')
         else:
             intensities = self.intensities
 
@@ -261,10 +260,6 @@ class VDFSegment:
         virtual_ed = np.zeros((size_x, size_y, num_segments))
 
         for i in range(num_segments):
-            print(i, 'i')
-            print(vectors[i], 'vectors[i]')
-            print(np.shape(vectors[i]), 'shape vectors[i]')
-            print(np.shape(intensities[i]), 'shape intensities[i]')
             if np.shape(np.shape(vectors[i]))[0] <= 1:
                 virtual_ed[..., i] = get_gaussian2d(
                     intensities[i], vectors[i][..., 0],
@@ -348,9 +343,13 @@ class VDFSegment:
             signal_j = np.zeros((nav_shape_x, nav_shape_y, dp_shape_x,
                                  dp_shape_y))
             for i in range(np.shape(vectors_j)[0]):
-                vector_mask_i = np.sum(list(map(
-                    lambda b: get_circular_mask(b, radius, cx, cy, x, y),
-                    vectors_j[i])), axis=0)
+                if np.shape(np.shape(vectors_j[i]))[0] <= 1:
+                    vector_mask_i = get_circular_mask(vectors_j[i], radius,
+                                                      cx, cy, x, y)
+                else:
+                    vector_mask_i = np.sum(list(map(
+                        lambda b: get_circular_mask(b, radius, cx, cy, x, y),
+                        vectors_j[i])), axis=0)
                 signal_j[np.where(segment_masks_j[i])] = \
                     original_signal.data[np.where(segment_masks_j[i])] \
                     * vector_mask_i
