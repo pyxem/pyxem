@@ -298,7 +298,33 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
 
 
 def get_circular_mask(vec, radius, cx, cy, x, y):
-    # TODO Check if centered!!
+    """Obtain a boolean mask that is only True within a circle centred
+    at vector vec and that has the given radius.
+
+    Parameters
+    ----------
+    vec : np.array
+        2-dimensional array that gives the centre values of the circle;
+        [vec x, vec y].
+    radius : float
+        Radius of the circle.
+    cx : float
+        Offset in the x-direction.
+    cy : float
+        Offset in the y-direction.
+    x : np.array
+        Indies for the x-axis of the mask. For the intended use;
+        y, x = np.indices((shape_x, shape_y)).
+    y : np.array
+        Indies for the y-axis of the mask.
+
+    Returns
+    -------
+    mask_temp : bool
+        Mask that is only True within a circle given by the input
+        parameters.
+    """
+    # TODO Check if centered correctly!!
     radial_grid_temp = np.sqrt((x - (vec[0] - cx)) ** 2 +
                                (y - (vec[1] - cy)) ** 2)
     mask_temp = (radial_grid_temp > radius).choose(radius, 0)
@@ -353,32 +379,46 @@ def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
     y, x = np.indices((dp_shape_x, dp_shape_y))
     x, y = x * scale, y * scale
 
+    # Create a mask for the sum_signal where all the diffraction vectors
+    # have been masked out by creating circular apertures of the given
+    # radius for all vectors. For sum_signal, the region within each
+    # aperture is set to nan, so that the diffraction vector intensities
+    # do not contribute to the calculated average background.
     vector_mask = np.sum(list(map(
         lambda b: get_circular_mask(b, radius, cx, cy, x, y),
         unique_vectors.data)), axis=0).astype('bool')
     sum_signal_masked = sum_signal.data.copy().astype('float32')
     sum_signal_masked[np.where(vector_mask == 1)] = np.nan
+
+    # The masked sum_signal is integrated radially to give a average 1D
+    # background.
+    mask = ~np.isnan(sum_signal_masked)
     radial_grid = (np.sqrt((x / scale + cx / scale + 0.5) ** 2 + (
                 y / scale + cy / scale + 0.5) ** 2) - 0.5).astype('int')
-
-    mask = ~np.isnan(sum_signal_masked)
-
     sum_masked_1d = np.bincount(radial_grid[mask].ravel(),
                                 weights=sum_signal_masked[mask].ravel()) \
                     / np.bincount(radial_grid[mask].ravel())
+
+    # A circular aperture of the given radius is integrated in 1D.
     aperture = get_circular_mask([0, 0], radius, cx, cy, x, y)
     aperture_1d = np.sum(aperture, axis=0)
     aperture_1d = aperture_1d[aperture_1d > 0]
 
+    # The average background for VDFs calculated with aprtures of the
+    # given radius can then be found by convoluting the aperture in 1D
+    # with the average 1D background.
     bkg_1d = np.convolve(aperture_1d, sum_masked_1d, mode='same') \
              / navigation_size
 
+    # The background value for each VDF is then given by the magnitude
+    # of the corresponding diffraction vector.
     axis = np.arange(np.max(radial_grid) + 1) * scale
-
     bkg_values = np.array(
         list(map(lambda a: bkg_1d[(np.abs(axis - a)).argmin()], gmags)))
     bkg_values = bkg_values.astype('int')
 
+    # Optionally plot the masked sum_signal, in 2D and 1D, and the
+    # average background in 1D.
     if plot_background:
         BaseSignal(sum_signal_masked).plot(cmap='magma_r', vmax=30000)
         BaseSignal(sum_masked_1d).plot()

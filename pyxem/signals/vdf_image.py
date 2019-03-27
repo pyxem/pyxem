@@ -25,7 +25,7 @@ import numpy as np
 from tqdm import tqdm
 from hyperspy.signals import Signal2D, BaseSignal
 from pyxem.utils.vdf_utils import (norm_cross_corr, get_vectors_and_indices_i,
-                                   get_gaussian2d)
+                                   get_gaussian2d, get_circular_mask)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import transfer_signal_axes
@@ -341,12 +341,6 @@ class VDFSegment:
         y, x = np.indices((dp_shape_x, dp_shape_y))
         x, y = x*scale_x, y*scale_y
 
-        def get_circular_mask(vec):
-            radial_grid = np.sqrt((x - (vec[0]-cx))**2 + (y - (vec[1]-cy))**2)
-            mask = (radial_grid > radius).choose(radius, 0)
-            mask = (radial_grid <= radius).choose(mask, 1)
-            return mask.astype('bool')
-
         separated_signals = []
         for j in range(int(np.max(assigned_num)+1)):
             segment_masks_j = segment_masks[np.where(assigned_num == j)]
@@ -355,7 +349,8 @@ class VDFSegment:
                                  dp_shape_y))
             for i in range(np.shape(vectors_j)[0]):
                 vector_mask_i = np.sum(list(map(
-                    get_circular_mask, vectors_j[i])), axis=0)
+                    lambda b: get_circular_mask(b, radius, cx, cy, x, y),
+                    vectors_j[i])), axis=0)
                 signal_j[np.where(segment_masks_j[i])] = \
                     original_signal.data[np.where(segment_masks_j[i])] \
                     * vector_mask_i
