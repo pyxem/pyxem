@@ -1254,3 +1254,51 @@ class TestPixelatedStemShiftDiffraction:
         assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
+
+
+class TestComputeAndAsLazy:
+
+    def test_2d_data_compute(self):
+        dask_array = da.random.random((100, 150), chunks=(50, 50))
+        s = LazyPixelatedSTEM(dask_array)
+        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        s.axes_manager[0].scale = scale0
+        s.axes_manager[1].scale = scale1
+        s.metadata.Test = metadata_string
+        s.compute()
+        assert s.__class__ == PixelatedSTEM
+        assert not hasattr(s.data, 'compute')
+        assert s.axes_manager[0].scale == scale0
+        assert s.axes_manager[1].scale == scale1
+        assert s.metadata.Test == metadata_string
+        assert dask_array.shape == s.data.shape
+
+    def test_5d_data_compute(self):
+        dask_array = da.random.random((2, 3, 4, 10, 15),
+                                      chunks=(1, 1, 1, 10, 15))
+        s = LazyPixelatedSTEM(dask_array)
+        s.compute()
+        assert s.__class__ == PixelatedSTEM
+        assert dask_array.shape == s.data.shape
+
+    def test_2d_data_as_lazy(self):
+        data = np.random.random((100, 150))
+        s = PixelatedSTEM(data)
+        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        s.axes_manager[0].scale = scale0
+        s.axes_manager[1].scale = scale1
+        s.metadata.Test = metadata_string
+        s_lazy = s.as_lazy()
+        assert s_lazy.__class__ == LazyPixelatedSTEM
+        assert hasattr(s_lazy.data, 'compute')
+        assert s_lazy.axes_manager[0].scale == scale0
+        assert s_lazy.axes_manager[1].scale == scale1
+        assert s_lazy.metadata.Test == metadata_string
+        assert data.shape == s_lazy.data.shape
+
+    def test_5d_data_as_lazy(self):
+        data = np.random.random((2, 3, 4, 10, 15))
+        s = PixelatedSTEM(data)
+        s_lazy = s.as_lazy()
+        assert s_lazy.__class__ == LazyPixelatedSTEM
+        assert data.shape == s_lazy.data.shape

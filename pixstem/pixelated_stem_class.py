@@ -40,6 +40,12 @@ class PixelatedSTEM(Signal2D):
         else:
             super().plot(*args, **kwargs)
 
+    def as_lazy(self, *args, **kwargs):
+        res = super().as_lazy(*args, **kwargs)
+        res.__class__ = LazyPixelatedSTEM
+        res.__init__(**res._to_dictionary())
+        return res
+
     def shift_diffraction(
             self, shift_x, shift_y, parallel=True,
             inplace=False, show_progressbar=True):
@@ -1669,3 +1675,8 @@ class LazyPixelatedSTEM(LazySignal, PixelatedSTEM):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def compute(self, *args, **kwargs):
+        super().compute(*args, **kwargs)
+        self.__class__ = PixelatedSTEM
+        self.__init__(**self._to_dictionary())
