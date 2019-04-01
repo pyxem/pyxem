@@ -1,5 +1,4 @@
 import pytest
-import unittest
 import numpy as np
 from numpy.random import randint
 import dask.array as da
@@ -802,7 +801,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         assert (s_r.data.argmax(axis=-1) == r).all()
 
 
-class test_pixelated_stem_angle_sector(unittest.TestCase):
+class TestPixelatedStemAngleSector:
 
     def test_get_angle_sector_mask_simple(self):
         array = np.zeros((10, 10, 10, 10))
@@ -962,7 +961,7 @@ class TestAngularSliceRadialIntegration:
                 s.angular_slice_radial_integration(slice_overlap=-0.2)
 
 
-class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
+class TestPixelatedStemVirtualAnnularDarkField:
 
     def test_simple(self):
         shape = (5, 9, 12, 14)
@@ -987,7 +986,7 @@ class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
         assert s1.axes_manager.signal_shape == (shape[1], shape[0])
 
 
-class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
+class TestPixelatedStemVirtualBrightField:
 
     def test_simple(self):
         shape = (5, 9, 12, 14)
@@ -1178,7 +1177,7 @@ class TestPixelatedStemFindPeaks:
         assert peak_array.shape == tuple(shape[:-2])
 
 
-class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
+class TestPixelatedStemRotateDiffraction:
 
     def test_rotate_diffraction_keep_shape(self):
         shape = (7, 5, 4, 15)
