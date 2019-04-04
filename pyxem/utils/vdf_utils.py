@@ -16,16 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
+import matplotlib.pyplot as plt
 
 from scipy.ndimage import distance_transform_edt, label
 
 from skimage.feature import peak_local_max, match_template
-from skimage.filters import sobel, threshold_li
+from skimage.filters import sobel
 from skimage.morphology import watershed
 
 from hyperspy.signals import BaseSignal, Signal2D
-from hyperspy.drawing.utils import plot_images
-
 
 def normalize_vdf(im):
     """Normalizes image intensity by dividing by maximum value.
@@ -77,8 +76,8 @@ def norm_cross_corr(image, template):
 
 def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
     """ Obtain an array of vectors resulting from merging the vectors in
-    vectors_i and vectors_add and removing duplicates. Also, an array of
-    indices corresponding to the vectors will be obtained.
+    vectors_i and vectors_add and then removing duplicates. Also, an
+    array of indices corresponding to the vectors will be obtained.
 
     Parameters
     ----------
@@ -127,7 +126,8 @@ def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
         g_is_equal = list(map(lambda x: np.array_equal(g[i], x), g[i + 1:]))
         if sum(g_is_equal):
             g_delete = np.append(g_delete, i)
-
+            print(g_delete)
+            print(np.where(g_is_equal)[0])
             # If the equal vectors do not have the same indices, make sure that
             # all required indices are added to the correct element.
             if indices[int(np.where(g_is_equal)[0]+i+1)] != indices[i]:
@@ -210,7 +210,7 @@ def separate(vdf_temp, background_value, min_distance, min_size,
     local_maxi = peak_local_max(distance, indices=False,
                                 min_distance=min_distance,
                                 num_peaks=max_number_of_grains,
-                                exclude_border=exclude_border, labels=mask)
+                                exclude_border=exclude_border)
 
     # Find the edges using the sobel transform.
     elevation = sobel(vdf_temp)
@@ -247,7 +247,6 @@ def separate(vdf_temp, background_value, min_distance, min_size,
         # If segments have been discarded, make new labels that do not
         # include the discarded segments.
         if np.max(labels) != (np.shape(sep)[2]) and (np.shape(sep)[2] != 0):
-            print('in if')
             labels = sep[:, :, 0]
             for i in range(1, np.shape(sep)[2]):
                 labels = labels + sep[..., i] * (i + 1)
@@ -255,12 +254,47 @@ def separate(vdf_temp, background_value, min_distance, min_size,
         elif np.shape(sep)[2] == 0:
             labels = np.zeros(np.shape(labels))
             print('No separate particles were found.\n')
-        plot_images([Signal2D(vdf_temp), Signal2D(mask), Signal2D(distance),
-                     Signal2D(elevation), Signal2D(labels),
-                     Signal2D(np.sum(vdf_sep, axis=0).T)],
-                    axes_decor='off', per_row=3, colorbar=True, cmap='gnuplot2',
-                    label=['VDF', 'Mask', 'Distances', 'Elevation', 'Labels',
-                           'Separated particles'])
+
+        maxi_coord = peak_local_max(distance, indices=True,
+                                    min_distance=min_distance,
+                                    num_peaks=max_number_of_grains,
+                                    exclude_border=exclude_border)
+
+        seps_img_sum = np.zeros_like(vdf_temp).astype('float64')
+        for l, vdf in zip(np.arange(1, np.max(labels)+1), vdf_sep):
+            mask_l = np.zeros_like(labels).astype('bool')
+            mask_l[np.where(labels == l)] = 1
+            seps_img_sum += vdf_temp * mask_l /\
+                            np.max(vdf_temp[np.where(labels == l)])
+            seps_img_sum[np.where(labels == l)] += l
+
+        fig, axes = plt.subplots(2, 3, sharex=True, sharey=True)
+        ax = axes.ravel()
+
+        ax[0].imshow(vdf_temp, cmap=plt.cm.magma)
+        ax[0].axis('off')
+        ax[0].set_title('VDF')
+
+        ax[1].imshow(mask, cmap=plt.cm.gray)
+        ax[0].axis('off')
+        ax[1].set_title('Mask')
+
+        ax[2].imshow(distance, cmap=plt.cm.magma)
+        ax[2].axis('off')
+        ax[2].set_title('Distance and maxima')
+        ax[2].plot(maxi_coord[:, 1], maxi_coord[:, 0], 'g.')
+
+        ax[3].imshow(elevation, cmap=plt.cm.magma)
+        ax[3].axis('off')
+        ax[3].set_title('Elevation')
+
+        ax[4].imshow(labels, cmap=plt.cm.gnuplot2)
+        ax[4].axis('off')
+        ax[4].set_title('Labels')
+
+        ax[5].imshow(seps_img_sum, cmap=plt.cm.magma)
+        ax[5].axis('off')
+        ax[5].set_title('Segments')
     return vdf_sep
 
 
