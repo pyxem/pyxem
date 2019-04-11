@@ -148,6 +148,7 @@ def get_vector_match_results(structure, rot_list, edc):
         keys=['A'])
     return diffraction_library, indexation
 
+
 @pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
 def test_orientation_mapping_physical(structure, rot_list, pattern_list, edc):
     M = get_template_match_results(structure, pattern_list, edc, rot_list)
@@ -231,7 +232,7 @@ def test_kinematic_intensities_rotation(structure, rotation):
     structure.placeInLattice(rotated_lattice)
     reciprocal_lattice = structure.lattice.reciprocal()
     g_indices = [(0, 0, 1)]
-    g_hkls = np.array([reciprocal_lattice.dist(g_indices, [0, 0, 0])])
+    g_hkls = reciprocal_lattice.dist(g_indices, [0, 0, 0])
 
     scattering_params_list = ['lobato', 'xtables']
     for scattering_params in scattering_params_list:
@@ -256,7 +257,7 @@ def test_kinematic_intensities_error_raise(structure, rotation):
     structure.placeInLattice(rotated_lattice)
     reciprocal_lattice = structure.lattice.reciprocal()
     g_indices = [(0, 0, 1)]
-    g_hkls = np.array([reciprocal_lattice.dist(g_indices, [0, 0, 0])])
+    g_hkls = reciprocal_lattice.dist(g_indices, [0, 0, 0])
 
     intensities = get_kinematical_intensities(
         structure,
