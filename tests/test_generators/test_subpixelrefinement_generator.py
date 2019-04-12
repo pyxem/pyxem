@@ -19,43 +19,76 @@
 import pytest
 import numpy as np
 
-import pyxem as pxm
 from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from skimage import draw
 
 
-@pytest.fixture()
 def create_spot():
-    z = np.zeros((128, 128))
+    z1 = np.zeros((128, 128))
+    z2 = np.zeros((128, 128))
 
     for r in [4, 3, 2]:
-        rr, cc = draw.circle(30, 90, radius=r, shape=z.shape)
-        z[rr, cc] = 1 / r
+        c = 1 / r
+        rr, cc = draw.circle(30, 90, radius=r, shape=z1.shape)
+        z1[rr, cc] = c
+        z2[rr, cc] = c
+        rr2, cc2 = draw.circle(100, 60, radius=r, shape=z2.shape)
+        z2[rr2, cc2] = c
 
-    dp = pxm.ElectronDiffraction(np.asarray([[z, z], [z, z]]))  # this needs to be in 2x2
+    dp = ElectronDiffraction(np.asarray([[z1, z1], [z2, z2]]))  # this needs to be in 2x2
+    print(dp.axes_manager)
     return dp
+
+
+def create_vectors():
+    v1 = np.array([[90 - 64, 30 - 64]])
+    v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
+    vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
+    vectors.axes_manager.set_signal_dimension(0)
+    return vectors
 
 
 @pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
 def test_conventional_xc(diffraction_pattern):
     SPR_generator = SubpixelrefinementGenerator(diffraction_pattern, np.asarray([[1, -1]]))
-    assert SPR_generator.calibration == 1
-    assert np.allclose(SPR_generator.center, 4)
+    np.testing.assert_allclose(SPR_generator.calibration, 1.0)
+    np.testing.assert_allclose(SPR_generator.center, 4)
     diff_vect = SPR_generator.conventional_xc(4, 2, 10)
 
 
+@pytest.mark.xfail(raises=ValueError)
+def test_wrong_navigation_dimensions():
+    dp = ElectronDiffraction(np.zeros((2, 2, 8, 8)))
+    dp.axes_manager.set_signal_dimension(2)
+    vectors = DiffractionVectors(np.zeros((1, 2)))
+    vectors.axes_manager.set_signal_dimension(0)
+    SPR_generator = SubpixelrefinementGenerator(dp, vectors)
+
+
+@pytest.mark.parametrize('dp, diffraction_vectors', [
+    (create_spot(), np.array([[90 - 64, 30 - 64]])),
+    (create_spot(), create_vectors())
+])
 @pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
-def test_assertioned_xc(create_spot):
-    spr = SubpixelrefinementGenerator(create_spot, np.asarray([[90 - 64, 30 - 64]]))
+@pytest.mark.filterwarnings('ignore::RuntimeWarning')  # various skimage warnings
+def test_assertioned_xc(dp, diffraction_vectors):
+    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
     s = spr.conventional_xc(12, 4, 8)
-    error = np.subtract(s[0, 0], np.asarray([[90 - 64, 30 - 64]]))
+    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
     rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
     assert rms_error < 0.2  # 1/5th a pixel
 
 
-def test_assertioned_com(create_spot):
-    spr = SubpixelrefinementGenerator(create_spot, np.asarray([[90 - 64, 30 - 64]]))
+@pytest.mark.parametrize('dp, diffraction_vectors', [
+    (create_spot(), np.array([[90 - 64, 30 - 64]])),
+    (create_spot(), create_vectors())
+])
+@pytest.mark.filterwarnings('ignore::RuntimeWarning')  # various skimage warnings
+def test_assertioned_com(dp, diffraction_vectors):
+    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
     s = spr.center_of_mass_method(8)
-    error = np.subtract(s[0, 0], np.asarray([[90 - 64, 30 - 64]]))
+    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
     rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
     assert rms_error < 1e-5  # perfect detection for this trivial case
