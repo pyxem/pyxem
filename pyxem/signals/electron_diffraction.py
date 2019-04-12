@@ -38,6 +38,7 @@ from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
 from pyxem.utils import peakfinder2D_gui
 
 from skimage import filters
+from skimage import transform as tf
 from skimage.morphology import square
 from scipy.optimize import curve_fit
 
@@ -278,8 +279,23 @@ class ElectronDiffraction(Signal2D):
             diffraction patterns.
 
         """
+        # These three lines account for the transformation center not being (0,0)
+        shape = self.axes_manager.signal_shape
+        shift_x = (shape[1] - 1) / 2
+        shift_y = (shape[0] - 1) / 2
+
+        tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
+        tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+
+        # This defines the transform you want to perform
+        distortion = tf.AffineTransform(matrix=D)
+
+        # skimage transforms can be added like this, actually matrix multiplication,
+        # hence the need for the brackets. (Note tf.warp takes the inverse)
+        transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
+
         return self.map(affine_transformation,
-                        matrix=D,
+                        transformation=transformation,
                         order=order,
                         inplace=inplace,
                         *args, **kwargs)
