@@ -125,8 +125,10 @@ class SubpixelrefinementGenerator():
 
         Returns
         -------
-        vector_out: np.array()
-            array containing the refined vectors in calibrated units
+        vector_out: DiffractionVectors
+            DiffractionVectors containing the refined vectors in calibrated
+            units with the same navigation shape as the diffraction patterns.
+
         """
 
         def _center_of_mass_hs(z):
