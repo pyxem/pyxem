@@ -149,8 +149,8 @@ class SubpixelrefinementGenerator():
             dx = np.sum(z, axis=0)
             dy = np.sum(z, axis=1)
             h, w = z.shape
-            cx = np.sum(dx * np.arange(h))
-            cy = np.sum(dy * np.arange(w))
+            cx = np.sum(dx * np.arange(w))
+            cy = np.sum(dy * np.arange(h))
             return cx, cy
                     
 
