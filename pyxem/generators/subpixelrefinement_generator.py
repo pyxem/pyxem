@@ -21,7 +21,6 @@ Generating subpixel resolution on diffraction vectors.
 """
 
 import numpy as np
-from scipy.ndimage.measurements import center_of_mass
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import peaks_as_gvectors
@@ -144,8 +143,14 @@ class SubpixelrefinementGenerator():
                 The x and y locations of the center of mass of the parsed square
             """
 
-            y, x = center_of_mass(z)
-            return (x, y)
+            z *= 1 / np.sum(z)
+            dx = np.sum(z, axis=0)
+            dy = np.sum(z, axis=1)
+            h, w = z.shape
+            cx = np.sum(dx * np.arange(h))
+            cy = np.sum(dy * np.arange(w))
+            return cx, cy
+                    
 
         def _com_experimental_square(z, vector, square_size):
             """Wrapper for get_experimental_square that makes the non-zero
