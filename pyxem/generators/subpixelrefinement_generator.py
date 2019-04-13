@@ -145,7 +145,9 @@ class SubpixelrefinementGenerator():
                 The x and y locations of the center of mass of the parsed square
             """
 
-            z *= 1 / np.sum(z)
+            s = np.sum(z)
+            if s != 0:
+                z *= 1 / s
             dx = np.sum(z, axis=0)
             dy = np.sum(z, axis=1)
             h, w = z.shape
