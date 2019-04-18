@@ -69,3 +69,9 @@ def diffraction_pattern(request):
     """A simple, multiuse dp, with dimensions: ElectronDiffraction <2,2|8,8>
     """
     return ElectronDiffraction(request.param)
+
+def diffraction_profile(request):
+    """A simple, multiuse dp, with dimensions: ElectronDiffraction <2,2|8,8>
+    """
+    dp = ElectronDiffraction(request.param)
+    return dp.get_radial_profile()

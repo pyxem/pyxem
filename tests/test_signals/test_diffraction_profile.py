@@ -18,5 +18,40 @@
 
 import numpy as np
 import pytest
-
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+
+
+class TestSimpleHyperspy:
+    # Tests functions that assign to hyperspy metadata
+
+    def test_set_experimental_parameters(self, diffraction_profile):
+        diffraction_profile.set_experimental_parameters(accelerating_voltage=3,
+                                                        camera_length=3,
+                                                        scan_rotation=1,
+                                                        convergence_angle=1,
+                                                        rocking_angle=1,
+                                                        rocking_frequency=1,
+                                                        exposure_time=1)
+        assert isinstance(diffraction_profile, ElectronDiffractionProfile)
+
+    def test_set_scan_calibration(self, diffraction_profile):
+        diffraction_profile.set_scan_calibration(19)
+        assert isinstance(diffraction_profile, ElectronDiffractionProfile)
+
+    @pytest.mark.parametrize('calibration', [1, 0.017, 0.5, ])
+    def test_set_diffraction_calibration(self,
+                                         diffraction_profile,
+                                         calibration):
+        diffraction_profile.set_diffraction_calibration(calibration)
+        dx = diffraction_profile.axes_manager.signal_axes
+        assert dx.scale == calibration
+
+
+class TestVirtualImaging:
+    # Tests that virtual imaging runs without failure
+
+    def test_plot_interactive_virtual_image(self, diffraction_profile):
+        diffraction_profile.plot_interactive_virtual_image(left=1, right=1.2)
+
+    def test_get_virtual_image(self, diffraction_profile):
+        diffraction_profile.get_virtual_image(left=1, right=1.2)
