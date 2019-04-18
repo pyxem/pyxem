@@ -28,8 +28,8 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead, affine_transformation, \
     regional_filter, subtract_background_dog, subtract_background_median, \
-    subtract_reference, circular_mask, reference_circle, \
-    find_beam_offset_cross_correlation, peaks_as_gvectors
+    subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
+    peaks_as_gvectors
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -126,12 +126,12 @@ class ElectronDiffraction(Signal2D):
         dx = self.axes_manager.signal_axes[0]
         dy = self.axes_manager.signal_axes[1]
 
-        dx.name = 'dx'
+        dx.name = 'kx'
         dx.scale = calibration
         dx.offset = -center[0]
         dx.units = '$A^{-1}$'
 
-        dy.name = 'dy'
+        dy.name = 'ky'
         dy.scale = calibration
         dy.offset = -center[1]
         dy.units = '$A^{-1}$'
