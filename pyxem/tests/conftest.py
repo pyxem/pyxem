@@ -77,12 +77,12 @@ def diffraction_pattern(request):
     """
     return ElectronDiffraction(request.param)
 
-def diffraction_profile(request):
+@pytest.fixture
+def diffraction_profile(diffraction_pattern):
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffractionProfile <2,2|12>
     """
-    dp = ElectronDiffraction(request.param)
-    return dp.get_radial_profile()
+    return diffraction_pattern.get_radial_profile()
 
 @pytest.fixture
 def vector_match_peaks():
