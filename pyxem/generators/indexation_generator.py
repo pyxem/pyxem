@@ -119,7 +119,7 @@ class IndexationGenerator():
                 num_peaks = min(pixel_coords_jagged[i].shape[0], max_peaks)
                 intensities[i, :num_peaks] = intensities_jagged[i][:num_peaks]
                 # Get and compute pixel coordinates for all rotations about the
-                # centre, clipped to the detector size and rounded to integer positions.
+                # center, clipped to the detector size and rounded to integer positions.
                 pixel_coords[:, i, :num_peaks] = np.clip(
                     (signal_half_width + rotation_matrices_2d @ (
                         pixel_coords_jagged[i][:num_peaks].T - signal_half_width)).transpose(0, 2, 1),
