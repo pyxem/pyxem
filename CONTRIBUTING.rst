@@ -45,7 +45,7 @@ Questions?
 Open source projects are all about community - we put in much effort to make
 good tools available to all and most people are happy to help others start out.
 Everyone had to start at some point and the philosophy of these projects
-centres around the fact that we can do better by working together.
+centers around the fact that we can do better by working together.
 
 Much of the conversation happens in 'public' using the 'issues' pages on
 `Github <https://github.com/pyxem/pyxem/issues>`_ -- doing things in public can

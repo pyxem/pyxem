@@ -372,7 +372,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to centre the direct beam centre by a cross-correlation algorithm.
+    """Method to center the direct beam center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
@@ -428,7 +428,7 @@ def peaks_as_gvectors(z, center, calibration):
     z : numpy array
         peak postitions as array indices.
     center : numpy array
-        diffraction pattern centre in array indices.
+        diffraction pattern center in array indices.
     calibration : float
         calibration in reciprocal Angstroms per pixels.
 
