@@ -110,11 +110,11 @@ class CalibrationGenerator():
 
         pts = np.array([x[standard_dp.data > 0].ravel(),
                         y[standard_dp.data > 0].ravel()]).ravel()
-        xcentre = (image_size - 1) / 2
-        ycentre = (image_size - 1) / 2
+        xcenter = (image_size - 1) / 2
+        ycenter = (image_size - 1) / 2
 
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
-        xf, cov = curve_fit(call_ring_pattern(xcentre, ycentre), pts, ref, p0=x0)
+        xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter), pts, ref, p0=x0)
 
         return xf
 
@@ -172,10 +172,10 @@ class CalibrationGenerator():
         x, y = np.meshgrid(xi, yi)
 
         pts = np.array([x.ravel(), y.ravel()]).ravel()
-        xcentre = (image_size - 1) / 2
-        ycentre = (image_size - 1) / 2
+        xcenter = (image_size - 1) / 2
+        ycenter = (image_size - 1) / 2
 
-        ring_pattern = call_ring_pattern(xcentre, ycentre)
+        ring_pattern = call_ring_pattern(xcenter, ycenter)
         generated_pattern = ring_pattern(pts, scale, amplitude, spread,
                                          direct_beam_amplitude, asymmetry,
                                          rotation)
