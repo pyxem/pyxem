@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
 import numpy as np
 
 from pyxem.generators.structure_library_generator import StructureLibraryGenerator
-from tests.test_utils.test_sim_utils import create_structure_cubic
+from pyxem.tests.test_utils.test_sim_utils import create_structure_cubic
 
 
 def test_orientations_from_list():
@@ -33,7 +32,6 @@ def test_orientations_from_list():
 
 
 def test_orientations_from_stereographic_triangle():
-    expected_orientations = []
     structure_cubic = create_structure_cubic()
     structure_library_generator = StructureLibraryGenerator([('a', structure_cubic, 'cubic')])
     structure_library = structure_library_generator.get_orientations_from_stereographic_triangle([[0]], np.pi / 8)
