@@ -91,12 +91,9 @@ class ElectronDiffractionProfile(Signal1D):
         calibration : float
             Diffraction profile calibration in reciprocal Angstroms per pixel.
         """
-        if center is None:
-            center = np.array(self.axes_manager.signal_shape) / 2 * calibration
-
         dx = self.axes_manager.signal_axes[0]
 
-        dx.name = 'dx'
+        dx.name = 'k'
         dx.scale = calibration
         dx.units = '$A^{-1}$'
 
