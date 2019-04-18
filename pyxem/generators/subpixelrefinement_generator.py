@@ -113,53 +113,6 @@ class SubpixelrefinementGenerator():
         self.last_method = "conventional_xc"
         return self.vectors_out
 
-    def local_gaussian_method(self,square_size):
-        """
-        docstrings will be added if this method proves succesful, callsign is as expected;
-        also will factor out the main function at a later date
-        """
-        self.vectors_out = np.zeros(
-            (self.dp.data.shape[0],
-             self.dp.data.shape[1],
-             self.vectors_init.shape[0],
-             self.vectors_init.shape[1]))
-
-        def new_com_idea(z):
-            """
-            short version:
-            find max pixel
-            take the up,left,right,down
-            now have two sets of three points for quadratics
-            solve each independantly
-            combine
-            return
-            """
-            si = np.unravel_index(np.argmax(z),z.shape)
-            z_ref = z[si[0]-1:si[0]+2,si[1]-1:si[1]+2]
-            if z_ref.shape != (3,3):
-                print("Warning, edge effects")
-                return (si[1],si[0])
-            M = z_ref[1,1]
-            LX,RX = z_ref[1,0],z_ref[1,2]
-            UY,DY = z_ref[0,1],z_ref[2,1]
-
-            x_ans = 0.5 * (LX-RX) / (LX + RX - 2*M)
-            y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
-            return (si[1]+x_ans,si[0]+y_ans)
-
-        for i in np.arange(0, len(self.vectors_init)):
-            vect = self.vectors_pixels[i]
-            expt_disc = self.dp.map(
-                get_experimental_square,
-                vector=vect,
-                square_size=square_size,
-                inplace=False)
-            shifts = expt_disc.map(new_com_idea,inplace=False)
-            self.vectors_out[:, :, i, :] = (((vect - (square_size/2) + shifts.data) - self.center) * self.calibration)
-
-        self.last_method = "new_com_idea"
-        return self.vectors_out
-
     def center_of_mass_method(self, square_size):
         """Find the subpixel refinement of a peak by assuming it lies at the
         center of intensity.
