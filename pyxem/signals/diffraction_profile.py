@@ -30,6 +30,95 @@ class ElectronDiffractionProfile(Signal1D):
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
 
+    def set_experimental_parameters(self,
+                                    accelerating_voltage=None,
+                                    camera_length=None,
+                                    scan_rotation=None,
+                                    convergence_angle=None,
+                                    rocking_angle=None,
+                                    rocking_frequency=None,
+                                    exposure_time=None):
+        """Set experimental parameters in metadata.
+
+        Parameters
+        ----------
+        accelerating_voltage : float
+            Accelerating voltage in kV
+        camera_length: float
+            Camera length in cm
+        scan_rotation : float
+            Scan rotation in degrees
+        convergence_angle : float
+            Convergence angle in mrad
+        rocking_angle : float
+            Beam rocking angle in mrad
+        rocking_frequency : float
+            Beam rocking frequency in Hz
+        exposure_time : float
+            Exposure time in ms.
+        """
+        md = self.metadata
+
+        if accelerating_voltage is not None:
+            md.set_item("Acquisition_instrument.TEM.accelerating_voltage",
+                        accelerating_voltage)
+        if camera_length is not None:
+            md.set_item(
+                "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
+                camera_length)
+        if scan_rotation is not None:
+            md.set_item("Acquisition_instrument.TEM.scan_rotation",
+                        scan_rotation)
+        if convergence_angle is not None:
+            md.set_item("Acquisition_instrument.TEM.convergence_angle",
+                        convergence_angle)
+        if rocking_angle is not None:
+            md.set_item("Acquisition_instrument.TEM.rocking_angle",
+                        rocking_angle)
+        if rocking_frequency is not None:
+            md.set_item("Acquisition_instrument.TEM.rocking_frequency",
+                        rocking_frequency)
+        if exposure_time is not None:
+            md.set_item(
+                "Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
+                exposure_time)
+
+    def set_diffraction_calibration(self, calibration):
+        """Set diffraction profile channel size in reciprocal Angstroms.
+
+        Parameters
+        ----------
+        calibration : float
+            Diffraction profile calibration in reciprocal Angstroms per pixel.
+        """
+        if center is None:
+            center = np.array(self.axes_manager.signal_shape) / 2 * calibration
+
+        dx = self.axes_manager.signal_axes[0]
+
+        dx.name = 'dx'
+        dx.scale = calibration
+        dx.units = '$A^{-1}$'
+
+    def set_scan_calibration(self, calibration):
+        """Set scan pixel size in nanometres.
+
+        Parameters
+        ----------
+        calibration: float
+            Scan calibration in nanometres per pixel.
+        """
+        x = self.axes_manager.navigation_axes[0]
+        y = self.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = calibration
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = calibration
+        y.units = 'nm'
+
     def plot_interactive_virtual_image(self, left, right, **kwargs):
         """Plots an interactive virtual image formed by integrating scatterered
         intensity over a specified range.
