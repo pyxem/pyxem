@@ -166,7 +166,7 @@ class ElectronDiffractionProfile(Signal1D):
         # Plot the result
         dark_field_sum.plot()
 
-    def get_virtual_image(self, roi):
+    def get_virtual_image(self, left, right):
         """Obtains a virtual image associated with a specified scattering range.
 
         Parameters

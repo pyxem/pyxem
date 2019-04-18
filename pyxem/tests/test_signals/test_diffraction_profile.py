@@ -43,7 +43,7 @@ class TestSimpleHyperspy:
                                          diffraction_profile,
                                          calibration):
         diffraction_profile.set_diffraction_calibration(calibration)
-        dx = diffraction_profile.axes_manager.signal_axes
+        dx = diffraction_profile.axes_manager.signal_axes[0]
         assert dx.scale == calibration
 
 
@@ -51,7 +51,7 @@ class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
     def test_plot_interactive_virtual_image(self, diffraction_profile):
-        diffraction_profile.plot_interactive_virtual_image(left=1, right=1.2)
+        diffraction_profile.plot_interactive_virtual_image(left=1., right=2.)
 
     def test_get_virtual_image(self, diffraction_profile):
-        diffraction_profile.get_virtual_image(left=1, right=1.2)
+        diffraction_profile.get_virtual_image(left=1., right=2.)
