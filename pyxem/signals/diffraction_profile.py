@@ -19,7 +19,9 @@
 
 """
 
-from hyperspy.signals import Signal1D
+from hyperspy.api import interactive
+from hyperspy.signals import Signal1D, BaseSignal
+from hyperspy.roi import SpanROI
 
 
 class ElectronDiffractionProfile(Signal1D):
@@ -27,3 +29,51 @@ class ElectronDiffractionProfile(Signal1D):
 
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
+
+    def plot_interactive_virtual_image(self, left, right, **kwargs):
+        """Plots an interactive virtual image formed by integrating scatterered
+        intensity over a specified range.
+
+        Parameters
+        ----------
+        left : float
+            Lower bound of the data range to be plotted.
+        right : float
+            Upper bound of the data range to be plotted.
+        **kwargs:
+            Keyword arguments to be passed to `ElectronDiffractionProfile.plot`
+
+        Examples
+        --------
+        .. code-block:: python
+
+            rp.plot_interactive_virtual_image(left=0.5, right=0.7)
+
+        """
+        # Define ROI
+        roi = SpanROI(left=left, right=right)
+        # Plot signal
+        self.plot(**kwargs)
+        # Add the ROI to the appropriate signal axes.
+        roi.add_widget(self, axes=self.axes_manager.signal_axes)
+        # Create an output signal for the virtual dark-field calculation.
+        dark_field = roi.interactive(self, navigation_signal='same')
+        dark_field_placeholder = \
+            BaseSignal(np.zeros(self.axes_manager.navigation_shape[::-1]))
+        # Create an interactive signal
+        dark_field_sum = interactive(
+            # Formed from the sum of the pixels in the dark-field signal
+            dark_field.sum,
+            # That updates whenever the widget is moved
+            event=dark_field.axes_manager.events.any_axis_changed,
+            axis=dark_field.axes_manager.signal_axes,
+            # And outputs into the prepared placeholder.
+            out=dark_field_placeholder,
+        )
+        # Set the parameters
+        dark_field_sum.axes_manager.update_axes_attributes_from(
+            self.axes_manager.navigation_axes,
+            ['scale', 'offset', 'units', 'name'])
+        dark_field_sum.metadata.General.title = "Virtual Dark Field"
+        # Plot the result
+        dark_field_sum.plot()
