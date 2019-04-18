@@ -25,15 +25,18 @@ from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
 def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
-    """
-    Calculates the displacement gradient by comparing vectors with linear algebra
+    """Calculates the displacement gradient by comparing vectors
 
     Parameters
     ----------
     strained_vectors : Signal2D
-
+        For two vectors V and U measured in x and y the components should fill
+        the array as
+        >>> array([[Vx, Vy],
+                   [Ux, Uy]])
     unstrained_vectors : numpy.array with shape (2,2)
-        For two vectors: V and U measured in x and y the components should fill the array as
+        For two vectors: V and U measured in x and y the components should fill
+        the array as
         >>> array([[Vx, Vy],
                    [Ux, Uy]])
     Returns
@@ -48,25 +51,28 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
 
     Notes
     -----
-    This function does not currently support keyword arguments to the underlying map function.
+    This function does not currently support keyword arguments to the underlying
+    map function.
     """
 
-    D = strained_vectors.map(get_single_DisplacementGradientTensor, Vu=unstrained_vectors, inplace=False)
+    D = strained_vectors.map(get_single_DisplacementGradientTensor,
+                             Vu=unstrained_vectors, inplace=False)
     return DisplacementGradientMap(D)
 
 
 def get_single_DisplacementGradientTensor(Vs, Vu=None):
-    """
-    Calculates the displacement gradient tensor by relating two pairs of vectors
+    """Calculates the displacement gradient tensor from two pairs of vectors
 
     Parameters
     ----------
     Vs : numpy.array with shape (2,2)
-        For two vectors V and U measured in x and y the components should fill the array as
+        For two vectors V and U measured in x and y the components should fill
+        the array as
         >>> array([[Vx, Vy],
                    [Ux, Uy]])
     Vu : numpy.array with shape (2,2)
-        For two vectors V and U measured in x and y the components should fill the array as
+        For two vectors V and U measured in x and y the components should fill
+        the array as
         >>> array([[Vx, Vy],
                    [Ux, Uy]])
 
@@ -80,10 +86,9 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None):
 
     Vs = L Vu
 
-    Where L is a (2x2) transform matrix that takes Vu (unstrained) onto Vs (strained).
+    Where L is a (2x2) matrix that takes Vu (unstrained) onto Vs (strained).
     We find L by using the np.linalg.inv() function
     """
-
     L = np.matmul(Vs, np.linalg.inv(Vu))
     D = np.eye(3)
     D[0:2, 0:2] = L

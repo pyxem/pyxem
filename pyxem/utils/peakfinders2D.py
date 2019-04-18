@@ -18,7 +18,7 @@
 
 import numpy as np
 import scipy.ndimage as ndi
-from skimage.feature import match_template, peak_local_max
+from skimage.feature import match_template, corner_peaks
 
 NO_PEAKS = np.array([[np.nan, np.nan]])
 
@@ -355,9 +355,9 @@ def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
 
     """
     response_image = match_template(z, disc_image, pad_input=True)
-    peaks = peak_local_max(response_image,
-                           min_distance=min_distance,
-                           threshold_rel=peak_threshold)
+    peaks = corner_peaks(response_image,
+                         min_distance=min_distance,
+                         threshold_rel=peak_threshold)
     # make return format the same as the other peak finders
     peaks -= 1
 
