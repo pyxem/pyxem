@@ -72,10 +72,17 @@ def default_structure():
 
 
 def diffraction_pattern(request):
-    """A simple, multiuse dp, with dimensions: ElectronDiffraction <2,2|8,8>
+    """A simple, multiuse diffraction pattern, with dimensions:
+    ElectronDiffraction <2,2|8,8>
     """
     return ElectronDiffraction(request.param)
 
+@pytest.fixture
+def diffraction_profile(diffraction_pattern):
+    """A simple, multiuse diffraction profile, with dimensions:
+    ElectronDiffractionProfile <2,2|12>
+    """
+    return diffraction_pattern.get_radial_profile()
 
 @pytest.fixture
 def vector_match_peaks():
@@ -84,7 +91,6 @@ def vector_match_peaks():
         [0, 2, 0],
         [1, 2, 3],
     ])
-
 
 @pytest.fixture
 def vector_library():

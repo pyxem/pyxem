@@ -126,12 +126,12 @@ class ElectronDiffraction(Signal2D):
         dx = self.axes_manager.signal_axes[0]
         dy = self.axes_manager.signal_axes[1]
 
-        dx.name = 'dx'
+        dx.name = 'kx'
         dx.scale = calibration
         dx.offset = -center[0]
         dx.units = '$A^{-1}$'
 
-        dy.name = 'dy'
+        dy.name = 'ky'
         dy.scale = calibration
         dy.offset = -center[1]
         dy.units = '$A^{-1}$'
