@@ -165,3 +165,37 @@ class ElectronDiffractionProfile(Signal1D):
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
         # Plot the result
         dark_field_sum.plot()
+
+    def get_virtual_image(self, roi):
+        """Obtains a virtual image associated with a specified scattering range.
+
+        Parameters
+        ----------
+        left : float
+            Lower bound of the data range to be plotted.
+        right : float
+            Upper bound of the data range to be plotted.
+
+        Returns
+        -------
+        dark_field_sum : :obj:`hyperspy.signals.BaseSignal`
+            The virtual image signal associated with the specified scattering
+            range.
+
+        Examples
+        --------
+        .. code-block:: python
+
+            rp.get_virtual_image(left=0.5, right=0.7)
+
+        """
+        # Define ROI
+        roi = SpanROI(left=left, right=right)
+        dark_field = roi(self, axes=self.axes_manager.signal_axes)
+        dark_field_sum = dark_field.sum(
+            axis=dark_field.axes_manager.signal_axes
+        )
+        dark_field_sum.metadata.General.title = "Virtual Dark Field"
+        vdfim = dark_field_sum.as_signal2D((0, 1))
+
+        return vdfim
