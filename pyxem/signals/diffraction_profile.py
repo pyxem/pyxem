@@ -19,6 +19,8 @@
 
 """
 
+import numpy as np
+
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, BaseSignal
 from hyperspy.roi import SpanROI
