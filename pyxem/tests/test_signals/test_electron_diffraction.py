@@ -271,10 +271,6 @@ class TestBackgroundMethods:
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
-<<<<<<< HEAD
-# @pytest.mark.skip(reason="Uncommented for speed during development")
-=======
->>>>>>> master
 
 class TestPeakFinding:
     # This is assertion free testing
