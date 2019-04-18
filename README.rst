@@ -1,6 +1,9 @@
 .. image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
     :target: https://travis-ci.org/pyxem/pyxem
 
+.. image:: https://ci.appveyor.com/api/projects/status/github/pyxem/pyxem?svg=true&branch=master
+    :target: https://ci.appveyor.com/project/dnjohnstone/pyxem/branch/master
+
 .. image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
     :target: https://coveralls.io/github/pyxem/pyxem?branch=master
 
@@ -30,9 +33,6 @@ pyXem requires python 3 and conda - we suggest using the python 3 version of `Mi
 Download the `source code <https://github.com/pyxem/pyxem>`__ and put it in a directory on your computer. The following commands will then install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
 
       $ conda install -c conda-forge diffpy.structure
-      $ conda install -c anaconda cython
-      $ conda install -c conda-forge spglib
-      $ conda install -c conda-forge traits
       $ pip install . -r requirements.txt
 
 

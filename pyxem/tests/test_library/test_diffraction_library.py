@@ -20,7 +20,6 @@ import pytest
 import pyxem as pxm
 import os
 import numpy as np
-import diffpy.structure
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.libraries.diffraction_library import load_DiffractionLibrary
@@ -33,7 +32,7 @@ def get_library(default_structure):
     dfl = pxm.DiffractionLibraryGenerator(diffraction_calculator)
     structure_library = StructureLibrary(['Phase'],
                                          [default_structure],
-                                         [[(0, 0, 0), (0, 0.2, 0)]])
+                                         [np.array([(0, 0, 0), (0, 0.2, 0)])])
 
     return dfl.get_diffraction_library(structure_library,
                                        0.017, 2.4, (72, 72))
@@ -43,6 +42,8 @@ def test_get_library_entry_assertionless(get_library):
     assert isinstance(get_library.get_library_entry()['Sim'],
                       DiffractionSimulation)
     assert isinstance(get_library.get_library_entry(phase='Phase')['Sim'],
+                      DiffractionSimulation)
+    assert isinstance(get_library.get_library_entry(phase='Phase', angle=(0, 0, 0))['Sim'],
                       DiffractionSimulation)
 
 
@@ -60,8 +61,13 @@ def test_library_io(get_library):
     os.remove('file_01.pickle')
     # We can't check that the entire libraries are the same as the memory
     # location of the 'Sim' changes
-    assert np.allclose(get_library['Phase'][(0, 0, 0)]['intensities'],
-                       loaded_library['Phase'][(0, 0, 0)]['intensities'])
+    for i in range(len(get_library['Phase']['orientations'])):
+        np.testing.assert_allclose(get_library['Phase']['orientations'][i],
+                                   loaded_library['Phase']['orientations'][i])
+        np.testing.assert_allclose(get_library['Phase']['intensities'][i],
+                                   loaded_library['Phase']['intensities'][i])
+        np.testing.assert_allclose(get_library['Phase']['pixel_coords'][i],
+                                   loaded_library['Phase']['pixel_coords'][i])
 
 
 @pytest.mark.xfail(raises=ValueError)

@@ -19,16 +19,12 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.generators.indexation_generator import ProfileIndexationGenerator
 from pyxem.generators.indexation_generator import VectorIndexationGenerator
 
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 from pyxem.signals.diffraction_simulation import ProfileSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-
-from tests.test_utils.test_indexation_utils import vector_library
-from tests.test_utils.test_indexation_utils import vector_match_peaks
 
 
 @pytest.fixture

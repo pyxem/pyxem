@@ -22,10 +22,6 @@ import pytest
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from tests.test_utils.test_indexation_utils import sp_template_match_result
-from tests.test_utils.test_indexation_utils import dp_template_match_result
-from tests.test_utils.test_indexation_utils import sp_vector_match_result
-from tests.test_utils.test_indexation_utils import dp_vector_match_result
 
 
 def test_template_get_crystallographic_map(dp_template_match_result,

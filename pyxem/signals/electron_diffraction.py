@@ -28,9 +28,8 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead, affine_transformation, \
     regional_filter, subtract_background_dog, subtract_background_median, \
-    subtract_reference, circular_mask, reference_circle, \
-    find_beam_offset_cross_correlation, calc_radius_with_distortion, \
-    call_ring_pattern, peaks_as_gvectors
+    subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
+    peaks_as_gvectors
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -38,8 +37,8 @@ from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
 from pyxem.utils import peakfinder2D_gui
 
 from skimage import filters
+from skimage import transform as tf
 from skimage.morphology import square
-from scipy.optimize import curve_fit
 
 
 class ElectronDiffraction(Signal2D):
@@ -127,12 +126,12 @@ class ElectronDiffraction(Signal2D):
         dx = self.axes_manager.signal_axes[0]
         dy = self.axes_manager.signal_axes[1]
 
-        dx.name = 'dx'
+        dx.name = 'kx'
         dx.scale = calibration
         dx.offset = -center[0]
         dx.units = '$A^{-1}$'
 
-        dy.name = 'dy'
+        dy.name = 'ky'
         dy.scale = calibration
         dy.offset = -center[1]
         dy.units = '$A^{-1}$'
@@ -278,8 +277,23 @@ class ElectronDiffraction(Signal2D):
             diffraction patterns.
 
         """
+        # These three lines account for the transformation center not being (0,0)
+        shape = self.axes_manager.signal_shape
+        shift_x = (shape[1] - 1) / 2
+        shift_y = (shape[0] - 1) / 2
+
+        tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
+        tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+
+        # This defines the transform you want to perform
+        distortion = tf.AffineTransform(matrix=D)
+
+        # skimage transforms can be added like this, actually matrix multiplication,
+        # hence the need for the brackets. (Note tf.warp takes the inverse)
+        transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
+
         return self.map(affine_transformation,
-                        matrix=D,
+                        transformation=transformation,
                         order=order,
                         inplace=inplace,
                         *args, **kwargs)
@@ -486,140 +500,6 @@ class ElectronDiffraction(Signal2D):
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
-
-    def fit_ring_pattern(self, mask_radius, scale=100, amplitude=1000, spread=2,
-                         direct_beam_amplitude=500, asymmetry=1, rotation=0):
-        """Determine diffraction pattern calibration and distortions from by
-        fitting a polycrystalline gold diffraction pattern to a set of rings.
-        It is suggested that the function generate_ring_pattern is used to
-        find initial values (initial guess) for the parameters used in the fit.
-
-        This function is written expecting a single 2D diffraction pattern
-        with equal dimensions (e.g. 256x256).
-
-        Parameters
-        ----------
-        mask_radius : int
-            The radius in pixels for a mask over the direct beam disc
-            (the direct beam disc within given radius will be excluded
-            from the fit)
-        scale : float
-            An initial guess for the diffraction calibration
-            in 1/Angstrom units
-        amplitude : float
-            An initial guess for the amplitude of the polycrystalline rings
-            in arbitrary units
-        spread : float
-            An initial guess for the spread within each ring (Gaussian width)
-        direct_beam_amplitude : float
-            An initial guess for the background intensity from the direct
-            beam disc in arbitrary units
-        asymmetry : float
-            An initial guess for any elliptical asymmetry in the
-            pattern (for a perfectly circular pattern asymmetry=1)
-        rotation : float
-            An initial guess for the rotation of the (elliptical) pattern
-            in radians.
-
-        Returns
-        ----------
-        params : np.array()
-            Array of fitting parameters.
-           [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation].
-
-        """
-        image_size = self.data.shape[0]
-        xi = np.linspace(0, image_size - 1, image_size)
-        yi = np.linspace(0, image_size - 1, image_size)
-        x, y = np.meshgrid(xi, yi)
-
-        mask = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
-                                           (image_size - 1) / 2, 1, 0)
-        mask[mask > mask_radius] = 0
-        self.data[mask > 0] *= 0
-
-        ref = self.data[self.data > 0]
-        ref = ref.ravel()
-
-        pts = np.array([x[self.data > 0].ravel(),
-                        y[self.data > 0].ravel()]).ravel()
-        xcentre = (image_size - 1) / 2
-        ycentre = (image_size - 1) / 2
-
-        x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
-        xf, cov = curve_fit(call_ring_pattern(xcentre, ycentre), pts, ref, p0=x0)
-
-        return xf
-
-    def generate_ring_pattern(self, mask=False, mask_radius=10, scale=100,
-                              amplitude=1000, spread=2, direct_beam_amplitude=500,
-                              asymmetry=1, rotation=0):
-        """Calculate a set of rings to model a polycrystalline gold diffraction
-        pattern for use in fitting for diffraction pattern calibration.
-        It is suggested that the function generate_ring_pattern is used to
-        find initial values (initial guess) for the parameters used in
-        the function fit_ring_pattern.
-
-        This function is written expecting a single 2D diffraction pattern
-        with equal dimensions (e.g. 256x256).
-
-        Parameters
-        ----------
-        mask : bool
-            Choice of whether to use mask or not (mask=True will return a
-            specified circular mask setting a region around
-            the direct beam to zero)
-        mask_radius : int
-            The radius in pixels for a mask over the direct beam disc
-            (the direct beam disc within given radius will be excluded
-            from the fit)
-        scale : float
-            An initial guess for the diffraction calibration
-            in 1/Angstrom units
-        amplitude : float
-            An initial guess for the amplitude of the polycrystalline rings
-            in arbitrary units
-        spread : float
-            An initial guess for the spread within each ring (Gaussian width)
-        direct_beam_amplitude : float
-            An initial guess for the background intensity from the
-            direct beam disc in arbitrary units
-        asymmetry : float
-            An initial guess for any elliptical asymmetry in the pattern
-            (for a perfectly circular pattern asymmetry=1)
-        rotation : float
-            An initial guess for the rotation of the (elliptical) pattern
-            in radians.
-
-        Returns
-        -------
-        image : np.array()
-            Simulated ring pattern with the same dimensions as self.data
-
-        """
-        image_size = self.data.shape[0]
-        xi = np.linspace(0, image_size - 1, image_size)
-        yi = np.linspace(0, image_size - 1, image_size)
-        x, y = np.meshgrid(xi, yi)
-
-        pts = np.array([x.ravel(), y.ravel()]).ravel()
-        xcentre = (image_size - 1) / 2
-        ycentre = (image_size - 1) / 2
-
-        ring_pattern = call_ring_pattern(xcentre, ycentre)
-        generated_pattern = ring_pattern(pts, scale, amplitude, spread,
-                                         direct_beam_amplitude, asymmetry,
-                                         rotation)
-        generated_pattern = np.reshape(generated_pattern,
-                                       (image_size, image_size))
-
-        if mask == True:
-            maskROI = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
-                                                  (image_size - 1) / 2, 1, 0)
-            maskROI[maskROI > mask_radius] = 0
-            generated_pattern[maskROI > 0] *= 0
-
-        return generated_pattern
 
     def remove_background(self, method,
                           *args, **kwargs):
