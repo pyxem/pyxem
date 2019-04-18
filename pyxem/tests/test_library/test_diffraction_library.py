@@ -20,7 +20,6 @@ import pytest
 import pyxem as pxm
 import os
 import numpy as np
-import diffpy.structure
 
 from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.libraries.diffraction_library import load_DiffractionLibrary

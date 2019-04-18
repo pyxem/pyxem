@@ -29,8 +29,9 @@ from pyxem.generators.library_generator import VectorLibraryGenerator
 from pyxem.libraries.structure_library import StructureLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.sim_utils import peaks_from_best_template, peaks_from_best_vector_match, \
-    get_kinematical_intensities
+from pyxem.utils.sim_utils import (peaks_from_best_template,
+                                   peaks_from_best_vector_match,
+                                   get_kinematical_intensities)
 
 """
 The test are designed to make sure orientation mapping works when actual
@@ -84,7 +85,7 @@ def edc():
     return pxm.DiffractionGenerator(300, 5e-2)
 
 
-@pytest.fixture()
+@pytest.fixture
 def rot_list():
     from itertools import product
     a, b, c = np.arange(0, 5, step=1), [0], [0]
