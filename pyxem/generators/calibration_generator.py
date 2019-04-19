@@ -22,6 +22,7 @@
 
 import numpy as np
 from scipy.optimize import curve_fit
+from math import sin, cos
 
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion
@@ -118,30 +119,47 @@ class CalibrationGenerator():
             A utility function generate_ring_pattern is implemented and may be
             used to manually determine appropriate initial parameters.
         """
-        standard_dp = self.signal
+        # Set diffraction pattern variable
+        standard_dp = self.diffraction_pattern
+        # Define grid values and center indices for ring pattern evaluation
         image_size = standard_dp.data.shape[0]
         xi = np.linspace(0, image_size - 1, image_size)
         yi = np.linspace(0, image_size - 1, image_size)
         x, y = np.meshgrid(xi, yi)
-
-        mask = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
-                                           (image_size - 1) / 2, 1, 0)
-        mask[mask > mask_radius] = 0
-        standard_dp.data[mask > 0] *= 0
-
-        ref = standard_dp.data[standard_dp.data > 0]
-        ref = ref.ravel()
-
-        pts = np.array([x[standard_dp.data > 0].ravel(),
-                        y[standard_dp.data > 0].ravel()]).ravel()
         xcenter = (image_size - 1) / 2
         ycenter = (image_size - 1) / 2
-
+        # Calculate eliptical parameters
+        mask = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
+                                           (image_size - 1) / 2, 1, 0)
+        # Mask direct beam
+        mask[mask > mask_radius] = 0
+        standard_dp.data[mask > 0] *= 0
+        # Manipulate measured data for fitting
+        ref = standard_dp.data[standard_dp.data > 0]
+        ref = ref.ravel()
+        # Define points for fitting
+        pts = np.array([x[standard_dp.data > 0].ravel(),
+                        y[standard_dp.data > 0].ravel()]).ravel()
+        # Set initial parameters for fitting
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
+        # Fit ring pattern to experimental data
         xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter),
                             pts, ref, p0=x0)
+        # Calculate affine transform parameters from fit parameters
+        scaling = np.array([[1, 0],
+                            [0, xf[4]**-0.5]])
 
-        return xf
+        rotation = np.array([[cos(xf[5]), -sin(xf[5])],
+                             [sin(xf[5]),  cos(xf[5])]])
+
+        correction = np.linalg.inv(np.dot(rotation.T,
+                                          np.dot(scaling, rotation)))
+
+        affine = np.array([[correction[0,0], correction[0,1], 0.00],
+                           [correction[1,0], correction[1,1], 0.00],
+                           [0.00, 0.00, 1.00]])
+
+        return affine
 
     def get_diffraction_calibration(self):
         """Determine the diffraction pattern pixel size calibration.
