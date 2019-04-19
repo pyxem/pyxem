@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,16 +22,23 @@ from heapq import nlargest
 from itertools import combinations
 from operator import itemgetter
 
-from pyxem.utils import correlate
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
 from transforms3d.euler import mat2euler
 
 
-def correlate_library(image, library, n_largest, mask, keys=[]):
+def correlate_library(image, library, n_largest, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
+
+    Calculated using the normalised (see return type documentation) dot
+    product, or cosine distance,
+
+    .. math::
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    for a template T and an experimental pattern P.
 
     Parameters
     ----------
@@ -42,8 +49,8 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
         experimental data.
     n_largest : int
         The number of well correlated simulations to be retained.
-    mask : bool array
-        A mask for navigation axes 1 indicates positions to be indexed.
+    mask : bool
+        A mask for navigation axes. 1 indicates positions to be indexed.
 
     Returns
     -------
@@ -51,31 +58,54 @@ def correlate_library(image, library, n_largest, mask, keys=[]):
         A numpy array containing the top n correlated simulations for the
         experimental pattern of interest, where each entry is on the form
             [phase index, [z, x, z], correlation]
+        where
+            phase_index : int
+                Index of the phase, following the ordering of the library keys
+            [z, x, z] : ndarray
+                numpy array of three floats, specifying the orientation in the
+                Bunge convention, in degrees.
+            correlation : float
+                A coefficient of correlation, only normalised to the template
+                intensity. This is in contrast to the reference work.
 
     See also
     --------
-    pyxem.utils.correlate and the correlate method of IndexationGenerator.
+    IndexationGenerator.correlate
+
+    References
+    ----------
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
+
     if mask == 1:
-        for phase_index, key in enumerate(library.keys()):
-            correlations = np.empty((len(library[key]), 4))
-            # Use enumerate to index, i, each (orientation, diffraction_pattern) in list
-            for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
-                correlation = correlate(image, diffraction_pattern)
-                correlations[i, :] = *orientation, correlation
+        for phase_index, library_entry in enumerate(library.values()):
+            orientations = library_entry['orientations']
+            pixel_coords = library_entry['pixel_coords']
+            intensities = library_entry['intensities']
+            pattern_norms = library_entry['pattern_norms']
 
-            # Partition to get the n_largest best matches
-            top_n = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
-            # Sort the matches by correlation score, descending
-            top_n = top_n[top_n[:, 3].argsort()][::-1]
+            # Extract experimental intensities from the diffraction image
+            image_intensities = image[pixel_coords[:, :, :, 1], pixel_coords[:, :, :, 0]]
+            # Correlation is the normalized dot product
+            correlations = np.sum(image_intensities * intensities, axis=2) / pattern_norms
 
+            # Find the top n correlations in sorted order
+            top_n_indices = correlations.argpartition(-n_largest, axis=None)[-n_largest:]
+            top_n_correlations = correlations.ravel()[top_n_indices]
+            top_n_indices = top_n_indices[top_n_correlations.argsort()[::-1]]
+
+            # Store the results in top_matches
             top_matches[phase_index, :, 0] = phase_index
+            inplane_rotation_angle = 360 / pixel_coords.shape[0]
             for i in range(n_largest):
-                top_matches[phase_index, i, 1] = top_n[i, :3]
-            top_matches[phase_index, :, 2] = top_n[:, 3]
+                inplane_index, orientation_index = np.unravel_index(top_n_indices[i], correlations.shape)
+                top_matches[phase_index, i, 1] = orientations[orientation_index] + np.array(
+                    [0, 0, inplane_index * inplane_rotation_angle])
+            top_matches[phase_index, :, 2] = correlations.ravel()[top_n_indices]
 
-    return top_matches.reshape((len(library) * n_largest, 3))
+    return top_matches.reshape(-1, 3)
 
 
 def index_magnitudes(z, simulation, tolerance):
@@ -133,7 +163,7 @@ def match_vectors(peaks,
     mag_tol : float
         Max allowed magnitude difference when comparing vectors.
     angle_tol : float
-        Max allowed angle difference when comparing vector pairs.
+        Max allowed angle difference in radians when comparing vector pairs.
     index_error_tol : float
         Max allowed error in peak indexation for classifying it as indexed,
         calculated as |hkl_calculated - round(hkl_calculated)|.
@@ -149,7 +179,8 @@ def match_vectors(peaks,
             [phase index, rotation matrix, match rate, error hkls, total error]
 
     """
-    peaks = peaks[0]
+    if peaks.shape == (1,) and peaks.dtype == 'object':
+        peaks = peaks[0]
     # Initialise for loop with first entry & assign empty array to hold
     # indexation results.
     top_matches = np.empty((len(library), n_best, 5), dtype='object')
@@ -158,7 +189,7 @@ def match_vectors(peaks,
 
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
     # with respect to each phase.
-    for phase_index, (key, structure) in enumerate(zip(library.keys(), library.structures)):
+    for phase_index, (phase_name, structure) in enumerate(zip(library.keys(), library.structures)):
         solutions = []
         lattice_recip = structure.lattice.reciprocal()
 
@@ -168,7 +199,6 @@ def match_vectors(peaks,
 
         # Determine overall indexations associated with each peak pair
         for peak_pair_indices in combinations(unindexed_peak_ids, 2):
-            # print('—'*80)
             # Consider a pair of experimental scattering vectors.
             q1, q2 = peaks[peak_pair_indices, :]
             q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
@@ -184,15 +214,15 @@ def match_vectors(peaks,
             # Get library indices for hkls matching peaks within tolerances.
             # TODO: Library[key] are object arrays. Test performance of direct float arrays
             # TODO: Test performance with short circuiting (np.where for each step)
-            match_ids = np.where((np.abs(q1_len - library[key][:, 2]) < mag_tol) &
-                                 (np.abs(q2_len - library[key][:, 3]) < mag_tol) &
-                                 (np.abs(angle - library[key][:, 4]) < angle_tol))[0]
+            match_ids = np.where((np.abs(q1_len - library[phase_name][:, 2]) < mag_tol) &
+                                 (np.abs(q2_len - library[phase_name][:, 3]) < mag_tol) &
+                                 (np.abs(angle - library[phase_name][:, 4]) < angle_tol))[0]
 
             # Iterate over matched library vectors determining the error in the
             # associated indexation and finding the minimum error cases.
             peak_pair_solutions = []
             for i, match_id in enumerate(match_ids):
-                hkl1, hkl2 = library[key][:, :2][match_id]
+                hkl1, hkl2 = library[phase_name][:, :2][match_id]
                 # Reference vectors are cartesian coordinates of hkls
                 ref_q1, ref_q2 = lattice_recip.cartesian(hkl1), lattice_recip.cartesian(hkl2)
 
@@ -249,8 +279,6 @@ def match_vectors(peaks,
         if n_solutions > 0:
             match_rate_index = 1
             solutions = np.array(solutions)
-            # match_rates = np.array([sol[match_rate_index][1] for sol in solutions])
-            # print('n_sol', n_solutions)
             top_n = solutions[solutions[:, match_rate_index].argpartition(-n_solutions)[-n_solutions:]]
 
             # Put the top n ranked solutions in the output array
@@ -352,7 +380,6 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z,x,z)), dict(metrics)]
     """
-    z_matches = z_matches[0]
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
     # Consider single phase and multi-phase matching cases separately

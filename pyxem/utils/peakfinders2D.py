@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,12 +18,28 @@
 
 import numpy as np
 import scipy.ndimage as ndi
-from skimage.feature import match_template, peak_local_max
+from skimage.feature import match_template, corner_peaks
 
-NO_PEAKS = np.array([[[np.nan, np.nan]]])
+NO_PEAKS = np.array([[np.nan, np.nan]])
 
 
 def clean_peaks(peaks):
+    """Utility function to deal with no peaks being found.
+
+    Parameters
+    ----------
+    peaks : numpy.ndarray
+        Result of peak finding
+
+    Returns
+    -------
+    peaks : numpy.ndarray
+        Result of peak finding
+
+    NO_PEAKS : string
+        Flag indicating no peaks found.
+
+    """
     if len(peaks) == 0:
         return NO_PEAKS
     else:
@@ -339,9 +355,9 @@ def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
 
     """
     response_image = match_template(z, disc_image, pad_input=True)
-    peaks = peak_local_max(response_image,
-                           min_distance=min_distance,
-                           threshold_rel=peak_threshold)
+    peaks = corner_peaks(response_image,
+                         min_distance=min_distance,
+                         threshold_rel=peak_threshold)
     # make return format the same as the other peak finders
     peaks -= 1
 

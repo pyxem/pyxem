@@ -1,35 +1,47 @@
 language: python
-python:
-  - "3.6"
+
+env:
+  global:
+    - DEPS="hyperspy-base transforms3d diffpy.structure"
+    - TEST_DEPS="pytest pytest-cov coveralls"
+    - DOC_DEPS="sphinx sphinx_bootstrap_theme"
+
+matrix:
+  include:
+  - env: export PYTHON=3.7
+  - env: export PYTHON=3.6
+  - env: export PYTHON=3.7
+    os: osx
+    language: generic
 
 sudo: True #for Miniconda 
 
 before_install:
-  # https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
+  # Install miniconda
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+      curl "https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh" -o miniconda.sh;
+    else wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - chmod +x miniconda.sh;
+    ./miniconda.sh -b -p $HOME/miniconda;
+    hash -r;
+  # setup environment
+  - source $HOME/miniconda/bin/activate root;
+    conda update -y conda;
+    conda config --append channels conda-forge;
+    conda create -n testenv --yes python=$PYTHON;
+    source activate testenv;
   - conda info -a
-  - conda create -q -n test-environment 
-  - source activate test-environment
-  - conda install -c diffpy/label/dev diffpy.structure
-  - conda install pip 
 
 install:
-  - pip install . -r requirements.txt
-
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3
+  - conda install -y $DEPS $TEST_DEPS $DOC_DEPS;
+  - pip install .
 
 script:
-  - timeout 2m pytest --cov=pyxem
+  - pytest --cov=pyxem
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
+
 after_success:
   - coveralls
 
@@ -40,4 +52,3 @@ deploy:
   local_dir: docs/build
   on:
     branch: master
-

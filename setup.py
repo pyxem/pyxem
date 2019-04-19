@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 exec(open('pyxem/version.py').read())  # grab version info
 
@@ -36,20 +36,12 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
 
-    packages=[
-        'pyxem',
-        'pyxem.utils',
-        'pyxem.io_plugins',
-	    'pyxem.components',
-        'pyxem.generators',
-	    'pyxem.signals',
-        'pyxem.libraries'
-    ],
+    packages=find_packages(),
 
     install_requires=[
     	'hyperspy >= 1.3',
         'transforms3d',
-	'scikit-learn >= 0.19'
+	    'scikit-learn >= 0.19'
       ],
 
     package_data={

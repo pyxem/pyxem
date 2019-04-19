@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -94,6 +94,9 @@ class DiffractionGenerator(object):
         reciprocal_radius : float
             The maximum radius of the sphere of reciprocal space to sample, in
             reciprocal angstroms.
+        with_direct_beam : bool
+            If True, the direct beam is included in the simulated diffraction
+            pattern. If False, it is not.
 
         Returns
         -------
