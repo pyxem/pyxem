@@ -39,7 +39,8 @@ class CalibrationGenerator():
 
     """
     def __init__(self,
-                 signal,
+                 diffraction_pattern,
+                 navigation_image,
                  standard='au-x-grating'):
         # Verify calibration standard is recognized and set attribute.
         standard_dict = {
@@ -52,22 +53,28 @@ class CalibrationGenerator():
                                       "See documentation for available "
                                       "implementations.".format(standard))
         # Check calibration data provided as ElectronDiffraction object.
-        if signal is not ElectronDiffraction:
+        if isinstance(signal, ElectronDiffraction) is False:
             raise ValueError("Data for calibration must be provided as an "
                              "ElectronDiffraction object.")
-        # Set calibration data in attribute after checking standard form.
-        if signal.axes_manager.navigation_shape == 1:
-            self.signal = signal
+        # Set diffraction patttern in attribute after checking standard form.
+        if diffraction_pattern.axes_manager.navigation_shape == 1:
+            self.diffraction_pattern = diffraction_pattern
         else:
             raise ValueError("Calibration using au-x-grating data requires "
                              "a single diffraction pattern to be provided.")
+        # Set navigation image in attribute.
+        if navigation_image:
+            self.navigation_image = navigation_image
+        # Assign attributes for calibration values to be determined
+        self.corrected_pattern = None
+        self.diffraction_rotation = None
+        self.diffraction_calibration = None
+        self.navigation_calibration = None
 
-    def get_diffraction_lens_distortion(self, mask_radius, scale=100,
-                                        amplitude=1000, spread=2,
-                                        direct_beam_amplitude=500, asymmetry=1,
-                                        rotation=0):
-        """Determine diffraction pattern calibration and distortions from by
-        fitting a polycrystalline gold diffraction pattern to a set of rings.
+    def get_elliptical_distortion(self, mask_radius, scale=100, amplitude=1000,
+                                  spread=2, direct_beam_amplitude=500,
+                                  asymmetry=1, rotation=0):
+        """Determine elliptical distortion of the diffraction pattern.
 
         Parameters
         ----------
@@ -103,7 +110,8 @@ class CalibrationGenerator():
                                           direct_beam_amplitude, asymmetry,
                                           rotation].
         affine_matrix : np.array()
-
+            Array defining the affine transformation that corrects for lens
+            distortions in the diffraction pattern.
 
         See Also
         --------
@@ -130,7 +138,8 @@ class CalibrationGenerator():
         ycenter = (image_size - 1) / 2
 
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
-        xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter), pts, ref, p0=x0)
+        xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter),
+                            pts, ref, p0=x0)
 
         return xf
 
@@ -140,4 +149,54 @@ class CalibrationGenerator():
         Parameters
         ----------
 
+        Returns
+        -------
+        diff_cal : float
+            Diffraction calibration in reciprocal angstroms per pixel.
+
         """
+        # Define line roi along which to take trace for calibration
+        line = Line2DROI()
+        # Obtain line trace
+        trace = line(self.signal)
+        # Find peaks in line trace
+        peaks = trace.find_peaks()
+        # Determine diffraction calibration from peak positions
+        diff_cal =
+
+        return diff_cal
+
+    def get_navigation_calibration(self):
+        """Determine the diffraction pattern pixel size calibration.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        diff_cal : float
+            Diffraction calibration in reciprocal angstroms per pixel.
+
+        """
+        # Define line roi along which to take trace for calibration
+        line = Line2DROI()
+        # Obtain line trace
+        trace = line(self.signal)
+        # Find peaks in line trace
+        peaks = trace.find_peaks()
+        # Determine diffraction calibration from peak positions
+        nav_cal =
+
+        return nav_cal
+
+    def get_calibration_values_dictionary(self):
+        """Get determined calibration values as a dictionary.
+
+        Returns
+        -------
+        calibration_dictionary : dict()
+            Dictionary of calibration values.
+        """
+        # Construct calibration dictionary from object attributes.
+
+        return calibration_dictionary
