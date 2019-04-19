@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Electron diffraction pattern calibration.
+"""Electron diffraction pattern calibration operations.
 
 """
 
@@ -32,7 +32,7 @@ class CalibrationGenerator():
     Parameters
     ----------
     signal : ElectronDiffraction
-        The signal of electron diffraction patterns to be indexed.
+        The signal of electron diffraction data to be used for calibration.
     standard : string
         Identifier for calibration standard used. At present only "au-x-grating"
         is supported.
@@ -41,9 +41,7 @@ class CalibrationGenerator():
     def __init__(self,
                  signal,
                  standard='au-x-grating'):
-
-        self.signal = signal
-
+        # Verify calibration standard is recognized and set attribute.
         standard_dict = {
             'au-x-grating': 'au-x-grating',
         }
@@ -53,16 +51,23 @@ class CalibrationGenerator():
             raise NotImplementedError("The standard `{}` is not recognized. "
                                       "See documentation for available "
                                       "implementations.".format(standard))
+        # Check calibration data provided as ElectronDiffraction object.
+        if signal is not ElectronDiffraction:
+            raise ValueError("Data for calibration must be provided as an "
+                             "ElectronDiffraction object.")
+        # Set calibration data in attribute after checking standard form.
+        if signal.axes_manager.navigation_shape == 1:
+            self.signal = signal
+        else:
+            raise ValueError("Calibration using au-x-grating data requires "
+                             "a single diffraction pattern to be provided.")
 
-    def fit_ring_pattern(self, mask_radius, scale=100, amplitude=1000, spread=2,
-                         direct_beam_amplitude=500, asymmetry=1, rotation=0):
+    def get_diffraction_lens_distortion(self, mask_radius, scale=100,
+                                        amplitude=1000, spread=2,
+                                        direct_beam_amplitude=500, asymmetry=1,
+                                        rotation=0):
         """Determine diffraction pattern calibration and distortions from by
         fitting a polycrystalline gold diffraction pattern to a set of rings.
-        It is suggested that the function generate_ring_pattern is used to
-        find initial values (initial guess) for the parameters used in the fit.
-
-        This function is written expecting a single 2D diffraction pattern
-        with equal dimensions (e.g. 256x256).
 
         Parameters
         ----------
@@ -89,11 +94,21 @@ class CalibrationGenerator():
             in radians.
 
         Returns
-        ----------
-        params : np.array()
-            Array of fitting parameters.
-           [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation].
+        -------
+        residuals : pxm.ElectronDiffraction()
+            Residual between data before and after distortion correct with
+            respect to simulated
+        fit_params : np.array()
+            Array of fitting parameters. [scale, amplitude, spread,
+                                          direct_beam_amplitude, asymmetry,
+                                          rotation].
+        affine_matrix : np.array()
 
+
+        See Also
+        --------
+            A utility function generate_ring_pattern is implemented and may be
+            used to manually determine appropriate initial parameters.
         """
         standard_dp = self.signal
         image_size = standard_dp.data.shape[0]
@@ -119,74 +134,10 @@ class CalibrationGenerator():
 
         return xf
 
-    def generate_ring_pattern(self, mask=False, mask_radius=10, scale=100,
-                              image_size=256, amplitude=1000, spread=2,
-                              direct_beam_amplitude=500, asymmetry=1,
-                              rotation=0):
-        """Calculate a set of rings to model a polycrystalline gold diffraction
-        pattern for use in fitting for diffraction pattern calibration.
-        It is suggested that the function generate_ring_pattern is used to
-        find initial values (initial guess) for the parameters used in
-        the function fit_ring_pattern.
-
-        This function is written expecting a single 2D diffraction pattern
-        with equal dimensions (e.g. 256x256).
+    def get_diffraction_calibration(self):
+        """Determine the diffraction pattern pixel size calibration.
 
         Parameters
         ----------
-        mask : bool
-            Choice of whether to use mask or not (mask=True will return a
-            specified circular mask setting a region around
-            the direct beam to zero)
-        mask_radius : int
-            The radius in pixels for a mask over the direct beam disc
-            (the direct beam disc within given radius will be excluded
-            from the fit)
-        scale : float
-            An initial guess for the diffraction calibration
-            in 1/Angstrom units
-        image_size : int
-            Size of the diffraction pattern to be generated in pixels.
-        amplitude : float
-            An initial guess for the amplitude of the polycrystalline rings
-            in arbitrary units
-        spread : float
-            An initial guess for the spread within each ring (Gaussian width)
-        direct_beam_amplitude : float
-            An initial guess for the background intensity from the
-            direct beam disc in arbitrary units
-        asymmetry : float
-            An initial guess for any elliptical asymmetry in the pattern
-            (for a perfectly circular pattern asymmetry=1)
-        rotation : float
-            An initial guess for the rotation of the (elliptical) pattern
-            in radians.
-
-        Returns
-        -------
-        image : np.array()
-            Simulated ring pattern with the same dimensions as self.data
 
         """
-        xi = np.linspace(0, image_size - 1, image_size)
-        yi = np.linspace(0, image_size - 1, image_size)
-        x, y = np.meshgrid(xi, yi)
-
-        pts = np.array([x.ravel(), y.ravel()]).ravel()
-        xcenter = (image_size - 1) / 2
-        ycenter = (image_size - 1) / 2
-
-        ring_pattern = call_ring_pattern(xcenter, ycenter)
-        generated_pattern = ring_pattern(pts, scale, amplitude, spread,
-                                         direct_beam_amplitude, asymmetry,
-                                         rotation)
-        generated_pattern = np.reshape(generated_pattern,
-                                       (image_size, image_size))
-
-        if mask == True:
-            maskROI = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
-                                                  (image_size - 1) / 2, 1, 0)
-            maskROI[maskROI > mask_radius] = 0
-            generated_pattern[maskROI > 0] *= 0
-
-        return generated_pattern
