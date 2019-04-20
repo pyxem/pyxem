@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
-from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import detector_to_fourier, detector_px_to_3D_kspace
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
@@ -66,7 +66,7 @@ class DiffractionVectors(BaseSignal):
         self.cartesian = None
         self.hkls = None
 
-    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
+    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold, center = True):
         """Plot the unique diffraction vectors.
 
         Parameters
@@ -78,6 +78,9 @@ class DiffractionVectors(BaseSignal):
         distance_threshold : float
             The minimum distance between diffraction vectors to be passed to
             get_unique_vectors.
+        center: bool
+            If True (default), the centre of the detector is set as origin.
+            If False, no centering applied.
 
         Returns
         -------
@@ -90,10 +93,19 @@ class DiffractionVectors(BaseSignal):
         # Plot the gvector positions
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(unique_vectors.data.T[0], -unique_vectors.data.T[1], 'ro')
-        ax.set_xlim(-xlim, xlim)
-        ax.set_ylim(-ylim, ylim)
-        ax.set_aspect('equal')
+        if center == True:
+            ax.plot(unique_vectors.data.T[0], -unique_vectors.data.T[1], 'ro')
+            ax.set_xlim(-xlim, xlim)
+            ax.set_ylim(-ylim, ylim)
+            ax.set_aspect('equal')
+        else:
+            ax.plot(unique_vectors.data.T[0], unique_vectors.data.T[1], 'ro')
+            ax.set_xlim(0, xlim)
+            ax.set_ylim(0, ylim)
+            #Invert the y-axis so it goes from top->bottom
+            ax = plt.gca()
+            ax.invert_yaxis()
+
         return fig
 
     def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
@@ -262,7 +274,7 @@ class DiffractionVectors(BaseSignal):
 
         return crystim
 
-    def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length,
+    def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length, xray=False,
                                         *args, **kwargs):
         """Get cartesian coordinates of the diffraction vectors.
 
@@ -272,14 +284,37 @@ class DiffractionVectors(BaseSignal):
             The acceleration voltage with which the data was acquired.
         camera_length : float
             The camera length in meters.
+        xray: boolean
+            If True, it calculates the wavelength for an x-ray (EM wave).
+            If False, it calculates the wavelength for a relativistic electron.
         """
         # Imported here to avoid circular dependency
-        from pyxem.utils.sim_utils import get_electron_wavelength
-        wavelength = get_electron_wavelength(accelerating_voltage)
+        from pyxem.utils.sim_utils import get_wavelength
+        wavelength = get_wavelength(accelerating_voltage, xray=xray)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,
                                   camera_length=camera_length * 1e10,
                                   inplace=False,
                                   parallel=False,  # TODO: For testing
                                   *args, **kwargs)
+        transfer_navigation_axes(self.cartesian, self)
+
+    def calculate_detector_px_to_cartesian_diffraction_coordinates(self, azimuthal_integrator, *args, **kwargs):
+        """It takes a DiffractionVector object with peaks expressed in pixels in the detector. It maps the function detector_px_to_3D_kspace along the scanning pixels of the DiffractionVector class.
+        It stores in the DiffractionVector.cartesian attribute, the gx, gy and gz cartesian coordinates of the diffraction vector, in Angstoms^-1, using purely geometrical arguments.
+        Args:
+        ----------
+        self :DiffractionVector
+            A DiffractionVector object with the diffraction vectors in pixel units of the detector.
+        azimuthal_integrator: pyFAI.azimuthalIntegrator.AzimuthalIntegrator object
+            A pyFAI Geometry object, containing all the detector geometry parameters.
+        Returns
+        ----------
+        self: DiffractionVector
+            DiffractionProfile.cartesian attribute has stored the respective transformed px cordinates to angstrom^-1, in the form of an array containing [g_x, g_y, g_z] for each scanning coordinate.
+        """
+
+        self.cartesian = self.map(detector_px_to_3D_kspace,
+            ai=azimuthal_integrator, 
+            show_progressbar=True, inplace=False, parallel=False)
         transfer_navigation_axes(self.cartesian, self)

@@ -60,6 +60,52 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     k = np.hstack((k_xy, k_z[:, np.newaxis]))
     return k
 
+def detector_px_to_3D_kspace(peak_coord, ai):
+    """Converts the detector 2d coordinate, in pixel units, to the respective 3D coordinate in the kspace, using the pyFAI Geometry object.
+    Args:
+    ----------
+    peak_coord: np.array
+        An array with the diffraction vectors of a single scanning coordinate, in pixel units of the detector.
+    ai: pyFAI.azimuthalIntegrator.AzimuthalIntegrator object
+        A pyFAI Geometry object, containing all the detector geometry parameters.
+    Returns
+    ----------
+    g_xyz: np.array
+        Array composed of [g_x, g_y, g_z] values for the peaks in the scanning coordinate, changed from pixel units to Angstrom^-1.
+    """
+    #Get the geometry parameters necessary for this transormation (all in metres)
+    det2sample_dist = ai.dist
+    wavelength = ai.wavelength
+    
+    #Transform each pixel unit to the actual disctance in metres, using the pyFAI module function
+    if peak_coord.shape == (1,) and peak_coord.dtype == 'object':
+        # From ragged array
+        peak_coord = peak_coord[0]
+    #x= peak_coord[:,0]
+    #y= peak_coord[:,1]
+    zyx =  ai.calc_pos_zyx(d1=peak_coord[:,1], d2=peak_coord[:,0])
+    
+    #Get the polar coordinate angles, in a 3D Edwald circunference:
+    #Note: zyx[2]==x, zyx[1]==y
+    #Vector moduli 'r' from the beam centre to the coordinate at the detector for each peak.
+    r = np.sqrt(zyx[2]**2 + zyx[1]**2)
+    #Phi angles (from z axis) for each peak:
+    phi = np.arctan(r/det2sample_dist)
+    #2 Theta angles (between x and y axis) for each peak. Use arctan2 to get the right quadrant sign:
+    two_theta = np.arctan2(np.sqrt(zyx[1]**2), zyx[2])
+    #TODO:
+    #Account for slight difference in the z-axis when computing angles (stored in the zyx[0])
+    
+    #Convert each x and y to the respective gx, gy and gz values, using 3D geometry. Multiply by the pixel sign:
+    sin_phi = np.sin(phi) #For memory saving
+    gx = (1/wavelength)*sin_phi*np.cos(two_theta)
+    gy = (1/wavelength)*sin_phi*np.sin(two_theta)
+    gz = (1/wavelength)*(np.cos(phi) - 1)
+
+    #Append the reciprocal vectors in one single array, while flipping the vector form, resembling the input array. Convert from m-1 to A-1:
+    g_xyz = np.hstack((gx[:,np.newaxis], gy[:,np.newaxis], gz[:,np.newaxis])) * 1e-10
+
+    return g_xyz
 
 def calculate_norms(z):
     """Calculates the norm of an array of cartesian vectors. For use with map().

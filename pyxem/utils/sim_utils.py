@@ -31,14 +31,17 @@ from transforms3d.euler import mat2euler
 from transforms3d.euler import euler2mat
 
 
-def get_electron_wavelength(accelerating_voltage):
+def get_wavelength(accelerating_voltage, xray=False):
     """Calculates the (relativistic) electron wavelength in Angstroms for a
-    given accelerating voltage in kV.
+    given accelerating voltage in kV, or for an x-ray.
 
     Parameters
     ----------
     accelerating_voltage : float
         The accelerating voltage in kV.
+    xray: boolean
+        If True, it calculates the wavelength for an x-ray (EM wave).
+        If False, it calculates the wavelength for a relativistic electron.
 
     Returns
     -------
@@ -47,12 +50,15 @@ def get_electron_wavelength(accelerating_voltage):
 
     """
     E = accelerating_voltage * 1e3
-    wavelength = h / math.sqrt(2 * m_e * e * E *
-                               (1 + (e / (2 * m_e * c * c)) * E)) * 1e10
+    if xray == False:
+        wavelength = h / math.sqrt(2 * m_e * e * E *
+            (1 + (e / (2 * m_e * c * c)) * E)) * 1e10
+    else:
+        wavelength = (h * c) / (E * e) * 1e10
     return wavelength
 
 
-def get_interaction_constant(accelerating_voltage):
+def get_interaction_constant(accelerating_voltage, xray=False):
     """Calculates the interaction constant, sigma, for a given
     acelerating voltage.
 
@@ -60,6 +66,9 @@ def get_interaction_constant(accelerating_voltage):
     ----------
     accelerating_voltage : float
         The accelerating voltage in V.
+    xray: boolean
+        If True, it calculates the wavelength for an x-ray (EM wave).
+        If False, it calculates the wavelength for a relativistic electron.
 
     Returns
     -------
@@ -68,7 +77,7 @@ def get_interaction_constant(accelerating_voltage):
 
     """
     E = accelerating_voltage
-    wavelength = get_electron_wavelength(accelerating_voltage)
+    wavelength = get_wavelength(accelerating_voltage, xray=xray)
     sigma = (2 * pi * (m_e + e * E))
 
     return sigma
@@ -273,7 +282,8 @@ def simulate_kinematic_scattering(atomic_coordinates,
                                   max_k=1.5,
                                   illumination='plane_wave',
                                   sigma=20,
-                                  scattering_params='lobato'):
+                                  scattering_params='lobato',
+                                  xray=False):
     """Simulate electron scattering from arrangement of atoms comprising one
     elemental species.
 
@@ -309,7 +319,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
     coeffs = np.array(get_scattering_params_dict(scattering_params)[element])
 
     # Calculate electron wavelength for given keV.
-    wavelength = get_electron_wavelength(accelerating_voltage)
+    wavelength = get_wavelength(accelerating_voltage, xray=xray)
 
     # Define a 2D array of k-vectors at which to evaluate scattering.
     l = np.linspace(-max_k, max_k, simulation_size)
