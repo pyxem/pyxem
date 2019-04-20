@@ -31,7 +31,7 @@ def create_spot():
 
     for r in [4, 3, 2]:
         c = 1 / r
-        rr, cc = draw.circle(30, 90, radius=r, shape=z1.shape)
+        rr, cc = draw.circle(30, 90, radius=r, shape=z1.shape) #30 is y!
         z1[rr, cc] = c
         z2[rr, cc] = c
         rr2, cc2 = draw.circle(100, 60, radius=r, shape=z2.shape)
