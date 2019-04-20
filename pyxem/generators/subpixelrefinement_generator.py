@@ -223,12 +223,6 @@ class SubpixelrefinementGenerator():
         which are then returned.
         """
 
-        self.vectors_out = np.zeros(
-                (self.dp.data.shape[0],
-                self.dp.data.shape[1],
-                self.vectors_init.shape[0],
-                self.vectors_init.shape[1]))
-
         def _new_lg_idea(z):
                 """ Internal function providing the algebra for the local_gaussian_method,
                 see docstring of that function for details
@@ -254,15 +248,21 @@ class SubpixelrefinementGenerator():
                 y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
                 return (si[1]+x_ans,si[0]+y_ans)
 
-        for i in np.arange(0, len(self.vectors_init)):
-            vect = self.vectors_pixels[i]
-            expt_disc = self.dp.map(
-            get_experimental_square,
-            vector=vect,
-            square_size=square_size,
-            inplace=False)
-            shifts = expt_disc.map(_new_lg_idea,inplace=False)
+        def _lg_map(dp, vectors,square_size,center,calibration):
+            shifts = np.zeros_like(vectors, dtype=np.float64)
+            for i, vector in enumerate(vectors):
+                expt_disc = get_experimental_square(dp, vector, square_size)
+                shifts[i] = _new_lg_idea(expt_disc)
+            return (((vectors + shifts) - center) * calibration)
 
-        self.vectors_out[:, :, i, :] = (((vect - (square_size/2) + shifts.data) - self.center) * self.calibration)
-        self.last_method = "new_lg_idea"
+        self.vectors_out = DiffractionVectors(
+        self.dp.map(_lg_map,
+                    vectors=self.vector_pixels,
+                    square_size = square_size,
+                    center=self.center,
+                    calibration=self.calibration,
+                    inplace=False))
+
+        self.vectors_out.axes_manager.set_signal_dimension(0)
+        self.last_method = "lg_method"
         return self.vectors_out
