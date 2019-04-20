@@ -84,5 +84,3 @@ def test_function(diffraction_pattern):
                [0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2, 2, 8, 8)
 ])
-def diffraction_pattern_SED(request):
-    return ElectronDiffraction(request.param)
