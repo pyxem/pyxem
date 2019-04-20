@@ -22,8 +22,8 @@ import pytest
 from transforms3d.euler import euler2mat
 
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged, \
-    detector_to_fourier, detector_px_to_3D_kspace, get_rotation_matrix_between_vectors, \
-    get_angle_cartesian, get_detector_to_sample_calibrated_distance
+    detector_to_fourier, get_rotation_matrix_between_vectors, \
+    get_angle_cartesian
 
 
 def test_calculate_norms():
@@ -57,25 +57,6 @@ def test_detector_to_fourier(wavelength,
     k = detector_to_fourier(detector_coords, wavelength, camera_length)
     np.testing.assert_allclose(k, k_expected)
 
-@pytest.mark.parametrize('beam_wavelen, det2sample_len, pixel_size, peak_coord, k_expected', [
-    (0.5, 2e9, 10, 
-        np.array([
-            [0, 0],
-            [0, 1],
-            [1, 0],
-            [1, 1]
-        ]),
-        np.array([
-            [0, 0, 0],
-            [0, (1/0.5)*np.sin(np.arctan(1e5/2e9)), (1/0.5)*(np.cos(np.arctan(1e5/2e9)) - 1)],
-            [(1/0.5)*np.sin(np.arctan(1e5/2e9)), 0, (1/0.5)*(np.cos(np.arctan(1e5/2e9)) - 1)],
-            [(1/0.5)*np.sin(np.arctan(np.sqrt(1e5**2 + 1e5**2)/2e9))*np.sqrt(2/4), (1/0.5)*np.sin(np.arctan(np.sqrt(1e5**2 + 1e5**2)/2e9))*np.sqrt(2/4), (1/0.5)*(np.cos(np.arctan(np.sqrt(1e5**2 + 1e5**2)/2e9)) - 1)]
-        ])
-     )
-])
-def test_detector_px_to_3D_kspace(beam_wavelen, det2sample_len, pixel_size, peak_coord, k_expected):
-    k = detector_px_to_3D_kspace(peak_coord, beam_wavelen, det2sample_len, pixel_size)
-    np.testing.assert_allclose(k, k_expected,atol = 1e-20)
 
 @pytest.mark.parametrize('k1, k2, ref_k1, ref_k2, expected_rotation', [
     ([0, 0, 1], [0, 0, 2], [1, 0, 0], [0, 1, 0], np.identity(3)),  # Degenerate
@@ -96,12 +77,3 @@ def test_get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2,
 def test_get_angle_cartesian(vec_a, vec_b, expected_angle):
     angle = get_angle_cartesian(vec_a, vec_b)
     assert np.isclose(angle, expected_angle)
-
-@pytest.mark.parametrize('distance_hkl, actual_px_len, beam_wavelen, pixel_size, d_expected', [
-    (1, 1, 0.5, 10,
-     1e5/np.tan(2*np.arcsin(0.5/2))
-    )
-])
-def test_get_detector_to_sample_calibrated_distance(distance_hkl, actual_px_len, beam_wavelen, pixel_size, d_expected):
-    d = get_detector_to_sample_calibrated_distance(distance_hkl, actual_px_len, beam_wavelen, pixel_size)
-    np.testing.assert_allclose(d, d_expected)
