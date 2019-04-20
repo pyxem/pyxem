@@ -61,6 +61,54 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     return k
 
 
+def detector_px_to_3D_kspace(peak_coord, beam_wavelen, det2sample_len, pixel_size):
+    """Converts the detector 2d coordinate, in px, to the respective 3D coordinate in the kspace
+    Args:
+    ----------
+    peak_coord: np.array
+        An array with the diffraction vectors of a single scanning coordinate, in pixel units of the detector.
+    beam_wavelen: float
+        Wavelength of the scanning beam, in Angstrom.
+    det2sample_len: float
+        Distance from detector to sample, in Angstrom. IMPORTANT: Distance obtained from the calibration file and the get_detector_to_sample_calibrated_distance function.
+    pixel_size: float
+        Length of each pixel in the detector, in micrometres.
+    Returns
+    ----------
+    g_xyz: np.array
+        Array composed of [g_x, g_y, g_z] values for the peaks in the scanning coordinate, changed from px to angstrom^-1.
+
+    """
+    #Convert each pixel to the actual disctance in Angstrom
+    if peak_coord.shape == (1,) and peak_coord.dtype == 'object':
+        # From ragged array
+        peak_coord = peak_coord[0]
+
+    xy = peak_coord*pixel_size*1e4
+
+    #Extract the pixel-coordinates of x and y axes as an array
+    x = xy[:,0]
+    y = xy[:,1]
+
+    #Get the polar coordinate angles, in a 3D Edwald circunference:
+    #Vector moduli 'r' from the beam centre to the coordinate at the detector for each peak.
+    r = np.sqrt(x**2 + y**2)
+    #Phi angles (from z axis) for each peak:
+    phi = np.arctan(r/det2sample_len)
+    #Theta angles (between x and y axis) for each peak. Use arctan2 to get the right quadrant sign:
+    theta = np.arctan2(y,x)
+    #Convert each x and y to the respective gx, gy and gz values, using 3D geometry. Multiply by the pixel sign:
+    sin_phi = np.sin(phi) #For memory saving
+    gx = (1/beam_wavelen)*sin_phi*np.cos(theta)
+    gy = (1/beam_wavelen)*sin_phi*np.sin(theta)
+    gz = (1/beam_wavelen)*(np.cos(phi) - 1)
+
+    #Append the reciprocal vectors in one single array, while flipping the vector form, resembling the input array:
+    g_xyz = np.hstack((gx[:,np.newaxis], gy[:,np.newaxis], gz[:,np.newaxis]))
+
+    return g_xyz
+
+
 def calculate_norms(z):
     """Calculates the norm of an array of cartesian vectors. For use with map().
 
@@ -200,3 +248,35 @@ def get_angle_cartesian(a, b):
     if determinant == 0:
         return 0.0
     return math.acos(max(-1.0, min(1.0, np.dot(a, b) / determinant)))
+
+def get_detector_to_sample_calibrated_distance(d_hkl_calc, peak_distance,
+                                               wavelength, pixel_size):
+    """
+    Get the calibrated detector to sample distance from a basic geometrical 
+    transformation, using a d_hkl_calc diffraction vector length and the actual 
+    pixel length. The center of the data array is assumed to be the center of the 
+    pattern.
+
+    Parameters
+    ----------
+    d_hkl_calc : float
+        Calculated diffraction vector (hkl) magnitude in reciprocal Angstroms.
+    peak_distance : int
+        The measured distance from the direct beam to the peak used for calibration, in pixel units.
+    wavelength : float
+        Wavelength radiation used as probe, in Angstroms.
+    pixel_size : float
+        Size of each pixel in the detector, in micrometres.
+    
+    Returns
+    -------
+    sample2det_len : float
+        Calibrated sample to detector distance, in Angstroms.
+    """
+
+    #Calculate the diffraction theta angle from the calculated diffraction vector magnitude.
+    two_theta = 2 * np.arcsin( (d_hkl_calc * wavelength) / 2 )
+    #Calculate, using basic trigonometry, the det2sample_len from the theta angle and the actual pixel detected length:
+    det2sample_len = (peak_distance * pixel_size * 1e4) / np.tan(two_theta)
+
+    return det2sample_len
