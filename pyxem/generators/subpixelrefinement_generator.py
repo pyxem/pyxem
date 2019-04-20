@@ -211,9 +211,9 @@ class SubpixelrefinementGenerator():
 
         Returns
         -------
-            vector_out : DiffractionVectors
-                DiffractionVectors containing the refined vectors in calibrated
-                units with the same navigation shape as the diffraction patterns.
+        vector_out : DiffractionVectors
+            DiffractionVectors containing the refined vectors in calibrated
+            units with the same navigation shape as the diffraction patterns.
 
         Notes
         -----
