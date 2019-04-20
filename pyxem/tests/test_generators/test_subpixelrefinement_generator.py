@@ -118,5 +118,3 @@ def test_local_gaussian_method_exciting(dp,diffraction_vectors):
     """
     spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
     s = spr.local_gaussian_method(8)
-    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
-    assert np.all(error < 5)
