@@ -31,7 +31,7 @@ def create_spot():
 
     for r in [4, 3, 2]:
         c = 1 / r
-        rr, cc = draw.circle(30, 90, radius=r, shape=z1.shape)
+        rr, cc = draw.circle(30, 90, radius=r, shape=z1.shape) #30 is y!
         z1[rr, cc] = c
         z2[rr, cc] = c
         rr2, cc2 = draw.circle(100, 60, radius=r, shape=z2.shape)
@@ -92,3 +92,29 @@ def test_assertioned_com(dp, diffraction_vectors):
     error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
     rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
     assert rms_error < 1e-5  # perfect detection for this trivial case
+
+@pytest.mark.parametrize('dp, diffraction_vectors', [
+    (create_spot(), np.array([[90 - 64, 30 - 64]])),
+])
+def test_local_gaussian_method_dull(dp,diffraction_vectors):
+    """
+    This aims to test that our x/y convention is correct. The peak shape for
+    these tests is unsuitable for this method.
+    """
+    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
+    s = spr.local_gaussian_method(8)
+    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
+    assert np.all(error < 5)
+
+@pytest.mark.parametrize('dp, diffraction_vectors', [
+    (create_spot(), create_vectors())
+])
+
+@pytest.mark.xfail(raises=ValueError)
+def test_local_gaussian_method_exciting(dp,diffraction_vectors):
+    """
+    This aims to test that our x/y convention is correct. The peak shape for
+    these tests is unsuitable for this method.
+    """
+    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
+    s = spr.local_gaussian_method(8)

@@ -154,7 +154,6 @@ class SubpixelrefinementGenerator():
             cx = np.sum(dx * np.arange(w))
             cy = np.sum(dy * np.arange(h))
             return cx, cy
-                    
 
         def _com_experimental_square(z, vector, square_size):
             """Wrapper for get_experimental_square that makes the non-zero
@@ -197,4 +196,73 @@ class SubpixelrefinementGenerator():
         self.vectors_out.axes_manager.set_signal_dimension(0)
 
         self.last_method = "center_of_mass_method"
+        return self.vectors_out
+
+    def local_gaussian_method(self,square_size):
+        """ Refinement based on the mathematics of a local maxima on a
+        continious region, using the (discrete) maxima pixel as a starting point.
+        See Notes.
+
+        Parameters
+        ----------
+        square_size : int
+            Length (in pixels) of one side of a square the contains the peak to
+            be refined.
+
+        Returns
+        -------
+        vector_out : DiffractionVectors
+            DiffractionVectors containing the refined vectors in calibrated
+            units with the same navigation shape as the diffraction patterns.
+
+        Notes
+        -----
+        This method works by first locating the maximum intenisty value within teh square.
+        The four adjacent pixels are then considered and used to form two independant
+        quadratic equations. Solving these gives the x_center and y_center coordinates,
+        which are then returned.
+        """
+
+        def _new_lg_idea(z):
+                """ Internal function providing the algebra for the local_gaussian_method,
+                see docstring of that function for details
+
+                Parameters
+                ----------
+                z : np.array
+                    subsquare containing the peak to be localised
+
+                Returns
+                -------
+                (x,y) : tuple
+                    Containing subpixel resolved values for the center
+                """
+                si = np.unravel_index(np.argmax(z),z.shape)
+                z_ref = z[si[0]-1:si[0]+2,si[1]-1:si[1]+2]
+                if z_ref.shape != (3,3):
+                    raise ValueError("The local maxima needs to have 4 adjacent pixels")
+                M = z_ref[1,1]
+                LX,RX = z_ref[1,0],z_ref[1,2]
+                UY,DY = z_ref[0,1],z_ref[2,1]
+                x_ans = 0.5 * (LX-RX) / (LX + RX - 2*M)
+                y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
+                return (si[1]+x_ans,si[0]+y_ans)
+
+        def _lg_map(dp, vectors,square_size,center,calibration):
+            shifts = np.zeros_like(vectors, dtype=np.float64)
+            for i, vector in enumerate(vectors):
+                expt_disc = get_experimental_square(dp, vector, square_size)
+                shifts[i] = _new_lg_idea(expt_disc)
+            return (((vectors + shifts) - center) * calibration)
+
+        self.vectors_out = DiffractionVectors(
+        self.dp.map(_lg_map,
+                    vectors=self.vector_pixels,
+                    square_size = square_size,
+                    center=self.center,
+                    calibration=self.calibration,
+                    inplace=False))
+
+        self.vectors_out.axes_manager.set_signal_dimension(0)
+        self.last_method = "lg_method"
         return self.vectors_out
