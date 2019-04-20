@@ -155,7 +155,6 @@ class SubpixelrefinementGenerator():
             cy = np.sum(dy * np.arange(h))
             return cx, cy
 
-
         def _com_experimental_square(z, vector, square_size):
             """Wrapper for get_experimental_square that makes the non-zero
             elements symmetrical around the 'unsubpixeled' peak by zeroing a
@@ -199,7 +198,7 @@ class SubpixelrefinementGenerator():
         self.last_method = "center_of_mass_method"
         return self.vectors_out
 
-        def local_gaussian_method(self,square_size):
+    def local_gaussian_method(self,square_size):
         """ Refinement based on the mathematics of a local maxima on a
         continious region, using the (discrete) maxima pixel as a starting point.
         See Notes.
@@ -224,47 +223,46 @@ class SubpixelrefinementGenerator():
         which are then returned.
         """
 
-            self.vectors_out = np.zeros(
+        self.vectors_out = np.zeros(
                 (self.dp.data.shape[0],
                 self.dp.data.shape[1],
                 self.vectors_init.shape[0],
                 self.vectors_init.shape[1]))
 
-                def _new_lg_idea(z):
-                    """ Internal function providing the algebra for the local_gaussian_method,
-                    see docstring of that function for details
+        def _new_lg_idea(z):
+                """ Internal function providing the algebra for the local_gaussian_method,
+                see docstring of that function for details
 
-                    Parameters
-                    ----------
-                    z : np.array
-                        subsquare containing the peak to be localised
+                Parameters
+                ----------
+                z : np.array
+                    subsquare containing the peak to be localised
 
-                    Returns
-                    -------
-                    (x,y) : tuple
-                        Containing subpixel resolved values for the center
-                    """
-                    si = np.unravel_index(np.argmax(z),z.shape)
-                    z_ref = z[si[0]-1:si[0]+2,si[1]-1:si[1]+2]
-                    if z_ref.shape != (3,3):
-                        raise ValueError("The local maxima needs to have 4 adjacent pixels")
-                    M = z_ref[1,1]
-                    LX,RX = z_ref[1,0],z_ref[1,2]
-                    UY,DY = z_ref[0,1],z_ref[2,1]
-
-                    x_ans = 0.5 * (LX-RX) / (LX + RX - 2*M)
-                    y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
-                    return (si[1]+x_ans,si[0]+y_ans)
+                Returns
+                -------
+                (x,y) : tuple
+                    Containing subpixel resolved values for the center
+                """
+                si = np.unravel_index(np.argmax(z),z.shape)
+                z_ref = z[si[0]-1:si[0]+2,si[1]-1:si[1]+2]
+                if z_ref.shape != (3,3):
+                    raise ValueError("The local maxima needs to have 4 adjacent pixels")
+                M = z_ref[1,1]
+                LX,RX = z_ref[1,0],z_ref[1,2]
+                UY,DY = z_ref[0,1],z_ref[2,1]
+                x_ans = 0.5 * (LX-RX) / (LX + RX - 2*M)
+                y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
+                return (si[1]+x_ans,si[0]+y_ans)
 
         for i in np.arange(0, len(self.vectors_init)):
             vect = self.vectors_pixels[i]
             expt_disc = self.dp.map(
-                get_experimental_square,
-                vector=vect,
-                square_size=square_size,
-                inplace=False)
+            get_experimental_square,
+            vector=vect,
+            square_size=square_size,
+            inplace=False)
             shifts = expt_disc.map(_new_lg_idea,inplace=False)
-            self.vectors_out[:, :, i, :] = (((vect - (square_size/2) + shifts.data) - self.center) * self.calibration)
 
+        self.vectors_out[:, :, i, :] = (((vect - (square_size/2) + shifts.data) - self.center) * self.calibration)
         self.last_method = "new_lg_idea"
         return self.vectors_out
