@@ -89,7 +89,7 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None):
     Where L is a (2x2) matrix that takes Vu (unstrained) onto Vs (strained).
     We find L by using the np.linalg.inv() function
     """
-    Vs,Vu = Vs.T,Vu.T #see Pull Request 368
+    Vs, Vu = Vs.T, Vu.T  # see Pull Request 368
     L = np.matmul(Vs, np.linalg.inv(Vu))
     D = np.eye(3)
     D[0:2, 0:2] = L
