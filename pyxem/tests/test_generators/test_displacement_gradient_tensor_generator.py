@@ -25,12 +25,12 @@ from pyxem.generators.displacement_gradient_tensor_generator import \
 
 
 def rotation(z):
-    z = z.T # [[Vx Ux],[Vy,Uy]] rotates incorrectly, so we transpose
+    z = z.T  # [[Vx Ux],[Vy,Uy]] rotates incorrectly, so we transpose
     theta = np.deg2rad(3)
     c, s = np.cos(theta), np.sin(theta)
     R = np.asarray(([c, -s], [s, c]))
     zbar = np.matmul(R, z)
-    return zbar.T # back to the incorrectly rotating format we expect
+    return zbar.T  # back to the incorrectly rotating format we expect
 
 
 def uniform_expansion(z):
@@ -65,27 +65,35 @@ def get_arrays():
     A pair that are neither orthogonal to each other, nor normalised
     """
     xy = np.asarray([[1, 0], [0, 1]])
-    oo = np.asarray(([1/np.sqrt(2),1/np.sqrt(2)], [1/np.sqrt(2),-1/np.sqrt(2)]))
-    danger = np.asarray(([1/np.sqrt(2),1/np.sqrt(2)], [3,-2])) #not orthogonal, not normalised
+    oo = np.asarray(([1 / np.sqrt(2), 1 / np.sqrt(2)], [1 / np.sqrt(2), -1 / np.sqrt(2)]))
+    danger = np.asarray(([1 / np.sqrt(2), 1 / np.sqrt(2)], [3, -2]))  # not orthogonal, not normalised
     s_xy = generate_strain_map(xy)
     s_oo = generate_strain_map(oo)
     s_da = generate_strain_map(danger)
-    return s_xy,s_oo,s_da
+    return s_xy, s_oo, s_da
+
 
 def test_rotation():
     """
     We should always measure the same rotations, regardless of basis (note the tighter constraint
     avaliable for orthonormalised vectors)
     """
-    s_xy,s_oo,s_da =  get_arrays()
-    np.testing.assert_almost_equal(s_xy.inav[3].data, s_oo.inav[3].data,decimal=5) #rotations
-    np.testing.assert_almost_equal(s_xy.inav[3].data, s_da.inav[3].data,decimal=2) #rotations
+    s_xy, s_oo, s_da = get_arrays()
+    np.testing.assert_almost_equal(s_xy.inav[3].data, s_oo.inav[3].data, decimal=5)  # rotations
+    np.testing.assert_almost_equal(s_xy.inav[3].data, s_da.inav[3].data, decimal=2)  # rotations
+
 
 def test_trace():
     """
     Basis does effect strain measurement, but we can simply calculate suitable invarients.
     See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
     """
-    s_xy,s_oo,s_da =  get_arrays()
-    np.testing.assert_almost_equal(np.add(s_xy.inav[0].data,s_xy.inav[1].data),np.add(s_oo.inav[0].data,s_oo.inav[1].data),decimal=5)
-    np.testing.assert_almost_equal(np.add(s_xy.inav[0].data,s_xy.inav[1].data),np.add(s_da.inav[0].data,s_da.inav[1].data),decimal=2)
+    s_xy, s_oo, s_da = get_arrays()
+    np.testing.assert_almost_equal(
+        np.add(
+            s_xy.inav[0].data, s_xy.inav[1].data), np.add(
+            s_oo.inav[0].data, s_oo.inav[1].data), decimal=5)
+    np.testing.assert_almost_equal(
+        np.add(
+            s_xy.inav[0].data, s_xy.inav[1].data), np.add(
+            s_da.inav[0].data, s_da.inav[1].data), decimal=2)

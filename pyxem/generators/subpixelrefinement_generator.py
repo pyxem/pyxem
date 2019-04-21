@@ -154,7 +154,6 @@ class SubpixelrefinementGenerator():
             cx = np.sum(dx * np.arange(w))
             cy = np.sum(dy * np.arange(h))
             return cx, cy
-                    
 
         def _com_experimental_square(z, vector, square_size):
             """Wrapper for get_experimental_square that makes the non-zero
