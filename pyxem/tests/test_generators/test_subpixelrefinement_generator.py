@@ -49,6 +49,22 @@ def create_vectors():
     vectors.axes_manager.set_signal_dimension(0)
     return vectors
 
+@pytest.mark.xfail(raises=ValueError)
+def test_bad_vectors_numpy():
+    """ tests that putting bad vectors in causes an error to be thrown when
+    you initiate the geneartor
+    """
+    v = np.array([[1,-100]])
+    dp = ElectronDiffraction(np.ones((20,20)))
+    sprg = SubpixelrefinementGenerator(dp,v)
+
+@pytest.mark.xfail(raises=ValueError)
+def test_bad_vectors_DiffractionVectors():
+    v = np.array([[1,-100]])
+    dv = DiffractionVectors(v)
+    dp = ElectronDiffraction(np.ones((20,20)))
+    sprg = SubpixelrefinementGenerator(dp,dv)
+
 
 @pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
 def test_conventional_xc(diffraction_pattern):

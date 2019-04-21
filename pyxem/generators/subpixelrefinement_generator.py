@@ -61,6 +61,7 @@ class SubpixelrefinementGenerator():
             if vectors.shape == (1,) and vectors.dtype == np.object:
                 vectors = vectors[0]
             return np.floor((vectors.astype(np.float64) / calibration) + center).astype(np.int)
+
         if isinstance(vectors, DiffractionVectors):
             if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
                 raise ValueError('Vectors with shape {} must have the same navigation shape '
@@ -72,6 +73,13 @@ class SubpixelrefinementGenerator():
                                              inplace=False)
         else:
             self.vector_pixels = _floor(vectors, self.calibration, self.center)
+
+        if isinstance(self.vector_pixels,DiffractionVectors):
+            if np.any(self.vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels.data < 0)):
+                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+        elif isinstance(self.vector_pixels,np.ndarray):
+            if np.any((self.vector_pixels > np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels < 0)):
+                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
 
     def conventional_xc(self, square_size, disc_radius, upsample_factor):
         """Refines the peaks using (phase) cross correlation.
