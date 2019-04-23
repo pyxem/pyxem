@@ -277,7 +277,7 @@ class ElectronDiffraction(Signal2D):
             diffraction patterns.
 
         """
-        # These three lines account for the transformation center not being (0,0)
+        # Account for the transformation center not being (0,0)
         shape = self.axes_manager.signal_shape
         shift_x = (shape[1] - 1) / 2
         shift_y = (shape[0] - 1) / 2
@@ -288,7 +288,7 @@ class ElectronDiffraction(Signal2D):
         # This defines the transform you want to perform
         distortion = tf.AffineTransform(matrix=D)
 
-        # skimage transforms can be added like this, actually matrix multiplication,
+        # skimage transforms can be added like this, does matrix multiplication,
         # hence the need for the brackets. (Note tf.warp takes the inverse)
         transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
 
@@ -505,8 +505,8 @@ class ElectronDiffraction(Signal2D):
 
             * 'h-dome' -
             * 'gaussian_difference' - Uses a difference between two gaussian
-                                convolutions to determine where the peaks are, and sets
-                                all other pixels to 0.
+                                convolutions to determine where the peaks are,
+                                and sets all other pixels to 0.
             * 'median' - Use a median filter for background removal
             * 'reference_pattern' - Subtract a user-defined reference patterns
                 from every diffraction pattern.
@@ -685,7 +685,8 @@ class ElectronDiffraction(Signal2D):
 
         """
         if disc_image is None:
-            warn("You have not specified a disc image, as such you will not be able to use the xc method in this session")
+            warn("You have not specified a disc image, as such you will not "
+                 "be able to use the xc method in this session")
 
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
