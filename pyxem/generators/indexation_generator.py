@@ -89,7 +89,7 @@ class IndexationGenerator():
         matching_results : TemplateMatchingResults
             Navigation axes of the electron diffraction signal containing
             correlation results for each diffraction pattern, in the form
-                [Library Number , [z, x, z], Correlation Score]
+            [Library Number , [z, x, z], Correlation Score]
 
         """
         signal = self.signal
@@ -244,7 +244,7 @@ class VectorIndexationGenerator():
             degrees, allowed for indexation.
         index_error_tol : float
             Max allowed error in peak indexation for classifying it as indexed,
-            calculated as |hkl_calculated - round(hkl_calculated)|.
+            calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
         n_peaks_to_index : int
             The maximum number of peak to index.
         n_best : int
