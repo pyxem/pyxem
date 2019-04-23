@@ -314,14 +314,14 @@ def match_vectors(peaks,
 def crystal_from_template_matching(z_matches):
     """Takes template matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
-    reliability/ies to define a crystallographic map.
+    reliability to define a crystallographic map.
 
     Parameters
     ----------
     z_matches : numpy.array
         Template matching results in an array of shape (m,3) sorted by
         correlation (descending) within each phase, with entries
-        {phase, [z, x, z], correlation}
+        {phase, [z, x, z], correlation}.
 
     Returns
     -------
