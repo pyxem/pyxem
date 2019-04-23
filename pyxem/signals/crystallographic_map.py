@@ -163,7 +163,7 @@ class CrystallographicMap(BaseSignal):
         'orientation_reliability'
         'phase_reliability'
 
-    Atrributes
+    Attributes
     ----------
     method : string
         Method used to obtain crystallographic mapping results, may be
@@ -215,30 +215,28 @@ class CrystallographicMap(BaseSignal):
         ----------
         metric : string
             String identifier for the indexation / matching metric to be
-            mapped, for template_matching valid metrics are
-                'correlation'
-                'orientation_reliability'
-                'phase_reliability'
-            Here, orientation reliability is given by
-                100 * (1 - second_best_correlation/best_correlation)
-            and phase reliability is given by
-                100 * (1 - second_best_correlation_of_other_phase/best_correlation)
-
-            For vector_matching, valid metrics are;
-                'match_rate'
-                'ehkls'
-                'total_error'
-                'orientation_reliability'
-                'phase_reliability'
-            Here, orientation reliability is given by
-                100 * (1 - lowest_error/second_lowest_error)
-            and phase reliability is given by
-                100 * (1 - lowest_error/lowest_error_of_other_phase)
+            mapped, for template matching valid metrics are {'correlation',
+            'orientation_reliability', 'phase_reliability'}. For vector matching
+            valid metrics are {'match_rate', 'ehkls', 'total_error',
+            'orientation_reliability', 'phase_reliability'}.
 
         Returns
         -------
         metric_map : Signal2D
             A map of the specified metric at each navigation position.
+
+        Notes
+        -----
+        For template matching, orientation reliability is given by
+            100 * (1 - second_best_correlation/best_correlation)
+        and phase reliability is given by
+            100 * (1 - second_best_correlation_of_other_phase/best_correlation)
+
+        For vector matching, orientation reliability is given by
+            100 * (1 - lowest_error/second_lowest_error)
+        and phase reliability is given by
+            100 * (1 - lowest_error/lowest_error_of_other_phase)
+
 
         """
         if self.method == 'template_matching':
