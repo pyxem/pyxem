@@ -365,6 +365,10 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
+        mask_array : numpy.array
+            Optional array with the same dimensions as the signal axes.
+            Consists of 0s for excluded pixels and 1s for non-excluded
+            pixels. The 0-pixels are excluded from the radial average.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
@@ -376,24 +380,13 @@ class ElectronDiffraction(Signal2D):
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
-            The radial average profile of each diffraction pattern
-            in the ElectronDiffraction signal as a Signal1D.
-
-        Parameters
-        -------
-        mask_array : optional array with the same dimensions as z
-                Consists of 0s for excluded pixels and 1s for non-excluded pixels.
-                The 0-pixels are excluded from the radial average.
+            The radial average profile of each diffraction pattern in the
+            ElectronDiffraction signal as a Signal1D.
 
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
 
-        Examples
-        --------
-        .. code-block:: python
-            profiles = ed.get_radial_profile(mask_array=mask)
-            profiles.plot()
         """
         radial_profiles = self.map(radial_average, mask=mask_array,
                                    inplace=inplace,

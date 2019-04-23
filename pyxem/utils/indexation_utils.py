@@ -74,6 +74,7 @@ def correlate_library(image, library, n_largest, mask):
         correlation : float
             A coefficient of correlation, only normalised to the template
             intensity. This is in contrast to the reference work.
+
     References
     ----------
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
@@ -168,7 +169,7 @@ def match_vectors(peaks,
         Max allowed angle difference in radians when comparing vector pairs.
     index_error_tol : float
         Max allowed error in peak indexation for classifying it as indexed,
-        calculated as |hkl_calculated - round(hkl_calculated)|.
+        calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
     n_peaks_to_index : int
         The maximum number of peak to index.
     n_best : int
@@ -317,14 +318,14 @@ def crystal_from_template_matching(z_matches):
 
     Parameters
     ----------
-    z_matches : np.array()
+    z_matches : numpy.array
         Template matching results in an array of shape (m,3) with entries
-            [phase, [z, x, z], correlation],
-        sorted by correlation (descending) within each phase.
+        [phase, [z, x, z], correlation], sorted by correlation (descending)
+        within each phase.
 
     Returns
     -------
-    results_array : np.array()
+    results_array : numpy.array
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
     """
