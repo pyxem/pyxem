@@ -7,6 +7,9 @@
 .. image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
     :target: https://coveralls.io/github/pyxem/pyxem?branch=master
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2649352.svg
+   :target: https://doi.org/10.5281/zenodo.2649352
+
 .. https://github.com/lemurheavy/coveralls-public/issues/971
 
 
