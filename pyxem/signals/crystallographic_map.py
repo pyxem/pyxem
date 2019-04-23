@@ -237,7 +237,6 @@ class CrystallographicMap(BaseSignal):
         and phase reliability is given by
             100 * (1 - lowest_error/lowest_error_of_other_phase)
 
-
         """
         if self.method == 'template_matching':
             template_metrics = [

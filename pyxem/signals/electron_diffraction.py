@@ -608,7 +608,25 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ---------
         method : str
-            Select peak finding algorithm to implement. Available methods are:
+            Select peak finding algorithm to implement. Available methods are
+            {'zaefferer', 'stat', 'laplacian_of_gaussians',
+            'difference_of_gaussians', 'xc'}
+        *args : arguments
+            Arguments to be passed to the peak finders.
+        **kwargs : arguments
+            Keyword arguments to be passed to the peak finders.
+
+        Returns
+        -------
+        peaks : DiffractionVectors
+            A DiffractionVectors object with navigation dimensions identical to
+            the original ElectronDiffraction object. Each signal is a BaseSignal
+            object contiaining the diffraction vectors found at each navigation
+            position, in calibrated units.
+
+        Notes
+        -----
+        Peak finding methods are detailed as:
 
             * 'zaefferer' - based on gradient thresholding and refinement
               by local region of interest optimisation
@@ -620,20 +638,6 @@ class ElectronDiffraction(Signal2D):
               `scikit-image` which uses the difference of Gaussian matrices
               approach.
             * 'xc' - A cross correlation peakfinder
-
-
-        *args:
-            Arguments to be passed to the peak finders.
-        **kwargs:
-            Keyword arguments to be passed to the peak finders.
-
-        Returns
-        -------
-        peaks : DiffractionVectors
-            A DiffractionVectors object with navigation dimensions identical to
-            the original ElectronDiffraction object. Each signal is a BaseSignal
-            object contiaining the diffraction vectors found at each navigation
-            position, in calibrated units.
 
         """
         method_dict = {
