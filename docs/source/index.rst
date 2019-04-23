@@ -55,9 +55,6 @@ pyXem requires python 3 and conda - we suggest using the python 3 version of `Mi
 Download the `source code <https://github.com/pyxem/pyxem>`__ and put it in a directory on your computer. The following commands will then install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
 
       $ conda install -c conda-forge diffpy.structure
-      $ conda install -c anaconda cython
-      $ conda install -c conda-forge spglib
-      $ conda install -c conda-forge traits
       $ pip install . -r requirements.txt
 
 
