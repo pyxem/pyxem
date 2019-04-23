@@ -26,9 +26,10 @@ from pyxem.signals.tensor_field import DisplacementGradientMap
 
 def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     """Calculates the displacement gradient tensor at each navigation position
-    in a map by comparing vectors to determine the 2 x 2 matrix, L, that maps
-    unstrained vectors, Vu, to strained vectors, Vs, using the np.lingalg.inv()
-    function to find L that satisfies :math:`Vs = \\mathbf(L) Vu`.
+    in a map by comparing vectors to determine the 2 x 2 matrix,
+    :math:`\\mathbf(L)`, that maps unstrained vectors, Vu, to strained vectors,
+    Vs, using the np.lingalg.inv() function to find L that satisfies
+    :math:`Vs = \\mathbf(L) Vu`.
 
     The transformation is returned as a 3 x 3 displacement gradient tensor.
 
@@ -62,9 +63,9 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
 
 def get_single_DisplacementGradientTensor(Vs, Vu=None):
     """Calculates the displacement gradient tensor from a pairs of vectors by
-    determining the 2 x 2 matrix, L, that maps unstrained vectors, Vu, onto
-    strained vectors, Vs, using the np.lingalg.inv() function to find L that
-    satisfies :math:`Vs = \\mathbf(L) Vu`.
+    determining the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
+    vectors, Vu, onto strained vectors, Vs, using the np.lingalg.inv() function
+    to find :math:`\\mathbf(L)` that satisfies :math:`Vs = \\mathbf(L) Vu`.
 
     The transformation is returned as a 3 x 3 displacement gradient tensor.
 
