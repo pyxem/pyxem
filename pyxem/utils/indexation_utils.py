@@ -319,16 +319,16 @@ def crystal_from_template_matching(z_matches):
     Parameters
     ----------
     z_matches : numpy.array
-        Template matching results in an array of shape (m,3) with entries
-        [phase, [z, x, z], correlation], sorted by correlation (descending)
-        within each phase.
+        Template matching results in an array of shape (m,3) sorted by
+        correlation (descending) within each phase.with entries
+        [phase, [z, x, z], correlation]
 
     Returns
     -------
     results_array : numpy.array
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
-    
+
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
