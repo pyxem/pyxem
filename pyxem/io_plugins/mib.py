@@ -237,79 +237,9 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
 def file_reader(filename, hdr_info=None, encoding="latin-1",
                 mmap_mode='c', *args, **kwds):
     """Parses a Medipix hdr (.hdr) file and reads the data from the
-    corresponding raw (.mib) file; or, reads a raw file if the dictionary
-    hdr_info is provided.
-
-    hdr stands for "Raw Parameter List", an ASCII text, tab delimited file in
-    which HyperSpy reads the image parameters for a raw file.
-
-                    TABLE OF hdr PARAMETERS
-        key             type     description
-      ----------   ------------ --------------------
-      # Mandatory      keys
-      width            int      # pixels per row
-      height           int      # number of rows
-      depth            int      # number of images or spectral pts
-      offset           int      # bytes to skip
-      data-type        str      # 'signed', 'unsigned', or 'float'
-      data-length      str      # bytes per pixel  '1', '2', '4', or '8'
-      byte-order       str      # 'big-endian', 'little-endian', or 'dont-care'
-      record-by        str      # 'image', 'vector', or 'dont-care'
-      # HyperSpy-specific keys
-      depth-origin    int      # energy offset in pixels
-      depth-scale     float    # energy scaling (units per pixel)
-      depth-units     str      # energy units, usually eV
-      depth-name      str      # Name of the magnitude stored as depth
-      width-origin         int      # column offset in pixels
-      width-scale          float    # column scaling (units per pixel)
-      width-units          str      # column units, usually nm
-      width-name      str           # Name of the magnitude stored as width
-      height-origin         int      # row offset in pixels
-      height-scale          float    # row scaling (units per pixel)
-      height-units          str      # row units, usually nm
-      height-name      str           # Name of the magnitude stored as height
-      signal            str        # Type of the signal stored, e.g. EDS_SEM
-      convergence-angle float   # TEM convergence angle in mrad
-      tilt-stage        float   # The tilt of the stage
-      date              str     # date in ISO 8601
-      time              str     # time in ISO 8601
-      title              str    # title of the signal to be stored
-
-    NOTES
-    -----
-
-    When 'data-length' is 1, the 'byte order' is not relevant as there is only
-    one byte per datum, and 'byte-order' should be 'dont-care'.
-
-    When 'depth' is 1, the file has one image, 'record-by' is not relevant and
-    should be 'dont-care'. For spectral images, 'record-by' is 'vector'.
-    For stacks of images, 'record-by' is 'image'.
-
-    Floating point numbers can be IEEE 4-byte, or IEEE 8-byte. Therefore if
-    data-type is float, data-length MUST be 4 or 8.
-
-    The hdr file is read in a case-insensitive manner. However, when providing
-    a dictionary as input, the keys MUST be lowercase.
-
-    Comment lines, beginning with a semi-colon ';' are allowed anywhere.
-
-    The first non-comment in the hdr file line MUST have two column names:
-    'name_1'<TAB>'name_2'; any name would do e.g. 'key'<TAB>'value'.
-
-    Parameters can be in ANY order.
-
-    In the hdr file, the parameter name is followed by ONE tab (spaces are
-    ignored) e.g.: 'data-length'<TAB>'2'
-
-    In the hdr file, other data and more tabs can follow the two items on
-    each row, and are ignored.
-
-    Other keys and values can be included and are ignored.
-
-    Any number of spaces can go along with each tab.
+    corresponding raw (.mib) file.
 
     """
-
     if not hdr_info:
         if filename[-3:] in file_extensions:
             with codecs.open(filename, encoding=encoding,

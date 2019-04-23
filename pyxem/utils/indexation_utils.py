@@ -328,6 +328,7 @@ def crystal_from_template_matching(z_matches):
     results_array : numpy.array
         Crystallographic mapping results in an array (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
+    
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
