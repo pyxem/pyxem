@@ -7,7 +7,7 @@
     :hidden:
 
     self
-    contents
+    modules
     literature
     conventions
     contributing
