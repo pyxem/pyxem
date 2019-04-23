@@ -321,13 +321,13 @@ def crystal_from_template_matching(z_matches):
     z_matches : numpy.array
         Template matching results in an array of shape (m,3) sorted by
         correlation (descending) within each phase, with entries
-        {phase, [z, x, z], correlation}.
+        [phase, [z, x, z], correlation]
 
     Returns
     -------
     results_array : numpy.array
-        Crystallographic mapping results in an array (3) with entries
-        {phase, np.array((z, x, z)), dict(metrics)}
+        Crystallographic mapping results in an array of shape (3) with entries
+        [phase, np.array((z, x, z)), dict(metrics)]
 
     """
     # Create empty array for results.
@@ -369,20 +369,20 @@ def crystal_from_template_matching(z_matches):
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
-    reliability/ies to define a crystallographic map.
+    reliability to define a crystallographic map.
 
     Parameters
     ----------
-    z_matches : np.array()
-        Template matching results in an array of shape (m,5) with entries
-            [phase, R, match_rate, ehkls, total_error],
-        sorted by total_error (ascending) within each phase.
+    z_matches : numpy.array
+        Template matching results in an array of shape (m,5) sorted by
+        total_error (ascending) within each phase, with entries
+        [phase, R, match_rate, ehkls, total_error]
 
     Returns
     -------
-    results_array : np.array()
-        Crystallographic mapping results in an array (3) with entries
-        [phase, np.array((z,x,z)), dict(metrics)]
+    results_array : numpy.array
+        Crystallographic mapping results in an array of shape (3) with entries
+        [phase, np.array((z, x, z)), dict(metrics)]
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
