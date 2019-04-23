@@ -680,11 +680,10 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        disc_image : numpy.array (default:None)
-            see .utils.peakfinders2D.peak_finder_xc for details. If not
+        disc_image : numpy.array
+            See .utils.peakfinders2D.peak_finder_xc for details. If not
             given a warning will be raised.
-
-        imshow_kwargs : (default:{})
+        imshow_kwargs : arguments
             kwargs to be passed to internal imshow statements
 
         Notes

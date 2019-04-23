@@ -42,7 +42,7 @@ def correlate_library(image, library, n_largest, mask):
 
     Parameters
     ----------
-    image : np.array()
+    image : numpy.array
         The experimental diffraction pattern of interest.
     library : DiffractionLibrary
         The library of diffraction simulations to be correlated with the
@@ -54,24 +54,26 @@ def correlate_library(image, library, n_largest, mask):
 
     Returns
     -------
-    top_matches : (<num phases>*n_largest, 3), np.array()
-        A numpy array containing the top n correlated simulations for the
-        experimental pattern of interest, where each entry is on the form
-            [phase index, [z, x, z], correlation]
-        where
-            phase_index : int
-                Index of the phase, following the ordering of the library keys
-            [z, x, z] : ndarray
-                numpy array of three floats, specifying the orientation in the
-                Bunge convention, in degrees.
-            correlation : float
-                A coefficient of correlation, only normalised to the template
-                intensity. This is in contrast to the reference work.
+    top_matches : numpy.array
+        Array of shape (<num phases>*n_largest, 3) containing the top n
+        correlated simulations for the experimental pattern of interest, where
+        each entry is on the form [phase index, [z, x, z], correlation].
 
     See also
     --------
     IndexationGenerator.correlate
 
+    Notes
+    -----
+    Correlation results are defined as,
+        phase_index : int
+            Index of the phase, following the ordering of the library keys
+        [z, x, z] : ndarray
+            numpy array of three floats, specifying the orientation in the
+            Bunge convention, in degrees.
+        correlation : float
+            A coefficient of correlation, only normalised to the template
+            intensity. This is in contrast to the reference work.
     References
     ----------
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
