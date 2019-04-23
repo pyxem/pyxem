@@ -246,7 +246,7 @@ def file_reader(filename, hdr_info=None, encoding="latin-1",
                     TABLE OF hdr PARAMETERS
         key             type     description
       ----------   ------------ --------------------
-      # Mandatory      keys:
+      # Mandatory      keys
       width            int      # pixels per row
       height           int      # number of rows
       depth            int      # number of images or spectral pts
@@ -625,8 +625,8 @@ def write_hdr(filename, keys_dictionary, encoding='ascii'):
 def write_mib(filename, signal, record_by):
     """Writes the raw file object
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename : string
         the filename, either with the extension or without it
     record_by : string
