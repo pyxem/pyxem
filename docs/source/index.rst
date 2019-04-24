@@ -30,6 +30,9 @@ pyXem - Crystallographic Electron Microscopy in Python
 .. image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
     :target: https://coveralls.io/github/pyxem/pyxem?branch=master
 
+.. image:: http://img.shields.io/pypi/v/pyxem.svg?style=flat
+    :target: https://pypi.python.org/pypi/pyxem
+
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2649352.svg
    :target: https://doi.org/10.5281/zenodo.2649352
 
