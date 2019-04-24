@@ -22,60 +22,93 @@ from heapq import nlargest
 from itertools import combinations
 from operator import itemgetter
 
-from pyxem.utils import correlate
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
 from transforms3d.euler import mat2euler
 
 
-def correlate_library(image, library, n_largest, mask, keys=[]):
+def correlate_library(image, library, n_largest, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
+    Calculated using the normalised (see return type documentation) dot
+    product, or cosine distance,
+
+    .. math::
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    for a template T and an experimental pattern P.
+
     Parameters
     ----------
-    image : np.array()
+    image : numpy.array
         The experimental diffraction pattern of interest.
     library : DiffractionLibrary
         The library of diffraction simulations to be correlated with the
         experimental data.
     n_largest : int
         The number of well correlated simulations to be retained.
-    mask : bool array
-        A mask for navigation axes 1 indicates positions to be indexed.
+    mask : bool
+        A mask for navigation axes. 1 indicates positions to be indexed.
 
     Returns
     -------
-    top_matches : (<num phases>*n_largest, 3), np.array()
-        A numpy array containing the top n correlated simulations for the
-        experimental pattern of interest, where each entry is on the form
-            [phase index, [z, x, z], correlation]
+    top_matches : numpy.array
+        Array of shape (<num phases>*n_largest, 3) containing the top n
+        correlated simulations for the experimental pattern of interest, where
+        each entry is on the form [phase index, [z, x, z], correlation].
 
     See also
     --------
-    pyxem.utils.correlate and the correlate method of IndexationGenerator.
+    IndexationGenerator.correlate
+
+    Notes
+    -----
+    Correlation results are defined as,
+        phase_index : int
+            Index of the phase, following the ordering of the library keys
+        [z, x, z] : ndarray
+            numpy array of three floats, specifying the orientation in the
+            Bunge convention, in degrees.
+        correlation : float
+            A coefficient of correlation, only normalised to the template
+            intensity. This is in contrast to the reference work.
+
+    References
+    ----------
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
+
     if mask == 1:
-        for phase_index, key in enumerate(library.keys()):
-            correlations = np.empty((len(library[key]), 4))
-            # Use enumerate to index, i, each (orientation, diffraction_pattern) in list
-            for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
-                correlation = correlate(image, diffraction_pattern)
-                correlations[i, :] = *orientation, correlation
+        for phase_index, library_entry in enumerate(library.values()):
+            orientations = library_entry['orientations']
+            pixel_coords = library_entry['pixel_coords']
+            intensities = library_entry['intensities']
+            pattern_norms = library_entry['pattern_norms']
 
-            # Partition to get the n_largest best matches
-            top_n = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
-            # Sort the matches by correlation score, descending
-            top_n = top_n[top_n[:, 3].argsort()][::-1]
+            # Extract experimental intensities from the diffraction image
+            image_intensities = image[pixel_coords[:, :, :, 1], pixel_coords[:, :, :, 0]]
+            # Correlation is the normalized dot product
+            correlations = np.sum(image_intensities * intensities, axis=2) / pattern_norms
 
+            # Find the top n correlations in sorted order
+            top_n_indices = correlations.argpartition(-n_largest, axis=None)[-n_largest:]
+            top_n_correlations = correlations.ravel()[top_n_indices]
+            top_n_indices = top_n_indices[top_n_correlations.argsort()[::-1]]
+
+            # Store the results in top_matches
             top_matches[phase_index, :, 0] = phase_index
+            inplane_rotation_angle = 360 / pixel_coords.shape[0]
             for i in range(n_largest):
-                top_matches[phase_index, i, 1] = top_n[i, :3]
-            top_matches[phase_index, :, 2] = top_n[:, 3]
+                inplane_index, orientation_index = np.unravel_index(top_n_indices[i], correlations.shape)
+                top_matches[phase_index, i, 1] = orientations[orientation_index] + np.array(
+                    [0, 0, inplane_index * inplane_rotation_angle])
+            top_matches[phase_index, :, 2] = correlations.ravel()[top_n_indices]
 
-    return top_matches.reshape((len(library) * n_largest, 3))
+    return top_matches.reshape(-1, 3)
 
 
 def index_magnitudes(z, simulation, tolerance):
@@ -136,7 +169,7 @@ def match_vectors(peaks,
         Max allowed angle difference in radians when comparing vector pairs.
     index_error_tol : float
         Max allowed error in peak indexation for classifying it as indexed,
-        calculated as |hkl_calculated - round(hkl_calculated)|.
+        calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
     n_peaks_to_index : int
         The maximum number of peak to index.
     n_best : int
@@ -281,20 +314,21 @@ def match_vectors(peaks,
 def crystal_from_template_matching(z_matches):
     """Takes template matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
-    reliability/ies to define a crystallographic map.
+    reliability to define a crystallographic map.
 
     Parameters
     ----------
-    z_matches : np.array()
-        Template matching results in an array of shape (m,3) with entries
-            [phase, [z, x, z], correlation],
-        sorted by correlation (descending) within each phase.
+    z_matches : numpy.array
+        Template matching results in an array of shape (m,3) sorted by
+        correlation (descending) within each phase, with entries
+        [phase, [z, x, z], correlation]
 
     Returns
     -------
-    results_array : np.array()
-        Crystallographic mapping results in an array (3) with entries
+    results_array : numpy.array
+        Crystallographic mapping results in an array of shape (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
+
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
@@ -335,20 +369,20 @@ def crystal_from_template_matching(z_matches):
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
-    reliability/ies to define a crystallographic map.
+    reliability to define a crystallographic map.
 
     Parameters
     ----------
-    z_matches : np.array()
-        Template matching results in an array of shape (m,5) with entries
-            [phase, R, match_rate, ehkls, total_error],
-        sorted by total_error (ascending) within each phase.
+    z_matches : numpy.array
+        Template matching results in an array of shape (m,5) sorted by
+        total_error (ascending) within each phase, with entries
+        [phase, R, match_rate, ehkls, total_error]
 
     Returns
     -------
-    results_array : np.array()
-        Crystallographic mapping results in an array (3) with entries
-        [phase, np.array((z,x,z)), dict(metrics)]
+    results_array : numpy.array
+        Crystallographic mapping results in an array of shape (3) with entries
+        [phase, np.array((z, x, z)), dict(metrics)]
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
