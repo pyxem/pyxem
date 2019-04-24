@@ -25,7 +25,7 @@ exec(open('pyxem/version.py').read())  # grab version info
 setup(
     name='pyxem',
     version=__version__,
-    description='An open-source Python library for crystallographic electron'
+    description='An open-source Python library for crystallographic electron '
                 'microscopy.',
     author=__author__,
     author_email=__email__,
