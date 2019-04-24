@@ -32,6 +32,7 @@ before_install:
     conda create -n testenv --yes python=$PYTHON;
     source activate testenv;
   - conda info -a
+  - df -h
 
 install:
   - conda install -y $DEPS $TEST_DEPS $DOC_DEPS;
