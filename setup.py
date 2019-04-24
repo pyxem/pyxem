@@ -31,9 +31,16 @@ setup(
     author_email=__email__,
     license="GPLv3",
     url="https://github.com/pyxem/pyxem",
-
+    long_description=open('README.rst').read(),
     classifiers=[
-        'Programming Language :: Python :: 3.6',
+        "Programming Language :: Python :: 3.6",
+	"Programming Language :: Python :: 3.7",
+	"Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Physics",
     ],
 
     packages=find_packages(),
@@ -41,7 +48,7 @@ setup(
     install_requires=[
     	'hyperspy >= 1.3',
         'transforms3d',
-	    'scikit-learn >= 0.19'
+	'scikit-learn >= 0.19'
       ],
 
     package_data={
