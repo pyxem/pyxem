@@ -22,6 +22,7 @@ import os
 import warnings
 
 import numpy as np
+from hyperspy.api import roi
 from hyperspy.drawing.marker import markers_metadata_dict_to_markers
 from hyperspy.exceptions import VisibleDeprecationWarning
 from hyperspy.io import load_with_reader
@@ -30,7 +31,6 @@ from hyperspy.misc.io.tools import overwrite as overwrite_method
 from hyperspy.misc.utils import stack as stack_method
 from hyperspy.misc.utils import (strlist2enumeration, find_subclasses)
 from hyperspy.ui_registry import get_gui
-from hyperspy.api import roi
 from natsort import natsorted
 
 from .components.diffraction_component import ElectronDiffractionForwardModel
