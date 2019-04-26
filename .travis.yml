@@ -36,7 +36,7 @@ before_install:
 
 install:
   - conda install -y $DEPS $TEST_DEPS $DOC_DEPS;
-  - pip install .
+  - pip install . -r requirements.txt
 
 script:
   - pytest --pyargs pyxem --cov=pyxem
