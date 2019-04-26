@@ -64,15 +64,6 @@ def test_correct_quadrant_hs(get_signal):
     assert (np.sum(S.isig[:72, 72:].data) == 0)
     assert (np.sum(S.isig[72:, 72:].data) > 0)
 
-# Test Profile Simulation
-
-
-@pytest.fixture(params=[
-    (300, 0.02, None),
-])
-def diffraction_calculator(request):
-    return DiffractionGenerator(*request.param)
-
 
 @pytest.fixture
 def profile_simulation():

@@ -35,7 +35,7 @@ class TemplateMatchingResults(BaseSignal):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
 
-    Atrributes
+    Attributes
     ----------
     vectors : DiffractionVectors
         Diffraction vectors indexed.
@@ -118,7 +118,7 @@ class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
 
-    Atrributes
+    Attributes
     ----------
     vectors : DiffractionVectors
         Diffraction vectors indexed.

@@ -32,13 +32,14 @@ before_install:
     conda create -n testenv --yes python=$PYTHON;
     source activate testenv;
   - conda info -a
+  - df -h
 
 install:
   - conda install -y $DEPS $TEST_DEPS $DOC_DEPS;
   - pip install .
 
 script:
-  - pytest --cov=pyxem
+  - pytest --pyargs pyxem --cov=pyxem
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
 

@@ -42,7 +42,7 @@ def correlate_library(image, library, n_largest, mask):
 
     Parameters
     ----------
-    image : np.array()
+    image : numpy.array
         The experimental diffraction pattern of interest.
     library : DiffractionLibrary
         The library of diffraction simulations to be correlated with the
@@ -54,23 +54,26 @@ def correlate_library(image, library, n_largest, mask):
 
     Returns
     -------
-    top_matches : (<num phases>*n_largest, 3), np.array()
-        A numpy array containing the top n correlated simulations for the
-        experimental pattern of interest, where each entry is on the form
-            [phase index, [z, x, z], correlation]
-        where
-            phase_index : int
-                Index of the phase, following the ordering of the library keys
-            [z, x, z] : ndarray
-                numpy array of three floats, specifying the orientation in the
-                Bunge convention, in degrees.
-            correlation : float
-                A coefficient of correlation, only normalised to the template
-                intensity. This is in contrast to the reference work.
+    top_matches : numpy.array
+        Array of shape (<num phases>*n_largest, 3) containing the top n
+        correlated simulations for the experimental pattern of interest, where
+        each entry is on the form [phase index, [z, x, z], correlation].
 
     See also
     --------
     IndexationGenerator.correlate
+
+    Notes
+    -----
+    Correlation results are defined as,
+        phase_index : int
+            Index of the phase, following the ordering of the library keys
+        [z, x, z] : ndarray
+            numpy array of three floats, specifying the orientation in the
+            Bunge convention, in degrees.
+        correlation : float
+            A coefficient of correlation, only normalised to the template
+            intensity. This is in contrast to the reference work.
 
     References
     ----------
@@ -166,7 +169,7 @@ def match_vectors(peaks,
         Max allowed angle difference in radians when comparing vector pairs.
     index_error_tol : float
         Max allowed error in peak indexation for classifying it as indexed,
-        calculated as |hkl_calculated - round(hkl_calculated)|.
+        calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
     n_peaks_to_index : int
         The maximum number of peak to index.
     n_best : int
@@ -311,20 +314,21 @@ def match_vectors(peaks,
 def crystal_from_template_matching(z_matches):
     """Takes template matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
-    reliability/ies to define a crystallographic map.
+    reliability to define a crystallographic map.
 
     Parameters
     ----------
-    z_matches : np.array()
-        Template matching results in an array of shape (m,3) with entries
-            [phase, [z, x, z], correlation],
-        sorted by correlation (descending) within each phase.
+    z_matches : numpy.array
+        Template matching results in an array of shape (m,3) sorted by
+        correlation (descending) within each phase, with entries
+        [phase, [z, x, z], correlation]
 
     Returns
     -------
-    results_array : np.array()
-        Crystallographic mapping results in an array (3) with entries
+    results_array : numpy.array
+        Crystallographic mapping results in an array of shape (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
+
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
@@ -365,20 +369,20 @@ def crystal_from_template_matching(z_matches):
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
-    reliability/ies to define a crystallographic map.
+    reliability to define a crystallographic map.
 
     Parameters
     ----------
-    z_matches : np.array()
-        Template matching results in an array of shape (m,5) with entries
-            [phase, R, match_rate, ehkls, total_error],
-        sorted by total_error (ascending) within each phase.
+    z_matches : numpy.array
+        Template matching results in an array of shape (m,5) sorted by
+        total_error (ascending) within each phase, with entries
+        [phase, R, match_rate, ehkls, total_error]
 
     Returns
     -------
-    results_array : np.array()
-        Crystallographic mapping results in an array (3) with entries
-        [phase, np.array((z,x,z)), dict(metrics)]
+    results_array : numpy.array
+        Crystallographic mapping results in an array of shape (3) with entries
+        [phase, np.array((z, x, z)), dict(metrics)]
     """
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
