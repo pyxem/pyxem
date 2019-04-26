@@ -1,14 +1,15 @@
 Contributor Guide
 =================
 
-This guide is intended to get new users and contributors started with pyXem.
+This guide is intended to get new developers started with contributing to pyxem.
 
 Many potential contributors will be scientists with much expert knowledge but
 potentially little experience with open-source code development. This guide is
 primarily aimed at this audience, helping to reduce the barrier to contribution.
 
+
 Start using pyXem
-=================
+-----------------
 
 The best way to start understanding how pyXem is to use it.
 
@@ -38,13 +39,13 @@ PS: If you choose to develop in Windows/Mac you may find `Github Desktop
 <https://desktop.github.com>`_ useful.
 
 
-Got a problem? -- ask!
-======================
+Questions?
+----------
 
 Open source projects are all about community - we put in much effort to make
 good tools available to all and most people are happy to help others start out.
 Everyone had to start at some point and the philosophy of these projects
-centres around the fact that we can do better by working together.
+centers around the fact that we can do better by working together.
 
 Much of the conversation happens in 'public' using the 'issues' pages on
 `Github <https://github.com/pyxem/pyxem/issues>`_ -- doing things in public can
@@ -60,6 +61,7 @@ The most important aspects of good coding practice are: (1) to work in managable
 branches, (2) develop good code style, (3) write tests for new functions, and (4)
 document what the code does. Tips on these points are provided below.
 
+
 Use git to work in managable branches
 -------------------------------------
 
@@ -72,6 +74,7 @@ You can learn all about Git `here <http://www.git-scm.com/about>`_!
 
 The most important thing to separate your contributions so that each branch is
 small advancement on the "master" code or on another branch.
+
 
 Get the style right
 -------------------
@@ -104,6 +107,7 @@ Windows:
     pepstorm.bat
     git add .
     git commit -m "autopep8 corrections"
+
 
 Writing tests
 -------------
@@ -142,8 +146,6 @@ Useful hints on testing:
 
 Write documentation
 -------------------
-
-Here we will focus on docstrings (rather than the user-guide documentation).
 
 Docstrings -- written at the start of a function and give essential information
 about how it should be used, such as which arguments can be passed to it and

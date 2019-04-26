@@ -7,63 +7,128 @@
     :hidden:
 
     self
-    conventions
+    contents
+    modules
     literature
+    conventions
+    contributing
 
 
 .. figure:: images/forkme_right_orange_ff7600.png
     :align: right
     :target: https://github.com/pyxem/pyxem
 
-Introduction
-============
+pyXem - Crystallographic Electron Microscopy in Python
+======================================================
 
 .. image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
     :target: https://travis-ci.org/pyxem/pyxem
 
+.. image:: https://ci.appveyor.com/api/projects/status/github/pyxem/pyxem?svg=true&branch=master
+    :target: https://ci.appveyor.com/project/dnjohnstone/pyxem/branch/master
+
 .. image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
     :target: https://coveralls.io/github/pyxem/pyxem?branch=master
 
+.. image:: http://img.shields.io/pypi/v/pyxem.svg?style=flat
+    :target: https://pypi.python.org/pypi/pyxem
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2649351.svg
+   :target: https://doi.org/10.5281/zenodo.2649351
+
 pyXem is an open-source Python library for crystallographic electron microscopy.
 The code is primarily developed as a platform for hybrid diffraction-imaging
-microscopy based on scanning (precession) electron diffraction (S(P)ED) data.
-This approach may be illustrated schematically, as follows:
-|
+microscopy based on scanning electron diffraction (SED) data.
 
 .. figure:: images/sped_scheme.png
    :align: center
    :width: 600
 
-pyXem builds heavily on the tools for multi-dimensional data analysis provided
-by the `HyperSpy <http://hyperspy.org>`__ library and draws on `DiffPy <http://diffpy.org>`__
-for atomic structure manipulation. pyXem is released under the GPL v3 license. One can find citation information, installation instructions and credits at our github page `here <https://github.com/pyxem/pyxem>`__. This website outlines some of the basic functionality avaliable in pyxem.
+pyXem is released under the GPL v3 license.
 
-pyXem provides a library of tools primarily developed for the analysis of
-4D-S(P)ED data, although many methods are applicable to electron diffraction
-data in general. 4D-S(P)ED datasets comprise many thousands of electron
-diffraction patterns and the :py:class:`~.ElectronDiffraction` class provides a
-specialized HyperSpy Signal() class for this data. If the data array is imagined
-as a tensor, D, of rank n then entries are addressed by n indices, D_{i,j,...,n}.
-The HyperSpy Signal() class allows some indices, or equivalently some axes, to
-be defined as navigation axes and others to be defined as signal axes. In the
-context of a 4D-S(P)ED data, the two axes corresponding to the real-space scan
-dimensions (i, j) are set as navigation axes and the two axes corresponding to
-the diffraction pattern plane (a, b) are set as signal axes, which can be
-written:
+If analysis using pyxem forms a part of published work please consider recognizing the
+code development by citing the github repository.
 
-.. code-block:: python
 
-    <i, j | a, b>
+Installation
+------------
 
- There are numerous ways to obtain physical insight from 4D-S(P)ED data all of
- which ultimately require the assignment of an atomic arrangement to each probe
- position that explains the observed diffraction. Different approaches to achieve
- this goal are summarized in the following schematic.
+pyXem requires python 3 and conda - we suggest using the python 3 version of `Miniconda <https://conda.io/miniconda.html>`__ and creating a new environment for pyxem using the following commands in the anaconda prompt:::
 
-.. figure:: images/pyxem-flow.png
-  :align: center
-  :width: 600
+      $ conda create -n pyxem
+      $ conda activate pyxem
+
+Download the `source code <https://github.com/pyxem/pyxem>`__ and put it in a directory on your computer. The following commands will then install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
+
+      $ conda install -c conda-forge diffpy.structure
+      $ pip install . -r requirements.txt
+
+
+Getting Started
+---------------
+
+To get started using pyxem, especially if you are unfamiliar with python, we recommend using jupyter notebooks. Having installed pyxem as above, a jupyter notebook can be opened using the following commands entered into an anaconda prompt or terminal:::
+
+      $ conda activate pyxem
+      $ jupyter notebook
+
+`Tutorials and Example Workflows <https://github.com/pyxem/pyxem-demos>`__ have been curated as a series of jupyter notebooks that you can work through and modify to perform many common analyses.
+
+
+Documentation
+-------------
+
+`Documentation <http://pyxem.github.io/pyxem/pyxem>`__ is available for all pyxem modules at the following links:
+
+- `pyxem.signals <http://pyxem.github.io/pyxem/pyxem.signals>`__ - for manipulating raw data and analysis results.
+
+- `pyxem.generators <http://pyxem.github.io/pyxem/pyxem.generators>`__ - for establishing simulation and analysis conditions.
+
+- `pyxem.components <http://pyxem.github.io/pyxem/pyxem.components>`__ - for fitting in model based analyses.
+
+- `pyxem.libraries <http://pyxem.github.io/pyxem/pyxem.libraries>`__ - that store simulation results needed for analysis.
+
+
+Questions
+---------
+
+If you have a question about pyxem, an issue using the code, or find a bug - we want to know!
+
+We prefer if you let us know by `raising an issue <https://github.com/pyxem/pyxem/issues>`_
+on our Github page so that we can answer in "public" and potentially help someone else who has
+the same question. You can also e-mail the development team via: pyxem.team@gmail.com
+
+Answers may sometimes also be found in our `documentation <http://pyxem.github.io/pyxem/pyxem>`__.
+
+
+Contributing and Feature Requests
+---------------------------------
+
+Feature requests, if pyxem doesn't do something you want it to, can be made by
+`raising an issue <https://github.com/pyxem/pyxem/issues>`_ or e-mailing the
+development team via pyxem.team@gmail.com
+
+Contributions from new developers are strongly encouraged. Many potential contributors
+may be scientists with little or no open-source development experience and we have written
+a `contributing guide <http://pyxem.github.io/pyxem/contributing.html>`_ particularly for
+this audience.
+
+
+Related Packages
+----------------
+
+The following packages are developed by the pyXem team:
+
+- `texpy <http://pyxem.github.io/pyxem/texpy>`__- for quaternion, rotation, and orientation handling in Python.
+
+
+These packages are central to the scientific functionality of pyXem:
+
+- `HyperSpy <http://hyperspy.org>`__ for multi-dimensional data handling.
+
+- `DiffPy <http://diffpy.org>`__ - for atomic structure manipulation.
+
 
 .. warning::
 
-    The pyXem project is under development and there will be bugs. All methods must be used with care.
+    The pyXem project is under continual development and there may be bugs. All methods must be used with care.

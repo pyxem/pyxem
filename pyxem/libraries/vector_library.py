@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,6 +21,24 @@ import numpy as np
 
 
 def load_VectorLibrary(filename, safety=False):
+    """Loads a previously saved vectorlibrary.
+
+    Parameters
+    ----------
+    filename : str
+        The location of the file to be loaded
+    safety : bool (defaults to False)
+        Unpickling is risky, this variable requires you to acknowledge this.
+
+    Returns
+    -------
+    VectorLibrary
+        Previously saved Library
+
+    See Also
+    --------
+    VectorLibrary.pickle_library()
+    """
     if safety:
         with open(filename, 'rb') as handle:
             return pickle.load(handle)
@@ -46,5 +64,17 @@ class DiffractionVectorLibrary(dict):
         self.structures = None
 
     def pickle_library(self, filename):
+        """Saves a diffraction library in the pickle format.
+
+        Parameters
+        ----------
+        filename : str
+            The location in which to save the file
+
+        See Also
+        --------
+            load_VectorLibrary()
+
+        """
         with open(filename, 'wb') as handle:
             pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)

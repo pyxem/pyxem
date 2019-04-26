@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -29,6 +29,7 @@ from pyxem.libraries.diffraction_library import DiffractionLibrary
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
 from pyxem.utils.sim_utils import get_points_in_sphere
+from pyxem.utils.sim_utils import simulate_rotated_structure
 from pyxem.utils.vector_utils import get_angle_cartesian
 
 
@@ -71,8 +72,10 @@ class DiffractionLibraryGenerator(object):
             library, in reciprocal Angstroms per pixel.
         reciprocal_radius : float
             The maximum g-vector magnitude to be included in the simulations.
-        half_shape: tuple
+        half_shape : tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
+        with_direct_beam : bool
+            Include the direct beam in the library.
 
         Returns
         -------
@@ -86,48 +89,43 @@ class DiffractionLibraryGenerator(object):
         # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
         # Iterate through phases in library.
-        for key in structure_library.struct_lib.keys():
+        for phase_name in structure_library.struct_lib.keys():
             phase_diffraction_library = dict()
-            structure = structure_library.struct_lib[key][0]
-            a, b, c = structure.lattice.a, structure.lattice.b, structure.lattice.c
-            alpha = structure.lattice.alpha
-            beta = structure.lattice.beta
-            gamma = structure.lattice.gamma
-            orientations = structure_library.struct_lib[key][1]
+            structure = structure_library.struct_lib[phase_name][0]
+            orientations = structure_library.struct_lib[phase_name][1]
+
+            num_orientations = len(orientations)
+            simulations = np.empty(num_orientations, dtype='object')
+            pixel_coords = np.empty(num_orientations, dtype='object')
+            intensities = np.empty(num_orientations, dtype='object')
             # Iterate through orientations of each phase.
-            for orientation in tqdm(orientations, leave=False):
-                _orientation = np.deg2rad(orientation)
-                matrix = euler2mat(_orientation[0],
-                                   _orientation[1],
-                                   _orientation[2], 'rzxz')
+            for i, orientation in enumerate(tqdm(orientations, leave=False)):
+                matrix = euler2mat(*np.deg2rad(orientation), 'rzxz')
+                simulation = simulate_rotated_structure(diffractor, structure, matrix, reciprocal_radius, with_direct_beam)
 
-                latt_rot = diffpy.structure.lattice.Lattice(a, b, c,
-                                                            alpha, beta, gamma,
-                                                            baserot=matrix)
-                structure.placeInLattice(latt_rot)
-
-                # Calculate electron diffraction for rotated structure
-                data = diffractor.calculate_ed_data(structure,
-                                                    reciprocal_radius,
-                                                    with_direct_beam)
                 # Calibrate simulation
-                data.calibration = calibration
-                pattern_intensities = data.intensities
+                simulation.calibration = calibration
                 pixel_coordinates = np.rint(
-                    data.calibrated_coordinates[:, :2] + half_shape).astype(int)
-                # Construct diffraction simulation library, removing those that
-                # contain no peaks
-                if len(pattern_intensities) > 0:
-                    phase_diffraction_library[tuple(orientation)] = \
-                        {'Sim': data, 'intensities': pattern_intensities,
-                         'pixel_coords': pixel_coordinates,
-                         'pattern_norm': np.sqrt(np.dot(pattern_intensities,
-                                                        pattern_intensities))}
-                    diffraction_library[key] = phase_diffraction_library
+                    simulation.calibrated_coordinates[:, :2] + half_shape).astype(int)
+
+                # Construct diffraction simulation library
+                simulations[i] = simulation
+                pixel_coords[i] = pixel_coordinates
+                intensities[i] = simulation.intensities
+
+            diffraction_library[phase_name] = {
+                'simulations': simulations,
+                'orientations': orientations,
+                'pixel_coords': pixel_coords,
+                'intensities': intensities,
+            }
 
         # Pass attributes to diffraction library from structure library.
         diffraction_library.identifiers = structure_library.identifiers
         diffraction_library.structures = structure_library.structures
+        diffraction_library.diffraction_generator = diffractor
+        diffraction_library.reciprocal_radius = reciprocal_radius
+        diffraction_library.with_direct_beam = with_direct_beam
 
         return diffraction_library
 

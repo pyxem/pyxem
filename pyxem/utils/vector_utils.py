@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -26,10 +26,13 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     """Maps two-dimensional Cartesian coordinates in the detector plane to
     three-dimensional coordinates in reciprocal space, with origo in [000].
 
+    The detector uses a left-handed coordinate system, while the reciprocal
+    space uses a right-handed coordinate system.
+
     Parameters
     ----------
     k_xy : np.array()
-        Array of Cartesian coordinates in the detector plane, in reciprocal Ångström.
+        Cartesian coordinates in detector plane, in reciprocal Ångström.
     wavelength : float
         Electron wavelength in Ångström.
     camera_length : float
@@ -42,19 +45,16 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     """
 
-    k_xy = k_xy[0]
-    # # The calibrated positions of the diffraction spots are already the x and y
-    # # coordinates of the k vector on the Ewald sphere. The radius is given by
-    # # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
-    # # the Ewald sphere radius.
-    # TODO: Actual projection to Ewald sphere (below). For now, just use the
-    # direct, calibrated detector coordinates in 2D, and set the z
-    # coordinate to zero
+    if k_xy.shape == (1,) and k_xy.dtype == 'object':
+        # From ragged array
+        k_xy = k_xy[0]
+
+    # The calibrated positions of the diffraction spots are already the x and y
+    # coordinates of the k vector on the Ewald sphere. The radius is given by
+    # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
+    # the Ewald sphere radius.
 
     k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
-
-    # For now, just set k_z = 0
-    # k_z = np.zeros((k_xy.shape[0]))
 
     # Stack the xy-vector and the z vector to get the full k
     k = np.hstack((k_xy, k_z[:, np.newaxis]))

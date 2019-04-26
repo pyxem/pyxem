@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,6 +24,7 @@ from hyperspy.api import markers
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
+from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
@@ -277,8 +278,8 @@ class DiffractionVectors(BaseSignal):
         wavelength = get_electron_wavelength(accelerating_voltage)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,
-                                  camera_length=camera_length,
+                                  camera_length=camera_length * 1e10,
                                   inplace=False,
                                   parallel=False,  # TODO: For testing
                                   *args, **kwargs)
-        self.cartesian.axes_manager.set_signal_dimension(0)
+        transfer_navigation_axes(self.cartesian, self)
