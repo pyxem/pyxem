@@ -104,6 +104,4 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     """
 
     shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)
-    x = shifts[1]
-    y = shifts[0]
-    return (x,y)
+    return shifts
