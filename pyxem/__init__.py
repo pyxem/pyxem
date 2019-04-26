@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -504,11 +504,10 @@ def save(filename, signal, overwrite=None, **kwds):
 
 
 def load_mib(filename, scan_size, sum_length=10):
-    """
-    Load a medipix hdr/mib file.
+    """Load a medipix hdr/mib file.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename : string
         File path and name to .hdr file.
     scan_size : int

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,6 +22,7 @@ from hyperspy.signal import BaseSignal
 from warnings import warn
 
 from pyxem.utils.sim_utils import peaks_from_best_template
+from pyxem.utils.sim_utils import peaks_from_best_vector_match
 from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
@@ -34,7 +35,7 @@ class TemplateMatchingResults(BaseSignal):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
 
-    Atrributes
+    Attributes
     ----------
     vectors : DiffractionVectors
         Diffraction vectors indexed.
@@ -49,28 +50,33 @@ class TemplateMatchingResults(BaseSignal):
         self.axes_manager.set_signal_dimension(2)
 
     def plot_best_matching_results_on_signal(self, signal,
-                                             phase, library,
+                                             library,
+                                             permanent_markers=True,
                                              *args, **kwargs):
-        """Plot the diffraction vectors on a signal.
+        """Plot the best matching diffraction vectors on a signal.
 
         Parameters
         ----------
         signal : ElectronDiffraction
             The ElectronDiffraction signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
+        library : DiffractionLibrary
+            Diffraction library containing the phases and rotations
+        permanent_markers : bool
+            Permanently save the peaks as markers on the signal
         *args :
             Arguments passed to signal.plot()
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
         match_peaks = self.map(peaks_from_best_template,
-                               phase=phase, library=library,
+                               library=library,
                                inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
             m = hs.markers.point(x=mx, y=my, color='red', marker='x')
-            signal.add_marker(m, plot_marker=True, permanent=True)
+            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):
@@ -112,7 +118,7 @@ class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
 
-    Atrributes
+    Attributes
     ----------
     vectors : DiffractionVectors
         Diffraction vectors indexed.
@@ -188,3 +194,32 @@ class VectorMatchingResults(BaseSignal):
             vectors.hkls = self.hkls
 
         return vectors
+
+    def plot_best_matching_results_on_signal(self, signal,
+                                             library,
+                                             permanent_markers=True,
+                                             *args, **kwargs):
+        """Plot the best matching diffraction vectors on a signal.
+
+        Parameters
+        ----------
+        signal : ElectronDiffraction
+            The ElectronDiffraction signal object on which to plot the peaks.
+            This signal must have the same navigation dimensions as the peaks.
+        library : DiffractionLibrary
+            Diffraction library containing the phases and rotations
+        permanent_markers : bool
+            Permanently save the peaks as markers on the signal. Default True.
+        *args :
+            Arguments passed to signal.plot()
+        **kwargs :
+            Keyword arguments passed to signal.plot()
+        """
+        match_peaks = self.map(peaks_from_best_vector_match,
+                               library=library,
+                               inplace=False)
+        mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
+        signal.plot(*args, **kwargs)
+        for mx, my in zip(mmx, mmy):
+            m = hs.markers.point(x=mx, y=my, color='red', marker='x')
+            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
