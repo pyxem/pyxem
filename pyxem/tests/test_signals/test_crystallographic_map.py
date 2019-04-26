@@ -166,7 +166,7 @@ class TestMapCreation:
 
 
 class TestMTEXIO:
-    def test_Crystallographic_Map_io(self, sp_cryst_map):
+    def test_Crystallographic_Map_io_sp(self, sp_cryst_map):
         saved, loaded = worker_for_test_CrystallographicMap_io(sp_cryst_map)
         saved.method = 'template_matching'
         loaded.method = 'template_matching'
@@ -174,7 +174,7 @@ class TestMTEXIO:
         assert np.allclose(np.array(saved.isig[1].data.tolist()), np.array(loaded.isig[1].data.tolist()))
         assert np.allclose(saved.get_metric_map('correlation').data, loaded.get_metric_map('correlation').data)
 
-    def test_Crystallographic_Map_io(self, dp_cryst_map):
+    def test_Crystallographic_Map_io_dp(self, dp_cryst_map):
         saved, loaded = worker_for_test_CrystallographicMap_io(dp_cryst_map)
         saved.method = 'template_matching'
         loaded.method = 'template_matching'
