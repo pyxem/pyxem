@@ -29,14 +29,13 @@ before_install:
   - source $HOME/miniconda/bin/activate root;
     conda update -y conda;
     conda config --append channels conda-forge;
-    conda create -n testenv --yes python=$PYTHON;
+    conda create -n testenv --yes python=$PYTHON --file requirements.txt;
     source activate testenv;
   - conda info -a
   - df -h
 
 install:
-  - conda install -y $DEPS $TEST_DEPS $DOC_DEPS;
-  - pip install . -r requirements.txt
+  - pip install . 
 
 script:
   - pytest --pyargs pyxem --cov=pyxem
