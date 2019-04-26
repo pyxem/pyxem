@@ -124,7 +124,7 @@ def test_kinematic_simulator_invalid_scattering_params():
                                         simulation_size=32,
                                         illumination='gaussian_probe',
                                         scattering_params='_empty')
-    assert isinstance(sim, ElectronDiffraction)
+    #assert isinstance(sim, ElectronDiffraction)
 
 
 @pytest.mark.xfail(raises=ValueError)
@@ -133,7 +133,7 @@ def test_kinematic_simulator_invalid_illumination():
     sim = simulate_kinematic_scattering(atomic_coordinates, "Si", 300.,
                                         simulation_size=32,
                                         illumination='gaussian')
-    assert isinstance(sim, ElectronDiffraction)
+    #assert isinstance(sim, ElectronDiffraction)
 
 
 @pytest.mark.parametrize('uvtw, uvw', [

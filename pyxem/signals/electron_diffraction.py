@@ -277,7 +277,7 @@ class ElectronDiffraction(Signal2D):
             diffraction patterns.
 
         """
-        # These three lines account for the transformation center not being (0,0)
+        # Account for the transformation center not being (0,0)
         shape = self.axes_manager.signal_shape
         shift_x = (shape[1] - 1) / 2
         shift_y = (shape[0] - 1) / 2
@@ -288,7 +288,7 @@ class ElectronDiffraction(Signal2D):
         # This defines the transform you want to perform
         distortion = tf.AffineTransform(matrix=D)
 
-        # skimage transforms can be added like this, actually matrix multiplication,
+        # skimage transforms can be added like this, does matrix multiplication,
         # hence the need for the brackets. (Note tf.warp takes the inverse)
         transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
 
@@ -365,6 +365,10 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
+        mask_array : numpy.array
+            Optional array with the same dimensions as the signal axes.
+            Consists of 0s for excluded pixels and 1s for non-excluded
+            pixels. The 0-pixels are excluded from the radial average.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
@@ -376,24 +380,13 @@ class ElectronDiffraction(Signal2D):
         Returns
         -------
         radial_profile: :obj:`hyperspy.signals.Signal1D`
-            The radial average profile of each diffraction pattern
-            in the ElectronDiffraction signal as a Signal1D.
-
-        Parameters
-        -------
-        mask_array : optional array with the same dimensions as z
-                Consists of 0s for excluded pixels and 1s for non-excluded pixels.
-                The 0-pixels are excluded from the radial average.
+            The radial average profile of each diffraction pattern in the
+            ElectronDiffraction signal as a Signal1D.
 
         See also
         --------
         :func:`pyxem.utils.expt_utils.radial_average`
 
-        Examples
-        --------
-        .. code-block:: python
-            profiles = ed.get_radial_profile(mask_array=mask)
-            profiles.plot()
         """
         radial_profiles = self.map(radial_average, mask=mask_array,
                                    inplace=inplace,
@@ -512,8 +505,8 @@ class ElectronDiffraction(Signal2D):
 
             * 'h-dome' -
             * 'gaussian_difference' - Uses a difference between two gaussian
-                                convolutions to determine where the peaks are, and sets
-                                all other pixels to 0.
+                                convolutions to determine where the peaks are,
+                                and sets all other pixels to 0.
             * 'median' - Use a median filter for background removal
             * 'reference_pattern' - Subtract a user-defined reference patterns
                 from every diffraction pattern.
@@ -608,7 +601,25 @@ class ElectronDiffraction(Signal2D):
         Parameters
         ---------
         method : str
-            Select peak finding algorithm to implement. Available methods are:
+            Select peak finding algorithm to implement. Available methods are
+            {'zaefferer', 'stat', 'laplacian_of_gaussians',
+            'difference_of_gaussians', 'xc'}
+        *args : arguments
+            Arguments to be passed to the peak finders.
+        **kwargs : arguments
+            Keyword arguments to be passed to the peak finders.
+
+        Returns
+        -------
+        peaks : DiffractionVectors
+            A DiffractionVectors object with navigation dimensions identical to
+            the original ElectronDiffraction object. Each signal is a BaseSignal
+            object contiaining the diffraction vectors found at each navigation
+            position, in calibrated units.
+
+        Notes
+        -----
+        Peak finding methods are detailed as:
 
             * 'zaefferer' - based on gradient thresholding and refinement
               by local region of interest optimisation
@@ -620,20 +631,6 @@ class ElectronDiffraction(Signal2D):
               `scikit-image` which uses the difference of Gaussian matrices
               approach.
             * 'xc' - A cross correlation peakfinder
-
-
-        *args:
-            Arguments to be passed to the peak finders.
-        **kwargs:
-            Keyword arguments to be passed to the peak finders.
-
-        Returns
-        -------
-        peaks : DiffractionVectors
-            A DiffractionVectors object with navigation dimensions identical to
-            the original ElectronDiffraction object. Each signal is a BaseSignal
-            object contiaining the diffraction vectors found at each navigation
-            position, in calibrated units.
 
         """
         method_dict = {
@@ -684,11 +681,10 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        disc_image : numpy.array (default:None)
-            see .utils.peakfinders2D.peak_finder_xc for details. If not
+        disc_image : numpy.array
+            See .utils.peakfinders2D.peak_finder_xc for details. If not
             given a warning will be raised.
-
-        imshow_kwargs : (default:{})
+        imshow_kwargs : arguments
             kwargs to be passed to internal imshow statements
 
         Notes
@@ -697,7 +693,8 @@ class ElectronDiffraction(Signal2D):
 
         """
         if disc_image is None:
-            warn("You have not specified a disc image, as such you will not be able to use the xc method in this session")
+            warn("You have not specified a disc image, as such you will not "
+                 "be able to use the xc method in this session")
 
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)

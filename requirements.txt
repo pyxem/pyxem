@@ -72,6 +72,6 @@ tqdm==4.24.0
 traitlets==4.3.2
 traits==4.6.0
 transforms3d==0.3.1
-urllib3==1.23
+urllib3>=1.24.2
 wcwidth==0.1.7
 wheel==0.31.1
