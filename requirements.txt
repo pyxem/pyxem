@@ -4,7 +4,6 @@ atomicwrites==1.3.0
 attrs==19.1.0
 babel==2.6.0
 backcall==0.1.0
-blas==1.0
 bleach==3.1.0
 bokeh==1.1.0
 ca-certificates==2019.1.23
