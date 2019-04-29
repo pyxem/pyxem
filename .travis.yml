@@ -28,10 +28,13 @@ before_install:
   - source $HOME/miniconda/bin/activate root;
     conda update -y conda;
     conda config --append channels conda-forge;
-    conda create -n testenv --yes python=$PYTHON --file requirements.txt;
-    source activate testenv;
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+    conda create -n testenv --yes python=$PYTHON
+    else conda create -n testenv --yes python=$PYTHON --file requirements.txt; 
+    fi
+  - source activate testenv;
   - conda info -a
-  - df -h
+  - conda list -e 
 
 install:
   - pip install . 
