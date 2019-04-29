@@ -29,7 +29,7 @@ before_install:
     conda update -y conda;
     conda config --append channels conda-forge;
   - if [ $TRAVIS_OS_NAME = osx ]; then
-    conda create -n testenv --yes python=$PYTHON
+    conda create -n testenv --yes python=$PYTHON;
     else conda create -n testenv --yes python=$PYTHON --file requirements.txt; 
     fi
   - source activate testenv;
