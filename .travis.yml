@@ -7,8 +7,7 @@ env:
     - DOC_DEPS="sphinx sphinx_bootstrap_theme"
 
 matrix:
-  include:
-  i#- env: export PYTHON=3.7
+  include: 
   - env: export PYTHON=3.7
     os: osx
     language: generic
