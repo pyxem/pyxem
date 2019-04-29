@@ -29,7 +29,7 @@ install:
   - 'conda install -yq %DEPS% %TEST_DEPS%'
 
   # Install our package
-  - 'pip install -e -r requirements.txt .'
+  - 'pip install -e .'
 
 build: off
 
