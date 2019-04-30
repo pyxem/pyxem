@@ -47,7 +47,7 @@ microscopy based on scanning electron diffraction (SED) data.
 pyXem is released under the GPL v3 license.
 
 If analysis using pyxem forms a part of published work please consider recognizing the
-code development by citing the github repository.
+code development by citing the DOI.
 
 
 Installation
@@ -58,8 +58,19 @@ pyXem requires python 3 and conda - we suggest using the python 3 version of `Mi
       $ conda create -n pyxem
       $ conda activate pyxem
 
-Download the `source code <https://github.com/pyxem/pyxem>`__ and put it in a directory on your computer. The following commands will then install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
+If you have no intention of developing the pyxem repo, and simply using it your simplest option is then to type:::
 
+      $ conda install pyxem
+
+if you wish to use pip, that's also avaliable:::
+
+      $ conda install pip
+      $ pip install pyxem
+
+
+If you've got development on your mind (great!) then download the `source code <https://github.com/pyxem/pyxem>`__ and put it in a directory on your computer. The following commands will then install everything you need if entered into the anaconda promt (or terminal) when located in the pyxem directory:::
+
+      $ conda install pip
       $ conda install -c conda-forge diffpy.structure
       $ pip install . -r requirements.txt
 
