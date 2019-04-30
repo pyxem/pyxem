@@ -72,7 +72,7 @@ If you've got development on your mind (great!) then download the `source code <
 
       $ conda install pip
       $ conda install -c conda-forge diffpy.structure
-      $ pip install . -r requirements.txt
+      $ pip install . 
 
 
 Getting Started
