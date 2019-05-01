@@ -71,7 +71,7 @@ class CalibrationGenerator():
         if navigation_image:
             self.navigation_image = navigation_image
         # Assign attributes for calibration values to be determined
-        self.corrected_pattern = None
+        self.affine_matrix = None
         self.diffraction_rotation = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
@@ -166,6 +166,8 @@ class CalibrationGenerator():
         affine = np.array([[correction[0,0], correction[0,1], 0.00],
                            [correction[1,0], correction[1,1], 0.00],
                            [0.00, 0.00, 1.00]])
+
+        self.affine_matrix = affine
 
         return affine
 
