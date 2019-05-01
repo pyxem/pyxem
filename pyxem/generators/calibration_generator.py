@@ -40,13 +40,16 @@ class CalibrationGenerator():
 
     """
     def __init__(self,
-                 diffraction_pattern,
-                 navigation_image,
+                 diffraction_pattern=None,
+                 navigation_image=None,
                  standard='au-x-grating'):
         # Verify calibration standard is recognized and set attribute.
         standard_dict = {
             'au-x-grating': 'au-x-grating',
         }
+        # Raise a warning if no calibration data is provided.
+        if diffraction_pattern is None and navigation_image is None:
+            raise ValueError("No calibration data has been provided!")
         if standard in standard_dict:
             self.standard = standard_dict[standard]
         else:
@@ -119,6 +122,10 @@ class CalibrationGenerator():
             A utility function generate_ring_pattern is implemented and may be
             used to manually determine appropriate initial parameters.
         """
+        # Check that necessary calibration data is provided
+        if self.diffraction_pattern is None:
+            raise ValueError("This method requires a diffraction_pattern to be "
+                             "specified.")
         # Set diffraction pattern variable
         standard_dp = self.diffraction_pattern
         # Define grid values and center indices for ring pattern evaluation
@@ -173,6 +180,10 @@ class CalibrationGenerator():
             Diffraction calibration in reciprocal angstroms per pixel.
 
         """
+        # Check that necessary calibration data is provided
+        if self.diffraction_pattern is None:
+            raise ValueError("This method requires a diffraction_pattern to be "
+                             "specified.")
         # Define line roi along which to take trace for calibration
         line = Line2DROI()
         # Obtain line trace
@@ -196,6 +207,10 @@ class CalibrationGenerator():
             Diffraction calibration in reciprocal angstroms per pixel.
 
         """
+        # Check that necessary calibration data is provided
+        if self.navigation_image is None:
+            raise ValueError("This method requires a navigation_image to be "
+                             "specified.")
         # Define line roi along which to take trace for calibration
         line = Line2DROI()
         # Obtain line trace
