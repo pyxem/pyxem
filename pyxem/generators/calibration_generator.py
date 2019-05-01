@@ -24,6 +24,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from math import sin, cos
 
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion
 
@@ -57,15 +58,15 @@ class CalibrationGenerator():
                                       "See documentation for available "
                                       "implementations.".format(standard))
         # Check calibration data provided as ElectronDiffraction object.
-        if isinstance(signal, ElectronDiffraction) is False:
+        if isinstance(diffraction_pattern, ElectronDiffraction) is False:
             raise ValueError("Data for calibration must be provided as an "
                              "ElectronDiffraction object.")
         # Set diffraction patttern in attribute after checking standard form.
-        if diffraction_pattern.axes_manager.navigation_shape == 1:
-            self.diffraction_pattern = diffraction_pattern
-        else:
+        if diffraction_pattern.axes_manager.navigation_shape:
             raise ValueError("Calibration using au-x-grating data requires "
                              "a single diffraction pattern to be provided.")
+        else:
+            self.diffraction_pattern = diffraction_pattern
         # Set navigation image in attribute.
         if navigation_image:
             self.navigation_image = navigation_image
@@ -191,7 +192,7 @@ class CalibrationGenerator():
         # Find peaks in line trace
         peaks = trace.find_peaks()
         # Determine diffraction calibration from peak positions
-        diff_cal =
+        diff_cal = 0.01
 
         return diff_cal
 
@@ -218,7 +219,7 @@ class CalibrationGenerator():
         # Find peaks in line trace
         peaks = trace.find_peaks()
         # Determine diffraction calibration from peak positions
-        nav_cal =
+        nav_cal = 1
 
         return nav_cal
 
