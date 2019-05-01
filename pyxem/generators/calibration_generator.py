@@ -117,7 +117,7 @@ class CalibrationGenerator():
 
         See Also
         --------
-            pyxem.utils.calibration_utils.generate_ring_pattern
+            pyxem.utils.calibration_utils.call_ring_pattern
 
         """
         # Check that necessary calibration data is provided
@@ -168,18 +168,28 @@ class CalibrationGenerator():
 
         return affine
 
-    def get_distortion_residuals(self):
+    def get_distortion_residuals(self, mask_radius, spread):
         """Determine the diffraction pattern pixel size calibration.
 
         Parameters
         ----------
+        mask_radius : int
+            The radius in pixels for a mask over the direct beam disc
+            (the direct beam disc within given radius will be excluded
+            from the fit)
+        spread : float
+            An initial guess for the spread within each ring (Gaussian width)
 
         Returns
         -------
-        diff_cal : float
-            Diffraction calibration in reciprocal angstroms per pixel.
-
+        diff_init : ElectronDiffraction
+            Difference between experimental data and simulated symmetric ring
+            pattern.
+        diff_end : ElectronDiffraction
+            Difference between distortion corrected data and simulated symmetric
+            ring pattern.
         """
+        # Check all required parameters are defined as attributes
         if self.diffraction_pattern is None:
             raise ValueError("This method requires a diffraction_pattern to be "
                              "specified.")
@@ -187,8 +197,25 @@ class CalibrationGenerator():
             raise ValueError("This method requires a distortion matrix to have "
                              "been determined. Use get_elliptical_distortion "
                              "to determine this matrix.")
+        # Set name for experimental data pattern
+        dpeg = self.diffraction_pattern
+        dpref = call_ring_pattern(mask=True, mask_radius=mask_radius,
+                                  scale=ringP[0],
+                                  amplitude=ringP[1],
+                                  spread=spread,
+                                  direct_beam_amplitude=ringP[3],
+                                  asymmetry=1, rotation=ringP[5])
+        # Apply distortion corrections to experimental data
+        dpegs = pxm.stack_method([dpeg, dpeg, dpeg, dpeg])
+        dpegs = pxm.ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs.apply_affine_transformation(self.affine_matrix,
+                                          preserve_range=True,
+                                          inplace=True)
+        # Calculate residuals to be returned
+        diff_init = ElectronDiffraction(dpeg.data - dpref.data)
+        diff_end = ElectronDiffraction(dpegs.inav[0,0].data - dpref.data)
 
-        return
+        return diff_init, diff_end
 
     def get_diffraction_calibration(self):
         """Determine the diffraction pattern pixel size calibration.
@@ -225,8 +252,8 @@ class CalibrationGenerator():
 
         Returns
         -------
-        diff_cal : float
-            Diffraction calibration in reciprocal angstroms per pixel.
+        nav_cal : float
+            Navigation calibration in nanometres per pixel.
 
         """
         # Check that necessary calibration data is provided
