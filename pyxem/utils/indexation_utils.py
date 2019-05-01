@@ -16,16 +16,22 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 
 from heapq import nlargest
 from itertools import combinations
+import math
 from operator import itemgetter
+
+import numpy as np
 
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
+from texpy.quaternion.rotation import Rotation
+from texpy.quaternion.symmetry import C1, Td
+
 from transforms3d.euler import mat2euler
+from transforms3d.quaternions import mat2quat
 
 
 def correlate_library(image, library, n_largest, mask):
@@ -144,16 +150,95 @@ def index_magnitudes(z, simulation, tolerance):
     return indexation
 
 
+def _choose_peak_ids(peaks, n_peaks_to_index):
+    """Choose `n_peaks_to_index` indices from `peaks`.
+
+    This implementation returns the indices of the
+    :math:`ceil(n_peaks_to_index / 2)` furthest from the center and the rest
+    closest to the center.
+
+    Parameters
+    ----------
+    peaks : array_like
+        Array of peak positions.
+    n_peaks_to_index : int
+        Number of indices to return.
+
+    Returns
+    -------
+    peak_ids : numpy.array
+        Array of indices of the chosen peaks.
+    """
+    n_peaks_to_index = min(peaks.shape[0], n_peaks_to_index)
+    n_long_peaks = int(math.ceil(n_peaks_to_index / 2))
+    n_short_peaks = n_peaks_to_index - n_long_peaks
+    peak_lengths = np.linalg.norm(peaks, axis=1)
+    peak_ids = np.empty(n_peaks_to_index, dtype=np.int)
+    peak_ids[:n_long_peaks] = peak_lengths.argpartition(-n_long_peaks)[-n_long_peaks:]
+    peak_ids[n_long_peaks:] = peak_lengths.argpartition(n_short_peaks)[:n_short_peaks]
+    return peak_ids
+
+
+def _symmetric_equivalents(rotations, symmetry):
+    symmetric_equivalents = np.empty((rotations.shape[0], symmetry.shape[0], 4))
+    # TODO: Remove loop (better broadcasting in texpy?)
+    for i, rotation in enumerate(rotations):
+        symmetric_rotations = rotation * symmetry
+        symmetric_equivalents[i] = symmetric_rotations.data
+    return Rotation(symmetric_equivalents)
+
+
+def _sort_solutions(solutions, n_solutions, symmetry):
+    """Sort the solutions by quality.
+
+    Parameters
+    ----------
+    solutions : numpy.array
+        Potential solutions on the form used by `match_vectors`.
+    n_solutions : int
+        Number of solutions to return.
+    symmetry : texpy.Symmetry
+        Crystallographic symmetry.
+
+    Results
+    -------
+    solutions : numpy.array
+        `n_solutions` best solutions, sorted.
+    """
+    # TODO: Parameterize nth
+    # Get 20th (or all) largest match rate
+    nth_largest = min(20, solutions.shape[0])
+    solutions = solutions[solutions[:, 1].argpartition(-nth_largest)[-nth_largest:]]
+
+    solution_rotations = Rotation([mat2quat(mat) for mat in solutions[:, 0]])
+    symmetric_eq = _symmetric_equivalents(solution_rotations, symmetry)
+    similar_count = np.zeros(len(solutions), dtype=np.int)
+    angle_threshold = np.deg2rad(3)
+    for i, rotation in enumerate(solution_rotations):
+        angle_difference = rotation.angle_with(symmetric_eq).data.min(axis=1)
+        similar_count[i] = np.count_nonzero(angle_difference < angle_threshold)
+
+    # Pick those with similar_count close to the best (80% of best, or best - 1 if smaller to allow at least best - 1)
+    similar_count_max = similar_count.max()
+    # TODO: Parameterise 0.8 threshold?
+    max_count_mask = similar_count >= min(0.5 * similar_count_max, similar_count_max - 1)
+    solutions = solutions[max_count_mask]
+
+    # Sort by match rate descending
+    n_solutions = min(n_solutions, solutions.shape[0])
+    solutions = solutions[solutions[:, 1].argsort()[::-1][:n_solutions]]
+
+    return solutions
+
+
 def match_vectors(peaks,
                   library,
                   mag_tol,
                   angle_tol,
                   index_error_tol,
                   n_peaks_to_index,
-                  n_best,
-                  keys=[],
-                  *args,
-                  **kwargs):
+                  n_best):
+    # TODO: Sort peaks by intensity or SNR
     """Assigns hkl indices to pairs of diffraction vectors.
 
     Parameters
@@ -184,29 +269,36 @@ def match_vectors(peaks,
     """
     if peaks.shape == (1,) and peaks.dtype == 'object':
         peaks = peaks[0]
-    # Initialise for loop with first entry & assign empty array to hold
-    # indexation results.
+    # Assign empty array to hold indexation results. The n_best best results
+    # from each phase is returned.
     top_matches = np.empty((len(library), n_best, 5), dtype='object')
     res_rhkls = []
-    # TODO: Sort these by intensity or SNR
 
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
-    # with respect to each phase.
-    for phase_index, (phase_name, structure) in enumerate(zip(library.keys(), library.structures)):
+    # on each phase, storing the best results in top_matches.
+    for phase_index, (phase, structure) in enumerate(zip(library.values(), library.structures)):
         solutions = []
         lattice_recip = structure.lattice.reciprocal()
+        phase_indices = phase['indices']
+        phase_measurements = phase['measurements']
 
         # Choose up to n_peaks_to_index unindexed peaks to be paired in all
-        # combinations
-        unindexed_peak_ids = range(min(peaks.shape[0], n_peaks_to_index))
+        # combinations.
+        # TODO: Matching can be done iteratively where successfully indexed
+        #       peaks are removed after each iteration. This can possibly
+        #       handle overlapping patterns.
+        # unindexed_peak_ids = range(min(peaks.shape[0], n_peaks_to_index))
+        # TODO: Better choice of peaks (longest, highest SNR?)
+        # TODO: Inline after choosing the best, and possibly require external sorting (if using sorted)?
+        unindexed_peak_ids = _choose_peak_ids(peaks, n_peaks_to_index)
 
-        # Determine overall indexations associated with each peak pair
-        for peak_pair_indices in combinations(unindexed_peak_ids, 2):
+        # Find possible solutions for each pair of peaks.
+        for vector_pair_index, peak_pair_indices in enumerate(list(combinations(unindexed_peak_ids, 2))):
             # Consider a pair of experimental scattering vectors.
             q1, q2 = peaks[peak_pair_indices, :]
             q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
 
-            # Ensure q1 is longer than q2 so combinations in correct order.
+            # Ensure q1 is longer than q2 for consistent order.
             if q1_len < q2_len:
                 q1, q2 = q2, q1
                 q1_len, q2_len = q2_len, q1_len
@@ -215,78 +307,62 @@ def match_vectors(peaks,
             angle = get_angle_cartesian(q1, q2)
 
             # Get library indices for hkls matching peaks within tolerances.
-            # TODO: Library[key] are object arrays. Test performance of direct float arrays
+            # TODO: phase are object arrays. Test performance of direct float arrays
             # TODO: Test performance with short circuiting (np.where for each step)
-            match_ids = np.where((np.abs(q1_len - library[phase_name][:, 2]) < mag_tol) &
-                                 (np.abs(q2_len - library[phase_name][:, 3]) < mag_tol) &
-                                 (np.abs(angle - library[phase_name][:, 4]) < angle_tol))[0]
+            tolerance_mask = ((np.abs(phase_measurements[:, 0] - q1_len) < mag_tol) &
+                              (np.abs(phase_measurements[:, 1] - q2_len) < mag_tol) &
+                              (np.abs(phase_measurements[:, 2] - angle) < angle_tol))
 
             # Iterate over matched library vectors determining the error in the
-            # associated indexation and finding the minimum error cases.
-            peak_pair_solutions = []
-            for i, match_id in enumerate(match_ids):
-                hkl1, hkl2 = library[phase_name][:, :2][match_id]
-                # Reference vectors are cartesian coordinates of hkls
-                ref_q1, ref_q2 = lattice_recip.cartesian(hkl1), lattice_recip.cartesian(hkl2)
-
-                # Rotation from ref to experimental
-                R = get_rotation_matrix_between_vectors(q1, q2,
-                                                        ref_q1, ref_q2)
+            # associated indexation.
+            if np.count_nonzero(tolerance_mask) == 0: continue
+            # TODO: Object arrays...
+            # Reference vectors are cartesian coordinates of hkls
+            reference_vectors = lattice_recip.cartesian(phase_indices[tolerance_mask])
+            for ref_q1, ref_q2 in reference_vectors:
+                # Rotation from experimental to reference frame
+                # TODO: Check direction. Transpose?
+                R = get_rotation_matrix_between_vectors(ref_q1, ref_q2,
+                                                        q1, q2)
 
                 # Index the peaks by rotating them to the reference coordinate
-                # system. R is used directly since it is multiplied from the
-                # right.
-                cartesian_to_index = structure.lattice.base
-                hkls = lattice_recip.fractional(peaks.dot(R))
+                # system. Transpose R since it is multiplied from the right.
+                hkls = lattice_recip.fractional(peaks.dot(R.T))
 
                 # Evaluate error of peak hkl indexation and total error.
                 rhkls = np.rint(hkls)
                 ehkls = np.abs(hkls - rhkls)
-                res_rhkls.append(rhkls)
 
                 # Indices of matched peaks within error tolerance
-                pair_ids = np.where(np.max(ehkls, axis=1) < index_error_tol)[0]
-                # TODO: SPIND allows trying to match multiple crystals
-                # (overlap) by iteratively matching until match_rate == 0 on
-                # the unindexed peaks
-                # pair_ids = list(set(pair_ids) - set(indexed_peak_ids))
+                valid_peak_mask = np.max(ehkls, axis=1) < index_error_tol
+                valid_peak_mask_count = np.count_nonzero(valid_peak_mask)
 
-                # calculate match_rate as fraction of peaks indexed
-                num_pairs = len(pair_ids)
-                num_peaks = len(peaks)
-                match_rate = num_pairs / num_peaks
+                # NOTE: Only append if this explains more 
+                if valid_peak_mask_count > 2:
+                    # Naive error of matching peaks
+                    error_mean = ehkls[valid_peak_mask].mean()
 
-                if len(pair_ids) == 0:
-                    # no matching peaks, set error to 1
-                    total_error = 1.0
-                else:
-                    # naive error of matching peaks
-                    total_error = ehkls[pair_ids].mean()
+                    # Calculate match_rate as fraction of peaks indexed
+                    num_peaks = len(peaks)
+                    match_rate = (valid_peak_mask_count / num_peaks) if num_peaks else 0
 
-                peak_pair_solutions.append([
-                    R,
-                    match_rate,
-                    ehkls,
-                    total_error
-                ])
-            solutions += peak_pair_solutions
+                    solutions.append([
+                        R,
+                        match_rate,
+                        ehkls,  # TODO: Don't really see the reason for exporting these?
+                        error_mean,
+                        vector_pair_index
+                    ])
+                    res_rhkls.append(rhkls)
 
-        # TODO: Intersect the solutions from each pair based on orientation.
-        #       If there is only one in the intersection, assume that this is
-        #       the correct crystal.
-        # TODO: SPIND sorts by highest match rate then lowest total error and
-        #       returns the single best solution. Here, we instead return the n
-        #       best solutions. Correct approach for pyXem?
-        #       best_match_rate_solutions = solutions[solutions[6].argmax()]
         n_solutions = min(n_best, len(solutions))
         if n_solutions > 0:
-            match_rate_index = 1
-            solutions = np.array(solutions)
-            top_n = solutions[solutions[:, match_rate_index].argpartition(-n_solutions)[-n_solutions:]]
+            # TODO: Symmetry (Td) based on phase
+            top_n = _sort_solutions(np.array(solutions), n_solutions, Td)
 
             # Put the top n ranked solutions in the output array
             top_matches[phase_index, :, 0] = phase_index
-            top_matches[phase_index, :n_solutions, 1:] = top_n
+            top_matches[phase_index, :n_solutions, 1:] = top_n[:, :4]
 
         if n_solutions < n_best:
             # Fill with dummy values
@@ -305,7 +381,7 @@ def match_vectors(peaks,
     # when the two tuple values have the same first dimension), we cannot
     # return a tuple directly, but instead have to format the result as an
     # array ourselves.
-    res = np.empty(2, dtype='object')
+    res = np.empty(2, dtype=np.object)
     res[0] = top_matches.reshape((len(library) * n_best, 5))
     res[1] = np.asarray(res_rhkls)
     return res

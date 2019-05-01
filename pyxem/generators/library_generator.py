@@ -33,7 +33,7 @@ from pyxem.utils.sim_utils import simulate_rotated_structure
 from pyxem.utils.vector_utils import get_angle_cartesian
 
 
-class DiffractionLibraryGenerator(object):
+class DiffractionLibraryGenerator:
     """Computes a library of electron diffraction patterns for specified atomic
     structures and orientations.
     """
@@ -130,7 +130,7 @@ class DiffractionLibraryGenerator(object):
         return diffraction_library
 
 
-class VectorLibraryGenerator(object):
+class VectorLibraryGenerator:
     """Computes a library of diffraction vectors and pairwise inter-vector
     angles for a specified StructureLibrary.
     """
@@ -157,6 +157,7 @@ class VectorLibraryGenerator(object):
 
         Returns
         -------
+        # TODO: Update
         vector_library : :class:`DiffractionVectorLibrary`
             Mapping of phase identifier to a numpy array with entries in the
             form: [hkl1, hkl2, len1, len2, angle] ; lengths are in reciprocal
@@ -178,9 +179,9 @@ class VectorLibraryGenerator(object):
                 reciprocal_radius)
 
             # Iterate through all pairs calculating interplanar angle
-            phase_vector_pairs = []
-            for comb in itertools.combinations(np.arange(len(indices)), 2):
-                i, j = comb[0], comb[1]
+            phase_index_pairs = []
+            phase_measurements = []
+            for i, j in itertools.combinations(np.arange(len(indices)), 2):
                 # Specify hkls and lengths associated with the crystal structure.
                 # TODO: This should be updated to reflect systematic absences
                 if np.count_nonzero(coordinates[i]) == 0 or np.count_nonzero(coordinates[j]) == 0:
@@ -193,11 +194,18 @@ class VectorLibraryGenerator(object):
                     hkl1, hkl2 = hkl2, hkl1
                     len1, len2 = len1, len2
                 angle = get_angle_cartesian(coordinates[i], coordinates[j])
-                phase_vector_pairs.append(np.array([hkl1, hkl2, len1, len2, angle]))
-            vector_library[phase_name] = np.array(phase_vector_pairs)
+                phase_index_pairs.append([hkl1, hkl2])
+                phase_measurements.append([len1, len2, angle])
+            phase_measurements = np.array(phase_measurements)
+            unique_measurements, unique_measurement_indices = np.unique(phase_measurements, axis=0, return_index=True)
+            vector_library[phase_name] = {
+                'indices': np.array(phase_index_pairs)[unique_measurement_indices],
+                'measurements': unique_measurements
+            }
 
         # Pass attributes to diffraction library from structure library.
         vector_library.identifiers = self.structures.identifiers
         vector_library.structures = self.structures.structures
+        vector_library.reciprocal_radius = reciprocal_radius
 
         return vector_library

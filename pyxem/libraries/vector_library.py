@@ -62,6 +62,7 @@ class DiffractionVectorLibrary(dict):
     def __init__(self, *args, **kwargs):
         self.identifiers = None
         self.structures = None
+        self.reciprocal_radius = None
 
     def pickle_library(self, filename):
         """Saves a diffraction library in the pickle format.

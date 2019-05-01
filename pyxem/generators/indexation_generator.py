@@ -20,13 +20,8 @@
 
 """
 
-from heapq import nlargest
-from operator import itemgetter
-
 import numpy as np
 import hyperspy.api as hs
-from math import acos, cos, sin, pi, radians, degrees
-import itertools
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
@@ -36,6 +31,7 @@ from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
+from pyxem.utils.indexation_utils import match_template_peaks
 
 import hyperspy.api as hs
 
@@ -117,12 +113,13 @@ class IndexationGenerator():
             pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
             for i in range(num_orientations):
                 num_peaks = min(pixel_coords_jagged[i].shape[0], max_peaks)
-                intensities[i, :num_peaks] = intensities_jagged[i][:num_peaks]
+                highest_intensity_indices = np.argpartition(intensities_jagged[i], -num_peaks)[-num_peaks:]
+                intensities[i, :num_peaks] = intensities_jagged[i][highest_intensity_indices]
                 # Get and compute pixel coordinates for all rotations about the
                 # center, clipped to the detector size and rounded to integer positions.
                 pixel_coords[:, i, :num_peaks] = np.clip(
                     (signal_half_width + rotation_matrices_2d @ (
-                        pixel_coords_jagged[i][:num_peaks].T - signal_half_width)).transpose(0, 2, 1),
+                        pixel_coords_jagged[i][highest_intensity_indices].T - signal_half_width)).transpose(0, 2, 1),
                     a_min=0,
                     a_max=np.array(sig_shape) - 1)
 
@@ -229,7 +226,6 @@ class VectorIndexationGenerator():
                       index_error_tol,
                       n_peaks_to_index,
                       n_best,
-                      keys=[],
                       *args,
                       **kwargs):
         """Assigns hkl indices to diffraction vectors.
@@ -249,11 +245,6 @@ class VectorIndexationGenerator():
             The maximum number of peak to index.
         n_best : int
             The maximum number of good solutions to be retained.
-        keys : list
-            If more than one phase present in library it is recommended that
-            these are submitted. This allows a mapping from the number to the
-            phase.  For example, keys = ['si','ga'] will have an output with 0
-            for 'si' and 1 for 'ga'.
         *args : arguments
             Arguments passed to the map() function.
         **kwargs : arguments
@@ -275,7 +266,6 @@ class VectorIndexationGenerator():
                                         index_error_tol=index_error_tol,
                                         n_peaks_to_index=n_peaks_to_index,
                                         n_best=n_best,
-                                        keys=keys,
                                         inplace=False,
                                         *args,
                                         **kwargs)
@@ -290,4 +280,88 @@ class VectorIndexationGenerator():
 
         vectors.hkls = rhkls
 
+        return indexation_results
+
+
+class TemplatePeakIndexationGenerator():
+    """TODO
+
+    Attributes
+    ----------
+    signal : ElectronDiffraction
+        The signal of electron diffractoin patterns to be indexed.
+    diffraction_library : DiffractionPeakLibrary
+        Library of simulated peak information.
+
+    Parameters
+    ----------
+    vectors : DiffractionVectors
+        Diffraction vectors to be indexed.
+    diffraction_library : DiffractionPeakLibrary
+        Library of simulated peak information.
+    """
+
+    def __init__(self, vectors, diffraction_library):
+        self.vectors = vectors
+        self.diffraction_library = diffraction_library
+
+    # TODO: This is very similar to the normal template matching. Only
+    # difference is the matching score calculation and input (signal vs
+    # vectors)
+    def index_vectors(self,
+                      n_largest=5,
+                      mask=None,
+                      *args,
+                      **kwargs):
+
+        inplane_rotations = np.deg2rad(inplane_rotations)
+        num_inplane_rotations = inplane_rotations.shape[0]
+        sig_shape = np.array(signal.axes_manager.signal_shape)
+        signal_half_shape = sig_shape / 2
+
+        if mask is None:
+            # Index at all real space pixels
+            mask = 1
+
+        # Create a copy of the library, cropping and padding the peaks to match
+        # max_peaks. Also create rotated pixel coordinates according to
+        # inplane_rotations
+        rotation_matrices_2d = np.array([[[np.cos(t), np.sin(t)], [-np.sin(t), np.cos(t)]] for t in inplane_rotations])
+        cropped_library = {}
+
+        for phase_name, phase_entry in library.items():
+            num_orientations = len(phase_entry['orientations'])
+            intensities_jagged = phase_entry['intensities']
+            intensities = np.zeros((num_orientations, max_peaks))
+            pixel_coords_jagged = phase_entry['pixel_coords']
+            pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
+            for i in range(num_orientations):
+                num_peaks = min(pixel_coords_jagged[i].shape[0], max_peaks)
+                intensities[i, :num_peaks] = intensities_jagged[i][:num_peaks]
+                # Get and compute pixel coordinates for all rotations about the
+                # centre, clipped to the detector size and rounded to integer positions.
+                pixel_coords[:, i, :num_peaks] = np.clip(
+                    (signal_half_shape + rotation_matrices_2d @ (
+                        pixel_coords_jagged[i][:num_peaks].T - signal_half_shape)).transpose(0, 2, 1),
+                    a_min=0,
+                    a_max=sig_shape - 1)
+
+            np.rint(pixel_coords, out=pixel_coords)
+            cropped_library[phase_name] = {
+                'orientations': phase_entry['orientations'],
+                'pixel_coords': pixel_coords.astype('int'),
+                'intensities': intensities,
+                'pattern_norms': np.linalg.norm(intensities, axis=1),
+            }
+        # TODO: Create inplane, same as normal template matching above
+        indexation = vectors.map(match_template_peaks,
+                                 library=self.diffraction_library,
+                                 mask=mask,
+                                 inplace=False,
+                                 parallel=False,  # TODO: Remove
+                                 *args,
+                                 **kwargs)
+
+        indexation_results = TemplatePeakMatchingResults(indexation.data)
+        indexation_results = transfer_navigation_axes(indexation_results, self.signal)
         return indexation_results
