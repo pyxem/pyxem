@@ -113,10 +113,9 @@ def call_ring_pattern(xcenter, ycenter):
         return amplitude * (v0 + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8).ravel()
     return ring_pattern
 
-def generate_ring_pattern(self, mask=False, mask_radius=10, scale=100,
-                          image_size=256, amplitude=1000, spread=2,
-                          direct_beam_amplitude=500, asymmetry=1,
-                          rotation=0):
+def generate_ring_pattern(image_size, mask=False, mask_radius=10, scale=100,
+                          amplitude=1000, spread=2, direct_beam_amplitude=500,
+                          asymmetry=1, rotation=0):
     """Calculate a set of rings to model a polycrystalline gold diffraction
     pattern for use in fitting for diffraction pattern calibration.
     It is suggested that the function generate_ring_pattern is used to

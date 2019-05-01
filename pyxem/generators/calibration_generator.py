@@ -26,7 +26,9 @@ from math import sin, cos
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.calibration_utils import call_ring_pattern, \
-                                          calc_radius_with_distortion
+                                          calc_radius_with_distortion,
+                                          generate_ring_pattern
+
 
 class CalibrationGenerator():
     """Obtains calibration information from common reference standards.
@@ -72,6 +74,7 @@ class CalibrationGenerator():
             self.navigation_image = navigation_image
         # Assign attributes for calibration values to be determined
         self.affine_matrix = None
+        self.ring_params = None
         self.diffraction_rotation = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
@@ -150,6 +153,7 @@ class CalibrationGenerator():
         # Fit ring pattern to experimental data
         xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter),
                             pts, ref, p0=x0)
+        self.ring_params = xf
         # Calculate affine transform parameters from fit parameters
         scaling = np.array([[1, 0],
                             [0, xf[4]**-0.5]])
@@ -198,12 +202,14 @@ class CalibrationGenerator():
                              "to determine this matrix.")
         # Set name for experimental data pattern
         dpeg = self.diffraction_pattern
-        dpref = call_ring_pattern(mask=True, mask_radius=mask_radius,
-                                  scale=ringP[0],
-                                  amplitude=ringP[1],
-                                  spread=spread,
-                                  direct_beam_amplitude=ringP[3],
-                                  asymmetry=1, rotation=ringP[5])
+        ringP = self.ring_params
+        dpref = generate_ring_pattern(image_size=dpeg.data.shape[0],
+                                      mask=True, mask_radius=mask_radius,
+                                      scale=ringP[0],
+                                      amplitude=ringP[1],
+                                      spread=spread,
+                                      direct_beam_amplitude=ringP[3],
+                                      asymmetry=1, rotation=ringP[5])
         # Apply distortion corrections to experimental data
         dpegs = pxm.stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = pxm.ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
