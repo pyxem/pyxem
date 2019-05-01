@@ -24,6 +24,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from math import sin, cos
 
+from pyxem import stack_method
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion, \
@@ -211,16 +212,17 @@ class CalibrationGenerator():
                                       direct_beam_amplitude=ringP[3],
                                       asymmetry=1, rotation=ringP[5])
         # Apply distortion corrections to experimental data
-        dpegs = pxm.stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = pxm.ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
+        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
         # Calculate residuals to be returned
         diff_init = ElectronDiffraction(dpeg.data - dpref.data)
         diff_end = ElectronDiffraction(dpegs.inav[0,0].data - dpref.data)
+        residuals = stack_method([diff_init, diff_end])
 
-        return diff_init, diff_end
+        return ElectronDiffraction(residuals)
 
     def get_diffraction_calibration(self):
         """Determine the diffraction pattern pixel size calibration.
