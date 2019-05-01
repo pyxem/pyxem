@@ -107,9 +107,6 @@ class CalibrationGenerator():
 
         Returns
         -------
-        residuals : pxm.ElectronDiffraction()
-            Residual between data before and after distortion correct with
-            respect to simulated
         fit_params : np.array()
             Array of fitting parameters. [scale, amplitude, spread,
                                           direct_beam_amplitude, asymmetry,
@@ -120,8 +117,8 @@ class CalibrationGenerator():
 
         See Also
         --------
-            A utility function generate_ring_pattern is implemented and may be
-            used to manually determine appropriate initial parameters.
+            pyxem.utils.calibration_utils.generate_ring_pattern
+
         """
         # Check that necessary calibration data is provided
         if self.diffraction_pattern is None:
@@ -170,6 +167,28 @@ class CalibrationGenerator():
         self.affine_matrix = affine
 
         return affine
+
+    def get_distortion_residuals(self):
+        """Determine the diffraction pattern pixel size calibration.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        diff_cal : float
+            Diffraction calibration in reciprocal angstroms per pixel.
+
+        """
+        if self.diffraction_pattern is None:
+            raise ValueError("This method requires a diffraction_pattern to be "
+                             "specified.")
+        if self.affine_matrix is None:
+            raise ValueError("This method requires a distortion matrix to have "
+                             "been determined. Use get_elliptical_distortion "
+                             "to determine this matrix.")
+
+        return
 
     def get_diffraction_calibration(self):
         """Determine the diffraction pattern pixel size calibration.
@@ -225,7 +244,19 @@ class CalibrationGenerator():
 
         return nav_cal
 
-    def get_calibration_values_dictionary(self):
+    def get_calibration_dictionary(self):
+        """Get determined calibration values as a dictionary.
+
+        Returns
+        -------
+        calibration_dictionary : dict()
+            Dictionary of calibration values.
+        """
+        # Construct calibration dictionary from object attributes.
+
+        return calibration_dictionary
+
+    def save_calibration_dictionary(self):
         """Get determined calibration values as a dictionary.
 
         Returns
