@@ -169,16 +169,15 @@ class CalibrationGenerator():
         return affine
 
     def get_distortion_residuals(self, mask_radius, spread):
-        """Determine the diffraction pattern pixel size calibration.
+        """Obtain residuals for experimental data and distortion corrected data
+        with respect to a simulated symmetric ring pattern.
 
         Parameters
         ----------
         mask_radius : int
-            The radius in pixels for a mask over the direct beam disc
-            (the direct beam disc within given radius will be excluded
-            from the fit)
+            Radius, in pixels, for a mask over the direct beam disc.
         spread : float
-            An initial guess for the spread within each ring (Gaussian width)
+            Gaussian spread of each ring in the simulated pattern.
 
         Returns
         -------
