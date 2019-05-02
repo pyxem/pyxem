@@ -23,9 +23,9 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from math import sin, cos
+from hyperspy.roi import CircleROI
 
 from pyxem import stack_method
-from pyxem.roi import CircleROI
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.calibration_utils import call_ring_pattern, \
@@ -54,19 +54,6 @@ class CalibrationGenerator():
         self.diffraction_rotation = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
-
-    def plot_calibration_data(self, data_to_plot=None, roi=None):
-        """ Plot the calibration data.
-
-        Parameters
-        ----------
-        data_to_plot : string
-            Specify the calibration data to be plotted. If None, all calibration
-            data is plotted as a Signal2D object.
-        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
-            An optional ROI object, as detailed in HyperSpy, to be added as a
-            widget to the calibration data plot.
-        """
 
     def get_elliptical_distortion(self, mask_radius, scale=100, amplitude=1000,
                                   spread=2, direct_beam_amplitude=500,

@@ -18,6 +18,7 @@
 
 import pickle
 import numpy as np
+from pyxem import stack_method
 
 
 def load_CalibrationDataLibrary(filename, safety=False):
@@ -68,6 +69,37 @@ class CalibrationDataLibrary():
         self.au_x_grating_im = au_x_grating_im
         self.moo3_dp = moo3_dp
         self.moo3_im = moo3_im
+
+    def plot_calibration_data(self, data_to_plot=None, roi=None,
+                              *args, **kwargs):
+        """ Plot the calibration data.
+
+        Parameters
+        ----------
+        data_to_plot : string
+            Specify the calibration data to be plotted. If None, all calibration
+            data is plotted as a Signal2D object. Valid options are:
+            {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im'}
+        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
+            An optional ROI object, as detailed in HyperSpy, to be added as a
+            widget to the calibration data plot.
+        """
+        # Construct object containing user defined data to plot
+        if data_to_plot == au_x_grating_dp:
+            data = self.au_x_grating_dp
+        if data_to_plot == au_x_grating_im:
+            data = self.au_x_grating_im
+        if data_to_plot == moo3_dp:
+            data = self.moo3_dp
+        if data_to_plot == moo3_im:
+            data = self.moo3_im
+        else:
+            data = stack_method([self.au_x_grating_dp, self.au_x_grating_im,
+                                 self.moo3_dp, self.moo3_im])
+        #Plot the data
+        data.plot(*args, **kwargs)
+        if roi:
+            roi.add_widget(data, axes=data.axes_manager.signal_axes)
 
     def pickle_library(self, filename):
         """Saves a diffraction library in the pickle format.
