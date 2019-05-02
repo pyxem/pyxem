@@ -23,6 +23,10 @@ from pyxem.generators.calibration_generator import CalibrationGenerator
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
+from pyxem.utils.calibration_utils import call_ring_pattern, \
+                                          calc_radius_with_distortion, \
+                                          generate_ring_pattern
+
 class TestCalibrationGenerator:
     @pytest.fixture
     def fit_parameters(self):
@@ -71,39 +75,41 @@ class TestCalibrationGenerator:
              [235, 188],
              [75, 186]]
         ))])
-    def test_generate_ring_pattern(self, cal_generator, generate_parameters,
+    def test_generate_ring_pattern(self, generate_parameters,
                                    known_values, reference_indices):
         x0 = generate_parameters
-        rings = cal_generator.generate_ring_pattern(mask=True,
-                                                    mask_radius=10,
-                                                    scale=x0[0],
-                                                    image_size=x0[1],
-                                                    amplitude=x0[2],
-                                                    spread=x0[3],
-                                                    direct_beam_amplitude=x0[4],
-                                                    asymmetry=x0[5],
-                                                    rotation=x0[6])
+        rings = generate_ring_pattern(mask=True,
+                                      mask_radius=10,
+                                      scale=x0[0],
+                                      image_size=x0[1],
+                                      amplitude=x0[2],
+                                      spread=x0[3],
+                                      direct_beam_amplitude=x0[4],
+                                      asymmetry=x0[5],
+                                      rotation=x0[6])
         assert np.allclose(known_values,
                            rings[reference_indices[:, 0], reference_indices[:, 1]])
 
     @pytest.fixture
-    def cal_generator_wt_data(self, cal_generator, generate_parameters):
+    def cal_generator_wt_data(self, generate_parameters):
         x0 = generate_parameters
-        ring_data = cal_generator.generate_ring_pattern(mask=True,
-                                                        mask_radius=10,
-                                                        scale=x0[0],
-                                                        amplitude=x0[1],
-                                                        spread=x0[2],
-                                                        direct_beam_amplitude=x0[3],
-                                                        asymmetry=x0[4],
-                                                        rotation=x0[5])
+        ring_data = generate_ring_pattern(image_size=256,
+                                          mask=True,
+                                          mask_radius=10,
+                                          scale=x0[0],
+                                          amplitude=x0[1],
+                                          spread=x0[2],
+                                          direct_beam_amplitude=x0[3],
+                                          asymmetry=x0[4],
+                                          rotation=x0[5])
         dp = ElectronDiffraction(ring_data)
         return CalibrationGenerator(dp)
 
     def test_fit_ring_pattern(self, cal_generator_wt_data,
                               fit_parameters):
         x0 = fit_parameters
-        xf = cal_generator_wt_data.fit_ring_pattern(10)
+        cal_generator_wt_data.get_elliptical_distortion(10)
+        xf = cal_generator_wt_data.ring_params
         # Need to re-phase the rotation angle
         mod0 = x0[-1] % (2 * np.pi)
         modf = xf[-1] % (2 * np.pi)
