@@ -87,11 +87,11 @@ class CalibrationDataLibrary():
         # Construct object containing user defined data to plot
         if data_to_plot == 'au_x_grating_dp':
             data = self.au_x_grating_dp
-        if data_to_plot == 'au_x_grating_im':
+        elif data_to_plot == 'au_x_grating_im':
             data = self.au_x_grating_im
-        if data_to_plot == 'moo3_dp':
+        elif data_to_plot == 'moo3_dp':
             data = self.moo3_dp
-        if data_to_plot == 'moo3_im':
+        elif data_to_plot == 'moo3_im':
             data = self.moo3_im
         else:
             raise ValueError("Please specify valid data_to_plot.")

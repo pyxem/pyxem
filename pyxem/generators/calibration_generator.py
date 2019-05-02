@@ -282,8 +282,8 @@ class CalibrationGenerator():
         pka = trace.isig[db + mask_length:].find_peaks1D_ohaver()[0]['position']
         pkb = trace.isig[:db - mask_length].find_peaks1D_ohaver()[0]['position']
         # Determine predicted position of 022 peak of Au pattern d022=1.437
-        au_pre = (db - (self.ring_params[0]/1.437)
-        au_post = (db + (self.ring_params[0]/1.437)
+        au_pre = db - (self.ring_params[0]/1.437)
+        au_post = db + (self.ring_params[0]/1.437)
         # Calculate differences between predicted and measured positions
         prediff = np.abs(pkb - au_pre)
         postdiff = np.abs(pka - au_post)
