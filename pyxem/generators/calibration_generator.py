@@ -26,6 +26,7 @@ from math import sin, cos
 
 from pyxem import stack_method
 from pyxem.roi import CircleROI
+from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion, \
@@ -37,49 +38,35 @@ class CalibrationGenerator():
 
     Parameters
     ----------
-    signal : ElectronDiffraction
+    calibration_data : CalibrationDataLibrary
         The signal of electron diffraction data to be used for calibration.
-    standard : string
-        Identifier for calibration standard used. At present only "au-x-grating"
-        is supported.
 
     """
-    def __init__(self,
-                 diffraction_pattern=None,
-                 navigation_image=None,
-                 standard='au-x-grating'):
-        # Verify calibration standard is recognized and set attribute.
-        standard_dict = {
-            'au-x-grating': 'au-x-grating',
-        }
-        # Raise a warning if no calibration data is provided.
-        if diffraction_pattern is None and navigation_image is None:
-            raise ValueError("No calibration data has been provided!")
-        if standard in standard_dict:
-            self.standard = standard_dict[standard]
-        else:
-            raise NotImplementedError("The standard `{}` is not recognized. "
-                                      "See documentation for available "
-                                      "implementations.".format(standard))
-        # Check calibration data provided as ElectronDiffraction object.
-        if isinstance(diffraction_pattern, ElectronDiffraction) is False:
-            raise ValueError("Data for calibration must be provided as an "
-                             "ElectronDiffraction object.")
-        # Set diffraction patttern in attribute after checking standard form.
-        if diffraction_pattern.axes_manager.navigation_shape:
-            raise ValueError("Calibration using au-x-grating data requires "
-                             "a single diffraction pattern to be provided.")
-        else:
-            self.diffraction_pattern = diffraction_pattern
-        # Set navigation image in attribute.
-        if navigation_image:
-            self.navigation_image = navigation_image
-        # Assign attributes for calibration values to be determined
+    def __init__(self, calibration_data):
+        # Verify that calibration_data is correct object class
+        if isinstance(calibration_data, CalibrationDataLibrary) is False:
+            raise ValueError("Calibration data must be provided as a "
+                             "CalibrationDataLibrary object.")
+        # Assign attributes
+        self.calibration_data = calibration_data
         self.affine_matrix = None
         self.ring_params = None
         self.diffraction_rotation = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
+
+    def plot_calibration_data(self, data_to_plot=None, roi=None):
+        """ Plot the calibration data.
+
+        Parameters
+        ----------
+        data_to_plot : string
+            Specify the calibration data to be plotted. If None, all calibration
+            data is plotted as a Signal2D object.
+        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
+            An optional ROI object, as detailed in HyperSpy, to be added as a
+            widget to the calibration data plot.
+        """
 
     def get_elliptical_distortion(self, mask_radius, scale=100, amplitude=1000,
                                   spread=2, direct_beam_amplitude=500,
@@ -292,6 +279,7 @@ class CalibrationGenerator():
         # Find peaks in line trace
         peaks = trace.find_peaks()
         # Determine diffraction calibration from peak positions
+        # TODO: get initial guess from ring fit parameters...
         diff_cal = 0.01
 
         return diff_cal
@@ -319,6 +307,7 @@ class CalibrationGenerator():
         # Find peaks in line trace
         peaks = trace.find_peaks()
         # Determine diffraction calibration from peak positions
+
         nav_cal = 1
 
         return nav_cal
