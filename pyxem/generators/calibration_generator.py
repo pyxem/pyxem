@@ -231,11 +231,11 @@ class CalibrationGenerator():
                                           inplace=True)
         dpegm = dpegs.mean((0,1))
         # Plot distortion corrected data
-        dpegcm.plot(cmap='magma', vmax=0.1)
+        dpegm.plot(cmap='magma', vmax=0.1)
         # add reference circle if specified
         if reference_circle is True:
             circ = CircleROI(cx=128, cy=128, r=53.5, r_inner=0)
-            circ.add_widget(dpegcm)
+            circ.add_widget(dpegm)
 
     def get_diffraction_calibration(self, linewidth):
         """Determine the diffraction pattern pixel size calibration.

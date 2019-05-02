@@ -70,7 +70,7 @@ class CalibrationDataLibrary():
         self.moo3_dp = moo3_dp
         self.moo3_im = moo3_im
 
-    def plot_calibration_data(self, data_to_plot=None, roi=None,
+    def plot_calibration_data(self, data_to_plot, roi=None,
                               *args, **kwargs):
         """ Plot the calibration data.
 
@@ -85,24 +85,23 @@ class CalibrationDataLibrary():
             widget to the calibration data plot.
         """
         # Construct object containing user defined data to plot
-        if data_to_plot == au_x_grating_dp:
+        if data_to_plot == 'au_x_grating_dp':
             data = self.au_x_grating_dp
-        if data_to_plot == au_x_grating_im:
+        if data_to_plot == 'au_x_grating_im':
             data = self.au_x_grating_im
-        if data_to_plot == moo3_dp:
+        if data_to_plot == 'moo3_dp':
             data = self.moo3_dp
-        if data_to_plot == moo3_im:
+        if data_to_plot == 'moo3_im':
             data = self.moo3_im
         else:
-            data = stack_method([self.au_x_grating_dp, self.au_x_grating_im,
-                                 self.moo3_dp, self.moo3_im])
+            raise ValueError("Please specify valid data_to_plot.")
         #Plot the data
         data.plot(*args, **kwargs)
         if roi:
             roi.add_widget(data, axes=data.axes_manager.signal_axes)
 
     def pickle_library(self, filename):
-        """Saves a diffraction library in the pickle format.
+        """Saves a calibration data library in the pickle format.
 
         Parameters
         ----------
@@ -111,7 +110,7 @@ class CalibrationDataLibrary():
 
         See Also
         --------
-            load_VectorLibrary()
+            load_CalibrationDataLibrary()
 
         """
         with open(filename, 'wb') as handle:

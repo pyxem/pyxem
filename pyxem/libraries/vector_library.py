@@ -64,7 +64,7 @@ class DiffractionVectorLibrary(dict):
         self.structures = None
 
     def pickle_library(self, filename):
-        """Saves a diffraction library in the pickle format.
+        """Saves a vector library in the pickle format.
 
         Parameters
         ----------
