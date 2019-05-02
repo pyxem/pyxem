@@ -100,9 +100,10 @@ class CalibrationGenerator():
 
         """
         # Check that necessary calibration data is provided
-        if self.diffraction_pattern is None:
-            raise ValueError("This method requires a diffraction_pattern to be "
-                             "specified.")
+        if self.calibration_data.au_x_grating_dp is None:
+            raise ValueError("This method requires an Au X-grating diffraction "
+                             "pattern to be provided. Please update the "
+                             "CalibrationDataLibrary.")
         # Set diffraction pattern variable
         standard_dp = self.diffraction_pattern
         # Define grid values and center indices for ring pattern evaluation
