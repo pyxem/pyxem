@@ -25,6 +25,7 @@ from scipy.optimize import curve_fit
 from math import sin, cos
 
 from pyxem import stack_method
+from pyxem.roi import CircleROI
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion, \
@@ -224,6 +225,40 @@ class CalibrationGenerator():
         residuals = stack_method([diff_init, diff_end])
 
         return ElectronDiffraction(residuals)
+
+    def plot_corrected_diffraction_pattern(self, reference_circle=True):
+        """Plot the distortion corrected diffraction pattern with an optional
+        reference circle.
+
+        Parameters
+        ----------
+        reference_circle : bool
+            If True a CircleROI widget is added to the plot for reference.
+
+        """
+        # Check all required parameters are defined as attributes
+        if self.diffraction_pattern is None:
+            raise ValueError("This method requires a diffraction_pattern to be "
+                             "specified.")
+        if self.affine_matrix is None:
+            raise ValueError("This method requires a distortion matrix to have "
+                             "been determined. Use get_elliptical_distortion "
+                             "to determine this matrix.")
+        # Set name for experimental data pattern
+        dpeg = self.diffraction_pattern
+        # Apply distortion corrections to experimental data
+        dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
+        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs.apply_affine_transformation(self.affine_matrix,
+                                          preserve_range=True,
+                                          inplace=True)
+        dpegm = dpegs.mean((0,1))
+        # Plot distortion corrected data
+        dpegcm.plot(cmap='magma', vmax=0.1)
+        # add reference circle if specified
+        if reference_circle is True:
+            circ = CircleROI(cx=128, cy=128, r=53.5, r_inner=0)
+            circ.add_widget(dpegcm)
 
     def get_diffraction_calibration(self, linewidth):
         """Determine the diffraction pattern pixel size calibration.
