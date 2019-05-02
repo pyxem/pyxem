@@ -291,13 +291,12 @@ class CalibrationGenerator():
         return calibration_dictionary
 
     def save_calibration_dictionary(self):
-        """Get determined calibration values as a dictionary.
+        """Saves a calibration dictionary in the pickle format.
 
-        Returns
-        -------
-        calibration_dictionary : dict()
-            Dictionary of calibration values.
+        Parameters
+        ----------
+        filename : str
+            The location in which to save the file
         """
-        # Construct calibration dictionary from object attributes.
-
-        return calibration_dictionary
+        with open(filename, 'wb') as handle:
+            pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
