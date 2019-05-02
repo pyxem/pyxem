@@ -29,18 +29,9 @@ from pyxem.utils.calibration_utils import call_ring_pattern, \
 
 class TestCalibrationGenerator:
     @pytest.fixture
-    def fit_parameters(self):
+    def input_parameters(self):
         x0 = [95, 1200, 2.8, 450, 1.5, 10]
         return x0
-
-    @pytest.fixture
-    def generate_parameters(self):
-        x0 = [95, 256, 1200, 2.8, 450, 1.5, 10]
-        return x0
-
-    @pytest.fixture
-    def cal_generator(self):
-        return CalibrationGenerator(ElectronDiffraction(np.zeros((256, 256))))
 
     @pytest.mark.parametrize('known_values', [
         (np.array(
@@ -75,24 +66,24 @@ class TestCalibrationGenerator:
              [235, 188],
              [75, 186]]
         ))])
-    def test_generate_ring_pattern(self, generate_parameters,
+    def test_generate_ring_pattern(self, input_parameters,
                                    known_values, reference_indices):
-        x0 = generate_parameters
-        rings = generate_ring_pattern(mask=True,
+        x0 = input_parameters
+        rings = generate_ring_pattern(image_size=256,
+                                      mask=True,
                                       mask_radius=10,
                                       scale=x0[0],
-                                      image_size=x0[1],
-                                      amplitude=x0[2],
-                                      spread=x0[3],
-                                      direct_beam_amplitude=x0[4],
-                                      asymmetry=x0[5],
-                                      rotation=x0[6])
+                                      amplitude=x0[1],
+                                      spread=x0[2],
+                                      direct_beam_amplitude=x0[3],
+                                      asymmetry=x0[4],
+                                      rotation=x0[5])
         assert np.allclose(known_values,
                            rings[reference_indices[:, 0], reference_indices[:, 1]])
 
     @pytest.fixture
-    def cal_generator_wt_data(self, generate_parameters):
-        x0 = generate_parameters
+    def cal_generator_wt_data(self, input_parameters):
+        x0 = input_parameters
         ring_data = generate_ring_pattern(image_size=256,
                                           mask=True,
                                           mask_radius=10,
@@ -106,8 +97,8 @@ class TestCalibrationGenerator:
         return CalibrationGenerator(dp)
 
     def test_fit_ring_pattern(self, cal_generator_wt_data,
-                              fit_parameters):
-        x0 = fit_parameters
+                              input_parameters):
+        x0 = input_parameters
         cal_generator_wt_data.get_elliptical_distortion(10)
         xf = cal_generator_wt_data.ring_params
         # Need to re-phase the rotation angle
