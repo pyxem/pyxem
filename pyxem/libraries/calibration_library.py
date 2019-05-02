@@ -62,7 +62,8 @@ class CalibrationDataLibrary():
         An image of an MoO3 standard.
     """
 
-    def __init__(self, au_x_grating_dp, au_x_grating_im, moo3_dp, moo3_im):
+    def __init__(self, au_x_grating_dp=None, au_x_grating_im=None,
+                 moo3_dp=None, moo3_im=None):
         self.au_x_grating_dp = au_x_grating_dp
         self.au_x_grating_im = au_x_grating_im
         self.moo3_dp = moo3_dp
