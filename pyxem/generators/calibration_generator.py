@@ -154,6 +154,7 @@ class CalibrationGenerator():
         # Fit ring pattern to experimental data
         xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter),
                             pts, ref, p0=x0)
+        # Set ring fitting parameters to attribute
         self.ring_params = xf
         # Calculate affine transform parameters from fit parameters
         scaling = np.array([[1, 0],
@@ -168,7 +169,7 @@ class CalibrationGenerator():
         affine = np.array([[correction[0,0], correction[0,1], 0.00],
                            [correction[1,0], correction[1,1], 0.00],
                            [0.00, 0.00, 1.00]])
-
+        # Set affine matrix to attribute
         self.affine_matrix = affine
 
         return affine
@@ -224,11 +225,12 @@ class CalibrationGenerator():
 
         return ElectronDiffraction(residuals)
 
-    def get_diffraction_calibration(self):
+    def get_diffraction_calibration(self, linewidth):
         """Determine the diffraction pattern pixel size calibration.
 
         Parameters
         ----------
+        linewidth : float
 
         Returns
         -------
@@ -240,10 +242,18 @@ class CalibrationGenerator():
         if self.diffraction_pattern is None:
             raise ValueError("This method requires a diffraction_pattern to be "
                              "specified.")
+        dpeg = self.diffraction_pattern
+        dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
+        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs.apply_affine_transformation(self.affine_matrix,
+                                          preserve_range=True,
+                                          inplace=True)
+        dpegm = dpegs.mean((0,1))
         # Define line roi along which to take trace for calibration
-        line = Line2DROI()
+        line = Line2DROI(x1=5,y1=5, x2=250,y2=250, linewidth=linewidth)
         # Obtain line trace
-        trace = line(self.signal)
+        trace = line(dpegm)
+        trace = trace.as_signal1D(0)
         # Find peaks in line trace
         peaks = trace.find_peaks()
         # Determine diffraction calibration from peak positions
@@ -277,18 +287,6 @@ class CalibrationGenerator():
         nav_cal = 1
 
         return nav_cal
-
-    def get_calibration_dictionary(self):
-        """Get determined calibration values as a dictionary.
-
-        Returns
-        -------
-        calibration_dictionary : dict()
-            Dictionary of calibration values.
-        """
-        # Construct calibration dictionary from object attributes.
-
-        return calibration_dictionary
 
     def save_calibration_dictionary(self):
         """Saves a calibration dictionary in the pickle format.
