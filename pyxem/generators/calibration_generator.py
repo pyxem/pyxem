@@ -23,7 +23,7 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from math import sin, cos
-from hyperspy.roi import CircleROI
+from hyperspy.roi import CircleROI, Line2DROI
 
 from pyxem import stack_method
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
@@ -238,16 +238,22 @@ class CalibrationGenerator():
             circ.add_widget(dpegm)
 
     def get_diffraction_calibration(self, mask_length, linewidth):
-        """Determine the diffraction pattern pixel size calibration.
+        """Determine the diffraction pattern pixel size calibration in units of
+        reciprocal Angsstroms per pixel.
 
         Parameters
         ----------
+        mask_length : float
+            Halfwidth of the region excluded from peak finding around the
+            diffraction pattern center.
         linewidth : float
+            Width of Line2DROI used to obtain line trace from distortion
+            corrected diffraction pattern.
 
         Returns
         -------
         diff_cal : float
-            Diffraction calibration in reciprocal angstroms per pixel.
+            Diffraction calibration in reciprocal Angstroms per pixel.
 
         """
         # Check that necessary calibration data is provided
@@ -271,16 +277,22 @@ class CalibrationGenerator():
         # Obtain line trace
         trace = line(dpegm)
         trace = trace.as_signal1D(0)
-        # Find peaks in line trace
-        direct_beam = (np.sqrt(2)*128) - (5*np.sqrt(2))
-        pks = trace.isig[direct_beam + mask_length:].find_peaks1D_ohaver()[0]['position']
-        pks2 = trace.isig[:direct_beam - mask_length].find_peaks1D_ohaver()[0]['position']
-        au_pre = (np.sqrt(2)*128) - (6*np.sqrt(2)) - (self.ring_params[0]/1.437)
-        au_post = (np.sqrt(2)*128) - (6*np.sqrt(2)) + (self.ring_params[0]/1.437)
-        prediff = np.abs(pks2 - au_pre)
-        postdiff = np.abs(pks - au_post)
+        # Find peaks in line trace either side of direct beam
+        db = (np.sqrt(2)*128) - (5*np.sqrt(2))
+        pka = trace.isig[db + mask_length:].find_peaks1D_ohaver()[0]['position']
+        pkb = trace.isig[:db - mask_length].find_peaks1D_ohaver()[0]['position']
+        # Determine predicted position of 022 peak of Au pattern d022=1.437
+        au_pre = (db - (self.ring_params[0]/1.437)
+        au_post = (db + (self.ring_params[0]/1.437)
+        # Calculate differences between predicted and measured positions
+        prediff = np.abs(pkb - au_pre)
+        postdiff = np.abs(pka - au_post)
+        # Calculate new calibration value based on most accurate peak positions
+        dc = (2/1.437)/(pka[postdiff==min(postdiff)]-pkb[prediff==min(prediff)])
+        # Store diffraction calibration value as attribute
+        self.diffraction_calibration = dc[0]
 
-        return (2/1.437)/(pks[postdiff==min(postdiff)]-pks2[prediff==min(prediff)])
+        return dc[0]
 
     def get_navigation_calibration(self):
         """Determine the diffraction pattern pixel size calibration.
