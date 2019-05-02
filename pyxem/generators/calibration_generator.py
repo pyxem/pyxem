@@ -322,6 +322,33 @@ class CalibrationGenerator():
 
         return nav_cal
 
+    def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
+        """ Plot calibrated data for visual inspection.
+
+        Parameters
+        ----------
+        data_to_plot : string
+            Specify the calibration data to be plotted. If None, all calibration
+            data is plotted as a Signal2D object. Valid options are:
+            {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im'}
+        """
+        # Construct object containing user defined data to plot and set the
+        # calibration checking that it is defined.
+        if data_to_plot == 'au_x_grating_dp':
+            data = self.calibration_data.au_x_grating_dp
+        elif data_to_plot == 'au_x_grating_im':
+            data = self.calibration_data.au_x_grating_im
+        elif data_to_plot == 'moo3_dp':
+            data = self.calibration_data.moo3_dp
+        elif data_to_plot == 'moo3_im':
+            data = self.calibration_data.moo3_im
+        else:
+            raise ValueError("Please specify valid data_to_plot.")
+        #Plot the data
+        data.plot(*args, **kwargs)
+        if roi:
+            roi.add_widget(data, axes=data.axes_manager.signal_axes)
+
     def save_calibration_dictionary(self):
         """Saves a calibration dictionary in the pickle format.
 
