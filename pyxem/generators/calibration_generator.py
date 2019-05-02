@@ -105,7 +105,7 @@ class CalibrationGenerator():
                              "pattern to be provided. Please update the "
                              "CalibrationDataLibrary.")
         # Set diffraction pattern variable
-        standard_dp = self.diffraction_pattern
+        standard_dp = self.calibration_data.au_x_grating_dp
         # Define grid values and center indices for ring pattern evaluation
         image_size = standard_dp.data.shape[0]
         xi = np.linspace(0, image_size - 1, image_size)
@@ -171,15 +171,16 @@ class CalibrationGenerator():
             ring pattern.
         """
         # Check all required parameters are defined as attributes
-        if self.diffraction_pattern is None:
-            raise ValueError("This method requires a diffraction_pattern to be "
-                             "specified.")
+        if self.calibration_data.au_x_grating_dp is None:
+            raise ValueError("This method requires an Au X-grating diffraction "
+                             "pattern to be provided. Please update the "
+                             "CalibrationDataLibrary.")
         if self.affine_matrix is None:
             raise ValueError("This method requires a distortion matrix to have "
                              "been determined. Use get_elliptical_distortion "
                              "to determine this matrix.")
         # Set name for experimental data pattern
-        dpeg = self.diffraction_pattern
+        dpeg = self.calibration_data.au_x_grating_dp
         ringP = self.ring_params
         dpref = generate_ring_pattern(image_size=dpeg.data.shape[0],
                                       mask=True, mask_radius=mask_radius,
@@ -212,15 +213,16 @@ class CalibrationGenerator():
 
         """
         # Check all required parameters are defined as attributes
-        if self.diffraction_pattern is None:
-            raise ValueError("This method requires a diffraction_pattern to be "
-                             "specified.")
+        if self.calibration_data.au_x_grating_dp is None:
+            raise ValueError("This method requires an Au X-grating diffraction "
+                             "pattern to be provided. Please update the "
+                             "CalibrationDataLibrary.")
         if self.affine_matrix is None:
             raise ValueError("This method requires a distortion matrix to have "
                              "been determined. Use get_elliptical_distortion "
                              "to determine this matrix.")
         # Set name for experimental data pattern
-        dpeg = self.diffraction_pattern
+        dpeg = self.calibration_data.au_x_grating_dp
         # Apply distortion corrections to experimental data
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
@@ -249,10 +251,11 @@ class CalibrationGenerator():
 
         """
         # Check that necessary calibration data is provided
-        if self.diffraction_pattern is None:
-            raise ValueError("This method requires a diffraction_pattern to be "
-                             "specified.")
-        dpeg = self.diffraction_pattern
+        if self.calibration_data.au_x_grating_dp is None:
+            raise ValueError("This method requires an Au X-grating diffraction "
+                             "pattern to be provided. Please update the "
+                             "CalibrationDataLibrary.")
+        dpeg = self.calibration_data.au_x_grating_dp
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
         dpegs.apply_affine_transformation(self.affine_matrix,
