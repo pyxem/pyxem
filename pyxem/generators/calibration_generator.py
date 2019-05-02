@@ -237,7 +237,7 @@ class CalibrationGenerator():
             circ = CircleROI(cx=128, cy=128, r=53.5, r_inner=0)
             circ.add_widget(dpegm)
 
-    def get_diffraction_calibration(self, linewidth):
+    def get_diffraction_calibration(self, mask_length, linewidth):
         """Determine the diffraction pattern pixel size calibration.
 
         Parameters
@@ -255,6 +255,10 @@ class CalibrationGenerator():
             raise ValueError("This method requires an Au X-grating diffraction "
                              "pattern to be provided. Please update the "
                              "CalibrationDataLibrary.")
+        if self.affine_matrix is None:
+            raise ValueError("This method requires a distortion matrix to have "
+                             "been determined. Use get_elliptical_distortion "
+                             "to determine this matrix.")
         dpeg = self.calibration_data.au_x_grating_dp
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
@@ -268,12 +272,15 @@ class CalibrationGenerator():
         trace = line(dpegm)
         trace = trace.as_signal1D(0)
         # Find peaks in line trace
-        peaks = trace.find_peaks()
-        # Determine diffraction calibration from peak positions
-        # TODO: get initial guess from ring fit parameters...
-        diff_cal = 0.01
+        direct_beam = (np.sqrt(2)*128) - (5*np.sqrt(2))
+        pks = trace.isig[direct_beam + mask_length:].find_peaks1D_ohaver()[0]['position']
+        pks2 = trace.isig[:direct_beam - mask_length].find_peaks1D_ohaver()[0]['position']
+        au_pre = (np.sqrt(2)*128) - (6*np.sqrt(2)) - (self.ring_params[0]/1.437)
+        au_post = (np.sqrt(2)*128) - (6*np.sqrt(2)) + (self.ring_params[0]/1.437)
+        prediff = np.abs(pks2 - au_pre)
+        postdiff = np.abs(pks - au_post)
 
-        return diff_cal
+        return (2/1.437)/(pks[postdiff==min(postdiff)]-pks2[prediff==min(prediff)])
 
     def get_navigation_calibration(self):
         """Determine the diffraction pattern pixel size calibration.
