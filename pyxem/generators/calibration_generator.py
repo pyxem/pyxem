@@ -294,11 +294,16 @@ class CalibrationGenerator():
 
         return dc[0]
 
-    def get_navigation_calibration(self):
-        """Determine the diffraction pattern pixel size calibration.
+    def get_navigation_calibration(self, line_roi, start, stop):
+        """Determine the navigation space pixel size calibration, nm per pixel.
 
         Parameters
         ----------
+        line_roi : Line2DROI
+            Line2DROI object along which a profile will be taken to determine
+        start : float
+
+        stop : float
 
         Returns
         -------
@@ -328,8 +333,7 @@ class CalibrationGenerator():
         Parameters
         ----------
         data_to_plot : string
-            Specify the calibration data to be plotted. If None, all calibration
-            data is plotted as a Signal2D object. Valid options are:
+            Specify the calibrated data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im'}
         """
         # Construct object containing user defined data to plot and set the
@@ -346,8 +350,6 @@ class CalibrationGenerator():
             raise ValueError("Please specify valid data_to_plot.")
         #Plot the data
         data.plot(*args, **kwargs)
-        if roi:
-            roi.add_widget(data, axes=data.axes_manager.signal_axes)
 
     def save_calibration_dictionary(self):
         """Saves a calibration dictionary in the pickle format.

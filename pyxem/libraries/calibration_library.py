@@ -77,8 +77,7 @@ class CalibrationDataLibrary():
         Parameters
         ----------
         data_to_plot : string
-            Specify the calibration data to be plotted. If None, all calibration
-            data is plotted as a Signal2D object. Valid options are:
+            Specify the calibration data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im'}
         roi : :obj:`hyperspy.roi.BaseInteractiveROI`
             An optional ROI object, as detailed in HyperSpy, to be added as a
