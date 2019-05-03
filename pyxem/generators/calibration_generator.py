@@ -294,16 +294,21 @@ class CalibrationGenerator():
 
         return dc[0]
 
-    def get_navigation_calibration(self, line_roi, start, stop):
+    def get_navigation_calibration(self, line_roi, x1, x2, n, xspace):
         """Determine the navigation space pixel size calibration, nm per pixel.
 
         Parameters
         ----------
         line_roi : Line2DROI
             Line2DROI object along which a profile will be taken to determine
-        start : float
-
-        stop : float
+        x1 : float
+            Estimate of first X-grating intersection.
+        x2 : float
+            Estimate of second X-grating intersection.
+        n : int
+            Number of X-grating squares crossed.
+        xspace : float
+            Spacing of X-grating in nanometres.
 
         Returns
         -------
@@ -312,20 +317,23 @@ class CalibrationGenerator():
 
         """
         # Check that necessary calibration data is provided
-        if self.navigation_image is None:
-            raise ValueError("This method requires a navigation_image to be "
-                             "specified.")
-        # Define line roi along which to take trace for calibration
-        line = Line2DROI()
+        if self.calibration_data.au_x_grating_im is None:
+            raise ValueError("This method requires an Au X-grating image to be "
+                             "provided. Please update the "
+                             "CalibrationDataLibrary.")
         # Obtain line trace
-        trace = line(self.signal)
+        trace = line_roi(self.calibration_data.au_x_grating_im).as_signal1D(0)
         # Find peaks in line trace
-        peaks = trace.find_peaks()
-        # Determine diffraction calibration from peak positions
+        pk = trace.find_peaks1D_ohaver()[0]['position']
+        # Determine peak positions
+        dif1 = np.abs(pk - x1)
+        dif2 = np.abs(pk - x2)
+        # Calculate navigation calibration
+        x = (n*xspace)/(pk[dif2==min(dif2)]-pk[dif1==min(dif1)])
+        # Store navigation calibration value as attribute
+        self.navigation_calibration = x[0]
 
-        nav_cal = 1
-
-        return nav_cal
+        return x[0]
 
     def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
         """ Plot calibrated data for visual inspection.
