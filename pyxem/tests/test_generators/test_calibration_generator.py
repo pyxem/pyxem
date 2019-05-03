@@ -21,55 +21,19 @@ import numpy as np
 
 from pyxem.generators.calibration_generator import CalibrationGenerator
 
+from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
-from pyxem.utils.calibration_utils import call_ring_pattern, \
-                                          calc_radius_with_distortion, \
-                                          generate_ring_pattern
 
-class TestCalibrationGenerator:
-    @pytest.fixture
-    def input_parameters(self):
-        x0 = [95, 1200, 2.8, 450, 1.5, 10]
-        return x0
+@pytest.fixture
+def input_parameters(self):
+    x0 = [95, 1200, 2.8, 450, 1.5, 10]
+    return x0
 
-    @pytest.mark.parametrize('known_values', [
-        (np.array(
-            [124.05909278, 25.85258647, 39.09906246,
-             173.75469207, 79.48046629, 533.72925614,
-             36.23521052, 29.58603406, 21.83270633,
-             75.89239623, 40.04732689, 14.52041808,
-             35.82637996, 75.33666451, 21.21751965,
-             38.97731538, 19.64631964, 161.72783637,
-             23.6894442, 282.3126376]
-        ))])
-    @pytest.mark.parametrize('reference_indices', [
-        (np.array(
-            [[205, 158],
-             [197, 1],
-             [105, 239],
-             [64, 148],
-             [61, 84],
-             [136, 155],
-             [37, 85],
-             [21, 94],
-             [247, 31],
-             [171, 195],
-             [202, 39],
-             [225, 255],
-             [233, 128],
-             [56, 107],
-             [22, 51],
-             [28, 119],
-             [20, 45],
-             [164, 65],
-             [235, 188],
-             [75, 186]]
-        ))])
-    def test_generate_ring_pattern(self, input_parameters,
-                                   known_values, reference_indices):
-        x0 = input_parameters
-        rings = generate_ring_pattern(image_size=256,
+@pytest.fixture
+def calibration_data(self, input_parameters):
+    x0 = input_parameters
+    ring_data = generate_ring_pattern(image_size=256,
                                       mask=True,
                                       mask_radius=10,
                                       scale=x0[0],
@@ -78,42 +42,14 @@ class TestCalibrationGenerator:
                                       direct_beam_amplitude=x0[3],
                                       asymmetry=x0[4],
                                       rotation=x0[5])
-        assert np.allclose(known_values,
-                           rings[reference_indices[:, 0], reference_indices[:, 1]])
 
-    @pytest.fixture
-    def cal_generator_wt_data(self, input_parameters):
-        x0 = input_parameters
-        ring_data = generate_ring_pattern(image_size=256,
-                                          mask=True,
-                                          mask_radius=10,
-                                          scale=x0[0],
-                                          amplitude=x0[1],
-                                          spread=x0[2],
-                                          direct_beam_amplitude=x0[3],
-                                          asymmetry=x0[4],
-                                          rotation=x0[5])
-        dp = ElectronDiffraction(ring_data)
-        return CalibrationGenerator(dp)
+    return ElectronDiffraction(ring_data)
 
-    def test_fit_ring_pattern(self, cal_generator_wt_data,
-                              input_parameters):
-        x0 = input_parameters
-        cal_generator_wt_data.get_elliptical_distortion(10)
-        xf = cal_generator_wt_data.ring_params
-        # Need to re-phase the rotation angle
-        mod0 = x0[-1] % (2 * np.pi)
-        modf = xf[-1] % (2 * np.pi)
-        if mod0 > 3 * np.pi / 2:
-            x0[-1] = 2 * np.pi - mod0
-        elif mod0 > np.pi / 2:
-            x0[-1] = mod0 - np.pi
-        else:
-            x0[-1] = mod0
-        if modf > 3 * np.pi / 2:
-            xf[-1] = 2 * np.pi - modf
-        elif modf > np.pi / 2:
-            xf[-1] = modf - np.pi
-        else:
-            xf[-1] = modf
-        assert np.allclose(x0, xf)
+@pytest.fixture
+def calibration_library(request, calibration_data):
+    return CalibrationDataLibrary(au_x_grating_dp=calibration_data)
+
+#class TestCalibrationGenerator:
+#
+#    def test_init(self, diffraction_calculator: DiffractionGenerator):
+#        assert diffraction_calculator.debye_waller_factors == {}
