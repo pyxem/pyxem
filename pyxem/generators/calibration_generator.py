@@ -357,17 +357,6 @@ class CalibrationGenerator():
             data.set_diffraction_calibration(self.diffraction_calibration)
         elif data_to_plot == 'au_x_grating_im':
             data = self.calibration_data.au_x_grating_im
-        elif data_to_plot == 'moo3_dp':
-            dpeg = self.calibration_data.moo3_dp
-            dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
-            dpegs.apply_affine_transformation(self.affine_matrix,
-                                              preserve_range=True,
-                                              inplace=True)
-            data = dpegs.mean((0,1))
-            data.set_diffraction_calibration(self.diffraction_calibration)
-        elif data_to_plot == 'moo3_im':
-            data = self.calibration_data.moo3_im
         else:
             raise ValueError("Please specify valid data_to_plot.")
         #Plot the data

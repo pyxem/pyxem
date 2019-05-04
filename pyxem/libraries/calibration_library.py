@@ -30,18 +30,12 @@ class CalibrationDataLibrary(dict):
         A ring diffraction pattern obtained from an Au X-grating standard.
     au_x_grating_im : :obj:`hyperspy.signals.Signal2D`
         An image of an Au X-grating standard.
-    moo3_dp : ElectronDiffraction
-        A spot diffraction pattern obtained from an MoO3 standard.
-    moo3_im : :obj:`hyperspy.signals.Signal2D`
-        An image of an MoO3 standard.
+
     """
 
-    def __init__(self, au_x_grating_dp=None, au_x_grating_im=None,
-                 moo3_dp=None, moo3_im=None):
+    def __init__(self, au_x_grating_dp=None, au_x_grating_im=None):
         self.au_x_grating_dp = au_x_grating_dp
         self.au_x_grating_im = au_x_grating_im
-        self.moo3_dp = moo3_dp
-        self.moo3_im = moo3_im
 
     def plot_calibration_data(self, data_to_plot, roi=None,
                               *args, **kwargs):
@@ -51,7 +45,7 @@ class CalibrationDataLibrary(dict):
         ----------
         data_to_plot : string
             Specify the calibration data to be plotted. Valid options are:
-            {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im'}
+            {'au_x_grating_dp', 'au_x_grating_im'}
         roi : :obj:`hyperspy.roi.BaseInteractiveROI`
             An optional ROI object, as detailed in HyperSpy, to be added as a
             widget to the calibration data plot.
@@ -61,10 +55,6 @@ class CalibrationDataLibrary(dict):
             data = self.au_x_grating_dp
         elif data_to_plot == 'au_x_grating_im':
             data = self.au_x_grating_im
-        elif data_to_plot == 'moo3_dp':
-            data = self.moo3_dp
-        elif data_to_plot == 'moo3_im':
-            data = self.moo3_im
         else:
             raise ValueError("Please specify valid data_to_plot.")
         #Plot the data
