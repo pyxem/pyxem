@@ -17,11 +17,10 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pyxem as pxm
-import os
 import numpy as np
 
 from hyperspy.signals import Signal2D
+from hyperspy.roi import Line2DROI
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
@@ -38,3 +37,29 @@ def library(diffraction_pattern):
 
 def test_initialization_dtype(library):
     assert isinstance(library.au_x_grating_dp, ElectronDiffraction)
+
+
+class TestPlotData:
+    # Tests that calibration library entries may be plotted with or without
+    # error.
+
+    def test_plot_au_x_grating_dp(self, library):
+        library.plot_calibration_data(data_to_plot='au_x_grating_dp')
+
+    def test_plot_au_x_grating_im(self, library):
+        library.plot_calibration_data(data_to_plot='au_x_grating_im')
+
+    def test_plot_moo3_dp(self, library):
+        library.plot_calibration_data(data_to_plot='moo3_dp')
+
+    def test_plot_moo3_im(self, library):
+        library.plot_calibration_data(data_to_plot='moo3_im')
+
+    @pytest.mark.xfail(raises=ValueError)
+    def test_plot_invalid(self, library):
+        library.plot_calibration_data(data_to_plot='no_data')
+
+    def test_plot_au_x_grating_dp(self, library):
+        line = Line2DROI(x1=1, y1=1, x2=3, y2=3, linewidth=1.)
+        library.plot_calibration_data(data_to_plot='au_x_grating_dp',
+                                      roi=line)
