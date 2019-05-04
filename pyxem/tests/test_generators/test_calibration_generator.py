@@ -87,6 +87,12 @@ class TestCalibrationGenerator:
         residuals = calgen.get_distortion_residuals(mask_radius=10, spread=2)
         assert isinstance(residuals, ElectronDiffraction)
 
+    def test_plot_corrected_diffraction_pattern(self, calgen):
+        calgen.get_elliptical_distortion(mask_radius=10,
+                                         direct_beam_amplitude=450,
+                                         scale=95, amplitude=1200,
+                                         asymmetry=1.5,spread=2.8, rotation=10)
+        calgen.plot_corrected_diffraction_pattern()
 
 
 @pytest.fixture
@@ -108,8 +114,14 @@ class TestEmptyCalibrationGenerator:
                                                asymmetry=1.5,spread=2.8,
                                                rotation=10)
 
-    def test_get_distortion_residuals_without_data(self, empty_calgen):
+    def test_get_distortion_residuals_no_data(self, empty_calgen):
         empty_calgen.get_distortion_residuals(mask_radius=10, spread=2)
 
-    def test_get_distortion_residuals_without_affine(self, calgen):
+    def test_get_distortion_residuals_no_affine(self, calgen):
         calgen.get_distortion_residuals(mask_radius=10, spread=2)
+
+    def test_plot_corrected_diffraction_pattern_no_data(self, empty_calgen):
+        empty_calgen.plot_corrected_diffraction_pattern()
+
+    def test_plot_corrected_diffraction_pattern_no_affine(self, calgen):
+        calgen.plot_corrected_diffraction_pattern()
