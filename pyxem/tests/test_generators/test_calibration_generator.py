@@ -18,9 +18,10 @@
 
 import pytest
 import numpy as np
-
+from hyperspy.signals import Signal2D
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.generators.calibration_generator import CalibrationGenerator
-
+from pyxem.utils.calibration_utils import generate_ring_pattern
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
@@ -31,7 +32,7 @@ def input_parameters():
     return x0
 
 @pytest.fixture
-def calibration_data(input_parameters):
+def ring_pattern(input_parameters):
     x0 = input_parameters
     ring_data = generate_ring_pattern(image_size=256,
                                       mask=True,
@@ -46,10 +47,18 @@ def calibration_data(input_parameters):
     return ElectronDiffraction(ring_data)
 
 @pytest.fixture
-def calibration_library(request, calibration_data):
-    return CalibrationDataLibrary(au_x_grating_dp=calibration_data)
+def calibration_library(request, ring_pattern):
+    im = Signal2D(np.ones((10,10)))
+    return CalibrationDataLibrary(au_x_grating_dp=ring_pattern,
+                                  au_x_grating_im=im)
 
-#class TestCalibrationGenerator:
-#
-#    def test_init(self, diffraction_calculator: DiffractionGenerator):
-#        assert diffraction_calculator.debye_waller_factors == {}
+@pytest.fixture
+def calgen(request, calibration_library):
+    return CalibrationGenerator(calibration_data=calibration_library)
+
+
+class TestCalibrationGenerator:
+
+    def test_init(self, calgen):
+        assert isinstance(calgen.calibration_data.au_x_grating_dp,
+                          ElectronDiffraction)
