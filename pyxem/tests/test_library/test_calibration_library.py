@@ -38,8 +38,6 @@ def test_initialization_dtype(library):
 
 
 class TestPlotData:
-    # Tests that calibration library entries may be plotted with or without
-    # error.
 
     def test_plot_au_x_grating_dp(self, library):
         library.plot_calibration_data(data_to_plot='au_x_grating_dp')
