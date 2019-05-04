@@ -63,6 +63,13 @@ def calibration_library(request, ring_pattern):
 def calgen(request, calibration_library):
     return CalibrationGenerator(calibration_data=calibration_library)
 
+@pytest.fixture
+def cal_dist(request, calgen):
+    calgen.get_elliptical_distortion(mask_radius=10,
+                                     direct_beam_amplitude=450,
+                                     scale=95, amplitude=1200,
+                                     asymmetry=1.5,spread=2.8, rotation=10)
+    return calgen
 
 class TestCalibrationGenerator:
 
@@ -70,36 +77,20 @@ class TestCalibrationGenerator:
         assert isinstance(calgen.calibration_data.au_x_grating_dp,
                           ElectronDiffraction)
 
-    def test_get_elliptical_distortion(self, calgen,
+    def test_get_elliptical_distortion(self, cal_dist,
                                        input_parameters, affine_answer):
-        calgen.get_elliptical_distortion(mask_radius=10,
-                                         direct_beam_amplitude=450,
-                                         scale=95, amplitude=1200,
-                                         asymmetry=1.5,spread=2.8, rotation=10)
-        np.testing.assert_allclose(calgen.affine_matrix, affine_answer)
-        np.testing.assert_allclose(calgen.ring_params, input_parameters)
+        np.testing.assert_allclose(cal_dist.affine_matrix, affine_answer)
+        np.testing.assert_allclose(cal_dist.ring_params, input_parameters)
 
-    def test_get_distortion_residuals(self, calgen):
-        calgen.get_elliptical_distortion(mask_radius=10,
-                                         direct_beam_amplitude=450,
-                                         scale=95, amplitude=1200,
-                                         asymmetry=1.5,spread=2.8, rotation=10)
-        residuals = calgen.get_distortion_residuals(mask_radius=10, spread=2)
+    def test_get_distortion_residuals(self, cal_dist):
+        residuals = cal_dist.get_distortion_residuals(mask_radius=10, spread=2)
         assert isinstance(residuals, ElectronDiffraction)
 
-    def test_plot_corrected_diffraction_pattern(self, calgen):
-        calgen.get_elliptical_distortion(mask_radius=10,
-                                         direct_beam_amplitude=450,
-                                         scale=95, amplitude=1200,
-                                         asymmetry=1.5,spread=2.8, rotation=10)
-        calgen.plot_corrected_diffraction_pattern()
+    def test_plot_corrected_diffraction_pattern(self, cal_dist):
+        cal_dist.plot_corrected_diffraction_pattern()
 
-    def test_get_diffraction_calibration(self, calgen):
-        calgen.get_elliptical_distortion(mask_radius=10,
-                                         direct_beam_amplitude=450,
-                                         scale=95, amplitude=1200,
-                                         asymmetry=1.5,spread=2.8, rotation=10)
-        value = calgen.get_diffraction_calibration(mask_length=30,
+    def test_get_diffraction_calibration(self, cal_dist):
+        value = cal_dist.get_diffraction_calibration(mask_length=30,
                                                    linewidth=5)
         np.testing.assert_almost_equal(value, 0.010648)
 
