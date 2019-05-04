@@ -22,8 +22,4 @@ If you know there is more to do, make a checklist here:
 - [ ] TODO 1
 - [ ] TODO 2
 
-**Usage example**
-Add a minimal code example that uses the new feature.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
