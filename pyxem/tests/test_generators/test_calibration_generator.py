@@ -32,6 +32,13 @@ def input_parameters():
     return x0
 
 @pytest.fixture
+def affine_answer():
+    a = np.asarray([[1.06651526, 0.10258988, 0.],
+                    [0.10258988, 1.15822961, 0.],
+                    [0.        , 0.        , 1.]])
+    return a
+
+@pytest.fixture
 def ring_pattern(input_parameters):
     x0 = input_parameters
     ring_data = generate_ring_pattern(image_size=256,
@@ -62,3 +69,32 @@ class TestCalibrationGenerator:
     def test_init(self, calgen):
         assert isinstance(calgen.calibration_data.au_x_grating_dp,
                           ElectronDiffraction)
+
+    def test_get_elliptical_distortion(self, calgen,
+                                       input_parameters, affine_answer):
+        calgen.get_elliptical_distortion(mask_radius=10,
+                                         direct_beam_amplitude=450,
+                                         scale=95, amplitude=1200,
+                                         asymmetry=1.5,spread=2.8, rotation=10)
+        np.testing.assert_allclose(calgen.affine_matrix, affine_answer)
+        np.testing.assert_allclose(calgen.ring_params, input_parameters)
+
+
+@pytest.fixture
+def empty_calibration_library(request):
+    return CalibrationDataLibrary()
+
+@pytest.fixture
+def empty_calgen(request, empty_calibration_library):
+    return CalibrationGenerator(calibration_data=empty_calibration_library)
+
+@pytest.mark.xfail(raises=ValueError)
+class TestEmptyCalibrationGenerator:
+
+    def test_get_elliptical_distortion(self, empty_calgen,
+                                       input_parameters, affine_answer):
+        empty_calgen.get_elliptical_distortion(mask_radius=10,
+                                               direct_beam_amplitude=450,
+                                               scale=95, amplitude=1200,
+                                               asymmetry=1.5,spread=2.8,
+                                               rotation=10)

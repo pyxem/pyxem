@@ -43,10 +43,6 @@ class CalibrationGenerator():
 
     """
     def __init__(self, calibration_data):
-        # Verify that calibration_data is correct object class
-        if isinstance(calibration_data, CalibrationDataLibrary) is False:
-            raise ValueError("Calibration data must be provided as a "
-                             "CalibrationDataLibrary object.")
         # Assign attributes
         self.calibration_data = calibration_data
         self.affine_matrix = None
@@ -361,14 +357,3 @@ class CalibrationGenerator():
             raise ValueError("Please specify valid data_to_plot.")
         #Plot the data
         data.plot(*args, **kwargs)
-
-    def save_calibration_dictionary(self):
-        """Saves a calibration dictionary in the pickle format.
-
-        Parameters
-        ----------
-        filename : str
-            The location in which to save the file
-        """
-        with open(filename, 'wb') as handle:
-            pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
