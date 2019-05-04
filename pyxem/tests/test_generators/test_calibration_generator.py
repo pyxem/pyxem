@@ -119,8 +119,8 @@ class TestCalibrationGenerator:
 
     def test_plot_calibrated_data_im(self, calgen):
         line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        value = calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
-                                                  n=1, xspace=500.)
+        calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
+                                          n=1, xspace=500.)
         calgen.plot_calibrated_data(data_to_plot='au_x_grating_im')
 
 
@@ -155,8 +155,15 @@ class TestEmptyCalibrationGenerator:
     def test_plot_corrected_diffraction_pattern_no_affine(self, calgen):
         calgen.plot_corrected_diffraction_pattern()
 
-    def test_plot_corrected_diffraction_pattern_no_data(self, empty_calgen):
-        empty_calgen.plot_corrected_diffraction_pattern()
+    def test_get_diffraction_calibration_no_data(self, empty_calgen):
+        empty_calgen.get_diffraction_calibration(mask_length=30,
+                                                 linewidth=5)
 
     def test_get_diffraction_calibration_no_affine(self, calgen):
-        calgen.plot_corrected_diffraction_pattern()
+        calgen.get_diffraction_calibration(mask_length=30,
+                                           linewidth=5)
+
+    def test_get_navigation_calibration_no_data(self, empty_calgen):
+        line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        empty_calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
+                                                n=1, xspace=500.)
