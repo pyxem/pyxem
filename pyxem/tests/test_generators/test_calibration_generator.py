@@ -94,6 +94,15 @@ class TestCalibrationGenerator:
                                          asymmetry=1.5,spread=2.8, rotation=10)
         calgen.plot_corrected_diffraction_pattern()
 
+    def test_get_diffraction_calibration(self, calgen):
+        calgen.get_elliptical_distortion(mask_radius=10,
+                                         direct_beam_amplitude=450,
+                                         scale=95, amplitude=1200,
+                                         asymmetry=1.5,spread=2.8, rotation=10)
+        value = calgen.get_diffraction_calibration(mask_length=30,
+                                                   linewidth=5)
+        np.testing.assert_almost_equal(value, 0.010648)
+
 
 @pytest.fixture
 def empty_calibration_library(request):
@@ -124,4 +133,10 @@ class TestEmptyCalibrationGenerator:
         empty_calgen.plot_corrected_diffraction_pattern()
 
     def test_plot_corrected_diffraction_pattern_no_affine(self, calgen):
+        calgen.plot_corrected_diffraction_pattern()
+
+    def test_plot_corrected_diffraction_pattern_no_data(self, empty_calgen):
+        empty_calgen.plot_corrected_diffraction_pattern()
+
+    def test_get_diffraction_calibration_no_affine(self, calgen):
         calgen.plot_corrected_diffraction_pattern()

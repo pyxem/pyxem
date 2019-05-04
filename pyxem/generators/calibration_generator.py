@@ -353,7 +353,5 @@ class CalibrationGenerator():
             data.set_diffraction_calibration(self.diffraction_calibration)
         elif data_to_plot == 'au_x_grating_im':
             data = self.calibration_data.au_x_grating_im
-        else:
-            raise ValueError("Please specify valid data_to_plot.")
         #Plot the data
         data.plot(*args, **kwargs)
