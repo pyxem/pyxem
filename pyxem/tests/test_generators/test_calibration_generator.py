@@ -79,6 +79,15 @@ class TestCalibrationGenerator:
         np.testing.assert_allclose(calgen.affine_matrix, affine_answer)
         np.testing.assert_allclose(calgen.ring_params, input_parameters)
 
+    def test_get_distortion_residuals(self, calgen):
+        calgen.get_elliptical_distortion(mask_radius=10,
+                                         direct_beam_amplitude=450,
+                                         scale=95, amplitude=1200,
+                                         asymmetry=1.5,spread=2.8, rotation=10)
+        residuals = calgen.get_distortion_residuals(mask_radius=10, spread=2)
+        assert isinstance(residuals, ElectronDiffraction)
+
+
 
 @pytest.fixture
 def empty_calibration_library(request):
@@ -98,3 +107,6 @@ class TestEmptyCalibrationGenerator:
                                                scale=95, amplitude=1200,
                                                asymmetry=1.5,spread=2.8,
                                                rotation=10)
+
+    def test_get_distortion_residuals_without_affine(self, calgen):
+        calgen.get_distortion_residuals(mask_radius=10, spread=2)
