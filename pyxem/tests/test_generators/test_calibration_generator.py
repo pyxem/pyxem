@@ -108,5 +108,8 @@ class TestEmptyCalibrationGenerator:
                                                asymmetry=1.5,spread=2.8,
                                                rotation=10)
 
+    def test_get_distortion_residuals_without_data(self, empty_calgen):
+        empty_calgen.get_distortion_residuals(mask_radius=10, spread=2)
+
     def test_get_distortion_residuals_without_affine(self, calgen):
         calgen.get_distortion_residuals(mask_radius=10, spread=2)
