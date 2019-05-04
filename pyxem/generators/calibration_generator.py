@@ -47,7 +47,6 @@ class CalibrationGenerator():
         self.calibration_data = calibration_data
         self.affine_matrix = None
         self.ring_params = None
-        self.diffraction_rotation = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
 
@@ -290,7 +289,8 @@ class CalibrationGenerator():
 
         return dc[0]
 
-    def get_navigation_calibration(self, line_roi, x1, x2, n, xspace):
+    def get_navigation_calibration(self, line_roi, x1, x2, n, xspace,
+                                   *args, **kwargs):
         """Determine the navigation space pixel size calibration, nm per pixel.
 
         Parameters
@@ -320,7 +320,7 @@ class CalibrationGenerator():
         # Obtain line trace
         trace = line_roi(self.calibration_data.au_x_grating_im).as_signal1D(0)
         # Find peaks in line trace
-        pk = trace.find_peaks1D_ohaver()[0]['position']
+        pk = trace.find_peaks1D_ohaver(*args, **kwargs)[0]['position']
         # Determine peak positions
         dif1 = np.abs(pk - x1)
         dif2 = np.abs(pk - x2)

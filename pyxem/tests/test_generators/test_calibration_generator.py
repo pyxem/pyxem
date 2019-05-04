@@ -18,7 +18,10 @@
 
 import pytest
 import numpy as np
+
 from hyperspy.signals import Signal2D
+from hyperspy.roi import Line2DROI
+
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.generators.calibration_generator import CalibrationGenerator
 from pyxem.utils.calibration_utils import generate_ring_pattern
@@ -55,7 +58,13 @@ def ring_pattern(input_parameters):
 
 @pytest.fixture
 def calibration_library(request, ring_pattern):
-    im = Signal2D(np.ones((10,10)))
+    #  Create a dummy X-grating image
+    data = np.zeros((200,200))
+    data[:,10:20] = 100
+    data[:,30:40] = 50
+    data[:,150:160] = 50
+    data[:,170:180] = 100
+    im = Signal2D(data)
     return CalibrationDataLibrary(au_x_grating_dp=ring_pattern,
                                   au_x_grating_im=im)
 
@@ -70,6 +79,7 @@ def cal_dist(request, calgen):
                                      scale=95, amplitude=1200,
                                      asymmetry=1.5,spread=2.8, rotation=10)
     return calgen
+
 
 class TestCalibrationGenerator:
 
@@ -90,9 +100,28 @@ class TestCalibrationGenerator:
         cal_dist.plot_corrected_diffraction_pattern()
 
     def test_get_diffraction_calibration(self, cal_dist):
-        value = cal_dist.get_diffraction_calibration(mask_length=30,
-                                                   linewidth=5)
-        np.testing.assert_almost_equal(value, 0.010648)
+        cal_dist.get_diffraction_calibration(mask_length=30,
+                                             linewidth=5)
+        np.testing.assert_almost_equal(cal_dist.diffraction_calibration,
+                                       0.010648)
+
+    def test_get_navigation_calibration(self, calgen):
+        line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        value = calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
+                                                  n=1, xspace=500.)
+        np.testing.assert_almost_equal(calgen.navigation_calibration,
+                                       3.0696742)
+
+    def test_plot_calibrated_data_dp(self, cal_dist):
+        cal_dist.get_diffraction_calibration(mask_length=30,
+                                             linewidth=5)
+        cal_dist.plot_calibrated_data(data_to_plot='au_x_grating_dp')
+
+    def test_plot_calibrated_data_im(self, calgen):
+        line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        value = calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
+                                                  n=1, xspace=500.)
+        calgen.plot_calibrated_data(data_to_plot='au_x_grating_im')
 
 
 @pytest.fixture
