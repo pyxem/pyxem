@@ -21,34 +21,7 @@ import numpy as np
 from pyxem import stack_method
 
 
-def load_CalibrationDataLibrary(filename, safety=False):
-    """Loads a previously saved vectorlibrary.
-
-    Parameters
-    ----------
-    filename : str
-        The location of the file to be loaded
-    safety : bool (defaults to False)
-        Unpickling is risky, this variable requires you to acknowledge this.
-
-    Returns
-    -------
-    CalibrationDataLibrary
-        Previously saved Library
-
-    See Also
-    --------
-    CalibrationDataLibrary.pickle_library()
-    """
-    if safety:
-        with open(filename, 'rb') as handle:
-            return pickle.load(handle)
-    else:
-        raise RuntimeError('Unpickling is risky, turn safety to True if \
-        trust the author of this content')
-
-
-class CalibrationDataLibrary():
+class CalibrationDataLibrary(dict):
     """Maps crystal structure (phase) to diffraction vectors.
 
     Attributes
@@ -98,19 +71,3 @@ class CalibrationDataLibrary():
         data.plot(*args, **kwargs)
         if roi:
             roi.add_widget(data, axes=data.axes_manager.signal_axes)
-
-    def pickle_library(self, filename):
-        """Saves a calibration data library in the pickle format.
-
-        Parameters
-        ----------
-        filename : str
-            The location in which to save the file
-
-        See Also
-        --------
-            load_CalibrationDataLibrary()
-
-        """
-        with open(filename, 'wb') as handle:
-            pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)

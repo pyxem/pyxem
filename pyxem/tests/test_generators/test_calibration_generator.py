@@ -26,12 +26,12 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 
 @pytest.fixture
-def input_parameters(self):
+def input_parameters():
     x0 = [95, 1200, 2.8, 450, 1.5, 10]
     return x0
 
 @pytest.fixture
-def calibration_data(self, input_parameters):
+def calibration_data(input_parameters):
     x0 = input_parameters
     ring_data = generate_ring_pattern(image_size=256,
                                       mask=True,
