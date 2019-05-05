@@ -157,12 +157,9 @@ class VectorLibraryGenerator:
 
         Returns
         -------
-        # TODO: Update
         vector_library : :class:`DiffractionVectorLibrary`
-            Mapping of phase identifier to a numpy array with entries in the
-            form: [hkl1, hkl2, len1, len2, angle] ; lengths are in reciprocal
-            Angstroms and angles are in radians.
-
+            Mapping of phase identifier to phase information in dictionary
+            format.
         """
         # Define DiffractionVectorLibrary object to contain results
         vector_library = DiffractionVectorLibrary()
