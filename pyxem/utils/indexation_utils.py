@@ -27,9 +27,6 @@ import numpy as np
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
-from texpy.quaternion.rotation import Rotation
-from texpy.quaternion.symmetry import C1, Td
-
 from transforms3d.euler import mat2euler
 from transforms3d.quaternions import mat2quat
 
@@ -179,16 +176,7 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     return peak_ids
 
 
-def _symmetric_equivalents(rotations, symmetry):
-    symmetric_equivalents = np.empty((rotations.shape[0], symmetry.shape[0], 4))
-    # TODO: Remove loop (better broadcasting in texpy?)
-    for i, rotation in enumerate(rotations):
-        symmetric_rotations = rotation * symmetry
-        symmetric_equivalents[i] = symmetric_rotations.data
-    return Rotation(symmetric_equivalents)
-
-
-def _sort_solutions(solutions, n_solutions, symmetry):
+def _sort_solutions(solutions, n_solutions):
     """Sort the solutions by quality.
 
     Parameters
@@ -197,38 +185,15 @@ def _sort_solutions(solutions, n_solutions, symmetry):
         Potential solutions on the form used by `match_vectors`.
     n_solutions : int
         Number of solutions to return.
-    symmetry : texpy.Symmetry
-        Crystallographic symmetry.
 
     Results
     -------
     solutions : numpy.array
         `n_solutions` best solutions, sorted.
     """
-    # TODO: Parameterize nth
-    # Get 20th (or all) largest match rate
-    nth_largest = min(20, solutions.shape[0])
-    solutions = solutions[solutions[:, 1].argpartition(-nth_largest)[-nth_largest:]]
-
-    solution_rotations = Rotation([mat2quat(mat) for mat in solutions[:, 0]])
-    symmetric_eq = _symmetric_equivalents(solution_rotations, symmetry)
-    similar_count = np.zeros(len(solutions), dtype=np.int)
-    angle_threshold = np.deg2rad(3)
-    for i, rotation in enumerate(solution_rotations):
-        angle_difference = rotation.angle_with(symmetric_eq).data.min(axis=1)
-        similar_count[i] = np.count_nonzero(angle_difference < angle_threshold)
-
-    # Pick those with similar_count close to the best (80% of best, or best - 1 if smaller to allow at least best - 1)
-    similar_count_max = similar_count.max()
-    # TODO: Parameterise 0.8 threshold?
-    max_count_mask = similar_count >= min(0.5 * similar_count_max, similar_count_max - 1)
-    solutions = solutions[max_count_mask]
-
     # Sort by match rate descending
     n_solutions = min(n_solutions, solutions.shape[0])
-    solutions = solutions[solutions[:, 1].argsort()[::-1][:n_solutions]]
-
-    return solutions
+    return solutions[solutions[:, 1].argsort()[::-1][:n_solutions]]
 
 
 def match_vectors(peaks,
@@ -357,8 +322,7 @@ def match_vectors(peaks,
 
         n_solutions = min(n_best, len(solutions))
         if n_solutions > 0:
-            # TODO: Symmetry (Td) based on phase
-            top_n = _sort_solutions(np.array(solutions), n_solutions, Td)
+            top_n = _sort_solutions(np.array(solutions), n_solutions)
 
             # Put the top n ranked solutions in the output array
             top_matches[phase_index, :, 0] = phase_index
