@@ -180,9 +180,7 @@ class CrystallographicMap(BaseSignal):
         """
         phase_map = self.isig[0].as_signal2D((0, 1))
         phase_map = transfer_navigation_axes_to_signal_axes(phase_map, self)
-        # TODO: Since vector matching results (and template in the future?) returns
-        # in object form, the isigs inherit it, even though this column is an index
-        phase_map.change_dtype('float')
+        phase_map.change_dtype(np.int)
 
         return phase_map
 
@@ -334,6 +332,8 @@ class CrystallographicMap(BaseSignal):
         results_array = np.zeros((x_size_nav * y_size_nav, 7))
         results_array[:, 0] = self.isig[0].data.ravel()
         results_array[:, 1:4] = np.array(self.isig[1].data.tolist()).reshape(-1, 3)
+        # results_array[:, 0] = self.isig[0].data.T.ravel()
+        # results_array[:, 1:4] = np.array(self.isig[1].data.tolist()).transpose(1, 0, 2).reshape(-1, 3)
         score_metric = 'correlation' if self.method == 'template_matching' else 'match_rate'
         results_array[:, 4] = self.get_metric_map(score_metric).data.ravel()
         x_indices = np.arange(x_size_nav)
