@@ -280,21 +280,20 @@ def match_vectors(peaks,
 
             # Iterate over matched library vectors determining the error in the
             # associated indexation.
-            if np.count_nonzero(tolerance_mask) == 0: continue
-            # TODO: Object arrays...
+            if np.count_nonzero(tolerance_mask) == 0:
+                continue
             # Reference vectors are cartesian coordinates of hkls
             reference_vectors = lattice_recip.cartesian(phase_indices[tolerance_mask])
             for ref_q1, ref_q2 in reference_vectors:
                 # Rotation from experimental to reference frame
-                # TODO: Check direction. Transpose?
-                R = get_rotation_matrix_between_vectors(ref_q1, ref_q2,
-                                                        q1, q2)
+                R = get_rotation_matrix_between_vectors(q1, q2,
+                                                        ref_q1, ref_q2)
 
                 # Index the peaks by rotating them to the reference coordinate
-                # system. Transpose R since it is multiplied from the right.
-                hkls = lattice_recip.fractional(peaks.dot(R.T))
+                # system. Use R directly since it is multiplied from the right.
+                hkls = lattice_recip.fractional(peaks.dot(R))
 
-                # Evaluate error of peak hkl indexation and total error.
+                # Evaluate error of peak hkl indexation
                 rhkls = np.rint(hkls)
                 ehkls = np.abs(hkls - rhkls)
 
@@ -302,7 +301,7 @@ def match_vectors(peaks,
                 valid_peak_mask = np.max(ehkls, axis=1) < index_error_tol
                 valid_peak_mask_count = np.count_nonzero(valid_peak_mask)
 
-                # NOTE: Only append if this explains more 
+                # Only append if this rotation indexes more than q1, q2
                 if valid_peak_mask_count > 2:
                     # Naive error of matching peaks
                     error_mean = ehkls[valid_peak_mask].mean()
@@ -314,7 +313,7 @@ def match_vectors(peaks,
                     solutions.append([
                         R,
                         match_rate,
-                        ehkls,  # TODO: Don't really see the reason for exporting these?
+                        ehkls,
                         error_mean,
                         vector_pair_index
                     ])
