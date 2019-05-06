@@ -430,7 +430,7 @@ def crystal_from_vector_matching(z_matches):
         # get best matching phase (there is only one here)
         results_array[0] = z_matches[0, 0]
         # get best matching orientation Euler angles
-        results_array[1] = mat2euler(z_matches[0, 1], 'rzxz')
+        results_array[1] = np.rad2deg(mat2euler(z_matches[0, 1], 'rzxz'))
         # get template matching metrics
         metrics = dict()
         metrics['match_rate'] = z_matches[0, 2]
@@ -445,7 +445,7 @@ def crystal_from_vector_matching(z_matches):
         # get best matching phase
         results_array[0] = z_matches[index_best_match, 0]
         # get best matching orientation Euler angles.
-        results_array[1] = mat2euler(z_matches[index_best_match, 1], 'rzxz')
+        results_array[1] = np.rad2deg(mat2euler(z_matches[index_best_match, 1], 'rzxz'))
 
         # get second smallest total error for orientation_reliability
         z = z_matches[z_matches[:, 0] == results_array[0]]
