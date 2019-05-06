@@ -24,10 +24,13 @@ from pyxem.tests.test_utils.test_sim_utils import create_structure_cubic
 
 def test_orientations_from_list():
     expected_orientations = [(0, 0, 0), (0, 90, 0)]
-    structure_library_generator = StructureLibraryGenerator([('a', None, 'cubic')])
+    structure_library_generator = StructureLibraryGenerator([
+        ('a', None, 'cubic'),
+        ('b', None, 'hexagonal')
+    ])
     structure_library = structure_library_generator.get_orientations_from_list(expected_orientations)
-    assert structure_library.identifiers == ['a']
-    assert structure_library.structures == [None]
+    assert structure_library.identifiers == ['a', 'b']
+    assert structure_library.structures == [None, None]
     np.testing.assert_almost_equal(structure_library.orientations, expected_orientations)
 
 

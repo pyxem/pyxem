@@ -180,9 +180,7 @@ class CrystallographicMap(BaseSignal):
         """
         phase_map = self.isig[0].as_signal2D((0, 1))
         phase_map = transfer_navigation_axes_to_signal_axes(phase_map, self)
-        # TODO: Since vector matching results (and template in the future?) returns
-        # in object form, the isigs inherit it, even though this column is an index
-        phase_map.change_dtype('float')
+        phase_map.change_dtype(np.int)
 
         return phase_map
 
