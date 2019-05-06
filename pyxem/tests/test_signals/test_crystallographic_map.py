@@ -170,17 +170,17 @@ class TestMTEXIO:
         saved, loaded = worker_for_test_CrystallographicMap_io(sp_cryst_map)
         saved.method = 'template_matching'
         loaded.method = 'template_matching'
-        assert np.allclose(saved.isig[0].data.astype('int'), loaded.isig[0].data.astype('int'))
-        assert np.allclose(np.array(saved.isig[1].data.tolist()), np.array(loaded.isig[1].data.tolist()))
-        assert np.allclose(saved.get_metric_map('correlation').data, loaded.get_metric_map('correlation').data)
+        np.testing.assert_allclose(saved.isig[0].data.astype(np.int), loaded.isig[0].data.astype(np.int))
+        np.testing.assert_allclose(np.array(saved.isig[1].data.tolist()), np.array(loaded.isig[1].data.tolist()))
+        np.testing.assert_allclose(saved.get_metric_map('correlation').data, loaded.get_metric_map('correlation').data)
 
     def test_Crystallographic_Map_io_dp(self, dp_cryst_map):
         saved, loaded = worker_for_test_CrystallographicMap_io(dp_cryst_map)
         saved.method = 'template_matching'
         loaded.method = 'template_matching'
-        assert np.allclose(saved.isig[0].data.astype('int'), loaded.isig[0].data.astype('int'))
-        assert np.allclose(np.array(saved.isig[1].data.tolist()), np.array(loaded.isig[1].data.tolist()))
-        assert np.allclose(saved.get_metric_map('correlation').data, loaded.get_metric_map('correlation').data)
+        np.testing.assert_allclose(saved.isig[0].data.astype(np.int), loaded.isig[0].data.astype(np.int))
+        np.testing.assert_allclose(np.array(saved.isig[1].data.tolist()), np.array(loaded.isig[1].data.tolist()))
+        np.testing.assert_allclose(saved.get_metric_map('correlation').data, loaded.get_metric_map('correlation').data)
 
 
 class TestModalAngularFunctionality:
