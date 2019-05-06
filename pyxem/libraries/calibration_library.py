@@ -33,9 +33,12 @@ class CalibrationDataLibrary(dict):
 
     """
 
-    def __init__(self, au_x_grating_dp=None, au_x_grating_im=None):
+    def __init__(self, au_x_grating_dp=None, au_x_grating_im=None,
+                 moo3_dp=None, moo3_im=None):
         self.au_x_grating_dp = au_x_grating_dp
         self.au_x_grating_im = au_x_grating_im
+        self.moo3_dp = moo3_dp
+        self.moo3_im = moo3_im
 
     def plot_calibration_data(self, data_to_plot, roi=None,
                               *args, **kwargs):
@@ -54,6 +57,10 @@ class CalibrationDataLibrary(dict):
         if data_to_plot == 'au_x_grating_dp':
             data = self.au_x_grating_dp
         elif data_to_plot == 'au_x_grating_im':
+            data = self.au_x_grating_im
+        if data_to_plot == 'moo3_dp':
+            data = self.au_x_grating_dp
+        elif data_to_plot == 'moo3_im':
             data = self.au_x_grating_im
         else:
             raise ValueError("Please specify valid data_to_plot.")
