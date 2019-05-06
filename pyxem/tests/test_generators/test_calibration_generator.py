@@ -110,7 +110,7 @@ class TestCalibrationGenerator:
         value = calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
                                                   n=1, xspace=500.)
         np.testing.assert_almost_equal(calgen.navigation_calibration,
-                                       3.0696742)
+                                       3.163927)
 
     def test_plot_calibrated_data_dp(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30,
@@ -131,6 +131,7 @@ def empty_calibration_library(request):
 @pytest.fixture
 def empty_calgen(request, empty_calibration_library):
     return CalibrationGenerator(calibration_data=empty_calibration_library)
+
 
 @pytest.mark.xfail(raises=ValueError)
 class TestEmptyCalibrationGenerator:
