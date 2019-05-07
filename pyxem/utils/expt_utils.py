@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -199,7 +199,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     return z_bar
 
 
-def affine_transformation(z, matrix, order, *args, **kwargs):
+def affine_transformation(z, transformation, order, *args, **kwargs):
     """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
@@ -220,19 +220,8 @@ def affine_transformation(z, matrix, order, *args, **kwargs):
     trans : array
         Affine transformed diffraction pattern.
     """
-    # These three lines account for the transformation center not being (0,0)
-    shift_y, shift_x = np.array(z.shape[:2]) / 2.
-    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
-    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-
-    # This defines the transform you want to perform
-    transformation = tf.AffineTransform(matrix=matrix)
-
-    # skimage transforms can be added like this, actually matrix multiplication,
-    # hence the need for the brackets. (Note tf.warp takes the inverse)
-    trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
+    trans = tf.warp(z, transformation,
                     order=order, *args, **kwargs)
-
     return trans
 
 
@@ -383,7 +372,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to centre the direct beam centre by a cross-correlation algorithm.
+    """Method to center the direct beam center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
@@ -528,8 +517,7 @@ def call_ring_pattern(xcentre, ycentre):
 
 
 def peaks_as_gvectors(z, center, calibration):
-    """
-    Converts peaks found as array indices to calibrated units, for use in a
+    """Converts peaks found as array indices to calibrated units, for use in a
     hyperspy map function.
 
     Parameters
@@ -537,7 +525,7 @@ def peaks_as_gvectors(z, center, calibration):
     z : numpy array
         peak postitions as array indices.
     center : numpy array
-        diffraction pattern centre in array indices.
+        diffraction pattern center in array indices.
     calibration : float
         calibration in reciprocal Angstroms per pixels.
 
@@ -545,6 +533,7 @@ def peaks_as_gvectors(z, center, calibration):
     -------
     g : numpy array
         peak positions in calibrated units.
+
     """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T

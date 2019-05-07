@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,15 +21,14 @@ import numpy as np
 
 
 def load_DiffractionLibrary(filename, safety=False):
-    """
-    Loads a previously saved diffraction library
+    """Loads a previously saved diffraction library.
 
     Parameters
     ----------
     filename : str
         The location of the file to be loaded
     safety : bool (defaults to False)
-        Unpickling is risky, this variable requires you to acknowledge those risks
+        Unpickling is risky, this variable requires you to acknowledge this.
 
     Returns
     -------
@@ -39,6 +38,7 @@ def load_DiffractionLibrary(filename, safety=False):
     See Also
     --------
     DiffractionLibrary.pickle_library()
+
     """
     if safety:
         with open(filename, 'rb') as handle:
@@ -48,92 +48,124 @@ def load_DiffractionLibrary(filename, safety=False):
         trust the author of this content')
 
 
-def _get_library_from_angles(library, phase, angle):
-    """
-    Finds an element that is 'basically' the same as the rotation asked for.
+def _get_library_entry_from_angles(library, phase, angles):
+    """Finds an element that is orientation within 1e-5 of that specified.
+
+    This is necessary because of floating point round off / hashability. If
+    multiple entries satisfy the above criterion a random (the first hit)
+    selection is made.
 
     Parameters
     ----------
     library : DiffractionLibrary
         The library to be searched
     phase : str
-        The phase to be searched
-    angle : tuple
-        The target angle, in the same format as the library angle keys
+        The phase of interest.
+    angles : tuple
+        The orientation of interest as a tuple of Euler angles following the
+        Bunge convention [z, x, z] in degrees.
 
     Returns
     -------
-    dict
-        Dictionary containing the simulation and associated properties
+    orientation_index : int
+        Index of the given orientation
 
-    Notes
-    -----
-    This is needed because of floating point round off/hashability.
-    'basically' in this context means to within 1e-5
-    If more than one angle satisfies this criterion a random solution is returned
     """
 
-    for key in library[phase]:
-        if np.abs(np.sum(np.subtract(list(key), angle))) < 1e-5:
-            return library[phase][key]
+    phase_entry = library[phase]
+    for orientation_index, orientation in enumerate(phase_entry['orientations']):
+        if np.sum(np.abs(np.subtract(orientation, angles))) < 1e-5:
+            return orientation_index
 
-    # we haven't found a suitable key
+    # We haven't found a suitable key
     raise ValueError("It appears that no library entry lies with 1e-5 of the target angle")
 
 
 class DiffractionLibrary(dict):
-    """
-    Maps crystal structure (phase) and orientation to simulated diffraction data.
+    """Maps crystal structure (phase) and orientation to simulated diffraction
+    data.
+
+    Attributes
+    ----------
+    identifiers : list of strings/ints
+        A list of phase identifiers referring to different atomic structures.
+    structures : list of diffpy.structure.Structure objects.
+        A list of diffpy.structure.Structure objects describing the atomic
+        structure associated with each phase in the library.
+    diffraction_generator : DiffractionGenerator
+        Diffraction generator used to generate this library.
+    reciprocal_radius : float
+        Maximum g-vector magnitude for peaks in the library.
+    with_direct_beam : bool
+        Whether the direct beam included in the library or not.
+
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.identifiers = None
+        self.structures = None
+        self.diffraction_generator = None
+        self.reciprocal_radius = 0.0
+        self.with_direct_beam = False
+
     def get_library_entry(self, phase=None, angle=None):
-        """
-        Extracts a single library entry for viewing
+        """Extracts a single DiffractionLibrary entry.
 
         Parameters
         ----------
-        Phase : str (default is a random choice)
-            label for the phase you are interested in
-        Angle : tuple (default is a random choice)
-            label for the angle you are interested in.
+        phase : str
+            Key for the phase of interest. If unspecified the choice is random.
+        angle : tuple
+            The orientation of interest as a tuple of Euler angles following the
+            Bunge convention [z, x, z] in degrees. If unspecified the choise is
+            random (the first hit).
+
         Returns
         -------
-        dict
-            Dictionary containing the simulation and associated properties
+        library_entries : dict
+            Dictionary containing the simulation associated with the specified
+            phase and orientation with associated properties.
+
         """
 
         if phase is not None:
+            phase_entry = self[phase]
             if angle is not None:
-                try:
-                    return self[phase][angle]
-                except KeyError:
-                    return _get_library_from_angles(self, phase, angle)
+                orientations = phase_entry['orientations']
+                if isinstance(orientations, np.ndarray):
+                    orientations = orientations.tolist()
+                if angle in orientations:
+                    orientation_index = orientations.index(angle)
+                else:
+                    orientation_index = _get_library_entry_from_angles(self, phase, angle)
             else:
-                for rotation in self[phase].keys():
-                    return self[phase][rotation]
+                orientation_index = 0
         else:
             if angle is not None:
                 raise ValueError("To select a certain angle you must first specify a phase")
-            for phase in self.keys():
-                for rotation in self[phase].keys():
-                    return self[phase][rotation]
+            phase_entry = next(iter(self.values()))
+            orientation_index = 0
+
+        return {
+            'Sim': phase_entry['simulations'][orientation_index],
+            'intensities': phase_entry['intensities'][orientation_index],
+            'pixel_coords': phase_entry['pixel_coords'][orientation_index],
+            'pattern_norm': np.linalg.norm(phase_entry['intensities'][orientation_index])
+        }
 
     def pickle_library(self, filename):
-        """
-        Saves a diffraction library in the pickle format
+        """Saves a diffraction library in the pickle format.
 
         Parameters
         ----------
         filename : str
             The location in which to save the file
 
-        Returns
-        -------
-        None
-
         See Also
         --------
         load_DiffractionLibrary()
+
         """
         with open(filename, 'wb') as handle:
             pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)

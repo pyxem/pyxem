@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,59 +21,18 @@
 """
 
 import numpy as np
-from pyxem.signals.indexation_results import IndexationResults
-
-from pyxem.utils import correlate
-from pyxem.utils.sim_utils import carry_through_navigation_calibration
-
 import hyperspy.api as hs
 
+from pyxem.signals.indexation_results import TemplateMatchingResults
+from pyxem.signals.indexation_results import VectorMatchingResults
 
-def correlate_library(image, library, n_largest, mask, keys=[]):
-    """Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image).
+from pyxem.utils.sim_utils import transfer_navigation_axes
 
-    Parameters
-    ----------
-    image : np.array()
-        The experimental diffraction pattern of interest.
-    library : DiffractionLibrary
-        The library of diffraction simulations to be correlated with the
-        experimental data.
-    n_largest : int
-        The number of well correlated simulations to be retained.
-    mask : bool array
-        A mask for navigation axes 1 indicates positions to be indexed.
+from pyxem.utils.indexation_utils import correlate_library
+from pyxem.utils.indexation_utils import index_magnitudes
+from pyxem.utils.indexation_utils import match_vectors
 
-    Returns
-    -------
-    top_matches : (<num phases>*n_largest, 5), np.array()
-        A numpy array containing the top n correlated simulations for the
-        experimental pattern of interest.
-
-    See also
-    --------
-    pyxem.utils.correlate and the correlate method of IndexationGenerator.
-    """
-    top_matches = np.zeros((len(library), n_largest, 5))
-    if mask == 1:
-        for phase_index, key in enumerate(library.keys()):
-            correlations = np.empty((len(library[key]), 4))
-            # Use enumerate to index, i, each (orientation, diffraction_pattern) in list
-            for i, (orientation, diffraction_pattern) in enumerate(library[key].items()):
-                correlation = correlate(image, diffraction_pattern)
-                correlations[i, :] = *orientation, correlation
-
-            # Partition to get the n_largest best matches
-            top_n = correlations[correlations[:, 3].argpartition(-n_largest)[-n_largest:]]
-            # Sort the matches by correlation score, descending
-            top_n = top_n[top_n[:, 3].argsort()][::-1]
-
-            top_matches[phase_index, :, 0] = phase_index
-            top_matches[phase_index, :, 1:] = top_n
-    else:
-        top_matches.fill(np.nan)
-    return top_matches.reshape((len(library) * n_largest, 5))
+import hyperspy.api as hs
 
 
 class IndexationGenerator():
@@ -83,19 +42,21 @@ class IndexationGenerator():
     ----------
     signal : ElectronDiffraction
         The signal of electron diffraction patterns to be indexed.
-    library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation
-
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
     """
 
-    def __init__(self, signal, library):
+    def __init__(self,
+                 signal,
+                 diffraction_library):
         self.signal = signal
-        self.library = library
+        self.library = diffraction_library
 
     def correlate(self,
                   n_largest=5,
-                  keys=[],
                   mask=None,
+                  inplane_rotations=np.arange(0, 360, 1),
+                  max_peaks=100,
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -105,13 +66,14 @@ class IndexationGenerator():
         ----------
         n_largest : int
             The n orientations with the highest correlation values are returned.
-        keys : list
-            If more than one phase present in library it is recommended that
-            these are submitted. This allows a mapping from the number to the
-            phase.  For example, keys = ['si','ga'] will have an output with 0
-            for 'si' and 1 for 'ga'.
         mask : Array
             Array with the same size as signal (in navigation) True False
+        inplane_rotations : ndarray
+            Array of inplane rotation angles in degrees. Defaults to 0-360 degrees
+            at 1 degree resolution.
+        max_peaks : int
+            Maximum number of peaks to consider when comparing a template to
+            the diffraction pattern. The strongest peaks are kept.
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -119,30 +81,64 @@ class IndexationGenerator():
 
         Returns
         -------
-        matching_results : pyxem.signals.indexation_results.IndexationResults
+        matching_results : TemplateMatchingResults
             Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern. As an example, the
-            signal in Euler reads:
-                    ( Library Number , Z , X , Z , Correlation Score)
+            correlation results for each diffraction pattern, in the form
+            [Library Number , [z, x, z], Correlation Score]
 
         """
         signal = self.signal
         library = self.library
+        inplane_rotations = np.deg2rad(inplane_rotations)
+        num_inplane_rotations = inplane_rotations.shape[0]
+        sig_shape = signal.axes_manager.signal_shape
+        signal_half_width = sig_shape[0] / 2
+
         if mask is None:
-            # index at all real space pixels
-            sig_shape = signal.axes_manager.navigation_shape
-            mask = hs.signals.Signal1D(np.ones((sig_shape[0], sig_shape[1], 1)))
+            # Index at all real space pixels
+            mask = 1
+
+        # Create a copy of the library, cropping and padding the peaks to match
+        # max_peaks. Also create rotated pixel coordinates according to
+        # inplane_rotations
+        rotation_matrices_2d = np.array([[[np.cos(t), np.sin(t)], [-np.sin(t), np.cos(t)]] for t in inplane_rotations])
+        cropped_library = {}
+
+        for phase_name, phase_entry in library.items():
+            num_orientations = len(phase_entry['orientations'])
+            intensities_jagged = phase_entry['intensities']
+            intensities = np.zeros((num_orientations, max_peaks))
+            pixel_coords_jagged = phase_entry['pixel_coords']
+            pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
+            for i in range(num_orientations):
+                num_peaks = min(pixel_coords_jagged[i].shape[0], max_peaks)
+                highest_intensity_indices = np.argpartition(intensities_jagged[i], -num_peaks)[-num_peaks:]
+                intensities[i, :num_peaks] = intensities_jagged[i][highest_intensity_indices]
+                # Get and compute pixel coordinates for all rotations about the
+                # center, clipped to the detector size and rounded to integer positions.
+                pixel_coords[:, i, :num_peaks] = np.clip(
+                    (signal_half_width + rotation_matrices_2d @ (
+                        pixel_coords_jagged[i][highest_intensity_indices].T - signal_half_width)).transpose(0, 2, 1),
+                    a_min=0,
+                    a_max=np.array(sig_shape) - 1)
+
+            np.rint(pixel_coords, out=pixel_coords)
+            cropped_library[phase_name] = {
+                'orientations': phase_entry['orientations'],
+                'pixel_coords': pixel_coords.astype('int'),
+                'intensities': intensities,
+                'pattern_norms': np.linalg.norm(intensities, axis=1),
+            }
 
         matches = signal.map(correlate_library,
-                             library=library,
+                             library=cropped_library,
                              n_largest=n_largest,
-                             keys=keys,
                              mask=mask,
                              inplace=False,
                              **kwargs)
-        matching_results = IndexationResults(matches)
 
-        matching_results = carry_through_navigation_calibration(matching_results, signal)
+        matching_results = TemplateMatchingResults(matches)
+        matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
 
@@ -159,12 +155,14 @@ class ProfileIndexationGenerator():
 
     """
 
-    def __init__(self, magnitudes, simulation):
+    def __init__(self, magnitudes, simulation, mapping=True):
+        self.map = mapping
         self.magnitudes = magnitudes
         self.simulation = simulation
 
     def index_peaks(self,
                     tolerance=0.1,
+                    *args,
                     **kwargs):
         """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -177,33 +175,108 @@ class ProfileIndexationGenerator():
             these are submitted. This allows a mapping from the number to the
             phase.  For example, keys = ['si','ga'] will have an output with 0
             for 'si' and 1 for 'ga'.
+        *args : arguments
+            Arguments passed to the map() function.
         **kwargs : arguments
-            Keyword arguments passed to the HyperSpy map() function.
+            Keyword arguments passed to the map() function.
 
         Returns
         -------
-        matching_results : pyxem.signals.indexation_results.IndexationResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern. As an example, the
-            signal in Euler reads:
-                    ( Library Number , Z , X , Z , Correlation Score)
+        matching_results : ProfileIndexation
 
         """
-        mags = self.magnitudes
-        simulation = self.simulation
+        return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
 
-        mags = np.array(mags)
-        sim_mags = np.array(simulation.magnitudes)
-        sim_hkls = np.array(simulation.hkls)
-        indexation = np.zeros(len(mags), dtype=object)
 
-        for i in np.arange(len(mags)):
-            diff = np.absolute((sim_mags - mags.data[i]) / mags.data[i] * 100)
+class VectorIndexationGenerator():
+    """Generates an indexer for DiffractionVectors using a number of methods.
 
-            hkls = sim_hkls[np.where(diff < tolerance)]
-            diffs = diff[np.where(diff < tolerance)]
+    Attributes
+    ----------
+    vectors : DiffractionVectors
+        DiffractionVectors to be indexed.
+    vector_library : DiffractionVectorLibrary
+        Library of theoretical diffraction vector magnitudes and inter-vector
+        angles for indexation.
 
-            indices = np.array((hkls, diffs))
-            indexation[i] = np.array((mags.data[i], indices))
+    Parameters
+    ----------
+    vectors : DiffractionVectors
+        DiffractionVectors to be indexed.
+    vector_library : DiffractionVectorLibrary
+        Library of theoretical diffraction vector magnitudes and inter-vector
+        angles for indexation.
+    """
 
-        return indexation
+    def __init__(self,
+                 vectors,
+                 vector_library):
+        if vectors.cartesian is None:
+            raise ValueError("Cartesian coordinates are required in order to index "
+                             "diffraction vectors. Use the calculate_cartesian_coordinates "
+                             "method of DiffractionVectors to obtain these.")
+        else:
+            self.vectors = vectors
+            self.library = vector_library
+
+    def index_vectors(self,
+                      mag_tol,
+                      angle_tol,
+                      index_error_tol,
+                      n_peaks_to_index,
+                      n_best,
+                      *args,
+                      **kwargs):
+        """Assigns hkl indices to diffraction vectors.
+
+        Parameters
+        ----------
+        mag_tol : float
+            The maximum absolute error in diffraction vector magnitude, in units
+            of reciprocal Angstroms, allowed for indexation.
+        angle_tol : float
+            The maximum absolute error in inter-vector angle, in units of
+            degrees, allowed for indexation.
+        index_error_tol : float
+            Max allowed error in peak indexation for classifying it as indexed,
+            calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
+        n_peaks_to_index : int
+            The maximum number of peak to index.
+        n_best : int
+            The maximum number of good solutions to be retained.
+        *args : arguments
+            Arguments passed to the map() function.
+        **kwargs : arguments
+            Keyword arguments passed to the map() function.
+
+        Returns
+        -------
+        indexation_results : VectorMatchingResults
+            Navigation axes of the diffraction vectors signal containing vector
+            indexation results for each probe position.
+        """
+        vectors = self.vectors
+        library = self.library
+
+        matched = vectors.cartesian.map(match_vectors,
+                                        library=library,
+                                        mag_tol=mag_tol,
+                                        angle_tol=np.deg2rad(angle_tol),
+                                        index_error_tol=index_error_tol,
+                                        n_peaks_to_index=n_peaks_to_index,
+                                        n_best=n_best,
+                                        inplace=False,
+                                        *args,
+                                        **kwargs)
+        indexation = np.array(matched.isig[0].data.tolist(), dtype='object')
+        rhkls = matched.isig[1].data
+
+        indexation_results = VectorMatchingResults(indexation)
+        indexation_results.vectors = vectors
+        indexation_results.hkls = rhkls
+        indexation_results = transfer_navigation_axes(indexation_results,
+                                                      vectors.cartesian)
+
+        vectors.hkls = rhkls
+
+        return indexation_results

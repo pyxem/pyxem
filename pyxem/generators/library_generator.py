@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,30 +17,34 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """Diffraction pattern library generator and associated tools.
-
 """
 
 import numpy as np
-from pyxem.libraries.diffraction_library import DiffractionLibrary
+import itertools
 from tqdm import tqdm
 from transforms3d.euler import euler2mat
 import diffpy.structure
 
+from pyxem.libraries.diffraction_library import DiffractionLibrary
+from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
-class DiffractionLibraryGenerator(object):
-    """
-    Computes a library of electron diffraction patterns for specified atomic
+from pyxem.utils.sim_utils import get_points_in_sphere
+from pyxem.utils.sim_utils import simulate_rotated_structure
+from pyxem.utils.vector_utils import get_angle_cartesian
+
+
+class DiffractionLibraryGenerator:
+    """Computes a library of electron diffraction patterns for specified atomic
     structures and orientations.
     """
 
     def __init__(self, electron_diffraction_calculator):
-        """Initialises the library with a diffraction calculator.
+        """Initialises the generator with a diffraction calculator.
 
         Parameters
         ----------
         electron_diffraction_calculator : :class:`DiffractionGenerator`
-            The calculator used for the diffraction patterns.
-
+            The calculator used to simulate diffraction patterns.
         """
         self.electron_diffraction_calculator = electron_diffraction_calculator
 
@@ -49,8 +53,7 @@ class DiffractionLibraryGenerator(object):
                                 calibration,
                                 reciprocal_radius,
                                 half_shape,
-                                with_direct_beam=True
-                                ):
+                                with_direct_beam=True):
         """Calculates a dictionary of diffraction data for a library of crystal
         structures and orientations.
 
@@ -64,20 +67,19 @@ class DiffractionLibraryGenerator(object):
         structure_library : pyxem:StructureLibrary Object
             Dictionary of structures and associated orientations for which
             electron diffraction is to be simulated.
-
         calibration : float
             The calibration of experimental data to be correlated with the
             library, in reciprocal Angstroms per pixel.
-
         reciprocal_radius : float
             The maximum g-vector magnitude to be included in the simulations.
-
-        half_shape: tuple
+        half_shape : tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
+        with_direct_beam : bool
+            Include the direct beam in the library.
 
         Returns
         -------
-        diffraction_library : dict of :class:`DiffractionSimulation`
+        diffraction_library : :class:`DiffractionLibrary`
             Mapping of crystal structure and orientation to diffraction data
             objects.
 
@@ -86,44 +88,121 @@ class DiffractionLibraryGenerator(object):
         diffraction_library = DiffractionLibrary()
         # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
-        structure_library = structure_library.struct_lib
         # Iterate through phases in library.
-        for key in structure_library.keys():
+        for phase_name in structure_library.struct_lib.keys():
             phase_diffraction_library = dict()
-            structure = structure_library[key][0]
-            a, b, c = structure.lattice.a, structure.lattice.b, structure.lattice.c
-            alpha = structure.lattice.alpha
-            beta = structure.lattice.beta
-            gamma = structure.lattice.gamma
-            orientations = structure_library[key][1]
+            structure = structure_library.struct_lib[phase_name][0]
+            orientations = structure_library.struct_lib[phase_name][1]
+
+            num_orientations = len(orientations)
+            simulations = np.empty(num_orientations, dtype='object')
+            pixel_coords = np.empty(num_orientations, dtype='object')
+            intensities = np.empty(num_orientations, dtype='object')
             # Iterate through orientations of each phase.
-            for orientation in tqdm(orientations, leave=False):
-                _orientation = np.deg2rad(orientation)
-                matrix = euler2mat(_orientation[0],
-                                   _orientation[1],
-                                   _orientation[2], 'rzxz')
+            for i, orientation in enumerate(tqdm(orientations, leave=False)):
+                matrix = euler2mat(*np.deg2rad(orientation), 'rzxz')
+                simulation = simulate_rotated_structure(diffractor, structure, matrix, reciprocal_radius, with_direct_beam)
 
-                latt_rot = diffpy.structure.lattice.Lattice(a, b, c,
-                                                            alpha, beta, gamma,
-                                                            baserot=matrix)
-                structure.placeInLattice(latt_rot)
-
-                # Calculate electron diffraction for rotated structure
-                data = diffractor.calculate_ed_data(structure,
-                                                    reciprocal_radius,
-                                                    with_direct_beam)
                 # Calibrate simulation
-                data.calibration = calibration
-                pattern_intensities = data.intensities
+                simulation.calibration = calibration
                 pixel_coordinates = np.rint(
-                    data.calibrated_coordinates[:, :2] + half_shape).astype(int)
-                # Construct diffraction simulation library, removing those that
-                # contain no peaks
-                if len(pattern_intensities) > 0:
-                    phase_diffraction_library[tuple(orientation)] = \
-                        {'Sim': data, 'intensities': pattern_intensities,
-                         'pixel_coords': pixel_coordinates,
-                         'pattern_norm': np.sqrt(np.dot(pattern_intensities,
-                                                        pattern_intensities))}
-                    diffraction_library[key] = phase_diffraction_library
+                    simulation.calibrated_coordinates[:, :2] + half_shape).astype(int)
+
+                # Construct diffraction simulation library
+                simulations[i] = simulation
+                pixel_coords[i] = pixel_coordinates
+                intensities[i] = simulation.intensities
+
+            diffraction_library[phase_name] = {
+                'simulations': simulations,
+                'orientations': orientations,
+                'pixel_coords': pixel_coords,
+                'intensities': intensities,
+            }
+
+        # Pass attributes to diffraction library from structure library.
+        diffraction_library.identifiers = structure_library.identifiers
+        diffraction_library.structures = structure_library.structures
+        diffraction_library.diffraction_generator = diffractor
+        diffraction_library.reciprocal_radius = reciprocal_radius
+        diffraction_library.with_direct_beam = with_direct_beam
+
         return diffraction_library
+
+
+class VectorLibraryGenerator:
+    """Computes a library of diffraction vectors and pairwise inter-vector
+    angles for a specified StructureLibrary.
+    """
+
+    def __init__(self, structure_library):
+        """Initialises the library with a diffraction calculator.
+
+        Parameters
+        ----------
+        structure_library : :class:`StructureLibrary`
+            The StructureLibrary defining structures to be
+        """
+        self.structures = structure_library
+
+    def get_vector_library(self,
+                           reciprocal_radius):
+        """Calculates a library of diffraction vectors and pairwise inter-vector
+        angles for a library of crystal structures.
+
+        Parameters
+        ----------
+        reciprocal_radius : float
+            The maximum g-vector magnitude to be included in the library.
+
+        Returns
+        -------
+        vector_library : :class:`DiffractionVectorLibrary`
+            Mapping of phase identifier to phase information in dictionary
+            format.
+        """
+        # Define DiffractionVectorLibrary object to contain results
+        vector_library = DiffractionVectorLibrary()
+        # Get structures from structure library
+        structure_library = self.structures.struct_lib
+        # Iterate through phases in library.
+        for phase_name in structure_library.keys():
+            # Get diffpy.structure object associated with phase
+            structure = structure_library[phase_name][0]
+            # Get reciprocal lattice points within reciprocal_radius
+            recip_latt = structure.lattice.reciprocal()
+            indices, coordinates, distances = get_points_in_sphere(
+                recip_latt,
+                reciprocal_radius)
+
+            # Iterate through all pairs calculating interplanar angle
+            phase_index_pairs = []
+            phase_measurements = []
+            for i, j in itertools.combinations(np.arange(len(indices)), 2):
+                # Specify hkls and lengths associated with the crystal structure.
+                # TODO: This should be updated to reflect systematic absences
+                if np.count_nonzero(coordinates[i]) == 0 or np.count_nonzero(coordinates[j]) == 0:
+                    continue  # Ignore combinations including [000]
+                hkl1 = indices[i]
+                hkl2 = indices[j]
+                len1 = distances[i]
+                len2 = distances[j]
+                if len1 < len2:  # Keep the longest first
+                    hkl1, hkl2 = hkl2, hkl1
+                    len1, len2 = len1, len2
+                angle = get_angle_cartesian(coordinates[i], coordinates[j])
+                phase_index_pairs.append([hkl1, hkl2])
+                phase_measurements.append([len1, len2, angle])
+            phase_measurements = np.array(phase_measurements)
+            unique_measurements, unique_measurement_indices = np.unique(phase_measurements, axis=0, return_index=True)
+            vector_library[phase_name] = {
+                'indices': np.array(phase_index_pairs)[unique_measurement_indices],
+                'measurements': unique_measurements
+            }
+
+        # Pass attributes to diffraction library from structure library.
+        vector_library.identifiers = self.structures.identifiers
+        vector_library.structures = self.structures.structures
+        vector_library.reciprocal_radius = reciprocal_radius
+
+        return vector_library

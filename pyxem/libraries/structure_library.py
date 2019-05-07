@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,11 +19,13 @@
 import pyxem as pxm
 
 
-class StructureLibrary(dict):
+class StructureLibrary():
     """
     A dictionary containing all the structures and their associated rotations
     in the .struct_lib attribute.
 
+    Attributes
+    ----------
     identifiers : list of strings/ints
         A list of phase identifiers referring to different atomic structures.
     structures : list of diffpy.structure.Structure objects.
@@ -38,11 +40,17 @@ class StructureLibrary(dict):
                  identifiers,
                  structures,
                  orientations):
+        if len(identifiers) != len(structures):
+            raise ValueError('Number of identifiers ({}) and structures ({}) must be the same.'.format(
+                len(identifiers), len(structures)))
+        if len(identifiers) != len(orientations):
+            raise ValueError('Number of identifiers ({}) and orientations ({}) must be the same.'.format(
+                len(identifiers), len(orientations)))
 
         self.identifiers = identifiers
         self.structures = structures
         self.orientations = orientations
-        # create the actual dictionary
+        # Create the actual dictionary
         self.struct_lib = dict()
         for ident, struct, ori in zip(identifiers, structures, orientations):
             self.struct_lib[ident] = (struct, ori)

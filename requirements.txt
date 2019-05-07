@@ -38,8 +38,7 @@ patsy==0.5.0
 pexpect==4.6.0
 pickleshare==0.7.4
 Pillow==5.2.0
-Pint==0.8.1
-pip==18.1               
+Pint==0.8.1             
 pluggy==0.7.1
 prompt-toolkit==1.0.15
 ptyprocess==0.6.0
@@ -73,6 +72,6 @@ tqdm==4.24.0
 traitlets==4.3.2
 traits==4.6.0
 transforms3d==0.3.1
-urllib3==1.23
+urllib3>=1.24.2
 wcwidth==0.1.7
 wheel==0.31.1

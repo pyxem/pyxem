@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -37,6 +37,7 @@ from .components.diffraction_component import ElectronDiffractionForwardModel
 
 from .generators.diffraction_generator import DiffractionGenerator
 from .generators.library_generator import DiffractionLibraryGenerator
+from .generators.library_generator import VectorLibraryGenerator
 from .generators.red_intensity_generator import ReducedIntensityGenerator
 from .generators.pdf_generator import PDFGenerator
 
@@ -70,8 +71,7 @@ def load(filenames=None,
          new_axis_name="stack_element",
          lazy=False,
          **kwds):
-    """
-    Load supported files into a pyxem structure.
+    """Load supported files into a pyxem structure.
 
     Supported formats: hspy (HDF5), Medipix (hdr + mib), blockfile, Gatan dm3,
     tif, msa, Bruker bcf, FEI ser and emi, SEMPER unf, EMD, EDAX spd/spc, tif,
@@ -509,11 +509,10 @@ def save(filename, signal, overwrite=None, **kwds):
 
 
 def load_mib(filename, scan_size, sum_length=10):
-    """
-    Load a medipix hdr/mib file.
+    """Load a medipix hdr/mib file.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename : string
         File path and name to .hdr file.
     scan_size : int
@@ -530,6 +529,9 @@ def load_mib(filename, scan_size, sum_length=10):
     if edge==scan_size - 1:
         dp = ElectronDiffraction(dpt.inav[0:edge, 1:])
     else:
-        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
+        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:],
+                                                 dpt.inav[0:edge, 1:]), axis=1))
+
+    dp.data = np.flip(dp.data, axis=2)
 
     return dp
