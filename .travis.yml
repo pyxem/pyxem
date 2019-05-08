@@ -4,7 +4,6 @@ env:
   global:
     - DEPS="hyperspy-base transforms3d diffpy.structure"
     - TEST_DEPS="pytest pytest-cov coveralls"
-    - DOC_DEPS="sphinx sphinx_bootstrap_theme"
 
 matrix:
   include:
@@ -35,21 +34,12 @@ before_install:
   - df -h
 
 install:
-  - conda install -y $DEPS $TEST_DEPS $DOC_DEPS;
+  - conda install -y $DEPS $TEST_DEPS;
   - pip install .
 
 script:
   - pytest --pyargs pyxem --cov=pyxem
-  - sphinx-apidoc -fo docs/source pyxem
-  - sphinx-build -b html docs/source docs/build
 
 after_success:
   - coveralls
 
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  local_dir: docs/build
-  on:
-    branch: master
