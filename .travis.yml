@@ -41,4 +41,4 @@ script:
   - conda list numpy 
   - conda list scipy
   - conda list hyperpsy
-  - pytest --pyargs pyxem/tests/test_generators/
+  - pytest --pyargs pyxem/tests/test_generators/test_calibration_generator
