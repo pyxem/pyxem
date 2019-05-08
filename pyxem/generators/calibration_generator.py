@@ -322,7 +322,7 @@ class CalibrationGenerator():
         # Find peaks in line trace
         pk = trace.find_peaks1D_ohaver(medfilt_radius=0,*args, **kwargs)[0]['position']
         self.navigation_calibration = pk
-        return pk
+        return trace
         # Determine peak positions
         #dif1 = np.abs(pk - x1)
         #dif2 = np.abs(pk - x2)
