@@ -9,7 +9,6 @@ env:
 matrix:
   include:
   - env: export PYTHON=3.7
-  - env: export PYTHON=3.6
   - env: export PYTHON=3.7
     os: osx
     language: generic
@@ -39,6 +38,9 @@ install:
   - pip install .
 
 script:
+  - conda list numpy 
+  - conda list scipy
+  - conda list hyperpsy
   - pytest --pyargs pyxem --cov=pyxem
   - sphinx-apidoc -fo docs/source pyxem
   - sphinx-build -b html docs/source docs/build
