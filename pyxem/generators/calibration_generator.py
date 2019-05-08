@@ -321,15 +321,17 @@ class CalibrationGenerator():
         trace = line_roi(self.calibration_data.au_x_grating_im).as_signal1D(0)
         # Find peaks in line trace
         pk = trace.find_peaks1D_ohaver(*args, **kwargs)[0]['position']
+        self.navigation_calibration = pk
+        return pk
         # Determine peak positions
-        dif1 = np.abs(pk - x1)
-        dif2 = np.abs(pk - x2)
+        #dif1 = np.abs(pk - x1)
+        #dif2 = np.abs(pk - x2)
         # Calculate navigation calibration
-        x = (n*xspace)/(pk[dif2==min(dif2)]-pk[dif1==min(dif1)])
+        #x = (n*xspace)/(pk[dif2==min(dif2)]-pk[dif1==min(dif1)])
         # Store navigation calibration value as attribute
-        self.navigation_calibration = x[0]
+        #self.navigation_calibration = x[0]
 
-        return x[0]
+        #return x[0]
 
     def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
         """ Plot calibrated data for visual inspection.
