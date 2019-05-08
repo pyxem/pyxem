@@ -321,7 +321,7 @@ class CalibrationGenerator():
         trace = line_roi(self.calibration_data.au_x_grating_im).as_signal1D(0)
         # Find peaks in line trace
         pk = trace.find_peaks1D_ohaver(medfilt_radius=0,*args, **kwargs)[0]['position']
-        self.navigation_calibration = pk
+        self.navigation_calibration = trace.data
         return trace
         # Determine peak positions
         #dif1 = np.abs(pk - x1)
