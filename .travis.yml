@@ -42,4 +42,4 @@ script:
   - conda list scipy
   - conda list python
   - conda list hyperspy
-  - pytest --pyargs pyxem/tests/test_generators/test_calibration_generator
+  - pytest --pyargs --cov=pyxem pyxem/ 

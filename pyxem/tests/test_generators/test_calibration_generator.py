@@ -110,7 +110,7 @@ class TestCalibrationGenerator:
         value = calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
                                                   n=1, xspace=500.)
         np.testing.assert_almost_equal(calgen.navigation_calibration,
-                                       3.149595)
+                                       3.14959545)
 
     def test_plot_calibrated_data_dp(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30,
