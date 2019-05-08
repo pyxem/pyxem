@@ -40,5 +40,5 @@ install:
 script:
   - conda list numpy 
   - conda list scipy
-  - conda list hyperpsy
+  - conda list hyperpspy
   - pytest --pyargs pyxem/tests/test_generators/test_calibration_generator
