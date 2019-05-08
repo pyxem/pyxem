@@ -41,17 +41,4 @@ script:
   - conda list numpy 
   - conda list scipy
   - conda list hyperpsy
-  - pytest --pyargs pyxem --cov=pyxem
-  - sphinx-apidoc -fo docs/source pyxem
-  - sphinx-build -b html docs/source docs/build
-
-after_success:
-  - coveralls
-
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  local_dir: docs/build
-  on:
-    branch: master
+  - pytest --pyargs pyxem/tests/test_generators/
