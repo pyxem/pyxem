@@ -128,7 +128,6 @@ class DiffractionLibrary(dict):
             phase and orientation with associated properties.
 
         """
-
         if phase is not None:
             phase_entry = self[phase]
             if angle is not None:
