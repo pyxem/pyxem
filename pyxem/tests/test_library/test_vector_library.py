@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -39,7 +39,8 @@ def test_library_io(get_library):
     os.remove('file_01.pickle')
     # we can't check that the entire libraries are the same as the memory
     # location of the 'Sim' changes
-    assert np.allclose(get_library['Phase'][0][0], loaded_library['Phase'][0][0])
+    np.testing.assert_allclose(get_library['Phase']['measurements'], loaded_library['Phase']['measurements'])
+    np.testing.assert_allclose(get_library['Phase']['indices'], loaded_library['Phase']['indices'])
 
 
 @pytest.mark.xfail(raises=RuntimeError)

@@ -4,6 +4,7 @@ environment:
   global:
     DEPS: "hyperspy-base transforms3d diffpy.structure"
     TEST_DEPS: "pytest"
+    MPLBACKEND: "agg"
 
   matrix:
     - PY_VERSION: 3.6

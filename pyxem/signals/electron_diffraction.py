@@ -161,7 +161,7 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
+        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
         **kwargs:
             Keyword arguments to be passed to `ElectronDiffraction.plot`

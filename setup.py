@@ -47,9 +47,9 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-    	'hyperspy >= 1.3',
+        'hyperspy >= 1.3',
         'transforms3d',
-	'scikit-learn >= 0.19',
+	    'scikit-learn >= 0.19',
         'scikit-image < 0.15'
       ],
 
