@@ -1,4 +1,5 @@
 # This file may be used to create an environment using:
+# Details and usage can be seen at https://github.com/pyxem/pyxem/pull/397, commit 40a4f06 gives the main idea.
 # $ conda create --name <env> --file <this file>
 # platform: linux-64
 asn1crypto=0.24.0=py37_0
