@@ -8,10 +8,6 @@ env:
 matrix:
   include:
   - env: export PYTHON=3.7
-  - env: export PYTHON=3.6
-  - env: export PYTHON=3.7
-    os: osx
-    language: generic
 
 sudo: True #for Miniconda 
 
@@ -28,7 +24,7 @@ before_install:
   - source $HOME/miniconda/bin/activate root;
     conda update -y conda;
     conda config --append channels conda-forge;
-    conda create -n testenv --yes python=$PYTHON;
+    conda create -n testenv --file package-list-linux.txt
     source activate testenv;
   - conda info -a
   - df -h
