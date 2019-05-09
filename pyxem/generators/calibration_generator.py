@@ -261,8 +261,9 @@ class CalibrationGenerator():
                              "been determined. Use get_elliptical_distortion "
                              "to determine this matrix.")
         dpeg = self.calibration_data.au_x_grating_dp
+        size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
@@ -344,8 +345,9 @@ class CalibrationGenerator():
         # calibration checking that it is defined.
         if data_to_plot == 'au_x_grating_dp':
             dpeg = self.calibration_data.au_x_grating_dp
+            size = dpeg.data.shape[0]
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+            dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
             dpegs.apply_affine_transformation(self.affine_matrix,
                                               preserve_range=True,
                                               inplace=True)
