@@ -45,8 +45,10 @@ class CalibrationGenerator():
     def __init__(self, calibration_data):
         # Assign attributes
         self.calibration_data = calibration_data
-        self.affine_matrix = None
         self.ring_params = None
+        self.affine_matrix = None
+        self.rotation_angle = None
+        self.correction_matrix = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
 
@@ -330,6 +332,38 @@ class CalibrationGenerator():
         self.navigation_calibration = x[0]
 
         return x[0]
+
+    def get_rotation_calibration(self):
+        """Determine the rotation between real and reciprocal space coordinates.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        rot_cal : float
+            Rotation angle in degrees.
+        """
+        # Check that necessary calibration data is provided
+        if self.calibration_data.moo3_dp is None:
+            raise ValueError("This method requires an MoO3 diffraction pattern "
+                             "to be provided. Please update the "
+                             "CalibrationDataLibrary.")
+        if self.calibration_data.moo3_im is None:
+            raise ValueError("This method requires an MoO3 image to be "
+                             "provided. Please update the "
+                             "CalibrationDataLibrary.")
+        # Determine rotation angle between 
+        rot_cal = angle_between(reciprocal_cart_vector1, real_cart_vector1)
+        # Store rotation angle calibration as attribute
+        self.rotation_angle = rot_cal
+
+        return rot_cal
+
+    def get_correction_matrix(self):
+        """
+        """
+
 
     def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
         """ Plot calibrated data for visual inspection.

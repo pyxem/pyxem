@@ -58,7 +58,7 @@ class CalibrationDataLibrary(dict):
             data = self.au_x_grating_dp
         elif data_to_plot == 'au_x_grating_im':
             data = self.au_x_grating_im
-        if data_to_plot == 'moo3_dp':
+        elif data_to_plot == 'moo3_dp':
             data = self.moo3_dp
         elif data_to_plot == 'moo3_im':
             data = self.moo3_im
