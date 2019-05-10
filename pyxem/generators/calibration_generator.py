@@ -179,7 +179,8 @@ class CalibrationGenerator():
         # Set name for experimental data pattern
         dpeg = self.calibration_data.au_x_grating_dp
         ringP = self.ring_params
-        dpref = generate_ring_pattern(image_size=dpeg.data.shape[0],
+        size = dpeg.data.shape[0]
+        dpref = generate_ring_pattern(image_size=size,
                                       mask=True, mask_radius=mask_radius,
                                       scale=ringP[0],
                                       amplitude=ringP[1],
@@ -188,7 +189,7 @@ class CalibrationGenerator():
                                       asymmetry=1, rotation=ringP[5])
         # Apply distortion corrections to experimental data
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
@@ -221,8 +222,9 @@ class CalibrationGenerator():
         # Set name for experimental data pattern
         dpeg = self.calibration_data.au_x_grating_dp
         # Apply distortion corrections to experimental data
+        size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
@@ -263,8 +265,9 @@ class CalibrationGenerator():
                              "been determined. Use get_elliptical_distortion "
                              "to determine this matrix.")
         dpeg = self.calibration_data.au_x_grating_dp
+        size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
@@ -378,8 +381,9 @@ class CalibrationGenerator():
         # calibration checking that it is defined.
         if data_to_plot == 'au_x_grating_dp':
             dpeg = self.calibration_data.au_x_grating_dp
+            size = dpeg.data.shape[0]
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,256,256)))
+            dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
             dpegs.apply_affine_transformation(self.affine_matrix,
                                               preserve_range=True,
                                               inplace=True)
