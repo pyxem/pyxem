@@ -183,6 +183,32 @@ def get_npeaks(found_peaks):
     return len(found_peaks[0])
 
 
+def get_angle_cartesian_vec(a, b):
+    """Compute the angles between two lists of vectors in a cartesian
+    coordinate system.
+
+    Parameters
+    ----------
+    a, b : np.array()
+        The two lists of directions to compute the angle between in Nx3 float
+        arrays.
+
+    Returns
+    -------
+    angles : np.array()
+        List of angles between `a` and `b` in radians.
+    """
+    if a.shape != b.shape:
+        raise ValueError('The shape of a {} and b {} must be the same.'.format(a.shape, b.shape))
+
+    denom = np.linalg.norm(a, axis=-1) * np.linalg.norm(b, axis=-1)
+    denom_nonzero = denom != 0.0
+    angles = np.zeros(a.shape[0])
+    angles[denom_nonzero] = np.arccos(np.clip(
+        np.sum(a[denom_nonzero] * b[denom_nonzero], axis=-1) / denom[denom_nonzero], -1.0, 1.0)).ravel()
+    return angles
+
+
 def get_angle_cartesian(a, b):
     """Compute the angle between two vectors in a cartesian coordinate system.
 

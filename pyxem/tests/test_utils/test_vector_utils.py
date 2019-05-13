@@ -21,9 +21,12 @@ import pytest
 
 from transforms3d.euler import euler2mat
 
-from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged, \
-    detector_to_fourier, get_rotation_matrix_between_vectors, \
-    get_angle_cartesian
+from pyxem.utils.vector_utils import calculate_norms
+from pyxem.utils.vector_utils import calculate_norms_ragged
+from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
+from pyxem.utils.vector_utils import get_angle_cartesian
+from pyxem.utils.vector_utils import get_angle_cartesian_vec
 
 
 def test_calculate_norms():
@@ -76,4 +79,17 @@ def test_get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2,
 ])
 def test_get_angle_cartesian(vec_a, vec_b, expected_angle):
     angle = get_angle_cartesian(vec_a, vec_b)
-    assert np.isclose(angle, expected_angle)
+    np.testing.assert_allclose(angle, expected_angle)
+
+
+@pytest.mark.parametrize('a, b, expected_angles', [
+    (np.array([[0, 0, 1], [0, 0, 0]]), np.array([[0, 1, 0], [0, 0, 1]]), [np.deg2rad(90), 0])
+])
+def test_get_angle_cartesian_vec(a, b, expected_angles):
+    angles = get_angle_cartesian_vec(a, b)
+    np.testing.assert_allclose(angles, expected_angles)
+
+
+@pytest.mark.xfail(raises=ValueError)
+def test_get_angle_cartesian_vec_input_validation():
+    get_angle_cartesian_vec(np.empty((2, 3)), np.empty((5, 3)))
