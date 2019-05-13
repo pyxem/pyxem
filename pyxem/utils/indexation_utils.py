@@ -303,7 +303,7 @@ def match_vectors(peaks,
                 solutions += [[
                     R,
                     match_rate,
-                    [],  # ehkls,  # TODO: Needed?
+                    ehkls,  # TODO: Needed?
                     error_mean,
                     vector_pair_index
                 ] for R, match_rate, error_mean in zip(
