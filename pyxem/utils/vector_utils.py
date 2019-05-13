@@ -146,8 +146,13 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
     normalize_or_zero(plane_common_axes)
 
     # Create rotation from-plane -> to-plane
+    common_valid = ~np.isclose(np.sum(np.abs(plane_common_axes), axis=-1), 0.0)
     angles = get_angle_cartesian_vec(np.broadcast_to(plane_normal_from, plane_normal_to.shape), plane_normal_to)
-    R1 = np.array([axangle2mat(axis, angle, is_normalized=True) for axis, angle in zip(plane_common_axes, angles)])
+    R1 = np.empty((angles.shape[0], 3, 3))
+    if np.any(common_valid):
+        R1[common_valid] = np.array([axangle2mat(axis, angle, is_normalized=True)
+            for axis, angle in zip(plane_common_axes[common_valid], angles[common_valid])])
+    R1[~common_valid] = np.identity(3)
 
     # Rotate from-plane into to-plane
     rot_from_v1 = np.matmul(R1, from_v1)
