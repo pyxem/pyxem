@@ -373,7 +373,7 @@ def crystal_from_template_matching(z_matches):
         # get template matching metrics
         metrics = dict()
         metrics['correlation'] = z_matches[0, 2]
-        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 2] / z_matches[0, 2])
+        metrics['orientation_reliability'] = 100 * (1 - z_matches[1, 2] / z_matches[0, 2]) if z_matches[0, 2] > 0 else 100
         results_array[2] = metrics
     else:
         # get best matching result
@@ -423,13 +423,16 @@ def crystal_from_vector_matching(z_matches):
         # get best matching phase (there is only one here)
         results_array[0] = z_matches[0, 0]
         # get best matching orientation Euler angles
-        results_array[1] = np.rad2deg(mat2euler(z_matches[0, 1], 'rzxz'))
-        # get template matching metrics
+        if isinstance(z_matches[0, 1], int) and z_matches[0, 1] == 0:
+            results_array[1] = np.array([0.0, 0.0, 0.0])  # TODO: Temporary, bad data fix
+        else:
+            results_array[1] = np.rad2deg(mat2euler(z_matches[0, 1], 'rzxz'))
+        # get vector matching metrics
         metrics = dict()
         metrics['match_rate'] = z_matches[0, 2]
         metrics['ehkls'] = z_matches[0, 3]
         metrics['total_error'] = z_matches[0, 4]
-        metrics['orientation_reliability'] = 100 * (1 - z_matches[0, 4] / z_matches[1, 4])
+        metrics['orientation_reliability'] = 100 * (1 - z_matches[0, 4] / (z_matches[1, 4] or 1.0))
         results_array[2] = metrics
 
     else:
