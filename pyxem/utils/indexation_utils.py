@@ -24,6 +24,7 @@ from operator import itemgetter
 
 import numpy as np
 
+from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
@@ -150,9 +151,8 @@ def index_magnitudes(z, simulation, tolerance):
 def _choose_peak_ids(peaks, n_peaks_to_index):
     """Choose `n_peaks_to_index` indices from `peaks`.
 
-    This implementation returns the indices of the
-    :math:`ceil(n_peaks_to_index / 2)` furthest from the center and the rest
-    closest to the center.
+    This implementation sorts by angle and then picks every
+    len(peaks)/n_peaks_to_index element to get an even distribution of angles.
 
     Parameters
     ----------
@@ -166,14 +166,8 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     peak_ids : numpy.array
         Array of indices of the chosen peaks.
     """
-    n_peaks_to_index = min(peaks.shape[0], n_peaks_to_index)
-    n_long_peaks = int(math.ceil(n_peaks_to_index / 2))
-    n_short_peaks = n_peaks_to_index - n_long_peaks
-    peak_lengths = np.linalg.norm(peaks, axis=1)
-    peak_ids = np.empty(n_peaks_to_index, dtype=np.int)
-    peak_ids[:n_long_peaks] = peak_lengths.argpartition(-n_long_peaks)[-n_long_peaks:]
-    peak_ids[n_long_peaks:] = peak_lengths.argpartition(n_short_peaks)[:n_short_peaks]
-    return peak_ids
+    r, angles = _cart2polar(peaks[:, 0], peaks[:, 1])
+    return angles.argsort()[np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=np.int)]
 
 
 def _sort_solutions(solutions, n_solutions):
