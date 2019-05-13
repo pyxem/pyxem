@@ -61,16 +61,20 @@ def test_detector_to_fourier(wavelength,
     np.testing.assert_allclose(k, k_expected)
 
 
-@pytest.mark.parametrize('k1, k2, ref_k1, ref_k2, expected_rotation', [
-    ([0, 0, 1], [0, 0, 2], [1, 0, 0], [0, 1, 0], np.identity(3)),  # Degenerate
-    ([0, 0, 1], [0, 1, 0], [0, 0, 1], [1, 0, 0], euler2mat(np.deg2rad(90), 0, 0, 'rzxz')),
-    ([0.5, -0.5, 1 / np.sqrt(2)], [1 / np.sqrt(2), 1 / np.sqrt(2), 0], [0, 0, 1], [1, 0, 0],
-        euler2mat(np.deg2rad(45), np.deg2rad(45), 0, 'rzxz'))
+@pytest.mark.parametrize('from_v1, from_v2, to_v1, to_v2, expected_rotation', [
+    # v2 from x to y
+    ([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz')),
+    # Degenerate to-vectors gives half-way rotation (about y-axis)
+    ([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0], euler2mat(*np.deg2rad([90, 45, -90]), 'rzxz')),
+    # Edges to body diagonals
+    ([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.5, -0.5, 1 / np.sqrt(2)], [1 / np.sqrt(2), 1 / np.sqrt(2), 0],
+        euler2mat(*np.deg2rad([45, 45, 0]), 'rzxz'))
 ])
-def test_get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2,
-                                             expected_rotation):
-    rotation_matrix = get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2)
-    assert np.allclose(rotation_matrix, expected_rotation)
+def test_get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2, expected_rotation):
+    rotation_matrix = get_rotation_matrix_between_vectors(
+        np.array(from_v1), np.array(from_v2),
+        np.array([to_v1]), np.array([to_v2]))
+    np.testing.assert_allclose(rotation_matrix, np.array([expected_rotation]), atol=1e-15)
 
 
 @pytest.mark.parametrize('vec_a, vec_b, expected_angle', [

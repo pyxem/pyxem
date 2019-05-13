@@ -97,48 +97,79 @@ def calculate_norms_ragged(z):
     return np.asarray(norms)
 
 
-def get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2):
-    """Calculates the rotation matrix to two experimentally measured
-    diffraction vectors from the corresponding vectors in a reference structure.
+def normalize_or_zero(v):
+    """Normalize `v`, or return the vector directly if it has zero length.
 
     Parameters
     ----------
-    k1 : np.array()
-        Experimentally measured scattering vector 1.
-    k2 : np.array()
-        Experimentally measured scattering vector 2.
-    ref_k1 : np.array()
-        Reference scattering vector 1.
-    ref_k2 : np.array()
-        Reference scattering vector 2.
+    v : np.array()
+        Single vector or array of vectors to be normalized.
+    """
+    norms = np.linalg.norm(v, axis=-1)
+    nonzero_mask = norms > 0
+    if np.any(nonzero_mask):
+        v[nonzero_mask] /= norms[nonzero_mask].reshape(-1, 1)
+
+
+def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
+    """Calculates the rotation matrix from one pair of vectors to the other.
+    Handles multiple to-vectors from a single from-vector.
+
+    Find `R` such that `v_to = R @ v_from`.
+
+    Parameters
+    ----------
+    from_v1, from_v2 : np.array()
+        Vector to rotate _from_.
+    to_v1, to_v2 : np.array()
+        Nx3 array of vectors to rotate _to_.
 
     Returns
     -------
     R : np.array()
-        Rotation matrix describing transformation from experimentally measured
-        scattering vectors to equivalent reference vectors.
+        Nx3x3 list of rotation matrices between the vector pairs.
     """
-    ref_plane_normal = np.cross(ref_k1, ref_k2)
-    k_plane_normal = np.cross(k1, k2)
-    axis = np.cross(ref_plane_normal, k_plane_normal)
-    # Avoid 0 degree including angle
-    if np.linalg.norm(axis) == 0:
-        R = np.identity(3)
-    else:
-        # Rotate ref plane into k plane
-        angle = get_angle_cartesian(ref_plane_normal, k_plane_normal)
-        R1 = axangle2mat(axis, angle)
-        rot_ref_k1, rot_ref_k2 = R1.dot(ref_k1), R1.dot(ref_k2)
+    # Find normals to rotate around
+    plane_normal_from = np.cross(from_v1, from_v2, axis=-1)
+    plane_normal_to = np.cross(to_v1, to_v2, axis=-1)
+    plane_common_axes = np.cross(plane_normal_from, plane_normal_to, axis=-1)
 
-        # Rotate ref vectors in plane
-        angle1 = get_angle_cartesian(k1, rot_ref_k1)
-        angle2 = get_angle_cartesian(k2, rot_ref_k2)
-        angle = 0.5 * (angle1 + angle2)
-        # k plane normal still the same
-        R2 = axangle2mat(k_plane_normal, angle)
+    # Try to remove normals from degenerate to-planes by replacing them with
+    # the rotation axes between from and to vectors.
+    to_degenerate = np.isclose(np.sum(np.abs(plane_normal_to), axis=-1), 0.0)
+    plane_normal_to[to_degenerate] = np.cross(from_v1, to_v1[to_degenerate], axis=-1)
+    to_degenerate = np.isclose(np.sum(np.abs(plane_normal_to), axis=-1), 0.0)
+    plane_normal_to[to_degenerate] = np.cross(from_v2, to_v2[to_degenerate], axis=-1)
 
-        # Total rotation is the combination of to plane R1 and in plane R2
-        R = R2.dot(R1)
+    # Normalize the axes used for rotation
+    normalize_or_zero(plane_normal_to)
+    normalize_or_zero(plane_common_axes)
+
+    # Create rotation from-plane -> to-plane
+    angles = get_angle_cartesian_vec(np.broadcast_to(plane_normal_from, plane_normal_to.shape), plane_normal_to)
+    R1 = np.array([axangle2mat(axis, angle, is_normalized=True) for axis, angle in zip(plane_common_axes, angles)])
+
+    # Rotate from-plane into to-plane
+    rot_from_v1 = np.matmul(R1, from_v1)
+    rot_from_v2 = np.matmul(R1, from_v2)
+
+    # Create rotation in the now common plane
+
+    # Find the average angle
+    angle1 = get_angle_cartesian_vec(rot_from_v1, to_v1)
+    angle2 = get_angle_cartesian_vec(rot_from_v2, to_v2)
+    angles = 0.5 * (angle1 + angle2)
+    # Negate angles where the rotation where the rotation axis points the
+    # opposite way of the to-plane normal. Einsum gives list of dot
+    # products.
+    neg_angle_mask = np.einsum('ij,ij->i', np.cross(rot_from_v1, to_v1, axis=-1), plane_normal_to) < 0
+    np.negative(angles, out=angles, where=neg_angle_mask)
+
+    # To-plane normal still the same
+    R2 = np.array([axangle2mat(axis, angle, is_normalized=True) for axis, angle in zip(plane_normal_to, angles)])
+
+    # Total rotation is the combination of to plane R1 and in plane R2
+    R = np.matmul(R2, R1)
 
     return R
 
