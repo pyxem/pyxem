@@ -293,7 +293,7 @@ def match_vectors(peaks,
                 rhklss = np.rint(hklss)
                 ehklss = np.abs(hklss - rhklss)
                 valid_peak_mask = np.max(ehklss, axis=-1) < index_error_tol
-                valid_peak_mask_counts = np.count_nonzero(valid_peak_mask, axis=-1)
+                valid_peak_counts = np.count_nonzero(valid_peak_mask, axis=-1)
                 error_means = ehklss.mean(axis=(1, 2))
 
                 num_peaks = len(peaks)
