@@ -423,10 +423,7 @@ def crystal_from_vector_matching(z_matches):
         # get best matching phase (there is only one here)
         results_array[0] = z_matches[0, 0]
         # get best matching orientation Euler angles
-        if isinstance(z_matches[0, 1], int) and z_matches[0, 1] == 0:
-            results_array[1] = np.array([0.0, 0.0, 0.0])  # TODO: Temporary, bad data fix
-        else:
-            results_array[1] = np.rad2deg(mat2euler(z_matches[0, 1], 'rzxz'))
+        results_array[1] = np.rad2deg(mat2euler(z_matches[0, 1], 'rzxz'))
         # get vector matching metrics
         metrics = dict()
         metrics['match_rate'] = z_matches[0, 2]
