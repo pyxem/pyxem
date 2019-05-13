@@ -306,9 +306,10 @@ def match_vectors(peaks,
                     ehkls,  # TODO: Needed?
                     error_mean,
                     vector_pair_index
-                ] for R, match_rate, error_mean in zip(
+                ] for R, match_rate, ehkls, error_mean in zip(
                     rotations[possible_solution_mask],
                     match_rates[possible_solution_mask],
+                    ehklss[possible_solution_mask],
                     error_means[possible_solution_mask])]
                 res_rhkls += rhklss[possible_solution_mask].tolist()
 
