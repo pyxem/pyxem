@@ -361,3 +361,53 @@ class VDFSegment:
             separated_signals.append(ElectronDiffraction(signal_j))
 
         return separated_signals
+
+    def get_decomposed_virtual_signal(self, calibration, dp_shape,
+                                      sigma=None):
+        """After having decomposed a VDFImage signal, obtain a virtual
+        electron diffraction signal that consists of one virtual
+        diffraction pattern for each decomposition component. Each
+        virtual pattern is composed of Gaussians centered at each
+        vector position with an amplitude given by the intensity of the
+        corresponding loading pattern.
+
+        Parameters
+        ----------
+        calibration : float
+            Reciprocal space calibration in inverse Angstrom per pixel.
+        dp_shape : tuple of int
+            Shape of the diffraction patterns (dp_length_x, dp_length_y)
+            in pixels, where dp_length_x and dp_length_y are integers.
+        sigma : float
+            The standard deviation of the Gaussians in inverse Angstrom
+            per pixel. If None (default), sigma=calibration.
+
+        Returns
+        -------
+        virtual_ed : ElectronDiffraction
+            Virtual electron diffraction signal consisting of one
+            virtual diffraction pattern for each decomposition component.
+        """
+        intensities = self.get_decomposition_loadings().data
+        vectors = self.vectors.data
+
+        num_components = np.shape(intensities)[0]
+
+        if sigma is None:
+            sigma = calibration
+
+        size_x, size_y = dp_shape[0], dp_shape[1]
+        cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
+        x, y = np.indices((size_x, size_y))
+        x, y = x * calibration + cx, y * calibration + cy
+        virtual_ed = np.zeros((size_x, size_y, num_components))
+
+        for i in range(num_components):
+            virtual_ed[..., i] = sum(list(map(
+                lambda a, xo, yo: get_gaussian2d(
+                    a, xo, yo, x=x, y=y, sigma=sigma),
+                intensities[i], vectors[..., 0], vectors[..., 1])))
+
+        virtual_ed = ElectronDiffraction(virtual_ed.T)
+
+        return virtual_ed

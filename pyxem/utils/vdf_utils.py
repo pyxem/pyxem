@@ -405,7 +405,6 @@ def get_circular_mask(vec, radius, cx, cy, x, y):
         Mask that is only True within a circle given by the input
         parameters.
     """
-    # TODO Check if centered correctly!!
     radial_grid_temp = np.sqrt((x - (vec[0] - cx)) ** 2 +
                                (y - (vec[1] - cy)) ** 2)
     mask_temp = (radial_grid_temp > radius).choose(radius, 0)
