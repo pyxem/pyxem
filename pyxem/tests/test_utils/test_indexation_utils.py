@@ -84,7 +84,7 @@ def test_match_vectors(vector_match_peaks, vector_library):
     assert len(matches) == 1
     np.testing.assert_allclose(matches[0][2], 1.0)  # match rate
     np.testing.assert_allclose(matches[0][1], np.identity(3), atol=0.1)
-    np.testing.assert_allclose(matches[0][4], 0.05, atol=0.01)  # error mean
+    np.testing.assert_allclose(matches[0][4], 0.03, atol=0.01)  # error mean
 
     np.testing.assert_allclose(rhkls[0][0], [1, 0, 0])
     np.testing.assert_allclose(rhkls[0][1], [0, 2, 0])

@@ -21,9 +21,12 @@ import pytest
 
 from transforms3d.euler import euler2mat
 
-from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged, \
-    detector_to_fourier, get_rotation_matrix_between_vectors, \
-    get_angle_cartesian
+from pyxem.utils.vector_utils import calculate_norms
+from pyxem.utils.vector_utils import calculate_norms_ragged
+from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
+from pyxem.utils.vector_utils import get_angle_cartesian
+from pyxem.utils.vector_utils import get_angle_cartesian_vec
 
 
 def test_calculate_norms():
@@ -58,16 +61,20 @@ def test_detector_to_fourier(wavelength,
     np.testing.assert_allclose(k, k_expected)
 
 
-@pytest.mark.parametrize('k1, k2, ref_k1, ref_k2, expected_rotation', [
-    ([0, 0, 1], [0, 0, 2], [1, 0, 0], [0, 1, 0], np.identity(3)),  # Degenerate
-    ([0, 0, 1], [0, 1, 0], [0, 0, 1], [1, 0, 0], euler2mat(np.deg2rad(90), 0, 0, 'rzxz')),
-    ([0.5, -0.5, 1 / np.sqrt(2)], [1 / np.sqrt(2), 1 / np.sqrt(2), 0], [0, 0, 1], [1, 0, 0],
-        euler2mat(np.deg2rad(45), np.deg2rad(45), 0, 'rzxz'))
+@pytest.mark.parametrize('from_v1, from_v2, to_v1, to_v2, expected_rotation', [
+    # v2 from x to y
+    ([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0], euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz')),
+    # Degenerate to-vectors gives half-way rotation (about y-axis)
+    ([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0], euler2mat(*np.deg2rad([90, 45, -90]), 'rzxz')),
+    # Edges to body diagonals
+    ([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.5, -0.5, 1 / np.sqrt(2)], [1 / np.sqrt(2), 1 / np.sqrt(2), 0],
+        euler2mat(*np.deg2rad([45, 45, 0]), 'rzxz'))
 ])
-def test_get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2,
-                                             expected_rotation):
-    rotation_matrix = get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2)
-    assert np.allclose(rotation_matrix, expected_rotation)
+def test_get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2, expected_rotation):
+    rotation_matrix = get_rotation_matrix_between_vectors(
+        np.array(from_v1), np.array(from_v2),
+        np.array([to_v1]), np.array([to_v2]))
+    np.testing.assert_allclose(rotation_matrix, np.array([expected_rotation]), atol=1e-15)
 
 
 @pytest.mark.parametrize('vec_a, vec_b, expected_angle', [
@@ -76,4 +83,17 @@ def test_get_rotation_matrix_between_vectors(k1, k2, ref_k1, ref_k2,
 ])
 def test_get_angle_cartesian(vec_a, vec_b, expected_angle):
     angle = get_angle_cartesian(vec_a, vec_b)
-    assert np.isclose(angle, expected_angle)
+    np.testing.assert_allclose(angle, expected_angle)
+
+
+@pytest.mark.parametrize('a, b, expected_angles', [
+    (np.array([[0, 0, 1], [0, 0, 0]]), np.array([[0, 1, 0], [0, 0, 1]]), [np.deg2rad(90), 0])
+])
+def test_get_angle_cartesian_vec(a, b, expected_angles):
+    angles = get_angle_cartesian_vec(a, b)
+    np.testing.assert_allclose(angles, expected_angles)
+
+
+@pytest.mark.xfail(raises=ValueError)
+def test_get_angle_cartesian_vec_input_validation():
+    get_angle_cartesian_vec(np.empty((2, 3)), np.empty((5, 3)))

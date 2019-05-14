@@ -429,7 +429,7 @@ def peaks_from_best_vector_match(single_match_result, library):
     best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
     best_index = best_fit[0]
 
-    rotation_matrix = best_fit[1].T
+    rotation_matrix = best_fit[1]
     # Don't change the original
     structure = library.structures[best_index]
     sim = simulate_rotated_structure(

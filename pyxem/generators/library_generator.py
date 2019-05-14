@@ -19,18 +19,19 @@
 """Diffraction pattern library generator and associated tools.
 """
 
-import numpy as np
 import itertools
+import math
+
+import numpy as np
 from tqdm import tqdm
 from transforms3d.euler import euler2mat
-import diffpy.structure
 
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
 from pyxem.utils.sim_utils import get_points_in_sphere
 from pyxem.utils.sim_utils import simulate_rotated_structure
-from pyxem.utils.vector_utils import get_angle_cartesian
+from pyxem.utils.vector_utils import get_angle_cartesian_vec
 
 
 class DiffractionLibraryGenerator:
@@ -171,32 +172,41 @@ class VectorLibraryGenerator:
             structure = structure_library[phase_name][0]
             # Get reciprocal lattice points within reciprocal_radius
             recip_latt = structure.lattice.reciprocal()
-            indices, coordinates, distances = get_points_in_sphere(
+            miller_indices, coordinates, distances = get_points_in_sphere(
                 recip_latt,
                 reciprocal_radius)
 
-            # Iterate through all pairs calculating interplanar angle
-            phase_index_pairs = []
-            phase_measurements = []
-            for i, j in itertools.combinations(np.arange(len(indices)), 2):
-                # Specify hkls and lengths associated with the crystal structure.
-                # TODO: This should be updated to reflect systematic absences
-                if np.count_nonzero(coordinates[i]) == 0 or np.count_nonzero(coordinates[j]) == 0:
-                    continue  # Ignore combinations including [000]
-                hkl1 = indices[i]
-                hkl2 = indices[j]
-                len1 = distances[i]
-                len2 = distances[j]
-                if len1 < len2:  # Keep the longest first
-                    hkl1, hkl2 = hkl2, hkl1
-                    len1, len2 = len1, len2
-                angle = get_angle_cartesian(coordinates[i], coordinates[j])
-                phase_index_pairs.append([hkl1, hkl2])
-                phase_measurements.append([len1, len2, angle])
-            phase_measurements = np.array(phase_measurements)
+            # Create pair_indices for selecting all point pair combinations
+            num_indices = len(miller_indices)
+            pair_a_indices, pair_b_indices = np.mgrid[:num_indices, :num_indices]
+
+            # Only select one of the permutations and don't pair an index with
+            # itself (select above diagonal)
+            upper_indices = np.triu_indices(num_indices, 1)
+            pair_a_indices = pair_a_indices[upper_indices].ravel()
+            pair_b_indices = pair_b_indices[upper_indices].ravel()
+
+            # Mask off origin (0, 0, 0)
+            origin_index = num_indices // 2
+            pair_a_indices = pair_a_indices[pair_a_indices != origin_index]
+            pair_b_indices = pair_b_indices[pair_b_indices != origin_index]
+
+            pair_indices = np.vstack([pair_a_indices, pair_b_indices])
+
+            # Create library entries
+            angles = get_angle_cartesian_vec(coordinates[pair_a_indices], coordinates[pair_b_indices])
+            pair_distances = distances[pair_indices.T]
+            # Ensure longest vector is first
+            len_sort = np.fliplr(pair_distances.argsort(axis=1))
+            # phase_index_pairs is a list of [hkl1, hkl2]
+            phase_index_pairs = np.take_along_axis(miller_indices[pair_indices.T], len_sort[:, :, np.newaxis], axis=1)
+            # phase_measurements is a list of [len1, len2, angle]
+            phase_measurements = np.column_stack((np.take_along_axis(pair_distances, len_sort, axis=1), angles))
+
+            # Only keep unique triplets
             unique_measurements, unique_measurement_indices = np.unique(phase_measurements, axis=0, return_index=True)
             vector_library[phase_name] = {
-                'indices': np.array(phase_index_pairs)[unique_measurement_indices],
+                'indices': phase_index_pairs[unique_measurement_indices],
                 'measurements': unique_measurements
             }
 
