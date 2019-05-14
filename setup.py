@@ -53,7 +53,7 @@ setup(
         'scikit-image < 0.15' # note the failure
       ],                      # add diffpy 
     package_data={
-        "": ["LICENSE", "readme.rst", "requirements.txt"],
+        "": ["LICENSE", "readme.rst",],
         "pyxem": ["*.py"],
     },
 )
