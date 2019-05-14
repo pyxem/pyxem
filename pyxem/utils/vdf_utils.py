@@ -644,3 +644,92 @@ def get_background(signal, peak_positions, radius,
     else:
         return bg_1d
 
+
+def get_vdf_background(signal, unique_vectors, radius, bg, std=None,
+                       maxs=None, return_radials=False):
+    """ Obtain the background intensities for VDFs corresponding to the
+    vectors in unique_vectors, by convoluting the given 1d background
+    with a 1d virtual aperture function of size given by radius.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction
+        ElectronDiffraction signal that unique_vectors and bg originate
+        from.
+    unique_vectors : DiffractionVector
+        A DiffractionVector with shape (n, 2) with n unique vectors
+        corresponding to n VDFs.
+    radius : float
+        Radius of the virtual aperture used to mask away all the unique
+        vectors. Given in reciprocal Angstroms.
+    bg : np.array
+        The 1d background of signal, typically given as the (average)
+        radial integral of patterns, with the peak positions masked out.
+        See get_background().
+    std : np.array
+        The standard deviation corresponding to the background values
+        given in bg. Default is None, and if given, the std values are
+        convoluted with a 1d circular aperture function, and returned.
+    maxs : np.array
+        The maximum values of the 1d background. Default is None, and if
+        given, the maxs values are convoluted with a 1d circular
+        aperture function, and returned.
+    return_radials : bool
+        If True (default is False), the full 1d arrays are returned, in
+        addition to arrays only holding the values corresponding to the
+        given unique_vectors.
+
+    Returns
+    -------
+    arrays_in_return : array
+        Array that holds the VDF background values corresponding to each
+        vector in unique_vectors. If std and/or maxs is given, the VDF
+        standard deviation and maxima arrays are also returned. Finally,
+        if return_radials is True (default is False), the full 1d
+        arrays are also returned. The returned arrays are given as:
+        [bkg_values, std_values, max_values,
+        bkg_1d, vdf_std_1d, vdf_max_1d].
+
+    """
+    gmags = unique_vectors.get_magnitudes().data
+    dp_shape_y, dp_shape_x = signal.axes_manager.signal_shape
+    cy = signal.axes_manager.signal_axes[0].offset
+    cx = signal.axes_manager.signal_axes[1].offset
+    scale = signal.axes_manager.signal_axes[0].scale
+    y, x = np.indices((dp_shape_x, dp_shape_y))
+    x, y = x * scale, y * scale
+
+    # A circular aperture of the given radius is integrated in 1D.
+    aperture = get_circular_mask([0, 0], radius, cx, cy, x, y)
+    aperture_1d = np.sum(aperture, axis=0)
+    aperture_1d = aperture_1d[aperture_1d > 0]
+
+    # The average background for VDFs calculated with apertures of the
+    # given radius can then be found by convoluting the aperture in 1D
+    # with the average 1D background.
+    bkg_1d = np.convolve(aperture_1d, bg, mode='same')
+
+    # The background value for each VDF is then given by the magnitude
+    # of the corresponding diffraction vector.
+    axis = np.arange(len(bg) + 1) * scale
+    bkg_values = np.array(
+        list(map(lambda a: bkg_1d[(np.abs(axis - a)).argmin()], gmags)))
+    bkg_values = bkg_values.astype('int')
+
+    if std is not None:
+        vdf_std_1d = np.convolve(aperture_1d, std, mode='same')
+        std_values = np.array(list(map(lambda a: vdf_std_1d[
+            (np.abs(axis - a)).argmin()], gmags)))
+
+    if maxs is not None:
+        vdf_max_1d = np.convolve(aperture_1d, maxs, mode='same')
+        max_values = np.array(list(map(lambda a: vdf_max_1d[
+            (np.abs(axis - a)).argmin()], gmags)))
+
+    if return_radials:
+        vdf_std_1d, vdf_max_1d, bkg_1d = None, None, None
+
+    arrays_in_return = [a for a in [bkg_values, std_values, max_values,
+                                    bkg_1d, vdf_std_1d, vdf_max_1d]
+                        if a is not None]
+    return arrays_in_return
