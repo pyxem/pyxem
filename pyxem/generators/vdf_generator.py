@@ -22,8 +22,7 @@
 
 from pyxem.signals.vdf_image import VDFImage, VDFSegment
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.vdf_utils import (normalize_vdf, separate,
-                                   get_vdf_background_intensities)
+from pyxem.utils.vdf_utils import (normalize_vdf, separate)
 from pyxem.utils.sim_utils import (transfer_signal_axes,
                                    transfer_navigation_axes_to_signal_axes)
 
@@ -173,10 +172,9 @@ class VDFSegmentGenerator:
         self.vdf_images = vdfs
         self.vectors = vdfs.vectors
 
-    def get_vdf_segments(self, radius, sum_signal, navigation_size,
-                         background_factor=.0, min_distance=1, min_size=10,
+    def get_vdf_segments(self, min_distance=1, min_size=10,
                          max_size=100, max_number_of_grains=np.inf,
-                         exclude_border=False, plot_background=False):
+                         exclude_border=False):
         """Separate segments (grains) from each of the VDF images using
         edge-detection by the sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a
@@ -189,25 +187,6 @@ class VDFSegmentGenerator:
 
         Parameters
         ----------
-        radius : float
-            Radius of the virtual aperture used to mask away all the
-            unique vectors. Given in reciprocal Angstroms. The
-            background intensities are calculated by radially
-            integrating a sum_signal where all the diffraction vectors
-            are masked out by virtual apertures of the given radius.
-        sum_signal : Signal2D
-            The image to calculate the background intensities from.
-            To obtain the average background intensities, this should be
-            the sum of all signals. For VDFs resulting from an
-            ElectronDiffraction signal s, this is given by s.sum().
-        navigation_size : int
-            The total number of pixels in each VDF. For VDFs resulting
-            from an ElectronDiffraction signal s, this is given by
-            s.axes_manager.navigation_size.
-        background_factor : float
-            Default is 0.0. A value given by
-            background value * background_factor is added to each
-            background value.
         min_distance: int
             Minimum distance (in pixels) between grains required for
             them to be considered as separate grains.
@@ -226,9 +205,7 @@ class VDFSegmentGenerator:
             exclude_border from the boarder will be discarded. If True,
             peaks at or closer than min_distance of the boarder, will be
             discarded.
-        plot_background : bool
-            If True, the masked sum_signal, integrated masked sum_signal in
-            1D and the background intensities in 1D are plotted.
+
         References
         ----------
         [1] http://scikit-image.org/docs/dev/auto_examples/segmentation/
@@ -247,19 +224,14 @@ class VDFSegmentGenerator:
         vectors = self.vectors.data
 
         #TODO : Add aperture radius as an attribute of VDFImage and VDFSegment?
-        bkg_values = get_vdf_background_intensities(
-            DiffractionVectors(self.vectors), radius, sum_signal,
-            navigation_size, plot_background)
-        bkg_values += (bkg_values * background_factor).astype('int')
 
         # Create an array of length equal to the number of vectors where each
         # element is a np.object with shape (n: number of segments for this
         # VDFImage, VDFImage size x, VDFImage size y).
         # map(lambda ids: my_function(ids, ip), volume_ids);
         vdfsegs = np.array(vdfs.map(
-            separate, background_value=BaseSignal(bkg_values).T,
-            show_progressbar=True, inplace=False, min_distance=min_distance,
-            min_size=min_size, max_size=max_size,
+            separate, show_progressbar=True, inplace=False,
+            min_distance=min_distance, min_size=min_size, max_size=max_size,
             max_number_of_grains=max_number_of_grains,
             exclude_border=exclude_border), dtype=np.object)
 

@@ -39,7 +39,7 @@ class VDFImage(Signal2D):
         super().__init__(*args, **kwargs)
         self.vectors = None
 
-    def get_virtual_decomposed_signal(self, calibration, dp_shape,
+    def get_virtual_decomposed_signal(self, loadings, calibration, dp_shape,
                                       sigma=None):
         """After having decomposed a VDFImage signal, obtain a virtual
         electron diffraction signal that consists of one virtual
@@ -52,6 +52,9 @@ class VDFImage(Signal2D):
         ----------
         calibration : float
             Reciprocal space calibration in inverse Angstrom per pixel.
+        loadings : BaseSignal
+            Decomposition loadings with dimensions ( nc | ng ), where nc
+            is the number of components and ng the number of vectors.
         dp_shape : tuple of int
             Shape of the diffraction patterns (dp_length_x, dp_length_y)
             in pixels, where dp_length_x and dp_length_y are integers.
@@ -65,7 +68,7 @@ class VDFImage(Signal2D):
             Virtual electron diffraction signal consisting of one
             virtual diffraction pattern for each decomposition component.
         """
-        intensities = self.get_decomposition_loadings().data
+        intensities = loadings.data
         vectors = self.vectors.data
 
         num_components = np.shape(intensities)[0]

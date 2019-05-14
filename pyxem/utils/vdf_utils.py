@@ -151,9 +151,8 @@ def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
     return g, indices
 
 
-def separate(vdf_temp, background_value, min_distance, min_size,
-             max_size, max_number_of_grains, exclude_border=False,
-             plot_on=False):
+def separate(vdf_temp, min_distance, min_size, max_size,
+             max_number_of_grains, exclude_border=False, plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
     scikit-image. See [1,2] for examples from scikit-image.
@@ -162,10 +161,6 @@ def separate(vdf_temp, background_value, min_distance, min_size,
     ----------
     vdf_temp : np.array
         One VDF image.
-    background_value : int
-        The value of the background intensity for vdf_temp. Can be found
-        by using get_vdf_background_intensities. Only VDF intensities
-        above background_value are considered signal.
     min_distance: int
         Minimum distance (in pixels) between grains required for them to
         be considered as separate grains.
@@ -184,7 +179,7 @@ def separate(vdf_temp, background_value, min_distance, min_size,
         from the boarder will be discarded. If True, peaks at or closer
         than min_distance of the boarder, will be discarded.
     plot_on : bool
-        If True, the VDF, the thresholded VDF, the distance transform
+        If True, the VDF, the mask, the distance transform
         and the separated grains will be plotted in one figure window.
 
     Returns
@@ -202,15 +197,13 @@ def separate(vdf_temp, background_value, min_distance, min_size,
         applications-plot-coins-segmentation-py
     """
 
-    # Create a mask that is True where the VDF intensity is larger than a
-    # background value.
-    mask = (vdf_temp > background_value).astype('bool')
+    # Create a mask from the input VDF image.
+    mask = vdf_temp.astype('bool')
     if np.any(np.nonzero(mask)) is False:
-        print('All VDF intensities are below the background value of ' +
-              str(background_value) + ', so no segments were found.\n')
+        print('All VDF intensities are below 0, so no segments were found.\n')
         return None
 
-    # Calculate the eucledian distance from each point in a binary image to the
+    # Calculate the eucledian distance from each point in the mask to the
     # nearest background point of value 0.
     distance = distance_transform_edt(mask)
 
@@ -266,8 +259,8 @@ def separate(vdf_temp, background_value, min_distance, min_size,
     # positions. The marker positions are the local maxima of the
     # distance. Find the locations where different basins meet, i.e. the
     # watershed lines (segment boundaries). Only search for segments
-    # (labels) in the area defined by mask (thresholded input VDF).
-    labels = watershed(elevation, markers=label(local_maxi), mask=mask)
+    # (labels) in the area defined by mask.
+    labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
 
     if not np.max(labels):
         print('No segments were found. Check input parameters.\n')
@@ -555,10 +548,12 @@ def get_single_pattern_background(pattern, peak_positions, radius, cx,
     # The masked sum_signal is integrated radially to give an average 1D
     # background.
     mask = ~np.isnan(pattern_masked)
+
+    bins_count = np.bincount(radial_grid[mask].ravel())
+    bins_count[bins_count == 0] = 1
     pattern_masked_1d = np.bincount(
         radial_grid[mask].ravel(),
-        weights=pattern_masked[mask].ravel()) \
-        / np.bincount(radial_grid[mask].ravel())
+        weights=pattern_masked[mask].ravel()) / bins_count
 
     return pattern_masked_1d
 
@@ -606,6 +601,7 @@ def get_background(signal, peak_positions, radius,
         return_max=True.
 
     """
+    # TODO: Check so that the same pattern is not included several times.
     scale = signal.axes_manager.signal_axes[0].scale
     dp_shape_y, dp_shape_x = signal.axes_manager.signal_shape
     nav_size_x, nav_size_y = signal.axes_manager.navigation_shape
@@ -730,7 +726,7 @@ def get_vdf_background(signal, unique_vectors, radius, bg, std=None,
         max_values = np.array(list(map(lambda a: vdf_max_1d[
             (np.abs(axis - a)).argmin()], gmags)))
 
-    if return_radials:
+    if return_radials is False:
         vdf_std_1d, vdf_max_1d, bkg_1d = None, None, None
 
     arrays_in_return = [a for a in [bkg_values, std_values, max_values,
