@@ -18,13 +18,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scipy.ndimage import distance_transform_edt, label
+from scipy.ndimage import distance_transform_edt, label, center_of_mass
+from scipy.spatial import distance_matrix
 
 from skimage.feature import peak_local_max, match_template
 from skimage.filters import sobel
 from skimage.morphology import watershed
 
+from sklearn.cluster import DBSCAN
+
 from hyperspy.signals import BaseSignal, Signal2D
+
 
 def normalize_vdf(im):
     """Normalizes image intensity by dividing by maximum value.
@@ -107,11 +111,11 @@ def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
         g = vectors_i.copy()
 
     if len(np.shape(indices_i)) > 1:
-        indices = np.array([], dtype=int)
+        indices = np.array([], dtype=object)
         for index in indices_i:
-            indices = np.append(indices, index).astype(int)
+            indices = np.append(indices, index).astype(object)
     else:
-        indices = indices_i.copy()
+        indices = indices_i.copy().astype(object)
 
     for i, index in zip(range(np.shape(vectors_add)[0]), indices_add):
         indices = np.append(indices, index)
@@ -122,18 +126,23 @@ def get_vectors_and_indices_i(vectors_add, vectors_i, indices_add, indices_i):
 
     # Check if there are any duplicates.
     g_delete = np.array([]).astype(int)
+
     for i in range(np.shape(g)[0]):
         g_is_equal = list(map(lambda x: np.array_equal(g[i], x), g[i + 1:]))
+
         if sum(g_is_equal):
             g_delete = np.append(g_delete, i)
-            print(g_delete)
-            print(np.where(g_is_equal)[0])
+
             # If the equal vectors do not have the same indices, make sure that
             # all required indices are added to the correct element.
-            if indices[int(np.where(g_is_equal)[0]+i+1)] != indices[i]:
-                indices[int(np.where(g_is_equal)[0]+i+1)] = np.append(
-                    indices[int(np.where(g_is_equal)[0]+i+1)],
-                    indices[i]).astype(int)
+            if np.shape(np.where(g_is_equal))[1]>1:
+                index = int(np.where(g_is_equal)[0][0]+i+1)
+            else:
+                index = int(np.where(g_is_equal)[0]+i+1)
+
+            if not np.all(np.isin(indices[i], indices[index])):
+                indices[index] = np.append(indices[index],
+                                           indices[i]).astype(int)
 
     # Delete duplicates.
     g = np.delete(g, g_delete, axis=0)
@@ -200,9 +209,9 @@ def separate(vdf_temp, background_value, min_distance, min_size,
         print('All VDF intensities are below the background value of ' +
               str(background_value) + ', so no segments were found.\n')
         return None
+
     # Calculate the eucledian distance from each point in a binary image to the
-    # background point of value 0, that has the smallest distance to all input
-    # points.
+    # nearest background point of value 0.
     distance = distance_transform_edt(mask)
 
     # Find the coordinates of the local maxima of the distance transform that
@@ -210,9 +219,47 @@ def separate(vdf_temp, background_value, min_distance, min_size,
     local_maxi = peak_local_max(distance, indices=False,
                                 min_distance=min_distance,
                                 num_peaks=max_number_of_grains,
-                                exclude_border=exclude_border)
+                                exclude_border=exclude_border,
+                                threshold_rel=None)
+    maxi_coord1 = np.where(local_maxi)
 
-    # Find the edges using the sobel transform.
+    # If there are any local maxima positioned at equal values of
+    # distance, the peak_local_max function will return all those
+    # maxima, irrespectively of the distances between them. Thus, below
+    # we check if such maxima are closer than min_distance. If so,
+    # we replace the maxima lying inside a cluster (found by DBSCAN by
+    # using min_distance) by the one maximum closest to their center of
+    # mass.
+    max_values, equal_max_count = np.unique(
+        distance[np.where(local_maxi)], return_counts=True)
+    if np.any(equal_max_count > 1):
+        for max_value in max_values[equal_max_count > 1]:
+            equal_maxi = np.zeros_like(distance).astype('bool')
+            equal_maxi[np.where((distance == max_value) &
+                                (local_maxi == True))] = True
+            equal_maxi_coord = np.reshape(np.transpose(
+                np.where(equal_maxi)), (-1, 2)).astype('int')
+            clusters = DBSCAN(eps=min_distance,
+                              min_samples=1).fit(equal_maxi_coord)
+            unique_labels, unique_labels_count = np.unique(
+                clusters.labels_, return_counts=True)
+            for n in np.arange(unique_labels.max()+1):
+                if unique_labels_count[n] > 1:
+                    equal_maxi_coord_temp = clusters.components_[
+                        clusters.labels_ == n]
+                    equal_maxi_temp = np.zeros_like(
+                        distance).astype('bool')
+                    equal_maxi_temp[
+                        np.transpose(equal_maxi_coord_temp)[0],
+                        np.transpose(equal_maxi_coord_temp)[1]] = True
+                    com = np.array(center_of_mass(equal_maxi_temp))
+                    index = distance_matrix(
+                        [com], equal_maxi_coord_temp).argmin()
+                    local_maxi[np.where(equal_maxi_temp)] = False
+                    local_maxi[equal_maxi_coord_temp[index][0],
+                               equal_maxi_coord_temp[index][1]] = True
+
+    # Find the edges of the VDF image using the sobel transform.
     elevation = sobel(vdf_temp)
 
     # 'Flood' the elevation (i.e. edge) image from basins at the marker
@@ -220,7 +267,7 @@ def separate(vdf_temp, background_value, min_distance, min_size,
     # distance. Find the locations where different basins meet, i.e. the
     # watershed lines (segment boundaries). Only search for segments
     # (labels) in the area defined by mask (thresholded input VDF).
-    labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
+    labels = watershed(elevation, markers=label(local_maxi), mask=mask)
 
     if not np.max(labels):
         print('No segments were found. Check input parameters.\n')
@@ -231,7 +278,8 @@ def separate(vdf_temp, background_value, min_distance, min_size,
     while (np.max(labels)) > n - 1:
         sep_temp = labels * (labels == n) / n
         sep_temp = np.nan_to_num(sep_temp)
-        # Discard segment if it is too small, or add it to separated segments.
+        # Discard segment if it is too small, or add it to separated
+        # segments.
         if ((np.sum(sep_temp, axis=(0, 1)) < min_size)
                 or (max_size is not None
                     and np.sum(sep_temp, axis=(0, 1)) > max_size)):
@@ -250,15 +298,10 @@ def separate(vdf_temp, background_value, min_distance, min_size,
             labels = sep[:, :, 0]
             for i in range(1, np.shape(sep)[2]):
                 labels = labels + sep[..., i] * (i + 1)
-        # If no separated particles were found, set all elements in labels to 0.
+        # If no separated particles were found, set all elements in
+        # labels to 0.
         elif np.shape(sep)[2] == 0:
             labels = np.zeros(np.shape(labels))
-            print('No separate particles were found.\n')
-
-        maxi_coord = peak_local_max(distance, indices=True,
-                                    min_distance=min_distance,
-                                    num_peaks=max_number_of_grains,
-                                    exclude_border=exclude_border)
 
         seps_img_sum = np.zeros_like(vdf_temp).astype('float64')
         for l, vdf in zip(np.arange(1, np.max(labels)+1), vdf_sep):
@@ -268,6 +311,8 @@ def separate(vdf_temp, background_value, min_distance, min_size,
                             np.max(vdf_temp[np.where(labels == l)])
             seps_img_sum[np.where(labels == l)] += l
 
+        maxi_coord = np.where(local_maxi)
+
         fig, axes = plt.subplots(2, 3, sharex=True, sharey=True)
         ax = axes.ravel()
 
@@ -276,13 +321,14 @@ def separate(vdf_temp, background_value, min_distance, min_size,
         ax[0].set_title('VDF')
 
         ax[1].imshow(mask, cmap=plt.cm.gray)
-        ax[0].axis('off')
+        ax[1].axis('off')
         ax[1].set_title('Mask')
 
         ax[2].imshow(distance, cmap=plt.cm.magma)
         ax[2].axis('off')
         ax[2].set_title('Distance and maxima')
-        ax[2].plot(maxi_coord[:, 1], maxi_coord[:, 0], 'g.')
+        ax[2].plot(maxi_coord1[1], maxi_coord1[0], 'r+')
+        ax[2].plot(maxi_coord[1], maxi_coord[0], 'gx')
 
         ax[3].imshow(elevation, cmap=plt.cm.magma)
         ax[3].axis('off')
@@ -295,6 +341,7 @@ def separate(vdf_temp, background_value, min_distance, min_size,
         ax[5].imshow(seps_img_sum, cmap=plt.cm.magma)
         ax[5].axis('off')
         ax[5].set_title('Segments')
+
     return vdf_sep
 
 

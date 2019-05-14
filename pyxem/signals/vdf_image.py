@@ -142,7 +142,11 @@ class VDFSegment:
         segment_intensities = np.sum(segments, axis=(1, 2))
         gvector_intensities = np.array(np.empty(len(gvectors)), dtype=object)
         for i in range(len(gvectors)):
-            gvector_intensities[i] = segment_intensities[vector_indices[i]]
+            gvector_intensities[i] = np.zeros(len(vector_indices[i]))
+            for n, index in zip(range(len(vector_indices[i])),
+                                vector_indices[i]):
+                gvector_intensities[i][n] = np.sum(segment_intensities[index])
+
         vdfseg = VDFSegment(Signal2D(image_stack), DiffractionVectors(gvectors),
                             gvector_intensities)
 
@@ -194,11 +198,12 @@ class VDFSegment:
         if vector_number_threshold is not None:
             n = 0
             while np.shape(image_stack)[0] > n:
-                if np.shape(vectors[n])[0] < vector_number_threshold:
+                if len(np.shape(vectors[n])) == 2 and \
+                        np.shape(vectors[n])[0] >= vector_number_threshold:
+                    n = n+1
+                else:
                     image_stack = np.delete(image_stack, n, axis=0)
                     vectors = np.delete(vectors, n, axis=0)
-                else:
-                    n = n+1
 
         if not np.any(image_stack):
             print('No segments left. Check the input thresholds.')
