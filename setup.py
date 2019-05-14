@@ -45,13 +45,13 @@ setup(
     ],
 
     packages=find_packages(),
-
+    # adjust the tabbing
     install_requires=[
-    	'hyperspy >= 1.3',
-        'transforms3d',
-	'scikit-learn >= 0.19',
-        'scikit-image < 0.15'
-      ],
+    	'hyperspy >= 1.3',  #move this to 1.4
+        'transforms3d',     # pin this to the stable 0.3.1 release
+	'scikit-learn >= 0.19', # note the failure
+        'scikit-image < 0.15' # note the failure
+      ],                      # add diffpy 
 
     package_data={
         "": ["LICENSE", "readme.rst", "requirements.txt"],
