@@ -564,3 +564,83 @@ def get_single_pattern_background(pattern, peak_positions, radius, cx,
 
     return pattern_masked_1d
 
+
+def get_background(signal, peak_positions, radius,
+                   pattern_fraction=0.1, return_std=False,
+                   return_max=False):
+    """ Obtain an array of the background intensities by radially
+    integrating a random fraction of all patterns in signal, where peaks
+    are masked out by circular apertures of the given radius.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction
+        ElectronDiffraction signal to calculate the background from.
+    peak_positions : DiffractionVector
+        A DiffractionVector with shape equal to the shape of signal,
+        where each navigation position holds the positions of the unique
+        vectors found at the corresponding navigation positions in
+        signal. Typically obtained from signal.find_peaks().
+    radius : float
+        Radius of the virtual aperture used to mask away all the peaks.
+        Given in reciprocal Angstroms.
+    pattern_fraction : float
+        Float (0., 1.) that determines how many patterns from signal (of
+        the total number of patterns) that will be randomly selected and
+        used for the background calculation.
+    return_std : bool
+        If True, the standard deviations of the masked radial integrals
+        are returned.
+    return_max : bool
+        If True, the maximum values of the radial integrals of all
+        selected patterns are returned.
+
+    Returns
+    -------
+    bg_1d : np.array
+        The (average) radial integral of a fraction of randomly selected
+        patterns, with the peak positions masked out.
+    std : np.array, optional
+        The standard deviation of the masked radial integrals. Returned
+        if return_std=True.
+    bg_1d_max : np.array, optional
+        The maximum values of the masked radial integrals. Returned if
+        return_max=True.
+
+    """
+    scale = signal.axes_manager.signal_axes[0].scale
+    dp_shape_y, dp_shape_x = signal.axes_manager.signal_shape
+    nav_size_x, nav_size_y = signal.axes_manager.navigation_shape
+    number_of_patterns = int(signal.axes_manager.navigation_size*pattern_fraction)
+    cy = signal.axes_manager.signal_axes[0].offset
+    cx = signal.axes_manager.signal_axes[1].offset
+    y, x = np.indices((dp_shape_x, dp_shape_y))
+    x, y = x * scale, y * scale
+    radial_grid = (np.sqrt((x / scale + cx / scale + 0.5) ** 2 + (
+            y / scale + cy / scale + 0.5) ** 2) - 0.5).astype('int')
+    # Create a mask for the sum_signal where all the diffraction vectors
+    # have been masked out by creating circular apertures of the given
+    # radius for all vectors. For sum_signal, the region within each
+    # aperture is set to nan, so that the diffraction vector intensities
+    # do not contribute to the calculated average background.
+    random_indices_x = np.random.randint(low=0, high=nav_size_x-1, size=number_of_patterns, dtype='int')
+    random_indices_y = np.random.randint(low=0, high=nav_size_y-1, size=number_of_patterns, dtype='int')
+    bgs = []
+    for i in range(number_of_patterns):
+        bgs.append(get_single_pattern_background(
+            signal.inav[random_indices_x[i], random_indices_y[i]],
+            peak_positions.inav[random_indices_x[i], random_indices_y[i]],
+            radius, cx, cy, x, y, radial_grid))
+    bg_1d = np.mean(bgs, axis=0)
+    bg_1d_max = np.max(bgs, axis=0)
+    if return_std and return_max:
+        std = np.std(bgs, axis=0)
+        return bg_1d, std, bg_1d_max
+    elif not return_std and return_max:
+        return bg_1d, bg_1d_max
+    elif return_std and not return_max:
+        std = np.std(bgs, axis=0)
+        return bg_1d, std
+    else:
+        return bg_1d
+
