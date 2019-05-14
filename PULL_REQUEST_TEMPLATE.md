@@ -7,7 +7,7 @@ about: A pull request that fixes a bug or adds a feature
 **Release Notes**
 0.9.0 or 0.8.1 (all but urgent bugfixes go in the former)
 new feature / improvement / bugfix / developer change
-1 line summary
+Summary: 1 line per end-user relevant change
 
 **What does this PR do? Please describe and/or link to an open issue.**
 A clear and concise description of what the code in this PR does. Does it fix a bug or add a new feature?
