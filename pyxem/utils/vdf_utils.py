@@ -415,7 +415,7 @@ def get_circular_mask(vec, radius, cx, cy, x, y):
 
 def get_vdf_background_from_sum_signal(unique_vectors, radius,
                                        sum_signal, navigation_size,
-                                       plot_background):
+                                       return_radial=False):
     """ Obtain an array of the background intensities for VDFs resulting
     from the vectors in unique_vectors. The background intensities are
     calculated by radially integrating a sum_signal where all the
@@ -442,9 +442,10 @@ def get_vdf_background_from_sum_signal(unique_vectors, radius,
         The total number of pixels in each VDF. For VDFs resulting from
         an ElectronDiffraction signal s, this is given by
         s.axes_manager.navigation_size.
-    plot_background : bool
-        If True, the masked sum_signal, integrated masked sum_signal in
-        1D and the background intensities in 1D are plotted.
+    return_radial : bool
+        If True (default is False), the full 1d background array is
+        returned, in addition to an arrays only holding the values
+        corresponding to the given unique_vectors.
 
     Returns
     -------
@@ -452,6 +453,8 @@ def get_vdf_background_from_sum_signal(unique_vectors, radius,
         The (average) background intensities for VDFs created with a
         virtual aperture of the given radius, corresponding to each
         vector in unique_vector.
+    bkg_1d : np.array, optional
+        The full (average) background intensities in 1d.
     """
     gmags = unique_vectors.get_magnitudes().data
     scale = sum_signal.axes_manager.signal_axes[0].scale
@@ -486,11 +489,11 @@ def get_vdf_background_from_sum_signal(unique_vectors, radius,
     aperture_1d = np.sum(aperture, axis=0)
     aperture_1d = aperture_1d[aperture_1d > 0]
 
-    # The average background for VDFs calculated with aprtures of the
+    # The average background for VDFs calculated with apertures of the
     # given radius can then be found by convoluting the aperture in 1D
     # with the average 1D background.
-    bkg_1d = np.convolve(aperture_1d, sum_masked_1d, mode='same') \
-             / navigation_size
+    bkg_1d = np.convolve(
+        aperture_1d, sum_masked_1d, mode='same') / navigation_size
 
     # The background value for each VDF is then given by the magnitude
     # of the corresponding diffraction vector.
@@ -499,14 +502,10 @@ def get_vdf_background_from_sum_signal(unique_vectors, radius,
         list(map(lambda a: bkg_1d[(np.abs(axis - a)).argmin()], gmags)))
     bkg_values = bkg_values.astype('int')
 
-    # Optionally plot the masked sum_signal, in 2D and 1D, and the
-    # average background in 1D.
-    if plot_background:
-        BaseSignal(sum_signal_masked).plot(cmap='magma_r', vmax=30000)
-        BaseSignal(sum_masked_1d).plot()
-        BaseSignal(bkg_1d).plot()
-
-    return bkg_values
+    if return_radial:
+        return bkg_values, bkg_1d
+    else:
+        return bkg_values
 
 
 def get_single_pattern_background(pattern, peak_positions, radius, cx,
@@ -611,21 +610,26 @@ def get_background(signal, peak_positions, radius,
     scale = signal.axes_manager.signal_axes[0].scale
     dp_shape_y, dp_shape_x = signal.axes_manager.signal_shape
     nav_size_x, nav_size_y = signal.axes_manager.navigation_shape
-    number_of_patterns = int(signal.axes_manager.navigation_size*pattern_fraction)
+    number_of_patterns = int(
+        signal.axes_manager.navigation_size * pattern_fraction)
     cy = signal.axes_manager.signal_axes[0].offset
     cx = signal.axes_manager.signal_axes[1].offset
     y, x = np.indices((dp_shape_x, dp_shape_y))
     x, y = x * scale, y * scale
     radial_grid = (np.sqrt((x / scale + cx / scale + 0.5) ** 2 + (
             y / scale + cy / scale + 0.5) ** 2) - 0.5).astype('int')
+
     # Create a mask for the sum_signal where all the diffraction vectors
     # have been masked out by creating circular apertures of the given
     # radius for all vectors. For sum_signal, the region within each
     # aperture is set to nan, so that the diffraction vector intensities
     # do not contribute to the calculated average background.
-    random_indices_x = np.random.randint(low=0, high=nav_size_x-1, size=number_of_patterns, dtype='int')
-    random_indices_y = np.random.randint(low=0, high=nav_size_y-1, size=number_of_patterns, dtype='int')
+    random_indices_x = np.random.randint(
+        low=0, high=nav_size_x-1, size=number_of_patterns, dtype='int')
+    random_indices_y = np.random.randint(
+        low=0, high=nav_size_y-1, size=number_of_patterns, dtype='int')
     bgs = []
+
     for i in range(number_of_patterns):
         bgs.append(get_single_pattern_background(
             signal.inav[random_indices_x[i], random_indices_y[i]],
@@ -633,6 +637,7 @@ def get_background(signal, peak_positions, radius,
             radius, cx, cy, x, y, radial_grid))
     bg_1d = np.mean(bgs, axis=0)
     bg_1d_max = np.max(bgs, axis=0)
+
     if return_std and return_max:
         std = np.std(bgs, axis=0)
         return bg_1d, std, bg_1d_max
