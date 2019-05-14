@@ -38,6 +38,7 @@ from .components.diffraction_component import ElectronDiffractionForwardModel
 from .generators.diffraction_generator import DiffractionGenerator
 from .generators.library_generator import DiffractionLibraryGenerator
 from .generators.library_generator import VectorLibraryGenerator
+from .generators.calibration_generator import CalibrationGenerator
 
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_profile import ElectronDiffractionProfile
@@ -524,6 +525,9 @@ def load_mib(filename, scan_size, sum_length=10):
     if edge==scan_size - 1:
         dp = ElectronDiffraction(dpt.inav[0:edge, 1:])
     else:
-        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:], dpt.inav[0:edge, 1:]), axis=1))
+        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:],
+                                                 dpt.inav[0:edge, 1:]), axis=1))
+
+    dp.data = np.flip(dp.data, axis=2)
 
     return dp

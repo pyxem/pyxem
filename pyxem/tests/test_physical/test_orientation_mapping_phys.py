@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -145,8 +145,7 @@ def get_vector_match_results(structure, rot_list, edc):
         angle_tol=1,
         index_error_tol=0.2,
         n_peaks_to_index=5,
-        n_best=2,
-        keys=['A'])
+        n_best=2)
     return diffraction_library, indexation
 
 

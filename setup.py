@@ -52,7 +52,6 @@ setup(
 	'scikit-learn >= 0.19', # note the failure
         'scikit-image < 0.15' # note the failure
       ],                      # add diffpy 
-
     package_data={
         "": ["LICENSE", "readme.rst", "requirements.txt"],
         "pyxem": ["*.py"],
