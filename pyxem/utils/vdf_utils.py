@@ -413,8 +413,9 @@ def get_circular_mask(vec, radius, cx, cy, x, y):
     return mask_temp.astype('bool')
 
 
-def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
-                                   navigation_size, plot_background):
+def get_vdf_background_from_sum_signal(unique_vectors, radius,
+                                       sum_signal, navigation_size,
+                                       plot_background):
     """ Obtain an array of the background intensities for VDFs resulting
     from the vectors in unique_vectors. The background intensities are
     calculated by radially integrating a sum_signal where all the
@@ -506,4 +507,60 @@ def get_vdf_background_intensities(unique_vectors, radius, sum_signal,
         BaseSignal(bkg_1d).plot()
 
     return bkg_values
+
+
+def get_single_pattern_background(pattern, peak_positions, radius, cx,
+                                  cy, x, y, radial_grid):
+    """ Get the average radial integral of the pattern where all peaks
+    have been masked out by an aperture of a given radius.
+
+    Parameters
+    ----------
+    pattern : np.array
+        The image to calculate the background intensities from.
+    peak_positions : DiffractionVector
+        A DiffractionVector signal with shape (n, 2) that holds the
+        positions of n unique vectors.
+    radius : float
+        Radius of the virtual aperture used to mask away all the unique
+        vectors. Given in reciprocal Angstroms.
+        cx : float
+        Offset in the x-direction.
+    cx : float
+        Offset in the x-direction for the centre of pattern.
+    cy : float
+        Offset in the y-direction for the centre of pattern.
+    x : np.array
+        Indies for the x-axis of the pattern. For the intended use;
+        y, x = np.indices((shape_x, shape_y)).
+    y : np.array
+        Indies for the y-axis of the pattern.
+    radial_grid : np.array
+        The radial integral is calculated over raidal_grid. Typically,
+        this is given by:
+        radial_grid = (np.sqrt((x / scale + cx / scale + 0.5) ** 2 + (
+            y / scale + cy / scale + 0.5) ** 2) - 0.5).astype('int')
+
+    Returns
+    -------
+    pattern_masked_1d : np.array
+        The background intensities found by averaging the radial
+        integral of the pattern with all peak_positions masked away by
+        circles of the given radius.
+    """
+    vector_mask = np.sum(list(map(
+        lambda b: get_circular_mask(b, radius, cx, cy, x, y),
+        peak_positions.data)), axis=0).astype('bool')
+    pattern_masked = pattern.data.copy().astype('float32')
+    pattern_masked[np.where(vector_mask == 1)] = np.nan
+
+    # The masked sum_signal is integrated radially to give an average 1D
+    # background.
+    mask = ~np.isnan(pattern_masked)
+    pattern_masked_1d = np.bincount(
+        radial_grid[mask].ravel(),
+        weights=pattern_masked[mask].ravel()) \
+        / np.bincount(radial_grid[mask].ravel())
+
+    return pattern_masked_1d
 
