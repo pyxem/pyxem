@@ -199,17 +199,20 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     return z_bar
 
 
-def affine_transformation(z, transformation, order, *args, **kwargs):
+def affine_transformation(z, transformation, order, casting, *args, **kwargs):
     """Apply an affine transformation to a 2-dimensional array.
 
     Parameters
     ----------
     z : np.array
         Array to be transformed
-    matrix : np.array
+    transformation : np.array
         3x3 numpy array specifying the affine transformation to be applied.
     order : int
-        Interpolation order.
+        Interpolation order. See documentation of skimage.warp for details
+    casting : bool
+        If False input and output data will have the same dtype (and
+        be forced to lie within the same range). If True data may be upcast.
     *args :
         To be passed to skimage.warp
     **kwargs :
@@ -220,8 +223,14 @@ def affine_transformation(z, transformation, order, *args, **kwargs):
     trans : array
         Affine transformed diffraction pattern.
     """
-    trans = tf.warp(z, transformation,
-                    order=order, *args, **kwargs)
+    if casting == True:
+        trans = tf.warp(z, transformation,
+                        order=order, *args, **kwargs)
+    elif casting == False:
+        trans = tf.warp(z, transformation,
+                        order=order, preserve_range=True, *args, **kwargs)
+        trans = trans.astype(z.dtype)
+
     return trans
 
 
