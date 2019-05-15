@@ -255,6 +255,7 @@ class ElectronDiffraction(Signal2D):
     def apply_affine_transformation(self,
                                     D,
                                     order=3,
+                                    casting=True,
                                     inplace=True,
                                     *args, **kwargs):
         """Correct geometric distortion by applying an affine transformation.
@@ -263,6 +264,11 @@ class ElectronDiffraction(Signal2D):
         ----------
         D : array
             3x3 np.array specifying the affine transform to be applied.
+        order : int
+            Interpolation order. See documentation of skimage.warp for details
+        casting : bool
+            If True (default) signal gets returned as cast by underlying scikit-image
+            code. If False dtype matches input dtype.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
@@ -295,6 +301,7 @@ class ElectronDiffraction(Signal2D):
         return self.map(affine_transformation,
                         transformation=transformation,
                         order=order,
+                        casting=casting,
                         inplace=inplace,
                         *args, **kwargs)
 
