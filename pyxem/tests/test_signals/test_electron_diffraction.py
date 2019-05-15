@@ -58,6 +58,13 @@ class TestSimpleMaps:
                         [0., 0., 1.]]))
         assert isinstance(diffraction_pattern, ElectronDiffraction)
 
+    def test_apply_affine_transformation_with_casting(self, diffraction_pattern):
+        transformed_dp = diffraction_pattern.apply_affine_transformation(
+            D=np.array([[1., 0., 0.],
+                        [0., 1., 0.],
+                        [0., 0., 1.2]]), order=2, casting=False, inplace=False)
+        assert isinstance(transformed_dp, ElectronDiffraction)
+
     methods = ['average', 'nan']
 
     @pytest.mark.parametrize('method', methods)
