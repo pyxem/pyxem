@@ -8,6 +8,7 @@ env:
 matrix:
   include:
   - env: export PYTHON=3.7
+  - env: export PYTHON=3.6
   - env: export PYTHON=3.7
     os: osx
     language: generic
