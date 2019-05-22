@@ -543,7 +543,8 @@ def get_cbed_signal():
             data[iy, ix, temp_y, temp_x] = temp_intensity
     for ix, iy in np.ndindex(data.shape[:2]):
         noise = np.random.randint(10, size=(100, 100))
-        data[iy, ix] = convolve2d(data[iy, ix], disk, mode='same') + noise
+        image = convolve2d(data[iy, ix], disk, mode='same') + noise
+        data[iy, ix] = gaussian_filter(image, 1.5)
     s_cbed = PixelatedSTEM(data)
     return s_cbed
 
