@@ -200,7 +200,59 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
 
 def affine_transformation(z, transformation, order, casting, *args, **kwargs):
-    """Apply an affine transformation to a 2-dimensional array.
+    """Private function for use within .apply_affine_transform method of
+    Electron Diffraaction.
+
+    Parameters
+    ----------
+    z : np.array
+        Array to be transformed
+    transformation : np.array
+        3x3 numpy array specifying the affine transformation to be applied.
+    order : int
+        Interpolation order. See documentation of skimage.warp for details
+    casting : bool
+        If False input and output data will have the same dtype (and
+        be forced to lie within the same range). If True data may be upcast.
+    *args :
+        To be passed to skimage.warp
+    **kwargs :
+        To be passed to skimage.warp
+
+    Returns
+    -------
+    trans : array
+        Affine transformed diffraction pattern.
+    """
+
+    shape = z.shape
+    shift_x = (shape[1] - 1) / 2
+    shift_y = (shape[0] - 1) / 2
+
+    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
+    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+
+    # This defines the transform you want to perform
+    distortion = tf.AffineTransform(matrix=transformation)
+
+    # skimage transforms can be added like this, does matrix multiplication,
+    # hence the need for the brackets. (Note tf.warp takes the inverse)
+    transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
+
+    if casting == True:
+        trans = tf.warp(z, transformation,
+                        order=order, *args, **kwargs)
+    elif casting == False:
+        trans = tf.warp(z, transformation,
+                        order=order, preserve_range=True, *args, **kwargs)
+        trans = trans.astype(z.dtype)
+
+    return trans
+
+
+def _affine_transformation(z, transformation, order, casting, *args, **kwargs):
+    """Private function for use within .apply_affine_transform method of
+    Electron Diffraaction.
 
     Parameters
     ----------
@@ -230,7 +282,6 @@ def affine_transformation(z, transformation, order, casting, *args, **kwargs):
         trans = tf.warp(z, transformation,
                         order=order, preserve_range=True, *args, **kwargs)
         trans = trans.astype(z.dtype)
-
     return trans
 
 
