@@ -198,16 +198,36 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     return z_bar
 
+def convert_affine_to_transform(D,shape):
+    """
+    Docstrings to be completed
+    """
 
-def affine_transformation(z, transformation, order, *args, **kwargs):
-    """Apply an affine transformation to a 2-dimensional array.
+    shift_x = (shape[1] - 1) / 2
+    shift_y = (shape[0] - 1) / 2
+
+    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
+    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+
+    # This defines the transform you want to perform
+    distortion = tf.AffineTransform(matrix=D)
+
+    # skimage transforms can be added like this, does matrix multiplication,
+    # hence the need for the brackets. (Note tf.warp takes the inverse)
+    transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
+
+    return transformation
+
+
+def apply_transformation(z, transformation, order, *args, **kwargs):
+    """Apply a transformation to a 2-dimensional array.
 
     Parameters
     ----------
     z : np.array
         Array to be transformed
-    matrix : np.array
-        3x3 numpy array specifying the affine transformation to be applied.
+    transformation : np.array
+        3x3 numpy array specifying the transformation to be applied.
     order : int
         Interpolation order.
     *args :
@@ -219,6 +239,10 @@ def affine_transformation(z, transformation, order, *args, **kwargs):
     -------
     trans : array
         Affine transformed diffraction pattern.
+
+    Notes
+    -----
+    Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
     trans = tf.warp(z, transformation,
                     order=order, *args, **kwargs)
