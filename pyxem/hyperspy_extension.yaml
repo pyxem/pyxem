@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2019 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+signals:
+  ElectronDiffraction:
+    signal_type: "ElectronDiffraction"
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    import: pyxem.signals.electron_diffraction
+  ElectronDiffractionProfile:
+    signal_type: "ElectronDiffractionProfile"
+    signal_dimension: 1
+    dtype: real
+    lazy: True
+    import: pyxem.signals.diffraction_profile
+  DiffractionVectors:
+    signal_type: "DiffractionVectors"
+    signal_dimension: None
+    dtype: real
+    lazy: False
+    import: pyxem.signals.diffraction_vectors
+  TemplateMatchingResults:
+    signal_type: "TemplateMatchingResults"
+    signal_dimension: None
+    dtype: real
+    lazy: False
+    import: pyxem.signals.indexation_results
+  VectorMatchingResults:
+    signal_type: "VectorMatchingResults"
+    signal_dimension: None
+    dtype: real
+    lazy: False
+    import: pyxem.signals.indexation_results
+  CrystallographicMap:
+    signal_type: "CrystallographicMap"
+    signal_dimension: None
+    dtype: real
+    lazy: False
+    import: pyxem.signals.crystallographic_map
+  DisplacementGradientMap:
+    signal_type: "DisplacementGradientMap"
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    import: pyxem.signals.tensor_field
+  VDFImage:
+    signal_type: "VDFImage"
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    import: pyxem.signals.vdf_image
+
+components:
+    DiffractionComponent:
+      import: pyxem.components.diffraction_component
+    ScalableReferencePattern:
+      import pyxem.components.ScalableReferencePattern
