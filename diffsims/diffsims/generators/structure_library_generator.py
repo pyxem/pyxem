@@ -18,8 +18,8 @@
 
 import numpy as np
 
-from pyxem.libraries.structure_library import StructureLibrary
-from pyxem.utils.sim_utils import rotation_list_stereographic
+from diffsims.libraries.structure_library import StructureLibrary
+from diffsims.utils.sim_utils import rotation_list_stereographic
 
 """Generating structure libraries."""
 

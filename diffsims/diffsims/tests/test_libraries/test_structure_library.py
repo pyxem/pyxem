@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.libraries.structure_library import StructureLibrary
+from diffsims.libraries.structure_library import StructureLibrary
 
 
 def test_constructor():

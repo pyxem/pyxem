@@ -19,10 +19,10 @@
 import pytest
 import diffpy.structure
 
-from pyxem.generators.diffraction_generator import DiffractionGenerator
-from pyxem.generators.library_generator import DiffractionLibraryGenerator
-from pyxem.libraries.diffraction_library import DiffractionLibrary
-from pyxem.libraries.structure_library import StructureLibrary
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.libraries.diffraction_library import DiffractionLibrary
+from diffsims.libraries.structure_library import StructureLibrary
 
 
 @pytest.fixture

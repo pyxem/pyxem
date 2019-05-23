@@ -18,8 +18,8 @@
 
 import numpy as np
 
-from pyxem.generators.structure_library_generator import StructureLibraryGenerator
-from pyxem.tests.test_utils.test_sim_utils import create_structure_cubic
+from diffsims.generators.structure_library_generator import StructureLibraryGenerator
+from diffsims.tests.test_utils.test_sim_utils import create_structure_cubic
 
 
 def test_orientations_from_list():

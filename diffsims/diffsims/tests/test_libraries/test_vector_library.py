@@ -17,19 +17,19 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pyxem as pxm
 import os
 import numpy as np
 import diffpy.structure
 
-from pyxem.libraries.vector_library import load_VectorLibrary
-from pyxem.libraries.structure_library import StructureLibrary
+from diffsims.libraries.vector_library import load_VectorLibrary
+from diffsims.libraries.structure_library import StructureLibrary
+from diffsims.generators.library_generator import VectorLibraryGenerator
 
 
 @pytest.fixture
 def get_library(default_structure):
     structure_library = StructureLibrary(['Phase'], [default_structure], [[(0, 0, 0), (0, 0.2, 0)]])
-    vlg = pxm.VectorLibraryGenerator(structure_library)
+    vlg = VectorLibraryGenerator(structure_library)
     return vlg.get_vector_library(0.5)
 
 
