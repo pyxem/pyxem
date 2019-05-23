@@ -199,8 +199,21 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     return z_bar
 
 def convert_affine_to_transform(D,shape):
-    """
-    Docstrings to be completed
+    """ Converts an affine transform on a diffraction pattern to a suitable
+    form for skimage.transform.warp()
+
+    Parameters
+    ----------
+    D : np.array
+        Affine transform to be applied
+    shape : tuple
+        Shape tuple in form (y,x) for the diffraction pattern
+
+    Returns
+    -------
+    transformation : np.array
+        3x3 numpy array of the transformation to be applied.
+    
     """
 
     shift_x = (shape[1] - 1) / 2
