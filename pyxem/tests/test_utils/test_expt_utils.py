@@ -22,7 +22,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, gain_normalise, remove_dead, affine_transformation, \
+    radial_average, gain_normalise, remove_dead, apply_transformation, \
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, reference_circle, \
     find_beam_offset_cross_correlation, peaks_as_gvectors
