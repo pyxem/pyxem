@@ -58,6 +58,23 @@ class TestSimpleMaps:
                         [0., 0., 1.]]))
         assert isinstance(diffraction_pattern, ElectronDiffraction)
 
+    def test_apply_affine_transforms_paths(self,diffraction_pattern):
+        D=np.array([[1., 0.9, 0.],
+                    [1.1, 1., 0.],
+                    [0., 0., 1.]])
+        s = Signal2D(np.asarray([[D,D],[D,D]]))
+        static  = diffraction_pattern.apply_affine_transformation(D,inplace=False)
+        dynamic = diffraction_pattern.apply_affine_transformation(s,inplace=False)
+        assert np.allclose(static.data,dynamic.data,atol=1e-3)
+
+    def test_apply_affine_transformation_with_casting(self, diffraction_pattern):
+        diffraction_pattern.change_dtype('uint8')
+        transformed_dp = ElectronDiffraction(diffraction_pattern).apply_affine_transformation(
+            D=np.array([[1., 0., 0.],
+                        [0., 1., 0.],
+                        [0., 0., 1.2]]), order=2, keep_dtype=True, inplace=False)
+        assert transformed_dp.data.dtype == 'uint8'
+
     methods = ['average', 'nan']
 
     @pytest.mark.parametrize('method', methods)
