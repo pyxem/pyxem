@@ -219,7 +219,7 @@ def convert_affine_to_transform(D,shape):
     return transformation
 
 
-def apply_transformation(z, transformation, order, *args, **kwargs):
+def apply_transformation(z, transformation, order, keep_dtype=False, *args, **kwargs):
     """Apply a transformation to a 2-dimensional array.
 
     Parameters
@@ -230,6 +230,8 @@ def apply_transformation(z, transformation, order, *args, **kwargs):
         3x3 numpy array specifying the transformation to be applied.
     order : int
         Interpolation order.
+    keep_dtype : bool
+        If True dtype of returned object is that of z
     *args :
         To be passed to skimage.warp
     **kwargs :
@@ -246,6 +248,9 @@ def apply_transformation(z, transformation, order, *args, **kwargs):
     """
     trans = tf.warp(z, transformation,
                     order=order, *args, **kwargs)
+    if keep_dtype == True:
+        trans = trans.astype(z.dtype)
+
     return trans
 
 

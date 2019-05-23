@@ -255,6 +255,7 @@ class ElectronDiffraction(Signal2D):
     def apply_affine_transformation(self,
                                     D,
                                     order=3,
+                                    keep_dtype=False,
                                     inplace=True,
                                     *args, **kwargs):
         """Correct geometric distortion by applying an affine transformation.
@@ -266,6 +267,9 @@ class ElectronDiffraction(Signal2D):
             to be applied.
         order : 1,2,3,4 or 5
             The order of interpolation on the transform. Default is 3.
+        keep_dtype : bool
+            If True dtype of returned ElectronDiffraction Signal is that of
+            the input, if False, casting to higher precision may occur.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
@@ -290,6 +294,7 @@ class ElectronDiffraction(Signal2D):
         return self.map(apply_transformation,
                         transformation=transformation,
                         order=order,
+                        keep_dtype=keep_dtype,
                         inplace=inplace,
                         *args, **kwargs)
 
