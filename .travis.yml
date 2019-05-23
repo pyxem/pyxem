@@ -29,7 +29,7 @@ before_install:
     conda update -y conda;
     conda config --append channels conda-forge;
     conda create -n testenv --yes python=$PYTHON;
-    source activate testenv;
+    conda activate testenv;
   - conda info -a
   - df -h
 
