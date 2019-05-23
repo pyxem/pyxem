@@ -219,7 +219,7 @@ def convert_affine_to_transform(D,shape):
     return transformation
 
 
-def apply_transformation(z, transformation, order, keep_dtype=False, *args, **kwargs):
+def apply_transformation(z, transformation,keep_dtype,order=1,*args, **kwargs):
     """Apply a transformation to a 2-dimensional array.
 
     Parameters
@@ -246,10 +246,13 @@ def apply_transformation(z, transformation, order, keep_dtype=False, *args, **kw
     -----
     Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
-    trans = tf.warp(z, transformation,
+    if keep_dtype == False:
+        trans = tf.warp(z, transformation,
                     order=order, *args, **kwargs)
     if keep_dtype == True:
-        trans = trans.astype(z.dtype)
+            trans = tf.warp(z, transformation,
+                        order=order,preserve_range=True, *args, **kwargs)
+            trans = trans.astype(z.dtype)
 
     return trans
 
