@@ -70,4 +70,4 @@ components:
     DiffractionComponent:
       import: pyxem.components.diffraction_component
     ScalableReferencePattern:
-      import pyxem.components.scalable_reference_component
+      import: pyxem.components.scalable_reference_component

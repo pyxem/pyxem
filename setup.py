@@ -32,16 +32,16 @@ setup(
     url="https://github.com/pyxem/pyxem",
     long_description=open('README.rst').read(),
     classifiers=[
-	"Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-	"Programming Language :: Python :: 3.7",
-	"Development Status :: 4 - Beta",
-	"Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Natural Language :: English",
-        "Operating System :: OS Independent",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Physics",
+	   "Programming Language :: Python :: 3",
+       "Programming Language :: Python :: 3.6",
+	   "Programming Language :: Python :: 3.7",
+	   "Development Status :: 4 - Beta",
+	   "Intended Audience :: Science/Research",
+       "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+       "Natural Language :: English",
+       "Operating System :: OS Independent",
+       "Topic :: Scientific/Engineering",
+       "Topic :: Scientific/Engineering :: Physics",
     ],
 
     packages=find_packages(),
@@ -50,12 +50,13 @@ setup(
     	'scikit-image < 0.15', # See pyxem/pull/378
         'matplotlib < 3.1.0' , # See pyxem/pull/403
         'scikit-learn >= 0.19', # bug unknown
-    	'hyperspy >= 1.3',      # 1.2 fails, (NTU Workshop - May 2019) 
-        'transforms3d',        
+    	'hyperspy > 1.4',      # needs to have extension register
+        'transforms3d',
         'diffpy.structure >= 3.0.0' # First Python 3 support
-      ],                       
+      ],
     package_data={
-        "": ["LICENSE", "readme.rst",],
+        "": ["LICENSE", "readme.rst", "hyperspy_extension.yaml"],
         "pyxem": ["*.py"],
     },
+    entry_points={'hyperspy.extensions': 'pyxem = pyxem'},
 )
