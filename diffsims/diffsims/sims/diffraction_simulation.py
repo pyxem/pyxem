@@ -19,8 +19,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
-
 
 class DiffractionSimulation:
     """Holds the result of a kinematic diffraction pattern simulation.
@@ -116,52 +114,6 @@ class DiffractionSimulation:
     @intensities.setter
     def intensities(self, intensities):
         self._intensities = intensities
-
-    def as_signal(self, size, sigma, max_r):
-        """Returns the diffraction data as an ElectronDiffraction signal with
-        two-dimensional Gaussians representing each diffracted peak. Should only
-        be used for qualitative work.
-
-        Parameters
-        ----------
-        size : int
-            Side length (in pixels) for the signal to be simulated.
-        sigma : float
-            Standard deviation of the Gaussian function to be plotted.
-        max_r : float
-            Half the side length in reciprocal Angstroms. Defines the signal's
-            calibration
-
-        Returns
-        -------
-
-        dp : ElectronDiffraction
-            Simulated electron diffraction pattern.
-
-        """
-        from skimage.filters import gaussian as point_spread
-
-        l, delta_l = np.linspace(-max_r, max_r, size, retstep=True)
-
-        mask_for_max_r = np.logical_and(np.abs(self.coordinates[:, 0]) < max_r,
-                                        np.abs(self.coordinates[:, 1]) < max_r)
-
-        coords = self.coordinates[mask_for_max_r]
-        inten = self.intensities[mask_for_max_r]
-
-        dp_dat = np.zeros([size, size])
-        x, y = (coords)[:, 0], (coords)[:, 1]
-        if len(x) > 0:  # avoiding problems in the peakless case
-            num = np.digitize(x, l, right=True), np.digitize(y, l, right=True)
-            dp_dat[num] = inten
-            # sigma in terms of pixels. transpose for Hyperspy
-            dp_dat = point_spread(dp_dat, sigma=sigma / delta_l).T
-            dp_dat = dp_dat / np.max(dp_dat)
-
-        dp = ElectronDiffraction(dp_dat)
-        dp.set_diffraction_calibration(2 * max_r / size)
-
-        return dp
 
 
 class ProfileSimulation:
