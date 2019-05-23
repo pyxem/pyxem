@@ -25,7 +25,7 @@ import diffpy.structure
 
 from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
-from pyxem.utils.vector_utils import get_angle_cartesian
+from .vector_utils import get_angle_cartesian
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
 from transforms3d.euler import euler2mat
@@ -299,12 +299,9 @@ def simulate_kinematic_scattering(atomic_coordinates,
 
     Returns
     -------
-    simulation : ElectronDiffraction
-        ElectronDiffraction simulation.
+    simulation : np.array
+        Simulated electron diffraction pattern
     """
-    # Delayed loading to prevent circular dependencies.
-    from pyxem.signals.electron_diffraction import ElectronDiffraction
-
     # Get atomic scattering parameters for specified element.
     coeffs = np.array(get_scattering_params_dict(scattering_params)[element])
 
@@ -340,7 +337,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
     # Calculate intensity
     intensity = (scattering * scattering.conjugate()).real
 
-    return ElectronDiffraction(intensity)
+    return intensity
 
 
 def simulate_rotated_structure(diffraction_generator, structure, rotation_matrix, reciprocal_radius, with_direct_beam):
