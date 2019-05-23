@@ -33,11 +33,12 @@ from hyperspy.ui_registry import get_gui
 from hyperspy.api import roi
 from natsort import natsorted
 
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.generators.library_generator import VectorLibraryGenerator
+
 from .components.diffraction_component import ElectronDiffractionForwardModel
 
-from .generators.diffraction_generator import DiffractionGenerator
-from .generators.library_generator import DiffractionLibraryGenerator
-from .generators.library_generator import VectorLibraryGenerator
 from .generators.calibration_generator import CalibrationGenerator
 
 from .signals.crystallographic_map import CrystallographicMap
