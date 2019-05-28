@@ -2,6 +2,7 @@
 name: Pull request 
 about: A pull request that fixes a bug or adds a feature
 
+- [ ] ready for review and merge?
 ---
 
 **Release Notes**
