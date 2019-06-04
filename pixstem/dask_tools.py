@@ -1,7 +1,6 @@
 import copy
 import numpy as np
 import dask.array as da
-from skimage import morphology
 from skimage.feature import match_template, blob_dog
 
 
@@ -116,74 +115,78 @@ def _threshold_array(dask_array, threshold_value=1, mask_array=None):
     return thresholded_array
 
 
-def _template_match_disk_single_frame(image, disk):
-    """Template match a circular disk with a single image.
+def _template_match_binary_image_single_frame(frame, binary_image):
+    """Template match a binary image (template) with a single image.
 
     Parameters
     ----------
-    image : NumPy 2D array
-    disk : NumPy 2D array
-        Must be smaller than image
+    frame : NumPy 2D array
+    binary_image : NumPy 2D array
+        Must be smaller than frame
 
     Returns
     -------
     template_match : NumPy 2D array
-        Same size as image
+        Same size as frame
 
     Examples
     --------
-    >>> image = np.random.randint(1000, size=(256, 256))
-    >>> disk = morphology.disk(4, np.uint16)
+    >>> frame = np.random.randint(1000, size=(256, 256))
+    >>> from skimage import morphology
+    >>> binary_image = morphology.disk(4, np.uint16)
     >>> import pixstem.dask_tools as dt
-    >>> template_match = dt._template_match_disk_single_frame(image, disk)
+    >>> template_match = dt._template_match_binary_image_single_frame(
+    ...     frame, binary_image)
 
     """
-    template_match = match_template(image, disk, pad_input=True)
+    template_match = match_template(frame, binary_image, pad_input=True)
     return template_match
 
 
-def _template_match_disk_chunk(data, disk):
+def _template_match_binary_image_chunk(data, binary_image):
     """Template match a circular disk with a 4D dataset.
 
     Parameters
     ----------
     data : NumPy 4D array
-    disk : NumPy 2D array
-        Must be smaller than image
+    binary_image : NumPy 2D array
+        Must be smaller than the two last dimensions in data
 
     Returns
     -------
     template_match : NumPy 4D array
-        Same size as inpt data
+        Same size as input data
 
     Examples
     --------
     >>> data = np.random.randint(1000, size=(10, 10, 256, 256))
-    >>> disk = morphology.disk(4, np.uint16)
+    >>> from skimage import morphology
+    >>> binary_image = morphology.disk(4, np.uint16)
     >>> import pixstem.dask_tools as dt
-    >>> template_match = dt._template_match_disk_chunk(data, disk)
+    >>> template_match = dt._template_match_binary_image_chunk(
+    ...     data, binary_image)
 
     """
     output_array = np.zeros_like(data, dtype=np.float32)
-    image = np.zeros(data.shape[-2:])
+    frame = np.zeros(data.shape[-2:])
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
-        image[:] = data[islice]
-        output_array[islice] = _template_match_disk_single_frame(image, disk)
+        frame[:] = data[islice]
+        output_array[islice] = _template_match_binary_image_single_frame(
+                frame, binary_image)
     return output_array
 
 
-def _template_match_disk(dask_array, disk_r=None):
-    """Template match a circular disk.
+def _template_match_with_binary_image(dask_array, binary_image):
+    """Template match a dask array with a binary image (template).
 
     Parameters
     ----------
     dask_array : Dask array
         The two last dimensions are the signal dimensions. Must have at least
         2 dimensions.
-    disk_r : scalar, optional
-        Radius of the disk. 2 * disk_r + 1 must be smaller than
-        the two signal dimensions.
+    binary_image : 2D NumPy array
+        Must be smaller than the two last dimensions in dask_array
 
     Returns
     -------
@@ -195,16 +198,22 @@ def _template_match_disk(dask_array, disk_r=None):
     >>> data = np.random.randint(1000, size=(20, 20, 256, 256))
     >>> import dask.array as da
     >>> dask_array = da.from_array(data, chunks=(5, 5, 128, 128))
+    >>> from skimage import morphology
+    >>> binary_image = morphology.disk(4, np.uint16)
     >>> import pixstem.dask_tools as dt
-    >>> template_match = dt._template_match_disk(dask_array, disk_r=4)
+    >>> template_match = dt._template_match_binary_image_chunk(
+    ...     dask_array, binary_image)
 
     """
     array_dims = len(dask_array.shape)
     if array_dims < 2:
         raise ValueError(
-                "dask_array must be at least 2-dimensions, not {0}".format(
+                "dask_array must be at least two dimensions, not {0}".format(
                     array_dims))
-    disk = morphology.disk(disk_r, dask_array.dtype)
+    if len(binary_image.shape) != 2:
+        raise ValueError(
+                "binary_image must have two dimensions, not {0}".format(
+                    len(binary_image.shape)))
     detx, dety = dask_array.shape[-2:]
     chunks = [None] * array_dims
     chunks[-2] = detx
@@ -212,8 +221,8 @@ def _template_match_disk(dask_array, disk_r=None):
     chunks = tuple(chunks)
     dask_array_rechunked = dask_array.rechunk(chunks=chunks)
     output_array = da.map_blocks(
-            _template_match_disk_chunk, dask_array_rechunked, disk,
-            dtype=np.float32)
+            _template_match_binary_image_chunk, dask_array_rechunked,
+            binary_image, dtype=np.float32)
     return output_array
 
 

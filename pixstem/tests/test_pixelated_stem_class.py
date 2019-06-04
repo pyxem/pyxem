@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from numpy.random import randint
 import dask.array as da
+from skimage import morphology
 from hyperspy.signals import Signal2D
 from pixstem.pixelated_stem_class import PixelatedSTEM
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
@@ -1092,6 +1093,63 @@ class TestPixelatedStemTemplateMatchDisk:
         s = PixelatedSTEM(np.random.random(size=shape))
         st = s.template_match_disk(disk_r=4, lazy_result=False)
         assert st.data.shape == tuple(shape)
+
+
+class TestPixelatedStemTemplateMatchRing:
+
+    def test_simple(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        s_template = s.template_match_ring(r_inner=3, r_outer=5)
+        assert s.data.shape == s_template.data.shape
+        assert s_template._lazy is True
+
+    def test_wrong_input(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        with pytest.raises(ValueError):
+            s.template_match_ring(r_inner=5, r_outer=3)
+        with pytest.raises(ValueError):
+            s.template_match_ring(r_inner=3, r_outer=3)
+
+
+class TestPixelatedStemTemplateWithBinaryImage:
+
+    def test_square_and_disk(self):
+        s = PixelatedSTEM(np.zeros((2, 2, 100, 100)))
+
+        square_image = np.zeros((9, 9))
+        square_image[2:-2, 2:-2] = 1
+        s.data[:, :, 20:29, 40:49] = square_image
+
+        disk = morphology.disk(4, s.data.dtype)
+        s.data[:, :, 60:69, 50:59] = disk
+
+        s_st = s.template_match_with_binary_image(square_image,
+                                                  lazy_result=False)
+        s_dt = s.template_match_with_binary_image(disk, lazy_result=False)
+
+        st_ind = np.unravel_index(
+                np.argmax(s_st.data, axis=None), s_st.data.shape)[-2:]
+        dt_ind = np.unravel_index(
+                np.argmax(s_dt.data, axis=None), s_dt.data.shape)[-2:]
+
+        assert st_ind == (24, 44)
+        assert dt_ind == (64, 54)
+        assert s.data.shape == s_st.data.shape
+        assert s.data.shape == s_dt.data.shape
+
+    def test_wrong_binary_image_input(self):
+        s = PixelatedSTEM(np.random.randint(0, 1000, (2, 2, 20, 20)))
+        template = np.zeros(10)
+        with pytest.raises(ValueError):
+            s.template_match_with_binary_image(template)
+
+        template = np.zeros((10, 5, 5))
+        with pytest.raises(ValueError):
+            s.template_match_with_binary_image(template)
+
+        template = np.zeros((10, 5, 5, 3))
+        with pytest.raises(ValueError):
+            s.template_match_with_binary_image(template)
 
 
 class TestPixelatedStemFindPeaks:

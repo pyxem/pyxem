@@ -287,7 +287,7 @@ class TestRemoveBadPixels:
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
 
 
-class TestTemplateMatchDisk:
+class TestTemplateMatchBinaryImage:
 
     @pytest.mark.parametrize(
             "x, y", [(13, 32), (76, 32), (87, 21), (43, 85)])
@@ -297,7 +297,7 @@ class TestTemplateMatchDisk:
         data = np.zeros(shape=(100, 100))
 
         data[y-disk_r:y+disk_r+1, x-disk_r:x+disk_r+1] = disk
-        match = dt._template_match_disk_single_frame(data, disk)
+        match = dt._template_match_binary_image_single_frame(data, disk)
         index = np.unravel_index(np.argmax(match), match.shape)
         assert (y, x) == index
 
@@ -306,7 +306,7 @@ class TestTemplateMatchDisk:
         disk = sm.disk(disk_r)
         data = np.zeros(shape=(5, 10, 100, 90))
         data[:, :, y-disk_r:y+disk_r+1, x-disk_r:x+disk_r+1] = disk
-        match_array = dt._template_match_disk_chunk(data, disk)
+        match_array = dt._template_match_binary_image_chunk(data, disk)
         assert data.shape == match_array.shape
         for ix, iy in np.ndindex(data.shape[:2]):
             match = match_array[ix, iy]
@@ -315,8 +315,10 @@ class TestTemplateMatchDisk:
 
     def test_simple(self):
         data = np.ones((5, 3, 50, 40))
+        disk = sm.disk(5)
         dask_array = da.from_array(data, chunks=(1, 1, 5, 5))
-        match_array_dask = dt._template_match_disk(dask_array, disk_r=5)
+        match_array_dask = dt._template_match_with_binary_image(
+                dask_array, binary_image=disk)
         match_array = match_array_dask.compute()
         assert match_array.shape == data.shape
 
@@ -335,8 +337,10 @@ class TestTemplateMatchDisk:
         data[1, 1, 20:31, 70:81] = sm.disk(disk_r)
         # Nav bottom right, sig x=55, y=75
         data[1, 2, 70:81, 50:61] = sm.disk(disk_r)
+        binary_image = sm.disk(disk_r)
         dask_array = da.from_array(data, chunks=(1, 1, 5, 5))
-        out_dask = dt._template_match_disk(dask_array, disk_r=disk_r)
+        out_dask = dt._template_match_with_binary_image(
+                dask_array, binary_image=binary_image)
         out = out_dask.compute()
         match00 = np.unravel_index(np.argmax(out[0, 0]), out[0, 0].shape)
         assert (5, 5) == match00
@@ -358,16 +362,20 @@ class TestTemplateMatchDisk:
         chunks = [1] * nav_dims
         chunks.extend([25, 25])
         dask_array = da.random.random(size=shape, chunks=chunks)
-        match_array_dask = dt._template_match_disk(dask_array, disk_r=5)
+        binary_image = sm.disk(5)
+        match_array_dask = dt._template_match_with_binary_image(
+                dask_array, binary_image=binary_image)
         assert len(dask_array.shape) == nav_dims + 2
         assert dask_array.shape == match_array_dask.shape
         match_array = match_array_dask.compute()
         assert dask_array.shape == match_array.shape
 
     def test_1d_dask_array_error(self):
+        binary_image = sm.disk(5)
         dask_array = da.random.random(size=50, chunks=10)
         with pytest.raises(ValueError):
-            dt._template_match_disk(dask_array, disk_r=5)
+            dt._template_match_with_binary_image(
+                    dask_array, binary_image=binary_image)
 
 
 class TestPeakFindDog:

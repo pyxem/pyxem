@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from scipy.ndimage import rotate, gaussian_filter
+from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
 import hyperspy.api as hs
@@ -652,6 +653,103 @@ class PixelatedSTEM(Signal2D):
         ...     disk_r=5, show_progressbar=False)
         >>> s.plot()
 
+        See also
+        --------
+        template_match_ring
+        template_match_with_binary_image
+
+        """
+        disk = morphology.disk(disk_r, self.data.dtype)
+        s = self.template_match_with_binary_image(
+                disk,
+                lazy_result=lazy_result,
+                show_progressbar=show_progressbar)
+        return s
+
+    def template_match_ring(
+            self, r_inner=5, r_outer=7, lazy_result=True,
+            show_progressbar=True):
+        """Template match the signal dimensions with a ring.
+
+        Used to find diffraction rings in convergent beam electron
+        diffraction data.
+
+        Parameters
+        ----------
+        r_inner, r_outer : scalar, optional
+            Inner and outer radius of the rings.
+        lazy_result : bool, default True
+            If True, will return a LazyPixelatedSTEM object. If False,
+            will compute the result and return a PixelatedSTEM object.
+        show_progressbar : bool, default True
+
+        Returns
+        -------
+        template_match : PixelatedSTEM object
+
+        Examples
+        --------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s_template = s.template_match_ring(show_progressbar=False)
+        >>> s.plot()
+
+        See also
+        --------
+        template_match_disk
+        template_match_with_binary_image
+
+        """
+        if r_outer <= r_inner:
+            raise ValueError(
+                    "r_outer ({0}) must be larger than r_inner ({1})".format(
+                        r_outer, r_inner))
+        edge = r_outer - r_inner
+        edge_slice = np.s_[edge:-edge, edge:-edge]
+
+        ring_inner = morphology.disk(r_inner, dtype=np.bool)
+        ring = morphology.disk(r_outer, dtype=np.bool)
+        ring[edge_slice] = ring[edge_slice] ^ ring_inner
+        s = self.template_match_with_binary_image(
+                ring,
+                lazy_result=lazy_result,
+                show_progressbar=show_progressbar)
+        return s
+
+    def template_match_with_binary_image(
+            self, binary_image, lazy_result=True, show_progressbar=True):
+        """Template match the signal dimensions with a binary image.
+
+        Used to find diffraction disks in convergent beam electron
+        diffraction data.
+
+        Might also work with non-binary images, but this haven't been
+        extensively tested.
+
+        Parameters
+        ----------
+        binary_image : 2-D NumPy array
+        lazy_result : bool, default True
+            If True, will return a LazyPixelatedSTEM object. If False,
+            will compute the result and return a PixelatedSTEM object.
+        show_progressbar : bool, default True
+
+        Returns
+        -------
+        template_match : PixelatedSTEM object
+
+        Examples
+        --------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> binary_image = np.random.randint(0, 2, (6, 6))
+        >>> s_template = s.template_match_with_binary_image(
+        ...     binary_image, show_progressbar=False)
+        >>> s.plot()
+
+        See also
+        --------
+        template_match_disk
+        template_match_ring
+
         """
         if self._lazy:
             dask_array = self.data
@@ -660,7 +758,8 @@ class PixelatedSTEM(Signal2D):
             chunks = [8] * len(self.axes_manager.navigation_shape)
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
-        output_array = dt._template_match_disk(dask_array, disk_r=disk_r)
+        output_array = dt._template_match_with_binary_image(
+                dask_array, binary_image)
         if not lazy_result:
             if show_progressbar:
                 pbar = ProgressBar()
