@@ -44,8 +44,21 @@ from skimage.morphology import square
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
 
-    def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
+    def __init__(self,S):
+        """
+        Create an ElectronDiffraction object from either a Signal2D a numpy.ndarray.
+
+        Parameters
+        ----------
+        S : np.ndarray or Signal2D
+            If a Signal2D is given the metadata is also imported.
+        """
+        try:
+            meta_dict = S.metadata.as_dictionary()
+            Signal2D.__init__(self,S,metadata=meta_dict)
+        except AttributeError:
+            Signal2D.__init__(self,S)
+
         # Set default attributes
         if 'Acquisition_instrument' in self.metadata.as_dictionary():
             if 'SEM' in self.metadata.as_dictionary()['Acquisition_instrument']:
