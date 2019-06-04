@@ -51,8 +51,21 @@ sigdic = {'electron_diffraction':ElectronDiffraction}
 def load(filename):
     """
     An extremely thin wrapper around hyperspy's load function
+
+    Parameters
+    ----------
+    filename : str
+        A single filename of a previously saved pyxem object. Other arguments may
+        succeed, but will have fallen back on hyperspy load and warn accordingly
+    *args :
+        args to be passed to hyperspy's load function
+    **kwargs :
+        kwargs to be passed to hyperspy's load function
     """
     s = hsload(filename)
+    if isinstance(filename,str) == False:
+        warnings.warn("filename is not a single string, for clarity consider using hs.load()")
+        return s
     try:
         s = sigdic[s.metadata.Signal.signal_type](s)
     except KeyError:

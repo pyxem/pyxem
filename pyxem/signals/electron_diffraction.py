@@ -50,8 +50,11 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        S : np.ndarray or Signal2D
-            If a Signal2D is given the metadata is also imported.
+        *args :
+            Passed to the __init__ of Signal2D. The first arg should be
+            either a numpy.ndarray or a Signal2D
+        **kwargs :
+            Passed to the __init__ of Signal2D
         """
         try:
             meta_dict = args[0].metadata.as_dictionary()
