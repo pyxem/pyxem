@@ -75,7 +75,9 @@ def diffraction_pattern(request):
     """A simple, multiuse diffraction pattern, with dimensions:
     ElectronDiffraction <2,2|8,8>
     """
-    return ElectronDiffraction(request.param)
+    dp = ElectronDiffraction(request.param)
+    dp.metadata.Signal.found_from = 'conftest' #dummy metadata
+    return dp
 
 @pytest.fixture
 def diffraction_profile(diffraction_pattern):
