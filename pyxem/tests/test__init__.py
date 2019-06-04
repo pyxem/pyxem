@@ -21,8 +21,16 @@ import numpy as np
 import pyxem as pxm
 import os
 
+from hyperspy.signals import Signal2D
 
-
+@pytest.fixture()
+def make_saved_Signal2D():
+    z = np.zeros((2,2,2,2))
+    s = Signal2D(z)
+    s.metadata.Signal.tracker = 'make_save_Signal2D'
+    s.save('S2D_temp')
+    yield
+    os.remove('S2D_temp.hspy')
 
 @pytest.fixture()
 def make_saved_dp(diffraction_pattern):
@@ -35,11 +43,23 @@ def make_saved_dp(diffraction_pattern):
     yield
     os.remove('dp_temp.hspy')
 
+@pytest.mark.filterwarnings('ignore::UserWarning') #this warning is by design (A)
+def test_load_Signal2D(make_saved_Signal2D):
+    """
+    This tests that we can load a Signal2D with pxm.load and that we can cast
+    safetly into ElectronDiffraction
+    """
+    s = pxm.load('S2D_temp.hspy') #(A)
+    assert s.metadata.Signal.tracker == 'make_save_Signal2D'
+    dp = pxm.ElectronDiffraction(s)
+    assert dp.metadata.Signal.signal_type == 'electron_diffraction'
+    assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
+
 def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
     """
-    This tests that our load function keeps .data, metadata and instance
+    This tests that our load function keeps .data, instance and metadata
     """
     dp = pxm.load('dp_temp.hspy')
     assert np.allclose(dp.data,diffraction_pattern.data)
     assert isinstance(dp, pxm.ElectronDiffraction)
-    assert diffraction_pattern.metadata == dp.metadata
+    assert diffraction_pattern.metadata.Signal.found_from == dp.metadata.Signal.found_from
