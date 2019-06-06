@@ -63,7 +63,7 @@ class ElectronDiffraction(Signal2D):
             pass #this is because a numpy array has been passed
         except IndexError:
             pass #this means that map continues to work.
-        Signal2D.__init__(self,*args,**kwargs)
+        super().__init__(*args,**kwargs)
 
         # Set default attributes
         if 'Acquisition_instrument' in self.metadata.as_dictionary():
