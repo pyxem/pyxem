@@ -403,7 +403,9 @@ class CalibrationGenerator():
                                         [sin(theta), cos(theta), 0],
                                         [0, 0, 1]])
             correction_matrix = np.matmul(rotation_matrix, self.affine_matrix)
-
+        # Set the correction matrix attribute
+        self.correction_matrix = correction_matrix
+        # Return the correction matrix
         return correction_matrix
 
     def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
