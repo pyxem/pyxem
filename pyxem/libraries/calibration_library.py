@@ -18,7 +18,7 @@
 
 import pickle
 import numpy as np
-from pyxem import stack_method
+from hyperspy.misc.utils import stack as stack_method
 
 
 class CalibrationDataLibrary(dict):

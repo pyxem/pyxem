@@ -80,27 +80,5 @@ def test_match_results():
     assert match_results.inav[0, 1].data[0][1][0] == 2
     assert match_results.inav[1, 1].data[0][1][0] == 3
 
-
-def test_visuals():
-    # This functions will need to abuse globals.
-    # & Can be removed if we trust the other tests
-    from pyxem.utils.sim_utils import peaks_from_best_template
-    from pyxem.utils.plot import generate_marker_inputs_from_peaks
-    import hyperspy.api as hs
-
-    peaks = match_results.map(peaks_from_best_template,
-                              library=library,
-                              inplace=False)
-    mmx, mmy = generate_marker_inputs_from_peaks(peaks)
-    dp.set_diffraction_calibration(2 / 144)
-    dp.plot(cmap='viridis')
-    for mx, my in zip(mmx, mmy):
-        m = hs.markers.point(x=mx, y=my, color='red', marker='x')
-        dp.add_marker(m, plot_marker=True, permanent=True)
-
-    # Hand checking again
-    assert True
-
-
 def test_plot_best_matching_results_on_signal():
     match_results.plot_best_matching_results_on_signal(dp, library=library)

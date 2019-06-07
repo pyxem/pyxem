@@ -35,8 +35,9 @@ def default_structure():
     return hexagonal_structure
 
 
-@pytest.fixture(params=[
-    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
+@pytest.fixture
+def z():
+    return np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 1., 0., 0., 0., 0.],
                [0., 0., 1., 2., 1., 0., 0., 0.],
@@ -68,14 +69,15 @@ def default_structure():
                [0., 0., 0., 0., 2., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
-])
 
-
-def diffraction_pattern(request):
+@pytest.fixture
+def diffraction_pattern(z):
     """A simple, multiuse diffraction pattern, with dimensions:
     ElectronDiffraction <2,2|8,8>
     """
-    return ElectronDiffraction(request.param)
+    dp = ElectronDiffraction(z)
+    dp.metadata.Signal.found_from = 'conftest' #dummy metadata
+    return dp
 
 @pytest.fixture
 def diffraction_profile(diffraction_pattern):
