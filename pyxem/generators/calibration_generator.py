@@ -30,7 +30,7 @@ from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion, \
-                                          generate_ring_pattern
+                                          generate_ring_pattern, angle_between
 
 
 class CalibrationGenerator():
@@ -336,37 +336,75 @@ class CalibrationGenerator():
 
         return x[0]
 
-    def get_rotation_calibration(self):
+    def get_rotation_calibration(self, real_line_roi, reciprocal_line_roi):
         """Determine the rotation between real and reciprocal space coordinates.
 
         Parameters
         ----------
+        real_line_roi : Line2DROI
+            Line2DROI object drawn along known direction in real space.
+        reciprocal_line_roi : Line2DROI
+            Line2DROI object drawn along known direction in reciprocal space.
 
         Returns
         -------
         rot_cal : float
             Rotation angle in degrees.
         """
-        # Check that necessary calibration data is provided
-        if self.calibration_data.moo3_dp is None:
-            raise ValueError("This method requires an MoO3 diffraction pattern "
-                             "to be provided. Please update the "
-                             "CalibrationDataLibrary.")
-        if self.calibration_data.moo3_im is None:
-            raise ValueError("This method requires an MoO3 image to be "
-                             "provided. Please update the "
-                             "CalibrationDataLibrary.")
-        # Determine rotation angle between 
-        rot_cal = angle_between(reciprocal_cart_vector1, real_cart_vector1)
+        # Calculate real space vector from line roi
+        rx1 = real_line_roi.x1
+        rx2 = real_line_roi.x2
+        ry1 = real_line_roi.y1
+        ry2 = real_line_roi.y2
+        real_vector = np.array([rx1-rx2, ry1-ry2])
+        # Calculate reciprocal space vector from line roi
+        kx1 = reciprocal_line_roi.x1
+        kx2 = reciprocal_line_roi.x2
+        ky1 = reciprocal_line_roi.y1
+        ky2 = reciprocal_line_roi.y2
+        reciprocal_vector = np.array([kx1-kx2, ky1-ky2])
+        # Determine rotation angle between
+        rot_cal = angle_between(reciprocal_vector, real_vector)
         # Store rotation angle calibration as attribute
         self.rotation_angle = rot_cal
-
+        # Return rotation angle calibration
         return rot_cal
 
     def get_correction_matrix(self):
-        """
-        """
+        """Determine the transformation matrix required to correct for
+        diffraction pattern distortions and/or rotation between real and
+        reciprocal space coordinates.
 
+        Returns
+        -------
+        correction_matrix : np.array()
+            Array defining the affine transformation that corrects for lens
+            distortions in the diffraction pattern.
+
+        """
+        if self.affine_matrix is None and self.rotation_angle is None:
+            raise ValueError("This method requires either an affine matrix to "
+                             "correct distortion or a rotation angle between "
+                             "real and reciprocal space to have been "
+                             "determined. Please determine these parameters.")
+        # Only distortion correction case
+        elif self.rotation_angle is None:
+            correction_matrix = affine_matrix
+        # Only rotation correction case
+        elif self.affine_matrix is None:
+            theta = self.rotation_angle
+            correction_matrix = np.array([[cos(theta), -sin(theta), 0],
+                                          [sin(theta), cos(theta), 0],
+                                          [0, 0, 1]])
+        # Otherwise both corrections required, distortion applied first
+        else:
+            theta = self.rotation_angle
+            rotation_matrix = np.array([[cos(theta), -sin(theta), 0],
+                                        [sin(theta), cos(theta), 0],
+                                        [0, 0, 1]])
+            correction_matrix = np.matmul(rotation_matrix, self.affine_matrix)
+
+        return correction_matrix
 
     def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
         """ Plot calibrated data for visual inspection.

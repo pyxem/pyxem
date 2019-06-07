@@ -47,10 +47,10 @@ class TestPlotData:
     def test_plot_au_x_grating_im(self, library):
         library.plot_calibration_data(data_to_plot='au_x_grating_im')
 
-    def test_plot_au_x_grating_dp(self, library):
+    def test_plot_moo3_dp(self, library):
         library.plot_calibration_data(data_to_plot='moo3_dp')
 
-    def test_plot_au_x_grating_im(self, library):
+    def test_plot_moo3_im(self, library):
         library.plot_calibration_data(data_to_plot='moo3_im')
 
     @pytest.mark.xfail(raises=ValueError)
