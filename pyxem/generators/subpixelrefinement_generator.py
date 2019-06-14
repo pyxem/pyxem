@@ -245,16 +245,16 @@ class SubpixelrefinementGenerator():
             (x,y) : tuple
                 Containing subpixel resolved values for the center
             """
-                si = np.unravel_index(np.argmax(z),z.shape)
-                z_ref = z[si[0]-1:si[0]+2,si[1]-1:si[1]+2]
-                if z_ref.shape != (3,3):
-                    raise ValueError("The local maxima needs to have 4 adjacent pixels")
-                M = z_ref[1,1]
-                LX,RX = z_ref[1,0],z_ref[1,2]
-                UY,DY = z_ref[0,1],z_ref[2,1]
-                x_ans = 0.5 * (LX-RX) / (LX + RX - 2*M)
-                y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
-                return (si[1]+x_ans,si[0]+y_ans)
+            si = np.unravel_index(np.argmax(z),z.shape)
+            z_ref = z[si[0]-1:si[0]+2,si[1]-1:si[1]+2]
+            if z_ref.shape != (3,3):
+                raise ValueError("The local maxima needs to have 4 adjacent pixels")
+            M = z_ref[1,1]
+            LX,RX = z_ref[1,0],z_ref[1,2]
+            UY,DY = z_ref[0,1],z_ref[2,1]
+            x_ans = 0.5 * (LX-RX) / (LX + RX - 2*M)
+            y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
+            return (si[1]+x_ans,si[0]+y_ans)
 
         def _lg_map(dp, vectors, square_size, center, calibration):
             shifts = np.zeros_like(vectors, dtype=np.float64)
