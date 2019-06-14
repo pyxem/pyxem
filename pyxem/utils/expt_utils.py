@@ -198,7 +198,8 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
     return z_bar
 
-def convert_affine_to_transform(D,shape):
+
+def convert_affine_to_transform(D, shape):
     """ Converts an affine transform on a diffraction pattern to a suitable
     form for skimage.transform.warp()
 
@@ -213,8 +214,8 @@ def convert_affine_to_transform(D,shape):
     -------
     transformation : np.array
         3x3 numpy array of the transformation to be applied.
-    
-    """    
+
+    """
 
     shift_x = (shape[1] - 1) / 2
     shift_y = (shape[0] - 1) / 2
@@ -232,7 +233,7 @@ def convert_affine_to_transform(D,shape):
     return transformation
 
 
-def apply_transformation(z, transformation,keep_dtype,order=1,*args, **kwargs):
+def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs):
     """Apply a transformation to a 2-dimensional array.
 
     Parameters
@@ -261,11 +262,11 @@ def apply_transformation(z, transformation,keep_dtype,order=1,*args, **kwargs):
     """
     if keep_dtype == False:
         trans = tf.warp(z, transformation,
-                    order=order, *args, **kwargs)
+                        order=order, *args, **kwargs)
     if keep_dtype == True:
-            trans = tf.warp(z, transformation,
-                        order=order,preserve_range=True, *args, **kwargs)
-            trans = trans.astype(z.dtype)
+        trans = tf.warp(z, transformation,
+                        order=order, preserve_range=True, *args, **kwargs)
+        trans = trans.astype(z.dtype)
 
     return trans
 

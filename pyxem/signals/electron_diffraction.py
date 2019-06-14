@@ -29,7 +29,7 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead,\
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
-    peaks_as_gvectors,convert_affine_to_transform,apply_transformation
+    peaks_as_gvectors, convert_affine_to_transform, apply_transformation
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -44,7 +44,7 @@ from skimage.morphology import square
 class ElectronDiffraction(Signal2D):
     _signal_type = "electron_diffraction"
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Create an ElectronDiffraction object from either a Signal2D a numpy.ndarray.
 
@@ -58,12 +58,12 @@ class ElectronDiffraction(Signal2D):
         """
         try:
             meta_dict = args[0].metadata.as_dictionary()
-            kwargs.update({'metadata':meta_dict})
+            kwargs.update({'metadata': meta_dict})
         except AttributeError:
-            pass #this is because a numpy array has been passed
+            pass  # this is because a numpy array has been passed
         except IndexError:
-            pass #this means that map continues to work.
-        super().__init__(*args,**kwargs)
+            pass  # this means that map continues to work.
+        super().__init__(*args, **kwargs)
 
         # Set default attributes
         if 'Acquisition_instrument' in self.metadata.as_dictionary():
@@ -306,9 +306,9 @@ class ElectronDiffraction(Signal2D):
 
         shape = self.axes_manager.signal_shape
         if type(D) == np.ndarray:
-            transformation = convert_affine_to_transform(D,shape)
+            transformation = convert_affine_to_transform(D, shape)
         else:
-            transformation = D.map(convert_affine_to_transform,shape=shape,inplace=False)
+            transformation = D.map(convert_affine_to_transform, shape=shape, inplace=False)
 
         return self.map(apply_transformation,
                         transformation=transformation,

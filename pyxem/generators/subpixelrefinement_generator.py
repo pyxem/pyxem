@@ -74,10 +74,10 @@ class SubpixelrefinementGenerator():
         else:
             self.vector_pixels = _floor(vectors, self.calibration, self.center)
 
-        if isinstance(self.vector_pixels,DiffractionVectors):
+        if isinstance(self.vector_pixels, DiffractionVectors):
             if np.any(self.vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels.data < 0)):
                 raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
-        elif isinstance(self.vector_pixels,np.ndarray):
+        elif isinstance(self.vector_pixels, np.ndarray):
             if np.any((self.vector_pixels > np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels < 0)):
                 raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
 
@@ -206,7 +206,7 @@ class SubpixelrefinementGenerator():
         self.last_method = "center_of_mass_method"
         return self.vectors_out
 
-    def local_gaussian_method(self,square_size):
+    def local_gaussian_method(self, square_size):
         """ Refinement based on the mathematics of a local maxima on a
         continious region, using the (discrete) maxima pixel as a starting point.
         See Notes.
@@ -256,7 +256,7 @@ class SubpixelrefinementGenerator():
                 y_ans = 0.5 * (UY-DY) / (UY + DY - 2*M)
                 return (si[1]+x_ans,si[0]+y_ans)
 
-        def _lg_map(dp, vectors,square_size,center,calibration):
+        def _lg_map(dp, vectors, square_size, center, calibration):
             shifts = np.zeros_like(vectors, dtype=np.float64)
             for i, vector in enumerate(vectors):
                 expt_disc = get_experimental_square(dp, vector, square_size)
@@ -264,12 +264,12 @@ class SubpixelrefinementGenerator():
             return (((vectors + shifts) - center) * calibration)
 
         self.vectors_out = DiffractionVectors(
-        self.dp.map(_lg_map,
-                    vectors=self.vector_pixels,
-                    square_size = square_size,
-                    center=self.center,
-                    calibration=self.calibration,
-                    inplace=False))
+            self.dp.map(_lg_map,
+                        vectors=self.vector_pixels,
+                        square_size=square_size,
+                        center=self.center,
+                        calibration=self.calibration,
+                        inplace=False))
 
         self.vectors_out.axes_manager.set_signal_dimension(0)
         self.last_method = "lg_method"

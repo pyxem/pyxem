@@ -57,7 +57,7 @@ class CalibrationDataLibrary(dict):
             data = self.au_x_grating_im
         else:
             raise ValueError("Please specify valid data_to_plot.")
-        #Plot the data
+        # Plot the data
         data.plot(*args, **kwargs)
         if roi:
             roi.add_widget(data, axes=data.axes_manager.signal_axes)
