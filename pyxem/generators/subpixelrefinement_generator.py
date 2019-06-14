@@ -225,26 +225,26 @@ class SubpixelrefinementGenerator():
 
         Notes
         -----
-        This method works by first locating the maximum intenisty value within teh square.
+        This method works by first locating the maximum intenisty value within the square.
         The four adjacent pixels are then considered and used to form two independant
         quadratic equations. Solving these gives the x_center and y_center coordinates,
         which are then returned.
         """
 
         def _new_lg_idea(z):
-                """ Internal function providing the algebra for the local_gaussian_method,
-                see docstring of that function for details
+            """ Internal function providing the algebra for the local_gaussian_method,
+            see docstring of that function for details
 
-                Parameters
-                ----------
-                z : np.array
-                    subsquare containing the peak to be localised
+            Parameters
+            ----------
+            z : np.array
+                subsquare containing the peak to be localised
 
-                Returns
-                -------
-                (x,y) : tuple
-                    Containing subpixel resolved values for the center
-                """
+            Returns
+            -------
+            (x,y) : tuple
+                Containing subpixel resolved values for the center
+            """
                 si = np.unravel_index(np.argmax(z),z.shape)
                 z_ref = z[si[0]-1:si[0]+2,si[1]-1:si[1]+2]
                 if z_ref.shape != (3,3):

@@ -47,7 +47,7 @@ def test_get_library_entry_assertionless(get_library):
                       DiffractionSimulation)
 
 
-def test_get_library_small_offeset(get_library):
+def test_get_library_small_offset(get_library):
     alpha = get_library.get_library_entry(phase='Phase',
                                           angle=(0, 0, 0))['intensities']
     beta = get_library.get_library_entry(phase='Phase',

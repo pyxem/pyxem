@@ -322,10 +322,15 @@ class CrystallographicMap(BaseSignal):
 
         Columns:
         1 = phase id,
-        2-4 = Euler angles in the zxz convention (radians),
+        2-4 = Euler angles in the zxz convention (degrees),
         5 = Correlation score (only the best match is saved),
         6 = x co-ord in navigation space,
         7 = y co-ord in navigation space.
+
+        Parameters
+        ----------
+        filename : string
+            Name of file to save the crystal map to
         """
         x_size_nav = self.data.shape[1]
         y_size_nav = self.data.shape[0]

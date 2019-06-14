@@ -358,6 +358,11 @@ def simulate_rotated_structure(diffraction_generator, structure, rotation_matrix
         The maximum g-vector magnitude to be included in the simulations.
     with_direct_beam : bool
         Include the direct beam peak
+
+    Returns
+    -------
+    simulation : DiffractionSimulation
+        The simulation data generated from the given structure and rotation.
     """
     lattice_rotated = diffpy.structure.lattice.Lattice(
         *structure.lattice.abcABG(),
@@ -593,8 +598,6 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
         The three corners of the inverse pole figure, each given by a
         three-dimensional coordinate. The coordinate system is given by the
         structure lattice.
-    resolution : float
-        Angular resolution in radians of the generated rotation list.
     inplane_rotations : list
         List of angles in radians for in-plane rotation of the diffraction
         pattern. This corresponds to the third Euler angle rotation. The
@@ -603,6 +606,8 @@ def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
         rotations in the rotation list, it becomes too large.
 
         To cover all inplane rotations, use e.g. np.linspace(0, 2*np.pi, 360).
+    resolution : float
+        Angular resolution in radians of the generated rotation list.
 
     Returns
     -------
