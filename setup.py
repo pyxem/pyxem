@@ -47,7 +47,7 @@ setup(
     packages=find_packages(),
     # adjust the tabbing
     install_requires=[
-    	'scikit-image == 0.14.3', # See pyxem/pull/378
+    	'scikit-image == 0.14.2', # See pyxem/pull/378
       'matplotlib < 3.1.0' , # See pyxem/pull/403
       'scikit-learn >= 0.19', # bug unknown
      	'hyperspy >= 1.3',      # 1.2 fails, (NTU Workshop - May 2019) 
