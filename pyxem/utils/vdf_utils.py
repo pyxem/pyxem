@@ -200,7 +200,7 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     # Create a mask from the input VDF image.
     mask = vdf_temp.astype('bool')
     if np.any(np.nonzero(mask)) is False:
-        print('All VDF intensities are below 0, so no segments were found.\n')
+        #print('All VDF intensities are below 0, so no segments were found.\n')
         return None
 
     # Calculate the eucledian distance from each point in the mask to the
@@ -262,8 +262,8 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     # (labels) in the area defined by mask.
     labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
 
-    if not np.max(labels):
-        print('No segments were found. Check input parameters.\n')
+    #if not np.max(labels):
+        #print('No segments were found. Check input parameters.\n')
 
     sep = np.zeros((np.shape(vdf_temp)[0], np.shape(vdf_temp)[1],
                     (np.max(labels))), dtype='int32')
@@ -711,7 +711,7 @@ def get_vdf_background(signal, unique_vectors, radius, bg, std=None,
 
     # The background value for each VDF is then given by the magnitude
     # of the corresponding diffraction vector.
-    axis = np.arange(len(bg) + 1) * scale
+    axis = np.arange(len(bg)) * scale
     bkg_values = np.array(
         list(map(lambda a: bkg_1d[(np.abs(axis - a)).argmin()], gmags)))
     bkg_values = bkg_values.astype('int')

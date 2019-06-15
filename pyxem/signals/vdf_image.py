@@ -233,12 +233,12 @@ class VDFSegment:
             As input, except that segments might have been removed after
             thresholds based on min intensity and/or number of vectors.
         """
-        # TODO: Must check this function, as something goes wrong!
         if min_intensity_threshold is None and vector_number_threshold is None:
             raise ValueError("Specify input threshold.")
 
         image_stack = self.segments.data.copy()
         vectors = self.vectors_of_segments.data.copy()
+        intensities = self.intensities.copy()
 
         if min_intensity_threshold is not None:
             n = 0
@@ -246,25 +246,27 @@ class VDFSegment:
                 if np.max(image_stack[n]) < min_intensity_threshold:
                     image_stack = np.delete(image_stack, n, axis=0)
                     vectors = np.delete(vectors, n, axis=0)
+                    intensities = np.delete(intensities, n, axis=0)
                 else:
-                    n = n+1
+                    n = n + 1
 
         if vector_number_threshold is not None:
             n = 0
             while np.shape(image_stack)[0] > n:
                 if len(np.shape(vectors[n])) == 2 and \
                         np.shape(vectors[n])[0] >= vector_number_threshold:
-                    n = n+1
+                    n = n + 1
                 else:
                     image_stack = np.delete(image_stack, n, axis=0)
                     vectors = np.delete(vectors, n, axis=0)
+                    intensities = np.delete(intensities, n, axis=0)
 
         if not np.any(image_stack):
             print('No segments left. Check the input thresholds.')
             return 0
 
         vdfseg = VDFSegment(Signal2D(image_stack), DiffractionVectors(vectors),
-                            self.intensities)
+                            intensities)
         # Transfer axes properties of segments
         vdfseg.segments = transfer_signal_axes(vdfseg.segments, self.segments)
         n = vdfseg.segments.axes_manager.navigation_axes[0]
