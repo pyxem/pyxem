@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import distance_transform_edt, label, center_of_mass
 from scipy.spatial import distance_matrix
 
-from skimage.feature import peak_local_max, match_template
+from skimage.feature import peak_local_max
 from skimage.filters import sobel
 from skimage.morphology import watershed
 
@@ -50,7 +50,7 @@ def normalize_vdf(im):
 
 def norm_cross_corr(image, template):
     """Calculates the normalised cross-correlation between an image
-    and a template using match_template from skimage.feature.
+    and a template at zero displacement.
 
     Parameters
     ----------
@@ -58,22 +58,14 @@ def norm_cross_corr(image, template):
         Image
     template: np.array
         Reference image
-        
+
     Returns
     -------
     corr : float
-        Normalised cross-correlation between image and template at zero
-        displacement.
+        Normalised cross-correlation between image and template.
     """
-    # If image and template are alike, 1 will be returned directly.
-    if np.array_equal(image, template):
-        corr = 1.
-    else: 
-        # Return only the value in the middle, i.e. at zero displacement
-        corr = match_template(
-            image=image, template=template, pad_input=True, mode='constant',
-            constant_values=0)[int(np.shape(image)[0]/2),
-                               int(np.shape(image)[1]/2)]
+    f, t = image - np.average(image), template - np.average(template)
+    corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
 
     return corr
 
