@@ -23,7 +23,13 @@ from pyxem.signals import push_metadata_through
 
 import numpy as np
 from tqdm import tqdm
+
+import matplotlib.pyplot as plt
+from matplotlib.cm import get_cmap
+from matplotlib.colors import ListedColormap
+
 from hyperspy.signals import Signal2D, BaseSignal
+
 from pyxem.utils.vdf_utils import (norm_cross_corr, get_vectors_and_indices_i,
                                    get_gaussian2d, get_circular_mask)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
@@ -417,3 +423,66 @@ class VDFSegment:
             separated_signals.append(ElectronDiffraction(signal_j))
 
         return separated_signals
+
+    def plot_all_segments(self, ved=None, image_to_plot_segments_on=None,
+                          image_to_plot_ved_on=None):
+        """Plot all segments in one figure, where each segment has a
+        distinct color. Optionally also plot the virtual electron
+        diffraction signal with colors corresponding to those of the
+        segments. The colors are uniformly distributed within the
+        matplotlib colormap 'gist_rainbow'.
+
+        Parameters
+        ----------
+        ved : ElectronDiffraction
+            Electron diffraction signal that is the virtual electron
+            diffraction signal corresponding to the VDF segments.
+        image_to_plot_segments_on : np.array
+            If provided, the segments will be plotted on top of this
+            image.
+        image_to_plot_ved_on : np.array
+            If provided, ved will be plotted on top of this image.
+        Returns
+        -------
+        None
+        """
+        cmap = get_cmap('gist_rainbow')
+        N = 256
+        nu = self.axes_manager.navigation_size
+        step = N / (nu + 2)
+        steps = np.arange(step, step * (nu + 1), step) / N
+
+        plt.figure()
+        if image_to_plot_segments_on is not None:
+            plt.imshow(image_to_plot_segments_on, cmap='gray', alpha=0.9)
+        for i in np.arange(nu):
+            a = cmap(steps[i])
+            vals = np.zeros((N, 4))
+            vals[:, 0] += a[0]
+            vals[:, 1] += a[1]
+            vals[:, 2] += a[2]
+            vals[:, 3] = np.linspace(0., 1., N)
+            cmap_i = ListedColormap(vals)
+            plt.imshow(self.inav[i].data / self.inav[i].data.max(),
+                       cmap=cmap_i)
+        plt.title('Segments')
+        plt.show()
+
+        if ved is not None:
+            plt.figure()
+            if image_to_plot_ved_on is not None:
+                plt.imshow(image_to_plot_ved_on, cmap='gray', alpha=0.9)
+            for i in np.arange(nu):
+                a = cmap(steps[i])
+                vals = np.zeros((N, 4))
+                vals[:, 0] += a[0]
+                vals[:, 1] += a[1]
+                vals[:, 2] += a[2]
+                vals[:, 3] = np.linspace(0., 1., N)
+                cmap_i = ListedColormap(vals)
+                plt.imshow(ved.inav[i].data / ved.inav[i].data.max(),
+                           cmap=cmap_i)
+            plt.title('Virtual signal')
+            plt.show()
+
+        return None
