@@ -34,12 +34,14 @@ def input_parameters():
     x0 = [95, 1200, 2.8, 450, 1.5, 10]
     return x0
 
+
 @pytest.fixture
 def affine_answer():
     a = np.asarray([[1.06651526, 0.10258988, 0.],
                     [0.10258988, 1.15822961, 0.],
                     [0.        , 0.        , 1.]])
     return a
+
 
 @pytest.fixture
 def ring_pattern(input_parameters):
@@ -56,28 +58,31 @@ def ring_pattern(input_parameters):
 
     return ElectronDiffraction(ring_data)
 
+
 @pytest.fixture
 def calibration_library(request, ring_pattern):
     #  Create a dummy X-grating image
-    data = np.zeros((200,200))
-    data[:,10:20] = 100
-    data[:,30:40] = 50
-    data[:,150:160] = 50
-    data[:,170:180] = 100
+    data = np.zeros((200, 200))
+    data[:, 10:20] = 100
+    data[:, 30:40] = 50
+    data[:, 150:160] = 50
+    data[:, 170:180] = 100
     im = Signal2D(data)
     return CalibrationDataLibrary(au_x_grating_dp=ring_pattern,
                                   au_x_grating_im=im)
 
+
 @pytest.fixture
 def calgen(request, calibration_library):
     return CalibrationGenerator(calibration_data=calibration_library)
+
 
 @pytest.fixture
 def cal_dist(request, calgen):
     calgen.get_elliptical_distortion(mask_radius=10,
                                      direct_beam_amplitude=450,
                                      scale=95, amplitude=1200,
-                                     asymmetry=1.5,spread=2.8, rotation=10)
+                                     asymmetry=1.5, spread=2.8, rotation=10)
     return calgen
 
 
@@ -107,7 +112,7 @@ class TestCalibrationGenerator:
 
     def test_get_navigation_calibration(self, calgen):
         line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        value = calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
+        value = calgen.get_navigation_calibration(line_roi=line, x1=12., x2=172.,
                                                   n=1, xspace=500.)
         np.testing.assert_almost_equal(calgen.navigation_calibration,
                                        value)
@@ -119,7 +124,7 @@ class TestCalibrationGenerator:
 
     def test_plot_calibrated_data_im(self, calgen):
         line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
+        calgen.get_navigation_calibration(line_roi=line, x1=12., x2=172.,
                                           n=1, xspace=500.)
         calgen.plot_calibrated_data(data_to_plot='au_x_grating_im')
 
@@ -127,6 +132,7 @@ class TestCalibrationGenerator:
 @pytest.fixture
 def empty_calibration_library(request):
     return CalibrationDataLibrary()
+
 
 @pytest.fixture
 def empty_calgen(request, empty_calibration_library):
@@ -141,7 +147,7 @@ class TestEmptyCalibrationGenerator:
         empty_calgen.get_elliptical_distortion(mask_radius=10,
                                                direct_beam_amplitude=450,
                                                scale=95, amplitude=1200,
-                                               asymmetry=1.5,spread=2.8,
+                                               asymmetry=1.5, spread=2.8,
                                                rotation=10)
 
     def test_get_distortion_residuals_no_data(self, empty_calgen):
@@ -166,5 +172,5 @@ class TestEmptyCalibrationGenerator:
 
     def test_get_navigation_calibration_no_data(self, empty_calgen):
         line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        empty_calgen.get_navigation_calibration(line_roi=line, x1=12.,x2=172.,
+        empty_calgen.get_navigation_calibration(line_roi=line, x1=12., x2=172.,
                                                 n=1, xspace=500.)

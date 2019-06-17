@@ -80,5 +80,6 @@ def test_match_results():
     assert match_results.inav[0, 1].data[0][1][0] == 2
     assert match_results.inav[1, 1].data[0][1][0] == 3
 
+
 def test_plot_best_matching_results_on_signal():
     match_results.plot_best_matching_results_on_signal(dp, library=library)

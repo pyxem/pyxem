@@ -198,7 +198,7 @@ class DiffractionVectors(BaseSignal):
             A DiffractionVectors object containing only the unique diffraction
             vectors in the original object.
         """
-        if (self.axes_manager.navigation_dimension == 2):
+        if self.axes_manager.navigation_dimension == 2:
             gvlist = np.array([self.data[0, 0][0]])
         else:
             raise ValueError("This method only works for ragged vector maps!")

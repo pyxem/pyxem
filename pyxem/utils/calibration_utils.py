@@ -18,6 +18,7 @@
 
 import numpy as np
 
+
 def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
     """ calculate the distance of each 2D point from the center (xc, yc) """
     xp = x * np.cos(rot) - y * np.sin(rot)
@@ -112,6 +113,7 @@ def call_ring_pattern(xcenter, ycenter):
 
         return amplitude * (v0 + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8).ravel()
     return ring_pattern
+
 
 def generate_ring_pattern(image_size, mask=False, mask_radius=10, scale=100,
                           amplitude=1000, spread=2, direct_beam_amplitude=500,
