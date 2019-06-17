@@ -9,6 +9,9 @@ The radius of these rings are proportional to the square root of the size of the
 This guide will show how to extract the size, intensity and width of HOLZ rings.
 These parameters can then be used to infer information about the crystal structure of a crystalline material.
 
+Example of this type of data processing: `Three-dimensional subnanoscale imaging of unit cell doubling due to octahedral tilting and cation modulation in strained perovskite thin films <https://doi.org/10.1103/PhysRevMaterials.3.063605>`_.
+
+
 Loading dataset
 ---------------
 
