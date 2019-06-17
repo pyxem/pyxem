@@ -254,7 +254,7 @@ class SubpixelrefinementGenerator():
             UY, DY = z_ref[0, 1], z_ref[2, 1]
             x_ans = 0.5 * (LX - RX) / (LX + RX - 2 * M)
             y_ans = 0.5 * (UY - DY) / (UY + DY - 2 * M)
-            return x_ans, y_ans
+            return (si[1] - z.shape[1] // 2 + x_ans, si[0] - z.shape[0] // 2 + y_ans)
 
         def _lg_map(dp, vectors, square_size, center, calibration):
             shifts = np.zeros_like(vectors, dtype=np.float64)

@@ -122,7 +122,10 @@ def test_assertioned_com(dp, diffraction_vectors):
 
 
 @pytest.mark.parametrize('dp, diffraction_vectors, refined_vectors', [
-    (create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]), np.array([[55.1 - 64, 25.3 - 64]]))
+    # Refinement within 1 px
+    (create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]), np.array([[55.1 - 64, 25.3 - 64]])),
+    # Refinement to recover from 2 px error in peak finding
+    (create_spot_gaussian(), np.array([[53 - 64, 23 - 64]]), np.array([[55.1 - 64, 25.3 - 64]]))
 ])
 def test_local_gaussian_method(dp, diffraction_vectors, refined_vectors):
     spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
