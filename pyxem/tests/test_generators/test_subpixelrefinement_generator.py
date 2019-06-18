@@ -38,7 +38,16 @@ def create_spot():
         z2[rr2, cc2] = c
 
     dp = ElectronDiffraction(np.asarray([[z1, z1], [z2, z2]]))  # this needs to be in 2x2
-    print(dp.axes_manager)
+    return dp
+
+
+def create_spot_gaussian():
+    z1 = np.zeros((128, 128))
+
+    x = np.arange(0.0, 10, 1.0)
+    y = x[:, np.newaxis]
+    z1[20:30, 50:60] = np.exp(-((x - 5.1)**2 + (y - 5.3)**2) / 4)
+    dp = ElectronDiffraction(np.asarray([[z1, z1], [z1, z1]]))  # this needs to be in 2x2
     return dp
 
 
@@ -112,25 +121,23 @@ def test_assertioned_com(dp, diffraction_vectors):
     assert rms_error < 1e-5  # perfect detection for this trivial case
 
 
-@pytest.mark.parametrize('dp, diffraction_vectors', [
-    (create_spot(), np.array([[90 - 64, 30 - 64]])),
+@pytest.mark.parametrize('dp, diffraction_vectors, refined_vectors', [
+    # Refinement within 1 px
+    (create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]), np.array([[55.1 - 64, 25.3 - 64]])),
+    # Refinement to recover from 2 px error in peak finding
+    (create_spot_gaussian(), np.array([[53 - 64, 23 - 64]]), np.array([[55.1 - 64, 25.3 - 64]]))
 ])
-def test_local_gaussian_method_dull(dp, diffraction_vectors):
-    """
-    This aims to test that our x/y convention is correct. The peak shape for
-    these tests is unsuitable for this method.
-    """
+def test_local_gaussian_method(dp, diffraction_vectors, refined_vectors):
     spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.local_gaussian_method(8)
-    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
-    assert np.all(error < 5)
+    s = spr.local_gaussian_method(10)
+    np.testing.assert_allclose(s.data[0, 0], refined_vectors, atol=0.1)
+
 
 @pytest.mark.parametrize('dp, diffraction_vectors', [
     (create_spot(), create_vectors())
 ])
-
 @pytest.mark.xfail(raises=ValueError)
-def test_local_gaussian_method_exciting(dp,diffraction_vectors):
+def test_local_gaussian_method_exciting(dp, diffraction_vectors):
     """
     This aims to test that our x/y convention is correct. The peak shape for
     these tests is unsuitable for this method.
