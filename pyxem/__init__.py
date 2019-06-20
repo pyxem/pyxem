@@ -20,7 +20,9 @@ import glob
 import logging
 import os
 import warnings
+
 from hyperspy.io import load as hsload
+from hyperspy.api import roi
 
 import numpy as np
 
