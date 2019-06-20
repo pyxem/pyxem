@@ -18,9 +18,9 @@
 
 import pytest
 import numpy as np
+import pyxem as pxm
 
 from hyperspy.signals import Signal1D, Signal2D
-from hyperspy.roi import CircleROI
 
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
@@ -121,11 +121,11 @@ class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
     def test_plot_interactive_virtual_image(self, diffraction_pattern):
-        roi = CircleROI(3, 3, 5)
+        roi = pxm.roi.CircleROI(3, 3, 5)
         diffraction_pattern.plot_interactive_virtual_image(roi)
 
     def test_get_virtual_image(self, diffraction_pattern):
-        roi = CircleROI(3, 3, 5)
+        roi = pxm.roi.CircleROI(3, 3, 5)
         diffraction_pattern.get_virtual_image(roi)
 
 
