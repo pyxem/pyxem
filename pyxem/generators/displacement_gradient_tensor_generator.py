@@ -23,8 +23,7 @@ Generating DisplacementGradientMaps from diffraction vectors
 import numpy as np
 from pyxem.signals.tensor_field import DisplacementGradientMap
 
-
-def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
+def get_DisplacementGradientMap(strained_vectors, unstrained_vectors,weights=None):
     """Calculates the displacement gradient tensor at each navigation position
     in a map by comparing vectors to determine the 2 x 2 matrix,
     :math:`\\mathbf(L)`, that maps unstrained vectors, Vu, to strained vectors,
@@ -36,12 +35,14 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     Parameters
     ----------
     strained_vectors : hyperspy.Signal2D
-        Signal2D with a 2 x 2 array at each navigation position containing the
+        Signal2D with a 2 x n array at each navigation position containing the
         Cartesian components of two strained basis vectors, V and U, defined as
         row vectors.
     unstrained_vectors : numpy.array
-        A 2 x 2 array containing the Cartesian components of two unstrained
+        A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
+
+    weights :
 
     Returns
     -------
@@ -56,12 +57,12 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     """
     # Calculate displacement gradient tensor across map.
     D = strained_vectors.map(get_single_DisplacementGradientTensor,
-                             Vu=unstrained_vectors, inplace=False)
+                             Vu=unstrained_vectors, weights = weights, inplace=False)
 
     return DisplacementGradientMap(D)
 
 
-def get_single_DisplacementGradientTensor(Vs, Vu=None):
+def get_single_DisplacementGradientTensor(Vs, Vu=None, weights = None):
     """Calculates the displacement gradient tensor from a pairs of vectors by
     determining the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
     vectors, Vu, onto strained vectors, Vs, using the np.lingalg.inv() function
@@ -72,10 +73,10 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None):
     Parameters
     ----------
     Vs : numpy.array
-        A 2 x 2 array containing the Cartesian components of two strained basis
+        A 2 x n array containing the Cartesian components of two strained basis
         vectors, V and U, defined as row vectors.
     Vu : numpy.array
-        A 2 x 2 array containing the Cartesian components of two unstrained
+        A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
 
     Returns
@@ -88,10 +89,21 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None):
     get_DisplacementGradientMap()
 
     """
-    # Take transpose to ensure conventions obeyed.
-    Vs, Vu = Vs.T, Vu.T
-    # Perform matrix multiplication to calculate 2 x 2 L-matrix.
-    L = np.matmul(Vs, np.linalg.inv(Vu))
+    if Vs.shape == (2,2) and Vu.shape ==(2,2):
+        """
+        old clean version
+        """
+        # Take transpose to ensure conventions obeyed.
+        Vs, Vu = Vs.T, Vu.T
+        # Perform matrix multiplication to calculate 2 x 2 L-matrix.
+        L = np.matmul(Vs, np.linalg.inv(Vu))
+    else:
+        if weights is not None:
+            # see https://stackoverflow.com/questions/27128688
+            Vs = np.multiply(Vs.T,np.sqrt(weights)) # transpose for conventions
+            Vu = np.multiply(Vu.T,np.sqrt(weights))
+        L = np.linalg.lstsq(vzero,v)
+
     # Put cacluated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L
