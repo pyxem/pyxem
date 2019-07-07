@@ -23,14 +23,17 @@ from hyperspy.api import markers
 
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
+from sklearn.cluster import DBSCAN
+
+from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
-from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
+
 
 """
 Signal class for diffraction vectors.
@@ -185,48 +188,60 @@ class DiffractionVectors(BaseSignal):
         return ghis
 
     def get_unique_vectors(self, distance_threshold=0):
-        """Obtain the unique diffraction vectors.
+        """Obtain the unique diffraction vectors by clustering (DBSCAN).
 
         Parameters
         ----------
         distance_threshold : float
-            The minimum distance between diffraction vectors for them to
-            be considered unique diffraction vectors.
+            The minimum distance between diffraction vectors for them to be
+            considered unique diffraction vectors.
 
         Returns
         -------
         unique_vectors : DiffractionVectors
-            A DiffractionVectors object containing only the unique
-            diffraction vectors of the original object.
+            A DiffractionVectors object containing only the unique diffraction
+            vectors from the original object.
         """
-        if self.axes_manager.navigation_dimension == 2:
-            gvlist = np.array([self.data[0, 0][0]])
+        # Flatten the array of peaks to reach dimension (n,2), where n
+        # is the number of peaks.
+        peaks_flat = self.data.flat
+        peaks_all = np.concatenate(np.array(list(map(
+            lambda x: peaks_flat[x].ravel(),
+            np.arange(self.axes_manager.navigation_size))))).reshape(-1, 2)
+
+        if distance_threshold == 0:
+            unique_peaks = np.unique(peaks_all, axis=0)
+
         else:
-            raise ValueError("This method only works for ragged vector maps!")
+            # If distance_threshold is specified, all peaks are clustered
+            # so that peaks within one cluster are separated by
+            # distance_threshold or less.
+            unique_vectors, unique_vectors_counts = np.unique(
+                peaks_all, axis=0, return_counts=True)
+            clusters = DBSCAN(eps=distance_threshold, min_samples=1,
+                              metric='euclidean').fit(
+                unique_vectors, sample_weight=unique_vectors_counts)
+            unique_labels, unique_labels_count = np.unique(
+                clusters.labels_, return_counts=True)
+            unique_peaks = np.zeros((unique_labels.max() + 1, 2))
 
-        for i in self._iterate_signal():
-            vlist = i[0]
-            distances = distance_matrix(gvlist, vlist)
-            new_indices = get_indices_from_distance_matrix(distances,
-                                                           distance_threshold)
-            gvlist_new = vlist[new_indices]
-            if gvlist_new.any():
-                gvlist = np.concatenate((gvlist, gvlist_new), axis=0)
-
-        # An internal check, just to be sure.
-        delete_indices = []
-        l = np.shape(gvlist)[0]
-        distances = distance_matrix(gvlist, gvlist)
-        for i in range(np.shape(distances)[1]):
-            if np.sum(distances[:, i] <= distance_threshold) > 1:
-                delete_indices = np.append(delete_indices, i)
-        gvecs = np.delete(gvlist, delete_indices, axis=0)
+            # For each cluster, a center of mass is calculated based on
+            # all the peaks within the cluster, and the stored unique
+            # vector is chosen as the peak closest to the center of mass.
+            for n in np.arange(unique_labels.max() + 1):
+                peaks_n_temp = unique_vectors[clusters.labels_ == n]
+                peaks_n_counts_temp = unique_vectors_counts[
+                    clusters.labels_ == n]
+                com = np.average(peaks_n_temp, weights=peaks_n_counts_temp,
+                                 axis=0)
+                index = distance_matrix([com], peaks_n_temp).argmin()
+                unique_peaks[n] = peaks_n_temp[index]
 
         # Manipulate into DiffractionVectors class
-        unique_vectors = DiffractionVectors(gvecs)
-        unique_vectors.axes_manager.set_signal_dimension(1)
+        unique_peaks = DiffractionVectors(unique_peaks)
+        unique_peaks.axes_manager.set_signal_dimension(1)
 
-        return unique_vectors
+        return unique_peaks
 
     def get_diffracting_pixels_map(self, binary=False):
         """Map of the number of vectors at each navigation position.

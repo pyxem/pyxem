@@ -430,7 +430,8 @@ class VDFSegment:
         distinct color. Optionally also plot the virtual electron
         diffraction signal with colors corresponding to those of the
         segments. The colors are uniformly distributed within the
-        matplotlib colormap 'gist_rainbow'.
+        matplotlib colormap 'gist_rainbow', excluding the lowest and
+        highest values (black and white).
 
         Parameters
         ----------
@@ -448,7 +449,8 @@ class VDFSegment:
         """
         cmap = get_cmap('gist_rainbow')
         N = 256
-        nu = self.axes_manager.navigation_size
+        segs = self.segments
+        nu = segs.axes_manager.navigation_size
         step = N / (nu + 2)
         steps = np.arange(step, step * (nu + 1), step) / N
 
@@ -463,7 +465,7 @@ class VDFSegment:
             vals[:, 2] += a[2]
             vals[:, 3] = np.linspace(0., 1., N)
             cmap_i = ListedColormap(vals)
-            plt.imshow(self.inav[i].data / self.inav[i].data.max(),
+            plt.imshow(segs.inav[i].data / segs.inav[i].data.max(),
                        cmap=cmap_i)
         plt.title('Segments')
         plt.show()
