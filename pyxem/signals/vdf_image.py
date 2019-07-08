@@ -30,8 +30,8 @@ from matplotlib.colors import ListedColormap
 
 from hyperspy.signals import Signal2D, BaseSignal
 
-from pyxem.utils.vdf_utils import (norm_cross_corr, get_vectors_and_indices_i,
-                                   get_gaussian2d, get_circular_mask)
+from pyxem.utils.vdf_utils import (norm_cross_corr, get_gaussian2d,
+                                   get_circular_mask)
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.utils.sim_utils import transfer_signal_axes
@@ -111,7 +111,8 @@ class VDFSegment:
         # Intensities corresponding to each vector
         self.intensities = intensities
 
-    def correlate_segments(self, corr_threshold=0.9):
+    def correlate_segments(self, corr_threshold=0.7, vector_threshold=3,
+                           segment_threshold=2):
         """Iterates through VDF segments and sums those that are
         associated with the same segment. Summation will be done for
         those segments that have a normalised cross correlation above
@@ -126,6 +127,15 @@ class VDFSegment:
         corr_threshold : float
             Segments will be summed if they have a normalized cross-
             correlation above corr_threshold. Must be between 0 and 1.
+        vector_threshold : int, optional
+            Correlated segments having a number of vectors less than
+            vector_threshold will be discarded.
+        segment_threshold : int, optional
+            Correlated segment intensities that lie in a region where
+            a number of segments less than segment_thresholdhave been
+            found, are set to 0, i.e. the resulting segment will only
+            have intensities above 0 where at least a number of
+            segment_threshold segments have intensitives above 0.
 
         Returns
         -------
@@ -138,9 +148,11 @@ class VDFSegment:
             raise ValueError("Input vectors are not of correct shape. Try to "
                              "rerun correlate_segments on original VDFSegment "
                              "resulting from get_vdf_segments.")
+        if segment_threshold > vector_threshold:
+            raise ValueError("segment_threshold must be smaller than or "
+                             "equal to vector_threshold.")
 
-        segments = self.segments.data
-        image_stack = self.segments.data.copy()
+        segments = self.segments.data.copy()
         num_vectors = np.shape(vectors)[0]
         gvectors = np.array(np.empty(num_vectors, dtype=object))
         vector_indices = np.array(np.empty(num_vectors, dtype=object))
@@ -149,65 +161,105 @@ class VDFSegment:
             gvectors[i] = np.array(vectors[i].copy())
             vector_indices[i] = np.array([i], dtype=int)
 
+        correlated_segments = np.zeros_like(segments[:1])
+        correlated_vectors = np.array([0.], dtype=object)
+        correlated_vectors[0] = np.array(np.zeros_like(vectors[:1]))
+        correlated_vector_indices = np.array([0], dtype=object)
+        correlated_vector_indices[0] = np.array([0])
         i = 0
-        pbar = tqdm(total=np.shape(image_stack)[0])
-        while np.shape(image_stack)[0] > i:
+        pbar = tqdm(total=np.shape(segments)[0])
+        while np.shape(segments)[0] > i:
             # For each segment, calculate the normalized cross-correlation to
             # all other segments, and define add_indices for those with a value
             # above corr_threshold.
             corr_list = list(map(
-                lambda x: norm_cross_corr(x, template=image_stack[i]),
-                image_stack))
+                lambda x: norm_cross_corr(x, template=segments[i]),
+                segments))
+
             corr_add = list(map(lambda x: x > corr_threshold, corr_list))
-
             add_indices = np.where(corr_add)
-
-            # If there are more add_indices than 1 (i.e. more segments should be
-            # added than itself), sum segments and add their vectors.
-            if np.shape(add_indices[0])[0] > 1:
-                image_stack[i] = np.sum(
-                    list(map(lambda x: np.sum([x, image_stack[i]], axis=0),
-                             image_stack[add_indices])), axis=0)
+            # If there are more add_indices than vector_threshold,
+            # sum segments and add their vectors. Otherwise, discard segment.
+            if (np.shape(add_indices[0])[0] >= vector_threshold and
+                    np.shape(add_indices[0])[0] > 1):
+                new_segment = np.array([np.sum(segments[add_indices],
+                                               axis=0)])
+                if segment_threshold > 1:
+                    segment_check = np.zeros_like(segments[add_indices],
+                                                  dtype=int)
+                    segment_check[np.where(segments[add_indices])] = 1
+                    segment_check = np.sum(segment_check, axis=0, dtype=int)
+                    segment_mask = np.zeros_like(segments[0], dtype=bool)
+                    segment_mask[
+                        np.where(segment_check >= segment_threshold)] = 1
+                    new_segment = new_segment * segment_mask
+                correlated_segments = np.append(correlated_segments,
+                                                new_segment, axis=0)
                 add_indices = add_indices[0]
-                gvectors[i], vector_indices[i] = get_vectors_and_indices_i(
-                    gvectors[add_indices], gvectors[i],
-                    vector_indices[add_indices],
-                    vector_indices[i])
-
-                # Delete the segment and vectors that were added to other
-                # segments and vectors, except the current one at i.
-                add_indices_noi = np.delete(add_indices,
-                                            np.where(add_indices == i),
-                                            axis=0)
-                image_stack = np.delete(image_stack, add_indices_noi, axis=0)
-                gvectors = np.delete(gvectors, add_indices_noi, axis=0)
-                vector_indices = np.delete(vector_indices, add_indices_noi,
-                                           axis=0)
-
+                new_vectors = np.array([0], dtype=object)
+                new_vectors[0] = np.concatenate(gvectors[add_indices],
+                                                axis=0).reshape(-1, 2)
+                correlated_vectors = np.append(correlated_vectors,
+                                               new_vectors, axis=0)
+                new_indices = np.array([0], dtype=object)
+                new_indices[0] = np.concatenate(vector_indices[add_indices],
+                                                axis=0).reshape(-1, 1)
+                correlated_vector_indices = np.append(correlated_vector_indices,
+                                                      new_indices, axis=0)
+            elif np.shape(add_indices[0])[0] >= vector_threshold:
+                add_indices = add_indices[0]
+                correlated_segments = np.append(correlated_segments,
+                                                segments[add_indices],
+                                                axis=0)
+                correlated_vectors = np.append(correlated_vectors,
+                                               gvectors[add_indices], axis=0)
+                correlated_vector_indices = np.append(correlated_vector_indices,
+                                                      vector_indices[
+                                                          add_indices],
+                                                      axis=0)
             else:
-                add_indices_noi = add_indices
-
-            # Update the iterator value i, after deleting elements.
-            if np.where(add_indices == i) != np.array([0]):
-                i = i + 1 - (np.shape(np.where(add_indices < i))[1])
-            else:
-                i = i + 1
-            pbar.update(np.shape(add_indices_noi)[0])
+                add_indices = i
+            segments = np.delete(segments, add_indices, axis=0)
+            gvectors = np.delete(gvectors, add_indices, axis=0)
+            vector_indices = np.delete(vector_indices, add_indices, axis=0)
 
         pbar.close()
+        correlated_segments = np.delete(correlated_segments, 0, axis=0)
+        correlated_vectors = np.delete(correlated_vectors, 0, axis=0)
+        correlated_vector_indices = np.delete(correlated_vector_indices,
+                                              0, axis=0)
+        correlated_vector_intensities = np.array(
+            np.empty(len(correlated_vectors)),
+            dtype=object)
 
         # Sum the intensities in the original segments and assign those to the
         # correct vectors by referring to vector_indices.
-        segment_intensities = np.sum(segments, axis=(1, 2))
-        gvector_intensities = np.array(np.empty(len(gvectors)), dtype=object)
-        for i in range(len(gvectors)):
-            gvector_intensities[i] = np.zeros(len(vector_indices[i]))
-            for n, index in zip(range(len(vector_indices[i])),
-                                vector_indices[i]):
-                gvector_intensities[i][n] = np.sum(segment_intensities[index])
+        # If segment_mask has been used, use the segments as masks too.
+        if segment_threshold > 1:
+            for i in range(len(correlated_vectors)):
+                correlated_vector_intensities[i] = np.zeros(len(
+                    correlated_vector_indices[i]))
+                segment_mask = np.zeros_like(segment_mask)
+                segment_mask[np.where(correlated_segments[i])] = 1
+                segment_intensities = np.sum(self.segments.data * segment_mask,
+                                             axis=(1, 2))
+                for n, index in zip(range(len(correlated_vector_indices[i])),
+                                    correlated_vector_indices[i]):
+                    correlated_vector_intensities[i][n] = np.sum(
+                        segment_intensities[index])
+        else:
+            segment_intensities = np.sum(self.segments.data, axis=(1, 2))
+            for i in range(len(correlated_vectors)):
+                correlated_vector_intensities[i] = np.zeros(
+                    len(correlated_vector_indices[i]))
+                for n, index in zip(range(len(correlated_vector_indices[i])),
+                                    correlated_vector_indices[i]):
+                    correlated_vector_intensities[i][n] = np.sum(
+                        segment_intensities[index])
 
-        vdfseg = VDFSegment(Signal2D(image_stack), DiffractionVectors(gvectors),
-                            gvector_intensities)
+        vdfseg = VDFSegment(Signal2D(correlated_segments),
+                            DiffractionVectors(correlated_vectors),
+                            correlated_vector_intensities)
 
         # Transfer axes properties of segments
         vdfseg.segments = transfer_signal_axes(vdfseg.segments, self.segments)

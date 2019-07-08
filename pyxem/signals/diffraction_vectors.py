@@ -187,7 +187,7 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
-    def get_unique_vectors(self, distance_threshold=0):
+    def get_unique_vectors(self, distance_threshold=0, min_samples=5):
         """Obtain the unique diffraction vectors by clustering (DBSCAN).
 
         Parameters
@@ -195,6 +195,9 @@ class DiffractionVectors(BaseSignal):
         distance_threshold : float
             The minimum distance between diffraction vectors for them to be
             considered unique diffraction vectors.
+        min_samples : int, optional
+            The minimum number of vectors within one cluster for it to not be
+            considered noise.
 
         Returns
         -------
@@ -218,7 +221,8 @@ class DiffractionVectors(BaseSignal):
             # distance_threshold or less.
             unique_vectors, unique_vectors_counts = np.unique(
                 peaks_all, axis=0, return_counts=True)
-            clusters = DBSCAN(eps=distance_threshold, min_samples=1,
+            clusters = DBSCAN(eps=distance_threshold,
+                              min_samples=min_samples,
                               metric='euclidean').fit(
                 unique_vectors, sample_weight=unique_vectors_counts)
             unique_labels, unique_labels_count = np.unique(
