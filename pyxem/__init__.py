@@ -50,19 +50,19 @@ _logger = logging.getLogger(__name__)
 
 sigdic = {'electron_diffraction':ElectronDiffraction}
 
-def load(filename):
+def load(filename,ElectronDiffraction=True):
     """
-    An extremely thin wrapper around hyperspy's load function
+    A wrapper around hyperspy's load function that enables auto-setting signals to ElectronDiffraction
+    and correct loading of pyxem defined signals
 
     Parameters
     ----------
     filename : str
         A single filename of a previously saved pyxem object. Other arguments may
         succeed, but will have fallen back on hyperspy load and warn accordingly
-    *args :
-        args to be passed to hyperspy's load function
-    **kwargs :
-        kwargs to be passed to hyperspy's load function
+    ElectronDiffraction : bool
+        If the signal is not a pxm saved signal (eg - it's a .blo file), cast to
+        an ElectronDiffraction option
     """
     s = hsload(filename)
     if isinstance(filename,str) == False:
@@ -71,7 +71,10 @@ def load(filename):
     try:
         s = sigdic[s.metadata.Signal.signal_type](s)
     except KeyError:
-        warnings.warn("No pyxem functionality used, for clarity consider using hs.load()")
+        if ElectronDiffraction:
+            s = ElectronDiffraction(s)
+        else:
+            warnings.warn("No pyxem functionality used, for clarity consider using hs.load()")
 
     return s
 
