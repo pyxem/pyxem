@@ -40,6 +40,7 @@ from .signals.diffraction_profile import ElectronDiffractionProfile
 from .signals.electron_diffraction import ElectronDiffraction
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
+from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
 
 from .io_plugins import io_plugins, default_write_ext
@@ -48,15 +49,19 @@ from .io_plugins import mib as mib_reader
 _logger = logging.getLogger(__name__)
 
 
-sigdic = {'electron_diffraction':ElectronDiffraction}
+signal_dictionary = {'electron_diffraction':ElectronDiffraction,
+                     'template_matching':TemplateMatchingResults,
+                     'diffraction_vectors':DiffractionVectors}
 
 def load(filename,ElectronDiffraction=True):
     """
     A wrapper around hyperspy's load function that enables auto-setting signals to ElectronDiffraction
-    and correct loading of pyxem defined signals
+    and correct loading of previously saved ElectronDiffraction, TemplateMatchingResults and DiffractionVectors
+    objects
 
     Parameters
     ----------
+    
     filename : str
         A single filename of a previously saved pyxem object. Other arguments may
         succeed, but will have fallen back on hyperspy load and warn accordingly
@@ -69,7 +74,7 @@ def load(filename,ElectronDiffraction=True):
         warnings.warn("filename is not a single string, for clarity consider using hs.load()")
         return s
     try:
-        s = sigdic[s.metadata.Signal.signal_type](s)
+        s = signal_dictionary[s.metadata.Signal.signal_type](s)
     except KeyError:
         if ElectronDiffraction:
             s = ElectronDiffraction(s)
