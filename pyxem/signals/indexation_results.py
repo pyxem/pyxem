@@ -42,11 +42,20 @@ class TemplateMatchingResults(BaseSignal):
     hkls : BaseSignal
         Miller indices associated with each diffraction vector.
     """
+
+
     _signal_type = "template_matching"
     _signal_dimension = 2
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        try:
+            meta_dict = args[0].metadata.as_dictionary()
+            kwargs.update({'metadata': meta_dict})
+        except AttributeError:
+            pass  # this is because a numpy array has been passed
+        except IndexError:
+            pass  # this means that map continues to work.
+        super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(2)
 
     def plot_best_matching_results_on_signal(self, signal,
