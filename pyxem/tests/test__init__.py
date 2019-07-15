@@ -86,4 +86,4 @@ def test_load_TMR(make_saved_TMR):
     """
     TMR = pxm.load('TMR_temp.hspy')
     assert isinstance(TMR, TemplateMatchingResults)
-    assert TMR.metadata.Signal.tracker == 'make_save_TMR'
+    assert TMR.metadata.Signal.tracker == 'make_saved_TMR'
