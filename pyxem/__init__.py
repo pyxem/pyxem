@@ -81,7 +81,7 @@ def load_mib(filename, scan_size, sum_length=10):
 
     return dp
 
-def load(filename,ElectronDiffraction=True):
+def load(filename,is_ElectronDiffraction=True):
     """
     A wrapper around hyperspy's load function that enables auto-setting signals to ElectronDiffraction
     and correct loading of previously saved ElectronDiffraction, TemplateMatchingResults and DiffractionVectors
@@ -93,7 +93,7 @@ def load(filename,ElectronDiffraction=True):
     filename : str
         A single filename of a previously saved pyxem object. Other arguments may
         succeed, but will have fallen back on hyperspy load and warn accordingly
-    ElectronDiffraction : bool
+    is_ElectronDiffraction : bool
         If the signal is not a pxm saved signal (eg - it's a .blo file), cast to
         an ElectronDiffraction object
     """
@@ -103,16 +103,16 @@ def load(filename,ElectronDiffraction=True):
         return s
 
     file_suffix = '.' + filename.split('.')[-1]
-    
-    if file_suffix == '.mib'
+
+    if file_suffix == '.mib':
         raise ValueError('mib files must be loaded directly using pxm.load_mib()')
 
-    if file_suffix is in ['.hspy','.blo']: # if True we are loading a signal from a format we know
+    if file_suffix in ['.hspy','.blo']: # if True we are loading a signal from a format we know
         s = hyperspyload(filename)
         try:
             s = signal_dictionary[s.metadata.Signal.signal_type](s)
         except KeyError:
-            if ElectronDiffraction:
+            if is_ElectronDiffraction:
                 s = ElectronDiffraction(s)
             else:
                 warnings.warn("No pyxem functionality used, for clarity consider using hs.load()")
