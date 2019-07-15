@@ -21,6 +21,7 @@ import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 from warnings import warn
 
+from pyxem.utils import push_metadata_through
 from pyxem.utils.sim_utils import peaks_from_best_template
 from pyxem.utils.sim_utils import peaks_from_best_vector_match
 from pyxem.utils.sim_utils import transfer_navigation_axes
@@ -29,7 +30,6 @@ from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 from pyxem import CrystallographicMap
-
 
 class TemplateMatchingResults(BaseSignal):
     """Template matching results containing the top n best matching crystal
@@ -48,13 +48,7 @@ class TemplateMatchingResults(BaseSignal):
     _signal_dimension = 2
 
     def __init__(self, *args, **kwargs):
-        try:
-            meta_dict = args[0].metadata.as_dictionary()
-            kwargs.update({'metadata': meta_dict})
-        except AttributeError:
-            pass  # this is because a numpy array has been passed
-        except IndexError:
-            pass  # this means that map continues to work.
+        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
         super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(2)
 
