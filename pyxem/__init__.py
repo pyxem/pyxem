@@ -53,6 +53,37 @@ signal_dictionary = {'electron_diffraction':ElectronDiffraction,
                      'template_matching':TemplateMatchingResults,
                      'diffraction_vectors':DiffractionVectors}
 
+def push_metadata_through(dummy,*args,**kwargs):
+    """
+    This function pushes loaded metadata through to pyxem objects, it is to be used for one
+    purpose, see the __init__ of ElectronDiffraction for an example.
+
+    Parameters
+    ----------
+    dummy :
+        This will always be the "self" of the object to be initialised
+
+    args : list
+        This will always be the "args" of the object to be initialised
+
+    kwargs : dict
+        This will always be the "args" of the object to be initialised
+
+    Returns
+    -------
+    dummy,args,kwargs :
+        The input variables, adjusted correctly
+    """
+    try:
+        meta_dict = args[0].metadata.as_dictionary()
+        kwargs.update({'metadata': meta_dict})
+    except AttributeError:
+        pass  # this is because a numpy array has been passed
+    except IndexError:
+        pass  # this means that map continues to work.
+
+    return dummy,args,kwargs
+
 def load_mib(filename, scan_size, sum_length=10):
     """Load a medipix hdr/mib file.
 
