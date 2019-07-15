@@ -24,7 +24,7 @@ import warnings
 
 from hyperspy.io import load as hyperspyload
 from hyperspy.api import roi
-from pyxem.utils.io_utils import load,load_mib
+from pyxem.signals.__init__ import push_metadata_through
 
 import numpy as np
 
@@ -47,5 +47,7 @@ from .signals.vdf_image import VDFImage
 
 from .io_plugins import io_plugins, default_write_ext
 from .io_plugins import mib as mib_reader
+from pyxem.utils.io_utils import load,load_mib
+
 
 _logger = logging.getLogger(__name__)
