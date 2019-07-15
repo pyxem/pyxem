@@ -21,7 +21,7 @@ import logging
 import os
 import warnings
 
-from hyperspy.io import load as hsload
+from hyperspy.io import load as hyperspyload
 from hyperspy.api import roi
 
 import numpy as np
@@ -61,27 +61,36 @@ def load(filename,ElectronDiffraction=True):
 
     Parameters
     ----------
-    
+
     filename : str
         A single filename of a previously saved pyxem object. Other arguments may
         succeed, but will have fallen back on hyperspy load and warn accordingly
     ElectronDiffraction : bool
         If the signal is not a pxm saved signal (eg - it's a .blo file), cast to
-        an ElectronDiffraction option
+        an ElectronDiffraction object
     """
-    s = hsload(filename)
     if isinstance(filename,str) == False:
         warnings.warn("filename is not a single string, for clarity consider using hs.load()")
+        s = hyperspyload(filename)
         return s
-    try:
-        s = signal_dictionary[s.metadata.Signal.signal_type](s)
-    except KeyError:
-        if ElectronDiffraction:
-            s = ElectronDiffraction(s)
-        else:
-            warnings.warn("No pyxem functionality used, for clarity consider using hs.load()")
 
-    return s
+    file_suffix = '.' + filename.split('.')[-1] 
+    if file_suffix is not  : #if True we are trying to load a signal
+        if file_suffix is in ['.hspy','.blo']: # if True we are loading a signal from a format we know
+            s = hyperspyload(filename)
+            try:
+                s = signal_dictionary[s.metadata.Signal.signal_type](s)
+            except KeyError:
+                if ElectronDiffraction:
+                    s = ElectronDiffraction(s)
+                else:
+                    warnings.warn("No pyxem functionality used, for clarity consider using hs.load()")
+        else:
+            warnings.warn("file suffix unknown, for clarity consider using hs.load()")
+            s = hyperspyload(filename)
+            return s
+
+        return s
 
 
 def load_mib(filename, scan_size, sum_length=10):
