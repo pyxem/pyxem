@@ -38,7 +38,7 @@ from pyxem.signals.vdf_image import VDFImage
 from pyxem.io_plugins import io_plugins, default_write_ext
 from pyxem.io_plugins import mib as mib_reader
 
-def load_mib(filename, scan_size, sum_length=10):
+def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
     """Load a medipix hdr/mib file.
 
     Parameters
