@@ -22,6 +22,7 @@ import pyxem as pxm
 import os
 
 from hyperspy.signals import Signal2D
+from pyxem.signals.indexation_results import TemplateMatchingResults
 
 @pytest.fixture()
 def make_saved_Signal2D():
@@ -43,6 +44,21 @@ def make_saved_dp(diffraction_pattern):
     yield
     os.remove('dp_temp.hspy')
 
+@pytest.fixture()
+def make_saved_TMR():
+    """
+    This fixture handles the creation and destruction of a saved electron_diffraction
+    pattern.
+    #Lifted from stackoverflow question #22627659
+    """
+    TMR = TemplateMatchingResults(np.zeros((2,2,2,2)))
+    TMR.metadata.Signal.tracker = 'make_saved_TMR'
+    TMR.save('TMR_temp')
+    yield
+    os.remove('TMR_temp.hspy')
+
+TemplateMatchingResults
+
 @pytest.mark.filterwarnings('ignore::UserWarning') #this warning is by design (A)
 def test_load_Signal2D(make_saved_Signal2D):
     """
@@ -63,3 +79,11 @@ def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
     assert np.allclose(dp.data,diffraction_pattern.data)
     assert isinstance(dp, pxm.ElectronDiffraction)
     assert diffraction_pattern.metadata.Signal.found_from == dp.metadata.Signal.found_from
+
+def test_load_TMR(make_saved_TMR):
+    """
+    This tests our load function keeps TemplateMatchingResults metadata
+    """
+    TMR = pxm.load('TMR_temp.hspy')
+    assert isinstance(TMR, TemplateMatchingResults)
+    assert TMR.metadata.Signal.tracker == 'make_save_TMR'
