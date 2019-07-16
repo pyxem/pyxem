@@ -82,19 +82,20 @@ def load(filename,is_ElectronDiffraction=True):
         If the signal is not a pxm saved signal (eg - it's a .blo file), cast to
         an ElectronDiffraction object
     """
-    if isinstance(filename,str) == False:
+    if isinstance(filename,str) == True:
+        file_suffix = '.' + filename.split('.')[-1]
+    else:
         warnings.warn("filename is not a single string, for clarity consider using hs.load()")
         s = hyperspyload(filename)
         return s
 
+    if file_suffix == '.mib':
+        raise ValueError('mib files must be loaded directly using pxm.load_mib()') #pragma: no cover
+
+
     signal_dictionary = {'electron_diffraction':ElectronDiffraction,
                          'template_matching':TemplateMatchingResults,
                          'diffraction_vectors':DiffractionVectors}
-
-    file_suffix = '.' + filename.split('.')[-1]
-
-    if file_suffix == '.mib':
-        raise ValueError('mib files must be loaded directly using pxm.load_mib()')
 
     if file_suffix in ['.hspy','.blo']: # if True we are loading a signal from a format we know
         s = hyperspyload(filename)
