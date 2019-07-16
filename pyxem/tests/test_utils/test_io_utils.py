@@ -1,0 +1,105 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2019 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+import pytest
+import numpy as np
+import pyxem as pxm
+import os
+
+from hyperspy.signals import Signal2D
+
+from pyxem.signals.crystallographic_map import CrystallographicMap
+from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.indexation_results import TemplateMatchingResults
+from pyxem.signals.vdf_image import VDFImage
+
+@pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction,'string1'),
+                                                       (TemplateMatchingResults,'string2'),
+                                                       (DiffractionVectors,'string3'),
+                                                       (CrystallographicMap,'string4'),
+                                                       (ElectronDiffractionProfile,'string5'),
+                                                       (VDFImage,'string6')])
+
+def test_load_function_core(class_to_test,meta_string):
+    """
+    Test the core; which is load a previously saved pyxem object.
+    """
+    to_save = class_to_test(np.zeros((2,2,2,2)))
+    to_save.metadata.Signal.tracker = meta_string
+    to_save.save('tempfile.hspy')
+    from_save = pxm.load('tempfile.hspy')
+    assert isinstance(from_save, class_to_test)
+    assert from_save.metadata.Signal.tracker == meta_string
+    assert np.allclose(to_save.data,from_save.data)
+    os.remove('tempfile.hspy')
+
+@pytest.fixture()
+def make_saved_Signal2D():
+    """
+    #Lifted from stackoverflow question #22627659
+    """
+    s = Signal2D(np.zeros((2,2,2,2)))
+    s.metadata.Signal.tracker = 'make_save_Signal2D'
+    s.save('S2D_temp')
+    s.save('badfilesuffix.emd')
+    yield
+    os.remove('S2D_temp.hspy')
+    os.remove('badfilesuffix.emd') #for case 3 of the edgecases
+
+@pytest.mark.filterwarnings('ignore::UserWarning') #pyxem warns about these cases
+def test_load_edge_case(make_saved_Signal2D):
+    # Case 1 - you have a list of filenames
+    filename = 'S2D_temp.hspy'
+    file_list = [filename,filename]
+    s = pxm.load(file_list)
+    # Case 2 - you have a non-electron diffraction, non-hyperspy signals
+    s = pxm.load(filename,is_ElectronDiffraction=False)
+    # Case 3 - you have a bad file suffix
+    s = pxm.load('badfilesuffix.emd')
+
+
+def test_load_Signal2D(make_saved_Signal2D):
+    """
+    This tests that we can "load a Signal2D" with pxm.load and that we auto cast
+    safetly into ElectronDiffraction
+    """
+    dp = pxm.load('S2D_temp.hspy')
+    assert dp.metadata.Signal.signal_type == 'electron_diffraction'
+    assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
+
+# below is just some extra ElectronDiffraction testing
+
+@pytest.fixture()
+def make_saved_dp(diffraction_pattern):
+    """
+    This makes use of conftest
+    """
+    diffraction_pattern.save('dp_temp')
+    yield
+    os.remove('dp_temp.hspy')
+
+def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
+    """
+    This tests that our load function keeps .data, instance and metadata
+    """
+    dp = pxm.load('dp_temp.hspy')
+    assert np.allclose(dp.data,diffraction_pattern.data)
+    assert isinstance(dp, pxm.ElectronDiffraction)
+    assert diffraction_pattern.metadata.Signal.found_from == dp.metadata.Signal.found_from
