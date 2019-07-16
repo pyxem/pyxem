@@ -43,7 +43,7 @@ from skimage.morphology import square
 
 
 class Diffraction2D(Signal2D):
-    _signal_type = "diffraction"
+    _signal_type = "diffraction2d"
 
     def __init__(self, *args, **kwargs):
         """
