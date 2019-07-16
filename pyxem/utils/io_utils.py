@@ -93,11 +93,11 @@ def load(filename,is_ElectronDiffraction2D=True):
         raise ValueError('mib files must be loaded directly using pxm.load_mib()') #pragma: no cover
 
 
-    signal_dictionary = {'electron_diffraction':ElectronDiffraction2D,
+    signal_dictionary = {'electron_diffraction2d':ElectronDiffraction2D,
                          'template_matching':TemplateMatchingResults,
                          'diffraction_vectors':DiffractionVectors,
                          'crystallographic_map':CrystallographicMap,
-                         'diffraction_profile':ElectronDiffraction1D,
+                         'electron_diffraction1d':ElectronDiffraction1D,
                          'vdf_image':VDFImage}
 
     if file_suffix in ['.hspy','.blo']: # if True we are loading a signal from a format we know

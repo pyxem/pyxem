@@ -81,7 +81,7 @@ def test_load_Signal2D(make_saved_Signal2D):
     safetly into ElectronDiffraction2D
     """
     dp = pxm.load('S2D_temp.hspy')
-    assert dp.metadata.Signal.signal_type == 'electron_diffraction'
+    assert dp.metadata.Signal.signal_type == 'electron_diffraction2d'
     assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
 
 # below is just some extra ElectronDiffraction2D testing
