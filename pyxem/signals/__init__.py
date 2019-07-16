@@ -47,3 +47,63 @@ def push_metadata_through(dummy, *args, **kwargs):
         pass  # this means that map continues to work.
 
     return dummy, args, kwargs
+
+
+def transfer_navigation_axes(new_signal, old_signal):
+    """ Transfers navigation axis calibrations from an old signal to a new
+    signal produced from it by a method or a generator.
+
+    Parameters
+    ----------
+    new_signal : Signal
+        The product signal with undefined navigation axes.
+    old_signal : Signal
+        The parent signal with calibrated navigation axes.
+
+    Returns
+    -------
+    new_signal : Signal
+        The new signal with calibrated navigation axes.
+    """
+    new_signal.axes_manager.set_signal_dimension(
+        len(new_signal.data.shape) - old_signal.axes_manager.navigation_dimension)
+
+    for i in range(min(new_signal.axes_manager.navigation_dimension,
+                       old_signal.axes_manager.navigation_dimension)):
+        ax_new = new_signal.axes_manager.navigation_axes[i]
+        ax_old = old_signal.axes_manager.navigation_axes[i]
+        ax_new.name = ax_old.name
+        ax_new.scale = ax_old.scale
+        ax_new.units = ax_old.units
+
+    return new_signal
+
+
+def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
+    """ Transfers navigation axis calibrations from an old signal to the signal
+    axes of a new signal produced from it by a method or a generator.
+
+    Used from methods that generate a signal with a single value at each
+    navigation position.
+
+    Parameters
+    ----------
+    new_signal : Signal
+        The product signal with undefined navigation axes.
+    old_signal : Signal
+        The parent signal with calibrated navigation axes.
+
+    Returns
+    -------
+    new_signal : Signal
+        The new signal with calibrated signal axes.
+    """
+    for i in range(min(new_signal.axes_manager.signal_dimension,
+                       old_signal.axes_manager.navigation_dimension)):
+        ax_new = new_signal.axes_manager.signal_axes[i]
+        ax_old = old_signal.axes_manager.navigation_axes[i]
+        ax_new.name = ax_old.name
+        ax_new.scale = ax_old.scale
+        ax_new.units = ax_old.units
+
+    return new_signal

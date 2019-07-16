@@ -26,13 +26,11 @@ import hyperspy.api as hs
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 
-from pyxem.utils.sim_utils import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes
 
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
-
-import hyperspy.api as hs
 
 
 class IndexationGenerator():
