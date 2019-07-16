@@ -22,6 +22,8 @@ from warnings import warn
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
+from hyperspy._signals.lazy import LazySignal
+
 from pyxem.signals.diffraction_profile import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through
@@ -598,3 +600,16 @@ class Diffraction2D(Signal2D):
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
+
+
+class LazyDiffraction2D(LazySignal, Diffraction2D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def compute(self, *args, **kwargs):
+        super().compute(*args, **kwargs)
+        self.__class__ = Diffraction2D
+        self.__init__(**self._to_dictionary())

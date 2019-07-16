@@ -20,7 +20,7 @@
 """
 
 from pyxem.signals import push_metadata_through
-
+from pyxem.signals.diffraction1d import Diffraction1D
 
 class ElectronDiffraction1D(Diffraction1D):
     _signal_type = "electron_diffraction1d"

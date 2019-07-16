@@ -23,6 +23,7 @@ import numpy as np
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, BaseSignal
+from hyperspy._signals.lazy import LazySignal
 from hyperspy.roi import SpanROI
 
 from pyxem.signals import push_metadata_through
@@ -116,3 +117,16 @@ class Diffraction1D(Signal1D):
         vdfim = dark_field_sum.as_signal2D((0, 1))
 
         return vdfim
+
+
+class LazyDiffraction1D(LazySignal, Diffraction1D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def compute(self, *args, **kwargs):
+        super().compute(*args, **kwargs)
+        self.__class__ = Diffraction2D
+        self.__init__(**self._to_dictionary())
