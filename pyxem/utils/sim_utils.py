@@ -23,8 +23,8 @@ from scipy.constants import h, m_e, e, c, pi
 import collections
 import diffpy.structure
 
-from .atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
-from .lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
+from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
+from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from pyxem.utils.vector_utils import get_angle_cartesian
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
