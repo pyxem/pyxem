@@ -24,11 +24,14 @@ from operator import itemgetter
 
 import numpy as np
 
+from diffsims.utils.sim_utils import simulate_rotated_structure
+
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
 from transforms3d.euler import mat2euler
+from transforms3d.euler import euler2mat
 from transforms3d.quaternions import mat2quat
 
 

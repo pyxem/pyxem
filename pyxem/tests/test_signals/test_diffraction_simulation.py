@@ -22,6 +22,7 @@ from diffsims.sims.diffraction_simulation import DiffractionSimulation
 from diffsims.sims.diffraction_simulation import ProfileSimulation
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem import ElectronDiffraction
+from pyxem.utils.sim_utils import sim_as_signal
 
 
 @pytest.fixture
@@ -42,7 +43,7 @@ def get_signal(coords_intensity_simulation):
     size = 144
     sigma = 0.03
     max_r = 1.5
-    return coords_intensity_simulation.as_signal(size, sigma, max_r)
+    return sim_as_signal(coords_intensity_simulation, size, sigma, max_r)
 
 
 def test_typing(get_signal):
