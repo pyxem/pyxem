@@ -26,10 +26,12 @@ from hyperspy.signals import Signal2D
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
+from pyxem.signals.crystallographic_map import CrystallographicMap
 
 @pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction,'string1'),
                                                        (TemplateMatchingResults,'string2'),
-                                                       (DiffractionVectors,'string3')])
+                                                       (DiffractionVectors,'string3'),
+                                                       (CrystallographicMap,'string4')])
 def test_load_function_core(class_to_test,meta_string):
     """
     Test the core; which is load a previously saved pyxem object.
