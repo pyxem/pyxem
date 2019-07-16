@@ -37,10 +37,10 @@ from .generators.library_generator import DiffractionLibraryGenerator
 from .generators.library_generator import VectorLibraryGenerator
 from .generators.calibration_generator import CalibrationGenerator
 
-from .signals.diffraction1D import Diffraction1D
-from .signals.diffraction2D import Diffraction2D
-from .signals.diffraction1D import LazyDiffraction1D
-from .signals.diffraction2D import LazyDiffraction2D
+from .signals.diffraction1d import Diffraction1D
+from .signals.diffraction2d import Diffraction2D
+from .signals.diffraction1d import LazyDiffraction1D
+from .signals.diffraction2d import LazyDiffraction2D
 from .signals.diffraction_profile import ElectronDiffraction1D
 from .signals.electron_diffraction import ElectronDiffraction2D
 
