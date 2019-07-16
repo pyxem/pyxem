@@ -46,7 +46,7 @@ def get_signal(coords_intensity_simulation):
 
 
 def test_typing(get_signal):
-    assert isinstance(get_signal, ElectronDiffraction)
+    assert isinstance(get_signal, ElectronDiffraction2D)
 
 
 def test_correct_quadrant_np(get_signal):
