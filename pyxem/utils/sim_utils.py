@@ -26,6 +26,7 @@ import diffpy.structure
 from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from pyxem.utils.vector_utils import get_angle_cartesian
+from pyxem.signals.electron_diffraction import ElectronDiffraction
 from transforms3d.axangles import axangle2mat
 from transforms3d.euler import mat2euler
 from transforms3d.euler import euler2mat
