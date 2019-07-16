@@ -20,6 +20,7 @@
 
 import numpy as np
 
+from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction2d import Diffraction2D
 
 
