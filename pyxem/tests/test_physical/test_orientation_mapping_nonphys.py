@@ -22,6 +22,8 @@ from diffsims.sims.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
 from diffsims.libraries.diffraction_library import DiffractionLibrary
 
+from pyxem.utils.sim_utils import sim_as_signal
+
 # This test suite is aimed at checking the basic functionality of the
 # orientation mapping process, obviously to have a succesful OM process
 # many other components will also need to be correct
@@ -50,7 +52,7 @@ def create_library():
         intensities[alpha] = dp_sim.intensities
         if alpha < 4:
             dps.append(
-                dp_sim.as_signal(
+                sim_as_signal(dp_sim,
                     2 * half_side_length,
                     0.075,
                     1).data)  # stores a numpy array of pattern
