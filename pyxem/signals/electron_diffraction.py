@@ -57,7 +57,7 @@ class ElectronDiffraction(Signal2D):
         **kwargs :
             Passed to the __init__ of Signal2D
         """
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
         # Set default attributes
@@ -300,7 +300,7 @@ class ElectronDiffraction(Signal2D):
         """
 
         shape = self.axes_manager.signal_shape
-        if type(D) == np.ndarray:
+        if isinstance(D, np.ndarray):
             transformation = convert_affine_to_transform(D, shape)
         else:
             transformation = D.map(convert_affine_to_transform, shape=shape, inplace=False)

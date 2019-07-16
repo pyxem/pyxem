@@ -30,47 +30,49 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.vdf_image import VDFImage
 
-@pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction,'string1'),
-                                                       (TemplateMatchingResults,'string2'),
-                                                       (DiffractionVectors,'string3'),
-                                                       (CrystallographicMap,'string4'),
-                                                       (ElectronDiffractionProfile,'string5'),
-                                                       (VDFImage,'string6')])
 
-def test_load_function_core(class_to_test,meta_string):
+@pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction, 'string1'),
+                                                       (TemplateMatchingResults, 'string2'),
+                                                       (DiffractionVectors, 'string3'),
+                                                       (CrystallographicMap, 'string4'),
+                                                       (ElectronDiffractionProfile, 'string5'),
+                                                       (VDFImage, 'string6')])
+def test_load_function_core(class_to_test, meta_string):
     """
     Test the core; which is load a previously saved pyxem object.
     """
-    to_save = class_to_test(np.zeros((2,2,2,2)))
+    to_save = class_to_test(np.zeros((2, 2, 2, 2)))
     to_save.metadata.Signal.tracker = meta_string
     to_save.save('tempfile.hspy')
     from_save = pxm.load('tempfile.hspy')
     assert isinstance(from_save, class_to_test)
     assert from_save.metadata.Signal.tracker == meta_string
-    assert np.allclose(to_save.data,from_save.data)
+    assert np.allclose(to_save.data, from_save.data)
     os.remove('tempfile.hspy')
+
 
 @pytest.fixture()
 def make_saved_Signal2D():
     """
     #Lifted from stackoverflow question #22627659
     """
-    s = Signal2D(np.zeros((2,2,2,2)))
+    s = Signal2D(np.zeros((2, 2, 2, 2)))
     s.metadata.Signal.tracker = 'make_save_Signal2D'
     s.save('S2D_temp')
     s.save('badfilesuffix.emd')
     yield
     os.remove('S2D_temp.hspy')
-    os.remove('badfilesuffix.emd') #for case 3 of the edgecases
+    os.remove('badfilesuffix.emd')  # for case 3 of the edgecases
 
-@pytest.mark.filterwarnings('ignore::UserWarning') #pyxem warns about these cases
+
+@pytest.mark.filterwarnings('ignore::UserWarning')  # pyxem warns about these cases
 def test_load_edge_case(make_saved_Signal2D):
     # Case 1 - you have a list of filenames
     filename = 'S2D_temp.hspy'
-    file_list = [filename,filename]
+    file_list = [filename, filename]
     s = pxm.load(file_list)
     # Case 2 - you have a non-electron diffraction, non-hyperspy signals
-    s = pxm.load(filename,is_ElectronDiffraction=False)
+    s = pxm.load(filename, is_ElectronDiffraction=False)
     # Case 3 - you have a bad file suffix
     s = pxm.load('badfilesuffix.emd')
 
@@ -86,6 +88,7 @@ def test_load_Signal2D(make_saved_Signal2D):
 
 # below is just some extra ElectronDiffraction testing
 
+
 @pytest.fixture()
 def make_saved_dp(diffraction_pattern):
     """
@@ -95,11 +98,12 @@ def make_saved_dp(diffraction_pattern):
     yield
     os.remove('dp_temp.hspy')
 
-def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
+
+def test_load_ElectronDiffraction(diffraction_pattern, make_saved_dp):
     """
     This tests that our load function keeps .data, instance and metadata
     """
     dp = pxm.load('dp_temp.hspy')
-    assert np.allclose(dp.data,diffraction_pattern.data)
+    assert np.allclose(dp.data, diffraction_pattern.data)
     assert isinstance(dp, pxm.ElectronDiffraction)
     assert diffraction_pattern.metadata.Signal.found_from == dp.metadata.Signal.found_from

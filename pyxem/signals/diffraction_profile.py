@@ -32,7 +32,7 @@ class ElectronDiffractionProfile(Signal1D):
     _signal_type = "diffraction_profile"
 
     def __init__(self, *args, **kwargs):
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
     def set_experimental_parameters(self,

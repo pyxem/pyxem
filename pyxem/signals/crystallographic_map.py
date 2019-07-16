@@ -173,7 +173,7 @@ class CrystallographicMap(BaseSignal):
     _signal_type = "crystallographic_map"
 
     def __init__(self, *args, **kwargs):
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
         self.method = None

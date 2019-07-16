@@ -24,7 +24,7 @@ from pyxem.signals.electron_diffraction import ElectronDiffraction
 from diffsims.utils.sim_utils import get_electron_wavelength, \
     get_interaction_constant, get_unique_families, get_kinematical_intensities,\
     get_vectorized_list_for_atomic_scattering_factors, get_points_in_sphere, \
-    simulate_kinematic_scattering, is_lattice_hexagonal,  uvtw_to_uvw, \
+    simulate_kinematic_scattering, is_lattice_hexagonal, uvtw_to_uvw, \
     rotation_list_stereographic
 from pyxem.utils.sim_utils import transfer_navigation_axes, \
     peaks_from_best_template

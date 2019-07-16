@@ -39,7 +39,7 @@ def input_parameters():
 def affine_answer():
     a = np.asarray([[1.06651526, 0.10258988, 0.],
                     [0.10258988, 1.15822961, 0.],
-                    [0.        , 0.        , 1.]])
+                    [0., 0., 1.]])
     return a
 
 
