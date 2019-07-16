@@ -30,7 +30,6 @@ import numpy as np
 from pyxem.signals.crystallographic_map import CrystallographicMap
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.vdf_image import VDFImage
@@ -70,9 +69,9 @@ def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
 
 def load(filename, is_ElectronDiffraction=True):
     """
-    A wrapper around hyperspy's load function that enables auto-setting signals to ElectronDiffraction
-    and correct loading of previously saved ElectronDiffraction, TemplateMatchingResults and DiffractionVectors
-    objects
+    A wrapper around hyperspy's load function that enables auto-setting signals
+    to ElectronDiffraction and correct loading of previously saved
+    ElectronDiffraction, TemplateMatchingResults and DiffractionVectors objects.
 
     Parameters
     ----------
