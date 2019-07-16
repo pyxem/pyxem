@@ -96,7 +96,9 @@ def load(filename,is_ElectronDiffraction=True):
     signal_dictionary = {'electron_diffraction':ElectronDiffraction,
                          'template_matching':TemplateMatchingResults,
                          'diffraction_vectors':DiffractionVectors,
-                         'crystallographic_map':CrystallographicMap}
+                         'crystallographic_map':CrystallographicMap,
+                         'diffraction_profile':ElectronDiffractionProfile,
+                         'vdf_image':VDFImage}
 
     if file_suffix in ['.hspy','.blo']: # if True we are loading a signal from a format we know
         s = hyperspyload(filename)

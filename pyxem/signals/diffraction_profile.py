@@ -25,12 +25,15 @@ from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, BaseSignal
 from hyperspy.roi import SpanROI
 
+from pyxem.signals import push_metadata_through
+
 
 class ElectronDiffractionProfile(Signal1D):
     _signal_type = "diffraction_profile"
 
     def __init__(self, *args, **kwargs):
-        Signal1D.__init__(self, *args, **kwargs)
+        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        super().__init__(*args, **kwargs)
 
     def set_experimental_parameters(self,
                                     accelerating_voltage=None,

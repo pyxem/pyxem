@@ -23,15 +23,20 @@ import os
 
 from hyperspy.signals import Signal2D
 
+from pyxem.signals.crystallographic_map import CrystallographicMap
+from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.signals.crystallographic_map import CrystallographicMap
+from pyxem.signals.vdf_image import VDFImage
 
 @pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction,'string1'),
                                                        (TemplateMatchingResults,'string2'),
                                                        (DiffractionVectors,'string3'),
-                                                       (CrystallographicMap,'string4')])
+                                                       (CrystallographicMap,'string4'),
+                                                       (ElectronDiffractionProfile,'string5'),
+                                                       (VDFImage,'string6')])
+
 def test_load_function_core(class_to_test,meta_string):
     """
     Test the core; which is load a previously saved pyxem object.
@@ -58,7 +63,7 @@ def make_saved_Signal2D():
     os.remove('S2D_temp.hspy')
     os.remove('badfilesuffix.emd') #for case 3 of the edgecases
 
-@pytest.mark.filterwarnigs('ignore:UserWarning') #pyxem warns about these cases
+@pytest.mark.filterwarnigs('ignore:UserWarning') #pyxem warns about these cases, this may not be working
 def test_load_edge_case(make_saved_Signal2D):
     # Case 1 - you have a list of filenames
     filename = 'S2D_temp.hspy'
