@@ -22,18 +22,39 @@ import pyxem as pxm
 import os
 
 from hyperspy.signals import Signal2D
+
+from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
+
+@pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction,'string1'),
+                                                       (TemplateMatchingResults,'string2'),
+                                                       (DiffractionVectors,'string3')])
+def test_load_function_core(class_to_test,meta_string):
+    """
+    Test the core; which is load a previously saved pyxem object.
+    """
+    to_save = class_to_test(np.zeros((2,2,2,2)))
+    to_save.metadata.Signal.tracker = meta_string
+    to_save.save('tempfile.hspy')
+    from_save = pxm.load('tempfile.hspy')
+    assert isinstance(from_save, class_to_test)
+    assert from_save.metadata.Signal.tracker == meta_string
+    assert np.allclose(to_save.data,from_save.data)
+    os.remove('tempfile.hspy')
 
 @pytest.fixture()
 def make_saved_Signal2D():
-    z = np.zeros((2,2,2,2))
-    s = Signal2D(z)
+    """
+    #Lifted from stackoverflow question #22627659
+    """
+    s = Signal2D(np.zeros((2,2,2,2)))
     s.metadata.Signal.tracker = 'make_save_Signal2D'
     s.save('S2D_temp')
-    s.save('badfilesuffix.bad')
+    s.save('badfilesuffix.emd')
     yield
     os.remove('S2D_temp.hspy')
-    os.remove('badfilesuffix.bad') #for case 3 of the edgecases
+    os.remove('badfilesuffix.emd') #for case 3 of the edgecases
 
 @pytest.mark.filterwarnigs('ignore:UserWarning') #pyxem warns about these cases
 def test_load_edge_case(make_saved_Signal2D):
@@ -44,43 +65,28 @@ def test_load_edge_case(make_saved_Signal2D):
     # Case 2 - you have a non-electron diffraction, non-hyperspy signals
     s = pxm.load(filename,is_ElectronDiffraction=False)
     # Case 3 - you have a bad file suffix
-    s = pxm.load('badfilesuffix.bad')
+    s = pxm.load('badfilesuffix.emd')
 
 
+def test_load_Signal2D(make_saved_Signal2D):
+    """
+    This tests that we can "load a Signal2D" with pxm.load and that we auto cast
+    safetly into ElectronDiffraction
+    """
+    dp = pxm.load('S2D_temp.hspy')
+    assert dp.metadata.Signal.signal_type == 'electron_diffraction'
+    assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
+
+# below is just some extra ElectronDiffraction testing
 
 @pytest.fixture()
 def make_saved_dp(diffraction_pattern):
     """
-    This fixture handles the creation and destruction of a saved electron_diffraction
-    pattern. #Lifted from stackoverflow question #22627659
+    This makes use of conftest
     """
     diffraction_pattern.save('dp_temp')
     yield
     os.remove('dp_temp.hspy')
-
-@pytest.fixture()
-def make_saved_TMR():
-    """
-    This fixture handles the creation and destruction of a saved TemplateMatchingResults
-    pattern.
-    """
-    TMR = TemplateMatchingResults(np.zeros((2,2,2,2)))
-    TMR.metadata.Signal.tracker = 'make_saved_TMR'
-    TMR.save('TMR_temp')
-    yield
-    os.remove('TMR_temp.hspy')
-
-@pytest.mark.filterwarnings('ignore::UserWarning') #this warning is by design (A)
-def test_load_Signal2D(make_saved_Signal2D):
-    """
-    This tests that we can load a Signal2D with pxm.load and that we can cast
-    safetly into ElectronDiffraction
-    """
-    s = pxm.load('S2D_temp.hspy') #(A)
-    assert s.metadata.Signal.tracker == 'make_save_Signal2D'
-    dp = pxm.ElectronDiffraction(s)
-    assert dp.metadata.Signal.signal_type == 'electron_diffraction'
-    assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
 
 def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
     """
@@ -90,12 +96,3 @@ def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
     assert np.allclose(dp.data,diffraction_pattern.data)
     assert isinstance(dp, pxm.ElectronDiffraction)
     assert diffraction_pattern.metadata.Signal.found_from == dp.metadata.Signal.found_from
-
-def test_load_TMR(make_saved_TMR):
-    """
-    This tests our load function keeps TemplateMatchingResults metadata & thus
-    that our push_metadata_through is functional (code that is used a lot elsewhere)
-    """
-    TMR = pxm.load('TMR_temp.hspy')
-    assert isinstance(TMR, TemplateMatchingResults)
-    assert TMR.metadata.Signal.tracker == 'make_saved_TMR'
