@@ -63,7 +63,7 @@ def make_saved_Signal2D():
     os.remove('S2D_temp.hspy')
     os.remove('badfilesuffix.emd') #for case 3 of the edgecases
 
-@pytest.mark.filterwarnigs('ignore:UserWarning') #pyxem warns about these cases, this may not be working
+@pytest.mark.filterwarnings('ignore::UserWarning') #pyxem warns about these cases
 def test_load_edge_case(make_saved_Signal2D):
     # Case 1 - you have a list of filenames
     filename = 'S2D_temp.hspy'
