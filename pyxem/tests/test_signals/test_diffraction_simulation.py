@@ -18,8 +18,8 @@
 
 import numpy as np
 import pytest
-from diffsims.signals.diffraction_simulation import DiffractionSimulation
-from diffsims.signals.diffraction_simulation import ProfileSimulation
+from diffsims.sims.diffraction_simulation import DiffractionSimulation
+from diffsims.sims.diffraction_simulation import ProfileSimulation
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem import ElectronDiffraction
 

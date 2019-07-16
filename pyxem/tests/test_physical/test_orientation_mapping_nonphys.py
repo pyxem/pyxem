@@ -18,7 +18,7 @@
 
 import numpy as np
 import pyxem as pxm
-from diffsims.signals.diffraction_simulation import DiffractionSimulation
+from diffsims.sims.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
 from diffsims.libraries.diffraction_library import DiffractionLibrary
 
