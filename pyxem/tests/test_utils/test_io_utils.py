@@ -30,15 +30,29 @@ def make_saved_Signal2D():
     s = Signal2D(z)
     s.metadata.Signal.tracker = 'make_save_Signal2D'
     s.save('S2D_temp')
+    s.save('badfilesuffix.bad')
     yield
     os.remove('S2D_temp.hspy')
+    os.remove('badfilesuffix.bad') #for case 3 of the edgecases
+
+@pytest.mark.filterwarnigs('ignore:UserWarning') #pyxem warns about these cases
+def test_load_edge_case(make_saved_Signal2D):
+    # Case 1 - you have a list of filenames
+    filename = 'S2D_temp.hspy'
+    file_list = [filename,filename]
+    s = pxm.load(file_list)
+    # Case 2 - you have a non-electron diffraction, non-hyperspy signals
+    s = pxm.load(filename,is_ElectronDiffraction=False)
+    # Case 3 - you have a bad file suffix
+    s = pxm.load('badfilesuffix.bad')
+
+
 
 @pytest.fixture()
 def make_saved_dp(diffraction_pattern):
     """
     This fixture handles the creation and destruction of a saved electron_diffraction
-    pattern.
-    #Lifted from stackoverflow question #22627659
+    pattern. #Lifted from stackoverflow question #22627659
     """
     diffraction_pattern.save('dp_temp')
     yield
@@ -47,17 +61,14 @@ def make_saved_dp(diffraction_pattern):
 @pytest.fixture()
 def make_saved_TMR():
     """
-    This fixture handles the creation and destruction of a saved electron_diffraction
+    This fixture handles the creation and destruction of a saved TemplateMatchingResults
     pattern.
-    #Lifted from stackoverflow question #22627659
     """
     TMR = TemplateMatchingResults(np.zeros((2,2,2,2)))
     TMR.metadata.Signal.tracker = 'make_saved_TMR'
     TMR.save('TMR_temp')
     yield
     os.remove('TMR_temp.hspy')
-
-TemplateMatchingResults
 
 @pytest.mark.filterwarnings('ignore::UserWarning') #this warning is by design (A)
 def test_load_Signal2D(make_saved_Signal2D):
@@ -82,7 +93,8 @@ def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
 
 def test_load_TMR(make_saved_TMR):
     """
-    This tests our load function keeps TemplateMatchingResults metadata
+    This tests our load function keeps TemplateMatchingResults metadata & thus
+    that our push_metadata_through is functional (code that is used a lot elsewhere)
     """
     TMR = pxm.load('TMR_temp.hspy')
     assert isinstance(TMR, TemplateMatchingResults)
