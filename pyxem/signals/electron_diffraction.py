@@ -24,6 +24,7 @@ from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals import push_metadata_through
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead,\
@@ -56,13 +57,7 @@ class ElectronDiffraction(Signal2D):
         **kwargs :
             Passed to the __init__ of Signal2D
         """
-        try:
-            meta_dict = args[0].metadata.as_dictionary()
-            kwargs.update({'metadata': meta_dict})
-        except AttributeError:
-            pass  # this is because a numpy array has been passed
-        except IndexError:
-            pass  # this means that map continues to work.
+        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
         super().__init__(*args, **kwargs)
 
         # Set default attributes
