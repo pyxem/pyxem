@@ -18,9 +18,9 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
-from pyxem.signals.diffraction_simulation import ProfileSimulation
-from pyxem.generators.diffraction_generator import DiffractionGenerator
+from diffsims.signals.diffraction_simulation import DiffractionSimulation
+from diffsims.signals.diffraction_simulation import ProfileSimulation
+from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem import ElectronDiffraction
 
 

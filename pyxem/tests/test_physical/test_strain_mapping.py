@@ -22,7 +22,7 @@ import diffpy.structure
 import numpy as np
 
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
-from pyxem.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem.signals.electron_diffraction import ElectronDiffraction
 
 

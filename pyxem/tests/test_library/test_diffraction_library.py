@@ -21,9 +21,9 @@ import pyxem as pxm
 import os
 import numpy as np
 
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
-from pyxem.libraries.diffraction_library import load_DiffractionLibrary
-from pyxem.libraries.structure_library import StructureLibrary
+from diffsims.signals.diffraction_simulation import DiffractionSimulation
+from diffsims.libraries.diffraction_library import load_DiffractionLibrary
+from diffsims.libraries.structure_library import StructureLibrary
 
 
 @pytest.fixture

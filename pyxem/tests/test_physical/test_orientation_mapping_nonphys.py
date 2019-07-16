@@ -18,9 +18,9 @@
 
 import numpy as np
 import pyxem as pxm
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from diffsims.signals.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
-from pyxem.libraries.diffraction_library import DiffractionLibrary
+from diffsims.libraries.diffraction_library import DiffractionLibrary
 
 # This test suite is aimed at checking the basic functionality of the
 # orientation mapping process, obviously to have a succesful OM process

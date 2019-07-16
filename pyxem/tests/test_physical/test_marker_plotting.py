@@ -21,7 +21,7 @@ import pytest
 import pyxem as pxm
 import hyperspy.api as hs
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from diffsims.signals.diffraction_simulation import DiffractionSimulation
 
 """
 When you run this the markers should land at the center of the peaks
