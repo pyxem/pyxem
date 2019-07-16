@@ -24,7 +24,7 @@ import warnings
 
 from hyperspy.io import load as hyperspyload
 from hyperspy.api import roi
-from pyxem.signals.__init__ import push_metadata_through
+from pyxem.signals import push_metadata_through
 
 import numpy as np
 
