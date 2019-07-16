@@ -38,8 +38,8 @@ from .generators.library_generator import VectorLibraryGenerator
 from .generators.calibration_generator import CalibrationGenerator
 
 from .signals.crystallographic_map import CrystallographicMap
-from .signals.diffraction_profile import ElectronDiffractionProfile
-from .signals.electron_diffraction import ElectronDiffraction
+from .signals.diffraction_profile import ElectronDiffraction1D
+from .signals.electron_diffraction import ElectronDiffraction2D
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults

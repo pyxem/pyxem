@@ -299,11 +299,11 @@ def simulate_kinematic_scattering(atomic_coordinates,
 
     Returns
     -------
-    simulation : ElectronDiffraction
-        ElectronDiffraction simulation.
+    simulation : ElectronDiffraction2D
+        ElectronDiffraction2D simulation.
     """
     # Delayed loading to prevent circular dependencies.
-    from pyxem.signals.electron_diffraction import ElectronDiffraction
+    from pyxem.signals.electron_diffraction import ElectronDiffraction2D
 
     # Get atomic scattering parameters for specified element.
     coeffs = np.array(get_scattering_params_dict(scattering_params)[element])
@@ -340,7 +340,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
     # Calculate intensity
     intensity = (scattering * scattering.conjugate()).real
 
-    return ElectronDiffraction(intensity)
+    return ElectronDiffraction2D(intensity)
 
 
 def simulate_rotated_structure(diffraction_generator, structure, rotation_matrix, reciprocal_radius, with_direct_beam):

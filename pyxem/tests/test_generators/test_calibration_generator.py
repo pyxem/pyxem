@@ -22,11 +22,11 @@ import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy.roi import Line2DROI
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction import ElectronDiffraction2D
 from pyxem.generators.calibration_generator import CalibrationGenerator
 from pyxem.utils.calibration_utils import generate_ring_pattern
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction import ElectronDiffraction2D
 
 
 @pytest.fixture
@@ -56,7 +56,7 @@ def ring_pattern(input_parameters):
                                       asymmetry=x0[4],
                                       rotation=x0[5])
 
-    return ElectronDiffraction(ring_data)
+    return ElectronDiffraction2D(ring_data)
 
 
 @pytest.fixture
@@ -90,7 +90,7 @@ class TestCalibrationGenerator:
 
     def test_init(self, calgen):
         assert isinstance(calgen.calibration_data.au_x_grating_dp,
-                          ElectronDiffraction)
+                          ElectronDiffraction2D)
 
     def test_get_elliptical_distortion(self, cal_dist,
                                        input_parameters, affine_answer):
@@ -99,7 +99,7 @@ class TestCalibrationGenerator:
 
     def test_get_distortion_residuals(self, cal_dist):
         residuals = cal_dist.get_distortion_residuals(mask_radius=10, spread=2)
-        assert isinstance(residuals, ElectronDiffraction)
+        assert isinstance(residuals, ElectronDiffraction2D)
 
     def test_plot_corrected_diffraction_pattern(self, cal_dist):
         cal_dist.plot_corrected_diffraction_pattern()

@@ -21,7 +21,7 @@ import numpy as np
 
 from pyxem.generators.vdf_generator import VDFGenerator
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.vdf_image import VDFImage
 
@@ -56,13 +56,13 @@ class TestVDFGenerator:
         dvm.axes_manager.set_signal_dimension(0)
 
         vdfgen = VDFGenerator(diffraction_pattern, dvm)
-        assert isinstance(vdfgen.signal, ElectronDiffraction)
+        assert isinstance(vdfgen.signal, ElectronDiffraction2D)
         assert isinstance(vdfgen.vectors, DiffractionVectors)
 
     def test_vdf_generator_init_without_vectors(self, diffraction_pattern):
 
         vdfgen = VDFGenerator(diffraction_pattern)
-        assert isinstance(vdfgen.signal, ElectronDiffraction)
+        assert isinstance(vdfgen.signal, ElectronDiffraction2D)
         assert isinstance(vdfgen.vectors, type(None))
 
     @pytest.mark.xfail(raises=ValueError)

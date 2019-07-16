@@ -28,7 +28,7 @@ from hyperspy.roi import SpanROI
 from pyxem.signals import push_metadata_through
 
 
-class ElectronDiffractionProfile(Signal1D):
+class ElectronDiffraction1D(Signal1D):
     _signal_type = "diffraction_profile"
 
     def __init__(self, *args, **kwargs):
@@ -132,7 +132,7 @@ class ElectronDiffractionProfile(Signal1D):
         right : float
             Upper bound of the data range to be plotted.
         **kwargs:
-            Keyword arguments to be passed to `ElectronDiffractionProfile.plot`
+            Keyword arguments to be passed to `ElectronDiffraction1D.plot`
 
         Examples
         --------

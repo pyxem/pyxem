@@ -22,7 +22,7 @@ from warnings import warn
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+from pyxem.signals.diffraction_profile import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through
 
@@ -42,12 +42,12 @@ from skimage import transform as tf
 from skimage.morphology import square
 
 
-class ElectronDiffraction(Signal2D):
+class ElectronDiffraction2D(Signal2D):
     _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):
         """
-        Create an ElectronDiffraction object from either a Signal2D a numpy.ndarray.
+        Create an ElectronDiffraction2D object from a hs.Signal2D or np.array.
 
         Parameters
         ----------
@@ -178,7 +178,7 @@ class ElectronDiffraction(Signal2D):
         roi : :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
         **kwargs:
-            Keyword arguments to be passed to `ElectronDiffraction.plot`
+            Keyword arguments to be passed to `ElectronDiffraction2D.plot`
 
         Examples
         --------
@@ -282,7 +282,7 @@ class ElectronDiffraction(Signal2D):
         order : 1,2,3,4 or 5
             The order of interpolation on the transform. Default is 3.
         keep_dtype : bool
-            If True dtype of returned ElectronDiffraction Signal is that of
+            If True dtype of returned ElectronDiffraction2D Signal is that of
             the input, if False, casting to higher precision may occur.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
@@ -294,7 +294,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-            ElectronDiffraction Signal containing the affine Transformed
+            ElectronDiffraction2D Signal containing the affine Transformed
             diffraction patterns.
 
         """
@@ -322,7 +322,7 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        dark_reference : ElectronDiffraction
+        dark_reference : ElectronDiffraction2D
             Dark reference image.
         bright_reference : DiffractionSignal
             Bright reference image.
@@ -351,8 +351,8 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        deadpixels : ElectronDiffraction
-            List
+        deadpixels : list
+            List of deadpixels to be removed.
         deadvalue : string
             Specify how deadpixels should be treated. 'average' sets the dead
             pixel value to the average of adjacent pixels. 'nan' sets the dead
@@ -393,9 +393,9 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        radial_profile: :obj:`hyperspy.signals.Signal1D`
+        radial_profile: :obj:`pyxem.signals.ElectronDiffraction1D`
             The radial average profile of each diffraction pattern in the
-            ElectronDiffraction signal as a Signal1D.
+            ElectronDiffraction2D signal as an ElectronDiffraction1D.
 
         See also
         --------
@@ -409,7 +409,7 @@ class ElectronDiffraction(Signal2D):
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
-        rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+        rp = ElectronDiffraction1D(radial_profiles.as_signal1D(signal_axis))
         ax_old = self.axes_manager.navigation_axes
         rp.axes_manager.navigation_axes[0].scale = ax_old[0].scale
         rp.axes_manager.navigation_axes[0].units = ax_old[0].units
@@ -483,7 +483,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        centered : ElectronDiffraction
+        centered : ElectronDiffraction2D
             The centered diffraction data.
 
         """
@@ -547,7 +547,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        bg_subtracted : :obj:`ElectronDiffraction`
+        bg_subtracted : :obj:`ElectronDiffraction2D`
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
 
@@ -627,7 +627,7 @@ class ElectronDiffraction(Signal2D):
         -------
         peaks : DiffractionVectors
             A DiffractionVectors object with navigation dimensions identical to
-            the original ElectronDiffraction object. Each signal is a BaseSignal
+            the original ElectronDiffraction2D object. Each signal is a BaseSignal
             object contiaining the diffraction vectors found at each navigation
             position, in calibrated units.
 

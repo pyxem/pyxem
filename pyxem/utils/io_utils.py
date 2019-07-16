@@ -28,8 +28,8 @@ from hyperspy.io import load as hyperspyload
 import numpy as np
 
 from pyxem.signals.crystallographic_map import CrystallographicMap
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.diffraction_profile import ElectronDiffraction1D
+from pyxem.signals.electron_diffraction import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.vdf_image import VDFImage
@@ -52,24 +52,25 @@ def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
 
     """
     dpt = load_with_reader(filename=filename, reader=mib_reader)
-    dpt = ElectronDiffraction(dpt.data.reshape((scan_size, scan_size, 256, 256)))
+    dpt = ElectronDiffraction2D(dpt.data.reshape((scan_size, scan_size, 256, 256)))
     trace = dpt.inav[:,0:sum_length].sum((1,2,3))
     edge = np.where(trace==max(trace.data))[0][0]
     if edge==scan_size - 1:
-        dp = ElectronDiffraction(dpt.inav[0:edge, 1:])
+        dp = ElectronDiffraction2D(dpt.inav[0:edge, 1:])
     else:
-        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:],
+        dp = ElectronDiffraction2D(np.concatenate((dpt.inav[edge + 1:, 1:],
                                                  dpt.inav[0:edge, 1:]), axis=1))
 
     dp.data = np.flip(dp.data, axis=2)
 
     return dp
 
-def load(filename,is_ElectronDiffraction=True):
+def load(filename,is_ElectronDiffraction2D=True):
     """
-    A wrapper around hyperspy's load function that enables auto-setting signals to ElectronDiffraction
-    and correct loading of previously saved ElectronDiffraction, TemplateMatchingResults and DiffractionVectors
-    objects
+    A wrapper around hyperspy's load function that enables auto-setting signals
+    to ElectronDiffraction2D and correct loading of previously saved
+    ElectronDiffraction2D, TemplateMatchingResults and DiffractionVectors
+    objects.
 
     Parameters
     ----------
@@ -77,9 +78,9 @@ def load(filename,is_ElectronDiffraction=True):
     filename : str
         A single filename of a previously saved pyxem object. Other arguments may
         succeed, but will have fallen back on hyperspy load and warn accordingly
-    is_ElectronDiffraction : bool
+    is_ElectronDiffraction2D : bool
         If the signal is not a pxm saved signal (eg - it's a .blo file), cast to
-        an ElectronDiffraction object
+        an ElectronDiffraction2D object
     """
     if isinstance(filename,str) == True:
         file_suffix = '.' + filename.split('.')[-1]
@@ -92,11 +93,11 @@ def load(filename,is_ElectronDiffraction=True):
         raise ValueError('mib files must be loaded directly using pxm.load_mib()') #pragma: no cover
 
 
-    signal_dictionary = {'electron_diffraction':ElectronDiffraction,
+    signal_dictionary = {'electron_diffraction':ElectronDiffraction2D,
                          'template_matching':TemplateMatchingResults,
                          'diffraction_vectors':DiffractionVectors,
                          'crystallographic_map':CrystallographicMap,
-                         'diffraction_profile':ElectronDiffractionProfile,
+                         'diffraction_profile':ElectronDiffraction1D,
                          'vdf_image':VDFImage}
 
     if file_suffix in ['.hspy','.blo']: # if True we are loading a signal from a format we know
@@ -104,8 +105,8 @@ def load(filename,is_ElectronDiffraction=True):
         try:
             s = signal_dictionary[s.metadata.Signal.signal_type](s)
         except KeyError:
-            if is_ElectronDiffraction:
-                s = ElectronDiffraction(s)
+            if is_ElectronDiffraction2D:
+                s = ElectronDiffraction2D(s)
             else:
                 warnings.warn("No pyxem functionality used, for clarity consider using hs.load()")
     else:

@@ -18,7 +18,7 @@
 
 import numpy as np
 import pytest
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+from pyxem.signals.diffraction_profile import ElectronDiffraction1D
 
 
 class TestSimpleHyperspy:
@@ -32,11 +32,11 @@ class TestSimpleHyperspy:
                                                         rocking_angle=1,
                                                         rocking_frequency=1,
                                                         exposure_time=1)
-        assert isinstance(diffraction_profile, ElectronDiffractionProfile)
+        assert isinstance(diffraction_profile, ElectronDiffraction1D)
 
     def test_set_scan_calibration(self, diffraction_profile):
         diffraction_profile.set_scan_calibration(19)
-        assert isinstance(diffraction_profile, ElectronDiffractionProfile)
+        assert isinstance(diffraction_profile, ElectronDiffraction1D)
 
     @pytest.mark.parametrize('calibration', [1, 0.017, 0.5, ])
     def test_set_diffraction_calibration(self,

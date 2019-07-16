@@ -24,17 +24,17 @@ import os
 from hyperspy.signals import Signal2D
 
 from pyxem.signals.crystallographic_map import CrystallographicMap
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.diffraction_profile import ElectronDiffraction1D
+from pyxem.signals.electron_diffraction import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.vdf_image import VDFImage
 
-@pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction,'string1'),
+@pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction2D,'string1'),
                                                        (TemplateMatchingResults,'string2'),
                                                        (DiffractionVectors,'string3'),
                                                        (CrystallographicMap,'string4'),
-                                                       (ElectronDiffractionProfile,'string5'),
+                                                       (ElectronDiffraction1D,'string5'),
                                                        (VDFImage,'string6')])
 
 def test_load_function_core(class_to_test,meta_string):
@@ -70,7 +70,7 @@ def test_load_edge_case(make_saved_Signal2D):
     file_list = [filename,filename]
     s = pxm.load(file_list)
     # Case 2 - you have a non-electron diffraction, non-hyperspy signals
-    s = pxm.load(filename,is_ElectronDiffraction=False)
+    s = pxm.load(filename,is_ElectronDiffraction2D=False)
     # Case 3 - you have a bad file suffix
     s = pxm.load('badfilesuffix.emd')
 
@@ -78,13 +78,13 @@ def test_load_edge_case(make_saved_Signal2D):
 def test_load_Signal2D(make_saved_Signal2D):
     """
     This tests that we can "load a Signal2D" with pxm.load and that we auto cast
-    safetly into ElectronDiffraction
+    safetly into ElectronDiffraction2D
     """
     dp = pxm.load('S2D_temp.hspy')
     assert dp.metadata.Signal.signal_type == 'electron_diffraction'
     assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
 
-# below is just some extra ElectronDiffraction testing
+# below is just some extra ElectronDiffraction2D testing
 
 @pytest.fixture()
 def make_saved_dp(diffraction_pattern):
@@ -95,11 +95,11 @@ def make_saved_dp(diffraction_pattern):
     yield
     os.remove('dp_temp.hspy')
 
-def test_load_ElectronDiffraction(diffraction_pattern,make_saved_dp):
+def test_load_ElectronDiffraction2D(diffraction_pattern,make_saved_dp):
     """
     This tests that our load function keeps .data, instance and metadata
     """
     dp = pxm.load('dp_temp.hspy')
     assert np.allclose(dp.data,diffraction_pattern.data)
-    assert isinstance(dp, pxm.ElectronDiffraction)
+    assert isinstance(dp, pxm.ElectronDiffraction2D)
     assert diffraction_pattern.metadata.Signal.found_from == dp.metadata.Signal.found_from

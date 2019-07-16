@@ -19,7 +19,7 @@
 def push_metadata_through(dummy,*args,**kwargs):
     """
     This function pushes loaded metadata through to pyxem objects, it is to be used for one
-    purpose, see the __init__ of ElectronDiffraction for an example.
+    purpose, see the __init__ of ElectronDiffraction2D for an example.
 
     Parameters
     ----------

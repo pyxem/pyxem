@@ -26,7 +26,7 @@ class CalibrationDataLibrary(dict):
 
     Attributes
     ----------
-    au_x_grating_dp : ElectronDiffraction
+    au_x_grating_dp : ElectronDiffraction2D
         A ring diffraction pattern obtained from an Au X-grating standard.
     au_x_grating_im : :obj:`hyperspy.signals.Signal2D`
         An image of an Au X-grating standard.
