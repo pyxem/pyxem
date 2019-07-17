@@ -18,6 +18,7 @@
 """Signal class for Electron Diffraction radial profiles
 
 """
+from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction1d import Diffraction1D
