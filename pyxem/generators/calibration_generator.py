@@ -336,39 +336,25 @@ class CalibrationGenerator():
 
         return x[0]
 
-    def get_rotation_calibration(self, real_line_roi, reciprocal_line_roi):
+    def get_rotation_calibration(self, real_line, reciprocal_line):
         """Determine the rotation between real and reciprocal space coordinates.
 
         Parameters
         ----------
-        real_line_roi : Line2DROI
+        real_line : Line2DROI
             Line2DROI object drawn along known direction in real space.
-        reciprocal_line_roi : Line2DROI
+        reciprocal_line : Line2DROI
             Line2DROI object drawn along known direction in reciprocal space.
 
         Returns
         -------
-        rot_cal : float
+        rotation_angle : float
             Rotation angle in degrees.
         """
-        # Calculate real space vector from line roi
-        rx1 = real_line_roi.x1
-        rx2 = real_line_roi.x2
-        ry1 = real_line_roi.y1
-        ry2 = real_line_roi.y2
-        real_vector = np.array([rx1-rx2, ry1-ry2])
-        # Calculate reciprocal space vector from line roi
-        kx1 = reciprocal_line_roi.x1
-        kx2 = reciprocal_line_roi.x2
-        ky1 = reciprocal_line_roi.y1
-        ky2 = reciprocal_line_roi.y2
-        reciprocal_vector = np.array([kx1-kx2, ky1-ky2])
-        # Determine rotation angle between
-        rot_cal = angle_between(reciprocal_vector, real_vector)
-        # Store rotation angle calibration as attribute
-        self.rotation_angle = rot_cal
+        # Calculate rotation angle and store as attribute
+        self.rotation_angle = real_line.angle() - reciprocal_line.angle()
         # Return rotation angle calibration
-        return rot_cal
+        return self.rotation_angle
 
     def get_correction_matrix(self):
         """Determine the transformation matrix required to correct for
