@@ -30,15 +30,12 @@ import numpy as np
 
 from natsort import natsorted
 
-
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
 from diffsims.generators.library_generator import VectorLibraryGenerator
-
 from diffsims.sims.diffraction_simulation import DiffractionSimulation
 
 from .components.diffraction_component import ElectronDiffractionForwardModel
-
 from .generators.calibration_generator import CalibrationGenerator
 
 from .signals.diffraction1d import Diffraction1D
@@ -52,9 +49,6 @@ from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 from .signals.vdf_image import VDFImage
 from .signals.crystallographic_map import CrystallographicMap
-from .signals.diffraction_profile import ElectronDiffractionProfile
-from .signals.electron_diffraction import ElectronDiffraction
-from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
