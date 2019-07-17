@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 import dask as da
 
-from pyxem.signals.diffraction1d import Diffraction2D, LazyDiffraction2D
+from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 
 
 class TestComputeAndAsLazy2D:
