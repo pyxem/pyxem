@@ -20,7 +20,7 @@ import numpy as np
 
 from skimage.filters import gaussian as point_spread
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
 def sim_as_signal(diffsim, size, sigma, max_r):
