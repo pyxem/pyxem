@@ -102,8 +102,8 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         *args :
             Arguments passed to signal.plot()

@@ -24,9 +24,8 @@ import numpy as np
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.sim_utils import sim_as_signal
-
 
 def test_strain_mapping_affine_transform():
     latt = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
@@ -48,7 +47,7 @@ def test_strain_mapping_affine_transform():
         dpi = sim_as_signal(diff_dat, 64, 0.02, 2.5)
         data.append(dpi.data)
     data = np.array(data)
-    dp = ElectronDiffraction(data.reshape((2, 2, 64, 64)))
+    dp = ElectronDiffraction2D(data.reshape((2, 2, 64, 64)))
 
     m = dp.create_model()
     ref = ScalableReferencePattern(dp.inav[0, 0])

@@ -38,7 +38,7 @@ class IndexationGenerator():
 
     Parameters
     ----------
-    signal : ElectronDiffraction
+    signal : ElectronDiffraction2D
         The signal of electron diffraction patterns to be indexed.
     diffraction_library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
@@ -146,7 +146,7 @@ class ProfileIndexationGenerator():
 
     Parameters
     ----------
-    profile : ElectronDiffractionProfile
+    profile : ElectronDiffraction1D
         The signal of diffraction profiles to be indexed.
     library : ProfileSimulation
         The simulated profile data.

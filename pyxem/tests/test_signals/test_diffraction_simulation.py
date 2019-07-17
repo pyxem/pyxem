@@ -21,7 +21,8 @@ import pytest
 from diffsims.sims.diffraction_simulation import DiffractionSimulation
 from diffsims.sims.diffraction_simulation import ProfileSimulation
 from diffsims.generators.diffraction_generator import DiffractionGenerator
-from pyxem import ElectronDiffraction
+
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.sim_utils import sim_as_signal
 
 
@@ -47,7 +48,7 @@ def get_signal(coords_intensity_simulation):
 
 
 def test_typing(get_signal):
-    assert isinstance(get_signal, ElectronDiffraction)
+    assert isinstance(get_signal, ElectronDiffraction2D)
 
 
 def test_correct_quadrant_np(get_signal):

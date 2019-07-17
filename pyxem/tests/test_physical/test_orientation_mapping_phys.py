@@ -30,7 +30,7 @@ from diffsims.utils.sim_utils import get_kinematical_intensities
 
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.generators.indexation_generator import VectorIndexationGenerator
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import peaks_from_best_vector_match
@@ -123,7 +123,7 @@ def get_template_library(structure, rot_list, edc):
 def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None, inplane_rotations=[0]):
     dp_library = get_template_library(structure, pattern_list, edc)
     for sim in dp_library['A']['simulations']:
-        pattern = (sim_as_signal(sim, 2 * half_side_length, 0.025, 1).data)
+        pattern = (sim.as_signal(2 * half_side_length, 0.025, 1).data)
     dp = pxm.ElectronDiffraction([[pattern, pattern], [pattern, pattern]])
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)

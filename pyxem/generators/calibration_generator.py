@@ -27,7 +27,7 @@ from hyperspy.roi import CircleROI, Line2DROI
 from hyperspy.misc.utils import stack as stack_method
 
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import call_ring_pattern, \
     calc_radius_with_distortion, \
     generate_ring_pattern
@@ -159,10 +159,10 @@ class CalibrationGenerator():
 
         Returns
         -------
-        diff_init : ElectronDiffraction
+        diff_init : ElectronDiffraction2D
             Difference between experimental data and simulated symmetric ring
             pattern.
-        diff_end : ElectronDiffraction
+        diff_end : ElectronDiffraction2D
             Difference between distortion corrected data and simulated symmetric
             ring pattern.
         """
@@ -188,16 +188,16 @@ class CalibrationGenerator():
                                       asymmetry=1, rotation=ringP[5])
         # Apply distortion corrections to experimental data
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2, 2, size, size)))
+        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
         # Calculate residuals to be returned
-        diff_init = ElectronDiffraction(dpeg.data - dpref.data)
-        diff_end = ElectronDiffraction(dpegs.inav[0, 0].data - dpref.data)
+        diff_init = ElectronDiffraction2D(dpeg.data - dpref.data)
+        diff_end = ElectronDiffraction2D(dpegs.inav[0, 0].data - dpref.data)
         residuals = stack_method([diff_init, diff_end])
 
-        return ElectronDiffraction(residuals)
+        return ElectronDiffraction2D(residuals)
 
     def plot_corrected_diffraction_pattern(self, reference_circle=True):
         """Plot the distortion corrected diffraction pattern with an optional
@@ -223,7 +223,7 @@ class CalibrationGenerator():
         # Apply distortion corrections to experimental data
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2, 2, size, size)))
+        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
@@ -266,7 +266,7 @@ class CalibrationGenerator():
         dpeg = self.calibration_data.au_x_grating_dp
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2, 2, size, size)))
+        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
@@ -350,7 +350,7 @@ class CalibrationGenerator():
             dpeg = self.calibration_data.au_x_grating_dp
             size = dpeg.data.shape[0]
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction(dpegs.data.reshape((2, 2, size, size)))
+            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
             dpegs.apply_affine_transformation(self.affine_matrix,
                                               preserve_range=True,
                                               inplace=True)

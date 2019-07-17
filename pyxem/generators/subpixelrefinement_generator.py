@@ -34,7 +34,7 @@ class SubpixelrefinementGenerator():
 
     Parameters
     ----------
-    dp : ElectronDiffraction
+    dp : ElectronDiffraction2D
         The electron diffraction patterns to be refined
     vectors : DiffractionVectors | ndarray
         Vectors (in calibrated units) to the locations of the spots to be
