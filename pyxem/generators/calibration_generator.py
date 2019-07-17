@@ -394,7 +394,8 @@ class CalibrationGenerator():
         # Return the correction matrix
         return correction_matrix
 
-    def plot_calibrated_data(self, data_to_plot, *args, **kwargs): # pragma: no cover
+    def plot_calibrated_data(self, data_to_plot, roi=None,
+                             *args, **kwargs): # pragma: no cover
         """ Plot calibrated data for visual inspection.
 
         Parameters
@@ -403,6 +404,9 @@ class CalibrationGenerator():
             Specify the calibrated data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im',
             'rotation_overlay'}
+        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
+            An optional ROI object, as detailed in HyperSpy, to be added as a
+            widget to the calibration data plot.
         """
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
@@ -440,3 +444,5 @@ class CalibrationGenerator():
             data.plot(*args, **kwargs)
         elif data_to_plot == 'rotation_overlay':
             pass
+        if roi:
+            roi.add_widget(data, axes=data.axes_manager.signal_axes)
