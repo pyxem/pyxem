@@ -25,6 +25,8 @@ from scipy.optimize import curve_fit
 from math import sin, cos
 from hyperspy.roi import CircleROI, Line2DROI
 from hyperspy.misc.utils import stack as stack_method
+import matplotlib.pyplot as plt
+from skimage.transform import rotate
 
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
@@ -394,7 +396,7 @@ class CalibrationGenerator():
         # Return the correction matrix
         return correction_matrix
 
-    def plot_calibrated_data(self, data_to_plot, roi=None,
+    def plot_calibrated_data(self, data_to_plot, line=None,
                              *args, **kwargs): # pragma: no cover
         """ Plot calibrated data for visual inspection.
 
@@ -404,9 +406,10 @@ class CalibrationGenerator():
             Specify the calibrated data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im',
             'rotation_overlay'}
-        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
-            An optional ROI object, as detailed in HyperSpy, to be added as a
-            widget to the calibration data plot.
+        line : :obj:`hyperspy.roi.Line2DROI`
+            An optional Line2DROI object, as detailed in HyperSpy, to be added
+            as a widget to the calibration data plot and the trace plotted
+            interactively.
         """
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
@@ -427,7 +430,7 @@ class CalibrationGenerator():
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
         elif data_to_plot == 'moo3_dp':
-            dpeg = self.calibration_data.au_x_grating_dp
+            dpeg = self.calibration_data.moo3_dp
             size = dpeg.data.shape[0]
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
             dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
@@ -439,10 +442,18 @@ class CalibrationGenerator():
             # Plot the calibrated diffraction data
             data.plot(*args, **kwargs)
         elif data_to_plot == 'moo3_im':
-            data = self.calibration_data.au_x_grating_im
+            data = self.calibration_data.moo3_im
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
         elif data_to_plot == 'rotation_overlay':
-            pass
-        if roi:
-            roi.add_widget(data, axes=data.axes_manager.signal_axes)
+            im1 = pxm.load('im3.tif')
+            im1r = im1.rebin(new_shape=(256,256))
+            stack1 = np.zeros((256,256,3))
+            stack1[:,:,0]=rotate((np.transpose(dp1.data/(0.05*dp1.data.max()),axes=(0,1))),-76)
+            stack1[:,:,2]=im1r.data/im1r.data.max()
+            plt.figure(1)
+            plt.imshow(stack1)
+        if line:
+            line.add_widget(data, axes=data.axes_manager.signal_axes)
+            trace = line.interactive(data, navigation_signal='same')
+            trace.plot()
