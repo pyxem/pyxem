@@ -21,7 +21,7 @@ import diffpy.structure
 import numpy as np
 from transforms3d.euler import euler2mat
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
 
@@ -80,7 +80,7 @@ def diffraction_pattern(z):
     return dp
 
 @pytest.fixture
-def diffraction_profile(diffraction_pattern):
+def electron_diffraction1d(diffraction_pattern):
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffraction1D <2,2|12>
     """

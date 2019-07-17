@@ -24,7 +24,7 @@ from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals.diffraction_profile import ElectronDiffraction1D
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through
 

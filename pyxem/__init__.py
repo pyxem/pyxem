@@ -41,8 +41,8 @@ from .signals.diffraction1d import Diffraction1D
 from .signals.diffraction2d import Diffraction2D
 from .signals.diffraction1d import LazyDiffraction1D
 from .signals.diffraction2d import LazyDiffraction2D
-from .signals.diffraction_profile import ElectronDiffraction1D
-from .signals.electron_diffraction import ElectronDiffraction2D
+from .signals.electron_diffraction1d import ElectronDiffraction1D
+from .signals.electron_diffraction2d import ElectronDiffraction2D
 
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_simulation import DiffractionSimulation

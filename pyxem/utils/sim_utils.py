@@ -303,7 +303,7 @@ def simulate_kinematic_scattering(atomic_coordinates,
         ElectronDiffraction2D simulation.
     """
     # Delayed loading to prevent circular dependencies.
-    from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+    from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
     # Get atomic scattering parameters for specified element.
     coeffs = np.array(get_scattering_params_dict(scattering_params)[element])

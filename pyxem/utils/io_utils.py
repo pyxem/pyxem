@@ -28,8 +28,8 @@ from hyperspy.io import load as hyperspyload
 import numpy as np
 
 from pyxem.signals.crystallographic_map import CrystallographicMap
-from pyxem.signals.diffraction_profile import ElectronDiffraction1D
-from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.vdf_image import VDFImage

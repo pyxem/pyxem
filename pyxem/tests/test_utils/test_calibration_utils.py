@@ -21,7 +21,7 @@ import numpy as np
 
 from pyxem.generators.calibration_generator import CalibrationGenerator
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 from pyxem.utils.calibration_utils import call_ring_pattern, \
     calc_radius_with_distortion, \

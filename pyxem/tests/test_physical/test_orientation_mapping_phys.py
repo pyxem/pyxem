@@ -27,7 +27,7 @@ from transforms3d.euler import euler2mat
 from pyxem.generators.indexation_generator import IndexationGenerator, VectorIndexationGenerator
 from pyxem.generators.library_generator import VectorLibraryGenerator
 from pyxem.libraries.structure_library import StructureLibrary
-from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.sim_utils import (peaks_from_best_template,
                                    peaks_from_best_vector_match,

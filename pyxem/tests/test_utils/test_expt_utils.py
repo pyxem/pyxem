@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead, apply_transformation, \
     regional_filter, subtract_background_dog, subtract_background_median, \

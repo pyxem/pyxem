@@ -22,7 +22,7 @@ import pyxem as pxm
 
 from hyperspy.signals import Signal1D, Signal2D
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
 def test_init():

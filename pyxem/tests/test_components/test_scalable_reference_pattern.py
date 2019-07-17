@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
-from pyxem.signals.electron_diffraction import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.expt_utils import _index_coords
 
 
