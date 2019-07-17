@@ -34,72 +34,63 @@ import os
 import numpy as np
 import h5py
 import dask.array as da
-import dask
-import hyperspy.api as hs
 
-#%%
-#from dask.distributed import Client, progress
-#client = Client(threads_per_worker=4, n_workers=10)
-#client
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
-#%%
 
 def _manageHeader(fname):
-    ''' Getting all the necessary information from the header  of the mib file '''
+    """Get necessary information from the header of the mib file.
 
-    Header = str()
+    Parameters
+    ----------
+    fname : str
+        Filename for header file.
+
+    Returns
+    -------
+    hdr : tuple
+        (DataOffset,NChips,PixelDepthInFile,sensorLayout,Timestamp,shuttertime,bitdepth)
+
+    Examples
+    --------
+    #Output for 6bit 256*256 data:
+    #(768, 4, 'R64', '2x2', '2019-06-14 11:46:12.607836', 0.0002, 6)
+    #Output for 12bit single frame nor RAW:
+    #(768, 4, 'U16', '2x2', '2019-06-06 11:12:42.001309', 0.001, 12)
+
+    """
+    header = str()
     with open(fname,'rb') as input:
         aByte= input.read(1)
         Header += str(aByte.decode('ascii'))
-
         # This gets rid of the header
         while aByte and ord(aByte) != 0:
-
             aByte= input.read(1)
-            Header += str(aByte.decode('ascii'))
-
-    ####################################################
-    #print(' Header str ',header_str)
-    #header = ImageHeader(header_str)
-    elements_in_header = Header.split(',')
-
-    #print(elements_in_header)
-
-    #Nframes = int(elements_in_header[1]) always returns 00001
-    #print(elements_in_header[2])
-
+            header += str(aByte.decode('ascii'))
+    # Split header into elements
+    elements_in_header = header.split(',')
+    # Read key parameters from header file
     DataOffset = int(elements_in_header[2])
-
     NChips = int(elements_in_header[3])
-    #if elements_in_header[4] == '1024':
-        #self.PixelXdim = int(elements_in_header[4])//2
-        #self.PixelYdim = int(elements_in_header[5])*2
-    #else:
-    #self.PixelXdim = int(elements_in_header[4])
-    #self.PixelYdim = int(elements_in_header[5])
-    #print(self.PixelXdim)
     PixelDepthInFile= elements_in_header[6]
     sensorLayout = elements_in_header[7].strip()
     Timestamp = elements_in_header[9]
     shuttertime = float(elements_in_header[10])
-    #GainMode= elements_in_header[13]
-
+    GainMode= elements_in_header[13]
+    # Assign bitdepth based on pixel depth code in header
     if PixelDepthInFile == 'R64':
-        bitdepth =int(elements_in_header[18]) # RAW
+        bitdepth =int(elements_in_header[18])
     elif PixelDepthInFile =='U16':
         bitdepth =12
     elif PixelDepthInFile =='U08':
         bitdepth =6
     elif PixelDepthInFile =='U32':
         bitdepth =24
-
-        #example output for 6bit 256*256 4DSTEM data:
-        #(768, 4, 'R64', '2x2', '2019-06-14 11:46:12.607836', 0.0002, 6)
-        #example output for 12bit single frame nor RAW:
-        #(768, 4, 'U16', '2x2', '2019-06-06 11:12:42.001309', 0.001, 12)
-
+    # Put header details into tuple to return
     hdr = (DataOffset,NChips,PixelDepthInFile,sensorLayout,Timestamp,shuttertime,bitdepth)
+
     return hdr
+
 
 def parse_hdr(fp):
     """Parse information from mib file header info from _manageHeader function.
@@ -166,7 +157,6 @@ def parse_hdr(fp):
     # print(hdr_info)
     return hdr_info
 
-#%%
 
 def add_crosses(a):
     # To be run on stack of images before reshape
@@ -234,7 +224,8 @@ def get_mib_depth(hdr_info,fp):
 
     # print(depth)
     return depth
-#%%
+
+
 def read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
     """
     Looks into the frame times of the first 10 pct of the frames to see if they are
@@ -322,7 +313,8 @@ def read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
         size = (height, width)
         data = data.reshape(size)
     return exp_time
-#%%
+
+
 def STEM_flag_dict(exp_times_list):
     output = {}
     times_set = set(exp_times_list)
@@ -365,11 +357,12 @@ def STEM_flag_dict(exp_times_list):
         output['flyback_times'] = flyback_times
 
     return output
-#%%
 
-def read_mib(hdr_info, fp, mmap_mode='r', save_hdf = False, path = None):
+
+def read_mib(hdr_info, fp, mmap_mode='r', path=None):
     """Read the raw file object 'fp' based on the information given in the
     'hdr_info' dictionary.
+
     Parameters
     ----------
     hdr_info: dict
@@ -528,15 +521,10 @@ def read_mib(hdr_info, fp, mmap_mode='r', save_hdf = False, path = None):
 
     #da_data = da.from_array(data)
 
-    if save_hdf:
-        os.chdir(path)
-        f = h5py.File('raw_data', 'w')
-        f.create_dataset('dataset1', data = data)
-        f.close()
-
     #print(da_data.shape)
     #data_hs = hs.signals.Signal2D(da_data).as_lazy()
     return data
+
 
 def mib_dask_reader(mib_filename):
     hdr_stuff = parse_hdr(mib_filename)
