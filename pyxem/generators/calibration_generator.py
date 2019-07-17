@@ -30,7 +30,7 @@ from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion, \
-                                          generate_ring_pattern, angle_between
+                                          generate_ring_pattern
 
 
 class CalibrationGenerator():
@@ -375,7 +375,7 @@ class CalibrationGenerator():
                              "determined. Please determine these parameters.")
         # Only distortion correction case
         elif self.rotation_angle is None:
-            correction_matrix = affine_matrix
+            correction_matrix = self.affine_matrix
         # Only rotation correction case
         elif self.affine_matrix is None:
             theta = self.rotation_angle
@@ -401,7 +401,7 @@ class CalibrationGenerator():
         ----------
         data_to_plot : string
             Specify the calibrated data to be plotted. Valid options are:
-            {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im'}
+            {'au_x_grating_dp', 'au_x_grating_im', 'rotation_overlay'}
         """
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
@@ -415,7 +415,11 @@ class CalibrationGenerator():
                                               inplace=True)
             data = dpegs.mean((0, 1))
             data.set_diffraction_calibration(self.diffraction_calibration)
+            # Plot the calibrated diffraction data
+            data.plot(*args, **kwargs)
         elif data_to_plot == 'au_x_grating_im':
             data = self.calibration_data.au_x_grating_im
-        # Plot the data
-        data.plot(*args, **kwargs)
+            # Plot the calibrated image data
+            data.plot(*args, **kwargs)
+        elif data_to_plot == 'rotation_overlay':
+            pass
