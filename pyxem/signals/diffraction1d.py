@@ -118,6 +118,26 @@ class Diffraction1D(Signal1D):
 
         return vdfim
 
+    def as_lazy(self, *args, **kwargs):
+        """Create a copy of the Diffraction1D object as a
+        :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction1D`.
+
+        Parameters
+        ----------
+        copy_variance : bool
+            If True variance from the original Diffraction1D object is copied to
+            the new LazyDiffraction1D object.
+
+        Returns
+        -------
+        res : :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction1D`.
+            The lazy signal.
+        """
+        res = super().as_lazy(*args, **kwargs)
+        res.__class__ = LazyDiffraction1D
+        res.__init__(**res._to_dictionary())
+        return res
+
 
 class LazyDiffraction1D(LazySignal, Diffraction1D):
 
