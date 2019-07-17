@@ -65,24 +65,12 @@ def make_saved_Signal2D():
     os.remove('badfilesuffix.emd')  # for case 3 of the edgecases
 
 
-@pytest.mark.filterwarnings('ignore::UserWarning')  # pyxem warns about these cases
-def test_load_edge_case(make_saved_Signal2D):
-    # Case 1 - you have a list of filenames
-    filename = 'S2D_temp.hspy'
-    file_list = [filename, filename]
-    s = pxm.load(file_list)
-    # Case 2 - you have a non-electron diffraction, non-hyperspy signals
-    s = pxm.load(filename, is_ElectronDiffraction2D=False)
-    # Case 3 - you have a bad file suffix
-    s = pxm.load('badfilesuffix.emd')
-
-
 def test_load_Signal2D(make_saved_Signal2D):
     """
     This tests that we can "load a Signal2D" with pxm.load and that we auto cast
     safetly into ElectronDiffraction2D
     """
-    dp = pxm.load('S2D_temp.hspy')
+    dp = pxm.load_hspy('S2D_temp.hspy', assign_to='electron_diffraction2d')
     assert dp.metadata.Signal.signal_type == 'electron_diffraction2d'
     assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
 
