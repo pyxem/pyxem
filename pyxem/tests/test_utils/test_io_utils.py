@@ -71,7 +71,7 @@ def test_load_Signal2D(make_saved_Signal2D):
     This tests that we can "load a Signal2D" with pxm.load and that we auto cast
     safetly into ElectronDiffraction2D
     """
-    dp = pxm.load('S2D_temp.hspy', assign_to='electron_diffraction2d')
+    dp = pxm.load('S2D_temp.hspy')
 
 
 def test_load_hspy_Signal2D(make_saved_Signal2D):
