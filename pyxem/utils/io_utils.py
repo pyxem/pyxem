@@ -37,6 +37,7 @@ from pyxem.signals.vdf_image import VDFImage
 from pyxem.io_plugins import io_plugins, default_write_ext
 from pyxem.io_plugins import mib as mib_reader
 
+
 def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
     """Load a medipix hdr/mib file.
 
@@ -53,19 +54,20 @@ def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
     """
     dpt = load_with_reader(filename=filename, reader=mib_reader)
     dpt = ElectronDiffraction2D(dpt.data.reshape((scan_size, scan_size, 256, 256)))
-    trace = dpt.inav[:,0:sum_length].sum((1,2,3))
-    edge = np.where(trace==max(trace.data))[0][0]
-    if edge==scan_size - 1:
+    trace = dpt.inav[:, 0:sum_length].sum((1, 2, 3))
+    edge = np.where(trace == max(trace.data))[0][0]
+    if edge == scan_size - 1:
         dp = ElectronDiffraction2D(dpt.inav[0:edge, 1:])
     else:
         dp = ElectronDiffraction2D(np.concatenate((dpt.inav[edge + 1:, 1:],
-                                                 dpt.inav[0:edge, 1:]), axis=1))
+                                                   dpt.inav[0:edge, 1:]), axis=1))
 
     dp.data = np.flip(dp.data, axis=2)
 
     return dp
 
-def load(filename,is_ElectronDiffraction2D=True):
+
+def load(filename, is_ElectronDiffraction2D=True):
     """
     A wrapper around hyperspy's load function that enables auto-setting signals
     to ElectronDiffraction2D and correct loading of previously saved
@@ -82,7 +84,7 @@ def load(filename,is_ElectronDiffraction2D=True):
         If the signal is not a pxm saved signal (eg - it's a .blo file), cast to
         an ElectronDiffraction2D object
     """
-    if isinstance(filename,str) == True:
+    if isinstance(filename, str) == True:
         file_suffix = '.' + filename.split('.')[-1]
     else:
         warnings.warn("filename is not a single string, for clarity consider using hs.load()")
@@ -90,17 +92,16 @@ def load(filename,is_ElectronDiffraction2D=True):
         return s
 
     if file_suffix == '.mib':
-        raise ValueError('mib files must be loaded directly using pxm.load_mib()') #pragma: no cover
+        raise ValueError('mib files must be loaded directly using pxm.load_mib()')  # pragma: no cover
 
+    signal_dictionary = {'electron_diffraction2d': ElectronDiffraction2D,
+                         'template_matching': TemplateMatchingResults,
+                         'diffraction_vectors': DiffractionVectors,
+                         'crystallographic_map': CrystallographicMap,
+                         'electron_diffraction1d': ElectronDiffraction1D,
+                         'vdf_image': VDFImage}
 
-    signal_dictionary = {'electron_diffraction2d':ElectronDiffraction2D,
-                         'template_matching':TemplateMatchingResults,
-                         'diffraction_vectors':DiffractionVectors,
-                         'crystallographic_map':CrystallographicMap,
-                         'electron_diffraction1d':ElectronDiffraction1D,
-                         'vdf_image':VDFImage}
-
-    if file_suffix in ['.hspy','.blo']: # if True we are loading a signal from a format we know
+    if file_suffix in ['.hspy', '.blo']:  # if True we are loading a signal from a format we know
         s = hyperspyload(filename)
         try:
             s = signal_dictionary[s.metadata.Signal.signal_type](s)

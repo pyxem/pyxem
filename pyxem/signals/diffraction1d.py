@@ -33,7 +33,7 @@ class Diffraction1D(Signal1D):
     _signal_type = "diffraction1d"
 
     def __init__(self, *args, **kwargs):
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
     def plot_interactive_virtual_image(self, left, right, **kwargs):

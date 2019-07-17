@@ -59,7 +59,7 @@ class Diffraction2D(Signal2D):
         **kwargs :
             Passed to the __init__ of Signal2D
         """
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
@@ -195,7 +195,7 @@ class Diffraction2D(Signal2D):
         """
 
         shape = self.axes_manager.signal_shape
-        if type(D) == np.ndarray:
+        if isinstance(D, np.ndarray):
             transformation = convert_affine_to_transform(D, shape)
         else:
             transformation = D.map(convert_affine_to_transform, shape=shape, inplace=False)
@@ -620,6 +620,7 @@ class Diffraction2D(Signal2D):
         res.__class__ = LazyDiffraction2D
         res.__init__(**res._to_dictionary())
         return res
+
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
 

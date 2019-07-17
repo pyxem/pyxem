@@ -22,11 +22,12 @@
 from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction1d import Diffraction1D
 
+
 class ElectronDiffraction1D(Diffraction1D):
     _signal_type = "electron_diffraction1d"
 
     def __init__(self, *args, **kwargs):
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
     def set_experimental_parameters(self,

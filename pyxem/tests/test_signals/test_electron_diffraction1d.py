@@ -29,12 +29,12 @@ class TestSimpleHyperspy:
 
     def test_set_experimental_parameters(self, electron_diffraction1d):
         electron_diffraction1d.set_experimental_parameters(accelerating_voltage=3,
-                                                        camera_length=3,
-                                                        scan_rotation=1,
-                                                        convergence_angle=1,
-                                                        rocking_angle=1,
-                                                        rocking_frequency=1,
-                                                        exposure_time=1)
+                                                           camera_length=3,
+                                                           scan_rotation=1,
+                                                           convergence_angle=1,
+                                                           rocking_angle=1,
+                                                           rocking_frequency=1,
+                                                           exposure_time=1)
         assert isinstance(electron_diffraction1d, ElectronDiffraction1D)
 
     def test_set_scan_calibration(self, electron_diffraction1d):

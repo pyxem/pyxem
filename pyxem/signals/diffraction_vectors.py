@@ -62,7 +62,7 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
