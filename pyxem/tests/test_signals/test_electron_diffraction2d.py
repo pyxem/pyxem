@@ -18,16 +18,18 @@
 
 import pytest
 import numpy as np
+import dask.array as da
+import pyxem as pxm
 
 from hyperspy.signals import Signal1D, Signal2D
-from hyperspy.roi import CircleROI
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 
 def test_init():
     z = np.zeros((2, 2, 2, 2))
-    dp = ElectronDiffraction(z, metadata={'Acquisition_instrument': {'SEM': 'Expensive-SEM'}})
+    dp = ElectronDiffraction2D(z, metadata={'Acquisition_instrument': {'SEM': 'Expensive-SEM'}})
 
 
 class TestSimpleMaps:
@@ -39,37 +41,37 @@ class TestSimpleMaps:
 
     def test_center_direct_beam(self, diffraction_pattern):
         # before inplace transform applied
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
         diffraction_pattern.center_direct_beam(radius_start=1, radius_finish=3)
         # after inplace transform applied
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
         diffraction_pattern.center_direct_beam(radius_start=1,
                                                radius_finish=3,
                                                square_width=3)
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     def test_apply_affine_transformation(self, diffraction_pattern):
         diffraction_pattern.apply_affine_transformation(
             D=np.array([[1., 0., 0.],
                         [0., 1., 0.],
                         [0., 0., 1.]]))
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
-    def test_apply_affine_transforms_paths(self,diffraction_pattern):
-        D=np.array([[1., 0.9, 0.],
-                    [1.1, 1., 0.],
-                    [0., 0., 1.]])
-        s = Signal2D(np.asarray([[D,D],[D,D]]))
-        static  = diffraction_pattern.apply_affine_transformation(D,inplace=False)
-        dynamic = diffraction_pattern.apply_affine_transformation(s,inplace=False)
-        assert np.allclose(static.data,dynamic.data,atol=1e-3)
+    def test_apply_affine_transforms_paths(self, diffraction_pattern):
+        D = np.array([[1., 0.9, 0.],
+                      [1.1, 1., 0.],
+                      [0., 0., 1.]])
+        s = Signal2D(np.asarray([[D, D], [D, D]]))
+        static = diffraction_pattern.apply_affine_transformation(D, inplace=False)
+        dynamic = diffraction_pattern.apply_affine_transformation(s, inplace=False)
+        assert np.allclose(static.data, dynamic.data, atol=1e-3)
 
     def test_apply_affine_transformation_with_casting(self, diffraction_pattern):
         diffraction_pattern.change_dtype('uint8')
-        transformed_dp = ElectronDiffraction(diffraction_pattern).apply_affine_transformation(
+        transformed_dp = ElectronDiffraction2D(diffraction_pattern).apply_affine_transformation(
             D=np.array([[1., 0., 0.],
                         [0., 1., 0.],
                         [0., 0., 1.2]]), order=2, keep_dtype=True, inplace=False)
@@ -81,7 +83,7 @@ class TestSimpleMaps:
     def test_remove_dead_pixels(self, diffraction_pattern, method):
         dpr = diffraction_pattern.remove_deadpixels([[1, 2], [5, 6]], method,
                                                     inplace=False)
-        assert isinstance(dpr, ElectronDiffraction)
+        assert isinstance(dpr, ElectronDiffraction2D)
 
 
 class TestSimpleHyperspy:
@@ -95,11 +97,11 @@ class TestSimpleHyperspy:
                                                         rocking_angle=1,
                                                         rocking_frequency=1,
                                                         exposure_time=1)
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     def test_set_scan_calibration(self, diffraction_pattern):
         diffraction_pattern.set_scan_calibration(19)
-        assert isinstance(diffraction_pattern, ElectronDiffraction)
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     @pytest.mark.parametrize('calibration, center', [
         (1, (4, 4),),
@@ -121,11 +123,11 @@ class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
     def test_plot_interactive_virtual_image(self, diffraction_pattern):
-        roi = CircleROI(3, 3, 5)
+        roi = pxm.roi.CircleROI(3, 3, 5)
         diffraction_pattern.plot_interactive_virtual_image(roi)
 
     def test_get_virtual_image(self, diffraction_pattern):
-        roi = CircleROI(3, 3, 5)
+        roi = pxm.roi.CircleROI(3, 3, 5)
         diffraction_pattern.get_virtual_image(roi)
 
 
@@ -170,9 +172,9 @@ class TestRadialProfile:
     def diffraction_pattern_for_radial(self):
         """
         Two diffraction patterns with easy to see radial profiles, wrapped
-        in ElectronDiffraction  <2|8,8>
+        in ElectronDiffraction2D  <2|8,8>
         """
-        dp = ElectronDiffraction(np.zeros((2, 8, 8)))
+        dp = ElectronDiffraction2D(np.zeros((2, 8, 8)))
         dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
                                [0., 2., 3., 3., 3., 3., 2., 0.],
                                [2., 3., 3., 4., 4., 3., 3., 2.],
@@ -221,7 +223,7 @@ class TestRadialProfile:
     @pytest.fixture
     def axes_test_dp(self):
         dp_data = np.random.randint(0, 10, (2, 2, 10, 10))
-        dp = ElectronDiffraction(dp_data)
+        dp = ElectronDiffraction2D(dp_data)
         return dp
 
     def test_radial_profile_axes(self, axes_test_dp):
@@ -295,14 +297,14 @@ class TestPeakFinding:
     @pytest.fixture
     def ragged_peak(self):
         """
-        A small selection of peaks in an ElectronDiffraction, to allow flexibilty
-        of test building here.
+        A small selection of peaks in an ElectronDiffraction2D, to allow
+        flexibilty of test building here.
         """
         pattern = np.zeros((2, 2, 128, 128))
         pattern[:, :, 40:42, 45] = 1
         pattern[:, :, 110, 30:32] = 1
         pattern[1, 0, 71:73, 21:23] = 1
-        dp = ElectronDiffraction(pattern)
+        dp = ElectronDiffraction2D(pattern)
         dp.set_diffraction_calibration(1)
         return dp
 
@@ -351,3 +353,51 @@ class TestNotImplemented():
     def test_remove_background_fake_implementation(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(
             method='median', implementation='fake_implementation')
+
+
+class TestComputeAndAsLazyElectron2D:
+
+    def test_2d_data_compute(self):
+        dask_array = da.random.random((100, 150), chunks=(50, 50))
+        s = LazyElectronDiffraction2D(dask_array)
+        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        s.axes_manager[0].scale = scale0
+        s.axes_manager[1].scale = scale1
+        s.metadata.Test = metadata_string
+        s.compute()
+        assert s.__class__ == ElectronDiffraction2D
+        assert not hasattr(s.data, 'compute')
+        assert s.axes_manager[0].scale == scale0
+        assert s.axes_manager[1].scale == scale1
+        assert s.metadata.Test == metadata_string
+        assert dask_array.shape == s.data.shape
+
+    def test_4d_data_compute(self):
+        dask_array = da.random.random((4, 4, 10, 15),
+                                      chunks=(1, 1, 10, 15))
+        s = LazyElectronDiffraction2D(dask_array)
+        s.compute()
+        assert s.__class__ == ElectronDiffraction2D
+        assert dask_array.shape == s.data.shape
+
+    def test_2d_data_as_lazy(self):
+        data = np.random.random((100, 150))
+        s = ElectronDiffraction2D(data)
+        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        s.axes_manager[0].scale = scale0
+        s.axes_manager[1].scale = scale1
+        s.metadata.Test = metadata_string
+        s_lazy = s.as_lazy()
+        assert s_lazy.__class__ == LazyElectronDiffraction2D
+        assert hasattr(s_lazy.data, 'compute')
+        assert s_lazy.axes_manager[0].scale == scale0
+        assert s_lazy.axes_manager[1].scale == scale1
+        assert s_lazy.metadata.Test == metadata_string
+        assert data.shape == s_lazy.data.shape
+
+    def test_4d_data_as_lazy(self):
+        data = np.random.random((4, 10, 15))
+        s = ElectronDiffraction2D(data)
+        s_lazy = s.as_lazy()
+        assert s_lazy.__class__ == LazyElectronDiffraction2D
+        assert data.shape == s_lazy.data.shape

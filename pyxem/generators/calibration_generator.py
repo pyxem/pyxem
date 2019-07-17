@@ -27,7 +27,7 @@ from hyperspy.roi import CircleROI, Line2DROI
 from hyperspy.misc.utils import stack as stack_method
 
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import call_ring_pattern, \
                                           calc_radius_with_distortion, \
                                           generate_ring_pattern, angle_between
@@ -134,13 +134,13 @@ class CalibrationGenerator():
                             [0, xf[4]**-0.5]])
 
         rotation = np.array([[cos(xf[5]), -sin(xf[5])],
-                             [sin(xf[5]),  cos(xf[5])]])
+                             [sin(xf[5]), cos(xf[5])]])
 
         correction = np.linalg.inv(np.dot(rotation.T,
                                           np.dot(scaling, rotation)))
 
-        affine = np.array([[correction[0,0], correction[0,1], 0.00],
-                           [correction[1,0], correction[1,1], 0.00],
+        affine = np.array([[correction[0, 0], correction[0, 1], 0.00],
+                           [correction[1, 0], correction[1, 1], 0.00],
                            [0.00, 0.00, 1.00]])
         # Set affine matrix to attribute
         self.affine_matrix = affine
@@ -160,10 +160,10 @@ class CalibrationGenerator():
 
         Returns
         -------
-        diff_init : ElectronDiffraction
+        diff_init : ElectronDiffraction2D
             Difference between experimental data and simulated symmetric ring
             pattern.
-        diff_end : ElectronDiffraction
+        diff_end : ElectronDiffraction2D
             Difference between distortion corrected data and simulated symmetric
             ring pattern.
         """
@@ -189,16 +189,16 @@ class CalibrationGenerator():
                                       asymmetry=1, rotation=ringP[5])
         # Apply distortion corrections to experimental data
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
+        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
         # Calculate residuals to be returned
-        diff_init = ElectronDiffraction(dpeg.data - dpref.data)
-        diff_end = ElectronDiffraction(dpegs.inav[0,0].data - dpref.data)
+        diff_init = ElectronDiffraction2D(dpeg.data - dpref.data)
+        diff_end = ElectronDiffraction2D(dpegs.inav[0, 0].data - dpref.data)
         residuals = stack_method([diff_init, diff_end])
 
-        return ElectronDiffraction(residuals)
+        return ElectronDiffraction2D(residuals)
 
     def plot_corrected_diffraction_pattern(self, reference_circle=True):
         """Plot the distortion corrected diffraction pattern with an optional
@@ -224,11 +224,11 @@ class CalibrationGenerator():
         # Apply distortion corrections to experimental data
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
+        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
-        dpegm = dpegs.mean((0,1))
+        dpegm = dpegs.mean((0, 1))
         # Plot distortion corrected data
         dpegm.plot(cmap='magma', vmax=0.1)
         # add reference circle if specified
@@ -267,23 +267,23 @@ class CalibrationGenerator():
         dpeg = self.calibration_data.au_x_grating_dp
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-        dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
+        dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
         dpegs.apply_affine_transformation(self.affine_matrix,
                                           preserve_range=True,
                                           inplace=True)
-        dpegm = dpegs.mean((0,1))
+        dpegm = dpegs.mean((0, 1))
         # Define line roi along which to take trace for calibration
-        line = Line2DROI(x1=5,y1=5, x2=250,y2=250, linewidth=linewidth)
+        line = Line2DROI(x1=5, y1=5, x2=250, y2=250, linewidth=linewidth)
         # Obtain line trace
         trace = line(dpegm)
         trace = trace.as_signal1D(0)
         # Find peaks in line trace either side of direct beam
-        db = (np.sqrt(2)*128) - (5*np.sqrt(2))
+        db = (np.sqrt(2) * 128) - (5 * np.sqrt(2))
         pka = trace.isig[db + mask_length:].find_peaks1D_ohaver()[0]['position']
         pkb = trace.isig[:db - mask_length].find_peaks1D_ohaver()[0]['position']
         # Determine predicted position of 022 peak of Au pattern d022=1.437
-        au_pre = db - (self.ring_params[0]/1.437)
-        au_post = db + (self.ring_params[0]/1.437)
+        au_pre = db - (self.ring_params[0] / 1.437)
+        au_post = db + (self.ring_params[0] / 1.437)
         # Calculate differences between predicted and measured positions
         prediff = np.abs(pkb - au_pre)
         postdiff = np.abs(pka - au_post)
@@ -330,7 +330,7 @@ class CalibrationGenerator():
         dif1 = np.abs(pk - x1)
         dif2 = np.abs(pk - x2)
         # Calculate navigation calibration
-        x = (n*xspace)/(pk[dif2==min(dif2)]-pk[dif1==min(dif1)])
+        x = (n * xspace) / (pk[dif2 == min(dif2)] - pk[dif1 == min(dif1)])
         # Store navigation calibration value as attribute
         self.navigation_calibration = x[0]
 
@@ -423,13 +423,13 @@ class CalibrationGenerator():
             dpeg = self.calibration_data.au_x_grating_dp
             size = dpeg.data.shape[0]
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
-            dpegs = ElectronDiffraction(dpegs.data.reshape((2,2,size,size)))
+            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
             dpegs.apply_affine_transformation(self.affine_matrix,
                                               preserve_range=True,
                                               inplace=True)
-            data = dpegs.mean((0,1))
+            data = dpegs.mean((0, 1))
             data.set_diffraction_calibration(self.diffraction_calibration)
         elif data_to_plot == 'au_x_grating_im':
             data = self.calibration_data.au_x_grating_im
-        #Plot the data
+        # Plot the data
         data.plot(*args, **kwargs)

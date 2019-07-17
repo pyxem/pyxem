@@ -21,16 +21,18 @@ import numpy as np
 
 from pyxem.generators.calibration_generator import CalibrationGenerator
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 from pyxem.utils.calibration_utils import call_ring_pattern, \
-                                          calc_radius_with_distortion, \
-                                          generate_ring_pattern
+    calc_radius_with_distortion, \
+    generate_ring_pattern
+
 
 @pytest.fixture
 def input_parameters():
     x0 = [95, 1200, 2.8, 450, 1.5, 10]
     return x0
+
 
 @pytest.mark.parametrize('known_values', [
     (np.array(
@@ -42,7 +44,6 @@ def input_parameters():
          38.97731538, 19.64631964, 161.72783637,
          23.6894442, 282.3126376]
     ))])
-
 @pytest.mark.parametrize('reference_indices', [
     (np.array(
         [[205, 158],
@@ -66,7 +67,6 @@ def input_parameters():
          [235, 188],
          [75, 186]]
     ))])
-
 def test_generate_ring_pattern(input_parameters,
                                known_values, reference_indices):
     x0 = input_parameters

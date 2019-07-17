@@ -62,7 +62,7 @@ def create_library():
         'pixel_coords': pixel_coords,
         'intensities': intensities,
     }
-    dp = pxm.ElectronDiffraction([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
+    dp = pxm.ElectronDiffraction2D([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
     return dp, library
 
 
@@ -79,6 +79,7 @@ def test_match_results():
     assert match_results.inav[1, 0].data[0][1][0] == 1
     assert match_results.inav[0, 1].data[0][1][0] == 2
     assert match_results.inav[1, 1].data[0][1][0] == 3
+
 
 def test_plot_best_matching_results_on_signal():
     match_results.plot_best_matching_results_on_signal(dp, library=library)

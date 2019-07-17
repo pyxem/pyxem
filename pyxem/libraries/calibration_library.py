@@ -26,7 +26,7 @@ class CalibrationDataLibrary(dict):
 
     Attributes
     ----------
-    au_x_grating_dp : ElectronDiffraction
+    au_x_grating_dp : ElectronDiffraction2D
         A ring diffraction pattern obtained from an Au X-grating standard.
     au_x_grating_im : :obj:`hyperspy.signals.Signal2D`
         An image of an Au X-grating standard.
@@ -64,7 +64,7 @@ class CalibrationDataLibrary(dict):
             data = self.moo3_im
         else:
             raise ValueError("Please specify valid data_to_plot.")
-        #Plot the data
+        # Plot the data
         data.plot(*args, **kwargs)
         if roi:
             roi.add_widget(data, axes=data.axes_manager.signal_axes)
