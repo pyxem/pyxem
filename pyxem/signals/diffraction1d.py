@@ -148,5 +148,5 @@ class LazyDiffraction1D(LazySignal, Diffraction1D):
 
     def compute(self, *args, **kwargs):
         super().compute(*args, **kwargs)
-        self.__class__ = Diffraction2D
+        self.__class__ = Diffraction1D
         self.__init__(**self._to_dictionary())
