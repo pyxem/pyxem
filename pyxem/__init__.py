@@ -43,16 +43,16 @@ from .signals.diffraction1d import LazyDiffraction1D
 from .signals.diffraction2d import LazyDiffraction2D
 from .signals.electron_diffraction1d import ElectronDiffraction1D
 from .signals.electron_diffraction2d import ElectronDiffraction2D
+from .signals.electron_diffraction1d import LazyElectronDiffraction1D
+from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
+from .signals.vdf_image import VDFImage
 from .signals.crystallographic_map import CrystallographicMap
 from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults
-from .signals.vdf_image import VDFImage
 
-from .io_plugins import io_plugins, default_write_ext
-from .io_plugins import mib as mib_reader
-from pyxem.utils.io_utils import load,load_mib
+from pyxem.utils.io_utils import load
 
 
 _logger = logging.getLogger(__name__)
