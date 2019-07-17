@@ -31,6 +31,7 @@ from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 from pyxem import CrystallographicMap
 
+
 class TemplateMatchingResults(BaseSignal):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
@@ -43,12 +44,11 @@ class TemplateMatchingResults(BaseSignal):
         Miller indices associated with each diffraction vector.
     """
 
-
     _signal_type = "template_matching"
     _signal_dimension = 2
 
     def __init__(self, *args, **kwargs):
-        self,args,kwargs = push_metadata_through(self,*args,**kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(2)
 
@@ -60,8 +60,8 @@ class TemplateMatchingResults(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
@@ -206,8 +206,8 @@ class VectorMatchingResults(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations

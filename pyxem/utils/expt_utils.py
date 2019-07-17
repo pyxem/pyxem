@@ -148,9 +148,9 @@ def gain_normalise(z, dref, bref):
     ----------
     z : np.array()
         Two-dimensional data array containing signal.
-    dref : ElectronDiffraction
+    dref : ElectronDiffraction2D
         Two-dimensional data array containing dark reference.
-    bref : ElectronDiffraction
+    bref : ElectronDiffraction2D
         Two-dimensional data array containing bright reference.
 
     Returns
