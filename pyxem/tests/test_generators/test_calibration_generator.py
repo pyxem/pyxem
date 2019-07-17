@@ -117,6 +117,13 @@ class TestCalibrationGenerator:
         np.testing.assert_almost_equal(calgen.navigation_calibration,
                                        value)
 
+    def test_get_rotation_calibration(self, calgen):
+        real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        value = calgen.get_rotation_calibration(real_line=real_line,
+                                                reciprocal_line=recip_line)
+        np.testing.assert_almost_equal(value, 0.3)
+
     def test_plot_calibrated_data_dp(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30,
                                              linewidth=5)
@@ -127,6 +134,35 @@ class TestCalibrationGenerator:
         calgen.get_navigation_calibration(line_roi=line, x1=12., x2=172.,
                                           n=1, xspace=500.)
         calgen.plot_calibrated_data(data_to_plot='au_x_grating_im')
+
+
+class TestGetCorrectionMatrix:
+
+    def test_get_correction_rotation_only(self, calgen):
+        real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        value = calgen.get_rotation_calibration(real_line=real_line,
+                                                reciprocal_line=recip_line)
+        np.testing.assert_almost_equal(value, 0.3)
+
+    def test_get_correction_matrix_only(self, calgen):
+        real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        value = calgen.get_rotation_calibration(real_line=real_line,
+                                                reciprocal_line=recip_line)
+        np.testing.assert_almost_equal(value, 0.3)
+
+    def test_get_correction_both(self, calgen):
+        real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        value = calgen.get_rotation_calibration(real_line=real_line,
+                                                reciprocal_line=recip_line)
+        np.testing.assert_almost_equal(value, 0.3)
+
+
+@pytest.mark.xfail(raises=ValueError)
+    def test_no_attributes_correction_matrix(self, calgen):
+        calgen.get_correction_matrix()
 
 
 @pytest.fixture
