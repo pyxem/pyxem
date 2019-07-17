@@ -18,7 +18,7 @@
 
 import pytest
 import numpy as np
-import dask as da
+import dask.array as da
 
 from pyxem.signals.diffraction1d import Diffraction1D, LazyDiffraction1D
 
