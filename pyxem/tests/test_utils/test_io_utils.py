@@ -83,8 +83,9 @@ def test_load_hspy_Signal2D(make_saved_Signal2D):
     assert dp.metadata.Signal.signal_type == 'electron_diffraction2d'
     assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
 
+
 @pytest.mark.xfail(raises=ValueError)
-def test_load_hspy_Signal2D(make_saved_Signal2D):
+def test_load_hspy_Signal2D_not_pyxem(make_saved_Signal2D):
     """
     This tests that we can "load a Signal2D" with pxm.load and that we auto cast
     safetly into ElectronDiffraction2D
