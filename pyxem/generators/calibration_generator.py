@@ -422,7 +422,7 @@ class CalibrationGenerator():
             data = self.calibration_data.au_x_grating_im
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
-        if data_to_plot == 'moo3_dp':
+        elif data_to_plot == 'moo3_dp':
             dpeg = self.calibration_data.au_x_grating_dp
             size = dpeg.data.shape[0]
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
