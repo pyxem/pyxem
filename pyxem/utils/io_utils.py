@@ -78,7 +78,7 @@ def load(filename, lazy=False):
         A pyxem Signal object containing loaded data.
     """
     s = hyperspyload(filename, lazy=lazy)
-    if lazy:
+    if lazy: # pragma: no cover
         try:
             s = lazy_signal_dictionary[s.metadata.Signal.signal_type](s)
         except KeyError:
@@ -118,7 +118,7 @@ def load_hspy(filename, lazy=False, assign_to=None):
     """
     s = hyperspyload(filename, lazy=lazy)
     if assign_to:
-        if lazy:
+        if lazy: # pragma: no cover
             try:
                 s = lazy_signal_dictionary[assign_to](s)
             except KeyError:
