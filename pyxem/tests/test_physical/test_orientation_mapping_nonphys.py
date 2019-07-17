@@ -62,7 +62,7 @@ def create_library():
         'pixel_coords': pixel_coords,
         'intensities': intensities,
     }
-    dp = pxm.ElectronDiffraction([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
+    dp = pxm.ElectronDiffraction2D([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
     return dp, library
 
 

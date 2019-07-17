@@ -16,10 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-def push_metadata_through(dummy,*args,**kwargs):
+
+def push_metadata_through(dummy, *args, **kwargs):
     """
     This function pushes loaded metadata through to pyxem objects, it is to be used for one
-    purpose, see the __init__ of ElectronDiffraction for an example.
+    purpose, see the __init__ of ElectronDiffraction2D for an example.
 
     Parameters
     ----------
@@ -45,4 +46,4 @@ def push_metadata_through(dummy,*args,**kwargs):
     except IndexError:
         pass  # this means that map continues to work.
 
-    return dummy,args,kwargs
+    return dummy, args, kwargs
