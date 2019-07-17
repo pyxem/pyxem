@@ -394,7 +394,7 @@ class CalibrationGenerator():
         # Return the correction matrix
         return correction_matrix
 
-    def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
+    def plot_calibrated_data(self, data_to_plot, roi, *args, **kwargs): # pragma: no cover
         """ Plot calibrated data for visual inspection.
 
         Parameters
@@ -402,6 +402,8 @@ class CalibrationGenerator():
         data_to_plot : string
             Specify the calibrated data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im', 'rotation_overlay'}
+        roi : roi
+            An roi to be added as a widget to the plot.
         """
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
@@ -417,9 +419,11 @@ class CalibrationGenerator():
             data.set_diffraction_calibration(self.diffraction_calibration)
             # Plot the calibrated diffraction data
             data.plot(*args, **kwargs)
+            roi.add_widget(data)
         elif data_to_plot == 'au_x_grating_im':
             data = self.calibration_data.au_x_grating_im
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
+            roi.add_widget(data)
         elif data_to_plot == 'rotation_overlay':
             pass
