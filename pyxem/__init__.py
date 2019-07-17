@@ -52,7 +52,7 @@ from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults
 
-from pyxem.utils.io_utils import load
+from pyxem.utils.io_utils import load, load_mib, load_hspy
 
 
 _logger = logging.getLogger(__name__)
