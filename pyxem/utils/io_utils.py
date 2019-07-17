@@ -120,7 +120,7 @@ def load(filename, lazy=False,
                 if is_ElectronDiffraction2D:
                     s = LazyElectronDiffraction2D(s)
                 else:
-                    warnings.warn("No pyxem functionality used, for clarity consider usi
+                    warnings.warn("No pyxem functionality used, for clarity consider using hs.load()")
         else:
             try:
                 s = signal_dictionary[s.metadata.Signal.signal_type](s)
