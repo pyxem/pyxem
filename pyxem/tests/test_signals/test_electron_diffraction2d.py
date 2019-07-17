@@ -18,6 +18,7 @@
 
 import pytest
 import numpy as np
+import dask.array as da
 import pyxem as pxm
 
 from hyperspy.signals import Signal1D, Signal2D

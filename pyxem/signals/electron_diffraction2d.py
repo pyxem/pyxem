@@ -174,7 +174,7 @@ class ElectronDiffraction2D(Diffraction2D):
         return res
 
 
-class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction2D):
+class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):
 
     _lazy = True
 
