@@ -19,20 +19,22 @@
 """Diffraction pattern library generator and associated tools.
 """
 
-import numpy as np
 import itertools
+import math
+
+import numpy as np
 from tqdm import tqdm
 from transforms3d.euler import euler2mat
-import diffpy.structure
 
 from pyxem.libraries.diffraction_library import DiffractionLibrary
 from pyxem.libraries.vector_library import DiffractionVectorLibrary
 
 from pyxem.utils.sim_utils import get_points_in_sphere
-from pyxem.utils.vector_utils import get_angle_cartesian
+from pyxem.utils.sim_utils import simulate_rotated_structure
+from pyxem.utils.vector_utils import get_angle_cartesian_vec
 
 
-class DiffractionLibraryGenerator(object):
+class DiffractionLibraryGenerator:
     """Computes a library of electron diffraction patterns for specified atomic
     structures and orientations.
     """
@@ -71,8 +73,10 @@ class DiffractionLibraryGenerator(object):
             library, in reciprocal Angstroms per pixel.
         reciprocal_radius : float
             The maximum g-vector magnitude to be included in the simulations.
-        half_shape: tuple
+        half_shape : tuple
             The half shape of the target patterns, for 144x144 use (72,72) etc
+        with_direct_beam : bool
+            Include the direct beam in the library.
 
         Returns
         -------
@@ -86,53 +90,48 @@ class DiffractionLibraryGenerator(object):
         # The electron diffraction calculator to do simulations
         diffractor = self.electron_diffraction_calculator
         # Iterate through phases in library.
-        for key in structure_library.struct_lib.keys():
+        for phase_name in structure_library.struct_lib.keys():
             phase_diffraction_library = dict()
-            structure = structure_library.struct_lib[key][0]
-            a, b, c, alpha, beta, gamma = structure.lattice.abcABG()
-            orientations = structure_library.struct_lib[key][1]
+            structure = structure_library.struct_lib[phase_name][0]
+            orientations = structure_library.struct_lib[phase_name][1]
+
+            num_orientations = len(orientations)
+            simulations = np.empty(num_orientations, dtype='object')
+            pixel_coords = np.empty(num_orientations, dtype='object')
+            intensities = np.empty(num_orientations, dtype='object')
             # Iterate through orientations of each phase.
-            for orientation in tqdm(orientations, leave=False):
-                _orientation = np.deg2rad(orientation)
-                matrix = euler2mat(_orientation[0],
-                                   _orientation[1],
-                                   _orientation[2], 'rzxz')
+            for i, orientation in enumerate(tqdm(orientations, leave=False)):
+                matrix = euler2mat(*np.deg2rad(orientation), 'rzxz')
+                simulation = simulate_rotated_structure(diffractor, structure, matrix, reciprocal_radius, with_direct_beam)
 
-                latt_rot = diffpy.structure.lattice.Lattice(a, b, c,
-                                                            alpha, beta, gamma,
-                                                            baserot=matrix)
-
-                # Don't change the original structure
-                structure_rotated = diffpy.structure.Structure(structure)
-                structure_rotated.placeInLattice(latt_rot)
-
-                # Calculate electron diffraction for rotated structure
-                data = diffractor.calculate_ed_data(structure_rotated,
-                                                    reciprocal_radius,
-                                                    with_direct_beam)
                 # Calibrate simulation
-                data.calibration = calibration
-                pattern_intensities = data.intensities
+                simulation.calibration = calibration
                 pixel_coordinates = np.rint(
-                    data.calibrated_coordinates[:, :2] + half_shape).astype(int)
-                # Construct diffraction simulation library, removing those that
-                # contain no peaks
-                if len(pattern_intensities) > 0:
-                    phase_diffraction_library[tuple(orientation)] = \
-                        {'Sim': data, 'intensities': pattern_intensities,
-                         'pixel_coords': pixel_coordinates,
-                         'pattern_norm': np.sqrt(np.dot(pattern_intensities,
-                                                        pattern_intensities))}
-                    diffraction_library[key] = phase_diffraction_library
+                    simulation.calibrated_coordinates[:, :2] + half_shape).astype(int)
+
+                # Construct diffraction simulation library
+                simulations[i] = simulation
+                pixel_coords[i] = pixel_coordinates
+                intensities[i] = simulation.intensities
+
+            diffraction_library[phase_name] = {
+                'simulations': simulations,
+                'orientations': orientations,
+                'pixel_coords': pixel_coords,
+                'intensities': intensities,
+            }
 
         # Pass attributes to diffraction library from structure library.
         diffraction_library.identifiers = structure_library.identifiers
         diffraction_library.structures = structure_library.structures
+        diffraction_library.diffraction_generator = diffractor
+        diffraction_library.reciprocal_radius = reciprocal_radius
+        diffraction_library.with_direct_beam = with_direct_beam
 
         return diffraction_library
 
 
-class VectorLibraryGenerator(object):
+class VectorLibraryGenerator:
     """Computes a library of diffraction vectors and pairwise inter-vector
     angles for a specified StructureLibrary.
     """
@@ -160,10 +159,8 @@ class VectorLibraryGenerator(object):
         Returns
         -------
         vector_library : :class:`DiffractionVectorLibrary`
-            Mapping of phase identifier to a numpy array with entries in the
-            form: [hkl1, hkl2, len1, len2, angle] ; lengths are in reciprocal
-            Angstroms and angles are in radians.
-
+            Mapping of phase identifier to phase information in dictionary
+            format.
         """
         # Define DiffractionVectorLibrary object to contain results
         vector_library = DiffractionVectorLibrary()
@@ -175,31 +172,47 @@ class VectorLibraryGenerator(object):
             structure = structure_library[phase_name][0]
             # Get reciprocal lattice points within reciprocal_radius
             recip_latt = structure.lattice.reciprocal()
-            indices, coordinates, distances = get_points_in_sphere(
+            miller_indices, coordinates, distances = get_points_in_sphere(
                 recip_latt,
                 reciprocal_radius)
 
-            # Iterate through all pairs calculating interplanar angle
-            phase_vector_pairs = []
-            for comb in itertools.combinations(np.arange(len(indices)), 2):
-                i, j = comb[0], comb[1]
-                # Specify hkls and lengths associated with the crystal structure.
-                # TODO: This should be updated to reflect systematic absences
-                if np.count_nonzero(coordinates[i]) == 0 or np.count_nonzero(coordinates[j]) == 0:
-                    continue  # Ignore combinations including [000]
-                hkl1 = indices[i]
-                hkl2 = indices[j]
-                len1 = distances[i]
-                len2 = distances[j]
-                if len1 < len2:  # Keep the longest first
-                    hkl1, hkl2 = hkl2, hkl1
-                    len1, len2 = len1, len2
-                angle = get_angle_cartesian(coordinates[i], coordinates[j])
-                phase_vector_pairs.append(np.array([hkl1, hkl2, len1, len2, angle]))
-            vector_library[phase_name] = np.array(phase_vector_pairs)
+            # Create pair_indices for selecting all point pair combinations
+            num_indices = len(miller_indices)
+            pair_a_indices, pair_b_indices = np.mgrid[:num_indices, :num_indices]
+
+            # Only select one of the permutations and don't pair an index with
+            # itself (select above diagonal)
+            upper_indices = np.triu_indices(num_indices, 1)
+            pair_a_indices = pair_a_indices[upper_indices].ravel()
+            pair_b_indices = pair_b_indices[upper_indices].ravel()
+
+            # Mask off origin (0, 0, 0)
+            origin_index = num_indices // 2
+            pair_a_indices = pair_a_indices[pair_a_indices != origin_index]
+            pair_b_indices = pair_b_indices[pair_b_indices != origin_index]
+
+            pair_indices = np.vstack([pair_a_indices, pair_b_indices])
+
+            # Create library entries
+            angles = get_angle_cartesian_vec(coordinates[pair_a_indices], coordinates[pair_b_indices])
+            pair_distances = distances[pair_indices.T]
+            # Ensure longest vector is first
+            len_sort = np.fliplr(pair_distances.argsort(axis=1))
+            # phase_index_pairs is a list of [hkl1, hkl2]
+            phase_index_pairs = np.take_along_axis(miller_indices[pair_indices.T], len_sort[:, :, np.newaxis], axis=1)
+            # phase_measurements is a list of [len1, len2, angle]
+            phase_measurements = np.column_stack((np.take_along_axis(pair_distances, len_sort, axis=1), angles))
+
+            # Only keep unique triplets
+            unique_measurements, unique_measurement_indices = np.unique(phase_measurements, axis=0, return_index=True)
+            vector_library[phase_name] = {
+                'indices': phase_index_pairs[unique_measurement_indices],
+                'measurements': unique_measurements
+            }
 
         # Pass attributes to diffraction library from structure library.
         vector_library.identifiers = self.structures.identifiers
         vector_library.structures = self.structures.structures
+        vector_library.reciprocal_radius = reciprocal_radius
 
         return vector_library

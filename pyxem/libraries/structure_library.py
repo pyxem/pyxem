@@ -40,10 +40,17 @@ class StructureLibrary():
                  identifiers,
                  structures,
                  orientations):
+        if len(identifiers) != len(structures):
+            raise ValueError('Number of identifiers ({}) and structures ({}) must be the same.'.format(
+                len(identifiers), len(structures)))
+        if len(identifiers) != len(orientations):
+            raise ValueError('Number of identifiers ({}) and orientations ({}) must be the same.'.format(
+                len(identifiers), len(orientations)))
+
         self.identifiers = identifiers
         self.structures = structures
         self.orientations = orientations
-        # create the actual dictionary
+        # Create the actual dictionary
         self.struct_lib = dict()
         for ident, struct, ori in zip(identifiers, structures, orientations):
             self.struct_lib[ident] = (struct, ori)

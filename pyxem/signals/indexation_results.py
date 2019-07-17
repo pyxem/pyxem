@@ -21,6 +21,7 @@ import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 from warnings import warn
 
+from pyxem.signals import push_metadata_through
 from pyxem.utils.sim_utils import peaks_from_best_template
 from pyxem.utils.sim_utils import peaks_from_best_vector_match
 from pyxem.utils.sim_utils import transfer_navigation_axes
@@ -35,33 +36,33 @@ class TemplateMatchingResults(BaseSignal):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
 
-    Atrributes
+    Attributes
     ----------
     vectors : DiffractionVectors
         Diffraction vectors indexed.
     hkls : BaseSignal
         Miller indices associated with each diffraction vector.
     """
+
     _signal_type = "template_matching"
     _signal_dimension = 2
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(2)
 
     def plot_best_matching_results_on_signal(self, signal,
-                                             phase_names, library,
+                                             library,
                                              permanent_markers=True,
                                              *args, **kwargs):
         """Plot the best matching diffraction vectors on a signal.
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
-        phase_names : list
-            List of phase names used as keys to the library
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
         permanent_markers : bool
@@ -72,7 +73,7 @@ class TemplateMatchingResults(BaseSignal):
             Keyword arguments passed to signal.plot()
         """
         match_peaks = self.map(peaks_from_best_template,
-                               phase_names=phase_names, library=library,
+                               library=library,
                                inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
@@ -120,7 +121,7 @@ class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
 
-    Atrributes
+    Attributes
     ----------
     vectors : DiffractionVectors
         Diffraction vectors indexed.
@@ -198,28 +199,18 @@ class VectorMatchingResults(BaseSignal):
         return vectors
 
     def plot_best_matching_results_on_signal(self, signal,
-                                             phase_names,
                                              library,
-                                             diffraction_generator,
-                                             reciprocal_radius,
                                              permanent_markers=True,
                                              *args, **kwargs):
         """Plot the best matching diffraction vectors on a signal.
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
-        phase_names : list
-            List of phase names used as keys to the library
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
-        diffraction_generator : DiffractionGenerator
-            Diffraction generator used to generate the patterns
-        reciprocal_radius : float
-            The maximum radius of the sphere of reciprocal space to sample, in
-            reciprocal angstroms.
         permanent_markers : bool
             Permanently save the peaks as markers on the signal. Default True.
         *args :
@@ -228,10 +219,7 @@ class VectorMatchingResults(BaseSignal):
             Keyword arguments passed to signal.plot()
         """
         match_peaks = self.map(peaks_from_best_vector_match,
-                               phase_names=phase_names,
                                library=library,
-                               diffraction_generator=diffraction_generator,
-                               reciprocal_radius=reciprocal_radius,
                                inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)

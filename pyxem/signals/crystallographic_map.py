@@ -27,6 +27,7 @@ from transforms3d.quaternions import qmult, qinverse
 
 from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.sim_utils import transfer_navigation_axes_to_signal_axes
+from pyxem.signals import push_metadata_through
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -163,15 +164,17 @@ class CrystallographicMap(BaseSignal):
         'orientation_reliability'
         'phase_reliability'
 
-    Atrributes
+    Attributes
     ----------
     method : string
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
+    _signal_type = "crystallographic_map"
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
         self.method = None
 
@@ -180,9 +183,7 @@ class CrystallographicMap(BaseSignal):
         """
         phase_map = self.isig[0].as_signal2D((0, 1))
         phase_map = transfer_navigation_axes_to_signal_axes(phase_map, self)
-        # TODO: Since vector matching results (and template in the future?) returns
-        # in object form, the isigs inherit it, even though this column is an index
-        phase_map.change_dtype('float')
+        phase_map.change_dtype(np.int)
 
         return phase_map
 
@@ -215,30 +216,27 @@ class CrystallographicMap(BaseSignal):
         ----------
         metric : string
             String identifier for the indexation / matching metric to be
-            mapped, for template_matching valid metrics are
-                'correlation'
-                'orientation_reliability'
-                'phase_reliability'
-            Here, orientation reliability is given by
-                100 * (1 - second_best_correlation/best_correlation)
-            and phase reliability is given by
-                100 * (1 - second_best_correlation_of_other_phase/best_correlation)
-
-            For vector_matching, valid metrics are;
-                'match_rate'
-                'ehkls'
-                'total_error'
-                'orientation_reliability'
-                'phase_reliability'
-            Here, orientation reliability is given by
-                100 * (1 - lowest_error/second_lowest_error)
-            and phase reliability is given by
-                100 * (1 - lowest_error/lowest_error_of_other_phase)
+            mapped, for template matching valid metrics are {'correlation',
+            'orientation_reliability', 'phase_reliability'}. For vector matching
+            valid metrics are {'match_rate', 'ehkls', 'total_error',
+            'orientation_reliability', 'phase_reliability'}.
 
         Returns
         -------
         metric_map : Signal2D
             A map of the specified metric at each navigation position.
+
+        Notes
+        -----
+        For template matching, orientation reliability is given by
+            100 * (1 - second_best_correlation/best_correlation)
+        and phase reliability is given by
+            100 * (1 - second_best_correlation_of_other_phase/best_correlation)
+
+        For vector matching, orientation reliability is given by
+            100 * (1 - lowest_error/second_lowest_error)
+        and phase reliability is given by
+            100 * (1 - lowest_error/lowest_error_of_other_phase)
 
         """
         if self.method == 'template_matching':
@@ -327,10 +325,15 @@ class CrystallographicMap(BaseSignal):
 
         Columns:
         1 = phase id,
-        2-4 = Euler angles in the zxz convention (radians),
+        2-4 = Euler angles in the zxz convention (degrees),
         5 = Correlation score (only the best match is saved),
         6 = x co-ord in navigation space,
         7 = y co-ord in navigation space.
+
+        Parameters
+        ----------
+        filename : string
+            Name of file to save the crystal map to
         """
         x_size_nav = self.data.shape[1]
         y_size_nav = self.data.shape[0]

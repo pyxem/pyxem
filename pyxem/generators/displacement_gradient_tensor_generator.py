@@ -25,66 +25,75 @@ from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
 def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
-    """
-    Calculates the displacement gradient by comparing vectors with linear algebra
+    """Calculates the displacement gradient tensor at each navigation position
+    in a map by comparing vectors to determine the 2 x 2 matrix,
+    :math:`\\mathbf(L)`, that maps unstrained vectors, Vu, to strained vectors,
+    Vs, using the np.lingalg.inv() function to find L that satisfies
+    :math:`Vs = \\mathbf(L) Vu`.
+
+    The transformation is returned as a 3 x 3 displacement gradient tensor.
 
     Parameters
     ----------
-    strained_vectors : Signal2D
+    strained_vectors : hyperspy.Signal2D
+        Signal2D with a 2 x 2 array at each navigation position containing the
+        Cartesian components of two strained basis vectors, V and U, defined as
+        row vectors.
+    unstrained_vectors : numpy.array
+        A 2 x 2 array containing the Cartesian components of two unstrained
+        basis vectors, V and U, defined as row vectors.
 
-    unstrained_vectors : numpy.array with shape (2,2)
-        For two vectors: V and U measured in x and y the components should fill the array as
-        >>> array([[Vx, Vy],
-                   [Ux, Uy]])
     Returns
     -------
     D : DisplacementGradientMap
-        The 3x3 displacement gradient tensor (measured in reciprocal space)
-        at every navigation position
+        The 3 x 3 displacement gradient tensor (measured in reciprocal space) at
+        every navigation position.
 
     See Also
     --------
     get_single_DisplacementGradientTensor()
 
-    Notes
-    -----
-    This function does not currently support keyword arguments to the underlying map function.
     """
+    # Calculate displacement gradient tensor across map.
+    D = strained_vectors.map(get_single_DisplacementGradientTensor,
+                             Vu=unstrained_vectors, inplace=False)
 
-    D = strained_vectors.map(get_single_DisplacementGradientTensor, Vu=unstrained_vectors, inplace=False)
     return DisplacementGradientMap(D)
 
 
 def get_single_DisplacementGradientTensor(Vs, Vu=None):
-    """
-    Calculates the displacement gradient tensor by relating two pairs of vectors
+    """Calculates the displacement gradient tensor from a pairs of vectors by
+    determining the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
+    vectors, Vu, onto strained vectors, Vs, using the np.lingalg.inv() function
+    to find :math:`\\mathbf(L)` that satisfies :math:`Vs = \\mathbf(L) Vu`.
+
+    The transformation is returned as a 3 x 3 displacement gradient tensor.
 
     Parameters
     ----------
-    Vs : numpy.array with shape (2,2)
-        For two vectors V and U measured in x and y the components should fill the array as
-        >>> array([[Vx, Vy],
-                   [Ux, Uy]])
-    Vu : numpy.array with shape (2,2)
-        For two vectors V and U measured in x and y the components should fill the array as
-        >>> array([[Vx, Vy],
-                   [Ux, Uy]])
+    Vs : numpy.array
+        A 2 x 2 array containing the Cartesian components of two strained basis
+        vectors, V and U, defined as row vectors.
+    Vu : numpy.array
+        A 2 x 2 array containing the Cartesian components of two unstrained
+        basis vectors, V and U, defined as row vectors.
 
     Returns
     -------
-    D : numpy.array of shape (3x3)
+    D : numpy.array
+        A 3 x 3 displacement gradient tensor (measured in reciprocal space).
 
-    Notes
-    -----
-    This routine is based on the equation
+    See Also
+    --------
+    get_DisplacementGradientMap()
 
-    Vs = L Vu
-
-    Where L is a (2x2) transform matrix that takes Vu (unstrained) onto Vs (strained).
-    We find L by using the np.linalg.inv() function
     """
-
+    # Take transpose to ensure conventions obeyed.
+    Vs, Vu = Vs.T, Vu.T
+    # Perform matrix multiplication to calculate 2 x 2 L-matrix.
     L = np.matmul(Vs, np.linalg.inv(Vu))
+    # Put cacluated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L
+
     return D

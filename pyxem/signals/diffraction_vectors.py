@@ -24,12 +24,12 @@ from hyperspy.api import markers
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
+from pyxem.signals import push_metadata_through
 from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
-
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
@@ -62,7 +62,8 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
 
@@ -101,8 +102,8 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         *args :
             Arguments passed to signal.plot()
@@ -198,7 +199,7 @@ class DiffractionVectors(BaseSignal):
             A DiffractionVectors object containing only the unique diffraction
             vectors in the original object.
         """
-        if (self.axes_manager.navigation_dimension == 2):
+        if self.axes_manager.navigation_dimension == 2:
             gvlist = np.array([self.data[0, 0][0]])
         else:
             raise ValueError("This method only works for ragged vector maps!")

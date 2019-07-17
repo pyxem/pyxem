@@ -103,8 +103,7 @@ def _polar2cart(r, theta):
 
 
 def radial_average(z, mask=None):
-    """Calculate the radial profile by azimuthal averaging about a specified
-    center.
+    """Calculate the radial profile by azimuthal averaging about the center.
 
     Parameters
     ----------
@@ -149,9 +148,9 @@ def gain_normalise(z, dref, bref):
     ----------
     z : np.array()
         Two-dimensional data array containing signal.
-    dref : ElectronDiffraction
+    dref : ElectronDiffraction2D
         Two-dimensional data array containing dark reference.
-    bref : ElectronDiffraction
+    bref : ElectronDiffraction2D
         Two-dimensional data array containing bright reference.
 
     Returns
@@ -199,17 +198,53 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     return z_bar
 
 
-def affine_transformation(z, matrix, order, *args, **kwargs):
-    """Apply an affine transformation to a 2-dimensional array.
+def convert_affine_to_transform(D, shape):
+    """ Converts an affine transform on a diffraction pattern to a suitable
+    form for skimage.transform.warp()
+
+    Parameters
+    ----------
+    D : np.array
+        Affine transform to be applied
+    shape : tuple
+        Shape tuple in form (y,x) for the diffraction pattern
+
+    Returns
+    -------
+    transformation : np.array
+        3x3 numpy array of the transformation to be applied.
+
+    """
+
+    shift_x = (shape[1] - 1) / 2
+    shift_y = (shape[0] - 1) / 2
+
+    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
+    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+
+    # This defines the transform you want to perform
+    distortion = tf.AffineTransform(matrix=D)
+
+    # skimage transforms can be added like this, does matrix multiplication,
+    # hence the need for the brackets. (Note tf.warp takes the inverse)
+    transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
+
+    return transformation
+
+
+def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs):
+    """Apply a transformation to a 2-dimensional array.
 
     Parameters
     ----------
     z : np.array
         Array to be transformed
-    matrix : np.array
-        3x3 numpy array specifying the affine transformation to be applied.
+    transformation : np.array
+        3x3 numpy array specifying the transformation to be applied.
     order : int
         Interpolation order.
+    keep_dtype : bool
+        If True dtype of returned object is that of z
     *args :
         To be passed to skimage.warp
     **kwargs :
@@ -219,19 +254,18 @@ def affine_transformation(z, matrix, order, *args, **kwargs):
     -------
     trans : array
         Affine transformed diffraction pattern.
+
+    Notes
+    -----
+    Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
-    # These three lines account for the transformation center not being (0,0)
-    shift_y, shift_x = np.array(z.shape[:2]) / 2.
-    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
-    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-
-    # This defines the transform you want to perform
-    transformation = tf.AffineTransform(matrix=matrix)
-
-    # skimage transforms can be added like this, actually matrix multiplication,
-    # hence the need for the brackets. (Note tf.warp takes the inverse)
-    trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order, *args, **kwargs)
+    if keep_dtype == False:
+        trans = tf.warp(z, transformation,
+                        order=order, *args, **kwargs)
+    if keep_dtype == True:
+        trans = tf.warp(z, transformation,
+                        order=order, preserve_range=True, *args, **kwargs)
+        trans = trans.astype(z.dtype)
 
     return trans
 
@@ -383,7 +417,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to centre the direct beam centre by a cross-correlation algorithm.
+    """Method to center the direct beam center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
@@ -430,102 +464,6 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     return (shift - 0.5)
 
 
-def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
-    """ calculate the distance of each 2D points from the center (xc, yc) """
-    xp = x * np.cos(rot) - y * np.sin(rot)
-    yp = x * np.sin(rot) + y * np.cos(rot)
-    xcp = xc * np.cos(rot) - yc * np.sin(rot)
-    ycp = xc * np.sin(rot) + yc * np.cos(rot)
-
-    return np.sqrt((xp - xcp)**2 + asym * (yp - ycp)**2)
-
-
-def call_ring_pattern(xcentre, ycentre):
-    """
-    Function to make a call to the function ring_pattern without passing the
-    variables directly (necessary for using scipy.optimize.curve_fit).
-
-    Parameters
-    ----------
-    xcentre : float
-        The coordinate (fractional pixel units) of the diffraction
-        pattern centre in the first dimension
-    ycentre : float
-        The coordinate (fractional pixel units) of the diffraction
-        pattern centre in the second dimension
-
-    Returns
-    -------
-    ring_pattern : function
-        A function that calculates a ring pattern given a set of points and
-        parameters.
-
-    """
-    def ring_pattern(pts, scale, amplitude, spread, direct_beam_amplitude,
-                     asymmetry, rotation):
-        """Calculats a polycrystalline gold diffraction pattern given a set of
-        pixel coordinates (points). It uses tabulated values of the spacings
-        (in reciprocal Angstroms) and relative intensities of rings derived from
-        X-ray scattering factors.
-
-        Parameters
-        -----------
-        pts : 1D array
-            One-dimensional array of points (first half as first-dimension
-            coordinates, second half as second-dimension coordinates)
-        scale : float
-            An initial guess for the diffraction calibration
-            in 1/Angstrom units
-        amplitude : float
-            An initial guess for the amplitude of the polycrystalline rings
-            in arbitrary units
-        spread : float
-            An initial guess for the spread within each ring (Gaussian width)
-        direct_beam_amplitude : float
-            An initial guess for the background intensity from
-            the direct beam disc in arbitrary units
-        asymmetry : float
-            An initial guess for any elliptical asymmetry in the pattern
-            (for a perfectly circular pattern asymmetry=1)
-        rotation : float
-            An initial guess for the rotation of the (elliptical) pattern
-            in radians.
-
-        Returns
-        -------
-        ring_pattern : np.array()
-            A one-dimensional array of the intensities of the ring pattern
-            at the supplied points.
-
-        """
-        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, \
-            0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966
-        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1 * scale, \
-            ring2 * scale, ring3 * scale, ring4 * scale, ring5 * scale, \
-            ring6 * scale, ring7 * scale, ring8 * scale
-        amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 = 1, 0.44, 0.19, \
-            0.16, 0.04, 0.014, 0.038, 0.036
-
-        x = pts[:round(np.size(pts, 0) / 2)]
-        y = pts[round(np.size(pts, 0) / 2):]
-        Ri = calc_radius_with_distortion(x, y, xcentre, ycentre,
-                                         asymmetry, rotation)
-
-        denom = 2 * spread**2
-        v0 = direct_beam_amplitude * Ri**-2  # np.exp((-1*(Ri)*(Ri))/d0)
-        v1 = amp1 * np.exp((-1 * (Ri - ring1) * (Ri - ring1)) / denom)
-        v2 = amp2 * np.exp((-1 * (Ri - ring2) * (Ri - ring2)) / denom)
-        v3 = amp3 * np.exp((-1 * (Ri - ring3) * (Ri - ring3)) / denom)
-        v4 = amp4 * np.exp((-1 * (Ri - ring4) * (Ri - ring4)) / denom)
-        v5 = amp5 * np.exp((-1 * (Ri - ring5) * (Ri - ring5)) / denom)
-        v6 = amp6 * np.exp((-1 * (Ri - ring6) * (Ri - ring6)) / denom)
-        v7 = amp7 * np.exp((-1 * (Ri - ring7) * (Ri - ring7)) / denom)
-        v8 = amp8 * np.exp((-1 * (Ri - ring8) * (Ri - ring8)) / denom)
-
-        return amplitude * (v0 + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8).ravel()
-    return ring_pattern
-
-
 def peaks_as_gvectors(z, center, calibration):
     """Converts peaks found as array indices to calibrated units, for use in a
     hyperspy map function.
@@ -535,7 +473,7 @@ def peaks_as_gvectors(z, center, calibration):
     z : numpy array
         peak postitions as array indices.
     center : numpy array
-        diffraction pattern centre in array indices.
+        diffraction pattern center in array indices.
     calibration : float
         calibration in reciprocal Angstroms per pixels.
 
