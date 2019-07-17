@@ -248,7 +248,8 @@ class SubpixelrefinementGenerator():
             si = np.unravel_index(np.argmax(z), z.shape)
             z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
             if z_ref.shape != (3, 3):
-                raise ValueError("The local maxima needs to have 4 adjacent pixels")
+                #raise ValueError("The local maxima needs to have 4 adjacent pixels")
+                return (si[1] - z.shape[1] // 2, si[0] - z.shape[0] // 2) # returns no shift
             M = z_ref[1, 1]
             LX, RX = z_ref[1, 0], z_ref[1, 2]
             UY, DY = z_ref[0, 1], z_ref[2, 1]
