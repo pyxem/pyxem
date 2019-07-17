@@ -151,3 +151,36 @@ class ElectronDiffraction2D(Diffraction2D):
         y.name = 'y'
         y.scale = calibration
         y.units = 'nm'
+
+    def as_lazy(self, *args, **kwargs):
+        """Create a copy of the ElectronDiffraction2D object as a
+        :py:class:`~pyxem.signals.electron_diffraction2d.LazyElectronDiffraction2D`.
+
+        Parameters
+        ----------
+        copy_variance : bool
+            If True variance from the original ElectronDiffraction2D object is
+            copied to the new LazyElectronDiffraction2D object.
+
+        Returns
+        -------
+        res : :py:class:`~pyxem.signals.electron_diffraction2d.LazyElectronDiffraction2D`.
+            The lazy signal.
+        """
+        res = super().as_lazy(*args, **kwargs)
+        res.__class__ = LazyElectronDiffraction2D
+        res.__init__(**res._to_dictionary())
+        return res
+
+
+class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction2D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def compute(self, *args, **kwargs):
+        super().compute(*args, **kwargs)
+        self.__class__ = ElectronDiffraction2D
+        self.__init__(**self._to_dictionary())
