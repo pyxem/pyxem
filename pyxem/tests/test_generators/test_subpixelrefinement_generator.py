@@ -131,16 +131,3 @@ def test_local_gaussian_method(dp, diffraction_vectors, refined_vectors):
     spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
     s = spr.local_gaussian_method(10)
     np.testing.assert_allclose(s.data[0, 0], refined_vectors, atol=0.1)
-
-
-@pytest.mark.parametrize('dp, diffraction_vectors', [
-    (create_spot(), create_vectors())
-])
-@pytest.mark.xfail(raises=ValueError)
-def test_local_gaussian_method_exciting(dp, diffraction_vectors):
-    """
-    This aims to test that our x/y convention is correct. The peak shape for
-    these tests is unsuitable for this method.
-    """
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.local_gaussian_method(8)
