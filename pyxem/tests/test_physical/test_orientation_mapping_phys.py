@@ -124,7 +124,7 @@ def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None
     dp_library = get_template_library(structure, pattern_list, edc)
     for sim in dp_library['A']['simulations']:
         pattern = (sim_as_signal(sim, 2 * half_side_length, 0.025, 1).data)
-    dp = pxm.ElectronDiffraction([[pattern, pattern], [pattern, pattern]])
+    dp = pxm.ElectronDiffraction2D([[pattern, pattern], [pattern, pattern]])
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
     return indexer.correlate(mask=mask, inplane_rotations=inplane_rotations)
