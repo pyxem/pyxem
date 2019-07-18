@@ -47,8 +47,8 @@ setup(
     packages=find_packages(),
     # adjust the tabbing
     install_requires=[
-      'scikit-image >= 0.15.0', #reason unknown 
-      'matplotlib >= 3.1.1' ,   #reason unknown
+      'scikit-image == 0.15.0', #reason unknown
+      'matplotlib < 3.1.1' ,   #reason unknown
       'scikit-learn >= 0.19',   #reason unknown
       'hyperspy >= 1.3',        #1.2 fails, (NTU Workshop - May 2019)
       'transforms3d',
