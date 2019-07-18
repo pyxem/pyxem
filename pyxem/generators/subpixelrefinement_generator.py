@@ -28,6 +28,8 @@ from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 
+import warnings
+
 
 class SubpixelrefinementGenerator():
     """Generates subpixel refinement of DiffractionVectors.
@@ -248,7 +250,7 @@ class SubpixelrefinementGenerator():
             si = np.unravel_index(np.argmax(z), z.shape)
             z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
             if z_ref.shape != (3, 3):
-                raise ValueError("The local maxima needs to have 4 adjacent pixels")
+                return (si[1] - z.shape[1] // 2, si[0] - z.shape[0] // 2)
             M = z_ref[1, 1]
             LX, RX = z_ref[1, 0], z_ref[1, 2]
             UY, DY = z_ref[0, 1], z_ref[2, 1]
@@ -261,15 +263,42 @@ class SubpixelrefinementGenerator():
             for i, vector in enumerate(vectors):
                 expt_disc = get_experimental_square(dp, vector, square_size)
                 shifts[i] = _new_lg_idea(expt_disc)
+
             return (((vectors + shifts) - center) * calibration)
 
-        self.vectors_out = DiffractionVectors(
-            self.dp.map(_lg_map,
+        self.vectors_out = DiffractionVectors(self.dp.map(_lg_map,
                         vectors=self.vector_pixels,
                         square_size=square_size,
                         center=self.center,
                         calibration=self.calibration,
                         inplace=False))
+
+        #check for unrefined peaks
+        def check_bad_square(z):
+            si = np.unravel_index(np.argmax(z), z.shape)
+            z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
+            if z_ref.shape == (3, 3):
+                return False
+            else:
+                return True
+
+        def _check_bad_square_map(dp,vectors,square_size):
+                bad_square = False
+                for i, vector in enumerate(vectors):
+                    expt_disc = get_experimental_square(dp, vector, square_size)
+                    bad_square = check_bad_square(expt_disc)
+                    if bad_square:
+                        return True
+                return False
+
+        bad_squares = self.dp.map(_check_bad_square_map,
+                                  vectors=self.vector_pixels,
+                                  square_size=square_size,
+                                  inplace=False)
+
+        if np.any(bad_squares):
+            warnings.warn("You have a peak in your pattern that lies on the edge of the square. \
+                          Consider increasing the square size")
 
         self.vectors_out.axes_manager.set_signal_dimension(0)
         self.last_method = "lg_method"
