@@ -25,13 +25,20 @@ from pyxem.generators.displacement_gradient_tensor_generator import \
 
 def vector_operation(z,M):
     """
+    Extracts our input format and applies operations vector by vector
+
     Parameters
     ----------
     z :
-        n | 2
+        n | 2 array
     M :
         tranformation matrix, (2,2)
+    Returns
+    -------
+    z_transformed :
+        n | 2 array after transformation
     """
+
     v_transformed = []
     for i in np.arange(0,z.shape[1]):
         v_transformed.append(np.matmul(M,z[:,i]))
@@ -65,11 +72,11 @@ def generate_strain_map(vectors):
     return st
 
 """
-Our "sample" allows us to use a range of basis vectors, we try 4 sets:
-xy
-Pair 2
-Pair 3
-Four vectors (for the least squares method)
+Our "sample" allows us to use a range of basis vectors, we try 4:
+> xy
+> a right handed: orthogonal set
+> a left handed: not orthogonal, not right handed set
+> Four vectors: (for the least squares method)
 """
 
 @pytest.fixture()
