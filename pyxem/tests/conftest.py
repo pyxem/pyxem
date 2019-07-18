@@ -22,7 +22,7 @@ import numpy as np
 from transforms3d.euler import euler2mat
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.libraries.vector_library import DiffractionVectorLibrary
+from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
 
 @pytest.fixture

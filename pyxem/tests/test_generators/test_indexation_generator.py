@@ -22,8 +22,8 @@ import numpy as np
 from pyxem.generators.indexation_generator import ProfileIndexationGenerator
 from pyxem.generators.indexation_generator import VectorIndexationGenerator
 
-from pyxem.libraries.vector_library import DiffractionVectorLibrary
-from pyxem.signals.diffraction_simulation import ProfileSimulation
+from diffsims.libraries.vector_library import DiffractionVectorLibrary
+from diffsims.sims.diffraction_simulation import ProfileSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 

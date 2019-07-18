@@ -2,7 +2,7 @@
 environment:
 
   global:
-    DEPS: "hyperspy-base transforms3d diffpy.structure"
+    DEPS: "hyperspy-base diffsims"
     TEST_DEPS: "pytest"
     MPLBACKEND: "agg"
 
