@@ -23,8 +23,7 @@ Generating DisplacementGradientMaps from diffraction vectors
 import numpy as np
 from pyxem.signals.tensor_field import DisplacementGradientMap
 
-
-def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
+def get_DisplacementGradientMap(strained_vectors, unstrained_vectors,weights=None):
     """Calculates the displacement gradient tensor at each navigation position
     in a map by comparing vectors to determine the 2 x 2 matrix,
     :math:`\\mathbf(L)`, that maps unstrained vectors, Vu, to strained vectors,
@@ -36,18 +35,24 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     Parameters
     ----------
     strained_vectors : hyperspy.Signal2D
-        Signal2D with a 2 x 2 array at each navigation position containing the
+        Signal2D with a 2 x n array at each navigation position containing the
         Cartesian components of two strained basis vectors, V and U, defined as
         row vectors.
     unstrained_vectors : numpy.array
-        A 2 x 2 array containing the Cartesian components of two unstrained
+        A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
+    weights : list
+        of weights to be passed to the least squares optimiser, not used for n=2
 
     Returns
     -------
     D : DisplacementGradientMap
         The 3 x 3 displacement gradient tensor (measured in reciprocal space) at
         every navigation position.
+
+    Notes
+    -----
+    n=2 case behaves differently to n>2, see pyxem pull request #425 for details
 
     See Also
     --------
@@ -56,43 +61,58 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors):
     """
     # Calculate displacement gradient tensor across map.
     D = strained_vectors.map(get_single_DisplacementGradientTensor,
-                             Vu=unstrained_vectors, inplace=False)
+                             Vu=unstrained_vectors, weights = weights, inplace=False)
 
     return DisplacementGradientMap(D)
 
 
-def get_single_DisplacementGradientTensor(Vs, Vu=None):
+def get_single_DisplacementGradientTensor(Vs, Vu=None, weights = None):
     """Calculates the displacement gradient tensor from a pairs of vectors by
     determining the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
-    vectors, Vu, onto strained vectors, Vs, using the np.lingalg.inv() function
-    to find :math:`\\mathbf(L)` that satisfies :math:`Vs = \\mathbf(L) Vu`.
+    vectors, Vu, onto strained vectors, Vs
 
     The transformation is returned as a 3 x 3 displacement gradient tensor.
 
     Parameters
     ----------
     Vs : numpy.array
-        A 2 x 2 array containing the Cartesian components of two strained basis
+        A 2 x n array containing the Cartesian components of two strained basis
         vectors, V and U, defined as row vectors.
     Vu : numpy.array
-        A 2 x 2 array containing the Cartesian components of two unstrained
+        A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
-
+    weights : list
+        of weights to be passed to the least squares optimiser, not used for n=2
     Returns
     -------
     D : numpy.array
         A 3 x 3 displacement gradient tensor (measured in reciprocal space).
+
+    Notes
+    -----
+    n=2 case behaves differently to n>2, see pyxem pull request #425 for details
 
     See Also
     --------
     get_DisplacementGradientMap()
 
     """
-    # Take transpose to ensure conventions obeyed.
-    Vs, Vu = Vs.T, Vu.T
-    # Perform matrix multiplication to calculate 2 x 2 L-matrix.
-    L = np.matmul(Vs, np.linalg.inv(Vu))
-    # Put cacluated matrix values into 3 x 3 matrix to be returned.
+    if Vs.shape == (2,2) and Vu.shape ==(2,2):
+        """ This code branch replicates the only behaviour in 0.8.1 """
+        Vs, Vu = Vs.T, Vu.T                  # Take transpose to ensure conventions obeyed.
+        L = np.matmul(Vs, np.linalg.inv(Vu)) # Perform matrix multiplication to calculate L-matrix.
+    else:
+        if weights is not None:
+            # see https://stackoverflow.com/questions/27128688
+            weights = np.asarray(weights)
+            # Need vectors normalized to the unstrained region otherwise the weighting breaks down
+            Vs = (np.divide(Vs,np.linalg.norm(Vu,axis=0))*np.sqrt(weights)).T #transpose for conventions
+            Vu = (np.divide(Vu,np.linalg.norm(Vu,axis=0))*np.sqrt(weights)).T
+        else:
+            Vs, Vu = Vs.T, Vu.T
+
+        L = np.linalg.lstsq(Vu,Vs)[0] # only need the return array, see np,linalg.lstsq docs
+    # Put caculated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L
 
