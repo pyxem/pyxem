@@ -41,14 +41,18 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors,weights=Non
     unstrained_vectors : numpy.array
         A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
-
-    weights :
+    weights : list
+        of weights to be passed to the least squares optimiser, not used for n=2
 
     Returns
     -------
     D : DisplacementGradientMap
         The 3 x 3 displacement gradient tensor (measured in reciprocal space) at
         every navigation position.
+
+    Notes
+    -----
+    n=2 case behaves differently to n>2, see pyxem pull request #425 for details
 
     See Also
     --------
@@ -65,8 +69,7 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors,weights=Non
 def get_single_DisplacementGradientTensor(Vs, Vu=None, weights = None):
     """Calculates the displacement gradient tensor from a pairs of vectors by
     determining the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
-    vectors, Vu, onto strained vectors, Vs, using the np.lingalg.inv() function
-    to find :math:`\\mathbf(L)` that satisfies :math:`Vs = \\mathbf(L) Vu`.
+    vectors, Vu, onto strained vectors, Vs
 
     The transformation is returned as a 3 x 3 displacement gradient tensor.
 
@@ -78,11 +81,16 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights = None):
     Vu : numpy.array
         A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
-
+    weights : list
+        of weights to be passed to the least squares optimiser, not used for n=2
     Returns
     -------
     D : numpy.array
         A 3 x 3 displacement gradient tensor (measured in reciprocal space).
+
+    Notes
+    -----
+    n=2 case behaves differently to n>2, see pyxem pull request #425 for details
 
     See Also
     --------

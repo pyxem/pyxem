@@ -146,10 +146,10 @@ def test_trivial_weight_function_case(xy_vectors):
 
 def test_weight_function_behaviour():
     multi_vector_array = np.asarray([[1,0,1,1],[0,1,-1,1]])
-    strained_by_10_in_x = vector_operation(multi_vector_array,np.asarray([[1.01, 0], [0, 1]]))
-    strained_by_20_in_x = vector_operation(multi_vector_array,np.asarray([[1.02, 0], [0, 1]]))
+    strained_by_1pc_in_x = vector_operation(multi_vector_array,np.asarray([[1.01, 0], [0, 1]])) #first  2
+    strained_by_2pc_in_x = vector_operation(multi_vector_array,np.asarray([[1.02, 0], [0, 1]])) #second 2
     weights = [1,1,2,2] # ((0.1*2 + 0.2*4)/6) = 0.166666
-    vectors = np.concatenate((strained_by_10_in_x[:,:2],strained_by_20_in_x[:,2:]),axis=1)
+    vectors = np.concatenate((strained_by_1pc_in_x[:,:2],strained_by_2pc_in_x[:,2:]),axis=1)
     deformed = hs.signals.Signal2D(np.asarray([[vectors,vectors],[vectors,vectors]]))
     strain_map = get_DisplacementGradientMap(deformed, multi_vector_array, weights = weights).get_strain_maps()
     np.testing.assert_almost_equal(strain_map.inav[0].isig[0,0].data[0], -1.0166666 + 1 ,decimal=4)
