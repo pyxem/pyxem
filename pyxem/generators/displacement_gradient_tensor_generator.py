@@ -90,19 +90,17 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights = None):
 
     """
     if Vs.shape == (2,2) and Vu.shape ==(2,2):
-        """ This code branch replicates the behaviour of 0.8.1 """
+        """ This code branch replicates the only behaviour in 0.8.1 """
         Vs, Vu = Vs.T, Vu.T                  # Take transpose to ensure conventions obeyed.
         L = np.matmul(Vs, np.linalg.inv(Vu)) # Perform matrix multiplication to calculate L-matrix.
     else:
-        if weights is not None:
-            # see https://stackoverflow.com/questions/27128688
-            Vs = np.multiply(Vs.T,np.sqrt(weights)) # transpose for conventions
-            Vu = np.multiply(Vu.T,np.sqrt(weights))
-        else:
-            Vs , Vu = Vs.T , Vu.T
-
-        L = np.linalg.lstsq(vzero,v)
-    # Put cacluated matrix values into 3 x 3 matrix to be returned.
+        if weights is None:
+            weights = 1
+        # see https://stackoverflow.com/questions/27128688
+        Vs = np.multiply(Vs.T,np.sqrt(weights)) #transpose for conventions
+        Vu = np.multiply(Vu.T,np.sqrt(weights))
+        L = np.linalg.lstsq(Vu,Vs)[0] # only need the return array, see np,linalg.lstsq docs
+    # Put caculated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L
 
