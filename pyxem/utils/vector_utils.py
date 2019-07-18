@@ -151,7 +151,7 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
     R1 = np.empty((angles.shape[0], 3, 3))
     if np.any(common_valid):
         R1[common_valid] = np.array([axangle2mat(axis, angle, is_normalized=True)
-            for axis, angle in zip(plane_common_axes[common_valid], angles[common_valid])])
+                                     for axis, angle in zip(plane_common_axes[common_valid], angles[common_valid])])
     R1[~common_valid] = np.identity(3)
 
     # Rotate from-plane into to-plane

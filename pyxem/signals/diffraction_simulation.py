@@ -19,7 +19,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
 class DiffractionSimulation:
@@ -118,7 +118,7 @@ class DiffractionSimulation:
         self._intensities = intensities
 
     def as_signal(self, size, sigma, max_r):
-        """Returns the diffraction data as an ElectronDiffraction signal with
+        """Returns the diffraction data as an ElectronDiffraction2D signal with
         two-dimensional Gaussians representing each diffracted peak. Should only
         be used for qualitative work.
 
@@ -135,7 +135,7 @@ class DiffractionSimulation:
         Returns
         -------
 
-        dp : ElectronDiffraction
+        dp : ElectronDiffraction2D
             Simulated electron diffraction pattern.
 
         """
@@ -158,7 +158,7 @@ class DiffractionSimulation:
             dp_dat = point_spread(dp_dat, sigma=sigma / delta_l).T
             dp_dat = dp_dat / np.max(dp_dat)
 
-        dp = ElectronDiffraction(dp_dat)
+        dp = ElectronDiffraction2D(dp_dat)
         dp.set_diffraction_calibration(2 * max_r / size)
 
         return dp

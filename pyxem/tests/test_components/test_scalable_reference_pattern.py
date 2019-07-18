@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.expt_utils import _index_coords
 
 
@@ -35,7 +35,7 @@ from pyxem.utils.expt_utils import _index_coords
               [0., 0., 0., 0., 0., 0., 0., 0.]])
 ])
 def diffraction_pattern(request):
-    return ElectronDiffraction(request.param)
+    return ElectronDiffraction2D(request.param)
 
 
 def test_scalable_reference_pattern_init(diffraction_pattern):

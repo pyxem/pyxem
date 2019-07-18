@@ -21,6 +21,7 @@ import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 from warnings import warn
 
+from pyxem.signals import push_metadata_through
 from pyxem.utils.sim_utils import peaks_from_best_template
 from pyxem.utils.sim_utils import peaks_from_best_vector_match
 from pyxem.utils.sim_utils import transfer_navigation_axes
@@ -42,11 +43,13 @@ class TemplateMatchingResults(BaseSignal):
     hkls : BaseSignal
         Miller indices associated with each diffraction vector.
     """
+
     _signal_type = "template_matching"
     _signal_dimension = 2
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(2)
 
     def plot_best_matching_results_on_signal(self, signal,
@@ -57,8 +60,8 @@ class TemplateMatchingResults(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
@@ -203,8 +206,8 @@ class VectorMatchingResults(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         library : DiffractionLibrary
             Diffraction library containing the phases and rotations
