@@ -94,11 +94,15 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights = None):
         Vs, Vu = Vs.T, Vu.T                  # Take transpose to ensure conventions obeyed.
         L = np.matmul(Vs, np.linalg.inv(Vu)) # Perform matrix multiplication to calculate L-matrix.
     else:
-        if weights is None:
-            weights = 1
-        # see https://stackoverflow.com/questions/27128688
-        Vs = np.multiply(Vs.T,np.sqrt(weights)) #transpose for conventions
-        Vu = np.multiply(Vu.T,np.sqrt(weights))
+        if weights is not None:
+            # see https://stackoverflow.com/questions/27128688
+            weights = np.asarray(weights)
+            # Need vectors normalized to the unstrained region otherwise the weighting breaks down
+            Vs = (np.divide(Vs,np.linalg.norm(Vu,axis=0))*np.sqrt(weights)).T #transpose for conventions
+            Vu = (np.divide(Vu,np.linalg.norm(Vu,axis=0))*np.sqrt(weights)).T
+        else:
+            Vs, Vu = Vs.T, Vu.T
+
         L = np.linalg.lstsq(Vu,Vs)[0] # only need the return array, see np,linalg.lstsq docs
     # Put caculated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)

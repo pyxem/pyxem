@@ -136,3 +136,20 @@ def test_multi_vector_method_has_xy_as_basis(xy_vectors,multi_vector):
     xy = xy_vectors.data
     mv = multi_vector.data
     np.testing.assert_almost_equal(xy,mv, decimal=2)
+
+def test_trivial_weight_function_case(xy_vectors):
+    weights = [1,1,1,1]
+    four_vectors = np.asarray([[1,0,1,1],[0,1,-1,1]])
+    deformed = hs.signals.Signal2D(generate_test_vectors(four_vectors))
+    weight_strain_map = get_DisplacementGradientMap(deformed,four_vectors, weights=weights).get_strain_maps()
+    np.testing.assert_almost_equal(xy_vectors.data,weight_strain_map.data,decimal=2)
+
+def test_weight_function_behaviour():
+    multi_vector_array = np.asarray([[1,0,1,1],[0,1,-1,1]])
+    strained_by_10_in_x = vector_operation(multi_vector_array,np.asarray([[1.01, 0], [0, 1]]))
+    strained_by_20_in_x = vector_operation(multi_vector_array,np.asarray([[1.02, 0], [0, 1]]))
+    weights = [1,1,2,2] # ((0.1*2 + 0.2*4)/6) = 0.166666
+    vectors = np.concatenate((strained_by_10_in_x[:,:2],strained_by_20_in_x[:,2:]),axis=1)
+    deformed = hs.signals.Signal2D(np.asarray([[vectors,vectors],[vectors,vectors]]))
+    strain_map = get_DisplacementGradientMap(deformed, multi_vector_array, weights = weights).get_strain_maps()
+    np.testing.assert_almost_equal(strain_map.inav[0].isig[0,0].data[0], -1.0166666 + 1 ,decimal=4)
