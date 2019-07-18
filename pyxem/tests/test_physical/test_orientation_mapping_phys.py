@@ -123,7 +123,7 @@ def get_template_library(structure, rot_list, edc):
 def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None, inplane_rotations=[0]):
     dp_library = get_template_library(structure, pattern_list, edc)
     for sim in dp_library['A']['simulations']:
-        pattern = (sim.as_signal(2 * half_side_length, 0.025, 1).data)
+        pattern = (sim_as_signal(sim, 2 * half_side_length, 0.025, 1).data)
     dp = pxm.ElectronDiffraction([[pattern, pattern], [pattern, pattern]])
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
@@ -222,7 +222,7 @@ def test_plot_best_matching_results_on_signal_vector(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     # Hyperspy can only add markers to square signals
     match_results.data = np.vstack((match_results.data, match_results.data))
-    dp = ElectronDiffraction(2 * [2 * [np.zeros((144, 144))]])
+    dp = ElectronDiffraction2D(2 * [2 * [np.zeros((144, 144))]])
     match_results.plot_best_matching_results_on_signal(dp,
                                                        library=library)
 
