@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+decimal=4# -*- coding: utf-8 -*-
 # Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
@@ -113,8 +113,8 @@ def test_rotation(xy_vectors,right_handed,multi_vector):
     rh_rot = right_handed.inav[3].data
     mv_rot = multi_vector.inav[3].data
 
-    np.testing.assert_almost_equal(xy_rot, rh_rot, decimal=2)  # rotations
-    np.testing.assert_almost_equal(xy_rot, mv_rot, decimal=2)  # rotations
+    np.testing.assert_almost_equal(xy_rot, rh_rot, decimal=4)  # rotations
+    np.testing.assert_almost_equal(xy_rot, mv_rot, decimal=4)  # rotations
 
 def test_left_vs_right_rotation(xy_vectors,left_handed):
     """
@@ -123,7 +123,7 @@ def test_left_vs_right_rotation(xy_vectors,left_handed):
     xy_rot = xy_vectors.inav[3].data
     lh_rot = np.multiply(left_handed.inav[3].data,-1)
 
-    np.testing.assert_almost_equal(xy_rot, lh_rot, decimal=2)  # rotations
+    np.testing.assert_almost_equal(xy_rot, lh_rot, decimal=4)  # rotations
 
 def test_trace(xy_vectors,right_handed,multi_vector):
     """
@@ -133,23 +133,23 @@ def test_trace(xy_vectors,right_handed,multi_vector):
     np.testing.assert_almost_equal(
         np.add(
             xy_vectors.inav[0].data, xy_vectors.inav[1].data), np.add(
-            right_handed.inav[0].data, right_handed.inav[1].data), decimal=3)
+            right_handed.inav[0].data, right_handed.inav[1].data), decimal=4)
     np.testing.assert_almost_equal(
         np.add(
             xy_vectors.inav[0].data, xy_vectors.inav[1].data), np.add(
-            multi_vector.inav[0].data, multi_vector.inav[1].data), decimal=3)
+            multi_vector.inav[0].data, multi_vector.inav[1].data), decimal=4)
 
 def test_multi_vector_method_has_xy_as_basis(xy_vectors,multi_vector):
     xy = xy_vectors.data
     mv = multi_vector.data
-    np.testing.assert_almost_equal(xy,mv, decimal=2)
+    np.testing.assert_almost_equal(xy,mv, decimal=4)
 
 def test_trivial_weight_function_case(xy_vectors):
     weights = [1,1,1,1]
     four_vectors = np.asarray([[1,0,1,1],[0,1,-1,1]])
     deformed = hs.signals.Signal2D(generate_test_vectors(four_vectors))
     weight_strain_map = get_DisplacementGradientMap(deformed,four_vectors, weights=weights).get_strain_maps()
-    np.testing.assert_almost_equal(xy_vectors.data,weight_strain_map.data,decimal=2)
+    np.testing.assert_almost_equal(xy_vectors.data,weight_strain_map.data,decimal=4)
 
 def test_weight_function_behaviour():
     multi_vector_array = np.asarray([[1,0,1,1],[0,1,-1,1]])
