@@ -136,6 +136,7 @@ def load_hspy(filename, lazy=False, assign_to=None):
 
 def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
     """Load a medipix hdr/mib file.
+
     Parameters
     ----------
     filename : string
@@ -145,15 +146,16 @@ def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
         the right shape.
     sum_length : int
         Number of lines to sum over to determine scan fly back location.
+
     """
     dpt = load_with_reader(filename=filename, reader=mib_reader)
-    dpt = ElectronDiffraction(dpt.data.reshape((scan_size, scan_size, 256, 256)))
-    trace = dpt.inav[:,0:sum_length].sum((1,2,3))
-    edge = np.where(trace==max(trace.data))[0][0]
-    if edge==scan_size - 1:
-        dp = ElectronDiffraction(dpt.inav[0:edge, 1:])
+    dpt = ElectronDiffraction2D(dpt.data.reshape((scan_size, scan_size, 256, 256)))
+    trace = dpt.inav[:, 0:sum_length].sum((1, 2, 3))
+    edge = np.where(trace == max(trace.data))[0][0]
+    if edge == scan_size - 1:
+        dp = ElectronDiffraction2D(dpt.inav[0:edge, 1:])
     else:
-        dp = ElectronDiffraction(np.concatenate((dpt.inav[edge + 1:, 1:],
+        dp = ElectronDiffraction2D(np.concatenate((dpt.inav[edge + 1:, 1:],
                                                  dpt.inav[0:edge, 1:]), axis=1))
 
     dp.data = np.flip(dp.data, axis=2)

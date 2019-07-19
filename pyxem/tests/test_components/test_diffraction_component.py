@@ -20,8 +20,8 @@ import pytest
 import numpy as np
 import diffpy.structure
 
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
-from pyxem.generators.diffraction_generator import DiffractionGenerator
+from diffsims.sims.diffraction_simulation import DiffractionSimulation
+from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem.components.diffraction_component import ElectronDiffractionForwardModel
 
 

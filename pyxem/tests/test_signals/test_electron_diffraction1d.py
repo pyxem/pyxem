@@ -106,3 +106,9 @@ class TestComputeAndAsLazyElectron1D:
         s_lazy = s.as_lazy()
         assert s_lazy.__class__ == LazyElectronDiffraction1D
         assert data.shape == s_lazy.data.shape
+
+
+class TestDecomposition:
+    def test_decomposition_class_assignment(self, electron_diffraction1d):
+        electron_diffraction1d.decomposition()
+        assert isinstance(electron_diffraction1d, ElectronDiffraction1D)

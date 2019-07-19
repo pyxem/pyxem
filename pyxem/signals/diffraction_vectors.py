@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.signals import push_metadata_through
-from pyxem.utils.sim_utils import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
@@ -276,7 +276,7 @@ class DiffractionVectors(BaseSignal):
             The camera length in meters.
         """
         # Imported here to avoid circular dependency
-        from pyxem.utils.sim_utils import get_electron_wavelength
+        from diffsims.utils.sim_utils import get_electron_wavelength
         wavelength = get_electron_wavelength(accelerating_voltage)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,

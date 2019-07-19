@@ -25,8 +25,8 @@ from hyperspy.signals import Signal2D
 from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 
-from pyxem.utils.sim_utils import transfer_navigation_axes
-from pyxem.utils.sim_utils import transfer_navigation_axes_to_signal_axes
+from pyxem.signals import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes_to_signal_axes
 from pyxem.signals import push_metadata_through
 
 """

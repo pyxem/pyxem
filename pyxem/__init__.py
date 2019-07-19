@@ -30,11 +30,12 @@ import numpy as np
 
 from natsort import natsorted
 
-from .components.diffraction_component import ElectronDiffractionForwardModel
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.generators.library_generator import VectorLibraryGenerator
+from diffsims.sims.diffraction_simulation import DiffractionSimulation
 
-from .generators.diffraction_generator import DiffractionGenerator
-from .generators.library_generator import DiffractionLibraryGenerator
-from .generators.library_generator import VectorLibraryGenerator
+from .components.diffraction_component import ElectronDiffractionForwardModel
 from .generators.calibration_generator import CalibrationGenerator
 
 from .signals.diffraction1d import Diffraction1D
@@ -48,9 +49,9 @@ from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 from .signals.vdf_image import VDFImage
 from .signals.crystallographic_map import CrystallographicMap
-from .signals.diffraction_simulation import DiffractionSimulation
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults
+from .signals.vdf_image import VDFImage
 
 from pyxem.utils.io_utils import load, load_mib, load_hspy
 
