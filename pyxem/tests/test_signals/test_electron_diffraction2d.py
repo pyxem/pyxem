@@ -328,6 +328,14 @@ class TestsAssertionless:
     def test_decomposition(self, diffraction_pattern):
         storage = diffraction_pattern.decomposition()
 
+    def test_decomposition_class_assignment(self, diffraction_pattern):
+        diffraction_pattern.decomposition()
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
+
+    def test_decomposition_is_performed(self, diffraction_pattern):
+        diffraction_pattern.decomposition()
+        assert diffraction_pattern.learning_results is not None
+
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
     # we don't want to use xc in this bit
     @pytest.mark.filterwarnings('ignore::UserWarning')
