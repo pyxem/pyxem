@@ -109,10 +109,6 @@ class TestComputeAndAsLazyElectron1D:
 
 
 class TestDecomposition:
-    def test_decomposition_is_performed(self, electron_diffraction1d):
-        electron_diffraction1d.decomposition()
-        assert electron_diffraction1d.learning_results is not None
-
     def test_decomposition_class_assignment(self, electron_diffraction1d):
         electron_diffraction1d.decomposition()
         assert isinstance(electron_diffraction1d, ElectronDiffraction1D)

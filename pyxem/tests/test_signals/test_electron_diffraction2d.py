@@ -402,9 +402,6 @@ class TestComputeAndAsLazyElectron2D:
 
 
 class TestDecomposition:
-    def test_decomposition(self, diffraction_pattern):
-        storage = diffraction_pattern.decomposition()
-
     def test_decomposition_class_assignment(self, diffraction_pattern):
         diffraction_pattern.decomposition()
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
