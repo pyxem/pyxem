@@ -499,6 +499,7 @@ class Diffraction2D(Signal2D):
         super(Signal2D, self).decomposition(*args, **kwargs)
         self.learning_results.loadings = np.nan_to_num(
             self.learning_results.loadings)
+        self.__class__ = Diffraction2D
 
     def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
@@ -633,3 +634,7 @@ class LazyDiffraction2D(LazySignal, Diffraction2D):
         super().compute(*args, **kwargs)
         self.__class__ = Diffraction2D
         self.__init__(**self._to_dictionary())
+
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = LazyDiffraction2D
