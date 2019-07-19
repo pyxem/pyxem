@@ -325,8 +325,6 @@ class TestPeakFinding:
 
 
 class TestsAssertionless:
-    def test_decomposition(self, diffraction_pattern):
-        storage = diffraction_pattern.decomposition()
 
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
     # we don't want to use xc in this bit
@@ -401,3 +399,9 @@ class TestComputeAndAsLazyElectron2D:
         s_lazy = s.as_lazy()
         assert s_lazy.__class__ == LazyElectronDiffraction2D
         assert data.shape == s_lazy.data.shape
+
+
+class TestDecomposition:
+    def test_decomposition_class_assignment(self, diffraction_pattern):
+        diffraction_pattern.decomposition()
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)

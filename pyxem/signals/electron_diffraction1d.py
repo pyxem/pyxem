@@ -137,6 +137,10 @@ class ElectronDiffraction1D(Diffraction1D):
         res.__init__(**res._to_dictionary())
         return res
 
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = ElectronDiffraction1D
+
 
 class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction1D):
 
@@ -149,3 +153,7 @@ class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction1D):
         super().compute(*args, **kwargs)
         self.__class__ = ElectronDiffraction1D
         self.__init__(**self._to_dictionary())
+
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = LazyElectronDiffraction1D
