@@ -2,13 +2,11 @@
 name: Pull request 
 about: A pull request that fixes a bug or adds a feature
 
-- [ ] ready for review and merge?
 ---
 
 **Release Notes**
-> major or minor (all but urgent bugfixes go in the former)
 > new feature / improvement / bugfix / developer change
-Summary: 1 line per end-user relevant change
+> Summary: 1 line per end-user relevant change
 
 **What does this PR do? Please describe and/or link to an open issue.**
 A clear and concise description of what the code in this PR does. Does it fix a bug or add a new feature?
@@ -25,4 +23,4 @@ If you know there is more to do, make a checklist here:
 - [ ] TODO 1
 - [ ] TODO 2
 
-
+<i> And then once it's all good to go, hit the request review button and an admin will get it checked and merged </i>
