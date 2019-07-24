@@ -416,9 +416,11 @@ class CalibrationGenerator():
         if data_to_plot == 'au_x_grating_dp':
             dpeg = self.calibration_data.au_x_grating_dp
             size = dpeg.data.shape[0]
+            if self.correction_matrix is None:
+                self.get_correction_matrix()
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
             dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-            dpegs.apply_affine_transformation(self.affine_matrix,
+            dpegs.apply_affine_transformation(self.correction_matrix,
                                               preserve_range=True,
                                               inplace=True)
             data = dpegs.mean((0, 1))
@@ -432,9 +434,11 @@ class CalibrationGenerator():
         elif data_to_plot == 'moo3_dp':
             dpeg = self.calibration_data.moo3_dp
             size = dpeg.data.shape[0]
+            if self.correction_matrix is None:
+                self.get_correction_matrix()
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
             dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-            dpegs.apply_affine_transformation(self.affine_matrix,
+            dpegs.apply_affine_transformation(self.correction_matrix,
                                               preserve_range=True,
                                               inplace=True)
             data = dpegs.mean((0, 1))
@@ -446,11 +450,20 @@ class CalibrationGenerator():
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
         elif data_to_plot == 'rotation_overlay':
-            im1 = pxm.load('im3.tif')
-            im1r = im1.rebin(new_shape=(256,256))
-            stack1 = np.zeros((256,256,3))
-            stack1[:,:,0]=rotate((np.transpose(dp1.data/(0.05*dp1.data.max()),axes=(0,1))),-76)
-            stack1[:,:,2]=im1r.data/im1r.data.max()
+            dpeg = self.calibration_data.moo3_dp
+            size = dpeg.data.shape[0]
+            if self.correction_matrix is None:
+                self.get_correction_matrix()
+            dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
+            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+            dpegs.apply_affine_transformation(self.correction_matrix,
+                                              preserve_range=True,
+                                              inplace=True)
+            dp = dpegs.mean((0, 1))
+            im = self.calibration_data.moo3_im.rebin(dp.data.shape)
+            stack1 = np.zeros((dp.data.shape[0], dp.data.shape[1], 3))
+            stack1[:,:,0]=dp.data/(0.05*dp.data.max())
+            stack1[:,:,2]=im.data/im.data.max()
             plt.figure(1)
             plt.imshow(stack1)
         if line:
