@@ -380,13 +380,13 @@ class CalibrationGenerator():
             correction_matrix = self.affine_matrix
         # Only rotation correction case
         elif self.affine_matrix is None:
-            theta = self.rotation_angle
+            theta = self.rotation_angle / 180 * np.pi
             correction_matrix = np.array([[cos(theta), -sin(theta), 0],
                                           [sin(theta), cos(theta), 0],
                                           [0, 0, 1]])
         # Otherwise both corrections required, distortion applied first
         else:
-            theta = self.rotation_angle
+            theta = self.rotation_angle / 180 * np.pi
             rotation_matrix = np.array([[cos(theta), -sin(theta), 0],
                                         [sin(theta), cos(theta), 0],
                                         [0, 0, 1]])
@@ -457,3 +457,4 @@ class CalibrationGenerator():
             line.add_widget(data, axes=data.axes_manager.signal_axes)
             trace = line.interactive(data, navigation_signal='same')
             trace.plot()
+            return trace

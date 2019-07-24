@@ -118,11 +118,11 @@ class TestCalibrationGenerator:
                                        value)
 
     def test_get_rotation_calibration(self, calgen):
-        real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        real_line = Line2DROI(x1=2.69824, y1=81.4867, x2=229.155, y2=61.6898, linewidth=3)
+        recip_line = Line2DROI(x1=-0.30367, y1=-1.21457, x2=0.344978, y2=1.24927, linewidth=0.115582)
         value = calgen.get_rotation_calibration(real_line=real_line,
                                                 reciprocal_line=recip_line)
-        np.testing.assert_almost_equal(value, 0.3)
+        np.testing.assert_almost_equal(value, -80.24669411537899)
 
     def test_plot_calibrated_data_dp(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30,
@@ -139,32 +139,33 @@ class TestCalibrationGenerator:
 class TestGetCorrectionMatrix:
 
     def test_get_correction_rotation_only(self, calgen):
-        real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
+        calgen.rotation_angle = -80.24669411537899
+        corr = calgen.get_correction_matrix()
+        np.testing.assert_almost_equal(corr, np.array([[ 0.16940637, 0.98554629, 0.],
+                                                       [-0.98554629, 0.16940637, 0.],
+                                                       [ 0.        , 0.        , 1.]]))
+
+    def test_get_correction_affine_only(self, calgen):
+        affine = np.array([[0.97579077, 0.01549655, 0.],
+                           [0.01549655, 0.99008051, 0.],
+                           [0.        , 0.        , 1.]])
+        calgen.affine_matrix = affine
+        corr = calgen.get_correction_matrix()
+        np.testing.assert_almost_equal(corr, affine)
+
+    def test_get_correction_affine_and_rotation(self, calgen):
+        affine = np.array([[0.97579077, 0.01549655, 0.        ],
+                           [0.01549655, 0.99008051, 0.        ],
+                           [0.        , 0.        , 1.        ]])
+        calgen.affine_matrix = affine
+        real_line = Line2DROI(x1=2.69824, y1=81.4867, x2=229.155, y2=61.6898, linewidth=3)
+        recip_line = Line2DROI(x1=-0.30367, y1=-1.21457, x2=0.344978, y2=1.24927, linewidth=0.115582)
         value = calgen.get_rotation_calibration(real_line=real_line,
                                                 reciprocal_line=recip_line)
         corr = calgen.get_correction_matrix()
-        np.testing.assert_almost_equal(corr, matrix)
-
-    def test_get_correction_matrix_only(self, calgen):
-        matrix = np.array([[0.97579077, 0.01549655, 0.        ],
-                           [0.01549655, 0.99008051, 0.        ],
-                           [0.        , 0.        , 1.        ]])
-        calgen.affine_matrix = matrix
-        corr = calgen.get_correction_matrix()
-        np.testing.assert_almost_equal(corr, matrix)
-
-    def test_get_correction_both(self, calgen):
-        matrix = np.array([[0.97579077, 0.01549655, 0.        ],
-                           [0.01549655, 0.99008051, 0.        ],
-                           [0.        , 0.        , 1.        ]])
-        calgen.affine_matrix = matrix
-        real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
-        value = calgen.get_rotation_calibration(real_line=real_line,
-                                                reciprocal_line=recip_line)
-        corr = calgen.get_correction_matrix()
-        np.testing.assert_almost_equal(corr, matrix)
+        np.testing.assert_almost_equal(corr, np.array([[ 0.1805777, 0.9783954, 0.],
+                                                       [-0.9590618, 0.1524534, 0.],
+                                                       [ 0.       , 0.       , 1.]]))
 
     @pytest.mark.xfail(raises=ValueError)
     def test_no_attributes_correction_matrix(self, calgen):
