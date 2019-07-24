@@ -25,7 +25,7 @@ exec(open('pyxem/version.py').read())  # grab version info
 setup(
     name='pyxem',
     version=__version__,
-    description='Crystallographic Electron Microscopy in Python.',
+    description='Crystallographic Diffraction Microscopy in Python.',
     author=__author__,
     author_email=__email__,
     license="GPLv3",
