@@ -134,9 +134,9 @@ def test_local_gaussian_method(dp, diffraction_vectors, refined_vectors):
 
 
 @pytest.mark.parametrize('dp, diffraction_vectors',
-                        [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))
-                        ])
-@pytest.mark.filterwarnings('ignore::UserWarning') #our warning
+                         [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))
+                          ])
+@pytest.mark.filterwarnings('ignore::UserWarning')  # our warning
 def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
     spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
     s = spr.local_gaussian_method(2)

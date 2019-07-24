@@ -267,13 +267,13 @@ class SubpixelrefinementGenerator():
             return (((vectors + shifts) - center) * calibration)
 
         self.vectors_out = DiffractionVectors(self.dp.map(_lg_map,
-                        vectors=self.vector_pixels,
-                        square_size=square_size,
-                        center=self.center,
-                        calibration=self.calibration,
-                        inplace=False))
+                                                          vectors=self.vector_pixels,
+                                                          square_size=square_size,
+                                                          center=self.center,
+                                                          calibration=self.calibration,
+                                                          inplace=False))
 
-        #check for unrefined peaks
+        # check for unrefined peaks
         def check_bad_square(z):
             si = np.unravel_index(np.argmax(z), z.shape)
             z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
@@ -282,14 +282,14 @@ class SubpixelrefinementGenerator():
             else:
                 return True
 
-        def _check_bad_square_map(dp,vectors,square_size):
-                bad_square = False
-                for i, vector in enumerate(vectors):
-                    expt_disc = get_experimental_square(dp, vector, square_size)
-                    bad_square = check_bad_square(expt_disc)
-                    if bad_square:
-                        return True
-                return False
+        def _check_bad_square_map(dp, vectors, square_size):
+            bad_square = False
+            for i, vector in enumerate(vectors):
+                expt_disc = get_experimental_square(dp, vector, square_size)
+                bad_square = check_bad_square(expt_disc)
+                if bad_square:
+                    return True
+            return False
 
         bad_squares = self.dp.map(_check_bad_square_map,
                                   vectors=self.vector_pixels,
