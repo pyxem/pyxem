@@ -8,7 +8,7 @@ for folder in test_components test_generators test_library test_physical test_si
 	cd .. 
 done
 cd ../
-for folder in components generators libraries signals utils  
+for folder in components generators io_plugins libraries signals utils  
 	do 
 	cd $folder
 	autopep8 *.py --aggressive --in-place --max-line-length 130
