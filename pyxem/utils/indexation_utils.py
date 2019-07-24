@@ -30,7 +30,7 @@ from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
-from transforms3d.euler import mat2euler,euler2mat
+from transforms3d.euler import mat2euler, euler2mat
 from transforms3d.quaternions import mat2quat
 
 

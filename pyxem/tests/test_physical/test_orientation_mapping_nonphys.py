@@ -53,9 +53,9 @@ def create_library():
         if alpha < 4:
             dps.append(
                 sim_as_signal(dp_sim,
-                    2 * half_side_length,
-                    0.075,
-                    1).data)  # stores a numpy array of pattern
+                              2 * half_side_length,
+                              0.075,
+                              1).data)  # stores a numpy array of pattern
 
     library = DiffractionLibrary()
     library["Phase"] = {

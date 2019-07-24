@@ -27,6 +27,7 @@ from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.sim_utils import sim_as_signal
 
+
 def test_strain_mapping_affine_transform():
     latt = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
     atom = diffpy.structure.atom.Atom(atype='Zn', xyz=[0, 0, 0], lattice=latt)

@@ -78,7 +78,7 @@ def load(filename, lazy=False):
         A pyxem Signal object containing loaded data.
     """
     s = hyperspyload(filename, lazy=lazy)
-    if lazy: # pragma: no cover
+    if lazy:  # pragma: no cover
         try:
             s = lazy_signal_dictionary[s.metadata.Signal.signal_type](s)
         except KeyError:
@@ -118,7 +118,7 @@ def load_hspy(filename, lazy=False, assign_to=None):
     """
     s = hyperspyload(filename, lazy=lazy)
     if assign_to:
-        if lazy: # pragma: no cover
+        if lazy:  # pragma: no cover
             try:
                 s = lazy_signal_dictionary[assign_to](s)
             except KeyError:
@@ -156,7 +156,7 @@ def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
         dp = ElectronDiffraction2D(dpt.inav[0:edge, 1:])
     else:
         dp = ElectronDiffraction2D(np.concatenate((dpt.inav[edge + 1:, 1:],
-                                                 dpt.inav[0:edge, 1:]), axis=1))
+                                                   dpt.inav[0:edge, 1:]), axis=1))
 
     dp.data = np.flip(dp.data, axis=2)
 

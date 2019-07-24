@@ -31,8 +31,8 @@ from skimage.transform import rotate
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import call_ring_pattern, \
-                                          calc_radius_with_distortion, \
-                                          generate_ring_pattern
+    calc_radius_with_distortion, \
+    generate_ring_pattern
 
 
 class CalibrationGenerator():
@@ -44,6 +44,7 @@ class CalibrationGenerator():
         The signal of electron diffraction data to be used for calibration.
 
     """
+
     def __init__(self, calibration_data):
         # Assign attributes
         self.calibration_data = calibration_data
@@ -290,7 +291,7 @@ class CalibrationGenerator():
         prediff = np.abs(pkb - au_pre)
         postdiff = np.abs(pka - au_post)
         # Calculate new calibration value based on most accurate peak positions
-        dc = (2/1.437)/(pka[postdiff==min(postdiff)]-pkb[prediff==min(prediff)])
+        dc = (2 / 1.437) / (pka[postdiff == min(postdiff)] - pkb[prediff == min(prediff)])
         # Store diffraction calibration value as attribute
         self.diffraction_calibration = dc[0]
 
@@ -397,7 +398,7 @@ class CalibrationGenerator():
         return correction_matrix
 
     def plot_calibrated_data(self, data_to_plot, line=None,
-                             *args, **kwargs): # pragma: no cover
+                             *args, **kwargs):  # pragma: no cover
         """ Plot calibrated data for visual inspection.
 
         Parameters
@@ -462,8 +463,8 @@ class CalibrationGenerator():
             dp = dpegs.mean((0, 1))
             im = self.calibration_data.moo3_im.rebin(dp.data.shape)
             stack1 = np.zeros((dp.data.shape[0], dp.data.shape[1], 3))
-            stack1[:,:,0]=dp.data/(0.05*dp.data.max())
-            stack1[:,:,2]=im.data/im.data.max()
+            stack1[:, :, 0] = dp.data / (0.05 * dp.data.max())
+            stack1[:, :, 2] = im.data / im.data.max()
             plt.figure(1)
             plt.imshow(stack1)
         if line:
