@@ -143,7 +143,8 @@ class TestGetCorrectionMatrix:
         recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
         value = calgen.get_rotation_calibration(real_line=real_line,
                                                 reciprocal_line=recip_line)
-        np.testing.assert_almost_equal(value, 0.3)
+        corr = calgen.get_correction_matrix()
+        np.testing.assert_almost_equal(corr, matrix)
 
     def test_get_correction_matrix_only(self, calgen):
         matrix = np.array([[0.97579077, 0.01549655, 0.        ],
@@ -154,14 +155,18 @@ class TestGetCorrectionMatrix:
         np.testing.assert_almost_equal(corr, matrix)
 
     def test_get_correction_both(self, calgen):
+        matrix = np.array([[0.97579077, 0.01549655, 0.        ],
+                           [0.01549655, 0.99008051, 0.        ],
+                           [0.        , 0.        , 1.        ]])
+        calgen.affine_matrix = matrix
         real_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
         recip_line = Line2DROI(x1=2.5, y1=13., x2=193., y2=12.5, linewidth=3.5)
         value = calgen.get_rotation_calibration(real_line=real_line,
                                                 reciprocal_line=recip_line)
-        np.testing.assert_almost_equal(value, 0.3)
+        corr = calgen.get_correction_matrix()
+        np.testing.assert_almost_equal(corr, matrix)
 
-
-@pytest.mark.xfail(raises=ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_no_attributes_correction_matrix(self, calgen):
         calgen.get_correction_matrix()
 
