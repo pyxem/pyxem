@@ -174,16 +174,13 @@ class VDFSegmentGenerator:
 
     def get_vdf_segments(self, min_distance=1, min_size=10,
                          max_size=100, max_number_of_grains=np.inf,
-                         exclude_border=False):
+                         threshold=False, exclude_border=False):
         """Separate segments (grains) from each of the VDF images using
         edge-detection by the sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a
         VDFSegment, similar to VDFImage, but where each image is a
         segment of a VDF and the vectors correspond to each segment and
-        are not (necessarily) unique. A background value is calculated
-        for each VDF using get_vdf_background_intensities, and only VDF
-        intensities above the background value are considered signal and
-        taken into account when finding segments.
+        are not (necessarily) unique.
 
         Parameters
         ----------
@@ -200,6 +197,10 @@ class VDFSegmentGenerator:
             Maximum number of grains included in the returned separated
             grains. If it is exceeded, those with highest peak
             intensities will be returned.
+        threshold: bool
+            If True, a mask is calculated by thresholding the VDF image
+            by the Li threshold method in scikit-image. If False
+            (default), the mask is the boolean VDF image.
         exclude_border : int or True, optional
             If non-zero integer, peaks within a distance of
             exclude_border from the boarder will be discarded. If True,
@@ -232,7 +233,7 @@ class VDFSegmentGenerator:
         vdfsegs = np.array(vdfs.map(
             separate, show_progressbar=True, inplace=False,
             min_distance=min_distance, min_size=min_size, max_size=max_size,
-            max_number_of_grains=max_number_of_grains,
+            max_number_of_grains=max_number_of_grains, threshold=threshold,
             exclude_border=exclude_border), dtype=np.object)
 
         segments, vectors_of_segments = [], []

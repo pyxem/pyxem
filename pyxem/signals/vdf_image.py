@@ -520,6 +520,7 @@ class VDFSegment:
             plt.imshow(segs.inav[i].data / segs.inav[i].data.max(),
                        cmap=cmap_i)
         plt.title('Segments')
+        plt.tight_layout()
         plt.show()
 
         if ved is not None:
@@ -537,6 +538,7 @@ class VDFSegment:
                 plt.imshow(ved.inav[i].data / ved.inav[i].data.max(),
                            cmap=cmap_i)
             plt.title('Virtual signal')
+            plt.tight_layout()
             plt.show()
 
         return None

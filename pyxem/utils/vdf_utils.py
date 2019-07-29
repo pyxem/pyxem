@@ -22,7 +22,7 @@ from scipy.ndimage import distance_transform_edt, label, center_of_mass
 from scipy.spatial import distance_matrix
 
 from skimage.feature import peak_local_max
-from skimage.filters import sobel
+from skimage.filters import sobel, threshold_li
 from skimage.morphology import watershed
 
 from sklearn.cluster import DBSCAN
@@ -71,7 +71,8 @@ def norm_cross_corr(image, template):
 
 
 def separate(vdf_temp, min_distance, min_size, max_size,
-             max_number_of_grains, exclude_border=False, plot_on=False):
+             max_number_of_grains, threshold=False,
+             exclude_border=False, plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
     scikit-image. See [1,2] for examples from scikit-image.
@@ -81,8 +82,8 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     vdf_temp : np.array
         One VDF image.
     min_distance: int
-        Minimum distance (in pixels) between grains required for them to
-        be considered as separate grains.
+        Minimum distance (in pixels) between markers for them to be
+        considered separate markers for the watershed segmentation.
     min_size : float
         Grains with size (i.e. total number of pixels) below min_size
         are discarded.
@@ -93,6 +94,10 @@ def separate(vdf_temp, min_distance, min_size, max_size,
         Maximum number of grains included in the returned separated
         grains. If it is exceeded, those with highest peak intensities
         will be returned.
+    threshold : bool
+        If True, a mask is calculated by thresholding the VDF image by
+        the Li threshold method in scikit-image. If False (default), the
+        mask is the boolean VDF image. 
     exclude_border : int or True, optional
         If non-zero integer, peaks within a distance of exclude_border
         from the boarder will be discarded. If True, peaks at or closer
@@ -117,9 +122,13 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     """
 
     # Create a mask from the input VDF image.
-    mask = vdf_temp.astype('bool')
+    if threshold:
+        th = threshold_li(vdf_temp)
+        mask = np.zeros_like(vdf_temp)
+        mask[vdf_temp > th] = True
+    else:
+        mask = vdf_temp.astype('bool')
     if np.any(np.nonzero(mask)) is False:
-        #print('All VDF intensities are below 0, so no segments were found.\n')
         return None
 
     # Calculate the eucledian distance from each point in the mask to the
@@ -180,9 +189,6 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     # watershed lines (segment boundaries). Only search for segments
     # (labels) in the area defined by mask.
     labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
-
-    #if not np.max(labels):
-        #print('No segments were found. Check input parameters.\n')
 
     sep = np.zeros((np.shape(vdf_temp)[0], np.shape(vdf_temp)[1],
                     (np.max(labels))), dtype='int32')
