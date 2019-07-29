@@ -23,11 +23,11 @@
 from pyxem.signals.vdf_image import VDFImage, VDFSegment
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.vdf_utils import (normalize_vdf, separate)
-from pyxem.utils.sim_utils import (transfer_signal_axes,
-                                   transfer_navigation_axes_to_signal_axes)
+from pyxem.signals import (transfer_signal_axes,
+                           transfer_navigation_axes_to_signal_axes)
 
 from hyperspy.api import roi
-from hyperspy.signals import BaseSignal, Signal2D
+from hyperspy.signals import Signal2D
 import numpy as np
 
 

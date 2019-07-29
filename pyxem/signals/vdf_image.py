@@ -24,17 +24,12 @@ from pyxem.signals import push_metadata_through
 import numpy as np
 from tqdm import tqdm
 
-import matplotlib.pyplot as plt
-from matplotlib.cm import get_cmap
-from matplotlib.colors import ListedColormap
+from hyperspy.signals import Signal2D
 
-from hyperspy.signals import Signal2D, BaseSignal
-
-from pyxem.utils.vdf_utils import (norm_cross_corr, get_gaussian2d,
-                                   get_circular_mask)
+from pyxem.utils.vdf_utils import norm_cross_corr, get_gaussian2d
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.utils.sim_utils import transfer_signal_axes
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals import transfer_signal_axes
 
 
 class VDFImage(Signal2D):
@@ -44,59 +39,6 @@ class VDFImage(Signal2D):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.vectors = None
-
-    def get_virtual_decomposed_signal(self, loadings, calibration, dp_shape,
-                                      sigma=None):
-        """After having decomposed a VDFImage signal, obtain a virtual
-        electron diffraction signal that consists of one virtual
-        diffraction pattern for each decomposition component. Each
-        virtual pattern is composed of Gaussians centered at each
-        vector position with an amplitude given by the intensity of the
-        corresponding loading pattern.
-
-        Parameters
-        ----------
-        calibration : float
-            Reciprocal space calibration in inverse Angstrom per pixel.
-        loadings : BaseSignal
-            Decomposition loadings with dimensions ( nc | ng ), where nc
-            is the number of components and ng the number of vectors.
-        dp_shape : tuple of int
-            Shape of the diffraction patterns (dp_length_x, dp_length_y)
-            in pixels, where dp_length_x and dp_length_y are integers.
-        sigma : float
-            The standard deviation of the Gaussians in inverse Angstrom
-            per pixel. If None (default), sigma=calibration.
-
-        Returns
-        -------
-        virtual_ed : ElectronDiffraction
-            Virtual electron diffraction signal consisting of one
-            virtual diffraction pattern for each decomposition component.
-        """
-        intensities = loadings.data
-        vectors = self.vectors.data
-
-        num_components = np.shape(intensities)[0]
-
-        if sigma is None:
-            sigma = calibration
-
-        size_x, size_y = dp_shape[0], dp_shape[1]
-        cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
-        x, y = np.indices((size_x, size_y))
-        x, y = x * calibration + cx, y * calibration + cy
-        virtual_ed = np.zeros((size_x, size_y, num_components))
-
-        for i in range(num_components):
-            virtual_ed[..., i] = sum(list(map(
-                lambda a, xo, yo: get_gaussian2d(
-                    a, xo, yo, x=x, y=y, sigma=sigma),
-                intensities[i], vectors[..., 0], vectors[..., 1])))
-
-        virtual_ed = ElectronDiffraction(virtual_ed.T)
-
-        return virtual_ed
 
 
 class VDFSegment:
@@ -111,8 +53,8 @@ class VDFSegment:
         # Intensities corresponding to each vector
         self.intensities = intensities
 
-    def correlate_segments(self, corr_threshold=0.7, vector_threshold=3,
-                           segment_threshold=2):
+    def correlate_segments(self, corr_threshold=0.7, vector_threshold=4,
+                           segment_threshold=3):
         """Iterates through VDF segments and sums those that are
         associated with the same segment. Summation will be done for
         those segments that have a normalised cross correlation above
@@ -269,70 +211,6 @@ class VDFSegment:
 
         return vdfseg
 
-    def threshold_segments(self, min_intensity_threshold=None,
-                           vector_number_threshold=None):
-        """Obtain a VDFSegment where the segments with a lower number of
-        vectors than that defined by vector_number_threshold or with a
-        smaller maximum intensity than that defined by
-        min_intensity_threshold have been removed.
-
-        Parameters
-        ----------
-        min_intensity_threshold : int
-            Threshold for the minimum intensity (in a single pixel) in a
-            segment for it to not be discarded.
-        vector_number_threshold : int
-            Threshold for the minimum number of vectors a segment should
-            contain for it to not be removed.
-
-        Returns
-        -------
-        vdfseg : VDFSegment
-            As input, except that segments might have been removed after
-            thresholds based on min intensity and/or number of vectors.
-        """
-        if min_intensity_threshold is None and vector_number_threshold is None:
-            raise ValueError("Specify input threshold.")
-
-        image_stack = self.segments.data.copy()
-        vectors = self.vectors_of_segments.data.copy()
-        intensities = self.intensities.copy()
-
-        if min_intensity_threshold is not None:
-            n = 0
-            while np.shape(image_stack)[0] > n:
-                if np.max(image_stack[n]) < min_intensity_threshold:
-                    image_stack = np.delete(image_stack, n, axis=0)
-                    vectors = np.delete(vectors, n, axis=0)
-                    intensities = np.delete(intensities, n, axis=0)
-                else:
-                    n = n + 1
-
-        if vector_number_threshold is not None:
-            n = 0
-            while np.shape(image_stack)[0] > n:
-                if len(np.shape(vectors[n])) == 2 and \
-                        np.shape(vectors[n])[0] >= vector_number_threshold:
-                    n = n + 1
-                else:
-                    image_stack = np.delete(image_stack, n, axis=0)
-                    vectors = np.delete(vectors, n, axis=0)
-                    intensities = np.delete(intensities, n, axis=0)
-
-        if not np.any(image_stack):
-            print('No segments left. Check the input thresholds.')
-            return 0
-
-        vdfseg = VDFSegment(Signal2D(image_stack), DiffractionVectors(vectors),
-                            intensities)
-        # Transfer axes properties of segments
-        vdfseg.segments = transfer_signal_axes(vdfseg.segments, self.segments)
-        n = vdfseg.segments.axes_manager.navigation_axes[0]
-        n.name = 'n'
-        n.units = 'number'
-
-        return vdfseg
-
     def get_virtual_electron_diffraction(self, calibration, shape, sigma=None):
         """ Obtain a virtual electron diffraction signal that consists
         of one virtual diffraction pattern for each segment. The virtual
@@ -389,156 +267,6 @@ class VDFSegment:
                         a, xo, yo, x=x, y=y, sigma=sigma),
                     intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
 
-        virtual_ed = ElectronDiffraction(virtual_ed.T)
+        virtual_ed = ElectronDiffraction2D(virtual_ed.T)
 
         return virtual_ed
-
-    def get_separated_electron_diffraction_signals(self, original_signal,
-                                                   radius):
-        """Obtain electron diffraction signals based on an original
-        electron diffraction signal and its separated vdf segments and
-        vectors, so that each output signal contains segments that do
-        not overlap. The intensities of each vector in the output
-        signals are collected directly from the original signal inside a
-        circle defined by radius.
-
-        Parameters
-        ----------
-        original_signal : ElectronDiffraction
-            Electron diffraction signal that the VDFSegment originates
-            from.
-        radius : float
-            Radius of the integration window in reciprocal Angstroms.
-            Similar to the radius used for VDF images.
-
-        Returns
-        -------
-        separated_signals : list of ElectronDiffraction
-            A list of electron diffraction signals corresponding to the
-            original signal, but where overlapping grains are found in
-            separate signals. The number of signals will reflect the max
-            number of grains that overlap with one grain.
-        """
-        vectors = self.vectors_of_segments.data
-        segments = self.segments.data
-        num_segments = np.shape(segments)[0]
-
-        segment_masks = (segments > 0).choose(segments, 1.).astype('int')
-        tot_segment_masks_sum = np.sum(segment_masks, axis=0)
-
-        assigned_num = np.zeros(num_segments)
-        segment_masks_sum = [np.zeros_like(tot_segment_masks_sum)]
-        for i, segment_mask in zip(range(num_segments), segment_masks):
-            if np.max(tot_segment_masks_sum[np.where(segment_mask)]) > 1:
-                n, finished = 0, False
-                while n < np.shape(segment_masks_sum)[0] and finished is False:
-                    if np.max(segment_masks_sum[n] + segment_mask) > 1:
-                        n = n+1
-                    else:
-                        finished = True
-                assigned_num[i] = n
-                if n+1 > np.shape(segment_masks_sum)[0]:
-                    segment_masks_sum.append(np.zeros_like(
-                        tot_segment_masks_sum))
-                segment_masks_sum[n] += segment_mask
-            else:
-                assigned_num[i] = 0
-                segment_masks_sum[0] += segment_mask
-
-        dp_shape_y, dp_shape_x = original_signal.axes_manager.signal_shape
-        nav_shape_y, nav_shape_x = original_signal.axes_manager.navigation_shape
-        scale_y = original_signal.axes_manager.signal_axes[0].scale
-        scale_x = original_signal.axes_manager.signal_axes[1].scale
-        cy = original_signal.axes_manager.signal_axes[0].offset
-        cx = original_signal.axes_manager.signal_axes[1].offset
-
-        y, x = np.indices((dp_shape_x, dp_shape_y))
-        x, y = x*scale_x, y*scale_y
-
-        separated_signals = []
-        for j in range(int(np.max(assigned_num)+1)):
-            segment_masks_j = segment_masks[np.where(assigned_num == j)]
-            vectors_j = vectors[np.where(assigned_num == j)]
-            signal_j = np.zeros((nav_shape_x, nav_shape_y, dp_shape_x,
-                                 dp_shape_y))
-            for i in range(np.shape(vectors_j)[0]):
-                if np.shape(np.shape(vectors_j[i]))[0] <= 1:
-                    vector_mask_i = get_circular_mask(vectors_j[i], radius,
-                                                      cx, cy, x, y)
-                else:
-                    vector_mask_i = np.sum(list(map(
-                        lambda b: get_circular_mask(b, radius, cx, cy, x, y),
-                        vectors_j[i])), axis=0)
-                signal_j[np.where(segment_masks_j[i])] = \
-                    original_signal.data[np.where(segment_masks_j[i])] \
-                    * vector_mask_i
-            separated_signals.append(ElectronDiffraction(signal_j))
-
-        return separated_signals
-
-    def plot_all_segments(self, ved=None, image_to_plot_segments_on=None,
-                          image_to_plot_ved_on=None):
-        """Plot all segments in one figure, where each segment has a
-        distinct color. Optionally also plot the virtual electron
-        diffraction signal with colors corresponding to those of the
-        segments. The colors are uniformly distributed within the
-        matplotlib colormap 'gist_rainbow', excluding the lowest and
-        highest values (black and white).
-
-        Parameters
-        ----------
-        ved : ElectronDiffraction
-            Electron diffraction signal that is the virtual electron
-            diffraction signal corresponding to the VDF segments.
-        image_to_plot_segments_on : np.array
-            If provided, the segments will be plotted on top of this
-            image.
-        image_to_plot_ved_on : np.array
-            If provided, ved will be plotted on top of this image.
-        Returns
-        -------
-        None
-        """
-        cmap = get_cmap('gist_rainbow')
-        N = 256
-        segs = self.segments
-        nu = segs.axes_manager.navigation_size
-        step = N / (nu + 2)
-        steps = np.arange(step, step * (nu + 1), step) / N
-
-        plt.figure()
-        if image_to_plot_segments_on is not None:
-            plt.imshow(image_to_plot_segments_on, cmap='gray', alpha=0.9)
-        for i in np.arange(nu):
-            a = cmap(steps[i])
-            vals = np.zeros((N, 4))
-            vals[:, 0] += a[0]
-            vals[:, 1] += a[1]
-            vals[:, 2] += a[2]
-            vals[:, 3] = np.linspace(0., 1., N)
-            cmap_i = ListedColormap(vals)
-            plt.imshow(segs.inav[i].data / segs.inav[i].data.max(),
-                       cmap=cmap_i)
-        plt.title('Segments')
-        plt.tight_layout()
-        plt.show()
-
-        if ved is not None:
-            plt.figure()
-            if image_to_plot_ved_on is not None:
-                plt.imshow(image_to_plot_ved_on, cmap='gray', alpha=0.9)
-            for i in np.arange(nu):
-                a = cmap(steps[i])
-                vals = np.zeros((N, 4))
-                vals[:, 0] += a[0]
-                vals[:, 1] += a[1]
-                vals[:, 2] += a[2]
-                vals[:, 3] = np.linspace(0., 1., N)
-                cmap_i = ListedColormap(vals)
-                plt.imshow(ved.inav[i].data / ved.inav[i].data.max(),
-                           cmap=cmap_i)
-            plt.title('Virtual signal')
-            plt.tight_layout()
-            plt.show()
-
-        return None
