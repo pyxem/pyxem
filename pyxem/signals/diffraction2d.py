@@ -389,6 +389,9 @@ class Diffraction2D(Signal2D):
         elif len(self.data.shape) == 3:
             nav_shape_x = self.data.shape[0]
             nav_shape_y = 1
+        else:
+            raise TypeError(
+                        "Input needs to be either a stack or 4DSTEM data")
             
         origin_coordinates = np.array((self.data.shape[-1] / 2 - 0.5,
                                        self.data.shape[-2] / 2 - 0.5))
