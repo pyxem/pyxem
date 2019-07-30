@@ -69,36 +69,36 @@ class DiffractionVectors(BaseSignal):
 
     def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
                                  unique_vectors=None,
-                                 distance_threshold=0, min_samples=1,
+                                 distance_threshold=0.01, min_samples=1,
                                  image_to_plot_on=None,
                                  image_cmap='gray',
                                  plot_label_colors=False,
-                                 distance_threshold_all=0.05):
+                                 distance_threshold_all=0.005):
         """Plot the unique diffraction vectors.
 
         Parameters
         ----------
         xlim : float
-            The maximum x coordinate to be plotted.
+            The maximum x coordinate in reciprocal Angstroms to be plotted.
         ylim : float
-            The maximum y coordinate to be plotted.
+            The maximum y coordinate in reciprocal Angstroms to be plotted.
         unique_vectors : DiffractionVectors, optional
             The unique vectors to be plotted (optional). If not given, the
             unique vectors will be found by get_unique_vectors.
         distance_threshold : float, optional
-            The minimum distance, in calibrated units, between diffraction
+            The minimum distance in reciprocal Angstroms between diffraction
             vectors for them to be considered unique diffraction vectors.
-            Will be passed to get_unique_vectors if no unique vectors were
+            Will be passed to get_unique_vectors if no unique vectors are
             given.
         min_samples : int, optional
             The minimum number of vectors within one cluster for it to be
             considered a core sample, i.e. to not be considered noise. Will
-            be passed to get_unique_vectors if no unique vectors were given.
+            be passed to get_unique_vectors if no unique vectors are given.
         image_to_plot_on : BaseSignal, optional
             If provided, the vectors will be plotted on top of this image.
             The image must be calibrated in terms of offset and scale.
         image_cmap : string, optional
-            The color map to plot the image in.
+            The colormap to plot the image in.
         plot_label_colors : bool, optional
             If True (default is False), the vectors constituting each
             cluster will be plotted also, with colors according to their
@@ -286,8 +286,7 @@ class DiffractionVectors(BaseSignal):
         Returns
         -------
         unique_peaks : DiffractionVectors
-            A DiffractionVectors object containing only the unique
-            diffraction vectors found in the input object.
+            The unique diffraction vectors obtained by clustering.
         clusters : DBSCAN
             The results from the clustering, given as class DBSCAN.
             Only returned if return_labels is True.
