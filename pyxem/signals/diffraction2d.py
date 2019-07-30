@@ -382,11 +382,17 @@ class Diffraction2D(Signal2D):
             The centered diffraction data.
 
         """
-        nav_shape_x = self.data.shape[0]
-        nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2] / 2 - 0.5,
-                                       self.data.shape[3] / 2 - 0.5))
-
+        # checks if reshaped 4DSTEM data otherwise aligns the stack
+        if len(self.data.shape) == 4:  
+            nav_shape_x = self.data.shape[0]
+            nav_shape_y = self.data.shape[1]
+        elif len(self.data.shape) == 3:
+            nav_shape_x = self.data.shape[0]
+            nav_shape_y = 1
+            
+        origin_coordinates = np.array((self.data.shape[-1] / 2 - 0.5,
+                                       self.data.shape[-2] / 2 - 0.5))
+        
         if square_width is not None:
             min_index = np.int(origin_coordinates[0] - (0.5 + square_width))
             # fails if non-square dp
@@ -398,7 +404,10 @@ class Diffraction2D(Signal2D):
                                                    *args, **kwargs)
 
         shifts = -1 * shifts.data
+
+
         shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
+        
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
@@ -479,26 +488,6 @@ class Diffraction2D(Signal2D):
                 "documentation for available implementations.".format(method))
 
         return bg_subtracted
-
-    def decomposition(self, *args, **kwargs):
-        """Decomposition with a choice of algorithms.
-
-        Parameters
-        ----------
-        *args :
-            Arguments to be passed to decomposition().
-        **kwargs :
-            Keyword arguments to be passed to decomposition().
-
-        Returns
-        -------
-        The results are stored in self.learning_results. For a full description
-        of parameters see :meth:`hyperspy.learn.mva.MVA.decomposition`
-
-        """
-        super(Signal2D, self).decomposition(*args, **kwargs)
-        self.learning_results.loadings = np.nan_to_num(
-            self.learning_results.loadings)
 
     def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
@@ -621,6 +610,10 @@ class Diffraction2D(Signal2D):
         res.__init__(**res._to_dictionary())
         return res
 
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = Diffraction2D
+
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
 
@@ -633,3 +626,7 @@ class LazyDiffraction2D(LazySignal, Diffraction2D):
         super().compute(*args, **kwargs)
         self.__class__ = Diffraction2D
         self.__init__(**self._to_dictionary())
+
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = LazyDiffraction2D
