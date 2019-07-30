@@ -24,6 +24,7 @@ from hyperspy.api import markers
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 from scipy.spatial import distance_matrix
+from sklearn.cluster import DBSCAN
 
 from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
@@ -261,7 +262,7 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
-    def get_unique_vectors(self, distance_threshold=0, min_samples=1,
+    def get_unique_vectors(self, distance_threshold=0.01, min_samples=1,
                            return_clusters=False):
         """Obtain the unique diffraction vectors by clustering using
         DBSCAN [1].
