@@ -179,30 +179,6 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
     return R
 
 
-def get_indices_from_distance_matrix(distances, distance_threshold):
-    """Checks if the distances from one vector in vlist to all other vectors in
-    vlist are larger than distance_threshold.
-
-    Parameters
-    ----------
-    distances : np.array()
-        Array of distances between vectors.
-    distance_threshold : float
-        The distance threshold for a vector to be retained.
-
-    Returns
-    -------
-    new_indices : np.array()
-        Array of vectors with distances greater than the threshold.
-    """
-    new_indices = []
-    l = np.shape(distances)[0]
-    for i in range(np.shape(distances)[1]):
-        if (np.sum(distances[:, i] > distance_threshold) == l):
-            new_indices = np.append(new_indices, i)
-    return np.array(new_indices, dtype=np.int)
-
-
 def get_npeaks(found_peaks):
     """Returns the number of entries in a list. For use with map().
 

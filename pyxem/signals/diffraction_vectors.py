@@ -29,7 +29,6 @@ from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
-from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
