@@ -22,10 +22,7 @@ from hyperspy.signals import BaseSignal, Signal1D
 from hyperspy.api import markers
 
 import matplotlib.pyplot as plt
-from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
-
-from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
@@ -187,8 +184,10 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
-    def get_unique_vectors(self, distance_threshold=0, min_samples=5):
-        """Obtain the unique diffraction vectors by clustering (DBSCAN).
+    def get_unique_vectors(self, distance_threshold=0, min_samples=None,
+                           return_labels=False):
+        """Obtain the unique diffraction vectors by clustering using
+        DBSCAN [1].
 
         Parameters
         ----------
@@ -196,25 +195,40 @@ class DiffractionVectors(BaseSignal):
             The minimum distance between diffraction vectors for them to be
             considered unique diffraction vectors.
         min_samples : int, optional
-            The minimum number of vectors within one cluster for it to not be
-            considered noise.
+            The minimum number of vectors within one cluster for it to be
+            considered a core sample, i.e. to not be considered noise.
+        return_labels : bool, optional
+            If True (False is default), the label (denoting cluster
+            membership) for all the unique vectors found without using
+            clustering and without considering any distance_threshold or
+            min_samples, i.e. only using np.unique().
+
+        References
+        ----------
+        [1] https://scikit-learn.org/stable/modules/generated/sklearn.
+            cluster.DBSCAN.html
 
         Returns
         -------
-        unique_vectors : DiffractionVectors
-            A DiffractionVectors object containing only the unique diffraction
-            vectors from the original object.
+        unique_peaks : DiffractionVectors
+            A DiffractionVectors object containing only the unique
+            diffraction vectors found in the input object.
+        labels_clusters : np.array, optional
+            Only returned if return_labels is True. List of cluster labels
+            corresponds to all the vectors that are
+            strictly unique not considering any clustering.
         """
-        # Flatten the array of peaks to reach dimension (n,2), where n
+        # Flatten the array of peaks to reach dimension (n, 2), where n
         # is the number of peaks.
+        peaks = self.data
         peaks_flat = self.data.flat
         peaks_all = np.concatenate(np.array(list(map(
             lambda x: peaks_flat[x].ravel(),
-            np.arange(self.axes_manager.navigation_size))))).reshape(-1, 2)
-
+            np.arange(peaks.size))))).reshape(-1, 2)
         if distance_threshold == 0:
             unique_peaks = np.unique(peaks_all, axis=0)
-
+            if return_labels:
+                labels_clusters = np.arange(np.shape(unique_peaks)[0])
         else:
             # If distance_threshold is specified, all peaks are clustered
             # so that peaks within one cluster are separated by
@@ -230,21 +244,22 @@ class DiffractionVectors(BaseSignal):
             unique_peaks = np.zeros((unique_labels.max() + 1, 2))
 
             # For each cluster, a center of mass is calculated based on
-            # all the peaks within the cluster, and the stored unique
-            # vector is chosen as the peak closest to the center of mass.
+            # all the peaks within the cluster, and the center of mass is
+            # taken as the final unique vector position.
+            if return_labels:
+                labels_clusters = clusters.labels_
             for n in np.arange(unique_labels.max() + 1):
                 peaks_n_temp = unique_vectors[clusters.labels_ == n]
                 peaks_n_counts_temp = unique_vectors_counts[
                     clusters.labels_ == n]
-                com = np.average(peaks_n_temp, weights=peaks_n_counts_temp,
-                                 axis=0)
-                index = distance_matrix([com], peaks_n_temp).argmin()
-                unique_peaks[n] = peaks_n_temp[index]
-
+                unique_peaks[n] = np.average(peaks_n_temp,
+                                             weights=peaks_n_counts_temp,
+                                             axis=0)
         # Manipulate into DiffractionVectors class
         unique_peaks = DiffractionVectors(unique_peaks)
         unique_peaks.axes_manager.set_signal_dimension(1)
-
+        if return_labels:
+            return unique_peaks, labels_clusters
         return unique_peaks
 
     def get_diffracting_pixels_map(self, binary=False):
