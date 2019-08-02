@@ -490,6 +490,29 @@ def peaks_as_gvectors(z, center, calibration):
 def investigate_dog_background_removal_interactive(sample_dp,
                                                    std_dev_maxs,
                                                    std_dev_mins):
+    """Utility function to help the parameter selection for the difference of
+    gaussians (dog) background subtraction method
+
+    Parameters
+    ----------
+    sample_dp : ElectronDiffraction2D
+        A single diffraction pattern
+    std_dev_maxs : iterable
+        Linearly spaced maximum standard deviations to be tried, ascending
+    std_dev_mins : iterable
+        Linearly spaced minimum standard deviations to be tried, ascending
+
+    Returns
+    -------
+    A hyperspy like navigation (sigma parameters), signal (proccessed patterns)
+    plot
+
+    See Also
+    --------
+    subtract_background_dog : The background subtraction method used.
+    np.arange : Produces suitable objects for std_dev_maxs
+
+    """
     gauss_processed = np.empty((
         len(std_dev_maxs),
         len(std_dev_mins),
@@ -510,3 +533,4 @@ def investigate_dog_background_removal_interactive(sample_dp,
         dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
 
     dp_gaussian.plot(cmap='viridis')
+    return None
