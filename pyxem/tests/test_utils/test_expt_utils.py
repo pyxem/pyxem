@@ -19,13 +19,15 @@
 import pytest
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
+from matplotlib import pyplot as plt
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead, apply_transformation, \
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, reference_circle, \
-    find_beam_offset_cross_correlation, peaks_as_gvectors
+    find_beam_offset_cross_correlation, peaks_as_gvectors, \
+    investigate_dog_background_removal_interactive
 
 
 @pytest.fixture(params=[
@@ -118,6 +120,16 @@ def test_remove_dead_pixels(diffraction_pattern_one_dimension, method):
     z = diffraction_pattern_one_dimension.data
     dead_removed = remove_dead(z, [[3, 3]], deadvalue=method)
     assert z[3, 3] != dead_removed[3, 3]
+
+
+def test_investigate_dog_background_removal_interactive(diffraction_pattern_one_dimension):
+    """ Test that this function runs without error """
+    z = diffraction_pattern_one_dimension
+    sigma_max_list = np.arange(10, 20, 4)
+    sigma_min_list = np.arange(5, 15, 6)
+    investigate_dog_background_removal_interactive(z, sigma_max_list, sigma_min_list)
+    plt.close('all')
+    assert True
 
 
 class TestCenteringAlgorithm:

@@ -18,6 +18,8 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+import pyxem as pxm  # for ElectronDiffraction2D
+
 from scipy.ndimage.interpolation import shift
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
@@ -27,6 +29,7 @@ from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from scipy.optimize import curve_fit
+from tqdm import tqdm
 
 
 """
@@ -520,9 +523,9 @@ def investigate_dog_background_removal_interactive(sample_dp,
 
     for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
         for j, std_dev_min in enumerate(std_dev_mins):
-            gauss_processed[i, j] = dp_test_area.remove_background('gaussian_difference',
-                                                                   sigma_min=std_dev_min, sigma_max=std_dev_max,
-                                                                   show_progressbar=False)
+            gauss_processed[i, j] = sample_dp.remove_background('gaussian_difference',
+                                                                sigma_min=std_dev_min, sigma_max=std_dev_max,
+                                                                show_progressbar=False)
     dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
     dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
     dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
