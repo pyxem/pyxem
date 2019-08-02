@@ -18,6 +18,8 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+import pyxem as pxm  # for ElectronDiffraction2D
+
 from scipy.ndimage.interpolation import shift
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
@@ -27,6 +29,7 @@ from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from scipy.optimize import curve_fit
+from tqdm import tqdm
 
 
 """
@@ -485,3 +488,52 @@ def peaks_as_gvectors(z, center, calibration):
     """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T
+
+
+def investigate_dog_background_removal_interactive(sample_dp,
+                                                   std_dev_maxs,
+                                                   std_dev_mins):
+    """Utility function to help the parameter selection for the difference of
+    gaussians (dog) background subtraction method
+
+    Parameters
+    ----------
+    sample_dp : ElectronDiffraction2D
+        A single diffraction pattern
+    std_dev_maxs : iterable
+        Linearly spaced maximum standard deviations to be tried, ascending
+    std_dev_mins : iterable
+        Linearly spaced minimum standard deviations to be tried, ascending
+
+    Returns
+    -------
+    A hyperspy like navigation (sigma parameters), signal (proccessed patterns)
+    plot
+
+    See Also
+    --------
+    subtract_background_dog : The background subtraction method used.
+    np.arange : Produces suitable objects for std_dev_maxs
+
+    """
+    gauss_processed = np.empty((
+        len(std_dev_maxs),
+        len(std_dev_mins),
+        *sample_dp.axes_manager.signal_shape))
+
+    for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
+        for j, std_dev_min in enumerate(std_dev_mins):
+            gauss_processed[i, j] = sample_dp.remove_background('gaussian_difference',
+                                                                sigma_min=std_dev_min, sigma_max=std_dev_max,
+                                                                show_progressbar=False)
+    dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
+    dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
+    dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
+    dp_gaussian.axes_manager.navigation_axes[1].name = r'$\sigma_{\mathrm{max}}$'
+    for axes_number, axes_value_list in [(0, std_dev_mins), (1, std_dev_maxs)]:
+        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = axes_value_list[1] - axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
+
+    dp_gaussian.plot(cmap='viridis')
+    return None
