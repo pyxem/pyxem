@@ -486,24 +486,25 @@ def peaks_as_gvectors(z, center, calibration):
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T
 
+
 def investigate_dog_background_removal_interactive(sample_dp,
                                                    std_dev_maxs,
                                                    std_dev_mins):
     gauss_processed = np.empty((
-    len(std_dev_maxs),
-    len(std_dev_mins),
-    *sample_dp.axes_manager.signal_shape))
+        len(std_dev_maxs),
+        len(std_dev_mins),
+        *sample_dp.axes_manager.signal_shape))
 
     for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
         for j, std_dev_min in enumerate(std_dev_mins):
             gauss_processed[i, j] = dp_test_area.remove_background('gaussian_difference',
-                                                          sigma_min=std_dev_min, sigma_max=std_dev_max,
-                                                          show_progressbar=False)
+                                                                   sigma_min=std_dev_min, sigma_max=std_dev_max,
+                                                                   show_progressbar=False)
     dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
     dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
     dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
     dp_gaussian.axes_manager.navigation_axes[1].name = r'$\sigma_{\mathrm{max}}$'
-    for axes_number,axes_value_list in [(0,std_dev_mins),(1,std_dev_maxs)]:
+    for axes_number, axes_value_list in [(0, std_dev_mins), (1, std_dev_maxs)]:
         dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[0]
         dp_gaussian.axes_manager.navigation_axes[axes_number].scale = axes_value_list[1] - axes_value_list[0]
         dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
