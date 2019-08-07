@@ -61,9 +61,9 @@ def _combine(l,x_list,y_list):
     Vs_final = np.hstack(tuple([x for x in vert_list]))
     return Vs_final
 
-def main_function(x_list,y_list,function):
+def main_function(fp, x_list,y_list,function):
     """
-    Produces a full output for x_list,y_list, function, this assumes x_list
+    Produces a full output for fp, x_list,y_list, function, this assumes x_list
     and y_list are linearly spaced.
     """
     l = []
