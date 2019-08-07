@@ -53,7 +53,7 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
 
     Notes
     -----
-    n=2 case behaves differently to n>2, see pyxem pull request #425 for details
+    n=2 now behaves the same as the n>2 case; see Release Notes for 0.10.0 for details.
 
     See Also
     --------
@@ -83,7 +83,7 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
         A 2 x n array containing the Cartesian components of two unstrained
         basis vectors, V and U, defined as row vectors.
     weights : list
-        of weights to be passed to the least squares optimiser, not used for n=2
+        of weights to be passed to the least squares optimiser
     Returns
     -------
     D : numpy.array
@@ -91,28 +91,23 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
 
     Notes
     -----
-    n=2 case behaves differently to n>2, see pyxem pull request #425 for details
+    n=2 now behaves the same as the n>2 case; see Release Notes for 0.10.0 for details.
 
     See Also
     --------
     get_DisplacementGradientMap()
 
     """
-    if Vs.shape == (2, 2) and Vu.shape == (2, 2):
-        """ This code branch replicates the only behaviour in 0.8.1 """
-        Vs, Vu = Vs.T, Vu.T                  # Take transpose to ensure conventions obeyed.
-        L = np.matmul(Vs, np.linalg.inv(Vu))  # Perform matrix multiplication to calculate L-matrix.
+    if weights is not None:
+        # see https://stackoverflow.com/questions/27128688
+        weights = np.asarray(weights)
+        # Need vectors normalized to the unstrained region otherwise the weighting breaks down
+        Vs = (np.divide(Vs, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)).T  # transpose for conventions
+        Vu = (np.divide(Vu, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)).T
     else:
-        if weights is not None:
-            # see https://stackoverflow.com/questions/27128688
-            weights = np.asarray(weights)
-            # Need vectors normalized to the unstrained region otherwise the weighting breaks down
-            Vs = (np.divide(Vs, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)).T  # transpose for conventions
-            Vu = (np.divide(Vu, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)).T
-        else:
-            Vs, Vu = Vs.T, Vu.T
+        Vs, Vu = Vs.T, Vu.T
 
-        L = np.linalg.lstsq(Vu, Vs, rcond=-1)[0]  # only need the return array, see np,linalg.lstsq docs
+    L = np.linalg.lstsq(Vu, Vs, rcond=-1)[0]  # only need the return array, see np,linalg.lstsq docs
     # Put caculated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L
