@@ -16,6 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+# over importing
+import hyperspy.api as hs
+import pyxem as pxm
+import numpy as np
+from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator
+from pyxem.signals.tensor_field import *
+from pyxem.generators.displacement_gradient_tensor_generator import *
 
 
 def load_and_dp(fp,x,y,chunk):
