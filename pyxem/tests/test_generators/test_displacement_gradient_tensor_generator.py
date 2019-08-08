@@ -76,7 +76,7 @@ def generate_strain_map(vectors):
 
 
 """
-Our "sample" allows us to use a range of basis vectors, we try 4:
+Our "sample" allows us to use a range of basis vectors
 > xy
 > a right handed: orthogonal set
 > a left handed: not orthogonal, not right handed set
@@ -105,7 +105,6 @@ def left_handed():
     s_da = generate_strain_map(danger)
     return s_da
 
-
 @pytest.fixture()
 def multi_vector():
     four_vectors = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
@@ -113,28 +112,55 @@ def multi_vector():
     return s_th
 
 
-def test_rotation(xy_vectors, right_handed, multi_vector):
+""" Each of these basis should return the same results, in an xy basis"""
+
+def test_results_returned_correctly_in_same_basis(xy_vectors,right_handed,left_handed,multi_vector):
+    """ Basic test of the summary statement for this section """
+    np.testing.assert_almost_equal(xy_vectors.data, right_handed.data, decimal=2)
+    np.testing.assert_almost_equal(xy_vectors.data, left_handed.data, decimal=2)
+    np.testing.assert_almost_equal(xy_vectors.data, multi_vector.data, decimal=2)
+
+
+def test_trivial_weight_function_case(xy_vectors):
+    """ If weights are [1,1,1,1] the result should be the same as weights=None"""
+    weights = [1, 1, 1, 1]
+    four_vectors = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
+    deformed = hs.signals.Signal2D(generate_test_vectors(four_vectors))
+    weight_strain_map = get_DisplacementGradientMap(deformed, four_vectors, weights=weights).get_strain_maps()
+    np.testing.assert_almost_equal(xy_vectors.data, weight_strain_map.data, decimal=2)
+
+
+def test_weight_function_behaviour():
+    """ Confirms that  a weight function [1,1,2,2] on [a,a,b,b] gives (2a+4b)/6 as the strain"""
+    multi_vector_array = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
+    strained_by_1pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.01, 0], [0, 1]]))  # first  2
+    strained_by_2pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.02, 0], [0, 1]]))  # second 2
+    weights = [1, 1, 2, 2]  # ((0.1*2 + 0.2*4)/6) = 0.166666
+    vectors = np.concatenate((strained_by_1pc_in_x[:, :2], strained_by_2pc_in_x[:, 2:]), axis=1)
+    deformed = hs.signals.Signal2D(np.asarray([[vectors, vectors], [vectors, vectors]]))
+    strain_map = get_DisplacementGradientMap(deformed, multi_vector_array, weights=weights).get_strain_maps()
+    np.testing.assert_almost_equal(strain_map.inav[0].isig[0, 0].data[0], -1.0166666 + 1, decimal=2)
+
+
+""" These test will be operational once a basis change functionality is introduced """
+
+
+@pytest.mark.skip(reason="basis change functionality not yet implemented")
+def test_rotation(xy_vectors, right_handed, left_handed, multi_vector):
     """
     We should always measure the same rotations, regardless of basis (as long as it's right handed)
     """
     xy_rot = xy_vectors.inav[3].data
     rh_rot = right_handed.inav[3].data
+    lh_rot = left_handed.inav[3].data
     mv_rot = multi_vector.inav[3].data
 
     np.testing.assert_almost_equal(xy_rot, rh_rot, decimal=2)  # rotations
+    np.testing.assert_almost_equal(xy_rot, lh_rot, decimal=2)  # rotations
     np.testing.assert_almost_equal(xy_rot, mv_rot, decimal=2)  # rotations
 
 
-def test_left_vs_right_rotation(xy_vectors, left_handed):
-    """
-    We no longer pick up a minus sign if we compare left vs right handed basis
-    """
-    xy_rot = xy_vectors.inav[3].data
-    lh_rot = np.multiply(left_handed.inav[3].data, +1)
-
-    np.testing.assert_almost_equal(xy_rot, lh_rot, decimal=2)  # rotations
-
-
+@pytest.mark.skip(reason="basis change functionality not yet implemented")
 def test_trace(xy_vectors, right_handed, multi_vector):
     """
     Basis does effect strain measurement, but we can simply calculate suitable invarients.
@@ -148,28 +174,3 @@ def test_trace(xy_vectors, right_handed, multi_vector):
         np.add(
             xy_vectors.inav[0].data, xy_vectors.inav[1].data), np.add(
             multi_vector.inav[0].data, multi_vector.inav[1].data), decimal=2)
-
-
-def test_multi_vector_method_has_xy_as_basis(xy_vectors, multi_vector):
-    xy = xy_vectors.data
-    mv = multi_vector.data
-    np.testing.assert_almost_equal(xy, mv, decimal=2)
-
-
-def test_trivial_weight_function_case(xy_vectors):
-    weights = [1, 1, 1, 1]
-    four_vectors = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
-    deformed = hs.signals.Signal2D(generate_test_vectors(four_vectors))
-    weight_strain_map = get_DisplacementGradientMap(deformed, four_vectors, weights=weights).get_strain_maps()
-    np.testing.assert_almost_equal(xy_vectors.data, weight_strain_map.data, decimal=2)
-
-
-def test_weight_function_behaviour():
-    multi_vector_array = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
-    strained_by_1pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.01, 0], [0, 1]]))  # first  2
-    strained_by_2pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.02, 0], [0, 1]]))  # second 2
-    weights = [1, 1, 2, 2]  # ((0.1*2 + 0.2*4)/6) = 0.166666
-    vectors = np.concatenate((strained_by_1pc_in_x[:, :2], strained_by_2pc_in_x[:, 2:]), axis=1)
-    deformed = hs.signals.Signal2D(np.asarray([[vectors, vectors], [vectors, vectors]]))
-    strain_map = get_DisplacementGradientMap(deformed, multi_vector_array, weights=weights).get_strain_maps()
-    np.testing.assert_almost_equal(strain_map.inav[0].isig[0, 0].data[0], -1.0166666 + 1, decimal=2)
