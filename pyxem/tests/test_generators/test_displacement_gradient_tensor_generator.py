@@ -146,7 +146,7 @@ def test_weight_function_behaviour():
 
 
 @pytest.mark.skip(reason="basis change functionality not yet implemented")
-def test_rotation(xy_vectors, right_handed, left_handed, multi_vector):
+def test_rotation(xy_vectors, right_handed, left_handed, multi_vector): # pragma: no cover
     """
     We should always measure the same rotations, regardless of basis (as long as it's right handed)
     """
@@ -161,7 +161,7 @@ def test_rotation(xy_vectors, right_handed, left_handed, multi_vector):
 
 
 @pytest.mark.skip(reason="basis change functionality not yet implemented")
-def test_trace(xy_vectors, right_handed, multi_vector):
+def test_trace(xy_vectors, right_handed, multi_vector): # pragma: no cover
     """
     Basis does effect strain measurement, but we can simply calculate suitable invarients.
     See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
