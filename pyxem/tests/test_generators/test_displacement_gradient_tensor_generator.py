@@ -105,6 +105,7 @@ def left_handed():
     s_da = generate_strain_map(danger)
     return s_da
 
+
 @pytest.fixture()
 def multi_vector():
     four_vectors = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
@@ -114,7 +115,8 @@ def multi_vector():
 
 """ Each of these basis should return the same results, in an xy basis"""
 
-def test_results_returned_correctly_in_same_basis(xy_vectors,right_handed,left_handed,multi_vector):
+
+def test_results_returned_correctly_in_same_basis(xy_vectors, right_handed, left_handed, multi_vector):
     """ Basic test of the summary statement for this section """
     np.testing.assert_almost_equal(xy_vectors.data, right_handed.data, decimal=2)
     np.testing.assert_almost_equal(xy_vectors.data, left_handed.data, decimal=2)
@@ -146,7 +148,7 @@ def test_weight_function_behaviour():
 
 
 @pytest.mark.skip(reason="basis change functionality not yet implemented")
-def test_rotation(xy_vectors, right_handed, left_handed, multi_vector): # pragma: no cover
+def test_rotation(xy_vectors, right_handed, left_handed, multi_vector):  # pragma: no cover
     """
     We should always measure the same rotations, regardless of basis (as long as it's right handed)
     """
@@ -161,7 +163,7 @@ def test_rotation(xy_vectors, right_handed, left_handed, multi_vector): # pragma
 
 
 @pytest.mark.skip(reason="basis change functionality not yet implemented")
-def test_trace(xy_vectors, right_handed, multi_vector): # pragma: no cover
+def test_trace(xy_vectors, right_handed, multi_vector):  # pragma: no cover
     """
     Basis does effect strain measurement, but we can simply calculate suitable invarients.
     See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
