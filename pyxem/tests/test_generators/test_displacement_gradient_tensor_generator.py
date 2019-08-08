@@ -127,10 +127,10 @@ def test_rotation(xy_vectors, right_handed, multi_vector):
 
 def test_left_vs_right_rotation(xy_vectors, left_handed):
     """
-    We should pick up a minus sign if we compare left vs right handed basis
+    We no longer pick up a minus sign if we compare left vs right handed basis
     """
     xy_rot = xy_vectors.inav[3].data
-    lh_rot = np.multiply(left_handed.inav[3].data, -1)
+    lh_rot = np.multiply(left_handed.inav[3].data, +1)
 
     np.testing.assert_almost_equal(xy_rot, lh_rot, decimal=2)  # rotations
 
