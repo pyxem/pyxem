@@ -16,6 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+from hyperspy.signals import Signal2D
+import numpy as np
+
+
+
 class StrainMap(Signal2D):
     _signal_type = "strain_map"
 
@@ -25,4 +30,13 @@ class StrainMap(Signal2D):
         self.current_basis_y = [0,1]
 
     def change_strain_basis(x_new):
+        # following
+        #https://www.continuummechanics.org/stressxforms.html
+        # retrived August 2019
+
+        def _get_rotation_matrix(x_new):
+            # just do an inverse job
+            x_old = self.current_basis_x
+            pass
+        
         pass
