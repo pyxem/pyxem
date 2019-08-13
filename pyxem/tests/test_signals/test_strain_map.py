@@ -37,7 +37,6 @@ def test__init__(Displacement_Grad_Map):
 
 """ These are change of basis tests """
 
-#@pytest.mark.skip(reason="Failing test above")
 def test_something_changes(Displacement_Grad_Map):
     oneone_strain_original = Displacement_Grad_Map.get_strain_maps()
     local_D  = Displacement_Grad_Map
