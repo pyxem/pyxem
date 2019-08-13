@@ -1,9 +1,4 @@
-from pyxem.generators.displacement_gradient_tensor_generator import \
-    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
-import hyperspy.api as hs
-import pytest
-import numpy as np
-decimal = 2  # -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 # Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
@@ -21,6 +16,11 @@ decimal = 2  # -*- coding: utf-8 -*-
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+from pyxem.generators.displacement_gradient_tensor_generator import \
+    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
+import hyperspy.api as hs
+import pytest
+import numpy as np
 
 def vector_operation(z, M):
     """
