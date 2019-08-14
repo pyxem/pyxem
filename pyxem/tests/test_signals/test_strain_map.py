@@ -20,8 +20,8 @@ import hyperspy.api as hs
 import pytest
 import numpy as np
 from pyxem.tests.test_generators.test_displacement_gradient_tensor_generator import generate_test_vectors
-import hyperspy.api as hs
 from pyxem.generators.displacement_gradient_tensor_generator import get_DisplacementGradientMap
+from pyxem.signals.strain_map import StrainMap, _get_rotation_matrix
 
 @pytest.fixture()
 def Displacement_Grad_Map():
@@ -29,6 +29,12 @@ def Displacement_Grad_Map():
     deformed = hs.signals.Signal2D(generate_test_vectors(xy))
     D = get_DisplacementGradientMap(deformed,xy)
     return D
+
+def test_rotation_matrix_former():
+    x_new = [np.random.rand(),np.random.rand()]
+    R = _get_rotation_matrix(x_new)
+    ratio_array = np.divide(x_new,np.matmul(R,[1,0]))
+    assert np.allclose(ratio_array[0],ratio_array[1])
 
 def test__init__(Displacement_Grad_Map):
     strain_map = Displacement_Grad_Map.get_strain_maps()
@@ -64,7 +70,7 @@ def test_trace(Displacement_Grad_Map):
     Basis does effect strain measurement, but we can simply calculate suitable invarients.
     See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
     """
-    
+
     local_D  = Displacement_Grad_Map
     original = local_D.get_strain_maps()
     rotation_alpha = original.rotate_strain_basis([1.3,+1.9])
