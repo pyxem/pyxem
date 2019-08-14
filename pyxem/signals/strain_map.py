@@ -34,8 +34,7 @@ class StrainMap(Signal2D):
 
 
     def rotate_strain_basis(self,x_new):
-        # following
-        #https://www.continuummechanics.org/stressxforms.html
+        # following https://www.continuummechanics.org/stressxforms.html
         # retrived August 2019
         from hyperspy.api import transpose
 
@@ -46,21 +45,27 @@ class StrainMap(Signal2D):
             except ZeroDivisionError:
                rotation_angle = np.deg2rad(90) #check sign on this
 
+            # angle sign agrees with https://en.wikipedia.org/wiki/Rotation_matrix
             R    = np.array([[np.cos(rotation_angle),-np.sin(rotation_angle)],
                              [np.sin(rotation_angle), np.cos(rotation_angle)]])
             return R
 
         R = _get_rotation_matrix(x_new)
+        ratio_array = np.divide(x_new,np.matmul(R,[1,0]))
+        if not np.allclose(ratio_array[0],ratio_array[1]):
+            print(x_new)
+            print(np.matmul(R,[1,0]))
+            raise ValueError("Bad rotation matrix")
 
         def apply_rotation(transposed_strain_map,R=R):
                 sigmaxx_old = transposed_strain_map[0]
-                sigmaxy_old = transposed_strain_map[1]
-                sigmaxy_old = transposed_strain_map[1]
-                sigmayy_old = transposed_strain_map[2]
+                sigmayy_old = transposed_strain_map[1]
+                sigmaxy_old = transposed_strain_map[2]
+
                 z = np.asarray([[sigmaxx_old,sigmaxy_old],
                                 [sigmaxy_old,sigmayy_old]])
-                new = np.matmul(R,np.matmul(z,R.T))
-                return [new[0,0],new[0,1],new[1,1],transposed_strain_map[3]]
+                new = np.matmul(R.T,np.matmul(z,R))
+                return [new[0,0],new[1,1],new[0,1],transposed_strain_map[3]]
 
         transposed = transpose(self)[0]
         transposed_to_new_basis = transposed.map(apply_rotation,R=R,inplace=False)
