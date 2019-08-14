@@ -30,7 +30,7 @@ def Displacement_Grad_Map():
     D = get_DisplacementGradientMap(deformed,xy)
     return D
 
-def test_rotation_matrix_former():
+def test_rotation_matrix_formation():
     x_new = [np.random.rand(),np.random.rand()]
     R = _get_rotation_matrix(x_new)
     ratio_array = np.divide(x_new,np.matmul(R,[1,0]))
@@ -40,6 +40,10 @@ def test__init__(Displacement_Grad_Map):
     strain_map = Displacement_Grad_Map.get_strain_maps()
     assert strain_map.axes_manager.navigation_size == 4
 
+#TODO test that a 90 degree rotation of basis does a sensible thing
+#TODO consider if there is something important going on with +- for shear
+#TODO confirm (and document) the handedness of our rotation matrix
+#TODO consider randomising all the extra bases
 
 """ These are change of basis tests """
 
