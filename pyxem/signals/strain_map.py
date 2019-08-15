@@ -32,9 +32,6 @@ def _get_rotation_matrix(x_new):
         R : 2 x 2 numpy asarray
             Contains the correct rotation matrix
         """
-        # TODO: facilitate rotations where the original basis is something
-        #other than [1,0], probably via a strain_map kwarg
-
         try:
             rotation_angle = np.arctan(x_new[1]/x_new[0])
         except ZeroDivisionError: #Taking x --> y
@@ -52,12 +49,15 @@ class StrainMap(Signal2D):
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
+
         # check init dimension are correct
 
         if 'current_basis_x' in kwargs.keys():
             self.current_basis_x = kwargs['current_basis_x']
         else:
             self.current_basis_x = [1,0]
+
+        self.current_basis_y = np.matmul(np.asarray([[0,1],[-1,0]]),self.current_basis_x)
 
     def rotate_strain_basis(self,x_new):
         """
@@ -74,24 +74,30 @@ class StrainMap(Signal2D):
         "https://www.continuummechanics.org/stressxforms.html" (August 2019)
         """
 
-        if self.current_basis_x != [1,0]:
-            return ValueError("This functional must act on a strain map in the [1,0] basis")
-
-        from hyperspy.api import transpose
-        R = _get_rotation_matrix(x_new)
-
-        def apply_rotation(transposed_strain_map,R=R):
+        def apply_rotation(transposed_strain_map,R):
                 sigmaxx_old = transposed_strain_map[0]
                 sigmayy_old = transposed_strain_map[1]
                 sigmaxy_old = transposed_strain_map[2]
 
                 z = np.asarray([[sigmaxx_old,sigmaxy_old],
-                                [sigmaxy_old,sigmayy_old]])
+                               [sigmaxy_old,sigmayy_old]])
 
                 new = np.matmul(R.T,np.matmul(z,R))
                 return [new[0,0],new[1,1],new[0,1],transposed_strain_map[3]]
 
-        transposed = transpose(self)[0]
-        transposed_to_new_basis = transposed.map(apply_rotation,R=R,inplace=False)
+        def apply_rotation_complete(self,R):
+            from hyperspy.api import transpose
+            transposed = transpose(self)[0]
+            transposed_to_new_basis = transposed.map(apply_rotation,R=R,inplace=False)
+            return transposed_to_new_basis
 
+        if self.current_basis_x != [1,0]:
+            #this takes us back to [1,0]
+            R = _get_rotation_matrix(x_new).T
+            strain_map_core = apply_rotation_complete(self,R)
+        else:
+            strain_map_core = self
+
+        R = _get_rotation_matrix(x_new)
+        transposed_to_new_basis = apply_rotation_complete(strain_map_core,R)
         return StrainMap(transposed_to_new_basis.T,current_basis_x=x_new)
