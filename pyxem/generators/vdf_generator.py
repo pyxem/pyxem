@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -33,7 +33,7 @@ class VDFGenerator():
 
     Parameters
     ----------
-    signal : ElectronDiffraction
+    signal : ElectronDiffraction2D
         The signal of electron diffraction patterns to be indexed.
     vectors: DiffractionVectors(optional)
         The vector positions, in calibrated units, at which to position
@@ -58,7 +58,7 @@ class VDFGenerator():
                               radius,
                               normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
-        navigation position in an ElectronDiffraction Signal by summation in a
+        navigation position in an ElectronDiffraction2D Signal by summation in a
         circular window of specified radius.
 
         Parameters
@@ -116,7 +116,7 @@ class VDFGenerator():
                                   k_steps,
                                   normalize=False):
         """Obtain the intensity scattered at each navigation position in an
-        ElectronDiffraction Signal by summation over a series of concentric
+        ElectronDiffraction2D Signal by summation over a series of concentric
         in annuli between a specified inner and outer radius in a number of
         steps.
 

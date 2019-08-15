@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,14 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import numpy as np
+
 from hyperspy.signals import BaseSignal, Signal1D
 from hyperspy.api import markers
 
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
-from pyxem.utils.expt_utils import *
-from pyxem.utils.vector_utils import *
+from pyxem.signals import push_metadata_through
+from pyxem.signals import transfer_navigation_axes
+from pyxem.utils.vector_utils import detector_to_fourier
+from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
+from pyxem.utils.vector_utils import get_indices_from_distance_matrix
+from pyxem.utils.vector_utils import get_npeaks
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
@@ -41,28 +47,44 @@ number of peaks.
 
 
 class DiffractionVectors(BaseSignal):
+    """Crystallographic mapping results containing the best matching crystal
+    phase and orientation at each navigation position with associated metrics.
+
+    Attributes
+    ----------
+    cartesian : np.array()
+        Array of 3-vectors describing Cartesian coordinates associated with
+        each diffraction vector.
+    hkls : np.array()
+        Array of Miller indices associated with each diffraction vector
+        following indexation.
+    """
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.cartesian = None
+        self.hkls = None
 
-    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
+    def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
+                                 distance_threshold=0.01):
         """Plot the unique diffraction vectors.
 
         Parameters
         ----------
         xlim : float
-            The maximum x coordinate to be plotted.
+            The maximum x coordinate in reciprocal Angstroms to be plotted.
         ylim : float
-            The maximum y coordinate to be plotted.
+            The maximum y coordinate in reciprocal Angstroms to be plotted.
         distance_threshold : float
-            The minimum distance between diffraction vectors to be passed to
-            get_unique_vectors.
+            The minimum distance in reciprocal Angstroms between diffraction
+            vectors to be passed to get_unique_vectors.
 
         Returns
         -------
         fig : matplotlib figure
-            The plot as a matplot lib figure.
+            The plot as a matplotlib figure.
 
         """
         # Find the unique gvectors to plot.
@@ -81,8 +103,8 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         *args :
             Arguments passed to signal.plot()
@@ -178,7 +200,7 @@ class DiffractionVectors(BaseSignal):
             A DiffractionVectors object containing only the unique diffraction
             vectors in the original object.
         """
-        if (self.axes_manager.navigation_dimension == 2):
+        if self.axes_manager.navigation_dimension == 2:
             gvlist = np.array([self.data[0, 0][0]])
         else:
             raise ValueError("This method only works for ragged vector maps!")
@@ -241,3 +263,25 @@ class DiffractionVectors(BaseSignal):
         y.units = 'nm'
 
         return crystim
+
+    def calculate_cartesian_coordinates(self, accelerating_voltage, camera_length,
+                                        *args, **kwargs):
+        """Get cartesian coordinates of the diffraction vectors.
+
+        Parameters
+        ----------
+        accelerating_voltage : float
+            The acceleration voltage with which the data was acquired.
+        camera_length : float
+            The camera length in meters.
+        """
+        # Imported here to avoid circular dependency
+        from diffsims.utils.sim_utils import get_electron_wavelength
+        wavelength = get_electron_wavelength(accelerating_voltage)
+        self.cartesian = self.map(detector_to_fourier,
+                                  wavelength=wavelength,
+                                  camera_length=camera_length * 1e10,
+                                  inplace=False,
+                                  parallel=False,  # TODO: For testing
+                                  *args, **kwargs)
+        transfer_navigation_axes(self.cartesian, self)

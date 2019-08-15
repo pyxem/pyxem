@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,6 +18,8 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+import pyxem as pxm  # for ElectronDiffraction2D
+
 from scipy.ndimage.interpolation import shift
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
@@ -27,6 +29,7 @@ from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from scipy.optimize import curve_fit
+from tqdm import tqdm
 
 
 """
@@ -52,7 +55,7 @@ def _index_coords(z, origin=None):
         Corrdinates for the indices of a numpy array.
     """
     ny, nx = z.shape[:2]
-    if origin is None:
+    if origin is None:l
         origin_x, origin_y = nx // 2, ny // 2
     else:
         origin_x, origin_y = origin
@@ -103,8 +106,7 @@ def _polar2cart(r, theta):
 
 
 def radial_average(z, mask=None):
-    """Calculate the radial profile by azimuthal averaging about a specified
-    center.
+    """Calculate the radial profile by azimuthal averaging about the center.
 
     Parameters
     ----------
@@ -149,9 +151,9 @@ def gain_normalise(z, dref, bref):
     ----------
     z : np.array()
         Two-dimensional data array containing signal.
-    dref : ElectronDiffraction
+    dref : ElectronDiffraction2D
         Two-dimensional data array containing dark reference.
-    bref : ElectronDiffraction
+    bref : ElectronDiffraction2D
         Two-dimensional data array containing bright reference.
 
     Returns
@@ -199,17 +201,53 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     return z_bar
 
 
-def affine_transformation(z, matrix, order, *args, **kwargs):
-    """Apply an affine transformation to a 2-dimensional array.
+def convert_affine_to_transform(D, shape):
+    """ Converts an affine transform on a diffraction pattern to a suitable
+    form for skimage.transform.warp()
+
+    Parameters
+    ----------
+    D : np.array
+        Affine transform to be applied
+    shape : tuple
+        Shape tuple in form (y,x) for the diffraction pattern
+
+    Returns
+    -------
+    transformation : np.array
+        3x3 numpy array of the transformation to be applied.
+
+    """
+
+    shift_x = (shape[1] - 1) / 2
+    shift_y = (shape[0] - 1) / 2
+
+    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
+    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+
+    # This defines the transform you want to perform
+    distortion = tf.AffineTransform(matrix=D)
+
+    # skimage transforms can be added like this, does matrix multiplication,
+    # hence the need for the brackets. (Note tf.warp takes the inverse)
+    transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
+
+    return transformation
+
+
+def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs):
+    """Apply a transformation to a 2-dimensional array.
 
     Parameters
     ----------
     z : np.array
         Array to be transformed
-    matrix : np.array
-        3x3 numpy array specifying the affine transformation to be applied.
+    transformation : np.array
+        3x3 numpy array specifying the transformation to be applied.
     order : int
         Interpolation order.
+    keep_dtype : bool
+        If True dtype of returned object is that of z
     *args :
         To be passed to skimage.warp
     **kwargs :
@@ -219,19 +257,18 @@ def affine_transformation(z, matrix, order, *args, **kwargs):
     -------
     trans : array
         Affine transformed diffraction pattern.
+
+    Notes
+    -----
+    Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
-    # These three lines account for the transformation center not being (0,0)
-    shift_y, shift_x = np.array(z.shape[:2]) / 2.
-    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
-    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-
-    # This defines the transform you want to perform
-    transformation = tf.AffineTransform(matrix=matrix)
-
-    # skimage transforms can be added like this, actually matrix multiplication,
-    # hence the need for the brackets. (Note tf.warp takes the inverse)
-    trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order, *args, **kwargs)
+    if keep_dtype == False:
+        trans = tf.warp(z, transformation,
+                        order=order, *args, **kwargs)
+    if keep_dtype == True:
+        trans = tf.warp(z, transformation,
+                        order=order, preserve_range=True, *args, **kwargs)
+        trans = trans.astype(z.dtype)
 
     return trans
 
@@ -383,7 +420,7 @@ def reference_circle(coords, dimX, dimY, radius):
 
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to centre the direct beam centre by a cross-correlation algorithm.
+    """Method to center the direct beam center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
@@ -528,8 +565,7 @@ def call_ring_pattern(xcentre, ycentre):
 
 
 def peaks_as_gvectors(z, center, calibration):
-    """
-    Converts peaks found as array indices to calibrated units, for use in a
+    """Converts peaks found as array indices to calibrated units, for use in a
     hyperspy map function.
 
     Parameters
@@ -537,7 +573,7 @@ def peaks_as_gvectors(z, center, calibration):
     z : numpy array
         peak postitions as array indices.
     center : numpy array
-        diffraction pattern centre in array indices.
+        diffraction pattern center in array indices.
     calibration : float
         calibration in reciprocal Angstroms per pixels.
 
@@ -545,6 +581,56 @@ def peaks_as_gvectors(z, center, calibration):
     -------
     g : numpy array
         peak positions in calibrated units.
+
     """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T
+
+
+def investigate_dog_background_removal_interactive(sample_dp,
+                                                   std_dev_maxs,
+                                                   std_dev_mins):
+    """Utility function to help the parameter selection for the difference of
+    gaussians (dog) background subtraction method
+
+    Parameters
+    ----------
+    sample_dp : ElectronDiffraction2D
+        A single diffraction pattern
+    std_dev_maxs : iterable
+        Linearly spaced maximum standard deviations to be tried, ascending
+    std_dev_mins : iterable
+        Linearly spaced minimum standard deviations to be tried, ascending
+
+    Returns
+    -------
+    A hyperspy like navigation (sigma parameters), signal (proccessed patterns)
+    plot
+
+    See Also
+    --------
+    subtract_background_dog : The background subtraction method used.
+    np.arange : Produces suitable objects for std_dev_maxs
+
+    """
+    gauss_processed = np.empty((
+        len(std_dev_maxs),
+        len(std_dev_mins),
+        *sample_dp.axes_manager.signal_shape))
+
+    for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
+        for j, std_dev_min in enumerate(std_dev_mins):
+            gauss_processed[i, j] = sample_dp.remove_background('gaussian_difference',
+                                                                sigma_min=std_dev_min, sigma_max=std_dev_max,
+                                                                show_progressbar=False)
+    dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
+    dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
+    dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
+    dp_gaussian.axes_manager.navigation_axes[1].name = r'$\sigma_{\mathrm{max}}$'
+    for axes_number, axes_value_list in [(0, std_dev_mins), (1, std_dev_maxs)]:
+        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = axes_value_list[1] - axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
+
+    dp_gaussian.plot(cmap='viridis')
+    return None

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,105 +19,209 @@
 import numpy as np
 import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
+from warnings import warn
 
-from pyxem.utils.sim_utils import peaks_from_best_template, carry_through_navigation_calibration
+from pyxem.signals import push_metadata_through, transfer_navigation_axes
+from pyxem.utils.indexation_utils import peaks_from_best_template
+from pyxem.utils.indexation_utils import peaks_from_best_vector_match
+from pyxem.utils.indexation_utils import crystal_from_template_matching
+from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 from pyxem import CrystallographicMap
 
 
-def crystal_from_matching_results(z_matches):
-    """Takes matching results for a single navigation position
-    and returns the best matching phase and orientation with correlation
-    and reliability/ies to define a crystallographic map.
+class TemplateMatchingResults(BaseSignal):
+    """Template matching results containing the top n best matching crystal
+    phase and orientation at each navigation position with associated metrics.
 
-    inputs: z_matches a numpy.array (m,5)
-
-    outputs: np.array of shape (6) or (7)
-    phase, angle,angle,angle, correlation, R_orientation,(R_phase)
+    Attributes
+    ----------
+    vectors : DiffractionVectors
+        Diffraction vectors indexed.
+    hkls : BaseSignal
+        Miller indices associated with each diffraction vector.
     """
 
-    # count the phases
-    if np.unique(z_matches[:, 0]).shape[0] == 1:
-        # these case is easier as output is correctly ordered
-        results_array = np.zeros(6)
-        results_array[:5] = z_matches[0, :5]
-        results_array[5] = 100 * (1 -
-                                  z_matches[1, 4] / results_array[4])
-    else:
-        results_array = np.zeros(7)
-        index_best_match = np.argmax(z_matches[:, 4])
-        # store phase,angle,angle,angle,correlation
-        results_array[:5] = z_matches[index_best_match, :5]
-        # do reliability_orientation
-        z = z_matches[z_matches[:, 0] == results_array[0]]
-        second_score = np.partition(z[:, 4], -2)[-2]
-        results_array[5] = 100 * (1 -
-                                  second_score / results_array[4])
-        # and reliability phase
-        z = z_matches[z_matches[:, 0] != results_array[0]]
-        second_score = np.max(z[:, 4])
-        results_array[6] = 100 * (1 -
-                                  second_score / results_array[4])
-
-    return results_array
-
-
-class IndexationResults(BaseSignal):
-    _signal_type = "matching_results"
+    _signal_type = "template_matching"
     _signal_dimension = 2
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(2)
 
     def plot_best_matching_results_on_signal(self, signal,
-                                             phase, library,
+                                             library,
+                                             permanent_markers=True,
                                              *args, **kwargs):
-        """Plot the diffraction vectors on a signal.
+        """Plot the best matching diffraction vectors on a signal.
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
+        library : DiffractionLibrary
+            Diffraction library containing the phases and rotations
+        permanent_markers : bool
+            Permanently save the peaks as markers on the signal
         *args :
             Arguments passed to signal.plot()
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
         match_peaks = self.map(peaks_from_best_template,
-                               phase=phase, library=library,
+                               library=library,
                                inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
             m = hs.markers.point(x=mx, y=my, color='red', marker='x')
-            signal.add_marker(m, plot_marker=True, permanent=True)
+            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):
-        """Obtain a crystallographic map specifying the best matching
-        phase and orientation at each probe position with corresponding
-        correlation and reliabilty scores.
+        """Obtain a crystallographic map specifying the best matching phase and
+        orientation at each probe position with corresponding metrics.
 
         Returns
         -------
         cryst_map : CrystallographicMap
-            Contains the best matching phase and orientation along with
-            corresponding correlation and reliability scores at all navigation
-            positions.
+            Crystallographic mapping results containing the best matching phase
+            and orientation at each navigation position with associated metrics.
+
+            The Signal at each navigation position is an array of,
+
+                            [phase, np.array((z,x,z)), dict(metrics)]
+
+            which defines the phase, orientation as Euler angles in the zxz
+            convention and metrics associated with the matching.
+
+            Metrics for template matching results are
+                'correlation'
+                'orientation_reliability'
+                'phase_reliability'
 
         """
-
-        # TODO: Add alternative methods beyond highest correlation score at each
-        # navigation position.
-        # TODO Only keep a subset of the data for the map
-        crystal_map = self.map(crystal_from_matching_results,
+        # TODO: Add alternative methods beyond highest correlation score.
+        crystal_map = self.map(crystal_from_template_matching,
                                inplace=False,
                                *args, **kwargs)
 
         cryst_map = CrystallographicMap(crystal_map)
-        cryst_map = carry_through_navigation_calibration(cryst_map, self)
+        cryst_map = transfer_navigation_axes(cryst_map, self)
+        cryst_map.method = 'template_matching'
 
         return cryst_map
+
+
+class VectorMatchingResults(BaseSignal):
+    """Vector matching results containing the top n best matching crystal
+    phase and orientation at each navigation position with associated metrics.
+
+    Attributes
+    ----------
+    vectors : DiffractionVectors
+        Diffraction vectors indexed.
+    hkls : BaseSignal
+        Miller indices associated with each diffraction vector.
+    """
+    _signal_type = "vector_matching"
+
+    def __init__(self, *args, **kwargs):
+        BaseSignal.__init__(self, *args, **kwargs)
+        self.axes_manager.set_signal_dimension(2)
+        self.vectors = None
+        self.hkls = None
+
+    def get_crystallographic_map(self,
+                                 *args, **kwargs):
+        """Obtain a crystallographic map specifying the best matching phase and
+        orientation at each probe position with corresponding metrics.
+
+        Returns
+        -------
+        cryst_map : CrystallographicMap
+            Crystallographic mapping results containing the best matching phase
+            and orientation at each navigation position with associated metrics.
+
+            The Signal at each navigation position is an array of,
+
+                            [phase, np.array((z,x,z)), dict(metrics)]
+
+            which defines the phase, orientation as Euler angles in the zxz
+            convention and metrics associated with the matching.
+
+            Metrics for template matching results are
+                'match_rate'
+                'total_error'
+                'orientation_reliability'
+                'phase_reliability'
+        """
+        crystal_map = self.map(crystal_from_vector_matching,
+                               inplace=False,
+                               *args, **kwargs)
+
+        cryst_map = CrystallographicMap(crystal_map)
+        cryst_map = transfer_navigation_axes(cryst_map, self)
+        cryst_map.method = 'vector_matching'
+
+        return cryst_map
+
+    def get_indexed_diffraction_vectors(self,
+                                        vectors,
+                                        overwrite=False,
+                                        *args, **kwargs):
+        """Obtain an indexed diffraction vectors object.
+
+        Parameters
+        ----------
+        vectors : DiffractionVectors
+            A diffraction vectors object to be indexed.
+
+        Returns
+        -------
+        indexed_vectors : DiffractionVectors
+            An indexed diffraction vectors object.
+        """
+        if overwrite == False:
+            if vectors.hkls is not None:
+                warn("The vectors supplied are already associated with hkls set "
+                     "overwrite=True to replace these hkls.")
+            else:
+                vectors.hkls = self.hkls
+
+        elif overwrite == True:
+            vectors.hkls = self.hkls
+
+        return vectors
+
+    def plot_best_matching_results_on_signal(self, signal,
+                                             library,
+                                             permanent_markers=True,
+                                             *args, **kwargs):
+        """Plot the best matching diffraction vectors on a signal.
+
+        Parameters
+        ----------
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
+            This signal must have the same navigation dimensions as the peaks.
+        library : DiffractionLibrary
+            Diffraction library containing the phases and rotations
+        permanent_markers : bool
+            Permanently save the peaks as markers on the signal. Default True.
+        *args :
+            Arguments passed to signal.plot()
+        **kwargs :
+            Keyword arguments passed to signal.plot()
+        """
+        match_peaks = self.map(peaks_from_best_vector_match,
+                               library=library,
+                               inplace=False)
+        mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
+        signal.plot(*args, **kwargs)
+        for mx, my in zip(mmx, mmy):
+            m = hs.markers.point(x=mx, y=my, color='red', marker='x')
+            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)

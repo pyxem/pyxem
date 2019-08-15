@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,7 +24,7 @@ from hyperspy.io_plugins import (msa, digital_micrograph, fei, mrc, ripple,
 
 from pyxem.io_plugins import mib
 
-io_plugins = [msa, digital_micrograph, fei, mrc, ripple, tiff, blockfile, 
+io_plugins = [msa, digital_micrograph, fei, mrc, ripple, tiff, blockfile,
               emd, mib]
 
 _logger = logging.getLogger(__name__)
