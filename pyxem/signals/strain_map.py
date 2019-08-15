@@ -102,7 +102,7 @@ class StrainMap(Signal2D):
 
         if self.current_basis_x != [1, 0]:
             # this takes us back to [1,0] if our current map is in a diferent basis
-            R = _get_rotation_matrix(self.curent_basis_x).T
+            R = _get_rotation_matrix(self.current_basis_x).T
             strain_map_core = apply_rotation_complete(self, R)
         else:
             strain_map_core = self
