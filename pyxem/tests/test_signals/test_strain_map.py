@@ -43,7 +43,6 @@ def test__init__(Displacement_Grad_Map):
     strain_map = Displacement_Grad_Map.get_strain_maps()
     assert strain_map.axes_manager.navigation_size == 4
 
-# TODO test that a 90 degree rotation of basis does a sensible thing
 # TODO consider if there is something important going on with +- for shear
 # TODO confirm (and document) the handedness of our rotation matrix
 
@@ -67,6 +66,18 @@ def test_90_degree_rotation(Displacement_Grad_Map):
     assert np.allclose(oneone_strain_original.inav[2:].data, oneone_strain_alpha.inav[2:].data, atol=0.01)
     assert np.allclose(oneone_strain_original.inav[0].data, oneone_strain_alpha.inav[1].data, atol=0.01)
     assert np.allclose(oneone_strain_original.inav[1].data, oneone_strain_alpha.inav[0].data, atol=0.01)
+
+
+def test_going_back_and_forward_between_bases(Displacement_Grad_Map):
+    """ Checks that going via an intermediate strain map doesn't give incorrect answers"""
+    strain_original = Displacement_Grad_Map.get_strain_maps()
+    local_D = Displacement_Grad_Map
+    temp_strain = local_D.get_strain_maps()
+    temp_strain = temp_strain.rotate_strain_basis([np.random.rand(), np.random.rand()])
+    fixed_xnew = [3.1, 4.1]
+    alpha = strain_original.rotate_strain_basis(fixed_xnew)
+    beta = temp_strain.rotate_strain_basis(fixed_xnew)
+    assert np.allclose(alpha, beta, atol=0.01)
 
 
 def test_rotation(Displacement_Grad_Map):
