@@ -45,6 +45,12 @@ def _get_rotation_matrix(x_new):
 
 
 class StrainMap(Signal2D):
+    """
+    Class for storing strain maps, if created within pyxem conventions are such that:
+    The 'y-axis' will always lie 90 degrees from the 'x-axis'
+    Rotations are defined such that positive corresponds to anticlockwise.
+    """
+
     _signal_type = "strain_map"
 
     def __init__(self, *args, **kwargs):
