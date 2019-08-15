@@ -47,6 +47,10 @@ from .signals.electron_diffraction2d import ElectronDiffraction2D
 from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
+from .generators.library_generator import VectorLibraryGenerator
+from .generators.red_intensity_generator import ReducedIntensityGenerator
+from .generators.pdf_generator import PDFGenerator
+
 from .signals.vdf_image import VDFImage
 from .signals.crystallographic_map import CrystallographicMap
 
