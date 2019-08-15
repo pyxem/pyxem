@@ -1,4 +1,4 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
@@ -23,46 +23,60 @@ from pyxem.tests.test_generators.test_displacement_gradient_tensor_generator imp
 from pyxem.generators.displacement_gradient_tensor_generator import get_DisplacementGradientMap
 from pyxem.signals.strain_map import StrainMap, _get_rotation_matrix
 
+
 @pytest.fixture()
 def Displacement_Grad_Map():
     xy = np.asarray([[1, 0], [0, 1]])
     deformed = hs.signals.Signal2D(generate_test_vectors(xy))
-    D = get_DisplacementGradientMap(deformed,xy)
+    D = get_DisplacementGradientMap(deformed, xy)
     return D
 
+
 def test_rotation_matrix_formation():
-    x_new = [np.random.rand(),np.random.rand()]
+    x_new = [np.random.rand(), np.random.rand()]
     R = _get_rotation_matrix(x_new)
-    ratio_array = np.divide(x_new,np.matmul(R,[1,0]))
-    assert np.allclose(ratio_array[0],ratio_array[1])
+    ratio_array = np.divide(x_new, np.matmul(R, [1, 0]))
+    assert np.allclose(ratio_array[0], ratio_array[1])
+
 
 def test__init__(Displacement_Grad_Map):
     strain_map = Displacement_Grad_Map.get_strain_maps()
     assert strain_map.axes_manager.navigation_size == 4
 
-#TODO test that a 90 degree rotation of basis does a sensible thing
-#TODO consider if there is something important going on with +- for shear
-#TODO confirm (and document) the handedness of our rotation matrix
-#TODO consider randomising all the extra bases
+# TODO test that a 90 degree rotation of basis does a sensible thing
+# TODO consider if there is something important going on with +- for shear
+# TODO confirm (and document) the handedness of our rotation matrix
+
 
 """ These are change of basis tests """
 
+
 def test_something_changes(Displacement_Grad_Map):
     oneone_strain_original = Displacement_Grad_Map.get_strain_maps()
-    local_D  = Displacement_Grad_Map
+    local_D = Displacement_Grad_Map
     strain_alpha = local_D.get_strain_maps()
-    oneone_strain_alpha = strain_alpha.rotate_strain_basis([1.3,+1.9])
-    assert not np.allclose(oneone_strain_original.data,oneone_strain_alpha.data, atol=0.01)
+    oneone_strain_alpha = strain_alpha.rotate_strain_basis([np.random.rand(), np.random.rand()])
+    assert not np.allclose(oneone_strain_original.data, oneone_strain_alpha.data, atol=0.01)
+
+
+def test_90_degree_rotation(Displacement_Grad_Map):
+    oneone_strain_original = Displacement_Grad_Map.get_strain_maps()
+    local_D = Displacement_Grad_Map
+    strain_alpha = local_D.get_strain_maps()
+    oneone_strain_alpha = strain_alpha.rotate_strain_basis([0, 1])
+    assert np.allclose(oneone_strain_original.inav[2:].data, oneone_strain_alpha.inav[2:].data, atol=0.01)
+    assert np.allclose(oneone_strain_original.inav[0].data, oneone_strain_alpha.inav[1].data, atol=0.01)
+    assert np.allclose(oneone_strain_original.inav[1].data, oneone_strain_alpha.inav[0].data, atol=0.01)
 
 
 def test_rotation(Displacement_Grad_Map):
     """
     We should always measure the same rotations, regardless of basis
     """
-    local_D  = Displacement_Grad_Map
+    local_D = Displacement_Grad_Map
     original = local_D.get_strain_maps()
-    rotation_alpha = original.rotate_strain_basis([1.3,+1.9])
-    rotation_beta  = original.rotate_strain_basis([1.7,-0.3])
+    rotation_alpha = original.rotate_strain_basis([np.random.rand(), np.random.rand()])
+    rotation_beta = original.rotate_strain_basis([np.random.rand(), -np.random.rand()])
 
     # check the functionality has left invarient quantities invarient
     np.testing.assert_almost_equal(original.inav[3].data, rotation_alpha.inav[3].data, decimal=2)  # rotations
@@ -75,11 +89,10 @@ def test_trace(Displacement_Grad_Map):
     See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
     """
 
-    local_D  = Displacement_Grad_Map
+    local_D = Displacement_Grad_Map
     original = local_D.get_strain_maps()
-    rotation_alpha = original.rotate_strain_basis([1.3,+1.9])
-    rotation_beta  = original.rotate_strain_basis([1.7,-0.3])
-
+    rotation_alpha = original.rotate_strain_basis([1.3, +1.9])
+    rotation_beta = original.rotate_strain_basis([1.7, -0.3])
 
     np.testing.assert_almost_equal(np.add(original.inav[0].data, original.inav[1].data),
                                    np.add(rotation_alpha.inav[0].data, rotation_alpha.inav[1].data),

@@ -1,4 +1,4 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
@@ -21,6 +21,7 @@ from pyxem.generators.displacement_gradient_tensor_generator import \
 import hyperspy.api as hs
 import pytest
 import numpy as np
+
 
 def vector_operation(z, M):
     """
