@@ -55,7 +55,7 @@ def _index_coords(z, origin=None):
         Corrdinates for the indices of a numpy array.
     """
     ny, nx = z.shape[:2]
-    if origin is None:l
+    if origin is None:
         origin_x, origin_y = nx // 2, ny // 2
     else:
         origin_x, origin_y = origin
