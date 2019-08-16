@@ -115,5 +115,6 @@ class StrainMap(Signal2D):
 
         R = _get_rotation_matrix(x_new)
         transposed_to_new_basis = apply_rotation_complete(strain_map_core, R)
+        meta_dict = self.metadata.as_dictionary()
 
-        return StrainMap(transposed_to_new_basis, current_basis_x=x_new)
+        return StrainMap(transposed_to_new_basis, current_basis_x=x_new, metadata=meta_dict)
