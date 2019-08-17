@@ -419,6 +419,44 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
+def _find_peak_max(arr: np.ndarray, sigma: int, m: int=50, w: int=10, kind: int=3) -> (float, float):
+    """Find the index of the pixel corresponding to peak maximum in 1D pattern `arr`
+    First, the pattern is smoothed using a gaussian filter with standard deviation `sigma`
+    The initial guess takes the position corresponding to the largest value in the resulting pattern
+    A window of size 2*w+1 around this guess is taken and expanded by factor `m` to to interpolate the
+    pattern to get the peak maximum position with subpixel precision."""
+    y1 = ndimage.filters.gaussian_filter1d(arr, sigma)
+    c1 = np.argmax(y1)  # initial guess for beam center
+
+    win_len = 2*w+1
+    
+    try:
+        r1 = np.linspace(c1-w, c1+w, win_len)
+        f  = interpolate.interp1d(r1, y1[c1-w: c1+w+1], kind=kind)
+        r2 = np.linspace(c1-w, c1+w, win_len*m)  # extrapolate for subpixel accuracy
+        y2 = f(r2)
+        c2 = np.argmax(y2) / m  # find beam center with `m` precision
+    except ValueError as e:  # if c1 is too close to the edges, return initial guess
+        return c1
+
+    return c2 + c1 - w
+
+
+def find_beam_offset_interpolate(img: np.ndarray, sigma: int=30, m: int=100, kind: int=3) -> (float, float):
+    """Find the center of the primary beam in the image `img`
+    The position is determined by summing along X/Y directions and finding the position along the two
+    directions independently. Uses interpolation by factor `m` to find the coordinates of the pimary
+    beam with subpixel accuracy."""
+    xx = np.sum(img, axis=1)
+    yy = np.sum(img, axis=0)
+    
+    cx = _find_peak_max(xx, sigma, m=m, kind=kind) 
+    cy = _find_peak_max(yy, sigma, m=m, kind=kind) 
+
+    center = np.array([cx, cy])
+    return center
+
+
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     """Method to center the direct beam center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
