@@ -17,6 +17,102 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+from skimage.feature import canny
+from skimage.measure import label, regionprops
+
+
+def apply_transform_to_image(img, transform, center=None):
+    """Applies transformation matrix to image and recenters it
+    http://docs.sunpy.org/en/stable/_modules/sunpy/image/transform.html
+    http://stackoverflow.com/q/20161175
+    """
+
+    if center is None:
+        center = (np.array(img.shape)[::-1]-1)/2.0
+    # shift = (center - center.dot(transform)).dot(np.linalg.inv(transform))
+    
+    displacement = np.dot(transform, center)
+    shift = center - displacement
+    
+    # order=1; linear interpolation, anything higher may introduce artifacts
+    img_tf = interpolation.affine_transform(img, transform, offset=shift, mode="constant", order=1, cval=0.0)
+    return img_tf
+
+
+def affine_transform_ellipse_to_circle(azimuth: float, amplitude: float, inverse=False):
+    """Usage: 
+
+    e2c = circle_to_ellipse_affine_transform(azimuth, amplitude):
+    np.dot(arr, e2c) # arr.shape == (n, 2)
+       or
+    apply_transform_to_image(img, e2c)
+
+    http://math.stackexchange.com/q/619037
+    """
+    sin = np.sin(azimuth)
+    cos = np.cos(azimuth)
+    sx    = 1 - amplitude
+    sy    = 1 + amplitude
+    
+    # apply in this order
+    rot1 = np.array((cos, -sin,  sin, cos)).reshape(2,2)
+    scale = np.array((sx, 0, 0, sy)).reshape(2,2)
+    rot2 = np.array((cos,  sin, -sin, cos)).reshape(2,2)
+    
+    composite = rot1.dot(scale).dot(rot2)
+    
+    if inverse:
+        return np.linalg.inv(composite)
+    else:
+        return composite
+
+
+def affine_transform_circle_to_ellipse(azimuth: float, amplitude: float):
+    """Usage: 
+
+    c2e = circle_to_ellipse_affine_transform(azimuth, amplitude):
+    np.dot(arr, c2e) # arr.shape == (n, 2)
+       or
+    apply_transform_to_image(img, c2e)
+    """
+    return affine_transform_ellipse_to_circle(azimuth, amplitude, inverse=True)
+
+
+def apply_stretch_correction(z, center=None, azimuth: float=0, amplitude: float=0):
+    """Apply stretch correction to image using calibrated values
+
+    center: list of floats
+        pixel coordinates of the center of the direct beam
+    azimuth: float
+        Direction of the azimuth in degrees with respect to the vertical axis (TODO: check this)
+    amplitude: float
+        The difference in percent between the long and short axes
+
+    returns:
+        (N,N) ndarray
+    """
+    azimuth_rad = np.radians(azimuth)    # go to radians
+    amplitude_pc = amplitude / (2*100)   # as percentage
+    tr_mat = affine_transform_ellipse_to_circle(azimuth_rad, amplitude_pc)
+    z = apply_transform_to_image(z, tr_mat, center=center)
+    return z
+
+
+def find_stretch_correction(img, sigma):
+    """Algorithm to find the stretch correction from powder ring images
+    Uses the canny edge detection from scipy
+
+    Based on https://github.com/stefsmeets/instamatic/blob/master/instamatic/processing/stretch_correction.py
+    """
+
+    # edge detection
+    edges = canny(img, sigma=sigma, low_threshold=None, high_threshold=None)
+
+    # get regionprops
+    props = get_ring_props(edges)
+
+    # parse results
+    plot_props(edges, props)
 
 
 def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
