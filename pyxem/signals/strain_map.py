@@ -22,16 +22,17 @@ from pyxem.signals import push_metadata_through, transfer_signal_axes
 
 
 def _get_rotation_matrix(x_new):
-    """Internal function to get the rotation matrix that takes [1,0] to x_new
+    """Calculate the rotation matrix mapping [1,0] to x_new.
 
     Parameters
     ----------
     x_new : list
-        The coordinates of a point that lies on the new 'x' axis
+        Coordinates of a point on the new 'x' axis.
+     
     Returns
     -------
-    R : 2 x 2 numpy asarray
-        Contains the correct rotation matrix
+    R : 2 x 2 numpy.array()
+        The rotation matrix.
     """
     try:
         rotation_angle = np.arctan(x_new[1] / x_new[0])
@@ -46,9 +47,9 @@ def _get_rotation_matrix(x_new):
 
 class StrainMap(Signal2D):
     """
-    Class for storing strain maps, if created within pyxem conventions are such that:
-    The 'y-axis' will always lie 90 degrees from the 'x-axis'
-    Rotations are defined such that positive corresponds to anticlockwise.
+    Class for storing strain maps, if created within pyxem conventions are:
+    The 'y-axis' is 90 degrees from the 'x-axis'
+    Positive rotations are anticlockwise.
     """
 
     _signal_type = "strain_map"
@@ -67,26 +68,28 @@ class StrainMap(Signal2D):
         self.current_basis_y = np.matmul(np.asarray([[0, 1], [-1, 0]]), self.current_basis_x)
 
     def rotate_strain_basis(self, x_new):
-        """ Rotates a strain map to a new basis, see the class documentation for conventions
+        """ Rotates a strain map to a new basis.
 
         Parameters
         ----------
         x_new : list
-            The coordinates of a point that lies on the new 'x' axis
+            The coordinates of a point on the new 'x' axis
 
         Returns
         -------
         StrainMap :
-            A new strain map object, in the desired basis.
+            StrainMap in the new (rotated) basis.
 
         Notes
         -----
-        We follows the mathmatical formalism described in (among other places)
+        Conventions are described in the class documentation.
+        
+        We follow mathmatical formalism described in:
         "https://www.continuummechanics.org/stressxforms.html" (August 2019)
         """
 
         def apply_rotation(transposed_strain_map, R):
-            """ Rotates a strain matrix to a new basis, for which R takes x_old to x_new """
+            """ Rotates a strain matrix to a new basis, for which R maps x_old to x_new """
             sigmaxx_old = transposed_strain_map[0]
             sigmayy_old = transposed_strain_map[1]
             sigmaxy_old = transposed_strain_map[2]
