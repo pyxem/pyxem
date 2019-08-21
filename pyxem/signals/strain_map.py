@@ -18,7 +18,7 @@
 
 from hyperspy.signals import Signal2D
 import numpy as np
-from pyxem.signals import push_metadata_through, transfer_navigation_axes
+from pyxem.signals import push_metadata_through, transfer_signal_axes
 
 
 def _get_rotation_matrix(x_new):
@@ -118,4 +118,4 @@ class StrainMap(Signal2D):
         meta_dict = self.metadata.as_dictionary()
 
         strainmap = StrainMap(transposed_to_new_basis, current_basis_x=x_new, metadata=meta_dict)
-        return transfer_navigation_axes(strainmap,self)
+        return transfer_signal_axes(strainmap,self)
