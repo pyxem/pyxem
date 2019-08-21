@@ -43,8 +43,14 @@ def test__init__(Displacement_Grad_Map):
     strain_map = Displacement_Grad_Map.get_strain_maps()
     assert strain_map.axes_manager.navigation_size == 4
 
-# TODO consider if there is something important going on with +- for shear
-# TODO confirm (and document) the handedness of our rotation matrix
+def test_signal_axes_carry_through(Displacement_Grad_Map):
+    """ A strain map that is calibrated, should stay calibrated when we change basis """
+    strain_map = Displacement_Grad_Map.get_strain_maps()
+    strain_map.axes_manager.signal_axes[1].units = 'nm'
+    strain_map.axes_manager.signal_axes[0].scale = 19
+    strain_alpha = strain_map.rotate_strain_basis([np.random.rand(), np.random.rand()])
+    assert strain_alpha.axes_manager.signal_axes[1].units == 'nm'
+    assert strain_alpha.axes_manager.signal_axes[0].scale == 19
 
 
 """ These are change of basis tests """
