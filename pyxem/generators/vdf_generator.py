@@ -172,9 +172,10 @@ class VDFSegmentGenerator:
         self.vdf_images = vdfs
         self.vectors = vdfs.vectors
 
-    def get_vdf_segments(self, min_distance=1, min_size=10,
-                         max_size=100, max_number_of_grains=np.inf,
-                         threshold=False, exclude_border=False):
+    def get_vdf_segments(self, min_distance=2, min_size=10,
+                         max_size=np.inf, max_number_of_grains=np.inf,
+                         marker_radius=2, threshold=False,
+                         exclude_border=False):
         """Separate segments (grains) from each of the VDF images using
         edge-detection by the sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a
@@ -197,6 +198,7 @@ class VDFSegmentGenerator:
             Maximum number of grains included in the returned separated
             grains. If it is exceeded, those with highest peak
             intensities will be returned.
+        marker_radius :
         threshold: bool
             If True, a mask is calculated by thresholding the VDF image
             by the Li threshold method in scikit-image. If False
@@ -233,7 +235,8 @@ class VDFSegmentGenerator:
         vdfsegs = np.array(vdfs.map(
             separate, show_progressbar=True, inplace=False,
             min_distance=min_distance, min_size=min_size, max_size=max_size,
-            max_number_of_grains=max_number_of_grains, threshold=threshold,
+            max_number_of_grains=max_number_of_grains,
+            marker_radius=marker_radius, threshold=threshold,
             exclude_border=exclude_border), dtype=np.object)
 
         segments, vectors_of_segments = [], []

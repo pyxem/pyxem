@@ -18,12 +18,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scipy.ndimage import distance_transform_edt, label, center_of_mass
+from numpy.ma import masked_where
+
+from scipy.ndimage import distance_transform_edt, label, binary_erosion
 from scipy.spatial import distance_matrix
+from scipy.signal import convolve2d
 
 from skimage.feature import peak_local_max
 from skimage.filters import sobel, threshold_li
-from skimage.morphology import watershed
+from skimage.morphology import watershed, disk
 
 from sklearn.cluster import DBSCAN
 
@@ -69,7 +72,7 @@ def norm_cross_corr(image, template):
 
 
 def separate(vdf_temp, min_distance, min_size, max_size,
-             max_number_of_grains, threshold=False,
+             max_number_of_grains, marker_radius=2, threshold=False,
              exclude_border=False, plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
@@ -92,6 +95,8 @@ def separate(vdf_temp, min_distance, min_size, max_size,
         Maximum number of grains included in the returned separated
         grains. If it is exceeded, those with highest peak intensities
         will be returned.
+    marker_radius :
+
     threshold : bool
         If True, a mask is calculated by thresholding the VDF image by
         the Li threshold method in scikit-image. If False (default), the
@@ -129,64 +134,80 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     if np.any(np.nonzero(mask)) is False:
         return None
 
-    # Calculate the eucledian distance from each point in the mask to the
+    # Calculate the Eucledian distance from each point in the mask to the
     # nearest background point of value 0.
     distance = distance_transform_edt(mask)
 
-    # Find the coordinates of the local maxima of the distance transform that
-    # lie inside a region defined by (2*min_distance+1).
+    # If exclude_boarder is given, the edge of the distance is removed
+    # by erosion. The distance image is used to find markers, and so the
+    # erosion is done to avoid that markers are located at the edge
+    # of the mask.
+    if exclude_border > 0:
+        distance_mask = binary_erosion(distance, structure=disk(exclude_border))
+        distance = distance * distance_mask.astype('bool')
+
+    # Find the coordinates of the local maxima of the distance transform.
     local_maxi = peak_local_max(distance, indices=False,
-                                min_distance=min_distance,
+                                min_distance=1,
                                 num_peaks=max_number_of_grains,
                                 exclude_border=exclude_border,
                                 threshold_rel=None)
     maxi_coord1 = np.where(local_maxi)
 
-    # If there are any local maxima positioned at equal values of
-    # distance, the peak_local_max function will return all those
-    # maxima, irrespectively of the distances between them. Thus, below
-    # we check if such maxima are closer than min_distance. If so,
-    # we replace the maxima lying inside a cluster (found by DBSCAN by
-    # using min_distance) by the one maximum closest to their center of
-    # mass.
-    max_values, equal_max_count = np.unique(
-        distance[np.where(local_maxi)], return_counts=True)
-    if np.any(equal_max_count > 1):
-        for max_value in max_values[equal_max_count > 1]:
-            equal_maxi = np.zeros_like(distance).astype('bool')
-            equal_maxi[np.where((distance == max_value) &
-                                (local_maxi == True))] = True
-            equal_maxi_coord = np.reshape(np.transpose(
-                np.where(equal_maxi)), (-1, 2)).astype('int')
-            clusters = DBSCAN(eps=min_distance,
-                              min_samples=1).fit(equal_maxi_coord)
-            unique_labels, unique_labels_count = np.unique(
-                clusters.labels_, return_counts=True)
-            for n in np.arange(unique_labels.max()+1):
-                if unique_labels_count[n] > 1:
-                    equal_maxi_coord_temp = clusters.components_[
-                        clusters.labels_ == n]
-                    equal_maxi_temp = np.zeros_like(
-                        distance).astype('bool')
-                    equal_maxi_temp[
-                        np.transpose(equal_maxi_coord_temp)[0],
-                        np.transpose(equal_maxi_coord_temp)[1]] = True
-                    com = np.array(center_of_mass(equal_maxi_temp))
-                    index = distance_matrix(
-                        [com], equal_maxi_coord_temp).argmin()
-                    local_maxi[np.where(equal_maxi_temp)] = False
-                    local_maxi[equal_maxi_coord_temp[index][0],
-                               equal_maxi_coord_temp[index][1]] = True
+    # Discard maxima that are found at pixels that are connected to a
+    # smaller number of pixels than min_size. Used as markers, these would lead
+    # to segments smaller than min_size and should therefore not be
+    # considered when deciding which maxima to use as markers.
+    if min_size > 1:
+        labels_check = label(mask)[0]
+        delete_indices = []
+        for i in np.arange(np.shape(maxi_coord1)[1]):
+            index = np.transpose(maxi_coord1)[i]
+            label_value = labels_check[index[0], index[1]]
+            if len(labels_check[labels_check==label_value]) < min_size:
+                delete_indices.append(i)
+                local_maxi[index[0], index[1]] = False
+        maxi_coord1 = np.delete(maxi_coord1, delete_indices, axis=1)
 
-    # Find the edges of the VDF image using the sobel transform.
+    # Cluster the maxima by DBSCAN based on min_distance. For each
+    # cluster, only the maximum closest to the average maxima position is
+    # used as a marker.
+    clusters = DBSCAN(eps=min_distance, metric='euclidean', min_samples=1,
+                      ).fit(np.transpose(maxi_coord1))
+    local_maxi = np.zeros_like(local_maxi)
+    for n in np.arange(clusters.labels_.max()+1):
+        maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]
+        com = np.average(maxi_coord1_n, axis=0).astype('int')
+        index = distance_matrix([com], maxi_coord1_n).argmin()
+        index = maxi_coord1_n[index]
+        local_maxi[index[0], index[1]] = True
+
+    # Use the resulting maxima as markers. Each marker should have a
+    # unique label value. For each maximum, generate markers with the same
+    # label value in a radius given by marker_radius centered at the
+    # maximum position. This is done to make the segmentation more robust
+    # to local changes in pixel values around the marker.
+    markers = label(local_maxi)[0]
+    if marker_radius > 1:
+        disk_mask = disk(marker_radius)
+        for mm in np.arange(1, np.max(markers) + 1):
+            im = np.zeros_like(markers)
+            im[np.where(markers == mm)] = markers[np.where(markers == mm)]
+            markers_temp = convolve2d(im, disk_mask, boundary='fill',
+                                      mode='same', fillvalue=0)
+            markers[np.where(markers_temp)] = mm
+            #markers[np.where(markers_temp)] = markers_temp[
+            #    np.where(markers_temp)]
+    markers = markers*mask
+
+    # Find the edges of the VDF image using the Sobel transform.
     elevation = sobel(vdf_temp)
 
     # 'Flood' the elevation (i.e. edge) image from basins at the marker
-    # positions. The marker positions are the local maxima of the
-    # distance. Find the locations where different basins meet, i.e. the
-    # watershed lines (segment boundaries). Only search for segments
+    # positions. Find the locations where different basins meet, i.e.
+    # the watershed lines (segment boundaries). Only search for segments
     # (labels) in the area defined by mask.
-    labels = watershed(elevation, markers=label(local_maxi)[0], mask=mask)
+    labels = watershed(elevation, markers=markers, mask=mask)
 
     sep = np.zeros((np.shape(vdf_temp)[0], np.shape(vdf_temp)[1],
                     (np.max(labels))), dtype='int32')
@@ -194,8 +215,8 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     while (np.max(labels)) > n - 1:
         sep_temp = labels * (labels == n) / n
         sep_temp = np.nan_to_num(sep_temp)
-        # Discard segment if it is too small, or add it to separated
-        # segments.
+        # Discard a segment if it is too small, or else add it to the list
+        # of separated segments.
         if ((np.sum(sep_temp, axis=(0, 1)) < min_size)
                 or (max_size is not None
                     and np.sum(sep_temp, axis=(0, 1)) > max_size)):
@@ -204,7 +225,7 @@ def separate(vdf_temp, min_distance, min_size, max_size,
         else:
             sep[:, :, (n - i) - 1] = sep_temp
         n = n + 1
-    # Put the intensity from the input VDF image into each segment area.
+    # Put the intensity from the input VDF image into each segmented area.
     vdf_sep = np.broadcast_to(vdf_temp.T, np.shape(sep.T)) * (sep.T == 1)
 
     if plot_on:
@@ -240,10 +261,12 @@ def separate(vdf_temp, min_distance, min_size, max_size,
         ax[1].axis('off')
         ax[1].set_title('Mask')
 
-        ax[2].imshow(distance, cmap=plt.cm.magma)
+        ax[2].imshow(distance, cmap=plt.cm.gray_r)
         ax[2].axis('off')
         ax[2].set_title('Distance and maxima')
-        ax[2].plot(maxi_coord1[1], maxi_coord1[0], 'r+')
+        ax[2].imshow(masked_where(markers == 0, markers),
+                     cmap=plt.cm.gist_rainbow)
+        ax[2].plot(maxi_coord1[1], maxi_coord1[0], 'k+')
         ax[2].plot(maxi_coord[1], maxi_coord[0], 'gx')
 
         ax[3].imshow(elevation, cmap=plt.cm.magma)
