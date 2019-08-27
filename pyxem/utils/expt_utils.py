@@ -458,9 +458,11 @@ def _find_peak_max(arr: np.ndarray, sigma: int, m: int=50, w: int=10, kind: int=
         y2 = f(r2)
         c2 = np.argmax(y2) / m  # find beam center with `m` precision
     except ValueError as e:  # if c1 is too close to the edges, return initial guess
-        return c1
+        ret = c1
+    else:
+        ret = c2 + c1 - w
 
-    return c2 + c1 - w
+    return ret
 
 
 def find_beam_center_interpolate(img: np.ndarray, sigma: int=30, m: int=100, kind: int=3) -> (float, float):

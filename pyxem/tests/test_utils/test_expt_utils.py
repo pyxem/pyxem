@@ -173,9 +173,20 @@ def test_find_beam_position_blur(center_expected, sigma):
 
 @pytest.mark.parametrize("center_expected", [(29.52, 25.97)])
 @pytest.mark.parametrize("sigma", [1, 2, 3])
-def test_find_beam_position_interpolate(center_expected, sigma):
+def test_find_beam_position_interpolate_1(center_expected, sigma):
     z = np.zeros((50, 50))
     z[28:31, 24:28] = 1
     z = gaussian_filter(z, sigma=sigma)
-    centers = find_beam_center_interpolate(z, 10)
+    centers = find_beam_center_interpolate(z, sigma=5, m=100, kind=3)
+    assert np.allclose(centers, center_expected, atol=0.2)
+
+
+@pytest.mark.parametrize("center_expected", [(9, 44)])
+@pytest.mark.parametrize("sigma", [2])
+def test_find_beam_position_interpolate_2(center_expected, sigma):
+    """Cover unlikely case when beam is close to the edge"""
+    z = np.zeros((50, 50))
+    z[5:15, 41:46] = 1
+    z = gaussian_filter(z, sigma=sigma)
+    centers = find_beam_center_interpolate(z, sigma=5, m=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)
