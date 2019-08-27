@@ -60,7 +60,7 @@ def test_something_changes(Displacement_Grad_Map):
     oneone_strain_original = Displacement_Grad_Map.get_strain_maps()
     local_D = Displacement_Grad_Map
     strain_alpha = local_D.get_strain_maps()
-    oneone_strain_alpha = strain_alpha.rotate_strain_basis([np.random.rand(), np.random.rand()])
+    oneone_strain_alpha = strain_alpha.rotate_strain_basis([1,1])
     assert not np.allclose(oneone_strain_original.data, oneone_strain_alpha.data, atol=0.01)
 
 
