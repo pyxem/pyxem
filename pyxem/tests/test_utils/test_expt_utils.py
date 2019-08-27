@@ -158,3 +158,13 @@ class TestCenteringAlgorithm:
         z = gaussian_filter(z, sigma=2, truncate=3)
         shifts = find_beam_offset_cross_correlation(z, 1, 4)
         assert np.allclose(shifts, shifts_expected, atol=0.2)
+
+
+@pytest.mark.parametrize("center_expected", [(29, 25)])
+@pytest.mark.parametrize("sigma", [1, 2, 3])
+def test_find_beam_position_blur(center_expected, sigma):
+    z = np.zeros((50, 50))
+    z[28:31, 24:27] = 1
+    z = gaussian_filter(z, sigma=sigma)
+    shifts = find_beam_position_blur(z, 10)
+    assert np.allclose(shifts, center_expected, atol=0.2)
