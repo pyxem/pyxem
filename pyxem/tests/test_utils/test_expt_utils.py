@@ -177,7 +177,7 @@ def test_find_beam_position_interpolate_1(center_expected, sigma):
     z = np.zeros((50, 50))
     z[28:31, 24:28] = 1
     z = gaussian_filter(z, sigma=sigma)
-    centers = find_beam_center_interpolate(z, sigma=5, m=100, kind=3)
+    centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)
 
 
@@ -188,5 +188,5 @@ def test_find_beam_position_interpolate_2(center_expected, sigma):
     z = np.zeros((50, 50))
     z[5:15, 41:46] = 1
     z = gaussian_filter(z, sigma=sigma)
-    centers = find_beam_center_interpolate(z, sigma=5, m=100, kind=3)
+    centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)
