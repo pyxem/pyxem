@@ -382,15 +382,14 @@ class Diffraction2D(Signal2D):
             The centered diffraction data.
 
         """
-        nav_shape_x = self.data.shape[0]
-        nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2] / 2 - 0.5,
-                                       self.data.shape[3] / 2 - 0.5))
+        nav_size = self.axes_manager.navigation_size
+        signal_shape = self.axes_manager.signal_shape
+        origin_coordinates = np.array(signal_shape) / 2
 
         if square_width is not None:
-            min_index = np.int(origin_coordinates[0] - (0.5 + square_width))
+            min_index = np.int(origin_coordinates[0] - square_width)
             # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + (1.5 + square_width))
+            max_index = np.int(origin_coordinates[0] + square_width)
             shifts = self.isig[min_index:max_index, min_index:max_index].get_direct_beam_position(
                 radius_start, radius_finish, *args, **kwargs)
         else:
@@ -398,7 +397,7 @@ class Diffraction2D(Signal2D):
                                                    *args, **kwargs)
 
         shifts = -1 * shifts.data
-        shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
+        shifts = shifts.reshape(nav_size, 2)
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
