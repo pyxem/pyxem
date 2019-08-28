@@ -52,7 +52,7 @@ setup(
       'scikit-learn >= 0.19',     # reason unknown
       'hyperspy >= 1.3',          # 1.2 fails, (NTU Workshop - May 2019)
       'diffsims',
-      'numpy < 1.17.0'            # 3.7 appveyor test failed on 1.17.1
+      'numpy >= 1.17.0'            # 3.7 appveyor test failed on 1.17.1
       ],
     package_data={
         "": ["LICENSE", "readme.rst",],
