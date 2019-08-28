@@ -502,7 +502,7 @@ def find_beam_center_interpolate(img: np.ndarray, sigma: int=30, upsample_factor
     return center
 
 
-def find_beam_position_blur(z: np.ndarray, sigma: int=30) -> np.ndarray:
+def find_beam_center_blur(z: np.ndarray, sigma: int=30) -> np.ndarray:
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 
@@ -522,7 +522,7 @@ def find_beam_position_blur(z: np.ndarray, sigma: int=30) -> np.ndarray:
 
 
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to center the direct beam center by a cross-correlation algorithm.
+    """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
