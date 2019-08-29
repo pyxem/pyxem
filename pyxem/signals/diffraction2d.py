@@ -396,7 +396,7 @@ class Diffraction2D(Signal2D):
         return shifts
 
     def center_direct_beam(self,
-                           method="default",
+                           method="cross_correlate",
                            radius_start=4,
                            radius_finish=8,
                            sigma=30,
@@ -411,7 +411,7 @@ class Diffraction2D(Signal2D):
         Parameters
         ----------
         method : str,
-            Must be one of "default", "cross_correlate", "blur", "interpolate"
+            Must be one of "cross_correlate", "blur", "interpolate"
             The default is "cross_correlate"
         radius_start : int (cross_correlate)
             The lower bound for the radius of the central disc to be used in the
