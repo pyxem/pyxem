@@ -324,7 +324,7 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method="default", 
+    def get_direct_beam_position(self, method="cross_correlate", 
                                  radius_start=4,
                                  radius_finish=8,
                                  sigma=30,
@@ -337,7 +337,7 @@ class Diffraction2D(Signal2D):
         Parameters
         ----------
         method : str,
-            Must be one of "default", "cross_correlate", "blur", "interpolate"
+            Must be one of "cross_correlate", "blur", "interpolate"
             The default is "cross_correlate"
         radius_start : int (cross_correlate)
             The lower bound for the radius of the central disc to be used in the
@@ -371,9 +371,9 @@ class Diffraction2D(Signal2D):
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        methods = "default", "cross_correlate", "blur", "interpolate"
+        methods = "cross_correlate", "blur", "interpolate"
 
-        if method in ("default", "cross_correlate"):
+        if method == "cross_correlate":
             shifts = self.map(find_beam_offset_cross_correlation,
                           radius_start=radius_start,
                           radius_finish=radius_finish,
