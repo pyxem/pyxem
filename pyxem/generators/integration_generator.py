@@ -29,7 +29,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 import warnings
 
 
-def _get_intensities(z, vectors, center=None, radius=1):
+def _get_intensities(z, vectors, radius=1):
     """
     Basic intensity integration routine, takes the maximum value at the
     given vector positions with the number of pixels given by `radius`.
@@ -47,10 +47,7 @@ def _get_intensities(z, vectors, center=None, radius=1):
     intensities : np.array
         List of extracted intensities
     """
-    if center is None:
-        center = np.array(z.shape) / 2
-    
-    i, j = (np.array(vectors.data) + center).astype(int).T
+    i, j = np.array(vectors.data).astype(int).T
     
     if radius > 1:
         footprint = morphology.disk(radius)
@@ -76,6 +73,8 @@ class IntegrationGenerator():
         navigation shape as the electron diffraction patterns. If an ndarray,
         the same set of vectors is mapped over all electron diffraction
         patterns.
+
+    TODO: extend with more sophisticated intensity extraction methods
     """
 
     def __init__(self, dp, vectors):
@@ -86,6 +85,30 @@ class IntegrationGenerator():
         self.calibration = [sig_ax[0].scale, sig_ax[1].scale]
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
+        def _floor(vectors, calibration, center):
+            if vectors.shape == (1,) and vectors.dtype == np.object:
+                vectors = vectors[0]
+            return np.floor((vectors.astype(np.float64) / calibration) + center).astype(np.int)
+
+        if isinstance(vectors, DiffractionVectors):
+            if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
+                raise ValueError('Vectors with shape {} must have the same navigation shape '
+                                 'as the diffraction patterns which has shape {}.'.format(
+                                     vectors.axes_manager.navigation_shape, dp.axes_manager.navigation_shape))
+            self.vector_pixels = vectors.map(_floor,
+                                             calibration=self.calibration,
+                                             center=self.center,
+                                             inplace=False)
+        else:
+            self.vector_pixels = _floor(vectors, self.calibration, self.center)
+
+        if isinstance(self.vector_pixels, DiffractionVectors):
+            if np.any(self.vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels.data < 0)):
+                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+        elif isinstance(self.vector_pixels, np.ndarray):
+            if np.any((self.vector_pixels > np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels < 0)):
+                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+
     def extract_intensities(self, radius: int=2):
         """
         Basic intensity integration routine, takes the maximum value at the
@@ -93,9 +116,6 @@ class IntegrationGenerator():
     
         Parameters
         ----------
-        vectors : DiffractionVectors
-            Vectors to the locations of the spots to be
-            integrated.
         radius: int,
             Number of pixels within which to find the largest maximum
     
@@ -105,8 +125,7 @@ class IntegrationGenerator():
             List of extracted intensities
         """
         intensities = self.dp.map(_get_intensities, 
-                                  vectors=self.vectors_init, 
-                                  center=self.center, 
+                                  vectors=self.vector_pixels, 
                                   radius=radius, 
                                   inplace=False)
 
