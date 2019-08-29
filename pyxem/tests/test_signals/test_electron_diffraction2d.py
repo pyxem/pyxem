@@ -48,7 +48,7 @@ class TestSimpleMaps:
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     @pytest.mark.xfail(raises=ValueError)
-    def test_center_direct_beam(self, diffraction_pattern):
+    def test_center_direct_beam_fail(self, diffraction_pattern):
         diffraction_pattern.center_direct_beam(method="Invalid value")
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
