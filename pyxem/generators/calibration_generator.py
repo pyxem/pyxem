@@ -25,6 +25,8 @@ from scipy.optimize import curve_fit
 from math import sin, cos
 from hyperspy.roi import CircleROI, Line2DROI
 from hyperspy.misc.utils import stack as stack_method
+import matplotlib.pyplot as plt
+from skimage.transform import rotate
 
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
@@ -46,8 +48,10 @@ class CalibrationGenerator():
     def __init__(self, calibration_data):
         # Assign attributes
         self.calibration_data = calibration_data
-        self.affine_matrix = None
         self.ring_params = None
+        self.affine_matrix = None
+        self.rotation_angle = None
+        self.correction_matrix = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
 
@@ -335,28 +339,136 @@ class CalibrationGenerator():
 
         return x[0]
 
-    def plot_calibrated_data(self, data_to_plot, *args, **kwargs):
+    def get_rotation_calibration(self, real_line, reciprocal_line):
+        """Determine the rotation between real and reciprocal space coordinates.
+
+        Parameters
+        ----------
+        real_line : Line2DROI
+            Line2DROI object drawn along known direction in real space.
+        reciprocal_line : Line2DROI
+            Line2DROI object drawn along known direction in reciprocal space.
+
+        Returns
+        -------
+        rotation_angle : float
+            Rotation angle in degrees.
+        """
+        # Calculate rotation angle and store as attribute
+        self.rotation_angle = real_line.angle() - reciprocal_line.angle()
+        # Return rotation angle calibration
+        return self.rotation_angle
+
+    def get_correction_matrix(self):
+        """Determine the transformation matrix required to correct for
+        diffraction pattern distortions and/or rotation between real and
+        reciprocal space coordinates.
+
+        Returns
+        -------
+        correction_matrix : np.array()
+            Array defining the affine transformation that corrects for lens
+            distortions in the diffraction pattern.
+
+        """
+        if self.affine_matrix is None and self.rotation_angle is None:
+            raise ValueError("This method requires either an affine matrix to "
+                             "correct distortion or a rotation angle between "
+                             "real and reciprocal space to have been "
+                             "determined. Please determine these parameters.")
+        # Only distortion correction case
+        elif self.rotation_angle is None:
+            correction_matrix = self.affine_matrix
+        # Only rotation correction case
+        elif self.affine_matrix is None:
+            theta = self.rotation_angle / 180 * np.pi
+            correction_matrix = np.array([[cos(theta), -sin(theta), 0],
+                                          [sin(theta), cos(theta), 0],
+                                          [0, 0, 1]])
+        # Otherwise both corrections required, distortion applied first
+        else:
+            theta = self.rotation_angle / 180 * np.pi
+            rotation_matrix = np.array([[cos(theta), -sin(theta), 0],
+                                        [sin(theta), cos(theta), 0],
+                                        [0, 0, 1]])
+            correction_matrix = np.matmul(rotation_matrix, self.affine_matrix)
+        # Set the correction matrix attribute
+        self.correction_matrix = correction_matrix
+        # Return the correction matrix
+        return correction_matrix
+
+    def plot_calibrated_data(self, data_to_plot, line=None,
+                             *args, **kwargs):  # pragma: no cover
         """ Plot calibrated data for visual inspection.
 
         Parameters
         ----------
         data_to_plot : string
             Specify the calibrated data to be plotted. Valid options are:
-            {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im'}
+            {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im',
+            'rotation_overlay'}
+        line : :obj:`hyperspy.roi.Line2DROI`
+            An optional Line2DROI object, as detailed in HyperSpy, to be added
+            as a widget to the calibration data plot and the trace plotted
+            interactively.
         """
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
         if data_to_plot == 'au_x_grating_dp':
             dpeg = self.calibration_data.au_x_grating_dp
             size = dpeg.data.shape[0]
+            if self.correction_matrix is None:
+                self.get_correction_matrix()
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
             dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-            dpegs.apply_affine_transformation(self.affine_matrix,
+            dpegs.apply_affine_transformation(self.correction_matrix,
                                               preserve_range=True,
                                               inplace=True)
             data = dpegs.mean((0, 1))
             data.set_diffraction_calibration(self.diffraction_calibration)
+            # Plot the calibrated diffraction data
+            data.plot(*args, **kwargs)
         elif data_to_plot == 'au_x_grating_im':
             data = self.calibration_data.au_x_grating_im
-        # Plot the data
-        data.plot(*args, **kwargs)
+            # Plot the calibrated image data
+            data.plot(*args, **kwargs)
+        elif data_to_plot == 'moo3_dp':
+            dpeg = self.calibration_data.moo3_dp
+            size = dpeg.data.shape[0]
+            if self.correction_matrix is None:
+                self.get_correction_matrix()
+            dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
+            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+            dpegs.apply_affine_transformation(self.correction_matrix,
+                                              preserve_range=True,
+                                              inplace=True)
+            data = dpegs.mean((0, 1))
+            data.set_diffraction_calibration(self.diffraction_calibration)
+            # Plot the calibrated diffraction data
+            data.plot(*args, **kwargs)
+        elif data_to_plot == 'moo3_im':
+            data = self.calibration_data.moo3_im
+            # Plot the calibrated image data
+            data.plot(*args, **kwargs)
+        elif data_to_plot == 'rotation_overlay':
+            dpeg = self.calibration_data.moo3_dp
+            size = dpeg.data.shape[0]
+            if self.correction_matrix is None:
+                self.get_correction_matrix()
+            dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
+            dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
+            dpegs.apply_affine_transformation(self.correction_matrix,
+                                              preserve_range=True,
+                                              inplace=True)
+            dp = dpegs.mean((0, 1))
+            im = self.calibration_data.moo3_im.rebin(dp.data.shape)
+            stack1 = np.zeros((dp.data.shape[0], dp.data.shape[1], 3))
+            stack1[:, :, 0] = dp.data / (0.05 * dp.data.max())
+            stack1[:, :, 2] = im.data / im.data.max()
+            plt.figure(1)
+            plt.imshow(stack1)
+        if line:
+            line.add_widget(data, axes=data.axes_manager.signal_axes)
+            trace = line.interactive(data, navigation_signal='same')
+            trace.plot()
+            return trace

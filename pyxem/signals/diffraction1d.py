@@ -138,6 +138,10 @@ class Diffraction1D(Signal1D):
         res.__init__(**res._to_dictionary())
         return res
 
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = Diffraction1D
+
 
 class LazyDiffraction1D(LazySignal, Diffraction1D):
 
@@ -150,3 +154,7 @@ class LazyDiffraction1D(LazySignal, Diffraction1D):
         super().compute(*args, **kwargs)
         self.__class__ = Diffraction1D
         self.__init__(**self._to_dictionary())
+
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = LazyDiffraction1D

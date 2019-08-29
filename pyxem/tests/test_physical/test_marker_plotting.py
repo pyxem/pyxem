@@ -21,7 +21,9 @@ import pytest
 import pyxem as pxm
 import hyperspy.api as hs
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from diffsims.sims.diffraction_simulation import DiffractionSimulation
+
+from pyxem.utils.sim_utils import sim_as_signal
 
 """
 When you run this the markers should land at the center of the peaks
@@ -74,7 +76,7 @@ def test_marker_placement_correct_beta():
     for coords in dp_cord_list:
         dp_sim = DiffractionSimulation(coordinates=coords,
                                        intensities=np.ones_like(coords[:, 0]))
-        dps.append(dp_sim.as_signal(144, 0.025, max_r).data)  # stores a numpy array of pattern
+        dps.append(sim_as_signal(dp_sim, 144, 0.025, max_r).data)  # stores a numpy array of pattern
     dp = pxm.ElectronDiffraction2D(np.array([dps[0:2], dps[2:]]))  # now from a 2x2 array of patterns
     dp.set_diffraction_calibration(2 * max_r / (144))
     local_plotter(dp, dp_cord_list)

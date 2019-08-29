@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.signals import push_metadata_through
-from pyxem.utils.sim_utils import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
@@ -67,23 +67,24 @@ class DiffractionVectors(BaseSignal):
         self.cartesian = None
         self.hkls = None
 
-    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
+    def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
+                                 distance_threshold=0.01):
         """Plot the unique diffraction vectors.
 
         Parameters
         ----------
         xlim : float
-            The maximum x coordinate to be plotted.
+            The maximum x coordinate in reciprocal Angstroms to be plotted.
         ylim : float
-            The maximum y coordinate to be plotted.
+            The maximum y coordinate in reciprocal Angstroms to be plotted.
         distance_threshold : float
-            The minimum distance between diffraction vectors to be passed to
-            get_unique_vectors.
+            The minimum distance in reciprocal Angstroms between diffraction
+            vectors to be passed to get_unique_vectors.
 
         Returns
         -------
         fig : matplotlib figure
-            The plot as a matplot lib figure.
+            The plot as a matplotlib figure.
 
         """
         # Find the unique gvectors to plot.
@@ -275,7 +276,7 @@ class DiffractionVectors(BaseSignal):
             The camera length in meters.
         """
         # Imported here to avoid circular dependency
-        from pyxem.utils.sim_utils import get_electron_wavelength
+        from diffsims.utils.sim_utils import get_electron_wavelength
         wavelength = get_electron_wavelength(accelerating_voltage)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,
