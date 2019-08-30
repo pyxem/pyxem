@@ -244,76 +244,78 @@ def match_vectors(peaks,
         phase_indices = phase['indices']
         phase_measurements = phase['measurements']
 
-        if peaks.shape[0] >= 2:
-            # Choose up to n_peaks_to_index unindexed peaks to be paired in all
-            # combinations.
-            # TODO: Matching can be done iteratively where successfully indexed
-            #       peaks are removed after each iteration. This can possibly
-            #       handle overlapping patterns.
-            # unindexed_peak_ids = range(min(peaks.shape[0], n_peaks_to_index))
-            # TODO: Better choice of peaks (longest, highest SNR?)
-            # TODO: Inline after choosing the best, and possibly require external sorting (if using sorted)?
-            unindexed_peak_ids = _choose_peak_ids(peaks, n_peaks_to_index)
+        if peaks.shape[0] < 2:
+            continue
 
-            # Find possible solutions for each pair of peaks.
-            for vector_pair_index, peak_pair_indices in enumerate(list(combinations(unindexed_peak_ids, 2))):
-                # Consider a pair of experimental scattering vectors.
-                q1, q2 = peaks[peak_pair_indices, :]
-                q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
+        # Choose up to n_peaks_to_index unindexed peaks to be paired in all
+        # combinations.
+        # TODO: Matching can be done iteratively where successfully indexed
+        #       peaks are removed after each iteration. This can possibly
+        #       handle overlapping patterns.
+        # unindexed_peak_ids = range(min(peaks.shape[0], n_peaks_to_index))
+        # TODO: Better choice of peaks (longest, highest SNR?)
+        # TODO: Inline after choosing the best, and possibly require external sorting (if using sorted)?
+        unindexed_peak_ids = _choose_peak_ids(peaks, n_peaks_to_index)
 
-                # Ensure q1 is longer than q2 for consistent order.
-                if q1_len < q2_len:
-                    q1, q2 = q2, q1
-                    q1_len, q2_len = q2_len, q1_len
+        # Find possible solutions for each pair of peaks.
+        for vector_pair_index, peak_pair_indices in enumerate(list(combinations(unindexed_peak_ids, 2))):
+            # Consider a pair of experimental scattering vectors.
+            q1, q2 = peaks[peak_pair_indices, :]
+            q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
 
-                # Calculate the angle between experimental scattering vectors.
-                angle = get_angle_cartesian(q1, q2)
+            # Ensure q1 is longer than q2 for consistent order.
+            if q1_len < q2_len:
+                q1, q2 = q2, q1
+                q1_len, q2_len = q2_len, q1_len
 
-                # Get library indices for hkls matching peaks within tolerances.
-                # TODO: phase are object arrays. Test performance of direct float arrays
-                tolerance_mask = np.abs(phase_measurements[:, 0] - q1_len) < mag_tol
-                tolerance_mask[tolerance_mask] &= np.abs(phase_measurements[tolerance_mask, 1] - q2_len) < mag_tol
-                tolerance_mask[tolerance_mask] &= np.abs(phase_measurements[tolerance_mask, 2] - angle) < angle_tol
+            # Calculate the angle between experimental scattering vectors.
+            angle = get_angle_cartesian(q1, q2)
 
-                # Iterate over matched library vectors determining the error in the
-                # associated indexation.
-                if np.count_nonzero(tolerance_mask) == 0:
-                    continue
+            # Get library indices for hkls matching peaks within tolerances.
+            # TODO: phase are object arrays. Test performance of direct float arrays
+            tolerance_mask = np.abs(phase_measurements[:, 0] - q1_len) < mag_tol
+            tolerance_mask[tolerance_mask] &= np.abs(phase_measurements[tolerance_mask, 1] - q2_len) < mag_tol
+            tolerance_mask[tolerance_mask] &= np.abs(phase_measurements[tolerance_mask, 2] - angle) < angle_tol
 
-                # Reference vectors are cartesian coordinates of hkls
-                reference_vectors = lattice_recip.cartesian(phase_indices[tolerance_mask])
+            # Iterate over matched library vectors determining the error in the
+            # associated indexation.
+            if np.count_nonzero(tolerance_mask) == 0:
+                continue
 
-                # Rotation from experimental to reference frame
-                rotations = get_rotation_matrix_between_vectors(q1, q2, reference_vectors[:, 0], reference_vectors[:, 1])
+            # Reference vectors are cartesian coordinates of hkls
+            reference_vectors = lattice_recip.cartesian(phase_indices[tolerance_mask])
 
-                # Index the peaks by rotating them to the reference coordinate
-                # system. Use rotation directly since it is multiplied from the
-                # right. Einsum gives list of peaks.dot(rotation).
-                hklss = lattice_recip.fractional(np.einsum('ijk,lk->ilj', rotations, peaks))
+            # Rotation from experimental to reference frame
+            rotations = get_rotation_matrix_between_vectors(q1, q2, reference_vectors[:, 0], reference_vectors[:, 1])
 
-                # Evaluate error of peak hkl indexation
-                rhklss = np.rint(hklss)
-                ehklss = np.abs(hklss - rhklss)
-                valid_peak_mask = np.max(ehklss, axis=-1) < index_error_tol
-                valid_peak_counts = np.count_nonzero(valid_peak_mask, axis=-1)
-                error_means = ehklss.mean(axis=(1, 2))
+            # Index the peaks by rotating them to the reference coordinate
+            # system. Use rotation directly since it is multiplied from the
+            # right. Einsum gives list of peaks.dot(rotation).
+            hklss = lattice_recip.fractional(np.einsum('ijk,lk->ilj', rotations, peaks))
 
-                num_peaks = len(peaks)
-                match_rates = (valid_peak_counts * (1 / num_peaks)) if num_peaks else 0
+            # Evaluate error of peak hkl indexation
+            rhklss = np.rint(hklss)
+            ehklss = np.abs(hklss - rhklss)
+            valid_peak_mask = np.max(ehklss, axis=-1) < index_error_tol
+            valid_peak_counts = np.count_nonzero(valid_peak_mask, axis=-1)
+            error_means = ehklss.mean(axis=(1, 2))
 
-                possible_solution_mask = match_rates > 0
-                solutions += [[
-                    R,
-                    match_rate,
-                    ehkls,  # TODO: Needed?
-                    error_mean,
-                    vector_pair_index
-                ] for R, match_rate, ehkls, error_mean in zip(
-                    rotations[possible_solution_mask],
-                    match_rates[possible_solution_mask],
-                    ehklss[possible_solution_mask],
-                    error_means[possible_solution_mask])]
-                res_rhkls += rhklss[possible_solution_mask].tolist()
+            num_peaks = len(peaks)
+            match_rates = (valid_peak_counts * (1 / num_peaks)) if num_peaks else 0
+
+            possible_solution_mask = match_rates > 0
+            solutions += [[
+                R,
+                match_rate,
+                ehkls,  # TODO: Needed?
+                error_mean,
+                vector_pair_index
+            ] for R, match_rate, ehkls, error_mean in zip(
+                rotations[possible_solution_mask],
+                match_rates[possible_solution_mask],
+                ehklss[possible_solution_mask],
+                error_means[possible_solution_mask])]
+            res_rhkls += rhklss[possible_solution_mask].tolist()
 
         n_solutions = min(n_best, len(solutions))
         if n_solutions > 0:
