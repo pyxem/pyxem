@@ -198,7 +198,10 @@ class VDFSegmentGenerator:
             Maximum number of grains included in the returned separated
             grains. If it is exceeded, those with highest peak
             intensities will be returned.
-        marker_radius :
+        marker_radius : float
+            If 1 or larger, each marker for watershed is expanded to a disk
+            of radius marker_radius. marker_radius should not exceed
+            2*min_distance.
         threshold: bool
             If True, a mask is calculated by thresholding the VDF image
             by the Li threshold method in scikit-image. If False

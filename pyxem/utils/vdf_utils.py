@@ -71,9 +71,9 @@ def norm_cross_corr(image, template):
     return corr
 
 
-def separate(vdf_temp, min_distance, min_size, max_size,
-             max_number_of_grains, marker_radius=2, threshold=False,
-             exclude_border=False, plot_on=False):
+def separate(vdf_temp, min_distance=2, min_size=10, max_size=np.inf,
+             max_number_of_grains=np.inf, marker_radius=2,
+             threshold=False, exclude_border=False, plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
     scikit-image. See [1,2] for examples from scikit-image.
@@ -95,8 +95,10 @@ def separate(vdf_temp, min_distance, min_size, max_size,
         Maximum number of grains included in the returned separated
         grains. If it is exceeded, those with highest peak intensities
         will be returned.
-    marker_radius :
-
+    marker_radius : float
+        If 1 or larger, each marker for watershed is expanded to a disk
+        of radius marker_radius. marker_radius should not exceed
+        2*min_distance.
     threshold : bool
         If True, a mask is calculated by thresholding the VDF image by
         the Li threshold method in scikit-image. If False (default), the
@@ -188,7 +190,7 @@ def separate(vdf_temp, min_distance, min_size, max_size,
     # maximum position. This is done to make the segmentation more robust
     # to local changes in pixel values around the marker.
     markers = label(local_maxi)[0]
-    if marker_radius > 1:
+    if marker_radius >= 1:
         disk_mask = disk(marker_radius)
         for mm in np.arange(1, np.max(markers) + 1):
             im = np.zeros_like(markers)
@@ -196,8 +198,6 @@ def separate(vdf_temp, min_distance, min_size, max_size,
             markers_temp = convolve2d(im, disk_mask, boundary='fill',
                                       mode='same', fillvalue=0)
             markers[np.where(markers_temp)] = mm
-            #markers[np.where(markers_temp)] = markers_temp[
-            #    np.where(markers_temp)]
     markers = markers*mask
 
     # Find the edges of the VDF image using the Sobel transform.
@@ -263,7 +263,7 @@ def separate(vdf_temp, min_distance, min_size, max_size,
 
         ax[2].imshow(distance, cmap=plt.cm.gray_r)
         ax[2].axis('off')
-        ax[2].set_title('Distance and maxima')
+        ax[2].set_title('Distance and markers')
         ax[2].imshow(masked_where(markers == 0, markers),
                      cmap=plt.cm.gist_rainbow)
         ax[2].plot(maxi_coord1[1], maxi_coord1[0], 'k+')
