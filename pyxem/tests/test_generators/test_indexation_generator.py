@@ -22,8 +22,8 @@ import numpy as np
 from pyxem.generators.indexation_generator import ProfileIndexationGenerator
 from pyxem.generators.indexation_generator import VectorIndexationGenerator
 
-from pyxem.libraries.vector_library import DiffractionVectorLibrary
-from pyxem.signals.diffraction_simulation import ProfileSimulation
+from diffsims.libraries.vector_library import DiffractionVectorLibrary
+from diffsims.sims.diffraction_simulation import ProfileSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
@@ -129,7 +129,6 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks,
         mag_tol=0.1,
         angle_tol=6,
         index_error_tol=0.3,
-        keys=list(vector_library.keys()),
         n_peaks_to_index=2,
         n_best=1)
 

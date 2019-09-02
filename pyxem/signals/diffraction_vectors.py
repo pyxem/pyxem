@@ -24,12 +24,13 @@ from hyperspy.api import markers
 import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
+from pyxem.signals import push_metadata_through
 from pyxem.utils.sim_utils import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier, detector_px_to_3D_kspace
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
-
+from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
@@ -62,19 +63,52 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        BaseSignal.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
 
-    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold, center = True):
+    @classmethod
+    def from_peaks(cls, peaks, center, calibration):
+        """Takes a list of peak positions (pixel coordinates) and returns
+        an instance of `Diffraction2D`
+
+        Parameters
+        ----------
+        peaks : Signal
+            Signal containing lists (np.array) of pixel coordinates specifying
+            the reflection positions
+        center : np.array
+            Diffraction pattern center in array indices.
+        calibration : np.array
+            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
+
+        Returns
+        -------
+        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+            List of diffraction vectors
+        """
+        gvectors = peaks.map(peaks_as_gvectors,
+                             center=center,
+                             calibration=calibration,
+                             inplace=False)
+
+        vectors = cls(gvectors)
+        vectors.axes_manager.set_signal_dimension(0)
+
+        return vectors
+
+    def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
+                                 distance_threshold=0.01,
+                                 center=True):
         """Plot the unique diffraction vectors.
 
         Parameters
         ----------
         xlim : float
-            The maximum x coordinate to be plotted.
+            The maximum x coordinate in reciprocal Angstroms to be plotted.
         ylim : float
-            The maximum y coordinate to be plotted.
+            The maximum y coordinate in reciprocal Angstroms to be plotted.
         distance_threshold : float
             The minimum distance between diffraction vectors to be passed to
             get_unique_vectors.
@@ -85,7 +119,7 @@ class DiffractionVectors(BaseSignal):
         Returns
         -------
         fig : matplotlib figure
-            The plot as a matplot lib figure.
+            The plot as a matplotlib figure.
 
         """
         # Find the unique gvectors to plot.
@@ -113,8 +147,8 @@ class DiffractionVectors(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction
-            The ElectronDiffraction signal object on which to plot the peaks.
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         *args :
             Arguments passed to signal.plot()
@@ -210,7 +244,7 @@ class DiffractionVectors(BaseSignal):
             A DiffractionVectors object containing only the unique diffraction
             vectors in the original object.
         """
-        if (self.axes_manager.navigation_dimension == 2):
+        if self.axes_manager.navigation_dimension == 2:
             gvlist = np.array([self.data[0, 0][0]])
         else:
             raise ValueError("This method only works for ragged vector maps!")
@@ -315,6 +349,6 @@ class DiffractionVectors(BaseSignal):
         """
 
         self.cartesian = self.map(detector_px_to_3D_kspace,
-            ai=azimuthal_integrator, 
+            ai=azimuthal_integrator,
             show_progressbar=True, inplace=False, parallel=False)
         transfer_navigation_axes(self.cartesian, self)

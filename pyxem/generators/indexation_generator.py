@@ -20,24 +20,17 @@
 
 """
 
-from heapq import nlargest
-from operator import itemgetter
-
 import numpy as np
 import hyperspy.api as hs
-from math import acos, cos, sin, pi, radians, degrees
-import itertools
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 
-from pyxem.utils.sim_utils import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes
 
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
-
-import hyperspy.api as hs
 
 
 class IndexationGenerator():
@@ -45,7 +38,7 @@ class IndexationGenerator():
 
     Parameters
     ----------
-    signal : ElectronDiffraction
+    signal : ElectronDiffraction2D
         The signal of electron diffraction patterns to be indexed.
     diffraction_library : DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
@@ -117,12 +110,13 @@ class IndexationGenerator():
             pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
             for i in range(num_orientations):
                 num_peaks = min(pixel_coords_jagged[i].shape[0], max_peaks)
-                intensities[i, :num_peaks] = intensities_jagged[i][:num_peaks]
+                highest_intensity_indices = np.argpartition(intensities_jagged[i], -num_peaks)[-num_peaks:]
+                intensities[i, :num_peaks] = intensities_jagged[i][highest_intensity_indices]
                 # Get and compute pixel coordinates for all rotations about the
                 # center, clipped to the detector size and rounded to integer positions.
                 pixel_coords[:, i, :num_peaks] = np.clip(
                     (signal_half_width + rotation_matrices_2d @ (
-                        pixel_coords_jagged[i][:num_peaks].T - signal_half_width)).transpose(0, 2, 1),
+                        pixel_coords_jagged[i][highest_intensity_indices].T - signal_half_width)).transpose(0, 2, 1),
                     a_min=0,
                     a_max=np.array(sig_shape) - 1)
 
@@ -152,7 +146,7 @@ class ProfileIndexationGenerator():
 
     Parameters
     ----------
-    profile : ElectronDiffractionProfile
+    profile : ElectronDiffraction1D
         The signal of diffraction profiles to be indexed.
     library : ProfileSimulation
         The simulated profile data.
@@ -229,7 +223,6 @@ class VectorIndexationGenerator():
                       index_error_tol,
                       n_peaks_to_index,
                       n_best,
-                      keys=[],
                       *args,
                       **kwargs):
         """Assigns hkl indices to diffraction vectors.
@@ -249,11 +242,6 @@ class VectorIndexationGenerator():
             The maximum number of peak to index.
         n_best : int
             The maximum number of good solutions to be retained.
-        keys : list
-            If more than one phase present in library it is recommended that
-            these are submitted. This allows a mapping from the number to the
-            phase.  For example, keys = ['si','ga'] will have an output with 0
-            for 'si' and 1 for 'ga'.
         *args : arguments
             Arguments passed to the map() function.
         **kwargs : arguments
@@ -275,7 +263,6 @@ class VectorIndexationGenerator():
                                         index_error_tol=index_error_tol,
                                         n_peaks_to_index=n_peaks_to_index,
                                         n_best=n_best,
-                                        keys=keys,
                                         inplace=False,
                                         *args,
                                         **kwargs)

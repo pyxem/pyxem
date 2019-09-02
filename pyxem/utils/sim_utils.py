@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import math
-
 import numpy as np
 from scipy.constants import h, m_e, e, c, pi
 import collections
@@ -57,11 +55,16 @@ def get_wavelength(accelerating_voltage, xray=False):
         wavelength = (h * c) / (E * e) * 1e10
     return wavelength
 
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 def get_interaction_constant(accelerating_voltage, xray=False):
     """Calculates the interaction constant, sigma, for a given
     acelerating voltage.
 
+def sim_as_signal(diffsim, size, sigma, max_r):
+    """Returns the diffraction data as an ElectronDiffraction signal with
+    two-dimensional Gaussians representing each diffracted peak. Should only
+    be used for qualitative work.
     Parameters
     ----------
     accelerating_voltage : float
@@ -502,197 +505,27 @@ def is_lattice_hexagonal(latt):
 
     Returns
     -------
-    is_true : bool
-        True if hexagonal or trigonal.
+    dp : ElectronDiffraction
+        Simulated electron diffraction pattern.
     """
-    truth_list = []
-    truth_list.append(latt.a == latt.b)
-    truth_list.append(latt.alpha == 90)
-    truth_list.append(latt.beta == 90)
-    truth_list.append(latt.gamma == 120)
-    return len(truth_list) == np.sum(truth_list)
+    l, delta_l = np.linspace(-max_r, max_r, size, retstep=True)
 
+    mask_for_max_r = np.logical_and(np.abs(diffsim.coordinates[:, 0]) < max_r,
+                                    np.abs(diffsim.coordinates[:, 1]) < max_r)
 
-def transfer_navigation_axes(new_signal, old_signal):
-    """ Transfers navigation axis calibrations from an old signal to a new
-    signal produced from it by a method or a generator.
+    coords = diffsim.coordinates[mask_for_max_r]
+    inten = diffsim.intensities[mask_for_max_r]
 
-    Parameters
-    ----------
-    new_signal : Signal
-        The product signal with undefined navigation axes.
-    old_signal : Signal
-        The parent signal with calibrated navigation axes.
+    dp_dat = np.zeros([size, size])
+    x, y = (coords)[:, 0], (coords)[:, 1]
+    if len(x) > 0:  # avoiding problems in the peakless case
+        num = np.digitize(x, l, right=True), np.digitize(y, l, right=True)
+        dp_dat[num] = inten
+        # sigma in terms of pixels. transpose for Hyperspy
+        dp_dat = point_spread(dp_dat, sigma=sigma / delta_l).T
+        dp_dat = dp_dat / np.max(dp_dat)
 
-    Returns
-    -------
-    new_signal : Signal
-        The new signal with calibrated navigation axes.
-    """
-    new_signal.axes_manager.set_signal_dimension(
-        len(new_signal.data.shape) - old_signal.axes_manager.navigation_dimension)
+    dp = ElectronDiffraction2D(dp_dat)
+    dp.set_diffraction_calibration(2 * max_r / size)
 
-    for i in range(min(new_signal.axes_manager.navigation_dimension,
-                       old_signal.axes_manager.navigation_dimension)):
-        ax_new = new_signal.axes_manager.navigation_axes[i]
-        ax_old = old_signal.axes_manager.navigation_axes[i]
-        ax_new.name = ax_old.name
-        ax_new.scale = ax_old.scale
-        ax_new.units = ax_old.units
-
-    return new_signal
-
-
-def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
-    """ Transfers navigation axis calibrations from an old signal to the signal
-    axes of a new signal produced from it by a method or a generator.
-
-    Used from methods that generate a signal with a single value at each
-    navigation position.
-
-    Parameters
-    ----------
-    new_signal : Signal
-        The product signal with undefined navigation axes.
-    old_signal : Signal
-        The parent signal with calibrated navigation axes.
-
-    Returns
-    -------
-    new_signal : Signal
-        The new signal with calibrated signal axes.
-    """
-    for i in range(min(new_signal.axes_manager.signal_dimension,
-                       old_signal.axes_manager.navigation_dimension)):
-        ax_new = new_signal.axes_manager.signal_axes[i]
-        ax_old = old_signal.axes_manager.navigation_axes[i]
-        ax_new.name = ax_old.name
-        ax_new.scale = ax_old.scale
-        ax_new.units = ax_old.units
-
-    return new_signal
-
-
-def uvtw_to_uvw(uvtw):
-    """Convert 4-index direction to a 3-index direction.
-
-    Parameters
-    ----------
-    uvtw : array-like with 4 floats
-
-    Returns
-    -------
-    uvw : tuple of 4 floats
-    """
-    u, v, t, w = uvtw
-    u, v, w = 2 * u + v, 2 * v + u, w
-    common_factor = math.gcd(math.gcd(u, v), w)
-    return tuple((int(x / common_factor)) for x in (u, v, w))
-
-
-def rotation_list_stereographic(structure, corner_a, corner_b, corner_c,
-                                inplane_rotations, resolution):
-    """Generate a rotation list covering the inverse pole figure specified by
-    three corners in cartesian coordinates.
-
-    Parameters
-    ----------
-    structure : diffpy.structure.Structure
-        Structure for which to calculate the rotation list.
-    corner_a, corner_b, corner_c : tuple
-        The three corners of the inverse pole figure, each given by a
-        three-dimensional coordinate. The coordinate system is given by the
-        structure lattice.
-    resolution : float
-        Angular resolution in radians of the generated rotation list.
-    inplane_rotations : list
-        List of angles in radians for in-plane rotation of the diffraction
-        pattern. This corresponds to the third Euler angle rotation. The
-        rotation list will be generated for each of these angles, and combined.
-        This should be done automatically, but by including all possible
-        rotations in the rotation list, it becomes too large.
-
-        To cover all inplane rotations, use e.g. np.linspace(0, 2*np.pi, 360).
-
-    Returns
-    -------
-    rotation_list : numpy.array
-        Rotations covering the inverse pole figure given as an array of Euler
-        angles in degrees.
-    """
-    # Convert the crystal directions to cartesian vectors and normalize
-    if len(corner_a) == 4:
-        corner_a = uvtw_to_uvw(corner_a)
-    if len(corner_b) == 4:
-        corner_b = uvtw_to_uvw(corner_b)
-    if len(corner_c) == 4:
-        corner_c = uvtw_to_uvw(corner_c)
-
-    lattice = structure.lattice
-
-    corner_a = np.dot(corner_a, lattice.stdbase)
-    corner_b = np.dot(corner_b, lattice.stdbase)
-    corner_c = np.dot(corner_c, lattice.stdbase)
-
-    corner_a /= np.linalg.norm(corner_a)
-    corner_b /= np.linalg.norm(corner_b)
-    corner_c /= np.linalg.norm(corner_c)
-
-    angle_a_to_b = get_angle_cartesian(corner_a, corner_b)
-    angle_a_to_c = get_angle_cartesian(corner_a, corner_c)
-    angle_b_to_c = get_angle_cartesian(corner_b, corner_c)
-    axis_a_to_b = np.cross(corner_a, corner_b)
-    axis_a_to_c = np.cross(corner_a, corner_c)
-
-    # Input validation. The corners have to define a non-degenerate triangle
-    if np.count_nonzero(axis_a_to_b) == 0:
-        raise ValueError('Directions a and b are parallel')
-    if np.count_nonzero(axis_a_to_c) == 0:
-        raise ValueError('Directions a and c are parallel')
-
-    rotations = []
-
-    # Generate a list of theta_count evenly spaced angles theta_b in the range
-    # [0, angle_a_to_b] and an equally long list of evenly spaced angles
-    # theta_c in the range[0, angle_a_to_c].
-    # Ensure that we keep the resolution also along the direction to the corner
-    # b or c farthest away from a.
-    theta_count = math.ceil(max(angle_a_to_b, angle_a_to_c) / resolution)
-    for i, (theta_b, theta_c) in enumerate(
-            zip(np.linspace(0, angle_a_to_b, theta_count),
-                np.linspace(0, angle_a_to_c, theta_count))):
-        # Define the corner local_b at a rotation theta_b from corner_a toward
-        # corner_b on the circle surface. Similarly, define the corner local_c
-        # at a rotation theta_c from corner_a toward corner_c.
-
-        rotation_a_to_b = axangle2mat(axis_a_to_b, theta_b)
-        rotation_a_to_c = axangle2mat(axis_a_to_c, theta_c)
-        local_b = np.dot(rotation_a_to_b, corner_a)
-        local_c = np.dot(rotation_a_to_c, corner_a)
-
-        # Then define an axis and a maximum rotation to create a great cicle
-        # arc between local_b and local_c. Ensure that this is not a degenerate
-        # case where local_b and local_c are coincident.
-        angle_local_b_to_c = get_angle_cartesian(local_b, local_c)
-        axis_local_b_to_c = np.cross(local_b, local_c)
-        if np.count_nonzero(axis_local_b_to_c) == 0:
-            # Theta rotation ended at the same position. First position, might
-            # be other cases?
-            axis_local_b_to_c = corner_a
-        axis_local_b_to_c /= np.linalg.norm(axis_local_b_to_c)
-
-        # Generate points along the great circle arc with a distance defined by
-        # resolution.
-        phi_count_local = max(math.ceil(angle_local_b_to_c / resolution), 1)
-        for j, phi in enumerate(
-                np.linspace(0, angle_local_b_to_c, phi_count_local)):
-            rotation_phi = axangle2mat(axis_local_b_to_c, phi)
-
-            for k, psi in enumerate(inplane_rotations):
-                # Combine the rotations. Order is important. The matrix is
-                # applied from the left, and we rotate by theta first toward
-                # local_b, then across the triangle toward local_c
-                rotation = list(mat2euler(rotation_phi @ rotation_a_to_b, 'rzxz'))
-                rotations.append(np.rad2deg([rotation[0], rotation[1], psi]))
-
-    return np.unique(rotations, axis=0)
+    return dp

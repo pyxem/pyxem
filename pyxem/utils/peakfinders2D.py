@@ -264,7 +264,7 @@ def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
 
 
 def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
-                   threshold=0.2, overlap=0.5):
+                   threshold=0.2, overlap=0.5, exclude_border=False):
     """
     Finds peaks via the difference of Gaussian Matrices method from
     `scikit-image`.
@@ -300,7 +300,7 @@ def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
 
 
 def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
-                   threshold=0.2, overlap=0.5, log_scale=False):
+                   threshold=0.2, overlap=0.5, log_scale=False, exclude_border=False):
     """
     Finds peaks via the Laplacian of Gaussian Matrices method from
     `scikit-image`.

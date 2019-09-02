@@ -15,21 +15,28 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Electron Diffraction data.
+
 """
+Signal base class for two-dimensional diffraction data.
+"""
+
 import numpy as np
 from warnings import warn
 
 from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+from hyperspy._signals.lazy import LazySignal
+
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals import push_metadata_through
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, gain_normalise, remove_dead, affine_transformation, \
+    radial_average, gain_normalise, remove_dead,\
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
-    peaks_as_gvectors
+    peaks_as_gvectors, convert_affine_to_transform, apply_transformation, \
+    find_beam_center_blur, find_beam_center_interpolate
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -41,119 +48,25 @@ from skimage import transform as tf
 from skimage.morphology import square
 
 
-class ElectronDiffraction(Signal2D):
-    _signal_type = "electron_diffraction"
+class Diffraction2D(Signal2D):
+    _signal_type = "diffraction2d"
 
     def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
-        # Set default attributes
-        if 'Acquisition_instrument' in self.metadata.as_dictionary():
-            if 'SEM' in self.metadata.as_dictionary()['Acquisition_instrument']:
-                self.metadata.set_item(
-                    "Acquisition_instrument.TEM",
-                    self.metadata.Acquisition_instrument.SEM)
-                del self.metadata.Acquisition_instrument.SEM
+        """
+        Create an Diffraction2D object from a hs.Signal2D or np.array.
+
+        Parameters
+        ----------
+        *args :
+            Passed to the __init__ of Signal2D. The first arg should be
+            either a numpy.ndarray or a Signal2D
+        **kwargs :
+            Passed to the __init__ of Signal2D
+        """
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
-
-    def set_experimental_parameters(self,
-                                    accelerating_voltage=None,
-                                    camera_length=None,
-                                    scan_rotation=None,
-                                    convergence_angle=None,
-                                    rocking_angle=None,
-                                    rocking_frequency=None,
-                                    exposure_time=None):
-        """Set experimental parameters in metadata.
-
-        Parameters
-        ----------
-        accelerating_voltage : float
-            Accelerating voltage in kV
-        camera_length: float
-            Camera length in cm
-        scan_rotation : float
-            Scan rotation in degrees
-        convergence_angle : float
-            Convergence angle in mrad
-        rocking_angle : float
-            Beam rocking angle in mrad
-        rocking_frequency : float
-            Beam rocking frequency in Hz
-        exposure_time : float
-            Exposure time in ms.
-        """
-        md = self.metadata
-
-        if accelerating_voltage is not None:
-            md.set_item("Acquisition_instrument.TEM.accelerating_voltage",
-                        accelerating_voltage)
-        if camera_length is not None:
-            md.set_item(
-                "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
-                camera_length)
-        if scan_rotation is not None:
-            md.set_item("Acquisition_instrument.TEM.scan_rotation",
-                        scan_rotation)
-        if convergence_angle is not None:
-            md.set_item("Acquisition_instrument.TEM.convergence_angle",
-                        convergence_angle)
-        if rocking_angle is not None:
-            md.set_item("Acquisition_instrument.TEM.rocking_angle",
-                        rocking_angle)
-        if rocking_frequency is not None:
-            md.set_item("Acquisition_instrument.TEM.rocking_frequency",
-                        rocking_frequency)
-        if exposure_time is not None:
-            md.set_item(
-                "Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
-                exposure_time)
-
-    def set_diffraction_calibration(self, calibration, center=None):
-        """Set diffraction pattern pixel size in reciprocal Angstroms and origin
-        location.
-
-        Parameters
-        ----------
-        calibration : float
-            Diffraction pattern calibration in reciprocal Angstroms per pixel.
-        center : tuple
-            Position of the direct beam center, in pixels. If None the center of
-            the data array is assumed to be the center of the pattern.
-        """
-        if center is None:
-            center = np.array(self.axes_manager.signal_shape) / 2 * calibration
-
-        dx = self.axes_manager.signal_axes[0]
-        dy = self.axes_manager.signal_axes[1]
-
-        dx.name = 'kx'
-        dx.scale = calibration
-        dx.offset = -center[0]
-        dx.units = '$A^{-1}$'
-
-        dy.name = 'ky'
-        dy.scale = calibration
-        dy.offset = -center[1]
-        dy.units = '$A^{-1}$'
-
-    def set_scan_calibration(self, calibration):
-        """Set scan pixel size in nanometres.
-
-        Parameters
-        ----------
-        calibration: float
-            Scan calibration in nanometres per pixel.
-        """
-        x = self.axes_manager.navigation_axes[0]
-        y = self.axes_manager.navigation_axes[1]
-
-        x.name = 'x'
-        x.scale = calibration
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = calibration
-        y.units = 'nm'
 
     def plot_interactive_virtual_image(self, roi, **kwargs):
         """Plots an interactive virtual image formed with a specified and
@@ -161,10 +74,10 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
+        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
         **kwargs:
-            Keyword arguments to be passed to `ElectronDiffraction.plot`
+            Keyword arguments to be passed to `Diffraction2D.plot`
 
         Examples
         --------
@@ -255,14 +168,21 @@ class ElectronDiffraction(Signal2D):
     def apply_affine_transformation(self,
                                     D,
                                     order=3,
+                                    keep_dtype=False,
                                     inplace=True,
                                     *args, **kwargs):
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
         ----------
-        D : array
-            3x3 np.array specifying the affine transform to be applied.
+        D : array or Signal2D of arrays
+            3x3 np.array (or Signal2D thereof) specifying the affine transform
+            to be applied.
+        order : 1,2,3,4 or 5
+            The order of interpolation on the transform. Default is 3.
+        keep_dtype : bool
+            If True dtype of returned ElectronDiffraction2D Signal is that of
+            the input, if False, casting to higher precision may occur.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
@@ -273,28 +193,21 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-            ElectronDiffraction Signal containing the affine Transformed
+            ElectronDiffraction2D Signal containing the affine Transformed
             diffraction patterns.
 
         """
-        # Account for the transformation center not being (0,0)
+
         shape = self.axes_manager.signal_shape
-        shift_x = (shape[1] - 1) / 2
-        shift_y = (shape[0] - 1) / 2
+        if isinstance(D, np.ndarray):
+            transformation = convert_affine_to_transform(D, shape)
+        else:
+            transformation = D.map(convert_affine_to_transform, shape=shape, inplace=False)
 
-        tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
-        tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-
-        # This defines the transform you want to perform
-        distortion = tf.AffineTransform(matrix=D)
-
-        # skimage transforms can be added like this, does matrix multiplication,
-        # hence the need for the brackets. (Note tf.warp takes the inverse)
-        transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
-
-        return self.map(affine_transformation,
+        return self.map(apply_transformation,
                         transformation=transformation,
                         order=order,
+                        keep_dtype=keep_dtype,
                         inplace=inplace,
                         *args, **kwargs)
 
@@ -308,7 +221,7 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        dark_reference : ElectronDiffraction
+        dark_reference : ElectronDiffraction2D
             Dark reference image.
         bright_reference : DiffractionSignal
             Bright reference image.
@@ -337,8 +250,8 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        deadpixels : ElectronDiffraction
-            List
+        deadpixels : list
+            List of deadpixels to be removed.
         deadvalue : string
             Specify how deadpixels should be treated. 'average' sets the dead
             pixel value to the average of adjacent pixels. 'nan' sets the dead
@@ -379,9 +292,9 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        radial_profile: :obj:`hyperspy.signals.Signal1D`
+        radial_profile: :obj:`pyxem.signals.ElectronDiffraction1D`
             The radial average profile of each diffraction pattern in the
-            ElectronDiffraction signal as a Signal1D.
+            ElectronDiffraction2D signal as an ElectronDiffraction1D.
 
         See also
         --------
@@ -395,7 +308,7 @@ class ElectronDiffraction(Signal2D):
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
-        rp = ElectronDiffractionProfile(radial_profiles.as_signal1D(signal_axis))
+        rp = ElectronDiffraction1D(radial_profiles.as_signal1D(signal_axis))
         ax_old = self.axes_manager.navigation_axes
         rp.axes_manager.navigation_axes[0].scale = ax_old[0].scale
         rp.axes_manager.navigation_axes[0].units = ax_old[0].units
@@ -411,20 +324,39 @@ class ElectronDiffraction(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, radius_start,
-                                 radius_finish,
+    def get_direct_beam_position(self, method="cross_correlate", 
+                                 radius_start=4,
+                                 radius_finish=8,
+                                 sigma=30,
+                                 upsample_factor=100,
+                                 kind=3,
                                  *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
         Parameters
         ----------
-        radius_start : int
+        method : str,
+            Must be one of "cross_correlate", "blur", "interpolate"
+            The default is "cross_correlate"
+        radius_start : int (cross_correlate)
             The lower bound for the radius of the central disc to be used in the
             alignment.
-        radius_finish : int
+        radius_finish : int (cross_correlate)
             The upper bounds for the radius of the central disc to be used in
             the alignment.
+        sigma : float (blur, interpolate)
+            Sigma value for Gaussian blurring kernel.
+        upsample_factor : int (interpolate)
+            Upsample factor for subpixel beam center finding, i.e. the center will 
+            be found with a precision of 1 / upsample_factor of a pixel. 
+        kind : str or int, optional (interpolate)
+            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+            interpolation of zeroth, first, second or third order; ‘previous’
+            and ‘next’ simply return the previous or next value of the point) or as
+            an integer specifying the order of the spline interpolator to use. 
         *args:
             Arguments to be passed to map().
         **kwargs:
@@ -436,14 +368,40 @@ class ElectronDiffraction(Signal2D):
             Array containing the centers for each SED pattern.
 
         """
-        shifts = self.map(find_beam_offset_cross_correlation,
+        signal_shape = self.axes_manager.signal_shape
+        origin_coordinates = np.array(signal_shape) / 2
+
+        methods = "cross_correlate", "blur", "interpolate"
+
+        if method == "cross_correlate":
+            shifts = self.map(find_beam_offset_cross_correlation,
                           radius_start=radius_start,
                           radius_finish=radius_finish,
                           inplace=False, *args, **kwargs)
+        elif method == "blur":
+            centers = self.map(find_beam_center_blur,
+                           sigma=sigma,
+                           inplace=False, *args, **kwargs)
+            shifts = origin_coordinates - centers
+        elif method == "interpolate":
+            centers = self.map(find_beam_center_interpolate,
+                           sigma=sigma,
+                           upsample_factor=upsample_factor,
+                           kind=kind,
+                           inplace=False, *args, **kwargs)
+            shifts = origin_coordinates - centers
+        else:
+            raise ValueError(f"`method` must be one of {methods}")
+
         return shifts
 
     def center_direct_beam(self,
-                           radius_start, radius_finish,
+                           method="cross_correlate",
+                           radius_start=4,
+                           radius_finish=8,
+                           sigma=30,
+                           upsample_factor=100,
+                           kind=3,
                            square_width=None,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
@@ -452,12 +410,27 @@ class ElectronDiffraction(Signal2D):
 
         Parameters
         ----------
-        radius_start : int
+        method : str,
+            Must be one of "cross_correlate", "blur", "interpolate"
+            The default is "cross_correlate"
+        radius_start : int (cross_correlate)
             The lower bound for the radius of the central disc to be used in the
             alignment.
-        radius_finish : int
+        radius_finish : int (cross_correlate)
             The upper bounds for the radius of the central disc to be used in
             the alignment.
+        sigma : float (blur, interpolate)
+            Sigma value for Gaussian blurring kernel.
+        upsample_factor : int (interpolate)
+            Upsample factor for subpixel beam center finding, i.e. the center will 
+            be found with a precision of 1 / upsample_factor of a pixel. 
+        kind : str or int, optional (interpolate)
+            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+            interpolation of zeroth, first, second or third order; ‘previous’
+            and ‘next’ simply return the previous or next value of the point) or as
+            an integer specifying the order of the spline interpolator to use. 
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
@@ -469,27 +442,37 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        centered : ElectronDiffraction
+        centered : ElectronDiffraction2D
             The centered diffraction data.
 
         """
-        nav_shape_x = self.data.shape[0]
-        nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2] / 2 - 0.5,
-                                       self.data.shape[3] / 2 - 0.5))
+        nav_size = self.axes_manager.navigation_size
+        signal_shape = self.axes_manager.signal_shape
+        origin_coordinates = np.array(signal_shape) / 2
 
         if square_width is not None:
-            min_index = np.int(origin_coordinates[0] - (0.5 + square_width))
+            min_index = np.int(origin_coordinates[0] - square_width)
             # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + (1.5 + square_width))
-            shifts = self.isig[min_index:max_index, min_index:max_index].get_direct_beam_position(
-                radius_start, radius_finish, *args, **kwargs)
+            max_index = np.int(origin_coordinates[0] + square_width)
+            cropped = self.isig[min_index:max_index, min_index:max_index]
+            shifts = cropped.get_direct_beam_position(method=method,
+                                                      radius_start=radius_start,
+                                                      radius_finish=radius_finish,
+                                                      sigma=sigma,
+                                                      upsample_factor=upsample_factor,
+                                                      kind=kind,
+                                                      *args, **kwargs)
         else:
-            shifts = self.get_direct_beam_position(radius_start, radius_finish,
+            shifts = self.get_direct_beam_position(method=method,
+                                                   radius_start=radius_start,
+                                                   radius_finish=radius_finish,
+                                                   sigma=sigma,
+                                                   upsample_factor=upsample_factor,
+                                                   kind=kind,
                                                    *args, **kwargs)
 
         shifts = -1 * shifts.data
-        shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
+        shifts = shifts.reshape(nav_size, 2)
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
@@ -533,7 +516,7 @@ class ElectronDiffraction(Signal2D):
 
         Returns
         -------
-        bg_subtracted : :obj:`ElectronDiffraction`
+        bg_subtracted : :obj:`ElectronDiffraction2D`
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
 
@@ -571,26 +554,6 @@ class ElectronDiffraction(Signal2D):
 
         return bg_subtracted
 
-    def decomposition(self, *args, **kwargs):
-        """Decomposition with a choice of algorithms.
-
-        Parameters
-        ----------
-        *args :
-            Arguments to be passed to decomposition().
-        **kwargs :
-            Keyword arguments to be passed to decomposition().
-
-        Returns
-        -------
-        The results are stored in self.learning_results. For a full description
-        of parameters see :meth:`hyperspy.learn.mva.MVA.decomposition`
-
-        """
-        super(Signal2D, self).decomposition(*args, **kwargs)
-        self.learning_results.loadings = np.nan_to_num(
-            self.learning_results.loadings)
-
     def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
 
@@ -613,7 +576,7 @@ class ElectronDiffraction(Signal2D):
         -------
         peaks : DiffractionVectors
             A DiffractionVectors object with navigation dimensions identical to
-            the original ElectronDiffraction object. Each signal is a BaseSignal
+            the original ElectronDiffraction2D object. Each signal is a BaseSignal
             object contiaining the diffraction vectors found at each navigation
             position, in calibrated units.
 
@@ -699,3 +662,44 @@ class ElectronDiffraction(Signal2D):
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
+
+    def as_lazy(self, *args, **kwargs):
+        """Create a copy of the Diffraction2D object as a
+        :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
+
+        Parameters
+        ----------
+        copy_variance : bool
+            If True variance from the original Diffraction2D object is copied to
+            the new LazyDiffraction2D object.
+
+        Returns
+        -------
+        res : :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
+            The lazy signal.
+        """
+        res = super().as_lazy(*args, **kwargs)
+        res.__class__ = LazyDiffraction2D
+        res.__init__(**res._to_dictionary())
+        return res
+
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = Diffraction2D
+
+
+class LazyDiffraction2D(LazySignal, Diffraction2D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def compute(self, *args, **kwargs):
+        super().compute(*args, **kwargs)
+        self.__class__ = Diffraction2D
+        self.__init__(**self._to_dictionary())
+
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = LazyDiffraction2D

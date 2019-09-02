@@ -21,8 +21,8 @@ import diffpy.structure
 import numpy as np
 from transforms3d.euler import euler2mat
 
-from pyxem.signals.electron_diffraction import ElectronDiffraction
-from pyxem.libraries.vector_library import DiffractionVectorLibrary
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
 
 @pytest.fixture
@@ -35,8 +35,9 @@ def default_structure():
     return hexagonal_structure
 
 
-@pytest.fixture(params=[
-    np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
+@pytest.fixture
+def z():
+    return np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 1., 0., 0., 0., 0.],
                [0., 0., 1., 2., 1., 0., 0., 0.],
@@ -68,19 +69,20 @@ def default_structure():
                [0., 0., 0., 0., 2., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
-])
-
-
-def diffraction_pattern(request):
-    """A simple, multiuse diffraction pattern, with dimensions:
-    ElectronDiffraction <2,2|8,8>
-    """
-    return ElectronDiffraction(request.param)
 
 @pytest.fixture
-def diffraction_profile(diffraction_pattern):
+def diffraction_pattern(z):
+    """A simple, multiuse diffraction pattern, with dimensions:
+    ElectronDiffraction2D <2,2|8,8>
+    """
+    dp = ElectronDiffraction2D(z)
+    dp.metadata.Signal.found_from = 'conftest' #dummy metadata
+    return dp
+
+@pytest.fixture
+def electron_diffraction1d(diffraction_pattern):
     """A simple, multiuse diffraction profile, with dimensions:
-    ElectronDiffractionProfile <2,2|12>
+    ElectronDiffraction1D <2,2|12>
     """
     return diffraction_pattern.get_radial_profile()
 
@@ -95,10 +97,18 @@ def vector_match_peaks():
 @pytest.fixture
 def vector_library():
     library = DiffractionVectorLibrary()
-    library['A'] = np.array([
-        [np.array([1, 0, 0]), np.array([0, 2, 0]), 2, 1, np.pi / 2],
-        [np.array([0, 0, 1]), np.array([2, 0, 0]), 1, 2, np.pi / 2],
-    ])
+    library['A'] = {
+        'indices': np.array([
+            [[0, 2, 0], [1, 0, 0]],
+            [[1, 2, 3], [0, 2, 0]],
+            [[1, 2, 3], [1, 0, 0]],
+        ]),
+        'measurements': np.array([
+            [2, 1, np.pi / 2],
+            [np.sqrt(14), 2, 1.006853685],
+            [np.sqrt(14), 1, 1.300246564],
+        ])
+    }
     lattice = diffpy.structure.Lattice(1, 1, 1, 90, 90, 90)
     library.structures = [
         diffpy.structure.Structure(lattice=lattice)

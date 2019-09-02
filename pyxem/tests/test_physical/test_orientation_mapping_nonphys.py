@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,9 +18,11 @@
 
 import numpy as np
 import pyxem as pxm
-from pyxem.signals.diffraction_simulation import DiffractionSimulation
+from diffsims.sims.diffraction_simulation import DiffractionSimulation
 from pyxem.generators.indexation_generator import IndexationGenerator
-from pyxem.libraries.diffraction_library import DiffractionLibrary
+from diffsims.libraries.diffraction_library import DiffractionLibrary
+
+from pyxem.utils.sim_utils import sim_as_signal
 
 # This test suite is aimed at checking the basic functionality of the
 # orientation mapping process, obviously to have a succesful OM process
@@ -50,10 +52,10 @@ def create_library():
         intensities[alpha] = dp_sim.intensities
         if alpha < 4:
             dps.append(
-                dp_sim.as_signal(
-                    2 * half_side_length,
-                    0.075,
-                    1).data)  # stores a numpy array of pattern
+                sim_as_signal(dp_sim,
+                              2 * half_side_length,
+                              0.075,
+                              1).data)  # stores a numpy array of pattern
 
     library = DiffractionLibrary()
     library["Phase"] = {
@@ -62,7 +64,7 @@ def create_library():
         'pixel_coords': pixel_coords,
         'intensities': intensities,
     }
-    dp = pxm.ElectronDiffraction([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
+    dp = pxm.ElectronDiffraction2D([dps[0:2], dps[2:]])  # now from a 2x2 array of patterns
     return dp, library
 
 
@@ -79,27 +81,6 @@ def test_match_results():
     assert match_results.inav[1, 0].data[0][1][0] == 1
     assert match_results.inav[0, 1].data[0][1][0] == 2
     assert match_results.inav[1, 1].data[0][1][0] == 3
-
-
-def test_visuals():
-    # This functions will need to abuse globals.
-    # & Can be removed if we trust the other tests
-    from pyxem.utils.sim_utils import peaks_from_best_template
-    from pyxem.utils.plot import generate_marker_inputs_from_peaks
-    import hyperspy.api as hs
-
-    peaks = match_results.map(peaks_from_best_template,
-                              library=library,
-                              inplace=False)
-    mmx, mmy = generate_marker_inputs_from_peaks(peaks)
-    dp.set_diffraction_calibration(2 / 144)
-    dp.plot(cmap='viridis')
-    for mx, my in zip(mmx, mmy):
-        m = hs.markers.point(x=mx, y=my, color='red', marker='x')
-        dp.add_marker(m, plot_marker=True, permanent=True)
-
-    # Hand checking again
-    assert True
 
 
 def test_plot_best_matching_results_on_signal():

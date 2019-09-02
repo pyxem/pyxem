@@ -1,4 +1,4 @@
-|Travis|_ |AppVeyor|_ |Coveralls|_ |pypi_version|_  |doi|_ 
+|Travis|_ |AppVeyor|_ |Coveralls|_ |pypi_version|_  |doi|_
 
 .. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
 .. _Travis: https://travis-ci.org/pyxem/pyxem
@@ -16,12 +16,12 @@
 .. _doi: https://doi.org/10.5281/zenodo.2649351
 
 
-pyXem is an open-source python library for crystallographic electron microscopy.
+pyXem is an open-source python library for crystallographic diffraction microscopy.
 
-The package defines objects and functions for the analysis of numerous electron diffraction patterns and has been primarily developed as a platform for hybrid diffraction-imaging microscopy based on 4D scanning electron diffraction (SED) data.
+The package defines objects and functions for the analysis of numerous diffraction patterns and has been primarily developed as a platform for hybrid diffraction-microscopy based on 4D scanning diffraction microscopy data in which a 2D diffraction pattern is recorded at every position in a 2D scan of a specimen.
 
-**Installation instructions, documentation and tutorial examples are available** `here <http://pyxem.github.io/pyxem>`__ .
+**Installation instructions, documentation and tutorial examples are available** `here <https://pyxem.github.io/pyxem-website>`__ .
 
-If analysis using pyXem forms a part of published work please cite the DOI at the top of this page. 
+If analysis using pyXem forms a part of published work please cite the DOI at the top of this page.
 
-pyXem is released under the GPL v3 license. 
+pyXem is released under the GPL v3 license.

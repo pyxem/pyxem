@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,9 +21,11 @@ import pytest
 import diffpy.structure
 import numpy as np
 
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
-from pyxem.generators.diffraction_generator import DiffractionGenerator
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.utils.sim_utils import sim_as_signal
 
 
 def test_strain_mapping_affine_transform():
@@ -43,10 +45,10 @@ def test_strain_mapping_affine_transform():
         structure.placeInLattice(latt_rot)
 
         diff_dat = ediff.calculate_ed_data(structure, 2.5)
-        dpi = diff_dat.as_signal(64, 0.02, 2.5)
+        dpi = sim_as_signal(diff_dat, 64, 0.02, 2.5)
         data.append(dpi.data)
     data = np.array(data)
-    dp = ElectronDiffraction(data.reshape((2, 2, 64, 64)))
+    dp = ElectronDiffraction2D(data.reshape((2, 2, 64, 64)))
 
     m = dp.create_model()
     ref = ScalableReferencePattern(dp.inav[0, 0])

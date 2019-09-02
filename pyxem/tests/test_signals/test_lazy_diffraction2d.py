@@ -15,18 +15,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for virtual diffraction contrast images.
 
-"""
-
-from hyperspy.signals import Signal2D
-from pyxem.signals import push_metadata_through
+from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 
 
-class VDFImage(Signal2D):
-    _signal_type = "vdf_image"
-
-    def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
-        super().__init__(*args, **kwargs)
-        self.vectors = None
+class TestDecomposition:
+    def test_decomposition_class_assignment(self, diffraction_pattern):
+        s = Diffraction2D(diffraction_pattern)
+        s = s.as_lazy()
+        s.decomposition()
+        assert isinstance(s, LazyDiffraction2D)

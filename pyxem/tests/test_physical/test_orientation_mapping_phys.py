@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,14 +24,17 @@ import diffpy.structure
 
 from transforms3d.euler import euler2mat
 
-from pyxem.generators.indexation_generator import IndexationGenerator, VectorIndexationGenerator
-from pyxem.generators.library_generator import VectorLibraryGenerator
-from pyxem.libraries.structure_library import StructureLibrary
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from diffsims.generators.library_generator import VectorLibraryGenerator
+from diffsims.libraries.structure_library import StructureLibrary
+from diffsims.utils.sim_utils import get_kinematical_intensities
+
+from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.generators.indexation_generator import VectorIndexationGenerator
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.sim_utils import (peaks_from_best_template,
-                                   peaks_from_best_vector_match,
-                                   get_kinematical_intensities)
+from pyxem.utils.indexation_utils import peaks_from_best_template
+from pyxem.utils.indexation_utils import peaks_from_best_vector_match
+from pyxem.utils.sim_utils import sim_as_signal
 
 """
 The test are designed to make sure orientation mapping works when actual
@@ -120,8 +123,8 @@ def get_template_library(structure, rot_list, edc):
 def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None, inplane_rotations=[0]):
     dp_library = get_template_library(structure, pattern_list, edc)
     for sim in dp_library['A']['simulations']:
-        pattern = (sim.as_signal(2 * half_side_length, 0.025, 1).data)
-    dp = pxm.ElectronDiffraction([[pattern, pattern], [pattern, pattern]])
+        pattern = (sim_as_signal(sim, 2 * half_side_length, 0.025, 1).data)
+    dp = pxm.ElectronDiffraction2D([[pattern, pattern], [pattern, pattern]])
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
     return indexer.correlate(mask=mask, inplane_rotations=inplane_rotations)
@@ -145,8 +148,7 @@ def get_vector_match_results(structure, rot_list, edc):
         angle_tol=1,
         index_error_tol=0.2,
         n_peaks_to_index=5,
-        n_best=2,
-        keys=['A'])
+        n_best=2)
     return diffraction_library, indexation
 
 
@@ -220,7 +222,7 @@ def test_plot_best_matching_results_on_signal_vector(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
     # Hyperspy can only add markers to square signals
     match_results.data = np.vstack((match_results.data, match_results.data))
-    dp = ElectronDiffraction(2 * [2 * [np.zeros((144, 144))]])
+    dp = ElectronDiffraction2D(2 * [2 * [np.zeros((144, 144))]])
     match_results.plot_best_matching_results_on_signal(dp,
                                                        library=library)
 
