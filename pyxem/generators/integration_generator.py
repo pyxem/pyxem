@@ -25,6 +25,7 @@ from hyperspy.signals import BaseSignal
 from skimage import morphology
 from skimage.measure import label   
 from scipy import ndimage as ndi
+from scipy.ndimage.measurements import center_of_mass
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.generators.generator_utils import _get_pixel_vectors
@@ -62,9 +63,9 @@ def _get_intensities(z, vectors, radius=1):
     return np.array(intensities)
 
 
-def _take_ragged(z, indices, axis=None, out=None, mode='raise'):
+def _take_ragged(z, indices, _axis=None, out=None, mode='raise'):
     """Like `np.take` for ragged arrays, see `np.take` for documentation."""
-    return np.take(z[0], indices, axis=axis, out=out, mode=mode)
+    return np.take(z[0], indices, axis=_axis, out=out, mode=mode)
 
 
 def _get_largest_connected_region(segmentation):
@@ -278,11 +279,12 @@ class IntegrationGenerator():
                              n_min=n_min,
                              n_max=n_max,
                              snr_thresh=snr_thresh,
-                             inplace=False)
+                             inplace=False,
+                             ragged=True)
 
-        peaks = result.map(_take_ragged, indices=[0,1], axis=1, inplace=False, ragged=True)
-        intensities = result.map(_take_ragged, indices=2, axis=1, inplace=False, ragged=True)
-        snr = result.map(_take_ragged, indices=3, axis=1, inplace=False, ragged=True)
+        peaks = result.map(_take_ragged, indices=[0,1], _axis=1, inplace=False, ragged=True)
+        intensities = result.map(_take_ragged, indices=2, _axis=1, inplace=False, ragged=True)
+        snr = result.map(_take_ragged, indices=3, _axis=1, inplace=False, ragged=True)
 
         vectors = DiffractionVectors.from_peaks(peaks, calibration=self.calibration, center=self.center)
         vectors.intensities = intensities
