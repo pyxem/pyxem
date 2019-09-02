@@ -21,8 +21,8 @@ import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 def _get_pixel_vectors(dp, vectors, calibration, center):
-    """Helper function to get the pixel coordinates for the given diffraction
-    pattern and vectors
+    """Get the pixel coordinates for the given diffraction
+    pattern and vectors.
 
     Parameters
     ----------
@@ -37,8 +37,8 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
 
     Returns
     -------
-        vector_pixels : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
-
+    vector_pixels : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        Pixel coordinates for given diffraction pattern and vectors.
     """
 
     def _floor(vectors, calibration, center):
