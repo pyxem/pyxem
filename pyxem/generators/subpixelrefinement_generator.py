@@ -27,6 +27,7 @@ from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
+from pyxem.generators.generator_utils import _get_pixel_vectors
 
 import warnings
 
@@ -59,29 +60,10 @@ class SubpixelrefinementGenerator():
         self.calibration = [sig_ax[0].scale, sig_ax[1].scale]
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
-        def _floor(vectors, calibration, center):
-            if vectors.shape == (1,) and vectors.dtype == np.object:
-                vectors = vectors[0]
-            return np.floor((vectors.astype(np.float64) / calibration) + center).astype(np.int)
-
-        if isinstance(vectors, DiffractionVectors):
-            if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
-                raise ValueError('Vectors with shape {} must have the same navigation shape '
-                                 'as the diffraction patterns which has shape {}.'.format(
-                                     vectors.axes_manager.navigation_shape, dp.axes_manager.navigation_shape))
-            self.vector_pixels = vectors.map(_floor,
-                                             calibration=self.calibration,
-                                             center=self.center,
-                                             inplace=False)
-        else:
-            self.vector_pixels = _floor(vectors, self.calibration, self.center)
-
-        if isinstance(self.vector_pixels, DiffractionVectors):
-            if np.any(self.vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels.data < 0)):
-                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
-        elif isinstance(self.vector_pixels, np.ndarray):
-            if np.any((self.vector_pixels > np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels < 0)):
-                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+        self.vector_pixels = _get_pixel_vectors(dp, 
+                                                vectors, 
+                                                calibration=self.calibration, 
+                                                center=self.center)
 
     def conventional_xc(self, square_size, disc_radius, upsample_factor):
         """Refines the peaks using (phase) cross correlation.
