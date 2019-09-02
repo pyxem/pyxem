@@ -70,8 +70,7 @@ class DiffractionVectors(BaseSignal):
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
-        """
-        Takes a list of peak positions (pixel coordinates) and returns
+        """Takes a list of peak positions (pixel coordinates) and returns
         an instance of `Diffraction2D`
 
         Parameters
