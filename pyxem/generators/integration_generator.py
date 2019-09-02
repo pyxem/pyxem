@@ -154,7 +154,7 @@ def _get_intensities_summation_method(z,
         X = i + dX
         Y = j + dY
         
-        if verbose:
+        if verbose:  # pragma: no cover
             print(f"\nMean(I): {bkg_mean:.2f} | Std(I): {bkg_std:.2f} | n_pix: {n_pix} \n" \
                   f"I: {inty:.2f} | I/pix: {inty/n_pix:.2f} | SNR(I): {snr:.2f} \n" \
                   f"i: {i:.2f} | j: {j:.2f} | dX: {dX:.2f} | dY: {dY:.2f} | X: {X:.2f} | Y: {Y:.2f}")
@@ -166,9 +166,9 @@ def _get_intensities_summation_method(z,
                 plt.plot(box_inner, box_inner, "g+")        # input
                 plt.show()
         
-        if n_pix > n_max:
+        if n_pix > n_max:  # pragma: no cover
             continue
-        if n_pix < n_min:
+        if n_pix < n_min:  # pragma: no cover
             continue
         
         # for some reason X/Y are reversed here
