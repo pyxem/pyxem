@@ -62,6 +62,11 @@ def _get_intensities(z, vectors, radius=1):
     return np.array(intensities)
 
 
+def _take_ragged(z, indices, axis=None, out=None, mode='raise'):
+    """Like `np.take` for ragged arrays, see `np.take` for documentation."""
+    return np.take(z[0], indices, axis=axis, out=out, mode=mode)
+
+
 def _get_largest_connected_region(segmentation):
     """
     Take a binary segmentation image and return the largest connected
@@ -117,11 +122,6 @@ def _get_intensities_summation_method(z,
     Implementation based on Barty et al, J. Appl. Cryst. (2014). 47, 1118-1131
                             Lesli, Acta Cryst. (2006). D62, 48-57
     """
-    # prepare meshgrid for centroid calculation
-    meshi, meshj = np.meshgrid(np.arange(box_inner*2), np.arange(box_inner*2))
-    meshi -= box_inner
-    meshj -= box_outer
-    
     peaks = []
     
     for i, j in vectors:
@@ -145,9 +145,11 @@ def _get_intensities_summation_method(z,
         inty = signal.sum()
         snr = (inty/n_pix) / bkg_std
         
-        # calculate centroid
-        dX = np.average(meshi, weights=signal)
-        dY = np.average(meshj, weights=signal)
+        # calculate center of mass
+        com_X, com_Y = center_of_mass(box, labels=signal_mask, index=1)
+        dX = com_X - box_inner
+        dY = com_Y - box_inner
+
         X = i + dX
         Y = j + dY
         
@@ -155,18 +157,25 @@ def _get_intensities_summation_method(z,
             print(f"\nMean(I): {bkg_mean:.2f} | Std(I): {bkg_std:.2f} | n_pix: {n_pix} \n" \
                   f"I: {inty:.2f} | I/pix: {inty/n_pix:.2f} | SNR(I): {snr:.2f} \n" \
                   f"i: {i:.2f} | j: {j:.2f} | dX: {dX:.2f} | dY: {dY:.2f} | X: {X:.2f} | Y: {Y:.2f}")
+            # for debugging purposes
+            plot = False
+            if plot:
+                plt.imshow(signal)
+                plt.plot(dY+box_inner, dX+box_inner, "r+")  # center_of_mass
+                plt.plot(box_inner, box_inner, "g+")        # input
+                plt.show()
         
         if n_pix > n_max:
             continue
         if n_pix < n_min:
             continue
         
-        peaks.append([X, Y, inty, snr])
+        # for some reason X/Y are reversed here
+        peaks.append([Y, X, inty, snr])
     
-    # TODO: how best to store these data?
     peaks = np.array(peaks)
-    intensities = peaks[:,2]
-    return intensities.reshape(-1,1)
+    
+    return np.array(peaks)
 
 
 class IntegrationGenerator():
@@ -183,8 +192,6 @@ class IntegrationGenerator():
         navigation shape as the electron diffraction patterns. If an ndarray,
         the same set of vectors is mapped over all electron diffraction
         patterns.
-
-    TODO: extend with more sophisticated intensity extraction methods
     """
 
     def __init__(self, dp, vectors):
@@ -258,22 +265,27 @@ class IntegrationGenerator():
     
         Returns
         -------
-        peaks : np.array
-            Array with 4 columns: X-position, Y-position, intensity, reflection SNR
+        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+            Optimized DiffractionVectors
     
         Implementation based on Barty et al, J. Appl. Cryst. (2014). 47, 1118-1131
                                 Lesli, Acta Cryst. (2006). D62, 48-57
         """
-        intensities = self.dp.map(_get_intensities_summation_method, 
-                                  vectors=self.vector_pixels, 
-                                  box_inner=box_inner,
-                                  box_outer=box_outer,
-                                  n_min=n_min,
-                                  n_max=n_max,
-                                  snr_thresh=snr_thresh,
-                                  inplace=False)
-        
-        intensities = BaseSignal(intensities)
-        intensities.axes_manager.set_signal_dimension(0)
+        result = self.dp.map(_get_intensities_summation_method, 
+                             vectors=self.vector_pixels, 
+                             box_inner=box_inner,
+                             box_outer=box_outer,
+                             n_min=n_min,
+                             n_max=n_max,
+                             snr_thresh=snr_thresh,
+                             inplace=False)
 
-        return intensities
+        peaks = result.map(_take_ragged, indices=[0,1], axis=1, inplace=False, ragged=True)
+        intensities = result.map(_take_ragged, indices=2, axis=1, inplace=False, ragged=True)
+        snr = result.map(_take_ragged, indices=3, axis=1, inplace=False, ragged=True)
+
+        vectors = DiffractionVectors.from_peaks(peaks, calibration=self.calibration, center=self.center)
+        vectors.intensities = intensities
+        vectors.snr = snr
+
+        return vectors
