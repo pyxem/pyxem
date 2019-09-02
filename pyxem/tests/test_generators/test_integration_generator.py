@@ -65,8 +65,6 @@ def test_integration_generator_summation_method():
     pattern[i, j] = 1.0
     pattern = gaussian_filter(pattern, 2)
 
-    pattern[25, 25] = 1.0
-    
     dv = DiffractionVectors(pixel_positions)
     dp = ElectronDiffraction2D(pattern)
     ig = IntegrationGenerator(dp, dv)
@@ -77,5 +75,6 @@ def test_integration_generator_summation_method():
     
     assert np.allclose(pixel_positions, vectors.data, atol=0.05)
     assert np.allclose(vectors.data, pixel_positions, atol=0.05)
-    assert np.allclose(vectors.intensities.data[0], [1.0, 1.0, 1.0], atol=0.05)
+    assert np.allclose(vectors.intensities.data[0], 1.0, atol=0.05)
+    assert np.allclose(vectors.sigma.data[0], 0.0, atol=0.05)
     assert isinstance(vectors, DiffractionVectors)
