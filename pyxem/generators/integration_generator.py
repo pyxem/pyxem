@@ -34,8 +34,7 @@ import warnings
 
 
 def _get_intensities(z, vectors, radius=1):
-    """
-    Basic intensity integration routine, takes the maximum value at the
+    """Basic intensity integration routine, takes the maximum value at the
     given vector positions with the number of pixels given by `radius`.
 
     Parameters
@@ -86,16 +85,15 @@ def _get_intensities_summation_method(z,
                                       n_max: int=None,
                                       snr_thresh=3.0,
                                       verbose: bool=False):
-    """
-    Integrate reflections using the summation method. Two boxes are defined, the
-    inner box is used to define the integration area. The outer box is used 
-    to calculate the average signal-to-noise ratio (SNR). 
+    """Integrate reflections using the summation method. Two boxes are defined,
+    the inner box is used to define the integration area. The outer box is used 
+    to calculate the average signal-to-noise ratio (SNR).
+    
     All pixels with a large enough SNR are considered to be signal. The largest region 
     of connected signal pixels are summed to calculate the reflection intensity.
 
     Parameters
     ----------
-
     vectors : DiffractionVectors
         Vectors to the locations of the spots to be
         integrated.
@@ -121,6 +119,8 @@ def _get_intensities_summation_method(z,
     peaks : np.array
         Array with 4 columns: X-position, Y-position, intensity, reflection SNR
 
+    Notes
+    -----
     Implementation based on Barty et al, J. Appl. Cryst. (2014). 47, 1118-1131
                             Lesli, Acta Cryst. (2006). D62, 48-57
     """
@@ -185,8 +185,7 @@ def _get_intensities_summation_method(z,
 
 
 class IntegrationGenerator():
-    """
-    Integrates reflections at the given vector positions.
+    """Integrates reflections at the given vector positions.
 
     Parameters
     ----------
@@ -214,8 +213,7 @@ class IntegrationGenerator():
                                                 center=self.center)
 
     def extract_intensities(self, radius: int=1):
-        """
-        Basic intensity integration routine, takes the maximum value at the
+        """Basic intensity integration routine, takes the maximum value at the
         given vector positions with the number of pixels given by `radius`.
     
         Parameters
@@ -244,9 +242,8 @@ class IntegrationGenerator():
                                              n_min: int=5,
                                              n_max: int=1000,
                                              snr_thresh: float=3.0):
-        """
-        Integrate reflections using the summation method. Two boxes are defined, the
-        inner box is used to define the integration area. The outer box is used 
+        """Integrate reflections using the summation method. Two boxes are defined,
+        the inner box is used to define the integration area. The outer box is used 
         to calculate the average signal-to-noise ratio (SNR). 
         All pixels with a large enough SNR are considered to be signal. The largest region 
         of connected signal pixels are summed to calculate the reflection intensity. The
@@ -254,7 +251,6 @@ class IntegrationGenerator():
     
         Parameters
         ----------
-    
         box_inner : int
             Defines the size of the inner box, which must be larger than the reflection.
         box_outer : int
@@ -277,6 +273,8 @@ class IntegrationGenerator():
             vectors.intensities -> `I`, vectors.sigma -> `sigma(I)`, and
             vectors.snr -> `I / sigma(I)`
     
+        Notes
+        -----
         Implementation based on Barty et al, J. Appl. Cryst. (2014). 47, 1118-1131
                                 Lesli, Acta Cryst. (2006). D62, 48-57
         """
