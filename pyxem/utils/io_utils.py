@@ -24,6 +24,7 @@ import os
 import warnings
 
 from hyperspy.io import load as hyperspyload
+from hyperspy.io import load_with_reader
 
 import numpy as np
 
