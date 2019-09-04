@@ -32,6 +32,8 @@ from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
 
+from collections import namedtuple
+
 from transforms3d.euler import mat2euler, euler2mat
 import lmfit
 
@@ -213,6 +215,171 @@ def get_nth_best_solution(single_match_result, rank=0):
     return best_fit
 
 
+# container for OrientationRefinementResults
+OrientationRefinementResults = namedtuple("OrientationRefinementResult", 
+                                          "phase_index rotation_matrix match_rate error_hkls total_error scale".split())
+
+
+def _refine_best_orientation(single_match_result, 
+                             vectors_cartesian,
+                             library,
+                             rank=0,
+                             index_error_tol=0.2,
+                             method="leastsq"
+                             ):
+    """
+    Refine a single orientation agains the given cartesian vector coordinates.
+
+    Parameters
+    ----------
+    single_match_result : VectorMatchingResults
+        Pool of solutions from the vector matching algorithm
+    rank : int
+        The rank of the solution, i.e. rank=2 returns the third best solution    solution : list
+        np.array containing the initial orientation
+    vectors_cartesian : DiffractionVectors
+        Cartesian DiffractionVectors to be indexed.
+    structure_library : :obj:`diffsims:StructureLibrary` Object
+        Dictionary of structures and associated orientations for which
+        electron diffraction is to be simulated.
+    index_error_tol : float
+        Max allowed error in peak indexation for classifying it as indexed,
+        calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
+    method : str
+        Minimization algorithm to use, choose from: 
+        'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
+        See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
+        for more information.
+
+    Returns
+    -------
+    result : OrientationRefinementResult
+        Container for the orientation refinement results
+    """
+    solution = get_nth_best_solution(single_match_result, rank=rank)
+    
+    result = _refine_orientation(solution, 
+                                 vectors_cartesian, 
+                                 library, 
+                                 index_error_tol=index_error_tol,
+                                 method=method,)
+
+    return result
+
+
+def _refine_orientation(solution, 
+                        vectors_cartesian,
+                        structure_library, 
+                        index_error_tol=0.2,
+                        method="leastsq",
+                        verbose=True):
+    """
+    Refine a single orientation agains the given cartesian vector coordinates.
+
+    Parameters
+    ----------
+    solution : list
+        np.array containing the initial orientation
+    vectors_cartesian : DiffractionVectors
+        Cartesian DiffractionVectors to be indexed.
+    structure_library : :obj:`diffsims:StructureLibrary` Object
+        Dictionary of structures and associated orientations for which
+        electron diffraction is to be simulated.
+    index_error_tol : float
+        Max allowed error in peak indexation for classifying it as indexed,
+        calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
+    method : str
+        Minimization algorithm to use, choose from: 
+        'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
+        See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
+        for more information.
+    verbose : bool
+        Be more verbose
+
+    Returns
+    -------
+    result : OrientationRefinementResult
+        Container for the orientation refinement results
+    """
+    phase_index, rotation_matrix, match_rate, error_hkls, total_error = solution
+
+    angles = mat2euler(rotation_matrix)
+
+    # prepare reciprocal_lattice
+    structure = structure_library.structures[phase_index]
+    lattice_recip = structure.lattice.reciprocal()
+    
+    def objfunc(params, cart, lattice_recip):
+        # cx = params["center_x"].value
+        # cy = params["center_y"].value
+        ai = params["ai"].value
+        aj = params["aj"].value
+        ak = params["ak"].value
+        scale = params["scale"].value
+        
+        rotmat = euler2mat(ai, aj, ak)
+        
+        intermediate = cart.dot(rotmat.T) # Must use the transpose here
+        hklss = lattice_recip.fractional(intermediate) * scale
+        
+        rhklss = np.rint(hklss)
+        ehklss = np.abs(hklss - rhklss)
+  
+        return ehklss
+    
+    ai, aj, ak = mat2euler(rotation_matrix)
+    
+    params = lmfit.Parameters()
+    # params.add("center_x", value=result.center_x, vary=vary_center, min=result.center_x - 2.0, max=result.center_x + 2.0)
+    # params.add("center_y", value=result.center_y, vary=vary_center, min=result.center_y - 2.0, max=result.center_y + 2.0)
+    params.add("ai", value=ai, vary=True)
+    params.add("aj", value=aj, vary=True)
+    params.add("ak", value=ak, vary=True)
+    params.add("scale", value=1.0, vary=True, min=0.8, max=1.2)
+    
+    args = vectors_cartesian, lattice_recip
+    
+    res = lmfit.minimize(objfunc, params, args=args, method=method)
+    
+    if verbose:
+        lmfit.report_fit(res)
+            
+    p = res.params
+
+    ai, aj, ak = p["ai"].value, p["aj"].value, p["ak"].value
+    scale = p["scale"].value
+    
+    rotation_matrix = euler2mat(ai, aj, ak)
+
+    intermediate = vectors_cartesian.dot(rotation_matrix.T)  # Must use the transpose here
+    hklss = lattice_recip.fractional(intermediate) * scale
+    
+    rhklss = np.rint(hklss)
+    
+    error_hkls = res.residual
+    error_mean = np.mean(error_hkls)
+    
+    valid_peak_mask = np.max(error_hkls, axis=-1) < index_error_tol
+    valid_peak_count = np.count_nonzero(valid_peak_mask, axis=-1)
+    
+    num_peaks = len(vectors_cartesian)
+    
+    match_rate = (valid_peak_count * (1 / num_peaks)) if num_peaks else 0
+    
+    orientation = OrientationRefinementResults(phase_index=phase_index,
+                                               rotation_matrix=rotation_matrix,
+                                               match_rate=match_rate,
+                                               error_hkls=error_hkls,
+                                               total_error=total_error,
+                                               scale=scale)
+
+    res = np.empty(2, dtype=np.object)
+    res[0] = orientation
+    res[1] = rhklss
+
+    return res
+
+
 class VectorIndexationGenerator():
     """Generates an indexer for DiffractionVectors using a number of methods.
 
@@ -308,106 +475,53 @@ class VectorIndexationGenerator():
 
     def refine_best_orientation(self, 
                                 indexation_results, 
-                                vectors_cartesian,
                                 rank=0,
                                 index_error_tol=0.2,
                                 method="leastsq"):
+        """Refines the best orientation and assigns hkl indices to diffraction vectors.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the solution, i.e. rank=2 returns the third best solution
+        index_error_tol : float
+            Max allowed error in peak indexation for classifying it as indexed,
+            calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
+        method : str
+            Minimization algorithm to use, choose from: 
+            'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
+            See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
+            for more information.
+
+        Returns
+        -------
+        indexation_results : VectorMatchingResults
+            Navigation axes of the diffraction vectors signal containing vector
+            indexation results for each probe position.
+        """
         vectors = self.vectors
         library = self.library
 
-        result = indexation_results.map(refine_best_orientation,
+        result = indexation_results.map(_refine_best_orientation,
                                         vectors_cartesian=vectors.cartesian,
                                         library=library,
                                         index_error_tol=index_error_tol,
                                         method=method,
                                         parallel=False, inplace=False)
 
+        indexation = np.array(result.isig[0].data.tolist(), dtype='object')
+        rhkls = result.isig[1].data
+
+        indexation_results = VectorMatchingResults(indexation)
+        indexation_results.vectors = vectors
+        indexation_results.hkls = rhkls
+        indexation_results = transfer_navigation_axes(indexation_results,
+                                                      vectors.cartesian)
+
+        vectors.hkls = rhkls
+
+        return indexation_results
+
     def refine_all_orientations(self):
         pass
 
-
-def refine_best_orientation(single_match_result, 
-                            vectors_cartesian,
-                            library,
-                            rank=0,
-                            index_error_tol=0.2,
-                            method="leastsq"
-                            ):
-    solution = get_nth_best_solution(single_match_result, rank=rank)
-    
-    _refine_orientation(solution, 
-                        vectors_cartesian, 
-                        library, 
-                        index_error_tol=index_error_tol,
-                        method=method,)
-
-
-def _refine_orientation(solution, 
-                        vectors_cartesian,
-                        structure_library, 
-                        index_error_tol=0.2,
-                        method="leastsq",
-                        verbose=True):
-
-    # 'nelder', 'powell', 'cobyla', 'least-squares'
-    
-    phase_index, rotation_matrix, match_rate, error_hkls, total_error = solution
-
-    angles = mat2euler(rotation_matrix)
-
-    # print(angles)
-
-    # prepare reciprocal_lattice
-    structure = structure_library.structures[phase_index]
-    lattice_recip = structure.lattice.reciprocal()
-    
-    def objfunc(params, cart, lattice_recip):
-        # cx = params["center_x"].value
-        # cy = params["center_y"].value
-        ai = params["ai"].value
-        aj = params["aj"].value
-        ak = params["ak"].value
-        sc = params["scale"].value
-        
-        rotmat = euler2mat(ai, aj, ak)
-        
-        intermediate = cart.dot(rotmat.T) # Must use the transpose here
-        hklss = lattice_recip.fractional(intermediate) * sc
-        
-        rhklss = np.rint(hklss)
-        ehklss = np.abs(hklss - rhklss)
-        
-        error_mean = ehklss.mean()
-        
-        valid_peak_mask = np.max(ehklss, axis=-1) < index_error_tol
-        valid_peak_count = np.count_nonzero(valid_peak_mask, axis=-1)
-        
-        num_peaks = len(cart)
-        
-        match_rate = (valid_peak_count * (1 / num_peaks)) if num_peaks else 0
-        match_rate, error_mean
-    
-        # print(error_mean, match_rate)
-        
-        return ehklss
-    
-    ai, aj, ak = mat2euler(rotation_matrix)
-    
-    params = lmfit.Parameters()
-    # params.add("center_x", value=result.center_x, vary=vary_center, min=result.center_x - 2.0, max=result.center_x + 2.0)
-    # params.add("center_y", value=result.center_y, vary=vary_center, min=result.center_y - 2.0, max=result.center_y + 2.0)
-    params.add("ai", value=ai, vary=True)
-    params.add("aj", value=aj, vary=True)
-    params.add("ak", value=ak, vary=True)
-    params.add("scale", value=1.0, vary=True, min=0.8, max=1.2)
-    
-    args = vectors_cartesian, lattice_recip
-    
-    res = lmfit.minimize(objfunc, params, args=args, method=method)
-    
-    if verbose:
-        lmfit.report_fit(res)
-            
-    p = res.params
-    
-    return p
