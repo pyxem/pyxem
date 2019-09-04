@@ -219,7 +219,7 @@ def match_vectors(peaks,
     n_peaks_to_index : int
         The maximum number of peak to index.
     n_best : int
-        The maximum number of good solutions to be retained.
+        The maximum number of good solutions to be retained for each phase.
 
     Returns
     -------
@@ -463,7 +463,7 @@ def crystal_from_vector_matching(z_matches):
     return results_array
 
 
-def peaks_from_best_template(single_match_result, library):
+def peaks_from_best_template(single_match_result, library, rank=0):
     """ Takes a TemplateMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
@@ -473,13 +473,16 @@ def peaks_from_best_template(single_match_result, library):
         An entry in a TemplateMatchingResults.
     library : DiffractionLibrary
         Diffraction library containing the phases and rotations.
+    rank : int
+        Get peaks from nth best orientation (default: 0, best vector match)
 
     Returns
     -------
     peaks : array
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
+    srt_idx = np.argsort(single_match_result[:, 2])[rank]
+    best_fit = single_match_result[rank]
     phase_names = list(library.keys())
     best_index = int(best_fit[0])
     phase = phase_names[best_index]
@@ -501,8 +504,8 @@ def peaks_from_best_template(single_match_result, library):
     return peaks
 
 
-def peaks_from_best_vector_match(single_match_result, library):
-    """ Takes a VectorMatchingResults object and return the associated peaks,
+def peaks_from_best_vector_match(single_match_result, library, rank=0):
+    """Takes a VectorMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
     Parameters
@@ -511,13 +514,16 @@ def peaks_from_best_vector_match(single_match_result, library):
         An entry in a VectorMatchingResults
     library : DiffractionLibrary
         Diffraction library containing the phases and rotations
+    rank : int
+        Get peaks from nth best orientation (default: 0, best vector match)
 
     Returns
     -------
     peaks : ndarray
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    best_fit = single_match_result[np.argmax(single_match_result[:, 2])]
+    srt_idx = np.argsort(single_match_result[:, 2])[rank]
+    best_fit = single_match_result[rank]
     best_index = best_fit[0]
 
     rotation_matrix = best_fit[1]
