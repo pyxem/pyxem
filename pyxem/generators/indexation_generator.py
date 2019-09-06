@@ -35,6 +35,9 @@ from pyxem.utils.indexation_utils import match_vectors
 from collections import namedtuple
 
 from transforms3d.euler import mat2euler, euler2mat
+from pyxem.utils.vector_utils import detector_to_fourier
+from diffsims.utils.sim_utils import get_electron_wavelength
+
 import lmfit
 
 class IndexationGenerator():
@@ -217,12 +220,14 @@ def get_nth_best_solution(single_match_result, rank=0):
 
 # container for OrientationRefinementResults
 OrientationRefinementResults = namedtuple("OrientationRefinementResult", 
-                                          "phase_index rotation_matrix match_rate error_hkls total_error scale".split())
+                                          "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 
 def _refine_best_orientation(single_match_result, 
-                             vectors_cartesian,
+                             vectors,
                              library,
+                             accelarating_voltage,
+                             camera_length,
                              rank=0,
                              index_error_tol=0.2,
                              method="leastsq"
@@ -237,8 +242,8 @@ def _refine_best_orientation(single_match_result,
     rank : int
         The rank of the solution, i.e. rank=2 returns the third best solution    solution : list
         np.array containing the initial orientation
-    vectors_cartesian : DiffractionVectors
-        Cartesian DiffractionVectors to be indexed.
+    vectors : DiffractionVectors
+        DiffractionVectors to be indexed.
     structure_library : :obj:`diffsims:StructureLibrary` Object
         Dictionary of structures and associated orientations for which
         electron diffraction is to be simulated.
@@ -259,8 +264,10 @@ def _refine_best_orientation(single_match_result,
     solution = get_nth_best_solution(single_match_result, rank=rank)
     
     result = _refine_orientation(solution, 
-                                 vectors_cartesian, 
-                                 library, 
+                                 vectors, 
+                                 library,
+                                 accelarating_voltage=accelarating_voltage,
+                                 camera_length=camera_length,
                                  index_error_tol=index_error_tol,
                                  method=method,)
 
@@ -268,11 +275,14 @@ def _refine_best_orientation(single_match_result,
 
 
 def _refine_orientation(solution, 
-                        vectors_cartesian,
+                        k_xy,
                         structure_library, 
+                        accelarating_voltage,
+                        camera_length,
                         index_error_tol=0.2,
                         method="leastsq",
-                        verbose=True):
+                        verbose=True,
+                        ):
     """
     Refine a single orientation agains the given cartesian vector coordinates.
 
@@ -280,8 +290,8 @@ def _refine_orientation(solution,
     ----------
     solution : list
         np.array containing the initial orientation
-    vectors_cartesian : DiffractionVectors
-        Cartesian DiffractionVectors to be indexed.
+    k_xy : DiffractionVectors
+        DiffractionVectors (x,y pixel format) to be indexed.
     structure_library : :obj:`diffsims:StructureLibrary` Object
         Dictionary of structures and associated orientations for which
         electron diffraction is to be simulated.
@@ -309,35 +319,44 @@ def _refine_orientation(solution,
     structure = structure_library.structures[phase_index]
     lattice_recip = structure.lattice.reciprocal()
     
-    def objfunc(params, cart, lattice_recip):
-        # cx = params["center_x"].value
-        # cy = params["center_y"].value
+    def objfunc(params, k_xy, lattice_recip, wavelength, camera_length):
+        cx = params["center_x"].value
+        cy = params["center_y"].value
         ai = params["ai"].value
         aj = params["aj"].value
         ak = params["ak"].value
         scale = params["scale"].value
         
         rotmat = euler2mat(ai, aj, ak)
+
+        print(k_xy.shape, end=" ")
+        
+        k_xy = (k_xy + np.array((cx, cy)) * scale)
+        cart = detector_to_fourier(k_xy, wavelength, camera_length)
         
         intermediate = cart.dot(rotmat.T) # Must use the transpose here
         hklss = lattice_recip.fractional(intermediate) * scale
         
         rhklss = np.rint(hklss)
         ehklss = np.abs(hklss - rhklss)
+        
+        print(ehklss.mean())
   
         return ehklss
     
     ai, aj, ak = mat2euler(rotation_matrix)
     
     params = lmfit.Parameters()
-    # params.add("center_x", value=result.center_x, vary=vary_center, min=result.center_x - 2.0, max=result.center_x + 2.0)
-    # params.add("center_y", value=result.center_y, vary=vary_center, min=result.center_y - 2.0, max=result.center_y + 2.0)
+    params.add("center_x", value=0.0, vary=False)
+    params.add("center_y", value=0.0, vary=False)
     params.add("ai", value=ai, vary=True)
     params.add("aj", value=aj, vary=True)
     params.add("ak", value=ak, vary=True)
     params.add("scale", value=1.0, vary=True, min=0.8, max=1.2)
     
-    args = vectors_cartesian, lattice_recip
+    wavelength = get_electron_wavelength(accelarating_voltage)
+    camera_length = camera_length * 1e10
+    args = k_xy, lattice_recip, wavelength, camera_length 
     
     res = lmfit.minimize(objfunc, params, args=args, method=method)
     
@@ -348,21 +367,28 @@ def _refine_orientation(solution,
 
     ai, aj, ak = p["ai"].value, p["aj"].value, p["ak"].value
     scale = p["scale"].value
+    cx = params["center_x"].value
+    cy = params["center_y"].value
     
     rotation_matrix = euler2mat(ai, aj, ak)
-
-    intermediate = vectors_cartesian.dot(rotation_matrix.T)  # Must use the transpose here
-    hklss = lattice_recip.fractional(intermediate) * scale
     
+    k_xy = (k_xy + np.array((cx, cy)) * scale)
+    cart = detector_to_fourier(k_xy, wavelength=wavelength, camera_length=camera_length)
+    
+    intermediate = cart.dot(rotation_matrix.T) # Must use the transpose here
+    hklss = lattice_recip.fractional(intermediate)
+
     rhklss = np.rint(hklss)
     
-    error_hkls = res.residual
+    error_hkls = res.residual.reshape(-1, 3)
     error_mean = np.mean(error_hkls)
+    
+    print("Final", error_mean)
     
     valid_peak_mask = np.max(error_hkls, axis=-1) < index_error_tol
     valid_peak_count = np.count_nonzero(valid_peak_mask, axis=-1)
     
-    num_peaks = len(vectors_cartesian)
+    num_peaks = len(k_xy)
     
     match_rate = (valid_peak_count * (1 / num_peaks)) if num_peaks else 0
     
@@ -370,8 +396,10 @@ def _refine_orientation(solution,
                                                rotation_matrix=rotation_matrix,
                                                match_rate=match_rate,
                                                error_hkls=error_hkls,
-                                               total_error=total_error,
-                                               scale=scale)
+                                               total_error=error_mean,
+                                               scale=scale,
+                                               center_x=cx,
+                                               center_y=cy)
 
     res = np.empty(2, dtype=np.object)
     res[0] = orientation
@@ -474,7 +502,9 @@ class VectorIndexationGenerator():
         return indexation_results
 
     def refine_best_orientation(self, 
-                                indexation_results, 
+                                indexation_results,
+                                accelarating_voltage,
+                                camera_length,
                                 rank=0,
                                 index_error_tol=0.2,
                                 method="leastsq"):
@@ -503,8 +533,10 @@ class VectorIndexationGenerator():
         library = self.library
 
         result = indexation_results.map(_refine_best_orientation,
-                                        vectors_cartesian=vectors.cartesian,
+                                        vectors=vectors,
                                         library=library,
+                                        accelarating_voltage=accelarating_voltage,
+                                        camera_length=camera_length,
                                         index_error_tol=index_error_tol,
                                         method=method,
                                         parallel=False, inplace=False)
