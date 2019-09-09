@@ -216,28 +216,24 @@ def get_nth_best_solution(single_match_result, rank=0):
             Library Number , [z, x, z], Correlation Score
     """
     try:
-        print(single_match_result.shape)
-        try:
-            best_fit = sorted(single_match_result[0].tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
-            print("1", type(best_fit))
-        except AttributeError:
-            best_fit = sorted(single_match_result.tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
-            print("2", type(best_fit))
+        best_fit = sorted(single_match_result[0].tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
     except:
         srt_idx = np.argsort(single_match_result[:, 2])[rank]
         best_fit = single_match_result[rank]
     return best_fit
 
 
-def _refine_best_orientation(single_match_result, 
-                             vectors,
-                             library,
-                             accelarating_voltage,
-                             camera_length,
-                             rank=0,
-                             index_error_tol=0.2,
-                             method="leastsq"
-                             ):
+def _refine_best_orientations(single_match_result, 
+                              vectors,
+                              library,
+                              accelarating_voltage,
+                              camera_length,
+                              n_best=5,
+                              rank=0,
+                              index_error_tol=0.2,
+                              method="leastsq",
+                              verbose=False
+                              ):
     """
     Refine a single orientation agains the given cartesian vector coordinates.
 
@@ -245,8 +241,12 @@ def _refine_best_orientation(single_match_result,
     ----------
     single_match_result : VectorMatchingResults
         Pool of solutions from the vector matching algorithm
+    n_best : int
+        Refine the best `n` orientations starting from `rank`. 
+        With `n_best=0` (default), all orientations are refined.
     rank : int
-        The rank of the solution, i.e. rank=2 returns the third best solution    solution : list
+        The rank of the solution to start from.  
+    solution : list
         np.array containing the initial orientation
     vectors : DiffractionVectors
         DiffractionVectors to be indexed.
@@ -267,17 +267,35 @@ def _refine_best_orientation(single_match_result,
     result : OrientationResult
         Container for the orientation refinement results
     """
-    solution = get_nth_best_solution(single_match_result, rank=rank)
-    
-    result = _refine_orientation(solution, 
-                                 vectors, 
-                                 library,
-                                 accelarating_voltage=accelarating_voltage,
-                                 camera_length=camera_length,
-                                 index_error_tol=index_error_tol,
-                                 method=method)
+    n_matches = len(single_match_result[0])
 
-    return result
+    if n_best == 0:
+        n_best = n_matches - rank
+
+    n_best = min(n_matches, n_best)
+
+    top_matches = np.empty(n_best, dtype="object")
+    res_rhkls = []
+    
+    for i in range(rank, rank + n_best):
+        solution = get_nth_best_solution(single_match_result, rank=i)
+    
+        result = _refine_orientation(solution, 
+                                     vectors, 
+                                     library,
+                                     accelarating_voltage=accelarating_voltage,
+                                     camera_length=camera_length,
+                                     index_error_tol=index_error_tol,
+                                     method=method,
+                                     verbose=verbose)
+        
+        top_matches[i] = result[0]
+        res_rhkls.append(result[1])
+
+    res = np.empty(2, dtype=np.object)
+    res[0] = top_matches
+    res[1] = np.asarray(res_rhkls)
+    return res
 
 
 def _refine_orientation(solution, 
@@ -510,7 +528,7 @@ class VectorIndexationGenerator():
         Parameters
         ----------
         rank : int
-            The rank of the solution, i.e. rank=2 returns the third best solution
+            The rank of the solution, i.e. rank=2 refines the third best solution
         index_error_tol : float
             Max allowed error in peak indexation for classifying it as indexed,
             calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
@@ -529,29 +547,74 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        matched = orientations.map(_refine_best_orientation,
-                                        vectors=vectors,
-                                        library=library,
-                                        accelarating_voltage=accelarating_voltage,
-                                        camera_length=camera_length,
-                                        index_error_tol=index_error_tol,
-                                        method=method,
-                                        rank=rank,
-                                        parallel=False, inplace=False)
+        return self.refine_n_best_orientations(orientations, 
+                                               accelarating_voltage=accelarating_voltage,
+                                               camera_length=camera_length,
+                                               n_best=1,
+                                               rank=rank,
+                                               index_error_tol=index_error_tol,
+                                               method=method)
 
+    def refine_n_best_orientations(self,
+                                   orientations,
+                                   accelarating_voltage,
+                                   camera_length,
+                                   n_best=0,
+                                   rank=0,
+                                   index_error_tol=0.2,
+                                   method="leastsq"):
+        """Refines the best orientation and assigns hkl indices to diffraction vectors.
+
+        Parameters
+        ----------
+        orientations : VectorMatchingResults
+            List of orientations to refine, must be an instance of `VectorMatchingResults`.
+        accelerating_voltage : float
+            The acceleration voltage with which the data was acquired.
+        camera_length : float
+            The camera length in meters.
+        n_best : int
+            Refine the best `n` orientations starting from `rank`. 
+            With `n_best=0` (default), all orientations are refined.
+        rank : int
+            The rank of the solution to start from.  
+        index_error_tol : float
+            Max allowed error in peak indexation for classifying it as indexed,
+            calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
+        method : str
+            Minimization algorithm to use, choose from: 
+            'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
+            See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
+            for more information.
+
+        Returns
+        -------
+        indexation_results : VectorMatchingResults
+            Navigation axes of the diffraction vectors signal containing vector
+            indexation results for each probe position.
+        """
+        vectors = self.vectors
+        library = self.library
+
+        matched = orientations.map(_refine_best_orientations,
+                                   vectors=vectors,
+                                   library=library,
+                                   accelarating_voltage=accelarating_voltage,
+                                   camera_length=camera_length,
+                                   n_best=n_best,
+                                   rank=rank,
+                                   method="leastsq",
+                                   verbose=False,
+                                   inplace=False, parallel=False)
+        
         indexation = matched.isig[0]
         rhkls = matched.isig[1].data
-
+        
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
                                                       vectors.cartesian)
 
-        vectors.hkls = rhkls
-
         return indexation_results
-
-    def refine_all_orientations(self):
-        pass
-
+        
