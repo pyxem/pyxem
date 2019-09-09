@@ -20,7 +20,7 @@
 from heapq import nlargest
 from itertools import combinations
 import math
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 
 import numpy as np
 
@@ -32,6 +32,13 @@ from pyxem.utils.vector_utils import get_angle_cartesian
 
 from transforms3d.euler import mat2euler, euler2mat
 from transforms3d.quaternions import mat2quat
+
+from collections import namedtuple
+
+
+# container for OrientationResults
+OrientationResult = namedtuple("OrientationResult", 
+                               "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 
 def correlate_library(image, library, n_largest, mask):
@@ -233,7 +240,7 @@ def match_vectors(peaks,
 
     # Assign empty array to hold indexation results. The n_best best results
     # from each phase is returned.
-    top_matches = np.empty((len(library), n_best, 5), dtype=np.object)
+    top_matches = np.empty(len(library) * n_best, dtype="object")
     res_rhkls = []
 
     # Iterate over phases in DiffractionVectorLibrary and perform indexation
@@ -304,38 +311,44 @@ def match_vectors(peaks,
             match_rates = (valid_peak_counts * (1 / num_peaks)) if num_peaks else 0
 
             possible_solution_mask = match_rates > 0
-            solutions += [[
-                R,
-                match_rate,
-                ehkls,  # TODO: Needed?
-                error_mean,
-                vector_pair_index
-            ] for R, match_rate, ehkls, error_mean in zip(
+            solutions += [OrientationResult(phase_index=phase_index,
+                                            rotation_matrix=R,
+                                            match_rate=match_rate,
+                                            error_hkls=ehkls,
+                                            total_error=error_mean,
+                                            scale=1.0,
+                                            center_x=0.0,
+                                            center_y=0.0 )
+            for R, match_rate, ehkls, error_mean in zip(
                 rotations[possible_solution_mask],
                 match_rates[possible_solution_mask],
                 ehklss[possible_solution_mask],
                 error_means[possible_solution_mask])]
+
             res_rhkls += rhklss[possible_solution_mask].tolist()
 
         n_solutions = min(n_best, len(solutions))
+
+        i = phase_index*n_best # starting index in unfolded array
+
         if n_solutions > 0:
-            top_n = _sort_solutions(np.array(solutions), n_solutions)
+            top_n = sorted(solutions, key=attrgetter('match_rate'), reverse=True)[:n_solutions]
 
             # Put the top n ranked solutions in the output array
-            top_matches[phase_index, :, 0] = phase_index
-            top_matches[phase_index, :n_solutions, 1:] = top_n[:, :4]
+            top_matches[i:i+n_solutions] = top_n
 
         if n_solutions < n_best:
             # Fill with dummy values
-            top_matches[phase_index, n_solutions:] = [
-                0,
-                np.identity(3),
-                0,
-                np.array([]),
-                1.0
-            ]
-
-        # TODO: Refine?
+            top_matches[i+n_solutions:i+n_best] = [OrientationResult(
+                phase_index=0,
+                rotation_matrix=np.identity(3),
+                match_rate=0.0,
+                error_hkls=np.array([]),
+                total_error=1.0,
+                scale=1.0,
+                center_x=0.0,
+                center_y=0.0,           
+                ) for x in range(n_solutions-n_best)]
 
     # Because of a bug in numpy (https://github.com/numpy/numpy/issues/7453),
     # triggered by the way HyperSpy reads results (np.asarray(res), which fails
@@ -343,7 +356,7 @@ def match_vectors(peaks,
     # return a tuple directly, but instead have to format the result as an
     # array ourselves.
     res = np.empty(2, dtype=np.object)
-    res[0] = top_matches.reshape((len(library) * n_best, 5))
+    res[0] = top_matches
     res[1] = np.asarray(res_rhkls)
     return res
 

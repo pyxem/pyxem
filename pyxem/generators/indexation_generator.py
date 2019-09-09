@@ -31,8 +31,10 @@ from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
+from pyxem.utils.indexation_utils import OrientationResult
 
 from collections import namedtuple
+from operator import attrgetter
 
 from transforms3d.euler import mat2euler, euler2mat
 from pyxem.utils.vector_utils import detector_to_fourier
@@ -205,22 +207,26 @@ def get_nth_best_solution(single_match_result, rank=0):
 
     Returns
     -------
-    best_fit : np.array
-        Parameters for the best fitting orientation
-        VectorMatching: 
+    VectorMatching: 
+        best_fit : `OrientationResult`
+            Parameters for the best fitting orientation
             Library Number, rotation_matrix, match_rate, error_hkls, total_error
-        TemplateMatching:
+    TemplateMatching: np.array
+            Parameters for the best fitting orientation
             Library Number , [z, x, z], Correlation Score
-
     """
-    srt_idx = np.argsort(single_match_result[:, 2])[rank]
-    best_fit = single_match_result[rank]
+    try:
+        print(single_match_result.shape)
+        try:
+            best_fit = sorted(single_match_result[0].tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
+            print("1", type(best_fit))
+        except AttributeError:
+            best_fit = sorted(single_match_result.tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
+            print("2", type(best_fit))
+    except:
+        srt_idx = np.argsort(single_match_result[:, 2])[rank]
+        best_fit = single_match_result[rank]
     return best_fit
-
-
-# container for OrientationRefinementResults
-OrientationRefinementResults = namedtuple("OrientationRefinementResult", 
-                                          "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 
 def _refine_best_orientation(single_match_result, 
@@ -258,7 +264,7 @@ def _refine_best_orientation(single_match_result,
 
     Returns
     -------
-    result : OrientationRefinementResult
+    result : OrientationResult
         Container for the orientation refinement results
     """
     solution = get_nth_best_solution(single_match_result, rank=rank)
@@ -269,7 +275,7 @@ def _refine_best_orientation(single_match_result,
                                  accelarating_voltage=accelarating_voltage,
                                  camera_length=camera_length,
                                  index_error_tol=index_error_tol,
-                                 method=method,)
+                                 method=method)
 
     return result
 
@@ -288,8 +294,8 @@ def _refine_orientation(solution,
 
     Parameters
     ----------
-    solution : list
-        np.array containing the initial orientation
+    solution : OrientationResult
+        Namedtuple containing the starting orientation
     k_xy : DiffractionVectors
         DiffractionVectors (x,y pixel format) to be indexed.
     structure_library : :obj:`diffsims:StructureLibrary` Object
@@ -308,15 +314,12 @@ def _refine_orientation(solution,
 
     Returns
     -------
-    result : OrientationRefinementResult
+    result : OrientationResult
         Container for the orientation refinement results
     """
-    phase_index, rotation_matrix, match_rate, error_hkls, total_error = solution
-
-    angles = mat2euler(rotation_matrix)
 
     # prepare reciprocal_lattice
-    structure = structure_library.structures[phase_index]
+    structure = structure_library.structures[solution.phase_index]
     lattice_recip = structure.lattice.reciprocal()
     
     def objfunc(params, k_xy, lattice_recip, wavelength, camera_length):
@@ -340,15 +343,15 @@ def _refine_orientation(solution,
         
         return ehklss
     
-    ai, aj, ak = mat2euler(rotation_matrix)
+    ai, aj, ak = mat2euler(solution.rotation_matrix)
     
     params = lmfit.Parameters()
-    params.add("center_x", value=0.0, vary=False)
-    params.add("center_y", value=0.0, vary=False)
+    params.add("center_x", value=solution.center_x, vary=False)
+    params.add("center_y", value=solution.center_y, vary=False)
     params.add("ai", value=ai, vary=True)
     params.add("aj", value=aj, vary=True)
     params.add("ak", value=ak, vary=True)
-    params.add("scale", value=1.0, vary=True, min=0.8, max=1.2)
+    params.add("scale", value=solution.scale, vary=True, min=0.8, max=1.2)
     
     wavelength = get_electron_wavelength(accelarating_voltage)
     camera_length = camera_length * 1e10
@@ -363,12 +366,12 @@ def _refine_orientation(solution,
 
     ai, aj, ak = p["ai"].value, p["aj"].value, p["ak"].value
     scale = p["scale"].value
-    cx = params["center_x"].value
-    cy = params["center_y"].value
+    center_x = params["center_x"].value
+    center_y = params["center_y"].value
     
     rotation_matrix = euler2mat(ai, aj, ak)
     
-    k_xy = (k_xy + np.array((cx, cy)) * scale)
+    k_xy = (k_xy + np.array((center_x, center_y)) * scale)
     cart = detector_to_fourier(k_xy, wavelength=wavelength, camera_length=camera_length)
     
     intermediate = cart.dot(rotation_matrix.T) # Must use the transpose here
@@ -379,8 +382,6 @@ def _refine_orientation(solution,
     error_hkls = res.residual.reshape(-1, 3)
     error_mean = np.mean(error_hkls)
     
-    print("Final", error_mean)
-    
     valid_peak_mask = np.max(error_hkls, axis=-1) < index_error_tol
     valid_peak_count = np.count_nonzero(valid_peak_mask, axis=-1)
     
@@ -388,14 +389,14 @@ def _refine_orientation(solution,
     
     match_rate = (valid_peak_count * (1 / num_peaks)) if num_peaks else 0
     
-    orientation = OrientationRefinementResults(phase_index=phase_index,
+    orientation = OrientationResult(phase_index=solution.phase_index,
                                                rotation_matrix=rotation_matrix,
                                                match_rate=match_rate,
                                                error_hkls=error_hkls,
                                                total_error=error_mean,
                                                scale=scale,
-                                               center_x=cx,
-                                               center_y=cy)
+                                               center_x=center_x,
+                                               center_y=center_y)
 
     res = np.empty(2, dtype=np.object)
     res[0] = orientation
@@ -484,7 +485,7 @@ class VectorIndexationGenerator():
                                         inplace=False,
                                         *args,
                                         **kwargs)
-        indexation = np.array(matched.isig[0].data.tolist(), dtype='object')
+        indexation = matched.isig[0]
         rhkls = matched.isig[1].data
 
         indexation_results = VectorMatchingResults(indexation)
@@ -498,7 +499,7 @@ class VectorIndexationGenerator():
         return indexation_results
 
     def refine_best_orientation(self, 
-                                indexation_results,
+                                orientations,
                                 accelarating_voltage,
                                 camera_length,
                                 rank=0,
@@ -528,17 +529,18 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        result = indexation_results.map(_refine_best_orientation,
+        matched = orientations.map(_refine_best_orientation,
                                         vectors=vectors,
                                         library=library,
                                         accelarating_voltage=accelarating_voltage,
                                         camera_length=camera_length,
                                         index_error_tol=index_error_tol,
                                         method=method,
+                                        rank=rank,
                                         parallel=False, inplace=False)
 
-        indexation = result.isig[0]
-        rhkls = result.isig[1].data
+        indexation = matched.isig[0]
+        rhkls = matched.isig[1].data
 
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
