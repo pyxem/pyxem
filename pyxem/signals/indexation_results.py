@@ -131,7 +131,7 @@ class VectorMatchingResults(BaseSignal):
 
     def __init__(self, *args, **kwargs):
         BaseSignal.__init__(self, *args, **kwargs)
-        self.axes_manager.set_signal_dimension(2)
+        # self.axes_manager.set_signal_dimension(2)
         self.vectors = None
         self.hkls = None
 

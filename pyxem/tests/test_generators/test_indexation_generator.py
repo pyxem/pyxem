@@ -26,6 +26,8 @@ from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
+from pyxem.utils.indexation_utils import OrientationResult
+
 
 @pytest.fixture
 def profile_simulation():
@@ -130,11 +132,19 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks,
         angle_tol=6,
         index_error_tol=0.3,
         n_peaks_to_index=2,
-        n_best=1)
+        n_best=5)
 
-    # Values are tested directly on the match_vector in the util tests
-    assert isinstance(indexation.vectors, DiffractionVectors)
-    # (n_best=1, 5 result values from each)
-    np.testing.assert_equal(indexation.data.shape, (1, 5))
+    np.testing.assert_equal(indexation.data.shape, (5,))
     # n_best=1, 3 peaks with hkl)
     np.testing.assert_equal(indexation.hkls.shape, (1, 3, 3))
+    
+    refined1 = gen.refine_n_best_orientations(indexation, 1.0, 1.0, n_best=0)
+
+    assert isinstance(refined1.vectors, DiffractionVectors)
+    np.testing.assert_equal(refined1.data.shape, (5,))
+    
+    refined2 = gen.refine_best_orientation(indexation, 1.0, 1.0)
+    
+    assert isinstance(refined2.vectors, DiffractionVectors)
+    np.testing.assert_equal(refined2.data.shape, (1,))
+    assert isinstance(refined2.data[0], OrientationResult)

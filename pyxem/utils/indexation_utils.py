@@ -179,24 +179,35 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     return angles.argsort()[np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=np.int)]
 
 
-def _sort_solutions(solutions, n_solutions):
-    """Sort the solutions by quality.
+def get_nth_best_solution(single_match_result, rank=0):
+    """Get the nth best solution by match_rate from a pool of solutions
 
     Parameters
     ----------
-    solutions : numpy.array
-        Potential solutions on the form used by `match_vectors`.
-    n_solutions : int
-        Number of solutions to return.
+    single_match_result : VectorMatchingResults, TemplateMatchingResults
+        Pool of solutions from the vector matching algorithm
+    rank : int
+        The rank of the solution, i.e. rank=2 returns the third best solution
 
-    Results
+    Returns
     -------
-    solutions : numpy.array
-        `n_solutions` best solutions, sorted.
+    VectorMatching: 
+        best_fit : `OrientationResult`
+            Parameters for the best fitting orientation
+            Library Number, rotation_matrix, match_rate, error_hkls, total_error
+    TemplateMatching: np.array
+            Parameters for the best fitting orientation
+            Library Number , [z, x, z], Correlation Score
     """
-    # Sort by match rate descending
-    n_solutions = min(n_solutions, solutions.shape[0])
-    return solutions[solutions[:, 1].argsort()[::-1][:n_solutions]]
+    try:
+        try:
+            best_fit = sorted(single_match_result[0].tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
+        except AttributeError:
+            best_fit = sorted(single_match_result.tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
+    except:
+        srt_idx = np.argsort(single_match_result[:, 2])[rank]
+        best_fit = single_match_result[rank]
+    return best_fit
 
 
 def match_vectors(peaks,
@@ -251,7 +262,7 @@ def match_vectors(peaks,
         phase_indices = phase['indices']
         phase_measurements = phase['measurements']
 
-        if peaks.shape[0] < 2:
+        if peaks.shape[0] < 2:  # pragma: no cover
             continue
 
         # Choose up to n_peaks_to_index unindexed peaks to be paired in all
@@ -348,7 +359,7 @@ def match_vectors(peaks,
                 scale=1.0,
                 center_x=0.0,
                 center_y=0.0,           
-                ) for x in range(n_solutions-n_best)]
+                ) for x in range(n_best - n_solutions)]
 
     # Because of a bug in numpy (https://github.com/numpy/numpy/issues/7453),
     # triggered by the way HyperSpy reads results (np.asarray(res), which fails
@@ -494,17 +505,17 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     peaks : array
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    srt_idx = np.argsort(single_match_result[:, 2])[rank]
-    best_fit = single_match_result[rank]
+    best_fit = get_nth_best_solution(single_match_result, rank=rank)
+
     phase_names = list(library.keys())
-    best_index = int(best_fit[0])
-    phase = phase_names[best_index]
+    phase_index = int(best_fit[0])
+    phase = phase_names[phase_index]
     try:
         simulation = library.get_library_entry(
             phase=phase,
             angle=tuple(best_fit[1]))['Sim']
     except ValueError:
-        structure = library.structures[best_index]
+        structure = library.structures[phase_index]
         rotation_matrix = euler2mat(*np.deg2rad(best_fit[1]), 'rzxz')
         simulation = simulate_rotated_structure(
             library.diffraction_generator,
@@ -535,13 +546,12 @@ def peaks_from_best_vector_match(single_match_result, library, rank=0):
     peaks : ndarray
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    srt_idx = np.argsort(single_match_result[:, 2])[rank]
-    best_fit = single_match_result[rank]
-    best_index = best_fit[0]
+    best_fit = get_nth_best_solution(single_match_result, rank=rank)
+    phase_index = best_fit.phase_index
 
-    rotation_matrix = best_fit[1]
+    rotation_matrix = best_fit.rotation_matrix
     # Don't change the original
-    structure = library.structures[best_index]
+    structure = library.structures[phase_index]
     sim = simulate_rotated_structure(
         library.diffraction_generator,
         structure,

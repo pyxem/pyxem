@@ -32,6 +32,7 @@ from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
 from pyxem.utils.indexation_utils import OrientationResult
+from pyxem.utils.indexation_utils import get_nth_best_solution
 
 from collections import namedtuple
 from operator import attrgetter
@@ -195,34 +196,6 @@ class ProfileIndexationGenerator():
         return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
 
 
-def get_nth_best_solution(single_match_result, rank=0):
-    """Get the nth best solution by match_rate from a pool of solutions
-
-    Parameters
-    ----------
-    single_match_result : VectorMatchingResults, TemplateMatchingResults
-        Pool of solutions from the vector matching algorithm
-    rank : int
-        The rank of the solution, i.e. rank=2 returns the third best solution
-
-    Returns
-    -------
-    VectorMatching: 
-        best_fit : `OrientationResult`
-            Parameters for the best fitting orientation
-            Library Number, rotation_matrix, match_rate, error_hkls, total_error
-    TemplateMatching: np.array
-            Parameters for the best fitting orientation
-            Library Number , [z, x, z], Correlation Score
-    """
-    try:
-        best_fit = sorted(single_match_result[0].tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
-    except:
-        srt_idx = np.argsort(single_match_result[:, 2])[rank]
-        best_fit = single_match_result[rank]
-    return best_fit
-
-
 def _refine_best_orientations(single_match_result, 
                               vectors,
                               library,
@@ -267,7 +240,9 @@ def _refine_best_orientations(single_match_result,
     result : OrientationResult
         Container for the orientation refinement results
     """
-    n_matches = len(single_match_result[0])
+    if not isinstance(single_match_result[0], tuple):  # pragma: no cover
+        single_match_result = single_match_result[0]
+    n_matches = len(single_match_result)
 
     if n_best == 0:
         n_best = n_matches - rank
@@ -278,6 +253,9 @@ def _refine_best_orientations(single_match_result,
     res_rhkls = []
     
     for i in range(rank, rank + n_best):
+        if verbose:  # pragma: no cover
+            print(f"# {i}/{n_best} ({n_matches})")
+
         solution = get_nth_best_solution(single_match_result, rank=i)
     
         result = _refine_orientation(solution, 
@@ -377,7 +355,7 @@ def _refine_orientation(solution,
     
     res = lmfit.minimize(objfunc, params, args=args, method=method)
     
-    if verbose:
+    if verbose:  # pragma: no cover
         lmfit.report_fit(res)
             
     p = res.params
