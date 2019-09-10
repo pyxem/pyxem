@@ -205,6 +205,9 @@ def _refine_best_orientations(single_match_result,
                               rank=0,
                               index_error_tol=0.2,
                               method="leastsq",
+                              vary_angles=True,
+                              vary_center=False,
+                              vary_scale=False,
                               verbose=False
                               ):
     """
@@ -234,6 +237,12 @@ def _refine_best_orientations(single_match_result,
         'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
         See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
         for more information.
+    vary_angles : bool,
+        Free the euler angles (rotation matrix) during the refinement.
+    vary_center : bool
+        Free the center of the diffraction pattern (beam center) during the refinement.
+    vary_scale : bool
+        Free the scale (i.e. pixel size) of the diffraction vectors during refinement.
 
     Returns
     -------
@@ -265,6 +274,9 @@ def _refine_best_orientations(single_match_result,
                                      camera_length=camera_length,
                                      index_error_tol=index_error_tol,
                                      method=method,
+                                     vary_angles=vary_angles,
+                                     vary_center=vary_center,
+                                     vary_scale=vary_scale,
                                      verbose=verbose)
         
         top_matches[i] = result[0]
@@ -283,6 +295,9 @@ def _refine_orientation(solution,
                         camera_length,
                         index_error_tol=0.2,
                         method="leastsq",
+                        vary_angles=True,
+                        vary_center=False,
+                        vary_scale=False,
                         verbose=False,
                         ):
     """
@@ -305,6 +320,12 @@ def _refine_orientation(solution,
         'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
         See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
         for more information.
+    vary_angles : bool,
+        Free the euler angles (rotation matrix) during the refinement.
+    vary_center : bool
+        Free the center of the diffraction pattern (beam center) during the refinement.
+    vary_scale : bool
+        Free the scale (i.e. pixel size) of the diffraction vectors during refinement.
     verbose : bool
         Be more verbose
 
@@ -342,12 +363,12 @@ def _refine_orientation(solution,
     ai, aj, ak = mat2euler(solution.rotation_matrix)
     
     params = lmfit.Parameters()
-    params.add("center_x", value=solution.center_x, vary=False)
-    params.add("center_y", value=solution.center_y, vary=False)
-    params.add("ai", value=ai, vary=True)
-    params.add("aj", value=aj, vary=True)
-    params.add("ak", value=ak, vary=True)
-    params.add("scale", value=solution.scale, vary=True, min=0.8, max=1.2)
+    params.add("center_x", value=solution.center_x, vary=vary_center)
+    params.add("center_y", value=solution.center_y, vary=vary_center)
+    params.add("ai", value=ai, vary=vary_angles)
+    params.add("aj", value=aj, vary=vary_angles)
+    params.add("ak", value=ak, vary=vary_angles)
+    params.add("scale", value=solution.scale, vary=vary_scale, min=0.8, max=1.2)
     
     wavelength = get_electron_wavelength(accelarating_voltage)
     camera_length = camera_length * 1e10
@@ -500,6 +521,9 @@ class VectorIndexationGenerator():
                                 camera_length,
                                 rank=0,
                                 index_error_tol=0.2,
+                                vary_angles=True,
+                                vary_center=False,
+                                vary_scale=False,
                                 method="leastsq"):
         """Refines the best orientation and assigns hkl indices to diffraction vectors.
 
@@ -515,6 +539,12 @@ class VectorIndexationGenerator():
             'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
             See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
             for more information.
+        vary_angles : bool,
+            Free the euler angles (rotation matrix) during the refinement.
+        vary_center : bool
+            Free the center of the diffraction pattern (beam center) during the refinement.
+        vary_scale : bool
+            Free the scale (i.e. pixel size) of the diffraction vectors during refinement.
 
         Returns
         -------
@@ -531,7 +561,10 @@ class VectorIndexationGenerator():
                                                n_best=1,
                                                rank=rank,
                                                index_error_tol=index_error_tol,
-                                               method=method)
+                                               method=method,
+                                               vary_angles=vary_angles,
+                                               vary_center=vary_center,
+                                               vary_scale=vary_scale)
 
     def refine_n_best_orientations(self,
                                    orientations,
@@ -540,6 +573,9 @@ class VectorIndexationGenerator():
                                    n_best=0,
                                    rank=0,
                                    index_error_tol=0.2,
+                                   vary_angles=True,
+                                   vary_center=False,
+                                   vary_scale=False,
                                    method="leastsq"):
         """Refines the best orientation and assigns hkl indices to diffraction vectors.
 
@@ -564,6 +600,12 @@ class VectorIndexationGenerator():
             'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
             See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
             for more information.
+        vary_angles : bool,
+            Free the euler angles (rotation matrix) during the refinement.
+        vary_center : bool
+            Free the center of the diffraction pattern (beam center) during the refinement.
+        vary_scale : bool
+            Free the scale (i.e. pixel size) of the diffraction vectors during refinement.
 
         Returns
         -------
@@ -583,6 +625,9 @@ class VectorIndexationGenerator():
                                    rank=rank,
                                    method="leastsq",
                                    verbose=False,
+                                   vary_angles=vary_angles,
+                                   vary_center=vary_center,
+                                   vary_scale=vary_scale,
                                    inplace=False, parallel=False)
         
         indexation = matched.isig[0]
