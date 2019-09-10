@@ -50,9 +50,9 @@ setup(
       'scikit-image >= 0.15.0',   # exclude_border argument in peak_finder laplacian (PR #436)
       'matplotlib >= 3.1.1' ,     # 3.1.0 failed
       'scikit-learn >= 0.19',     # reason unknown
-      'hyperspy >= 1.3',          # 1.2 fails, (NTU Workshop - May 2019)
+      'hyperspy >= 1.5.2',        # earlier versions incompatible with numpy >= 1.17.0
+      'numpy >= 1.17.0',
       'diffsims',
-      'numpy == 1.16.5',          # See PR#464 and Issue#466
       'lmfit >= 0.9.12'
       ],
     package_data={
