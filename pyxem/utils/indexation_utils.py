@@ -179,7 +179,7 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     return angles.argsort()[np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=np.int)]
 
 
-def get_nth_best_solution(single_match_result, rank=0):
+def get_nth_best_solution(single_match_result, rank=0, key="match_rate", descending=True):
     """Get the nth best solution by match_rate from a pool of solutions
 
     Parameters
@@ -188,6 +188,10 @@ def get_nth_best_solution(single_match_result, rank=0):
         Pool of solutions from the vector matching algorithm
     rank : int
         The rank of the solution, i.e. rank=2 returns the third best solution
+    key : str
+        The key to sort the solutions by, default = match_rate
+    descending : bool
+        Rank the keys from large to small
 
     Returns
     -------
@@ -201,9 +205,9 @@ def get_nth_best_solution(single_match_result, rank=0):
     """
     try:
         try:
-            best_fit = sorted(single_match_result[0].tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
+            best_fit = sorted(single_match_result[0].tolist(), key=attrgetter(key), reverse=descending)[rank]
         except AttributeError:
-            best_fit = sorted(single_match_result.tolist(), key=attrgetter('match_rate'), reverse=True)[rank]
+            best_fit = sorted(single_match_result.tolist(), key=attrgetter(key), reverse=descending)[rank]
     except:
         srt_idx = np.argsort(single_match_result[:, 2])[rank]
         best_fit = single_match_result[rank]
@@ -445,44 +449,43 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array of shape (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
     """
+    if z_matches.shape == (1,):
+        z_matches = z_matches[0]
+
     # Create empty array for results.
     results_array = np.empty(3, dtype='object')
-    # Consider single phase and multi-phase matching cases separately
-    if np.unique(z_matches[:, 0]).shape[0] == 1:
-        # get best matching phase (there is only one here)
-        results_array[0] = z_matches[0, 0]
-        # get best matching orientation Euler angles
-        results_array[1] = np.rad2deg(mat2euler(z_matches[0, 1], 'rzxz'))
-        # get vector matching metrics
-        metrics = dict()
-        metrics['match_rate'] = z_matches[0, 2]
-        metrics['ehkls'] = z_matches[0, 3]
-        metrics['total_error'] = z_matches[0, 4]
-        metrics['orientation_reliability'] = 100 * (1 - z_matches[0, 4] / (z_matches[1, 4] or 1.0))
-        results_array[2] = metrics
 
+    # get best matching phase
+    best_match = get_nth_best_solution(z_matches, key="total_error", descending=False)
+    results_array[0] = best_match.phase_index
+
+    # get best matching orientation Euler angles
+    results_array[1] = np.rad2deg(mat2euler(best_match.rotation_matrix, 'rzxz'))
+
+    # get vector matching metrics
+    metrics = dict()
+    metrics['match_rate'] = best_match.match_rate
+    metrics['ehkls'] = best_match.error_hkls
+    metrics['total_error'] = best_match.total_error
+
+    # get second highest correlation phase for phase_reliability (if present)
+    other_phase_matches = [match for match in z_matches if match.phase_index != best_match.phase_index]
+    
+    if other_phase_matches:
+        second_best_phase = sorted(other_phase_matches, key=attrgetter('total_error'), reverse=False)[0]
+
+        metrics['phase_reliability'] = 100 * (1 - best_match.total_error / second_best_phase.total_error)
+
+        # get second best matching orientation for orientation_reliability
+        same_phase_matches = [match for match in z_matches if match.phase_index == best_match.phase_index]
+        second_match = sorted(same_phase_matches, key=attrgetter('total_error'), reverse=False)[1]
     else:
-        # get best matching result, with minimal total_error
-        index_best_match = np.argmin(z_matches[:, 4])
-        # get best matching phase
-        results_array[0] = z_matches[index_best_match, 0]
-        # get best matching orientation Euler angles.
-        results_array[1] = np.rad2deg(mat2euler(z_matches[index_best_match, 1], 'rzxz'))
+        # get second best matching orientation for orientation_reliability
+        second_match = get_nth_best_solution(z_matches, rank=1, key="total_error", descending=False)
 
-        # get second smallest total error for orientation_reliability
-        z = z_matches[z_matches[:, 0] == results_array[0]]
-        second_orientation = np.partition(z[:, 4], 1)[1]
-        # get second highest correlation phase for phase_reliability
-        z = z_matches[z_matches[:, 0] != results_array[0]]
-        second_phase = np.min(z[:, 4])
-        # get template matching metrics
-        metrics = dict()
-        metrics['match_rate'] = z_matches[index_best_match, 2]
-        metrics['ehkls'] = z_matches[index_best_match, 3]
-        metrics['total_error'] = z_matches[index_best_match, 4]
-        metrics['orientation_reliability'] = 100 * (1 - z_matches[index_best_match, 4] / second_orientation)
-        metrics['phase_reliability'] = 100 * (1 - z_matches[index_best_match, 4] / second_phase)
-        results_array[2] = metrics
+    metrics['orientation_reliability'] = 100 * (1 - best_match.total_error / (second_match.total_error or 1.0))
+    
+    results_array[2] = metrics
 
     return results_array
 
