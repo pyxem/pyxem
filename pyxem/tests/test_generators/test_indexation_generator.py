@@ -134,12 +134,17 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks,
         n_peaks_to_index=2,
         n_best=5)
 
+    # Values are tested directly on the match_vector in the util tests
+    assert isinstance(indexation.vectors, DiffractionVectors)
+    
+    # (n_best=1, 5 result values from each)
     np.testing.assert_equal(indexation.data.shape, (5,))
+    
     # n_best=1, 3 peaks with hkl)
     np.testing.assert_equal(indexation.hkls.shape, (1, 3, 3))
     
     refined1 = gen.refine_n_best_orientations(indexation, 1.0, 1.0, n_best=0)
-
+    
     assert isinstance(refined1.vectors, DiffractionVectors)
     np.testing.assert_equal(refined1.data.shape, (5,))
     
@@ -148,3 +153,12 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks,
     assert isinstance(refined2.vectors, DiffractionVectors)
     np.testing.assert_equal(refined2.data.shape, (1,))
     assert isinstance(refined2.data[0], OrientationResult)
+    
+    assert refined2.data[0].phase_index == indexation.data[0].phase_index
+    assert refined2.data[0].match_rate == indexation.data[0].match_rate
+
+    # Must use a large tolerance here, because there are only 3 vectors
+    np.testing.assert_almost_equal(np.diag(  refined1.data[0].rotation_matrix), 
+                                   np.diag(indexation.data[0].rotation_matrix), 1)
+    np.testing.assert_almost_equal(np.diag(  refined2.data[0].rotation_matrix), 
+                                   np.diag(indexation.data[0].rotation_matrix), 1)

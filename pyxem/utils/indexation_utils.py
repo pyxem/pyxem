@@ -449,7 +449,7 @@ def crystal_from_vector_matching(z_matches):
         Crystallographic mapping results in an array of shape (3) with entries
         [phase, np.array((z, x, z)), dict(metrics)]
     """
-    if z_matches.shape == (1,):
+    if z_matches.shape == (1,):  # pragma: no cover
         z_matches = z_matches[0]
 
     # Create empty array for results.
