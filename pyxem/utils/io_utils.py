@@ -137,33 +137,55 @@ def load_hspy(filename, lazy=False, assign_to=None):
     return s
 
 
-def load_mib(filename, scan_size, sum_length=10):  # pragma: no cover
-    """Load a medipix hdr/mib file.
 
+def load_mib(mib_filename, reshape=True):
+    """Read a .mib file using dask and return as a lazy pyXem / hyperspy signal.
+    
     Parameters
     ----------
-    filename : string
-        File path and name to .hdr file.
-    scan_size : int
-        Scan size in pixels, allows the function to reshape the array into
-        the right shape.
-    sum_length : int
-        Number of lines to sum over to determine scan fly back location.
-
+    mib_filename : str
+        The name of the .mib file to be read.
+    
+    Returns
+    -------
+    data_hs : hyperspy.signals.Signal2D
+                The metadata adds the following domains:
+                General
+                │   └── title = 
+                └── Signal
+                    ├── binned = False
+                    ├── exposure_time = 0.001
+                    ├── flyback_times = [0.066, 0.071, 0.065, 0.017825]
+                    ├── frames_number_skipped = 90
+                    ├── scan_X = 256
+                    └── signal_type = STEM   
+        
+    
+    TODO: add data_dict as attributes to data
+        
     """
-    dpt = load_with_reader(filename=filename, reader=mib_reader)
-    dpt = ElectronDiffraction2D(dpt.data.reshape((scan_size, scan_size, 256, 256)))
-    trace = dpt.inav[:, 0:sum_length].sum((1, 2, 3))
-    edge = np.where(trace == max(trace.data))[0][0]
-    if edge == scan_size - 1:
-        dp = ElectronDiffraction2D(dpt.inav[0:edge, 1:])
-    else:
-        dp = ElectronDiffraction2D(np.concatenate((dpt.inav[edge + 1:, 1:],
-                                                   dpt.inav[0:edge, 1:]), axis=1))
+    hdr_stuff = parse_hdr(mib_filename)
+    data = read_mib(mib_filename, hdr_stuff)
+    exp_times_list = read_exposures(hdr_stuff, mib_filename)
+    data_dict = STEM_flag_dict(exp_times_list)
 
-    dp.data = np.flip(dp.data, axis=2)
+    if hdr_stuff['Assembly Size'] == '2x2':
+        data = add_crosses(data)
+        
+    data_hs = hs.signals.Signal2D(data).as_lazy()
+    
+    # Tranferring dict info to metadata
+    if data_dict['STEM_flag'] == 1:
+        data_hs.metadata.Signal.signal_type = 'STEM'
+    else: 
+        data_hs.metadata.Signal.signal_type = 'TEM'
+    data_hs.metadata.Signal.scan_X = data_dict['scan_X']
+    data_hs.metadata.Signal.exposure_time = data_dict['exposure time']
+    data_hs.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
+    data_hs.metadata.Signal.flyback_times = data_dict['flyback_times']
+    #TODO: Add reshape option
+    return data_hs
 
-    return dp
 
 
 def _manageHeader(fname):
@@ -687,55 +709,6 @@ def read_mib(fp, hdr_info, mmap_mode='r'):
         data = data.reshape(size)
 
     return data
-
-
-def mib_dask_reader(mib_filename):
-    """Read a .mib file using dask and return as a lazy pyXem / hyperspy signal.
-    
-    Parameters
-    ----------
-    mib_filename : str
-        The name of the .mib file to be read.
-    
-    Returns
-    -------
-    data_hs : hyperspy.signals.Signal2D
-                The metadata adds the following domains:
-                General
-                │   └── title = 
-                └── Signal
-                    ├── binned = False
-                    ├── exposure_time = 0.001
-                    ├── flyback_times = [0.066, 0.071, 0.065, 0.017825]
-                    ├── frames_number_skipped = 90
-                    ├── scan_X = 256
-                    └── signal_type = STEM   
-        
-    
-    TODO: add data_dict as attributes to data
-        
-    """
-    hdr_stuff = parse_hdr(mib_filename)
-    data = read_mib(mib_filename, hdr_stuff)
-    exp_times_list = read_exposures(hdr_stuff, mib_filename)
-    data_dict = STEM_flag_dict(exp_times_list)
-
-    if hdr_stuff['Assembly Size'] == '2x2':
-        data = add_crosses(data)
-        
-    data_hs = hs.signals.Signal2D(data).as_lazy()
-    
-    # Tranferring dict info to metadata
-    if data_dict['STEM_flag'] == 1:
-        data_hs.metadata.Signal.signal_type = 'STEM'
-    else: 
-        data_hs.metadata.Signal.signal_type = 'TEM'
-    data_hs.metadata.Signal.scan_X = data_dict['scan_X']
-    data_hs.metadata.Signal.exposure_time = data_dict['exposure time']
-    data_hs.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
-    data_hs.metadata.Signal.flyback_times = data_dict['flyback_times']
-    
-    return data_hs
 
 def reshape_4DSTEM_FlyBack(data):
     """Reshapes the lazy-imported frame stack to navigation dimensions determined
