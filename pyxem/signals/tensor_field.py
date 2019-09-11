@@ -21,6 +21,7 @@ import numpy as np
 from scipy.linalg import polar
 from hyperspy.utils import stack
 import math
+from pyxem.signals.strain_map import StrainMap
 
 """
 Signal class for Tensor Fields
@@ -111,4 +112,4 @@ class DisplacementGradientMap(Signal2D):
 
         strain_results = stack([e11, e22, e12, theta])
 
-        return strain_results
+        return StrainMap(strain_results)

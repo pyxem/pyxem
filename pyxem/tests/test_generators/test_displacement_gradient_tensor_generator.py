@@ -1,9 +1,4 @@
-from pyxem.generators.displacement_gradient_tensor_generator import \
-    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
-import hyperspy.api as hs
-import pytest
-import numpy as np
-decimal = 2  # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
@@ -20,6 +15,12 @@ decimal = 2  # -*- coding: utf-8 -*-
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+from pyxem.generators.displacement_gradient_tensor_generator import \
+    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
+import hyperspy.api as hs
+import pytest
+import numpy as np
 
 
 def vector_operation(z, M):
@@ -142,37 +143,3 @@ def test_weight_function_behaviour():
     deformed = hs.signals.Signal2D(np.asarray([[vectors, vectors], [vectors, vectors]]))
     strain_map = get_DisplacementGradientMap(deformed, multi_vector_array, weights=weights).get_strain_maps()
     np.testing.assert_almost_equal(strain_map.inav[0].isig[0, 0].data[0], -1.0166666 + 1, decimal=2)
-
-
-""" These test will be operational once a basis change functionality is introduced """
-
-
-@pytest.mark.skip(reason="basis change functionality not yet implemented")
-def test_rotation(xy_vectors, right_handed, left_handed, multi_vector):  # pragma: no cover
-    """
-    We should always measure the same rotations, regardless of basis (as long as it's right handed)
-    """
-    xy_rot = xy_vectors.inav[3].data
-    rh_rot = right_handed.inav[3].data
-    lh_rot = left_handed.inav[3].data
-    mv_rot = multi_vector.inav[3].data
-
-    np.testing.assert_almost_equal(xy_rot, rh_rot, decimal=2)  # rotations
-    np.testing.assert_almost_equal(xy_rot, lh_rot, decimal=2)  # rotations
-    np.testing.assert_almost_equal(xy_rot, mv_rot, decimal=2)  # rotations
-
-
-@pytest.mark.skip(reason="basis change functionality not yet implemented")
-def test_trace(xy_vectors, right_handed, multi_vector):  # pragma: no cover
-    """
-    Basis does effect strain measurement, but we can simply calculate suitable invarients.
-    See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
-    """
-    np.testing.assert_almost_equal(
-        np.add(
-            xy_vectors.inav[0].data, xy_vectors.inav[1].data), np.add(
-            right_handed.inav[0].data, right_handed.inav[1].data), decimal=2)
-    np.testing.assert_almost_equal(
-        np.add(
-            xy_vectors.inav[0].data, xy_vectors.inav[1].data), np.add(
-            multi_vector.inav[0].data, multi_vector.inav[1].data), decimal=2)

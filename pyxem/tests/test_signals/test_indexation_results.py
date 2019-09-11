@@ -38,9 +38,9 @@ def test_vector_get_crystallographic_map(dp_vector_match_result,
                                          sp_vector_match_result):
     # Assertion free test, as the tests in test_indexation_utils do the heavy
     # lifting
-    match_results = np.array([np.vstack((dp_vector_match_result, sp_vector_match_result))])
+    match_results = np.hstack([dp_vector_match_result, sp_vector_match_result])
     match_results = VectorMatchingResults(match_results)
-    match_results.axes_manager.set_signal_dimension(2)
+    match_results.axes_manager.set_signal_dimension(1)
     cryst_map = match_results.get_crystallographic_map()
     assert cryst_map.method == 'vector_matching'
 
