@@ -51,7 +51,6 @@ setup(
       'matplotlib >= 3.1.1' ,     # 3.1.0 failed
       'scikit-learn >= 0.19',     # reason unknown
       'hyperspy >= 1.5.2',        # earlier versions incompatible with numpy >= 1.17.0
-      'numpy >= 1.17.0',
       'diffsims',
       'lmfit >= 0.9.12'
       ],
