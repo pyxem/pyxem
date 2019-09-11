@@ -25,11 +25,12 @@ import matplotlib.pyplot as plt
 from scipy.spatial import distance_matrix
 
 from pyxem.signals import push_metadata_through
-from pyxem.utils.sim_utils import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_indices_from_distance_matrix
 from pyxem.utils.vector_utils import get_npeaks
+from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
@@ -67,23 +68,54 @@ class DiffractionVectors(BaseSignal):
         self.cartesian = None
         self.hkls = None
 
-    def plot_diffraction_vectors(self, xlim, ylim, distance_threshold):
+    @classmethod
+    def from_peaks(cls, peaks, center, calibration):
+        """Takes a list of peak positions (pixel coordinates) and returns
+        an instance of `Diffraction2D`
+
+        Parameters
+        ----------
+        peaks : Signal
+            Signal containing lists (np.array) of pixel coordinates specifying 
+            the reflection positions
+        center : np.array
+            Diffraction pattern center in array indices.
+        calibration : np.array
+            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
+
+        Returns
+        -------
+        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+            List of diffraction vectors
+        """
+        gvectors = peaks.map(peaks_as_gvectors, 
+                             center=center, 
+                             calibration=calibration, 
+                             inplace=False)
+
+        vectors = cls(gvectors)
+        vectors.axes_manager.set_signal_dimension(0)
+
+        return vectors
+
+    def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
+                                 distance_threshold=0.01):
         """Plot the unique diffraction vectors.
 
         Parameters
         ----------
         xlim : float
-            The maximum x coordinate to be plotted.
+            The maximum x coordinate in reciprocal Angstroms to be plotted.
         ylim : float
-            The maximum y coordinate to be plotted.
+            The maximum y coordinate in reciprocal Angstroms to be plotted.
         distance_threshold : float
-            The minimum distance between diffraction vectors to be passed to
-            get_unique_vectors.
+            The minimum distance in reciprocal Angstroms between diffraction
+            vectors to be passed to get_unique_vectors.
 
         Returns
         -------
         fig : matplotlib figure
-            The plot as a matplot lib figure.
+            The plot as a matplotlib figure.
 
         """
         # Find the unique gvectors to plot.
@@ -275,7 +307,7 @@ class DiffractionVectors(BaseSignal):
             The camera length in meters.
         """
         # Imported here to avoid circular dependency
-        from pyxem.utils.sim_utils import get_electron_wavelength
+        from diffsims.utils.sim_utils import get_electron_wavelength
         wavelength = get_electron_wavelength(accelerating_voltage)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,

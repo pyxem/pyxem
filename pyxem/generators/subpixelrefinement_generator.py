@@ -27,6 +27,9 @@ from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
+from pyxem.generators.generator_utils import _get_pixel_vectors
+
+import warnings
 
 
 class SubpixelrefinementGenerator():
@@ -57,29 +60,10 @@ class SubpixelrefinementGenerator():
         self.calibration = [sig_ax[0].scale, sig_ax[1].scale]
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
-        def _floor(vectors, calibration, center):
-            if vectors.shape == (1,) and vectors.dtype == np.object:
-                vectors = vectors[0]
-            return np.floor((vectors.astype(np.float64) / calibration) + center).astype(np.int)
-
-        if isinstance(vectors, DiffractionVectors):
-            if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
-                raise ValueError('Vectors with shape {} must have the same navigation shape '
-                                 'as the diffraction patterns which has shape {}.'.format(
-                                     vectors.axes_manager.navigation_shape, dp.axes_manager.navigation_shape))
-            self.vector_pixels = vectors.map(_floor,
-                                             calibration=self.calibration,
-                                             center=self.center,
-                                             inplace=False)
-        else:
-            self.vector_pixels = _floor(vectors, self.calibration, self.center)
-
-        if isinstance(self.vector_pixels, DiffractionVectors):
-            if np.any(self.vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels.data < 0)):
-                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
-        elif isinstance(self.vector_pixels, np.ndarray):
-            if np.any((self.vector_pixels > np.max(dp.data.shape) - 1)) or (np.any(self.vector_pixels < 0)):
-                raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+        self.vector_pixels = _get_pixel_vectors(dp, 
+                                                vectors, 
+                                                calibration=self.calibration, 
+                                                center=self.center)
 
     def conventional_xc(self, square_size, disc_radius, upsample_factor):
         """Refines the peaks using (phase) cross correlation.
@@ -248,7 +232,7 @@ class SubpixelrefinementGenerator():
             si = np.unravel_index(np.argmax(z), z.shape)
             z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
             if z_ref.shape != (3, 3):
-                raise ValueError("The local maxima needs to have 4 adjacent pixels")
+                return (si[1] - z.shape[1] // 2, si[0] - z.shape[0] // 2)
             M = z_ref[1, 1]
             LX, RX = z_ref[1, 0], z_ref[1, 2]
             UY, DY = z_ref[0, 1], z_ref[2, 1]
@@ -261,15 +245,42 @@ class SubpixelrefinementGenerator():
             for i, vector in enumerate(vectors):
                 expt_disc = get_experimental_square(dp, vector, square_size)
                 shifts[i] = _new_lg_idea(expt_disc)
+
             return (((vectors + shifts) - center) * calibration)
 
-        self.vectors_out = DiffractionVectors(
-            self.dp.map(_lg_map,
-                        vectors=self.vector_pixels,
-                        square_size=square_size,
-                        center=self.center,
-                        calibration=self.calibration,
-                        inplace=False))
+        self.vectors_out = DiffractionVectors(self.dp.map(_lg_map,
+                                                          vectors=self.vector_pixels,
+                                                          square_size=square_size,
+                                                          center=self.center,
+                                                          calibration=self.calibration,
+                                                          inplace=False))
+
+        # check for unrefined peaks
+        def check_bad_square(z):
+            si = np.unravel_index(np.argmax(z), z.shape)
+            z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
+            if z_ref.shape == (3, 3):
+                return False
+            else:
+                return True
+
+        def _check_bad_square_map(dp, vectors, square_size):
+            bad_square = False
+            for i, vector in enumerate(vectors):
+                expt_disc = get_experimental_square(dp, vector, square_size)
+                bad_square = check_bad_square(expt_disc)
+                if bad_square:
+                    return True
+            return False
+
+        bad_squares = self.dp.map(_check_bad_square_map,
+                                  vectors=self.vector_pixels,
+                                  square_size=square_size,
+                                  inplace=False)
+
+        if np.any(bad_squares):
+            warnings.warn("You have a peak in your pattern that lies on the edge of the square. \
+                          Consider increasing the square size")
 
         self.vectors_out.axes_manager.set_signal_dimension(0)
         self.last_method = "lg_method"

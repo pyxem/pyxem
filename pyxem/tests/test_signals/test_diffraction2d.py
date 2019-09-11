@@ -69,3 +69,15 @@ class TestComputeAndAsLazy2D:
         s_lazy = s.as_lazy()
         assert s_lazy.__class__ == LazyDiffraction2D
         assert data.shape == s_lazy.data.shape
+
+
+class TestDecomposition:
+    def test_decomposition_is_performed(self, diffraction_pattern):
+        s = Diffraction2D(diffraction_pattern)
+        s.decomposition()
+        assert s.learning_results is not None
+
+    def test_decomposition_class_assignment(self, diffraction_pattern):
+        s = Diffraction2D(diffraction_pattern)
+        s.decomposition()
+        assert isinstance(s, Diffraction2D)

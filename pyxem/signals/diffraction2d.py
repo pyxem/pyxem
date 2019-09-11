@@ -15,8 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal base class for two-dimensional diffraction data.
+
 """
+Signal base class for two-dimensional diffraction data.
+"""
+
 import numpy as np
 from warnings import warn
 
@@ -32,7 +35,8 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead,\
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
-    peaks_as_gvectors, convert_affine_to_transform, apply_transformation
+    peaks_as_gvectors, convert_affine_to_transform, apply_transformation, \
+    find_beam_center_blur, find_beam_center_interpolate
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -320,20 +324,39 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, radius_start,
-                                 radius_finish,
+    def get_direct_beam_position(self, method="cross_correlate", 
+                                 radius_start=4,
+                                 radius_finish=8,
+                                 sigma=30,
+                                 upsample_factor=100,
+                                 kind=3,
                                  *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
         Parameters
         ----------
-        radius_start : int
+        method : str,
+            Must be one of "cross_correlate", "blur", "interpolate"
+            The default is "cross_correlate"
+        radius_start : int (cross_correlate)
             The lower bound for the radius of the central disc to be used in the
             alignment.
-        radius_finish : int
+        radius_finish : int (cross_correlate)
             The upper bounds for the radius of the central disc to be used in
             the alignment.
+        sigma : float (blur, interpolate)
+            Sigma value for Gaussian blurring kernel.
+        upsample_factor : int (interpolate)
+            Upsample factor for subpixel beam center finding, i.e. the center will 
+            be found with a precision of 1 / upsample_factor of a pixel. 
+        kind : str or int, optional (interpolate)
+            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+            interpolation of zeroth, first, second or third order; ‘previous’
+            and ‘next’ simply return the previous or next value of the point) or as
+            an integer specifying the order of the spline interpolator to use. 
         *args:
             Arguments to be passed to map().
         **kwargs:
@@ -345,14 +368,40 @@ class Diffraction2D(Signal2D):
             Array containing the centers for each SED pattern.
 
         """
-        shifts = self.map(find_beam_offset_cross_correlation,
+        signal_shape = self.axes_manager.signal_shape
+        origin_coordinates = np.array(signal_shape) / 2
+
+        methods = "cross_correlate", "blur", "interpolate"
+
+        if method == "cross_correlate":
+            shifts = self.map(find_beam_offset_cross_correlation,
                           radius_start=radius_start,
                           radius_finish=radius_finish,
                           inplace=False, *args, **kwargs)
+        elif method == "blur":
+            centers = self.map(find_beam_center_blur,
+                           sigma=sigma,
+                           inplace=False, *args, **kwargs)
+            shifts = origin_coordinates - centers
+        elif method == "interpolate":
+            centers = self.map(find_beam_center_interpolate,
+                           sigma=sigma,
+                           upsample_factor=upsample_factor,
+                           kind=kind,
+                           inplace=False, *args, **kwargs)
+            shifts = origin_coordinates - centers
+        else:
+            raise ValueError(f"`method` must be one of {methods}")
+
         return shifts
 
     def center_direct_beam(self,
-                           radius_start, radius_finish,
+                           method="cross_correlate",
+                           radius_start=4,
+                           radius_finish=8,
+                           sigma=30,
+                           upsample_factor=100,
+                           kind=3,
                            square_width=None,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
@@ -361,12 +410,27 @@ class Diffraction2D(Signal2D):
 
         Parameters
         ----------
-        radius_start : int
+        method : str,
+            Must be one of "cross_correlate", "blur", "interpolate"
+            The default is "cross_correlate"
+        radius_start : int (cross_correlate)
             The lower bound for the radius of the central disc to be used in the
             alignment.
-        radius_finish : int
+        radius_finish : int (cross_correlate)
             The upper bounds for the radius of the central disc to be used in
             the alignment.
+        sigma : float (blur, interpolate)
+            Sigma value for Gaussian blurring kernel.
+        upsample_factor : int (interpolate)
+            Upsample factor for subpixel beam center finding, i.e. the center will 
+            be found with a precision of 1 / upsample_factor of a pixel. 
+        kind : str or int, optional (interpolate)
+            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+            interpolation of zeroth, first, second or third order; ‘previous’
+            and ‘next’ simply return the previous or next value of the point) or as
+            an integer specifying the order of the spline interpolator to use. 
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
@@ -382,23 +446,33 @@ class Diffraction2D(Signal2D):
             The centered diffraction data.
 
         """
-        nav_shape_x = self.data.shape[0]
-        nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2] / 2 - 0.5,
-                                       self.data.shape[3] / 2 - 0.5))
+        nav_size = self.axes_manager.navigation_size
+        signal_shape = self.axes_manager.signal_shape
+        origin_coordinates = np.array(signal_shape) / 2
 
         if square_width is not None:
-            min_index = np.int(origin_coordinates[0] - (0.5 + square_width))
+            min_index = np.int(origin_coordinates[0] - square_width)
             # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + (1.5 + square_width))
-            shifts = self.isig[min_index:max_index, min_index:max_index].get_direct_beam_position(
-                radius_start, radius_finish, *args, **kwargs)
+            max_index = np.int(origin_coordinates[0] + square_width)
+            cropped = self.isig[min_index:max_index, min_index:max_index]
+            shifts = cropped.get_direct_beam_position(method=method,
+                                                      radius_start=radius_start,
+                                                      radius_finish=radius_finish,
+                                                      sigma=sigma,
+                                                      upsample_factor=upsample_factor,
+                                                      kind=kind,
+                                                      *args, **kwargs)
         else:
-            shifts = self.get_direct_beam_position(radius_start, radius_finish,
+            shifts = self.get_direct_beam_position(method=method,
+                                                   radius_start=radius_start,
+                                                   radius_finish=radius_finish,
+                                                   sigma=sigma,
+                                                   upsample_factor=upsample_factor,
+                                                   kind=kind,
                                                    *args, **kwargs)
 
         shifts = -1 * shifts.data
-        shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
+        shifts = shifts.reshape(nav_size, 2)
 
         return self.align2D(shifts=shifts, crop=False, fill_value=0,
                             *args, **kwargs)
@@ -479,26 +553,6 @@ class Diffraction2D(Signal2D):
                 "documentation for available implementations.".format(method))
 
         return bg_subtracted
-
-    def decomposition(self, *args, **kwargs):
-        """Decomposition with a choice of algorithms.
-
-        Parameters
-        ----------
-        *args :
-            Arguments to be passed to decomposition().
-        **kwargs :
-            Keyword arguments to be passed to decomposition().
-
-        Returns
-        -------
-        The results are stored in self.learning_results. For a full description
-        of parameters see :meth:`hyperspy.learn.mva.MVA.decomposition`
-
-        """
-        super(Signal2D, self).decomposition(*args, **kwargs)
-        self.learning_results.loadings = np.nan_to_num(
-            self.learning_results.loadings)
 
     def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
@@ -621,6 +675,10 @@ class Diffraction2D(Signal2D):
         res.__init__(**res._to_dictionary())
         return res
 
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = Diffraction2D
+
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
 
@@ -633,3 +691,7 @@ class LazyDiffraction2D(LazySignal, Diffraction2D):
         super().compute(*args, **kwargs)
         self.__class__ = Diffraction2D
         self.__init__(**self._to_dictionary())
+
+    def decomposition(self, *args, **kwargs):
+        super().decomposition(*args, **kwargs)
+        self.__class__ = LazyDiffraction2D

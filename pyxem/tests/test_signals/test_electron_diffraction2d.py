@@ -35,16 +35,21 @@ def test_init():
 class TestSimpleMaps:
     # Confirms that maps run without error.
 
-    def test_get_direct_beam_postion(self, diffraction_pattern):
-        shifts = diffraction_pattern.get_direct_beam_position(radius_start=1,
-                                                              radius_finish=3)
+    @pytest.mark.parametrize('method', ('cross_correlate', 'blur', 'interpolate'))
+    def test_get_direct_beam_postion(self, diffraction_pattern, method):
+        shifts = diffraction_pattern.get_direct_beam_position(method=method, radius_start=1, radius_finish=3)
 
-    def test_center_direct_beam(self, diffraction_pattern):
+    @pytest.mark.parametrize('method', ('cross_correlate', 'blur', 'interpolate'))
+    def test_center_direct_beam(self, diffraction_pattern, method):
         # before inplace transform applied
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
-        diffraction_pattern.center_direct_beam(radius_start=1, radius_finish=3)
+        diffraction_pattern.center_direct_beam(method=method, radius_start=1, radius_finish=3)
         # after inplace transform applied
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
+
+    @pytest.mark.xfail(raises=ValueError)
+    def test_center_direct_beam_fail(self, diffraction_pattern):
+        diffraction_pattern.center_direct_beam(method="Invalid value")
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
@@ -325,8 +330,6 @@ class TestPeakFinding:
 
 
 class TestsAssertionless:
-    def test_decomposition(self, diffraction_pattern):
-        storage = diffraction_pattern.decomposition()
 
     @pytest.mark.filterwarnings('ignore::DeprecationWarning')
     # we don't want to use xc in this bit
@@ -401,3 +404,9 @@ class TestComputeAndAsLazyElectron2D:
         s_lazy = s.as_lazy()
         assert s_lazy.__class__ == LazyElectronDiffraction2D
         assert data.shape == s_lazy.data.shape
+
+
+class TestDecomposition:
+    def test_decomposition_class_assignment(self, diffraction_pattern):
+        diffraction_pattern.decomposition()
+        assert isinstance(diffraction_pattern, ElectronDiffraction2D)
