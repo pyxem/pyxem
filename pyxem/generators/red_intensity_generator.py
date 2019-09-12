@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 from hyperspy.signals import Signal1D
 
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
 
 from pyxem.components.scattering_fit_component import ScatteringFitComponent
