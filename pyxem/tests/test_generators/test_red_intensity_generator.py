@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
 from pyxem.generators.red_intensity_generator import ReducedIntensityGenerator
 
@@ -28,7 +28,7 @@ from pyxem.generators.red_intensity_generator import ReducedIntensityGenerator
 def red_int_generator():
     data = np.arange(10, 0, -1).reshape(1, 10) * np.arange(1, 5).reshape(4, 1)
     data = data.reshape(2, 2, 10)
-    rp = ElectronDiffractionProfile(data)
+    rp = ElectronDiffraction1D(data)
     rigen = ReducedIntensityGenerator(rp)
     return rigen
 

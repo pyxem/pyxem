@@ -19,13 +19,13 @@
 import pytest
 import numpy as np
 from pyxem.utils.ri_utils import *
-from pyxem.signals.electron_diffraction import ElectronDiffraction
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
 def test_as_signal_generation():
 
-    N = ElectronDiffraction([[np.array(1.)]])
-    C = ElectronDiffraction([[np.array(0.)]])
+    N = ElectronDiffraction2D([[np.array(1.)]])
+    C = ElectronDiffraction2D([[np.array(0.)]])
     elements = ['Cu']
     fracs = [1]
     s_size = 10

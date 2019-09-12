@@ -18,18 +18,6 @@
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 
-<<<<<<< HEAD:tests/test_signals/test_diffraction_profile.py
-from hyperspy.signals import Signal1D
-from pyxem.signals.diffraction_profile import ElectronDiffractionProfile
-
-class TestDiffractionProfile:
-    
-    def test_get_electron_diffraction_profile(self,
-                        ):
-        rad_signal = Signal1D(np.array([0,4,3,5,1,4,6,2]))
-        difprof = ElectronDiffractionProfile(rad_signal)
-        assert isinstance(difprof,ElectronDiffractionProfile)
-=======
 
 class TestDecomposition:
     def test_decomposition_class_assignment(self, diffraction_pattern):
@@ -37,4 +25,3 @@ class TestDecomposition:
         s = s.as_lazy()
         s.decomposition()
         assert isinstance(s, LazyDiffraction2D)
->>>>>>> master:pyxem/tests/test_signals/test_lazy_diffraction2d.py
