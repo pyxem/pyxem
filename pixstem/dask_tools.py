@@ -201,7 +201,7 @@ def _template_match_with_binary_image(dask_array, binary_image):
     >>> from skimage import morphology
     >>> binary_image = morphology.disk(4, np.uint16)
     >>> import pixstem.dask_tools as dt
-    >>> template_match = dt._template_match_binary_image_chunk(
+    >>> template_match = dt._template_match_with_binary_image(
     ...     dask_array, binary_image)
 
     """

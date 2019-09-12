@@ -263,7 +263,7 @@ class TestRemoveBadPixels:
         data[2, 5, 9] = 0
         data[3, 2, 1] = 0
         dask_array = da.from_array(data, chunks=(5, 5, 5))
-        bad_pixel_array = np.zeros_like(dask_array)
+        bad_pixel_array = np.zeros(dask_array.shape)
         bad_pixel_array[2, 5, 9] = True
         bad_pixel_array[3, 2, 1] = True
         bad_pixel_array = da.from_array(bad_pixel_array, chunks=(5, 5, 5))

@@ -305,7 +305,10 @@ class PixelatedSTEM(Signal2D):
             mask_array = np.invert(mask_array)
         else:
             mask_array = None
-        dask_array = da.from_array(self.data, chunks=chunk_calculations)
+        if self._lazy:
+            dask_array = self.data.rechunk(chunk_calculations)
+        else:
+            dask_array = da.from_array(self.data, chunks=chunk_calculations)
         data = dt._center_of_mass_array(
                 dask_array, threshold_value=threshold,
                 mask_array=mask_array)
