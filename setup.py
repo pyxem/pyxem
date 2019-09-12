@@ -27,7 +27,7 @@ setup(
             'numpy>=1.13',
             'h5py',
             'ipython>=2.0',
-            'matplotlib>=2.0',
+            'matplotlib>=3.1.0',
             'hyperspy>=1.4',
             'dask',
             'tqdm',
