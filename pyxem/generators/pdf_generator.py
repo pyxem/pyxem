@@ -83,9 +83,9 @@ class PDFGenerator():
             print('Too many axes for current implementation. Aborting...')
             return
 
-        pdf_sine = np.sin(4 * np.pi * s_values@r_values)
+        pdf_sine = np.sin(2 * np.pi * s_values@r_values)
         # creates a vector of the pdf
-        rpdf = PDFProfile(16 * np.pi * s_scale * (limited_red_int@pdf_sine))
+        rpdf = PDFProfile(8 * np.pi * s_scale * (limited_red_int@pdf_sine))
 
         signal_axis = rpdf.axes_manager.signal_axes[0]
         pdf_scaling = r_increment

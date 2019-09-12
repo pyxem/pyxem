@@ -161,27 +161,3 @@ class ReducedIntensityProfile(Signal1D):
         self.data = self.data - fit_value
 
         return
-
-    def smooth_moving_average_filter(self, n_points=5):
-        """
-        Smooths the reduced intensity signal using a moving average filter.
-        The signal at each point is replaced by an average of the nearest
-        n points. This operation is done via a convolution with a moving box.
-
-        Parameters
-        ----------
-        n_points : the number of points over which the signal is averaged over.
-                    This is the total number, and must be odd so that the
-                    smoothing is symmetric.
-        """
-        raise NotImplementedError("Not implemented yet!")
-        '''
-        if n_points%2 != 1 or n_points < 1:
-            raise ValueError("N must be a positive odd integer.")
-            return
-        box = np.ones(n_points)/n_points
-        smoothed_data = np.convolve(self.data,box,mode='same')
-
-        self.data = smoothed_data
-        return
-        '''

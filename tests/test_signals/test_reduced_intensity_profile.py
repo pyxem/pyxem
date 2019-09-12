@@ -122,14 +122,6 @@ def test_multiple_scatter_correction(RedIntData):
     return
 
 
-def test_smoothing_average_filter(RedIntData):
-    with pytest.raises(NotImplementedError):
-        ri = ReducedIntensityProfile(RedIntData)
-        assert isinstance(ri, ReducedIntensityProfile)
-        ri.smooth_moving_average_filter()
-    return
-
-
 def test_s_max_statements(RedIntData):
     ri = ReducedIntensityProfile(RedIntData)
     ri.damp_lorch()
