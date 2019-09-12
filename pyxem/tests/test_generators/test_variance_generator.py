@@ -72,6 +72,8 @@ class TestVarianceGenerator:
           [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
           [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]]).reshape(8,8)
         corr_var_dp = var_dp-np.divide(dqe,mean_dp)
+        corr_var_dp[np.isinf(corr_var_dp)]=0
+        corr_var_dp[np.isnan(corr_var_dp)]=0
 
         assert np.array_equal(vardps.data[0,0], mean_dp)
         assert np.array_equal(vardps.data[0,1], meansq_dp)
