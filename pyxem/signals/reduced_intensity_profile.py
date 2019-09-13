@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -37,12 +37,12 @@ class ReducedIntensityProfile(Signal1D):
 
     def damp_exponential(self, b):
         """ Damps the reduced intensity signal to reduce noise in the high s
-        region.
+        region by a factor of exp(-b*(s^2)), where b is the damping parameter.
 
         Parameters
         ----------
-        b : the damping parameter, which multiplies the reduced intensity
-            profile by exp(-b*(s^2))
+        b : float
+                    The damping parameter.
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
@@ -54,14 +54,13 @@ class ReducedIntensityProfile(Signal1D):
 
     def damp_lorch(self, s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
-        region.
+        region by a factor of sin(s*delta) / (s*delta),
+        where delta = pi / s_max. (from Lorch 1969)
 
         Parameters
         ----------
-        q_max : the damping parameter, which should be the maximum q value
-        (scattering vector) recorded.
-        delta = pi / q_max. The function is damped by sin(q*delta) / (q*delta)
-        (from Lorch 1969)
+        s_max : float
+                    The maximum s value to be used for transformation to PDF.
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
@@ -77,16 +76,16 @@ class ReducedIntensityProfile(Signal1D):
 
     def damp_updated_lorch(self, s_max=None):
         """ Damps the reduced intensity signal to reduce noise in the high s
-        region.
+        region by a factor of 3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
+        where delta = pi / s_max.
+        From "Extracting the pair distribution function from white-beam X-ray
+        total scattering data", Soper & Barney, 2011
 
         Parameters
         ----------
-        q_max : the damping parameter, which need not be the maximum q
-        value (scattering vector) recorded. It's a good guess however
-        delta = pi / q_max. The function is damped by
-        3 / (q*delta)^3 (sin(q*delta)-q*delta(cos(q*delta)))
-        from "Extracting the pair distribution function from white-beam X-ray
-        total scattering data", Soper & Barney, 2011
+        s_max : float
+                    the damping parameter, which need not be the maximum s
+                    to be used for the PDF transform. It's a good guess however
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
@@ -108,12 +107,15 @@ class ReducedIntensityProfile(Signal1D):
 
     def damp_low_q_region_erfc(self, scale=20, offset=1.3):
         """ Damps the reduced intensity signal in the low q region as a
-        correction to central beam effects
+        correction to central beam effects. The reduced intensity profile is
+        damped by (erf(scale * s - offset) + 1) / 2
 
         Parameters
         ----------
-        scale : a scalar affecting the error function
-        offset : a scalar offset affecting the error function
+        scale : float
+                    A scalar multiplier for s in the error function
+        offset : float
+                    A scalar offset affecting the error function.
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
@@ -141,8 +143,11 @@ class ReducedIntensityProfile(Signal1D):
 
         Parameters
         ----------
-        s_max : maximum range of fit. The reduced intensity should go to zero
-                at this value.
+        s_max : float
+                    Maximum range of fit. The reduced intensity should go to zero
+                    at this value.
+        plot : bool
+                    Whether to plot the fit after fitting. If True, fit is plotted.
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size

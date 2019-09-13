@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -39,8 +39,8 @@ class ReducedIntensityGenerator():
 
     Parameters
     ----------
-    signal : ElectronDiffractionProfile
-        An electron diffraction radial average profile.
+    signal : ElectronDiffraction1D
+        An electron diffraction radial profile.
     """
 
     def __init__(self, signal, *args, **kwargs):
@@ -55,14 +55,29 @@ class ReducedIntensityGenerator():
     def specify_scattering_calibration(self, calibration):
         """
         Defines calibration for the signal axis variable s in terms of
-        A^-1 per pixel.
+        A^-1 per pixel. Note that s is defined here as
+        s = 2 sin(theta)/lambda = 1/d.
+
+        Parameters
+        ----------
+        calibration: float
+                    Calibration in terms of A^-1 per pixel.
         """
         self.signal.axes_manager.signal_axes[0].scale = calibration
         return
 
     def specify_cutoff_vector(self, s_min, s_max):
         """
-        Specified in terms of s (in inverse angstroms).
+        Scattering vector cutoff for the purposes of fitting an atomic scattering
+        factor to the 1D profile. Specified in terms of s (in inverse angstroms).
+        s is defined as s = 2 sin(theta)/lambda = 1/d.
+
+        Parameters
+        ----------
+        s_min: float
+                    Minimum scattering vector amplitude for cutoff.
+        s_max: float
+                    Maximum scattering vector amplitude for cutoff.
         """
         #s_scale = self.signal.axes_manager.signal_axes[0].scale
         self.cutoff = [s_min, s_max]
@@ -74,18 +89,25 @@ class ReducedIntensityGenerator():
         """Fits a diffraction intensity profile to the background using
         FIT = N * sum(ci * (fi^2) + C)
 
-        NOTE: define s cutoff via the function specify_cutoff_vector
-        s_cutoff is given as a function of scattering vector
+        The cutoff for the scattering factor fit to s is defined via the function
+        specify_cutoff_vector above.
 
         Parameters
         ----------
-        elements: a list of elements present (by symbol)
-        fracs: a list of fraction of the respective elements
-        N = the "slope"
-        C = an additive constant
-        type = type of scattering parameters fitted. Default is lobato.
-                See scattering_fit_component for more details.
-        plot_fit: a bool to decide if the fit from scattering is plotted
+        elements: list of str
+                    A list of elements present (by symbol).
+        fracs: list of float
+                    A list of fraction of the respective elements. Should sum to 1.
+        N : float
+                    The "slope" of the fit.
+        C : float
+                    An additive constant to the fit.
+        type : str
+                    Type of scattering parameters fitted. Default is lobato.
+                    See scattering_fit_component for more details.
+        plot_fit: bool
+                    A bool to decide if the fit from scattering is plotted
+                    after fitting.
         """
 
         fit_model = self.signal.create_model()
@@ -102,7 +124,7 @@ class ReducedIntensityGenerator():
         s_size = self.sig_size[0]
         s_scale = self.signal.axes_manager.signal_axes[0].scale
         fit, normalisation = scattering_to_signal(elements, fracs, N_values,
-                                                      C_values, s_size, s_scale, type)
+                                                  C_values, s_size, s_scale, type)
         # self.fit = np.array(background.sum_squares).reshape(
         #            self.nav_size[0],self.nav_size[1],self.sig_size[0])
 
@@ -116,25 +138,28 @@ class ReducedIntensityGenerator():
 
         Parameters
         ----------
-        Bkgd_pattern : A numpy array line profile of the same resolution
-        as the radial profile
+        Bkgd_pattern : np.array
+                    A numpy array of a single line profile of the same resolution
+                    (same number of pixels) as the radial profile.
         """
         self.signal = self.signal - bkgd_pattern
 
         return
 
-    def mask_from_bkgd_pattern(self, mask_pattern, mask_threshold = 1):
+    def mask_from_bkgd_pattern(self, mask_pattern, mask_threshold=1):
         """Uses a background pattern with a threshold, and sets that part of
-        the signal to zero, effectively adding a mask. This is to deal with the
-        edges of the central beam. This method will edit self.signal.
+        the signal to zero, effectively adding a mask. This can be used to mask
+        the central beam. This method will edit self.signal.
 
         Parameters
         ----------
-        mask_pattern : A numpy array line profile of the same resolution
-                        as the radial profile
-        mask_threshold : An integer or float threshold. Any pixel in the
-                            mask_pattern with lower intensity is kept, any with
-                            higher or equal is set to zero.
+        mask_pattern : np.array
+                    A numpy array line profile of the same resolution
+                    as the radial profile.
+        mask_threshold : int or float
+                    An integer or float threshold. Any pixel in the
+                    mask_pattern with lower intensity is kept, any with
+                    higher or equal is set to zero.
         """
 
         mask_array = mask_pattern < mask_threshold
@@ -143,15 +168,23 @@ class ReducedIntensityGenerator():
 
         return
 
-    def get_reduced_intensity(self, cutoff=None):
-        if cutoff:
-            self.cutoff = cutoff
+    def get_reduced_intensity(self, s_cutoff=None):
+        """Obtains a reduced intensity profile from the radial profile.
+
+        Parameters
+        ----------
+        s_cutoff : list of float
+                    A list of the form [s_min, s_max] to change the s_cutoff
+                    from the fit.
+        """
+        if s_cutoff:
+            self.cutoff = s_cutoff
         else:
-            cutoff = self.cutoff
+            s_cutoff = self.cutoff
 
         # define numerical cutoff to remove certain data parts
         s_scale = self.signal.axes_manager.signal_axes[0].scale
-        num_min, num_max = int(cutoff[0] / s_scale), int(cutoff[1] / s_scale)
+        num_min, num_max = int(s_cutoff[0] / s_scale), int(s_cutoff[1] / s_scale)
 
         s = np.arange(self.signal.axes_manager.signal_axes[0].size,
                       dtype='float64')

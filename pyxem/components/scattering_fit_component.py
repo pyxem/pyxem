@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -31,20 +31,30 @@ class ScatteringFitComponent(Component):
 
     def __init__(self, elements, fracs, N=1., C=0., type='lobato'):
         """
+        A scattering component to fit background atomic scattering.
+        Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
+        and the square of the sum square_sum = (sum(ci * fi))**2
+        for atomic fraction ci with electron scattering factor fi.
+        The latter is used for normalisation.
+
         N and C are fitting parameters for the Component class.
 
         Parameters
         ----------
-        N = the "slope"
-        C = an additive constant
-        type = the type of scattering parameter fit done.
-                Options are:
-                    - lobato: Fit to Lobato & Van Dyck (2014)
-                    - xtables: Fit to International Tables Vol. C, table 4.3.2.3
+        elements: list of str
+                    A list of elements present (by symbol).
+        fracs: list of float
+                    A list of fraction of the respective elements. Should sum to 1.
+        N : float
+                    The "slope" of the fit.
+        C : float
+                    An additive constant to the fit.
+        type : str
+                    Type of scattering parameters fitted. Default is lobato.
+                    Options are:
+                        - lobato: Fit to Lobato & Van Dyck (2014)
+                        - xtables: Fit to International Tables Vol. C, table 4.3.2.3
 
-        sum_squares = sum (ci * fi**2 )
-        square_sum = (sum(ci * fi))**2 for atomic fraction ci with
-        electron scattering factor fi. Used for normalisation.
         """
         Component.__init__(self, ['N', 'C'])
         self.type = type
@@ -65,6 +75,10 @@ class ScatteringFitComponent(Component):
         self.params = params
 
     def function(self, x):
+        """
+        The actual fitted function. Based on the HyperSpy Component class.
+
+        """
         N = self.N.value
         C = self.C.value
         params = self.params

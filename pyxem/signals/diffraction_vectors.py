@@ -76,7 +76,7 @@ class DiffractionVectors(BaseSignal):
         Parameters
         ----------
         peaks : Signal
-            Signal containing lists (np.array) of pixel coordinates specifying 
+            Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
         center : np.array
             Diffraction pattern center in array indices.
@@ -88,9 +88,9 @@ class DiffractionVectors(BaseSignal):
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
-        gvectors = peaks.map(peaks_as_gvectors, 
-                             center=center, 
-                             calibration=calibration, 
+        gvectors = peaks.map(peaks_as_gvectors,
+                             center=center,
+                             calibration=calibration,
                              inplace=False)
 
         vectors = cls(gvectors)

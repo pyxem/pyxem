@@ -324,7 +324,7 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method="cross_correlate", 
+    def get_direct_beam_position(self, method="cross_correlate",
                                  radius_start=4,
                                  radius_finish=8,
                                  sigma=30,
@@ -348,15 +348,15 @@ class Diffraction2D(Signal2D):
         sigma : float (blur, interpolate)
             Sigma value for Gaussian blurring kernel.
         upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will 
-            be found with a precision of 1 / upsample_factor of a pixel. 
+            Upsample factor for subpixel beam center finding, i.e. the center will
+            be found with a precision of 1 / upsample_factor of a pixel.
         kind : str or int, optional (interpolate)
             Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
             ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
             ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
             interpolation of zeroth, first, second or third order; ‘previous’
             and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use. 
+            an integer specifying the order of the spline interpolator to use.
         *args:
             Arguments to be passed to map().
         **kwargs:
@@ -375,20 +375,20 @@ class Diffraction2D(Signal2D):
 
         if method == "cross_correlate":
             shifts = self.map(find_beam_offset_cross_correlation,
-                          radius_start=radius_start,
-                          radius_finish=radius_finish,
-                          inplace=False, *args, **kwargs)
+                              radius_start=radius_start,
+                              radius_finish=radius_finish,
+                              inplace=False, *args, **kwargs)
         elif method == "blur":
             centers = self.map(find_beam_center_blur,
-                           sigma=sigma,
-                           inplace=False, *args, **kwargs)
+                               sigma=sigma,
+                               inplace=False, *args, **kwargs)
             shifts = origin_coordinates - centers
         elif method == "interpolate":
             centers = self.map(find_beam_center_interpolate,
-                           sigma=sigma,
-                           upsample_factor=upsample_factor,
-                           kind=kind,
-                           inplace=False, *args, **kwargs)
+                               sigma=sigma,
+                               upsample_factor=upsample_factor,
+                               kind=kind,
+                               inplace=False, *args, **kwargs)
             shifts = origin_coordinates - centers
         else:
             raise ValueError(f"`method` must be one of {methods}")
@@ -422,15 +422,15 @@ class Diffraction2D(Signal2D):
         sigma : float (blur, interpolate)
             Sigma value for Gaussian blurring kernel.
         upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will 
-            be found with a precision of 1 / upsample_factor of a pixel. 
+            Upsample factor for subpixel beam center finding, i.e. the center will
+            be found with a precision of 1 / upsample_factor of a pixel.
         kind : str or int, optional (interpolate)
             Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
             ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
             ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
             interpolation of zeroth, first, second or third order; ‘previous’
             and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use. 
+            an integer specifying the order of the spline interpolator to use.
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against

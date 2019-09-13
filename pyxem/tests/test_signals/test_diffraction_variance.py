@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,26 +23,28 @@ from pyxem.signals.diffraction_variance import DiffractionVariance
 from pyxem.signals.diffraction_variance import ImageVariance
 from pyxem.signals.variance_profile import DiffractionVarianceProfile
 
+
 @pytest.fixture
 def diffraction_variance(diffraction_pattern):
     return DiffractionVariance(diffraction_pattern)
 
+
 class TestDiffractionVariance:
 
     def test_get_diffraction_variance_signal(self,
-                        diffraction_pattern):
+                                             diffraction_pattern):
         difvar = DiffractionVariance(diffraction_pattern)
-        assert isinstance(difvar,DiffractionVariance)
+        assert isinstance(difvar, DiffractionVariance)
 
     def test_difvar_radial_profile(self,
-                        diffraction_pattern):
+                                   diffraction_pattern):
         rp = DiffractionVarianceProfile(diffraction_pattern)
-        assert isinstance(rp,DiffractionVarianceProfile)
+        assert isinstance(rp, DiffractionVarianceProfile)
 
 
 class TestImageVariance:
 
     def test_get_image_variance_signal(self,
-                        diffraction_pattern):
+                                       diffraction_pattern):
         imvar = ImageVariance(diffraction_pattern)
-        assert isinstance(imvar,ImageVariance)
+        assert isinstance(imvar, ImageVariance)

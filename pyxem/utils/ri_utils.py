@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,7 +22,30 @@ from pyxem.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 
 
 def scattering_to_signal(elements, fracs, N, C, s_size, s_scale, type='lobato'):
+    """ A function to override HyperSpy's as_signal method in a fit, as that
+    method fails for large signals.
 
+    Parameters
+    ----------
+    elements: list of str
+                A list of elements present (by symbol).
+    fracs: list of float
+                A list of fraction of the respective elements. Should sum to 1.
+    N : array of float
+                The "slope" of the fit.
+    C : array of float
+                An additive constant to the fit. Supplied as array.
+    s_size : int
+                Size of fitted signal in the signal dimension (in pixels)/
+    s_scale : float
+                Calibration factor of s.
+    type : str
+                Type of scattering parameters fitted. Default is lobato.
+                Options are:
+                    - lobato: Fit to Lobato & Van Dyck (2014)
+                    - xtables: Fit to International Tables Vol. C, table 4.3.2.3
+
+    """
     params = []
 
     if type == 'lobato':

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -29,7 +29,7 @@ from pyxem.signals.pdf_profile import PDFProfile
 
 
 class PDFGenerator():
-    """Generates a PDF profile for a specified reduced intensity profile.
+    """Generates a PDF profile from a specified reduced intensity profile.
 
 
     Parameters
@@ -46,14 +46,19 @@ class PDFGenerator():
                 r_cutoff=[0, 20],
                 r_increment=0.01
                 ):
-        """ Calculates the pdf
+        """ Calculates the pdf from the reduced intensity profile.
 
         Parameters
         ----------
-        s_cutoff = a list with the format [<s_min>, <s_max>], which sets the
-        integration limits for the pdf calculation.
-        r_cutoff = a list with the format [<r_min>, <r_max>], which sets the
-        limits of the real space axis in
+        s_cutoff : list of float
+                    A list with the format [<s_min>, <s_max>], which sets the
+                    integration limits for the pdf calculation. Note that s is
+                    defined here as s = 2 sin(theta)/lambda = 1/d.
+        r_cutoff : list of float
+                    A list with the format [<r_min>, <r_max>], which sets the
+                    limits of the real space axis in the calculated PDF.
+        r_increment : float
+                    Step size in r in the extracted PDF.
         """
         r_min, r_max = r_cutoff
         s_min, s_max = s_cutoff

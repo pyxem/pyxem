@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,13 +27,14 @@ from pyxem.utils.expt_utils import radial_average
 
 import numpy as np
 
+
 class DiffractionVariance(Signal2D):
     _signal_type = "diffraction_variance"
 
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
 
-    def get_radial_profile(self,inplace=False,**kwargs):
+    def get_radial_profile(self, inplace=False, **kwargs):
         """Return the radial profile of the diffraction variance signals.
 
         Returns
@@ -53,7 +54,7 @@ class DiffractionVariance(Signal2D):
             profiles.plot()
         """
         radial_profiles = self.map(radial_average,
-                                   inplace=inplace,**kwargs)
+                                   inplace=inplace, **kwargs)
 
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
@@ -65,6 +66,7 @@ class DiffractionVariance(Signal2D):
         rp_axis.units = '$A^{-1}$'
 
         return rp
+
 
 class ImageVariance(Signal2D):
     _signal_type = "image_variance"
