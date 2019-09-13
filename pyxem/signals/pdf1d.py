@@ -23,8 +23,8 @@ from hyperspy.signals import Signal1D
 import numpy as np
 
 
-class PDFProfile(Signal1D):
-    _signal_type = "pdf_profile"
+class PDF1D(Signal1D):
+    _signal_type = "pdf1d"
 
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)

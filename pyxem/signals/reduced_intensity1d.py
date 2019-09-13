@@ -23,13 +23,12 @@ vector.
 from hyperspy.signals import Signal1D
 import numpy as np
 from scipy import special
-from scipy.signal import savgol_filter
 
 from pyxem.components.reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
 
 
-class ReducedIntensityProfile(Signal1D):
-    _signal_type = "reduced_intensity_profile"
+class ReducedIntensity1D(Signal1D):
+    _signal_type = "reduced_intensity1d"
 
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
@@ -45,7 +44,7 @@ class ReducedIntensityProfile(Signal1D):
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
-        
+
         scattering_axis = s_scale * np.arange(s_size, dtype='float64')
         damping_term = np.exp(-b * np.square(scattering_axis))
         self.data = self.data * damping_term
@@ -78,7 +77,7 @@ class ReducedIntensityProfile(Signal1D):
         region by a factor of 3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
         where delta = pi / s_max.
         From "Extracting the pair distribution function from white-beam X-ray
-        total scattering data", Soper & Barney, 2011
+        total scattering data", Soper & Barney, (2011).
 
         Parameters
         ----------

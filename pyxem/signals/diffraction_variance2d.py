@@ -21,15 +21,15 @@
 
 from hyperspy.signals import Signal2D
 
-from pyxem.signals.variance_profile import DiffractionVarianceProfile
+from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
 
 from pyxem.utils.expt_utils import radial_average
 
 import numpy as np
 
 
-class DiffractionVariance(Signal2D):
-    _signal_type = "diffraction_variance"
+class DiffractionVariance2D(Signal2D):
+    _signal_type = "diffraction_variance2d"
 
     def __init__(self, *args, **kwargs):
         Signal2D.__init__(self, *args, **kwargs)
@@ -39,10 +39,10 @@ class DiffractionVariance(Signal2D):
 
         Returns
         -------
-        DiffractionVariance
-            radial_profile: :obj:`pyxem.signals.DiffractionVarianceProfile`
+        DiffractionVariance1D
+            radial_profile: :obj:`pyxem.signals.DiffractionVariance1D`
             The radial profile of each diffraction variance pattern in the
-            DiffractionVariance signal.
+            DiffractionVariance2D signal.
 
         See also
         --------
@@ -60,7 +60,7 @@ class DiffractionVariance(Signal2D):
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
-        rp = DiffractionVarianceProfile(radial_profiles.as_signal1D(signal_axis))
+        rp = DiffractionVariance1D(radial_profiles.as_signal1D(signal_axis))
         rp_axis = rp.axes_manager.signal_axes[0]
         rp_axis.name = 'q'
         rp_axis.scale = self.axes_manager.signal_axes[0].scale

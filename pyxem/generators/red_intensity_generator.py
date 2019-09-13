@@ -26,14 +26,14 @@ import matplotlib.pyplot as plt
 from hyperspy.signals import Signal1D
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
+from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.components.scattering_fit_component import ScatteringFitComponent
 from pyxem.utils.ri_utils import scattering_to_signal
 
 
 class ReducedIntensityGenerator():
-    """Generates a reduced intensity profile for a specified diffraction radial
+    """Generates a reduced intensity 1D profile for a specified diffraction radial
     profile.
 
 
@@ -197,7 +197,7 @@ class ReducedIntensityGenerator():
                                        self.normalisation))
 
         #ri = ReducedIntensityProfile(reduced_intensity.data[:,:,num_min:num_max])
-        ri = ReducedIntensityProfile(reduced_intensity)
+        ri = ReducedIntensity1D(reduced_intensity)
         ax_old = self.signal.axes_manager.navigation_axes
         ri.axes_manager.navigation_axes[0].scale = ax_old[0].scale
         ri.axes_manager.navigation_axes[0].units = ax_old[0].units

@@ -25,8 +25,8 @@ import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy.api import stack
 
-from pyxem.signals.diffraction_variance import DiffractionVariance
-from pyxem.signals.diffraction_variance import ImageVariance
+from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
+from pyxem.signals.diffraction_variance2d import ImageVariance
 
 
 class VarianceGenerator():
@@ -76,7 +76,7 @@ class VarianceGenerator():
         sig_x = vardps.data.shape[1]
         sig_y = vardps.data.shape[2]
 
-        dv = DiffractionVariance(vardps.data.reshape((2, 2, sig_x, sig_y)))
+        dv = DiffractionVariance2D(vardps.data.reshape((2, 2, sig_x, sig_y)))
         dx = dv.axes_manager.signal_axes[0]
         dx.scale = dp.axes_manager.signal_axes[0].scale
         dx.units = dp.axes_manager.signal_axes[0].units

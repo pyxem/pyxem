@@ -22,8 +22,8 @@
 from hyperspy.signals import Signal1D
 
 
-class DiffractionVarianceProfile(Signal1D):
-    _signal_type = "diffraction_profile"
+class DiffractionVariance1D(Signal1D):
+    _signal_type = "diffraction_variance1d"
 
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)

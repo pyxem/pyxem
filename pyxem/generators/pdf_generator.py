@@ -24,17 +24,17 @@ import numpy as np
 
 from hyperspy.signals import Signal1D
 
-from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
-from pyxem.signals.pdf_profile import PDFProfile
+from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
+from pyxem.signals.pdf1d import PDF1D
 
 
 class PDFGenerator():
-    """Generates a PDF profile from a specified reduced intensity profile.
+    """Generates a PDF1D signal from a specified ReducedIntensity1D signal.
 
 
     Parameters
     ----------
-    signal : ReducedIntensityProfile
+    signal : ReducedIntensity1D
         A reduced intensity radial profile.
     """
 
@@ -46,7 +46,7 @@ class PDFGenerator():
                 r_cutoff=[0, 20],
                 r_increment=0.01
                 ):
-        """ Calculates the pdf from the reduced intensity profile.
+        """ Calculates the pdf from the reduced intensity signal.
 
         Parameters
         ----------
@@ -90,7 +90,7 @@ class PDFGenerator():
 
         pdf_sine = np.sin(2 * np.pi * s_values@r_values)
         # creates a vector of the pdf
-        rpdf = PDFProfile(8 * np.pi * s_scale * (limited_red_int@pdf_sine))
+        rpdf = PDF1D(8 * np.pi * s_scale * (limited_red_int@pdf_sine))
 
         signal_axis = rpdf.axes_manager.signal_axes[0]
         pdf_scaling = r_increment
