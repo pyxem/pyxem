@@ -96,8 +96,10 @@ class ReducedIntensityGenerator():
         ----------
         elements: list of str
                     A list of elements present (by symbol).
+                    Example: ['Ca', 'C', 'O'] (for CaCO3)
         fracs: list of float
                     A list of fraction of the respective elements. Should sum to 1.
+                    Example: [0.2, 0.2, 0.6] (for CaCO3)
         N : float
                     The "slope" of the fit.
         C : float

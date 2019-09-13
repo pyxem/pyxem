@@ -90,7 +90,13 @@ class VarianceGenerator():
 
     def get_image_variance(self, dqe):
         """Calculates the variance in scattered intensity as a function of
-        scattering vector.
+        scattering vector. The calculated variance is normalised by the mean
+        squared, as is appropriate for the distribution of intensities. This
+        causes a problem if Poisson noise is significant in the data, resulting
+        in a divergence of the Poisson noise term. To in turn remove this
+        effect, we subtract a dqe/mean_dp term (although it is suggested that
+        dqe=1) from the data, creating a "poisson noise-free" corrected variance
+        pattern. DQE is fitted to make this pattern flat.
 
         Parameters
         ----------
@@ -104,7 +110,8 @@ class VarianceGenerator():
 
         varims : Signal2D
             A two dimensional Signal class object containing the mean DP, mean
-            squared DP, and variance DP.
+            squared DP, and variance DP, and a Poisson noise-corrected variance
+            DP.
         """
         im = self.signal.T
         mean_im = im.mean((0, 1))

@@ -21,7 +21,6 @@ vector.
 """
 
 from hyperspy.signals import Signal1D
-# ??from hyperspy.component import Polynomial
 import numpy as np
 from scipy import special
 from scipy.signal import savgol_filter
@@ -46,7 +45,7 @@ class ReducedIntensityProfile(Signal1D):
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
-        # should include offset
+        
         scattering_axis = s_scale * np.arange(s_size, dtype='float64')
         damping_term = np.exp(-b * np.square(scattering_axis))
         self.data = self.data * damping_term
