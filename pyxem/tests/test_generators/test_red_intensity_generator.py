@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
+from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 from pyxem.generators.red_intensity_generator import ReducedIntensityGenerator
 
 
@@ -115,8 +115,8 @@ def test_get_reduced_intensity(red_int_generator):
     fracs = [1]
     red_int_generator.fit_atomic_scattering(elements=elements, fracs=fracs)
     ri = red_int_generator.get_reduced_intensity()
-    assert isinstance(ri, ReducedIntensityProfile)
+    assert isinstance(ri, ReducedIntensity1D)
     ri = red_int_generator.get_reduced_intensity(s_cutoff=[0, 8])
-    assert isinstance(ri, ReducedIntensityProfile)
+    assert isinstance(ri, ReducedIntensity1D)
     # better test needed here, an assert allclose or such at least
     return

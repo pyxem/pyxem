@@ -22,8 +22,8 @@ import numpy as np
 from pyxem.generators.variance_generator import VarianceGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
-from pyxem.signals.diffraction_variance import DiffractionVariance
-from pyxem.signals.diffraction_variance import ImageVariance
+from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
+from pyxem.signals.diffraction_variance2d import ImageVariance
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ class TestVarianceGenerator:
     ):
 
         vardps = variance_generator.get_diffraction_variance(dqe)
-        assert isinstance(vardps, DiffractionVariance)
+        assert isinstance(vardps, DiffractionVariance2D)
 
         mean_dp = np.array(
             [[0., 0., 0., 0., 0., 0., 0., 0.5],

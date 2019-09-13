@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
+from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
 
 @pytest.fixture
@@ -29,13 +29,13 @@ def RedIntData():
     return data
 
 
-def test_reduced_intensity_profile_init(RedIntData):
-    ri = ReducedIntensityProfile(RedIntData)
-    assert isinstance(ri, ReducedIntensityProfile)
+def test_reduced_intensity1d_init(RedIntData):
+    ri = ReducedIntensity1D(RedIntData)
+    assert isinstance(ri, ReducedIntensity1D)
 
 
 def test_damp_exponential(RedIntData):
-    ri = ReducedIntensityProfile(RedIntData)
+    ri = ReducedIntensity1D(RedIntData)
     ri.damp_exponential(b=1)
     compare = np.array([[[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
                           0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
@@ -55,7 +55,7 @@ def test_damp_exponential(RedIntData):
 
 
 def test_damp_lorch(RedIntData):
-    ri = ReducedIntensityProfile(RedIntData)
+    ri = ReducedIntensity1D(RedIntData)
     ri.damp_lorch(s_max=10)
     compare = np.array([[[0., 0., 0., 0., 0.,
                           0., 0., 0., 0., 0.],
@@ -71,7 +71,7 @@ def test_damp_lorch(RedIntData):
 
 
 def test_damp_updated_lorch(RedIntData):
-    ri = ReducedIntensityProfile(RedIntData)
+    ri = ReducedIntensity1D(RedIntData)
     ri.damp_updated_lorch(s_max=10)
     compare = np.array([[[0., 0., 0., 0., 0.,
                           0., 0., 0., 0., 0.],
@@ -87,7 +87,7 @@ def test_damp_updated_lorch(RedIntData):
 
 
 def test_damp_low_q_region_erfc(RedIntData):
-    ri = ReducedIntensityProfile(RedIntData)
+    ri = ReducedIntensity1D(RedIntData)
     ri.damp_low_q_region_erfc(scale=20, offset=1.3)
     compare = np.array([[[0., 0., 0., 0., 0.,
                           0., 0., 0., 0., 0.],
@@ -103,7 +103,7 @@ def test_damp_low_q_region_erfc(RedIntData):
 
 
 def test_multiple_scatter_correction(RedIntData):
-    ri = ReducedIntensityProfile(RedIntData)
+    ri = ReducedIntensity1D(RedIntData)
     ri.fit_thermal_multiple_scattering_correction()
     compare = np.array([[[0., 0., 0., 0.,
                           0., 0., 0., 0.,
@@ -123,9 +123,9 @@ def test_multiple_scatter_correction(RedIntData):
 
 
 def test_s_max_statements(RedIntData):
-    ri = ReducedIntensityProfile(RedIntData)
+    ri = ReducedIntensity1D(RedIntData)
     ri.damp_lorch()
     ri.damp_updated_lorch()
     ri.fit_thermal_multiple_scattering_correction(s_max=5, plot=True)
-    assert isinstance(ri, ReducedIntensityProfile)
+    assert isinstance(ri, ReducedIntensity1D)
     return

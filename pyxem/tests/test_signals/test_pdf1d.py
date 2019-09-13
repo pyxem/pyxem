@@ -16,16 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 import pytest
+import numpy as np
 
-from hyperspy.signals import Signal1D
-from pyxem.signals.variance_profile import DiffractionVarianceProfile
+from pyxem.signals.pdf1d import PDF1D
 
-
-class TestDiffractionProfile:
-
-    def test_get_electron_diffraction_profile(self):
-        rad_signal = Signal1D(np.array([0, 4, 3, 5, 1, 4, 6, 2]))
-        difprof = DiffractionVarianceProfile(rad_signal)
-        assert isinstance(difprof, DiffractionVarianceProfile)
+def test_generate_signal():
+    data = np.ones((1, 10)) * np.arange(4).reshape(4, 1)
+    data = data.reshape(2, 2, 10)
+    pdf = PDF1D(data)
+    assert isinstance(pdf, PDF1D)
+    pdf.normalise_signal()
+    assert np.equal(pdf, np.ones((2, 2, 10)))

@@ -19,9 +19,9 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.diffraction_variance import DiffractionVariance
-from pyxem.signals.diffraction_variance import ImageVariance
-from pyxem.signals.variance_profile import DiffractionVarianceProfile
+from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
+from pyxem.signals.diffraction_variance2d import ImageVariance
+from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
@@ -36,14 +36,14 @@ class TestDiffractionVariance:
 
     def test_get_diffraction_variance_signal(self,
                                              diffraction_pattern):
-        difvar = DiffractionVariance(diffraction_pattern)
-        assert isinstance(difvar, DiffractionVariance)
+        difvar = DiffractionVariance2D(diffraction_pattern)
+        assert isinstance(difvar, DiffractionVariance2D)
 
     def test_get_dif_var_radial_profile(self,
                                    diffraction_pattern):
-        difvar = DiffractionVariance(diffraction_pattern)
+        difvar = DiffractionVariance2D(diffraction_pattern)
         rp = difvar.get_radial_profile()
-        assert isinstance(rp, DiffractionVarianceProfile)
+        assert isinstance(rp, DiffractionVariance1D)
 
 
     @pytest.fixture
