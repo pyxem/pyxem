@@ -27,7 +27,8 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 @pytest.fixture()
 def diffraction_variance(diffraction_pattern):
-    return DiffractionVariance(diffraction_pattern)
+    dif_var = DiffractionVariance2D(diffraction_pattern)
+    return dif_var
 
 
 
