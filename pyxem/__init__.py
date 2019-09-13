@@ -52,13 +52,13 @@ from .signals.crystallographic_map import CrystallographicMap
 from .generators.red_intensity_generator import ReducedIntensityGenerator
 from .generators.pdf_generator import PDFGenerator
 from .generators.variance_generator import VarianceGenerator
-from .signals.variance_profile import DiffractionVarianceProfile
+from .signals.diffraction_variance1d import DiffractionVariance1D
 
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
-from .signals.pdf_profile import PDFProfile
-from .signals.reduced_intensity_profile import ReducedIntensityProfile
+from .signals.pdf1d import PDF1D
+from .signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.utils.io_utils import load, load_mib, load_hspy
 

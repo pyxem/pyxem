@@ -18,7 +18,7 @@
 
 import pytest
 import numpy as np
-from pyxem.signals.reduced_intensity_profile import ReducedIntensityProfile
+from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 from pyxem.components.scattering_fit_component import ScatteringFitComponent
 
 
@@ -49,7 +49,7 @@ def test_scattering_component_init_not_implemented():
     np.array([4., 3., 2., 2., 1., 1., 1., 0.])
 ])
 def ri_model(request):
-    ri = ReducedIntensityProfile(request.param)
+    ri = ReducedIntensity1D(request.param)
     m = ri.create_model()
     return m
 
