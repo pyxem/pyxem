@@ -25,14 +25,6 @@ from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
-@pytest.fixture()
-def diffraction_variance(diffraction_pattern):
-    dif_var = DiffractionVariance2D(diffraction_pattern)
-    return dif_var
-
-
-
-
 class TestDiffractionVariance:
 
     def test_get_diffraction_variance_signal(self,
