@@ -103,7 +103,7 @@ def test_mask_from_bkgd(red_int_generator):
     red_int_generator.mask_from_bkgd_pattern(mask_pattern,mask_threshold=mask_threshold)
 
     expected = np.arange(10, 0, -1).reshape(1, 10) * np.arange(1, 5).reshape(4, 1)
-    expected = data.reshape(2, 2, 10)
+    expected = expected.reshape(2, 2, 10)
     expected[:,:,:4] = 0
 
     assert np.array_equal(red_int_generator.signal.data, expected)

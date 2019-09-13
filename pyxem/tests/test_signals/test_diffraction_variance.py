@@ -22,6 +22,7 @@ import numpy as np
 from pyxem.signals.diffraction_variance import DiffractionVariance
 from pyxem.signals.diffraction_variance import ImageVariance
 from pyxem.signals.variance_profile import DiffractionVarianceProfile
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
 @pytest.fixture()
