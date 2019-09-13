@@ -97,6 +97,17 @@ def test_subtract_bkgd(red_int_generator):
     assert np.array_equal(red_int_generator.signal.data, expected)
     return
 
+def test_mask_from_bkgd(red_int_generator):
+    mask_pattern = np.arange(10, 0, -1).reshape(10)
+    mask_threshold = 6.5
+    red_int_generator.mask_from_bkgd_pattern(mask_pattern,mask_threshold=mask_threshold)
+
+    expected = np.arange(10, 0, -1).reshape(1, 10) * np.arange(1, 5).reshape(4, 1)
+    expected = data.reshape(2, 2, 10)
+    expected[:,:,:4] = 0
+
+    assert np.array_equal(red_int_generator.signal.data, expected)
+    return
 
 def test_get_reduced_intensity(red_int_generator):
 

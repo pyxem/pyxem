@@ -24,9 +24,11 @@ from pyxem.signals.diffraction_variance import ImageVariance
 from pyxem.signals.variance_profile import DiffractionVarianceProfile
 
 
-@pytest.fixture
+@pytest.fixture()
 def diffraction_variance(diffraction_pattern):
     return DiffractionVariance(diffraction_pattern)
+
+
 
 
 class TestDiffractionVariance:
@@ -36,10 +38,45 @@ class TestDiffractionVariance:
         difvar = DiffractionVariance(diffraction_pattern)
         assert isinstance(difvar, DiffractionVariance)
 
-    def test_difvar_radial_profile(self,
+    def test_get_dif_var_radial_profile(self,
                                    diffraction_pattern):
-        rp = DiffractionVarianceProfile(diffraction_pattern)
+        difvar = DiffractionVariance(diffraction_pattern)
+        rp = difvar.get_radial_profile()
         assert isinstance(rp, DiffractionVarianceProfile)
+
+
+    @pytest.fixture
+    def axes_test_dp(self):
+        dp_data = np.random.randint(0, 10, (2, 2, 10, 10))
+        dp = ElectronDiffraction2D(dp_data)
+        return dp
+
+    def test_radial_profile_axes(self, axes_test_dp):
+        n_scale = 0.5
+        axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
+        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
+        name = 'real_space'
+        axes_test_dp.axes_manager.navigation_axes[0].name = name
+        axes_test_dp.axes_manager.navigation_axes[1].units = name
+        units = 'um'
+        axes_test_dp.axes_manager.navigation_axes[1].name = units
+        axes_test_dp.axes_manager.navigation_axes[0].units = units
+
+        rp = axes_test_dp.get_radial_profile()
+        rp_scale_x = rp.axes_manager.navigation_axes[0].scale
+        rp_scale_y = rp.axes_manager.navigation_axes[1].scale
+        rp_units_x = rp.axes_manager.navigation_axes[0].units
+        rp_name_x = rp.axes_manager.navigation_axes[0].name
+        rp_units_y = rp.axes_manager.navigation_axes[1].units
+        rp_name_y = rp.axes_manager.navigation_axes[1].name
+
+        assert n_scale == rp_scale_x
+        assert 2 * n_scale == rp_scale_y
+        assert units == rp_units_x
+        assert name == rp_name_x
+        assert name == rp_units_y
+        assert units == rp_name_y
+
 
 
 class TestImageVariance:

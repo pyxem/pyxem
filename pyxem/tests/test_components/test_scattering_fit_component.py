@@ -43,7 +43,6 @@ def test_scattering_component_init_not_implemented():
     elements = ['Cu']
     fracs = [1]
     ref = ScatteringFitComponent(elements, fracs, N=1., C=0., type='nope')
-    return
 
 
 @pytest.fixture(params=[
