@@ -17,8 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from pyxem.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
-from pyxem.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
+from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
+from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 
 
 def scattering_to_signal(elements, fracs, N, C, s_size, s_scale, type='lobato'):
