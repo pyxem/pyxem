@@ -298,23 +298,32 @@ class DiffractionVectors(BaseSignal):
 
         return ghis
 
-    def get_unique_vectors(self, distance_threshold=0.01, min_samples=1,
+    def get_unique_vectors(self, distance_threshold=0.01,
+                           method='distance_comparison', min_samples=1,
                            return_clusters=False):
-        """Obtain the unique diffraction vectors by clustering using
-        DBSCAN [1].
+        """Obtain the unique diffraction vectors by a distance
+        comparison or by clustering using DBSCAN [1].
 
         Parameters
         ----------
         distance_threshold : float
             The minimum distance between diffraction vectors for them to
             be considered unique diffraction vectors.
+        method : string
+            The method to use to determine unique vectors. Valid methods
+            are 'distance_comparison' or 'DBSCAN'. 'distance_comparison'
+            iteratively checks the distance between two vectors to
+            determine if they should belong to the same unique vector,
+            and if so, the unique vector is iteratively updated to the
+            average value of the two. 'DBSCAN' relys on the DBSCAN [1]
+            clustering algorithm, and uses an Eucledian distance metric.
         min_samples : int, optional
-            The minimum number of not identical vectors within one cluster
-            for it to be considered a core sample, i.e. to not be considered
-            noise.
+            The minimum number of not identical vectors within one
+            cluster for it to be considered a core sample, i.e. to not
+            be considered noise. Only used for method='DBSCAN'.
         return_clusters : bool, optional
             If True (False is default), the DBSCAN clustering result is
-            returned.
+            returned. Only used for method='DBSCAN'.
 
         References
         ----------
@@ -327,7 +336,7 @@ class DiffractionVectors(BaseSignal):
             The unique diffraction vectors obtained by clustering.
         clusters : DBSCAN
             The results from the clustering, given as class DBSCAN.
-            Only returned if return_labels is True.
+            Only returned if method='DBSCAN' and return_labels is True.
         """
         # Flatten the array of peaks to reach dimension (n, 2), where n
         # is the number of peaks.
@@ -339,35 +348,63 @@ class DiffractionVectors(BaseSignal):
         if distance_threshold == 0:
             unique_peaks = np.unique(peaks_all, axis=0)
         else:
-            # If distance_threshold is specified, all peaks are clustered
-            # so that peaks within one cluster are separated by
-            # distance_threshold or less.
-            unique_vectors, unique_vectors_counts = np.unique(
-                peaks_all, axis=0, return_counts=True)
-            clusters = DBSCAN(
-                eps=distance_threshold, min_samples=min_samples,
-                metric='euclidean').fit(
-                unique_vectors, sample_weight=unique_vectors_counts)
-            unique_labels, unique_labels_count = np.unique(
-                clusters.labels_, return_counts=True)
-            unique_peaks = np.zeros((unique_labels.max() + 1, 2))
+            if method == 'distance_comparison':
+                unique_vectors, unique_counts = np.unique(
+                    peaks_all, axis=0, return_counts=True)
 
-            # For each cluster, a center of mass is calculated based on
-            # all the peaks within the cluster, and the center of mass is
-            # taken as the final unique vector position.
-            for n in np.arange(unique_labels.max() + 1):
-                peaks_n_temp = unique_vectors[clusters.labels_ == n]
-                peaks_n_counts_temp = unique_vectors_counts[
-                    clusters.labels_ == n]
-                unique_peaks[n] = np.average(peaks_n_temp,
-                                             weights=peaks_n_counts_temp,
+                unique_peaks = np.array([[0, 0]])
+                unique_peaks_counts = np.array([0])
+
+                while unique_vectors.shape[0] > 0:
+                    unique_vector = unique_vectors[0]
+                    distances = distance_matrix(
+                        np.array([unique_vector]), unique_vectors)
+                    indices = np.where(distances < distance_threshold)[1]
+
+                    new_count = indices.size
+                    new_unique_peak = np.array([np.average(
+                        unique_vectors[indices], weights=unique_counts[indices],
+                        axis=0)])
+
+                    unique_peaks = np.append(unique_peaks, new_unique_peak,
                                              axis=0)
+
+                    unique_peaks_counts = np.append(unique_peaks_counts,
+                                                    new_count)
+                    unique_vectors = np.delete(unique_vectors, indices, axis=0)
+                    unique_counts = np.delete(unique_counts, indices, axis=0)
+                unique_peaks = np.delete(unique_peaks, [0], axis=0)
+
+            elif method == 'DBSCAN':
+                # If distance_threshold is specified, all peaks are
+                # clustered so that peaks within one cluster are
+                # separated by distance_threshold or less.
+                unique_vectors, unique_vectors_counts = np.unique(
+                    peaks_all, axis=0, return_counts=True)
+                clusters = DBSCAN(
+                    eps=distance_threshold, min_samples=min_samples,
+                    metric='euclidean').fit(
+                    unique_vectors, sample_weight=unique_vectors_counts)
+                unique_labels, unique_labels_count = np.unique(
+                    clusters.labels_, return_counts=True)
+                unique_peaks = np.zeros((unique_labels.max() + 1, 2))
+
+                # For each cluster, a center of mass is calculated based
+                # on all the peaks within the cluster, and the center of
+                # mass is taken as the final unique vector position.
+                for n in np.arange(unique_labels.max() + 1):
+                    peaks_n_temp = unique_vectors[clusters.labels_ == n]
+                    peaks_n_counts_temp = unique_vectors_counts[
+                        clusters.labels_ == n]
+                    unique_peaks[n] = np.average(
+                        peaks_n_temp, weights=peaks_n_counts_temp,
+                        axis=0)
 
         # Manipulate into DiffractionVectors class
         if unique_peaks.size > 0:
             unique_peaks = DiffractionVectors(unique_peaks)
             unique_peaks.axes_manager.set_signal_dimension(1)
-        if return_clusters:
+        if return_clusters and method=='DBSCAN':
             return unique_peaks, clusters
         else:
             return unique_peaks
