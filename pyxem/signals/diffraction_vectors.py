@@ -131,8 +131,8 @@ class DiffractionVectors(BaseSignal):
             ax.set_aspect('equal')
 
         if plot_label_colors is True:
-            unique_vectors, clusters = self.get_unique_vectors(
-                distance_threshold, min_samples, return_clusters=True)
+            clusters = self.get_unique_vectors(
+                distance_threshold, min_samples, return_clusters=True)[0]
             labs = clusters.labels_[clusters.core_sample_indices_]
             # Get all vectors from the clustering not considered noise
             cores = clusters.components_

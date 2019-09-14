@@ -253,11 +253,11 @@ def separate(vdf_temp, min_distance=2, min_size=10, max_size=np.inf,
         fig, axes = plt.subplots(2, 3, sharex=True, sharey=True)
         ax = axes.ravel()
 
-        ax[0].imshow(vdf_temp, cmap=plt.cm.magma)
+        ax[0].imshow(vdf_temp, cmap=plt.cm.magma_r)
         ax[0].axis('off')
         ax[0].set_title('VDF')
 
-        ax[1].imshow(mask, cmap=plt.cm.gray)
+        ax[1].imshow(mask, cmap=plt.cm.gray_r)
         ax[1].axis('off')
         ax[1].set_title('Mask')
 
@@ -269,15 +269,15 @@ def separate(vdf_temp, min_distance=2, min_size=10, max_size=np.inf,
         ax[2].plot(maxi_coord1[1], maxi_coord1[0], 'k+')
         ax[2].plot(maxi_coord[1], maxi_coord[0], 'gx')
 
-        ax[3].imshow(elevation, cmap=plt.cm.magma)
+        ax[3].imshow(elevation, cmap=plt.cm.magma_r)
         ax[3].axis('off')
         ax[3].set_title('Elevation')
 
-        ax[4].imshow(labels, cmap=plt.cm.gnuplot2)
+        ax[4].imshow(labels, cmap=plt.cm.gnuplot2_r)
         ax[4].axis('off')
         ax[4].set_title('Labels')
 
-        ax[5].imshow(seps_img_sum, cmap=plt.cm.magma)
+        ax[5].imshow(seps_img_sum, cmap=plt.cm.magma_r)
         ax[5].axis('off')
         ax[5].set_title('Segments')
 
