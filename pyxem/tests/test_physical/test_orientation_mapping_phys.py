@@ -34,6 +34,7 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import peaks_from_best_vector_match
+from pyxem.utils.indexation_utils import OrientationResult
 from pyxem.utils.sim_utils import sim_as_signal
 
 """
@@ -198,9 +199,10 @@ def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
     _, match_results = get_vector_match_results(structure, rot_list, edc)
-    assert match_results.data.shape == (2, 2, 2, 5)  # 2x2 rotations, 2 best peaks, 5 values
-    np.testing.assert_allclose(match_results.data[0, 0, 0, 2], 1.0)  # match rate for best orientation
-    np.testing.assert_allclose(match_results.data[0, 1, 0, 2], 1.0)  # match rate for best orientation
+    assert match_results.data.shape == (2, 2)  # 2x2 rotations, 2 best peaks, 5 values
+    isinstance(match_results.data[0, 0][0], OrientationResult)
+    np.testing.assert_allclose(match_results.data[0, 0][0].match_rate, 1.0)  # match rate for best orientation
+    np.testing.assert_allclose(match_results.data[0, 1][0].match_rate, 1.0)  # match rate for best orientation
 
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])

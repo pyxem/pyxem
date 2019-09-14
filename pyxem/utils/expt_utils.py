@@ -18,7 +18,10 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+import pyxem as pxm  # for ElectronDiffraction2D
+
 from scipy.ndimage.interpolation import shift
+from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
@@ -27,6 +30,7 @@ from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from scipy.optimize import curve_fit
+from tqdm import tqdm
 
 
 """
@@ -416,8 +420,109 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
+def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int=50, window: int=10, kind: int=3) -> float:
+    """Find the index of the pixel corresponding to peak maximum in 1D pattern
+
+    Parameters
+    ----------
+    sigma : int
+        Sigma value for Gaussian blurring kernel for initial beam center estimation.
+    upsample_factor : int
+        Upsample factor for subpixel maximum finding, i.e. the maximum will 
+        be found with a precision of 1 / upsample_factor of a pixel. 
+    kind : str or int, optional
+        Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+        ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+        ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+        interpolation of zeroth, first, second or third order; ‘previous’
+        and ‘next’ simply return the previous or next value of the point) or as
+        an integer specifying the order of the spline interpolator to use. 
+    window : int
+       A box of size 2*window+1 around the first estimate is taken and 
+       expanded by `upsample_factor` to to interpolate the pattern to get 
+       the peak maximum position with subpixel precision.
+
+    Returns
+    -------
+    center: float
+        Pixel position of the maximum
+    """
+    y1 = ndi.filters.gaussian_filter1d(arr, sigma)
+    c1 = np.argmax(y1)  # initial guess for beam center
+
+    m = upsample_factor
+    w = window
+    win_len = 2*w+1
+    
+    try:
+        r1 = np.linspace(c1-w, c1+w, win_len)
+        f  = interp1d(r1, y1[c1-w: c1+w+1], kind=kind)
+        r2 = np.linspace(c1-w, c1+w, win_len*m)  # extrapolate for subpixel accuracy
+        y2 = f(r2)
+        c2 = np.argmax(y2) / m  # find beam center with `m` precision
+    except ValueError:  # if c1 is too close to the edges, return initial guess
+        center = c1
+    else:
+        center = c2 + c1 - w
+
+    return center
+
+
+def find_beam_center_interpolate(img: np.ndarray, sigma: int=30, upsample_factor: int=100, kind: int=3) -> (float, float):
+    """Find the center of the primary beam in the image `img` by summing along 
+    X/Y directions and finding the position along the two directions independently. 
+
+    Parameters
+    ----------
+    sigma : int
+        Sigma value for Gaussian blurring kernel for initial beam center estimation.
+    upsample_factor : int
+        Upsample factor for subpixel beam center finding, i.e. the center will 
+        be found with a precision of 1 / upsample_factor of a pixel. 
+    kind : str or int, optional
+        Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+        ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+        ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+        interpolation of zeroth, first, second or third order; ‘previous’
+        and ‘next’ simply return the previous or next value of the point) or as
+        an integer specifying the order of the spline interpolator to use. 
+
+    Returns
+    -------
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
+    """
+    xx = np.sum(img, axis=1)
+    yy = np.sum(img, axis=0)
+    
+    cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind) 
+    cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind) 
+
+    center = np.array([cx, cy])
+    return center
+
+
+def find_beam_center_blur(z: np.ndarray, sigma: int=30) -> np.ndarray:
+    """Estimate direct beam position by blurring the image with a large
+    Gaussian kernel and finding the maximum.
+
+    Parameters
+    ----------
+    sigma : float
+        Sigma value for Gaussian blurring kernel.
+
+    Returns
+    -------
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
+    """
+    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
+    center = np.unravel_index(blurred.argmax(), blurred.shape)
+    return np.array(center)
+
+
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to center the direct beam center by a cross-correlation algorithm.
+    """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
@@ -485,3 +590,52 @@ def peaks_as_gvectors(z, center, calibration):
     """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T
+
+
+def investigate_dog_background_removal_interactive(sample_dp,
+                                                   std_dev_maxs,
+                                                   std_dev_mins):
+    """Utility function to help the parameter selection for the difference of
+    gaussians (dog) background subtraction method
+
+    Parameters
+    ----------
+    sample_dp : ElectronDiffraction2D
+        A single diffraction pattern
+    std_dev_maxs : iterable
+        Linearly spaced maximum standard deviations to be tried, ascending
+    std_dev_mins : iterable
+        Linearly spaced minimum standard deviations to be tried, ascending
+
+    Returns
+    -------
+    A hyperspy like navigation (sigma parameters), signal (proccessed patterns)
+    plot
+
+    See Also
+    --------
+    subtract_background_dog : The background subtraction method used.
+    np.arange : Produces suitable objects for std_dev_maxs
+
+    """
+    gauss_processed = np.empty((
+        len(std_dev_maxs),
+        len(std_dev_mins),
+        *sample_dp.axes_manager.signal_shape))
+
+    for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
+        for j, std_dev_min in enumerate(std_dev_mins):
+            gauss_processed[i, j] = sample_dp.remove_background('gaussian_difference',
+                                                                sigma_min=std_dev_min, sigma_max=std_dev_max,
+                                                                show_progressbar=False)
+    dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
+    dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
+    dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
+    dp_gaussian.axes_manager.navigation_axes[1].name = r'$\sigma_{\mathrm{max}}$'
+    for axes_number, axes_value_list in [(0, std_dev_mins), (1, std_dev_maxs)]:
+        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = axes_value_list[1] - axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
+
+    dp_gaussian.plot(cmap='viridis')
+    return None

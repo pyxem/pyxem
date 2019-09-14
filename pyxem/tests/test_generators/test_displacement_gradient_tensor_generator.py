@@ -1,9 +1,4 @@
-from pyxem.generators.displacement_gradient_tensor_generator import \
-    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
-import hyperspy.api as hs
-import pytest
-import numpy as np
-decimal = 2  # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
@@ -20,6 +15,12 @@ decimal = 2  # -*- coding: utf-8 -*-
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+from pyxem.generators.displacement_gradient_tensor_generator import \
+    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
+import hyperspy.api as hs
+import pytest
+import numpy as np
 
 
 def vector_operation(z, M):
@@ -76,7 +77,7 @@ def generate_strain_map(vectors):
 
 
 """
-Our "sample" allows us to use a range of basis vectors, we try 4:
+Our "sample" allows us to use a range of basis vectors
 > xy
 > a right handed: orthogonal set
 > a left handed: not orthogonal, not right handed set
@@ -113,50 +114,18 @@ def multi_vector():
     return s_th
 
 
-def test_rotation(xy_vectors, right_handed, multi_vector):
-    """
-    We should always measure the same rotations, regardless of basis (as long as it's right handed)
-    """
-    xy_rot = xy_vectors.inav[3].data
-    rh_rot = right_handed.inav[3].data
-    mv_rot = multi_vector.inav[3].data
-
-    np.testing.assert_almost_equal(xy_rot, rh_rot, decimal=2)  # rotations
-    np.testing.assert_almost_equal(xy_rot, mv_rot, decimal=2)  # rotations
+""" Each of these basis should return the same results, in an xy basis"""
 
 
-def test_left_vs_right_rotation(xy_vectors, left_handed):
-    """
-    We should pick up a minus sign if we compare left vs right handed basis
-    """
-    xy_rot = xy_vectors.inav[3].data
-    lh_rot = np.multiply(left_handed.inav[3].data, -1)
-
-    np.testing.assert_almost_equal(xy_rot, lh_rot, decimal=2)  # rotations
-
-
-def test_trace(xy_vectors, right_handed, multi_vector):
-    """
-    Basis does effect strain measurement, but we can simply calculate suitable invarients.
-    See https://en.wikipedia.org/wiki/Infinitesimal_strain_theory for details.
-    """
-    np.testing.assert_almost_equal(
-        np.add(
-            xy_vectors.inav[0].data, xy_vectors.inav[1].data), np.add(
-            right_handed.inav[0].data, right_handed.inav[1].data), decimal=2)
-    np.testing.assert_almost_equal(
-        np.add(
-            xy_vectors.inav[0].data, xy_vectors.inav[1].data), np.add(
-            multi_vector.inav[0].data, multi_vector.inav[1].data), decimal=2)
-
-
-def test_multi_vector_method_has_xy_as_basis(xy_vectors, multi_vector):
-    xy = xy_vectors.data
-    mv = multi_vector.data
-    np.testing.assert_almost_equal(xy, mv, decimal=2)
+def test_results_returned_correctly_in_same_basis(xy_vectors, right_handed, left_handed, multi_vector):
+    """ Basic test of the summary statement for this section """
+    np.testing.assert_almost_equal(xy_vectors.data, right_handed.data, decimal=2)
+    np.testing.assert_almost_equal(xy_vectors.data, left_handed.data, decimal=2)
+    np.testing.assert_almost_equal(xy_vectors.data, multi_vector.data, decimal=2)
 
 
 def test_trivial_weight_function_case(xy_vectors):
+    """ If weights are [1,1,1,1] the result should be the same as weights=None"""
     weights = [1, 1, 1, 1]
     four_vectors = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
     deformed = hs.signals.Signal2D(generate_test_vectors(four_vectors))
@@ -165,6 +134,7 @@ def test_trivial_weight_function_case(xy_vectors):
 
 
 def test_weight_function_behaviour():
+    """ Confirms that  a weight function [1,1,2,2] on [a,a,b,b] gives (2a+4b)/6 as the strain"""
     multi_vector_array = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
     strained_by_1pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.01, 0], [0, 1]]))  # first  2
     strained_by_2pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.02, 0], [0, 1]]))  # second 2
