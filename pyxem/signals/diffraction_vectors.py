@@ -127,8 +127,8 @@ class DiffractionVectors(BaseSignal):
             Will be passed to get_unique_vectors if no unique vectors are
             given.
         method : string
-            The method to use to determine unique vectors. Valid methods
-            are 'strict', 'distance_comparison' and 'DBSCAN'.
+            The method to use to determine unique vectors, if not given.
+            Valid methods are 'strict', 'distance_comparison' and 'DBSCAN'.
             'strict' returns all vectors that are strictly unique and
             corresponds to distance_threshold=0.
             'distance_comparison' checks the distance between vectors to
@@ -148,8 +148,8 @@ class DiffractionVectors(BaseSignal):
         image_cmap : string, optional
             The colormap to plot the image in.
         plot_label_colors : bool, optional
-            If True (default is False), the vectors constituting each
-            cluster will be plotted also, with colors according to their
+            If True (default is False), also the vectors contained within each
+            cluster will be plotted, with colors according to their
             cluster membership. If True, the unique vectors will be
             calculated by get_unique_vectors. Requires on method=='DBSCAN'.
         distance_threshold_all : float, optional
@@ -342,8 +342,7 @@ class DiffractionVectors(BaseSignal):
         min_samples : int, optional
             The minimum number of not strictly identical vectors within
             one cluster for the cluster to be considered a core sample,
-            i.e. to not be considered noise. Only used for
-            method='DBSCAN'.
+            i.e. to not be considered noise. Only used for method='DBSCAN'.
         return_clusters : bool, optional
             If True (False is default), the DBSCAN clustering result is
             returned. Only used for method='DBSCAN'.
