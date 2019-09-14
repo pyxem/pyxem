@@ -101,7 +101,9 @@ class DiffractionVectors(BaseSignal):
 
     def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
                                  unique_vectors=None,
-                                 distance_threshold=0.01, min_samples=1,
+                                 distance_threshold=0.01,
+                                 method='distance_comparison',
+                                 min_samples=1,
                                  image_to_plot_on=None,
                                  image_cmap='gray',
                                  plot_label_colors=False,
@@ -122,11 +124,19 @@ class DiffractionVectors(BaseSignal):
             vectors for them to be considered unique diffraction vectors.
             Will be passed to get_unique_vectors if no unique vectors are
             given.
+        method : string
+            The method to use to determine unique vectors. Valid methods
+            are 'distance_comparison' or 'DBSCAN'. 'distance_comparison'
+            iteratively checks the distance between two vectors to
+            determine if they should belong to the same unique vector,
+            and if so, the unique vector is iteratively updated to the
+            average value of the two. 'DBSCAN' relys on the DBSCAN [1]
+            clustering algorithm, and uses an Eucledian distance metric.
         min_samples : int, optional
             The minimum number of not identical vectors within one cluster
             for it to be considered a core sample, i.e. to not be considered
             noise. Will be passed to get_unique_vectors if no unique vectors
-            are given.
+            are given. Only used if method=='DBSCAN'.
         image_to_plot_on : BaseSignal, optional
             If provided, the vectors will be plotted on top of this image.
             The image must be calibrated in terms of offset and scale.
@@ -136,11 +146,11 @@ class DiffractionVectors(BaseSignal):
             If True (default is False), the vectors constituting each
             cluster will be plotted also, with colors according to their
             cluster membership. If True, the unique vectors will be
-            calculated by get_unique_vectors.
+            calculated by get_unique_vectors. Requires on method=='DBSCAN'.
         distance_threshold_all : float, optional
             The minimum distance, in calibrated units, between diffraction
             vectors inside one cluster for them to be plotted. Only used if
-            plot_label_colors is True.
+            plot_label_colors is True and requires method=='DBSCAN'.
 
         Returns
         -------
@@ -163,7 +173,8 @@ class DiffractionVectors(BaseSignal):
 
         if plot_label_colors is True:
             _, clusters = self.get_unique_vectors(
-                distance_threshold, min_samples, return_clusters=True)
+                distance_threshold, method='DBSCAN', min_samples=min_samples,
+                return_clusters=True)
             labs = clusters.labels_[clusters.core_sample_indices_]
             # Get all vectors from the clustering not considered noise
             cores = clusters.components_
@@ -204,7 +215,7 @@ class DiffractionVectors(BaseSignal):
                             color=cmap_lab(lab))
         if unique_vectors is None:
             unique_vectors = self.get_unique_vectors(
-                distance_threshold, min_samples)
+                distance_threshold, method=method, min_samples=min_samples)
         # Plot the unique vectors
         ax.plot((unique_vectors.data.T[0] - offset) / scale,
                 (unique_vectors.data.T[1] - offset) / scale, 'kx')
