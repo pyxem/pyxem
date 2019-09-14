@@ -31,6 +31,7 @@ from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_npeaks
+from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 
@@ -68,6 +69,36 @@ class DiffractionVectors(BaseSignal):
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
+
+    @classmethod
+    def from_peaks(cls, peaks, center, calibration):
+        """Takes a list of peak positions (pixel coordinates) and returns
+        an instance of `Diffraction2D`
+
+        Parameters
+        ----------
+        peaks : Signal
+            Signal containing lists (np.array) of pixel coordinates specifying 
+            the reflection positions
+        center : np.array
+            Diffraction pattern center in array indices.
+        calibration : np.array
+            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
+
+        Returns
+        -------
+        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+            List of diffraction vectors
+        """
+        gvectors = peaks.map(peaks_as_gvectors, 
+                             center=center, 
+                             calibration=calibration, 
+                             inplace=False)
+
+        vectors = cls(gvectors)
+        vectors.axes_manager.set_signal_dimension(0)
+
+        return vectors
 
     def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
                                  unique_vectors=None,

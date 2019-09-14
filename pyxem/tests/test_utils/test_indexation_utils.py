@@ -82,13 +82,15 @@ def test_match_vectors(vector_match_peaks, vector_library):
         n_peaks_to_index=2,
         n_best=1)
     assert len(matches) == 1
-    np.testing.assert_allclose(matches[0][2], 1.0)  # match rate
-    np.testing.assert_allclose(matches[0][1], np.identity(3), atol=0.1)
-    np.testing.assert_allclose(matches[0][4], 0.03, atol=0.01)  # error mean
+    np.testing.assert_allclose(matches[0].match_rate, 1.0)
+    np.testing.assert_allclose(matches[0].rotation_matrix, np.identity(3), atol=0.1)
+    np.testing.assert_allclose(matches[0].total_error, 0.03, atol=0.01)
 
     np.testing.assert_allclose(rhkls[0][0], [1, 0, 0])
     np.testing.assert_allclose(rhkls[0][1], [0, 2, 0])
     np.testing.assert_allclose(rhkls[0][2], [1, 2, 3])
+
+
 
 
 def test_match_vector_total_error_default(vector_match_peaks, vector_library):
