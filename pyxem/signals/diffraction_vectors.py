@@ -123,9 +123,10 @@ class DiffractionVectors(BaseSignal):
             Will be passed to get_unique_vectors if no unique vectors are
             given.
         min_samples : int, optional
-            The minimum number of vectors within one cluster for it to be
-            considered a core sample, i.e. to not be considered noise. Will
-            be passed to get_unique_vectors if no unique vectors are given.
+            The minimum number of not identical vectors within one cluster
+            for it to be considered a core sample, i.e. to not be considered
+            noise. Will be passed to get_unique_vectors if no unique vectors
+            are given.
         image_to_plot_on : BaseSignal, optional
             If provided, the vectors will be plotted on top of this image.
             The image must be calibrated in terms of offset and scale.
@@ -161,42 +162,46 @@ class DiffractionVectors(BaseSignal):
             ax.set_aspect('equal')
 
         if plot_label_colors is True:
-            unique_vectors, clusters = self.get_unique_vectors(
+            _, clusters = self.get_unique_vectors(
                 distance_threshold, min_samples, return_clusters=True)
             labs = clusters.labels_[clusters.core_sample_indices_]
             # Get all vectors from the clustering not considered noise
             cores = clusters.components_
-            peaks = DiffractionVectors(cores)
-            peaks.axes_manager.set_signal_dimension(1)
-            # Since this original number of vectors can be huge, we
-            # find a reduced number of vectors that should be plotted, by
-            # running a new clustering on all the vectors not considered
-            # noise, considering distance_threshold_all.
-            peaks = peaks.get_unique_vectors(
-                distance_threshold_all, min_samples=1,
-                return_clusters=False)
-            peaks_all_len = peaks.data.shape[0]
-            labels_to_plot = np.zeros(peaks_all_len)
-            peaks_to_plot = np.zeros((peaks_all_len, 2))
-            # Find the labels of each of the peaks to plot by referring back
-            # to the list of labels for the original vectors.
-            for n, peak in zip(np.arange(peaks_all_len), peaks):
-                index = distance_matrix([peak.data], cores).argmin()
-                peaks_to_plot[n] = cores[index]
-                labels_to_plot[n] = labs[index]
-            # Assign a color value to each label, and shuffle these so that
-            # adjacent clusters hopefully get distinct colors.
-            cmap_lab = get_cmap('gist_rainbow')
-            lab_values_shuffled = np.arange(np.max(labels_to_plot) + 1)
-            np.random.shuffle(lab_values_shuffled)
-            labels_steps = np.array(list(map(
-                lambda n: lab_values_shuffled[int(n)], labels_to_plot)))
-            labels_steps = labels_steps / (np.max(labels_to_plot) + 1)
-            # Plot all peaks
-            for lab, peak in zip(labels_steps, peaks_to_plot):
-                ax.plot((peak[0] - offset) / scale,
-                        (peak[1] - offset) / scale, '.',
-                        color=cmap_lab(lab))
+            if cores.size == 0:
+                print('No clusters were found. Check parameters, or '
+                      'use plot_label_colors=False.')
+            else:
+                peaks = DiffractionVectors(cores)
+                peaks.axes_manager.set_signal_dimension(1)
+                # Since this original number of vectors can be huge, we
+                # find a reduced number of vectors that should be plotted, by
+                # running a new clustering on all the vectors not considered
+                # noise, considering distance_threshold_all.
+                peaks = peaks.get_unique_vectors(
+                    distance_threshold_all, min_samples=1,
+                    return_clusters=False)
+                peaks_all_len = peaks.data.shape[0]
+                labels_to_plot = np.zeros(peaks_all_len)
+                peaks_to_plot = np.zeros((peaks_all_len, 2))
+                # Find the labels of each of the peaks to plot by referring back
+                # to the list of labels for the original vectors.
+                for n, peak in zip(np.arange(peaks_all_len), peaks):
+                    index = distance_matrix([peak.data], cores).argmin()
+                    peaks_to_plot[n] = cores[index]
+                    labels_to_plot[n] = labs[index]
+                # Assign a color value to each label, and shuffle these so that
+                # adjacent clusters hopefully get distinct colors.
+                cmap_lab = get_cmap('gist_rainbow')
+                lab_values_shuffled = np.arange(np.max(labels_to_plot) + 1)
+                np.random.shuffle(lab_values_shuffled)
+                labels_steps = np.array(list(map(
+                    lambda n: lab_values_shuffled[int(n)], labels_to_plot)))
+                labels_steps = labels_steps / (np.max(labels_to_plot) + 1)
+                # Plot all peaks
+                for lab, peak in zip(labels_steps, peaks_to_plot):
+                    ax.plot((peak[0] - offset) / scale,
+                            (peak[1] - offset) / scale, '.',
+                            color=cmap_lab(lab))
         if unique_vectors is None:
             unique_vectors = self.get_unique_vectors(
                 distance_threshold, min_samples)
@@ -301,11 +306,12 @@ class DiffractionVectors(BaseSignal):
         Parameters
         ----------
         distance_threshold : float
-            The minimum distance between diffraction vectors for them to be
-            considered unique diffraction vectors.
+            The minimum distance between diffraction vectors for them to
+            be considered unique diffraction vectors.
         min_samples : int, optional
-            The minimum number of vectors within one cluster for it to be
-            considered a core sample, i.e. to not be considered noise.
+            The minimum number of not identical vectors within one cluster
+            for it to be considered a core sample, i.e. to not be considered
+            noise.
         return_clusters : bool, optional
             If True (False is default), the DBSCAN clustering result is
             returned.
