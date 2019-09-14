@@ -107,7 +107,7 @@ class DiffractionVectors(BaseSignal):
                                  image_to_plot_on=None,
                                  image_cmap='gray',
                                  plot_label_colors=False,
-                                 distance_threshold_all=0.005):
+                                 distance_threshold_all=0.005): # pragma: no cover
         """Plot the unique diffraction vectors.
 
         Parameters
@@ -323,11 +323,11 @@ class DiffractionVectors(BaseSignal):
         method : string
             The method to use to determine unique vectors. Valid methods
             are 'distance_comparison' or 'DBSCAN'. 'distance_comparison'
-            iteratively checks the distance between two vectors to
-            determine if they should belong to the same unique vector,
-            and if so, the unique vector is iteratively updated to the
-            average value of the two. 'DBSCAN' relys on the DBSCAN [1]
-            clustering algorithm, and uses an Eucledian distance metric.
+            checks the distance between vectors to determine if some
+            should belong to the same unique vector, and if so, the
+            unique vector is iteratively updated to the average value.
+            'DBSCAN' relys on the DBSCAN [1] clustering algorithm, and
+            uses the Eucledian distance metric.
         min_samples : int, optional
             The minimum number of not identical vectors within one
             cluster for it to be considered a core sample, i.e. to not
@@ -347,7 +347,7 @@ class DiffractionVectors(BaseSignal):
             The unique diffraction vectors obtained by clustering.
         clusters : DBSCAN
             The results from the clustering, given as class DBSCAN.
-            Only returned if method='DBSCAN' and return_labels is True.
+            Only returned if method='DBSCAN' and return_clusters=True.
         """
         # Flatten the array of peaks to reach dimension (n, 2), where n
         # is the number of peaks.
