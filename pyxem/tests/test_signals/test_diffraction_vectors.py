@@ -19,6 +19,7 @@
 import pytest
 import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+from sklearn.cluster.dbscan_ import DBSCAN
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
 # all of equal length, and the ragged case. A fixture is defined for each of
@@ -92,9 +93,9 @@ def test_plot_diffraction_vectors_on_signal(diffraction_vectors_map,
 
 
 def test_get_cartesian_coordinates(diffraction_vectors_map):
-    accelerating_volage = 200
+    accelerating_voltage = 200
     camera_length = 0.2
-    diffraction_vectors_map.calculate_cartesian_coordinates(accelerating_volage,
+    diffraction_vectors_map.calculate_cartesian_coordinates(accelerating_voltage,
                                                             camera_length)
     # Coordinate conversion is tested in vector_utils. Just test that the
     # result is stored correctly
@@ -129,25 +130,61 @@ class TestUniqueVectors:
         diffraction_vectors_single.get_unique_vectors()
 
     @pytest.mark.parametrize('distance_threshold, answer', [
-        (0.01, np.array([[0.089685, 0.292971],
-                         [0.017937, 0.277027],
-                         [-0.069755, 0.257097],
-                         [-0.165419, 0.241153],
-                         [0.049825, 0.149475],
-                         [-0.037867, 0.129545],
-                         [-0.117587, 0.113601],
-                         [0.149475, 0.065769],
-                         [0.229195, 0.045839],
-                         [0.141503, 0.025909],
-                         [0.073741, 0.013951],
-                         [0.001993, 0.001993],
-                         [-0.069755, -0.009965]])),
-        (0.1, np.array([[0.089685, 0.292971]])),
+        (0.01, np.array([[-0.165419,  0.241153],
+                         [-0.117587,  0.113601],
+                         [-0.069755, -0.009965],
+                         [-0.069755,  0.257097],
+                         [-0.037867,  0.129545],
+                         [0.001993,  0.001993],
+                         [0.017937,  0.277027],
+                         [0.049825,  0.149475],
+                         [0.073741,  0.013951],
+                         [0.089685,  0.292971],
+                         [0.141503,  0.025909],
+                         [0.149475,  0.065769],
+                         [0.229195,  0.045839]])),
+        (0.1, np.array([[-0.117587,  0.249125],
+                        [-0.077727,  0.121573],
+                        [-0.021923, -0.001993],
+                        [0.053811,  0.284999],
+                        [0.049825,  0.149475],
+                        [0.121573,  0.03520967],
+                        [0.229195,  0.045839]])),
     ])
     def test_get_unique_vectors_map_values(self, diffraction_vectors_map,
                                            distance_threshold, answer):
         unique_vectors = diffraction_vectors_map.get_unique_vectors(
             distance_threshold=distance_threshold)
+        np.testing.assert_almost_equal(unique_vectors.data, answer)
+
+    def test_get_unique_vectors_map_dbscan(self, diffraction_vectors_map):
+        unique_dbscan = diffraction_vectors_map.get_unique_vectors(
+            method='DBSCAN', return_clusters=True)
+        assert isinstance(unique_dbscan[0], DiffractionVectors)
+        assert isinstance(unique_dbscan[1], DBSCAN)
+
+    @pytest.mark.parametrize('distance_threshold, answer', [
+        (0.01, np.array([[-0.165419,  0.241153],
+                         [-0.117587,  0.113601],
+                         [-0.069755, -0.009965],
+                         [-0.069755,  0.257097],
+                         [-0.037867,  0.129545],
+                         [0.001993,  0.001993],
+                         [0.017937,  0.277027],
+                         [0.049825,  0.149475],
+                         [0.073741,  0.013951],
+                         [0.089685,  0.292971],
+                         [0.141503,  0.025909],
+                         [0.149475,  0.065769],
+                         [0.229195,  0.045839]])),
+        (0.1, np.array([[-0.031888,  0.267062],
+                       [-0.03520967,  0.13087367],
+                       [0.10200536,  0.02699609]])),
+    ])
+    def test_get_unique_vectors_map_values_dbscan(
+            self, diffraction_vectors_map, distance_threshold, answer):
+        unique_vectors = diffraction_vectors_map.get_unique_vectors(
+            distance_threshold=distance_threshold, method='DBSCAN')
         np.testing.assert_almost_equal(unique_vectors.data, answer)
 
 
