@@ -23,8 +23,8 @@ from hyperspy.signals import Signal1D
 import numpy as np
 
 
-class PDF1D(Signal1D):
-    _signal_type = "pdf1d"
+class PairDistributionFunction1D(Signal1D):
+    _signal_type = "pair_distribution_function1d"
 
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)

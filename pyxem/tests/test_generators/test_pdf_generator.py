@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 from pyxem.generators.pdf_generator import PDFGenerator
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.signals.pdf1d import PDF1D
+from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def test_pdf_gen_init(reduced_intensity1d):
 def test_get_pdf(reduced_intensity1d):
     pdfgen = PDFGenerator(reduced_intensity1d)
     pdf = pdfgen.get_pdf(s_cutoff=[0, 9])
-    assert isinstance(pdf, PDF1D)
+    assert isinstance(pdf, PairDistributionFunction1D)
 
 
 def test_s_limits(reduced_intensity1d):
@@ -54,17 +54,17 @@ def test_signal_size():
     ri = ReducedIntensity1D(spectrum)
     pdfgen = PDFGenerator(ri)
     pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
-    assert isinstance(pdf, PDF1D)
+    assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([spectrum])
     pdfgen = PDFGenerator(ri)
     pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
-    assert isinstance(pdf, PDF1D)
+    assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([[spectrum]])
     pdfgen = PDFGenerator(ri)
     pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
-    assert isinstance(pdf, PDF1D)
+    assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([[[spectrum]]])
     pdfgen = PDFGenerator(ri)

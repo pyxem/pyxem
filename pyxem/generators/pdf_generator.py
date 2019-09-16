@@ -25,12 +25,13 @@ import numpy as np
 from hyperspy.signals import Signal1D
 
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.signals.pdf1d import PDF1D
+from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 from pyxem.signals import transfer_navigation_axes
 
 
 class PDFGenerator():
-    """Generates a PDF1D signal from a specified ReducedIntensity1D signal.
+    """Generates a PairDistributionFunction1D signal from a specified
+        ReducedIntensity1D signal.
 
 
     Parameters
@@ -83,7 +84,7 @@ class PDFGenerator():
 
         pdf_sine = np.sin(2 * np.pi * s_values@r_values)
         # creates a vector of the pdf
-        rpdf = PDF1D(8 * np.pi * s_scale * (limited_red_int@pdf_sine))
+        rpdf = PairDistributionFunction1D(8 * np.pi * s_scale * (limited_red_int@pdf_sine))
 
         signal_axis = rpdf.axes_manager.signal_axes[0]
         pdf_scaling = r_increment

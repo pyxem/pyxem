@@ -19,12 +19,12 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.pdf1d import PDF1D
+from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 
 def test_generate_signal():
     data = np.ones((1, 10)) * np.arange(4).reshape(4, 1)
     data = data.reshape(2, 2, 10)
-    pdf = PDF1D(data)
-    assert isinstance(pdf, PDF1D)
+    pdf = PairDistributionFunction1D(data)
+    assert isinstance(pdf, PairDistributionFunction1D)
     pdf.normalise_signal()
     assert np.equal(pdf, np.ones((2, 2, 10)))
