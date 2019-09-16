@@ -27,6 +27,8 @@ from hyperspy.api import stack
 
 from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
 from pyxem.signals.diffraction_variance2d import ImageVariance
+from pyxem.signals import transfer_signal_axes
+from pyxem.signals import transfer_navigation_axes_to_signal_axes
 
 
 class VarianceGenerator():
@@ -77,14 +79,8 @@ class VarianceGenerator():
         sig_y = vardps.data.shape[2]
 
         dv = DiffractionVariance2D(vardps.data.reshape((2, 2, sig_x, sig_y)))
-        dx = dv.axes_manager.signal_axes[0]
-        dx.scale = dp.axes_manager.signal_axes[0].scale
-        dx.units = dp.axes_manager.signal_axes[0].units
-        dx.name = dp.axes_manager.signal_axes[0].name
-        dy = dv.axes_manager.signal_axes[1]
-        dy.scale = dp.axes_manager.signal_axes[1].scale
-        dy.units = dp.axes_manager.signal_axes[1].units
-        dy.name = dp.axes_manager.signal_axes[1].name
+
+        transfer_signal_axes(dv,self.signal)
 
         return dv
 
@@ -127,13 +123,6 @@ class VarianceGenerator():
         sig_x = varims.data.shape[1]
         sig_y = varims.data.shape[2]
         iv = ImageVariance(varims.data.reshape((2, 2, sig_x, sig_y)))
-        rx = iv.axes_manager.signal_axes[0]
-        rx.scale = im.axes_manager.signal_axes[0].scale
-        rx.units = im.axes_manager.signal_axes[0].units
-        rx.name = im.axes_manager.signal_axes[0].name
-        ry = iv.axes_manager.signal_axes[1]
-        ry.scale = im.axes_manager.signal_axes[1].scale
-        ry.units = im.axes_manager.signal_axes[1].units
-        ry.name = im.axes_manager.signal_axes[1].name
+        transfer_navigation_axes_to_signal_axes(iv,self.signal)
 
         return iv

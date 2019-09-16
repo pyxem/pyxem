@@ -26,6 +26,7 @@ from hyperspy.signals import Signal1D
 
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 from pyxem.signals.pdf1d import PDF1D
+from pyxem.signals import transfer_navigation_axes
 
 
 class PDFGenerator():
@@ -68,9 +69,9 @@ class PDFGenerator():
         # turn to a row vector for integral
 
         s_scale = self.signal.axes_manager.signal_axes[0].scale
-        # invert to find limits in terms of which values in the reduced Intensity
         s_limits = [int(s_min / s_scale), int(s_max / s_scale)]
-        # write a check that these aren't out of bounds
+
+        #check that these aren't out of bounds
         if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
             s_limits[1] = self.signal.axes_manager.signal_axes[0].size
             print('s_max out of bounds for reduced intensity.',
@@ -88,6 +89,7 @@ class PDFGenerator():
         pdf_scaling = r_increment
         signal_axis.scale = pdf_scaling
         signal_axis.name = 'Radius r'
-        signal_axis.units = '$A$'
+        signal_axis.units = '$Å$'
+        transfer_navigation_axes(rpdf,self.signal)
 
         return rpdf

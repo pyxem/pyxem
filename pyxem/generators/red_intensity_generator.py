@@ -30,6 +30,8 @@ from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.components.scattering_fit_component import ScatteringFitComponent
 from pyxem.utils.ri_utils import scattering_to_signal
+from pyxem.signals import transfer_navigation_axes
+from pyxem.signals import transfer_signal_axes
 
 
 class ReducedIntensityGenerator():
@@ -198,18 +200,7 @@ class ReducedIntensityGenerator():
 
         #ri = ReducedIntensityProfile(reduced_intensity.data[:,:,num_min:num_max])
         ri = ReducedIntensity1D(reduced_intensity)
-        ax_old = self.signal.axes_manager.navigation_axes
-        ri.axes_manager.navigation_axes[0].scale = ax_old[0].scale
-        ri.axes_manager.navigation_axes[0].units = ax_old[0].units
-        ri.axes_manager.navigation_axes[0].name = ax_old[0].name
-        if len(ax_old) > 1:
-            ri.axes_manager.navigation_axes[1].scale = ax_old[1].scale
-            ri.axes_manager.navigation_axes[1].units = ax_old[1].units
-            ri.axes_manager.navigation_axes[1].name = ax_old[1].name
-
-        ri_axis = ri.axes_manager.signal_axes[0]
-        ri_axis.name = 's'
-        ri_axis.scale = self.signal.axes_manager.signal_axes[0].scale
-        ri_axis.units = '$A^{-1}$'
+        transfer_navigation_axes(ri,self.signal)
+        transfer_signal_axes(ri,self.signal)
 
         return ri
