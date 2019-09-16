@@ -60,9 +60,9 @@ class SubpixelrefinementGenerator():
         self.calibration = [sig_ax[0].scale, sig_ax[1].scale]
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
-        self.vector_pixels = _get_pixel_vectors(dp, 
-                                                vectors, 
-                                                calibration=self.calibration, 
+        self.vector_pixels = _get_pixel_vectors(dp,
+                                                vectors,
+                                                calibration=self.calibration,
                                                 center=self.center)
 
     def conventional_xc(self, square_size, disc_radius, upsample_factor):

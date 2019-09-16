@@ -20,6 +20,7 @@ import numpy as np
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
+
 def _get_pixel_vectors(dp, vectors, calibration, center):
     """Get the pixel coordinates for the given diffraction
     pattern and vectors.
@@ -52,9 +53,9 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
                              'as the diffraction patterns which has shape {}.'.format(
                                  vectors.axes_manager.navigation_shape, dp.axes_manager.navigation_shape))
         vector_pixels = vectors.map(_floor,
-                                         calibration=calibration,
-                                         center=center,
-                                         inplace=False)
+                                    calibration=calibration,
+                                    center=center,
+                                    inplace=False)
     else:
         vector_pixels = _floor(vectors, calibration, center)
 

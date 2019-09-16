@@ -79,7 +79,7 @@ class DiffractionVectors(BaseSignal):
         Parameters
         ----------
         peaks : Signal
-            Signal containing lists (np.array) of pixel coordinates specifying 
+            Signal containing lists (np.array) of pixel coordinates specifying
             the reflection positions
         center : np.array
             Diffraction pattern center in array indices.
@@ -91,9 +91,9 @@ class DiffractionVectors(BaseSignal):
         vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
             List of diffraction vectors
         """
-        gvectors = peaks.map(peaks_as_gvectors, 
-                             center=center, 
-                             calibration=calibration, 
+        gvectors = peaks.map(peaks_as_gvectors,
+                             center=center,
+                             calibration=calibration,
                              inplace=False)
 
         vectors = cls(gvectors)
@@ -109,7 +109,7 @@ class DiffractionVectors(BaseSignal):
                                  image_to_plot_on=None,
                                  image_cmap='gray',
                                  plot_label_colors=False,
-                                 distance_threshold_all=0.005): # pragma: no cover
+                                 distance_threshold_all=0.005):  # pragma: no cover
         """Plot the unique diffraction vectors.
 
         Parameters
@@ -371,7 +371,7 @@ class DiffractionVectors(BaseSignal):
             if method is not 'strict':
                 warn(message='distance_threshold=0 was given, and therefore ' +
                      'a strict comparison is used, even though the ' +
-                     'specified method was '+method+'.')
+                     'specified method was ' + method + '.')
                 method = 'strict'
 
         if method == 'strict':
@@ -432,7 +432,7 @@ class DiffractionVectors(BaseSignal):
         if unique_peaks.size > 0:
             unique_peaks = DiffractionVectors(unique_peaks)
             unique_peaks.axes_manager.set_signal_dimension(1)
-        if return_clusters and method=='DBSCAN':
+        if return_clusters and method == 'DBSCAN':
             return unique_peaks, clusters
         else:
             return unique_peaks

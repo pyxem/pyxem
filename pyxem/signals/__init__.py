@@ -48,6 +48,7 @@ def push_metadata_through(dummy, *args, **kwargs):
 
     return dummy, args, kwargs
 
+
 def transfer_signal_axes(new_signal, old_signal):
     """ Transfers signal axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
