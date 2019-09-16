@@ -69,4 +69,5 @@ def test_signal_size():
     ri = ReducedIntensity1D([[[spectrum]]])
     pdfgen = PDFGenerator(ri)
     pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
-    assert pdf is None
+    shape = pdf.data.shape
+    assert shape == (1,1,1,2000)
