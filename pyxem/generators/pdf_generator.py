@@ -78,15 +78,7 @@ class PDFGenerator():
         s_values = np.arange(s_limits[0], s_limits[1], 1) * s_scale
         s_values = s_values.reshape(s_values.size, 1)  # column vector
 
-        if len(self.signal.data.shape) == 1:
-            limited_red_int = self.signal.data[s_limits[0]:s_limits[1]]
-        elif len(self.signal.data.shape) == 2:
-            limited_red_int = self.signal.data[:, s_limits[0]:s_limits[1]]
-        elif len(self.signal.data.shape) == 3:
-            limited_red_int = self.signal.data[:, :, s_limits[0]:s_limits[1]]
-        else:
-            print('Too many axes for current implementation. Aborting...')
-            return
+        limited_red_int = self.signal.isig[s_limits[0]:s_limits[1]].data
 
         pdf_sine = np.sin(2 * np.pi * s_values@r_values)
         # creates a vector of the pdf
