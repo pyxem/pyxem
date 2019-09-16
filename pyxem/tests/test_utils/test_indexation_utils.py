@@ -91,8 +91,6 @@ def test_match_vectors(vector_match_peaks, vector_library):
     np.testing.assert_allclose(rhkls[0][2], [1, 2, 3])
 
 
-
-
 def test_match_vector_total_error_default(vector_match_peaks, vector_library):
     matches, rhkls = match_vectors(
         vector_match_peaks,

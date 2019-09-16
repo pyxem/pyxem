@@ -28,7 +28,7 @@ def _get_rotation_matrix(x_new):
     ----------
     x_new : list
         Coordinates of a point on the new 'x' axis.
-     
+
     Returns
     -------
     R : 2 x 2 numpy.array()
@@ -83,7 +83,7 @@ class StrainMap(Signal2D):
         Notes
         -----
         Conventions are described in the class documentation.
-        
+
         We follow mathmatical formalism described in:
         "https://www.continuummechanics.org/stressxforms.html" (August 2019)
         """
@@ -121,4 +121,4 @@ class StrainMap(Signal2D):
         meta_dict = self.metadata.as_dictionary()
 
         strainmap = StrainMap(transposed_to_new_basis, current_basis_x=x_new, metadata=meta_dict)
-        return transfer_signal_axes(strainmap,self)
+        return transfer_signal_axes(strainmap, self)

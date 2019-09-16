@@ -43,6 +43,7 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 
 import lmfit
 
+
 class IndexationGenerator():
     """Generates an indexer for data using a number of methods.
 
@@ -196,7 +197,7 @@ class ProfileIndexationGenerator():
         return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
 
 
-def _refine_best_orientations(single_match_result, 
+def _refine_best_orientations(single_match_result,
                               vectors,
                               library,
                               accelarating_voltage,
@@ -218,10 +219,10 @@ def _refine_best_orientations(single_match_result,
     single_match_result : VectorMatchingResults
         Pool of solutions from the vector matching algorithm
     n_best : int
-        Refine the best `n` orientations starting from `rank`. 
+        Refine the best `n` orientations starting from `rank`.
         With `n_best=0` (default), all orientations are refined.
     rank : int
-        The rank of the solution to start from.  
+        The rank of the solution to start from.
     solution : list
         np.array containing the initial orientation
     vectors : DiffractionVectors
@@ -233,7 +234,7 @@ def _refine_best_orientations(single_match_result,
         Max allowed error in peak indexation for classifying it as indexed,
         calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
     method : str
-        Minimization algorithm to use, choose from: 
+        Minimization algorithm to use, choose from:
         'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
         See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
         for more information.
@@ -260,15 +261,15 @@ def _refine_best_orientations(single_match_result,
 
     top_matches = np.empty(n_best, dtype="object")
     res_rhkls = []
-    
+
     for i in range(rank, rank + n_best):
         if verbose:  # pragma: no cover
             print(f"# {i}/{n_best} ({n_matches})")
 
         solution = get_nth_best_solution(single_match_result, rank=i)
-    
-        result = _refine_orientation(solution, 
-                                     vectors, 
+
+        result = _refine_orientation(solution,
+                                     vectors,
                                      library,
                                      accelarating_voltage=accelarating_voltage,
                                      camera_length=camera_length,
@@ -278,7 +279,7 @@ def _refine_best_orientations(single_match_result,
                                      vary_center=vary_center,
                                      vary_scale=vary_scale,
                                      verbose=verbose)
-        
+
         top_matches[i] = result[0]
         res_rhkls.append(result[1])
 
@@ -288,9 +289,9 @@ def _refine_best_orientations(single_match_result,
     return res
 
 
-def _refine_orientation(solution, 
+def _refine_orientation(solution,
                         k_xy,
-                        structure_library, 
+                        structure_library,
                         accelarating_voltage,
                         camera_length,
                         index_error_tol=0.2,
@@ -316,7 +317,7 @@ def _refine_orientation(solution,
         Max allowed error in peak indexation for classifying it as indexed,
         calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
     method : str
-        Minimization algorithm to use, choose from: 
+        Minimization algorithm to use, choose from:
         'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
         See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
         for more information.
@@ -338,7 +339,7 @@ def _refine_orientation(solution,
     # prepare reciprocal_lattice
     structure = structure_library.structures[solution.phase_index]
     lattice_recip = structure.lattice.reciprocal()
-    
+
     def objfunc(params, k_xy, lattice_recip, wavelength, camera_length):
         cx = params["center_x"].value
         cy = params["center_y"].value
@@ -346,22 +347,22 @@ def _refine_orientation(solution,
         aj = params["aj"].value
         ak = params["ak"].value
         scale = params["scale"].value
-        
+
         rotmat = euler2mat(ai, aj, ak)
 
         k_xy = (k_xy + np.array((cx, cy)) * scale)
         cart = detector_to_fourier(k_xy, wavelength, camera_length)
-        
-        intermediate = cart.dot(rotmat.T) # Must use the transpose here
+
+        intermediate = cart.dot(rotmat.T)  # Must use the transpose here
         hklss = lattice_recip.fractional(intermediate) * scale
-        
+
         rhklss = np.rint(hklss)
         ehklss = np.abs(hklss - rhklss)
-        
+
         return ehklss
-    
+
     ai, aj, ak = mat2euler(solution.rotation_matrix)
-    
+
     params = lmfit.Parameters()
     params.add("center_x", value=solution.center_x, vary=vary_center)
     params.add("center_y", value=solution.center_y, vary=vary_center)
@@ -369,51 +370,51 @@ def _refine_orientation(solution,
     params.add("aj", value=aj, vary=vary_angles)
     params.add("ak", value=ak, vary=vary_angles)
     params.add("scale", value=solution.scale, vary=vary_scale, min=0.8, max=1.2)
-    
+
     wavelength = get_electron_wavelength(accelarating_voltage)
     camera_length = camera_length * 1e10
-    args = k_xy, lattice_recip, wavelength, camera_length 
-    
+    args = k_xy, lattice_recip, wavelength, camera_length
+
     res = lmfit.minimize(objfunc, params, args=args, method=method)
-    
+
     if verbose:  # pragma: no cover
         lmfit.report_fit(res)
-            
+
     p = res.params
 
     ai, aj, ak = p["ai"].value, p["aj"].value, p["ak"].value
     scale = p["scale"].value
     center_x = params["center_x"].value
     center_y = params["center_y"].value
-    
+
     rotation_matrix = euler2mat(ai, aj, ak)
-    
+
     k_xy = (k_xy + np.array((center_x, center_y)) * scale)
     cart = detector_to_fourier(k_xy, wavelength=wavelength, camera_length=camera_length)
-    
-    intermediate = cart.dot(rotation_matrix.T) # Must use the transpose here
+
+    intermediate = cart.dot(rotation_matrix.T)  # Must use the transpose here
     hklss = lattice_recip.fractional(intermediate)
 
     rhklss = np.rint(hklss)
-    
+
     error_hkls = res.residual.reshape(-1, 3)
     error_mean = np.mean(error_hkls)
-    
+
     valid_peak_mask = np.max(error_hkls, axis=-1) < index_error_tol
     valid_peak_count = np.count_nonzero(valid_peak_mask, axis=-1)
-    
+
     num_peaks = len(k_xy)
-    
+
     match_rate = (valid_peak_count * (1 / num_peaks)) if num_peaks else 0
-    
+
     orientation = OrientationResult(phase_index=solution.phase_index,
-                                               rotation_matrix=rotation_matrix,
-                                               match_rate=match_rate,
-                                               error_hkls=error_hkls,
-                                               total_error=error_mean,
-                                               scale=scale,
-                                               center_x=center_x,
-                                               center_y=center_y)
+                                    rotation_matrix=rotation_matrix,
+                                    match_rate=match_rate,
+                                    error_hkls=error_hkls,
+                                    total_error=error_mean,
+                                    scale=scale,
+                                    center_x=center_x,
+                                    center_y=center_y)
 
     res = np.empty(2, dtype=np.object)
     res[0] = orientation
@@ -515,7 +516,7 @@ class VectorIndexationGenerator():
 
         return indexation_results
 
-    def refine_best_orientation(self, 
+    def refine_best_orientation(self,
                                 orientations,
                                 accelarating_voltage,
                                 camera_length,
@@ -535,7 +536,7 @@ class VectorIndexationGenerator():
             Max allowed error in peak indexation for classifying it as indexed,
             calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
         method : str
-            Minimization algorithm to use, choose from: 
+            Minimization algorithm to use, choose from:
             'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
             See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
             for more information.
@@ -555,7 +556,7 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        return self.refine_n_best_orientations(orientations, 
+        return self.refine_n_best_orientations(orientations,
                                                accelarating_voltage=accelarating_voltage,
                                                camera_length=camera_length,
                                                n_best=1,
@@ -588,15 +589,15 @@ class VectorIndexationGenerator():
         camera_length : float
             The camera length in meters.
         n_best : int
-            Refine the best `n` orientations starting from `rank`. 
+            Refine the best `n` orientations starting from `rank`.
             With `n_best=0` (default), all orientations are refined.
         rank : int
-            The rank of the solution to start from.  
+            The rank of the solution to start from.
         index_error_tol : float
             Max allowed error in peak indexation for classifying it as indexed,
             calculated as :math:`|hkl_calculated - round(hkl_calculated)|`.
         method : str
-            Minimization algorithm to use, choose from: 
+            Minimization algorithm to use, choose from:
             'leastsq', 'nelder', 'powell', 'cobyla', 'least-squares'.
             See `lmfit` documentation (https://lmfit.github.io/lmfit-py/fitting.html)
             for more information.
@@ -629,10 +630,10 @@ class VectorIndexationGenerator():
                                    vary_center=vary_center,
                                    vary_scale=vary_scale,
                                    inplace=False, parallel=False)
-        
+
         indexation = matched.isig[0]
         rhkls = matched.isig[1].data
-        
+
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
@@ -640,4 +641,3 @@ class VectorIndexationGenerator():
                                                       vectors.cartesian)
 
         return indexation_results
-        
