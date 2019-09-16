@@ -71,8 +71,8 @@ def norm_cross_corr(image, template):
     return corr
 
 
-def separate(vdf_temp, min_distance=2, min_size=10, max_size=np.inf,
-             max_number_of_grains=np.inf, marker_radius=2,
+def separate(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
+             max_number_of_grains=np.inf, marker_radius=1,
              threshold=False, exclude_border=False, plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
@@ -129,6 +129,8 @@ def separate(vdf_temp, min_distance=2, min_size=10, max_size=np.inf,
     # Create a mask from the input VDF image.
     if threshold:
         th = threshold_li(vdf_temp)
+        if np.isnan(th):
+            th = 0.
         mask = np.zeros_like(vdf_temp)
         mask[vdf_temp > th] = True
     else:
@@ -174,15 +176,16 @@ def separate(vdf_temp, min_distance=2, min_size=10, max_size=np.inf,
     # Cluster the maxima by DBSCAN based on min_distance. For each
     # cluster, only the maximum closest to the average maxima position is
     # used as a marker.
-    clusters = DBSCAN(eps=min_distance, metric='euclidean', min_samples=1,
-                      ).fit(np.transpose(maxi_coord1))
-    local_maxi = np.zeros_like(local_maxi)
-    for n in np.arange(clusters.labels_.max()+1):
-        maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]
-        com = np.average(maxi_coord1_n, axis=0).astype('int')
-        index = distance_matrix([com], maxi_coord1_n).argmin()
-        index = maxi_coord1_n[index]
-        local_maxi[index[0], index[1]] = True
+    if min_distance>1 and np.shape(maxi_coord1)[1]>1:# and np.min(distance_matrix())<min_distance:
+        clusters = DBSCAN(eps=min_distance, metric='euclidean', min_samples=1,
+                          ).fit(np.transpose(maxi_coord1))
+        local_maxi = np.zeros_like(local_maxi)
+        for n in np.arange(clusters.labels_.max()+1):
+            maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]
+            com = np.average(maxi_coord1_n, axis=0).astype('int')
+            index = distance_matrix([com], maxi_coord1_n).argmin()
+            index = maxi_coord1_n[index]
+            local_maxi[index[0], index[1]] = True
 
     # Use the resulting maxima as markers. Each marker should have a
     # unique label value. For each maximum, generate markers with the same

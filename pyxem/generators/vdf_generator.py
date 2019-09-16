@@ -57,7 +57,6 @@ class VDFGenerator:
 
         self.signal = signal
         self.vectors = unique_vectors
-        self.vectors = transfer_signal_axes(self.vectors, self.signal)
 
     def get_vector_vdf_images(self, radius, normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
@@ -155,14 +154,14 @@ class VDFGenerator:
 
 
 class VDFSegmentGenerator:
-    """Generates VDF segments for specified VDFImages and corresponding
-    set of aperture positions (i.e. unique vectors).
+    """Generates VDF segments for the given VDFImages with corresponding
+    vector (aperture) positions.
 
     Parameters
     ----------
     vdfs : VDFImage
         The VDF images to be segmented.
-    vectors: DiffractionVectors
+    vectors: DiffractionVectors, optional
         The vector positions corresponding to the VDF images.
 
     """
@@ -172,16 +171,16 @@ class VDFSegmentGenerator:
         self.vdf_images = vdfs
         self.vectors = vdfs.vectors
 
-    def get_vdf_segments(self, min_distance=2, min_size=10,
+    def get_vdf_segments(self, min_distance=1, min_size=1,
                          max_size=np.inf, max_number_of_grains=np.inf,
-                         marker_radius=2, threshold=False,
+                         marker_radius=1, threshold=False,
                          exclude_border=False):
-        """Separate segments (grains) from each of the VDF images using
-        edge-detection by the sobel transform and the watershed
+        """Separate segments from each of the VDF images using
+        edge-detection by the Sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a
         VDFSegment, similar to VDFImage, but where each image is a
         segment of a VDF and the vectors correspond to each segment and
-        are not (necessarily) unique.
+        are not necessarily unique.
 
         Parameters
         ----------
@@ -234,7 +233,6 @@ class VDFSegmentGenerator:
         # Create an array of length equal to the number of vectors where each
         # element is a np.object with shape (n: number of segments for this
         # VDFImage, VDFImage size x, VDFImage size y).
-        # map(lambda ids: my_function(ids, ip), volume_ids);
         vdfsegs = np.array(vdfs.map(
             separate, show_progressbar=True, inplace=False,
             min_distance=min_distance, min_size=min_size, max_size=max_size,
@@ -246,9 +244,11 @@ class VDFSegmentGenerator:
         for i, vector in zip(np.arange(vectors.size), vectors):
             segments = np.append(segments, vdfsegs[i])
             num_segs = np.shape(vdfsegs[i])[0]
-            vectors_of_segments = np.append(vectors_of_segments,
-                                            np.broadcast_to(vector,
-                                                            (num_segs, 2)))
+            vectors_of_segments = np.append(
+                vectors_of_segments, np.broadcast_to(vector, (num_segs, 2)))
+
+        if segments.dtype == object:
+            segments = segments.astype(float)
 
         vectors_of_segments = vectors_of_segments.reshape((-1, 2))
         segments = segments.reshape((np.shape(vectors_of_segments)[0],
