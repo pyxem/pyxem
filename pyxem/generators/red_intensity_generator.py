@@ -172,7 +172,7 @@ class ReducedIntensityGenerator():
 
         return
 
-    def get_reduced_intensity(self, s_cutoff=None):
+    def get_reduced_intensity(self):
         """Obtains a reduced intensity profile from the radial profile.
 
         Parameters
@@ -181,14 +181,9 @@ class ReducedIntensityGenerator():
                     A list of the form [s_min, s_max] to change the s_cutoff
                     from the fit.
         """
-        if s_cutoff:
-            self.cutoff = s_cutoff
-        else:
-            s_cutoff = self.cutoff
 
         # define numerical cutoff to remove certain data parts
         s_scale = self.signal.axes_manager.signal_axes[0].scale
-        num_min, num_max = int(s_cutoff[0] / s_scale), int(s_cutoff[1] / s_scale)
 
         s = np.arange(self.signal.axes_manager.signal_axes[0].size,
                       dtype='float64')

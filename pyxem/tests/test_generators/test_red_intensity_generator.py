@@ -116,7 +116,7 @@ def test_get_reduced_intensity(red_int_generator):
     red_int_generator.fit_atomic_scattering(elements=elements, fracs=fracs)
     ri = red_int_generator.get_reduced_intensity()
     assert isinstance(ri, ReducedIntensity1D)
-    ri = red_int_generator.get_reduced_intensity(s_cutoff=[0, 8])
+    ri = red_int_generator.get_reduced_intensity()
     assert isinstance(ri, ReducedIntensity1D)
     # better test needed here, an assert allclose or such at least
     return
