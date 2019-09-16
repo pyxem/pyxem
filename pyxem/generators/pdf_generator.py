@@ -62,12 +62,11 @@ class PDFGenerator():
         r_increment : float
                     Step size in r in the extracted PDF.
         """
-        r_min, r_max = r_cutoff
-        s_min, s_max = s_cutoff
+        r_min, r_max = r_cutoff[0],r_cutoff[1]
+        s_min, s_max = s_cutoff[0],s_cutoff[1]
 
         r_values = np.arange(r_min, r_max, r_increment)
         r_values = r_values.reshape(1, r_values.size)
-        # turn to a row vector for integral
 
         s_scale = self.signal.axes_manager.signal_axes[0].scale
         s_limits = [int(s_min / s_scale), int(s_max / s_scale)]
@@ -75,7 +74,7 @@ class PDFGenerator():
         #check that these aren't out of bounds
         if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
             s_limits[1] = self.signal.axes_manager.signal_axes[0].size
-            print('s_max out of bounds for reduced intensity.',
+            Warning('s_max out of bounds for reduced intensity.',
                   'Setting to full signal')
         s_values = np.arange(s_limits[0], s_limits[1], 1) * s_scale
         s_values = s_values.reshape(s_values.size, 1)  # column vector
@@ -84,7 +83,8 @@ class PDFGenerator():
 
         pdf_sine = np.sin(2 * np.pi * s_values@r_values)
         # creates a vector of the pdf
-        rpdf = PairDistributionFunction1D(8 * np.pi * s_scale * (limited_red_int@pdf_sine))
+        rpdf = PairDistributionFunction1D(8 * np.pi * s_scale
+                                    * np.matmul(limited_red_int,pdf_sine))
 
         signal_axis = rpdf.axes_manager.signal_axes[0]
         pdf_scaling = r_increment

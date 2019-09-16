@@ -77,6 +77,11 @@ class ScatteringFitComponent(Component):
     def function(self, x):
         """
         The actual fitted function. Based on the HyperSpy Component class.
+        The function "function" is called innately by HyperSpy's fitting
+        algorithm, and represents the appropriate atomic scattering factor
+        function presented respectively in:
+            lobato: Lobato & Van Dyck (2014)
+            xtables: International Tables Vol. C, table 4.3.2.3
 
         """
         N = self.N.value
