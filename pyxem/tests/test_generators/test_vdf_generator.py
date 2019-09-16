@@ -116,7 +116,9 @@ def test_vdf_generator_from_map(diffraction_pattern):
 
 
 @pytest.fixture(params=[
-    np.array([np.array([0, 0]), np.array([3, 3]), np.array([5, 5])])
+    np.array([np.array([0, 0]), np.array([3, 0]), np.array([3, 5]),
+              np.array([0, 5]), np.array([0, 3]), np.array([3, 3]),
+              np.array([5, 3]), np.array([5, 5])])
 ])
 def unique_vectors(request):
     uv = DiffractionVectors(request.param)
@@ -126,12 +128,26 @@ def unique_vectors(request):
 
 @pytest.fixture
 def signal_data():
-    diff_sim_data = np.zeros((4, 5, 6, 6))
-    s = ElectronDiffraction2D(diff_sim_data)
-    s.inav[:2, :2].data[..., 0, 0] = 1
+    s = ElectronDiffraction2D(np.zeros((4, 5, 6, 6)))
+    s.inav[:2, :2].data[..., 0, 0] = 2
+    s.inav[:2, :2].data[..., 0, 3] = 2
+    s.inav[:2, :2].data[..., 3, 5] = 2
+
+    s.inav[2:, :3].data[..., 3, 3] = 2
+    s.inav[2:, :3].data[..., 3, 0] = 2
+
     s.inav[2, :2].data[..., 0, 0] = 1
-    s.inav[2:, :3].data[..., 3, 3] = 1
-    s.inav[1:, 2:].data[..., 5, 5] = 1
+    s.inav[2, :2].data[..., 0, 3] = 1
+    s.inav[2, :2].data[..., 3, 5] = 1
+    s.inav[2, :2].data[..., 3, 3] = 1
+    s.inav[2, :2].data[..., 3, 0] = 1
+
+    s.inav[:2, 2:].data[..., 5, 5] = 3
+    s.inav[:2, 2:].data[..., 5, 0] = 3
+    s.inav[:2, 2:].data[..., 5, 3] = 3
+
+    s.inav[3:, 2:].data[..., 5, 5] = 3
+    s.inav[3:, 2:].data[..., 5, 0] = 3
     return s
 
 
