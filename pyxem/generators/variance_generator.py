@@ -47,7 +47,7 @@ class VarianceGenerator():
 
         # add a check for calibration
 
-    def get_diffraction_variance(self, dqe):
+    def get_diffraction_variance(self, dqe, set_data_type=None):
         """Calculates the variance in scattered intensity as a function of
         scattering vector.
 
@@ -57,6 +57,15 @@ class VarianceGenerator():
         dqe : float
             Detective quantum efficiency of the detector for Poisson noise
             correction.
+        data_type : numpy data type.
+            For numpy data types, see
+            https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html.
+            This is incorporated as squaring the numbers in meansq_dp results
+            in considerably larger than the ones in the original array. This can
+            result in an overflow error that is difficult to distinguish. Hence
+            the data can be converted to a different data type to accommodate.
+
+
 
         Returns
         -------
@@ -65,9 +74,14 @@ class VarianceGenerator():
             A DiffractionVariance object containing the mean DP, mean
             squared DP, and variance DP.
         """
+
         dp = self.signal
         mean_dp = dp.mean((0, 1))
-        meansq_dp = Signal2D(np.square(dp.data.astype(np.uint16))).mean((0, 1))
+        if set_data_type is None:
+            meansq_dp = Signal2D(np.square(dp.data)).mean((0, 1))
+        else:
+            meansq_dp = Signal2D(np.square(dp.data.astype(set_data_type))).mean((0, 1))
+            
         normvar = (meansq_dp.data / np.square(mean_dp.data)) - 1.
         var_dp = Signal2D(normvar)
         corr_var_array = var_dp.data - (np.divide(dqe, mean_dp.data))

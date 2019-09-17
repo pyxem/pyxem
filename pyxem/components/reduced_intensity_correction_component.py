@@ -28,12 +28,21 @@ from hyperspy.component import Component
 
 class ReducedIntensityCorrectionComponent(Component):
 
-    def __init__(self, a=0, b=0, c=0, d=0):
+    def __init__(self, a=0., b=0., c=0., d=0.):
         '''
         Parameters
         ----------
-        a,b,c,d : the coefficients of the 1st, 2nd, 3rd, and 4th order terms
-        respectively.
+        a : float
+        b : float
+        c : float
+        d : float
+            a, b, c, and d are the coefficients of the 1st, 2nd, 3rd, and 4th
+            order terms respectively of the returned polynomial.
+
+        Returns
+        -------
+        p : polynomial of the form ax + bx^2 + cx^3 + dx^4
+
         '''
 
         Component.__init__(self, ('a', 'b', 'c', 'd'))
@@ -44,4 +53,5 @@ class ReducedIntensityCorrectionComponent(Component):
         c = self.c.value
         d = self.d.value
 
-        return a * x + b * (x**2) + c * (x**3) + d * (x**4)
+        p = a * x + b * (x**2) + c * (x**3) + d * (x**4)
+        return p

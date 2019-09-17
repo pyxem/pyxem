@@ -44,8 +44,10 @@ class PDFGenerator():
         self.signal = signal
 
     def get_pdf(self,
-                s_cutoff,
-                r_cutoff=[0, 20],
+                s_min,
+                s_max,
+                r_min=0,
+                r_max=20,
                 r_increment=0.01
                 ):
         """ Calculates the pdf from the reduced intensity signal.
@@ -62,8 +64,6 @@ class PDFGenerator():
         r_increment : float
                     Step size in r in the extracted PDF.
         """
-        r_min, r_max = r_cutoff[0],r_cutoff[1]
-        s_min, s_max = s_cutoff[0],s_cutoff[1]
 
         r_values = np.arange(r_min, r_max, r_increment)
         r_values = r_values.reshape(1, r_values.size)
