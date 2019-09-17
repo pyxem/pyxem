@@ -22,88 +22,88 @@ signals:
     signal_dimension: 1
     dtype: real
     lazy: False
-    import: pyxem.signals.diffraction1d
+    module: pyxem.signals.diffraction1d
   Diffraction2D:
     signal_type: "Diffraction2D"
     signal_dimension: 2
     dtype: real
     lazy: False
-    import: pyxem.signals.diffraction2d
+    module: pyxem.signals.diffraction2d
   LazyDiffraction1D:
     signal_type: "LazyDiffraction1D"
     signal_dimension: 1
     dtype: real
-    lazy: False
-    import: pyxem.signals.diffraction1d
+    lazy: True
+    module: pyxem.signals.diffraction1d
   LazyDiffraction2D:
     signal_type: "LazyDiffraction2D"
     signal_dimension: 2
     dtype: real
-    lazy: False
-    import: pyxem.signals.diffraction2d
+    lazy: True
+    module: pyxem.signals.diffraction2d
   ElectronDiffraction1D:
     signal_type: "ElectronDiffraction1D"
     signal_dimension: 1
     dtype: real
     lazy: False
-    import: pyxem.signals.electron_diffraction1d
+    module: pyxem.signals.electron_diffraction1d
   ElectronDiffraction2D:
     signal_type: "ElectronDiffraction2D"
     signal_dimension: 2
     dtype: real
     lazy: False
-    import: pyxem.signals.electron_diffraction2d
+    module: pyxem.signals.electron_diffraction2d
   LazyElectronDiffraction1D:
     signal_type: "LazyElectronDiffraction1D"
     signal_dimension: 1
     dtype: real
-    lazy: False
-    import: pyxem.signals.electron_diffraction1d
+    lazy: True
+    module: pyxem.signals.electron_diffraction1d
   LazyElectronDiffraction2D:
     signal_type: "LazyElectronDiffraction2D"
     signal_dimension: 2
     dtype: real
-    lazy: False
-    import: pyxem.signals.electron_diffraction2d
+    lazy: True
+    module: pyxem.signals.electron_diffraction2d
   DiffractionVectors:
     signal_type: "DiffractionVectors"
     signal_dimension: None
     dtype: real
     lazy: False
-    import: pyxem.signals.diffraction_vectors
+    module: pyxem.signals.diffraction_vectors
   TemplateMatchingResults:
     signal_type: "TemplateMatchingResults"
     signal_dimension: None
     dtype: real
     lazy: False
-    import: pyxem.signals.indexation_results
+    module: pyxem.signals.indexation_results
   VectorMatchingResults:
     signal_type: "VectorMatchingResults"
     signal_dimension: None
     dtype: real
     lazy: False
-    import: pyxem.signals.indexation_results
+    module: pyxem.signals.indexation_results
   CrystallographicMap:
     signal_type: "CrystallographicMap"
     signal_dimension: None
     dtype: real
     lazy: False
-    import: pyxem.signals.crystallographic_map
+    module: pyxem.signals.crystallographic_map
   DisplacementGradientMap:
     signal_type: "DisplacementGradientMap"
     signal_dimension: 2
     dtype: real
     lazy: False
-    import: pyxem.signals.tensor_field
+    module: pyxem.signals.tensor_field
   VDFImage:
     signal_type: "VDFImage"
     signal_dimension: 2
     dtype: real
     lazy: False
-    import: pyxem.signals.vdf_image
+    module: pyxem.signals.vdf_image
 
-components:
+components2D:
     DiffractionComponent:
-      import: pyxem.components.diffraction_component
+      module: pyxem.components.diffraction_component
     ScalableReferencePattern:
-      import: pyxem.components.scalable_reference_component
+      module: pyxem.components.scalable_reference_component
