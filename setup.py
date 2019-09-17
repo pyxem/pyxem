@@ -57,6 +57,7 @@ setup(
     package_data={
         "": ["LICENSE", "readme.rst","hyperspy_extension.yaml"],
         "pyxem": ["*.py"],
+    },
     entry_points={'hyperspy.extensions': 'pyxem = pyxem'},
     },
 )
