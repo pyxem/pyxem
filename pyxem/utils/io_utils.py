@@ -168,7 +168,6 @@ def load_mib(mib_filename, reshape=True):
     if hdr_stuff['Assembly Size'] == '2x2':
         data = _add_crosses(data)
 
-    #data_hs = hs.signals.Signal2D(data).as_lazy()
     data_pxm = LazyElectronDiffraction2D(data)
 
     # Tranferring dict info to metadata
