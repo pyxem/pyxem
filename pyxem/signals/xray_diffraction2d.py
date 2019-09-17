@@ -111,31 +111,31 @@ class XrayDiffraction2D(Diffraction2D):
         pass
 
     def as_lazy(self, *args, **kwargs):
-        """Create a copy of the ElectronDiffraction2D object as a
-        :py:class:`~pyxem.signals.electron_diffraction2d.LazyElectronDiffraction2D`.
+        """Create a copy of the XrayDiffraction2D object as a
+        :py:class:`~pyxem.signals.xray_diffraction2d.LazyXrayDiffraction2D`.
 
         Parameters
         ----------
         copy_variance : bool
-            If True variance from the original ElectronDiffraction2D object is
-            copied to the new LazyElectronDiffraction2D object.
+            If True variance from the original XrayDiffraction2D object is
+            copied to the new LazyXrayDiffraction2D object.
 
         Returns
         -------
-        res : :py:class:`~pyxem.signals.electron_diffraction2d.LazyElectronDiffraction2D`.
+        res : :py:class:`~pyxem.signals.xray_diffraction2d.LazyXrayDiffraction2D`.
             The lazy signal.
         """
         res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyElectronDiffraction2D
+        res.__class__ = LazyXrayDiffraction2D
         res.__init__(**res._to_dictionary())
         return res
 
     def decomposition(self, *args, **kwargs):
         super().decomposition(*args, **kwargs)
-        self.__class__ = ElectronDiffraction2D
+        self.__class__ = XrayDiffraction2D
 
 
-class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):
+class LazyXrayDiffraction2D(LazySignal, XrayDiffraction2D):
 
     _lazy = True
 
@@ -144,9 +144,9 @@ class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):
 
     def compute(self, *args, **kwargs):
         super().compute(*args, **kwargs)
-        self.__class__ = ElectronDiffraction2D
+        self.__class__ = XrayDiffraction2D
         self.__init__(**self._to_dictionary())
 
     def decomposition(self, *args, **kwargs):
         super().decomposition(*args, **kwargs)
-        self.__class__ = LazyElectronDiffraction2D
+        self.__class__ = LazyXrayDiffraction2D
