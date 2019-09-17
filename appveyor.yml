@@ -1,0 +1,42 @@
+# environment variables
+environment:
+
+  global:
+    DEPS: "hyperspy-base diffsims lmfit"
+    TEST_DEPS: "pytest"
+    MPLBACKEND: "agg"
+
+  matrix:
+    - PY_VERSION: 3.7
+    - PY_VERSION: 3.6
+# scripts that run after cloning repository
+install:
+  # Activate miniconda root environment
+  - "CALL C:\\Miniconda37-x64\\Scripts\\activate.bat"
+
+  # Setup miniconda environment.
+  - ps: Add-AppveyorMessage "Setup miniconda environment..."
+  - "conda update -y -n base conda"
+  # See https://github.com/conda/conda/issues/8836 & others
+  - set "PATH=%MINICONDA%\condabin:%PATH%"
+  - 'conda config --add channels conda-forge'
+  - "conda create -y -n testenv python=%PY_VERSION%"
+  - "conda activate testenv"
+
+  # Install the dependencies of pyxem.
+  - 'conda install -yq %DEPS% %TEST_DEPS%'
+
+  # Install our package
+  - 'pip install -e .'
+
+build: off
+
+test_script:
+  - 'pytest'
+
+after_test:
+  - 'python setup.py bdist_wheel'
+
+artifacts:
+  - path: dist\*.whl
+    name: wheel

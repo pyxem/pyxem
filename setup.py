@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 exec(open('pyxem/version.py').read())  # grab version info
 
@@ -25,35 +25,37 @@ exec(open('pyxem/version.py').read())  # grab version info
 setup(
     name='pyxem',
     version=__version__,
-    description='An open-source Python library for crystallographic electron'
-                'microscopy.',
+    description='Crystallographic Diffraction Microscopy in Python.',
     author=__author__,
     author_email=__email__,
     license="GPLv3",
     url="https://github.com/pyxem/pyxem",
-
+    long_description=open('README.rst').read(),
     classifiers=[
-        'Programming Language :: Python :: 3.6',
+	"Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+	"Programming Language :: Python :: 3.7",
+	"Development Status :: 4 - Beta",
+	"Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Physics",
     ],
 
-    packages=[
-        'pyxem',
-        'pyxem.utils',
-        'pyxem.io_plugins',
-	    'pyxem.components',
-        'pyxem.generators',
-	    'pyxem.signals',
-        'pyxem.libraries'
-    ],
-
+    packages=find_packages(),
+    # adjust the tabbing
     install_requires=[
-    	'hyperspy >= 1.3',
-        'transforms3d',
-	'scikit-learn >= 0.19'
+      'scikit-image >= 0.15.0',   # exclude_border argument in peak_finder laplacian (PR #436)
+      'matplotlib >= 3.1.1' ,     # 3.1.0 failed
+      'scikit-learn >= 0.19',     # reason unknown
+      'hyperspy >= 1.5.2',        # earlier versions incompatible with numpy >= 1.17.0
+      'diffsims',
+      'lmfit >= 0.9.12'
       ],
-
     package_data={
-        "": ["LICENSE", "readme.rst", "requirements.txt"],
+        "": ["LICENSE", "readme.rst",],
         "pyxem": ["*.py"],
     },
 )

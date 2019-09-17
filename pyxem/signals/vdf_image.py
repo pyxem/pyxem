@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -20,11 +20,13 @@
 """
 
 from hyperspy.signals import Signal2D
+from pyxem.signals import push_metadata_through
 
 
 class VDFImage(Signal2D):
     _signal_type = "vdf_image"
 
     def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.vectors = None

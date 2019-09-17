@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -63,7 +63,7 @@ endianess2hdr = {
     '>': 'big-endian'}
 
 # Warning: for selection lists use tuples not lists.
-#keys extracted fromt the hdr file
+# keys extracted fromt the hdr file
 hdr_keys = {
     'width': int,
     'height': int,
@@ -92,14 +92,15 @@ hdr_keys = {
     'title': str,
 }
 
+
 def parse_hdr(fp):
     """Parse information from hdr (.hdr) file.
     Accepts file object 'fp. Returns dictionary hdr_info.
     """
     hdr_info = {}
     for line in fp.readlines():
-        #skip blank entries
-        if any (skip_line in line for skip_line in ('HDR', 'End')):
+        # skip blank entries
+        if any(skip_line in line for skip_line in ('HDR', 'End')):
             continue
         if line[:2] not in newline and line[0] != comment:
             line = line.strip('\r\n')
@@ -110,12 +111,12 @@ def parse_hdr(fp):
                 err += 'it should be a <TAB> ("\\t")'
                 raise IOError(err)
             line = [seg.strip() for seg in line.split(sep)]  # now it's a list
-            line[0] = line[0].strip(':') #remove ':' from keys
+            line[0] = line[0].strip(':')  # remove ':' from keys
         hdr_info[line[0]] = line[1]
 
-    #assign values to mandatory keys
-    #set the array size of the chip
-    #Adding the try argument to accommodate the new hdr formatting as of April 2018
+    # assign values to mandatory keys
+    # set the array size of the chip
+    # Adding the try argument to accommodate the new hdr formatting as of April 2018
     try:
         if hdr_info['Assembly Size (1X1, 2X2)'] == '1x1':
             hdr_info['width'] = 256
@@ -123,7 +124,7 @@ def parse_hdr(fp):
         elif hdr_info['Assembly Size (1X1, 2X2)'] == '2x2':
             hdr_info['width'] = 512
             hdr_info['height'] = 512
-    except:
+    except BaseException:
         if hdr_info['Assembly Size (NX1, 2X2)'] == '1x1':
             hdr_info['width'] = 256
             hdr_info['height'] = 256
@@ -131,35 +132,35 @@ def parse_hdr(fp):
             hdr_info['width'] = 512
             hdr_info['height'] = 512
 
-    #convert frames to depth
+    # convert frames to depth
     hdr_info['depth'] = int(hdr_info['Frames in Acquisition (Number)'])
-    #set mib offset
+    # set mib offset
     hdr_info['offset'] = 0
-    #set data-type
+    # set data-type
     hdr_info['data-type'] = 'unsigned'
-    #set data-length
+    # set data-length
     if hdr_info['Counter Depth (number)'] == '6' or hdr_info['Counter Depth (number)'] == '12':
-        cd_int = int(hdr_info['Counter Depth (number)'] )
-        hdr_info['data-length'] = str(int((cd_int + cd_int/3) ))
+        cd_int = int(hdr_info['Counter Depth (number)'])
+        hdr_info['data-length'] = str(int((cd_int + cd_int / 3)))
     else:
         hdr_info['data-length'] = hdr_info['Counter Depth (number)']
-    #set byte order
+    # set byte order
     hdr_info['byte-order'] = 'dont-care'
-    #set record by to stack of images
+    # set record by to stack of images
     hdr_info['record-by'] = 'image'
 
-    #set title to file name
+    # set title to file name
     hdr_info['title'] = fp.name.split('\\')[-1]
-    #set time and date
-    #Adding the try argument to accommodate the new hdr formatting as of April 2018
+    # set time and date
+    # Adding the try argument to accommodate the new hdr formatting as of April 2018
     try:
         day, month, year_time = hdr_info['Time and Date Stamp (day, mnth, yr, hr, min, s)'].split('/')
-        year , time = year_time.split(' ')
+        year, time = year_time.split(' ')
         hdr_info['date'] = year + month + day
         hdr_info['time'] = time
-    except:
+    except BaseException:
         day, month, year_time = hdr_info['Time and Date Stamp (yr, mnth, day, hr, min, s)'].split('/')
-        year , time = year_time.split(' ')
+        year, time = year_time.split(' ')
         hdr_info['date'] = year + month + day
         hdr_info['time'] = time
     return hdr_info
@@ -210,8 +211,8 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
     data_type = np.dtype(data_type)
     data_type = data_type.newbyteorder(endian)
 
-    #set header number of bits
-    hdr_multiplier = (int(data_length)/8)**-1
+    # set header number of bits
+    hdr_multiplier = (int(data_length) / 8)**-1
     hdr_bits = int(384 * hdr_multiplier)
 
     data = np.memmap(fp,
@@ -226,10 +227,8 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
         width_height = width * height
         #a_width, a_height = round(np.sqrt(depth)), depth/ (round(np.sqrt(depth)))
         size = (depth, height, width)
-        #print(size)
-        #remove headers at the beginning of each frame and reshape
-        data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(size)
-        #print()
+        # remove headers at the beginning of each frame and reshape
+        data = data.reshape(-1, width_height + hdr_bits)[:, -width_height:].reshape(size)
     elif record_by == 'dont-care':  # stack of images
         size = (height, width)
         data = data.reshape(size)
@@ -239,79 +238,9 @@ def read_mib(hdr_info, fp, mmap_mode='c'):
 def file_reader(filename, hdr_info=None, encoding="latin-1",
                 mmap_mode='c', *args, **kwds):
     """Parses a Medipix hdr (.hdr) file and reads the data from the
-    corresponding raw (.mib) file; or, reads a raw file if the dictionary
-    hdr_info is provided.
-
-    hdr stands for "Raw Parameter List", an ASCII text, tab delimited file in
-    which HyperSpy reads the image parameters for a raw file.
-
-                    TABLE OF hdr PARAMETERS
-        key             type     description
-      ----------   ------------ --------------------
-      # Mandatory      keys:
-      width            int      # pixels per row
-      height           int      # number of rows
-      depth            int      # number of images or spectral pts
-      offset           int      # bytes to skip
-      data-type        str      # 'signed', 'unsigned', or 'float'
-      data-length      str      # bytes per pixel  '1', '2', '4', or '8'
-      byte-order       str      # 'big-endian', 'little-endian', or 'dont-care'
-      record-by        str      # 'image', 'vector', or 'dont-care'
-      # HyperSpy-specific keys
-      depth-origin    int      # energy offset in pixels
-      depth-scale     float    # energy scaling (units per pixel)
-      depth-units     str      # energy units, usually eV
-      depth-name      str      # Name of the magnitude stored as depth
-      width-origin         int      # column offset in pixels
-      width-scale          float    # column scaling (units per pixel)
-      width-units          str      # column units, usually nm
-      width-name      str           # Name of the magnitude stored as width
-      height-origin         int      # row offset in pixels
-      height-scale          float    # row scaling (units per pixel)
-      height-units          str      # row units, usually nm
-      height-name      str           # Name of the magnitude stored as height
-      signal            str        # Type of the signal stored, e.g. EDS_SEM
-      convergence-angle float   # TEM convergence angle in mrad
-      tilt-stage        float   # The tilt of the stage
-      date              str     # date in ISO 8601
-      time              str     # time in ISO 8601
-      title              str    # title of the signal to be stored
-
-    NOTES
-    -----
-
-    When 'data-length' is 1, the 'byte order' is not relevant as there is only
-    one byte per datum, and 'byte-order' should be 'dont-care'.
-
-    When 'depth' is 1, the file has one image, 'record-by' is not relevant and
-    should be 'dont-care'. For spectral images, 'record-by' is 'vector'.
-    For stacks of images, 'record-by' is 'image'.
-
-    Floating point numbers can be IEEE 4-byte, or IEEE 8-byte. Therefore if
-    data-type is float, data-length MUST be 4 or 8.
-
-    The hdr file is read in a case-insensitive manner. However, when providing
-    a dictionary as input, the keys MUST be lowercase.
-
-    Comment lines, beginning with a semi-colon ';' are allowed anywhere.
-
-    The first non-comment in the hdr file line MUST have two column names:
-    'name_1'<TAB>'name_2'; any name would do e.g. 'key'<TAB>'value'.
-
-    Parameters can be in ANY order.
-
-    In the hdr file, the parameter name is followed by ONE tab (spaces are
-    ignored) e.g.: 'data-length'<TAB>'2'
-
-    In the hdr file, other data and more tabs can follow the two items on
-    each row, and are ignored.
-
-    Other keys and values can be included and are ignored.
-
-    Any number of spaces can go along with each tab.
+    corresponding raw (.mib) file.
 
     """
-
     if not hdr_info:
         if filename[-3:] in file_extensions:
             with codecs.open(filename, encoding=encoding,
@@ -627,8 +556,8 @@ def write_hdr(filename, keys_dictionary, encoding='ascii'):
 def write_mib(filename, signal, record_by):
     """Writes the raw file object
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename : string
         the filename, either with the extension or without it
     record_by : string

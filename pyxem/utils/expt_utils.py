@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2018 The pyXem developers
+# Copyright 2017-2019 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,7 +18,10 @@
 
 import numpy as np
 import scipy.ndimage as ndi
+import pyxem as pxm  # for ElectronDiffraction2D
+
 from scipy.ndimage.interpolation import shift
+from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
@@ -27,6 +30,7 @@ from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from scipy.optimize import curve_fit
+from tqdm import tqdm
 
 
 """
@@ -103,8 +107,7 @@ def _polar2cart(r, theta):
 
 
 def radial_average(z, mask=None):
-    """Calculate the radial profile by azimuthal averaging about a specified
-    center.
+    """Calculate the radial profile by azimuthal averaging about the center.
 
     Parameters
     ----------
@@ -222,9 +225,9 @@ def gain_normalise(z, dref, bref):
     ----------
     z : np.array()
         Two-dimensional data array containing signal.
-    dref : ElectronDiffraction
+    dref : ElectronDiffraction2D
         Two-dimensional data array containing dark reference.
-    bref : ElectronDiffraction
+    bref : ElectronDiffraction2D
         Two-dimensional data array containing bright reference.
 
     Returns
@@ -272,17 +275,53 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     return z_bar
 
 
-def affine_transformation(z, matrix, order, *args, **kwargs):
-    """Apply an affine transformation to a 2-dimensional array.
+def convert_affine_to_transform(D, shape):
+    """ Converts an affine transform on a diffraction pattern to a suitable
+    form for skimage.transform.warp()
+
+    Parameters
+    ----------
+    D : np.array
+        Affine transform to be applied
+    shape : tuple
+        Shape tuple in form (y,x) for the diffraction pattern
+
+    Returns
+    -------
+    transformation : np.array
+        3x3 numpy array of the transformation to be applied.
+
+    """
+
+    shift_x = (shape[1] - 1) / 2
+    shift_y = (shape[0] - 1) / 2
+
+    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
+    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
+
+    # This defines the transform you want to perform
+    distortion = tf.AffineTransform(matrix=D)
+
+    # skimage transforms can be added like this, does matrix multiplication,
+    # hence the need for the brackets. (Note tf.warp takes the inverse)
+    transformation = (tf_shift + (distortion + tf_shift_inv)).inverse
+
+    return transformation
+
+
+def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs):
+    """Apply a transformation to a 2-dimensional array.
 
     Parameters
     ----------
     z : np.array
         Array to be transformed
-    matrix : np.array
-        3x3 numpy array specifying the affine transformation to be applied.
+    transformation : np.array
+        3x3 numpy array specifying the transformation to be applied.
     order : int
         Interpolation order.
+    keep_dtype : bool
+        If True dtype of returned object is that of z
     *args :
         To be passed to skimage.warp
     **kwargs :
@@ -292,19 +331,18 @@ def affine_transformation(z, matrix, order, *args, **kwargs):
     -------
     trans : array
         Affine transformed diffraction pattern.
+
+    Notes
+    -----
+    Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
-    # These three lines account for the transformation center not being (0,0)
-    shift_y, shift_x = np.array(z.shape[:2]) / 2.
-    tf_shift = tf.SimilarityTransform(translation=[-shift_x, -shift_y])
-    tf_shift_inv = tf.SimilarityTransform(translation=[shift_x, shift_y])
-
-    # This defines the transform you want to perform
-    transformation = tf.AffineTransform(matrix=matrix)
-
-    # skimage transforms can be added like this, actually matrix multiplication,
-    # hence the need for the brackets. (Note tf.warp takes the inverse)
-    trans = tf.warp(z, (tf_shift + (transformation + tf_shift_inv)).inverse,
-                    order=order, *args, **kwargs)
+    if keep_dtype == False:
+        trans = tf.warp(z, transformation,
+                        order=order, *args, **kwargs)
+    if keep_dtype == True:
+        trans = tf.warp(z, transformation,
+                        order=order, preserve_range=True, *args, **kwargs)
+        trans = trans.astype(z.dtype)
 
     return trans
 
@@ -457,8 +495,109 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
+def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, window: int = 10, kind: int = 3) -> float:
+    """Find the index of the pixel corresponding to peak maximum in 1D pattern
+
+    Parameters
+    ----------
+    sigma : int
+        Sigma value for Gaussian blurring kernel for initial beam center estimation.
+    upsample_factor : int
+        Upsample factor for subpixel maximum finding, i.e. the maximum will
+        be found with a precision of 1 / upsample_factor of a pixel.
+    kind : str or int, optional
+        Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+        ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+        ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+        interpolation of zeroth, first, second or third order; ‘previous’
+        and ‘next’ simply return the previous or next value of the point) or as
+        an integer specifying the order of the spline interpolator to use.
+    window : int
+       A box of size 2*window+1 around the first estimate is taken and
+       expanded by `upsample_factor` to to interpolate the pattern to get
+       the peak maximum position with subpixel precision.
+
+    Returns
+    -------
+    center: float
+        Pixel position of the maximum
+    """
+    y1 = ndi.filters.gaussian_filter1d(arr, sigma)
+    c1 = np.argmax(y1)  # initial guess for beam center
+
+    m = upsample_factor
+    w = window
+    win_len = 2 * w + 1
+
+    try:
+        r1 = np.linspace(c1 - w, c1 + w, win_len)
+        f = interp1d(r1, y1[c1 - w: c1 + w + 1], kind=kind)
+        r2 = np.linspace(c1 - w, c1 + w, win_len * m)  # extrapolate for subpixel accuracy
+        y2 = f(r2)
+        c2 = np.argmax(y2) / m  # find beam center with `m` precision
+    except ValueError:  # if c1 is too close to the edges, return initial guess
+        center = c1
+    else:
+        center = c2 + c1 - w
+
+    return center
+
+
+def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_factor: int = 100, kind: int = 3) -> (float, float):
+    """Find the center of the primary beam in the image `img` by summing along
+    X/Y directions and finding the position along the two directions independently.
+
+    Parameters
+    ----------
+    sigma : int
+        Sigma value for Gaussian blurring kernel for initial beam center estimation.
+    upsample_factor : int
+        Upsample factor for subpixel beam center finding, i.e. the center will
+        be found with a precision of 1 / upsample_factor of a pixel.
+    kind : str or int, optional
+        Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+        ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+        ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+        interpolation of zeroth, first, second or third order; ‘previous’
+        and ‘next’ simply return the previous or next value of the point) or as
+        an integer specifying the order of the spline interpolator to use.
+
+    Returns
+    -------
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
+    """
+    xx = np.sum(img, axis=1)
+    yy = np.sum(img, axis=0)
+
+    cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind)
+    cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind)
+
+    center = np.array([cx, cy])
+    return center
+
+
+def find_beam_center_blur(z: np.ndarray, sigma: int = 30) -> np.ndarray:
+    """Estimate direct beam position by blurring the image with a large
+    Gaussian kernel and finding the maximum.
+
+    Parameters
+    ----------
+    sigma : float
+        Sigma value for Gaussian blurring kernel.
+
+    Returns
+    -------
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
+    """
+    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
+    center = np.unravel_index(blurred.argmax(), blurred.shape)
+    return np.array(center)
+
+
 def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to centre the direct beam centre by a cross-correlation algorithm.
+    """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
@@ -505,102 +644,6 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     return (shift - 0.5)
 
 
-def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
-    """ calculate the distance of each 2D points from the center (xc, yc) """
-    xp = x * np.cos(rot) - y * np.sin(rot)
-    yp = x * np.sin(rot) + y * np.cos(rot)
-    xcp = xc * np.cos(rot) - yc * np.sin(rot)
-    ycp = xc * np.sin(rot) + yc * np.cos(rot)
-
-    return np.sqrt((xp - xcp)**2 + asym * (yp - ycp)**2)
-
-
-def call_ring_pattern(xcentre, ycentre):
-    """
-    Function to make a call to the function ring_pattern without passing the
-    variables directly (necessary for using scipy.optimize.curve_fit).
-
-    Parameters
-    ----------
-    xcentre : float
-        The coordinate (fractional pixel units) of the diffraction
-        pattern centre in the first dimension
-    ycentre : float
-        The coordinate (fractional pixel units) of the diffraction
-        pattern centre in the second dimension
-
-    Returns
-    -------
-    ring_pattern : function
-        A function that calculates a ring pattern given a set of points and
-        parameters.
-
-    """
-    def ring_pattern(pts, scale, amplitude, spread, direct_beam_amplitude,
-                     asymmetry, rotation):
-        """Calculats a polycrystalline gold diffraction pattern given a set of
-        pixel coordinates (points). It uses tabulated values of the spacings
-        (in reciprocal Angstroms) and relative intensities of rings derived from
-        X-ray scattering factors.
-
-        Parameters
-        -----------
-        pts : 1D array
-            One-dimensional array of points (first half as first-dimension
-            coordinates, second half as second-dimension coordinates)
-        scale : float
-            An initial guess for the diffraction calibration
-            in 1/Angstrom units
-        amplitude : float
-            An initial guess for the amplitude of the polycrystalline rings
-            in arbitrary units
-        spread : float
-            An initial guess for the spread within each ring (Gaussian width)
-        direct_beam_amplitude : float
-            An initial guess for the background intensity from
-            the direct beam disc in arbitrary units
-        asymmetry : float
-            An initial guess for any elliptical asymmetry in the pattern
-            (for a perfectly circular pattern asymmetry=1)
-        rotation : float
-            An initial guess for the rotation of the (elliptical) pattern
-            in radians.
-
-        Returns
-        -------
-        ring_pattern : np.array()
-            A one-dimensional array of the intensities of the ring pattern
-            at the supplied points.
-
-        """
-        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = 0.4247, \
-            0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966
-        ring1, ring2, ring3, ring4, ring5, ring6, ring7, ring8 = ring1 * scale, \
-            ring2 * scale, ring3 * scale, ring4 * scale, ring5 * scale, \
-            ring6 * scale, ring7 * scale, ring8 * scale
-        amp1, amp2, amp3, amp4, amp5, amp6, amp7, amp8 = 1, 0.44, 0.19, \
-            0.16, 0.04, 0.014, 0.038, 0.036
-
-        x = pts[:round(np.size(pts, 0) / 2)]
-        y = pts[round(np.size(pts, 0) / 2):]
-        Ri = calc_radius_with_distortion(x, y, xcentre, ycentre,
-                                         asymmetry, rotation)
-
-        denom = 2 * spread**2
-        v0 = direct_beam_amplitude * Ri**-2  # np.exp((-1*(Ri)*(Ri))/d0)
-        v1 = amp1 * np.exp((-1 * (Ri - ring1) * (Ri - ring1)) / denom)
-        v2 = amp2 * np.exp((-1 * (Ri - ring2) * (Ri - ring2)) / denom)
-        v3 = amp3 * np.exp((-1 * (Ri - ring3) * (Ri - ring3)) / denom)
-        v4 = amp4 * np.exp((-1 * (Ri - ring4) * (Ri - ring4)) / denom)
-        v5 = amp5 * np.exp((-1 * (Ri - ring5) * (Ri - ring5)) / denom)
-        v6 = amp6 * np.exp((-1 * (Ri - ring6) * (Ri - ring6)) / denom)
-        v7 = amp7 * np.exp((-1 * (Ri - ring7) * (Ri - ring7)) / denom)
-        v8 = amp8 * np.exp((-1 * (Ri - ring8) * (Ri - ring8)) / denom)
-
-        return amplitude * (v0 + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8).ravel()
-    return ring_pattern
-
-
 def peaks_as_gvectors(z, center, calibration):
     """Converts peaks found as array indices to calibrated units, for use in a
     hyperspy map function.
@@ -610,7 +653,7 @@ def peaks_as_gvectors(z, center, calibration):
     z : numpy array
         peak postitions as array indices.
     center : numpy array
-        diffraction pattern centre in array indices.
+        diffraction pattern center in array indices.
     calibration : float
         calibration in reciprocal Angstroms per pixels.
 
@@ -622,3 +665,52 @@ def peaks_as_gvectors(z, center, calibration):
     """
     g = (z - center) * calibration
     return np.array([g[0].T[1], g[0].T[0]]).T
+
+
+def investigate_dog_background_removal_interactive(sample_dp,
+                                                   std_dev_maxs,
+                                                   std_dev_mins):
+    """Utility function to help the parameter selection for the difference of
+    gaussians (dog) background subtraction method
+
+    Parameters
+    ----------
+    sample_dp : ElectronDiffraction2D
+        A single diffraction pattern
+    std_dev_maxs : iterable
+        Linearly spaced maximum standard deviations to be tried, ascending
+    std_dev_mins : iterable
+        Linearly spaced minimum standard deviations to be tried, ascending
+
+    Returns
+    -------
+    A hyperspy like navigation (sigma parameters), signal (proccessed patterns)
+    plot
+
+    See Also
+    --------
+    subtract_background_dog : The background subtraction method used.
+    np.arange : Produces suitable objects for std_dev_maxs
+
+    """
+    gauss_processed = np.empty((
+        len(std_dev_maxs),
+        len(std_dev_mins),
+        *sample_dp.axes_manager.signal_shape))
+
+    for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
+        for j, std_dev_min in enumerate(std_dev_mins):
+            gauss_processed[i, j] = sample_dp.remove_background('gaussian_difference',
+                                                                sigma_min=std_dev_min, sigma_max=std_dev_max,
+                                                                show_progressbar=False)
+    dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
+    dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
+    dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
+    dp_gaussian.axes_manager.navigation_axes[1].name = r'$\sigma_{\mathrm{max}}$'
+    for axes_number, axes_value_list in [(0, std_dev_mins), (1, std_dev_maxs)]:
+        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = axes_value_list[1] - axes_value_list[0]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
+
+    dp_gaussian.plot(cmap='viridis')
+    return None
