@@ -58,6 +58,5 @@ setup(
         "": ["LICENSE", "readme.rst","hyperspy_extension.yaml"],
         "pyxem": ["*.py"],
     },
-    entry_points={'hyperspy.extensions': 'pyxem = pyxem'},
-    },
+    entry_points={'hyperspy.extensions': ['pyxem = pyxem']},
 )
