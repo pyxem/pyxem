@@ -17,18 +17,30 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 signals:
-  ElectronDiffraction:
-    signal_type: "ElectronDiffraction"
+  Diffraction1D:
+    signal_type: "Diffraction1D"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    import: pyxem.signals.diffraction1d
+  Diffraction2D:
+    signal_type: "Diffraction2D"
     signal_dimension: 2
     dtype: real
     lazy: False
-    import: pyxem.signals.electron_diffraction
-  ElectronDiffractionProfile:
-    signal_type: "ElectronDiffractionProfile"
+    import: pyxem.signals.diffraction2d
+  ElectronDiffraction1D:
+    signal_type: "ElectronDiffraction1D"
     signal_dimension: 1
     dtype: real
-    lazy: True
-    import: pyxem.signals.diffraction_profile
+    lazy: False
+    import: pyxem.signals.electron_diffraction1d
+  ElectronDiffraction2D:
+    signal_type: "ElectronDiffraction2D"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    import: pyxem.signals.electron_diffraction2d
   DiffractionVectors:
     signal_type: "DiffractionVectors"
     signal_dimension: None
