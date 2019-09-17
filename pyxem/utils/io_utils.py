@@ -29,6 +29,7 @@ from hyperspy.io import load_with_reader
 import numpy as np
 import dask.array as da
 from math import floor
+from scipy.signal import find_peaks
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.diffraction2d import Diffraction2D
@@ -179,9 +180,23 @@ def load_mib(mib_filename, reshape=True):
     data_pxm.metadata.Signal.exposure_time = data_dict['exposure time']
     data_pxm.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
     data_pxm.metadata.Signal.flyback_times = data_dict['flyback_times']
-    #TODO: Add reshape option
-    if reshape:
-        data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
+
+    if data_pxm.metadata.Signal.signal_type is 'TEM' and data_pxm.metadata.Signal.exposure_time is not None:
+        print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
+        return data_pxm
+    try:
+        if reshape:
+            # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
+            # to reshape otherwise use reshape_4DSTEM_FlyBack function
+            if data_pxm.metadata.Signal.exposure_time is None:
+                data_pxm = reshape_4DSTEM_SumFrames(data_pxm)
+            else:
+                data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
+    except TypeError:
+        raise ValueError('Reshaping did not work. Get the stack by passing reshape=False')
+    except ValueError:
+        raise ValueError('Reshaping did not work. Get the stack by passing reshape=False')
+
     return data_pxm
 
 
@@ -734,8 +749,8 @@ def reshape_4DSTEM_FlyBack(data):
         Reshaped electron diffraction data <scan_x, scan_y | det_size, det_size>
     """
     # Get detector size in pixels
-
-    det_size = data.axes_manager[1].size  #detector size in pixels
+    # detector size in pixels
+    det_size = data.axes_manager[1].size
     # Read metadata
     skip_ind = data.metadata.Signal.frames_number_skipped
     line_len = data.metadata.Signal.scan_X
@@ -751,4 +766,63 @@ def reshape_4DSTEM_FlyBack(data):
     # Cropping the bright fly-back pixel
     data_skip = data_skip.inav[1:]
 
+    return data_skip
+def reshape_4DSTEM_SumFrames(data):
+    """
+    Reshapes the lazy-imported stack of dimensions: (xxxxxx|Det_X, Det_Y) to the correct scan pattern
+    shape: (x, y | Det_X, Det_Y) when the frame exposure times are not in headre bits.
+    It utilises the over-exposed fly-back frame to identify the start of the lines in the first 20
+    lines of frames,checks line length consistancy and finds the number of frames to skip at the
+    beginning (this number is printed out as string output).
+
+    Parameters
+    ----------
+    data : pyxem LazyElectronDiffraction2D imported mib file with diensions of: framenumbers|Det_X, Det_Y
+
+    Returns
+    -------
+    data_reshaped : reshaped data (x, y | Det_X, Det_Y)
+    """
+    # Assuming sacn_x, i.e. number of probe positions in a line is square root
+    # of total number of frames
+    scan_x = int(np.sqrt(data.axes_manager[0].size))
+    # detector size in pixels
+    det_size = data.axes_manager[1].size
+    # crop the first ~20 lines
+    data_crop = data.inav[0:20*scan_x]
+    data_crop_t = data_crop.T
+    data_crop_t_sum = data_crop_t.sum()
+    # summing over patterns
+    intensity_array = data_crop_t_sum.data
+    intensity_array = intensity_array.compute()
+    peaks = find_peaks(intensity_array, distance=scan_x)
+    # Difference between consecutive elements of the array
+    lines = np.ediff1d(peaks[0])
+    # Assuming the last element to be the line length
+    line_len = lines[-1]
+    if line_len != scan_x:
+        raise ValueError('Fly_back does not correspond to correct line length!')
+        #  Exits this routine and reshapes using scan size instead
+    # Checking line lengths
+    check = np.ravel(np.where(lines == line_len, True, False))
+    # In case there is a False in there take the index of the last False
+    if ~np.all(check):
+        start_ind = np.where(check == False)[0][-1] + 2
+        # Adding 2 - instead of 1 -  to be sure scan is OK
+        skip_ind = peaks[0][start_ind]
+     # In case they are all True take the index of the first True
+    else:
+         # number of frames to skip at the beginning
+        skip_ind = peaks[0][0]
+    # Number of lines
+    n_lines = floor((data.data.shape[0] - skip_ind) / line_len)
+    # with the skipped frames removed
+    data_skip = data.inav[skip_ind:skip_ind + (n_lines * line_len)]
+    data_skip.data = data_skip.data.reshape(n_lines, line_len, det_size, det_size)
+    data_skip.axes_manager._axes.insert(0, data_skip.axes_manager[0].copy())
+    data_skip.get_dimensions_from_data()
+    print('Reshaping using the frame intensity sums of the first 20 lines')
+    print('Number of frames skipped at the beginning: ', skip_ind)
+    # Croppimg the flyaback pixel at the start
+    data_skip = data_skip.inav[1:]
     return data_skip
