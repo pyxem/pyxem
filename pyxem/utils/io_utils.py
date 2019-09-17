@@ -136,7 +136,7 @@ def load_hspy(filename, lazy=False, assign_to=None):
 
 
 
-def load_mib(mib_filename, reshape=True):
+def load_mib(mib_filename, reshape=True, flip=True):
     """Read a .mib file using dask and return as LazyElectronDiffraction2D.
 
     Parameters
@@ -146,20 +146,24 @@ def load_mib(mib_filename, reshape=True):
     reshape : boolean
         keywork argument to control reshaping of the stack (default is True).
         It attepmts to reshape using the flyback pixel.
+    flip: boolean
+        keyword argument to vertically flip the diffraction signal (default)
+        or return unchanged. The metadata is updated accordingly.
 
     Returns
     -------
     data_pxm : pyxem.signals.LazyElectronDiffraction2D
                 The metadata adds the following domains:
-                General
+                ├── General
                 │   └── title =
                 └── Signal
                     ├── binned = False
                     ├── exposure_time = 0.001
-                    ├── flyback_times = [0.066, 0.071, 0.065, 0.017825]
-                    ├── frames_number_skipped = 90
+                    ├── flip = True
+                    ├── flyback_times = [0.064, 0.067, 0.065, 0.017607]
+                    ├── frames_number_skipped = 101
                     ├── scan_X = 256
-                    └── signal_type = STEM
+                    └── signal_type = electron_diffraction2d
     """
     hdr_stuff = _parse_hdr(mib_filename)
     data = _read_mib(mib_filename, hdr_stuff)
@@ -196,7 +200,11 @@ def load_mib(mib_filename, reshape=True):
         raise ValueError('Reshaping did not work. Get the stack by passing reshape=False')
     except ValueError:
         raise ValueError('Reshaping did not work. Get the stack by passing reshape=False')
-
+    if flip:
+        data_pxm.data = np.flip(data_pxm.data, axis=2)
+        data_pxm.metadata.Signal.flip = True
+    else:
+        data_pxm.metadata.Signal.flip = False
     return data_pxm
 
 
