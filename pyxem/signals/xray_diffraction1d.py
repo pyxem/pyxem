@@ -15,32 +15,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for two-dimensional electron diffraction data.
-"""
+"""Signal class for Electron Diffraction radial profiles
 
-import numpy as np
-from hyperspy.signals import BaseSignal
+"""
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals import push_metadata_through
-from pyxem.signals.diffraction2d import Diffraction2D
+from pyxem.signals.diffraction1d import Diffraction1D
 
 
-class XrayDiffraction2D(Diffraction2D):
-    _signal_type = "xray_diffraction2d"
+class XrayDiffraction1D(Diffraction1D):
+    _signal_type = "xray_diffraction1d"
 
     def __init__(self, *args, **kwargs):
-        """
-        Create an XrayDiffraction2D object from a hs.Signal2D or np.array.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Diffraction2D. The first arg should be
-            either a numpy.ndarray or a Signal2D
-        **kwargs :
-            Passed to the __init__ of Diffraction2D
-        """
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
@@ -86,17 +73,13 @@ class XrayDiffraction2D(Diffraction2D):
                 "Acquisition_instrument.I14.Detector.Diffraction.exposure_time",
                 exposure_time)
 
-    def set_diffraction_calibration(self, calibration, center=None):
-        """Set diffraction pattern pixel size in reciprocal Angstroms and origin
-        location.
+    def set_diffraction_calibration(self, calibration):
+        """Set diffraction profile channel size in reciprocal Angstroms.
 
         Parameters
         ----------
         calibration : float
-            Diffraction pattern calibration in reciprocal Angstroms per pixel.
-        center : tuple
-            Position of the direct beam center, in pixels. If None the center of
-            the data array is assumed to be the center of the pattern.
+            Diffraction profile calibration in reciprocal Angstroms per pixel.
         """
         pass
 
@@ -118,33 +101,33 @@ class XrayDiffraction2D(Diffraction2D):
         y.name = 'y'
         y.scale = calibration
         y.units = 'nm'
-        
+
     def as_lazy(self, *args, **kwargs):
-        """Create a copy of the XrayDiffraction2D object as a
-        :py:class:`~pyxem.signals.xray_diffraction2d.LazyXrayDiffraction2D`.
+        """Create a copy of the XrayDiffraction1D object as a
+        :py:class:`~pyxem.signals.xray_diffraction1d.LazyXrayDiffraction1D`.
 
         Parameters
         ----------
         copy_variance : bool
-            If True variance from the original XrayDiffraction2D object is
-            copied to the new LazyXrayDiffraction2D object.
+            If True variance from the original XrayDiffraction1D object is
+            copied to the new LazyXrayDiffraction1D object.
 
         Returns
         -------
-        res : :py:class:`~pyxem.signals.xray_diffraction2d.LazyXrayDiffraction2D`.
+        res : :py:class:`~pyxem.signals.xray_diffraction1d.LazyXrayDiffraction1D`.
             The lazy signal.
         """
         res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyXrayDiffraction2D
+        res.__class__ = LazyXrayDiffraction1D
         res.__init__(**res._to_dictionary())
         return res
 
     def decomposition(self, *args, **kwargs):
         super().decomposition(*args, **kwargs)
-        self.__class__ = XrayDiffraction2D
+        self.__class__ = XrayDiffraction1D
 
 
-class LazyXrayDiffraction2D(LazySignal, XrayDiffraction2D):
+class LazyXrayDiffraction1D(LazySignal, XrayDiffraction1D):
 
     _lazy = True
 
@@ -153,9 +136,9 @@ class LazyXrayDiffraction2D(LazySignal, XrayDiffraction2D):
 
     def compute(self, *args, **kwargs):
         super().compute(*args, **kwargs)
-        self.__class__ = XrayDiffraction2D
+        self.__class__ = XrayDiffraction1D
         self.__init__(**self._to_dictionary())
 
     def decomposition(self, *args, **kwargs):
         super().decomposition(*args, **kwargs)
-        self.__class__ = LazyXrayDiffraction2D
+        self.__class__ = LazyXrayDiffraction1D
