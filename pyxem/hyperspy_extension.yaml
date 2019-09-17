@@ -29,6 +29,18 @@ signals:
     dtype: real
     lazy: False
     import: pyxem.signals.diffraction2d
+  LazyDiffraction1D:
+    signal_type: "LazyDiffraction1D"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    import: pyxem.signals.diffraction1d
+  LazyDiffraction2D:
+    signal_type: "LazyDiffraction2D"
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    import: pyxem.signals.diffraction2d
   ElectronDiffraction1D:
     signal_type: "ElectronDiffraction1D"
     signal_dimension: 1
@@ -37,7 +49,19 @@ signals:
     import: pyxem.signals.electron_diffraction1d
   ElectronDiffraction2D:
     signal_type: "ElectronDiffraction2D"
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    import: pyxem.signals.electron_diffraction2d
+  LazyElectronDiffraction1D:
+    signal_type: "LazyElectronDiffraction1D"
     signal_dimension: 1
+    dtype: real
+    lazy: False
+    import: pyxem.signals.electron_diffraction1d
+  LazyElectronDiffraction2D:
+    signal_type: "LazyElectronDiffraction2D"
+    signal_dimension: 2
     dtype: real
     lazy: False
     import: pyxem.signals.electron_diffraction2d
