@@ -16,13 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyxem.signals.xray_diffraction2d import XrayDiffraction2D
-from pyxem.signals.xray_diffraction2d import LazyXrayDiffraction2D
+from pyxem.signals.xray_diffraction1d import XrayDiffraction1D
+from pyxem.signals.xray_diffraction1d import LazyXrayDiffraction1D
 
 
 class TestDecomposition:
-    def test_decomposition_class_assignment(self, diffraction_pattern):
-        diffraction_pattern = XrayDiffraction2D(diffraction_pattern)
-        diffraction_pattern = diffraction_pattern.as_lazy()
-        diffraction_pattern.decomposition()
-        assert isinstance(diffraction_pattern, LazyXrayDiffraction2D)
+    def test_decomposition_class_assignment(self, electron_diffraction1d):
+        xdiff1d = XrayDiffraction1D(electron_diffraction1d)
+        s = xdiff1d.as_lazy()
+        s.decomposition()
+        assert isinstance(s, LazyXrayDiffraction1D)
