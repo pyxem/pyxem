@@ -137,7 +137,7 @@ def load_hspy(filename, lazy=False, assign_to=None):
 
 
 def load_mib(mib_filename, reshape=True):
-    """Read a .mib file using dask and return as a lazy pyXem / hyperspy signal.
+    """Read a .mib file using dask and return as LazyElectronDiffraction2D.
 
     Parameters
     ----------
@@ -149,7 +149,7 @@ def load_mib(mib_filename, reshape=True):
 
     Returns
     -------
-    data_pxm : pyxem.signals.electron_diffraction2d
+    data_pxm : pyxem.signals.LazyElectronDiffraction2D
                 The metadata adds the following domains:
                 General
                 │   └── title =
