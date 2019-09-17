@@ -58,8 +58,19 @@ def _get_detector_pixel_size(header_string):
 
 def load_binary_merlin_signal(
         filename, probe_x=None, probe_y=None, chunks=(32, 32, 32, 32),
-        flyback_pixels=1, lazy_result=True):
+        flyback_pixels=1, datatype=None, lazy_result=True):
     """Temporary function for loading Merlin binary data.
+
+    Parameters
+    ----------
+    filename : string
+    probe_x, probe_y : int
+    chunks : tuple
+        Default (32, 32, 32, 32)
+    flyback_pixels : int
+    datatype : string
+         6 bit: ">u1". 12 bit: ">u2". 24 bit: ">u4".
+    lazy_result : bool
 
     This function will be replaced at some point, so do not rely on it for
     other functions!
@@ -77,7 +88,8 @@ def load_binary_merlin_signal(
     header_string = f.read(50).decode()
     f.close()
 
-    datatype = _get_dtype_from_header_string(header_string)
+    if datatype is None:
+        datatype = _get_dtype_from_header_string(header_string)
     det_x, det_y = _get_detector_pixel_size(header_string)
 
     value_between_frames = 192
