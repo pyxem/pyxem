@@ -46,16 +46,8 @@ class DetectorCoordinates2D(BaseSignal):
     """Coordinates defining positions on a two-dimensional detector in pixel
     units.
 
-    Attributes
-    ----------
-    cartesian : np.array()
-        Array of 3-vectors describing Cartesian coordinates associated with
-        each diffraction vector.
-    hkls : np.array()
-        Array of Miller indices associated with each diffraction vector
-        following indexation.
     """
-    _signal_type = "diffraction_vectors"
+    _signal_type = "detector_coordinates"
 
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
