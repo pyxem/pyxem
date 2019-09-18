@@ -45,7 +45,7 @@ class PDFGenerator():
 
     def get_pdf(self,
                 s_min,
-                s_max,
+                s_max=None,
                 r_min=0,
                 r_max=20,
                 r_increment=0.01
@@ -54,9 +54,11 @@ class PDFGenerator():
 
         Parameters
         ----------
-        s_cutoff : list of float
-                    A list with the format [<s_min>, <s_max>], which sets the
-                    integration limits for the pdf calculation. Note that s is
+        s_min : float
+                    Minimum scattering vector s for the pdf calculation. Note that s is
+                    defined here as s = 2 sin(theta)/lambda = 1/d.
+        s_max : float
+                    Maximum scattering vector s for the pdf calculation. Note that s is
                     defined here as s = 2 sin(theta)/lambda = 1/d.
         r_cutoff : list of float
                     A list with the format [<r_min>, <r_max>], which sets the
@@ -64,6 +66,10 @@ class PDFGenerator():
         r_increment : float
                     Step size in r in the extracted PDF.
         """
+
+        if s_max is None:
+            s_max = self.signal.axes_manager.signal_axes[0].size
+            Print('s_max set to maximum of signal.')
 
         r_values = np.arange(r_min, r_max, r_increment)
         r_values = r_values.reshape(1, r_values.size)
@@ -74,8 +80,8 @@ class PDFGenerator():
         #check that these aren't out of bounds
         if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
             s_limits[1] = self.signal.axes_manager.signal_axes[0].size
-            Warning('s_max out of bounds for reduced intensity.',
-                  'Setting to full signal')
+            ValueError('s_max out of bounds for reduced intensity.',
+                  'Aborting')
         s_values = np.arange(s_limits[0], s_limits[1], 1) * s_scale
         s_values = s_values.reshape(s_values.size, 1)  # column vector
 
