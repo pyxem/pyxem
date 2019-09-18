@@ -105,5 +105,7 @@ signals:
 components2D:
     DiffractionComponent:
       module: pyxem.components.diffraction_component
+      class: DiffractionComponent
     ScalableReferencePattern:
       module: pyxem.components.scalable_reference_component
+      class: ScalableReferencePattern
