@@ -217,7 +217,7 @@ class ReducedIntensityGenerator():
             Keyword arguments to be passed to map().
     """
 
-        mask_array = mask_pattern.astype('np.uint8')
+        mask_array = mask_pattern.astype(np.uint8)
         if np.max(mask_array) != 1 or np.min(mask_array) != 0:
             raise ValueError('Masking array does not consist of zeroes and ones.')
 

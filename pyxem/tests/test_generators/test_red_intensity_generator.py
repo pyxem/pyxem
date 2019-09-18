@@ -109,6 +109,26 @@ def test_mask_from_bkgd(red_int_generator):
     assert np.array_equal(red_int_generator.signal.data, expected)
     return
 
+def test_mask_reduced_intensity(red_int_generator):
+    mask_pattern = np.ones(10)
+    mask_pattern[:4] = 0
+    red_int_generator.mask_reduced_intensity(mask_pattern)
+
+    expected = np.arange(10, 0, -1).reshape(1, 10) * np.arange(1, 5).reshape(4, 1)
+    expected = expected.reshape(2, 2, 10)
+    expected[:,:,:4] = 0
+
+    assert np.array_equal(red_int_generator.signal.data, expected)
+    return
+
+@pytest.mark.xfail(raises=ValueError)
+def test_incorrect_mask(red_int_generator):
+    mask_pattern = np.ones(10)
+    mask_pattern[:4] = 0
+    mask_pattern[8] = 2
+    red_int_generator.mask_reduced_intensity(mask_pattern)
+
+
 def test_get_reduced_intensity(red_int_generator):
     calib = 0.1
     red_int_generator.set_diffraction_calibration(calibration=calib)
