@@ -50,9 +50,8 @@ number of peaks.
 """
 
 
-class DiffractionVectors(BaseSignal):
-    """Crystallographic mapping results containing the best matching crystal
-    phase and orientation at each navigation position with associated metrics.
+class DiffractionVectors2D(BaseSignal):
+    """Two-dimensional diffraction vectors in reciprocal Angstrom units.
 
     Attributes
     ----------
@@ -101,15 +100,15 @@ class DiffractionVectors(BaseSignal):
 
         return vectors
 
-    def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
-                                 unique_vectors=None,
-                                 distance_threshold=0.01,
-                                 method='distance_comparison',
-                                 min_samples=1,
-                                 image_to_plot_on=None,
-                                 image_cmap='gray',
-                                 plot_label_colors=False,
-                                 distance_threshold_all=0.005):  # pragma: no cover
+    def plot_vectors(self, xlim=1.0, ylim=1.0,
+                     unique_vectors=None,
+                     distance_threshold=0.01,
+                     method='distance_comparison',
+                     min_samples=1,
+                     image_to_plot_on=None,
+                     image_cmap='gray',
+                     plot_label_colors=False,
+                     distance_threshold_all=0.005):  # pragma: no cover
         """Plot the unique diffraction vectors.
 
         Parameters
@@ -227,7 +226,7 @@ class DiffractionVectors(BaseSignal):
         plt.axis('off')
         return fig
 
-    def plot_diffraction_vectors_on_signal(self, signal, *args, **kwargs):
+    def plot_vectors_on_signal(self, signal, *args, **kwargs):
         """Plot the diffraction vectors on a signal.
 
         Parameters
@@ -415,7 +414,6 @@ class DiffractionVectors(BaseSignal):
             unique_labels, unique_labels_count = np.unique(
                 clusters.labels_, return_counts=True)
             unique_peaks = np.zeros((unique_labels.max() + 1, 2))
-
             # For each cluster, a center of mass is calculated based
             # on all the peaks within the cluster, and the center of
             # mass is taken as the final unique vector position.
@@ -426,7 +424,6 @@ class DiffractionVectors(BaseSignal):
                 unique_peaks[n] = np.average(
                     peaks_n_temp, weights=peaks_n_counts_temp,
                     axis=0)
-
         # Manipulate into DiffractionVectors class
         if unique_peaks.size > 0:
             unique_peaks = DiffractionVectors(unique_peaks)
@@ -495,42 +492,5 @@ class DiffractionVectors(BaseSignal):
                                   wavelength=wavelength,
                                   camera_length=camera_length * 1e10,
                                   inplace=False,
-                                  *args, **kwargs)
-        transfer_navigation_axes(self.cartesian, self)
-
-    def detector_px_to_cartesian_diffraction_coordinates(self,
-                                                         azimuthal_integrator,
-                                                         *args, **kwargs):
-        """Takes a DiffractionVector object with peaks expressed in pixels
-        in the detector. It maps the function detector_px_to_3D_kspace along the
-        scanning pixels of the DiffractionVector class. It stores in the
-        DiffractionVector.cartesian attribute, the gx, gy and gz cartesian
-        coordinates of the diffraction vector, in Angstoms^-1, using purely
-        geometrical arguments.
-
-        Parameters
-        ----------
-        self: DiffractionVector
-            A DiffractionVector object with the diffraction vectors in pixel
-            units of the detector.
-        azimuthal_integrator: pyFAI.azimuthalIntegrator.AzimuthalIntegrator
-            A pyFAI Geometry object, containing all the detector geometry
-            parameters.
-        *args : arguments
-            Arguments to be passed to the plot method.
-        **kwargs : keyword arguments
-            Keyword arguments to be passed to the plot method.
-
-        Returns
-        ----------
-        self: DiffractionVector
-            DiffractionProfile.cartesian attribute has stored the respective
-            transformed px cordinates to angstrom^-1, in the form of an array
-            containing [g_x, g_y, g_z] for each scanning coordinate.
-        """
-        self.cartesian = self.map(detector_px_to_3D_kspace,
-                                  ai=azimuthal_integrator,
-                                  inplace=False,
-                                  parallel=False
                                   *args, **kwargs)
         transfer_navigation_axes(self.cartesian, self)
