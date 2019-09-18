@@ -70,8 +70,8 @@ class VarianceGenerator():
         Returns
         -------
 
-        vardps : Signal2D
-            A DiffractionVariance object containing the mean DP, mean
+        vardps : DiffractionVariance2D
+            A DiffractionVariance2D object containing the mean DP, mean
             squared DP, and variance DP.
         """
 
@@ -81,7 +81,7 @@ class VarianceGenerator():
             meansq_dp = Signal2D(np.square(dp.data)).mean((0, 1))
         else:
             meansq_dp = Signal2D(np.square(dp.data.astype(set_data_type))).mean((0, 1))
-            
+
         normvar = (meansq_dp.data / np.square(mean_dp.data)) - 1.
         var_dp = Signal2D(normvar)
         corr_var_array = var_dp.data - (np.divide(dqe, mean_dp.data))
@@ -118,7 +118,7 @@ class VarianceGenerator():
         Returns
         -------
 
-        varims : Signal2D
+        varims : ImageVariance
             A two dimensional Signal class object containing the mean DP, mean
             squared DP, and variance DP, and a Poisson noise-corrected variance
             DP.
@@ -128,9 +128,8 @@ class VarianceGenerator():
         meansq_im = Signal2D(np.square(im.data.astype(np.uint16))).mean((0, 1))
         normvar = (meansq_im.data / np.square(mean_im.data)) - 1.
         var_im = Signal2D(normvar)
-        corr_var_array = var_im.data - (np.divide(dqe, mean_im.data))
-        corr_var_array[np.isinf(corr_var_array)] = 0
-        corr_var_array[np.isnan(corr_var_array)] = 0
+        corr_var_array = normvar - (np.divide(dqe, mean_im.data))
+        corr_var_array[np.invert(np.isfinite(corr_var_array))] = 0
         corr_var = Signal2D(corr_var_array)
         varims = stack((mean_im, meansq_im, var_im, corr_var))
 

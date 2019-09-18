@@ -232,6 +232,9 @@ class ReducedIntensityGenerator():
         s_cutoff : list of float
                     A list of the form [s_min, s_max] to change the s_cutoff
                     from the fit.
+        Returns
+        -------
+        ri : ReducedIntensity1D
         """
 
         s_scale = self.signal.axes_manager.signal_axes[0].scale

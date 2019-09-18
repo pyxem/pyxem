@@ -65,6 +65,10 @@ class PDFGenerator():
                     limits of the real space axis in the calculated PDF.
         r_increment : float
                     Step size in r in the extracted PDF.
+        Returns
+        -------
+        pdf : PDF1D
+                    A signal of pair distribution functions.
         """
         s_scale = self.signal.axes_manager.signal_axes[0].scale
         if s_max is None:
