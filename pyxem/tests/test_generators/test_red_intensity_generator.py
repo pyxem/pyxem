@@ -39,14 +39,14 @@ def test_init(red_int_generator):
 
 def test_scattering_calibration(red_int_generator):
     calib = 0.1
-    red_int_generator.specify_scattering_calibration(calibration=calib)
+    red_int_generator.set_diffraction_calibration(calibration=calib)
     s_scale = red_int_generator.signal.axes_manager.signal_axes[0].scale
     assert s_scale == calib
 
 
 def test_fit_atomic_scattering(red_int_generator):
     calib = 0.1
-    red_int_generator.specify_scattering_calibration(calibration=calib)
+    red_int_generator.set_diffraction_calibration(calibration=calib)
     elements = ['Cu']
     fracs = [1]
     assert red_int_generator.background_fit is None
@@ -80,9 +80,9 @@ def test_fit_atomic_scattering(red_int_generator):
     assert np.allclose(red_int_generator.normalisation, norm_expected)
 
 
-def test_specify_cutoff(red_int_generator):
+def test_set_cutoff(red_int_generator):
     s_min, s_max = 0, 8
-    red_int_generator.specify_cutoff_vector(s_min, s_max)
+    red_int_generator.set_cutoff_vector(s_min, s_max)
     assert red_int_generator.cutoff == [s_min, s_max]
     return
 

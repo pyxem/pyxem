@@ -54,7 +54,7 @@ class ReducedIntensityGenerator():
         self.background_fit = None  # added in one of the fits below.
         self.normalisation = None
 
-    def specify_scattering_calibration(self, calibration):
+    def set_diffraction_calibration(self, calibration):
         """
         Defines calibration for the signal axis variable s in terms of
         A^-1 per pixel. Note that s is defined here as
@@ -68,7 +68,7 @@ class ReducedIntensityGenerator():
         self.signal.axes_manager.signal_axes[0].scale = calibration
         return
 
-    def specify_cutoff_vector(self, s_min, s_max):
+    def set_cutoff_vector(self, s_min, s_max):
         """
         Scattering vector cutoff for the purposes of fitting an atomic scattering
         factor to the 1D profile. Specified in terms of s (in inverse angstroms).
@@ -92,7 +92,7 @@ class ReducedIntensityGenerator():
         FIT = N * sum(ci * (fi^2) + C)
 
         The cutoff for the scattering factor fit to s is defined via the function
-        specify_cutoff_vector above.
+        set_cutoff_vector above.
 
         Parameters
         ----------

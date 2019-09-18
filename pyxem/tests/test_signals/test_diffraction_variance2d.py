@@ -47,12 +47,13 @@ class TestDiffractionVariance:
 
     def test_radial_profile_axes(self, axes_test_dp):
         n_scale = 0.5
+        name = 'real_space'
+        units = 'um'
+
         axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
         axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
-        name = 'real_space'
         axes_test_dp.axes_manager.navigation_axes[0].name = name
         axes_test_dp.axes_manager.navigation_axes[1].units = name
-        units = 'um'
         axes_test_dp.axes_manager.navigation_axes[1].name = units
         axes_test_dp.axes_manager.navigation_axes[0].units = units
 
