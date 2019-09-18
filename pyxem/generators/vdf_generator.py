@@ -35,7 +35,7 @@ class VDFGenerator():
     ----------
     signal : ElectronDiffraction2D
         The signal of electron diffraction patterns to be indexed.
-    vectors: DiffractionVectors(optional)
+    vectors: DiffractionVectors2D(optional)
         The vector positions, in calibrated units, at which to position
         integration windows for VDF formation.
 
@@ -90,7 +90,7 @@ class VDFGenerator():
                 vdfim.map(normalize_vdf)
 
         else:
-            raise ValueError("DiffractionVectors non-specified by user. Please "
+            raise ValueError("DiffractionVectors2D non-specified by user. Please "
                              "initialize VDFGenerator with some vectors. ")
 
         # Set calibration to same as signal

@@ -31,7 +31,7 @@ from diffsims.utils.sim_utils import get_kinematical_intensities
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.generators.indexation_generator import VectorIndexationGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import peaks_from_best_vector_match
 from pyxem.utils.indexation_utils import OrientationResult
@@ -136,7 +136,7 @@ def get_vector_match_results(structure, rot_list, edc):
     peak_lists = []
     for pixel_coords in diffraction_library['A']['pixel_coords']:
         peak_lists.append(pixel_coords)
-    peaks = DiffractionVectors((np.array([peak_lists, peak_lists]) - half_side_length) / half_side_length)
+    peaks = DiffractionVectors2D((np.array([peak_lists, peak_lists]) - half_side_length) / half_side_length)
     peaks.axes_manager.set_signal_dimension(2)
     peaks.calculate_cartesian_coordinates(200, 0.2)
     peaks.cartesian.axes_manager.set_signal_dimension(2)

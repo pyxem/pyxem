@@ -22,7 +22,7 @@ Generating subpixel resolution on diffraction vectors.
 
 import numpy as np
 
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
@@ -33,15 +33,15 @@ import warnings
 
 
 class SubpixelrefinementGenerator():
-    """Generates subpixel refinement of DiffractionVectors.
+    """Generates subpixel refinement of DiffractionVectors2D.
 
     Parameters
     ----------
     dp : ElectronDiffraction2D
         The electron diffraction patterns to be refined
-    vectors : DiffractionVectors | ndarray
+    vectors : DiffractionVectors2D | ndarray
         Vectors (in calibrated units) to the locations of the spots to be
-        refined. If given as DiffractionVectors, it must have the same
+        refined. If given as DiffractionVectors2D, it must have the same
         navigation shape as the electron diffraction patterns. If an ndarray,
         the same set of vectors is mapped over all electron diffraction
         patterns.
@@ -80,12 +80,13 @@ class SubpixelrefinementGenerator():
 
         Returns
         -------
-        vector_out: DiffractionVectors
-            DiffractionVectors containing the refined vectors in calibrated
+        vector_out: DiffractionVectors2D
+            DiffractionVectors2D containing the refined vectors in calibrated
             units with the same navigation shape as the diffraction patterns.
 
         """
-        def _conventional_xc_map(dp, vectors, sim_disc, upsample_factor, center, calibration):
+        def _conventional_xc_map(dp, vectors, sim_disc,
+                                 upsample_factor, center, calibration):
             shifts = np.zeros_like(vectors, dtype=np.float64)
             for i, vector in enumerate(vectors):
                 expt_disc = get_experimental_square(dp, vector, square_size)
@@ -93,7 +94,7 @@ class SubpixelrefinementGenerator():
             return (((vectors + shifts) - center) * calibration)
 
         sim_disc = get_simulated_disc(square_size, disc_radius)
-        self.vectors_out = DiffractionVectors(
+        self.vectors_out = DiffractionVectors2D(
             self.dp.map(_conventional_xc_map,
                         vectors=self.vector_pixels,
                         sim_disc=sim_disc,
@@ -117,8 +118,8 @@ class SubpixelrefinementGenerator():
 
         Returns
         -------
-        vector_out: DiffractionVectors
-            DiffractionVectors containing the refined vectors in calibrated
+        vector_out: DiffractionVectors2D
+            DiffractionVectors2D containing the refined vectors in calibrated
             units with the same navigation shape as the diffraction patterns.
 
         """
@@ -178,7 +179,7 @@ class SubpixelrefinementGenerator():
                 shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
             return ((vectors + shifts) - center) * calibration
 
-        self.vectors_out = DiffractionVectors(
+        self.vectors_out = DiffractionVectors2D(
             self.dp.map(_center_of_mass_map,
                         vectors=self.vector_pixels,
                         square_size=square_size,
@@ -203,21 +204,21 @@ class SubpixelrefinementGenerator():
 
         Returns
         -------
-        vector_out : DiffractionVectors
-            DiffractionVectors containing the refined vectors in calibrated
+        vector_out : DiffractionVectors2D
+            DiffractionVectors2D containing the refined vectors in calibrated
             units with the same navigation shape as the diffraction patterns.
 
         Notes
         -----
-        This method works by first locating the maximum intenisty value within the square.
-        The four adjacent pixels are then considered and used to form two independant
-        quadratic equations. Solving these gives the x_center and y_center coordinates,
-        which are then returned.
+        This method works by first locating the maximum intenisty value within
+        the square. The four adjacent pixels are then considered and used to
+        form two independant quadratic equations. Solving these gives the
+        x_center and y_center coordinates, which are then returned.
         """
 
         def _new_lg_idea(z):
-            """ Internal function providing the algebra for the local_gaussian_method,
-            see docstring of that function for details
+            """ Internal function providing the algebra for the
+            local_gaussian_method, see docstring of that function for details.
 
             Parameters
             ----------
@@ -248,12 +249,12 @@ class SubpixelrefinementGenerator():
 
             return (((vectors + shifts) - center) * calibration)
 
-        self.vectors_out = DiffractionVectors(self.dp.map(_lg_map,
-                                                          vectors=self.vector_pixels,
-                                                          square_size=square_size,
-                                                          center=self.center,
-                                                          calibration=self.calibration,
-                                                          inplace=False))
+        self.vectors_out = DiffractionVectors2D(self.dp.map(_lg_map,
+                                                   vectors=self.vector_pixels,
+                                                   square_size=square_size,
+                                                   center=self.center,
+                                                   calibration=self.calibration,
+                                                   inplace=False))
 
         # check for unrefined peaks
         def check_bad_square(z):

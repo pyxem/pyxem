@@ -225,8 +225,8 @@ def _refine_best_orientations(single_match_result,
         The rank of the solution to start from.
     solution : list
         np.array containing the initial orientation
-    vectors : DiffractionVectors
-        DiffractionVectors to be indexed.
+    vectors : DiffractionVectors3D
+        DiffractionVectors3D to be indexed.
     structure_library : :obj:`diffsims:StructureLibrary` Object
         Dictionary of structures and associated orientations for which
         electron diffraction is to be simulated.
@@ -308,8 +308,8 @@ def _refine_orientation(solution,
     ----------
     solution : OrientationResult
         Namedtuple containing the starting orientation
-    k_xy : DiffractionVectors
-        DiffractionVectors (x,y pixel format) to be indexed.
+    k_xy : DetectorCoordinates2D
+        DetectorCoordinates2D (x,y pixel format) to be indexed.
     structure_library : :obj:`diffsims:StructureLibrary` Object
         Dictionary of structures and associated orientations for which
         electron diffraction is to be simulated.
@@ -390,7 +390,8 @@ def _refine_orientation(solution,
     rotation_matrix = euler2mat(ai, aj, ak)
 
     k_xy = (k_xy + np.array((center_x, center_y)) * scale)
-    cart = detector_to_fourier(k_xy, wavelength=wavelength, camera_length=camera_length)
+    cart = detector_to_fourier(k_xy, wavelength=wavelength,
+                               camera_length=camera_length)
 
     intermediate = cart.dot(rotation_matrix.T)  # Must use the transpose here
     hklss = lattice_recip.fractional(intermediate)
@@ -424,20 +425,20 @@ def _refine_orientation(solution,
 
 
 class VectorIndexationGenerator():
-    """Generates an indexer for DiffractionVectors using a number of methods.
+    """Generates an indexer for DiffractionVectors3D using a number of methods.
 
     Attributes
     ----------
-    vectors : DiffractionVectors
-        DiffractionVectors to be indexed.
+    vectors : DiffractionVectors3D
+        DiffractionVectors3D to be indexed.
     vector_library : DiffractionVectorLibrary
         Library of theoretical diffraction vector magnitudes and inter-vector
         angles for indexation.
 
     Parameters
     ----------
-    vectors : DiffractionVectors
-        DiffractionVectors to be indexed.
+    vectors : DiffractionVectors3D
+        DiffractionVectors3D to be indexed.
     vector_library : DiffractionVectorLibrary
         Library of theoretical diffraction vector magnitudes and inter-vector
         angles for indexation.
@@ -446,11 +447,6 @@ class VectorIndexationGenerator():
     def __init__(self,
                  vectors,
                  vector_library):
-        if vectors.cartesian is None:
-            raise ValueError("Cartesian coordinates are required in order to index "
-                             "diffraction vectors. Use the calculate_cartesian_coordinates "
-                             "method of DiffractionVectors to obtain these.")
-        else:
             self.vectors = vectors
             self.library = vector_library
 
@@ -526,7 +522,8 @@ class VectorIndexationGenerator():
                                 vary_center=False,
                                 vary_scale=False,
                                 method="leastsq"):
-        """Refines the best orientation and assigns hkl indices to diffraction vectors.
+        """Refines the best orientation and assigns hkl indices to diffraction
+        vectors.
 
         Parameters
         ----------

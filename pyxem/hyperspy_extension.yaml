@@ -71,13 +71,13 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.detector_coordinates
-  DiffractionVectors:
+  DiffractionVectors2D:
     signal_type: "DiffractionVectors2D"
     signal_dimension: None
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
-  DiffractionVectors:
+  DiffractionVectors3D:
     signal_type: "DiffractionVectors3D"
     signal_dimension: None
     dtype: real

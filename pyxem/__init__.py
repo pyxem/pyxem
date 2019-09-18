@@ -49,7 +49,9 @@ from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 from .signals.vdf_image import VDFImage
 from .signals.crystallographic_map import CrystallographicMap
-from .signals.diffraction_vectors import DiffractionVectors
+from .signals.detector_coordinates import DetectorCoordinates2D
+from .signals.diffraction_vectors import DiffractionVectors2D
+from .signals.diffraction_vectors import DiffractionVectors3D
 from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
 

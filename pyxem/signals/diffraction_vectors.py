@@ -87,7 +87,7 @@ class DiffractionVectors2D(BaseSignal):
 
         Returns
         -------
-        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors2D`
             List of diffraction vectors
         """
         gvectors = peaks.map(peaks_as_gvectors,
@@ -117,7 +117,7 @@ class DiffractionVectors2D(BaseSignal):
             The maximum x coordinate in reciprocal Angstroms to be plotted.
         ylim : float
             The maximum y coordinate in reciprocal Angstroms to be plotted.
-        unique_vectors : DiffractionVectors, optional
+        unique_vectors : DiffractionVectors2D, optional
             The unique vectors to be plotted (optional). If not given, the
             unique vectors will be found by get_unique_vectors.
         distance_threshold : float, optional
@@ -185,7 +185,7 @@ class DiffractionVectors2D(BaseSignal):
                 warn('No clusters were found. Check parameters, or '
                      'use plot_label_colors=False.')
             else:
-                peaks = DiffractionVectors(cores)
+                peaks = DiffractionVectors2D(cores)
                 peaks.axes_manager.set_signal_dimension(1)
                 # Since this original number of vectors can be huge, we
                 # find a reduced number of vectors that should be plotted, by
@@ -352,7 +352,7 @@ class DiffractionVectors2D(BaseSignal):
 
         Returns
         -------
-        unique_peaks : DiffractionVectors
+        unique_peaks : DiffractionVectors2D
             The unique diffraction vectors.
         clusters : DBSCAN
             The results from the clustering, given as class DBSCAN.
@@ -424,9 +424,9 @@ class DiffractionVectors2D(BaseSignal):
                 unique_peaks[n] = np.average(
                     peaks_n_temp, weights=peaks_n_counts_temp,
                     axis=0)
-        # Manipulate into DiffractionVectors class
+        # Manipulate into DiffractionVectors2D class
         if unique_peaks.size > 0:
-            unique_peaks = DiffractionVectors(unique_peaks)
+            unique_peaks = DiffractionVectors2D(unique_peaks)
             unique_peaks.axes_manager.set_signal_dimension(1)
         if return_clusters and method == 'DBSCAN':
             return unique_peaks, clusters

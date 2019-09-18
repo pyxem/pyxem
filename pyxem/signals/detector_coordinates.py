@@ -72,7 +72,7 @@ class DetectorCoordinates2D(BaseSignal):
 
         Returns
         -------
-        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors2D`
             List of diffraction vectors
         """
         gvectors = peaks.map(peaks_as_gvectors,
@@ -102,7 +102,7 @@ class DetectorCoordinates2D(BaseSignal):
             The maximum x coordinate in reciprocal Angstroms to be plotted.
         ylim : float
             The maximum y coordinate in reciprocal Angstroms to be plotted.
-        unique_vectors : DiffractionVectors, optional
+        unique_vectors : DetectorCoordinates2D, optional
             The unique vectors to be plotted (optional). If not given, the
             unique vectors will be found by get_unique_vectors.
         distance_threshold : float, optional
@@ -170,7 +170,7 @@ class DetectorCoordinates2D(BaseSignal):
                 warn('No clusters were found. Check parameters, or '
                      'use plot_label_colors=False.')
             else:
-                peaks = DiffractionVectors(cores)
+                peaks = DetectorCooreinates2D(cores)
                 peaks.axes_manager.set_signal_dimension(1)
                 # Since this original number of vectors can be huge, we
                 # find a reduced number of vectors that should be plotted, by

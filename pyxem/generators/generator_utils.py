@@ -18,7 +18,7 @@
 
 import numpy as np
 
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 
 
 def _get_pixel_vectors(dp, vectors, calibration, center):
@@ -29,7 +29,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
     ----------
     dp: :obj:`pyxem.signals.ElectronDiffraction2D`
         Instance of ElectronDiffraction2D
-    vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+    vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors2D`
         List of diffraction vectors
     calibration : [float, float]
         Calibration values
@@ -38,7 +38,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
 
     Returns
     -------
-    vector_pixels : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+    vector_pixels : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors2D`
         Pixel coordinates for given diffraction pattern and vectors.
     """
 
@@ -47,7 +47,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
             vectors = vectors[0]
         return np.floor((vectors.astype(np.float64) / calibration) + center).astype(np.int)
 
-    if isinstance(vectors, DiffractionVectors):
+    if isinstance(vectors, DiffractionVectors2D):
         if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
             raise ValueError('Vectors with shape {} must have the same navigation shape '
                              'as the diffraction patterns which has shape {}.'.format(
@@ -59,7 +59,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
     else:
         vector_pixels = _floor(vectors, calibration, center)
 
-    if isinstance(vector_pixels, DiffractionVectors):
+    if isinstance(vector_pixels, DiffractionVectors2D):
         if np.any(vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(vector_pixels.data < 0)):
             raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
     elif isinstance(vector_pixels, np.ndarray):

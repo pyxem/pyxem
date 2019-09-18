@@ -28,7 +28,7 @@ from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 from pyxem.signals import push_metadata_through
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
@@ -554,7 +554,9 @@ class Diffraction2D(Signal2D):
 
         return bg_subtracted
 
-    def find_peaks(self, method, *args, **kwargs):
+    def find_peaks(self, method,
+                   return_as='detector_coordinates',
+                   *args, **kwargs):
         """Find the position of diffraction peaks.
 
         Function to locate the positive peaks in an image using various, user
@@ -563,10 +565,12 @@ class Diffraction2D(Signal2D):
 
         Parameters
         ---------
-        method : str
+        method : string
             Select peak finding algorithm to implement. Available methods are
             {'zaefferer', 'stat', 'laplacian_of_gaussians',
             'difference_of_gaussians', 'xc'}
+        return_as : string
+            'detector_coordinates' or 'diffraction_vectors'. Choose how
         *args : arguments
             Arguments to be passed to the peak finders.
         **kwargs : arguments
@@ -574,11 +578,10 @@ class Diffraction2D(Signal2D):
 
         Returns
         -------
-        peaks : DiffractionVectors
-            A DiffractionVectors object with navigation dimensions identical to
-            the original ElectronDiffraction2D object. Each signal is a BaseSignal
-            object contiaining the diffraction vectors found at each navigation
-            position, in calibrated units.
+        peaks : DiffractionCoordinates2D | DiffractionVectors2D
+            A DetectorCoordinates2D or DiffractionVectors2D object with
+            navigation dimensions identical to the original
+            ElectronDiffraction2D object.
 
         Notes
         -----
@@ -611,11 +614,15 @@ class Diffraction2D(Signal2D):
                                       "implementations.".format(method))
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-        peaks.map(peaks_as_gvectors,
-                  center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
-                  calibration=self.axes_manager.signal_axes[0].scale)
-        peaks = DiffractionVectors(peaks)
-        peaks.axes_manager.set_signal_dimension(0)
+        if return_as=='diffraction_vectors':
+            peaks.map(peaks_as_gvectors,
+                      center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
+                      calibration=self.axes_manager.signal_axes[0].scale)
+            peaks = DiffractionVectors2D(peaks)
+            peaks.axes_manager.set_signal_dimension(0)
+        elif return_as is not 'detector_coordinates':
+            raise ValueError("return_as must be 'diffraction_vectors' or "
+                             "'detector_coordinates' only. ")
 
         # Set calibration to same as signal
         x = peaks.axes_manager.navigation_axes[0]

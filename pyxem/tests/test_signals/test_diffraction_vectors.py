@@ -18,7 +18,7 @@
 
 import pytest
 import numpy as np
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 from sklearn.cluster.dbscan_ import DBSCAN
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
@@ -37,7 +37,7 @@ from sklearn.cluster.dbscan_ import DBSCAN
               [0.123566, 0.151468]])
 ])
 def diffraction_vectors_single(request):
-    dvs = DiffractionVectors(request.param)
+    dvs = DiffractionVectors2D(request.param)
     dvs.axes_manager.set_signal_dimension(1)
     return dvs
 
@@ -77,7 +77,7 @@ def diffraction_vectors_single(request):
                np.array([[0.001993, 0.001993]])]], dtype=object)
 ])
 def diffraction_vectors_map(request):
-    dvm = DiffractionVectors(request.param)
+    dvm = DiffractionVectors2D(request.param)
     dvm.axes_manager.set_signal_dimension(0)
     return dvm
 
@@ -123,7 +123,7 @@ class TestUniqueVectors:
 
     def test_get_unique_vectors_map_type(self, diffraction_vectors_map):
         unique_vectors = diffraction_vectors_map.get_unique_vectors()
-        assert isinstance(unique_vectors, DiffractionVectors)
+        assert isinstance(unique_vectors, DiffractionVectors2D)
 
     @pytest.mark.xfail(raises=ValueError)
     def test_get_unique_vectors_single(self, diffraction_vectors_single):
@@ -160,7 +160,7 @@ class TestUniqueVectors:
     def test_get_unique_vectors_map_dbscan(self, diffraction_vectors_map):
         unique_dbscan = diffraction_vectors_map.get_unique_vectors(
             method='DBSCAN', return_clusters=True)
-        assert isinstance(unique_dbscan[0], DiffractionVectors)
+        assert isinstance(unique_dbscan[0], DiffractionVectors2D)
         assert isinstance(unique_dbscan[1], DBSCAN)
 
     @pytest.mark.parametrize('distance_threshold, answer', [

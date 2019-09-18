@@ -21,7 +21,7 @@ import pytest
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 
 
 def test_template_get_crystallographic_map(dp_template_match_result,
@@ -55,7 +55,7 @@ def test_vector_get_indexed_diffraction_vectors(overwrite,
                                                 expected_hkl):
     match_results = VectorMatchingResults(np.array([[1], [2]]))
     match_results.hkls = result_hkl
-    vectors = DiffractionVectors(np.array([[1], [2]]))
+    vectors = DiffractionVectors2D(np.array([[1], [2]]))
     vectors.hkls = current_hkl
     match_results.get_indexed_diffraction_vectors(vectors, overwrite)
     np.testing.assert_allclose(vectors.hkls, expected_hkl)
@@ -64,7 +64,7 @@ def test_vector_get_indexed_diffraction_vectors(overwrite,
 def test_vector_get_indexed_diffraction_vectors_warn():
     match_results = VectorMatchingResults(np.array([[1], [2]]))
     match_results.hkls = [0, 0, 1]
-    vectors = DiffractionVectors(np.array([[1], [2]]))
+    vectors = DiffractionVectors2D(np.array([[1], [2]]))
     vectors.hkls = [0, 0, 0]
     with pytest.warns(Warning):
         match_results.get_indexed_diffraction_vectors(vectors)

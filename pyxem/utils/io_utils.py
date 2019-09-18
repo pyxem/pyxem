@@ -37,7 +37,7 @@ from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.vdf_image import VDFImage
 from pyxem.signals.crystallographic_map import CrystallographicMap
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 from pyxem.signals.indexation_results import TemplateMatchingResults
 
 from pyxem.signals.diffraction1d import LazyDiffraction1D
@@ -51,7 +51,7 @@ signal_dictionary = {'diffraction1d': Diffraction1D,
                      'electron_diffraction2d': ElectronDiffraction2D,
                      'vdf_image': VDFImage,
                      'template_matching': TemplateMatchingResults,
-                     'diffraction_vectors': DiffractionVectors,
+                     'diffraction_vectors': DiffractionVectors2D,
                      'crystallographic_map': CrystallographicMap}
 
 lazy_signal_dictionary = {'diffraction1d': LazyDiffraction1D,

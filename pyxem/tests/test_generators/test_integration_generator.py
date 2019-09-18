@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.generators.integration_generator import IntegrationGenerator
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors3D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from hyperspy.signals import BaseSignal
 from scipy.ndimage import gaussian_filter
@@ -47,7 +47,7 @@ def test_integration_generator(radius, offset):
     i, j = (pixel_positions + center + offset).T.astype(int)
     pattern[i, j] = 1
 
-    dv = DiffractionVectors(pixel_positions)
+    dv = DiffractionVectors2D(pixel_positions)
     dp = ElectronDiffraction2D(pattern)
     ig = IntegrationGenerator(dp, dv)
     assert isinstance(ig, IntegrationGenerator)
@@ -66,7 +66,7 @@ def test_integration_generator_summation_method():
     pattern[i, j] = 1.0
     pattern = gaussian_filter(pattern, 2)
 
-    dv = DiffractionVectors(pixel_positions)
+    dv = DiffractionVectors2D(pixel_positions)
     dp = ElectronDiffraction2D(pattern)
     ig = IntegrationGenerator(dp, dv)
 
@@ -78,4 +78,4 @@ def test_integration_generator_summation_method():
     assert np.allclose(vectors.data, pixel_positions, atol=0.05)
     assert np.allclose(vectors.intensities.data[0], 1.0, atol=0.05)
     assert np.allclose(vectors.sigma.data[0], 0.0, atol=0.05)
-    assert isinstance(vectors, DiffractionVectors)
+    assert isinstance(vectors, DiffractionVectors2D)

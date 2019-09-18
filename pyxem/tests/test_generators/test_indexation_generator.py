@@ -24,7 +24,7 @@ from pyxem.generators.indexation_generator import VectorIndexationGenerator
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 
 from pyxem.utils.indexation_utils import OrientationResult
 
@@ -105,8 +105,7 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
 
 
 def test_vector_indexation_generator_init():
-    vectors = DiffractionVectors([[1], [2]])
-    vectors.cartesian = [[1], [2]]
+    vectors = DiffractionVectors3D([[1], [2], [3]])
     vector_library = DiffractionVectorLibrary()
     vector_indexation_generator = VectorIndexationGenerator(vectors, vector_library)
     assert isinstance(vector_indexation_generator, VectorIndexationGenerator)
@@ -116,7 +115,7 @@ def test_vector_indexation_generator_init():
 
 @pytest.mark.xfail(raises=ValueError)
 def test_vector_indexation_generator_cartesian_check():
-    vectors = DiffractionVectors([[1], [2]])
+    vectors = DiffractionVectors3D([[1], [2], [3]])
     vector_library = DiffractionVectorLibrary()
     vector_indexation_generator = VectorIndexationGenerator(vectors, vector_library)
 
@@ -124,8 +123,8 @@ def test_vector_indexation_generator_cartesian_check():
 def test_vector_indexation_generator_index_vectors(vector_match_peaks,
                                                    vector_library):
     # vectors not used directly
-    vectors = DiffractionVectors(np.array(vector_match_peaks[:, :2]))
-    vectors.cartesian = DiffractionVectors(np.array(vector_match_peaks))
+    vectors = DiffractionVectors3D(np.array(vector_match_peaks[:, :2]))
+    vectors.cartesian = DiffractionVectors3D(np.array(vector_match_peaks))
     gen = VectorIndexationGenerator(vectors, vector_library)
     indexation = gen.index_vectors(
         mag_tol=0.1,
@@ -135,7 +134,7 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks,
         n_best=5)
 
     # Values are tested directly on the match_vector in the util tests
-    assert isinstance(indexation.vectors, DiffractionVectors)
+    assert isinstance(indexation.vectors, DiffractionVectors3D)
 
     # (n_best=1, 5 result values from each)
     np.testing.assert_equal(indexation.data.shape, (5,))
@@ -145,12 +144,12 @@ def test_vector_indexation_generator_index_vectors(vector_match_peaks,
 
     refined1 = gen.refine_n_best_orientations(indexation, 1.0, 1.0, n_best=0)
 
-    assert isinstance(refined1.vectors, DiffractionVectors)
+    assert isinstance(refined1.vectors, DiffractionVectors3D)
     np.testing.assert_equal(refined1.data.shape, (5,))
 
     refined2 = gen.refine_best_orientation(indexation, 1.0, 1.0)
 
-    assert isinstance(refined2.vectors, DiffractionVectors)
+    assert isinstance(refined2.vectors, DiffractionVectors3D)
     np.testing.assert_equal(refined2.data.shape, (1,))
     assert isinstance(refined2.data[0], OrientationResult)
 

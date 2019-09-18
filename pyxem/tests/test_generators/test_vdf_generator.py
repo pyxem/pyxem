@@ -22,7 +22,7 @@ import numpy as np
 from pyxem.generators.vdf_generator import VDFGenerator
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 from pyxem.signals.vdf_image import VDFImage
 
 
@@ -31,7 +31,7 @@ from pyxem.signals.vdf_image import VDFImage
               [2, 2]])
 ])
 def diffraction_vectors(request):
-    dvec = DiffractionVectors(request.param)
+    dvec = DiffractionVectors2D(request.param)
     dvec.axes_manager.set_signal_dimension(1)
     return dvec
 
@@ -44,7 +44,7 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
 class TestVDFGenerator:
 
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
-        dvm = DiffractionVectors(np.array([[np.array([[1, 1],
+        dvm = DiffractionVectors2D(np.array([[np.array([[1, 1],
                                                       [2, 2]]),
                                             np.array([[1, 1],
                                                       [2, 2],
@@ -57,7 +57,7 @@ class TestVDFGenerator:
 
         vdfgen = VDFGenerator(diffraction_pattern, dvm)
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
-        assert isinstance(vdfgen.vectors, DiffractionVectors)
+        assert isinstance(vdfgen.vectors, DiffractionVectors2D)
 
     def test_vdf_generator_init_without_vectors(self, diffraction_pattern):
 
@@ -97,7 +97,7 @@ class TestVDFGenerator:
 
 
 def test_vdf_generator_from_map(diffraction_pattern):
-    dvm = DiffractionVectors(np.array([[np.array([[1, 1],
+    dvm = DiffractionVectors2D(np.array([[np.array([[1, 1],
                                                   [2, 2]]),
                                         np.array([[1, 1],
                                                   [2, 2],
