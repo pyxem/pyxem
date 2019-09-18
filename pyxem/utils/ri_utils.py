@@ -21,7 +21,8 @@ from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 
 
-def scattering_to_signal(elements, fracs, N, C, s_size, s_scale, type='lobato'):
+def scattering_to_signal(elements, fracs, N, C, s_size, s_scale,
+                            scattering_factor='lobato'):
     """ A function to override HyperSpy's as_signal method in a fit, as that
     method fails for large signals.
 
@@ -38,8 +39,9 @@ def scattering_to_signal(elements, fracs, N, C, s_size, s_scale, type='lobato'):
     s_size : int
                 Size of fitted signal in the signal dimension (in pixels)/
     s_scale : float
-                Calibration factor of s.
-    type : str
+                Calibration factor of scattering factor s = 1/d in reciprocal
+                angstroms per pixel.
+    scattering_factor : str
                 Type of scattering parameters fitted. Default is lobato.
                 Options are:
                     - lobato: Fit to Lobato & Van Dyck (2014)
@@ -48,16 +50,16 @@ def scattering_to_signal(elements, fracs, N, C, s_size, s_scale, type='lobato'):
     """
     params = []
 
-    if type == 'lobato':
+    if scattering_factor == 'lobato':
         for e in elements:
             params.append(ATOMIC_SCATTERING_PARAMS_LOBATO[e])
-    elif type == 'xtables':
+    elif scattering_factor == 'xtables':
         for e in elements:
             params.append(ATOMIC_SCATTERING_PARAMS[e])
     else:
         raise NotImplementedError("The parameters `{}` are not implemented."
                                   "See documentation for available "
-                                  "implementations.".format(type))
+                                  "implementations.".format(scattering_factor))
 
     x_size = N.data.shape[0]
     y_size = N.data.shape[1]
@@ -67,7 +69,7 @@ def scattering_to_signal(elements, fracs, N, C, s_size, s_scale, type='lobato'):
 
     x = np.arange(s_size) * s_scale
 
-    if type == 'lobato':
+    if scattering_factor == 'lobato':
         for i, element in enumerate(params):
             fi = np.zeros(s_size)
             for n in range(len(element)):  # 5 parameters per element
@@ -78,7 +80,7 @@ def scattering_to_signal(elements, fracs, N, C, s_size, s_scale, type='lobato'):
             sum_squares += np.square(fi) * elem_frac
             square_sum += fi * elem_frac
 
-    elif type == 'xtables':
+    elif scattering_factor == 'xtables':
         for i, element in enumerate(params):
             fi = np.zeros(s_size)
             for n in range(len(element)):  # 5 parameters per element

@@ -25,7 +25,7 @@ from pyxem.components.scattering_fit_component import ScatteringFitComponent
 def test_scattering_component_init_lobato():
     elements = ['Cu']
     fracs = [1]
-    ref = ScatteringFitComponent(elements, fracs, N=1., C=0., type='lobato')
+    ref = ScatteringFitComponent(elements, fracs, N=1., C=0., scattering_factor='lobato')
     assert isinstance(ref, ScatteringFitComponent)
     return
 
@@ -33,7 +33,7 @@ def test_scattering_component_init_lobato():
 def test_scattering_component_init_xtables():
     elements = ['Cu']
     fracs = [1]
-    ref = ScatteringFitComponent(elements, fracs, N=1., C=0., type='xtables')
+    ref = ScatteringFitComponent(elements, fracs, N=1., C=0., scattering_factor='xtables')
     assert isinstance(ref, ScatteringFitComponent)
     return
 
@@ -42,7 +42,7 @@ def test_scattering_component_init_xtables():
 def test_scattering_component_init_not_implemented():
     elements = ['Cu']
     fracs = [1]
-    ref = ScatteringFitComponent(elements, fracs, N=1., C=0., type='nope')
+    ref = ScatteringFitComponent(elements, fracs, N=1., C=0., scattering_factor='nope')
 
 
 @pytest.fixture(params=[
@@ -57,7 +57,7 @@ def ri_model(request):
 def test_function_lobato(ri_model):
     elements = ['Cu']
     fracs = [1]
-    sc_component = ScatteringFitComponent(elements, fracs, N=1., C=0., type='lobato')
+    sc_component = ScatteringFitComponent(elements, fracs, N=1., C=0., scattering_factor='lobato')
     ri_model.append(sc_component)
     ri_model.fit()
     return
@@ -66,7 +66,7 @@ def test_function_lobato(ri_model):
 def test_function_xtables(ri_model):
     elements = ['Cu']
     fracs = [1]
-    sc_component = ScatteringFitComponent(elements, fracs, N=1., C=0., type='xtables')
+    sc_component = ScatteringFitComponent(elements, fracs, N=1., C=0., scattering_factor='xtables')
     ri_model.append(sc_component)
     ri_model.fit()
     return

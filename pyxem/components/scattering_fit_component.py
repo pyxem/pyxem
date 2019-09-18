@@ -29,7 +29,7 @@ from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOB
 
 class ScatteringFitComponent(Component):
 
-    def __init__(self, elements, fracs, N=1., C=0., type='lobato'):
+    def __init__(self, elements, fracs, N=1., C=0., scattering_factor='lobato'):
         """
         A scattering component to fit background atomic scattering.
         Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
@@ -49,7 +49,7 @@ class ScatteringFitComponent(Component):
                     The "slope" of the fit.
         C : float
                     An additive constant to the fit.
-        type : str
+        scattering_factor : str
                     Type of scattering parameters fitted. Default is lobato.
                     Options are:
                         - lobato: Fit to Lobato & Van Dyck (2014)
@@ -57,7 +57,7 @@ class ScatteringFitComponent(Component):
 
         """
         Component.__init__(self, ['N', 'C'])
-        self.type = type
+        self.scattering_factor = scattering_factor
         self.elements = elements
         self.fracs = fracs
         params = []
@@ -70,7 +70,7 @@ class ScatteringFitComponent(Component):
         else:
             raise NotImplementedError("The parameters `{}` are not implemented."
                                       "See documentation for available "
-                                      "implementations.".format(type))
+                                      "implementations.".format(scattering_factor))
             # As in International Tables for Crystallography, 2006, 4.3.2
         self.params = params
 
@@ -92,7 +92,7 @@ class ScatteringFitComponent(Component):
         sum_squares = np.zeros(x.size)
         square_sum = np.zeros(x.size)
 
-        if self.type == 'lobato':
+        if self.scattering_factor == 'lobato':
             for i, element in enumerate(params):
                 fi = np.zeros(x.size)
                 for n in range(len(element)):  # 5 parameters per element
@@ -103,7 +103,7 @@ class ScatteringFitComponent(Component):
                 sum_squares += np.square(fi) * elem_frac
                 square_sum += fi * elem_frac
 
-        elif self.type == 'xtables':
+        elif self.scattering_factor == 'xtables':
             for i, element in enumerate(params):
                 fi = np.zeros(x.size)
                 for n in range(len(element)):  # 5 parameters per element
