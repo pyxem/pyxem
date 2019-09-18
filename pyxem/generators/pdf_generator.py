@@ -98,6 +98,6 @@ class PDFGenerator():
         signal_axis.scale = pdf_scaling
         signal_axis.name = 'Radius r'
         signal_axis.units = '$Å$'
-        transfer_navigation_axes(rpdf,self.signal)
+        rpdf = transfer_navigation_axes(rpdf,self.signal)
 
         return rpdf

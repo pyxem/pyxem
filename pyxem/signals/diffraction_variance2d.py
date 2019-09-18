@@ -22,7 +22,7 @@
 from hyperspy.signals import Signal2D
 
 from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
-
+from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.expt_utils import radial_average
 
 import numpy as np
@@ -61,6 +61,7 @@ class DiffractionVariance2D(Signal2D):
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
 
         rp = DiffractionVariance1D(radial_profiles.as_signal1D(signal_axis))
+        rp = transfer_navigation_axes(rp, self)
         rp_axis = rp.axes_manager.signal_axes[0]
         rp_axis.name = 'q'
         rp_axis.scale = self.axes_manager.signal_axes[0].scale

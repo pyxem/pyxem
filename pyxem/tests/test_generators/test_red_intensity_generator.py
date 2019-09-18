@@ -84,7 +84,6 @@ def test_set_cutoff(red_int_generator):
     s_min, s_max = 0, 8
     red_int_generator.set_cutoff_vector(s_min, s_max)
     assert red_int_generator.cutoff == [s_min, s_max]
-    return
 
 
 def test_subtract_bkgd(red_int_generator):
@@ -95,7 +94,6 @@ def test_subtract_bkgd(red_int_generator):
     expected = expected.reshape(2, 2, 10)
 
     assert np.array_equal(red_int_generator.signal.data, expected)
-    return
 
 def test_mask_from_bkgd(red_int_generator):
     mask_pattern = np.arange(10, 0, -1).reshape(10)
@@ -107,7 +105,6 @@ def test_mask_from_bkgd(red_int_generator):
     expected[:,:,:4] = 0
 
     assert np.array_equal(red_int_generator.signal.data, expected)
-    return
 
 def test_mask_reduced_intensity(red_int_generator):
     mask_pattern = np.ones(10)
@@ -119,7 +116,6 @@ def test_mask_reduced_intensity(red_int_generator):
     expected[:,:,:4] = 0
 
     assert np.array_equal(red_int_generator.signal.data, expected)
-    return
 
 @pytest.mark.xfail(raises=ValueError)
 def test_incorrect_mask(red_int_generator):
@@ -130,11 +126,8 @@ def test_incorrect_mask(red_int_generator):
 
 
 def test_get_reduced_intensity(red_int_generator):
-    calib = 0.1
-    red_int_generator.set_diffraction_calibration(calibration=calib)
-    elements = ['Cu']
-    fracs = [1]
-    red_int_generator.fit_atomic_scattering(elements=elements, fracs=fracs)
+    red_int_generator.set_diffraction_calibration(calibration=0.1)
+    red_int_generator.fit_atomic_scattering(elements=['Cu'], fracs=[1])
     ri = red_int_generator.get_reduced_intensity()
     assert isinstance(ri, ReducedIntensity1D)
 
@@ -146,4 +139,3 @@ def test_get_reduced_intensity(red_int_generator):
     ri_expected = ReducedIntensity1D(ri_expected_array)
 
     assert np.allclose(ri.data, ri_expected.data)
-    return

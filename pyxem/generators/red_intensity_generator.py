@@ -247,7 +247,7 @@ class ReducedIntensityGenerator():
                                        self.normalisation))
 
         ri = ReducedIntensity1D(reduced_intensity)
-        transfer_navigation_axes(ri,self.signal)
-        transfer_signal_axes(ri,self.signal)
+        ri = transfer_navigation_axes(ri,self.signal)
+        ri = transfer_signal_axes(ri,self.signal)
 
         return ri

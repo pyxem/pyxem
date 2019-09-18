@@ -51,7 +51,6 @@ def test_damp_exponential(RedIntData):
                           3.37605524e-07, 4.16638316e-11, 6.95856849e-16, 1.57286570e-21,
                           4.81143267e-28, 1.99190316e-35]]])
     assert np.allclose(ri, compare)
-    return
 
 
 def test_damp_lorch(RedIntData):
@@ -67,7 +66,6 @@ def test_damp_lorch(RedIntData):
                          [0., 2.95089493, 2.80646785, 2.57518107, 2.27048019,
                           1.90985932, 1.51365346, 1.10364903, 0.70161696, 0.32787721]]])
     assert np.allclose(ri, compare)
-    return
 
 
 def test_damp_updated_lorch(RedIntData):
@@ -83,7 +81,6 @@ def test_damp_updated_lorch(RedIntData):
                          [0., 2.97049536, 2.88322246, 2.74183673, 2.55220944,
                           2.32211048, 2.06079219, 1.77849991, 1.48593909, 1.1937312]]])
     assert np.allclose(ri, compare)
-    return
 
 
 def test_damp_low_q_region_erfc(RedIntData):
@@ -99,7 +96,6 @@ def test_damp_low_q_region_erfc(RedIntData):
                          [0.09898808, 3., 3., 3., 3.,
                           3., 3., 3., 3., 3.]]])
     assert np.allclose(ri, compare)
-    return
 
 
 def test_multiple_scatter_correction(RedIntData):
@@ -119,7 +115,6 @@ def test_multiple_scatter_correction(RedIntData):
                           0.10966691, 0.19740047, 0.01218523, -0.20714863,
                           0.08529649, 1.74248558]]])
     assert np.allclose(ri, compare)
-    return
 
 
 def test_s_max_statements(RedIntData):
@@ -128,4 +123,3 @@ def test_s_max_statements(RedIntData):
     ri.damp_updated_lorch()
     ri.fit_thermal_multiple_scattering_correction(s_max=5, plot=True)
     assert isinstance(ri, ReducedIntensity1D)
-    return

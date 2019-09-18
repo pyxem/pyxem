@@ -23,11 +23,8 @@ from pyxem.components.scattering_fit_component_lobato import ScatteringFitCompon
 
 
 def test_scattering_component_init_lobato():
-    elements = ['Cu']
-    fracs = [1]
-    ref = ScatteringFitComponentLobato(elements, fracs, N=1., C=0.)
+    ref = ScatteringFitComponentLobato(['Cu'], [1], N=1., C=0.)
     assert isinstance(ref, ScatteringFitComponentLobato)
-    return
 
 @pytest.fixture(params=[
     np.array([4., 3., 2., 2., 1., 1., 1., 0.])
@@ -44,4 +41,3 @@ def test_function_lobato(ri_model):
     sc_component = ScatteringFitComponentLobato(elements, fracs, N=1., C=0.)
     ri_model.append(sc_component)
     ri_model.fit()
-    return
