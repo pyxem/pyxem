@@ -61,10 +61,10 @@ class ScatteringFitComponent(Component):
         self.elements = elements
         self.fracs = fracs
         params = []
-        if self.type == 'lobato':
+        if self.scattering_factor == 'lobato':
             for e in elements:
                 params.append(ATOMIC_SCATTERING_PARAMS_LOBATO[e])
-        elif self.type == 'xtables':
+        elif self.scattering_factor == 'xtables':
             for e in elements:
                 params.append(ATOMIC_SCATTERING_PARAMS[e])
         else:

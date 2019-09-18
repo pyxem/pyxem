@@ -38,14 +38,14 @@ def test_pdf_gen_init(reduced_intensity1d):
 
 def test_get_pdf(reduced_intensity1d):
     pdfgen = PDFGenerator(reduced_intensity1d)
-    pdf = pdfgen.get_pdf(s_cutoff=[0, 9])
+    pdf = pdfgen.get_pdf(s_min=0, s_max=9)
     assert isinstance(pdf, PairDistributionFunction1D)
 
 
 def test_s_limits(reduced_intensity1d):
     pdfgen = PDFGenerator(reduced_intensity1d)
-    pdf = pdfgen.get_pdf(s_cutoff=[0, 12])
-    pdf2 = pdfgen.get_pdf(s_cutoff=[0, 10])
+    pdf = pdfgen.get_pdf(s_min=0, s_max=12)
+    pdf2 = pdfgen.get_pdf(s_min=0, s_max=10)
     assert np.array_equal(pdf.data, pdf2.data)
 
 
@@ -53,21 +53,27 @@ def test_signal_size():
     spectrum = np.array([5., 4., 3., 2., 2., 1., 1., 1., 0., 0.])
     ri = ReducedIntensity1D(spectrum)
     pdfgen = PDFGenerator(ri)
-    pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
+    pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([spectrum])
     pdfgen = PDFGenerator(ri)
-    pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
+    pdf = pdfgen.get_pdf(s_min=0,s_max=10)
     assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([[spectrum]])
     pdfgen = PDFGenerator(ri)
-    pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
+    pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([[[spectrum]]])
     pdfgen = PDFGenerator(ri)
-    pdf = pdfgen.get_pdf(s_cutoff=[0, 10])
+    pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     shape = pdf.data.shape
     assert shape == (1,1,1,2000)
+
+    ri = ReducedIntensity1D([[[spectrum]]])
+    pdfgen = PDFGenerator(ri)
+    pdf = pdfgen.get_pdf(s_min=0, s_max=10, r_min=0, r_max=8)
+    shape = pdf.data.shape
+    assert shape == (1,1,1,800)
