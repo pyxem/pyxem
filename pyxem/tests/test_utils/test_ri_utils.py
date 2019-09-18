@@ -30,12 +30,12 @@ def test_as_signal_generation():
     fracs = [1]
     s_size = 10
     s_scale = 0.1
-    scattering_factors = ['lobato', 'xtables', 'not_implemented']
+    scattering_factors = ['lobato', 'xtables']
 
     for table_choice in scattering_factors:
         if table_choice == 'lobato':
-            signal, normalisation = scattering_to_signal(elements, fracs, N, C,
-                                                         s_size, s_scale, table_choice)
+            signal, normalisation = scattering_to_signal_lobato(elements, fracs,
+                                                    N, C, s_size, s_scale)
             expected_signal = np.array([[[31.371201, 21.08535486, 10.62320925,
                                           5.89629809, 3.51507336, 2.15565751, 1.34986551,
                                           0.8664032, 0.57201346, 0.38888391]]])
@@ -46,8 +46,8 @@ def test_as_signal_generation():
             assert np.allclose(normalisation, expected_normalisation)
 
         elif table_choice == 'xtables':
-            signal, normalisation = scattering_to_signal(elements, fracs, N, C,
-                                                         s_size, s_scale, table_choice)
+            signal, normalisation = scattering_to_signal_xtables(elements, fracs,
+                                                    N, C, s_size, s_scale)
             expected_signal = np.array([[[31.23021456, 21.12038612, 10.61694231,
                                           5.9564419, 3.47051602, 2.11850579, 1.36598179,
                                           0.90445736, 0.60043364, 0.39823201]]])
@@ -56,10 +56,5 @@ def test_as_signal_generation():
                                                  0.95102963, 0.77487653, 0.63105627]]])
             assert np.allclose(signal, expected_signal)
             assert np.allclose(normalisation, expected_normalisation)
-        else:
-            # expect error
-            with pytest.raises(NotImplementedError):
-                signal, normalisation = scattering_to_signal(elements, fracs, N, C,
-                                                             s_size, s_scale, table_choice)
 
     return

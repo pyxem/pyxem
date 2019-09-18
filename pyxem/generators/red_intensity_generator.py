@@ -28,10 +28,16 @@ from hyperspy.signals import Signal1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
-from pyxem.components.scattering_fit_component import ScatteringFitComponent
-from pyxem.utils.ri_utils import scattering_to_signal
+from pyxem.components.scattering_fit_component_xtables import ScatteringFitComponentXTables
+from pyxem.components.scattering_fit_component_lobato import ScatteringFitComponentLobato
+from pyxem.utils.ri_utils import scattering_to_signal_lobato, scattering_to_signal_xtables
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import transfer_signal_axes
+
+scattering_factor_dictionary = {'lobato': ScatteringFitComponentLobato,
+                                'xtables': ScatteringFitComponentXTables}
+scattering_signal_dictionary = {'lobato': scattering_to_signal_lobato,
+                                'xtables': scattering_to_signal_xtables}
 
 
 class ReducedIntensityGenerator():
@@ -114,7 +120,8 @@ class ReducedIntensityGenerator():
         """
 
         fit_model = self.signal.create_model()
-        background = ScatteringFitComponent(elements, fracs, N, C, scattering_factor)
+        background = scattering_factor_dictionary[scattering_factor](elements,
+                                                fracs, N, C)
 
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
@@ -126,10 +133,10 @@ class ReducedIntensityGenerator():
         N_values = background.N.as_signal()
         s_size = self.sig_size[0]
         s_scale = self.signal.axes_manager.signal_axes[0].scale
-        fit, normalisation = scattering_to_signal(elements, fracs, N_values,
-                                                  C_values, s_size, s_scale, scattering_factor)
+        fit, normalisation = scattering_signal_dictionary[scattering_factor](elements,
+                                    fracs, N_values, C_values, s_size, s_scale)
 
-        self.normalisation = normalisation  # change this
+        self.normalisation = normalisation
         self.background_fit = fit
         return
 
@@ -179,13 +186,11 @@ class ReducedIntensityGenerator():
                     from the fit.
         """
 
-        # define numerical cutoff to remove certain data parts
         s_scale = self.signal.axes_manager.signal_axes[0].scale
-
         s = np.arange(self.signal.axes_manager.signal_axes[0].size,
                       dtype='float64')
         s *= self.signal.axes_manager.signal_axes[0].scale
-        # remember axes scale and size!
+
         reduced_intensity = (4 * np.pi * s *
                              np.divide((self.signal.data - self.background_fit),
                                        self.normalisation))

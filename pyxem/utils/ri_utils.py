@@ -21,10 +21,11 @@ from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 
 
-def scattering_to_signal(elements, fracs, N, C, s_size, s_scale,
-                            scattering_factor='lobato'):
+def scattering_to_signal_lobato(elements, fracs, N, C, s_size, s_scale):
     """ A function to override HyperSpy's as_signal method in a fit, as that
     method fails for large signals.
+
+    Fit to Lobato & Van Dyck (2014)
 
     Parameters
     ----------
@@ -41,25 +42,11 @@ def scattering_to_signal(elements, fracs, N, C, s_size, s_scale,
     s_scale : float
                 Calibration factor of scattering factor s = 1/d in reciprocal
                 angstroms per pixel.
-    scattering_factor : str
-                Type of scattering parameters fitted. Default is lobato.
-                Options are:
-                    - lobato: Fit to Lobato & Van Dyck (2014)
-                    - xtables: Fit to International Tables Vol. C, table 4.3.2.3
-
     """
     params = []
 
-    if scattering_factor == 'lobato':
-        for e in elements:
-            params.append(ATOMIC_SCATTERING_PARAMS_LOBATO[e])
-    elif scattering_factor == 'xtables':
-        for e in elements:
-            params.append(ATOMIC_SCATTERING_PARAMS[e])
-    else:
-        raise NotImplementedError("The parameters `{}` are not implemented."
-                                  "See documentation for available "
-                                  "implementations.".format(scattering_factor))
+    for e in elements:
+        params.append(ATOMIC_SCATTERING_PARAMS_LOBATO[e])
 
     x_size = N.data.shape[0]
     y_size = N.data.shape[1]
@@ -69,25 +56,65 @@ def scattering_to_signal(elements, fracs, N, C, s_size, s_scale,
 
     x = np.arange(s_size) * s_scale
 
-    if scattering_factor == 'lobato':
-        for i, element in enumerate(params):
-            fi = np.zeros(s_size)
-            for n in range(len(element)):  # 5 parameters per element
-                fi += (element[n][0] * (2 + element[n][1] * np.square(2 * x))
-                       * np.divide(1, np.square(1 + element[n][1] *
+    for i, element in enumerate(params):
+        fi = np.zeros(s_size)
+        for n in range(len(element)):  # 5 parameters per element
+            fi += (element[n][0] * (2 + element[n][1] * np.square(2 * x))
+                   * np.divide(1, np.square(1 + element[n][1] *
                                                 np.square(2 * x))))
-            elem_frac = fracs[i]
-            sum_squares += np.square(fi) * elem_frac
-            square_sum += fi * elem_frac
+        elem_frac = fracs[i]
+        sum_squares += np.square(fi) * elem_frac
+        square_sum += fi * elem_frac
 
-    elif scattering_factor == 'xtables':
-        for i, element in enumerate(params):
-            fi = np.zeros(s_size)
-            for n in range(len(element)):  # 5 parameters per element
-                fi += element[n][0] * np.exp(-element[n][1] * (np.square(x)))
-            elem_frac = fracs[i]
-            sum_squares += np.square(fi) * elem_frac
-            square_sum += fi * elem_frac
+    signal = N.data.reshape(x_size, y_size, 1) * sum_squares + C.data.reshape(x_size, y_size, 1)
+    square_sum = N.data.reshape(x_size, y_size, 1) * square_sum
+
+    return signal, square_sum
+
+
+
+def scattering_to_signal_xtables(elements, fracs, N, C, s_size, s_scale):
+    """ A function to override HyperSpy's as_signal method in a fit, as that
+    method fails for large signals.
+
+    Fit to International Tables Vol. C, table 4.3.2.3
+
+    Parameters
+    ----------
+    elements: list of str
+                A list of elements present (by symbol).
+    fracs: list of float
+                A list of fraction of the respective elements. Should sum to 1.
+    N : array of float
+                The "slope" of the fit.
+    C : array of float
+                An additive constant to the fit. Supplied as array.
+    s_size : int
+                Size of fitted signal in the signal dimension (in pixels)/
+    s_scale : float
+                Calibration factor of scattering factor s = 1/d in reciprocal
+                angstroms per pixel.
+    """
+    params = []
+
+    for e in elements:
+        params.append(ATOMIC_SCATTERING_PARAMS[e])
+
+    x_size = N.data.shape[0]
+    y_size = N.data.shape[1]
+
+    sum_squares = np.zeros((x_size, y_size, s_size))
+    square_sum = np.zeros((x_size, y_size, s_size))
+
+    x = np.arange(s_size) * s_scale
+
+    for i, element in enumerate(params):
+        fi = np.zeros(s_size)
+        for n in range(len(element)):  # 5 parameters per element
+            fi += element[n][0] * np.exp(-element[n][1] * (np.square(x)))
+        elem_frac = fracs[i]
+        sum_squares += np.square(fi) * elem_frac
+        square_sum += fi * elem_frac
 
     signal = N.data.reshape(x_size, y_size, 1) * sum_squares + C.data.reshape(x_size, y_size, 1)
     square_sum = N.data.reshape(x_size, y_size, 1) * square_sum
