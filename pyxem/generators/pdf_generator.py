@@ -81,7 +81,7 @@ class PDFGenerator():
 
         limited_red_int = self.signal.isig[s_limits[0]:s_limits[1]].data
 
-        pdf_sine = np.sin(2 * np.pi * s_values@r_values)
+        pdf_sine = np.sin(2 * np.pi * np.matmul(s_values,r_values))
         # creates a vector of the pdf
         rpdf = PairDistributionFunction1D(8 * np.pi * s_scale
                                     * np.matmul(limited_red_int,pdf_sine))
