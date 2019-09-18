@@ -110,13 +110,20 @@ def test_mask_from_bkgd(red_int_generator):
     return
 
 def test_get_reduced_intensity(red_int_generator):
-
+    calib = 0.1
+    red_int_generator.set_diffraction_calibration(calibration=calib)
     elements = ['Cu']
     fracs = [1]
     red_int_generator.fit_atomic_scattering(elements=elements, fracs=fracs)
     ri = red_int_generator.get_reduced_intensity()
     assert isinstance(ri, ReducedIntensity1D)
-    ri = red_int_generator.get_reduced_intensity()
-    assert isinstance(ri, ReducedIntensity1D)
-    # better test needed here, an assert allclose or such at least
+
+    ri_expected_single = np.array([-0.,0.28825135,5.40069217,11.20803745,
+                                    13.64332079,8.28785318,-11.48095348,
+                                    -54.78616349,-133.1141455,-260.12362871])
+    ri_expected_array = np.vstack((ri_expected_single,ri_expected_single,
+                                    ri_expected_single,ri_expected_single)).reshape(2,2,10)
+    ri_expected = ReducedIntensity1D(ri_expected_array)
+
+    assert np.allclose(ri.data, ri_expected.data)
     return
