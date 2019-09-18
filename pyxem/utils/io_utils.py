@@ -135,7 +135,6 @@ def load_hspy(filename, lazy=False, assign_to=None):
     return s
 
 
-
 def load_mib(mib_filename, reshape=True, flip=True):
     """Read a .mib file using dask and return as LazyElectronDiffraction2D.
 
@@ -208,7 +207,6 @@ def load_mib(mib_filename, reshape=True, flip=True):
     return data_pxm
 
 
-
 def _manageHeader(fname):
     """Get necessary information from the header of the .mib file.
 
@@ -231,37 +229,36 @@ def _manageHeader(fname):
 
     """
     Header = str()
-    with open(fname,'rb') as input:
-        aByte= input.read(1)
+    with open(fname, 'rb') as input:
+        aByte = input.read(1)
         Header += str(aByte.decode('ascii'))
         # This gets rid of the header
         while aByte and ord(aByte) != 0:
 
-            aByte= input.read(1)
+            aByte = input.read(1)
             Header += str(aByte.decode('ascii'))
 
     elements_in_header = Header.split(',')
-
 
     DataOffset = int(elements_in_header[2])
 
     NChips = int(elements_in_header[3])
 
-    PixelDepthInFile= elements_in_header[6]
+    PixelDepthInFile = elements_in_header[6]
     sensorLayout = elements_in_header[7].strip()
     Timestamp = elements_in_header[9]
     shuttertime = float(elements_in_header[10])
 
     if PixelDepthInFile == 'R64':
-        bitdepth =int(elements_in_header[18]) # RAW
-    elif PixelDepthInFile =='U16':
-        bitdepth =12
-    elif PixelDepthInFile =='U08':
-        bitdepth =6
-    elif PixelDepthInFile =='U32':
-        bitdepth =24
+        bitdepth = int(elements_in_header[18])  # RAW
+    elif PixelDepthInFile == 'U16':
+        bitdepth = 12
+    elif PixelDepthInFile == 'U08':
+        bitdepth = 6
+    elif PixelDepthInFile == 'U32':
+        bitdepth = 24
 
-    hdr = (DataOffset,NChips,PixelDepthInFile,sensorLayout,Timestamp,shuttertime,bitdepth)
+    hdr = (DataOffset, NChips, PixelDepthInFile, sensorLayout, Timestamp, shuttertime, bitdepth)
 
     return hdr
 
@@ -306,10 +303,10 @@ def _parse_hdr(fp):
     else:
         # Changes 6 to 8 , 12 to 16 and 24 to 32 bit
         cd_int = int(read_hdr[6])
-        hdr_info['data-length'] = str(int((cd_int + cd_int/3) ))
+        hdr_info['data-length'] = str(int((cd_int + cd_int / 3)))
 
     hdr_info['Counter Depth (number)'] = int(read_hdr[6])
-    if read_hdr[2] =='R64':
+    if read_hdr[2] == 'R64':
         hdr_info['raw'] = 'R64'
     else:
         hdr_info['raw'] = 'MIB'
@@ -318,26 +315,24 @@ def _parse_hdr(fp):
     # Set record by to stack of images
     hdr_info['record-by'] = 'image'
 
-
     # Set title to file name
     hdr_info['title'] = fp.split('.')[0]
     # Set time and date
     # Adding the try argument to accommodate the new hdr formatting as of April 2018
     try:
         year, month, day_time = read_hdr[4].split('-')
-        day , time = day_time.split(' ')
+        day, time = day_time.split(' ')
         hdr_info['date'] = year + month + day
         hdr_info['time'] = time
-    except:
+    except BaseException:
         day, month, year_time = read_hdr[4].split('/')
-        year , time = year_time.split(' ')
+        year, time = year_time.split(' ')
         hdr_info['date'] = year + month + day
         hdr_info['time'] = time
 
     hdr_info['data offset'] = read_hdr[0]
 
     return hdr_info
-
 
 
 def _add_crosses(a):
@@ -359,20 +354,21 @@ def _add_crosses(a):
     a_shape = a.shape
 
     len_a_shape = len(a_shape)
-    img_axes = len_a_shape-2, len_a_shape-1
+    img_axes = len_a_shape - 2, len_a_shape - 1
     a_half = int(a_shape[img_axes[0]] / 2), int(a_shape[img_axes[1]] / 2)
     # Define 3 pixel wide cross of zeros to pad raw data
-    z_array = da.zeros((a_shape[0],a_shape[1],3), dtype = a_type)
-    z_array2 = da.zeros((a_shape[0],3,a_shape[img_axes[1]]+3), dtype = a_type)
+    z_array = da.zeros((a_shape[0], a_shape[1], 3), dtype=a_type)
+    z_array2 = da.zeros((a_shape[0], 3, a_shape[img_axes[1]] + 3), dtype=a_type)
     # Insert blank cross into raw data
 
-    b = da.concatenate((a[:,:,:a_half[1]],z_array, a[:,:,a_half[1]:]), axis = -1)
+    b = da.concatenate((a[:, :, :a_half[1]], z_array, a[:, :, a_half[1]:]), axis=-1)
 
-    b = da.concatenate((b[:, :a_half[0],:], z_array2, b[:,a_half[0]:,:]), axis = -2)
+    b = da.concatenate((b[:, :a_half[0], :], z_array2, b[:, a_half[0]:, :]), axis=-2)
 
     return b
 
-def _get_mib_depth(hdr_info,fp):
+
+def _get_mib_depth(hdr_info, fp):
     """Determine the total number of frames based on .mib file size.
 
     Parameters
@@ -390,26 +386,26 @@ def _get_mib_depth(hdr_info,fp):
     # Define standard frame sizes for quad and single medipix chips
     if hdr_info['Assembly Size'] == '2x2':
         mib_file_size_dict = {
-        '1': 33536,
-        '6': 262912,
-        '12': 525056,
-        '24': 1049344,
+            '1': 33536,
+            '6': 262912,
+            '12': 525056,
+            '24': 1049344,
         }
     if hdr_info['Assembly Size'] == '1x1':
         mib_file_size_dict = {
-        '1': 8576,
-        '6': 65920,
-        '12': 131456,
-        '24': 262528,
+            '1': 8576,
+            '6': 65920,
+            '12': 131456,
+            '24': 262528,
         }
 
-    file_size = os.path.getsize(fp[:-3]+'mib')
+    file_size = os.path.getsize(fp[:-3] + 'mib')
     if hdr_info['raw'] == 'R64':
 
         single_frame = mib_file_size_dict.get(str(hdr_info['Counter Depth (number)']))
         depth = int(file_size / single_frame)
     elif hdr_info['raw'] == 'MIB':
-        if hdr_info['Counter Depth (number)'] =='1':
+        if hdr_info['Counter Depth (number)'] == '1':
             # 1 bit and 6 bit non-raw frames have the same size
             single_frame = mib_file_size_dict.get('6')
             depth = int(file_size / single_frame)
@@ -419,7 +415,8 @@ def _get_mib_depth(hdr_info,fp):
 
     return depth
 
-def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
+
+def _read_exposures(hdr_info, fp, pct_frames_to_read=0.1, mmap_mode='r'):
     """
     Looks into the frame times of the first 10 pct of the frames to see if they are
     all the same (TEM) or there is a flyback (4D-STEM).
@@ -466,7 +463,7 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
     data_type = np.dtype(data_type)
     data_type = data_type.newbyteorder(endian)
 
-    hdr_multiplier = (int(data_length)/8)**-1
+    hdr_multiplier = (int(data_length) / 8)**-1
     hdr_bits = int(hdr_info['data offset'] * hdr_multiplier)
 
     data = np.memmap(fp,
@@ -483,13 +480,13 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
 
         size = (depth, height, width)
 
-        #remove headers at the beginning of each frame and reshape
+        # remove headers at the beginning of each frame and reshape
 
         if hdr_info['raw'] == 'R64':
             try:
-                data = data.reshape(-1,  width_height + hdr_bits)[:,71:79]
-                data = data [:, ]
-                data_crop = data[:int(depth*pct_frames_to_read)]
+                data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
+                data = data[:, ]
+                data_crop = data[:int(depth * pct_frames_to_read)]
                 d = data_crop.compute()
                 exp_time = []
                 for line in range(d.shape[0]):
@@ -497,13 +494,12 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
                     exp_time.append(float(''.join(str_list)))
             except ValueError:
                 print('Frame exposure times are not appearing in header!')
-
 
         else:
             try:
-                data = data.reshape(-1,  width_height + hdr_bits)[:,71:79]
-                data = data [:, ]
-                data_crop = data[:int(depth*pct_frames_to_read)]
+                data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
+                data = data[:, ]
+                data_crop = data[:int(depth * pct_frames_to_read)]
                 d = data_crop.compute()
                 exp_time = []
                 for line in range(d.shape[0]):
@@ -511,7 +507,6 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
                     exp_time.append(float(''.join(str_list)))
             except ValueError:
                 print('Frame exposure times are not appearing in header!')
-
 
     elif record_by == 'dont-care':  # stack of images
         size = (height, width)
@@ -543,8 +538,8 @@ def _STEM_flag_dict(exp_times_list):
         output['exposure time'] = list(times_set)
         output['number of frames_to_skip'] = None
         output['flyback_times'] = None
-    #In case exp times not appearing in header treat as TEM data
-    elif len(times_set) ==0:
+    # In case exp times not appearing in header treat as TEM data
+    elif len(times_set) == 0:
 
         output['STEM_flag'] = 0
         output['scan_X'] = None
@@ -555,8 +550,8 @@ def _STEM_flag_dict(exp_times_list):
     else:
         STEM_flag = 1
         # Check that the smallest time is the majority of the values
-        exp_time = max(times_set, key = exp_times_list.count)
-        if exp_times_list.count(exp_time) < int(0.9*len(exp_times_list)):
+        exp_time = max(times_set, key=exp_times_list.count)
+        if exp_times_list.count(exp_time) < int(0.9 * len(exp_times_list)):
             print('Something wrong with the triggering!')
         peaks = [i for i, e in enumerate(exp_times_list) if e != exp_time]
         # Diff between consecutive elements of the array
@@ -566,7 +561,7 @@ def _STEM_flag_dict(exp_times_list):
             scan_X = lines[0]
             frames_to_skip = peaks[0]
         else:
-        # Assuming the last element to be the line length
+            # Assuming the last element to be the line length
             scan_X = lines[-1]
             check = np.ravel(np.where(lines == scan_X, True, False))
             # Checking line lengths
@@ -622,7 +617,6 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
 
     depth = _get_mib_depth(hdr_info, fp)
 
-
     if data_type == 'signed':
         data_type = 'int'
     elif data_type == 'unsigned':
@@ -643,17 +637,14 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
         data_type = np.dtype(data_type)
     data_type = data_type.newbyteorder(endian)
 
-
-    hdr_multiplier = (int(data_length)/8)**-1
+    hdr_multiplier = (int(data_length) / 8)**-1
     hdr_bits = int(hdr_info['data offset'] * hdr_multiplier)
-
 
     data = np.memmap(fp,
                      offset=reader_offset,
                      dtype=data_type,
                      mode=mmap_mode)
     data = da.from_array(data)
-
 
     if record_by == 'vector':   # spectral image
         size = (height, width, depth)
@@ -665,22 +656,19 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
 
                 data = data.reshape(depth)
 
-
     elif record_by == 'image':  # stack of images
         width_height = width * height
 
         size = (depth, height, width)
 
-        #remove headers at the beginning of each frame and reshape
+        # remove headers at the beginning of each frame and reshape
 
         if hdr_info['Assembly Size'] == '2x2':
 
-            data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(depth, width, height)
-
-
+            data = data.reshape(-1, width_height + hdr_bits)[:, -width_height:].reshape(depth, width, height)
 
         if hdr_info['raw'] == 'R64':
-            if hdr_info['Counter Depth (number)'] == 24 or  hdr_info['Counter Depth (number)'] == 12:
+            if hdr_info['Counter Depth (number)'] == 24 or hdr_info['Counter Depth (number)'] == 12:
                 COLS = 4
 
             if hdr_info['Counter Depth (number)'] == 1:
@@ -689,28 +677,26 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
             if hdr_info['Counter Depth (number)'] == 6:
                 COLS = 8
 
+            data = data.reshape((depth * width_height))
 
-            data = data.reshape((depth*width_height))
+            data = data.reshape(depth, height * (height // COLS), COLS)
 
-            data = data.reshape(depth,height * (height//COLS) , COLS )
-
-
-            data = da.flip(data,2)
+            data = da.flip(data, 2)
 
             if hdr_info['Assembly Size'] == '2x2':
 
                 try:
-                    data = data.reshape((depth*width_height))
+                    data = data.reshape((depth * width_height))
 
-                    data = data.reshape(depth,512 // 2, 512 * 2 )
+                    data = data.reshape(depth, 512 // 2, 512 * 2)
                 except ValueError:
-                    data = data.reshape((depth*width_height))
-                    data = data.reshape(depth,512 // 2, 512 * 2 )
+                    data = data.reshape((depth * width_height))
+                    data = data.reshape(depth, 512 // 2, 512 * 2)
 
                 det1 = data[:, :, 0:256]
                 det2 = data[:, :, 256:512]
                 det3 = data[:, :, 512:512 + 256]
-                det4 = data[:, :, 512+256:]
+                det4 = data[:, :, 512 + 256:]
 
                 det3 = da.flip(det3, 2)
                 det3 = da.flip(det3, 1)
@@ -718,18 +704,19 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
                 det4 = da.flip(det4, 2)
                 det4 = da.flip(det4, 1)
 
-                data = da.concatenate((da.concatenate((det1,det3),1),da.concatenate((det2,det4),1)),2)
+                data = da.concatenate((da.concatenate((det1, det3), 1), da.concatenate((det2, det4), 1)), 2)
 
         if hdr_info['Assembly Size'] == '1x1':
 
-            data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(depth, width, height)
-            data = data.reshape(depth,256, 256 )
+            data = data.reshape(-1, width_height + hdr_bits)[:, -width_height:].reshape(depth, width, height)
+            data = data.reshape(depth, 256, 256)
 
     elif record_by == 'dont-care':  # stack of images
         size = (height, width)
         data = data.reshape(size)
 
     return data
+
 
 def reshape_4DSTEM_FlyBack(data):
     """Reshapes the lazy-imported frame stack to navigation dimensions determined
@@ -775,6 +762,8 @@ def reshape_4DSTEM_FlyBack(data):
     data_skip = data_skip.inav[1:]
 
     return data_skip
+
+
 def reshape_4DSTEM_SumFrames(data):
     """
     Reshapes the lazy-imported stack of dimensions: (xxxxxx|Det_X, Det_Y) to the correct scan pattern
@@ -797,7 +786,7 @@ def reshape_4DSTEM_SumFrames(data):
     # detector size in pixels
     det_size = data.axes_manager[1].size
     # crop the first ~20 lines
-    data_crop = data.inav[0:20*scan_x]
+    data_crop = data.inav[0:20 * scan_x]
     data_crop_t = data_crop.T
     data_crop_t_sum = data_crop_t.sum()
     # summing over patterns
