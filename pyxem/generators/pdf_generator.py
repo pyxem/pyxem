@@ -66,21 +66,18 @@ class PDFGenerator():
         r_increment : float
                     Step size in r in the extracted PDF.
         """
-
+        s_scale = self.signal.axes_manager.signal_axes[0].scale
         if s_max is None:
-            s_max = self.signal.axes_manager.signal_axes[0].size
-            Print('s_max set to maximum of signal.')
+            s_max = self.signal.axes_manager.signal_axes[0].size * s_scale
+            print('s_max set to maximum of signal.')
 
         r_values = np.arange(r_min, r_max, r_increment)
         r_values = r_values.reshape(1, r_values.size)
-
-        s_scale = self.signal.axes_manager.signal_axes[0].scale
         s_limits = [int(s_min / s_scale), int(s_max / s_scale)]
 
         #check that these aren't out of bounds
         if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
-            s_limits[1] = self.signal.axes_manager.signal_axes[0].size
-            ValueError('s_max out of bounds for reduced intensity.',
+            raise ValueError('s_max out of bounds for reduced intensity.',
                   'Aborting')
         s_values = np.arange(s_limits[0], s_limits[1], 1) * s_scale
         s_values = s_values.reshape(s_values.size, 1)  # column vector

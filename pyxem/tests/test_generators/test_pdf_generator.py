@@ -44,9 +44,14 @@ def test_get_pdf(reduced_intensity1d):
 
 def test_s_limits(reduced_intensity1d):
     pdfgen = PDFGenerator(reduced_intensity1d)
-    pdf = pdfgen.get_pdf(s_min=0, s_max=12)
+    pdf = pdfgen.get_pdf(s_min=0)
     pdf2 = pdfgen.get_pdf(s_min=0, s_max=10)
     assert np.array_equal(pdf.data, pdf2.data)
+
+@pytest.mark.xfail(raises=ValueError)
+def test_s_limit_failure(reduced_intensity1d):
+    pdfgen = PDFGenerator(reduced_intensity1d)
+    pdf3 = pdfgen.get_pdf(s_min=0, s_max=15)
 
 
 def test_signal_size():
