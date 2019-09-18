@@ -97,7 +97,7 @@ class ReducedIntensityGenerator():
         Parameters
         ----------
         elements: list of str
-                    A list of elements present (by symbol).
+                    A list of elements present (by symbol). No order is necessary.
                     Example: ['Ca', 'C', 'O'] (for CaCO3)
         fracs: list of float
                     A list of fraction of the respective elements. Should sum to 1.
