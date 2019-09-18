@@ -81,7 +81,6 @@ class ReducedIntensityGenerator():
         s_max: float
                     Maximum scattering vector amplitude for cutoff.
         """
-        #s_scale = self.signal.axes_manager.signal_axes[0].scale
         self.cutoff = [s_min, s_max]
         return
 
@@ -129,8 +128,6 @@ class ReducedIntensityGenerator():
         s_scale = self.signal.axes_manager.signal_axes[0].scale
         fit, normalisation = scattering_to_signal(elements, fracs, N_values,
                                                   C_values, s_size, s_scale, scattering_factor)
-        # self.fit = np.array(background.sum_squares).reshape(
-        #            self.nav_size[0],self.nav_size[1],self.sig_size[0])
 
         self.normalisation = normalisation  # change this
         self.background_fit = fit
@@ -193,7 +190,6 @@ class ReducedIntensityGenerator():
                              np.divide((self.signal.data - self.background_fit),
                                        self.normalisation))
 
-        #ri = ReducedIntensityProfile(reduced_intensity.data[:,:,num_min:num_max])
         ri = ReducedIntensity1D(reduced_intensity)
         transfer_navigation_axes(ri,self.signal)
         transfer_signal_axes(ri,self.signal)
