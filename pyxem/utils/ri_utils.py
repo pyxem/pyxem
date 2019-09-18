@@ -19,7 +19,48 @@
 import numpy as np
 from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
+from scipy import special
 
+def subtract_pattern(z, pattern, *args, **kwargs):
+    """Used by hs.map in the ReducedIntensityGenerator to subtract a background
+    pattern.
+
+    Parameters
+    ----------
+    z : np.array
+        A np.array to be transformed
+    pattern : np.array
+        A numpy array of a single line profile of the same resolution
+        (same number of pixels) as the signal to be subtracted from.
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+    return z-pattern
+
+def mask_from_pattern(z, pattern, *args, **kwargs):
+    """Used by hs.map in the ReducedIntensityGenerator to mask using a
+    background pattern.
+
+    Parameters
+    ----------
+    z : np.array
+        A np.array to be transformed
+    pattern : np.array
+        A numpy array consisting of 0s and 1s in a single line profile
+        of the same resolution (same number of pixels) as the signal.
+        1s in the signal are kept. 0s are masked (into zeroes)
+    mask_threshold : int or float
+        An integer or float threshold. Any pixel in the
+        mask_pattern with lower intensity is kept, any with
+        higher or equal is set to zero.
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+    return z*pattern
 
 def scattering_to_signal_lobato(elements, fracs, N, C, s_size, s_scale):
     """ A function to override HyperSpy's as_signal method in a fit, as that
@@ -30,18 +71,18 @@ def scattering_to_signal_lobato(elements, fracs, N, C, s_size, s_scale):
     Parameters
     ----------
     elements: list of str
-                A list of elements present (by symbol).
+        A list of elements present (by symbol).
     fracs: list of float
-                A list of fraction of the respective elements. Should sum to 1.
+        A list of fraction of the respective elements. Should sum to 1.
     N : array of float
-                The "slope" of the fit.
+        The "slope" of the fit.
     C : array of float
-                An additive constant to the fit. Supplied as array.
+        An additive constant to the fit. Supplied as array.
     s_size : int
-                Size of fitted signal in the signal dimension (in pixels)/
+        Size of fitted signal in the signal dimension (in pixels)/
     s_scale : float
-                Calibration factor of scattering factor s = 1/d in reciprocal
-                angstroms per pixel.
+        Calibration factor of scattering factor s = 1/d in reciprocal
+        angstroms per pixel.
     """
     params = []
 
@@ -82,18 +123,18 @@ def scattering_to_signal_xtables(elements, fracs, N, C, s_size, s_scale):
     Parameters
     ----------
     elements: list of str
-                A list of elements present (by symbol).
+        A list of elements present (by symbol).
     fracs: list of float
-                A list of fraction of the respective elements. Should sum to 1.
+        A list of fraction of the respective elements. Should sum to 1.
     N : array of float
-                The "slope" of the fit.
+        The "slope" of the fit.
     C : array of float
-                An additive constant to the fit. Supplied as array.
+        An additive constant to the fit. Supplied as array.
     s_size : int
-                Size of fitted signal in the signal dimension (in pixels)/
+        Size of fitted signal in the signal dimension (in pixels)/
     s_scale : float
-                Calibration factor of scattering factor s = 1/d in reciprocal
-                angstroms per pixel.
+        Calibration factor of scattering factor s = 1/d in reciprocal
+        angstroms per pixel.
     """
     params = []
 
@@ -120,3 +161,125 @@ def scattering_to_signal_xtables(elements, fracs, N, C, s_size, s_scale):
     square_sum = N.data.reshape(x_size, y_size, 1) * square_sum
 
     return signal, square_sum
+
+def damp_ri_exponential(z, b, s_scale, s_size, *args, **kwargs):
+    """Used by hs.map in the ReducedIntensity1D to damp the reduced
+    intensity signal to reduce noise in the high s region by a factor of
+    exp(-b*(s^2)), where b is the damping parameter.
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    b : float
+        The damping parameter.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+    damping_term = np.exp(-b * np.square(scattering_axis))
+    return z*damping_term
+
+def damp_ri_lorch(z, s_max, s_scale, s_size, *args, **kwargs):
+    """Used by hs.map in the ReducedIntensity1D to damp the reduced
+    intensity signal to reduce noise in the high s region by a factor of
+    sin(s*delta) / (s*delta), where delta = pi / s_max. (from Lorch 1969).
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    s_max : float
+        The maximum s value to be used for transformation to PDF.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    delta = np.pi / s_max
+
+    scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+    damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
+    damping_term = np.nan_to_num(damping_term)
+    return z*damping_term
+
+def damp_ri_updated_lorch(z, s_max, s_scale, s_size, *args, **kwargs):
+    """Used by hs.map in the ReducedIntensity1D to damp the reduced
+    intensity signal to reduce noise in the high s region by a factor of
+    3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
+    where delta = pi / s_max.
+
+    From "Extracting the pair distribution function from white-beam X-ray
+    total scattering data", Soper & Barney, (2011).
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    s_max : float
+        The damping parameter, which need not be the maximum scattering
+        vector s to be used for the PDF transform.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    delta = np.pi / s_max
+
+    scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+    exponent_array = 3 * np.ones(scattering_axis.shape)
+    cubic_array = np.power(scattering_axis, exponent_array)
+    multiplicative_term = np.divide(3 / (delta**3), cubic_array)
+    sine_term = (np.sin(delta * scattering_axis)
+                 - delta * scattering_axis * np.cos(delta * scattering_axis))
+
+    damping_term = multiplicative_term * sine_term
+    damping_term = np.nan_to_num(damping_term)
+    return z*damping_term
+
+def damp_ri_low_q_region_erfc(z, scale, offset, s_scale, s_size, *args,
+                                **kwargs):
+    """Used by hs.map in the ReducedIntensity1D to damp the reduced
+    intensity signal in the low q region as a correction to central beam
+    effects. The reduced intensity profile is damped by
+    (erf(scale * s - offset) + 1) / 2
+
+    Parameters
+    ----------
+    z : np.array
+        A reduced intensity np.array to be transformed.
+    scale : float
+        A scalar multiplier for s in the error function
+    offset : float
+        A scalar offset affecting the error function.
+    scale : float
+        The scattering vector calibation of the reduced intensity array.
+    size : int
+        The size of the reduced intensity signal. (in pixels)
+    *args:
+        Arguments to be passed to map().
+    **kwargs:
+        Keyword arguments to be passed to map().
+    """
+
+    scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+
+    damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
+    return z*damping_term

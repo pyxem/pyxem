@@ -22,9 +22,10 @@ vector.
 
 from hyperspy.signals import Signal1D
 import numpy as np
-from scipy import special
 
 from pyxem.components.reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
+from pyxem.utils.ri_utils import damp_ri_exponential, damp_ri_lorch, \
+    damp_ri_updated_lorch, damp_ri_low_q_region_erfc
 
 
 class ReducedIntensity1D(Signal1D):
@@ -33,46 +34,55 @@ class ReducedIntensity1D(Signal1D):
     def __init__(self, *args, **kwargs):
         Signal1D.__init__(self, *args, **kwargs)
 
-    def damp_exponential(self, b):
+    def damp_exponential(self, b, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of exp(-b*(s^2)), where b is the damping parameter.
 
         Parameters
         ----------
         b : float
-                    The damping parameter.
+            The damping parameter.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
         """
+
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
 
-        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
-        damping_term = np.exp(-b * np.square(scattering_axis))
-        self.data = self.data * damping_term
-        return
+        return self.map(damp_ri_exponential, b=b, s_scale=s_scale,
+                        s_size=s_size, inplace=inplace, *args, **kwargs)
 
-    def damp_lorch(self, s_max=None):
+    def damp_lorch(self, s_max=None, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
-        region by a factor of sin(s*delta) / (s*delta),
-        where delta = pi / s_max. (from Lorch 1969)
+        region by a factor of sin(s*delta) / (s*delta), where
+        delta = pi / s_max. (from Lorch 1969)
 
         Parameters
         ----------
         s_max : float
-                    The maximum s value to be used for transformation to PDF.
+            The maximum s value to be used for transformation to PDF.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
             s_max = s_scale * s_size
-        delta = np.pi / s_max
 
-        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
-        damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
-        damping_term = np.nan_to_num(damping_term)
-        self.data = self.data * damping_term
-        return
+        return self.map(damp_ri_lorch,s_max=s_max,s_scale=s_scale,
+                        s_size=s_size, inplace=inplace, *args, **kwargs)
 
-    def damp_updated_lorch(self, s_max=None):
+    def damp_updated_lorch(self, s_max=None, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of 3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
         where delta = pi / s_max.
@@ -82,28 +92,26 @@ class ReducedIntensity1D(Signal1D):
         Parameters
         ----------
         s_max : float
-                    the damping parameter, which need not be the maximum s
-                    to be used for the PDF transform. It's a good guess however
+            the damping parameter, which need not be the maximum scattering
+            vector s to be used for the PDF transform. It's a good guess however
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
         if not s_max:
             s_max = s_scale * s_size
-        delta = np.pi / s_max
 
-        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
-        exponent_array = 3 * np.ones(scattering_axis.shape)
-        cubic_array = np.power(scattering_axis, exponent_array)
-        multiplicative_term = np.divide(3 / (delta**3), cubic_array)
-        sine_term = (np.sin(delta * scattering_axis)
-                     - delta * scattering_axis * np.cos(delta * scattering_axis))
+        return self.map(damp_ri_updated_lorch,s_max=s_max,s_scale=s_scale,
+                        s_size=s_size, inplace=inplace, *args, **kwargs)
 
-        damping_term = multiplicative_term * sine_term
-        damping_term = np.nan_to_num(damping_term)
-        self.data = self.data * damping_term
-        return
-
-    def damp_low_q_region_erfc(self, scale=20, offset=1.3):
+    def damp_low_q_region_erfc(self, scale=20, offset=1.3, inplace=True, *args,
+                                **kwargs):
         """ Damps the reduced intensity signal in the low q region as a
         correction to central beam effects. The reduced intensity profile is
         damped by (erf(scale * s - offset) + 1) / 2
@@ -111,20 +119,26 @@ class ReducedIntensity1D(Signal1D):
         Parameters
         ----------
         scale : float
-                    A scalar multiplier for s in the error function
+            A scalar multiplier for s in the error function
         offset : float
-                    A scalar offset affecting the error function.
+            A scalar offset affecting the error function.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
 
-        scattering_axis = s_scale * np.arange(s_size, dtype='float64')
+        return self.map(damp_ri_low_q_region_erfc, scale=scale, offset=offset,
+                        s_scale=s_scale,s_size=s_size, inplace=inplace,
+                        *args, **kwargs)
 
-        damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
-        self.data = self.data * damping_term
-        return
-
-    def fit_thermal_multiple_scattering_correction(self, s_max=None, plot=False):
+    def fit_thermal_multiple_scattering_correction(self, s_max=None,
+                                                    plot=False):
         """ Fits a 4th order polynomial function to the reduced intensity.
         This is used to calculate the error in the reduced intensity due to
         the effects of multiple and thermal diffuse scattering, which
@@ -142,10 +156,17 @@ class ReducedIntensity1D(Signal1D):
         Parameters
         ----------
         s_max : float
-                    Maximum range of fit. The reduced intensity should go to zero
-                    at this value.
+            Maximum range of fit. The reduced intensity should go to zero
+            at this value.
         plot : bool
-                    Whether to plot the fit after fitting. If True, fit is plotted.
+            Whether to plot the fit after fitting. If True, fit is plotted.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size

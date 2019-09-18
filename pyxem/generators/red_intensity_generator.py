@@ -30,7 +30,8 @@ from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.components.scattering_fit_component_xtables import ScatteringFitComponentXTables
 from pyxem.components.scattering_fit_component_lobato import ScatteringFitComponentLobato
-from pyxem.utils.ri_utils import scattering_to_signal_lobato, scattering_to_signal_xtables
+from pyxem.utils.ri_utils import scattering_to_signal_lobato, \
+    scattering_to_signal_xtables, subtract_pattern, mask_from_pattern
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import transfer_signal_axes
 
@@ -140,41 +141,88 @@ class ReducedIntensityGenerator():
         self.background_fit = fit
         return
 
-    def subtract_bkgd_pattern(self, bkgd_pattern):
+    def subtract_bkgd_pattern(self, bkgd_pattern, inplace=True,
+                              *args, **kwargs):
         """Subtracts a background pattern from the signal. This method will edit
         self.signal.
 
         Parameters
         ----------
-        Bkgd_pattern : np.array
-                    A numpy array of a single line profile of the same resolution
-                    (same number of pixels) as the radial profile.
+        bkgd_pattern : np.array
+            A numpy array of a single line profile of the same resolution
+            (same number of pixels) as the radial profile.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
         """
-        self.signal = self.signal - bkgd_pattern
+        return self.signal.map(subtract_pattern, pattern=bkgd_pattern,
+                                inplace=inplace, *args, **kwargs)
 
-        return
-
-    def mask_from_bkgd_pattern(self, mask_pattern, mask_threshold=1):
+    def mask_from_bkgd_pattern(self, mask_pattern, mask_threshold=1,
+                                inplace=True, *args, **kwargs):
         """Uses a background pattern with a threshold, and sets that part of
         the signal to zero, effectively adding a mask. This can be used to mask
-        the central beam. This method will edit self.signal.
+        the central beam.
 
         Parameters
         ----------
         mask_pattern : np.array
-                    A numpy array line profile of the same resolution
-                    as the radial profile.
+            A numpy array line profile of the same resolution
+            as the radial profile.
         mask_threshold : int or float
-                    An integer or float threshold. Any pixel in the
-                    mask_pattern with lower intensity is kept, any with
-                    higher or equal is set to zero.
+            An integer or float threshold. Any pixel in the
+            mask_pattern with lower intensity is kept, any with
+            higher or equal is set to zero.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
         """
 
         mask_array = mask_pattern < mask_threshold
 
-        self.signal = self.signal * mask_array.astype(float)
+        return self.signal.map(mask_from_pattern,
+                                pattern=mask_array.astype(float),
+                                inplace=inplace, *args, **kwargs)
 
-        return
+    def mask_reduced_intensity(self, mask_pattern, inplace=True, *args,
+                                **kwargs):
+        """Masks the reduced intensity signal by multiplying it with a pattern
+        consisting of only zeroes and ones. This can be used to mask
+        the central beam.
+
+        Parameters
+        ----------
+        mask_pattern : np.array of 0s and 1s
+            A numpy array line profile of the same resolution as the radial profile.
+            Must consist only of zeroes and ones. Ones are kept while zeroes are
+            set to zero.
+        mask_threshold : int or float
+            An integer or float threshold. Any pixel in the
+            mask_pattern with lower intensity is kept, any with
+            higher or equal is set to zero.
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
+    """
+
+        mask_array = mask_pattern.astype('np.uint8')
+        if np.max(mask_array) != 1 or np.min(mask_array) != 0:
+            raise ValueError('Masking array does not consist of zeroes and ones.')
+
+        return self.signal.map(mask_from_pattern, pattern=mask_array,
+                                    inplace=inplace, *args, **kwargs)
 
     def get_reduced_intensity(self):
         """Obtains a reduced intensity profile from the radial profile.
