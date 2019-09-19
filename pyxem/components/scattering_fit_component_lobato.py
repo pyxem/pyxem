@@ -38,6 +38,14 @@ class ScatteringFitComponentLobato(Component):
 
         N and C are fitting parameters for the Component class.
 
+        The fitted function f is of the form:
+
+        f = sum(fi), fi = ai(2 + bi*g^2) / (1 + bi*g^2)^2
+        where 1 < i < 5, ai, and bi are tabulated constants, and
+        g = 1/d = 2sin(theta)/lambda is the scattering vector magnitude.
+        The factors are tabulated in ATOMIC_SCATTERING_PARAMS_LOBATO.
+
+
         The parametrisation is detailed in [1].
 
         Parameters

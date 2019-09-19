@@ -38,6 +38,13 @@ class ScatteringFitComponentXTables(Component):
 
         N and C are fitting parameters for the Component class.
 
+        The fitted function f is of the form:
+
+        f = sum(fi), fi = ai * exp(-bi*g^2)
+        where 1 < i < 5, ai, and bi are tabulated constants, and
+        g = 1/d = 2sin(theta)/lambda is the scattering vector magnitude.
+        The factors are tabulated in ATOMIC_SCATTERING_PARAMS_XTABLES.
+
         The fitted scattering factor is from [1].
 
         Parameters

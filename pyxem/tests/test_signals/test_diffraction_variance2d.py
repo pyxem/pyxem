@@ -51,17 +51,19 @@ class TestDiffractionVariance:
         units = 'um'
 
         axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
-        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
         axes_test_dp.axes_manager.navigation_axes[0].name = name
-        axes_test_dp.axes_manager.navigation_axes[1].units = name
-        axes_test_dp.axes_manager.navigation_axes[1].name = units
         axes_test_dp.axes_manager.navigation_axes[0].units = units
+        #name and units are flipped to make sure everything follows
+        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
+        axes_test_dp.axes_manager.navigation_axes[1].name = units
+        axes_test_dp.axes_manager.navigation_axes[1].units = name
 
         rp = axes_test_dp.get_radial_profile()
         rp_scale_x = rp.axes_manager.navigation_axes[0].scale
-        rp_scale_y = rp.axes_manager.navigation_axes[1].scale
         rp_units_x = rp.axes_manager.navigation_axes[0].units
         rp_name_x = rp.axes_manager.navigation_axes[0].name
+
+        rp_scale_y = rp.axes_manager.navigation_axes[1].scale
         rp_units_y = rp.axes_manager.navigation_axes[1].units
         rp_name_y = rp.axes_manager.navigation_axes[1].name
 
