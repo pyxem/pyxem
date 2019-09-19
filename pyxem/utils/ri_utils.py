@@ -22,7 +22,7 @@ from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOB
 from scipy import special
 
 def subtract_pattern(z, pattern, *args, **kwargs):
-    """Used by hs.map in the ReducedIntensityGenerator to subtract a background
+    """Used by hs.map in the ReducedIntensityGenerator1D to subtract a background
     pattern.
 
     Parameters
@@ -40,7 +40,7 @@ def subtract_pattern(z, pattern, *args, **kwargs):
     return z-pattern
 
 def mask_from_pattern(z, pattern, *args, **kwargs):
-    """Used by hs.map in the ReducedIntensityGenerator to mask using a
+    """Used by hs.map in the ReducedIntensityGenerator1D to mask using a
     background pattern.
 
     Parameters

@@ -40,8 +40,7 @@ class PairDistributionFunction1D(Signal1D):
         s_min : float
             The minimum scattering vector s to be considered. Values at lower s
             are ignored. This is to prevent the effect of large oscillations at
-            r=0. If not set, the full signal is used. Normalisation can aid
-            unsupervised machine learning methods distinguish signals present.
+            r=0. If not set, the full signal is used. 
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.

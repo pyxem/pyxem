@@ -41,7 +41,7 @@ scattering_signal_dictionary = {'lobato': scattering_to_signal_lobato,
                                 'xtables': scattering_to_signal_xtables}
 
 
-class ReducedIntensityGenerator():
+class ReducedIntensityGenerator1D():
     """Generates a reduced intensity 1D profile for a specified diffraction radial
     profile.
 
@@ -65,21 +65,22 @@ class ReducedIntensityGenerator():
         """
         Defines calibration for the signal axis variable s in terms of
         A^-1 per pixel. Note that s is defined here as
-        s = 2 sin(theta)/lambda = 1/d.
+        s = 2 sin(theta)/lambda = 1/d, where theta is the scattering angle,
+        lambda the wavelength, and d the reciprocal spacing.
 
         Parameters
         ----------
         calibration: float
-                    Calibration in terms of A^-1 per pixel.
+                    Scattering vector calibration in terms of A^-1 per pixel.
         """
         self.signal.axes_manager.signal_axes[0].scale = calibration
-        return
 
     def set_cutoff_vector(self, s_min, s_max):
         """
         Scattering vector cutoff for the purposes of fitting an atomic scattering
         factor to the 1D profile. Specified in terms of s (in inverse angstroms).
-        s is defined as s = 2 sin(theta)/lambda = 1/d.
+        s is defined as s = 2 sin(theta)/lambda = 1/d, where theta is the
+        scattering angle, lambda the wavelength, and d the reciprocal spacing.
 
         Parameters
         ----------

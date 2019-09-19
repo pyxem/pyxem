@@ -21,7 +21,7 @@ import numpy as np
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.generators.red_intensity_generator import ReducedIntensityGenerator
+from pyxem.generators.red_intensity_generator1d import ReducedIntensityGenerator1D
 
 
 @pytest.fixture
@@ -29,12 +29,12 @@ def red_int_generator():
     data = np.arange(10, 0, -1).reshape(1, 10) * np.arange(1, 5).reshape(4, 1)
     data = data.reshape(2, 2, 10)
     rp = ElectronDiffraction1D(data)
-    rigen = ReducedIntensityGenerator(rp)
+    rigen = ReducedIntensityGenerator1D(rp)
     return rigen
 
 
 def test_init(red_int_generator):
-    assert isinstance(red_int_generator, ReducedIntensityGenerator)
+    assert isinstance(red_int_generator, ReducedIntensityGenerator1D)
 
 
 def test_scattering_calibration(red_int_generator):
