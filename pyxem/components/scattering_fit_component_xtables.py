@@ -38,34 +38,43 @@ class ScatteringFitComponentXTables(Component):
 
         N and C are fitting parameters for the Component class.
 
-        Fit to International Tables Vol. C, table 4.3.2.3
+        The fitted scattering factor is from [1].
 
         Parameters
         ----------
         elements: list of str
-                    A list of elements present (by symbol).
+            A list of elements present (by symbol).
         fracs: list of float
-                    A list of fraction of the respective elements. Should sum to 1.
+            A list of fraction of the respective elements. Should sum to 1.
         N : float
-                    The "slope" of the fit.
+            The "slope" of the fit.
         C : float
-                    An additive constant to the fit.
+            An additive constant to the fit.
+
+        References
+        ----------
+        [1] Prince, E. (2004). International tables for crystallography.
+        Vol. C, table 4.3.2.3.
 
         """
         Component.__init__(self, ['N', 'C'])
+        self._whitelist['elements'] = ('init,sig', elements)
+        self._whitelist['fracs'] = ('init,sig', fracs)
         self.elements = elements
         self.fracs = fracs
         params = []
         for e in elements:
             params.append(ATOMIC_SCATTERING_PARAMS[e])
         self.params = params
+        self.N.value = N
+        self.C.value = C
 
     def function(self, x):
         """
         The actual fitted function. Based on the HyperSpy Component class.
         The function "function" is called innately by HyperSpy's fitting
         algorithm, and represents the appropriate atomic scattering factor
-        function presented in International Tables Vol. C, table 4.3.2.3
+        function.
 
         """
         N = self.N.value
@@ -84,6 +93,6 @@ class ScatteringFitComponentXTables(Component):
             sum_squares += np.square(fi) * elem_frac
             square_sum += fi * elem_frac
 
-        self.square_sum = N * np.square(square_sum)
+        self.square_sum = np.square(square_sum)
         # square sum is kept for normalisation.
         return N * sum_squares + C

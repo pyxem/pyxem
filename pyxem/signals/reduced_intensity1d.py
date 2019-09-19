@@ -60,7 +60,7 @@ class ReducedIntensity1D(Signal1D):
     def damp_lorch(self, s_max=None, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of sin(s*delta) / (s*delta), where
-        delta = pi / s_max. (from Lorch 1969)
+        delta = pi / s_max. See [1].
 
         Parameters
         ----------
@@ -73,6 +73,12 @@ class ReducedIntensity1D(Signal1D):
             Arguments to be passed to map().
         **kwargs:
             Keyword arguments to be passed to map().
+
+        References
+        ----------
+        [1] Lorch, E. (1969). Neutron diffraction by germania, silica and
+        radiation-damaged silica glasses. Journal of Physics C: Solid State
+        Physics, 2(2), 229.
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
@@ -85,9 +91,7 @@ class ReducedIntensity1D(Signal1D):
     def damp_updated_lorch(self, s_max=None, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of 3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
-        where delta = pi / s_max.
-        From "Extracting the pair distribution function from white-beam X-ray
-        total scattering data", Soper & Barney, (2011).
+        where delta = pi / s_max. From [1].
 
         Parameters
         ----------
@@ -101,6 +105,12 @@ class ReducedIntensity1D(Signal1D):
             Arguments to be passed to map().
         **kwargs:
             Keyword arguments to be passed to map().
+
+        References
+        ----------
+        [1] Soper, A. K., & Barney, E. R. (2011). Extracting the pair
+        distribution function from white-beam X-ray total scattering data.
+        Journal of Applied Crystallography, 44(4), 714-726.
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size
@@ -145,9 +155,7 @@ class ReducedIntensity1D(Signal1D):
         results in the earlier background fit being incorrect for either
         low or high angle scattering (or both). A correction is then applied,
         making the reduced intensity oscillate around zero as it should. This
-        will distort peak shape. For more detail see Mu et al (2014):
-        "Evolution of order in amorphous-to-crystalline phase transformation
-        of MgF2".
+        will distort peak shape. For more detail see [1].
 
         To use this correction, the fitted data should be fitted to high
         scattering vector, so that the intensity goes to zero at q_max
@@ -167,6 +175,12 @@ class ReducedIntensity1D(Signal1D):
             Arguments to be passed to map().
         **kwargs:
             Keyword arguments to be passed to map().
+
+        References
+        ----------
+        [1] Mu, X. et al. (2013). Evolution of order in amorphous-to-crystalline
+        phase transformation of MgF2. Journal of Applied Crystallography, 46(4),
+        1105-1116.
         """
         s_scale = self.axes_manager.signal_axes[0].scale
         s_size = self.axes_manager.signal_axes[0].size

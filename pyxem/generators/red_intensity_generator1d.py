@@ -30,15 +30,12 @@ from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.components.scattering_fit_component_xtables import ScatteringFitComponentXTables
 from pyxem.components.scattering_fit_component_lobato import ScatteringFitComponentLobato
-from pyxem.utils.ri_utils import scattering_to_signal_lobato, \
-    scattering_to_signal_xtables, subtract_pattern, mask_from_pattern
+from pyxem.utils.ri_utils import subtract_pattern, mask_from_pattern
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import transfer_signal_axes
 
 scattering_factor_dictionary = {'lobato': ScatteringFitComponentLobato,
                                 'xtables': ScatteringFitComponentXTables}
-scattering_signal_dictionary = {'lobato': scattering_to_signal_lobato,
-                                'xtables': scattering_to_signal_xtables}
 
 
 class ReducedIntensityGenerator1D():
@@ -75,7 +72,7 @@ class ReducedIntensityGenerator1D():
         """
         self.signal.axes_manager.signal_axes[0].scale = calibration
 
-    def set_cutoff_vector(self, s_min, s_max):
+    def set_s_cutoff(self, s_min, s_max):
         """
         Scattering vector cutoff for the purposes of fitting an atomic scattering
         factor to the 1D profile. Specified in terms of s (in inverse angstroms).
@@ -94,12 +91,12 @@ class ReducedIntensityGenerator1D():
 
     def fit_atomic_scattering(self, elements, fracs,
                               N=1., C=0., scattering_factor='lobato',
-                              plot_fit=True):
+                              plot_fit=True, *args, **kwargs):
         """Fits a diffraction intensity profile to the background using
         FIT = N * sum(ci * (fi^2) + C)
 
         The cutoff for the scattering factor fit to s is defined via the function
-        set_cutoff_vector above.
+        set_s_cutoff above.
 
         Parameters
         ----------
@@ -110,15 +107,21 @@ class ReducedIntensityGenerator1D():
                     A list of fraction of the respective elements. Should sum to 1.
                     Example: [0.2, 0.2, 0.6] (for CaCO3)
         N : float
-                    The "slope" of the fit.
+                    The "slope" of the fit. Initial value is used to start the
+                    fit.
         C : float
-                    An additive constant to the fit.
+                    An additive constant to the fit. Initial value is used to
+                    start the fit.
         scattering_factor : str
                     Type of scattering parameters fitted. Default is lobato.
                     See scattering_fit_component for more details.
         plot_fit: bool
                     A bool to decide if the fit from scattering is plotted
                     after fitting.
+        *args:
+            Arguments to be passed to hs.multifit().
+        **kwargs:
+            Keyword arguments to be passed to hs.multifit().
         """
 
         fit_model = self.signal.create_model()
@@ -127,16 +130,18 @@ class ReducedIntensityGenerator1D():
 
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
-        fit_model.multifit()
+        fit_model.multifit(*args, **kwargs)
         fit_model.reset_signal_range()
         if plot_fit == True:
             fit_model.plot()
-        C_values = background.C.as_signal()
+        fit = fit_model.as_signal()
+
         N_values = background.N.as_signal()
-        s_size = self.sig_size[0]
-        s_scale = self.signal.axes_manager.signal_axes[0].scale
-        fit, normalisation = scattering_signal_dictionary[scattering_factor](elements,
-                                    fracs, N_values, C_values, s_size, s_scale)
+        square_sum = background.square_sum
+
+        x_size = N_values.data.shape[0]
+        y_size = N_values.data.shape[1]
+        normalisation = N_values.data.reshape(x_size, y_size, 1) * square_sum
 
         self.normalisation = normalisation
         self.background_fit = fit
@@ -243,7 +248,7 @@ class ReducedIntensityGenerator1D():
                       dtype='float64')
         s *= self.signal.axes_manager.signal_axes[0].scale
 
-        reduced_intensity = (4 * np.pi * s *
+        reduced_intensity = (2 * np.pi * s *
                              np.divide((self.signal.data - self.background_fit),
                                        self.normalisation))
 

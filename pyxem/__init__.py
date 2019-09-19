@@ -53,6 +53,7 @@ from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
 from .generators.pdf_generator1d import PDFGenerator1D
 from .generators.variance_generator import VarianceGenerator
 from .signals.diffraction_variance1d import DiffractionVariance1D
+from .signals.diffraction_variance2d import DiffractionVariance2D
 
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults

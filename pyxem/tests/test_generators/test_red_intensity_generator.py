@@ -66,15 +66,19 @@ def test_fit_atomic_scattering(red_int_generator):
                               [44.18563327, 35.06613799, 25.7903345, 21.59942561,
                                19.48821693, 18.28295037, 17.56853016, 17.13988946,
                                16.87888168, 16.71651788]]])
-    norm_expected = np.array([[[1.24147037, 1.01779718, 0.72243479, 0.53822083, 0.41556406,
-                                0.32543231, 0.25752301, 0.206315, 0.16763856, 0.13822315],
-                               [2.48294075, 2.03559437, 1.44486959, 1.07644167, 0.83112813,
-                                0.65086462, 0.51504602, 0.41263001, 0.33527711, 0.27644629]],
+    norm_expected = np.array([[[ 6.95347555,  4.67360174,  2.35465087,  1.30692365,
+                                0.77912148,  0.47780484,  0.29919979,  0.19203962,
+                                0.12678767,  0.08619672],
+                                [13.9069511 ,  9.34720348,  4.70930174,  2.61384731,
+                                1.55824297,  0.95560969,  0.59839959,  0.38407924,
+                                0.25357535,  0.17239345]],
 
-                              [[3.72441111, 3.05339154, 2.16730438, 1.61466249, 1.24669219,
-                                0.97629693, 0.77256903, 0.61894501, 0.50291567, 0.41466944],
-                               [4.9658815, 4.07118874, 2.88973919, 2.15288333, 1.66225626,
-                                1.30172924, 1.03009204, 0.82526001, 0.67055423, 0.55289259]]])
+                                [[20.86042659, 14.02080517,  7.06395259,  3.92077095,
+                                2.33736445,  1.43341453,  0.89759938,  0.57611885,
+                                0.38036302,  0.25859017],
+                                [27.81390212, 18.6944069 ,  9.41860346,  5.2276946 ,
+                                3.11648593,  1.91121937,  1.19679917,  0.76815847,
+                                0.5071507 ,  0.3447869 ]]])
 
     assert np.allclose(red_int_generator.background_fit, fit_expected)
     assert np.allclose(red_int_generator.normalisation, norm_expected)
@@ -82,7 +86,7 @@ def test_fit_atomic_scattering(red_int_generator):
 
 def test_set_cutoff(red_int_generator):
     s_min, s_max = 0, 8
-    red_int_generator.set_cutoff_vector(s_min, s_max)
+    red_int_generator.set_s_cutoff(s_min, s_max)
     assert red_int_generator.cutoff == [s_min, s_max]
 
 
@@ -131,9 +135,11 @@ def test_get_reduced_intensity(red_int_generator):
     ri = red_int_generator.get_reduced_intensity()
     assert isinstance(ri, ReducedIntensity1D)
 
-    ri_expected_single = np.array([-0.,0.28825135,5.40069217,11.20803745,
-                                    13.64332079,8.28785318,-11.48095348,
-                                    -54.78616349,-133.1141455,-260.12362871])
+    ri_expected_single = np.array([-0.00000000e+00, 3.13870790e-02,
+                                    8.28498177e-01, 2.30786214e+00,
+                                    3.63850434e+00, 2.82242349e+00,
+                                    -4.94086192e+00, -2.94293632e+01,
+                                    -8.80017073e+01, -2.08564231e+02])
     ri_expected_array = np.vstack((ri_expected_single,ri_expected_single,
                                     ri_expected_single,ri_expected_single)).reshape(2,2,10)
     ri_expected = ReducedIntensity1D(ri_expected_array)
