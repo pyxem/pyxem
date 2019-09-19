@@ -98,9 +98,9 @@ class ScatteringFitComponentLobato(Component):
         for i, element in enumerate(params):
             fi = np.zeros(x.size)
             for n in range(len(element)):  # 5 parameters per element
-                fi += (element[n][0] * (2 + element[n][1] * np.square(2 * x))
+                fi += (element[n][0] * (2 + element[n][1] * np.square(x))
                        * np.divide(1, np.square(1 + element[n][1] *
-                                                np.square(2 * x))))
+                                                np.square(x))))
             elem_frac = fracs[i]
             sum_squares += np.square(fi) * elem_frac
             square_sum += fi * elem_frac
