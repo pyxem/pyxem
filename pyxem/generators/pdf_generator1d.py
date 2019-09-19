@@ -81,8 +81,9 @@ class PDFGenerator1D():
 
         #check that these aren't out of bounds
         if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
-            raise ValueError('s_max out of bounds for reduced intensity.',
-                  'Aborting')
+            raise ValueError('User specified s_max is larger than the maximum '
+                    'scattering vector magnitude in the data. Please reduce '
+                    's_max or use s_max=None to use the full scattering range.')
         s_values = np.arange(s_limits[0], s_limits[1], 1) * s_scale
         s_values = s_values.reshape(s_values.size, 1)  # column vector
 
