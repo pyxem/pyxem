@@ -18,7 +18,7 @@
 
 import pytest
 import numpy as np
-from pyxem.generators.pdf_generator import PDFGenerator
+from pyxem.generators.pdf_generator1d import PDFGenerator1D
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 
@@ -32,53 +32,53 @@ def reduced_intensity1d():
 
 
 def test_pdf_gen_init(reduced_intensity1d):
-    pdfgen = PDFGenerator(reduced_intensity1d)
-    assert isinstance(pdfgen, PDFGenerator)
+    pdfgen = PDFGenerator1D(reduced_intensity1d)
+    assert isinstance(pdfgen, PDFGenerator1D)
 
 
 def test_get_pdf(reduced_intensity1d):
-    pdfgen = PDFGenerator(reduced_intensity1d)
+    pdfgen = PDFGenerator1D(reduced_intensity1d)
     pdf = pdfgen.get_pdf(s_min=0, s_max=9)
     assert isinstance(pdf, PairDistributionFunction1D)
 
 
 def test_s_limits(reduced_intensity1d):
-    pdfgen = PDFGenerator(reduced_intensity1d)
+    pdfgen = PDFGenerator1D(reduced_intensity1d)
     pdf = pdfgen.get_pdf(s_min=0)
     pdf2 = pdfgen.get_pdf(s_min=0, s_max=10)
     assert np.array_equal(pdf.data, pdf2.data)
 
 @pytest.mark.xfail(raises=ValueError)
 def test_s_limit_failure(reduced_intensity1d):
-    pdfgen = PDFGenerator(reduced_intensity1d)
+    pdfgen = PDFGenerator1D(reduced_intensity1d)
     pdf3 = pdfgen.get_pdf(s_min=0, s_max=15)
 
 
 def test_signal_size():
     spectrum = np.array([5., 4., 3., 2., 2., 1., 1., 1., 0., 0.])
     ri = ReducedIntensity1D(spectrum)
-    pdfgen = PDFGenerator(ri)
+    pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([spectrum])
-    pdfgen = PDFGenerator(ri)
+    pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0,s_max=10)
     assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([[spectrum]])
-    pdfgen = PDFGenerator(ri)
+    pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([[[spectrum]]])
-    pdfgen = PDFGenerator(ri)
+    pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     shape = pdf.data.shape
     assert shape == (1,1,1,2000)
 
     ri = ReducedIntensity1D([[[spectrum]]])
-    pdfgen = PDFGenerator(ri)
+    pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0, s_max=10, r_min=0, r_max=8)
     shape = pdf.data.shape
     assert shape == (1,1,1,800)

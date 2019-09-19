@@ -29,7 +29,7 @@ from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1
 from pyxem.signals import transfer_navigation_axes
 
 
-class PDFGenerator():
+class PDFGenerator1D():
     """Generates a PairDistributionFunction1D signal from a specified
         ReducedIntensity1D signal.
 
