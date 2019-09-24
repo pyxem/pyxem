@@ -27,12 +27,13 @@ from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
+from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, gain_normalise, remove_dead,\
+    radial_average, azimuthal_integrate, gain_normalise, remove_dead,\
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
     peaks_as_gvectors, convert_affine_to_transform, apply_transformation, \
@@ -271,6 +272,26 @@ class Diffraction2D(Signal2D):
                         inplace=inplace,
                         show_progressbar=progress_bar,
                         *args, **kwargs)
+
+
+    def get_azimuthal_integral(self, origin, detector, detector_distance,
+                                wavelength, size_1d):
+        """
+        TEST
+        """
+        azimuthal_integrals = self.map(azimuthal_integrate, origin=origin,
+                                     detector_distance=detector_distance,
+                                     detector=detector, wavelength=wavelength,
+                                     size_1d=size_1d, inplace=False)
+
+        rp = Diffraction1D(azimuthal_integrals.data[:,:,1,:])
+        tth = azimuthal_integrals.data[0,0,0,:] #tth is the signal axis
+        scale = tth[1]-tth[0]
+        offset = tth[0]
+        rp.axes_manager.signal_axes[0].scale = scale
+        rp.axes_manager.signal_axes[0].offset = offset
+
+        return rp
 
     def get_radial_profile(self, mask_array=None, inplace=False,
                            *args, **kwargs):
@@ -654,6 +675,7 @@ class Diffraction2D(Signal2D):
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
+
 
     def as_lazy(self, *args, **kwargs):
         """Create a copy of the Diffraction2D object as a

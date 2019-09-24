@@ -32,6 +32,8 @@ from skimage.feature import register_translation
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+
 
 """
 This module contains utility functions for processing electron diffraction
@@ -105,6 +107,16 @@ def _polar2cart(r, theta):
     y = -r * np.sin(theta)
     return x, y
 
+def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
+                        size_1d):
+    """
+    TEST
+    """
+    p1, p2 = origin[0]*detector.pixel1, origin[1]*detector.pixel2
+    ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
+                             detector=detector, wavelength=wavelength)
+    tth, I = ai.integrate1d(z,size_1d,unit="q_A^-1")
+    return tth, I
 
 def radial_average(z, mask=None):
     """Calculate the radial profile by azimuthal averaging about the center.
