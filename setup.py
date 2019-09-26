@@ -55,7 +55,8 @@ setup(
       'lmfit >= 0.9.12'
       ],
     package_data={
-        "": ["LICENSE", "readme.rst",],
-        "pyxem": ["*.py"],
+        "": ["LICENSE", "readme.rst"],
+        "pyxem": ["*.py", "hyperspy_extension.yaml"],
     },
+    entry_points={'hyperspy.extensions': ['pyxem = pyxem']},
 )
