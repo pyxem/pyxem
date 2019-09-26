@@ -19,7 +19,7 @@
 
 from setuptools import setup, find_packages
 
-exec(open('pyxem/version.py').read())  # grab version info
+exec(open('pyxem/__init__.py').read())  # grab version info
 
 
 setup(
