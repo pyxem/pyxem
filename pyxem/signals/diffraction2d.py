@@ -554,6 +554,100 @@ class Diffraction2D(Signal2D):
 
         return bg_subtracted
 
+    def get_polar_spectrum(self,
+                           phase_width=720,
+                           radius=[0, -1],
+                           parallel=False,
+                           inplace=False,
+                           segments=None,
+                           num_points=500):
+        """Take the Diffraction Pattern and unwrap the diffraction pattern.
+
+        Parameters
+        ----------
+        phase_width: int
+            The number of pixels in the x direction
+        radius: int
+            The number of pixels in the y direction
+        parallel: boolean
+            use multiple processors for calculations (useful for large numbers of diffraction patterns,
+            more for large pixel size)
+        inplace: boolean
+            replaces diffraction pattern data with polar equivalent
+
+        Returns
+        -------
+        polar: PolarSignal
+            Polar signal returned
+        """
+
+        if not self.metadata.Signal.Ellipticity.calibrated:
+            self.determine_ellipse()
+        rag = None
+        if self._lazy:
+            rag = False
+        if radius[1] == -1:
+            radius[1] = int(min(np.subtract(self.axes_manager.signal_shape, self.metadata.Signal.Ellipticity.center))-1)
+        if segments is None:
+            print(rag)
+            polar_signal = self.map(convert,
+                                    center=self.metadata.Signal.Ellipticity.center,
+                                    angle=self.metadata.Signal.Ellipticity.angle,
+                                    lengths=self.metadata.Signal.Ellipticity.lengths,
+                                    phase_width=phase_width,
+                                    radius=radius,
+                                    parallel=parallel,
+                                    inplace=inplace,
+                                    show_progressbar=False)
+            print(np.shape(polar_signal))
+        else:
+            len_of_segments = np.array(self.axes_manager.navigation_shape) // segments
+            extra_len = np.array(self.axes_manager.navigation_shape) % segments
+            centers = np.zeros(shape=(*self.axes_manager.navigation_shape, 2))
+            lengths = np.zeros(shape=(*self.axes_manager.navigation_shape, 2))
+            angle = np.zeros(shape=self.axes_manager.navigation_shape)
+            for i in range(segments):
+                for j in range(segments):
+                    extra = [extra_len[0] * (i == segments-1), extra_len[1] * (j == segments-1)]
+                    s1 = int(i*len_of_segments[0])
+                    sp1 = int((i+1)*len_of_segments[0]+extra[0])
+                    s2 = int(j*len_of_segments[1])
+                    sp2 = int((j+1)*len_of_segments[1]+extra[1])
+                    centers[s1:sp1, s2:sp2, :], lengths[s1:sp1, s2:sp2, :], angle[s1:sp1, s2:sp2] = solve_ellipse(self.inav[s1:sp1, s2:sp2].sum().data,num_points=num_points)
+
+            ellip = (('center', np.reshape(centers, (-1, 2))),
+                     ('lengths', np.reshape(lengths, (-1, 2))),
+                     ('angle', np.reshape(angle, -1)))
+            polar_signal = self._map_iterate(convert,
+                                             iterating_kwargs=ellip,
+                                             parallel=parallel,
+                                             inplace=inplace,
+                                             show_progressbar=False,
+                                             radius=radius,
+                                             phase_width=phase_width)
+            print(polar_signal.inav[1, 1])
+
+            print("done")
+
+
+        passed_meta_data = self.metadata.as_dictionary()
+        if self.metadata.Signal.has_item('Ellipticity'):
+            del(passed_meta_data['Signal']['Ellipticity'])
+
+        polar = PolarDiffraction2D(polar_signal, metadata=passed_meta_data)
+        polar.mask_below(value=-9)
+
+        polar.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        polar.set_axes(-2,
+                       name="Radians",
+                       scale=2*np.pi/phase_width,
+                       units="rad")
+        polar.set_axes(-1,
+                       name="k",
+                       scale=self.axes_manager[-1].scale,
+                       units=self.axes_manager[-1].units)
+    return polar
+
     def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
 
@@ -667,7 +761,7 @@ class Diffraction2D(Signal2D):
 
         Returns
         -------
-        res : :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
+        res : :py:class:`~pyxem.signals.diffraction2d.LazyDiffraction2D`.
             The lazy signal.
         """
         res = super().as_lazy(*args, **kwargs)

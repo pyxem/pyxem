@@ -22,6 +22,7 @@ import pyxem as pxm  # for ElectronDiffraction2D
 
 from scipy.ndimage.interpolation import shift
 from scipy.interpolate import interp1d
+from scipy.interpolate import RectBivariateSpline
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
@@ -215,6 +216,126 @@ def reproject_polar(z, origin=None, jacobian=False, dr=1, dt=None):
         output = output*r_i[:, np.newaxis]
 
     return output
+
+
+def ellipsoid_in_cartesian(r_list,
+                           theta_list,
+                           center,
+                           axes_lengths=None,
+                           angle=None):
+    """Defines cartesian coordinates of points on an ellipsoid.
+
+    Parameters
+    ----------
+    r_list: array
+        list of all of the radius.  Can either be all values or even_spaced
+    theta_list: array
+        list of all of the radius.  Can either be all values or even_spaced
+    center: array_like
+        center of the ellipsoid
+    lengths: float
+        length of the major axis
+    minor: float
+        length of the minor axis
+    angle: float
+        angle of the major axis in radians
+
+    Returns
+    -------
+    x_list: array_like
+        list of x points
+    y_list: array_like
+        list of y points
+    """
+    # Averaging the major and minor axes
+    if axes_lengths is not None:
+        axes_avg = sum(axes_lengths)/2
+        h_o = max(axes_lengths)/axes_avg  # major
+        k_o = min(axes_lengths)/axes_avg
+    else:
+        h_o = 1
+        k_o = 1
+    r_mat = np.mat(r_list)
+
+    # calculating points equally spaced annularly on a unit circle
+    t_sin = np.mat([np.sin(t)for t in theta_list])
+    t_cos = np.mat([np.cos(t)for t in theta_list])
+    # unit circle to ellipses at r spacing
+    x_circle = r_mat.transpose()*t_sin*h_o
+    y_circle = r_mat.transpose()*t_cos * k_o
+
+    if angle is not None:
+        # angle of rotation
+        cos_angle = np.cos(angle)
+        sin_angle = np.sin(angle)
+        x_list = x_circle*cos_angle - y_circle*sin_angle
+        x_list = np.add(x_list, center[0])
+        y_list = y_circle*cos_angle + x_circle*sin_angle
+        y_list = np.add(y_list, center[1])
+        return np.array(x_list), np.array(y_list)
+    else:
+        x_list = np.add(x_circle, center[0])
+        y_list = np.add(y_circle, center[1])
+    return np.array(x_list), np.array(y_list)
+
+
+def reproject_cartesian_to_polar(img,
+                                 center=None,
+                                 angle=None,
+                                 lengths=None,
+                                 radius=[0,100],
+                                 phase_width=720):
+    """Project an image from cartesian coordinates to polar coordinates.
+
+    Parameters
+    ----------
+
+    img:array-like
+        A n by 2-d array for the image to convert to polar coordinates
+    center: list
+        [X,Y] coordinates for the center of the image
+    angle: float
+        Angle of rotation if the sample is elliptical
+    lengths: list
+        The major and minor lengths of the ellipse
+    radius: list
+        The inner and outer indexes to define the radius by.
+    phase_width: int
+        The number of "pixels" in the polar image along the x direction
+
+    Returns
+    -------
+    polar_img: array-like
+        A numpy array of the input img  in polar coordiates.
+        Dim (radius[1]-radius[0]) x phase_width
+    """
+    img_shape = np.shape(img)
+    initial_y, initial_x = range(0, img_shape[-2]), range(0, img_shape[-1])
+    if center is None:
+        center = np.true_divide(img_shape[-2:], 2)
+    final_the = np.linspace(0, 2*np.pi, num=phase_width)
+    final_rad = np.arange(radius[0], radius[1], 1)
+    final_x, final_y = ellipsoid_in_cartesian(final_rad,
+                                              final_the,
+                                              center,
+                                              axes_lengths=lengths,
+                                              angle=angle)
+    intensity = img.data
+
+    # setting masked values to negative values. Anything interpolated from
+    # masked values becomes negative
+    try:
+        intensity[img.mask] = -999999
+    except AttributeError:
+        pass
+    spline = RectBivariateSpline(initial_x, initial_y, intensity, kx=1, ky=1)  # bi-linear spline (Takes 90% of time)
+    polar_img = np.array(spline.ev(final_x, final_y))
+    polar_img = np.reshape(polar_img, (int(radius[1]-radius[0]), phase_width))
+
+    # outputting new mask
+    polar_img[polar_img < 0] = -10
+
+    return polar_img
 
 
 def gain_normalise(z, dref, bref):

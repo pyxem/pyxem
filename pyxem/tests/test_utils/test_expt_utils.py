@@ -28,7 +28,8 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     subtract_reference, circular_mask, reference_circle, \
     find_beam_offset_cross_correlation, peaks_as_gvectors, \
     investigate_dog_background_removal_interactive, \
-    find_beam_center_blur, find_beam_center_interpolate
+    find_beam_center_blur, find_beam_center_interpolate, \
+    ellipsoid_in_cartesian, reproject_cartesian_to_polar
 
 
 @pytest.fixture(params=[
@@ -190,3 +191,37 @@ def test_find_beam_center_interpolate_2(center_expected, sigma):
     z = gaussian_filter(z, sigma=sigma)
     centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)
+
+
+class TestEllipseCoordinates():
+    def setUp(self):
+        self.thetas = np.linspace(-1*np.pi, np.pi, num=180)
+        self.radii = np.arange(1, 40)
+
+    def test_ellipse_conversion(self):
+        x, y = ellipsoid_list_to_cartesian(self.radii,
+                                           self.thetas,
+                                           center=[0,0],
+                                           axes_lengths=[10,20],
+                                           angle=np.pi/4)
+
+class TestPolarReprojection():
+    def setUp(self):
+        self.d = np.zeros((512, 512))
+        self.center = [276, 256]
+        self.lengths = sorted(np.random.rand(2) * 100 + 100, reverse=True)
+        self.angle = np.random.rand() * np.pi
+        rand_points = random_ellipse(num_points=100, center=self.center,
+                                     foci=self.lengths, angle=self.angle)
+
+        self.d[rand_points[:, 0], rand_points[:, 1]] = 10
+
+    def test_2d_convert(self):
+        conversion = reproject_cartesian_to_polar(self.d,
+                                                  center=self.center,
+                                                  angle=self.angle,
+                                                  lengths=self.lengths,
+                                                  phase_width=720)
+        s = np.sum(conversion, axis=1)
+        even = np.sum(conversion, axis=0)
+        self.assertLess((s > max(s)/2).sum(), 4)
