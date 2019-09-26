@@ -19,16 +19,16 @@
 
 from setuptools import setup, find_packages
 
-exec(open('pyxem/version.py').read())  # grab version info
+exec(open('pyxem/release_info.py').read())  # grab version info
 
 
 setup(
-    name='pyxem',
-    version=__version__,
+    name=name,
+    version=version,
     description='Crystallographic Diffraction Microscopy in Python.',
-    author=__author__,
-    author_email=__email__,
-    license="GPLv3",
+    author=author,
+    author_email=email,
+    license=license,
     url="https://github.com/pyxem/pyxem",
     long_description=open('README.rst').read(),
     classifiers=[
