@@ -63,5 +63,13 @@ from .signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.utils.io_utils import load, load_mib, load_hspy
 
+__author__ = "Duncan Johnstone, Phillip Crout"
+__copyright__ = "Copyright 2017-2019, The pyXem Developers"
+__credits__ = ["Duncan Johnstone", "Phillip Crout", "Ben Martineau", "Simon Hogas"]
+__license__ = "GPL"
+__version__ = "0.10.0dev"
+__maintainer__ = "Duncan Johnstone, Phillip Crout"
+__email__ = "pyxem.team@gmail.com"
+__status__ = "Development"
 
 _logger = logging.getLogger(__name__)
