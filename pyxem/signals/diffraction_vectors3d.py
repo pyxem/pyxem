@@ -292,3 +292,8 @@ class DiffractionVectors3D(BaseSignal):
         y.units = 'nm'
 
         return crystim
+
+    def as_detector_coordinates2d(self, beam_energy,
+                                  camera_length,
+                                  pixel_size):
+        pass
