@@ -28,6 +28,8 @@ from pyxem.signals import transfer_signal_axes
 from pyxem.signals import push_metadata_through
 from pyxem.signals.segments import VDFSegment
 
+from traits.trait_errors import TraitError
+
 
 class VDFImage(Signal2D):
     _signal_type = "vdf_image"
@@ -120,9 +122,13 @@ class VDFImage(Signal2D):
         segments = segments.reshape((np.shape(vectors_of_segments)[0],
                                      vdfs.axes_manager.signal_shape[0],
                                      vdfs.axes_manager.signal_shape[1]))
-
-        segments = Signal2D(segments).transpose(navigation_axes=[0],
-                                                signal_axes=[2, 1])
+        try:
+            segments = Signal2D(segments).transpose(navigation_axes=[0],
+                                                    signal_axes=[2, 1])
+        except TraitError:
+            if segments.shape[0] == 0:
+                raise ValueError('No segments were found. Check the input '
+                                 'parameters.')
 
         # Create VDFSegment and transfer axes calibrations
         vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments))

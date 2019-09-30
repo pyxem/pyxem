@@ -48,6 +48,7 @@ def push_metadata_through(dummy, *args, **kwargs):
 
     return dummy, args, kwargs
 
+
 def transfer_signal_axes(new_signal, old_signal):
     """ Transfers signal axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
@@ -131,40 +132,5 @@ def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
         ax_new.name = ax_old.name
         ax_new.scale = ax_old.scale
         ax_new.units = ax_old.units
-
-    return new_signal
-
-
-def transfer_signal_axes(new_signal, old_signal):
-    """ Transfers signal axis calibrations from an old signal to a new
-    signal produced from it by a method or a generator.
-
-    Parameters
-    ----------
-    new_signal : Signal
-        The product signal with undefined signal axes.
-    old_signal : Signal
-        The parent signal with calibrated signal axes.
-
-    Returns
-    -------
-    new_signal : Signal
-        The new signal with calibrated signal axes.
-    """
-    #TODO: Must update with for in range
-    try:
-        x = new_signal.axes_manager.signal_axes[0]
-        x.name = old_signal.axes_manager.signal_axes[0].name
-        x.scale = old_signal.axes_manager.signal_axes[0].scale
-        x.units = old_signal.axes_manager.signal_axes[0].units
-    except IndexError:
-        pass
-    try:
-        y = new_signal.axes_manager.signal_axes[1]
-        y.name = old_signal.axes_manager.signal_axes[1].name
-        y.scale = old_signal.axes_manager.signal_axes[1].scale
-        y.units = old_signal.axes_manager.signal_axes[1].units
-    except IndexError:
-        pass
 
     return new_signal

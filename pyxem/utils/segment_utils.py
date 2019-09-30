@@ -65,8 +65,8 @@ def norm_cross_corr(image, template):
 
 
 def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
-             max_number_of_grains=np.inf, marker_radius=1,
-             threshold=False, exclude_border=False, plot_on=False):
+                       max_number_of_grains=np.inf, marker_radius=1,
+                       threshold=False, exclude_border=False, plot_on=False):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
     scikit-image. See [1,2] for examples from scikit-image.

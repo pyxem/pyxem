@@ -15,8 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal classes for segmentation results obtained from i) machine
-learning: LearingSegment and ii) VDF images: VDFSegment.
+"""Signal classes for segmentation results obtained from
+i) machine learning (LearningSegment) and ii) VDF images (VDFSegment).
 
 """
 
@@ -30,6 +30,8 @@ from pyxem.utils.segment_utils import (norm_cross_corr, separate_watershed,
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals import transfer_signal_axes
+
+from traits.trait_errors import TraitError
 
 
 class LearningSegment:
@@ -61,33 +63,28 @@ class LearningSegment:
         Returns
         -------
         learning_segment : LearningSegment
-            The VDFSegment instance updated according to the image
-            correlation results.
+            LearningSegment where possibly some factors and loadings
+            have been summed.
         """
-        factors = self.factors.copy()
-        loadings = self.loadings.copy()
-        factors_signal = factors.copy()
-        loadings_signal = loadings.copy()
-
         # If a mask was used during the decomposition, the factors and/or
         # loadings will contain nan, which must be converted to numbers prior
         # to the correlations calculations.
-        factors_num = factors.map(lambda x: np.nan_to_num(x), inplace=False).data
-        loadings_num = loadings.map(lambda x: np.nan_to_num(x), inplace=False).data
-        correlated_loadings = np.zeros_like(loadings_num[:1])
-        correlated_factors = np.zeros_like(factors_num[:1])
+        factors = self.factors.map(lambda x: np.nan_to_num(x), inplace=False)
+        loadings = self.loadings.map(lambda x: np.nan_to_num(x), inplace=False)
+        factors = factors.copy().data
+        loadings = loadings.copy().data
+        correlated_loadings = np.zeros_like(loadings[:1])
+        correlated_factors = np.zeros_like(factors[:1])
 
         # For each loading and factor, calculate the normalized
         # cross-correlation to all other loadings and factors, and define
         # add_indices for those with a value above corr_th_loadings and
         # corr_th_factors respectively.
-        while np.shape(loadings_num)[0] > 0:
+        while np.shape(loadings)[0] > 0:
             corr_list_loadings = list(map(
-                lambda x: norm_cross_corr(x, template=loadings_num[0]),
-                loadings_num))
+                lambda x: norm_cross_corr(x, template=loadings[0]), loadings))
             corr_list_factors = list(map(
-                lambda x: norm_cross_corr(x, template=factors_num[0]),
-                factors_num))
+                lambda x: norm_cross_corr(x, template=factors[0]), factors))
 
             add_indices = np.where(list(map(
                 lambda l, f: (l > corr_th_loadings and f > corr_th_factors),
@@ -95,19 +92,15 @@ class LearningSegment:
 
             correlated_loadings = np.append(
                 correlated_loadings,
-                np.array([np.sum(loadings_signal.data[add_indices], axis=0)]),
+                np.array([np.sum(loadings[add_indices], axis=0)]),
                 axis=0)
             correlated_factors = np.append(
                 correlated_factors,
-                np.array([np.sum(factors_signal.data[add_indices], axis=0)]),
+                np.array([np.sum(factors[add_indices], axis=0)]),
                 axis=0)
 
-            loadings_signal.data = np.delete(
-                loadings_signal.data, add_indices, axis=0)
-            factors_signal.data = np.delete(
-                factors_signal.data, add_indices, axis=0)
-            loadings_num = np.delete(loadings_num, add_indices, axis=0)
-            factors_num = np.delete(factors_num, add_indices, axis=0)
+            loadings = np.delete(loadings, add_indices, axis=0)
+            factors = np.delete(factors, add_indices, axis=0)
 
         correlated_loadings = Signal2D(np.delete(
             correlated_loadings, 0, axis=0))
@@ -208,8 +201,13 @@ class LearningSegment:
             factors_of_segments = np.delete(
                 factors_of_segments, delete_indices, axis=0)
 
-        segments = Signal2D(segments).transpose(navigation_axes=[0],
-                                                signal_axes=[2, 1])
+        try:
+            segments = Signal2D(segments).transpose(navigation_axes=[0],
+                                                    signal_axes=[2, 1])
+        except TraitError:
+            if segments.shape[0] == 0:
+                raise ValueError('No segments were found. Check the input '
+                                 'parameters.')
         factors_of_segments = Signal2D(factors_of_segments)
         learning_segment = LearningSegment(segments, factors_of_segments)
         return learning_segment
