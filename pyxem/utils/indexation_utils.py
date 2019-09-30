@@ -100,7 +100,7 @@ def correlate_library(image, library, n_largest, mask):
             orientations = library_entry['orientations']
             pixel_coords = library_entry['pixel_coords']
             intensities = library_entry['intensities']
-            pattern_norms = library_entry['pattern_norms']
+            pattern_norms = library_entry['pattern_norms'] #TODO: This is only applicable some of the time, probably use an if + special_local in the for
 
             zip_for_locals = zip(orientations,pixel_coords,intensities,pattern_norms)
 
