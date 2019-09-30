@@ -62,10 +62,9 @@ class IndexationGenerator():
         self.library = diffraction_library
 
     def correlate(self,
+                  method='pNCC',
                   n_largest=5,
                   mask=None,
-                  inplane_rotations=np.arange(0, 360, 1),
-                  max_peaks=100,
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -73,16 +72,13 @@ class IndexationGenerator():
 
         Parameters
         ----------
+        method : 'pNCC'
+            The method for comparing template and pattern, currently on partially
+            normalised cross correlation ('pNCC') is avaliable.
         n_largest : int
             The n orientations with the highest correlation values are returned.
         mask : Array
-            Array with the same size as signal (in navigation) True False
-        inplane_rotations : ndarray
-            Array of inplane rotation angles in degrees. Defaults to 0-360 degrees
-            at 1 degree resolution.
-        max_peaks : int
-            Maximum number of peaks to consider when comparing a template to
-            the diffraction pattern. The strongest peaks are kept.
+            Array with the same size as signal (in navigation) or None
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -98,49 +94,22 @@ class IndexationGenerator():
         """
         signal = self.signal
         library = self.library
-        inplane_rotations = np.deg2rad(inplane_rotations)
-        num_inplane_rotations = inplane_rotations.shape[0]
-        sig_shape = signal.axes_manager.signal_shape
-        signal_half_width = sig_shape[0] / 2
 
         if mask is None:
             # Index at all real space pixels
             mask = 1
 
-        # Create a copy of the library, cropping and padding the peaks to match
-        # max_peaks. Also create rotated pixel coordinates according to
-        # inplane_rotations
-        rotation_matrices_2d = np.array([[[np.cos(t), np.sin(t)], [-np.sin(t), np.cos(t)]] for t in inplane_rotations])
-        cropped_library = {}
+        if method == 'pNCC':
+            #adds a normalisation to library
+            for phase in library.keys():
+                norm_array = np.ones(library[phase]['intensities'].shape[0]) #will store the norms
+                for i,intensity_array in enumerate(library[phase]['intensities']):
+                    norm_array[i] = np.linalg.norm(intensity_array)
+                library[phase]['pattern_norms'] = norm_array #puts this normalisation into the library
 
-        for phase_name, phase_entry in library.items():
-            num_orientations = len(phase_entry['orientations'])
-            intensities_jagged = phase_entry['intensities']
-            intensities = np.zeros((num_orientations, max_peaks))
-            pixel_coords_jagged = phase_entry['pixel_coords']
-            pixel_coords = np.zeros((num_inplane_rotations, num_orientations, max_peaks, 2))
-            for i in range(num_orientations):
-                num_peaks = min(pixel_coords_jagged[i].shape[0], max_peaks)
-                highest_intensity_indices = np.argpartition(intensities_jagged[i], -num_peaks)[-num_peaks:]
-                intensities[i, :num_peaks] = intensities_jagged[i][highest_intensity_indices]
-                # Get and compute pixel coordinates for all rotations about the
-                # center, clipped to the detector size and rounded to integer positions.
-                pixel_coords[:, i, :num_peaks] = np.clip(
-                    (signal_half_width + rotation_matrices_2d @ (
-                        pixel_coords_jagged[i][highest_intensity_indices].T - signal_half_width)).transpose(0, 2, 1),
-                    a_min=0,
-                    a_max=np.array(sig_shape) - 1)
 
-            np.rint(pixel_coords, out=pixel_coords)
-            cropped_library[phase_name] = {
-                'orientations': phase_entry['orientations'],
-                'pixel_coords': pixel_coords.astype('int'),
-                'intensities': intensities,
-                'pattern_norms': np.linalg.norm(intensities, axis=1),
-            }
-
-        matches = signal.map(correlate_library,
-                             library=cropped_library,
+            matches = signal.map(correlate_library,
+                             library=library,
                              n_largest=n_largest,
                              mask=mask,
                              inplace=False,
