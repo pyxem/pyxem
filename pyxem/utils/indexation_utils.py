@@ -93,7 +93,7 @@ def correlate_library(image, library, n_largest, mask):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    top_matches = np.empty((len(library), n_largest, 3), dtype='object')
+    top_matches = np.empty((len(library), n_largest, 5), dtype='object')
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
@@ -102,26 +102,21 @@ def correlate_library(image, library, n_largest, mask):
             intensities = library_entry['intensities']
             pattern_norms = library_entry['pattern_norms']
 
-            # Extract experimental intensities from the diffraction image
-            image_intensities = image[pixel_coords[:, :, :, 1], pixel_coords[:, :, :, 0]]
-            # Correlation is the normalized dot product
-            correlations = np.sum(image_intensities * intensities, axis=2) / pattern_norms
+            zip_for_locals = zip(orientations,pixel_coords,intensities,pattern_norms)
 
-            # Find the top n correlations in sorted order
-            top_n_indices = correlations.argpartition(-n_largest, axis=None)[-n_largest:]
-            top_n_correlations = correlations.ravel()[top_n_indices]
-            top_n_indices = top_n_indices[top_n_correlations.argsort()[::-1]]
+            or_saved,corr_saved = np.empty((n_largest,3)),np.zeros((n_largest,1))
+            for (or_local,px_local,int_local,pn_local) in zip_for_locals:
+                # Extract experimental intensities from the diffraction image
+                image_intensities = image[px_local[:, 1], px_local[:, 0]]
+                # Correlation is the normalized dot product
+                corr_local = np.sum(np.multiply(image_intensities,int_local)) / pn_local
+                if corr_local > np.min(corr_saved):
+                    or_saved[np.argmin(corr_saved)] = or_local
+                    corr_saved[np.argmin(corr_saved)] = corr_local
 
-            # Store the results in top_matches
-            top_matches[phase_index, :, 0] = phase_index
-            inplane_rotation_angle = 360 / pixel_coords.shape[0]
-            for i in range(n_largest):
-                inplane_index, orientation_index = np.unravel_index(top_n_indices[i], correlations.shape)
-                top_matches[phase_index, i, 1] = orientations[orientation_index] + np.array(
-                    [0, 0, inplane_index * inplane_rotation_angle])
-            top_matches[phase_index, :, 2] = correlations.ravel()[top_n_indices]
-
-    return top_matches.reshape(-1, 3)
+                top_matches[phase_index] = np.concatenate((np.ones_like(corr_saved)*phase_index,np.asarray(or_saved),corr_saved),axis=1)
+                #sort them now
+    return top_matches
 
 
 def index_magnitudes(z, simulation, tolerance):
