@@ -106,16 +106,17 @@ def correlate_library(image, library, n_largest, mask):
 
             or_saved,corr_saved = np.empty((n_largest,3)),np.zeros((n_largest,1))
             for (or_local,px_local,int_local,pn_local) in zip_for_locals:
-                # Extract experimental intensities from the diffraction image
-                image_intensities = image[px_local[:, 1], px_local[:, 0]]
-                # Correlation is the normalized dot product
-                corr_local = np.sum(np.multiply(image_intensities,int_local)) / pn_local
+                #TODO: Factorise out the generation of corr_local to a method='mthd' section
+                image_intensities = image[px_local[:, 1], px_local[:, 0]]     # Extract experimental intensities from the diffraction image
+                corr_local = np.sum(np.multiply(image_intensities,int_local)) / pn_local # Correlation is the partially normalized dot product
+
                 if corr_local > np.min(corr_saved):
                     or_saved[np.argmin(corr_saved)] = or_local
                     corr_saved[np.argmin(corr_saved)] = corr_local
 
+                #TODO: Tidy this up so that it returns in the same style as the vector matching.
                 top_matches[phase_index] = np.concatenate((np.ones_like(corr_saved)*phase_index,np.asarray(or_saved),corr_saved),axis=1)
-                #sort them now
+                #TODO: This includes sorting the results within any given phase
     return top_matches
 
 
