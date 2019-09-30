@@ -19,10 +19,12 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator
+from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator, get_simulated_disc
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
+from numpy import array, pad
+import pyxem as pxm
 
 
 def create_spot():
@@ -140,3 +142,16 @@ def test_local_gaussian_method(dp, diffraction_vectors, refined_vectors):
 def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
     spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
     s = spr.local_gaussian_method(2)
+
+def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
+    """ This was the MWE example code for the issue """
+    dp = get_simulated_disc(100,20)
+    # translate y by +4
+    shifted = np.pad(dp, ((0,4),(0,0)), 'constant')[4:].reshape(1,1,*dp.shape)
+    signal = pxm.ElectronDiffraction2D(shifted)
+    spg = SubpixelrefinementGenerator(signal, array([[0,0]]))
+    peaks = spg.conventional_xc(100,20,1).data[0,0,0] #as quoted in the issue
+    np.testing.assert_allclose([0,-4],peaks)
+    """ we also test com method for clarity """
+    peaks = spg.center_of_mass_method(60).data[0,0,0]
+    np.testing.assert_allclose([0,-4],peaks,atol=1.5)
