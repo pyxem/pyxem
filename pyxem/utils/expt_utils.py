@@ -420,7 +420,7 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
-def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int=50, window: int=10, kind: int=3) -> float:
+def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, window: int = 10, kind: int = 3) -> float:
     """Find the index of the pixel corresponding to peak maximum in 1D pattern
 
     Parameters
@@ -428,18 +428,18 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int=50, window:
     sigma : int
         Sigma value for Gaussian blurring kernel for initial beam center estimation.
     upsample_factor : int
-        Upsample factor for subpixel maximum finding, i.e. the maximum will 
-        be found with a precision of 1 / upsample_factor of a pixel. 
+        Upsample factor for subpixel maximum finding, i.e. the maximum will
+        be found with a precision of 1 / upsample_factor of a pixel.
     kind : str or int, optional
         Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
         ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
         ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
         interpolation of zeroth, first, second or third order; ‘previous’
         and ‘next’ simply return the previous or next value of the point) or as
-        an integer specifying the order of the spline interpolator to use. 
+        an integer specifying the order of the spline interpolator to use.
     window : int
-       A box of size 2*window+1 around the first estimate is taken and 
-       expanded by `upsample_factor` to to interpolate the pattern to get 
+       A box of size 2*window+1 around the first estimate is taken and
+       expanded by `upsample_factor` to to interpolate the pattern to get
        the peak maximum position with subpixel precision.
 
     Returns
@@ -452,12 +452,12 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int=50, window:
 
     m = upsample_factor
     w = window
-    win_len = 2*w+1
-    
+    win_len = 2 * w + 1
+
     try:
-        r1 = np.linspace(c1-w, c1+w, win_len)
-        f  = interp1d(r1, y1[c1-w: c1+w+1], kind=kind)
-        r2 = np.linspace(c1-w, c1+w, win_len*m)  # extrapolate for subpixel accuracy
+        r1 = np.linspace(c1 - w, c1 + w, win_len)
+        f = interp1d(r1, y1[c1 - w: c1 + w + 1], kind=kind)
+        r2 = np.linspace(c1 - w, c1 + w, win_len * m)  # extrapolate for subpixel accuracy
         y2 = f(r2)
         c2 = np.argmax(y2) / m  # find beam center with `m` precision
     except ValueError:  # if c1 is too close to the edges, return initial guess
@@ -468,24 +468,24 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int=50, window:
     return center
 
 
-def find_beam_center_interpolate(img: np.ndarray, sigma: int=30, upsample_factor: int=100, kind: int=3) -> (float, float):
-    """Find the center of the primary beam in the image `img` by summing along 
-    X/Y directions and finding the position along the two directions independently. 
+def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_factor: int = 100, kind: int = 3) -> (float, float):
+    """Find the center of the primary beam in the image `img` by summing along
+    X/Y directions and finding the position along the two directions independently.
 
     Parameters
     ----------
     sigma : int
         Sigma value for Gaussian blurring kernel for initial beam center estimation.
     upsample_factor : int
-        Upsample factor for subpixel beam center finding, i.e. the center will 
-        be found with a precision of 1 / upsample_factor of a pixel. 
+        Upsample factor for subpixel beam center finding, i.e. the center will
+        be found with a precision of 1 / upsample_factor of a pixel.
     kind : str or int, optional
         Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
         ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
         ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
         interpolation of zeroth, first, second or third order; ‘previous’
         and ‘next’ simply return the previous or next value of the point) or as
-        an integer specifying the order of the spline interpolator to use. 
+        an integer specifying the order of the spline interpolator to use.
 
     Returns
     -------
@@ -494,15 +494,15 @@ def find_beam_center_interpolate(img: np.ndarray, sigma: int=30, upsample_factor
     """
     xx = np.sum(img, axis=1)
     yy = np.sum(img, axis=0)
-    
-    cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind) 
-    cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind) 
+
+    cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind)
+    cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind)
 
     center = np.array([cx, cy])
     return center
 
 
-def find_beam_center_blur(z: np.ndarray, sigma: int=30) -> np.ndarray:
+def find_beam_center_blur(z: np.ndarray, sigma: int = 30) -> np.ndarray:
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 
@@ -567,7 +567,6 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     shift, error, diffphase = register_translation(ref, im, 100)
 
     return (shift - 0.5)
-
 
 def peaks_as_gvectors(z, center, calibration):
     """Converts peaks found as array indices to calibrated units, for use in a

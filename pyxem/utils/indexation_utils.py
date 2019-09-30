@@ -37,7 +37,7 @@ from collections import namedtuple
 
 
 # container for OrientationResults
-OrientationResult = namedtuple("OrientationResult", 
+OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 
@@ -195,7 +195,7 @@ def get_nth_best_solution(single_match_result, rank=0, key="match_rate", descend
 
     Returns
     -------
-    VectorMatching: 
+    VectorMatching:
         best_fit : `OrientationResult`
             Parameters for the best fitting orientation
             Library Number, rotation_matrix, match_rate, error_hkls, total_error
@@ -208,7 +208,7 @@ def get_nth_best_solution(single_match_result, rank=0, key="match_rate", descend
             best_fit = sorted(single_match_result[0].tolist(), key=attrgetter(key), reverse=descending)[rank]
         except AttributeError:
             best_fit = sorted(single_match_result.tolist(), key=attrgetter(key), reverse=descending)[rank]
-    except:
+    except BaseException:
         srt_idx = np.argsort(single_match_result[:, 2])[rank]
         best_fit = single_match_result[rank]
     return best_fit
@@ -333,8 +333,8 @@ def match_vectors(peaks,
                                             total_error=error_mean,
                                             scale=1.0,
                                             center_x=0.0,
-                                            center_y=0.0 )
-            for R, match_rate, ehkls, error_mean in zip(
+                                            center_y=0.0)
+                          for R, match_rate, ehkls, error_mean in zip(
                 rotations[possible_solution_mask],
                 match_rates[possible_solution_mask],
                 ehklss[possible_solution_mask],
@@ -344,17 +344,17 @@ def match_vectors(peaks,
 
         n_solutions = min(n_best, len(solutions))
 
-        i = phase_index*n_best # starting index in unfolded array
+        i = phase_index * n_best  # starting index in unfolded array
 
         if n_solutions > 0:
             top_n = sorted(solutions, key=attrgetter('match_rate'), reverse=True)[:n_solutions]
 
             # Put the top n ranked solutions in the output array
-            top_matches[i:i+n_solutions] = top_n
+            top_matches[i:i + n_solutions] = top_n
 
         if n_solutions < n_best:
             # Fill with dummy values
-            top_matches[i+n_solutions:i+n_best] = [OrientationResult(
+            top_matches[i + n_solutions:i + n_best] = [OrientationResult(
                 phase_index=0,
                 rotation_matrix=np.identity(3),
                 match_rate=0.0,
@@ -362,8 +362,8 @@ def match_vectors(peaks,
                 total_error=1.0,
                 scale=1.0,
                 center_x=0.0,
-                center_y=0.0,           
-                ) for x in range(n_best - n_solutions)]
+                center_y=0.0,
+            ) for x in range(n_best - n_solutions)]
 
     # Because of a bug in numpy (https://github.com/numpy/numpy/issues/7453),
     # triggered by the way HyperSpy reads results (np.asarray(res), which fails
@@ -470,7 +470,7 @@ def crystal_from_vector_matching(z_matches):
 
     # get second highest correlation phase for phase_reliability (if present)
     other_phase_matches = [match for match in z_matches if match.phase_index != best_match.phase_index]
-    
+
     if other_phase_matches:
         second_best_phase = sorted(other_phase_matches, key=attrgetter('total_error'), reverse=False)[0]
 
@@ -484,7 +484,7 @@ def crystal_from_vector_matching(z_matches):
         second_match = get_nth_best_solution(z_matches, rank=1, key="total_error", descending=False)
 
     metrics['orientation_reliability'] = 100 * (1 - best_match.total_error / (second_match.total_error or 1.0))
-    
+
     results_array[2] = metrics
 
     return results_array

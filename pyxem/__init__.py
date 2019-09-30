@@ -47,13 +47,31 @@ from .signals.electron_diffraction2d import ElectronDiffraction2D
 from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
-from .signals.vdf_image import VDFImage
 from .signals.crystallographic_map import CrystallographicMap
+
+from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
+from .generators.pdf_generator1d import PDFGenerator1D
+from .generators.variance_generator import VarianceGenerator
+from .signals.diffraction_variance1d import DiffractionVariance1D
+from .signals.diffraction_variance2d import DiffractionVariance2D
+
 from .signals.diffraction_vectors import DiffractionVectors
 from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
+from .signals.pair_distribution_function1d import PairDistributionFunction1D
+from .signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.utils.io_utils import load, load_mib, load_hspy
 
+from . import release_info
+
+__version__ = release_info.version
+__author__ = release_info.author
+__copyright__ = release_info.copyright
+__credits__ = release_info.credits
+__license__ = release_info.license
+__maintainer__ = release_info.maintainer
+__email__ = release_info.email
+__status__ = release_info.status
 
 _logger = logging.getLogger(__name__)
