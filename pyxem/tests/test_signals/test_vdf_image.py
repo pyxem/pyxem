@@ -17,15 +17,15 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+
 import pytest
 
 from hyperspy.signals import Signal2D
 
-from pyxem.generators.vdf_generator import (VDFGenerator,
-                                            VDFSegmentGenerator)
+from pyxem.generators.vdf_generator import VDFGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.vdf_image import VDFSegment
+from pyxem.signals.segments import VDFSegment
 
 
 @pytest.fixture(params=[
@@ -65,32 +65,29 @@ def signal_data():
 
 
 @pytest.fixture
-def vdf_segments(signal_data, unique_vectors):
-    vdfgen = VDFGenerator(signal_data, unique_vectors)
-    vdfs = vdfgen.get_vector_vdf_images(radius=1)
-    vdfseggen = VDFSegmentGenerator(vdfs)
-    return vdfseggen.get_vdf_segments()
+def vdf_generator_seg(signal_data, unique_vectors):
+    return VDFGenerator(signal_data, unique_vectors)
 
 
-class TestVDFSegment:
+@pytest.fixture
+def vdf_vector_images_seg(vdf_generator_seg):
+    return vdf_generator_seg.get_vector_vdf_images(radius=1)
 
-    @pytest.mark.parametrize('corr_threshold, vector_threshold,'
-                             'segment_threshold',
-                             [(0.1, 1, 1),
-                              (0.9, 3, 2)])
-    def test_correlate_segments(self, vdf_segments: VDFSegment,
-                                corr_threshold, vector_threshold,
-                                segment_threshold):
-        corrsegs = vdf_segments.correlate_segments(
-            corr_threshold, vector_threshold, segment_threshold)
-        assert isinstance(corrsegs.segments, Signal2D)
-        assert isinstance(corrsegs.vectors_of_segments, DiffractionVectors)
-        assert isinstance(corrsegs.intensities, np.ndarray)
 
-    def test_get_virtual_electron_diffraction(self, vdf_segments: VDFSegment,
-                                              ):
-        corrsegs = vdf_segments.correlate_segments(0.1, 1, 1)
-        vs = corrsegs.get_virtual_electron_diffraction(
-            calibration=1, sigma=1,
-            shape=signal_data().axes_manager.signal_shape)
-        assert isinstance(vs, ElectronDiffraction2D)
+class TestVDFImage:
+
+    @pytest.mark.parametrize('min_distance, min_size, max_size,'
+                             'max_number_of_grains, marker_radius,'
+                             'threshold, exclude_border',
+                             [(1, 1, 20, 5, 1, False, 0),
+                              (2, 3, 200, 10, 2, True, 1)])
+    def test_get_vdf_segments(
+            self, vdf_vector_images_seg,
+            min_distance, min_size, max_size, max_number_of_grains,
+            marker_radius, threshold, exclude_border):
+        segs = vdf_vector_images_seg.get_vdf_segments(
+            min_distance, min_size, max_size, max_number_of_grains,
+            marker_radius, threshold, exclude_border)
+        assert isinstance(segs, VDFSegment)
+        assert isinstance(segs.segments, Signal2D)
+        assert isinstance(segs.vectors_of_segments, DiffractionVectors)

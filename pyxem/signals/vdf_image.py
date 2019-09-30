@@ -20,23 +20,22 @@
 """
 import numpy as np
 
-from pyxem.signals import push_metadata_through
-
 from hyperspy.signals import Signal2D
 
 from pyxem.utils.segment_utils import separate_watershed
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import transfer_signal_axes
+from pyxem.signals import push_metadata_through
+from pyxem.signals.segments import VDFSegment
 
 
-class VDFImage():
+class VDFImage(Signal2D):
     _signal_type = "vdf_image"
 
-    def __init__(self, vdfs, vectors):
-        # VDF images as Signal2D
-        self.vdf_images = vdfs
-        # Vectors as DiffractionVectors
-        self.vectors = vectors
+    def __init__(self, *args, **kwargs):
+        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.vectors = None
 
     def get_vdf_segments(self, min_distance=1, min_size=1,
                          max_size=np.inf, max_number_of_grains=np.inf,
@@ -92,7 +91,7 @@ class VDFImage():
             VDFSegment object containing segments (i.e. grains) of
             single virtual dark field images with corresponding vectors.
         """
-        vdfs = self.vdf_images
+        vdfs = self.copy()
         vectors = self.vectors.data
 
         #TODO : Add aperture radius as an attribute of VDFImage?
@@ -126,9 +125,8 @@ class VDFImage():
                                                 signal_axes=[2, 1])
 
         # Create VDFSegment and transfer axes calibrations
-        vdfsegs = VDFImage(segments, DiffractionVectors(vectors_of_segments))
-        vdfsegs.segments = transfer_signal_axes(vdfsegs.segments,
-                                                self.vdf_images)
+        vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments))
+        vdfsegs.segments = transfer_signal_axes(vdfsegs.segments, vdfs)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
         n.name = 'n'
         n.units = 'number'

@@ -19,7 +19,8 @@
 import numpy as np
 import pytest
 
-from pyxem.utils.vdf_utils import (norm_cross_corr, separate, get_gaussian2d)
+from pyxem.utils.segment_utils import (norm_cross_corr, separate_watershed,
+                                       get_gaussian2d)
 
 
 @pytest.mark.parametrize('img, template, corr_expt', [
@@ -60,13 +61,13 @@ def vdf_image():
                           (1, 5, np.inf, np.inf, 0, True, (2, 6, 7)),
                           (1, 1, np.inf, 4, 0, True, (3, 6, 7))
 ])
-def test_separate(vdf_image, min_distance, min_size, max_size,
-                  max_number_of_grains, exclude_border, threshold,
-                  sep_shape_expt):
-    sep = separate(vdf_image, min_distance=min_distance, min_size=min_size,
-                   max_size=max_size,
-                   max_number_of_grains=max_number_of_grains,
-                   exclude_border=exclude_border, threshold=threshold)
+def test_separate_watershed(vdf_image, min_distance, min_size, max_size,
+                            max_number_of_grains, exclude_border, threshold,
+                            sep_shape_expt):
+    sep = separate_watershed(vdf_image, min_distance=min_distance,
+                             min_size=min_size, max_size=max_size,
+                             max_number_of_grains=max_number_of_grains,
+                             exclude_border=exclude_border, threshold=threshold)
     np.testing.assert_equal(sep.shape, sep_shape_expt)
 
 

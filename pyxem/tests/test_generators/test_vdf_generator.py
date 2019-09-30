@@ -19,14 +19,11 @@
 import pytest
 import numpy as np
 
-from hyperspy.signals import Signal2D
-
-from pyxem.generators.vdf_generator import (VDFGenerator,
-                                            VDFSegmentGenerator)
+from pyxem.generators.vdf_generator import VDFGenerator
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.vdf_image import VDFImage, VDFSegment
+from pyxem.signals.vdf_image import VDFImage
 
 
 @pytest.fixture(params=[
@@ -113,74 +110,3 @@ def test_vdf_generator_from_map(diffraction_pattern):
 
     vdfgen = VDFGenerator(diffraction_pattern, dvm)
     assert isinstance(vdfgen, VDFGenerator)
-
-
-@pytest.fixture(params=[
-    np.array([np.array([0, 0]), np.array([3, 0]), np.array([3, 5]),
-              np.array([0, 5]), np.array([0, 3]), np.array([3, 3]),
-              np.array([5, 3]), np.array([5, 5])])
-])
-def unique_vectors(request):
-    uv = DiffractionVectors(request.param)
-    uv.axes_manager.set_signal_dimension(0)
-    return uv
-
-
-@pytest.fixture
-def signal_data():
-    s = ElectronDiffraction2D(np.zeros((4, 5, 6, 6)))
-    s.inav[:2, :2].data[..., 0, 0] = 2
-    s.inav[:2, :2].data[..., 0, 3] = 2
-    s.inav[:2, :2].data[..., 3, 5] = 2
-
-    s.inav[2:, :3].data[..., 3, 3] = 2
-    s.inav[2:, :3].data[..., 3, 0] = 2
-
-    s.inav[2, :2].data[..., 0, 0] = 1
-    s.inav[2, :2].data[..., 0, 3] = 1
-    s.inav[2, :2].data[..., 3, 5] = 1
-    s.inav[2, :2].data[..., 3, 3] = 1
-    s.inav[2, :2].data[..., 3, 0] = 1
-
-    s.inav[:2, 2:].data[..., 5, 5] = 3
-    s.inav[:2, 2:].data[..., 5, 0] = 3
-    s.inav[:2, 2:].data[..., 5, 3] = 3
-
-    s.inav[3:, 2:].data[..., 5, 5] = 3
-    s.inav[3:, 2:].data[..., 5, 0] = 3
-    return s
-
-
-@pytest.fixture
-def vdf_generator_seg(signal_data, unique_vectors):
-    return VDFGenerator(signal_data, unique_vectors)
-
-
-@pytest.fixture
-def vdf_vector_images_seg(vdf_generator_seg):
-    return vdf_generator_seg.get_vector_vdf_images(radius=1)
-
-
-class TestVDFSegmentGenerator:
-
-    def test_vdf_segment_generator(self, vdf_vector_images_seg: VDFImage):
-        vdfsegmentgen = VDFSegmentGenerator(vdf_vector_images_seg)
-        assert isinstance(vdfsegmentgen.vdf_images, VDFImage)
-        assert isinstance(vdfsegmentgen.vectors, DiffractionVectors)
-
-    @pytest.mark.parametrize('min_distance, min_size, max_size,'
-                             'max_number_of_grains, marker_radius,'
-                             'threshold, exclude_border',
-                             [(1, 1, 20, 5, 1, False, 0),
-                              (2, 3, 200, 10, 2, True, 1)])
-    def test_get_vdf_segments(
-            self, vdf_vector_images_seg,
-            min_distance, min_size, max_size, max_number_of_grains,
-            marker_radius, threshold, exclude_border):
-        vdf_segment_generator = VDFSegmentGenerator(vdf_vector_images_seg)
-        segs = vdf_segment_generator.get_vdf_segments(
-            min_distance, min_size, max_size, max_number_of_grains,
-            marker_radius, threshold, exclude_border)
-        assert isinstance(segs, VDFSegment)
-        assert isinstance(segs.segments, Signal2D)
-        assert isinstance(segs.vectors_of_segments, DiffractionVectors)

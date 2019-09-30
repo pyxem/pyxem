@@ -112,8 +112,8 @@ class LearningSegment:
         correlated_loadings = Signal2D(np.delete(
             correlated_loadings, 0, axis=0))
         correlated_factors = Signal2D(np.delete(correlated_factors, 0, axis=0))
-        learning_segment = LearningSegment(correlated_loadings,
-                                           correlated_factors)
+        learning_segment = LearningSegment(
+            factors=correlated_factors, loadings=correlated_loadings)
         return learning_segment
 
     def separate_learning_segments(self, min_intensity_threshold=0,
@@ -226,8 +226,8 @@ class VDFSegment:
         # Intensities corresponding to each vector
         self.intensities = intensities
 
-    def correlate_segments(self, corr_threshold=0.7, vector_threshold=4,
-                           segment_threshold=3):
+    def correlate_vdf_segments(self, corr_threshold=0.7, vector_threshold=4,
+                               segment_threshold=3):
         """Iterates through VDF segments and sums those that are
         associated with the same segment. Summation will be done for
         those segments that have a normalised cross correlation above

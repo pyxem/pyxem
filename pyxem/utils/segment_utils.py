@@ -31,6 +31,8 @@ from skimage.morphology import watershed, disk
 
 from sklearn.cluster import DBSCAN
 
+import warnings
+
 
 def norm_cross_corr(image, template):
     """Calculates the normalised cross-correlation between an image
@@ -49,7 +51,15 @@ def norm_cross_corr(image, template):
         Normalised cross-correlation between image and template.
     """
     f, t = image - np.average(image), template - np.average(template)
-    corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='error', category=RuntimeWarning)
+        try:
+            corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
+        except (RuntimeError, RuntimeWarning, ZeroDivisionError):
+            if np.all(f == np.zeros_like(f)) and np.all(t == np.zeros_like(t)):
+                corr = 1.
+            else:
+                corr = 0.
 
     return corr
 
