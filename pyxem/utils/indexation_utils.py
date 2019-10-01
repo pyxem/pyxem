@@ -117,6 +117,8 @@ def correlate_library(image, library, n_largest, mask):
                 #TODO: Tidy this up so that it returns in the same style as the vector matching.
                 combined_array = np.hstack((or_saved,corr_saved))
                 combined_array = combined_array[np.flip(combined_array[:,3].argsort())] #see stackoverflow/2828059 for details
+                top_matches[phase_index,:,0] = phase_index
+                top_matches[phase_index,:,2] = combined_array[:,3]  #correlation
     return top_matches
 
 
