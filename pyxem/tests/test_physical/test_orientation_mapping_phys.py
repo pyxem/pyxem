@@ -151,3 +151,11 @@ def test_peaks_from_best_vector_match(structure, rot_list, edc):
         lib = library['A']['simulations'][i].coordinates[:, :2]
         for p in peaks.data[0, i]:
             assert np.isclose(p[0], lib[:, 0], atol=0.1).any() and np.isclose(p[1], lib[:, 1], atol=0.1).any()
+
+@pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
+def test_plot_best_vector_matching_results_on_signal(structure, rot_list, edc):
+    library, match_results = get_vector_match_results(structure, rot_list, edc)
+    match_results.data = np.vstack((match_results.data, match_results.data)) # Hyperspy can only add markers to square signals
+    dp = ElectronDiffraction2D(2 * [2 * [np.zeros((144, 144))]])
+    match_results.plot_best_matching_results_on_signal(dp,
+                                                       library=library)

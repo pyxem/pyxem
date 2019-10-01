@@ -75,6 +75,6 @@ def test_match_results():
         assert match_results.inav[0, 1].data[0][1][zxz_angle] == 2
         assert match_results.inav[1, 1].data[0][1][zxz_angle] == 3
 
-def test_plot_best_matching_results_on_signal():
+def test_plot_best_template_matching_results_on_signal():
     # for coverage
     match_results.plot_best_matching_results_on_signal(dp, library=library)
