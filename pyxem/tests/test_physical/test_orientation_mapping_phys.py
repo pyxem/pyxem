@@ -37,19 +37,9 @@ from pyxem.utils.indexation_utils import peaks_from_best_vector_match
 from pyxem.utils.indexation_utils import OrientationResult
 from pyxem.utils.sim_utils import sim_as_signal
 
-"""
-The test are designed to make sure orientation mapping works when actual
-rotation are considered.
-
-Specifically we test (for both an orthorhombic and hexagonal samples) that:
-
-- The algorithm can tell the difference between down a, down b and down c axes
-"""
-
-
 half_side_length = 72
 
-
+""" Template Matching set up """
 def create_Ortho():
     latt = diffpy.structure.lattice.Lattice(3, 4, 5, 90, 90, 90)
     atom = diffpy.structure.atom.Atom(atype='Zn', xyz=[0, 0, 0], lattice=latt)
@@ -61,33 +51,9 @@ def create_Hex():
     atom = diffpy.structure.atom.Atom(atype='Ni', xyz=[0, 0, 0], lattice=latt)
     return diffpy.structure.Structure(atoms=[atom], lattice=latt)
 
-
-def create_wurtzite(rotation=None):
-    """Construct a hexagonal P63mc GaAs Wurtzite structure. """
-    if rotation is None:
-        rotation = np.eye(3)
-    a = 4.053
-    c = 6.680
-    lattice = diffpy.structure.lattice.Lattice(a, a, c, 90, 90, 120)
-    atom_list = []
-    for x, y, z in [(1 / 3, 2 / 3, 0), (2 / 3, 1 / 3, 1 / 2)]:
-        atom_list.append(
-            diffpy.structure.atom.Atom(
-                atype='Ga',
-                xyz=[x, y, z],
-                lattice=lattice))
-        atom_list.append(
-            diffpy.structure.atom.Atom(
-                atype='As',
-                xyz=[x + 3 / 8, y + 3 / 8, z + 3 / 8],
-                lattice=lattice))
-    return diffpy.structure.Structure(atoms=atom_list, lattice=lattice)
-
-
 @pytest.fixture
 def edc():
     return pxm.DiffractionGenerator(300, 5e-2)
-
 
 @pytest.fixture
 def rot_list():
@@ -100,11 +66,9 @@ def rot_list():
     rot_list_temp += list(product(a, b, c))  # rotations around C
     return rot_list_temp
 
-
 @pytest.fixture
 def pattern_list():
     return [(0, 0, 2)]
-
 
 def get_template_library(structure, rot_list, edc):
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
@@ -120,7 +84,6 @@ def get_template_library(structure, rot_list, edc):
     library.with_direct_beam = False
     return library
 
-
 def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None):
     dp_library = get_template_library(structure, pattern_list, edc)
     for sim in dp_library['A']['simulations']:
@@ -130,6 +93,23 @@ def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None
     indexer = IndexationGenerator(dp, library)
     return indexer.correlate(mask=mask)
 
+""" Tests for template matching """
+
+@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
+def test_orientation_mapping_physical(structure, rot_list, pattern_list, edc):
+    M = get_template_match_results(structure, pattern_list, edc, rot_list)
+    assert np.all(M.inav[0, 0] == M.inav[1, 0])
+    match_data = M.inav[0, 0].isig[:4, 0].data
+    assert match_data[0] == 0
+    np.testing.assert_allclose(match_data[1], [2, 0, 0])
+
+
+def test_masked_OM(default_structure, rot_list, pattern_list, edc):
+    mask = hs.signals.Signal1D(([[[1], [1]], [[0], [1]]]))
+    M = get_template_match_results(default_structure, pattern_list, edc, rot_list, mask)
+    assert np.all(np.equal(M.inav[0, 1].data, None))
+
+""" Testing Vector Matching Results """
 
 def get_vector_match_results(structure, rot_list, edc):
     diffraction_library = get_template_library(structure, rot_list, edc)
@@ -151,21 +131,6 @@ def get_vector_match_results(structure, rot_list, edc):
         n_peaks_to_index=5,
         n_best=2)
     return diffraction_library, indexation
-
-
-@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
-def test_orientation_mapping_physical(structure, rot_list, pattern_list, edc):
-    M = get_template_match_results(structure, pattern_list, edc, rot_list)
-    assert np.all(M.inav[0, 0] == M.inav[1, 0])
-    match_data = M.inav[0, 0].isig[:4, 0].data
-    assert match_data[0] == 0
-    np.testing.assert_allclose(match_data[1], [2, 0, 0])
-
-
-def test_masked_OM(default_structure, rot_list, pattern_list, edc):
-    mask = hs.signals.Signal1D(([[[1], [1]], [[0], [1]]]))
-    M = get_template_match_results(default_structure, pattern_list, edc, rot_list, mask)
-    assert np.all(np.equal(M.inav[0, 1].data, None))
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
