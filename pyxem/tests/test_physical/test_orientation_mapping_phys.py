@@ -99,8 +99,9 @@ def get_template_match_results(structure,edc, rot_list, mask=None):
 def test_orientation_mapping_physical(structure, rot_list, edc):
     M = get_template_match_results(structure, edc, rot_list)
     assert np.all(M.inav[0, 0] == M.inav[1, 0])
-    match_data = M.inav[0, 0].isig[:4, 0].data
-    np.testing.assert_allclose(match_data[1], [90, 90, 4])
+    match_data = M.inav[0, 0].isig[1].data
+    for result_number in [0,1,2]:
+        np.testing.assert_allclose(match_data[result_number][:2], [90, 90]) #always looking down c
 
 def test_masked_template_matching(default_structure, rot_list, edc):
     mask = hs.signals.Signal1D(([[[1], [1]], [[0], [1]]]))
