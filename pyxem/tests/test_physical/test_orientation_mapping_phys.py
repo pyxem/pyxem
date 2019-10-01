@@ -180,22 +180,6 @@ def expected_best_peaks_rotated(library, rotation_euler):
     coords = library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
     return (rotation @ coords.T).T
 
-
-@pytest.mark.parametrize('pattern_list, inplane_rotations, get_expected_peaks', [
-    ([(0, 0, 2)], [0], expected_best_peaks_pattern_list),
-    ([(0, 0, 45)], np.arange(0, 360, 1), expected_best_peaks_rotated),
-])
-def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_list, edc, get_expected_peaks, inplane_rotations):
-    library = get_template_library(default_structure, rot_list, edc)
-    M = get_template_match_results(default_structure, pattern_list, edc, rot_list, inplane_rotations=inplane_rotations)
-    peaks = M.map(peaks_from_best_template,
-                  library=library,
-                  inplace=False)
-    expected_peaks = get_expected_peaks(library, pattern_list)
-    for expected_peak in expected_peaks:
-        assert np.any(np.isclose(np.linalg.norm(peaks.inav[0, 0] - expected_peak, axis=1), 0, atol=0.03))
-
-
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
     _, match_results = get_vector_match_results(structure, rot_list, edc)
