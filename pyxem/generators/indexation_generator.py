@@ -62,7 +62,6 @@ class IndexationGenerator():
         self.library = diffraction_library
 
     def correlate(self,
-                  method='pNCC',
                   n_largest=5,
                   mask=None,
                   *args,
@@ -99,7 +98,9 @@ class IndexationGenerator():
             # Index at all real space pixels
             mask = 1
 
-        if method == 'pNCC':
+        #TODO: Add extra methods
+        no_extra_methods_yet = True
+        if no_extra_methods_yet:
             #adds a normalisation to library
             for phase in library.keys():
                 norm_array = np.ones(library[phase]['intensities'].shape[0]) #will store the norms
