@@ -167,10 +167,6 @@ def test_masked_OM(default_structure, rot_list, pattern_list, edc):
     M = get_template_match_results(default_structure, pattern_list, edc, rot_list, mask)
     assert np.all(np.equal(M.inav[0, 1].data, None))
 
-
-def expected_best_peaks_pattern_list(library, _):
-    return library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
-
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
     _, match_results = get_vector_match_results(structure, rot_list, edc)
