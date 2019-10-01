@@ -115,7 +115,8 @@ def correlate_library(image, library, n_largest, mask):
                     corr_saved[np.argmin(corr_saved)] = corr_local
 
                 #TODO: Tidy this up so that it returns in the same style as the vector matching.
-                #TODO: This includes sorting the results within any given phase
+                combined_array = np.hstack((or_saved,corr_saved))
+                combined_array = combined_array[np.flip(combined_array[:,3].argsort())] #see stackoverflow/2828059 for details
     return top_matches
 
 
