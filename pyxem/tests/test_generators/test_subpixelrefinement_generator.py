@@ -24,6 +24,29 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
+class Test_init():
+    @pytest.mark.xfail(raises=ValueError)
+    def test_out_of_range_vectors_numpy(self):
+        """ Tests that putting vectors that lie outside of the diffraction patterns
+        raise a ValueError"""
+        vector = np.array([[1, -100]])
+        dp = ElectronDiffraction2D(np.ones((20, 20)))
+        sprg = SubpixelrefinementGenerator(dp, vector)
+
+    @pytest.mark.xfail(raises=ValueError)
+    def test_out_of_range_vectors_DiffractionVectors(self):
+        vectors = DiffractionVectors(np.array([[1, -100]]))
+        dp = ElectronDiffraction2D(np.ones((20, 20)))
+        sprg = SubpixelrefinementGenerator(dp, vectors)
+
+    @pytest.mark.xfail(raises=ValueError)
+    def test_wrong_navigation_dimensions(self):
+        dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
+        vectors = DiffractionVectors(np.zeros((1, 2)))
+        dp.axes_manager.set_signal_dimension(2)
+        vectors.axes_manager.set_signal_dimension(0)
+        SPR_generator = SubpixelrefinementGenerator(dp, vectors)
+
 
 def create_spot():
     z1 = np.zeros((128, 128))
@@ -59,23 +82,6 @@ def create_vectors():
     return vectors
 
 
-@pytest.mark.xfail(raises=ValueError)
-def test_bad_vectors_numpy():
-    """ tests that putting bad vectors in causes an error to be thrown when
-    you initiate the geneartor
-    """
-    v = np.array([[1, -100]])
-    dp = ElectronDiffraction2D(np.ones((20, 20)))
-    sprg = SubpixelrefinementGenerator(dp, v)
-
-
-@pytest.mark.xfail(raises=ValueError)
-def test_bad_vectors_DiffractionVectors():
-    v = np.array([[1, -100]])
-    dv = DiffractionVectors(v)
-    dp = ElectronDiffraction2D(np.ones((20, 20)))
-    sprg = SubpixelrefinementGenerator(dp, dv)
-
 
 @pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
 def test_conventional_xc(diffraction_pattern):
@@ -85,13 +91,7 @@ def test_conventional_xc(diffraction_pattern):
     diff_vect = SPR_generator.conventional_xc(4, 2, 10)
 
 
-@pytest.mark.xfail(raises=ValueError)
-def test_wrong_navigation_dimensions():
-    dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
-    dp.axes_manager.set_signal_dimension(2)
-    vectors = DiffractionVectors(np.zeros((1, 2)))
-    vectors.axes_manager.set_signal_dimension(0)
-    SPR_generator = SubpixelrefinementGenerator(dp, vectors)
+
 
 
 @pytest.mark.parametrize('dp, diffraction_vectors', [
