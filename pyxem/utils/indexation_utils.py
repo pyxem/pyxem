@@ -115,7 +115,6 @@ def correlate_library(image, library, n_largest, mask):
                     corr_saved[np.argmin(corr_saved)] = corr_local
 
                 #TODO: Tidy this up so that it returns in the same style as the vector matching.
-                top_matches[phase_index] = np.concatenate((np.ones_like(corr_saved)*phase_index,np.asarray(or_saved),corr_saved),axis=1)
                 #TODO: This includes sorting the results within any given phase
     return top_matches
 
