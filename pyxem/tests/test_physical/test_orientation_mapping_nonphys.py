@@ -42,7 +42,7 @@ def create_library_and_diffraction_pattern():
         coords = (np.random.rand(5, 2) - 0.5) * 2  # zero mean, range from -1 to +1
         simulated_pattern = DiffractionSimulation(coordinates=coords,
                                        intensities=np.ones_like(coords[:, 0]),
-                                       calibration=1 / half_side_length)
+                                       calibration=1 / 72)
 
         simulations[alpha] = simulated_pattern
         orientations[alpha] = (alpha, alpha, alpha)
@@ -63,7 +63,7 @@ def create_library_and_diffraction_pattern():
 
     return dp, library
 
-dp, library = create_library()
+dp, library = create_library_and_diffraction_pattern()
 indexer = IndexationGenerator(dp, library)
 match_results = indexer.correlate()
 
