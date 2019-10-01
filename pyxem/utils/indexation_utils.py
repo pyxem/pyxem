@@ -513,19 +513,9 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     phase_names = list(library.keys())
     phase_index = int(best_fit[0])
     phase = phase_names[phase_index]
-    try:
-        simulation = library.get_library_entry(
-            phase=phase,
-            angle=tuple(best_fit[1]))['Sim']
-    except ValueError:
-        structure = library.structures[phase_index]
-        rotation_matrix = euler2mat(*np.deg2rad(best_fit[1]), 'rzxz')
-        simulation = simulate_rotated_structure(
-            library.diffraction_generator,
-            structure,
-            rotation_matrix,
-            library.reciprocal_radius,
-            library.with_direct_beam)
+    simulation = library.get_library_entry(
+                            phase=phase,
+                            angle=tuple(best_fit[1]))['Sim']
 
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks

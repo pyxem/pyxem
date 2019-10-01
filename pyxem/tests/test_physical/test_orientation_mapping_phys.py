@@ -171,15 +171,6 @@ def test_masked_OM(default_structure, rot_list, pattern_list, edc):
 def expected_best_peaks_pattern_list(library, _):
     return library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
 
-
-def expected_best_peaks_rotated(library, rotation_euler):
-    angle = np.deg2rad(rotation_euler[0][2])
-    rotation = np.array([
-        [np.cos(angle), np.sin(angle)],
-        [-np.sin(angle), np.cos(angle)]])
-    coords = library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
-    return (rotation @ coords.T).T
-
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
     _, match_results = get_vector_match_results(structure, rot_list, edc)
