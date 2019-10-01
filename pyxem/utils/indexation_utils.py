@@ -121,7 +121,7 @@ def correlate_library(image, library, n_largest, mask):
                 for i in np.arange(n_largest):
                     top_matches[phase_index,i,1] = combined_array[i,:3] #orientation
 
-    return top_matches
+    return top_matches.reshape(-1, 3)
 
 
 def index_magnitudes(z, simulation, tolerance):
