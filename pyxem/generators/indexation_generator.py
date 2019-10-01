@@ -71,9 +71,6 @@ class IndexationGenerator():
 
         Parameters
         ----------
-        method : 'pNCC'
-            The method for comparing template and pattern, currently on partially
-            normalised cross correlation ('pNCC') is avaliable.
         n_largest : int
             The n orientations with the highest correlation values are returned.
         mask : Array
