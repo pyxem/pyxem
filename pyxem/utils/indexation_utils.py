@@ -93,7 +93,7 @@ def correlate_library(image, library, n_largest, mask):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    top_matches = np.empty((len(library), n_largest, 5), dtype='object')
+    top_matches = np.empty((len(library), n_largest, 3), dtype='object')
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
