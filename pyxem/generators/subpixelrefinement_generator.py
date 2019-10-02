@@ -27,7 +27,7 @@ from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
-from pyxem.generators.generator_utils import _get_pixel_vectors
+from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
 import warnings
 

@@ -24,6 +24,7 @@ import numpy as np
 from skimage.feature import register_translation
 from skimage import draw
 from skimage.transform import rescale
+from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
 def get_experimental_square(z, vector, square_size):
@@ -106,3 +107,50 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)
     shifts = np.flip(shifts) #to comply with hyperspy conventions - see issue#490
     return shifts
+
+def _get_pixel_vectors(dp, vectors, calibration, center):
+    """Get the pixel coordinates for the given diffraction
+    pattern and vectors.
+
+    Parameters
+    ----------
+    dp: :obj:`pyxem.signals.ElectronDiffraction2D`
+        Instance of ElectronDiffraction2D
+    vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        List of diffraction vectors
+    calibration : [float, float]
+        Calibration values
+    center : float, float
+        Image origin in pixel coordinates
+
+    Returns
+    -------
+    vector_pixels : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        Pixel coordinates for given diffraction pattern and vectors.
+    """
+
+    def _floor(vectors, calibration, center):
+        if vectors.shape == (1,) and vectors.dtype == np.object:
+            vectors = vectors[0]
+        return np.floor((vectors.astype(np.float64) / calibration) + center).astype(np.int)
+
+    if isinstance(vectors, DiffractionVectors):
+        if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
+            raise ValueError('Vectors with shape {} must have the same navigation shape '
+                             'as the diffraction patterns which has shape {}.'.format(
+                                 vectors.axes_manager.navigation_shape, dp.axes_manager.navigation_shape))
+        vector_pixels = vectors.map(_floor,
+                                    calibration=calibration,
+                                    center=center,
+                                    inplace=False)
+    else:
+        vector_pixels = _floor(vectors, calibration, center)
+
+    if isinstance(vector_pixels, DiffractionVectors):
+        if np.any(vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(vector_pixels.data < 0)):
+            raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+    elif isinstance(vector_pixels, np.ndarray):
+        if np.any((vector_pixels > np.max(dp.data.shape) - 1)) or (np.any(vector_pixels < 0)):
+            raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+
+    return vector_pixels
