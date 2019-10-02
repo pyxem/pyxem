@@ -71,7 +71,7 @@ def create_library():
 dp, library = create_library()
 
 indexer = IndexationGenerator(dp, library)
-match_results = indexer.correlate(inplane_rotations=[0])
+match_results = indexer.correlate()
 
 
 def test_match_results():

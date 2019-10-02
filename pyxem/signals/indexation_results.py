@@ -34,13 +34,6 @@ from pyxem import CrystallographicMap
 class TemplateMatchingResults(BaseSignal):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
-
-    Attributes
-    ----------
-    vectors : DiffractionVectors
-        Diffraction vectors indexed.
-    hkls : BaseSignal
-        Miller indices associated with each diffraction vector.
     """
 
     _signal_type = "template_matching"
