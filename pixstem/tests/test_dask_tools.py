@@ -425,7 +425,7 @@ class TestPeakFindDog:
         image[54, 29] = 100
         image[54, 32] = 100
         max_sigma, sigma_ratio = 5, 5
-        threshold, overlap = 0.1, 0.1
+        threshold, overlap = 0.01, 0.1
         peaks0 = dt._peak_find_dog_single_frame(
                 image, min_sigma=1, max_sigma=max_sigma,
                 sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
@@ -539,3 +539,429 @@ class TestPeakFindDog:
         dask_array = da.random.random(size=50, chunks=10)
         with pytest.raises(ValueError):
             dt._peak_find_dog(dask_array)
+
+
+
+
+class TestPeakPositionRefinementCOM:
+    
+    def test_single_frame_peak(self):
+        numpy_array = np.zeros((50, 50))
+        numpy_array[25, 28] = 1
+        numpy_array[10, 14] = 1
+        peak = np.array([[27, 29], [11, 15]], np.int32)
+        square_size = 6
+
+        data = dt._peak_refinement_centre_of_mass_frame(numpy_array, peak, square_size)
+        assert data[0][0] == 25.
+        assert data[0][1] == 28.
+        assert data[1][0] == 10.
+        assert data[1][1] == 14.
+        
+        
+#    def test_single_frame_square_size():
+#        
+#        with pytest.raises(ValueError):
+#            numpy_array = np.zeros((50, 50))
+#            peak = np.array([27, 29], np.int32)
+#            square_size = 7
+#            dt._peak_refinement_centre_of_mass_frame(numpy_array, peak, square_size)
+
+    def test_chunk_peak(self):
+        numpy_array = np.zeros((2, 2, 50, 50))
+        numpy_array[:, :, 25, 25] = 1
+
+        peak_array = np.zeros((numpy_array.shape[0],numpy_array.shape[1],1,1), dtype = np.object)
+        real_array = np.zeros((numpy_array.shape[:-2]), dtype = np.object)
+        for index in np.ndindex(numpy_array.shape[:-2]):
+            islice = np.s_[index]
+            peak_array[islice][0,0] = np.asarray([(27,27)])
+            real_array[islice] = np.asarray([(25,25)])
+            
+        square_size = 12
+
+        data = dt._peak_refinement_centre_of_mass_chunk(numpy_array, peak_array, square_size)
+        assert data.shape == (2, 2)
+        assert np.sum(data - real_array).sum() == 0
+
+
+    def test_dask_array(self):
+        numpy_array = np.zeros((10, 10, 50, 50))
+        numpy_array[:, :, 25, 25] = 1
+
+        peak_array = np.zeros((numpy_array.shape[:-2]), dtype = np.object)
+        real_array = np.zeros((numpy_array.shape[:-2]), dtype = np.object)
+        for index in np.ndindex(numpy_array.shape[:-2]):
+            islice = np.s_[index]
+            peak_array[islice] = np.asarray([(27,27)])
+            real_array[islice] = np.asarray([(25,25)])
+            
+        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+        dask_peak_array = da.from_array(peak_array, chunks=(5, 5))
+        dask_peak_array = dask_peak_array.reshape(dask_peak_array.shape[0],dask_peak_array.shape[1],1,1)
+
+        square_size = 12
+
+        data = dt._peak_refinement_centre_of_mass(dask_array, dask_peak_array, square_size)
+        data = data.compute()
+        assert data.shape == (10, 10)
+        assert np.sum(data - real_array).sum() == 0
+
+
+
+class TestBackgroundRemovalDOG:
+    
+    def test_single_frame_min_sigma(self):
+        min_sigma = 10
+        numpy_array = np.ones((50,50))
+        numpy_array[20:30,20:30] = 5
+        data = dt._background_removal_single_frame_dog(numpy_array, min_sigma = min_sigma)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[ 0, :].all() == 0
+
+
+    def test_single_frame_max_sigma(self):
+        max_sigma = 10
+        numpy_array = np.ones((50,50))
+        numpy_array[20:30,20:30] = 5
+        data = dt._background_removal_single_frame_dog(numpy_array, max_sigma = max_sigma)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[0, :].all() == 0
+
+
+    def test_chunk_min_sigma(self):
+        min_sigma = 10
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        data = dt._background_removal_chunk_dog(numpy_array, min_sigma = min_sigma)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[:, :, 0, :].all() == 0
+
+
+    def test_chunk_max_sigma(self):
+        max_sigma = 10
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        data = dt._background_removal_chunk_dog(numpy_array, max_sigma = max_sigma)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[:, :, 0, :].all() == 0
+
+
+    def test_dask_min_sigma(self):
+        min_sigma = 10
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
+
+        data = dt._background_removal_dog(dask_array, min_sigma = min_sigma)
+        data.compute()
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[:, :, 0, :].all() == 0
+
+
+    def test_dask_max_sigma(self):
+        max_sigma = 10
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
+
+        data = dt._background_removal_dog(dask_array, max_sigma = max_sigma)
+        data.compute()
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[:, :, 0, :].all() == 0
+
+
+class TestBackgroundRemovalMedianFilter:
+    
+    def test_single_frame_footprint(self):
+        footprint = 10
+        numpy_array = np.ones((50,50))
+        numpy_array[20:30,20:30] = 5
+        data = dt._background_removal_single_frame_median(numpy_array, footprint = footprint)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[0, :].all() == 0
+
+    def test_chunk_footprint(self):
+        footprint = 10
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        data = dt._background_removal_chunk_median(numpy_array, footprint = footprint)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[:, :, 0, :].all() == 0
+
+    def test_dask_footprint(self):
+        footprint = 10
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
+
+        data = dt._background_removal_median(dask_array, footprint = footprint)
+        data = data.compute()
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[:, :, 0, :].all() == 0
+
+
+
+class TestBackgroundRemovalRadialMedian:
+    
+    def test_single_frame_centre(self):
+        centre_x = 25
+        centre_y = 25
+        numpy_array = np.ones((50,50))
+        numpy_array[20:30,20:30] = 5
+        data = dt._background_removal_single_frame_radial_median(numpy_array, centre_x = centre_x, centre_y = centre_y)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[0,:].all()== 0
+
+        
+    def test_chunk_centre(self):
+        centre_x = 25
+        centre_y = 25
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        data = dt._background_removal_chunk_radial_median(numpy_array, centre_x = centre_x, centre_y = centre_y)
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert data[:,:,0, :].all() == 0
+
+
+
+    def test_dask_centre(self):
+        centre_x = 25
+        centre_y = 25
+        numpy_array = np.ones((10,10,50,50))
+        numpy_array[:,:20:30,20:30] = 5
+        dask_array = da.from_array(numpy_array, chunks=(2, 2, 50, 50))
+
+        data = dt._background_removal_radial_median(dask_array,  centre_x = centre_x, centre_y = centre_y)
+        data = data.compute()
+        assert data.sum() != numpy_array.sum()
+        assert data.shape == numpy_array.shape
+        assert (data[:,:,0, :]).all() == 0
+
+
+class TestIntensityArray:
+
+    def test_intensity_peaks_image_r_disk(self):
+        numpy_array = np.zeros((50, 50))
+        numpy_array[27, 29] = 2
+        numpy_array[11, 15] = 1
+        peak = np.array([[27, 29], [11, 15]], np.int32)
+        r_disk0 = 1
+        r_disk1 = 2
+        intensity0 = dt._intensity_peaks_image_single_frame(numpy_array, peak, r_disk0)
+        intensity1 = dt._intensity_peaks_image_single_frame(numpy_array, peak, r_disk1)
+
+        assert intensity0[0].all() == np.array([27.,29.,2/9]).all()
+        assert intensity0[1].all() == np.array([11., 15., 1/9]).all()
+        assert intensity1[0].all() == np.array([27., 29., 2 / 25]).all()
+        assert intensity1[1].all() == np.array([11., 15., 1 / 25]).all()
+        assert intensity0.shape == intensity1.shape == (2,3)
+
+    def test_intensity_peaks_chunk(self):
+        numpy_array = np.zeros((2, 2, 50, 50))
+        numpy_array[:, :, 27, 27] = 1
+
+        peak_array = np.zeros((numpy_array.shape[0],numpy_array.shape[1],1,1), dtype = np.object)
+        for index in np.ndindex(numpy_array.shape[:-2]):
+            islice = np.s_[index]
+            peak_array[islice][0,0] = np.asarray([(27,27)])
+
+        r_disk  = 2
+        intensity_array = dt._intensity_peaks_image_chunk(numpy_array, peak_array, r_disk)
+
+        assert intensity_array.shape== peak_array.shape[:-2]
+
+    def test_intensity_peaks_dask(self):
+        numpy_array = np.zeros((10, 10, 50, 50))
+        numpy_array[:, :, 27, 27] = 1
+
+        peak_array = np.zeros((numpy_array.shape[0],numpy_array.shape[1]), dtype=np.object)
+        for index in np.ndindex(numpy_array.shape[:-2]):
+            islice = np.s_[index]
+            nm = (islice[0], islice[1], 0, 0)
+            peak_array[islice] = np.asarray([(27, 27)])
+
+        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+        dask_peak_array = da.from_array(peak_array, chunks=(5, 5))
+        dask_peak_array = dask_peak_array.reshape(dask_peak_array.shape[0],dask_peak_array.shape[1],1,1)
+
+        r_disk  = 2
+        intensity_array = dt._intensity_peaks_image(dask_array, dask_peak_array, r_disk)
+        intensity_array_computed = intensity_array.compute()
+        assert intensity_array_computed.shape == peak_array.shape
+
+
+class TestPeakFindLog:
+
+    @pytest.mark.parametrize(
+            "x, y", [(112, 32), (170, 92), (54, 76), (10, 15)])
+    def test_single_frame_one_peak(self, x, y):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[x, y] = 654
+        min_sigma, max_sigma, num_sigma = 2, 5, 10
+        threshold, overlap = 0.01, 1
+        peaks = dt._peak_find_log_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        assert (x, y) == (peaks[0, 0], peaks[0, 1])
+
+    def test_single_frame_multiple_peak(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        peak_list = [[120, 76], [23, 54], [32, 78], [10, 15]]
+        for x, y in peak_list:
+            image[x, y] = 654
+        min_sigma, max_sigma, num_sigma = 2, 5, 10
+        threshold, overlap = 0.01, 1
+        peaks = dt._peak_find_dog_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        assert len(peaks) == len(peak_list)
+        for peak in peaks.tolist():
+            assert peak in peak_list
+
+    def test_single_frame_threshold(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[54, 29] = 100
+        image[123, 54] = 20
+        min_sigma, max_sigma, num_sigma, overlap = 2, 5, 10, 1
+        peaks0 = dt._peak_find_log_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                num_sigma=num_sigma, threshold=0.01, overlap=overlap)
+        assert len(peaks0) == 2
+        peaks1 = dt._peak_find_log_single_frame(
+                image, min_sigma=min_sigma, max_sigma=max_sigma,
+                num_sigma=num_sigma, threshold=0.05, overlap=overlap)
+        assert len(peaks1) == 1
+
+    def test_single_frame_min_sigma(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[54, 29] = 100
+        image[54, 32] = 100
+        max_sigma, num_sigma = 5, 10
+        threshold, overlap = 0.01, 0.1
+        peaks0 = dt._peak_find_log_single_frame(
+                image, min_sigma=1, max_sigma=max_sigma,
+                num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        assert len(peaks0) == 2
+        peaks1 = dt._peak_find_log_single_frame(
+                image, min_sigma=2, max_sigma=max_sigma,
+                num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        assert len(peaks1) == 1
+
+    def test_single_frame_max_sigma(self):
+        image = np.zeros(shape=(200, 100), dtype=np.float64)
+        image[52:58, 22:28] = 100
+        min_sigma, num_sigma = 0.1, 10
+        threshold, overlap = 0.1, 0.01
+        peaks = dt._peak_find_log_single_frame(
+                image, min_sigma=min_sigma, max_sigma=1.0,
+                num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        assert len(peaks) > 1
+        peaks = dt._peak_find_log_single_frame(
+                image, min_sigma=min_sigma, max_sigma=5.0,
+                num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        assert len(peaks) == 2
+
+    def test_single_frame_normalize_value(self):
+        image = np.zeros((100, 100), dtype=np.uint16)
+        image[49:52, 49:52] = 100
+        image[19:22, 9:12] = 10
+        peaks0 = dt._peak_find_log_single_frame(image, normalize_value=100)
+        peaks1 = dt._peak_find_log_single_frame(image, normalize_value=10)
+        assert (peaks0 == [[50, 50]]).all()
+        assert (peaks1 == [[50, 50], [20, 10]]).all()
+
+    def test_chunk(self):
+        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
+        data[0, 0, 50, 20] = 100
+        data[0, 1, 51, 21] = 100
+        data[0, 2, 52, 22] = 100
+        data[1, 0, 53, 23] = 100
+        data[1, 1, 54, 24] = 100
+        data[1, 2, 55, 25] = 100
+        min_sigma, max_sigma, num_sigma = 0.08, 1, 10
+        threshold, overlap = 0.06, 0.01
+        peaks = dt._peak_find_log_chunk(
+                data, min_sigma=min_sigma, max_sigma=max_sigma,
+                num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        assert peaks[0, 0][0].tolist() == [50, 20]
+        assert peaks[0, 1][0].tolist() == [51, 21]
+        assert peaks[0, 2][0].tolist() == [52, 22]
+        assert peaks[1, 0][0].tolist() == [53, 23]
+        assert peaks[1, 1][0].tolist() == [54, 24]
+        assert peaks[1, 2][0].tolist() == [55, 25]
+
+    def test_chunk_normalize_value(self):
+        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
+        data[:, :, 49:52, 49:52] = 100
+        data[:, :, 19:22, 9:12] = 10
+
+        peak_array0 = dt._peak_find_log_chunk(data, normalize_value=100)
+        peak_array1 = dt._peak_find_log_chunk(data, normalize_value=10)
+        for ix, iy in np.ndindex(peak_array0.shape):
+            assert (peak_array0[ix, iy] == [[50, 50]]).all()
+            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
+
+    def test_dask_array(self):
+        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
+        data[0, 0, 50, 20] = 100
+        data[0, 1, 51, 21] = 100
+        data[0, 2, 52, 22] = 100
+        data[1, 0, 53, 23] = 100
+        data[1, 1, 54, 24] = 100
+        data[1, 2, 55, 25] = 100
+        dask_array = da.from_array(data, chunks=(1, 1, 200, 100))
+        min_sigma, max_sigma, num_sigma = 0.08, 1, 10
+        threshold, overlap = 0.06, 0.01
+        peaks = dt._peak_find_log(
+            dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
+            num_sigma=num_sigma, threshold=threshold, overlap=overlap)
+        peaks = peaks.compute()
+        assert peaks[0, 0][0].tolist() == [50, 20]
+        assert peaks[0, 1][0].tolist() == [51, 21]
+        assert peaks[0, 2][0].tolist() == [52, 22]
+        assert peaks[1, 0][0].tolist() == [53, 23]
+        assert peaks[1, 1][0].tolist() == [54, 24]
+        assert peaks[1, 2][0].tolist() == [55, 25]
+
+    def test_dask_array_normalize_value(self):
+        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
+        data[:, :, 49:52, 49:52] = 100
+        data[:, :, 19:22, 9:12] = 10
+        dask_array = da.from_array(data, chunks=(1, 1, 100, 100))
+        peak_array0 = dt._peak_find_log(dask_array, normalize_value=100)
+        peak_array1 = dt._peak_find_log(dask_array, normalize_value=10)
+        for ix, iy in np.ndindex(peak_array0.shape):
+            assert (peak_array0[ix, iy] == [[50, 50]]).all()
+            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_array_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        chunks = [1] * nav_dims
+        chunks.extend([25, 25])
+        dask_array = da.random.random(size=shape, chunks=chunks)
+        peak_array_dask = dt._peak_find_log(dask_array)
+        assert len(peak_array_dask.shape) == nav_dims
+        assert dask_array.shape[:-2] == peak_array_dask.shape
+        peak_array = peak_array_dask.compute()
+        assert dask_array.shape[:-2] == peak_array.shape
+
+    def test_1d_dask_array_error(self):
+        dask_array = da.random.random(size=50, chunks=10)
+        with pytest.raises(ValueError):
+            dt._peak_find_log(dask_array)
+
+
