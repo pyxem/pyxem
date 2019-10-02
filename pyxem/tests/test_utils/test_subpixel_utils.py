@@ -19,11 +19,9 @@
 import pytest
 import numpy as np
 
-from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 
-from skimage.transform import rescale
 from skimage import draw
 
 
@@ -36,38 +34,16 @@ def exp_disc():
     arr[rr, cc] = 1
     return arr
 
-
-@pytest.fixture()
-def sim_disc():
-    return get_simulated_disc(60, 5)
-
-
-@pytest.fixture()
-def upsample_factor():
-    return int(10)
-
-
 @pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
-def test___conventional_xc(exp_disc, sim_disc, upsample_factor):
-    # this work (and measures) on the upsampled versions of the images
-    s = _conventional_xc(exp_disc, sim_disc, upsample_factor)
-    error = np.subtract(s, np.asarray([20, -10]))
-    rms = np.sqrt(error[0]**2 + error[1]**2)
-    assert rms < 1  # which corresponds to a 10th of a pixel
-
-
-@pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
-def test_get_experimental_square(exp_disc):
+def test_experimental_square_size(exp_disc):
     square = get_experimental_square(exp_disc, [17, 19], 6)
     assert square.shape[0] == int(6)
     assert square.shape[1] == int(6)
 
-
 @pytest.mark.xfail(strict=True)
-def test_non_even_errors_get_simulated_disc():
+def test_failure_for_non_even_entry_to_get_simulated_disc():
     disc = get_simulated_disc(61, 5)
 
-
 @pytest.mark.xfail(strict=True)
-def test_non_even_errors_get_experimental_errors(exp_disc):
+def test_failure_for_non_even_errors_get_experimental_square(exp_disc):
     square = get_experimental_square(exp_disc, [17, 19], 7)
