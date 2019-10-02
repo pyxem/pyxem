@@ -26,6 +26,7 @@ def test_scattering_component_init_lobato():
     ref = ScatteringFitComponentLobato(['Cu'], [1], N=1., C=0.)
     assert isinstance(ref, ScatteringFitComponentLobato)
 
+
 @pytest.fixture(params=[
     np.array([4., 3., 2., 2., 1., 1., 1., 0.])
 ])

@@ -21,6 +21,7 @@ import numpy as np
 
 from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 
+
 def test_generate_signal():
     data = np.ones((1, 10)) * np.arange(4).reshape(4, 1)
     data = data.reshape(2, 2, 10)
