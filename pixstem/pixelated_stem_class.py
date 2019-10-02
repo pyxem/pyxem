@@ -33,9 +33,9 @@ class PixelatedSTEM(Signal2D):
                     super().plot(*args, **kwargs)
                 else:
                     raise ValueError(
-                            "navigation_signal does not have the same shape "
-                            "({0}) as the signal's navigation shape "
-                            "({1})".format(nav_sig_shape, self_nav_shape))
+                        "navigation_signal does not have the same shape "
+                        "({0}) as the signal's navigation shape "
+                        "({1})".format(nav_sig_shape, self_nav_shape))
             else:
                 super().plot(*args, **kwargs)
         else:
@@ -91,17 +91,17 @@ class PixelatedSTEM(Signal2D):
 
         if (not isiterable(shift_x)) or (not isiterable(shift_y)):
             shift_x, shift_y = pst._make_centre_array_from_signal(
-                    self, x=shift_x, y=shift_y)
+                self, x=shift_x, y=shift_y)
         shift_x = shift_x.flatten()
         shift_y = shift_y.flatten()
         iterating_kwargs = [
-                ('shift_x', shift_x),
-                ('shift_y', shift_y)]
+            ('shift_x', shift_x),
+            ('shift_y', shift_y)]
 
         s_shift = self._map_iterate(
-                pst._shift_single_frame, iterating_kwargs=iterating_kwargs,
-                inplace=inplace, ragged=False, parallel=parallel,
-                show_progressbar=show_progressbar)
+            pst._shift_single_frame, iterating_kwargs=iterating_kwargs,
+            inplace=inplace, ragged=False, parallel=parallel,
+            show_progressbar=show_progressbar)
         if not inplace:
             return s_shift
 
@@ -138,19 +138,19 @@ class PixelatedSTEM(Signal2D):
         """
         if self._lazy:
             raise NotImplementedError(
-                    "threshold_and_mask is currently not implemented for "
-                    "lazy signals. Use compute() first to turn signal into "
-                    "a non-lazy signal. Note that this will load the full "
-                    "dataset into memory, which might crash your computer.")
+                "threshold_and_mask is currently not implemented for "
+                "lazy signals. Use compute() first to turn signal into "
+                "a non-lazy signal. Note that this will load the full "
+                "dataset into memory, which might crash your computer.")
         if mask is not None:
             x, y, r = mask
             im_x, im_y = self.axes_manager.signal_shape
             mask = pst._make_circular_mask(x, y, im_x, im_y, r)
         s_out = self.map(
-                function=pst._threshold_and_mask_single_frame,
-                ragged=False, inplace=False, parallel=True,
-                show_progressbar=show_progressbar,
-                threshold=threshold, mask=mask)
+            function=pst._threshold_and_mask_single_frame,
+            ragged=False, inplace=False, parallel=True,
+            show_progressbar=show_progressbar,
+            threshold=threshold, mask=mask)
         return s_out
 
     def rotate_diffraction(self, angle, parallel=True, show_progressbar=True):
@@ -177,9 +177,9 @@ class PixelatedSTEM(Signal2D):
 
         """
         s_rotated = self.map(
-                rotate, ragged=False, angle=-angle, reshape=False,
-                parallel=parallel, inplace=False,
-                show_progressbar=show_progressbar)
+            rotate, ragged=False, angle=-angle, reshape=False,
+            parallel=parallel, inplace=False,
+            show_progressbar=show_progressbar)
         if self._lazy:
             s_rotated.compute(progressbar=show_progressbar)
         return s_rotated
@@ -301,14 +301,14 @@ class PixelatedSTEM(Signal2D):
         if mask is not None:
             x, y, r = mask
             mask_array = pst._make_circular_mask(
-                    x, y, det_shape[0], det_shape[1], r)
+                x, y, det_shape[0], det_shape[1], r)
             mask_array = np.invert(mask_array)
         else:
             mask_array = None
         dask_array = da.from_array(self.data, chunks=chunk_calculations)
         data = dt._center_of_mass_array(
-                dask_array, threshold_value=threshold,
-                mask_array=mask_array)
+            dask_array, threshold_value=threshold,
+            mask_array=mask_array)
         if lazy_result:
             if nav_dim == 2:
                 s_com = LazyDPCSignal2D(data)
@@ -334,7 +334,7 @@ class PixelatedSTEM(Signal2D):
                 self.axes_manager.navigation_axes,
                 s_com.axes_manager.signal_axes):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
-        return(s_com)
+        return (s_com)
 
     def add_peak_array_as_markers(
             self, peak_array, color='red', size=20, bool_array=None,
@@ -360,8 +360,8 @@ class PixelatedSTEM(Signal2D):
 
         """
         mt.add_peak_array_to_signal_as_markers(
-                self, peak_array, color=color, size=size,
-                bool_array=bool_array, bool_invert=bool_invert)
+            self, peak_array, color=color, size=size,
+            bool_array=bool_array, bool_invert=bool_invert)
 
     def add_ellipse_array_as_markers(
             self, ellipse_array, inlier_array=None, peak_array=None,
@@ -405,10 +405,10 @@ class PixelatedSTEM(Signal2D):
         if len(self.data.shape) != 4:
             raise ValueError("Signal must be 4 dims to use this function")
         marker_list = ret._get_ellipse_markers(
-                ellipse_array, inlier_array, peak_array, nr=20,
-                color_ellipse='blue', linewidth=1, linestyle='solid',
-                color_inlier='blue', color_outlier='red', point_size=20,
-                signal_axes=self.axes_manager.signal_axes)
+            ellipse_array, inlier_array, peak_array, nr=20,
+            color_ellipse='blue', linewidth=1, linestyle='solid',
+            color_inlier='blue', color_outlier='red', point_size=20,
+            signal_axes=self.axes_manager.signal_axes)
 
         mt._add_permanent_markers_to_signal(self, marker_list)
 
@@ -460,10 +460,10 @@ class PixelatedSTEM(Signal2D):
             mask_array = np.zeros(det_shape[::-1], dtype=np.bool)
         else:
             mask_array = pst._make_circular_mask(
-                    cx, cy, det_shape[0], det_shape[1], r)
+                cx, cy, det_shape[0], det_shape[1], r)
             mask_array = np.invert(mask_array)
         data = dt._mask_array(
-                self.data, mask_array=mask_array).sum(axis=(-2, -1))
+            self.data, mask_array=mask_array).sum(axis=(-2, -1))
         s_bf = LazySignal2D(data)
         if not lazy_result:
             s_bf.compute(progressbar=show_progressbar)
@@ -513,18 +513,18 @@ class PixelatedSTEM(Signal2D):
         """
         if r_inner > r:
             raise ValueError(
-                    "r_inner must be higher than r. The argument order is " +
-                    "(cx, cy, r_inner, r)")
+                "r_inner must be higher than r. The argument order is " +
+                "(cx, cy, r_inner, r)")
         det_shape = self.axes_manager.signal_shape
 
         mask_array0 = pst._make_circular_mask(
-                cx, cy, det_shape[0], det_shape[1], r)
+            cx, cy, det_shape[0], det_shape[1], r)
         mask_array1 = pst._make_circular_mask(
-                cx, cy, det_shape[0], det_shape[1], r_inner)
+            cx, cy, det_shape[0], det_shape[1], r_inner)
         mask_array = mask_array0 == mask_array1
 
         data = dt._mask_array(
-                self.data, mask_array=mask_array).sum(axis=(-2, -1))
+            self.data, mask_array=mask_array).sum(axis=(-2, -1))
         s_adf = LazySignal2D(data)
         if not lazy_result:
             s_adf.compute(progressbar=show_progressbar)
@@ -588,17 +588,17 @@ class PixelatedSTEM(Signal2D):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
         elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
             centre_x, centre_y = pst._make_centre_array_from_signal(
-                    self, x=centre_x, y=centre_y)
+                self, x=centre_x, y=centre_y)
         radial_array_size = pst._find_longest_distance(
-                self.axes_manager.signal_axes[0].size,
-                self.axes_manager.signal_axes[1].size,
-                centre_x.min(), centre_y.min(),
-                centre_x.max(), centre_y.max())+1
+            self.axes_manager.signal_axes[0].size,
+            self.axes_manager.signal_axes[1].size,
+            centre_x.min(), centre_y.min(),
+            centre_x.max(), centre_y.max()) + 1
         centre_x = centre_x.flatten()
         centre_y = centre_y.flatten()
         iterating_kwargs = [
-                ('centre_x', centre_x),
-                ('centre_y', centre_y)]
+            ('centre_x', centre_x),
+            ('centre_y', centre_y)]
         if mask_array is not None:
             #  This line flattens the mask array, except for the two
             #  last dimensions. This to make the mask array work for the
@@ -608,23 +608,23 @@ class PixelatedSTEM(Signal2D):
 
         if self._lazy:
             data = pst._radial_integration_dask_array(
-                    self.data, return_sig_size=radial_array_size,
-                    centre_x=centre_x, centre_y=centre_y,
-                    mask_array=mask_array, normalize=normalize,
-                    show_progressbar=show_progressbar)
+                self.data, return_sig_size=radial_array_size,
+                centre_x=centre_x, centre_y=centre_y,
+                mask_array=mask_array, normalize=normalize,
+                show_progressbar=show_progressbar)
             s_radial = hs.signals.Signal1D(data)
         else:
             s_radial = self._map_iterate(
-                    pst._get_radial_profile_of_diff_image,
-                    normalize=normalize,
-                    iterating_kwargs=iterating_kwargs,
-                    inplace=False, ragged=False,
-                    parallel=parallel,
-                    radial_array_size=radial_array_size,
-                    show_progressbar=show_progressbar)
+                pst._get_radial_profile_of_diff_image,
+                normalize=normalize,
+                iterating_kwargs=iterating_kwargs,
+                inplace=False, ragged=False,
+                parallel=parallel,
+                radial_array_size=radial_array_size,
+                show_progressbar=show_progressbar)
             data = s_radial.data
         s_radial = hs.signals.Signal1D(data)
-        return(s_radial)
+        return (s_radial)
 
     def template_match_disk(
             self, disk_r=4, lazy_result=True, show_progressbar=True):
@@ -661,9 +661,9 @@ class PixelatedSTEM(Signal2D):
         """
         disk = morphology.disk(disk_r, self.data.dtype)
         s = self.template_match_with_binary_image(
-                disk,
-                lazy_result=lazy_result,
-                show_progressbar=show_progressbar)
+            disk,
+            lazy_result=lazy_result,
+            show_progressbar=show_progressbar)
         return s
 
     def template_match_ring(
@@ -701,8 +701,8 @@ class PixelatedSTEM(Signal2D):
         """
         if r_outer <= r_inner:
             raise ValueError(
-                    "r_outer ({0}) must be larger than r_inner ({1})".format(
-                        r_outer, r_inner))
+                "r_outer ({0}) must be larger than r_inner ({1})".format(
+                    r_outer, r_inner))
         edge = r_outer - r_inner
         edge_slice = np.s_[edge:-edge, edge:-edge]
 
@@ -710,9 +710,9 @@ class PixelatedSTEM(Signal2D):
         ring = morphology.disk(r_outer, dtype=np.bool)
         ring[edge_slice] = ring[edge_slice] ^ ring_inner
         s = self.template_match_with_binary_image(
-                ring,
-                lazy_result=lazy_result,
-                show_progressbar=show_progressbar)
+            ring,
+            lazy_result=lazy_result,
+            show_progressbar=show_progressbar)
         return s
 
     def template_match_with_binary_image(
@@ -759,7 +759,7 @@ class PixelatedSTEM(Signal2D):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
         output_array = dt._template_match_with_binary_image(
-                dask_array, binary_image)
+            dask_array, binary_image)
         if not lazy_result:
             if show_progressbar:
                 pbar = ProgressBar()
@@ -773,22 +773,25 @@ class PixelatedSTEM(Signal2D):
         pst._copy_signal_all_axes_metadata(self, s)
         return s
 
-    def find_peaks(self, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76,
-                   threshold=0.36, overlap=0.81, normalize_value=None,
-                   lazy_result=True, show_progressbar=True):
-        """Find peaks in the signal dimensions using skimage's blob_dog.
+    def find_peaks(self, method='dog', lazy_result=True,
+                   show_progressbar=True, **kwargs):
+        """Find peaks in the signal dimensions using skimage's blob_dog or blob_log.
 
         Parameters
         ----------
+        method: string 'dog' or 'log'
         min_sigma : float, optional
         max_sigma : float, optional
-        sigma_ratio : float, optional
+        sigma_ratio : float, optional (for dog)
+        num_sigma: float, optional (for log)
         threshold : float, optional
         overlap : float, optional
         normalize_value : float, optional
             All the values in the signal will be divided by this value.
             If no value is specified, the max value in each individual image
             will be used.
+        max_r: float, maximum radius compared from the
+                center of the diffraction pattern
         lazy_result : bool, optional
             Default True
         show_progressbar : bool, optional
@@ -828,10 +831,17 @@ class PixelatedSTEM(Signal2D):
             chunks = [8] * len(self.axes_manager.navigation_shape)
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
-        output_array = dt._peak_find_dog(
-                dask_array, min_sigma=min_sigma, max_sigma=max_sigma,
-                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap,
-                normalize_value=normalize_value)
+
+        if (method == 'dog'):
+            output_array = dt._peak_find_dog(
+                dask_array, **kwargs)
+        elif (method == 'log'):
+            output_array = dt._peak_find_log(
+                dask_array, **kwargs)
+        else:
+            print('Method is not a valid name, should be dog or log')
+            return
+
         if not lazy_result:
             if show_progressbar:
                 pbar = ProgressBar()
@@ -840,6 +850,199 @@ class PixelatedSTEM(Signal2D):
             if show_progressbar:
                 pbar.unregister()
         return output_array
+
+    def peak_position_refinement_com(self, peak_array, square_size,
+                                     lazy_result=True, show_progressbar=True):
+        """
+        Refines the peak postion using the center of mass
+        Parameters
+        ----------
+        peak_array : Numpy object array with x and y
+                    coordinates of the peak positions
+        square_size: Even integer, sub image from
+                    which the com is calculated
+        lazy_result : bool, default True
+            If True, will return a LazyPixelatedSTEM object. If False,
+            will compute the result and return a PixelatedSTEM object.
+        show_progressbar : bool, default True
+
+        Returns
+        -------
+        dask 2D object array
+            Same size as the two last dimensions in data, in the form
+            [[y0, x0], [y1, x1], ...].
+            The peak positions themselves are stored in 2D NumPy arrays
+            inside each position in peak_array. This is done instead of
+            making a 4D NumPy array, since the number of found peaks can
+            vary in each position.
+
+        Examples
+        --------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> peak_array = s.find_peaks()
+        >>> refined_peak_array = s.peak_position_refinement_com(peak_array, 20)
+        >>> refined_peak_array_computed =
+        >>>           refined_peak_array.compute(show_progressbar=False)
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+
+        chunks_peak = dask_array.chunksize[:-2]
+        peak_dask_array = da.from_array(peak_array, chunks=chunks_peak)
+        shape = list(peak_dask_array.shape)
+        shape.extend([1, 1])
+        peak_dask_array = peak_dask_array.reshape(shape)
+
+        output_array = dt._peak_refinement_centre_of_mass(
+                        dask_array, peak_dask_array, square_size)
+
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+        return output_array
+
+    def intensity_peaks(self, peak_array, r_disk=4,
+                        lazy_result=True, show_progressbar=True):
+        """Mean intensity of a peak in the diffraction data.
+        The mean is chosen inside a radius r_disk.
+
+        Parameters
+        ----------
+        peak_array : Numpy object with navigation shape of PixelatedSTEM
+        r_disk = int
+            radius of the disc chosen to take the mean value of
+        lazy_result : bool, default True
+            If True, will return a LazyPixelatedSTEM object. If False,
+            will compute the result and return a PixelatedSTEM object.
+        show_progressbar : bool, default True
+        Returns
+        -------
+        intensity_array: Numpy object with navigation
+        shape of PixelatedSTEM, with peak position in
+        x and y coordinates and the mean intensity.
+        
+        
+        Examples
+        --------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> peak_array = s.find_peaks()
+        >>> intensity_array = s.intensity_peaks(peak_array, r_disk = 6)
+        >>> intensity_array_computed = intensity_array.compute()
+
+        """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+
+        chunks_peak = dask_array.chunksize[:-2]
+        peak_dask_array = da.from_array(peak_array, chunks=chunks_peak)
+        shape = list(peak_dask_array.shape)
+        shape.extend([1, 1])
+        peak_dask_array = peak_dask_array.reshape(shape)
+
+        output_array = dt._intensity_peaks_image(
+            dask_array, peak_dask_array, r_disk)
+
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+        return output_array
+
+    def subtract_diffraction_background(
+            self, method, lazy_result=True, show_progressbar=True, **kwargs):
+        """Background subtraction of the diffraction data using different
+            methods. The methods are difference of gaussians, median kernel and
+            radial median.
+    
+            Parameters
+            ----------
+            method : {difference of gaussians, median kernel, radial median}
+            lazy_result : bool, default True
+                If True, will return a LazyPixelatedSTEM object. If False,
+                will compute the result and return a PixelatedSTEM object.
+            show_progressbar : bool, default True
+
+        sigma_min : float,optional
+            Standard deviation for the minimum gaussian convolution
+            (difference of gaussians only)
+        sigma_max : float, optional
+            Standard deviation for the maximum gaussian convolution
+            (difference of gaussians only)
+        footprint : int, optional
+            Size of the window that is convoluted with the array to determine
+            the median. Should be large enough that it is about 3x as big as the
+            size of the peaks (median kernel only).
+        centre_x : int, optional
+            Centre x position of the coordinate system on which to map
+            to radial coordinates (radial median only).
+        centre_y : int, optional
+            Centre y position of the coordinate system on which to map
+            to radial coordinates (radial median only).
+
+    
+            Returns
+            -------
+            s: PixelatedSTEM signal or LazyPixelatedSTEM
+            
+            Examples
+            --------
+            >>> s = ps.dummy_data.get_cbed_signal()
+            >>> s_rem = s.subtract_diffraction_background(
+            >>>        method = 'median kernel', footprint = 20)
+            >>> s_rem_com = s_rem.compute()
+            """
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+
+        if (method == 'difference of gaussians'):
+            output_array = dt._background_removal_dog(dask_array, **kwargs)
+        elif (method == 'median kernel'):
+            output_array = dt._background_removal_median(dask_array, **kwargs)
+        elif (method == 'radial median'):
+            output_array = dt._background_removal_radial_median(dask_array, **kwargs)
+        else:
+            raise NotImplementedError(
+                "The method specified, '{}', is not implemented. "
+                "The different methods are: difference of gaussians,"
+                " median kernel, radial median.".format(
+                    method))
+
+        if not lazy_result:
+            if show_progressbar:
+                pbar = ProgressBar()
+                pbar.register()
+            output_array = output_array.compute()
+            if show_progressbar:
+                pbar.unregister()
+            s = PixelatedSTEM(output_array)
+        else:
+            s = LazyPixelatedSTEM(output_array)
+
+        pst._copy_signal_all_axes_metadata(self, s)
+
+        return s
 
     def angular_mask(
             self, angle0, angle1,
@@ -873,10 +1076,10 @@ class PixelatedSTEM(Signal2D):
         """
 
         bool_array = pst._get_angle_sector_mask(
-                self, angle0, angle1,
-                centre_x_array=centre_x_array,
-                centre_y_array=centre_y_array)
-        return(bool_array)
+            self, angle0, angle1,
+            centre_x_array=centre_x_array,
+            centre_y_array=centre_y_array)
+        return (bool_array)
 
     def angular_slice_radial_integration(
             self, angleN=20, centre_x=None, centre_y=None,
@@ -936,9 +1139,9 @@ class PixelatedSTEM(Signal2D):
         else:
             if (slice_overlap < 0) or (slice_overlap > 1):
                 raise ValueError(
-                        "slice_overlap is {0}. But must be between "
-                        "0 and 1".format(slice_overlap))
-        angle_step = 2*np.pi/angleN
+                    "slice_overlap is {0}. But must be between "
+                    "0 and 1".format(slice_overlap))
+        angle_step = 2 * np.pi / angleN
         for i in range(angleN):
             angle0 = (angle_step * i) - (angle_step * slice_overlap)
             angle1 = (angle_step * (i + 1)) + (angle_step * slice_overlap)
@@ -947,26 +1150,26 @@ class PixelatedSTEM(Signal2D):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
         elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
             centre_x, centre_y = pst._make_centre_array_from_signal(
-                    self, x=centre_x, y=centre_y)
+                self, x=centre_x, y=centre_y)
 
         for angle in tqdm(angle_list, disable=(not show_progressbar)):
             mask_array = self.angular_mask(
-                    angle[0], angle[1],
-                    centre_x_array=centre_x,
-                    centre_y_array=centre_y)
+                angle[0], angle[1],
+                centre_x_array=centre_x,
+                centre_y_array=centre_y)
             s_r = self.radial_integration(
-                    centre_x=centre_x,
-                    centre_y=centre_y,
-                    mask_array=mask_array,
-                    show_progressbar=show_progressbar)
+                centre_x=centre_x,
+                centre_y=centre_y,
+                mask_array=mask_array,
+                show_progressbar=show_progressbar)
             signal_list.append(s_r)
         angle_scale = angle_list[1][1] - angle_list[0][1]
         signal = hs.stack(signal_list, new_axis_name='Angle slice')
-        signal.axes_manager['Angle slice'].offset = angle_scale/2
+        signal.axes_manager['Angle slice'].offset = angle_scale / 2
         signal.axes_manager['Angle slice'].scale = angle_scale
         signal.axes_manager['Angle slice'].units = 'Radians'
         signal.axes_manager[-1].name = 'Scattering angle'
-        return(signal)
+        return (signal)
 
     def fem_analysis(self, centre_x=None, centre_y=None,
                      show_progressbar=True):
@@ -1059,8 +1262,8 @@ class PixelatedSTEM(Signal2D):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
         dead_pixels = dt._find_dead_pixels(
-                dask_array, dead_pixel_value=dead_pixel_value,
-                mask_array=mask_array)
+            dask_array, dead_pixel_value=dead_pixel_value,
+            mask_array=mask_array)
         s_dead_pixels = LazySignal2D(dead_pixels)
         if not lazy_result:
             s_dead_pixels.compute(progressbar=show_progressbar)
@@ -1123,8 +1326,8 @@ class PixelatedSTEM(Signal2D):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
         hot_pixels = dt._find_hot_pixels(
-                dask_array, threshold_multiplier=threshold_multiplier,
-                mask_array=mask_array)
+            dask_array, threshold_multiplier=threshold_multiplier,
+            mask_array=mask_array)
 
         s_hot_pixels = LazySignal2D(hot_pixels)
         if not lazy_result:
@@ -1184,7 +1387,7 @@ class PixelatedSTEM(Signal2D):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
         bad_pixel_removed = dt._remove_bad_pixels(
-                dask_array, bad_pixel_array.data)
+            dask_array, bad_pixel_array.data)
         s_bad_pixel_removed = LazyPixelatedSTEM(bad_pixel_removed)
         pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)
         if not lazy_result:
@@ -1205,6 +1408,7 @@ class DPCBaseSignal(BaseSignal):
     and the second navigation is the y-shift (s.inav[1]).
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1256,12 +1460,12 @@ class DPCSignal1D(Signal1D):
         x_position = self.inav[0].data
         y_position = self.inav[1].data
         s_hist = pst._make_bivariate_histogram(
-                    x_position, y_position,
-                    histogram_range=histogram_range,
-                    masked=masked,
-                    bins=bins,
-                    spatial_std=spatial_std)
-        return(s_hist)
+            x_position, y_position,
+            histogram_range=histogram_range,
+            masked=masked,
+            bins=bins,
+            spatial_std=spatial_std)
+        return (s_hist)
 
 
 class DPCSignal2D(Signal2D):
@@ -1328,7 +1532,7 @@ class DPCSignal2D(Signal2D):
                 ramp = pst._fit_ramp_to_image(s, corner_size=0.05)
             output.data[i, :, :] -= ramp
         if out is None:
-            return(output)
+            return (output)
 
     def get_magnitude_signal(self, autolim=True, autolim_sigma=4):
         """Get DPC magnitude image visualized as greyscale.
@@ -1360,18 +1564,18 @@ class DPCSignal2D(Signal2D):
 
         """
         magnitude = np.sqrt(
-                np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
+            np.abs(self.inav[0].data) ** 2 + np.abs(self.inav[1].data) ** 2)
         magnitude_limits = None
         if autolim:
             magnitude_limits = pst._get_limits_from_array(
-                    magnitude, sigma=autolim_sigma)
+                magnitude, sigma=autolim_sigma)
             np.clip(
-                    magnitude, magnitude_limits[0],
-                    magnitude_limits[1], out=magnitude)
+                magnitude, magnitude_limits[0],
+                magnitude_limits[1], out=magnitude)
 
         signal = Signal2D(magnitude)
         pst._copy_signal2d_axes_manager_metadata(self, signal)
-        return(signal)
+        return (signal)
 
     def get_phase_signal(
             self, rotation=None):
@@ -1412,13 +1616,13 @@ class DPCSignal2D(Signal2D):
             rotation = -30
         else:
             rotation = rotation - 30
-        phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2*np.pi)
+        phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2 * np.pi)
         rgb_array = pst._get_rgb_phase_array(phase=phase, rotation=rotation)
-        signal_rgb = Signal1D(rgb_array*(2**16-1))
+        signal_rgb = Signal1D(rgb_array * (2 ** 16 - 1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")
         pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)
-        return(signal_rgb)
+        return (signal_rgb)
 
     def get_color_signal(
             self, rotation=None, autolim=True, autolim_sigma=4):
@@ -1463,22 +1667,22 @@ class DPCSignal2D(Signal2D):
             rotation = -30
         else:
             rotation = rotation - 30
-        phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2*np.pi)
+        phase = np.arctan2(self.inav[0].data, self.inav[1].data) % (2 * np.pi)
         magnitude = np.sqrt(
-                np.abs(self.inav[0].data)**2+np.abs(self.inav[1].data)**2)
+            np.abs(self.inav[0].data) ** 2 + np.abs(self.inav[1].data) ** 2)
 
         magnitude_limits = None
         if autolim:
             magnitude_limits = pst._get_limits_from_array(
-                    magnitude, sigma=autolim_sigma)
+                magnitude, sigma=autolim_sigma)
         rgb_array = pst._get_rgb_phase_magnitude_array(
-                phase=phase, magnitude=magnitude, rotation=rotation,
-                magnitude_limits=magnitude_limits)
-        signal_rgb = Signal1D(rgb_array*(2**16-1))
+            phase=phase, magnitude=magnitude, rotation=rotation,
+            magnitude_limits=magnitude_limits)
+        signal_rgb = Signal1D(rgb_array * (2 ** 16 - 1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")
         pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)
-        return(signal_rgb)
+        return (signal_rgb)
 
     def get_color_image_with_indicator(
             self, phase_rotation=0, indicator_rotation=0, only_phase=False,
@@ -1535,25 +1739,25 @@ class DPCSignal2D(Signal2D):
             s = self.get_phase_signal(rotation=phase_rotation)
         else:
             s = self.get_color_signal(
-                    rotation=phase_rotation, autolim=autolim,
-                    autolim_sigma=autolim_sigma)
+                rotation=phase_rotation, autolim=autolim,
+                autolim_sigma=autolim_sigma)
         s.change_dtype('uint16')
         s.change_dtype('float64')
         extent = self.axes_manager.signal_extent
         extent = [extent[0], extent[1], extent[3], extent[2]]
-        ax.imshow(s.data/65536., extent=extent)
+        ax.imshow(s.data / 65536., extent=extent)
         if ax_indicator is not False:
             if ax_indicator is None:
                 ax_indicator = fig.add_subplot(331)
             pst._make_color_wheel(
-                    ax_indicator,
-                    rotation=indicator_rotation + phase_rotation)
+                ax_indicator,
+                rotation=indicator_rotation + phase_rotation)
         ax.set_axis_off()
         if scalebar_size is not None:
             scalebar_label = '{0} {1}'.format(
-                    scalebar_size, s.axes_manager[0].units)
+                scalebar_size, s.axes_manager[0].units)
             sb = AnchoredSizeBar(
-                    ax.transData, scalebar_size, scalebar_label, loc=4)
+                ax.transData, scalebar_size, scalebar_label, loc=4)
             ax.add_artist(sb)
         if set_fig:
             fig.subplots_adjust(0, 0, 1, 1)
@@ -1598,14 +1802,14 @@ class DPCSignal2D(Signal2D):
         x_position = self.inav[0].data
         y_position = self.inav[1].data
         s_hist = pst._make_bivariate_histogram(
-                    x_position, y_position,
-                    histogram_range=histogram_range,
-                    masked=masked,
-                    bins=bins,
-                    spatial_std=spatial_std)
+            x_position, y_position,
+            histogram_range=histogram_range,
+            masked=masked,
+            bins=bins,
+            spatial_std=spatial_std)
         s_hist.metadata.General.title = "Bivariate histogram of {0}".format(
-                self.metadata.General.title)
-        return(s_hist)
+            self.metadata.General.title)
+        return (s_hist)
 
     def flip_axis_90_degrees(self, flips=1):
         """Flip both the spatial and beam deflection axis
@@ -1671,10 +1875,10 @@ class DPCSignal2D(Signal2D):
 
         """
         s_new = self.map(
-                rotate, show_progressbar=False,
-                inplace=False, reshape=reshape,
-                angle=-angle)
-        return(s_new)
+            rotate, show_progressbar=False,
+            inplace=False, reshape=reshape,
+            angle=-angle)
+        return (s_new)
 
     def rotate_beam_shifts(self, angle):
         """Rotate the beam shift vector.
@@ -1703,7 +1907,7 @@ class DPCSignal2D(Signal2D):
         x, y = self.inav[0].data, self.inav[1].data
         s_new.data[0] = x * np.cos(angle_rad) - y * np.sin(angle_rad)
         s_new.data[1] = x * np.sin(angle_rad) + y * np.cos(angle_rad)
-        return(s_new)
+        return (s_new)
 
     def gaussian_blur(self, sigma=2, output=None):
         """Blur the x- and y-beam shifts.
@@ -1745,7 +1949,6 @@ class DPCSignal2D(Signal2D):
 
 
 class LazyDPCBaseSignal(LazySignal, DPCBaseSignal):
-
     _lazy = True
 
     def __init__(self, *args, **kwargs):
@@ -1753,7 +1956,6 @@ class LazyDPCBaseSignal(LazySignal, DPCBaseSignal):
 
 
 class LazyDPCSignal1D(LazySignal, DPCSignal1D):
-
     _lazy = True
 
     def __init__(self, *args, **kwargs):
@@ -1761,7 +1963,6 @@ class LazyDPCSignal1D(LazySignal, DPCSignal1D):
 
 
 class LazyDPCSignal2D(LazySignal, DPCSignal2D):
-
     _lazy = True
 
     def __init__(self, *args, **kwargs):
@@ -1769,7 +1970,6 @@ class LazyDPCSignal2D(LazySignal, DPCSignal2D):
 
 
 class LazyPixelatedSTEM(LazySignal, PixelatedSTEM):
-
     _lazy = True
 
     def __init__(self, *args, **kwargs):
