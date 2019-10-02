@@ -88,6 +88,10 @@ class Test_subpixelpeakfinders:
 
     set_up = set_up_for_subpixelpeakfinders()
 
+    def get_spr(self,diffraction_vectors):
+        dp = set_up_for_subpixelpeakfinders().create_spot()
+        return SubpixelrefinementGenerator(dp, diffraction_vectors)
+
     def no_shift_case(self,s):
         error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
         rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
@@ -101,19 +105,14 @@ class Test_subpixelpeakfinders:
     @pytest.mark.parametrize("diffraction_vectors",
                             [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_xc(self,diffraction_vectors):
-        dp = set_up_for_subpixelpeakfinders().create_spot()
-        spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-        subpixelsfound = spr.conventional_xc(12, 4, 8)
+        subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
-
 
     @pytest.mark.parametrize("diffraction_vectors",
                             [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_com(self,diffraction_vectors):
-        dp = set_up_for_subpixelpeakfinders().create_spot()
-        spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-        subpixelsfound = spr.center_of_mass_method(12)
+        subpixelsfound = self.get_spr(diffraction_vectors).center_of_mass_method(12)
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
@@ -121,9 +120,7 @@ class Test_subpixelpeakfinders:
     @pytest.mark.parametrize("diffraction_vectors",
                             [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_log(self,diffraction_vectors):
-        dp = set_up_for_subpixelpeakfinders().create_spot()
-        spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-        subpixelsfound = spr.local_gaussian_method(12)
+        subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
