@@ -24,118 +24,117 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
+@pytest.mark.xfail(raises=ValueError)
+class Test_init_xfails:
+    """ Tests (both cases) that putting vectors that lie outside of the
+    diffraction patterns raises a ValueError"""
 
-def create_spot():
-    z1 = np.zeros((128, 128))
-    z2 = np.zeros((128, 128))
+    def test_out_of_range_vectors_numpy(self):
+        vector = np.array([[1, -100]])
+        dp = ElectronDiffraction2D(np.ones((20, 20)))
+        sprg = SubpixelrefinementGenerator(dp, vector)
 
-    for r in [4, 3, 2]:
-        c = 1 / r
-        rr, cc = draw.circle(30, 90, radius=r, shape=z1.shape)  # 30 is y!
-        z1[rr, cc] = c
-        z2[rr, cc] = c
-        rr2, cc2 = draw.circle(100, 60, radius=r, shape=z2.shape)
-        z2[rr2, cc2] = c
+    def test_out_of_range_vectors_DiffractionVectors(self):
+        vectors = DiffractionVectors(np.array([[1, -100]]))
+        dp = ElectronDiffraction2D(np.ones((20, 20)))
+        sprg = SubpixelrefinementGenerator(dp, vectors)
 
-    dp = ElectronDiffraction2D(np.asarray([[z1, z1], [z2, z2]]))  # this needs to be in 2x2
-    return dp
+    """ Tests that navigation dimensions must be appropriate too """
+    def test_wrong_navigation_dimensions(self):
+        dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
+        vectors = DiffractionVectors(np.zeros((1, 2)))
+        dp.axes_manager.set_signal_dimension(2)
+        vectors.axes_manager.set_signal_dimension(0)
+        SPR_generator = SubpixelrefinementGenerator(dp, vectors)
+
+class set_up_for_subpixelpeakfinders:
+
+    def create_spot(self):
+        z1,z1a = np.zeros((128, 128)),np.zeros((128, 128))
+        z2,z2a = np.zeros((128, 128)),np.zeros((128, 128))
+
+        rr, cc = draw.circle(30, 90, radius=4, shape=z1.shape)  # 30 is y!
+        z1[rr, cc],z2[rr, cc] = 1,1
+        rr2, cc2 = draw.circle(100, 60, radius=4, shape=z2.shape)
+        z2[rr2, cc2] = 1
+        rr, cc = draw.circle(30, 90+3, radius=4, shape=z1.shape)  # 30 is y!
+        z1a[rr, cc],z2a[rr, cc] = 1,1
+        rr2, cc2 = draw.circle(100-2, 60, radius=4, shape=z2.shape)
+        z2a[rr2, cc2] = 1
+
+        #marks centers for local com and local_gaussian_method
+        z1[30,90],z2[30,90],z2[100,60] = 2,2,2
+        z1a[30,93],z2a[30,93],z2a[98,60] = 10,10,10
+
+        dp = ElectronDiffraction2D(np.asarray([[z1, z1a], [z2, z2a]]))  # this needs to be in 2x2
+        return dp
+
+
+    def create_Diffraction_vectors(self):
+        v1 = np.array([[90 - 64, 30 - 64]])
+        v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
+        vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
+        vectors.axes_manager.set_signal_dimension(0)
+        return vectors
+
+
+class Test_subpixelpeakfinders:
+    """ Tests the various peak finders have the correct x,y conventions for
+    both the vectors and the shifts, in both the numpy and the DiffractionVectors
+    cases as well as confirming we have avoided 'off by one' errors """
+
+    set_up = set_up_for_subpixelpeakfinders()
+
+    @pytest.fixture(params=[set_up.create_Diffraction_vectors(),np.array([[90 - 64, 30 - 64]])])
+    def diffraction_vectors(self,request):
+        #see https://bit.ly/2mXpSlD for an example of this architecture
+        return request.param
+
+    def get_spr(self,diffraction_vectors):
+        dp = set_up_for_subpixelpeakfinders().create_spot()
+        return SubpixelrefinementGenerator(dp, diffraction_vectors)
+
+    def no_shift_case(self,s):
+        error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
+        rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
+        assert rms_error < 1e-5  # perfect detection for this trivial case
+
+    def x_shift_case(self,s):
+        error = s.data[0, 1] - np.asarray([[93 - 64, 30 - 64]])
+        rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
+        assert rms_error < 0.5   # correct to within a pixel
+
+
+    def test_assertioned_xc(self,diffraction_vectors):
+        subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)
+        self.no_shift_case(subpixelsfound)
+        self.x_shift_case(subpixelsfound)
+
+    def test_assertioned_com(self,diffraction_vectors):
+        subpixelsfound = self.get_spr(diffraction_vectors).center_of_mass_method(12)
+        self.no_shift_case(subpixelsfound)
+        self.x_shift_case(subpixelsfound)
+
+    def test_assertioned_log(self,diffraction_vectors):
+        subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
+        self.no_shift_case(subpixelsfound)
+        self.x_shift_case(subpixelsfound)
+
+#class Test_misc():
+""" These tests will be removed for 0.11.0, but are needed for the log method &
+security on the x/y conventions until then """
 
 
 def create_spot_gaussian():
     z1 = np.zeros((128, 128))
-
     x = np.arange(0.0, 10, 1.0)
     y = x[:, np.newaxis]
     z1[20:30, 50:60] = np.exp(-((x - 5.1)**2 + (y - 5.3)**2) / 4)
     dp = ElectronDiffraction2D(np.asarray([[z1, z1], [z1, z1]]))  # this needs to be in 2x2
     return dp
 
-
-def create_vectors():
-    v1 = np.array([[90 - 64, 30 - 64]])
-    v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
-    vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
-    vectors.axes_manager.set_signal_dimension(0)
-    return vectors
-
-
-@pytest.mark.xfail(raises=ValueError)
-def test_bad_vectors_numpy():
-    """ tests that putting bad vectors in causes an error to be thrown when
-    you initiate the geneartor
-    """
-    v = np.array([[1, -100]])
-    dp = ElectronDiffraction2D(np.ones((20, 20)))
-    sprg = SubpixelrefinementGenerator(dp, v)
-
-
-@pytest.mark.xfail(raises=ValueError)
-def test_bad_vectors_DiffractionVectors():
-    v = np.array([[1, -100]])
-    dv = DiffractionVectors(v)
-    dp = ElectronDiffraction2D(np.ones((20, 20)))
-    sprg = SubpixelrefinementGenerator(dp, dv)
-
-
-@pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
-def test_conventional_xc(diffraction_pattern):
-    SPR_generator = SubpixelrefinementGenerator(diffraction_pattern, np.asarray([[1, -1]]))
-    np.testing.assert_allclose(SPR_generator.calibration, 1.0)
-    np.testing.assert_allclose(SPR_generator.center, 4)
-    diff_vect = SPR_generator.conventional_xc(4, 2, 10)
-
-
-@pytest.mark.xfail(raises=ValueError)
-def test_wrong_navigation_dimensions():
-    dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
-    dp.axes_manager.set_signal_dimension(2)
-    vectors = DiffractionVectors(np.zeros((1, 2)))
-    vectors.axes_manager.set_signal_dimension(0)
-    SPR_generator = SubpixelrefinementGenerator(dp, vectors)
-
-
-@pytest.mark.parametrize('dp, diffraction_vectors', [
-    (create_spot(), np.array([[90 - 64, 30 - 64]])),
-    (create_spot(), create_vectors())
-])
-@pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
-@pytest.mark.filterwarnings('ignore::RuntimeWarning')  # various skimage warnings
-def test_assertioned_xc(dp, diffraction_vectors):
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.conventional_xc(12, 4, 8)
-    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
-    rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
-    assert rms_error < 0.2  # 1/5th a pixel
-
-
-@pytest.mark.parametrize('dp, diffraction_vectors', [
-    (create_spot(), np.array([[90 - 64, 30 - 64]])),
-    (create_spot(), create_vectors())
-])
-@pytest.mark.filterwarnings('ignore::RuntimeWarning')  # various skimage warnings
-def test_assertioned_com(dp, diffraction_vectors):
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.center_of_mass_method(8)
-    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
-    rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
-    assert rms_error < 1e-5  # perfect detection for this trivial case
-
-
-@pytest.mark.parametrize('dp, diffraction_vectors, refined_vectors', [
-    # Refinement within 1 px
-    (create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]), np.array([[55.1 - 64, 25.3 - 64]])),
-    # Refinement to recover from 2 px error in peak finding
-    (create_spot_gaussian(), np.array([[53 - 64, 23 - 64]]), np.array([[55.1 - 64, 25.3 - 64]]))
-])
-def test_local_gaussian_method(dp, diffraction_vectors, refined_vectors):
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.local_gaussian_method(10)
-    np.testing.assert_allclose(s.data[0, 0], refined_vectors, atol=0.1)
-
-
 @pytest.mark.parametrize('dp, diffraction_vectors',
-                         [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))
-                          ])
+                         [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))])
 @pytest.mark.filterwarnings('ignore::UserWarning')  # our warning
 def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
     spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
