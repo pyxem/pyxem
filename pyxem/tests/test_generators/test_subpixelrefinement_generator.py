@@ -24,22 +24,22 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
-class Test_init():
-    @pytest.mark.xfail(raises=ValueError)
+@pytest.mark.xfail(raises=ValueError)
+class Test_init_xfails():
+    """ Tests (both cases) that putting vectors that lie outside of the
+    diffraction patterns raises a ValueError"""
+
     def test_out_of_range_vectors_numpy(self):
-        """ Tests that putting vectors that lie outside of the diffraction patterns
-        raise a ValueError"""
         vector = np.array([[1, -100]])
         dp = ElectronDiffraction2D(np.ones((20, 20)))
         sprg = SubpixelrefinementGenerator(dp, vector)
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_out_of_range_vectors_DiffractionVectors(self):
         vectors = DiffractionVectors(np.array([[1, -100]]))
         dp = ElectronDiffraction2D(np.ones((20, 20)))
         sprg = SubpixelrefinementGenerator(dp, vectors)
 
-    @pytest.mark.xfail(raises=ValueError)
+    """ Tests that navigation dimensions must be appropriate too """
     def test_wrong_navigation_dimensions(self):
         dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
         vectors = DiffractionVectors(np.zeros((1, 2)))
@@ -47,7 +47,10 @@ class Test_init():
         vectors.axes_manager.set_signal_dimension(0)
         SPR_generator = SubpixelrefinementGenerator(dp, vectors)
 
-class Test_finder():
+class Test_subpixelpeakfinders():
+    """ Tests the various peak finders have the correct x,y conventions for
+    both the vectors and the shifts, in both the numpy and the DiffractionVectors
+    cases as well as confirming we have avoided 'off by one' errors """
 
     def create_spot(self):
         z1 = np.zeros((128, 128))
@@ -98,6 +101,9 @@ class Test_finder():
 
 
 class Test_misc():
+    """ These tests will be removed for 0.11.0, but are needed for the log method &
+    security on the x/y conventions until then """
+    
     @pytest.mark.parametrize('dp, diffraction_vectors',
                          [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))])
     @pytest.mark.filterwarnings('ignore::UserWarning')  # our warning
