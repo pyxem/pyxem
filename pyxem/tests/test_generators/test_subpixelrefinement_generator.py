@@ -48,9 +48,6 @@ class Test_init_xfails:
         SPR_generator = SubpixelrefinementGenerator(dp, vectors)
 
 class set_up_for_subpixelpeakfinders:
-    """ Tests the various peak finders have the correct x,y conventions for
-    both the vectors and the shifts, in both the numpy and the DiffractionVectors
-    cases as well as confirming we have avoided 'off by one' errors """
 
     def create_spot(self):
         z1,z1a = np.zeros((128, 128)),np.zeros((128, 128))
@@ -65,9 +62,9 @@ class set_up_for_subpixelpeakfinders:
         rr2, cc2 = draw.circle(100-2, 60, radius=4, shape=z2.shape)
         z2a[rr2, cc2] = 1
 
-        #marks centers for local local_gaussian_method
-        z1[30,90],z2[30,90],z2[100,60] = 1.2,1.2,1.3
-        z1a[30,93],z2a[30,93],z2a[98,60] = 1.2,1.4,1.7
+        #marks centers for local com and local_gaussian_method
+        z1[30,90],z2[30,90],z2[100,60] = 2,2,2
+        z1a[30,93],z2a[30,93],z2a[98,60] = 10,10,10
 
         dp = ElectronDiffraction2D(np.asarray([[z1, z1a], [z2, z2a]]))  # this needs to be in 2x2
         return dp
@@ -85,34 +82,50 @@ class set_up_for_subpixelpeakfinders:
 
 
 class Test_subpixelpeakfinders:
+    """ Tests the various peak finders have the correct x,y conventions for
+    both the vectors and the shifts, in both the numpy and the DiffractionVectors
+    cases as well as confirming we have avoided 'off by one' errors """
+
     set_up = set_up_for_subpixelpeakfinders()
+
+    def no_shift_case(self,s):
+        error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
+        rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
+        assert rms_error < 1e-5  # perfect detection for this trivial case
+
+    def x_shift_case(self,s):
+        error = s.data[0, 1] - np.asarray([[93 - 64, 30 - 64]])
+        rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
+        assert rms_error < 0.5
 
     @pytest.mark.parametrize("diffraction_vectors",
                             [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_xc(self,diffraction_vectors):
         dp = set_up_for_subpixelpeakfinders().create_spot()
         spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-        s = spr.conventional_xc(12, 4, 8)
-        error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
-        rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
-        assert rms_error < 0.2  # 1/5th a pixel
+        subpixelsfound = spr.conventional_xc(12, 4, 8)
+        self.no_shift_case(subpixelsfound)
+        self.x_shift_case(subpixelsfound)
+
 
     @pytest.mark.parametrize("diffraction_vectors",
                             [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_com(self,diffraction_vectors):
         dp = set_up_for_subpixelpeakfinders().create_spot()
         spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-        s = spr.center_of_mass_method(8)
-        error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
-        rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
-        assert rms_error < 1e-5  # perfect detection for this trivial case
+        subpixelsfound = spr.center_of_mass_method(12)
+        self.no_shift_case(subpixelsfound)
+        self.x_shift_case(subpixelsfound)
+
 
     @pytest.mark.parametrize("diffraction_vectors",
                             [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_log(self,diffraction_vectors):
         dp = set_up_for_subpixelpeakfinders().create_spot()
-        #rename some of the internal bits of functionality
-        pass
+        spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
+        subpixelsfound = spr.local_gaussian_method(12)
+        self.no_shift_case(subpixelsfound)
+        self.x_shift_case(subpixelsfound)
 
 #class Test_misc():
 """ These tests will be removed for 0.11.0, but are needed for the log method &
