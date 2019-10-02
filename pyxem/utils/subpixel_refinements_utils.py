@@ -82,32 +82,6 @@ def get_simulated_disc(square_size, disc_radius):
     arr[rr, cc] = 1
     return arr
 
-
-def _conventional_xc(exp_disc, sim_disc, upsample_factor):
-    """Takes two images of disc and finds the shift between them using
-    conventional (phase) cross correlation.
-
-    Parameters
-    ----------
-    exp_disc : np.array()
-        A numpy array of the "experimental" disc
-    sim_disc : np.array()
-        A numpy array of the disc used as a template
-    upsample_factor: int (must be even)
-        Factor to upsample by, reciprocal of the subpixel resolution
-        (eg 10 ==> 1/10th of a pixel)
-
-    Returns
-    -------
-    shifts
-        Pixel shifts required to register the two images
-
-    """
-
-    shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)
-    shifts = np.flip(shifts) #to comply with hyperspy conventions - see issue#490
-    return shifts
-
 def _get_pixel_vectors(dp, vectors, calibration, center):
     """Get the pixel coordinates for the given diffraction
     pattern and vectors.
