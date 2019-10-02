@@ -85,6 +85,10 @@ class Test_subpixelpeakfinders:
 
     set_up = set_up_for_subpixelpeakfinders()
 
+    @pytest.fixture(params=[set_up.create_Diffraction_vectors(),np.array([[90 - 64, 30 - 64]])])
+    def diffraction_vectors(self,request):
+        #see https://bit.ly/2mXpSlD for an example of this architecture
+        return request.param
 
     def get_spr(self,diffraction_vectors):
         dp = set_up_for_subpixelpeakfinders().create_spot()
@@ -100,10 +104,6 @@ class Test_subpixelpeakfinders:
         rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
         assert rms_error < 0.5   # correct to within a pixel
 
-    @pytest.fixture(params=[set_up.create_Diffraction_vectors(),np.array([[90 - 64, 30 - 64]])])
-    def diffraction_vectors(self,request):
-        #see https://bit.ly/2mXpSlD for an example of this architecture
-        return request.param
 
     def test_assertioned_xc(self,diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)
