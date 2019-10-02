@@ -69,16 +69,13 @@ class set_up_for_subpixelpeakfinders:
         dp = ElectronDiffraction2D(np.asarray([[z1, z1a], [z2, z2a]]))  # this needs to be in 2x2
         return dp
 
+
     def create_Diffraction_vectors(self):
         v1 = np.array([[90 - 64, 30 - 64]])
         v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
         vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
         vectors.axes_manager.set_signal_dimension(0)
         return vectors
-
-    def create_numpy_vectors(self):
-        return np.array([[90 - 64, 30 - 64]])
-
 
 
 class Test_subpixelpeakfinders:
@@ -87,6 +84,7 @@ class Test_subpixelpeakfinders:
     cases as well as confirming we have avoided 'off by one' errors """
 
     set_up = set_up_for_subpixelpeakfinders()
+
 
     def get_spr(self,diffraction_vectors):
         dp = set_up_for_subpixelpeakfinders().create_spot()
@@ -100,25 +98,23 @@ class Test_subpixelpeakfinders:
     def x_shift_case(self,s):
         error = s.data[0, 1] - np.asarray([[93 - 64, 30 - 64]])
         rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
-        assert rms_error < 0.5
+        assert rms_error < 0.5   # correct to within a pixel
 
-    @pytest.mark.parametrize("diffraction_vectors",
-                            [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
+    @pytest.fixture(params=[set_up.create_Diffraction_vectors(),np.array([[90 - 64, 30 - 64]])])
+    def diffraction_vectors(self,request):
+        #see https://bit.ly/2mXpSlD for an example of this architecture
+        return request.param
+
     def test_assertioned_xc(self,diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
-    @pytest.mark.parametrize("diffraction_vectors",
-                            [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_com(self,diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).center_of_mass_method(12)
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
-
-    @pytest.mark.parametrize("diffraction_vectors",
-                            [set_up.create_Diffraction_vectors(),set_up.create_numpy_vectors()])
     def test_assertioned_log(self,diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
         self.no_shift_case(subpixelsfound)
