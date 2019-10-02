@@ -21,9 +21,11 @@ import numpy as np
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 from pyxem.components.scattering_fit_component_xtables import ScatteringFitComponentXTables
 
+
 def test_scattering_component_init_xtables():
     ref = ScatteringFitComponentXTables(['Cu'], [1], N=1., C=0.)
     assert isinstance(ref, ScatteringFitComponentXTables)
+
 
 @pytest.fixture(params=[
     np.array([4., 3., 2., 2., 1., 1., 1., 0.])

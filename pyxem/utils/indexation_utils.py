@@ -100,26 +100,26 @@ def correlate_library(image, library, n_largest, mask):
             orientations = library_entry['orientations']
             pixel_coords = library_entry['pixel_coords']
             intensities = library_entry['intensities']
-            pattern_norms = library_entry['pattern_norms']
+            pattern_norms = library_entry['pattern_norms'] #TODO: This is only applicable some of the time, probably use an if + special_local in the for
 
-            # Extract experimental intensities from the diffraction image
-            image_intensities = image[pixel_coords[:, :, :, 1], pixel_coords[:, :, :, 0]]
-            # Correlation is the normalized dot product
-            correlations = np.sum(image_intensities * intensities, axis=2) / pattern_norms
+            zip_for_locals = zip(orientations,pixel_coords,intensities,pattern_norms)
 
-            # Find the top n correlations in sorted order
-            top_n_indices = correlations.argpartition(-n_largest, axis=None)[-n_largest:]
-            top_n_correlations = correlations.ravel()[top_n_indices]
-            top_n_indices = top_n_indices[top_n_correlations.argsort()[::-1]]
+            or_saved,corr_saved = np.empty((n_largest,3)),np.zeros((n_largest,1))
+            for (or_local,px_local,int_local,pn_local) in zip_for_locals:
+                #TODO: Factorise out the generation of corr_local to a method='mthd' section
+                image_intensities = image[px_local[:, 1], px_local[:, 0]]     # Extract experimental intensities from the diffraction image
+                corr_local = np.sum(np.multiply(image_intensities,int_local)) / pn_local # Correlation is the partially normalized dot product
 
-            # Store the results in top_matches
-            top_matches[phase_index, :, 0] = phase_index
-            inplane_rotation_angle = 360 / pixel_coords.shape[0]
-            for i in range(n_largest):
-                inplane_index, orientation_index = np.unravel_index(top_n_indices[i], correlations.shape)
-                top_matches[phase_index, i, 1] = orientations[orientation_index] + np.array(
-                    [0, 0, inplane_index * inplane_rotation_angle])
-            top_matches[phase_index, :, 2] = correlations.ravel()[top_n_indices]
+                if corr_local > np.min(corr_saved):
+                    or_saved[np.argmin(corr_saved)] = or_local
+                    corr_saved[np.argmin(corr_saved)] = corr_local
+
+                combined_array = np.hstack((or_saved,corr_saved))
+                combined_array = combined_array[np.flip(combined_array[:,3].argsort())] #see stackoverflow/2828059 for details
+                top_matches[phase_index,:,0] = phase_index
+                top_matches[phase_index,:,2] = combined_array[:,3]  #correlation
+                for i in np.arange(n_largest):
+                    top_matches[phase_index,i,1] = combined_array[i,:3] #orientation
 
     return top_matches.reshape(-1, 3)
 
@@ -513,19 +513,9 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     phase_names = list(library.keys())
     phase_index = int(best_fit[0])
     phase = phase_names[phase_index]
-    try:
-        simulation = library.get_library_entry(
-            phase=phase,
-            angle=tuple(best_fit[1]))['Sim']
-    except ValueError:
-        structure = library.structures[phase_index]
-        rotation_matrix = euler2mat(*np.deg2rad(best_fit[1]), 'rzxz')
-        simulation = simulate_rotated_structure(
-            library.diffraction_generator,
-            structure,
-            rotation_matrix,
-            library.reciprocal_radius,
-            library.with_direct_beam)
+    simulation = library.get_library_entry(
+                            phase=phase,
+                            angle=tuple(best_fit[1]))['Sim']
 
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
