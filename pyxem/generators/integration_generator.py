@@ -28,7 +28,7 @@ from scipy import ndimage as ndi
 from scipy.ndimage.measurements import center_of_mass
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.generators.generator_utils import _get_pixel_vectors
+from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
 import warnings
 
