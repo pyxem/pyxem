@@ -203,7 +203,8 @@ class CalibrationGenerator():
 
         return ElectronDiffraction2D(residuals)
 
-    def plot_corrected_diffraction_pattern(self, reference_circle=True):
+    def plot_corrected_diffraction_pattern(self, reference_circle=True,
+                                           *args, **kwargs):
         """Plot the distortion corrected diffraction pattern with an optional
         reference circle.
 
@@ -211,6 +212,10 @@ class CalibrationGenerator():
         ----------
         reference_circle : bool
             If True a CircleROI widget is added to the plot for reference.
+        *args : arguments
+            Arguments to be passed to the plot method.
+        **kwargs : keyword arguments
+            Keyword arguments to be passed to the plot method.
 
         """
         # Check all required parameters are defined as attributes
@@ -233,7 +238,7 @@ class CalibrationGenerator():
                                           inplace=True)
         dpegm = dpegs.mean((0, 1))
         # Plot distortion corrected data
-        dpegm.plot(cmap='magma', vmax=0.1)
+        dpegm.plot(*args, **kwargs)
         # add reference circle if specified
         if reference_circle is True:
             circ = CircleROI(cx=128, cy=128, r=53.5, r_inner=0)
@@ -313,6 +318,10 @@ class CalibrationGenerator():
             Number of X-grating squares crossed.
         xspace : float
             Spacing of X-grating in nanometres.
+        *args : arguments
+            Arguments to be passed to the find_peaks1D method.
+        **kwargs : keyword arguments
+            Keyword arguments to be passed to the find_peaks1D method.
 
         Returns
         -------
@@ -411,6 +420,10 @@ class CalibrationGenerator():
             An optional Line2DROI object, as detailed in HyperSpy, to be added
             as a widget to the calibration data plot and the trace plotted
             interactively.
+        *args : arguments
+            Arguments to be passed to the plot method.
+        **kwargs : keyword arguments
+            Keyword arguments to be passed to the plot method.
         """
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
