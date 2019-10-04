@@ -267,5 +267,5 @@ class DetectorCoordinates2D(BaseSignal):
                                   ai=azimuthal_integrator,
                                   inplace=False,
                                   parallel=False
-                                  *args, **kwargs)
+                                  * args, **kwargs)
         transfer_navigation_axes(self.cartesian, self)

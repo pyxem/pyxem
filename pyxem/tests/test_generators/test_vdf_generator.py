@@ -45,14 +45,14 @@ class TestVDFGenerator:
 
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
         dvm = DiffractionVectors2D(np.array([[np.array([[1, 1],
-                                                      [2, 2]]),
-                                            np.array([[1, 1],
-                                                      [2, 2],
-                                                      [1, 2]])],
-                                           [np.array([[1, 1],
-                                                      [2, 2]]),
-                                            np.array([[1, 1],
-                                                      [2, 2]])]], dtype=object))
+                                                        [2, 2]]),
+                                              np.array([[1, 1],
+                                                        [2, 2],
+                                                        [1, 2]])],
+                                             [np.array([[1, 1],
+                                                        [2, 2]]),
+                                              np.array([[1, 1],
+                                                        [2, 2]])]], dtype=object))
         dvm.axes_manager.set_signal_dimension(0)
 
         vdfgen = VDFGenerator(diffraction_pattern, dvm)
@@ -98,14 +98,14 @@ class TestVDFGenerator:
 
 def test_vdf_generator_from_map(diffraction_pattern):
     dvm = DiffractionVectors2D(np.array([[np.array([[1, 1],
-                                                  [2, 2]]),
-                                        np.array([[1, 1],
-                                                  [2, 2],
-                                                  [1, 2]])],
-                                       [np.array([[1, 1],
-                                                  [2, 2]]),
-                                        np.array([[1, 1],
-                                                  [2, 2]])]], dtype=object))
+                                                    [2, 2]]),
+                                          np.array([[1, 1],
+                                                    [2, 2],
+                                                    [1, 2]])],
+                                         [np.array([[1, 1],
+                                                    [2, 2]]),
+                                          np.array([[1, 1],
+                                                    [2, 2]])]], dtype=object))
     dvm.axes_manager.set_signal_dimension(0)
 
     vdfgen = VDFGenerator(diffraction_pattern, dvm)

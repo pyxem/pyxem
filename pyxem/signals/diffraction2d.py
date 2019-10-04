@@ -614,7 +614,7 @@ class Diffraction2D(Signal2D):
                                       "implementations.".format(method))
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-        if return_as=='diffraction_vectors':
+        if return_as == 'diffraction_vectors':
             peaks.map(peaks_as_gvectors,
                       center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
                       calibration=self.axes_manager.signal_axes[0].scale)

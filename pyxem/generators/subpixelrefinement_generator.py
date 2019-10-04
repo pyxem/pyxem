@@ -31,6 +31,7 @@ from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
 import warnings
 
+
 def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     """Takes two images of disc and finds the shift between them using
     conventional (phase) cross correlation.
@@ -53,7 +54,7 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     """
 
     shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)
-    shifts = np.flip(shifts) #to comply with hyperspy conventions - see issue#490
+    shifts = np.flip(shifts)  # to comply with hyperspy conventions - see issue#490
     return shifts
 
 
@@ -275,11 +276,11 @@ class SubpixelrefinementGenerator():
             return (((vectors + shifts) - center) * calibration)
 
         self.vectors_out = DiffractionVectors2D(self.dp.map(_lg_map,
-                                                   vectors=self.vector_pixels,
-                                                   square_size=square_size,
-                                                   center=self.center,
-                                                   calibration=self.calibration,
-                                                   inplace=False))
+                                                            vectors=self.vector_pixels,
+                                                            square_size=square_size,
+                                                            center=self.center,
+                                                            calibration=self.calibration,
+                                                            inplace=False))
 
         # check for unrefined peaks
         def check_bad_square(z):

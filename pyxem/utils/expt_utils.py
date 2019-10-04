@@ -568,6 +568,7 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
 
     return (shift - 0.5)
 
+
 def peaks_as_gvectors(z, center, calibration):
     """Converts peaks found as array indices to calibrated units, for use in a
     hyperspy map function.
