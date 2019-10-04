@@ -478,7 +478,7 @@ class Diffraction2D(Signal2D):
                             *args, **kwargs)
 
     def remove_background(self, method,
-                          *args, **kwargs):
+                          **kwargs):
         """Perform background subtraction via multiple methods.
 
         Parameters
@@ -486,14 +486,9 @@ class Diffraction2D(Signal2D):
         method : string
             Specifies the method, from:
             {'h-dome','gaussian_difference','median','reference_pattern'}
-        *args:
-            Arguments to be passed to map()
         **kwargs:
-            Keyword arguments to be passed to map(), including method specific ones:
-            'h-dome' requires 'h'
-            'gaussian_difference' requires 'sigma_min' and 'sigma_max'
-            'median' requires 'footprint'
-            'reference_pattern' requires 'bg'
+            Keyword arguments to be passed to map(), including method specific ones,
+            running a method with no kwargs will tell you which kwargs you need
 
         Returns
         -------
@@ -506,35 +501,40 @@ class Diffraction2D(Signal2D):
         Further details on the methods can be found by looking at the docstrings
         for the associated utils, these can be accessed by:
         >>> from pyxem.utils.expt_utils import regional_filter
-        >>> from pyxem.utils.expt_utils import subtract_background_dog
-        >>> from pyxem.utils.expt_utils import subtract_background_median
-        >>> from pyxem.utils.expt_utils import subtract_reference
+        and likewise for: subtract_background_dog
+                          subtract_background_median
+                          subtract_reference
 
         """
-        if method == 'h-dome':
+        method_dict = {
+            'h-dome':
+            {'method':'h-dome','params':['h']},
+            'gaussian_difference':
+            {'method':subtract_background_dog,'params':['sigma_min','sigma_max']},
+            'median':
+            {'method':subtract_background_median,'params':['footprint']},
+            'reference_pattern':
+            {'method':subtract_background_reference_pattern,'params':['bg']},
+            }
+
+        if method not in method_dict:
+            raise NotImplementedError("The method `{}` is not implemented. "
+                                         "See documentation for available "
+                                         "implementations.".format(method))
+        if not kwargs:
+            for kwarg in method_dict[method]['params']:
+                print("You need the `{}` kwarg".format(kwarg))
+
+        if method != 'h-dome':
+            bg_subtracted = self.map(method_dict[method][method],
+                                     inplace=False, *args, **kwargs)
+        else:
             scale = self.data.max()
             self.data = self.data / scale
             bg_subtracted = self.map(regional_filter,
                                      inplace=False, *args, **kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
-
-        elif method == 'gaussian_difference':
-            bg_subtracted = self.map(subtract_background_dog,
-                                     inplace=False, *args, **kwargs)
-
-        elif method == 'median':
-            bg_subtracted = self.map(subtract_background_median,
-                                     inplace=False, *args, **kwargs)
-
-        elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, inplace=False,
-                                     *args, **kwargs)
-
-        else:
-            raise NotImplementedError(
-                "The method specified, '{}', is not implemented. See"
-                "documentation for available implementations.".format(method))
 
         return bg_subtracted
 
