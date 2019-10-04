@@ -21,15 +21,40 @@ Generating subpixel resolution on diffraction vectors.
 """
 
 import numpy as np
+from skimage.feature import register_translation
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors2D
 from pyxem.utils.expt_utils import peaks_as_gvectors
-from pyxem.utils.subpixel_refinements_utils import _conventional_xc
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
-from pyxem.generators.generator_utils import _get_pixel_vectors
+from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
 import warnings
+
+def _conventional_xc(exp_disc, sim_disc, upsample_factor):
+    """Takes two images of disc and finds the shift between them using
+    conventional (phase) cross correlation.
+
+    Parameters
+    ----------
+    exp_disc : np.array()
+        A numpy array of the "experimental" disc
+    sim_disc : np.array()
+        A numpy array of the disc used as a template
+    upsample_factor: int (must be even)
+        Factor to upsample by, reciprocal of the subpixel resolution
+        (eg 10 ==> 1/10th of a pixel)
+
+    Returns
+    -------
+    shifts
+        Pixel shifts required to register the two images
+
+    """
+
+    shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)
+    shifts = np.flip(shifts) #to comply with hyperspy conventions - see issue#490
+    return shifts
 
 
 class SubpixelrefinementGenerator():

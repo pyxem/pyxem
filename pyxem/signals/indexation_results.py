@@ -34,7 +34,6 @@ from pyxem import CrystallographicMap
 class TemplateMatchingResults(BaseSignal):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
-
     """
 
     _signal_type = "template_matching"

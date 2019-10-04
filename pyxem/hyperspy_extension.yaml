@@ -113,6 +113,31 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.vdf_image
+  ReducedIntensity1D:
+    signal_type: "ReducedIntensity1D"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.reduced_intensity1d
+  PairDistributionFunction1D:
+    signal_type: "PairDistributionFunction1D"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.pair_distribution_function1d
+  DiffractionVariance1D:
+    signal_type: "DiffractionVariance1D"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.diffraction_variance1d
+  DiffractionVariance2D:
+    signal_type: "DiffractionVariance2D"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.diffraction_variance2d
+
 
 components2D:
     DiffractionComponent:
@@ -121,3 +146,14 @@ components2D:
     ScalableReferencePattern:
       module: pyxem.components.scalable_reference_component
       class: ScalableReferencePattern
+
+components1D:
+    ReducedIntensityCorrectionComponent:
+      module: pyxem.components.reduced_intensity_correction_component
+      class: ReducedIntensityCorrectionComponent
+    ScatteringFitComponentLobato:
+      module: pyxem.components.scattering_fit_component_lobato
+      class: ScatteringFitComponentLobato
+    ScatteringFitComponentXTables:
+      module: pyxem.components.scattering_fit_component_xtables
+      class: ScatteringFitComponentXTables

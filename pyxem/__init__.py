@@ -36,7 +36,11 @@ from diffsims.generators.library_generator import VectorLibraryGenerator
 from diffsims.sims.diffraction_simulation import DiffractionSimulation
 
 from .components.diffraction_component import ElectronDiffractionForwardModel
+
 from .generators.calibration_generator import CalibrationGenerator
+from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
+from .generators.pdf_generator1d import PDFGenerator1D
+from .generators.variance_generator import VarianceGenerator
 
 from .signals.diffraction1d import Diffraction1D
 from .signals.diffraction2d import Diffraction2D
@@ -47,15 +51,32 @@ from .signals.electron_diffraction2d import ElectronDiffraction2D
 from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
-from .signals.vdf_image import VDFImage
-from .signals.crystallographic_map import CrystallographicMap
 from .signals.detector_coordinates import DetectorCoordinates2D
 from .signals.diffraction_vectors2d import DiffractionVectors2D
 from .signals.diffraction_vectors3d import DiffractionVectors3D
-from .signals.indexation_results import TemplateMatchingResults
+
 from .signals.vdf_image import VDFImage
+from .signals.diffraction_variance1d import DiffractionVariance1D
+from .signals.diffraction_variance2d import DiffractionVariance2D
+
+from .signals.pair_distribution_function1d import PairDistributionFunction1D
+from .signals.reduced_intensity1d import ReducedIntensity1D
+
+from .signals.crystallographic_map import CrystallographicMap
+from .signals.indexation_results import TemplateMatchingResults
+
 
 from pyxem.utils.io_utils import load, load_mib, load_hspy
 
+from . import release_info
+
+__version__ = release_info.version
+__author__ = release_info.author
+__copyright__ = release_info.copyright
+__credits__ = release_info.credits
+__license__ = release_info.license
+__maintainer__ = release_info.maintainer
+__email__ = release_info.email
+__status__ = release_info.status
 
 _logger = logging.getLogger(__name__)
