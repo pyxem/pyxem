@@ -283,6 +283,7 @@ class TestBackgroundMethods:
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
         ('median', {'footprint': 4, }),
         ('reference_pattern', {'bg': np.ones((8, 8)), })
+        ('reference_pattern',{})
     ])
     # skimage being warned by numpy, not for us
     @pytest.mark.filterwarnings('ignore::FutureWarning')

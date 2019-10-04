@@ -524,6 +524,7 @@ class Diffraction2D(Signal2D):
         if not kwargs:
             for kwarg in method_dict[method]['params']:
                 print("You need the `{}` kwarg".format(kwarg))
+            return None
 
         if method != 'h-dome':
             bg_subtracted = self.map(method_dict[method][method],
