@@ -61,7 +61,7 @@ from .signals.vdf_image import VDFImage
 from .signals.pair_distribution_function1d import PairDistributionFunction1D
 from .signals.reduced_intensity1d import ReducedIntensity1D
 
-from pyxem.utils.io_utils import load, load_mib, load_hspy
+from pyxem.utils.io_utils import load_mib
 
 from . import release_info
 
