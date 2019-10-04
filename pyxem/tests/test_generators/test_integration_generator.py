@@ -20,23 +20,11 @@ import pytest
 import numpy as np
 
 from pyxem.generators.integration_generator import IntegrationGenerator
-from pyxem.signals.diffraction_vectors3d import DiffractionVectors3D
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from hyperspy.signals import BaseSignal
 from scipy.ndimage import gaussian_filter
 
-
-# @pytest.fixture
-# def pixel_positions():
-#     positions = np.array([[0, 0], [15, -15], [-15, 15]])
-#     return positions
-
-# @pytest.fixture
-# def diffraction_pattern():
-#     pattern = np.zeros((50, 50))
-#     i,j = pixel_positions.T
-#     pattern[i, j] = 1
-#     return pattern
 
 @pytest.mark.parametrize("radius, offset", [[1, 0], [2, 1], [3, 2]])
 # @pytest.mark.parametrize("offset", [0, 1, 2])
