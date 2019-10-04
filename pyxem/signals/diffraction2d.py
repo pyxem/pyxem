@@ -504,9 +504,6 @@ class Diffraction2D(Signal2D):
             Size of the window that is convoluted with the array to determine
             the median. Should be large enough that it is about 3x as big as the
             size of the peaks (median only).
-        implementation : 'scipy' or 'skimage'
-            (median only) see expt_utils.subtract_background_median
-            for details, if not selected 'scipy' is used
         bg : array
             Background array extracted from vacuum. (subtract_reference only)
         *args:
@@ -534,12 +531,6 @@ class Diffraction2D(Signal2D):
                                      inplace=False, *args, **kwargs)
 
         elif method == 'median':
-            if 'implementation' in kwargs.keys():
-                if kwargs['implementation'] != 'scipy' and kwargs['implementation'] != 'skimage':
-                    raise NotImplementedError(
-                        "Unknown implementation `{}`".format(
-                            kwargs['implementation']))
-
             bg_subtracted = self.map(subtract_background_median,
                                      inplace=False, *args, **kwargs)
 

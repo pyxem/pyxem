@@ -282,7 +282,6 @@ class TestBackgroundMethods:
         ('h-dome', {'h': 1, }),
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
         ('median', {'footprint': 4, }),
-        ('median', {'footprint': 4, 'implementation': 'skimage'}),
         ('reference_pattern', {'bg': np.ones((8, 8)), })
     ])
     # skimage being warned by numpy, not for us
@@ -352,10 +351,6 @@ class TestNotImplemented():
 
     def test_remove_background_fake_method(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='fake_method')
-
-    def test_remove_background_fake_implementation(self, diffraction_pattern):
-        bgr = diffraction_pattern.remove_background(
-            method='median', implementation='fake_implementation')
 
 
 class TestComputeAndAsLazyElectron2D:
