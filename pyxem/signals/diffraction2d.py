@@ -514,7 +514,7 @@ class Diffraction2D(Signal2D):
             'median':
             {'method':subtract_background_median,'params':['footprint']},
             'reference_pattern':
-            {'method':subtract_background_reference_pattern,'params':['bg']},
+            {'method':subtract_reference,'params':['bg']},
             }
 
         if method not in method_dict:
@@ -527,13 +527,13 @@ class Diffraction2D(Signal2D):
             return None
 
         if method != 'h-dome':
-            bg_subtracted = self.map(method_dict[method][method],
-                                     inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(method_dict[method]['method'],
+                                     inplace=False,**kwargs)
         else:
             scale = self.data.max()
             self.data = self.data / scale
             bg_subtracted = self.map(regional_filter,
-                                     inplace=False, *args, **kwargs)
+                                     inplace=False,**kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
