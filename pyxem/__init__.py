@@ -36,6 +36,8 @@ from diffsims.generators.library_generator import VectorLibraryGenerator
 from diffsims.sims.diffraction_simulation import DiffractionSimulation
 
 from .components.diffraction_component import ElectronDiffractionForwardModel
+from .components.scattering_fit_component_lobato import ScatteringFitComponentLobato
+from .components.scattering_fit_component_xtables import ScatteringFitComponentXTables
 
 from .generators.calibration_generator import CalibrationGenerator
 from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
