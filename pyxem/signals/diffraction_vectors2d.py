@@ -487,7 +487,7 @@ class DiffractionVectors2D(BaseSignal):
         # Imported here to avoid circular dependency
         # TODO: Need to generalize this to X-rays/electrons
         from diffsims.utils.sim_utils import get_electron_wavelength
-        wavelength = get_electron_wavelength(accelerating_voltage)
+        wavelength = get_electron_wavelength(beam_energy)
         self.cartesian = self.map(detector_to_fourier,
                                   wavelength=wavelength,
                                   camera_length=camera_length * 1e10,
