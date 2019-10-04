@@ -46,7 +46,7 @@ class CalibrationDataLibrary(dict):
 
         Parameters
         ----------
-        data_to_plot : string
+        data_to_plot : str
             Specify the calibration data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im'}
         roi : :obj:`hyperspy.roi.BaseInteractiveROI`

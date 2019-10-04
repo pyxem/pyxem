@@ -412,7 +412,7 @@ class CalibrationGenerator():
 
         Parameters
         ----------
-        data_to_plot : string
+        data_to_plot : str
             Specify the calibrated data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im',
             'rotation_overlay'}

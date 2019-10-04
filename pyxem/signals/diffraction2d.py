@@ -252,7 +252,7 @@ class Diffraction2D(Signal2D):
         ----------
         deadpixels : list
             List of deadpixels to be removed.
-        deadvalue : string
+        deadvalue : str
             Specify how deadpixels should be treated. 'average' sets the dead
             pixel value to the average of adjacent pixels. 'nan' sets the dead
             pixel to nan
@@ -483,7 +483,7 @@ class Diffraction2D(Signal2D):
 
         Parameters
         ----------
-        method : string
+        method : str
             Specify the method used to determine the direct beam position.
 
             * 'h-dome' -
@@ -565,11 +565,11 @@ class Diffraction2D(Signal2D):
 
         Parameters
         ---------
-        method : string
+        method : str
             Select peak finding algorithm to implement. Available methods are
             {'zaefferer', 'stat', 'laplacian_of_gaussians',
             'difference_of_gaussians', 'xc'}
-        return_as : string
+        return_as : str
             'detector_coordinates' or 'diffraction_vectors'. Choose how
         *args : arguments
             Arguments to be passed to the peak finders.

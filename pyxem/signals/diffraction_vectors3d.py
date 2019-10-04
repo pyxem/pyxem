@@ -178,7 +178,7 @@ class DiffractionVectors3D(BaseSignal):
             be considered unique diffraction vectors. If
             distance_threshold==0, the unique vectors will be determined
             by strict comparison.
-        method : string
+        method : str
             The method to use to determine unique vectors. Valid methods
             are 'strict', 'distance_comparison' and 'DBSCAN'.
             'strict' returns all vectors that are strictly unique and
