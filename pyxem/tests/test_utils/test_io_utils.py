@@ -20,6 +20,7 @@ import pytest
 import numpy as np
 import pyxem as pxm
 import os
+import hyperspy.api as hs
 
 from hyperspy.signals import Signal2D
 
@@ -39,75 +40,14 @@ from pyxem.signals.vdf_image import VDFImage
                                                        (VDFImage, 'string6')])
 def test_load_function_core(class_to_test, meta_string):
     """
-    Test the core; which is load a previously saved pyxem object.
+    Test the core functionality which is
+    loading a previously saved pyxem object
     """
     to_save = class_to_test(np.zeros((2, 2, 2, 2)))
     to_save.metadata.Signal.tracker = meta_string
     to_save.save('tempfile.hspy')
-    from_save = pxm.load('tempfile.hspy')
+    from_save = hs.load('tempfile.hspy')
     assert isinstance(from_save, class_to_test)
     assert from_save.metadata.Signal.tracker == meta_string
     assert np.allclose(to_save.data, from_save.data)
     os.remove('tempfile.hspy')
-
-
-@pytest.fixture()
-def make_saved_Signal2D():
-    """
-    #Lifted from stackoverflow question #22627659
-    """
-    s = Signal2D(np.zeros((2, 2, 2, 2)))
-    s.metadata.Signal.tracker = 'make_save_Signal2D'
-    s.save('S2D_temp')
-    s.save('badfilesuffix.emd')
-    yield
-    os.remove('S2D_temp.hspy')
-    os.remove('badfilesuffix.emd')  # for case 3 of the edgecases
-
-
-@pytest.mark.xfail(raises=ValueError)
-def test_load_Signal2D(make_saved_Signal2D):
-    """
-    This tests that we can "load a Signal2D" with pxm.load and that we auto cast
-    safetly into ElectronDiffraction2D
-    """
-    dp = pxm.load('S2D_temp.hspy')
-
-
-def test_load_hspy_Signal2D(make_saved_Signal2D):
-    """
-    This tests that we can "load a Signal2D" with pxm.load and that we auto cast
-    safetly into ElectronDiffraction2D
-    """
-    dp = pxm.load_hspy('S2D_temp.hspy', assign_to='electron_diffraction2d')
-    assert dp.metadata.Signal.signal_type == 'electron_diffraction2d'
-    assert dp.metadata.Signal.tracker == 'make_save_Signal2D'
-
-
-@pytest.mark.xfail(raises=ValueError)
-def test_load_hspy_Signal2D_not_pyxem(make_saved_Signal2D):
-    """
-    This tests that we can "load a Signal2D" with pxm.load and that we auto cast
-    safetly into ElectronDiffraction2D
-    """
-    dp = pxm.load_hspy('S2D_temp.hspy', assign_to='not_pyxem_signal')
-
-
-@pytest.fixture()
-def make_saved_dp(diffraction_pattern):
-    """
-    This makes use of conftest
-    """
-    diffraction_pattern.save('dp_temp')
-    yield
-    os.remove('dp_temp.hspy')
-
-
-def test_load_ElectronDiffraction2D(diffraction_pattern, make_saved_dp):
-    """
-    This tests that our load function keeps .data, instance and metadata
-    """
-    dp = pxm.load('dp_temp.hspy')
-    assert np.allclose(dp.data, diffraction_pattern.data)
-    assert isinstance(dp, ElectronDiffraction2D)
-    assert diffraction_pattern.metadata.Signal.found_from == dp.metadata.Signal.found_from
