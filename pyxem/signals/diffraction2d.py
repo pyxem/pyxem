@@ -484,38 +484,31 @@ class Diffraction2D(Signal2D):
         Parameters
         ----------
         method : string
-            Specify the method used to determine the direct beam position.
-
-            * 'h-dome' -
-            * 'gaussian_difference' - Uses a difference between two gaussian
-                                convolutions to determine where the peaks are,
-                                and sets all other pixels to 0.
-            * 'median' - Use a median filter for background removal
-            * 'reference_pattern' - Subtract a user-defined reference patterns
-                from every diffraction pattern.
-
-        sigma_min : int, float
-            Standard deviation for the minimum gaussian convolution
-            (gaussian_difference only)
-        sigma_max : int, float
-            Standard deviation for the maximum gaussian convolution
-            (gaussian_difference only)
-        footprint : int
-            Size of the window that is convoluted with the array to determine
-            the median. Should be large enough that it is about 3x as big as the
-            size of the peaks (median only).
-        bg : array
-            Background array extracted from vacuum. (subtract_reference only)
+            Specifies the method, from:
+            {'h-dome','gaussian_difference','median','reference_pattern'}
         *args:
-            Arguments to be passed to map().
+            Arguments to be passed to map()
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to map(), including method specific ones:
+            'h-dome' requires 'h'
+            'gaussian_difference' requires 'sigma_min' and 'sigma_max'
+            'median' requires 'footprint'
+            'reference_pattern' requires 'bg'
 
         Returns
         -------
         bg_subtracted : :obj:`ElectronDiffraction2D`
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
+
+        Notes
+        -----
+        Further details on the methods can be found by looking at the docstrings
+        for the associated utils, these can be accessed by:
+        >>> from pyxem.utils.expt_utils import regional_filter
+        >>> from pyxem.utils.expt_utils import subtract_background_dog
+        >>> from pyxem.utils.expt_utils import subtract_background_median
+        >>> from pyxem.utils.expt_utils import subtract_reference
 
         """
         if method == 'h-dome':
