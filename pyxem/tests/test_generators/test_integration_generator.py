@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.generators.integration_generator import IntegrationGenerator
-from pyxem.signals.diffraction_vectors import DiffractionVectors3D
+from pyxem.signals.diffraction_vectors3d import DiffractionVectors3D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from hyperspy.signals import BaseSignal
 from scipy.ndimage import gaussian_filter

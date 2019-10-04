@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator, get_simulated_disc
-from pyxem.signals.diffraction_vectors import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
@@ -34,19 +34,20 @@ class Test_init_xfails:
         dp = ElectronDiffraction2D(np.ones((20, 20)))
         sprg = SubpixelrefinementGenerator(dp, vector)
 
-    def test_out_of_range_vectors_DiffractionVectors(self):
-        vectors = DiffractionVectors(np.array([[1, -100]]))
+    def test_out_of_range_vectors_DiffractionVectors2D(self):
+        vectors = DiffractionVectors2D(np.array([[1, -100]]))
         dp = ElectronDiffraction2D(np.ones((20, 20)))
         sprg = SubpixelrefinementGenerator(dp, vectors)
 
     """ Tests that navigation dimensions must be appropriate too """
     def test_wrong_navigation_dimensions(self):
         dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
-        vectors = DiffractionVectors(np.zeros((1, 2)))
+        vectors = DiffractionVectors2D(np.zeros((1, 2)))
         dp.axes_manager.set_signal_dimension(2)
         vectors.axes_manager.set_signal_dimension(0)
         SPR_generator = SubpixelrefinementGenerator(dp, vectors)
 
+class set_up_for_subpixelpeakfinders:
 
     def create_spot(self):
         z1,z1a = np.zeros((128, 128)),np.zeros((128, 128))
@@ -64,22 +65,22 @@ class Test_init_xfails:
         #marks centers for local com and local_gaussian_method
         z1[30,90],z2[30,90],z2[100,60] = 2,2,2
         z1a[30,93],z2a[30,93],z2a[98,60] = 10,10,10
-
-        dp = ElectronDiffraction2D(np.asarray([[z1, z1a], [z2, z2a]]))  # this needs to be in 2x2
+        # this needs to be in 2x2
+        dp = ElectronDiffraction2D(np.asarray([[z1, z1a], [z2, z2a]]))
         return dp
 
 
     def create_Diffraction_vectors(self):
         v1 = np.array([[90 - 64, 30 - 64]])
         v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
-        vectors = DiffractionVectors(np.array([[v1, v1], [v2, v2]]))
+        vectors = DiffractionVectors2D(np.array([[v1, v1], [v2, v2]]))
         vectors.axes_manager.set_signal_dimension(0)
         return vectors
 
 
 class Test_subpixelpeakfinders:
     """ Tests the various peak finders have the correct x,y conventions for
-    both the vectors and the shifts, in both the numpy and the DiffractionVectors
+    both the vectors and the shifts, in both the numpy and the DiffractionVectors2D
     cases as well as confirming we have avoided 'off by one' errors """
 
     set_up = set_up_for_subpixelpeakfinders()
@@ -103,18 +104,6 @@ class Test_subpixelpeakfinders:
         rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
         assert rms_error < 0.5   # correct to within a pixel
 
-@pytest.mark.parametrize('dp, diffraction_vectors', [
-    (create_spot(), np.array([[90 - 64, 30 - 64]])),
-    (create_spot(), create_vectors())
-])
-@pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
-@pytest.mark.filterwarnings('ignore::RuntimeWarning')  # various skimage warnings
-def test_assertioned_xc(dp, diffraction_vectors):
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.conventional_xc(12, 4, 8)
-    error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
-    rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
-    assert rms_error < 0.2  # 1/5th a pixel
 
     def test_assertioned_xc(self,diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).conventional_xc(12, 4, 8)

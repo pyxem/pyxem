@@ -24,7 +24,7 @@ from pyxem.generators.indexation_generator import VectorIndexationGenerator
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
-from pyxem.signals.diffraction_vectors import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 
 from pyxem.utils.indexation_utils import OrientationResult
 

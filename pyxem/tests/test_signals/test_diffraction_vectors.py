@@ -18,7 +18,7 @@
 
 import pytest
 import numpy as np
-from pyxem.signals.diffraction_vectors import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from sklearn.cluster.dbscan_ import DBSCAN
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors

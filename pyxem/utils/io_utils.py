@@ -37,7 +37,7 @@ from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.vdf_image import VDFImage
 from pyxem.signals.crystallographic_map import CrystallographicMap
-from pyxem.signals.diffraction_vectors import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.signals.indexation_results import TemplateMatchingResults
 
 from pyxem.signals.diffraction1d import LazyDiffraction1D
@@ -502,12 +502,12 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
         else:
             try:
                 if hdr_info['Counter Depth (number)'] == 1:
-                    # RAW 1 bit data: the header bits are written as uint8 but the frames 
-                    # are binary and need to be unpacked as such. 
+                    # RAW 1 bit data: the header bits are written as uint8 but the frames
+                    # are binary and need to be unpacked as such.
                     data = data.reshape(-1, width_height/8 + hdr_bits)[:, 71:79]
                 else:
                     data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
-                
+
                 data = data [:, ]
                 data_crop = data[:int(depth*pct_frames_to_read)]
                 d = data_crop.compute()
@@ -683,8 +683,8 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
 
         if hdr_info['Assembly Size'] == '2x2':
             if hdr_info['Counter Depth (number)'] == 1:
-                # RAW 1 bit data: the header bits are written as uint8 but the frames 
-                # are binary and need to be unpacked as such. 
+                # RAW 1 bit data: the header bits are written as uint8 but the frames
+                # are binary and need to be unpacked as such.
                 data = data.reshape(-1, width_height/8 + hdr_bits)
                 data = data[:,hdr_bits:]
                 data = np.unpackbits(data)

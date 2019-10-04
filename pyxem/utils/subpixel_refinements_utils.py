@@ -23,7 +23,7 @@ utils to support SubpixelrefinementGenerator
 import numpy as np
 from skimage import draw
 from skimage.transform import rescale
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 
 
 def get_experimental_square(z, vector, square_size):

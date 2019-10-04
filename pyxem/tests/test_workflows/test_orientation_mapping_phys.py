@@ -31,7 +31,7 @@ from diffsims.utils.sim_utils import get_kinematical_intensities
 from pyxem.generators.indexation_generator import IndexationGenerator
 from pyxem.generators.indexation_generator import VectorIndexationGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.diffraction_vectors import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import peaks_from_best_vector_match
 from pyxem.utils.indexation_utils import OrientationResult

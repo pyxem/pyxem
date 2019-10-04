@@ -21,7 +21,7 @@ import pytest
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
-from pyxem.signals.diffraction_vectors import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 
 
 def test_template_get_crystallographic_map(dp_template_match_result,
