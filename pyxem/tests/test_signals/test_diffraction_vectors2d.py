@@ -83,20 +83,20 @@ def diffraction_vectors_map(request):
 
 
 def test_plot_diffraction_vectors(diffraction_vectors_map):
-    diffraction_vectors_map.plot_diffraction_vectors(xlim=1., ylim=1.,
+    diffraction_vectors_map.plot_vectors(xlim=1., ylim=1.,
                                                      distance_threshold=0)
 
 
 def test_plot_diffraction_vectors_on_signal(diffraction_vectors_map,
                                             diffraction_pattern):
-    diffraction_vectors_map.plot_diffraction_vectors_on_signal(diffraction_pattern)
+    diffraction_vectors_map.plot_vectors_on_signal(diffraction_pattern)
 
 
-def test_get_cartesian_coordinates(diffraction_vectors_map):
+def test_as_diffraction_vectors3d(diffraction_vectors_map):
     accelerating_voltage = 200
     camera_length = 0.2
-    diffraction_vectors_map.calculate_cartesian_coordinates(accelerating_voltage,
-                                                            camera_length)
+    diffraction_vectors_map.as_diffraction_vectors3d(accelerating_voltage,
+                                                     camera_length)
     # Coordinate conversion is tested in vector_utils. Just test that the
     # result is stored correctly
     assert diffraction_vectors_map.cartesian is not None
