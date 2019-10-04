@@ -455,10 +455,19 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
     # mib data always big-endian
     endian = '>'
     data_type += str(int(data_length))
-    data_type = np.dtype(data_type)
+    # uint1 not a valid dtype
+    if data_type == 'uint1':
+        data_type = 'uint8'
+        data_type = np.dtype(data_type)
+    else:
+        data_type = np.dtype(data_type)
     data_type = data_type.newbyteorder(endian)
 
-    hdr_multiplier = (int(data_length)/8)**-1
+    if data_length == '1':
+        hdr_multiplier = 1
+    else:
+        hdr_multiplier = (int(data_length)/8)**-1
+
     hdr_bits = int(hdr_info['data offset'] * hdr_multiplier)
 
     data = np.memmap(fp,
@@ -490,10 +499,15 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
             except ValueError:
                 print('Frame exposure times are not appearing in header!')
 
-
         else:
             try:
-                data = data.reshape(-1,  width_height + hdr_bits)[:,71:79]
+                if hdr_info['Counter Depth (number)'] == 1:
+                    # RAW 1 bit data: the header bits are written as uint8 but the frames 
+                    # are binary and need to be unpacked as such. 
+                    data = data.reshape(-1, width_height/8 + hdr_bits)[:, 71:79]
+                else:
+                    data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
+                
                 data = data [:, ]
                 data_crop = data[:int(depth*pct_frames_to_read)]
                 d = data_crop.compute()
@@ -634,9 +648,11 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
     else:
         data_type = np.dtype(data_type)
     data_type = data_type.newbyteorder(endian)
+    if data_length == '1':
+        hdr_multiplier = 1
+    else:
+        hdr_multiplier = (int(data_length)/8)**-1
 
-
-    hdr_multiplier = (int(data_length)/8)**-1
     hdr_bits = int(hdr_info['data offset'] * hdr_multiplier)
 
 
@@ -666,9 +682,18 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
         #remove headers at the beginning of each frame and reshape
 
         if hdr_info['Assembly Size'] == '2x2':
-
+            if hdr_info['Counter Depth (number)'] == 1:
+                # RAW 1 bit data: the header bits are written as uint8 but the frames 
+                # are binary and need to be unpacked as such. 
+                data = data.reshape(-1, width_height/8 + hdr_bits)
+                data = data[:,hdr_bits:]
+                data = np.unpackbits(data)
+                data = data.reshape(depth,width,height)
+            else:
+                data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(depth, width, height)
+        elif hdr_info['Assembly Size'] == '1x1':
             data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(depth, width, height)
-
+            data = data.reshape(depth, 256, 256)
 
 
         if hdr_info['raw'] == 'R64':
@@ -691,13 +716,9 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
 
             if hdr_info['Assembly Size'] == '2x2':
 
-                try:
-                    data = data.reshape((depth*width_height))
 
-                    data = data.reshape(depth,512 // 2, 512 * 2 )
-                except ValueError:
-                    data = data.reshape((depth*width_height))
-                    data = data.reshape(depth,512 // 2, 512 * 2 )
+                data = data.reshape((depth*width_height))
+                data = data.reshape(depth, 512 // 2, 512 * 2)
 
                 det1 = data[:, :, 0:256]
                 det2 = data[:, :, 256:512]
