@@ -28,7 +28,7 @@ from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.signals.detector_coordinates2d import DetectorCoordinates2D
 from pyxem.signals import push_metadata_through
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \

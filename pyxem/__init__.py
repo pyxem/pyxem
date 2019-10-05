@@ -53,7 +53,7 @@ from .signals.electron_diffraction2d import ElectronDiffraction2D
 from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 
-from .signals.detector_coordinates import DetectorCoordinates2D
+from .signals.detector_coordinates2d import DetectorCoordinates2D
 from .signals.diffraction_vectors2d import DiffractionVectors2D
 from .signals.diffraction_vectors3d import DiffractionVectors3D
 
