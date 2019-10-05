@@ -70,19 +70,19 @@ signals:
     signal_dimension: None
     dtype: real
     lazy: False
-    module: pyxem.signals.detector_coordinates
+    module: pyxem.signals.detector_coordinates2d
   DiffractionVectors2D:
     signal_type: "DiffractionVectors2D"
     signal_dimension: None
     dtype: real
     lazy: False
-    module: pyxem.signals.diffraction_vectors
+    module: pyxem.signals.diffraction_vectors2d
   DiffractionVectors3D:
     signal_type: "DiffractionVectors3D"
     signal_dimension: None
     dtype: real
     lazy: False
-    module: pyxem.signals.diffraction_vectors
+    module: pyxem.signals.diffraction_vectors3d
   TemplateMatchingResults:
     signal_type: "TemplateMatchingResults"
     signal_dimension: None
