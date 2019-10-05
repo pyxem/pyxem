@@ -486,7 +486,7 @@ class Diffraction2D(Signal2D):
         method : str
             Specifies the method, from:
             {'h-dome','gaussian_difference','median','reference_pattern'}
-        **kwargs:
+        **kwargs :
             Method specific keyword arguments to be passed to map().
             If None, the method speicic kward documentation will be returned.
 
@@ -540,9 +540,8 @@ class Diffraction2D(Signal2D):
         return bg_subtracted
 
     def find_peaks(self, method,
-                   return_as='detector_coordinates',
                    *args, **kwargs):
-        """Find the position of diffraction peaks.
+        """Determine the coordinates of
 
         Function to locate the positive peaks in an image using various, user
         specified, methods. Returns a structured array containing the peak
@@ -554,19 +553,15 @@ class Diffraction2D(Signal2D):
             Select peak finding algorithm to implement. Available methods are
             {'zaefferer', 'stat', 'laplacian_of_gaussians',
             'difference_of_gaussians', 'xc'}
-        return_as : str
-            'detector_coordinates' or 'diffraction_vectors'. Choose how
-        *args : arguments
-            Arguments to be passed to the peak finders.
-        **kwargs : arguments
-            Keyword arguments to be passed to the peak finders.
+        **kwargs :
+            Method specific keyword arguments to be passed to map().
+            If None, the method speicic kward documentation will be returned.
 
         Returns
         -------
-        peaks : DiffractionCoordinates2D | DiffractionVectors2D
-            A DetectorCoordinates2D or DiffractionVectors2D object with
-            navigation dimensions identical to the original
-            ElectronDiffraction2D object.
+        peak_coordinates : DetectorCoordinates2D
+            The pixel coordinates of peaks found in the Diffraction2D signal,
+            with navigation dimensions identical to the Diffraction2D object.
 
         Notes
         -----
@@ -585,33 +580,37 @@ class Diffraction2D(Signal2D):
 
         """
         method_dict = {
-            'zaefferer': find_peaks_zaefferer,
-            'stat': find_peaks_stat,
-            'laplacian_of_gaussians': find_peaks_log,
-            'difference_of_gaussians': find_peaks_dog,
-            'xc': find_peaks_xc
-        }
-        if method in method_dict:
-            method = method_dict[method]
-        else:
+            'zaefferer':
+            {'method':find_peaks_zaefferer,
+             'params':['sigma_min','sigma_max']},
+            'stat':
+            {'method':find_peaks_stat,
+             'params':['footprint']},
+            'laplacian_of_gaussians':
+            {'method':find_peaks_log,
+             'params':['bg']},
+            'difference_of_gaussians':
+            {'method':find_peaks_dog,
+             'params':['bg']},
+            'xc':
+            {'method':find_peaks_xc,
+             'params':['bg']},
+            }
+
+        if method not in method_dict:
             raise NotImplementedError("The method `{}` is not implemented. "
-                                      "See documentation for available "
-                                      "implementations.".format(method))
+                                         "See documentation for available "
+                                         "implementations.".format(method))
+        if not kwargs:
+            for kwarg in method_dict[method]['params']:
+                print("You need the `{}` kwarg".format(kwarg))
+            return None
 
-        peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-        if return_as == 'diffraction_vectors':
-            peaks.map(peaks_as_gvectors,
-                      center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
-                      calibration=self.axes_manager.signal_axes[0].scale)
-            peaks = DiffractionVectors2D(peaks)
-            peaks.axes_manager.set_signal_dimension(0)
-        elif return_as is not 'detector_coordinates':
-            raise ValueError("return_as must be 'diffraction_vectors' or "
-                             "'detector_coordinates' only. ")
-
+        peak_coordinates = self.map(method, **kwargs,
+                                    inplace=False, ragged=True)
         # Set calibration to same as signal
-        x = peaks.axes_manager.navigation_axes[0]
-        y = peaks.axes_manager.navigation_axes[1]
+        x = peak_coordinates.axes_manager.navigation_axes[0]
+        y = peaks_coordinates.axes_manager.navigation_axes[1]
 
         x.name = 'x'
         x.scale = self.axes_manager.navigation_axes[0].scale
@@ -621,7 +620,7 @@ class Diffraction2D(Signal2D):
         y.scale = self.axes_manager.navigation_axes[1].scale
         y.units = 'nm'
 
-        return peaks
+        return peak_coordinates
 
     def find_peaks_interactive(self, disc_image=None, imshow_kwargs={}):
         """Find peaks using an interactive tool.
