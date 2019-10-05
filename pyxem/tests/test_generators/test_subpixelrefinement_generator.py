@@ -152,3 +152,6 @@ def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
     """ we also test com method for clarity """
     peaks = spg.center_of_mass_method(60).data[0,0,0]
     np.testing.assert_allclose([0,-4],peaks,atol=1.5)
+    """ we also test reference_xc """
+    peaks = spg.reference_xc(100,dp,1).data[0,0,0] #as quoted in the issue
+    np.testing.assert_allclose([0,-4],peaks)
