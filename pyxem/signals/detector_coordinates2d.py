@@ -319,6 +319,41 @@ class DetectorCoordinates2D(BaseSignal):
         else:
             return unique_peaks
 
+    def get_npeaks_map(self, binary=False):
+        """Map of the number of vectors at each navigation position.
+
+        Parameters
+        ----------
+        binary : boolean
+            If True a binary image with diffracting pixels taking value == 1 is
+            returned.
+
+        Returns
+        -------
+        crystim : Signal2D
+            2D map of diffracting pixels.
+        """
+        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+
+        if binary == True:
+            crystim = crystim == 1
+
+        crystim.change_dtype('float')
+
+        # Set calibration to same as signal
+        x = crystim.axes_manager.signal_axes[0]
+        y = crystim.axes_manager.signal_axes[1]
+
+        x.name = 'x'
+        x.scale = self.axes_manager.navigation_axes[0].scale
+        x.units = 'nm'
+
+        y.name = 'y'
+        y.scale = self.axes_manager.navigation_axes[0].scale
+        y.units = 'nm'
+
+        return crystim
+
     def as_diffraction_vectors2d(self, center, calibration,
                                  *args, **kwargs):
         """Transform detector coordinates to two-dimensional diffraction vectors

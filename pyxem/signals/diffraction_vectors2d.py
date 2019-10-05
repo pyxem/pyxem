@@ -62,7 +62,7 @@ class DiffractionVectors2D(BaseSignal):
         Array of Miller indices associated with each diffraction vector
         following indexation.
     """
-    _signal_type = "diffraction_vectors"
+    _signal_type = "diffraction_vectors2d"
 
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
@@ -402,41 +402,6 @@ class DiffractionVectors2D(BaseSignal):
             return unique_peaks, clusters
         else:
             return unique_peaks
-
-    def get_diffracting_pixels_map(self, binary=False):
-        """Map of the number of vectors at each navigation position.
-
-        Parameters
-        ----------
-        binary : boolean
-            If True a binary image with diffracting pixels taking value == 1 is
-            returned.
-
-        Returns
-        -------
-        crystim : Signal2D
-            2D map of diffracting pixels.
-        """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
-
-        if binary == True:
-            crystim = crystim == 1
-
-        crystim.change_dtype('float')
-
-        # Set calibration to same as signal
-        x = crystim.axes_manager.signal_axes[0]
-        y = crystim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
-
-        return crystim
 
     def as_diffraction_vectors3d(self, beam_energy,
                                  camera_length,

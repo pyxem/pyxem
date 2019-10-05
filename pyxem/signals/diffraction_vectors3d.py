@@ -55,47 +55,20 @@ class DiffractionVectors3D(BaseSignal):
 
     Attributes
     ----------
+    detector_coordinates : DetectorCoordinates2D
+        Array of 2-vectors describing detector coordinates associated with each
+        diffraction vector.
     hkls : np.array()
         Array of Miller indices associated with each diffraction vector
         following indexation.
     """
-    _signal_type = "diffraction_vectors"
+    _signal_type = "diffraction_vectors3d"
 
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
-        self.cartesian = None
+        self.detector_coordinates = None
         self.hkls = None
-
-    @classmethod
-    def from_peaks(cls, peaks, center, calibration):
-        """Takes a list of peak positions (pixel coordinates) and returns
-        an instance of `Diffraction3D`
-
-        Parameters
-        ----------
-        peaks : Signal
-            Signal containing lists (np.array) of pixel coordinates specifying
-            the reflection positions
-        center : np.array
-            Diffraction pattern center in array indices.
-        calibration : np.array
-            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
-
-        Returns
-        -------
-        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors2D`
-            List of diffraction vectors
-        """
-        gvectors = peaks.map(peaks_as_gvectors,
-                             center=center,
-                             calibration=calibration,
-                             inplace=False)
-
-        vectors = cls(gvectors)
-        vectors.axes_manager.set_signal_dimension(0)
-
-        return vectors
 
     def get_magnitudes(self, *args, **kwargs):
         """Calculate the magnitude of diffraction vectors.
@@ -257,43 +230,3 @@ class DiffractionVectors3D(BaseSignal):
             return unique_peaks, clusters
         else:
             return unique_peaks
-
-    def get_diffracting_pixels_map(self, binary=False):
-        """Map of the number of vectors at each navigation position.
-
-        Parameters
-        ----------
-        binary : boolean
-            If True a binary image with diffracting pixels taking value == 1 is
-            returned.
-
-        Returns
-        -------
-        crystim : Signal2D
-            2D map of diffracting pixels.
-        """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
-
-        if binary == True:
-            crystim = crystim == 1
-
-        crystim.change_dtype('float')
-
-        # Set calibration to same as signal
-        x = crystim.axes_manager.signal_axes[0]
-        y = crystim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
-
-        return crystim
-
-    def as_detector_coordinates2d(self, beam_energy,
-                                  camera_length,
-                                  pixel_size):
-        pass
