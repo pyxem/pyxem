@@ -487,8 +487,8 @@ class Diffraction2D(Signal2D):
             Specifies the method, from:
             {'h-dome','gaussian_difference','median','reference_pattern'}
         **kwargs:
-            Keyword arguments to be passed to map(), including method specific ones,
-            running a method with no kwargs will tell you which kwargs you need
+            Method specific keyword arguments to be passed to map().
+            If None, the method speicic kward documentation will be returned.
 
         Returns
         -------
