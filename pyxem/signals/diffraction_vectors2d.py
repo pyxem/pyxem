@@ -55,9 +55,9 @@ class DiffractionVectors2D(BaseSignal):
 
     Attributes
     ----------
-    cartesian : np.array()
-        Array of 3-vectors describing Cartesian coordinates associated with
-        each diffraction vector.
+    detector_coordinates : DetectorCoordinates2D
+        Array of 2-vectors describing detector coordinates associated with each
+        diffraction vector.
     hkls : np.array()
         Array of Miller indices associated with each diffraction vector
         following indexation.
