@@ -130,17 +130,17 @@ class SubpixelrefinementGenerator():
         self.last_method = "conventional_xc"
         return self.vectors_out
 
-    def reference_xc(self, reference_dp, square_size, upsample_factor):
+    def reference_xc(self, square_size, reference_dp, upsample_factor):
         """Refines the peaks using (phase) cross correlation with a reference
         diffraction image.
 
         Parameters
         ----------
-        reference_dp: ndarray
-            Same shape as a single diffraction image
         square_size : int
             Length (in pixels) of one side of a square the contains the peak to
             be refined.
+        reference_dp: ndarray
+            Same shape as a single diffraction image
         upsample_factor: int
             Factor by which to upsample the patterns
 
