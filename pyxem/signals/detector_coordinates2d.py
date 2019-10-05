@@ -52,18 +52,16 @@ class DetectorCoordinates2D(BaseSignal):
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
-        self.cartesian = None
-        self.hkls = None
 
-    def plot_diffraction_vectors(self, xlim=1.0, ylim=1.0,
-                                 unique_vectors=None,
-                                 distance_threshold=0.01,
-                                 method='distance_comparison',
-                                 min_samples=1,
-                                 image_to_plot_on=None,
-                                 image_cmap='gray',
-                                 plot_label_colors=False,
-                                 distance_threshold_all=0.005):  # pragma: no cover
+    def plot_detector_coordinates(self, xlim=1.0, ylim=1.0,
+                                  unique_vectors=None,
+                                  distance_threshold=0.01,
+                                  method='distance_comparison',
+                                  min_samples=1,
+                                  image_to_plot_on=None,
+                                  image_cmap='gray',
+                                  plot_label_colors=False,
+                                  distance_threshold_all=0.005): # pragma: no cover
         """Plot the unique diffraction vectors.
 
         Parameters
@@ -200,30 +198,49 @@ class DetectorCoordinates2D(BaseSignal):
             m = markers.point(x=mx, y=my, color='red', marker='x')
             signal.add_marker(m, plot_marker=True, permanent=False)
 
-    def as_diffraction_vectors2D():
-        vectors = self.map(peaks_as_gvectors,
-                           center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
-                           calibration=self.axes_manager.signal_axes[0].scale)
-        vectors = DiffractionVectors2D(vectors)
-        vectors.axes_manager.set_signal_dimension(0)
-        pass
+    def as_diffraction_vectors2d(self, center, calibration,
+                                 *args, **kwargs):
+        """Transform detector coordinates to two-dimensional diffraction vectors
+        with coordinates in calibrated units of reciprocal Angstroms.
 
-    def detector_px_to_cartesian_diffraction_coordinates(self,
-                                                         azimuthal_integrator,
-                                                         *args, **kwargs):
-        """Takes a DiffractionVector object with peaks expressed in pixels
-        in the detector. It maps the function detector_px_to_3D_kspace along the
-        scanning pixels of the DiffractionVector class. It stores in the
-        DiffractionVector.cartesian attribute, the gx, gy and gz cartesian
-        coordinates of the diffraction vector, in Angstoms^-1, using purely
-        geometrical arguments.
+        Note that this transformation corresponds to making a flat Ewald sphere
+        approximation.
 
         Parameters
         ----------
-        self: DiffractionVector
-            A DiffractionVector object with the diffraction vectors in pixel
-            units of the detector.
-        azimuthal_integrator: pyFAI.azimuthalIntegrator.AzimuthalIntegrator
+        center :
+        calibration :
+        *args : arguments
+            Arguments to be passed to the map method.
+        **kwargs : keyword arguments
+            Keyword arguments to be passed to the map method.
+
+        Returns
+        -------
+        vectors : DiffractionVectors2D
+            Object containing two-dimensional reciprocal space vectors with
+            coordinates [k_x, k_y] for each detector coorinate. The
+            navigation dimensions are unchanged.
+        """
+        vectors = self.map(peaks_as_gvectors,
+                           center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
+                           calibration=self.axes_manager.signal_axes[0].scale,
+                           inplace=False,
+                           parallel=False,
+                           *args, **kwargs)
+        transfer_navigation_axes(vectors, self)
+
+        return vectors
+
+    def as_diffraction_vectors3d(self,
+                                 azimuthal_integrator,
+                                 *args, **kwargs):
+        """Transform detector coordinates to three-dimensional diffraction vectors
+        with coordinates in calibrated units of reciprocal Angstroms.
+
+        Parameters
+        ----------
+        azimuthal_integrator : pyFAI.azimuthalIntegrator.AzimuthalIntegrator
             A pyFAI Geometry object, containing all the detector geometry
             parameters.
         *args : arguments
@@ -232,15 +249,17 @@ class DetectorCoordinates2D(BaseSignal):
             Keyword arguments to be passed to the plot method.
 
         Returns
-        ----------
-        self: DiffractionVector
-            DiffractionProfile.cartesian attribute has stored the respective
-            transformed px cordinates to angstrom^-1, in the form of an array
-            containing [g_x, g_y, g_z] for each scanning coordinate.
+        -------
+        vectors : DiffractionVectors3D
+            Object containing three-dimensional reciprocal space vectors with
+            coordinates [k_x, k_y, k_z] for each detector coorinate. The
+            navigation dimensions are unchanged.
         """
-        self.cartesian = self.map(detector_px_to_3D_kspace,
-                                  ai=azimuthal_integrator,
-                                  inplace=False,
-                                  parallel=False
-                                  * args, **kwargs)
-        transfer_navigation_axes(self.cartesian, self)
+        vectors = self.map(detector_px_to_3D_kspace,
+                             ai=azimuthal_integrator,
+                             inplace=False,
+                             parallel=False
+                             *args, **kwargs)
+        transfer_navigation_axes(vectors, self)
+
+        return vectors
