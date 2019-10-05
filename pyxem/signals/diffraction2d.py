@@ -508,19 +508,19 @@ class Diffraction2D(Signal2D):
         """
         method_dict = {
             'h-dome':
-            {'method':'h-dome','params':['h']},
+            {'method': 'h-dome', 'params': ['h']},
             'gaussian_difference':
-            {'method':subtract_background_dog,'params':['sigma_min','sigma_max']},
+            {'method': subtract_background_dog, 'params': ['sigma_min', 'sigma_max']},
             'median':
-            {'method':subtract_background_median,'params':['footprint']},
+            {'method': subtract_background_median, 'params': ['footprint']},
             'reference_pattern':
-            {'method':subtract_reference,'params':['bg']},
-            }
+            {'method': subtract_reference, 'params': ['bg']},
+        }
 
         if method not in method_dict:
             raise NotImplementedError("The method `{}` is not implemented. "
-                                         "See documentation for available "
-                                         "implementations.".format(method))
+                                      "See documentation for available "
+                                      "implementations.".format(method))
         if not kwargs:
             for kwarg in method_dict[method]['params']:
                 print("You need the `{}` kwarg".format(kwarg))
@@ -528,12 +528,12 @@ class Diffraction2D(Signal2D):
 
         if method != 'h-dome':
             bg_subtracted = self.map(method_dict[method]['method'],
-                                     inplace=False,**kwargs)
+                                     inplace=False, **kwargs)
         else:
             scale = self.data.max()
             self.data = self.data / scale
             bg_subtracted = self.map(regional_filter,
-                                     inplace=False,**kwargs)
+                                     inplace=False, **kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
@@ -581,32 +581,34 @@ class Diffraction2D(Signal2D):
         """
         method_dict = {
             'zaefferer':
-            {'method':find_peaks_zaefferer,
-             'params':['sigma_min','sigma_max']},
+            {'method': find_peaks_zaefferer,
+             'params': ['grad_threshold', 'window_size', 'distance_cutoff']},
             'stat':
-            {'method':find_peaks_stat,
-             'params':['footprint']},
-            'laplacian_of_gaussians':
-            {'method':find_peaks_log,
-             'params':['bg']},
+            {'method': find_peaks_stat,
+             'params': ['alpha', 'window_raidus', 'convergence_ratio']},
             'difference_of_gaussians':
-            {'method':find_peaks_dog,
-             'params':['bg']},
+            {'method': find_peaks_dog,
+             'params': ['min_sigma', 'max_sigma', 'sigma_ratio', 'threshold',
+                        'overlap', 'exclude_border']},
+            'laplacian_of_gaussians':
+            {'method': find_peaks_log,
+             'params': ['min_sigma', 'max_sigma', 'num_sigma', 'threshold',
+                        'overlap', 'log_scale', 'exclude_border']},
             'xc':
-            {'method':find_peaks_xc,
-             'params':['bg']},
-            }
+            {'method': find_peaks_xc,
+             'params': ['disc_image', 'min_distance', 'peak_threshold']},
+        }
 
         if method not in method_dict:
             raise NotImplementedError("The method `{}` is not implemented. "
-                                         "See documentation for available "
-                                         "implementations.".format(method))
+                                      "See documentation for available "
+                                      "implementations.".format(method))
         if not kwargs:
             for kwarg in method_dict[method]['params']:
                 print("You need the `{}` kwarg".format(kwarg))
             return None
 
-        peak_coordinates = self.map(method, **kwargs,
+        peak_coordinates = self.map(method_dict[method]['method'], **kwargs,
                                     inplace=False, ragged=True)
         # Set calibration to same as signal
         x = peak_coordinates.axes_manager.navigation_axes[0]

@@ -232,8 +232,8 @@ class DetectorCoordinates2D(BaseSignal):
 
     def as_diffraction_vectors2D():
         vectors = self.map(peaks_as_gvectors,
-                      center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
-                      calibration=self.axes_manager.signal_axes[0].scale)
+                           center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
+                           calibration=self.axes_manager.signal_axes[0].scale)
         vectors = DiffractionVectors2D(vectors)
         vectors.axes_manager.set_signal_dimension(0)
         pass

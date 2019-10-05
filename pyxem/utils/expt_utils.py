@@ -353,7 +353,7 @@ def subtract_reference(z, bg):
         Two-dimensional data array containing signal with background removed.
     """
     im = z.astype(np.float64) - bg
-    im = np.where(im > 0,im,0)
+    im = np.where(im > 0, im, 0)
     return im
 
 

@@ -294,9 +294,10 @@ class TestBackgroundMethods:
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
-    def test_no_kwarg(self,diffraction_pattern):
+    def test_no_kwarg(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='h-dome')
         assert bgr is None
+
 
 class TestPeakFinding:
     # This is assertion free testing
