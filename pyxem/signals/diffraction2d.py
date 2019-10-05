@@ -541,16 +541,13 @@ class Diffraction2D(Signal2D):
 
     def find_peaks(self, method,
                    *args, **kwargs):
-        """Determine the coordinates of
-
-        Function to locate the positive peaks in an image using various, user
-        specified, methods. Returns a structured array containing the peak
-        positions.
+        """Determine the coordinates in the detector plane of positive peaks
+        using various user defined methods.
 
         Parameters
         ---------
         method : str
-            Select peak finding algorithm to implement. Available methods are
+            Specifies the method, from:
             {'zaefferer', 'stat', 'laplacian_of_gaussians',
             'difference_of_gaussians', 'xc'}
         **kwargs :
