@@ -612,7 +612,7 @@ class Diffraction2D(Signal2D):
                                     inplace=False, ragged=True)
         # Set calibration to same as signal
         x = peak_coordinates.axes_manager.navigation_axes[0]
-        y = peaks_coordinates.axes_manager.navigation_axes[1]
+        y = peak_coordinates.axes_manager.navigation_axes[1]
 
         x.name = 'x'
         x.scale = self.axes_manager.navigation_axes[0].scale
