@@ -20,9 +20,9 @@ import numpy as np
 import math
 
 from transforms3d.axangles import axangle2mat
+from diffsims.utils.sim_utils import get_electron_wavelength
 
-
-def detector_to_fourier(k_xy, wavelength, camera_length):
+def detector_to_fourier(k_xy, beam_energy, camera_length):
     """Maps two-dimensional Cartesian coordinates in the detector plane to
     three-dimensional coordinates in reciprocal space, with origo in [000].
 
@@ -33,8 +33,8 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     ----------
     k_xy : np.array()
         Cartesian coordinates in detector plane, in reciprocal Ångström.
-    wavelength : float
-        Electron wavelength in Ångström.
+    beam_energy : float
+        Beam energy in keV.
     camera_length : float
         Camera length in metres.
 
@@ -44,7 +44,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
         Array of Cartesian coordinates in reciprocal space relative to [000].
 
     """
-
+    wavelength = get_electron_wavelength(beam_energy)
     if k_xy.shape == (1,) and k_xy.dtype == 'object':
         # From ragged array
         k_xy = k_xy[0]
