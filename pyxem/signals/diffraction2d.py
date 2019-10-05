@@ -422,15 +422,15 @@ class Diffraction2D(Signal2D):
         sigma : float (blur, interpolate)
             Sigma value for Gaussian blurring kernel.
         upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will
-            be found with a precision of 1 / upsample_factor of a pixel.
+            Upsample factor for subpixel beam center finding, i.e. the center
+            will be found with a precision of 1 / upsample_factor of a pixel.
         kind : str or int, optional (interpolate)
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
-            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
-            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-            interpolation of zeroth, first, second or third order; ‘previous’
-            and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use.
+            Specifies interpolation type (‘linear’, ‘nearest’, ‘zero’,
+            ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’) refering to a
+            spline interpolation of zeroth, first, second or third order;
+            ‘previous’ and ‘next’ simply return the previous or next value of
+            the point) or as an integer specifying the order of the spline
+            interpolator to use.
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
