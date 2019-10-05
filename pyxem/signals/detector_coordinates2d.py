@@ -184,8 +184,8 @@ class DetectorCoordinates2D(BaseSignal):
 
         Parameters
         ----------
-        signal : ElectronDiffraction2D
-            The ElectronDiffraction2D signal object on which to plot the peaks.
+        signal : Diffraction2D
+            The Diffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
         *args :
             Arguments passed to signal.plot()

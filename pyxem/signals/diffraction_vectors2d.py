@@ -67,38 +67,8 @@ class DiffractionVectors2D(BaseSignal):
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
-        self.cartesian = None
+        self.detector_coordinates = None
         self.hkls = None
-
-    @classmethod
-    def from_peaks(cls, peaks, center, calibration):
-        """Takes a list of peak positions (pixel coordinates) and returns
-        an instance of `Diffraction2D`
-
-        Parameters
-        ----------
-        peaks : Signal
-            Signal containing lists (np.array) of pixel coordinates specifying
-            the reflection positions
-        center : np.array
-            Diffraction pattern center in array indices.
-        calibration : np.array
-            Calibration in reciprocal Angstroms per pixels for each of the dimensions.
-
-        Returns
-        -------
-        vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors2D`
-            List of diffraction vectors
-        """
-        gvectors = peaks.map(peaks_as_gvectors,
-                             center=center,
-                             calibration=calibration,
-                             inplace=False)
-
-        vectors = cls(gvectors)
-        vectors.axes_manager.set_signal_dimension(0)
-
-        return vectors
 
     def plot_vectors(self, xlim=1.0, ylim=1.0,
                      unique_vectors=None,
@@ -483,14 +453,19 @@ class DiffractionVectors2D(BaseSignal):
             Arguments to be passed to the map method.
         **kwargs : keyword arguments
             Keyword arguments to be passed to the map method.
+
+        Returns
+        -------
+        vectors3d : DiffractionVectors3D
+            Object containing three-dimensional reciprocal space vectors with
+            coordinates [k_x, k_y, k_z] for each detector coorinate. The
+            navigation dimensions are unchanged.
         """
-        # Imported here to avoid circular dependency
-        # TODO: Need to generalize this to X-rays/electrons
-        from diffsims.utils.sim_utils import get_electron_wavelength
-        wavelength = get_electron_wavelength(beam_energy)
-        self.cartesian = self.map(detector_to_fourier,
-                                  wavelength=wavelength,
-                                  camera_length=camera_length * 1e10,
-                                  inplace=False,
-                                  *args, **kwargs)
-        transfer_navigation_axes(self.cartesian, self)
+        vectors3d = self.map(detector_to_fourier,
+                             beam_energy=beam_energy,
+                             camera_length=camera_length * 1e10,
+                             inplace=False,
+                             *args, **kwargs)
+        transfer_navigation_axes(vectors3d, self)
+
+        return vectors3d
