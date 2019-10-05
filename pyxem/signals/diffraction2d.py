@@ -478,41 +478,17 @@ class Diffraction2D(Signal2D):
                             *args, **kwargs)
 
     def remove_background(self, method,
-                          *args, **kwargs):
+                          **kwargs):
         """Perform background subtraction via multiple methods.
 
         Parameters
         ----------
         method : str
-            Specify the method used to determine the direct beam position.
-
-            * 'h-dome' -
-            * 'gaussian_difference' - Uses a difference between two gaussian
-                                convolutions to determine where the peaks are,
-                                and sets all other pixels to 0.
-            * 'median' - Use a median filter for background removal
-            * 'reference_pattern' - Subtract a user-defined reference patterns
-                from every diffraction pattern.
-
-        sigma_min : int, float
-            Standard deviation for the minimum gaussian convolution
-            (gaussian_difference only)
-        sigma_max : int, float
-            Standard deviation for the maximum gaussian convolution
-            (gaussian_difference only)
-        footprint : int
-            Size of the window that is convoluted with the array to determine
-            the median. Should be large enough that it is about 3x as big as the
-            size of the peaks (median only).
-        implementation : 'scipy' or 'skimage'
-            (median only) see expt_utils.subtract_background_median
-            for details, if not selected 'scipy' is used
-        bg : array
-            Background array extracted from vacuum. (subtract_reference only)
-        *args:
-            Arguments to be passed to map().
+            Specifies the method, from:
+            {'h-dome','gaussian_difference','median','reference_pattern'}
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to map(), including method specific ones,
+            running a method with no kwargs will tell you which kwargs you need
 
         Returns
         -------
@@ -520,37 +496,46 @@ class Diffraction2D(Signal2D):
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
 
+        Notes
+        -----
+        Further details on the methods can be found by looking at the docstrings
+        for the associated utils, these can be accessed by:
+        >>> from pyxem.utils.expt_utils import regional_filter
+        and likewise for: subtract_background_dog
+                          subtract_background_median
+                          subtract_reference
+
         """
-        if method == 'h-dome':
+        method_dict = {
+            'h-dome':
+            {'method':'h-dome','params':['h']},
+            'gaussian_difference':
+            {'method':subtract_background_dog,'params':['sigma_min','sigma_max']},
+            'median':
+            {'method':subtract_background_median,'params':['footprint']},
+            'reference_pattern':
+            {'method':subtract_reference,'params':['bg']},
+            }
+
+        if method not in method_dict:
+            raise NotImplementedError("The method `{}` is not implemented. "
+                                         "See documentation for available "
+                                         "implementations.".format(method))
+        if not kwargs:
+            for kwarg in method_dict[method]['params']:
+                print("You need the `{}` kwarg".format(kwarg))
+            return None
+
+        if method != 'h-dome':
+            bg_subtracted = self.map(method_dict[method]['method'],
+                                     inplace=False,**kwargs)
+        else:
             scale = self.data.max()
             self.data = self.data / scale
             bg_subtracted = self.map(regional_filter,
-                                     inplace=False, *args, **kwargs)
+                                     inplace=False,**kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
-
-        elif method == 'gaussian_difference':
-            bg_subtracted = self.map(subtract_background_dog,
-                                     inplace=False, *args, **kwargs)
-
-        elif method == 'median':
-            if 'implementation' in kwargs.keys():
-                if kwargs['implementation'] != 'scipy' and kwargs['implementation'] != 'skimage':
-                    raise NotImplementedError(
-                        "Unknown implementation `{}`".format(
-                            kwargs['implementation']))
-
-            bg_subtracted = self.map(subtract_background_median,
-                                     inplace=False, *args, **kwargs)
-
-        elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, inplace=False,
-                                     *args, **kwargs)
-
-        else:
-            raise NotImplementedError(
-                "The method specified, '{}', is not implemented. See"
-                "documentation for available implementations.".format(method))
 
         return bg_subtracted
 
