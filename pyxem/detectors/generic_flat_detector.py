@@ -18,16 +18,40 @@
 
 """
 A generic flat detector class for azimuthal integration and other similar
-operations using pyFAI azimuthalIntegrator.
+operations using the pyFAI AzimuthalIntegrator for a
 
-?Maybe put in example text here?
 """
 
 from pyFAI.detectors import Detector
 
 class GenericFlatDetector(Detector):
     '''
-    Flavour text
+    A PyFAI Detector class for an arbitrarily sized flat detector (i.e. the
+    calibration is assumed to be constant across the detector plane)
+
+    The detector class is used for get_azimuthal_integral in a Diffraction2D
+    signal. The data is assumed to be flat in the small angle approximation.
+
+    PyFAI works in real space coordinates, the pixel size is assumed to be 1 (m)
+    and the remaining parameters, via knowing the calibration and wavelength,
+    are calculated to have an appropriate physical setup.
+
+    Parameters
+    ----------
+    size_x : int
+        The size (in pixels) of the detector in the x coordinate.
+    size_y : int
+        The size (in pixels) of the detector in the y coordinate.
+
+    Examples
+    --------
+    >>> from pyxem.detectors import GenericFlatDetector
+    >>> detector = GenericFlatDetector(512,512)
+    >>> detector
+    Detector GenericFlatDetector	 Spline= None
+    PixelSize= 1.000e+00, 1.000e+00 m
+
+    !!Put some example of how to do the rest of the calibration here.
     '''
     IS_FLAT = True  # this detector is flat
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents

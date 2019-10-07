@@ -25,13 +25,24 @@ from pyFAI.detectors import Detector
 
 class Medipix256x256Detector(Detector):
     '''
-    Flavour text
+    A PyFAI Detector class for a 256256 pixel Medipix direct electron detector.
+    The detector class is used for get_azimuthal_integral in a Diffraction2D
+    signal. The calibration is not assumed to be constant in scattering vector.
+
+    Examples
+    --------
+    >>> from pyxem.detectors import Medipix256x256Detector
+    >>> detector = Medipix256x256Detector()
+    >>> detector
+    Detector Medipix256x256Detector	 Spline= None
+    PixelSize= 5.500e-05, 5.500e-05 m
     '''
     IS_FLAT = False  # this detector is not flat
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents
     API_VERSION = "1.0"
     aliases = ["Medipix256x256Detector"]
     MAX_SHAPE=256,256
+
     def __init__(self):
         pixel1=55e-6 #55 micron pixel size in x
         pixel2=55e-6 #55 micron pixel size in y

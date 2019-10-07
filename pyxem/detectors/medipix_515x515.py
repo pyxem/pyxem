@@ -27,23 +27,38 @@ from pyFAI.detectors import Detector
 
 class Medipix515x515Detector(Detector):
     '''
-    Flavour text
+    A PyFAI Detector class for a 515x515 pixel Medipix Quad direct electron
+    detector. A central 5x5 cross is not intepretable, and is stored as a
+    calc_mask method.
+
+    The detector class is used for get_azimuthal_integral in a Diffraction2D
+    signal. The calibration is not assumed to be constant in scattering vector.
+
+    Examples
+    --------
+    >>> from pyxem.detectors import Medipix515x515Detector
+    >>> detector = Medipix515x515Detector()
+    >>> detector
+    Detector Medipix515x515Detector	 Spline= None
+    PixelSize= 5.500e-05, 5.500e-05 m
     '''
     IS_FLAT = False  # this detector is not flat
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents
     API_VERSION = "1.0"
-    aliases = ["Medipix256x256Detector"]
+    aliases = ["Medipix515x515Detector"]
     MAX_SHAPE=515,515
 
     def __init__(self):
         pixel1=55e-6 #55 micron pixel size in x
         pixel2=55e-6 #55 micron pixel size in y
-        raise NotImplementedError
         Detector.__init__(self, pixel1=pixel1, pixel2=pixel2)
 
     def calc_mask(self):
-        #Overrides the Detector calc_mask() function to define a mask.
-        #the missing segment is a 5-wide cross in the middle
+        '''Overrides the base Detector calc_mask() function to define a mask.
+        The missing segment is a 5-wide cross in the middle of the detector
+
+        '''
+
         mask = np.zeros((515,515))
         mask[255:260,:] = 1
         mask[:,255:260] = 1

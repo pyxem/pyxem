@@ -298,12 +298,14 @@ class Diffraction2D(Signal2D):
                                      *args, **kwargs)
 
             azimuthal_integrals = self.map(azimuthal_integrate_fast,
+                                     azimuthal_integrator=ai,
                                      size_1d=size_1d, inplace=False)
 
         else:
             #this time each centre is read in origin
+            #origin is passed as a flattened array in the navigation dimensions
             azimuthal_integrals = self._map_iterate(azimuthal_integrate,
-                                     iterating_kwargs=(('origin',origin),),
+                                     iterating_kwargs=(('origin',origin.reshape(-1,2)),),
                                      detector_distance=detector_distance,
                                      detector=detector, wavelength=wavelength,
                                      size_1d=size_1d, inplace=False)
