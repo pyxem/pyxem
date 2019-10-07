@@ -55,6 +55,67 @@ def saved_result_to_top_matches(or_saved,corr_saved):
         top_matches[phase_index,i,1] = combined_array[i,:3] #orientation
     return top_matches
 
+
+def vector_hybrid_correlate_library(image, library,peak_threshol=0,n_largest):
+    """
+
+    Parameters
+    ----------
+    image : numpy.array
+        The experimental diffraction pattern of interest.
+    library : DiffractionLibrary
+        The library of diffraction simulations to be correlated with the
+        experimental data.
+    peak_threshold :
+
+    n_largest : int
+        The number of well correlated simulations to be retained.
+
+    Returns
+    -------
+    top_matches : numpy.array
+        Array of shape (<num phases>*n_largest, 3) containing the top n
+        correlated simulations for the experimental pattern of interest, where
+        each entry is on the form [phase index, [z, x, z], correlation].
+
+    See also
+    --------
+    IndexationGenerator.correlate
+
+    Notes
+    -----
+    Correlation results are defined as,
+        phase_index : int
+            Index of the phase, following the ordering of the library keys
+        [z, x, z] : ndarray
+            numpy array of three floats, specifying the orientation in the
+            Bunge convention, in degrees.
+        correlation : float
+            A coefficient of correlation, only normalised to the template
+            intensity. This is in contrast to the reference work.
+
+    """
+    top_matches = np.empty((len(library), n_largest, 3), dtype='object')
+    flat_image = image.flatten()
+    for phase_index, library_entry in enumerate(library.values()):
+            orientations = library_entry['orientations']
+            pixel_coords = library_entry['pixel_coords']
+
+            zip_for_locals = zip(orientations,pixel_coords)
+
+            or_saved,corr_saved = np.empty((n_largest,3)),np.zeros((n_largest,1))
+            for (or_local,px_local) in zip_for_locals:
+                corr_local =
+
+                if corr_local > np.min(corr_saved):
+                    or_saved[np.argmin(corr_saved)] = or_local
+                    corr_saved[np.argmin(corr_saved)] = corr_local
+
+            top_matches = saved_result_to_top_matches(or_saved,corr_saved)
+
+
+    return top_matches.reshape(-1, 3)
+
 def correlate_library(image, library, n_largest, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).

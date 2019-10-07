@@ -95,23 +95,31 @@ class IndexationGenerator():
             # Index at all real space pixels
             mask = 1
 
-        #TODO: Add extra methods
-        no_extra_methods_yet = True
-        if no_extra_methods_yet:
+        if method == 'pNCC':
             #adds a normalisation to library
             for phase in library.keys():
                 norm_array = np.ones(library[phase]['intensities'].shape[0]) #will store the norms
                 for i,intensity_array in enumerate(library[phase]['intensities']):
                     norm_array[i] = np.linalg.norm(intensity_array)
                 library[phase]['pattern_norms'] = norm_array #puts this normalisation into the library
-
-
             matches = signal.map(correlate_library,
                              library=library,
                              n_largest=n_largest,
                              mask=mask,
                              inplace=False,
                              **kwargs)
+
+        if method == 'fast':
+            for phase in library.keys():
+                norm_array = np.ones(library[phase]['intensities'].shape[0]) #will store the norms
+                for i,intensity_array in enumerate(library[phase]['intensities']):
+                    norm_array[i] = np.linalg.norm(intensity_array)
+                library[phase]['pattern_norms'] = norm_array #puts this normalisation into the library
+            matches = signal.map(vector_hybrid_correlate_library,
+                             library=library,
+                             inplace=False,
+                             **kwargs)
+
 
         matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
