@@ -40,6 +40,20 @@ from collections import namedtuple
 OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
+def saved_result_to_top_matches(or_saved,corr_saved):
+    """
+
+    Returns
+    -------
+    top_matches
+    """
+    combined_array = np.hstack((or_saved,corr_saved))
+    combined_array = combined_array[np.flip(combined_array[:,3].argsort())] #see stackoverflow/2828059 for details
+    top_matches[phase_index,:,0] = phase_index
+    top_matches[phase_index,:,2] = combined_array[:,3]  #correlation
+    for i in np.arange(n_largest):
+        top_matches[phase_index,i,1] = combined_array[i,:3] #orientation
+    return top_matches
 
 def correlate_library(image, library, n_largest, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -114,12 +128,8 @@ def correlate_library(image, library, n_largest, mask):
                     or_saved[np.argmin(corr_saved)] = or_local
                     corr_saved[np.argmin(corr_saved)] = corr_local
 
-            combined_array = np.hstack((or_saved,corr_saved))
-            combined_array = combined_array[np.flip(combined_array[:,3].argsort())] #see stackoverflow/2828059 for details
-            top_matches[phase_index,:,0] = phase_index
-            top_matches[phase_index,:,2] = combined_array[:,3]  #correlation
-            for i in np.arange(n_largest):
-                top_matches[phase_index,i,1] = combined_array[i,:3] #orientation
+            top_matches = saved_result_to_top_matches(or,saved,corr_saved)
+
 
     return top_matches.reshape(-1, 3)
 
