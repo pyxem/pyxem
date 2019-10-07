@@ -277,19 +277,45 @@ class Diffraction2D(Signal2D):
                         *args, **kwargs)
 
     def get_azimuthal_integral(self, origin, detector, detector_distance,
-                                wavelength, size_1d, *args,
+                                wavelength, size_1d, inplace=False, *args,
                                 **kwargs):
         """
-        TEST
-        origin: if a list of arrays, will assume a series of centres and act
-        accordingly
+        Returns the azimuthal integral of the diffraction pattern as a
+        Diffraction1D signal.
 
-        shifts: if shifts are present, assume that the detector moves between
-        different data bits ##removed as can't move detector afaik
+        Parameters
+        ----------
+        origin : np.array_like
+            This parameter should either be a list or numpy.array with two
+            coordinates ([x_origin,y_origin]), or an array of the same shape as
+            the navigation axes, with an origin (with the shape
+            [x_origin,y_origin]) at each navigation location.
+        inplace : bool
+            If True (default False), this signal is overwritten. Otherwise,
+            returns anew signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
+            !!! Separate kwargs needed for AzimuthalIntegrator, hs.map and
+            integrate1d. What a nightmare!!!!
+
+        Returns
+        -------
+        radial_profile: :obj:`pyxem.signals.ElectronDiffraction1D`
+            The radial average profile of each diffraction pattern in the
+            ElectronDiffraction2D signal as an ElectronDiffraction1D.
+
+        See also
+        --------
+        :func:`pyxem.utils.expt_utils.azimuthal_integrate`
+        :func:`pyxem.utils.expt_utils.azimuthal_integrate_fast`
         """
 
-        if np.array(origin).size == 2: #single origin
-            #define azimuthal integrator here....
+        if np.array(origin).size == 2:
+            #single origin
+            #The AzimuthalIntegrator can be defined once and repeatedly used,
+            #making for a fast integration
             #this uses azimuthal_integrate_fast
 
             p1, p2 = origin[0]*detector.pixel1, origin[1]*detector.pixel2
@@ -299,16 +325,17 @@ class Diffraction2D(Signal2D):
 
             azimuthal_integrals = self.map(azimuthal_integrate_fast,
                                      azimuthal_integrator=ai,
-                                     size_1d=size_1d, inplace=False)
+                                     size_1d=size_1d, inplace=inplace)
 
         else:
             #this time each centre is read in origin
             #origin is passed as a flattened array in the navigation dimensions
             azimuthal_integrals = self._map_iterate(azimuthal_integrate,
-                                     iterating_kwargs=(('origin',origin.reshape(-1,2)),),
+                                     iterating_kwargs=(('origin',
+                                     origin.reshape(-1,2)),),
                                      detector_distance=detector_distance,
                                      detector=detector, wavelength=wavelength,
-                                     size_1d=size_1d, inplace=False)
+                                     size_1d=size_1d, inplace=inplace)
 
         ap = Diffraction1D(azimuthal_integrals.data[:,:,1,:])
         tth = azimuthal_integrals.data[0,0,0,:] #tth is the signal axis
