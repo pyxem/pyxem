@@ -33,11 +33,12 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, azimuthal_integrate, gain_normalise, remove_dead,\
-    regional_filter, subtract_background_dog, subtract_background_median, \
-    subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
-    peaks_as_gvectors, convert_affine_to_transform, apply_transformation, \
-    find_beam_center_blur, find_beam_center_interpolate
+    radial_average, azimuthal_integrate, azimuthal_integrate_fast, \
+    gain_normalise, remove_dead, regional_filter, subtract_background_dog, \
+    subtract_background_median, subtract_reference, circular_mask, \
+    find_beam_offset_cross_correlation, peaks_as_gvectors, \
+    convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
+    find_beam_center_interpolate
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -47,6 +48,8 @@ from pyxem.utils import peakfinder2D_gui
 from skimage import filters
 from skimage import transform as tf
 from skimage.morphology import square
+
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D):
@@ -273,25 +276,46 @@ class Diffraction2D(Signal2D):
                         show_progressbar=progress_bar,
                         *args, **kwargs)
 
-
     def get_azimuthal_integral(self, origin, detector, detector_distance,
-                                wavelength, size_1d):
+                                wavelength, size_1d, *args,
+                                **kwargs):
         """
         TEST
+        origin: if a list of arrays, will assume a series of centres and act
+        accordingly
+
+        shifts: if shifts are present, assume that the detector moves between
+        different data bits ##removed as can't move detector afaik
         """
-        azimuthal_integrals = self.map(azimuthal_integrate, origin=origin,
+
+        if np.array(origin).size == 2: #single origin
+            #define azimuthal integrator here....
+            #this uses azimuthal_integrate_fast
+
+            p1, p2 = origin[0]*detector.pixel1, origin[1]*detector.pixel2
+            ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
+                                     detector=detector, wavelength=wavelength,
+                                     *args, **kwargs)
+
+            azimuthal_integrals = self.map(azimuthal_integrate_fast,
+                                     size_1d=size_1d, inplace=False)
+
+        else:
+            #this time each centre is read in origin
+            azimuthal_integrals = self._map_iterate(azimuthal_integrate,
+                                     iterating_kwargs=(('origin',origin),),
                                      detector_distance=detector_distance,
                                      detector=detector, wavelength=wavelength,
                                      size_1d=size_1d, inplace=False)
 
-        rp = Diffraction1D(azimuthal_integrals.data[:,:,1,:])
+        ap = Diffraction1D(azimuthal_integrals.data[:,:,1,:])
         tth = azimuthal_integrals.data[0,0,0,:] #tth is the signal axis
         scale = tth[1]-tth[0]
         offset = tth[0]
-        rp.axes_manager.signal_axes[0].scale = scale
-        rp.axes_manager.signal_axes[0].offset = offset
+        ap.axes_manager.signal_axes[0].scale = scale
+        ap.axes_manager.signal_axes[0].offset = offset
 
-        return rp
+        return ap
 
     def get_radial_profile(self, mask_array=None, inplace=False,
                            *args, **kwargs):

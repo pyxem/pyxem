@@ -108,14 +108,24 @@ def _polar2cart(r, theta):
     return x, y
 
 def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
-                        size_1d):
+                        size_1d, *args, **kwargs):
     """
     TEST
     """
     p1, p2 = origin[0]*detector.pixel1, origin[1]*detector.pixel2
     ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
-                             detector=detector, wavelength=wavelength)
+                             detector=detector, wavelength=wavelength,
+                             *args, **kwargs)
     tth, I = ai.integrate1d(z,size_1d,unit="q_A^-1")
+    return tth, I
+
+def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d):
+    """
+    TEST
+    A faster method where an AzimuthalIntegrator is already defined.
+    Only works if the centre and detector are identical in each frame.
+    """
+    tth, I = azimuthal_integrator.integrate1d(z,size_1d,unit="q_A^-1")
     return tth, I
 
 def radial_average(z, mask=None):
