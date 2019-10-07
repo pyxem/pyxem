@@ -33,11 +33,10 @@ class TestDiffractionVariance:
         assert isinstance(difvar, DiffractionVariance2D)
 
     def test_get_dif_var_radial_profile(self,
-                                   diffraction_pattern):
+                                        diffraction_pattern):
         difvar = DiffractionVariance2D(diffraction_pattern)
         rp = difvar.get_radial_profile()
         assert isinstance(rp, DiffractionVariance1D)
-
 
     @pytest.fixture
     def axes_test_dp(self):
@@ -53,7 +52,7 @@ class TestDiffractionVariance:
         axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
         axes_test_dp.axes_manager.navigation_axes[0].name = name
         axes_test_dp.axes_manager.navigation_axes[0].units = units
-        #name and units are flipped to make sure everything follows
+        # name and units are flipped to make sure everything follows
         axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
         axes_test_dp.axes_manager.navigation_axes[1].name = units
         axes_test_dp.axes_manager.navigation_axes[1].units = name
@@ -73,7 +72,6 @@ class TestDiffractionVariance:
         assert name == rp_name_x
         assert name == rp_units_y
         assert units == rp_name_y
-
 
 
 class TestImageVariance:

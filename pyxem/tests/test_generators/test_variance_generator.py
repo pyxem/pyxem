@@ -84,32 +84,31 @@ class TestVarianceGenerator:
 
     def test_set_data_type(
             self):
-            #set 8 bit data type which will result in an incorrect mean square
-            #pattern if not changed.
+        # set 8 bit data type which will result in an incorrect mean square
+        # pattern if not changed.
 
-            dp_array = np.array([[
-                            [[10,10],[50,30]],
-                            [[8,20],[50,30]]],
-                            [[[12,30],[0,30]],
-                            [[10,10],[50,30]]
-                            ]]).astype(np.uint8)
+        dp_array = np.array([[
+            [[10, 10], [50, 30]],
+            [[8, 20], [50, 30]]],
+            [[[12, 30], [0, 30]],
+             [[10, 10], [50, 30]]
+             ]]).astype(np.uint8)
 
-            variance_test_diffraction_pattern = ElectronDiffraction2D(dp_array)
-            vargen = VarianceGenerator(variance_test_diffraction_pattern)
+        variance_test_diffraction_pattern = ElectronDiffraction2D(dp_array)
+        vargen = VarianceGenerator(variance_test_diffraction_pattern)
 
-            vardps_8 = vargen.get_diffraction_variance(dqe=1)
-            assert isinstance(vardps_8, DiffractionVariance2D)
-            corr_var_dp_8 = np.array([[-0.08,-0.66857143],
-                                        [-0.92213333, -0.88666667]])
-            assert np.allclose(vardps_8.data[1, 1], corr_var_dp_8, atol=1e-6, equal_nan=True)
+        vardps_8 = vargen.get_diffraction_variance(dqe=1)
+        assert isinstance(vardps_8, DiffractionVariance2D)
+        corr_var_dp_8 = np.array([[-0.08, -0.66857143],
+                                  [-0.92213333, -0.88666667]])
+        assert np.allclose(vardps_8.data[1, 1], corr_var_dp_8, atol=1e-6, equal_nan=True)
 
-            vardps_16 = vargen.get_diffraction_variance(dqe=1,set_data_type=np.uint16)
-            assert isinstance(vardps_16, DiffractionVariance2D)
-            corr_var_dp_16 = np.array([[-0.08,0.16734694],
-                                        [0.30666667, -0.0333333]])
+        vardps_16 = vargen.get_diffraction_variance(dqe=1, set_data_type=np.uint16)
+        assert isinstance(vardps_16, DiffractionVariance2D)
+        corr_var_dp_16 = np.array([[-0.08, 0.16734694],
+                                   [0.30666667, -0.0333333]])
 
-            assert np.allclose(vardps_16.data[1, 1], corr_var_dp_16, atol=1e-6, equal_nan=True)
-
+        assert np.allclose(vardps_16.data[1, 1], corr_var_dp_16, atol=1e-6, equal_nan=True)
 
     @pytest.mark.parametrize('dqe', [
         0.5,

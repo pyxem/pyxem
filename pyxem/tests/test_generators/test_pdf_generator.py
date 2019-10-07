@@ -48,6 +48,7 @@ def test_s_limits(reduced_intensity1d):
     pdf2 = pdfgen.get_pdf(s_min=0, s_max=10)
     assert np.array_equal(pdf.data, pdf2.data)
 
+
 @pytest.mark.xfail(raises=ValueError)
 def test_s_limit_failure(reduced_intensity1d):
     pdfgen = PDFGenerator1D(reduced_intensity1d)
@@ -63,7 +64,7 @@ def test_signal_size():
 
     ri = ReducedIntensity1D([spectrum])
     pdfgen = PDFGenerator1D(ri)
-    pdf = pdfgen.get_pdf(s_min=0,s_max=10)
+    pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     assert isinstance(pdf, PairDistributionFunction1D)
 
     ri = ReducedIntensity1D([[spectrum]])
@@ -75,10 +76,10 @@ def test_signal_size():
     pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0, s_max=10)
     shape = pdf.data.shape
-    assert shape == (1,1,1,2000)
+    assert shape == (1, 1, 1, 2000)
 
     ri = ReducedIntensity1D([[[spectrum]]])
     pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0, s_max=10, r_min=0, r_max=8)
     shape = pdf.data.shape
-    assert shape == (1,1,1,800)
+    assert shape == (1, 1, 1, 800)
