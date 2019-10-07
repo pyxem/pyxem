@@ -29,7 +29,7 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import push_metadata_through
+from pyxem.signals import push_metadata_through, select_method_from_method_dict
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead,\
@@ -488,51 +488,28 @@ class Diffraction2D(Signal2D):
             {'h-dome','gaussian_difference','median','reference_pattern'}
         **kwargs:
             Keyword arguments to be passed to map(), including method specific ones,
-            running a method with no kwargs will tell you which kwargs you need
+            running a method with no kwargs will return help
 
         Returns
         -------
         bg_subtracted : :obj:`ElectronDiffraction2D`
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
-
-        Notes
-        -----
-        Further details on the methods can be found by looking at the docstrings
-        for the associated utils, these can be accessed by:
-        >>> from pyxem.utils.expt_utils import regional_filter
-        and likewise for: subtract_background_dog
-                          subtract_background_median
-                          subtract_reference
-
         """
-        method_dict = {
-            'h-dome':
-            {'method':'h-dome','params':['h']},
-            'gaussian_difference':
-            {'method':subtract_background_dog,'params':['sigma_min','sigma_max']},
-            'median':
-            {'method':subtract_background_median,'params':['footprint']},
-            'reference_pattern':
-            {'method':subtract_reference,'params':['bg']},
-            }
+        method_dict = {'h-dome':regional_filter,
+            'gaussian_difference':subtract_background_dog,
+            'median':subtract_background_median,
+            'reference_pattern':subtract_reference,}
 
-        if method not in method_dict:
-            raise NotImplementedError("The method `{}` is not implemented. "
-                                         "See documentation for available "
-                                         "implementations.".format(method))
-        if not kwargs:
-            for kwarg in method_dict[method]['params']:
-                print("You need the `{}` kwarg".format(kwarg))
-            return None
+        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
 
         if method != 'h-dome':
-            bg_subtracted = self.map(method_dict[method]['method'],
+            bg_subtracted = self.map(method_function,
                                      inplace=False,**kwargs)
-        else:
+        elif method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
-            bg_subtracted = self.map(regional_filter,
+            bg_subtracted = self.map(method_function,
                                      inplace=False,**kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
