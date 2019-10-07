@@ -284,9 +284,8 @@ class TestBackgroundMethods:
         ('median', {'footprint': 4, }),
         ('reference_pattern', {'bg': np.ones((8, 8)), })
     ])
-    # skimage being warned by numpy, not for us
+
     @pytest.mark.filterwarnings('ignore::FutureWarning')
-    # we don't care about precision loss here
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
@@ -294,9 +293,9 @@ class TestBackgroundMethods:
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
+    @pytest.mark.xfail(raises=TypeError)
     def test_no_kwarg(self,diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='h-dome')
-        assert bgr is None
 
 class TestPeakFinding:
     # This is assertion free testing
