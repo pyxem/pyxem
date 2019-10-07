@@ -315,7 +315,7 @@ def subtract_background_dog(z, sigma_min, sigma_max):
     return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
 
 
-def subtract_background_median(z, footprint=19):
+def subtract_background_median(z, footprint):
     """Remove background using a median filter.
 
     Parameters
