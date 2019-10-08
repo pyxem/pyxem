@@ -42,9 +42,8 @@ class TestSimpleMaps:
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
-        diffraction_pattern.center_direct_beam(method='cross_correlate',
-                                               radius_start=1,
-                                               radius_finish=3,
+        diffraction_pattern.center_direct_beam(method='blur',
+                                               sigma=5,
                                                square_width=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
