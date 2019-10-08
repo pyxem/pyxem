@@ -411,7 +411,7 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
-def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, window: int = 10, kind: int = 3) -> float:
+def _find_peak_max(arr,sigma,upsample_factor,kind):
     """Find the index of the pixel corresponding to peak maximum in 1D pattern
 
     Parameters
@@ -428,10 +428,6 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, windo
         interpolation of zeroth, first, second or third order; ‘previous’
         and ‘next’ simply return the previous or next value of the point) or as
         an integer specifying the order of the spline interpolator to use.
-    window : int
-       A box of size 2*window+1 around the first estimate is taken and
-       expanded by `upsample_factor` to to interpolate the pattern to get
-       the peak maximum position with subpixel precision.
 
     Returns
     -------
@@ -442,13 +438,13 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, windo
     c1 = np.argmax(y1)  # initial guess for beam center
 
     m = upsample_factor
-    w = window
-    win_len = 2 * w + 1
+    window = 10
+    win_len = 2 * window + 1
 
     try:
-        r1 = np.linspace(c1 - w, c1 + w, win_len)
-        f = interp1d(r1, y1[c1 - w: c1 + w + 1], kind=kind)
-        r2 = np.linspace(c1 - w, c1 + w, win_len * m)  # extrapolate for subpixel accuracy
+        r1 = np.linspace(c1 - window, c1 + window, win_len)
+        f = interp1d(r1, y1[c1 - window: c1 + window + 1], kind=kind)
+        r2 = np.linspace(c1 - window, c1 + window, win_len * m)  # extrapolate for subpixel accuracy
         y2 = f(r2)
         c2 = np.argmax(y2) / m  # find beam center with `m` precision
     except ValueError:  # if c1 is too close to the edges, return initial guess
@@ -459,7 +455,7 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, windo
     return center
 
 
-def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_factor: int = 100, kind: int = 3) -> (float, float):
+def find_beam_center_interpolate(z,sigma,upsample_factor,kind):
     """Find the center of the primary beam in the image `img` by summing along
     X/Y directions and finding the position along the two directions independently.
 
@@ -483,8 +479,8 @@ def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_fact
     center : np.array
         np.array containing indices of estimated direct beam positon.
     """
-    xx = np.sum(img, axis=1)
-    yy = np.sum(img, axis=0)
+    xx = np.sum(z, axis=1)
+    yy = np.sum(z, axis=0)
 
     cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind)
     cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind)
@@ -493,7 +489,7 @@ def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_fact
     return center
 
 
-def find_beam_center_blur(z: np.ndarray, sigma: int = 30) -> np.ndarray:
+def find_beam_center_blur(z,sigma):
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 
@@ -512,7 +508,7 @@ def find_beam_center_blur(z: np.ndarray, sigma: int = 30) -> np.ndarray:
     return np.array(center)
 
 
-def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
+def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
