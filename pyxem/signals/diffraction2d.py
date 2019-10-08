@@ -378,7 +378,7 @@ class Diffraction2D(Signal2D):
             diffracted spots brighter than the direct beam.
 
         **kwargs:
-            Keyword arguments to be passed to align2D().
+            To be passed to method function
 
         Returns
         -------
@@ -402,7 +402,7 @@ class Diffraction2D(Signal2D):
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,**kwargs)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
     def remove_background(self, method,
                           **kwargs):
