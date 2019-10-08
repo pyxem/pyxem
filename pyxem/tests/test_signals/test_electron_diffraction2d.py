@@ -36,10 +36,6 @@ class TestSimpleMaps:
     # Confirms that maps run without error.
 
     @pytest.mark.parametrize('method', ('cross_correlate', 'blur', 'interpolate'))
-    def test_get_direct_beam_postion(self, diffraction_pattern, method):
-        shifts = diffraction_pattern.get_direct_beam_position(method=method, radius_start=1, radius_finish=3)
-
-    @pytest.mark.parametrize('method', ('cross_correlate', 'blur', 'interpolate'))
     def test_center_direct_beam(self, diffraction_pattern, method):
         # before inplace transform applied
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
