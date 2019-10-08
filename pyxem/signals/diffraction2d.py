@@ -324,13 +324,7 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method="cross_correlate",
-                                 radius_start=4,
-                                 radius_finish=8,
-                                 sigma=30,
-                                 upsample_factor=100,
-                                 kind=3,
-                                 *args, **kwargs):
+    def get_direct_beam_position(self, method,**kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -338,70 +332,35 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur", "interpolate"
-            The default is "cross_correlate"
-        radius_start : int (cross_correlate)
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int (cross_correlate)
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
-        sigma : float (blur, interpolate)
-            Sigma value for Gaussian blurring kernel.
-        upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will
-            be found with a precision of 1 / upsample_factor of a pixel.
-        kind : str or int, optional (interpolate)
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
-            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
-            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-            interpolation of zeroth, first, second or third order; ‘previous’
-            and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use.
-        *args:
-            Arguments to be passed to map().
+
         **kwargs:
             Keyword arguments to be passed to map().
 
         Returns
         -------
-        centers : ndarray
-            Array containing the centers for each SED pattern.
+        shifts : ndarray
+            Array containing the shifts for each SED pattern.
 
         """
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        methods = "cross_correlate", "blur", "interpolate"
+        method_dict = {'cross_correlate':find_beam_offset_cross_correlation,
+                       'blur':find_beam_center_blur,
+                       'interpolate':find_beam_center_interpolate}
 
-        if method == "cross_correlate":
-            shifts = self.map(find_beam_offset_cross_correlation,
-                              radius_start=radius_start,
-                              radius_finish=radius_finish,
-                              inplace=False, *args, **kwargs)
-        elif method == "blur":
-            centers = self.map(find_beam_center_blur,
-                               sigma=sigma,
-                               inplace=False, *args, **kwargs)
+        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
+
+        if method == 'cross_correlate':
+            shifts = self.map(method_function,inplace=False,**kwargs)
+        elif method == 'blur' or method == 'interpolate':
+            centers = self.map(method_function,inplace=False,**kwargs)
             shifts = origin_coordinates - centers
-        elif method == "interpolate":
-            centers = self.map(find_beam_center_interpolate,
-                               sigma=sigma,
-                               upsample_factor=upsample_factor,
-                               kind=kind,
-                               inplace=False, *args, **kwargs)
-            shifts = origin_coordinates - centers
-        else:
-            raise ValueError(f"`method` must be one of {methods}")
 
         return shifts
 
     def center_direct_beam(self,
-                           method="cross_correlate",
-                           radius_start=4,
-                           radius_finish=8,
-                           sigma=30,
-                           upsample_factor=100,
-                           kind=3,
+                           method,
                            square_width=None,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
@@ -411,32 +370,13 @@ class Diffraction2D(Signal2D):
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur", "interpolate"
-            The default is "cross_correlate"
-        radius_start : int (cross_correlate)
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int (cross_correlate)
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
-        sigma : float (blur, interpolate)
-            Sigma value for Gaussian blurring kernel.
-        upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will
-            be found with a precision of 1 / upsample_factor of a pixel.
-        kind : str or int, optional (interpolate)
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
-            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
-            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-            interpolation of zeroth, first, second or third order; ‘previous’
-            and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use.
+            Must be one of 'cross_correlate', 'blur', 'interpolate'
+
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-        *args:
-            Arguments to be passed to align2D().
+
         **kwargs:
             Keyword arguments to be passed to align2D().
 
@@ -455,27 +395,14 @@ class Diffraction2D(Signal2D):
             # fails if non-square dp
             max_index = np.int(origin_coordinates[0] + square_width)
             cropped = self.isig[min_index:max_index, min_index:max_index]
-            shifts = cropped.get_direct_beam_position(method=method,
-                                                      radius_start=radius_start,
-                                                      radius_finish=radius_finish,
-                                                      sigma=sigma,
-                                                      upsample_factor=upsample_factor,
-                                                      kind=kind,
-                                                      *args, **kwargs)
+            shifts = cropped.get_direct_beam_position(method=method,**kwargs)
         else:
-            shifts = self.get_direct_beam_position(method=method,
-                                                   radius_start=radius_start,
-                                                   radius_finish=radius_finish,
-                                                   sigma=sigma,
-                                                   upsample_factor=upsample_factor,
-                                                   kind=kind,
-                                                   *args, **kwargs)
+            shifts = self.get_direct_beam_position(method=method,**kwargs)
 
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,
-                            *args, **kwargs)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0,**kwargs)
 
     def remove_background(self, method,
                           **kwargs):
