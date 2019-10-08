@@ -450,7 +450,7 @@ def _find_peak_max(arr,sigma,upsample_factor,kind):
     except ValueError:  # if c1 is too close to the edges, return initial guess
         center = c1
     else:
-        center = c2 + c1 - w
+        center = c2 + c1 - window
 
     return center
 
