@@ -502,12 +502,12 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read = 0.1, mmap_mode='r'):
         else:
             try:
                 if hdr_info['Counter Depth (number)'] == 1:
-                    # RAW 1 bit data: the header bits are written as uint8 but the frames 
-                    # are binary and need to be unpacked as such. 
+                    # RAW 1 bit data: the header bits are written as uint8 but the frames
+                    # are binary and need to be unpacked as such.
                     data = data.reshape(-1, width_height/8 + hdr_bits)[:, 71:79]
                 else:
                     data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
-                
+
                 data = data [:, ]
                 data_crop = data[:int(depth*pct_frames_to_read)]
                 d = data_crop.compute()
@@ -683,8 +683,8 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
 
         if hdr_info['Assembly Size'] == '2x2':
             if hdr_info['Counter Depth (number)'] == 1:
-                # RAW 1 bit data: the header bits are written as uint8 but the frames 
-                # are binary and need to be unpacked as such. 
+                # RAW 1 bit data: the header bits are written as uint8 but the frames
+                # are binary and need to be unpacked as such.
                 data = data.reshape(-1, width_height/8 + hdr_bits)
                 data = data[:,hdr_bits:]
                 data = np.unpackbits(data)
@@ -733,10 +733,6 @@ def _read_mib(fp, hdr_info, mmap_mode='r'):
 
                 data = da.concatenate((da.concatenate((det1,det3),1),da.concatenate((det2,det4),1)),2)
 
-        if hdr_info['Assembly Size'] == '1x1':
-
-            data = data.reshape(-1, width_height + hdr_bits)[:,-width_height:].reshape(depth, width, height)
-            data = data.reshape(depth,256, 256 )
 
     elif record_by == 'dont-care':  # stack of images
         size = (height, width)
