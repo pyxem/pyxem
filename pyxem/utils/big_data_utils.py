@@ -20,64 +20,71 @@ import hyperspy.api as hs
 import pyxem as pxm
 import numpy as np
 
-def get_chunk_size(x_list,y_list):
+
+
+def _get_chunk_size(x_list,y_list):
     """ finds chunk size and validates list entries """
     chunk_size = x_list[1] - x_list[0]
+    if chunk_size != (y_list[1] - y_list[0]):
+        raise ValueError("x_list and y_list need to have the same chunksize")
     epsilon = 1e-5 #np.arange returns excluding the endpoint argument
     if not np.allclose(x_list,np.arange(x_list[0],x_list[-1]+epsilon,chunk_size)):
-        raise ValueError()
+        raise ValueError("There is a problem with your x_list")
     elif not np.allclose(y_list,np.arange(y_list[0],y_list[-1]+epsilon,chunk_size)):
-        raise ValueError()
+        raise ValueError("There is a problem with your y_list")
 
     return chunk_size
 
-def load_and_cast(filepath,x,y,chunk_size):
-    """
-    This function loads a chunk of a larger diffraction pattern
-    """
+def _load_and_cast(filepath,x,y,chunk_size):
+    """ Loads a chunk of a larger diffraction pattern"""
     s = hs.load(filepath,lazy=True)
     s = s.inav[x:x+chunk_size,y:y+chunk_size]
     s.compute()
     return pxm.ElectronDiffraction2D(s)
 
-def factory(fp,x,y,chunk_size,function):
+def _factory(fp,x,y,chunk_size,function):
     """
-    This loads a chunk of a signal, and then applies (the user defined) function,
-    function must take a single argument; dp
+    Loads a chunk of a signal, and applies the UDF function
+
+    See Also
+    --------
+    pxm.utils.big_data_utils.chunked_application_of_UDF
     """
-    dp = load_and_cast(fp,x,y,chunk_size)
+    dp = _load_and_cast(fp,x,y,chunk_size)
     analysis_output = function(dp)
     return analysis_output
 
-#TODO: tidy the naming up here
-#TODO: faciltiate rectangular regions of interest (although square analysis areas)
-def _create_vert(l,start_int,gap):
-    """
-    Internal function that produces the columns that are then stacked to produce
-    an output.
-    """
-    left = start_int*gap
-    right = left + gap
-    return np.vstack(tuple([x for x in l[left:right]]))
+def _create_columns(results_list,left_index,right_index):
+    """ provides the vstack for ._combine_list_into_navigation_space """
 
-#TODO: tidy the naming up here
-#TODO: faciltiate rectangular regions of interest (although square analysis areas)
-def _combine(l,x_list,y_list):
+    return np.vstack(tuple([x for x in results_list[left_index:right_index]]))
+
+def _combine_list_into_navigation_space(results_list,x_list):
     """
-    Internal function that combines the local list 'l' into a correctly shaped
+    Internal function that combines the results_list into a correctly shaped
     output object.
+
+    Parameters
+    ----------
+    results_list : list
+
+    y_list : list or np.array
+        as defined in pyx.utils.big_data_utils.chunked_application_of_UDF
+
+    Returns
+    -------
+    np_output : np.array
+        as defined in pyx.utils.big_data_utils.chunked_application_of_UDF
     """
-    i_max,gap = len(x_list),len(y_list)
     vert_list = []
-    i = 0
-    while i < i_max:
-        vert_list.append(_create_vert(l,i,gap))
-        i += 1
+    gap = x_list[1] - x_list[0]
+    for i in np.arange(0,len(x_list)):
+        vert_list.append(_create_columns(results_list,int(x_list[i]),int(x_list[i]+gap)))
 
     np_output = np.hstack(tuple([x for x in vert_list]))
     return np_output
 
-def main_function(fp, x_list,y_list,function):
+def chunked_application_of_UDF(filepath, x_list,y_list,function):
     """
     #docstrings tbc
 
@@ -85,13 +92,15 @@ def main_function(fp, x_list,y_list,function):
     ----------
 
     filepath : str
+        Path to the file contain the data to be inverstigated
 
+    x_list : list or np.array
+        Iterable running from the "start" index to the final start "index" with a fixed step
+        size. ie) Data total it equivilant to [start:final+step_size]
 
-    x_list : list
-
-
-    y_list : list
-
+    y_list : list or np.array
+        Iterable running from the "start" index to the final start "index" with a fixed step
+        size. Step size must be the same as in x_list.
 
     function : function
         A user defined function that take a ElectronDiffraction2D as an argument and returns the desired output
@@ -100,12 +109,13 @@ def main_function(fp, x_list,y_list,function):
     -------
 
     np_output : np.array
+        The results, as a numpy array.
     """
     results_list = []
-    chunk_size = get_chunk_size(x_list,y_list)
+    chunk_size = _get_chunk_size(x_list,y_list)
     for x in x_list:
         for y in y_list:
-            analysis_output = factory(fp,x,y,chunk_size,function)
+            analysis_output = _factory(filepath,x,y,chunk_size,function)
             results_list.append(analysis_output.data)
-    np_output = _combine(results_list,x_list,y_list)
+    np_output = _combine_list_into_navigation_space(results_list,x_list)
     return np_output

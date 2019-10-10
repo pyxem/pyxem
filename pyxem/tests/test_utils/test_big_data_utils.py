@@ -20,8 +20,19 @@ import hyperspy.api as hs
 import numpy as np
 import pytest
 import pyxem as pxm
-from pyxem.utils.big_data_utils import main_function
+from pyxem.utils.big_data_utils import chunked_application_of_UDF,_get_chunk_size
 import os
+
+@pytest.mark.xfail(raises=ValueError,strict=True)
+class Test_bad_xy_lists:
+    def test_two_chunksizes(self):
+        _get_chunk_size([0,10],[0,5])
+
+    def test_bad_x_list(self):
+        _get_chunk_size([0,2,5],[0,2])
+
+    def test_bad_y_list(self):
+        _get_chunk_size([0,2],[0,2,5])
 
 @pytest.fixture()
 def big_electron_diffraction_pattern():
@@ -42,8 +53,8 @@ def test_core_big_data_functionality(big_electron_diffraction_pattern):
 
     filepath = 'tempfile.hspy'
     x_list = [0,2,4]
-    y_list = np.arange(0,3,2)
+    y_list = np.arange(0,2+1e-5,2)
 
-    test_output = main_function(filepath,x_list,y_list,dp_sqrt)
+    test_output = chunked_application_of_UDF(filepath,x_list,y_list,dp_sqrt)
     assert np.allclose(expected_output,test_output.data)
     os.remove('tempfile.hspy')
