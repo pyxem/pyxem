@@ -14,6 +14,8 @@ Data is loaded by using two specialized loading functions:
 
 Both these functions are accessible through :py:mod:`pixstem.api`.
 
+Real datasets (and sometimes processing scripts) you can use for testing the functionality is found in :ref:`open_datasets`.
+
 Pixelated STEM
 --------------
 
