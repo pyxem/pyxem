@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator, get_simulated_disc
+from pyxem.generators.subpixelrefinement_generator2d import SubpixelRefinementGenerator2D, get_simulated_disc
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
@@ -33,12 +33,12 @@ class Test_init_xfails:
     def test_out_of_range_vectors_numpy(self):
         vector = np.array([[1, -100]])
         dp = ElectronDiffraction2D(np.ones((20, 20)))
-        sprg = SubpixelrefinementGenerator(dp, vector)
+        sprg = SubpixelRefinementGenerator2D(dp, vector)
 
     def test_out_of_range_vectors_DiffractionVectors2D(self):
         vectors = DiffractionVectors2D(np.array([[1, -100]]))
         dp = ElectronDiffraction2D(np.ones((20, 20)))
-        sprg = SubpixelrefinementGenerator(dp, vectors)
+        sprg = SubpixelRefinementGenerator2D(dp, vectors)
 
     """ Tests that navigation dimensions must be appropriate too """
 
@@ -47,7 +47,7 @@ class Test_init_xfails:
         vectors = DiffractionVectors2D(np.zeros((1, 2)))
         dp.axes_manager.set_signal_dimension(2)
         vectors.axes_manager.set_signal_dimension(0)
-        SPR_generator = SubpixelrefinementGenerator(dp, vectors)
+        SPR_generator = SubpixelRefinementGenerator2D(dp, vectors)
 
 
 class set_up_for_subpixelpeakfinders:
@@ -94,7 +94,7 @@ class Test_subpixelpeakfinders:
 
     def get_spr(self, diffraction_vectors):
         dp = set_up_for_subpixelpeakfinders().create_spot()
-        return SubpixelrefinementGenerator(dp, diffraction_vectors)
+        return SubpixelRefinementGenerator2D(dp, diffraction_vectors)
 
     def no_shift_case(self, s):
         error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
@@ -139,7 +139,7 @@ def create_spot_gaussian():
                          [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))])
 @pytest.mark.filterwarnings('ignore::UserWarning')  # our warning
 def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
+    spr = SubpixelRefinementGenerator2D(dp, diffraction_vectors)
     s = spr.local_gaussian_method(2)
 
 
@@ -149,7 +149,7 @@ def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
     # translate y by +4
     shifted = np.pad(dp, ((0, 4), (0, 0)), 'constant')[4:].reshape(1, 1, *dp.shape)
     signal = ElectronDiffraction2D(shifted)
-    spg = SubpixelrefinementGenerator(signal, np.array([[0, 0]]))
+    spg = SubpixelRefinementGenerator2D(signal, np.array([[0, 0]]))
     peaks = spg.conventional_xc(100, 20, 1).data[0, 0, 0]  # as quoted in the issue
     np.testing.assert_allclose([0, -4], peaks)
     """ we also test com method for clarity """

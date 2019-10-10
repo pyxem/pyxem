@@ -58,7 +58,7 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     return shifts
 
 
-class SubpixelrefinementGenerator():
+class SubpixelRefinementGenerator2D():
     """Generates subpixel refinement of DiffractionVectors2D.
 
     Parameters
