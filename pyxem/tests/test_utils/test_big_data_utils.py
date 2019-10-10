@@ -61,4 +61,4 @@ def test_core_big_data_functionality(big_electron_diffraction_pattern):
 
     test_output = chunked_application_of_UDF(filepath,x_list,y_list,dp_sqrt)
     assert np.allclose(expected_output,test_output.data)
-    os.remove('tempfile.hspy')
+    os.remove('tempfile_for_big_data_util_testing.hspy')
