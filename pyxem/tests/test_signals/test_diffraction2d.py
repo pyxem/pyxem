@@ -125,8 +125,31 @@ class TestAzimuthalIntegral:
         assert isinstance(ap, Diffraction1D)
 
     @pytest.fixture
+    def test_dp4D(self):
+        dp = Diffraction2D(np.ones((5, 5, 5, 5)))
+        return dp
 
-    def test_radial_profile_axes(self, axes_test_dp):
+    def test_azimuthal_integral_4D(self, test_dp4D):
+        origin = [2,2]
+        detector = GenericFlatDetector(5,5)
+        ap = test_dp4D.get_azimuthal_integral(origin,
+                                            detector=detector,
+                                            detector_distance=1e6,
+                                            wavelength=1, size_1d=4)
+        assert isinstance(ap, Diffraction1D)
+        assert np.array_equal(ap.data, np.ones((5,5,4)))
+
+
+    @pytest.fixture
+    def axes_test_dp(self):
+        """
+        Two diffraction patterns with easy to see radial profiles, wrapped
+        in Diffraction2D  <2,2|3,3>
+        """
+        dp = Diffraction2D(np.zeros((2, 2, 3, 3)))
+        return dp
+
+    def test_azimuthal_integral_axes(self, axes_test_dp):
         n_scale = 0.5
         axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
         axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
@@ -137,7 +160,9 @@ class TestAzimuthalIntegral:
         axes_test_dp.axes_manager.navigation_axes[1].name = units
         axes_test_dp.axes_manager.navigation_axes[0].units = units
 
-        ap = diffraction_pattern_for_radial.get_azimuthal_integral(origin,
+        origin = [1,1]
+        detector = GenericFlatDetector(3,3)
+        ap = axes_test_dp.get_azimuthal_integral(origin,
                                             detector=detector,
                                             detector_distance=1,
                                             wavelength=1, size_1d=5)
@@ -157,15 +182,45 @@ class TestAzimuthalIntegral:
 
     @pytest.mark.parametrize('expected', [
         (np.array(
-            [[5., 4., 3., 2., 0.],
-             [1., 0.5, 0.2, 0.2, 0.]]
+            [[4.5,3.73302794,2.76374221,1.87174165,0.83391893,0.],
+            [0.75,0.46369326,0.24536559,0.15187129,0.06550021,0.]]
         ))])
 
-    def test_radial_profile(self, diffraction_pattern_for_azimuthal, expected):
+    def test_azimuthal_integral_fast(self, diffraction_pattern_for_azimuthal,
+                                     expected):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8,8)
         ap = diffraction_pattern_for_azimuthal.get_azimuthal_integral(origin,
                                             detector=detector,
-                                            detector_distance=1,
-                                            wavelength=1, size_1d=5)
-        #assert np.allclose(ap.data, expected, atol=1e-3)
+                                            detector_distance=1e9,
+                                            wavelength=1, size_1d=6)
+        assert np.allclose(ap.data, expected, atol=1e-3)
+
+    @pytest.fixture
+    def diffraction_pattern_for_origin_variation(self):
+        """
+        Two diffraction patterns with easy to see radial profiles, wrapped
+        in Diffraction2D  <2,2|3,3>
+        """
+        dp = Diffraction2D(np.zeros((2, 2, 4, 4)))
+        dp.data = np.array(
+        [[[[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]],
+        [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]]],
+        [[[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]],
+        [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]]]])
+        return dp
+
+    def test_azimuthal_integral_slow(self,
+                                     diffraction_pattern_for_origin_variation):
+        origin = np.array([[[0,0],[1,1]],[[1.5,1.5],[2,3]]])
+        detector = GenericFlatDetector(4,4)
+        ap = diffraction_pattern_for_origin_variation.get_azimuthal_integral(
+                                            origin,
+                                            detector=detector,
+                                            detector_distance=1e9,
+                                            wavelength=1, size_1d=4)
+        expected = np.array([[[1.01127149e-07,4.08790171e-01,2.93595970e-01,0.00000000e+00],
+                        [2.80096084e-01,4.43606853e-01,1.14749573e-01,0.00000000e+00]],
+                        [[6.20952725e-01,2.99225271e-01,4.63002026e-02,0.00000000e+00],
+                        [5.00000000e-01,3.43071640e-01,1.27089232e-01,0.00000000e+00]]])
+        assert np.allclose(ap.data, expected, atol=1e-5)

@@ -31,6 +31,7 @@ from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through
+from pyxem.signals import transfer_navigation_axes
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, azimuthal_integrate, azimuthal_integrate_fast, \
@@ -347,6 +348,9 @@ class Diffraction2D(Signal2D):
         offset = tth[0]
         ap.axes_manager.signal_axes[0].scale = scale
         ap.axes_manager.signal_axes[0].offset = offset
+
+        transfer_navigation_axes(ap,self)
+        push_metadata_through(ap,self)
 
         return ap
 

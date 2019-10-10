@@ -24,6 +24,7 @@ and the surrounding ones are "masked".
 """
 
 from pyFAI.detectors import Detector
+import numpy as np
 
 class Medipix515x515Detector(Detector):
     '''
