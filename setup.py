@@ -53,7 +53,7 @@ setup(
       'hyperspy >= 1.5.2',        # earlier versions incompatible with numpy >= 1.17.0
       'diffsims',
       'lmfit >= 0.9.12',
-      'pyFAI'
+      'pyfai'
       ],
     package_data={
         "": ["LICENSE", "readme.rst"],
