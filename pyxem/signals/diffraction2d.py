@@ -324,7 +324,7 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method,**kwargs):
+    def get_direct_beam_position(self, method, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -345,16 +345,16 @@ class Diffraction2D(Signal2D):
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        method_dict = {'cross_correlate':find_beam_offset_cross_correlation,
-                       'blur':find_beam_center_blur,
-                       'interpolate':find_beam_center_interpolate}
+        method_dict = {'cross_correlate': find_beam_offset_cross_correlation,
+                       'blur': find_beam_center_blur,
+                       'interpolate': find_beam_center_interpolate}
 
-        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
+        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
         if method == 'cross_correlate':
-            shifts = self.map(method_function,inplace=False,**kwargs)
+            shifts = self.map(method_function, inplace=False, **kwargs)
         elif method == 'blur' or method == 'interpolate':
-            centers = self.map(method_function,inplace=False,**kwargs)
+            centers = self.map(method_function, inplace=False, **kwargs)
             shifts = origin_coordinates - centers
 
         return shifts
@@ -395,9 +395,9 @@ class Diffraction2D(Signal2D):
             # fails if non-square dp
             max_index = np.int(origin_coordinates[0] + square_width)
             cropped = self.isig[min_index:max_index, min_index:max_index]
-            shifts = cropped.get_direct_beam_position(method=method,**kwargs)
+            shifts = cropped.get_direct_beam_position(method=method, **kwargs)
         else:
-            shifts = self.get_direct_beam_position(method=method,**kwargs)
+            shifts = self.get_direct_beam_position(method=method, **kwargs)
 
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
@@ -423,21 +423,21 @@ class Diffraction2D(Signal2D):
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
         """
-        method_dict = {'h-dome':regional_filter,
-            'gaussian_difference':subtract_background_dog,
-            'median':subtract_background_median,
-            'reference_pattern':subtract_reference,}
+        method_dict = {'h-dome': regional_filter,
+                       'gaussian_difference': subtract_background_dog,
+                       'median': subtract_background_median,
+                       'reference_pattern': subtract_reference, }
 
-        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
+        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
         if method != 'h-dome':
             bg_subtracted = self.map(method_function,
-                                     inplace=False,**kwargs)
+                                     inplace=False, **kwargs)
         elif method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
             bg_subtracted = self.map(method_function,
-                                     inplace=False,**kwargs)
+                                     inplace=False, **kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 

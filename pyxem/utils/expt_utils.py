@@ -353,7 +353,7 @@ def subtract_reference(z, bg):
         Two-dimensional data array containing signal with background removed.
     """
     im = z.astype(np.float64) - bg
-    im = np.where(im > 0,im,0)
+    im = np.where(im > 0, im, 0)
     return im
 
 
@@ -411,7 +411,7 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
-def _find_peak_max(arr,sigma,upsample_factor,kind):
+def _find_peak_max(arr, sigma, upsample_factor, kind):
     """Find the index of the pixel corresponding to peak maximum in 1D pattern
 
     Parameters
@@ -455,7 +455,7 @@ def _find_peak_max(arr,sigma,upsample_factor,kind):
     return center
 
 
-def find_beam_center_interpolate(z,sigma,upsample_factor,kind):
+def find_beam_center_interpolate(z, sigma, upsample_factor, kind):
     """Find the center of the primary beam in the image `img` by summing along
     X/Y directions and finding the position along the two directions independently.
 
@@ -489,7 +489,7 @@ def find_beam_center_interpolate(z,sigma,upsample_factor,kind):
     return center
 
 
-def find_beam_center_blur(z,sigma):
+def find_beam_center_blur(z, sigma):
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 
@@ -554,6 +554,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     shift, error, diffphase = register_translation(ref, im, 100)
 
     return (shift - 0.5)
+
 
 def peaks_as_gvectors(z, center, calibration):
     """Converts peaks found as array indices to calibrated units, for use in a

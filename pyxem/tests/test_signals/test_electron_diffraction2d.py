@@ -273,7 +273,6 @@ class TestBackgroundMethods:
         ('median', {'footprint': 4, }),
         ('reference_pattern', {'bg': np.ones((8, 8)), })
     ])
-
     @pytest.mark.filterwarnings('ignore::FutureWarning')
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_remove_background(self, diffraction_pattern,
@@ -283,8 +282,9 @@ class TestBackgroundMethods:
         assert bgr.max() <= diffraction_pattern.max()
 
     @pytest.mark.xfail(raises=TypeError)
-    def test_no_kwarg(self,diffraction_pattern):
+    def test_no_kwarg(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='h-dome')
+
 
 class TestPeakFinding:
     # This is assertion free testing
