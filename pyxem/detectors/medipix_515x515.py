@@ -55,14 +55,12 @@ class Medipix515x515Detector(Detector):
         Detector.__init__(self, pixel1=pixel1, pixel2=pixel2)
 
     def calc_mask(self):
-        '''Overrides the base Detector calc_mask() function to define a mask.
-        The missing segment is a 5-wide cross in the middle of the detector
-
-        This is the method in which the masks are stored for a given detector
-        in pyFAI.
+        '''Defines a function to define a mask of missing and uninterpretable
+        pixels in the detector plane, following
+        The missing segment is a 5-wide cross in the middle of the detector.
         '''
 
         mask = np.zeros((515,515))
         mask[255:260,:] = 1
         mask[:,255:260] = 1
-        return mask
+        return mask.astype(numpy.int8)
