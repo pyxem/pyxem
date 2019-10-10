@@ -20,7 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.generators.subpixelrefinement_generator2d import SubpixelRefinementGenerator2D, get_simulated_disc
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.signals.detector_coordinates2d import DetectorCoordinates2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
@@ -36,7 +36,7 @@ class Test_init_xfails:
         sprg = SubpixelRefinementGenerator2D(dp, vector)
 
     def test_out_of_range_vectors_DiffractionVectors2D(self):
-        vectors = DiffractionVectors2D(np.array([[1, -100]]))
+        vectors = DetectorCoordinates2D(np.array([[1, -100]]))
         dp = ElectronDiffraction2D(np.ones((20, 20)))
         sprg = SubpixelRefinementGenerator2D(dp, vectors)
 
@@ -44,7 +44,7 @@ class Test_init_xfails:
 
     def test_wrong_navigation_dimensions(self):
         dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
-        vectors = DiffractionVectors2D(np.zeros((1, 2)))
+        vectors = DetectorCoordinates2D(np.zeros((1, 2)))
         dp.axes_manager.set_signal_dimension(2)
         vectors.axes_manager.set_signal_dimension(0)
         SPR_generator = SubpixelRefinementGenerator2D(dp, vectors)
@@ -73,9 +73,9 @@ class set_up_for_subpixelpeakfinders:
         return dp
 
     def create_Diffraction_vectors(self):
-        v1 = np.array([[90 - 64, 30 - 64]])
-        v2 = np.array([[90 - 64, 30 - 64], [100 - 64, 60 - 64]])
-        vectors = DiffractionVectors2D(np.array([[v1, v1], [v2, v2]]))
+        v1 = np.array([[90, 30]])
+        v2 = np.array([[90, 30], [100, 60]])
+        vectors = DetectorCoordinates2D(np.array([[v1, v1], [v2, v2]]))
         vectors.axes_manager.set_signal_dimension(0)
         return vectors
 
@@ -87,7 +87,7 @@ class Test_subpixelpeakfinders:
 
     set_up = set_up_for_subpixelpeakfinders()
 
-    @pytest.fixture(params=[set_up.create_Diffraction_vectors(), np.array([[90 - 64, 30 - 64]])])
+    @pytest.fixture(params=[set_up.create_Diffraction_vectors(), np.array([[90, 30]])])
     def diffraction_vectors(self, request):
         # see https://bit.ly/2mXpSlD for an example of this architecture
         return request.param
@@ -97,12 +97,12 @@ class Test_subpixelpeakfinders:
         return SubpixelRefinementGenerator2D(dp, diffraction_vectors)
 
     def no_shift_case(self, s):
-        error = s.data[0, 0] - np.asarray([[90 - 64, 30 - 64]])
+        error = s.data[0, 0] - np.asarray([[90, 30]])
         rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
         assert rms_error < 1e-5  # perfect detection for this trivial case
 
     def x_shift_case(self, s):
-        error = s.data[0, 1] - np.asarray([[93 - 64, 30 - 64]])
+        error = s.data[0, 1] - np.asarray([[93, 30]])
         rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
         assert rms_error < 0.5   # correct to within a pixel
 
@@ -136,22 +136,8 @@ def create_spot_gaussian():
     return dp
 
 @pytest.mark.parametrize('dp, diffraction_vectors',
-                         [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))])
+                         [(create_spot_gaussian(), np.array([[55, 25]]))])
 @pytest.mark.filterwarnings('ignore::UserWarning')  # our warning
 def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
     spr = SubpixelRefinementGenerator2D(dp, diffraction_vectors)
     s = spr.local_gaussian_method(2)
-
-
-def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
-    """ This was the MWE example code for the issue """
-    dp = get_simulated_disc(100, 20)
-    # translate y by +4
-    shifted = np.pad(dp, ((0, 4), (0, 0)), 'constant')[4:].reshape(1, 1, *dp.shape)
-    signal = ElectronDiffraction2D(shifted)
-    spg = SubpixelRefinementGenerator2D(signal, np.array([[0, 0]]))
-    peaks = spg.conventional_xc(100, 20, 1).data[0, 0, 0]  # as quoted in the issue
-    np.testing.assert_allclose([0, -4], peaks)
-    """ we also test com method for clarity """
-    peaks = spg.center_of_mass_method(60).data[0, 0, 0]
-    np.testing.assert_allclose([0, -4], peaks, atol=1.5)

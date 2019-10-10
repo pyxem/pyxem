@@ -23,8 +23,7 @@ Generating subpixel resolution on diffraction vectors.
 import numpy as np
 from skimage.feature import register_translation
 
-from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
-from pyxem.utils.expt_utils import peaks_as_gvectors
+from pyxem.signals.detector_coordinates2d import DetectorCoordinates2D
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
@@ -59,7 +58,7 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
 
 
 class SubpixelRefinementGenerator2D():
-    """Generates subpixel refinement of DiffractionVectors2D.
+    """Generates subpixel refinement of DetectorCoordinates2D.
 
     Parameters
     ----------
@@ -98,8 +97,8 @@ class SubpixelRefinementGenerator2D():
 
         Returns
         -------
-        vector_out: DiffractionVectors2D
-            DiffractionVectors2D containing the refined vectors in calibrated
+        vector_out: DetectorCoordinates2D
+            DetectorCoordinates2D containing the refined vectors in calibrated
             units with the same navigation shape as the diffraction patterns.
 
         """
@@ -111,7 +110,7 @@ class SubpixelRefinementGenerator2D():
             return vectors + shifts
 
         sim_disc = get_simulated_disc(square_size, disc_radius)
-        self.vectors_out = DiffractionVectors2D(
+        self.vectors_out = DetectorCoordinates2D(
             self.dp.map(_conventional_xc_map,
                         vectors=self.coordinates,
                         sim_disc=sim_disc,
@@ -133,8 +132,8 @@ class SubpixelRefinementGenerator2D():
 
         Returns
         -------
-        vector_out: DiffractionVectors2D
-            DiffractionVectors2D containing the refined vectors in calibrated
+        vector_out: DDetectorCoordinates2D
+            DetectorCoordinates2D containing the refined vectors in calibrated
             units with the same navigation shape as the diffraction patterns.
 
         """
@@ -194,7 +193,7 @@ class SubpixelRefinementGenerator2D():
                 shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
             return vectors + shifts
 
-        self.vectors_out = DiffractionVectors2D(
+        self.vectors_out = DetectorCoordinates2D(
             self.dp.map(_center_of_mass_map,
                         vectors=self.coordinates,
                         square_size=square_size,
@@ -217,8 +216,8 @@ class SubpixelRefinementGenerator2D():
 
         Returns
         -------
-        vector_out : DiffractionVectors2D
-            DiffractionVectors2D containing the refined vectors in calibrated
+        vector_out : DetectorCoordinates2D
+            DetectorCoordinates2D containing the refined vectors in calibrated
             units with the same navigation shape as the diffraction patterns.
 
         Notes
@@ -262,7 +261,7 @@ class SubpixelRefinementGenerator2D():
 
             return vectors + shifts
 
-        self.vectors_out = DiffractionVectors2D(self.dp.map(_lg_map,
+        self.vectors_out = DetectorCoordinates2D(self.dp.map(_lg_map,
                                                             vectors=self.coordinates,
                                                             square_size=square_size,
                                                             inplace=False))
