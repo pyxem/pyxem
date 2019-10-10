@@ -25,7 +25,7 @@ import os
 
 @pytest.fixture()
 def big_electron_diffraction_pattern():
-    z = np.arange(0,64,step=1).reshape(4,4,2,2) # x_size=6, y_size=4 in hspy
+    z = np.arange(0,96,step=1).reshape(4,6,2,2) # x_size=6, y_size=4 in hspy
     dp =  pxm.ElectronDiffraction2D(z)
     dp.save('tempfile')
     return dp
@@ -41,7 +41,7 @@ def test_core_big_data_functionality(big_electron_diffraction_pattern):
     expected_output = np.sqrt(big_electron_diffraction_pattern.data)
 
     filepath = 'tempfile.hspy'
-    x_list = [0,2]
+    x_list = [0,2,4]
     y_list = np.arange(0,3,2)
 
     test_output = main_function(filepath,x_list,y_list,dp_sqrt)
