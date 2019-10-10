@@ -252,7 +252,7 @@ class Diffraction2D(Signal2D):
         ----------
         deadpixels : list
             List of deadpixels to be removed.
-        deadvalue : string
+        deadvalue : str
             Specify how deadpixels should be treated. 'average' sets the dead
             pixel value to the average of adjacent pixels. 'nan' sets the dead
             pixel to nan
@@ -410,7 +410,7 @@ class Diffraction2D(Signal2D):
 
         Parameters
         ----------
-        method : string
+        method : str
             Specifies the method, from:
             {'h-dome','gaussian_difference','median','reference_pattern'}
         **kwargs:

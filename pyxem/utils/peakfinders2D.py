@@ -36,7 +36,7 @@ def clean_peaks(peaks):
     peaks : numpy.ndarray
         Result of peak finding
 
-    NO_PEAKS : string
+    NO_PEAKS : str
         Flag indicating no peaks found.
 
     """

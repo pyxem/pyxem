@@ -175,7 +175,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     deadpixels : np.array()
         Array containing the array indices of dead pixels in the diffraction
         pattern.
-    deadvalue : string
+    deadvalue : str
         Specify how deadpixels should be treated, options are;
             'average': takes the average of adjacent pixels
             'nan':  sets the dead pixel to nan
