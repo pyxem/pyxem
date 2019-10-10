@@ -36,6 +36,9 @@ from pyxem.utils.vector_utils import get_npeaks
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
+from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
+from pyxem.signals.diffraction_vectors3d import DiffractionVectors3D
+
 """
 Signal class for detector coordinates.
 
@@ -107,7 +110,7 @@ class DetectorCoordinates2D(BaseSignal):
 
         return crystim
 
-    def as_diffraction_vectors2d(self, calibration, center=None,
+    def as_diffraction_vectors2d(self, center, calibration,
                                  *args, **kwargs):
         """Transform detector coordinates to two-dimensional diffraction vectors
         with coordinates in calibrated units of reciprocal Angstroms.
@@ -117,10 +120,11 @@ class DetectorCoordinates2D(BaseSignal):
 
         Parameters
         ----------
+        center : array like, optional
+            Coordinates of the diffraction pattern center in pixel units.
         calibration : float
             Calibrated pixel size in units of reciprocal Angstroms per pixel.
-        center : array like, optional
-            Coordinates of the diffraction pattern center.
+
         *args : arguments
             Arguments to be passed to the map method.
         **kwargs : keyword arguments
@@ -133,8 +137,6 @@ class DetectorCoordinates2D(BaseSignal):
             coordinates [k_x, k_y] for each detector coorinate. The
             navigation dimensions are unchanged.
         """
-        if center == None:
-            center = np.array(self.axes_manager.signal_shape) / 2 - 0.5
         vectors = self.map(peaks_as_gvectors,
                            calibration=calibration,
                            center=center,
