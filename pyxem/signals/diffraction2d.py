@@ -337,8 +337,12 @@ class Diffraction2D(Signal2D):
                                      detector=detector, wavelength=wavelength,
                                      size_1d=size_1d, inplace=inplace)
 
-        ap = Diffraction1D(azimuthal_integrals.data[:,:,1,:])
-        tth = azimuthal_integrals.data[0,0,0,:] #tth is the signal axis
+        if len(azimuthal_integrals.data.shape) == 3:
+            ap = Diffraction1D(azimuthal_integrals.data[:,1,:])
+            tth = azimuthal_integrals.data[0,0,:] #tth is the signal axis
+        else:
+            ap = Diffraction1D(azimuthal_integrals.data[:,:,1,:])
+            tth = azimuthal_integrals.data[0,0,0,:] #tth is the signal axis
         scale = tth[1]-tth[0]
         offset = tth[0]
         ap.axes_manager.signal_axes[0].scale = scale

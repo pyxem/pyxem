@@ -2,7 +2,7 @@ language: python
 
 env:
   global:
-    - DEPS="hyperspy-base diffsims lmfit"
+    - DEPS="hyperspy-base diffsims lmfit pyFAI"
     - TEST_DEPS="pytest pytest-cov coveralls"
 
 matrix:
