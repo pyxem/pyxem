@@ -35,21 +35,15 @@ def test_init():
 class TestSimpleMaps:
     # Confirms that maps run without error.
 
-    def test_get_direct_beam_postion(self, diffraction_pattern):
-        shifts = diffraction_pattern.get_direct_beam_position(radius_start=1,
-                                                              radius_finish=3)
-
-    def test_center_direct_beam(self, diffraction_pattern):
-        # before inplace transform applied
+    def test_center_direct_beam_cross_correlate(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
-        diffraction_pattern.center_direct_beam(radius_start=1, radius_finish=3)
-        # after inplace transform applied
+        diffraction_pattern.center_direct_beam(method='cross_correlate', radius_start=1, radius_finish=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
-        diffraction_pattern.center_direct_beam(radius_start=1,
-                                               radius_finish=3,
+        diffraction_pattern.center_direct_beam(method='blur',
+                                               sigma=5,
                                                square_width=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
@@ -277,12 +271,10 @@ class TestBackgroundMethods:
         ('h-dome', {'h': 1, }),
         ('gaussian_difference', {'sigma_min': 0.5, 'sigma_max': 1, }),
         ('median', {'footprint': 4, }),
-        ('median', {'footprint': 4, 'implementation': 'skimage'}),
         ('reference_pattern', {'bg': np.ones((8, 8)), })
     ])
-    # skimage being warned by numpy, not for us
+
     @pytest.mark.filterwarnings('ignore::FutureWarning')
-    # we don't care about precision loss here
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
@@ -290,6 +282,9 @@ class TestBackgroundMethods:
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
+    @pytest.mark.xfail(raises=TypeError)
+    def test_no_kwarg(self,diffraction_pattern):
+        bgr = diffraction_pattern.remove_background(method='h-dome')
 
 class TestPeakFinding:
     # This is assertion free testing
@@ -347,10 +342,6 @@ class TestNotImplemented():
 
     def test_remove_background_fake_method(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='fake_method')
-
-    def test_remove_background_fake_implementation(self, diffraction_pattern):
-        bgr = diffraction_pattern.remove_background(
-            method='median', implementation='fake_implementation')
 
 
 class TestComputeAndAsLazyElectron2D:

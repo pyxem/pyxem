@@ -48,6 +48,39 @@ def push_metadata_through(dummy, *args, **kwargs):
 
     return dummy, args, kwargs
 
+def select_method_from_method_dict(method,method_dict,**kwargs):
+        """
+        Streamlines the selection of utils to be mapped in class methods
+
+        Parameters
+        ----------
+        method : str
+            The key to method_dict for the chosen method
+
+        method_dict : dict
+            dictionary with strings as keys and functions as values
+
+        kwargs : dict
+            Parameters for the method, if empty help is return
+
+        Returns
+        -------
+        method_function :
+            The utility function that corresponds the given method string, unless
+            kwargs is empty, in which case the help for the utility function is returned.
+        """
+
+        if method not in method_dict:
+            raise NotImplementedError("The method `{}` is not implemented. "
+                                        "See documentation for available "
+                                        "implementations.".format(method))
+        elif not kwargs:
+            help(method_dict[method])
+
+        return method_dict[method]
+
+
+
 def transfer_signal_axes(new_signal, old_signal):
     """ Transfers signal axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.

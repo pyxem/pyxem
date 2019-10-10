@@ -15,8 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal base class for two-dimensional diffraction data.
+
 """
+Signal base class for two-dimensional diffraction data.
+"""
+
 import numpy as np
 from warnings import warn
 
@@ -26,13 +29,14 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import push_metadata_through
+from pyxem.signals import push_metadata_through, select_method_from_method_dict
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead,\
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
-    peaks_as_gvectors, convert_affine_to_transform, apply_transformation
+    peaks_as_gvectors, convert_affine_to_transform, apply_transformation, \
+    find_beam_center_blur, find_beam_center_interpolate
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -320,39 +324,43 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, radius_start,
-                                 radius_finish,
-                                 *args, **kwargs):
+    def get_direct_beam_position(self, method,**kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
         Parameters
         ----------
-        radius_start : int
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
-        *args:
-            Arguments to be passed to map().
+        method : str,
+            Must be one of "cross_correlate", "blur", "interpolate"
+
         **kwargs:
             Keyword arguments to be passed to map().
 
         Returns
         -------
-        centers : ndarray
-            Array containing the centers for each SED pattern.
+        shifts : ndarray
+            Array containing the shifts for each SED pattern.
 
         """
-        shifts = self.map(find_beam_offset_cross_correlation,
-                          radius_start=radius_start,
-                          radius_finish=radius_finish,
-                          inplace=False, *args, **kwargs)
+        signal_shape = self.axes_manager.signal_shape
+        origin_coordinates = np.array(signal_shape) / 2
+
+        method_dict = {'cross_correlate':find_beam_offset_cross_correlation,
+                       'blur':find_beam_center_blur,
+                       'interpolate':find_beam_center_interpolate}
+
+        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
+
+        if method == 'cross_correlate':
+            shifts = self.map(method_function,inplace=False,**kwargs)
+        elif method == 'blur' or method == 'interpolate':
+            centers = self.map(method_function,inplace=False,**kwargs)
+            shifts = origin_coordinates - centers
+
         return shifts
 
     def center_direct_beam(self,
-                           radius_start, radius_finish,
+                           method,
                            square_width=None,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
@@ -361,20 +369,16 @@ class Diffraction2D(Signal2D):
 
         Parameters
         ----------
-        radius_start : int
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
+        method : str,
+            Must be one of 'cross_correlate', 'blur', 'interpolate'
+
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-        *args:
-            Arguments to be passed to align2D().
+
         **kwargs:
-            Keyword arguments to be passed to align2D().
+            To be passed to method function
 
         Returns
         -------
@@ -382,101 +386,60 @@ class Diffraction2D(Signal2D):
             The centered diffraction data.
 
         """
-        nav_shape_x = self.data.shape[0]
-        nav_shape_y = self.data.shape[1]
-        origin_coordinates = np.array((self.data.shape[2] / 2 - 0.5,
-                                       self.data.shape[3] / 2 - 0.5))
+        nav_size = self.axes_manager.navigation_size
+        signal_shape = self.axes_manager.signal_shape
+        origin_coordinates = np.array(signal_shape) / 2
 
         if square_width is not None:
-            min_index = np.int(origin_coordinates[0] - (0.5 + square_width))
+            min_index = np.int(origin_coordinates[0] - square_width)
             # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + (1.5 + square_width))
-            shifts = self.isig[min_index:max_index, min_index:max_index].get_direct_beam_position(
-                radius_start, radius_finish, *args, **kwargs)
+            max_index = np.int(origin_coordinates[0] + square_width)
+            cropped = self.isig[min_index:max_index, min_index:max_index]
+            shifts = cropped.get_direct_beam_position(method=method,**kwargs)
         else:
-            shifts = self.get_direct_beam_position(radius_start, radius_finish,
-                                                   *args, **kwargs)
+            shifts = self.get_direct_beam_position(method=method,**kwargs)
 
         shifts = -1 * shifts.data
-        shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
+        shifts = shifts.reshape(nav_size, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,
-                            *args, **kwargs)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
     def remove_background(self, method,
-                          *args, **kwargs):
+                          **kwargs):
         """Perform background subtraction via multiple methods.
 
         Parameters
         ----------
         method : string
-            Specify the method used to determine the direct beam position.
-
-            * 'h-dome' -
-            * 'gaussian_difference' - Uses a difference between two gaussian
-                                convolutions to determine where the peaks are,
-                                and sets all other pixels to 0.
-            * 'median' - Use a median filter for background removal
-            * 'reference_pattern' - Subtract a user-defined reference patterns
-                from every diffraction pattern.
-
-        sigma_min : int, float
-            Standard deviation for the minimum gaussian convolution
-            (gaussian_difference only)
-        sigma_max : int, float
-            Standard deviation for the maximum gaussian convolution
-            (gaussian_difference only)
-        footprint : int
-            Size of the window that is convoluted with the array to determine
-            the median. Should be large enough that it is about 3x as big as the
-            size of the peaks (median only).
-        implementation : 'scipy' or 'skimage'
-            (median only) see expt_utils.subtract_background_median
-            for details, if not selected 'scipy' is used
-        bg : array
-            Background array extracted from vacuum. (subtract_reference only)
-        *args:
-            Arguments to be passed to map().
+            Specifies the method, from:
+            {'h-dome','gaussian_difference','median','reference_pattern'}
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to map(), including method specific ones,
+            running a method with no kwargs will return help
 
         Returns
         -------
         bg_subtracted : :obj:`ElectronDiffraction2D`
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
-
         """
-        if method == 'h-dome':
+        method_dict = {'h-dome':regional_filter,
+            'gaussian_difference':subtract_background_dog,
+            'median':subtract_background_median,
+            'reference_pattern':subtract_reference,}
+
+        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
+
+        if method != 'h-dome':
+            bg_subtracted = self.map(method_function,
+                                     inplace=False,**kwargs)
+        elif method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
-            bg_subtracted = self.map(regional_filter,
-                                     inplace=False, *args, **kwargs)
+            bg_subtracted = self.map(method_function,
+                                     inplace=False,**kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
-
-        elif method == 'gaussian_difference':
-            bg_subtracted = self.map(subtract_background_dog,
-                                     inplace=False, *args, **kwargs)
-
-        elif method == 'median':
-            if 'implementation' in kwargs.keys():
-                if kwargs['implementation'] != 'scipy' and kwargs['implementation'] != 'skimage':
-                    raise NotImplementedError(
-                        "Unknown implementation `{}`".format(
-                            kwargs['implementation']))
-
-            bg_subtracted = self.map(subtract_background_median,
-                                     inplace=False, *args, **kwargs)
-
-        elif method == 'reference_pattern':
-            bg_subtracted = self.map(subtract_reference, inplace=False,
-                                     *args, **kwargs)
-
-        else:
-            raise NotImplementedError(
-                "The method specified, '{}', is not implemented. See"
-                "documentation for available implementations.".format(method))
 
         return bg_subtracted
 

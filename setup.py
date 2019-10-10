@@ -19,16 +19,16 @@
 
 from setuptools import setup, find_packages
 
-exec(open('pyxem/version.py').read())  # grab version info
+exec(open('pyxem/release_info.py').read())  # grab version info
 
 
 setup(
-    name='pyxem',
-    version=__version__,
+    name=name,
+    version=version,
     description='Crystallographic Diffraction Microscopy in Python.',
-    author=__author__,
-    author_email=__email__,
-    license="GPLv3",
+    author=author,
+    author_email=email,
+    license=license,
     url="https://github.com/pyxem/pyxem",
     long_description=open('README.rst').read(),
     classifiers=[
@@ -50,11 +50,13 @@ setup(
       'scikit-image >= 0.15.0',   # exclude_border argument in peak_finder laplacian (PR #436)
       'matplotlib >= 3.1.1' ,     # 3.1.0 failed
       'scikit-learn >= 0.19',     # reason unknown
-      'hyperspy >= 1.3',          # 1.2 fails, (NTU Workshop - May 2019)
-      'diffsims'                 
+      'hyperspy >= 1.5.2',        # earlier versions incompatible with numpy >= 1.17.0
+      'diffsims',
+      'lmfit >= 0.9.12'
       ],
     package_data={
-        "": ["LICENSE", "readme.rst",],
-        "pyxem": ["*.py"],
+        "": ["LICENSE", "readme.rst"],
+        "pyxem": ["*.py", "hyperspy_extension.yaml"],
     },
+    entry_points={'hyperspy.extensions': ['pyxem = pyxem']},
 )

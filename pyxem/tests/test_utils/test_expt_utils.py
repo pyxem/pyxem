@@ -27,7 +27,8 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, reference_circle, \
     find_beam_offset_cross_correlation, peaks_as_gvectors, \
-    investigate_dog_background_removal_interactive
+    investigate_dog_background_removal_interactive, \
+    find_beam_center_blur, find_beam_center_interpolate
 
 
 @pytest.fixture(params=[
@@ -158,3 +159,34 @@ class TestCenteringAlgorithm:
         z = gaussian_filter(z, sigma=2, truncate=3)
         shifts = find_beam_offset_cross_correlation(z, 1, 4)
         assert np.allclose(shifts, shifts_expected, atol=0.2)
+
+
+@pytest.mark.parametrize("center_expected", [(29, 25)])
+@pytest.mark.parametrize("sigma", [1, 2, 3])
+def test_find_beam_center_blur(center_expected, sigma):
+    z = np.zeros((50, 50))
+    z[28:31, 24:27] = 1
+    z = gaussian_filter(z, sigma=sigma)
+    shifts = find_beam_center_blur(z, 10)
+    assert np.allclose(shifts, center_expected, atol=0.2)
+
+
+@pytest.mark.parametrize("center_expected", [(29.52, 25.97)])
+@pytest.mark.parametrize("sigma", [1, 2, 3])
+def test_find_beam_center_interpolate_1(center_expected, sigma):
+    z = np.zeros((50, 50))
+    z[28:31, 24:28] = 1
+    z = gaussian_filter(z, sigma=sigma)
+    centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
+    assert np.allclose(centers, center_expected, atol=0.2)
+
+
+@pytest.mark.parametrize("center_expected", [(9, 44)])
+@pytest.mark.parametrize("sigma", [2])
+def test_find_beam_center_interpolate_2(center_expected, sigma):
+    """Cover unlikely case when beam is close to the edge"""
+    z = np.zeros((50, 50))
+    z[5:15, 41:46] = 1
+    z = gaussian_filter(z, sigma=sigma)
+    centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
+    assert np.allclose(centers, center_expected, atol=0.2)

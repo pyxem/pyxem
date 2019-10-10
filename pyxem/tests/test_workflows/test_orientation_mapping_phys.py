@@ -34,59 +34,25 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import peaks_from_best_vector_match
+from pyxem.utils.indexation_utils import OrientationResult
 from pyxem.utils.sim_utils import sim_as_signal
-
-"""
-The test are designed to make sure orientation mapping works when actual
-rotation are considered.
-
-Specifically we test (for both an orthorhombic and hexagonal samples) that:
-
-- The algorithm can tell the difference between down a, down b and down c axes
-"""
-
 
 half_side_length = 72
 
-
+""" Template Matching set up """
 def create_Ortho():
     latt = diffpy.structure.lattice.Lattice(3, 4, 5, 90, 90, 90)
     atom = diffpy.structure.atom.Atom(atype='Zn', xyz=[0, 0, 0], lattice=latt)
     return diffpy.structure.Structure(atoms=[atom], lattice=latt)
-
 
 def create_Hex():
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
     atom = diffpy.structure.atom.Atom(atype='Ni', xyz=[0, 0, 0], lattice=latt)
     return diffpy.structure.Structure(atoms=[atom], lattice=latt)
 
-
-def create_wurtzite(rotation=None):
-    """Construct a hexagonal P63mc GaAs Wurtzite structure. """
-    if rotation is None:
-        rotation = np.eye(3)
-    a = 4.053
-    c = 6.680
-    lattice = diffpy.structure.lattice.Lattice(a, a, c, 90, 90, 120)
-    atom_list = []
-    for x, y, z in [(1 / 3, 2 / 3, 0), (2 / 3, 1 / 3, 1 / 2)]:
-        atom_list.append(
-            diffpy.structure.atom.Atom(
-                atype='Ga',
-                xyz=[x, y, z],
-                lattice=lattice))
-        atom_list.append(
-            diffpy.structure.atom.Atom(
-                atype='As',
-                xyz=[x + 3 / 8, y + 3 / 8, z + 3 / 8],
-                lattice=lattice))
-    return diffpy.structure.Structure(atoms=atom_list, lattice=lattice)
-
-
 @pytest.fixture
 def edc():
     return pxm.DiffractionGenerator(300, 5e-2)
-
 
 @pytest.fixture
 def rot_list():
@@ -98,12 +64,6 @@ def rot_list():
     a, b, c = [90], [90], np.arange(0, 5, step=1)
     rot_list_temp += list(product(a, b, c))  # rotations around C
     return rot_list_temp
-
-
-@pytest.fixture
-def pattern_list():
-    return [(0, 0, 2)]
-
 
 def get_template_library(structure, rot_list, edc):
     diff_gen = pxm.DiffractionLibraryGenerator(edc)
@@ -119,16 +79,36 @@ def get_template_library(structure, rot_list, edc):
     library.with_direct_beam = False
     return library
 
-
-def get_template_match_results(structure, pattern_list, edc, rot_list, mask=None, inplane_rotations=[0]):
-    dp_library = get_template_library(structure, pattern_list, edc)
+def generate_diffraction_patterns(structure,edc):
+    # generates 4, dumb patterns in a 2x2 array, rotated around c axis
+    dp_library = get_template_library(structure, [(90,90,4)], edc)
     for sim in dp_library['A']['simulations']:
         pattern = (sim_as_signal(sim, 2 * half_side_length, 0.025, 1).data)
     dp = pxm.ElectronDiffraction2D([[pattern, pattern], [pattern, pattern]])
+    return dp
+
+def get_template_match_results(structure,edc, rot_list, mask=None):
+    dp = generate_diffraction_patterns(structure,edc)
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
-    return indexer.correlate(mask=mask, inplane_rotations=inplane_rotations)
+    return indexer.correlate(mask=mask)
 
+""" Tests for template matching """
+
+@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
+def test_orientation_mapping_physical(structure, rot_list, edc):
+    M = get_template_match_results(structure, edc, rot_list)
+    assert np.all(M.inav[0, 0] == M.inav[1, 0])
+    match_data = M.inav[0, 0].isig[1].data
+    for result_number in [0,1,2]:
+        np.testing.assert_allclose(match_data[result_number][:2], [90, 90]) #always looking down c
+
+def test_masked_template_matching(default_structure, rot_list, edc):
+    mask = hs.signals.Signal1D(([[[1], [1]], [[0], [1]]]))
+    M = get_template_match_results(default_structure, edc, rot_list, mask)
+    assert np.all(np.equal(M.inav[0, 1].data, None))
+
+""" Testing Vector Matching Results """
 
 def get_vector_match_results(structure, rot_list, edc):
     diffraction_library = get_template_library(structure, rot_list, edc)
@@ -151,56 +131,13 @@ def get_vector_match_results(structure, rot_list, edc):
         n_best=2)
     return diffraction_library, indexation
 
-
-@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
-def test_orientation_mapping_physical(structure, rot_list, pattern_list, edc):
-    M = get_template_match_results(structure, pattern_list, edc, rot_list)
-    assert np.all(M.inav[0, 0] == M.inav[1, 0])
-    match_data = M.inav[0, 0].isig[:4, 0].data
-    assert match_data[0] == 0
-    np.testing.assert_allclose(match_data[1], [2, 0, 0])
-
-
-def test_masked_OM(default_structure, rot_list, pattern_list, edc):
-    mask = hs.signals.Signal1D(([[[1], [1]], [[0], [1]]]))
-    M = get_template_match_results(default_structure, pattern_list, edc, rot_list, mask)
-    assert np.all(np.equal(M.inav[0, 1].data, None))
-
-
-def expected_best_peaks_pattern_list(library, _):
-    return library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
-
-
-def expected_best_peaks_rotated(library, rotation_euler):
-    angle = np.deg2rad(rotation_euler[0][2])
-    rotation = np.array([
-        [np.cos(angle), np.sin(angle)],
-        [-np.sin(angle), np.cos(angle)]])
-    coords = library.get_library_entry("A", (0, 0, 0))['Sim'].coordinates[:, :2]
-    return (rotation @ coords.T).T
-
-
-@pytest.mark.parametrize('pattern_list, inplane_rotations, get_expected_peaks', [
-    ([(0, 0, 2)], [0], expected_best_peaks_pattern_list),
-    ([(0, 0, 45)], np.arange(0, 360, 1), expected_best_peaks_rotated),
-])
-def test_generate_peaks_from_best_template(default_structure, rot_list, pattern_list, edc, get_expected_peaks, inplane_rotations):
-    library = get_template_library(default_structure, rot_list, edc)
-    M = get_template_match_results(default_structure, pattern_list, edc, rot_list, inplane_rotations=inplane_rotations)
-    peaks = M.map(peaks_from_best_template,
-                  library=library,
-                  inplace=False)
-    expected_peaks = get_expected_peaks(library, pattern_list)
-    for expected_peak in expected_peaks:
-        assert np.any(np.isclose(np.linalg.norm(peaks.inav[0, 0] - expected_peak, axis=1), 0, atol=0.03))
-
-
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
 def test_vector_matching_physical(structure, rot_list, edc):
     _, match_results = get_vector_match_results(structure, rot_list, edc)
-    assert match_results.data.shape == (2, 2, 2, 5)  # 2x2 rotations, 2 best peaks, 5 values
-    np.testing.assert_allclose(match_results.data[0, 0, 0, 2], 1.0)  # match rate for best orientation
-    np.testing.assert_allclose(match_results.data[0, 1, 0, 2], 1.0)  # match rate for best orientation
+    assert match_results.data.shape == (2, 2)  # 2x2 rotations, 2 best peaks, 5 values
+    isinstance(match_results.data[0, 0][0], OrientationResult)
+    np.testing.assert_allclose(match_results.data[0, 0][0].match_rate, 1.0)  # match rate for best orientation
+    np.testing.assert_allclose(match_results.data[0, 1][0].match_rate, 1.0)  # match rate for best orientation
 
 
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
@@ -215,58 +152,10 @@ def test_peaks_from_best_vector_match(structure, rot_list, edc):
         for p in peaks.data[0, i]:
             assert np.isclose(p[0], lib[:, 0], atol=0.1).any() and np.isclose(p[1], lib[:, 1], atol=0.1).any()
 
-
 @pytest.mark.parametrize('structure, rot_list', [(create_Hex(), [(0, 0, 10), (0, 0, 0)])])
-def test_plot_best_matching_results_on_signal_vector(structure, rot_list, edc):
-    # Just test that the code runs
+def test_plot_best_vector_matching_results_on_signal(structure, rot_list, edc):
     library, match_results = get_vector_match_results(structure, rot_list, edc)
-    # Hyperspy can only add markers to square signals
-    match_results.data = np.vstack((match_results.data, match_results.data))
+    match_results.data = np.vstack((match_results.data, match_results.data)) # Hyperspy can only add markers to square signals
     dp = ElectronDiffraction2D(2 * [2 * [np.zeros((144, 144))]])
     match_results.plot_best_matching_results_on_signal(dp,
                                                        library=library)
-
-
-@pytest.mark.parametrize("structure, rotation", [(create_wurtzite(), euler2mat(0, np.pi / 2, 0, 'rzxz'))])
-def test_kinematic_intensities_rotation(structure, rotation):
-    """Test that kinematically forbidden diffraction spots gets zero intensity also after rotation."""
-    rotated_lattice = diffpy.structure.lattice.Lattice(structure.lattice)
-    rotated_lattice.setLatPar(baserot=rotation)
-    structure.placeInLattice(rotated_lattice)
-    reciprocal_lattice = structure.lattice.reciprocal()
-    g_indices = [(0, 0, 1)]
-    g_hkls = reciprocal_lattice.dist(g_indices, [0, 0, 0])
-
-    scattering_params_list = ['lobato', 'xtables']
-    for scattering_params in scattering_params_list:
-        intensities = get_kinematical_intensities(
-            structure,
-            g_indices,
-            g_hkls,
-            excitation_error=0,
-            maximum_excitation_error=1,
-            debye_waller_factors={},
-            scattering_params=scattering_params)
-
-        np.testing.assert_almost_equal(intensities, [0])
-
-
-@pytest.mark.parametrize("structure, rotation", [(create_wurtzite(), euler2mat(0, np.pi / 2, 0, 'rzxz'))])
-@pytest.mark.xfail(raises=NotImplementedError)
-def test_kinematic_intensities_error_raise(structure, rotation):
-    """Test that kinematically forbidden diffraction spots gets zero intensity also after rotation."""
-    rotated_lattice = diffpy.structure.lattice.Lattice(structure.lattice)
-    rotated_lattice.setLatPar(baserot=rotation)
-    structure.placeInLattice(rotated_lattice)
-    reciprocal_lattice = structure.lattice.reciprocal()
-    g_indices = [(0, 0, 1)]
-    g_hkls = reciprocal_lattice.dist(g_indices, [0, 0, 0])
-
-    intensities = get_kinematical_intensities(
-        structure,
-        g_indices,
-        g_hkls,
-        excitation_error=0,
-        maximum_excitation_error=1,
-        debye_waller_factors={},
-        scattering_params='_empty')

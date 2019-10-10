@@ -21,6 +21,7 @@ import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
 
 from scipy.ndimage.interpolation import shift
+from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
@@ -314,7 +315,7 @@ def subtract_background_dog(z, sigma_min, sigma_max):
     return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
 
 
-def subtract_background_median(z, footprint=19, implementation='scipy'):
+def subtract_background_median(z, footprint):
     """Remove background using a median filter.
 
     Parameters
@@ -323,21 +324,15 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
         size of the window that is convoluted with the array to determine
         the median. Should be large enough that it is about 3x as big as the
         size of the peaks.
-    implementation: str
-        One of 'scipy', 'skimage'. Skimage is much faster, but it messes with
-        the data format. The scipy implementation is safer, but slower.
 
     Returns
     -------
         Pattern with background subtracted as np.array
     """
 
-    if implementation == 'scipy':
-        bg_subtracted = z - ndi.median_filter(z, size=footprint)
-    elif implementation == 'skimage':
-        selem = morphology.square(footprint)
-        # skimage only accepts input image as uint16
-        bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
+    selem = morphology.square(footprint)
+    # skimage only accepts input image as uint16
+    bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
 
     return np.maximum(bg_subtracted, 0)
 
@@ -358,10 +353,7 @@ def subtract_reference(z, bg):
         Two-dimensional data array containing signal with background removed.
     """
     im = z.astype(np.float64) - bg
-    for i in range(0, z.shape[0]):
-        for j in range(0, z.shape[1]):
-            if im[i, j] < 0:
-                im[i, j] = 0
+    im = np.where(im > 0,im,0)
     return im
 
 
@@ -419,8 +411,105 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
-def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
-    """Method to center the direct beam center by a cross-correlation algorithm.
+def _find_peak_max(arr,sigma,upsample_factor,kind):
+    """Find the index of the pixel corresponding to peak maximum in 1D pattern
+
+    Parameters
+    ----------
+    sigma : int
+        Sigma value for Gaussian blurring kernel for initial beam center estimation.
+    upsample_factor : int
+        Upsample factor for subpixel maximum finding, i.e. the maximum will
+        be found with a precision of 1 / upsample_factor of a pixel.
+    kind : str or int, optional
+        Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+        ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+        ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+        interpolation of zeroth, first, second or third order; ‘previous’
+        and ‘next’ simply return the previous or next value of the point) or as
+        an integer specifying the order of the spline interpolator to use.
+
+    Returns
+    -------
+    center: float
+        Pixel position of the maximum
+    """
+    y1 = ndi.filters.gaussian_filter1d(arr, sigma)
+    c1 = np.argmax(y1)  # initial guess for beam center
+
+    m = upsample_factor
+    window = 10
+    win_len = 2 * window + 1
+
+    try:
+        r1 = np.linspace(c1 - window, c1 + window, win_len)
+        f = interp1d(r1, y1[c1 - window: c1 + window + 1], kind=kind)
+        r2 = np.linspace(c1 - window, c1 + window, win_len * m)  # extrapolate for subpixel accuracy
+        y2 = f(r2)
+        c2 = np.argmax(y2) / m  # find beam center with `m` precision
+    except ValueError:  # if c1 is too close to the edges, return initial guess
+        center = c1
+    else:
+        center = c2 + c1 - window
+
+    return center
+
+
+def find_beam_center_interpolate(z,sigma,upsample_factor,kind):
+    """Find the center of the primary beam in the image `img` by summing along
+    X/Y directions and finding the position along the two directions independently.
+
+    Parameters
+    ----------
+    sigma : int
+        Sigma value for Gaussian blurring kernel for initial beam center estimation.
+    upsample_factor : int
+        Upsample factor for subpixel beam center finding, i.e. the center will
+        be found with a precision of 1 / upsample_factor of a pixel.
+    kind : str or int, optional
+        Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
+        ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
+        ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
+        interpolation of zeroth, first, second or third order; ‘previous’
+        and ‘next’ simply return the previous or next value of the point) or as
+        an integer specifying the order of the spline interpolator to use.
+
+    Returns
+    -------
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
+    """
+    xx = np.sum(z, axis=1)
+    yy = np.sum(z, axis=0)
+
+    cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind)
+    cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind)
+
+    center = np.array([cx, cy])
+    return center
+
+
+def find_beam_center_blur(z,sigma):
+    """Estimate direct beam position by blurring the image with a large
+    Gaussian kernel and finding the maximum.
+
+    Parameters
+    ----------
+    sigma : float
+        Sigma value for Gaussian blurring kernel.
+
+    Returns
+    -------
+    center : np.array
+        np.array containing indices of estimated direct beam positon.
+    """
+    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
+    center = np.unravel_index(blurred.argmax(), blurred.shape)
+    return np.array(center)
+
+
+def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
+    """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
     performance in regions where the direct beam size changes,
@@ -465,7 +554,6 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     shift, error, diffphase = register_translation(ref, im, 100)
 
     return (shift - 0.5)
-
 
 def peaks_as_gvectors(z, center, calibration):
     """Converts peaks found as array indices to calibrated units, for use in a
