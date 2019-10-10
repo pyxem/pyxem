@@ -34,6 +34,10 @@ class Test_bad_xy_lists:
     def test_bad_y_list(self):
         _get_chunk_size([0,2],[0,2,5])
 
+"""
+This runs a simple case of square rooting all elements of a pattern,
+the chunked version is compared with doing the entire operation in memory. 
+"""
 @pytest.fixture()
 def big_electron_diffraction_pattern():
     z = np.arange(0,96,step=1).reshape(4,6,2,2) # x_size=6, y_size=4 in hspy

@@ -20,8 +20,6 @@ import hyperspy.api as hs
 import pyxem as pxm
 import numpy as np
 
-
-
 def _get_chunk_size(x_list,y_list):
     """ finds chunk size and validates list entries """
     chunk_size = x_list[1] - x_list[0]
@@ -64,17 +62,9 @@ def _combine_list_into_navigation_space(results_list,x_list):
     Internal function that combines the results_list into a correctly shaped
     output object.
 
-    Parameters
-    ----------
-    results_list : list
-
-    y_list : list or np.array
-        as defined in pyx.utils.big_data_utils.chunked_application_of_UDF
-
-    Returns
-    -------
-    np_output : np.array
-        as defined in pyx.utils.big_data_utils.chunked_application_of_UDF
+    See Also
+    --------
+    pyxem.utils.big_data_utils.chunked_application_of_UDF
     """
     vert_list = []
     gap = x_list[1] - x_list[0]
@@ -86,17 +76,17 @@ def _combine_list_into_navigation_space(results_list,x_list):
 
 def chunked_application_of_UDF(filepath, x_list,y_list,function):
     """
-    #docstrings tbc
+    Applies a user specificed function to a diffraction pattern object with
+    chunking for memory.
 
     Parameters
     ----------
-
     filepath : str
         Path to the file contain the data to be inverstigated
 
     x_list : list or np.array
         Iterable running from the "start" index to the final start "index" with a fixed step
-        size. ie) Data total it equivilant to [start:final+step_size]
+        size. ie) Data total is as with dp.inav[start:final+step_size]
 
     y_list : list or np.array
         Iterable running from the "start" index to the final start "index" with a fixed step
@@ -107,7 +97,6 @@ def chunked_application_of_UDF(filepath, x_list,y_list,function):
 
     Returns
     -------
-
     np_output : np.array
         The results, as a numpy array.
     """
