@@ -36,13 +36,13 @@ class Test_bad_xy_lists:
 
 """
 This runs a simple case of square rooting all elements of a pattern,
-the chunked version is compared with doing the entire operation in memory. 
+the chunked version is compared with doing the entire operation in memory.
 """
 @pytest.fixture()
 def big_electron_diffraction_pattern():
     z = np.arange(0,96,step=1).reshape(4,6,2,2) # x_size=6, y_size=4 in hspy
     dp =  pxm.ElectronDiffraction2D(z)
-    dp.save('tempfile')
+    dp.save('tempfile_for_big_data_util_testing')
     return dp
 
 def single_navigation_square_root(z):
@@ -55,7 +55,7 @@ def dp_sqrt(dp):
 def test_core_big_data_functionality(big_electron_diffraction_pattern):
     expected_output = np.sqrt(big_electron_diffraction_pattern.data)
 
-    filepath = 'tempfile.hspy'
+    filepath = 'tempfile_for_big_data_util_testing.hspy'
     x_list = [0,2,4]
     y_list = np.arange(0,2+1e-5,2)
 
