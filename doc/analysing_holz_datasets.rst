@@ -10,7 +10,7 @@ This guide will show how to extract the size, intensity and width of HOLZ rings.
 These parameters can then be used to infer information about the crystal structure of a crystalline material.
 
 Example of this type of data processing: `Three-dimensional subnanoscale imaging of unit cell doubling due to octahedral tilting and cation modulation in strained perovskite thin films <https://doi.org/10.1103/PhysRevMaterials.3.063605>`_.
-
+The data and processing scripts used in this paper is available at Zenodo with the DOI `10.5281/zenodo.3476746 <https://dx.doi.org/10.5281/zenodo.3476746>`_, and Medipix3 dataset can be downloaded directly: https://zenodo.org/record/3476746/files/m004_LSMO_LFO_STO_medipix.hdf5?download=1.
 
 Loading dataset
 ---------------
