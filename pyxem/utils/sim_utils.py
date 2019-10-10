@@ -61,6 +61,5 @@ def sim_as_signal(diffsim, size, sigma, max_r):
         dp_dat = dp_dat / np.max(dp_dat)
 
     dp = ElectronDiffraction2D(dp_dat)
-    dp.set_diffraction_calibration(2 * max_r / size)
 
     return dp
