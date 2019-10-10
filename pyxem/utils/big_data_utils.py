@@ -16,34 +16,33 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-# over importing
 import hyperspy.api as hs
 import pyxem as pxm
 import numpy as np
-from pyxem.generators.subpixelrefinement_generator import SubpixelrefinementGenerator
-from pyxem.signals.tensor_field import *
-from pyxem.generators.displacement_gradient_tensor_generator import *
 
+def check_consisent_lists_and_chunks(x_list,y_list,chunk_size):
+    pass
 
-def load_and_dp(fp,x,y,chunk):
+def load_and_cast(filepath,x,y,chunk_size):
     """
-    This function loads a chunk of signal
+    This function loads a chunk of a larger diffraction pattern
     """
-    s = hs.load(fp,lazy=True)
-    s = s.inav[x:x+chunk,y:y+chunk]
+    s = hs.load(filepath,lazy=True)
+    s = s.inav[x:x+chunk_size,y:y+chunk_size]
     s.compute()
     return pxm.ElectronDiffraction2D(s)
 
-def factory(fp,x,y,chunk,function):
+def factory(fp,x,y,chunk_size,function):
     """
     This loads a chunk of a signal, and then applies (the user defined) function,
     function must take a single argument; dp
     """
-    dp = load_and_dp(fp,x,y,chunk)
-    vectors = function(dp)
-    return vectors
+    dp = load_and_cast(fp,x,y,chunk_size)
+    analysis_output = function(dp)
+    return analysis_output
 
-
+#TODO: tidy the naming up here
+#TODO: faciltiate rectangular regions of interest (although square analysis areas)
 def _create_vert(l,start_int,gap):
     """
     Internal function that produces the columns that are then stacked to produce
@@ -53,6 +52,8 @@ def _create_vert(l,start_int,gap):
     right = left + gap
     return np.vstack(tuple([x for x in l[left:right]]))
 
+#TODO: tidy the naming up here
+#TODO: faciltiate rectangular regions of interest (although square analysis areas)
 def _combine(l,x_list,y_list):
     """
     Internal function that combines the local list 'l' into a correctly shaped
@@ -65,18 +66,38 @@ def _combine(l,x_list,y_list):
         vert_list.append(_create_vert(l,i,gap))
         i += 1
 
-    Vs_final = np.hstack(tuple([x for x in vert_list]))
-    return Vs_final
+    np_output = np.hstack(tuple([x for x in vert_list]))
+    return np_output
 
 def main_function(fp, x_list,y_list,function):
     """
-    Produces a full output for fp, x_list,y_list, function, this assumes x_list
-    and y_list are linearly spaced.
+    #docstrings tbc
+    
+    Parameters
+    ----------
+    
+    filepath : str
+    
+    
+    x_list : list
+    
+    
+    y_list : list
+    
+    
+    function : function
+        A user defined function that take a ElectronDiffraction2D as an argument and returns the desired output    
+    
+    Returns
+    -------
+    
+    np_output : np.array
     """
-    l = []
+    results_list = []
+    chunk_size = x_list[1] - x_list[0] #assumed to be == y_list[i] - y_list[j] for (i-j) == 1
     for x in x_list:
         for y in y_list:
-            dp = factory(fp,x,y,x_list[1]-x_list[0],function)
-            l.append(dp.data)
-    z = _combine(l,x_list,y_list)
-    return z
+            analyis_output = factory(fp,x,y,chunk_size,function)
+            results_list.append(analysis_output.data)
+    np_output = _combine(l,x_list,y_list)
+    return np_output
