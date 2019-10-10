@@ -50,8 +50,6 @@ class GenericFlatDetector(Detector):
     >>> detector
     Detector GenericFlatDetector	 Spline= None
     PixelSize= 1.000e+00, 1.000e+00 m
-
-    !!Put some example of how to do the rest of the calibration here.
     '''
     IS_FLAT = True  # this detector is flat
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents
