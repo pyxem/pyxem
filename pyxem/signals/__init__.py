@@ -48,37 +48,37 @@ def push_metadata_through(dummy, *args, **kwargs):
 
     return dummy, args, kwargs
 
-def select_method_from_method_dict(method,method_dict,**kwargs):
-        """
-        Streamlines the selection of utils to be mapped in class methods
 
-        Parameters
-        ----------
-        method : str
-            The key to method_dict for the chosen method
+def select_method_from_method_dict(method, method_dict, **kwargs):
+    """
+    Streamlines the selection of utils to be mapped in class methods
 
-        method_dict : dict
-            dictionary with strings as keys and functions as values
+    Parameters
+    ----------
+    method : str
+        The key to method_dict for the chosen method
 
-        kwargs : dict
-            Parameters for the method, if empty help is return
+    method_dict : dict
+        dictionary with strings as keys and functions as values
 
-        Returns
-        -------
-        method_function :
-            The utility function that corresponds the given method string, unless
-            kwargs is empty, in which case the help for the utility function is returned.
-        """
+    kwargs : dict
+        Parameters for the method, if empty help is return
 
-        if method not in method_dict:
-            raise NotImplementedError("The method `{}` is not implemented. "
-                                        "See documentation for available "
-                                        "implementations.".format(method))
-        elif not kwargs:
-            help(method_dict[method])
+    Returns
+    -------
+    method_function :
+        The utility function that corresponds the given method string, unless
+        kwargs is empty, in which case the help for the utility function is returned.
+    """
 
-        return method_dict[method]
+    if method not in method_dict:
+        raise NotImplementedError("The method `{}` is not implemented. "
+                                  "See documentation for available "
+                                  "implementations.".format(method))
+    elif not kwargs:
+        help(method_dict[method])
 
+    return method_dict[method]
 
 
 def transfer_signal_axes(new_signal, old_signal):

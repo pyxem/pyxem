@@ -81,6 +81,7 @@ def get_simulated_disc(square_size, disc_radius):
     arr[rr, cc] = 1
     return arr
 
+
 def _get_pixel_vectors(dp, vectors, calibration, center):
     """Get the pixel coordinates for the given diffraction
     pattern and vectors.
