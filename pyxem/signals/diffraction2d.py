@@ -42,6 +42,7 @@ from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
 
 from pyxem.utils import peakfinder2D_gui
+from pyxem.signals import transfer_navigation_axes
 
 from skimage import filters
 from skimage import transform as tf
@@ -67,6 +68,34 @@ class Diffraction2D(Signal2D):
         super().__init__(*args, **kwargs)
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
+        dx = self.axes_manager.signal_axes[0]
+        dy = self.axes_manager.signal_axes[1]
+
+        dx.name = 'detector x'
+        dx.units = 'pixels'
+        dy.name = 'detector y'
+        dy.units = 'pixels'
+
+    def set_scan_calibration(self, calibration, units):
+        """Set scan pixel size in nanometres.
+
+        Parameters
+        ----------
+        calibration : float
+            Scan calibration in units per pixel.
+        units : str
+            Scan calibration units.
+        """
+        x = self.axes_manager.navigation_axes[0]
+        y = self.axes_manager.navigation_axes[1]
+
+        x.name = 'x'
+        x.scale = calibration
+        x.units = units
+
+        y.name = 'y'
+        y.scale = calibration
+        y.units = units
 
     def plot_interactive_virtual_image(self, roi, **kwargs):
         """Plots an interactive virtual image formed with a specified and
@@ -511,17 +540,10 @@ class Diffraction2D(Signal2D):
 
         peak_coordinates = self.map(method_dict[method]['method'], **kwargs,
                                     inplace=False, ragged=True)
-        # Set calibration to same as signal
-        x = peak_coordinates.axes_manager.navigation_axes[0]
-        y = peak_coordinates.axes_manager.navigation_axes[1]
+        peak_coordinates = DetectorCoordinates2D(peak_coordinates)
+        peak_coordinates.axes_manager.set_signal_dimension(0)
 
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[1].scale
-        y.units = 'nm'
+        transfer_navigation_axes(peak_coordinates, self)
 
         return peak_coordinates
 

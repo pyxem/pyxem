@@ -63,14 +63,14 @@ class SubpixelRefinementGenerator2D():
 
     Parameters
     ----------
-    dp : ElectronDiffraction2D
-        The electron diffraction patterns to be refined
-    vectors : DiffractionVectors2D | ndarray
-        Vectors (in calibrated units) to the locations of the spots to be
-        refined. If given as DiffractionVectors2D, it must have the same
-        navigation shape as the electron diffraction patterns. If an ndarray,
-        the same set of vectors is mapped over all electron diffraction
-        patterns.
+    dp : Diffraction2D
+        The diffraction patterns containing the raw measurements of peask to be
+        refined.
+    coordinates : DetectorCoordinates2D | ndarray
+        Coordinates of positive peaks on the detector to be refined. If given as
+        DetectorCoordinates2D, the navigation shape must be the same as for the
+        corresponding Diffraction2D object. If an ndarray, the same coordinates
+        are used at every navigation index.
 
     References
     ----------
@@ -78,18 +78,10 @@ class SubpixelRefinementGenerator2D():
 
     """
 
-    def __init__(self, dp, vectors):
+    def __init__(self, dp, coordinates):
         self.dp = dp
-        self.vectors_init = vectors
+        self.coordinates = coordinates
         self.last_method = None
-        sig_ax = dp.axes_manager.signal_axes
-        self.calibration = [sig_ax[0].scale, sig_ax[1].scale]
-        self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
-
-        self.vector_pixels = _get_pixel_vectors(dp,
-                                                vectors,
-                                                calibration=self.calibration,
-                                                center=self.center)
 
     def conventional_xc(self, square_size, disc_radius, upsample_factor):
         """Refines the peaks using (phase) cross correlation.
@@ -111,22 +103,19 @@ class SubpixelRefinementGenerator2D():
             units with the same navigation shape as the diffraction patterns.
 
         """
-        def _conventional_xc_map(dp, vectors, sim_disc,
-                                 upsample_factor, center, calibration):
+        def _conventional_xc_map(dp, vectors, sim_disc, upsample_factor):
             shifts = np.zeros_like(vectors, dtype=np.float64)
             for i, vector in enumerate(vectors):
                 expt_disc = get_experimental_square(dp, vector, square_size)
                 shifts[i] = _conventional_xc(expt_disc, sim_disc, upsample_factor)
-            return (((vectors + shifts) - center) * calibration)
+            return vectors + shifts
 
         sim_disc = get_simulated_disc(square_size, disc_radius)
         self.vectors_out = DiffractionVectors2D(
             self.dp.map(_conventional_xc_map,
-                        vectors=self.vector_pixels,
+                        vectors=self.coordinates,
                         sim_disc=sim_disc,
                         upsample_factor=upsample_factor,
-                        center=self.center,
-                        calibration=self.calibration,
                         inplace=False))
         self.vectors_out.axes_manager.set_signal_dimension(0)
         self.last_method = "conventional_xc"
@@ -198,19 +187,17 @@ class SubpixelRefinementGenerator2D():
             z_adpt[0, :] = 0
             return z_adpt
 
-        def _center_of_mass_map(dp, vectors, square_size, center, calibration):
+        def _center_of_mass_map(dp, vectors, square_size):
             shifts = np.zeros_like(vectors, dtype=np.float64)
             for i, vector in enumerate(vectors):
                 expt_disc = _com_experimental_square(dp, vector, square_size)
                 shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
-            return ((vectors + shifts) - center) * calibration
+            return vectors + shifts
 
         self.vectors_out = DiffractionVectors2D(
             self.dp.map(_center_of_mass_map,
-                        vectors=self.vector_pixels,
+                        vectors=self.coordinates,
                         square_size=square_size,
-                        center=self.center,
-                        calibration=self.calibration,
                         inplace=False))
         self.vectors_out.axes_manager.set_signal_dimension(0)
 
@@ -267,19 +254,17 @@ class SubpixelRefinementGenerator2D():
             y_ans = 0.5 * (UY - DY) / (UY + DY - 2 * M)
             return (si[1] - z.shape[1] // 2 + x_ans, si[0] - z.shape[0] // 2 + y_ans)
 
-        def _lg_map(dp, vectors, square_size, center, calibration):
+        def _lg_map(dp, vectors, square_size):
             shifts = np.zeros_like(vectors, dtype=np.float64)
             for i, vector in enumerate(vectors):
                 expt_disc = get_experimental_square(dp, vector, square_size)
                 shifts[i] = _new_lg_idea(expt_disc)
 
-            return (((vectors + shifts) - center) * calibration)
+            return vectors + shifts
 
         self.vectors_out = DiffractionVectors2D(self.dp.map(_lg_map,
-                                                            vectors=self.vector_pixels,
+                                                            vectors=self.coordinates,
                                                             square_size=square_size,
-                                                            center=self.center,
-                                                            calibration=self.calibration,
                                                             inplace=False))
 
         # check for unrefined peaks
@@ -301,7 +286,7 @@ class SubpixelRefinementGenerator2D():
             return False
 
         bad_squares = self.dp.map(_check_bad_square_map,
-                                  vectors=self.vector_pixels,
+                                  vectors=self.coordinates,
                                   square_size=square_size,
                                   inplace=False)
 

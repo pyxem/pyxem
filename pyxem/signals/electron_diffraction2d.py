@@ -106,53 +106,6 @@ class ElectronDiffraction2D(Diffraction2D):
                 "Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
                 exposure_time)
 
-    def set_diffraction_calibration(self, calibration, center=None):
-        """Set diffraction pattern pixel size in reciprocal Angstroms and origin
-        location.
-
-        Parameters
-        ----------
-        calibration : float
-            Diffraction pattern calibration in reciprocal Angstroms per pixel.
-        center : tuple
-            Position of the direct beam center, in pixels. If None the center of
-            the data array is assumed to be the center of the pattern.
-        """
-        if center is None:
-            center = np.array(self.axes_manager.signal_shape) / 2 * calibration
-
-        dx = self.axes_manager.signal_axes[0]
-        dy = self.axes_manager.signal_axes[1]
-
-        dx.name = 'kx'
-        dx.scale = calibration
-        dx.offset = -center[0]
-        dx.units = '$A^{-1}$'
-
-        dy.name = 'ky'
-        dy.scale = calibration
-        dy.offset = -center[1]
-        dy.units = '$A^{-1}$'
-
-    def set_scan_calibration(self, calibration):
-        """Set scan pixel size in nanometres.
-
-        Parameters
-        ----------
-        calibration: float
-            Scan calibration in nanometres per pixel.
-        """
-        x = self.axes_manager.navigation_axes[0]
-        y = self.axes_manager.navigation_axes[1]
-
-        x.name = 'x'
-        x.scale = calibration
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = calibration
-        y.units = 'nm'
-
     def as_lazy(self, *args, **kwargs):
         """Create a copy of the ElectronDiffraction2D object as a
         :py:class:`~pyxem.signals.electron_diffraction2d.LazyElectronDiffraction2D`.
