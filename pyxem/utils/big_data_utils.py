@@ -20,8 +20,16 @@ import hyperspy.api as hs
 import pyxem as pxm
 import numpy as np
 
-def check_consisent_lists_and_chunks(x_list,y_list,chunk_size):
-    pass
+def get_chunk_size(x_list,y_list):
+    """ finds chunk size and validates list entries """
+    chunk_size = x_list[1] - x_list[0]
+    epsilon = 1e-5 #np.arange returns excluding the endpoint argument
+    if not np.allclose(x_list,np.arange(x_list[0],x_list[-1]+epsilon,chunk_size)):
+        raise ValueError()
+    elif not np.allclose(y_list,np.arange(y_list[0],y_list[-1]+epsilon,chunk_size)):
+        raise ValueError()
+
+    return chunk_size
 
 def load_and_cast(filepath,x,y,chunk_size):
     """
@@ -94,7 +102,7 @@ def main_function(fp, x_list,y_list,function):
     np_output : np.array
     """
     results_list = []
-    chunk_size = x_list[1] - x_list[0] #assumed to be == y_list[i] - y_list[j] for (i-j) == 1
+    chunk_size = get_chunk_size(x_list,y_list)
     for x in x_list:
         for y in y_list:
             analysis_output = factory(fp,x,y,chunk_size,function)
