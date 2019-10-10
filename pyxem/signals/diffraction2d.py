@@ -29,7 +29,7 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import push_metadata_through
+from pyxem.signals import push_metadata_through, select_method_from_method_dict
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead,\
@@ -324,13 +324,7 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method="cross_correlate",
-                                 radius_start=4,
-                                 radius_finish=8,
-                                 sigma=30,
-                                 upsample_factor=100,
-                                 kind=3,
-                                 *args, **kwargs):
+    def get_direct_beam_position(self, method,**kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -338,70 +332,35 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur", "interpolate"
-            The default is "cross_correlate"
-        radius_start : int (cross_correlate)
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int (cross_correlate)
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
-        sigma : float (blur, interpolate)
-            Sigma value for Gaussian blurring kernel.
-        upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will
-            be found with a precision of 1 / upsample_factor of a pixel.
-        kind : str or int, optional (interpolate)
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
-            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
-            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-            interpolation of zeroth, first, second or third order; ‘previous’
-            and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use.
-        *args:
-            Arguments to be passed to map().
+
         **kwargs:
             Keyword arguments to be passed to map().
 
         Returns
         -------
-        centers : ndarray
-            Array containing the centers for each SED pattern.
+        shifts : ndarray
+            Array containing the shifts for each SED pattern.
 
         """
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        methods = "cross_correlate", "blur", "interpolate"
+        method_dict = {'cross_correlate':find_beam_offset_cross_correlation,
+                       'blur':find_beam_center_blur,
+                       'interpolate':find_beam_center_interpolate}
 
-        if method == "cross_correlate":
-            shifts = self.map(find_beam_offset_cross_correlation,
-                              radius_start=radius_start,
-                              radius_finish=radius_finish,
-                              inplace=False, *args, **kwargs)
-        elif method == "blur":
-            centers = self.map(find_beam_center_blur,
-                               sigma=sigma,
-                               inplace=False, *args, **kwargs)
+        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
+
+        if method == 'cross_correlate':
+            shifts = self.map(method_function,inplace=False,**kwargs)
+        elif method == 'blur' or method == 'interpolate':
+            centers = self.map(method_function,inplace=False,**kwargs)
             shifts = origin_coordinates - centers
-        elif method == "interpolate":
-            centers = self.map(find_beam_center_interpolate,
-                               sigma=sigma,
-                               upsample_factor=upsample_factor,
-                               kind=kind,
-                               inplace=False, *args, **kwargs)
-            shifts = origin_coordinates - centers
-        else:
-            raise ValueError(f"`method` must be one of {methods}")
 
         return shifts
 
     def center_direct_beam(self,
-                           method="cross_correlate",
-                           radius_start=4,
-                           radius_finish=8,
-                           sigma=30,
-                           upsample_factor=100,
-                           kind=3,
+                           method,
                            square_width=None,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
@@ -411,34 +370,15 @@ class Diffraction2D(Signal2D):
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur", "interpolate"
-            The default is "cross_correlate"
-        radius_start : int (cross_correlate)
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int (cross_correlate)
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
-        sigma : float (blur, interpolate)
-            Sigma value for Gaussian blurring kernel.
-        upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will
-            be found with a precision of 1 / upsample_factor of a pixel.
-        kind : str or int, optional (interpolate)
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
-            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
-            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-            interpolation of zeroth, first, second or third order; ‘previous’
-            and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use.
+            Must be one of 'cross_correlate', 'blur', 'interpolate'
+
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-        *args:
-            Arguments to be passed to align2D().
+
         **kwargs:
-            Keyword arguments to be passed to align2D().
+            To be passed to method function
 
         Returns
         -------
@@ -455,27 +395,14 @@ class Diffraction2D(Signal2D):
             # fails if non-square dp
             max_index = np.int(origin_coordinates[0] + square_width)
             cropped = self.isig[min_index:max_index, min_index:max_index]
-            shifts = cropped.get_direct_beam_position(method=method,
-                                                      radius_start=radius_start,
-                                                      radius_finish=radius_finish,
-                                                      sigma=sigma,
-                                                      upsample_factor=upsample_factor,
-                                                      kind=kind,
-                                                      *args, **kwargs)
+            shifts = cropped.get_direct_beam_position(method=method,**kwargs)
         else:
-            shifts = self.get_direct_beam_position(method=method,
-                                                   radius_start=radius_start,
-                                                   radius_finish=radius_finish,
-                                                   sigma=sigma,
-                                                   upsample_factor=upsample_factor,
-                                                   kind=kind,
-                                                   *args, **kwargs)
+            shifts = self.get_direct_beam_position(method=method,**kwargs)
 
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,
-                            *args, **kwargs)
+        return self.align2D(shifts=shifts, crop=False, fill_value=0)
 
     def remove_background(self, method,
                           **kwargs):
@@ -488,51 +415,28 @@ class Diffraction2D(Signal2D):
             {'h-dome','gaussian_difference','median','reference_pattern'}
         **kwargs:
             Keyword arguments to be passed to map(), including method specific ones,
-            running a method with no kwargs will tell you which kwargs you need
+            running a method with no kwargs will return help
 
         Returns
         -------
         bg_subtracted : :obj:`ElectronDiffraction2D`
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
-
-        Notes
-        -----
-        Further details on the methods can be found by looking at the docstrings
-        for the associated utils, these can be accessed by:
-        >>> from pyxem.utils.expt_utils import regional_filter
-        and likewise for: subtract_background_dog
-                          subtract_background_median
-                          subtract_reference
-
         """
-        method_dict = {
-            'h-dome':
-            {'method':'h-dome','params':['h']},
-            'gaussian_difference':
-            {'method':subtract_background_dog,'params':['sigma_min','sigma_max']},
-            'median':
-            {'method':subtract_background_median,'params':['footprint']},
-            'reference_pattern':
-            {'method':subtract_reference,'params':['bg']},
-            }
+        method_dict = {'h-dome':regional_filter,
+            'gaussian_difference':subtract_background_dog,
+            'median':subtract_background_median,
+            'reference_pattern':subtract_reference,}
 
-        if method not in method_dict:
-            raise NotImplementedError("The method `{}` is not implemented. "
-                                         "See documentation for available "
-                                         "implementations.".format(method))
-        if not kwargs:
-            for kwarg in method_dict[method]['params']:
-                print("You need the `{}` kwarg".format(kwarg))
-            return None
+        method_function = select_method_from_method_dict(method,method_dict,**kwargs)
 
         if method != 'h-dome':
-            bg_subtracted = self.map(method_dict[method]['method'],
+            bg_subtracted = self.map(method_function,
                                      inplace=False,**kwargs)
-        else:
+        elif method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
-            bg_subtracted = self.map(regional_filter,
+            bg_subtracted = self.map(method_function,
                                      inplace=False,**kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
