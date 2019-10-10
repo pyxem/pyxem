@@ -278,8 +278,9 @@ class Diffraction2D(Signal2D):
                         *args, **kwargs)
 
     def get_azimuthal_integral(self, origin, detector, detector_distance,
-                                wavelength, size_1d, inplace=False, *args,
-                                **kwargs):
+                               wavelength, size_1d, inplace=False,
+                               kwargs_for_map={}, kwargs_for_integrator={},
+                               kwargs_for_integrate1d={}):
         """
         Returns the azimuthal integral of the diffraction pattern as a
         Diffraction1D signal.
@@ -294,12 +295,13 @@ class Diffraction2D(Signal2D):
         inplace : bool
             If True (default False), this signal is overwritten. Otherwise,
             returns anew signal.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to be passed to map().
-            !!! Separate kwargs needed for AzimuthalIntegrator, hs.map and
-            integrate1d. What a nightmare!!!!
+        kwargs_for_map : dictionary
+            Keyword arguments to be passed to self.map().
+        kwargs_for_integrator : dictionary
+            Keyword arguments to be passed to pyFAI AzimuthalIntegrator().
+        kwargs_for_integrate1d : dictionary
+            Keyword arguments to be passed to pyFAI ai.integrate1d().
+
 
         Returns
         -------
@@ -314,43 +316,50 @@ class Diffraction2D(Signal2D):
         """
 
         if np.array(origin).size == 2:
-            #single origin
-            #The AzimuthalIntegrator can be defined once and repeatedly used,
-            #making for a fast integration
-            #this uses azimuthal_integrate_fast
+            # single origin
+            # The AzimuthalIntegrator can be defined once and repeatedly used,
+            # making for a fast integration
+            # this uses azimuthal_integrate_fast
 
-            p1, p2 = origin[0]*detector.pixel1, origin[1]*detector.pixel2
+            p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
             ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
                                      detector=detector, wavelength=wavelength,
-                                     *args, **kwargs)
+                                     **kwargs_for_integrator)
 
             azimuthal_integrals = self.map(azimuthal_integrate_fast,
-                                     azimuthal_integrator=ai,
-                                     size_1d=size_1d, inplace=inplace)
+                                           azimuthal_integrator=ai,
+                                           size_1d=size_1d, inplace=inplace,
+                                           kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                           **kwargs_for_map)
 
         else:
-            #this time each centre is read in origin
-            #origin is passed as a flattened array in the navigation dimensions
+            # this time each centre is read in origin
+            # origin is passed as a flattened array in the navigation dimensions
             azimuthal_integrals = self._map_iterate(azimuthal_integrate,
-                                     iterating_kwargs=(('origin',
-                                     origin.reshape(-1,2)),),
-                                     detector_distance=detector_distance,
-                                     detector=detector, wavelength=wavelength,
-                                     size_1d=size_1d, inplace=inplace)
+                                            iterating_kwargs=(('origin',
+                                            origin.reshape(-1, 2)),),
+                                            detector_distance=detector_distance,
+                                            detector=detector,
+                                            wavelength=wavelength,
+                                            size_1d=size_1d,
+                                            inplace=inplace,
+                                            kwargs_for_integrator=kwargs_for_integrator,
+                                            kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                            **kwargs_for_map)
 
         if len(azimuthal_integrals.data.shape) == 3:
-            ap = Diffraction1D(azimuthal_integrals.data[:,1,:])
-            tth = azimuthal_integrals.data[0,0,:] #tth is the signal axis
+            ap = Diffraction1D(azimuthal_integrals.data[:, 1, :])
+            tth = azimuthal_integrals.data[0, 0, :]  # tth is the signal axis
         else:
-            ap = Diffraction1D(azimuthal_integrals.data[:,:,1,:])
-            tth = azimuthal_integrals.data[0,0,0,:] #tth is the signal axis
-        scale = tth[1]-tth[0]
+            ap = Diffraction1D(azimuthal_integrals.data[:, :, 1, :])
+            tth = azimuthal_integrals.data[0, 0, 0, :]  # tth is the signal axis
+        scale = tth[1] - tth[0]
         offset = tth[0]
         ap.axes_manager.signal_axes[0].scale = scale
         ap.axes_manager.signal_axes[0].offset = offset
 
-        transfer_navigation_axes(ap,self)
-        push_metadata_through(ap,self)
+        transfer_navigation_axes(ap, self)
+        push_metadata_through(ap, self)
 
         return ap
 
@@ -625,7 +634,6 @@ class Diffraction2D(Signal2D):
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
-
 
     def as_lazy(self, *args, **kwargs):
         """Create a copy of the Diffraction2D object as a

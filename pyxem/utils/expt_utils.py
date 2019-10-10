@@ -107,8 +107,10 @@ def _polar2cart(r, theta):
     y = -r * np.sin(theta)
     return x, y
 
+
 def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
-                        size_1d, *args, **kwargs):
+                        size_1d, kwargs_for_integrator,
+                        kwargs_for_integrate1d):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is iterated, compared to
@@ -141,14 +143,17 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    p1, p2 = origin[0]*detector.pixel1, origin[1]*detector.pixel2
+    p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
     ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
                              detector=detector, wavelength=wavelength,
-                             *args, **kwargs)
-    tth, I = ai.integrate1d(z,size_1d,unit="q_A^-1")
+                             **kwargs_for_integrator)
+    tth, I = ai.integrate1d(z, size_1d, unit="q_A^-1",
+                                **kwargs_for_integrate1d)
     return tth, I
 
-def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, *args, **kwargs):
+
+def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d,
+                             kwargs_for_integrate1d):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -176,8 +181,10 @@ def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, *args, **kwargs):
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    tth, I = azimuthal_integrator.integrate1d(z,size_1d,unit="q_A^-1")
+    tth, I = azimuthal_integrator.integrate1d(z, size_1d, unit="q_A^-1",
+                                              **kwargs_for_integrate1d)
     return tth, I
+
 
 def radial_average(z, mask=None):
     """Calculate the radial profile by azimuthal averaging about the center.
