@@ -72,32 +72,32 @@ def _combine(l,x_list,y_list):
 def main_function(fp, x_list,y_list,function):
     """
     #docstrings tbc
-    
+
     Parameters
     ----------
-    
+
     filepath : str
-    
-    
+
+
     x_list : list
-    
-    
+
+
     y_list : list
-    
-    
+
+
     function : function
-        A user defined function that take a ElectronDiffraction2D as an argument and returns the desired output    
-    
+        A user defined function that take a ElectronDiffraction2D as an argument and returns the desired output
+
     Returns
     -------
-    
+
     np_output : np.array
     """
     results_list = []
     chunk_size = x_list[1] - x_list[0] #assumed to be == y_list[i] - y_list[j] for (i-j) == 1
     for x in x_list:
         for y in y_list:
-            analyis_output = factory(fp,x,y,chunk_size,function)
+            analysis_output = factory(fp,x,y,chunk_size,function)
             results_list.append(analysis_output.data)
-    np_output = _combine(l,x_list,y_list)
+    np_output = _combine(results_list,x_list,y_list)
     return np_output
