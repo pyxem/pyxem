@@ -47,7 +47,7 @@ def load_mtex_map(filename):
 
     Parameters
     ----------
-    filename : string
+    filename : str
         Path to the file to be loaded.
 
     Returns
@@ -132,7 +132,7 @@ def _metric_from_dict(metric_dict, metric):
     ----------
     metric_dict : dict
         Dictionary to retrieve entry from
-    metrics : string
+    metrics : str
         Name of the entry
 
     Returns
@@ -166,7 +166,7 @@ class CrystallographicMap(BaseSignal):
 
     Attributes
     ----------
-    method : string
+    method : str
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
@@ -214,7 +214,7 @@ class CrystallographicMap(BaseSignal):
 
         Parameters
         ----------
-        metric : string
+        metric : str
             String identifier for the indexation / matching metric to be
             mapped, for template matching valid metrics are {'correlation',
             'orientation_reliability', 'phase_reliability'}. For vector matching
@@ -332,7 +332,7 @@ class CrystallographicMap(BaseSignal):
 
         Parameters
         ----------
-        filename : string
+        filename : str
             Name of file to save the crystal map to
         """
         x_size_nav = self.data.shape[1]

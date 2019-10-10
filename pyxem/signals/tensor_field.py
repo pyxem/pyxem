@@ -35,7 +35,7 @@ def _polar_decomposition(image, side):
     ----------
     image : np.array()
         Matrix on which to form polar decomposition.
-    side : string
+    side : str
         'left' or 'right' the side on which to perform polar decomposition.
 
     Returns

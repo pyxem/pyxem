@@ -18,6 +18,7 @@
 
 import numpy as np
 
+
 def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
     """Used by hs.map in the PairDistributionFunction1D to normalise the signal
     to the maximum in the signal.
@@ -37,4 +38,4 @@ def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
     """
 
     max_val = np.max(z[index_min:])
-    return np.divide(z,max_val)
+    return np.divide(z, max_val)

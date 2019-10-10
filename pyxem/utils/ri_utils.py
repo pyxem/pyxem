@@ -21,6 +21,7 @@ from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOBATO
 from scipy import special
 
+
 def subtract_pattern(z, pattern, *args, **kwargs):
     """Used by hs.map in the ReducedIntensityGenerator1D to subtract a background
     pattern.
@@ -37,7 +38,8 @@ def subtract_pattern(z, pattern, *args, **kwargs):
     **kwargs:
         Keyword arguments to be passed to map().
     """
-    return z-pattern
+    return z - pattern
+
 
 def mask_from_pattern(z, pattern, *args, **kwargs):
     """Used by hs.map in the ReducedIntensityGenerator1D to mask using a
@@ -60,7 +62,8 @@ def mask_from_pattern(z, pattern, *args, **kwargs):
     **kwargs:
         Keyword arguments to be passed to map().
     """
-    return z*pattern
+    return z * pattern
+
 
 def damp_ri_exponential(z, b, s_scale, s_size, *args, **kwargs):
     """Used by hs.map in the ReducedIntensity1D to damp the reduced
@@ -85,7 +88,8 @@ def damp_ri_exponential(z, b, s_scale, s_size, *args, **kwargs):
 
     scattering_axis = s_scale * np.arange(s_size, dtype='float64')
     damping_term = np.exp(-b * np.square(scattering_axis))
-    return z*damping_term
+    return z * damping_term
+
 
 def damp_ri_lorch(z, s_max, s_scale, s_size, *args, **kwargs):
     """Used by hs.map in the ReducedIntensity1D to damp the reduced
@@ -113,7 +117,8 @@ def damp_ri_lorch(z, s_max, s_scale, s_size, *args, **kwargs):
     scattering_axis = s_scale * np.arange(s_size, dtype='float64')
     damping_term = np.sin(delta * scattering_axis) / (delta * scattering_axis)
     damping_term = np.nan_to_num(damping_term)
-    return z*damping_term
+    return z * damping_term
+
 
 def damp_ri_updated_lorch(z, s_max, s_scale, s_size, *args, **kwargs):
     """Used by hs.map in the ReducedIntensity1D to damp the reduced
@@ -152,10 +157,11 @@ def damp_ri_updated_lorch(z, s_max, s_scale, s_size, *args, **kwargs):
 
     damping_term = multiplicative_term * sine_term
     damping_term = np.nan_to_num(damping_term)
-    return z*damping_term
+    return z * damping_term
+
 
 def damp_ri_low_q_region_erfc(z, scale, offset, s_scale, s_size, *args,
-                                **kwargs):
+                              **kwargs):
     """Used by hs.map in the ReducedIntensity1D to damp the reduced
     intensity signal in the low q region as a correction to central beam
     effects. The reduced intensity profile is damped by
@@ -182,4 +188,4 @@ def damp_ri_low_q_region_erfc(z, scale, offset, s_scale, s_size, *args,
     scattering_axis = s_scale * np.arange(s_size, dtype='float64')
 
     damping_term = (special.erf(scattering_axis * scale - offset) + 1) / 2
-    return z*damping_term
+    return z * damping_term
