@@ -33,7 +33,7 @@ Load the data using :py:func:`~pixstem.io_tools.load_ps_signal`:
     >>> import pixstem.api as ps
     >>> s = ps.load_ps_signal("test_data.hdf5", lazy=True)
 
-Here `lazy=True` was used.
+Here ``lazy=True`` was used.
 Essentially this does not load all the data into memory, meaning very large datasets
 can be processed.
 However, this also means that the processing will take longer to do, and some care needs to be taken
