@@ -27,16 +27,19 @@ from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
+from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.detector_coordinates2d import DetectorCoordinates2D
-from pyxem.signals import push_metadata_through, select_method_from_method_dict
+from pyxem.signals import push_metadata_through, transfer_navigation_axes, \
+    select_method_from_method_dict
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, gain_normalise, remove_dead,\
-    regional_filter, subtract_background_dog, subtract_background_median, \
-    subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
-    peaks_as_gvectors, convert_affine_to_transform, apply_transformation, \
-    find_beam_center_blur, find_beam_center_interpolate
+    radial_average, azimuthal_integrate, azimuthal_integrate_fast, \
+    gain_normalise, remove_dead, regional_filter, subtract_background_dog, \
+    subtract_background_median, subtract_reference, circular_mask, \
+    find_beam_offset_cross_correlation, peaks_as_gvectors, \
+    convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
+    find_beam_center_interpolate
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -47,6 +50,8 @@ from pyxem.signals import transfer_navigation_axes
 from skimage import filters
 from skimage import transform as tf
 from skimage.morphology import square
+
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D):
@@ -300,6 +305,116 @@ class Diffraction2D(Signal2D):
                         inplace=inplace,
                         show_progressbar=progress_bar,
                         *args, **kwargs)
+
+    def get_azimuthal_integral(self, origin, detector, detector_distance,
+                               wavelength, size_1d, unit='k_A^-1',
+                               inplace=False,
+                               kwargs_for_map={}, kwargs_for_integrator={},
+                               kwargs_for_integrate1d={}):
+        """
+        Returns the azimuthal integral of the diffraction pattern as a
+        Diffraction1D signal.
+
+        Parameters
+        ----------
+        origin : np.array_like
+            This parameter should either be a list or numpy.array with two
+            coordinates ([x_origin,y_origin]), or an array of the same shape as
+            the navigation axes, with an origin (with the shape
+            [x_origin,y_origin]) at each navigation location.
+        detector : pyFAI.detectors.Detector object
+            A pyFAI detector used for the AzimuthalIntegrator.
+        detector_distance : float
+            Detector distance in meters passed to pyFAI AzimuthalIntegrator.
+        wavelength : float
+            The electron wavelength in meters. Used by pyFAI AzimuthalIntegrator
+        size_1d : int
+            The size of the returned 1D signal. (i.e. number of pixels in the
+            1D azimuthal integral.)
+        unit : str
+            The unit for for PyFAI integrate1d. The default "k_A^-1" gives k in
+            inverse Angstroms and is not natively in PyFAI. The other options
+            are from PyFAI and are can be "q_nm^-1", "q_A^-1", "2th_deg",
+            "2th_rad", and "r_mm".
+        inplace : bool
+            If True (default False), this signal is overwritten. Otherwise,
+            returns anew signal.
+        kwargs_for_map : dictionary
+            Keyword arguments to be passed to self.map().
+        kwargs_for_integrator : dictionary
+            Keyword arguments to be passed to pyFAI AzimuthalIntegrator().
+        kwargs_for_integrate1d : dictionary
+            Keyword arguments to be passed to pyFAI ai.integrate1d().
+
+
+        Returns
+        -------
+        radial_profile: :obj:`pyxem.signals.ElectronDiffraction1D`
+            The radial average profile of each diffraction pattern in the
+            ElectronDiffraction2D signal as an ElectronDiffraction1D.
+
+        See also
+        --------
+        :func:`pyxem.utils.expt_utils.azimuthal_integrate`
+        :func:`pyxem.utils.expt_utils.azimuthal_integrate_fast`
+        """
+
+        #Scaling factor is used to output the unit in k instead of q.
+        #It multiplies the scale that comes out of pyFAI integrate1d
+        scaling_factor = 1
+        if unit == 'k_A^-1':
+            scaling_factor = 1/2/np.pi
+            unit = 'q_A^-1'
+
+        if np.array(origin).size == 2:
+            # single origin
+            # The AzimuthalIntegrator can be defined once and repeatedly used,
+            # making for a fast integration
+            # this uses azimuthal_integrate_fast
+
+            p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
+            ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
+                                     detector=detector, wavelength=wavelength,
+                                     **kwargs_for_integrator)
+
+            azimuthal_integrals = self.map(azimuthal_integrate_fast,
+                                           azimuthal_integrator=ai,
+                                           size_1d=size_1d, unit=unit,
+                                           inplace=inplace,
+                                           kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                           **kwargs_for_map)
+
+        else:
+            # this time each centre is read in origin
+            # origin is passed as a flattened array in the navigation dimensions
+            azimuthal_integrals = self._map_iterate(azimuthal_integrate,
+                                            iterating_kwargs=(('origin',
+                                            origin.reshape(-1, 2)),),
+                                            detector_distance=detector_distance,
+                                            detector=detector,
+                                            wavelength=wavelength,
+                                            size_1d=size_1d,
+                                            unit=unit,
+                                            inplace=inplace,
+                                            kwargs_for_integrator=kwargs_for_integrator,
+                                            kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                            **kwargs_for_map)
+
+        if len(azimuthal_integrals.data.shape) == 3:
+            ap = Diffraction1D(azimuthal_integrals.data[:, 1, :])
+            tth = azimuthal_integrals.data[0, 0, :]  # tth is the signal axis
+        else:
+            ap = Diffraction1D(azimuthal_integrals.data[:, :, 1, :])
+            tth = azimuthal_integrals.data[0, 0, 0, :]  # tth is the signal axis
+        scale = (tth[1] - tth[0]) * scaling_factor
+        offset = tth[0] * scaling_factor
+        ap.axes_manager.signal_axes[0].scale = scale
+        ap.axes_manager.signal_axes[0].offset = offset
+
+        transfer_navigation_axes(ap, self)
+        push_metadata_through(ap, self)
+
+        return ap
 
     def get_radial_profile(self, mask_array=None, inplace=False,
                            *args, **kwargs):
