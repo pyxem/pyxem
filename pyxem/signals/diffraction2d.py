@@ -303,8 +303,10 @@ class Diffraction2D(Signal2D):
             The size of the returned 1D signal. (i.e. number of pixels in the
             1D azimuthal integral.)
         unit : str
-            The unit for for PyFAI integrate1d. The default "k_A^-1" is not
-            natively in PyFAI, and added here.
+            The unit for for PyFAI integrate1d. The default "k_A^-1" gives k in
+            inverse Angstroms and is not natively in PyFAI. The other options
+            are from PyFAI and are can be "q_nm^-1", "q_A^-1", "2th_deg",
+            "2th_rad", and "r_mm".
         inplace : bool
             If True (default False), this signal is overwritten. Otherwise,
             returns anew signal.
@@ -328,9 +330,11 @@ class Diffraction2D(Signal2D):
         :func:`pyxem.utils.expt_utils.azimuthal_integrate_fast`
         """
 
-        k_scaling_factor = 1
+        #Scaling factor is used to output the unit in k instead of q.
+        #It multiplies the scale that comes out of pyFAI integrate1d
+        scaling_factor = 1
         if unit == 'k_A^-1':
-            k_scaling_factor = 1/2/np.pi
+            scaling_factor = 1/2/np.pi
             unit = 'q_A^-1'
 
         if np.array(origin).size == 2:
@@ -373,8 +377,8 @@ class Diffraction2D(Signal2D):
         else:
             ap = Diffraction1D(azimuthal_integrals.data[:, :, 1, :])
             tth = azimuthal_integrals.data[0, 0, 0, :]  # tth is the signal axis
-        scale = (tth[1] - tth[0]) * k_scaling_factor
-        offset = tth[0] * k_scaling_factor
+        scale = (tth[1] - tth[0]) * scaling_factor
+        offset = tth[0] * scaling_factor
         ap.axes_manager.signal_axes[0].scale = scale
         ap.axes_manager.signal_axes[0].offset = offset
 
