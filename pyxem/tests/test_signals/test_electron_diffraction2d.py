@@ -101,11 +101,6 @@ class TestSimpleHyperspy:
         diffraction_pattern.set_scan_calibration(19)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
-    @pytest.mark.parametrize('calibration, center', [
-        (1, (4, 4),),
-        (0.017, (3, 3)),
-        (0.5, None,), ])
-
 
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
