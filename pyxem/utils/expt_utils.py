@@ -109,7 +109,7 @@ def _polar2cart(r, theta):
 
 
 def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
-                        size_1d, kwargs_for_integrator,
+                        size_1d, unit, kwargs_for_integrator,
                         kwargs_for_integrate1d):
     """Calculate the azimuthal integral of z around a determined origin.
 
@@ -132,6 +132,8 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
     size_1d : int
         The size of the returned 1D signal. (i.e. number of pixels in the 1D
         azimuthal integral.)
+    unit : str
+        The unit for for PyFAI integrate1d.
     *args :
         Arguments to be passed to AzimuthalIntegrator.
     **kwargs :
@@ -147,12 +149,12 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
     ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
                              detector=detector, wavelength=wavelength,
                              **kwargs_for_integrator)
-    tth, I = ai.integrate1d(z, size_1d, unit="q_A^-1",
+    tth, I = ai.integrate1d(z, size_1d, unit=unit,
                                 **kwargs_for_integrate1d)
     return tth, I
 
 
-def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d,
+def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
                              kwargs_for_integrate1d):
     """Calculate the azimuthal integral of z around a determined origin.
 
@@ -170,6 +172,8 @@ def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d,
     size_1d : int
         The size of the returned 1D signal. (i.e. number of pixels in the 1D
         azimuthal integral.)
+    unit : str
+        The unit for for PyFAI integrate1d.
     *args :
         Arguments to be passed to ai.integrate1d.
     **kwargs :
@@ -181,7 +185,7 @@ def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    tth, I = azimuthal_integrator.integrate1d(z, size_1d, unit="q_A^-1",
+    tth, I = azimuthal_integrator.integrate1d(z, size_1d, unit=unit,
                                               **kwargs_for_integrate1d)
     return tth, I
 

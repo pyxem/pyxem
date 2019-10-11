@@ -278,7 +278,8 @@ class Diffraction2D(Signal2D):
                         *args, **kwargs)
 
     def get_azimuthal_integral(self, origin, detector, detector_distance,
-                               wavelength, size_1d, inplace=False,
+                               wavelength, size_1d, unit='k_A^-1',
+                               inplace=False,
                                kwargs_for_map={}, kwargs_for_integrator={},
                                kwargs_for_integrate1d={}):
         """
@@ -292,6 +293,18 @@ class Diffraction2D(Signal2D):
             coordinates ([x_origin,y_origin]), or an array of the same shape as
             the navigation axes, with an origin (with the shape
             [x_origin,y_origin]) at each navigation location.
+        detector : pyFAI.detectors.Detector object
+            A pyFAI detector used for the AzimuthalIntegrator.
+        detector_distance : float
+            Detector distance in meters passed to pyFAI AzimuthalIntegrator.
+        wavelength : float
+            The electron wavelength in meters. Used by pyFAI AzimuthalIntegrator
+        size_1d : int
+            The size of the returned 1D signal. (i.e. number of pixels in the
+            1D azimuthal integral.)
+        unit : str
+            The unit for for PyFAI integrate1d. The default "k_A^-1" is not
+            natively in PyFAI, and added here.
         inplace : bool
             If True (default False), this signal is overwritten. Otherwise,
             returns anew signal.
@@ -315,6 +328,11 @@ class Diffraction2D(Signal2D):
         :func:`pyxem.utils.expt_utils.azimuthal_integrate_fast`
         """
 
+        k_scaling_factor = 1
+        if unit == 'k_A^-1':
+            k_scaling_factor = 1/2/np.pi
+            unit = 'q_A^-1'
+
         if np.array(origin).size == 2:
             # single origin
             # The AzimuthalIntegrator can be defined once and repeatedly used,
@@ -328,7 +346,8 @@ class Diffraction2D(Signal2D):
 
             azimuthal_integrals = self.map(azimuthal_integrate_fast,
                                            azimuthal_integrator=ai,
-                                           size_1d=size_1d, inplace=inplace,
+                                           size_1d=size_1d, unit=unit,
+                                           inplace=inplace,
                                            kwargs_for_integrate1d=kwargs_for_integrate1d,
                                            **kwargs_for_map)
 
@@ -342,6 +361,7 @@ class Diffraction2D(Signal2D):
                                             detector=detector,
                                             wavelength=wavelength,
                                             size_1d=size_1d,
+                                            unit=unit,
                                             inplace=inplace,
                                             kwargs_for_integrator=kwargs_for_integrator,
                                             kwargs_for_integrate1d=kwargs_for_integrate1d,
@@ -353,8 +373,8 @@ class Diffraction2D(Signal2D):
         else:
             ap = Diffraction1D(azimuthal_integrals.data[:, :, 1, :])
             tth = azimuthal_integrals.data[0, 0, 0, :]  # tth is the signal axis
-        scale = tth[1] - tth[0]
-        offset = tth[0]
+        scale = (tth[1] - tth[0]) * k_scaling_factor
+        offset = tth[0] * k_scaling_factor
         ap.axes_manager.signal_axes[0].scale = scale
         ap.axes_manager.signal_axes[0].offset = offset
 

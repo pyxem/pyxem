@@ -63,4 +63,4 @@ class Medipix515x515Detector(Detector):
         mask = np.zeros((515,515))
         mask[255:260,:] = 1
         mask[:,255:260] = 1
-        return mask.astype(numpy.int8)
+        return mask.astype(np.int8)
