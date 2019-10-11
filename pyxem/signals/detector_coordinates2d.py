@@ -28,6 +28,8 @@ from sklearn.cluster import DBSCAN
 
 from warnings import warn
 
+from diffsims.utils.sim_utils import get_electron_wavelength
+
 from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
@@ -111,6 +113,7 @@ class DetectorCoordinates2D(BaseSignal):
         return crystim
 
     def as_diffraction_vectors2d(self, center, calibration,
+                                 beam_energy, camera_length,
                                  *args, **kwargs):
         """Transform detector coordinates to two-dimensional diffraction vectors
         with coordinates in calibrated units of reciprocal Angstroms.
@@ -124,7 +127,10 @@ class DetectorCoordinates2D(BaseSignal):
             Coordinates of the diffraction pattern center in pixel units.
         calibration : float
             Calibrated pixel size in units of reciprocal Angstroms per pixel.
-
+        beam_energy : float
+            The beam energy at which the data was acquired in keV.
+        camera_length : float
+            The camera length at which the data was acquired in meters.
         *args : arguments
             Arguments to be passed to the map method.
         **kwargs : keyword arguments
@@ -144,6 +150,19 @@ class DetectorCoordinates2D(BaseSignal):
                            parallel=False,
                            *args, **kwargs)
         vectors = DiffractionVectors2D(vectors)
+        # Set coordinates in vectors attributes
+        vectors.detector_coordinates = self
+        wavelength = get_electron_wavelength(beam_energy)
+        # Calculate 3D cartesian coordinates and set in vectors attributes to
+        # enable indexation of a DiffractionVectors2D object
+        vectors.cartesian = vectors.map(detector_to_fourier,
+                                        wavelength=wavelength,
+                                        camera_length=camera_length * 1e10,
+                                        inplace=False,
+                                        parallel=False,
+                                        *args, **kwargs)
+        # Transfer navigation axes from the detector coordinates object to the
+        # new DiffractionVectors2D object.
         transfer_navigation_axes(vectors, self)
 
         return vectors

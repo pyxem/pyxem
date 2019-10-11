@@ -30,10 +30,8 @@ from warnings import warn
 
 from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
-from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_npeaks
-from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 """
@@ -58,7 +56,10 @@ class DiffractionVectors2D(BaseSignal):
     detector_coordinates : DetectorCoordinates2D
         Array of 2-vectors describing detector coordinates associated with each
         diffraction vector.
-    hkls : np.array()
+    cartesian : np.array
+        Array of 3-vectors describing Cartesian coordinates associated with
+        each diffraction vector.
+    hkls : np.array
         Array of Miller indices associated with each diffraction vector
         following indexation.
     """
@@ -68,6 +69,7 @@ class DiffractionVectors2D(BaseSignal):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.detector_coordinates = None
+        self.cartesian = None
         self.hkls = None
 
     def plot_vectors(self, xlim=1.0, ylim=1.0,
@@ -402,35 +404,3 @@ class DiffractionVectors2D(BaseSignal):
             return unique_peaks, clusters
         else:
             return unique_peaks
-
-    def as_diffraction_vectors3d(self, beam_energy,
-                                 camera_length,
-                                 *args, **kwargs):
-        """Get cartesian coordinates of the diffraction vectors.
-
-        Parameters
-        ----------
-        beam_energy : float
-            The beam energy at which the data was acquired.
-        camera_length : float
-            The camera length in meters.
-        *args : arguments
-            Arguments to be passed to the map method.
-        **kwargs : keyword arguments
-            Keyword arguments to be passed to the map method.
-
-        Returns
-        -------
-        vectors3d : DiffractionVectors3D
-            Object containing three-dimensional reciprocal space vectors with
-            coordinates [k_x, k_y, k_z] for each detector coorinate. The
-            navigation dimensions are unchanged.
-        """
-        vectors3d = self.map(detector_to_fourier,
-                             beam_energy=beam_energy,
-                             camera_length=camera_length * 1e10,
-                             inplace=False,
-                             *args, **kwargs)
-        transfer_navigation_axes(vectors3d, self)
-
-        return vectors3d
