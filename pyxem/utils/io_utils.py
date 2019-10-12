@@ -51,7 +51,7 @@ signal_dictionary = {'diffraction1d': Diffraction1D,
                      'electron_diffraction2d': ElectronDiffraction2D,
                      'vdf_image': VDFImage,
                      'template_matching': TemplateMatchingResults,
-                     'diffraction_vectors': DiffractionVectors2D,
+                     'diffraction_vectors2d': DiffractionVectors2D,
                      'crystallographic_map': CrystallographicMap}
 
 lazy_signal_dictionary = {'diffraction1d': LazyDiffraction1D,
