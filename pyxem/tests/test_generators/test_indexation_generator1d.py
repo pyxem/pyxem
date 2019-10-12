@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.indexation_generator import ProfileIndexationGenerator
+from pyxem.generators.indexation_generator1d import IndexationGenerator1D
 
 from diffsims.sims.diffraction_simulation import ProfileSimulation
 
@@ -65,7 +65,7 @@ def profile_simulation():
 
 
 def test_profile_indexation_generator_init(profile_simulation):
-    pig = ProfileIndexationGenerator(magnitudes=[0.31891931643691351,
+    pig = IndexationGenerator1D(magnitudes=[0.31891931643691351,
                                                  0.52079306292509475,
                                                  0.6106839974876449,
                                                  0.73651261277849378,
@@ -78,11 +78,11 @@ def test_profile_indexation_generator_init(profile_simulation):
                                                  1.2074090451670043,
                                                  1.2756772657476541],
                                      simulation=profile_simulation)
-    assert isinstance(pig, ProfileIndexationGenerator)
+    assert isinstance(pig, IndexationGenerator1D)
 
 
 def test_profile_indexation_generator_single_indexation(profile_simulation):
-    pig = ProfileIndexationGenerator(magnitudes=[0.31891931643691351,
+    pig = IndexationGenerator1D(magnitudes=[0.31891931643691351,
                                                  0.52079306292509475,
                                                  0.6106839974876449,
                                                  0.73651261277849378,

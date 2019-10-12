@@ -118,51 +118,6 @@ class IndexationGenerator():
         return matching_results
 
 
-class ProfileIndexationGenerator():
-    """Generates an indexer for data using a number of methods.
-
-    Parameters
-    ----------
-    profile : ElectronDiffraction1D
-        The signal of diffraction profiles to be indexed.
-    library : ProfileSimulation
-        The simulated profile data.
-
-    """
-
-    def __init__(self, magnitudes, simulation, mapping=True):
-        self.map = mapping
-        self.magnitudes = magnitudes
-        self.simulation = simulation
-
-    def index_peaks(self,
-                    tolerance=0.1,
-                    *args,
-                    **kwargs):
-        """Assigns hkl indices to peaks in the diffraction profile.
-
-        Parameters
-        ----------
-        tolerance : float
-            The n orientations with the highest correlation values are returned.
-        keys : list
-            If more than one phase present in library it is recommended that
-            these are submitted. This allows a mapping from the number to the
-            phase.  For example, keys = ['si','ga'] will have an output with 0
-            for 'si' and 1 for 'ga'.
-        *args : arguments
-            Arguments passed to the map() function.
-        **kwargs : arguments
-            Keyword arguments passed to the map() function.
-
-        Returns
-        -------
-        matching_results : ProfileIndexation
-
-        """
-        return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
-
-
 def _refine_best_orientations(single_match_result,
                               vectors,
                               library,
