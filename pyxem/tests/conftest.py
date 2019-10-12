@@ -21,8 +21,10 @@ import diffpy.structure
 import numpy as np
 from transforms3d.euler import euler2mat
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
+
+from pyxem.signals.diffraction2d import Diffraction2D
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 from pyxem.utils.indexation_utils import OrientationResult
 
@@ -70,6 +72,15 @@ def z():
                [0., 0., 0., 0., 2., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.],
                [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
+
+@pytest.fixture
+def diffraction2d(z):
+    """A simple, multiuse diffraction pattern, with dimensions:
+    Diffraction2D <2,2|8,8>
+    """
+    dp = Diffraction2D(z)
+    dp.metadata.Signal.found_from = 'conftest' #dummy metadata
+    return dp
 
 @pytest.fixture
 def diffraction_pattern(z):
@@ -140,7 +151,7 @@ def sp_vector_match_result():
     res[0] = OrientationResult(0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.1, 1.0, 0, 0)
     res[1] = OrientationResult(0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.6, np.array([0.1, 0.10, 0.2]), 0.2, 1.0, 0, 0)
     return res
-    
+
 
 @pytest.fixture
 def dp_vector_match_result():
