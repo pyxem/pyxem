@@ -78,7 +78,7 @@ class DetectorCoordinates2D(BaseSignal):
             signal.add_marker(m, plot_marker=True, permanent=False)
 
     def get_npeaks_map(self, binary=False):
-        """Map of the number of vectors at each navigation position.
+        """Map of the number of peaks at each navigation position.
 
         Parameters
         ----------
@@ -113,7 +113,6 @@ class DetectorCoordinates2D(BaseSignal):
         return crystim
 
     def as_diffraction_vectors2d(self, center, calibration,
-                                 beam_energy, camera_length,
                                  *args, **kwargs):
         """Transform detector coordinates to two-dimensional diffraction vectors
         with coordinates in calibrated units of reciprocal Angstroms.
@@ -127,10 +126,6 @@ class DetectorCoordinates2D(BaseSignal):
             Coordinates of the diffraction pattern center in pixel units.
         calibration : float
             Calibrated pixel size in units of reciprocal Angstroms per pixel.
-        beam_energy : float
-            The beam energy at which the data was acquired in keV.
-        camera_length : float
-            The camera length at which the data was acquired in meters.
         *args : arguments
             Arguments to be passed to the map method.
         **kwargs : keyword arguments
@@ -152,15 +147,6 @@ class DetectorCoordinates2D(BaseSignal):
         vectors = DiffractionVectors2D(vectors)
         # Set coordinates in vectors attributes
         vectors.detector_coordinates = self
-        wavelength = get_electron_wavelength(beam_energy)
-        # Calculate 3D cartesian coordinates and set in vectors attributes to
-        # enable indexation of a DiffractionVectors2D object
-        vectors.cartesian = vectors.map(detector_to_fourier,
-                                        wavelength=wavelength,
-                                        camera_length=camera_length * 1e10,
-                                        inplace=False,
-                                        parallel=False,
-                                        *args, **kwargs)
         # Transfer navigation axes from the detector coordinates object to the
         # new DiffractionVectors2D object.
         transfer_navigation_axes(vectors, self)
@@ -190,6 +176,15 @@ class DetectorCoordinates2D(BaseSignal):
             coordinates [k_x, k_y, k_z] for each detector coorinate. The
             navigation dimensions are unchanged.
         """
+        wavelength = get_electron_wavelength(beam_energy)
+        # Calculate 3D cartesian coordinates and set in vectors attributes to
+        # enable indexation of a DiffractionVectors2D object
+        vectors = self.map(detector_to_fourier,
+                            wavelength=wavelength,
+                                        camera_length=camera_length * 1e10,
+                                        inplace=False,
+                                        parallel=False,
+                                        *args, **kwargs)
         vectors = self.map(detector_px_to_3D_kspace,
                              ai=azimuthal_integrator,
                              inplace=False,
