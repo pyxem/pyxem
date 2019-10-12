@@ -276,7 +276,7 @@ class BaseDiffractionVectors(BaseSignal):
                     axis=0)
         # Manipulate into DiffractionVectors2D class
         if unique_peaks.size > 0:
-            unique_peaks = DiffractionVectors2D(unique_peaks)
+            unique_peaks = BaseDiffractionVectors(unique_peaks)
             unique_peaks.axes_manager.set_signal_dimension(1)
         if return_clusters and method == 'DBSCAN':
             return unique_peaks, clusters
