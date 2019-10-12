@@ -78,28 +78,17 @@ def diffraction_vectors_single(request):
 ])
 def diffraction_vectors_map(request):
     dvm = DiffractionVectors2D(request.param)
-    dvm.axes_manager.set_signal_dimension(0)
     return dvm
 
 
-def test_plot_diffraction_vectors(diffraction_vectors_map):
-    diffraction_vectors_map.plot_vectors(xlim=1., ylim=1.,
+def test_plot_unique_vectors(diffraction_vectors_map):
+    diffraction_vectors_map.plot_unique_vectors(xlim=1., ylim=1.,
                                          distance_threshold=0)
 
 
-def test_plot_diffraction_vectors_on_signal(diffraction_vectors_map,
+def test_plot_vectors_on_signal(diffraction_vectors_map,
                                             diffraction_pattern):
     diffraction_vectors_map.plot_vectors_on_signal(diffraction_pattern)
-
-
-def test_as_diffraction_vectors3d(diffraction_vectors_map):
-    accelerating_voltage = 200
-    camera_length = 0.2
-    diffraction_vectors_map.as_diffraction_vectors3d(accelerating_voltage,
-                                                     camera_length)
-    # Coordinate conversion is tested in vector_utils. Just test that the
-    # result is stored correctly
-    assert diffraction_vectors_map.cartesian is not None
 
 
 class TestMagnitudes:
@@ -191,7 +180,7 @@ class TestUniqueVectors:
 class TestDiffractingPixelMaps:
 
     def test_get_dpm_map(self, diffraction_vectors_map):
-        diffraction_vectors_map.get_diffracting_pixels_map()
+        diffraction_vectors_map.get_nvectors_map()
 
     def test_get_dpm_map_binary(self, diffraction_vectors_map):
-        diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
+        diffraction_vectors_map.get_nvectors_map(binary=True)
