@@ -28,8 +28,8 @@ from diffsims.generators.library_generator import VectorLibraryGenerator
 from diffsims.libraries.structure_library import StructureLibrary
 from diffsims.utils.sim_utils import get_kinematical_intensities
 
-from pyxem.generators.indexation_generator import IndexationGenerator
-from pyxem.generators.indexation_generator import VectorIndexationGenerator
+from pyxem.generators.indexation_generator2d import IndexationGenerator2D
+from pyxem.generators.vector_indexation_generator import VectorIndexationGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
 from pyxem.utils.indexation_utils import peaks_from_best_template
@@ -90,7 +90,7 @@ def generate_diffraction_patterns(structure,edc):
 def get_template_match_results(structure,edc, rot_list, mask=None):
     dp = generate_diffraction_patterns(structure,edc)
     library = get_template_library(structure, rot_list, edc)
-    indexer = IndexationGenerator(dp, library)
+    indexer = IndexationGenerator2D(dp, library)
     return indexer.correlate(mask=mask)
 
 """ Tests for template matching """

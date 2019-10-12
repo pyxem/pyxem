@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.indexation_generator import VectorIndexationGenerator
+from pyxem.generators.vector_indexation_generator import VectorIndexationGenerator
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D

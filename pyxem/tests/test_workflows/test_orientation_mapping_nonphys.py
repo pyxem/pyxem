@@ -19,7 +19,7 @@
 import numpy as np
 import pyxem as pxm
 from diffsims.sims.diffraction_simulation import DiffractionSimulation
-from pyxem.generators.indexation_generator import IndexationGenerator
+from pyxem.generators.indexation_generator2d import IndexationGenerator2D
 from diffsims.libraries.diffraction_library import DiffractionLibrary
 
 from pyxem.utils.sim_utils import sim_as_signal
@@ -64,7 +64,7 @@ def create_library_and_diffraction_pattern():
     return dp, library
 
 dp, library = create_library_and_diffraction_pattern()
-indexer = IndexationGenerator(dp, library)
+indexer = IndexationGenerator2D(dp, library)
 match_results = indexer.correlate()
 
 def test_match_results():
