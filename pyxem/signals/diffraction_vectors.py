@@ -53,12 +53,10 @@ class BaseDiffractionVectors(BaseSignal):
         Array of 2-vectors describing detector coordinates associated with each
         diffraction vector.
     """
-    _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
-        self.detector_coordinates = None
 
     def get_npeaks_map(self, binary=False):
         """Map of the number of vectors at each navigation position.

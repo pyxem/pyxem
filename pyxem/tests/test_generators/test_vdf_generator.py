@@ -53,8 +53,11 @@ class TestVDFGenerator:
                                                         [2, 2]]),
                                               np.array([[1, 1],
                                                         [2, 2]])]], dtype=object))
+        # TODO: Class reassignment here is needed because setting signal
+        # dimension reverts to BaseDiffractionVectors - should be possible to
+        # do avoid this.
         dvm.axes_manager.set_signal_dimension(0)
-
+        dvm = DiffractionVectors2D(dvm)
         vdfgen = VDFGenerator(diffraction_pattern, dvm)
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
         assert isinstance(vdfgen.vectors, DiffractionVectors2D)
