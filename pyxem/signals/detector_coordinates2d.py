@@ -176,20 +176,11 @@ class DetectorCoordinates2D(BaseSignal):
             coordinates [k_x, k_y, k_z] for each detector coorinate. The
             navigation dimensions are unchanged.
         """
-        wavelength = get_electron_wavelength(beam_energy)
-        # Calculate 3D cartesian coordinates and set in vectors attributes to
-        # enable indexation of a DiffractionVectors2D object
-        vectors = self.map(detector_to_fourier,
-                            wavelength=wavelength,
-                                        camera_length=camera_length * 1e10,
-                                        inplace=False,
-                                        parallel=False,
-                                        *args, **kwargs)
         vectors = self.map(detector_px_to_3D_kspace,
-                             ai=azimuthal_integrator,
-                             inplace=False,
-                             parallel=False
-                             *args, **kwargs)
+                           ai=azimuthal_integrator,
+                           inplace=False,
+                           parallel=False
+                           *args, **kwargs)
         vectors = DiffractionVectors3D(vectors)
         transfer_navigation_axes(vectors, self)
 
