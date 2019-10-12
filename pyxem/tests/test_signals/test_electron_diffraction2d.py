@@ -43,7 +43,7 @@ class TestSimpleHyperspy:
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     def test_set_scan_calibration(self, diffraction_pattern):
-        diffraction_pattern.set_scan_calibration(19)
+        diffraction_pattern.set_scan_calibration(19, 'nm')
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
 
