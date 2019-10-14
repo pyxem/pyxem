@@ -106,6 +106,5 @@ def chunked_application_of_UDF(filepath, x_list,y_list,function):
         for y in y_list:
             analysis_output = _factory(filepath,x,y,chunk_size,function)
             results_list.append(analysis_output.data)
-    analysis_output = None #manual clean up for windows
     np_output = _combine_list_into_navigation_space(results_list,x_list)
     return np_output
