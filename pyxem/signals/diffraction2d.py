@@ -29,6 +29,7 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
+from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through, transfer_navigation_axes, \
     select_method_from_method_dict
@@ -593,11 +594,12 @@ class Diffraction2D(Signal2D):
         polar_signal = self.map(reproject_polar,
                                 dr=dr, dt=dt,
                                 jacobian=jacobian,
+                                inplace=False,
                                 *args, **kwargs)
         # Assign to appropriate signal
         polar = PolarDiffraction2D(polar_signal)
         # Transfer navigation_axes
-        polar.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        transfer_navigation_axes(polar, self)
         # Set signal axes parameters (Theta)
         polar_t_axis = polar.axes_manager.signal_axes[0]
         polar_t_axis.name = 'theta'
@@ -606,7 +608,7 @@ class Diffraction2D(Signal2D):
         # Set signal axes parameters (magnitude)
         polar_k_axis = polar.axes_manager.signal_axes[1]
         polar_k_axis.name = 'k'
-        polar_k_axis.scale = self.axes_manager.signal_axes[0].scale,
+        #polar_k_axis.scale = self.axes_manager.signal_axes[0].scale,
         polar_k_axis.units = self.axes_manager.signal_axes[0].units
 
         return polar
