@@ -39,7 +39,7 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     subtract_background_median, subtract_reference, circular_mask, \
     find_beam_offset_cross_correlation, peaks_as_gvectors, \
     convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
-    find_beam_center_interpolate
+    find_beam_center_interpolate, reproject_polar
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -558,6 +558,59 @@ class Diffraction2D(Signal2D):
 
         return bg_subtracted
 
+    def as_polar_diffraction2D(self,
+                               dr=1., dt=None,
+                               jacobian=False,
+                               *args, **kwargs):
+        """Reprojects two-dimensional diffraction data from cartesian to polar
+        coordinates.
+
+        Parameters
+        ----------
+        dr : float
+            Radial coordinate spacing for the grid interpolation
+            tests show that there is not much point in going below 0.5
+        dt : float
+            Angular coordinate spacing (in radians)
+            if ``dt=None``, dt will be set such that the number of theta values
+            is equal to the maximum value between the height or the width of
+            the image.
+        Jacobian : boolean
+            Include ``r`` intensity scaling in the coordinate transform.
+            This should be included to account for the changing pixel size that
+            occurs during the transform.
+        *args : arguments
+            Arguments passed to the hyperspy map function.
+        **kwargs : keyord arguments
+            Keyword arguments passed to the hyperspy map function.
+
+        Returns
+        -------
+        polar : PolarDiffraction2D
+            Two-dimensional diffraction data in polar coordinates (k, theta).
+
+        """
+        polar_signal = self.map(reproject_polar,
+                                dr=dr, dt=dt,
+                                jacobian=jacobian,
+                                *args, **kwargs)
+        # Assign to appropriate signal
+        polar = PolarDiffraction2D(polar_signal)
+        # Transfer navigation_axes
+        polar.axes_manager.navigation_axes = self.axes_manager.navigation_axes
+        # Set signal axes parameters (Theta)
+        polar_t_axis = polar.axes_manager.signal_axes[0]
+        polar_t_axis.name = 'theta'
+        polar_t_axis.scale = 2 * np.pi / polar_t_axis.size
+        polar_t_axis.units = '$rad$'
+        # Set signal axes parameters (magnitude)
+        polar_k_axis = polar.axes_manager.signal_axes[1]
+        polar_k_axis.name = 'k'
+        polar_k_axis.scale = self.axes_manager.signal_axes[0].scale,
+        polar_k_axis.units = self.axes_manager.signal_axes[0].units
+
+        return polar
+
     def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
 
@@ -671,7 +724,7 @@ class Diffraction2D(Signal2D):
 
         Returns
         -------
-        res : :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
+        res : :py:class:`~pyxem.signals.diffraction2d.LazyDiffraction2D`.
             The lazy signal.
         """
         res = super().as_lazy(*args, **kwargs)
