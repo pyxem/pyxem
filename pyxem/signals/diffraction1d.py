@@ -27,7 +27,7 @@ from hyperspy._signals.lazy import LazySignal
 from hyperspy.roi import SpanROI
 
 from pyxem.signals import push_metadata_through
-
+from pyxem.utils.expt_utils1d import hampel_filter
 
 class Diffraction1D(Signal1D):
     _signal_type = "diffraction1d"
@@ -117,6 +117,37 @@ class Diffraction1D(Signal1D):
         vdfim = dark_field_sum.as_signal2D((0, 1))
 
         return vdfim
+
+    def remove_hot_pixels(self, window_size, n_sigmas=6):
+        """Identifies and removes hot pixels using a Hampel filter applied to
+        the mean diffraction 1D data.
+
+        Parameters
+        ----------
+        window_size : int
+            Used for median filter.
+        n_sigmas : int
+            Number of standard deviations a peak must be to be identified as a
+            hot pixel.
+
+        Returns
+        -------
+        hot_removed : Diffraction1D
+            Diffraction data with hot pixels replaced with local average value.
+        """
+        # Calculate mean signal in which to find hot pixels
+        s_mean = self.mean()
+        # Determine location of hot pixels by applying Hampel filter to mean.
+        out = hampel_filter(s_mean.data,
+                            window_size=window_size,
+                            n_sigmas=n_sigmas)
+        # Iterate through the signal (manually) and denoise the points found
+        # using Hampel filter by taking average over adjacent pixels.
+        for i in range(len(self.data[0])):
+            for j in range (len(self.data[1])):
+                for k in range (len(out[1])):
+                    self.data[i,j,out[1][k]] = (self.data[i,j,out[1][k]-1] + self.data[i,j,out[1][k]+1])/2
+
 
     def as_lazy(self, *args, **kwargs):
         """Create a copy of the Diffraction1D object as a
