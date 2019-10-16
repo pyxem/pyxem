@@ -180,6 +180,7 @@ Any shape input image can be used for the template matching.
 
 .. code-block:: python
 
+    >>> import numpy as np
     >>> data = np.zeros((2, 2, 50, 50))
     >>> data[:, :, 23:27, 23:27] = 1
     >>> data[:, :, 13:17, 23:27] = 1
