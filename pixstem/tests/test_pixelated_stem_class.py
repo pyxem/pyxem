@@ -957,9 +957,9 @@ class TestAngularSliceRadialIntegration:
         assert (s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
         with pytest.raises(ValueError):
-                s.angular_slice_radial_integration(slice_overlap=1.2)
+            s.angular_slice_radial_integration(slice_overlap=1.2)
         with pytest.raises(ValueError):
-                s.angular_slice_radial_integration(slice_overlap=-0.2)
+            s.angular_slice_radial_integration(slice_overlap=-0.2)
 
 
 class TestPixelatedStemVirtualAnnularDarkField:

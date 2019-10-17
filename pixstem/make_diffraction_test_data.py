@@ -506,11 +506,11 @@ class MakeTestData(object):
         self.signal.axes_manager[1].scale = self.scale
 
     def set_downscale_factor(self, factor):
-            self.downscale_factor = factor
-            self.generate_mesh()
-            for i in self.z_list:
-                i.update_axis(self.xx, self.yy)
-            self.update_signal()
+        self.downscale_factor = factor
+        self.generate_mesh()
+        for i in self.z_list:
+            i.update_axis(self.xx, self.yy)
+        self.update_signal()
 
     def set_signal_zero(self):
         self.z_list = []
