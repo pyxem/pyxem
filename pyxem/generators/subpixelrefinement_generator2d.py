@@ -63,7 +63,7 @@ class SubpixelRefinementGenerator2D():
     Parameters
     ----------
     dp : Diffraction2D
-        The diffraction patterns containing the raw measurements of peask to be
+        The diffraction patterns containing the raw measurements of peaks to be
         refined.
     coordinates : DetectorCoordinates2D | ndarray
         Coordinates of positive peaks on the detector to be refined. If given as
@@ -98,8 +98,8 @@ class SubpixelRefinementGenerator2D():
         Returns
         -------
         vector_out: DetectorCoordinates2D
-            DetectorCoordinates2D containing the refined vectors in calibrated
-            units with the same navigation shape as the diffraction patterns.
+            DetectorCoordinates2D containing the refined coordinates 
+            with the same navigation shape as the diffraction patterns.
 
         """
         def _conventional_xc_map(dp, vectors, sim_disc, upsample_factor):
@@ -132,9 +132,10 @@ class SubpixelRefinementGenerator2D():
 
         Returns
         -------
-        vector_out: DDetectorCoordinates2D
-            DetectorCoordinates2D containing the refined vectors in calibrated
-            units with the same navigation shape as the diffraction patterns.
+        vector_out: DetectorCoordinates2D
+         DetectorCoordinates2D containing the refined coordinates 
+            with the same navigation shape as the diffraction patterns.
+            
 
         """
 
