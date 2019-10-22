@@ -99,17 +99,12 @@ class DetectorCoordinates2D(BaseSignal):
         crystim.change_dtype('float')
 
         # Set calibration to same as signal
-        x = crystim.axes_manager.signal_axes[0]
-        y = crystim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
-
+        for i in [0,1]:
+            axis = crystim.axes_manager.signal_axes[i]
+            axis.scale = self.axes_manager.navigation_axes[i].scale
+            axis.units = 'nm'
+            axis.name = 'x' if i == 0 else axis.name = 'y'
+              
         return crystim
 
     def as_diffraction_vectors2d(self, center, calibration,
