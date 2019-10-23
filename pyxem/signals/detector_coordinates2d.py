@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 from warnings import warn
 
