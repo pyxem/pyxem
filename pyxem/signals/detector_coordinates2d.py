@@ -92,21 +92,20 @@ class DetectorCoordinates2D(BaseSignal):
         crystim : Signal2D
             2D map of diffracting pixels.
         """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
-
+        npeaks_map = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+        # If binary set values greater than 0 to 1
         if binary == True:
-            crystim = crystim == 1
-
-        crystim.change_dtype('float')
-
+            npeaks_map = npeaks_map == 1
+        # Ensure floating point output
+        npeaks_map.change_dtype('float')
         # Set calibration to same as signal
         for i in [0,1]:
-            axis = crystim.axes_manager.signal_axes[i]
+            axis = npeaks_map.axes_manager.signal_axes[i]
             axis.scale = self.axes_manager.navigation_axes[i].scale
             axis.units = 'nm'
             axis.name = 'x' if i == 0 else 'y'
 
-        return crystim
+        return npeaks_map
 
     def as_diffraction_vectors2d(self, center, calibration,
                                  *args, **kwargs):
