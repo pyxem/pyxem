@@ -103,8 +103,8 @@ class DetectorCoordinates2D(BaseSignal):
             axis = crystim.axes_manager.signal_axes[i]
             axis.scale = self.axes_manager.navigation_axes[i].scale
             axis.units = 'nm'
-            axis.name = 'x' if i == 0 else axis.name = 'y'
-              
+            axis.name = 'x' if i == 0 else 'y'
+
         return crystim
 
     def as_diffraction_vectors2d(self, center, calibration,
