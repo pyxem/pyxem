@@ -34,15 +34,15 @@ from pyxem.utils.indexation_utils import match_vectors
 from pyxem.utils.indexation_utils import OrientationResult
 
 
-class IndexationGenerator2D():
+class PatternMatchGenerator2D():
     """Generates an indexer for data using a number of methods.
 
     Parameters
     ----------
     signal : ElectronDiffraction2D
-        The signal of electron diffraction patterns to be indexed.
+        The signal of measured electron diffraction patterns.
     diffraction_library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
+        The library of simulated diffraction patterns for pattern matching.
     """
 
     def __init__(self,

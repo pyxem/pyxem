@@ -44,84 +44,10 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 import lmfit
 
 
-class IndexationGenerator():
-    """Generates an indexer for data using a number of methods.
-
-    Parameters
-    ----------
-    signal : ElectronDiffraction2D
-        The signal of electron diffraction patterns to be indexed.
-    diffraction_library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
-    """
-
-    def __init__(self,
-                 signal,
-                 diffraction_library):
-        self.signal = signal
-        self.library = diffraction_library
-
-    def correlate(self,
-                  n_largest=5,
-                  mask=None,
-                  *args,
-                  **kwargs):
-        """Correlates the library of simulated diffraction patterns with the
-        electron diffraction signal.
-
-        Parameters
-        ----------
-        n_largest : int
-            The n orientations with the highest correlation values are returned.
-        mask : Array
-            Array with the same size as signal (in navigation) or None
-        *args : arguments
-            Arguments passed to map().
-        **kwargs : arguments
-            Keyword arguments passed map().
-
-        Returns
-        -------
-        matching_results : TemplateMatchingResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern, in the form
-            [Library Number , [z, x, z], Correlation Score]
-
-        """
-        signal = self.signal
-        library = self.library
-
-        if mask is None:
-            # Index at all real space pixels
-            mask = 1
-
-        # TODO: Add extra methods
-        no_extra_methods_yet = True
-        if no_extra_methods_yet:
-            # adds a normalisation to library
-            for phase in library.keys():
-                norm_array = np.ones(library[phase]['intensities'].shape[0])  # will store the norms
-                for i, intensity_array in enumerate(library[phase]['intensities']):
-                    norm_array[i] = np.linalg.norm(intensity_array)
-                library[phase]['pattern_norms'] = norm_array  # puts this normalisation into the library
-
-            matches = signal.map(correlate_library,
-                                 library=library,
-                                 n_largest=n_largest,
-                                 mask=mask,
-                                 inplace=False,
-                                 **kwargs)
-
-        matching_results = TemplateMatchingResults(matches)
-        matching_results = transfer_navigation_axes(matching_results, signal)
-
-        return matching_results
-
-
 def _refine_best_orientations(single_match_result,
                               vectors,
                               library,
-                              accelarating_voltage,
+                              beam_energy,
                               camera_length,
                               n_best=5,
                               rank=0,
@@ -133,7 +59,7 @@ def _refine_best_orientations(single_match_result,
                               verbose=False
                               ):
     """
-    Refine a single orientation agains the given cartesian vector coordinates.
+    Refine a single orientation against the given cartesian vector coordinates.
 
     Parameters
     ----------
@@ -192,7 +118,7 @@ def _refine_best_orientations(single_match_result,
         result = _refine_orientation(solution,
                                      vectors,
                                      library,
-                                     accelarating_voltage=accelarating_voltage,
+                                     beam_energy=beam_energy,
                                      camera_length=camera_length,
                                      index_error_tol=index_error_tol,
                                      method=method,
@@ -213,7 +139,7 @@ def _refine_best_orientations(single_match_result,
 def _refine_orientation(solution,
                         k_xy,
                         structure_library,
-                        accelarating_voltage,
+                        beam_energy,
                         camera_length,
                         index_error_tol=0.2,
                         method="leastsq",
@@ -223,7 +149,7 @@ def _refine_orientation(solution,
                         verbose=False,
                         ):
     """
-    Refine a single orientation agains the given cartesian vector coordinates.
+    Refine a single orientation against the given cartesian vector coordinates.
 
     Parameters
     ----------
@@ -256,7 +182,6 @@ def _refine_orientation(solution,
     result : OrientationResult
         Container for the orientation refinement results
     """
-
     # prepare reciprocal_lattice
     structure = structure_library.structures[solution.phase_index]
     lattice_recip = structure.lattice.reciprocal()
@@ -292,7 +217,7 @@ def _refine_orientation(solution,
     params.add("ak", value=ak, vary=vary_angles)
     params.add("scale", value=solution.scale, vary=vary_scale, min=0.8, max=1.2)
 
-    wavelength = get_electron_wavelength(accelarating_voltage)
+    wavelength = get_electron_wavelength(beam_energy)
     camera_length = camera_length * 1e10
     args = k_xy, lattice_recip, wavelength, camera_length
 
@@ -345,7 +270,7 @@ def _refine_orientation(solution,
     return res
 
 
-class VectorIndexationGenerator():
+class IndexationGenerator3D():
     """Generates an indexer for DiffractionVectors3D using a number of methods.
 
     Attributes
@@ -407,35 +332,32 @@ class VectorIndexationGenerator():
             Navigation axes of the diffraction vectors signal containing vector
             indexation results for each probe position.
         """
-        vectors = self.vectors
-        library = self.library
-
-        matched = vectors.cartesian.map(match_vectors,
-                                        library=library,
-                                        mag_tol=mag_tol,
-                                        angle_tol=np.deg2rad(angle_tol),
-                                        index_error_tol=index_error_tol,
-                                        n_peaks_to_index=n_peaks_to_index,
-                                        n_best=n_best,
-                                        inplace=False,
-                                        *args,
-                                        **kwargs)
+        matched = self.vectors.map(match_vectors,
+                                   library=self.library,
+                                   mag_tol=mag_tol,
+                                   angle_tol=np.deg2rad(angle_tol),
+                                   index_error_tol=index_error_tol,
+                                   n_peaks_to_index=n_peaks_to_index,
+                                   n_best=n_best,
+                                   inplace=False,
+                                   *args,
+                                   **kwargs)
         indexation = matched.isig[0]
         rhkls = matched.isig[1].data
 
         indexation_results = VectorMatchingResults(indexation)
-        indexation_results.vectors = vectors
+        indexation_results.vectors = self.vectors
         indexation_results.hkls = rhkls
         indexation_results = transfer_navigation_axes(indexation_results,
-                                                      vectors.cartesian)
+                                                      self.vectors)
 
-        vectors.hkls = rhkls
+        self.vectors.hkls = rhkls
 
         return indexation_results
 
     def refine_best_orientation(self,
                                 orientations,
-                                accelarating_voltage,
+                                beam_energy,
                                 camera_length,
                                 rank=0,
                                 index_error_tol=0.2,
@@ -467,15 +389,15 @@ class VectorIndexationGenerator():
 
         Returns
         -------
-        indexation_results : VectorMatchingResults
-            Navigation axes of the diffraction vectors signal containing vector
+        indexation_results : IndexationResults
+            Navigation axes of the diffraction vectors signal containing
             indexation results for each probe position.
         """
         vectors = self.vectors
         library = self.library
 
         return self.refine_n_best_orientations(orientations,
-                                               accelarating_voltage=accelarating_voltage,
+                                               beam_energy=beam_energy,
                                                camera_length=camera_length,
                                                n_best=1,
                                                rank=rank,
@@ -487,7 +409,7 @@ class VectorIndexationGenerator():
 
     def refine_n_best_orientations(self,
                                    orientations,
-                                   accelarating_voltage,
+                                   beam_energy,
                                    camera_length,
                                    n_best=0,
                                    rank=0,
@@ -502,7 +424,7 @@ class VectorIndexationGenerator():
         ----------
         orientations : VectorMatchingResults
             List of orientations to refine, must be an instance of `VectorMatchingResults`.
-        accelerating_voltage : float
+        beam_energy : float
             The acceleration voltage with which the data was acquired.
         camera_length : float
             The camera length in meters.
@@ -538,7 +460,7 @@ class VectorIndexationGenerator():
         matched = orientations.map(_refine_best_orientations,
                                    vectors=vectors,
                                    library=library,
-                                   accelarating_voltage=accelarating_voltage,
+                                   beam_energy=beam_energy,
                                    camera_length=camera_length,
                                    n_best=n_best,
                                    rank=rank,

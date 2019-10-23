@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.vector_indexation_generator import VectorIndexationGenerator
+from pyxem.generators.indexation_generator3d import IndexationGenerator3D
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from pyxem.signals.diffraction_vectors2d import DiffractionVectors2D
@@ -30,17 +30,17 @@ from pyxem.utils.indexation_utils import OrientationResult
 def test_vector_indexation_generator_init():
     vectors = DiffractionVectors2D([[1], [2], [3]])
     vector_library = DiffractionVectorLibrary()
-    vector_indexation_generator = VectorIndexationGenerator(vectors, vector_library)
-    assert isinstance(vector_indexation_generator, VectorIndexationGenerator)
-    assert vector_indexation_generator.vectors == vectors
-    assert vector_indexation_generator.library == vector_library
+    indexation_generator3d = IndexationGenerator3D(vectors, vector_library)
+    assert isinstance(indexation_generator3d, IndexationGenerator3D)
+    assert indexation_generator3d.vectors == vectors
+    assert indexation_generator3d.library == vector_library
 
 
 @pytest.mark.xfail(raises=ValueError)
 def test_vector_indexation_generator_cartesian_check():
     vectors = DiffractionVectors2D([[1], [2], [3]])
     vector_library = DiffractionVectorLibrary()
-    vector_indexation_generator = VectorIndexationGenerator(vectors, vector_library)
+    vector_indexation_generator = IndexationGenerator3D(vectors, vector_library)
 
 
 #def test_vector_indexation_generator_index_vectors(vector_match_peaks,
@@ -48,7 +48,7 @@ def test_vector_indexation_generator_cartesian_check():
 #    # vectors not used directly
 #    vectors = DiffractionVectors2D(np.array(vector_match_peaks[:, :2]))
 #    vectors.cartesian = DiffractionVectors2D(np.array(vector_match_peaks))
-#    gen = VectorIndexationGenerator(vectors, vector_library)
+#    gen = VectorIndexationGenerator3D(vectors, vector_library)
 #    indexation = gen.index_vectors(
 #        mag_tol=0.1,
 #        angle_tol=6,
