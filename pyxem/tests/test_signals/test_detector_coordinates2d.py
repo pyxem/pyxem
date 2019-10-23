@@ -114,7 +114,7 @@ class TestAsDiffractionVectors3D:
         detector = GenericFlatDetector(8, 8)
         detector_coordinates_single.as_diffraction_vectors3d(origin,
                                                              detector=detector,
-                                                             detector_distance,
+                                                             detector_distance=1,
                                                              wavelength=1)
 
     def test_dcm_to_3d(self, detector_coordinates_map):

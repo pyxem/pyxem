@@ -149,16 +149,24 @@ class DetectorCoordinates2D(BaseSignal):
         return vectors
 
     def as_diffraction_vectors3d(self,
-                                 azimuthal_integrator,
+                                 detector,
+                                 origin,
+                                 detector_distance,
                                  *args, **kwargs):
         """Transform detector coordinates to three-dimensional diffraction vectors
         with coordinates in calibrated units of reciprocal Angstroms.
 
         Parameters
         ----------
-        azimuthal_integrator : pyFAI.azimuthalIntegrator.AzimuthalIntegrator
-            A pyFAI Geometry object, containing all the detector geometry
-            parameters.
+        detector : pyFAI.detectors.Detector object
+            A pyFAI detector used for the AzimuthalIntegrator.
+        origin : np.array_like
+            This parameter should either be a list or numpy.array with two
+            coordinates ([x_origin,y_origin]), or an array of the same shape as
+            the navigation axes, with an origin (with the shape
+            [x_origin,y_origin]) at each navigation location.
+        detector_distance : float
+            Detector distance in meters passed to pyFAI AzimuthalIntegrator.
         *args : arguments
             Arguments to be passed to the plot method.
         **kwargs : keyword arguments
@@ -171,10 +179,16 @@ class DetectorCoordinates2D(BaseSignal):
             coordinates [k_x, k_y, k_z] for each detector coorinate. The
             navigation dimensions are unchanged.
         """
+        # Define pyFAI azimuthal integrator
+        p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
+        ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
+                                 detector=detector, wavelength=wavelength,
+                                 **kwargs_for_integrator)
+        # Map detector coordinates to 3D reciprocal space
         vectors = self.map(detector_px_to_3D_kspace,
-                           ai=azimuthal_integrator,
+                           ai=ai,
                            inplace=False,
-                           parallel=False
+                           parallel=False,
                            *args, **kwargs)
         vectors = DiffractionVectors3D(vectors)
         transfer_navigation_axes(vectors, self)
