@@ -137,9 +137,10 @@ class DetectorCoordinates2D(BaseSignal):
                            calibration=calibration,
                            center=center,
                            inplace=False,
-                           parallel=False,
+                           ragged=True,
                            *args, **kwargs)
         vectors = DiffractionVectors2D(vectors)
+        vectors.axes_manager.set_signal_dimension(0)
         # Set coordinates in vectors attributes
         vectors.detector_coordinates = self
         # Transfer navigation axes from the detector coordinates object to the

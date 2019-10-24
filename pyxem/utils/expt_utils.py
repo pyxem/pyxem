@@ -651,7 +651,7 @@ def peaks_as_gvectors(z, center, calibration):
     center : numpy array
         diffraction pattern center in array indices.
     calibration : float
-        calibration in reciprocal Angstroms per pixels.
+        calibration in reciprocal Angstroms per pixel.
 
     Returns
     -------

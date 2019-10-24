@@ -26,7 +26,6 @@ from skimage.feature import register_translation
 from pyxem.signals.detector_coordinates2d import DetectorCoordinates2D
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
-from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
 import warnings
 
@@ -98,7 +97,7 @@ class SubpixelRefinementGenerator2D():
         Returns
         -------
         vector_out: DetectorCoordinates2D
-            DetectorCoordinates2D containing the refined coordinates 
+            DetectorCoordinates2D containing the refined coordinates
             with the same navigation shape as the diffraction patterns.
 
         """
@@ -115,7 +114,8 @@ class SubpixelRefinementGenerator2D():
                         vectors=self.coordinates,
                         sim_disc=sim_disc,
                         upsample_factor=upsample_factor,
-                        inplace=False))
+                        inplace=False,
+                        ragged=True))
         self.vectors_out.axes_manager.set_signal_dimension(0)
         self.last_method = "conventional_xc"
         return self.vectors_out
@@ -133,9 +133,9 @@ class SubpixelRefinementGenerator2D():
         Returns
         -------
         vector_out: DetectorCoordinates2D
-         DetectorCoordinates2D containing the refined coordinates 
+         DetectorCoordinates2D containing the refined coordinates
             with the same navigation shape as the diffraction patterns.
-            
+
 
         """
 
@@ -198,7 +198,8 @@ class SubpixelRefinementGenerator2D():
             self.dp.map(_center_of_mass_map,
                         vectors=self.coordinates,
                         square_size=square_size,
-                        inplace=False))
+                        inplace=False,
+                        ragged=True))
         self.vectors_out.axes_manager.set_signal_dimension(0)
 
         self.last_method = "center_of_mass_method"
