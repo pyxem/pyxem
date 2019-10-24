@@ -266,7 +266,8 @@ class SubpixelRefinementGenerator2D():
         self.vectors_out = DetectorCoordinates2D(self.dp.map(_lg_map,
                                                             vectors=self.coordinates,
                                                             square_size=square_size,
-                                                            inplace=False))
+                                                            inplace=False,
+                                                            ragged=True))
 
         # check for unrefined peaks
         def check_bad_square(z):
