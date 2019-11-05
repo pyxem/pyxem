@@ -440,7 +440,7 @@ class Diffraction2D(Signal2D):
         return rp
 
     def get_direct_beam_position(self, method,
-                                 square_width=None, 
+                                 square_width=None,
                                  **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
@@ -462,7 +462,8 @@ class Diffraction2D(Signal2D):
             Array containing the shifts for each SED pattern.
 
         """
-        nav_size = self.axes_manager.navigation_size
+        nav_shape_x = self.data.shape[0]
+        nav_shape_y = self.data.shape[1]
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
@@ -485,6 +486,9 @@ class Diffraction2D(Signal2D):
         elif method == 'blur' or method == 'interpolate':
             centers = sig.map(method_function, inplace=False, **kwargs)
             shifts = origin_coordinates - centers
+
+        shifts = -1 * shifts.data
+        shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
 
         return shifts
 
