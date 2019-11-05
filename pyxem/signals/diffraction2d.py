@@ -439,7 +439,9 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method, **kwargs):
+    def get_direct_beam_position(self, method,
+                                 square_width=None, 
+                                 **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -447,7 +449,10 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur", "interpolate"
-
+        square_width  : int
+            Half the side length of square that captures the direct beam in all
+            scans. Means that the centering algorithm is stable against
+            diffracted spots brighter than the direct beam.
         **kwargs:
             Keyword arguments to be passed to map().
 
@@ -457,6 +462,7 @@ class Diffraction2D(Signal2D):
             Array containing the shifts for each SED pattern.
 
         """
+        nav_size = self.axes_manager.navigation_size
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
@@ -466,10 +472,18 @@ class Diffraction2D(Signal2D):
 
         method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
+        if square_width is not None:
+            min_index = np.int(origin_coordinates[0] - square_width)
+            # fails if non-square dp
+            max_index = np.int(origin_coordinates[0] + square_width)
+            sig = self.isig[min_index:max_index, min_index:max_index]
+        else:
+            sig = self
+
         if method == 'cross_correlate':
-            shifts = self.map(method_function, inplace=False, **kwargs)
+            shifts = sig.map(method_function, inplace=False, **kwargs)
         elif method == 'blur' or method == 'interpolate':
-            centers = self.map(method_function, inplace=False, **kwargs)
+            centers = sig.map(method_function, inplace=False, **kwargs)
             shifts = origin_coordinates - centers
 
         return shifts
@@ -486,12 +500,10 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of 'cross_correlate', 'blur', 'interpolate'
-
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-
         **kwargs:
             To be passed to method function
 
