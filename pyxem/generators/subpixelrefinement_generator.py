@@ -21,10 +21,14 @@ Generating subpixel resolution on diffraction vectors.
 """
 
 import numpy as np
+import pyxem as pxm
 
 from skimage.feature import register_translation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import peaks_as_gvectors
+from pyxem.signals import (transfer_signal_axes,
+                           transfer_navigation_axes)
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
@@ -78,8 +82,17 @@ class SubpixelrefinementGenerator():
 
     """
 
-    def __init__(self, dp, vectors):
-        self.dp = dp
+    def __init__(self, dp, vectors, padding=None):
+        if padding:
+            dp_padded = np.zeros((dp.data.shape[0], dp.data.shape[1],
+                                  dp.data.shape[2] + padding, dp.data.shape[2] + padding))
+            dp_padded[:, :, int(padding / 2):dp.data.shape[2] + int(padding / 2), int(padding / 2):dp.data.shape[2] + int(padding / 2)] = dp.data
+            dp_padded = pxm.ElectronDiffraction2D(dp_padded)
+            transfer_signal_axes(dp_padded, dp)
+            transfer_navigation_axes(dp_padded, dp)
+            self.dp = dp_padded
+        else:
+            self.dp = dp
         self.vectors_init = vectors
         self.last_method = None
         sig_ax = dp.axes_manager.signal_axes
