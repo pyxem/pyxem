@@ -149,4 +149,3 @@ class VDFGenerator:
         vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
 
         return vdfim
-

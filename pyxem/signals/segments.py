@@ -422,7 +422,7 @@ class VDFSegment:
             sigma = calibration
 
         size_x, size_y = shape[0], shape[1]
-        cx, cy = -size_x/2*calibration, -size_y/2*calibration
+        cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
         x, y = np.indices((size_x, size_y))
         x, y = x * calibration + cx, y * calibration + cy
         virtual_ed = np.zeros((size_x, size_y, num_segments))

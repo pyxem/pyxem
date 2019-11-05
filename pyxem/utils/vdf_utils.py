@@ -33,4 +33,3 @@ def normalize_vdf(im):
     """
     imn = im / im.max()
     return imn
-

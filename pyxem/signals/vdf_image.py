@@ -96,7 +96,7 @@ class VDFImage(Signal2D):
         vdfs = self.copy()
         vectors = self.vectors.data
 
-        #TODO : Add aperture radius as an attribute of VDFImage?
+        # TODO : Add aperture radius as an attribute of VDFImage?
 
         # Create an array of length equal to the number of vectors where each
         # element is a np.object with shape (n: number of segments for this

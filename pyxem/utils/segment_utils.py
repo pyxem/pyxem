@@ -161,7 +161,7 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
         for i in np.arange(np.shape(maxi_coord1)[1]):
             index = np.transpose(maxi_coord1)[i]
             label_value = labels_check[index[0], index[1]]
-            if len(labels_check[labels_check==label_value]) < min_size:
+            if len(labels_check[labels_check == label_value]) < min_size:
                 delete_indices.append(i)
                 local_maxi[index[0], index[1]] = False
         maxi_coord1 = np.delete(maxi_coord1, delete_indices, axis=1)
@@ -169,11 +169,11 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     # Cluster the maxima by DBSCAN based on min_distance. For each
     # cluster, only the maximum closest to the average maxima position is
     # used as a marker.
-    if min_distance>1 and np.shape(maxi_coord1)[1]>1:
+    if min_distance > 1 and np.shape(maxi_coord1)[1] > 1:
         clusters = DBSCAN(eps=min_distance, metric='euclidean', min_samples=1,
                           ).fit(np.transpose(maxi_coord1))
         local_maxi = np.zeros_like(local_maxi)
-        for n in np.arange(clusters.labels_.max()+1):
+        for n in np.arange(clusters.labels_.max() + 1):
             maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]
             com = np.average(maxi_coord1_n, axis=0).astype('int')
             index = distance_matrix([com], maxi_coord1_n).argmin()
@@ -194,7 +194,7 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
             markers_temp = convolve2d(im, disk_mask, boundary='fill',
                                       mode='same', fillvalue=0)
             markers[np.where(markers_temp)] = mm
-    markers = markers*mask
+    markers = markers * mask
 
     # Find the edges of the VDF image using the Sobel transform.
     elevation = sobel(vdf_temp)
@@ -237,11 +237,11 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
             labels = np.zeros(np.shape(labels))
 
         seps_img_sum = np.zeros_like(vdf_temp).astype('float64')
-        for l, vdf in zip(np.arange(1, np.max(labels)+1), vdf_sep):
+        for l, vdf in zip(np.arange(1, np.max(labels) + 1), vdf_sep):
             mask_l = np.zeros_like(labels).astype('bool')
             mask_l[np.where(labels == l)] = 1
             seps_img_sum += vdf_temp * mask_l /\
-                            np.max(vdf_temp[np.where(labels == l)])
+                np.max(vdf_temp[np.where(labels == l)])
             seps_img_sum[np.where(labels == l)] += l
 
         maxi_coord = np.where(local_maxi)
@@ -311,4 +311,3 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
         -((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
 
     return gaussian
-

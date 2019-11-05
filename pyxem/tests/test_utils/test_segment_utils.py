@@ -60,7 +60,7 @@ def vdf_image():
                           (1, 1, np.inf, np.inf, 1, False, (1, 6, 7)),
                           (1, 5, np.inf, np.inf, 0, True, (2, 6, 7)),
                           (1, 1, np.inf, 4, 0, True, (3, 6, 7))
-])
+                          ])
 def test_separate_watershed(vdf_image, min_distance, min_size, max_size,
                             max_number_of_grains, exclude_border, threshold,
                             sep_shape_expt):
@@ -71,7 +71,7 @@ def test_separate_watershed(vdf_image, min_distance, min_size, max_size,
     np.testing.assert_equal(sep.shape, sep_shape_expt)
 
 
-@pytest.mark.parametrize('a, xo, yo, x, y, sigma, gauss_shape_expt',[
+@pytest.mark.parametrize('a, xo, yo, x, y, sigma, gauss_shape_expt', [
     (10, 5, 5, np.arange(10), np.arange(10), 0.2, (10,)),
     (10, 5, 5, np.tile(np.arange(10), (5, 1)), np.tile(np.arange(10), (5, 1)),
      0.2, (5, 10)),

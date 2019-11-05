@@ -330,11 +330,11 @@ class Diffraction2D(Signal2D):
         :func:`pyxem.utils.expt_utils.azimuthal_integrate_fast`
         """
 
-        #Scaling factor is used to output the unit in k instead of q.
-        #It multiplies the scale that comes out of pyFAI integrate1d
+        # Scaling factor is used to output the unit in k instead of q.
+        # It multiplies the scale that comes out of pyFAI integrate1d
         scaling_factor = 1
         if unit == 'k_A^-1':
-            scaling_factor = 1/2/np.pi
+            scaling_factor = 1 / 2 / np.pi
             unit = 'q_A^-1'
 
         if np.array(origin).size == 2:
@@ -359,17 +359,17 @@ class Diffraction2D(Signal2D):
             # this time each centre is read in origin
             # origin is passed as a flattened array in the navigation dimensions
             azimuthal_integrals = self._map_iterate(azimuthal_integrate,
-                                            iterating_kwargs=(('origin',
-                                            origin.reshape(-1, 2)),),
-                                            detector_distance=detector_distance,
-                                            detector=detector,
-                                            wavelength=wavelength,
-                                            size_1d=size_1d,
-                                            unit=unit,
-                                            inplace=inplace,
-                                            kwargs_for_integrator=kwargs_for_integrator,
-                                            kwargs_for_integrate1d=kwargs_for_integrate1d,
-                                            **kwargs_for_map)
+                                                    iterating_kwargs=(('origin',
+                                                                       origin.reshape(-1, 2)),),
+                                                    detector_distance=detector_distance,
+                                                    detector=detector,
+                                                    wavelength=wavelength,
+                                                    size_1d=size_1d,
+                                                    unit=unit,
+                                                    inplace=inplace,
+                                                    kwargs_for_integrator=kwargs_for_integrator,
+                                                    kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                                    **kwargs_for_map)
 
         if len(azimuthal_integrals.data.shape) == 3:
             ap = Diffraction1D(azimuthal_integrals.data[:, 1, :])
