@@ -15,7 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal classes for segmentation results obtained from
+
+"""Signal classes for nanocrystal segmentation results obtained from
 i) machine learning (LearningSegment) and ii) VDF images (VDFSegment).
 
 """

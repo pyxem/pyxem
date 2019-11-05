@@ -131,9 +131,9 @@ class TestVDFSegment:
         assert isinstance(corrsegs.intensities, np.ndarray)
 
     def test_get_virtual_electron_diffraction(self, vdf_segments: VDFSegment,
-                                              ):
+                                              signal_data):
         corrsegs = vdf_segments.correlate_vdf_segments(0.1, 1, 1)
         vs = corrsegs.get_virtual_electron_diffraction(
             calibration=1, sigma=1,
-            shape=signal_data().axes_manager.signal_shape)
+            shape=signal_data.axes_manager.signal_shape)
         assert isinstance(vs, ElectronDiffraction2D)
