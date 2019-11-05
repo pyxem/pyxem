@@ -131,6 +131,46 @@ class SubpixelrefinementGenerator():
         self.last_method = "conventional_xc"
         return self.vectors_out
 
+    def reference_xc(self, square_size, reference_dp, upsample_factor):
+        """Refines the peaks using (phase) cross correlation with a reference
+        diffraction image.
+
+        Parameters
+        ----------
+        square_size : int
+            Length (in pixels) of one side of a square the contains the peak to
+            be refined.
+        reference_dp: ndarray
+            Same shape as a single diffraction image
+        upsample_factor: int
+            Factor by which to upsample the patterns
+
+        Returns
+        -------
+        vector_out: DiffractionVectors
+            DiffractionVectors containing the refined vectors in calibrated
+            units with the same navigation shape as the diffraction patterns.
+
+        """
+        def _reference_xc_map(dp, vectors, upsample_factor, center, calibration):
+            shifts = np.zeros_like(vectors, dtype=np.float64)
+            for i, vector in enumerate(vectors):
+                ref_disc = get_experimental_square(reference_dp, vector, square_size)
+                expt_disc = get_experimental_square(dp, vector, square_size)
+                shifts[i] = _conventional_xc(expt_disc, ref_disc, upsample_factor)
+            return (((vectors + shifts) - center) * calibration)
+
+        self.vectors_out = DiffractionVectors(
+            self.dp.map(_reference_xc_map,
+                        vectors=self.vector_pixels,
+                        upsample_factor=upsample_factor,
+                        center=self.center,
+                        calibration=self.calibration,
+                        inplace=False))
+        self.vectors_out.axes_manager.set_signal_dimension(0)
+        self.last_method = "reference_xc"
+        return self.vectors_out
+
     def center_of_mass_method(self, square_size):
         """Find the subpixel refinement of a peak by assuming it lies at the
         center of intensity.
