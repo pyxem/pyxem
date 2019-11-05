@@ -52,7 +52,8 @@ setup(
       'scikit-learn >= 0.19',     # reason unknown
       'hyperspy >= 1.5.2',        # earlier versions incompatible with numpy >= 1.17.0
       'diffsims',
-      'lmfit >= 0.9.12'
+      'lmfit >= 0.9.12',
+      'pyfai'
       ],
     package_data={
         "": ["LICENSE", "readme.rst"],

@@ -126,7 +126,7 @@ class DiffractionVectors(BaseSignal):
             vectors for them to be considered unique diffraction vectors.
             Will be passed to get_unique_vectors if no unique vectors are
             given.
-        method : string
+        method : str
             The method to use to determine unique vectors, if not given.
             Valid methods are 'strict', 'distance_comparison' and 'DBSCAN'.
             'strict' returns all vectors that are strictly unique and
@@ -145,7 +145,7 @@ class DiffractionVectors(BaseSignal):
         image_to_plot_on : BaseSignal, optional
             If provided, the vectors will be plotted on top of this image.
             The image must be calibrated in terms of offset and scale.
-        image_cmap : string, optional
+        image_cmap : str, optional
             The colormap to plot the image in.
         plot_label_colors : bool, optional
             If True (default is False), also the vectors contained within each
@@ -328,7 +328,7 @@ class DiffractionVectors(BaseSignal):
             be considered unique diffraction vectors. If
             distance_threshold==0, the unique vectors will be determined
             by strict comparison.
-        method : string
+        method : str
             The method to use to determine unique vectors. Valid methods
             are 'strict', 'distance_comparison' and 'DBSCAN'.
             'strict' returns all vectors that are strictly unique and
