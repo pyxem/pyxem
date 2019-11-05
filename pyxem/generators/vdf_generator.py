@@ -19,16 +19,18 @@
 """VDF generator and associated tools.
 
 """
+import numpy as np
+
+from hyperspy.api import roi
 
 from pyxem.signals.vdf_image import VDFImage
 from pyxem.utils.vdf_utils import normalize_vdf
+from pyxem.signals import (transfer_signal_axes,
+                           transfer_navigation_axes_to_signal_axes)
 
-from hyperspy.api import roi
-import numpy as np
 
-
-class VDFGenerator():
-    """Generates a VDF images for a specified signal and set of aperture
+class VDFGenerator:
+    """Generates VDF images for a specified signal and set of aperture
     positions.
 
     Parameters
@@ -54,9 +56,7 @@ class VDFGenerator():
         self.signal = signal
         self.vectors = unique_vectors
 
-    def get_vector_vdf_images(self,
-                              radius,
-                              normalize=False):
+    def get_vector_vdf_images(self, radius, normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an ElectronDiffraction2D Signal by summation in a
         circular window of specified radius.
@@ -86,7 +86,7 @@ class VDFGenerator():
 
             vdfim = VDFImage(np.asarray(vdfs))
 
-            if normalize == True:
+            if normalize is True:
                 vdfim.map(normalize_vdf)
 
         else:
@@ -94,27 +94,15 @@ class VDFGenerator():
                              "initialize VDFGenerator with some vectors. ")
 
         # Set calibration to same as signal
-        x = vdfim.axes_manager.signal_axes[0]
-        y = vdfim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
 
         # Assign vectors used to generate images to vdfim attribute.
-        vdfim.vectors = self.vectors.data
+        vdfim.vectors = self.vectors
+        vdfim.vectors = transfer_signal_axes(vdfim.vectors, self.vectors)
 
         return vdfim
 
-    def get_concentric_vdf_images(self,
-                                  k_min,
-                                  k_max,
-                                  k_steps,
-                                  normalize=False):
+    def get_concentric_vdf_images(self, k_min, k_max, k_steps, normalize=False):
         """Obtain the intensity scattered at each navigation position in an
         ElectronDiffraction2D Signal by summation over a series of concentric
         in annuli between a specified inner and outer radius in a number of
@@ -154,19 +142,11 @@ class VDFGenerator():
 
         vdfim = VDFImage(np.asarray(vdfs))
 
-        if normalize == True:
+        if normalize is True:
             vdfim.map(normalize_vdf)
 
         # Set calibration to same as signal
-        x = vdfim.axes_manager.signal_axes[0]
-        y = vdfim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.signal.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.signal.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
 
         return vdfim
+

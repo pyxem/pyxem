@@ -36,6 +36,7 @@ from pyxem.utils.vector_utils import get_npeaks
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
+
 """
 Signal class for diffraction vectors.
 
@@ -115,7 +116,7 @@ class DiffractionVectors(BaseSignal):
         Parameters
         ----------
         xlim : float
-            The maximum x coordinate in reciprocal Angstroms to be plotted.
+            The maximum x coordinate to be plotted.
         ylim : float
             The maximum y coordinate in reciprocal Angstroms to be plotted.
         unique_vectors : DiffractionVectors, optional
@@ -425,8 +426,7 @@ class DiffractionVectors(BaseSignal):
                 peaks_n_counts_temp = unique_vectors_counts[
                     clusters.labels_ == n]
                 unique_peaks[n] = np.average(
-                    peaks_n_temp, weights=peaks_n_counts_temp,
-                    axis=0)
+                    peaks_n_temp, weights=peaks_n_counts_temp, axis=0)
 
         # Manipulate into DiffractionVectors class
         if unique_peaks.size > 0:
@@ -453,7 +453,7 @@ class DiffractionVectors(BaseSignal):
         """
         crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
 
-        if binary == True:
+        if binary is True:
             crystim = crystim == 1
 
         crystim.change_dtype('float')
