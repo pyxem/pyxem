@@ -70,8 +70,8 @@ class LearningSegment:
         # If a mask was used during the decomposition, the factors and/or
         # loadings will contain nan, which must be converted to numbers prior
         # to the correlations calculations.
-        factors = self.factors.map(lambda x: np.nan_to_num(x), inplace=False)
-        loadings = self.loadings.map(lambda x: np.nan_to_num(x), inplace=False)
+        factors = self.factors.map(np.nan_to_num, inplace=False)
+        loadings = self.loadings.map(np.nan_to_num, inplace=False)
         factors = factors.copy().data
         loadings = loadings.copy().data
         correlated_loadings = np.zeros_like(loadings[:1])
