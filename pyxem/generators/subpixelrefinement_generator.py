@@ -24,7 +24,6 @@ import numpy as np
 
 from skimage.feature import register_translation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
