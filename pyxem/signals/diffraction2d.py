@@ -487,8 +487,8 @@ class Diffraction2D(Signal2D):
             centers = sig.map(method_function, inplace=False, **kwargs)
             shifts = origin_coordinates - centers
 
-        shifts = -1 * shifts.data
-        shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
+        #shifts = -1 * shifts.data
+        #shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
 
         return shifts
 
