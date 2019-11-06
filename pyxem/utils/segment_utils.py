@@ -128,9 +128,7 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
         mask[vdf_temp > th] = True
     else:
         mask = vdf_temp.astype('bool')
-    if np.any(np.nonzero(mask)) is False:
-        return None
-
+    
     # Calculate the Eucledian distance from each point in the mask to the
     # nearest background point of value 0.
     distance = distance_transform_edt(mask)
