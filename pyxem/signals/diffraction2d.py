@@ -462,8 +462,6 @@ class Diffraction2D(Signal2D):
             Array containing the shifts for each SED pattern.
 
         """
-        nav_shape_x = self.data.shape[0]
-        nav_shape_y = self.data.shape[1]
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
@@ -473,28 +471,18 @@ class Diffraction2D(Signal2D):
 
         method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
-        if square_width is not None:
-            min_index = np.int(origin_coordinates[0] - square_width)
-            # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + square_width)
-            sig = self.isig[min_index:max_index, min_index:max_index]
-        else:
-            sig = self
-
         if method == 'cross_correlate':
-            shifts = sig.map(method_function, inplace=False, **kwargs)
+            shifts = self.map(method_function, inplace=False, **kwargs)
         elif method == 'blur' or method == 'interpolate':
-            centers = sig.map(method_function, inplace=False, **kwargs)
+            centers = self.map(method_function, inplace=False, **kwargs)
             shifts = origin_coordinates - centers
-
-        #shifts = -1 * shifts.data
-        #shifts = shifts.reshape(nav_shape_x * nav_shape_y, 2)
 
         return shifts
 
     def center_direct_beam(self,
                            method,
                            square_width=None,
+                           return_shifts=False,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
@@ -508,6 +496,8 @@ class Diffraction2D(Signal2D):
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
+        return_shifts : bool
+            If True, the values of applied shifts are returned
         **kwargs:
             To be passed to method function
 
@@ -533,7 +523,10 @@ class Diffraction2D(Signal2D):
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0)
+        self.align2D(shifts=shifts, crop=False, fill_value=0)
+
+        if return_shifts:
+            return  shifts
 
     def remove_background(self, method,
                           **kwargs):
