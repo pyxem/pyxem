@@ -70,8 +70,8 @@ class LearningSegment:
         # If a mask was used during the decomposition, the factors and/or
         # loadings will contain nan, which must be converted to numbers prior
         # to the correlations calculations.
-        factors = self.factors.map(lambda x: np.nan_to_num(x), inplace=False)
-        loadings = self.loadings.map(lambda x: np.nan_to_num(x), inplace=False)
+        factors = self.factors.map(np.nan_to_num, inplace=False)
+        loadings = self.loadings.map(np.nan_to_num, inplace=False)
         factors = factors.copy().data
         loadings = loadings.copy().data
         correlated_loadings = np.zeros_like(loadings[:1])
@@ -194,21 +194,15 @@ class LearningSegment:
         factors_of_segments = factors_of_segments.reshape(
             (num_segs_tot, factors_shape_x, factors_shape_y))
 
-        if min_intensity_threshold > 0:
-            delete_indices = list(map(
-                lambda x: x.max() < min_intensity_threshold, segments))
-            delete_indices = np.where(delete_indices)
-            segments = np.delete(segments, delete_indices, axis=0)
-            factors_of_segments = np.delete(
+        delete_indices = list(map(lambda x: x.max() < min_intensity_threshold, segments))
+        delete_indices = np.where(delete_indices)
+        segments = np.delete(segments, delete_indices, axis=0)
+        factors_of_segments = np.delete(
                 factors_of_segments, delete_indices, axis=0)
 
-        try:
-            segments = Signal2D(segments).transpose(navigation_axes=[0],
+        # if TraitError is raised, it is likely no segements were found
+        segments = Signal2D(segments).transpose(navigation_axes=[0],
                                                     signal_axes=[2, 1])
-        except TraitError:
-            if segments.shape[0] == 0:
-                raise ValueError('No segments were found. Check the input '
-                                 'parameters.')
         factors_of_segments = Signal2D(factors_of_segments)
         learning_segment = LearningSegment(segments, factors_of_segments)
         return learning_segment
