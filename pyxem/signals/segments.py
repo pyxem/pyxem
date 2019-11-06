@@ -194,12 +194,10 @@ class LearningSegment:
         factors_of_segments = factors_of_segments.reshape(
             (num_segs_tot, factors_shape_x, factors_shape_y))
 
-        if min_intensity_threshold > 0:
-            delete_indices = list(map(
-                lambda x: x.max() < min_intensity_threshold, segments))
-            delete_indices = np.where(delete_indices)
-            segments = np.delete(segments, delete_indices, axis=0)
-            factors_of_segments = np.delete(
+        delete_indices = list(map(lambda x: x.max() < min_intensity_threshold, segments))
+        delete_indices = np.where(delete_indices)
+        segments = np.delete(segments, delete_indices, axis=0)
+        factors_of_segments = np.delete(
                 factors_of_segments, delete_indices, axis=0)
 
         try:
