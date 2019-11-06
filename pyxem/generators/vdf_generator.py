@@ -85,7 +85,7 @@ class VDFGenerator:
 
             vdfim = VDFImage(np.asarray(vdfs))
 
-            if normalize is True:
+            if normalize:
                 vdfim.map(normalize_vdf)
 
         else:
@@ -141,7 +141,7 @@ class VDFGenerator:
 
         vdfim = VDFImage(np.asarray(vdfs))
 
-        if normalize is True:
+        if normalize:
             vdfim.map(normalize_vdf)
 
         # Set calibration to same as signal
