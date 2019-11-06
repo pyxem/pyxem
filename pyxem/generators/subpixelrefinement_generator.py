@@ -21,13 +21,11 @@ Generating subpixel resolution on diffraction vectors.
 """
 
 import numpy as np
-import pyxem as pxm
 
 from skimage.feature import register_translation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.expt_utils import peaks_as_gvectors
-from pyxem.signals import transfer_signal_axes, transfer_navigation_axes
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
