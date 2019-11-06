@@ -25,8 +25,7 @@ from hyperspy.api import roi
 
 from pyxem.signals.vdf_image import VDFImage
 from pyxem.utils.vdf_utils import normalize_vdf
-from pyxem.signals import (transfer_signal_axes,
-                           transfer_navigation_axes_to_signal_axes)
+from pyxem.signals import transfer_signal_axes,transfer_navigation_axes_to_signal_axes
 
 
 class VDFGenerator:
