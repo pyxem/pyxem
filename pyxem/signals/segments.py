@@ -474,15 +474,10 @@ class VDFSegment:
         virtual_ed = np.zeros((size_x, size_y, num_segments))
 
         for i in range(num_segments):
-            if np.shape(np.shape(vectors[i]))[0] <= 1:
-                virtual_ed[..., i] = get_gaussian2d(
-                    intensities[i], vectors[i][..., 0],
-                    vectors[i][..., 1], x=x, y=y, sigma=sigma)
-            else:
-                virtual_ed[..., i] = sum(list(map(
-                    lambda a, xo, yo: get_gaussian2d(
-                        a, xo, yo, x=x, y=y, sigma=sigma),
-                    intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
+            virtual_ed[..., i] = sum(list(map(
+                lambda a, xo, yo: get_gaussian2d(
+                a, xo, yo, x=x, y=y, sigma=sigma),
+                intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
 
         virtual_ed = ElectronDiffraction2D(virtual_ed.T)
 
