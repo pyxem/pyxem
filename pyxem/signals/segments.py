@@ -432,7 +432,7 @@ class VDFSegment:
 
         return vdfseg
 
-    def get_virtual_electron_diffraction(self, calibration, shape, sigma=None):
+    def get_virtual_electron_diffraction(self, calibration, shape, sigma):
         """ Obtain a virtual electron diffraction signal that consists
         of one virtual diffraction pattern for each segment. The virtual
         diffraction pattern is composed of Gaussians centered at each
@@ -449,7 +449,7 @@ class VDFSegment:
             shape_x and shape_y are integers.
         sigma : float
             The standard deviation of the Gaussians in inverse Angstrom
-            per pixel.
+            per pixel. 'calibration' is a decent starting value.
 
         Returns
         -------
@@ -467,9 +467,6 @@ class VDFSegment:
             intensities = np.ones_like(vectors)
         else:
             intensities = self.intensities
-
-        if sigma is None:
-            sigma = calibration
 
         size_x, size_y = shape[0], shape[1]
         cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
