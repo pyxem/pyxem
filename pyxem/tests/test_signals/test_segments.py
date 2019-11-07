@@ -63,18 +63,44 @@ def signal_decomposition(signal_data):
 
 
 @pytest.fixture
-def signal_learning_segment(signal_decomposition):
+def learning_segment(signal_decomposition):
     return LearningSegment(signal_decomposition[0], signal_decomposition[1])
 
 
 class TestLearningSegment:
+
+    def test_learning_ncc_matrix(self, learning_segment):
+        ncc = learning_segment.get_ncc_matrix()
+        ans = np.array([[[1., -0.26413543, -0.50636968, 0.61237256,
+                          0.],
+                         [-0.26413543, 1., -0.40125028, -0.43133109,
+                          0.],
+                         [-0.50636968, -0.40125028, 1., -0.31008684,
+                          0.],
+                         [0.61237256, -0.43133109, -0.31008684, 1.,
+                          0.],
+                         [0., 0., 0., 0.,
+                          1.]],
+
+                        [[1., -0.0588285, -0.07313363, -0.04087783,
+                          0.],
+                         [-0.0588285, 1., -0.07312725, -0.04099601,
+                            0.],
+                         [-0.07313363, -0.07312725, 1., -0.05096472,
+                            0.],
+                         [-0.04087783, -0.04099601, -0.05096472, 1.,
+                            0.],
+                         [0., 0., 0., 0.,
+                            1.]]])
+        np.testing.assert_almost_equal(ncc.data, ans)
+
     @pytest.mark.parametrize('corr_th_factors, corr_th_loadings',
                              [(-0.1, 0.6),
                               (0.5, 0.5)])
     def test_correlate_learning_segments(
-            self, signal_learning_segment: LearningSegment, corr_th_factors,
+            self, learning_segment: LearningSegment, corr_th_factors,
             corr_th_loadings):
-        learn_corr = signal_learning_segment.correlate_learning_segments(
+        learn_corr = learning_segment.correlate_learning_segments(
             corr_th_factors, corr_th_loadings)
         assert isinstance(learn_corr.loadings, Signal2D)
         assert isinstance(learn_corr.factors, Signal2D)
@@ -86,10 +112,10 @@ class TestLearningSegment:
                               (1, 2, 4, 30, 10, 1, False, True),
                               (0.1, 1, 1, 100, 100, 1, True, True)])
     def test_separate_learning_segments(
-            self, signal_learning_segment: LearningSegment,
+            self, learning_segment: LearningSegment,
             min_intensity_threshold, min_distance, min_size, max_size,
             max_number_of_grains, marker_radius, threshold, exclude_border):
-        learn_seg = signal_learning_segment.separate_learning_segments(
+        learn_seg = learning_segment.separate_learning_segments(
             min_intensity_threshold, min_distance, min_size, max_size,
             max_number_of_grains, marker_radius, threshold, exclude_border)
         assert isinstance(learn_seg.loadings, Signal2D)
