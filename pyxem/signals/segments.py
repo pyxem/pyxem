@@ -44,24 +44,36 @@ class LearningSegment:
         # Corresponding loadings as Signal2D
         self.loadings = loadings
 
-    def get_ncc_matrices(self):
-        """
-        """
-        factors = self.factors
-        loadings = self.loadings
-        num_comp = np.shape(loadings.data)[0]
+    def get_ncc_matrix(self):
+        """Get the normalised correlation coefficient (NCC) matrix containing
+        the NCC between each pair of segments.
 
-        corr_list_loadings = np.zeros((num_comp, num_comp))
+        Returns
+        -------
+        ncc_matrix : Signal2D
+            Normalised correlation coefficient matrix for loadings and factors.
+        """
+        # Set up empty matrices of correct size to store NCC values.
+        num_comp = np.shape(self.loadings.data)[0]
+        ncc_loadings = np.zeros((num_comp, num_comp))
+        ncc_factors = np.zeros((num_comp, num_comp))
+        # Iterate through loadings calculating NCC values.
         for i in np.arange(num_comp):
-            corr_list_loadings[i] = list(map(
-                lambda x: norm_cross_corr(x, template=loadings.data[i]),
-                                          loadings.data))
+            ncc_loadings[i] = list(map(
+                lambda x: norm_cross_corr(x, template=self.loadings.data[i]),
+                                          self.loadings.data))
+        # Iterate through factors calculating NCC values.
+        for i in np.arange(num_comp):
+            ncc_factors[i] = list(map(
+                lambda x: norm_cross_corr(x, template=self.factors.data[i]),
+                                          self.factors.data))
+        # Convert matrix to Signal2D and set axes
+        ncc_sig = Signal2D(np.array((ncc_loadings, ncc_factors)
+        ncc_sig.axes_manager.signal_axes[0].name = 'index'
+        ncc_sig.axes_manager.signal_axes[1].name = 'index'
+        ncc_sig.metadata.General.title = 'Normalised Correlation Coefficient'
 
-        corr_list_factors = np.zeros((num_comp, num_comp))
-        for i in np.arange(num_comp):
-            corr_list_factors[i] = list(map(
-                lambda x: norm_cross_corr(x, template=factors.data[i]),
-                                          factors.data))
+        return ncc_sig
 
     def correlate_learning_segments(self, corr_th_factors=0.4,
                                     corr_th_loadings=0.4):
