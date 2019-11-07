@@ -32,7 +32,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals import transfer_signal_axes
 
-from traits.trait_errors import TraitError
+import warnings
 
 
 class LearningSegment:
@@ -462,8 +462,7 @@ class VDFSegment:
         num_segments = np.shape(segments)[0]
 
         if self.intensities is None:
-            print("The VDFSegment does not have the attribute intensities."
-                  "All intensities will be set to ones.")
+            warnings.warn("The VDFSegment does not have the attribute intensities. All intensities will be set to ones.")
             intensities = np.ones_like(vectors)
         else:
             intensities = self.intensities
