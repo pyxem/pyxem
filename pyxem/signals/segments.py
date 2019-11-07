@@ -26,13 +26,12 @@ from tqdm import tqdm
 
 from hyperspy.signals import Signal2D
 
-from pyxem.utils.segment_utils import (norm_cross_corr, separate_watershed,
-                                       get_gaussian2d)
+from pyxem.utils.segment_utils import norm_cross_corr, separate_watershed,get_gaussian2d
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals import transfer_signal_axes
 
-from traits.trait_errors import TraitError
+import warnings
 
 
 class LearningSegment:
@@ -432,7 +431,7 @@ class VDFSegment:
 
         return vdfseg
 
-    def get_virtual_electron_diffraction(self, calibration, shape, sigma=None):
+    def get_virtual_electron_diffraction(self, calibration, shape, sigma):
         """ Obtain a virtual electron diffraction signal that consists
         of one virtual diffraction pattern for each segment. The virtual
         diffraction pattern is composed of Gaussians centered at each
@@ -449,7 +448,7 @@ class VDFSegment:
             shape_x and shape_y are integers.
         sigma : float
             The standard deviation of the Gaussians in inverse Angstrom
-            per pixel.
+            per pixel. 'calibration' is a decent starting value.
 
         Returns
         -------
@@ -462,15 +461,12 @@ class VDFSegment:
         num_segments = np.shape(segments)[0]
 
         if self.intensities is None:
-            print("The VDFSegment does not have the attribute intensities."
-                  "All intensities will be set to ones.")
+            warnings.warn("The VDFSegment does not have the attribute intensities. All intensities will be set to ones.")
             intensities = np.ones_like(vectors)
         else:
             intensities = self.intensities
 
-        if sigma is None:
-            sigma = calibration
-
+        #TODO: Refactor this to use the diffsims simulation to plot functionality
         size_x, size_y = shape[0], shape[1]
         cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
         x, y = np.indices((size_x, size_y))
@@ -478,15 +474,10 @@ class VDFSegment:
         virtual_ed = np.zeros((size_x, size_y, num_segments))
 
         for i in range(num_segments):
-            if np.shape(np.shape(vectors[i]))[0] <= 1:
-                virtual_ed[..., i] = get_gaussian2d(
-                    intensities[i], vectors[i][..., 0],
-                    vectors[i][..., 1], x=x, y=y, sigma=sigma)
-            else:
-                virtual_ed[..., i] = sum(list(map(
-                    lambda a, xo, yo: get_gaussian2d(
-                        a, xo, yo, x=x, y=y, sigma=sigma),
-                    intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
+            virtual_ed[..., i] = sum(list(map(
+                lambda a, xo, yo: get_gaussian2d(
+                a, xo, yo, x=x, y=y, sigma=sigma),
+                intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
 
         virtual_ed = ElectronDiffraction2D(virtual_ed.T)
 

@@ -128,7 +128,7 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
         mask[vdf_temp > th] = True
     else:
         mask = vdf_temp.astype('bool')
-    
+
     # Calculate the Eucledian distance from each point in the mask to the
     # nearest background point of value 0.
     distance = distance_transform_edt(mask)
@@ -305,6 +305,7 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
         Array with the 2D Gaussian.
     """
 
+    #TODO This function should be removed in view of its duplication within diffsims
     gaussian = a / (2 * np.pi * sigma ** 2) * np.exp(
         -((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
 
