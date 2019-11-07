@@ -130,6 +130,10 @@ class TestVDFSegment:
         assert isinstance(corrsegs.vectors_of_segments, DiffractionVectors)
         assert isinstance(corrsegs.intensities, np.ndarray)
 
+    @pytest.mark.xfail
+    def test_corelate_segments_bad_thresholds(self, vdf_segments: VDFSegment):
+        corrsegs = vdf_segments.correlate_vdf_segments(vector_threshold=4,segment_threshold=5)
+
     def test_get_virtual_electron_diffraction(self, vdf_segments: VDFSegment,
                                               signal_data):
         corrsegs = vdf_segments.correlate_vdf_segments(0.1, 1, 1)
