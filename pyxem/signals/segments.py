@@ -238,7 +238,7 @@ class VDFSegment:
         # Intensities corresponding to each vector
         self.intensities = intensities
 
-    def get_ncc_matrices(self):
+    def get_segments_ncc_matrix(self):
         """
         """
         loadings = self.segments
