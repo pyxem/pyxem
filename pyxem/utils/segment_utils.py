@@ -209,11 +209,10 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     while (np.max(labels)) > n - 1:
         sep_temp = labels * (labels == n) / n
         sep_temp = np.nan_to_num(sep_temp)
-        # Discard a segment if it is too small, or else add it to the list
-        # of separated segments.
+        # Discard a segment if it is too small or too large, or else add
+        # it to the list of separated segments.
         if ((np.sum(sep_temp, axis=(0, 1)) < min_size)
-                or (max_size is not None
-                    and np.sum(sep_temp, axis=(0, 1)) > max_size)):
+                or np.sum(sep_temp, axis=(0, 1)) > max_size):
             sep = np.delete(sep, ((n - i) - 1), axis=2)
             i = i + 1
         else:
