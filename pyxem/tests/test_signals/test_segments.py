@@ -55,7 +55,6 @@ def signal_data():
 
 @pytest.fixture
 def signal_decomposition(signal_data):
-    signal_data.decomposition()
     signal_data.decomposition(algorithm='nmf', output_dimension=5)
     s_nmf = signal_data.get_decomposition_model(components=5)
     factors = s_nmf.get_decomposition_factors()
