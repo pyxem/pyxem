@@ -61,6 +61,7 @@ def vdf_image():
                           (1, 5, np.inf, np.inf, 0, True, (2, 6, 7)),
                           (1, 1, np.inf, 4, 0, True, (3, 6, 7)),
                           (1, 1, 3, np.inf, 0, True, (1, 6, 7)),
+                          (3, 1, np.inf, np.inf, 0, True, (1, 6, 7)),
                           ])
 def test_separate_watershed(vdf_image, min_distance, min_size, max_size,
                             max_number_of_grains, exclude_border, threshold,
