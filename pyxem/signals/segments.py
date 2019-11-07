@@ -26,8 +26,7 @@ from tqdm import tqdm
 
 from hyperspy.signals import Signal2D
 
-from pyxem.utils.segment_utils import (norm_cross_corr, separate_watershed,
-                                       get_gaussian2d)
+from pyxem.utils.segment_utils import norm_cross_corr, separate_watershed,get_gaussian2d
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals import transfer_signal_axes
@@ -467,6 +466,7 @@ class VDFSegment:
         else:
             intensities = self.intensities
 
+        #TODO: Refactor this to use the diffsims simulation to plot functionality
         size_x, size_y = shape[0], shape[1]
         cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
         x, y = np.indices((size_x, size_y))
