@@ -213,8 +213,11 @@ class TestFilterVectors:
         np.testing.assert_almost_equal(filtered_vectors.data[0][1], ans)
 
     def test_filter_vector_magnitudes_single(self, diffraction_vectors_single):
-        filtered_vectors = diffraction_vectors_single.filter_vector_magnitudes(0.1, 1.0)
-        assert isinstance(filtered_vectors, DiffractionVectors)
+        filtered_vectors = diffraction_vectors_single.filter_vector_magnitudes(0.15, 1.0)
+        ans = np.array([[-0.115594, 0.123566],
+                        [0.103636, -0.11958],
+                        [0.123566, 0.151468]])
+        np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
 
 class TestDiffractingPixelMaps:

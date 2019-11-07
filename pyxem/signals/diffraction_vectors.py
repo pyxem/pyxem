@@ -465,15 +465,18 @@ class DiffractionVectors(BaseSignal):
                                         max_magnitude=max_magnitude,
                                         inplace=False,
                                         *args, **kwargs)
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
             magnitudes = self.get_magnitudes()
             magnitudes.data[magnitudes.data < min_magnitude] = 0
             magnitudes.data[magnitudes.data > max_magnitude] = 0
             filtered_vectors = self.data[np.where(magnitudes)]
-        # Type assignment to DiffractionVectors for return
-        filtered_vectors = DiffractionVectors(filtered_vectors)
-        filtered_vectors.axes_manager.set_signal_dimension(0)
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(1)
 
         return filtered_vectors
 
