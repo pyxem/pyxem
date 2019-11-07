@@ -381,6 +381,8 @@ class Diffraction2D(Signal2D):
         offset = tth[0] * scaling_factor
         ap.axes_manager.signal_axes[0].scale = scale
         ap.axes_manager.signal_axes[0].offset = offset
+        ap.axes_manager.signal_axes[0].name = 'scattering'
+        ap.axes_manager.signal_axes[0].units = unit
 
         transfer_navigation_axes(ap, self)
         push_metadata_through(ap, self)
