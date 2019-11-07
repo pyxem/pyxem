@@ -522,7 +522,7 @@ class Diffraction2D(Signal2D):
         self.align2D(shifts=shifts, crop=False, fill_value=0)
 
         if return_shifts:
-            return  shifts
+            return shifts
 
     def remove_background(self, method,
                           **kwargs):

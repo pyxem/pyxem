@@ -187,6 +187,15 @@ class TestUniqueVectors:
             distance_threshold=distance_threshold, method='DBSCAN')
         np.testing.assert_almost_equal(unique_vectors.data, answer)
 
+class TestFilterVectors:
+
+    def test_filter_vector_magnitudes_map_type(self, diffraction_vectors_map):
+        filtered_vectors = diffraction_vectors_map.filter_vector_magnitudes(0.1, 1.0)
+        assert isinstance(filtered_vectors, DiffractionVectors)
+
+    def test_filter_vector_magnitudes_single_type(self, diffraction_vectors_single):
+        filtered_vectors = diffraction_vectors_single.filter_vector_magnitudes(0.1, 1.0)
+        assert isinstance(filtered_vectors, DiffractionVectors)
 
 class TestDiffractingPixelMaps:
 
