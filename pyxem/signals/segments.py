@@ -238,17 +238,29 @@ class VDFSegment:
         # Intensities corresponding to each vector
         self.intensities = intensities
 
-    def get_segments_ncc_matrix(self):
-        """
-        """
-        loadings = self.segments
-        num_comp = np.shape(loadings.data)[0]
+    def get_ncc_matrix(self):
+        """Get the normalised correlation coefficient (NCC) matrix containing
+        the NCC between each pair of segments.
 
-        corr_list_loadings = np.zeros((num_comp, num_comp))
+        Returns
+        -------
+        ncc_matrix : Signal2D
+            Normalised correlation coefficient matrix.
+        """
+        # Set up an empty matrix of correct size to store NCC values.
+        num_comp = np.shape(self.segments.data)[0]
+        ncc_matrix = np.zeros((num_comp, num_comp))
+        # Iterate through segments calculating NCC values.
         for i in np.arange(num_comp):
-            corr_list_loadings[i] = list(map(
-                lambda x: norm_cross_corr(x, template=loadings.data[i]),
-                                          loadings.data))
+            ncc_matrix[i] = list(map(
+                lambda x: norm_cross_corr(x, template=self.segments.data[i]),
+                                          self.segments.data))
+        # Convert matrix to Signal2D and set axes
+        ncc_sig = Signal2D(ncc_matrix)
+        ncc_sig.axes_manager.signal_axes[0].name = 'segment index'
+        ncc_sig.axes_manager.signal_axes[1].name = 'segment index'
+        ncc_sig.metadata.General.title = 'Normalised Correlation Coefficient'
+        return ncc_sig
 
     def correlate_vdf_segments(self, corr_threshold=0.7, vector_threshold=4,
                                segment_threshold=3):
