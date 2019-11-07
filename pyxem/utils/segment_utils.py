@@ -51,15 +51,15 @@ def norm_cross_corr(image, template):
         Normalised cross-correlation between image and template.
     """
     f, t = image - np.average(image), template - np.average(template)
-    with warnings.catch_warnings():
-        warnings.filterwarnings(action='error', category=RuntimeWarning)
-        try:
-            corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
-        except (RuntimeError, RuntimeWarning, ZeroDivisionError):
-            if np.all(f == np.zeros_like(f)) and np.all(t == np.zeros_like(t)):
-                corr = 1.
-            else:
-                corr = 0.
+    if np.all(f == np.zeros_like(f)) and np.all(t == np.zeros_like(t)): 
+        #both arrays contains only 0's
+        corr = 1
+    elif np.all(f == np.zeros_like(f)) or np.all(t == np.zeros_like(t)): 
+        #one arrays contains only 0's
+        corr = 0
+    else:
+        # no divide by zero to worry about now, normal corr definition in use
+        corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
 
     return corr
 
