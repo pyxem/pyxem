@@ -51,10 +51,10 @@ def norm_cross_corr(image, template):
         Normalised cross-correlation between image and template.
     """
     f, t = image - np.average(image), template - np.average(template)
-    if np.all(f == np.zeros_like(f)) and np.all(t == np.zeros_like(t)): 
+    if np.all(f == 0) and np.all(t == 0): 
         #both arrays contains only 0's
         corr = 1
-    elif np.all(f == np.zeros_like(f)) or np.all(t == np.zeros_like(t)): 
+    elif np.all(f == 0) or np.all(t == 0): 
         #one arrays contains only 0's
         corr = 0
     else:
