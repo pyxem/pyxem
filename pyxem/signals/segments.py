@@ -306,10 +306,7 @@ class VDFSegment:
             correlation results.
         """
         vectors = self.vectors_of_segments.data
-        if len(np.shape(vectors)) <= 1:
-            raise ValueError("Input vectors are not of correct shape. Try to "
-                             "rerun correlate_segments on original VDFSegment "
-                             "resulting from get_vdf_segments.")
+        
         if segment_threshold > vector_threshold:
             raise ValueError("segment_threshold must be smaller than or "
                              "equal to vector_threshold.")
