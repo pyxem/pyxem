@@ -44,6 +44,25 @@ class LearningSegment:
         # Corresponding loadings as Signal2D
         self.loadings = loadings
 
+    def get_ncc_matrices(self):
+        """
+        """
+        factors = self.factors
+        loadings = self.loadings
+        num_comp = np.shape(loadings.data)[0]
+
+        corr_list_loadings = np.zeros((num_comp, num_comp))
+        for i in np.arange(num_comp):
+            corr_list_loadings[i] = list(map(
+                lambda x: norm_cross_corr(x, template=loadings.data[i]),
+                                          loadings.data))
+
+        corr_list_factors = np.zeros((num_comp, num_comp))
+        for i in np.arange(num_comp):
+            corr_list_factors[i] = list(map(
+                lambda x: norm_cross_corr(x, template=factors.data[i]),
+                                          factors.data))
+
     def correlate_learning_segments(self, corr_th_factors=0.4,
                                     corr_th_loadings=0.4):
         """Iterates through the factors and loadings and calculates the
@@ -218,6 +237,18 @@ class VDFSegment:
         self.vectors_of_segments = vectors_of_segments
         # Intensities corresponding to each vector
         self.intensities = intensities
+
+    def get_ncc_matrices(self):
+        """
+        """
+        loadings = self.segments
+        num_comp = np.shape(loadings.data)[0]
+
+        corr_list_loadings = np.zeros((num_comp, num_comp))
+        for i in np.arange(num_comp):
+            corr_list_loadings[i] = list(map(
+                lambda x: norm_cross_corr(x, template=loadings.data[i]),
+                                          loadings.data))
 
     def correlate_vdf_segments(self, corr_threshold=0.7, vector_threshold=4,
                                segment_threshold=3):
