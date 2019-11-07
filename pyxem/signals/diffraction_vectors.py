@@ -437,6 +437,30 @@ class DiffractionVectors(BaseSignal):
         else:
             return unique_peaks
 
+    def filter_vector_magnitudes(self, min_magnitude, max_magnitude):
+        """Filter the diffraction vectors to accept only those with magnitudes
+        within a user specified range.
+
+        Parameters
+        ----------
+        min_magnitude : float
+            Minimum allowed vector magnitude.
+        max_magnitude : float
+            Maximum allowed vector magnitude.
+
+        Returns
+        -------
+        filtered_vectors : DiffractionVectors
+            Diffraction vectors within allowed magnitude tolerances.
+        """
+        magnitudes = self.get_magnitudes()
+        magnitudes.data[magnitudes.data<min_magnitude] = 0
+        magnitudes.data[magnitudes.data>max_magnitude] = 0
+        filtered_vectors = self.data[np.where(magnitudes)]
+        filtered_vectors = DiffractionVectors(filtered_vectors)
+        filtered_vectors.axes_manager.set_signal_dimension(0)
+        return filtered_vectors
+
     def get_diffracting_pixels_map(self, binary=False):
         """Map of the number of vectors at each navigation position.
 
