@@ -439,9 +439,7 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method,
-                                 square_width=None,
-                                 **kwargs):
+    def get_direct_beam_position(self, method, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -449,10 +447,6 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur", "interpolate"
-        square_width  : int
-            Half the side length of square that captures the direct beam in all
-            scans. Means that the centering algorithm is stable against
-            diffracted spots brighter than the direct beam.
         **kwargs:
             Keyword arguments to be passed to map().
 
