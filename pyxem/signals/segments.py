@@ -68,7 +68,7 @@ class LearningSegment:
                 lambda x: norm_cross_corr(x, template=self.factors.data[i]),
                                           self.factors.data))
         # Convert matrix to Signal2D and set axes
-        ncc_sig = Signal2D(np.array((ncc_loadings, ncc_factors)
+        ncc_sig = Signal2D(np.array((ncc_loadings, ncc_factors)))
         ncc_sig.axes_manager.signal_axes[0].name = 'index'
         ncc_sig.axes_manager.signal_axes[1].name = 'index'
         ncc_sig.metadata.General.title = 'Normalised Correlation Coefficient'
