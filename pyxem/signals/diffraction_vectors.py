@@ -32,7 +32,7 @@ from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
-from pyxem.utils.vector_utils import get_npeaks
+from pyxem.utils.vector_utils import get_npeaks, filter_vectors_ragged
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
@@ -437,7 +437,8 @@ class DiffractionVectors(BaseSignal):
         else:
             return unique_peaks
 
-    def filter_vector_magnitudes(self, min_magnitude, max_magnitude):
+    def filter_vector_magnitudes(self, min_magnitude, max_magnitude,
+                                 *args, **kwargs):
         """Filter the diffraction vectors to accept only those with magnitudes
         within a user specified range.
 
@@ -447,18 +448,33 @@ class DiffractionVectors(BaseSignal):
             Minimum allowed vector magnitude.
         max_magnitude : float
             Maximum allowed vector magnitude.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
 
         Returns
         -------
         filtered_vectors : DiffractionVectors
             Diffraction vectors within allowed magnitude tolerances.
         """
-        magnitudes = self.get_magnitudes()
-        magnitudes.data[magnitudes.data<min_magnitude] = 0
-        magnitudes.data[magnitudes.data>max_magnitude] = 0
-        filtered_vectors = self.data[np.where(magnitudes)]
+        # If ragged the signal axes will not be defined
+        if len(self.axes_manager.signal_axes) == 0:
+            filtered_vectors = self.map(filter_vectors_ragged,
+                                        min_magnitude=min_magnitude,
+                                        max_magnitude=max_magnitude,
+                                        inplace=False,
+                                        *args, **kwargs)
+        # Otherwise easier to calculate.
+        else:
+            magnitudes = self.get_magnitudes()
+            magnitudes.data[magnitudes.data < min_magnitude] = 0
+            magnitudes.data[magnitudes.data > max_magnitude] = 0
+            filtered_vectors = self.data[np.where(magnitudes)]
+        # Type assignment to DiffractionVectors for return
         filtered_vectors = DiffractionVectors(filtered_vectors)
         filtered_vectors.axes_manager.set_signal_dimension(0)
+
         return filtered_vectors
 
     def get_diffracting_pixels_map(self, binary=False):

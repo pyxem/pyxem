@@ -60,12 +60,12 @@ class LearningSegment:
         for i in np.arange(num_comp):
             ncc_loadings[i] = list(map(
                 lambda x: norm_cross_corr(x, template=self.loadings.data[i]),
-                                          self.loadings.data))
+                self.loadings.data))
         # Iterate through factors calculating NCC values.
         for i in np.arange(num_comp):
             ncc_factors[i] = list(map(
                 lambda x: norm_cross_corr(x, template=self.factors.data[i]),
-                                          self.factors.data))
+                self.factors.data))
         # Convert matrix to Signal2D and set axes
         ncc_sig = Signal2D(np.array((ncc_loadings, ncc_factors)))
         ncc_sig.axes_manager.signal_axes[0].name = 'index'
@@ -228,11 +228,11 @@ class LearningSegment:
         delete_indices = np.where(delete_indices)
         segments = np.delete(segments, delete_indices, axis=0)
         factors_of_segments = np.delete(
-                factors_of_segments, delete_indices, axis=0)
+            factors_of_segments, delete_indices, axis=0)
 
         # if TraitError is raised, it is likely no segements were found
         segments = Signal2D(segments).transpose(navigation_axes=[0],
-                                                    signal_axes=[2, 1])
+                                                signal_axes=[2, 1])
         factors_of_segments = Signal2D(factors_of_segments)
         learning_segment = LearningSegment(segments, factors_of_segments)
         return learning_segment
@@ -265,7 +265,7 @@ class VDFSegment:
         for i in np.arange(num_comp):
             ncc_matrix[i] = list(map(
                 lambda x: norm_cross_corr(x, template=self.segments.data[i]),
-                                          self.segments.data))
+                self.segments.data))
         # Convert matrix to Signal2D and set axes
         ncc_sig = Signal2D(ncc_matrix)
         ncc_sig.axes_manager.signal_axes[0].name = 'segment index'

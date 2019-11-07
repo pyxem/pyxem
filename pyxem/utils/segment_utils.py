@@ -222,7 +222,7 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     # Put the intensity from the input VDF image into each segmented area.
     vdf_sep = np.broadcast_to(vdf_temp.T, np.shape(sep.T)) * (sep.T == 1)
 
-    if plot_on: # pragma: no cover
+    if plot_on:  # pragma: no cover
         # If segments have been discarded, make new labels that do not
         # include the discarded segments.
         if np.max(labels) != (np.shape(sep)[2]) and (np.shape(sep)[2] != 0):
