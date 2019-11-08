@@ -626,6 +626,10 @@ class Diffraction2D(Signal2D):
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
 
+        # Set DiffractionVectors attributes
+        peaks.pixel_calibration = self.axes_manager.signal_axes[0].scale
+        peaks.detector_shape = self.axes_manager.signal_shape
+
         # Set calibration to same as signal
         x = peaks.axes_manager.navigation_axes[0]
         y = peaks.axes_manager.navigation_axes[1]
