@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 from hyperspy.signals import Signal2D
 
-from pyxem.utils.segment_utils import norm_cross_corr, separate_watershed,get_gaussian2d
+from pyxem.utils.segment_utils import norm_cross_corr, separate_watershed, get_gaussian2d
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals import transfer_signal_axes
@@ -308,7 +308,7 @@ class VDFSegment:
             correlation results.
         """
         vectors = self.vectors_of_segments.data
-        
+
         if segment_threshold > vector_threshold:
             raise ValueError("segment_threshold must be smaller than or "
                              "equal to vector_threshold.")
@@ -465,7 +465,7 @@ class VDFSegment:
         else:
             intensities = self.intensities
 
-        #TODO: Refactor this to use the diffsims simulation to plot functionality
+        # TODO: Refactor this to use the diffsims simulation to plot functionality
         size_x, size_y = shape[0], shape[1]
         cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
         x, y = np.indices((size_x, size_y))
@@ -475,7 +475,7 @@ class VDFSegment:
         for i in range(num_segments):
             virtual_ed[..., i] = sum(list(map(
                 lambda a, xo, yo: get_gaussian2d(
-                a, xo, yo, x=x, y=y, sigma=sigma),
+                    a, xo, yo, x=x, y=y, sigma=sigma),
                 intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
 
         virtual_ed = ElectronDiffraction2D(virtual_ed.T)

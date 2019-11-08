@@ -51,11 +51,11 @@ def norm_cross_corr(image, template):
         Normalised cross-correlation between image and template.
     """
     f, t = image - np.average(image), template - np.average(template)
-    if np.all(f == 0) and np.all(t == 0): 
-        #both arrays contains only 0's
+    if np.all(f == 0) and np.all(t == 0):
+        # both arrays contains only 0's
         corr = 1
-    elif np.all(f == 0) or np.all(t == 0): 
-        #one arrays contains only 0's
+    elif np.all(f == 0) or np.all(t == 0):
+        # one arrays contains only 0's
         corr = 0
     else:
         # no divide by zero to worry about now, normal corr definition in use
@@ -304,7 +304,7 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
         Array with the 2D Gaussian.
     """
 
-    #TODO This function should be removed in view of its duplication within diffsims
+    # TODO This function should be removed in view of its duplication within diffsims
     gaussian = a / (2 * np.pi * sigma ** 2) * np.exp(
         -((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
 

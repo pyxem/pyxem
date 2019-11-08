@@ -139,6 +139,7 @@ def vdf_segments(signal_data, unique_vectors):
     vdfs = vdfgen.get_vector_vdf_images(radius=1)
     return vdfs.get_vdf_segments()
 
+
 @pytest.fixture
 def vdf_segments_cropped(vdf_segments):
     return VDFSegment(vdf_segments.segments.inav[:4],
@@ -193,7 +194,6 @@ class TestVDFSegment:
     def test_correlate_segments_small_vector_threshold(self, vdf_segments: VDFSegment):
         corrsegs = vdf_segments.correlate_vdf_segments(
             corr_threshold=0.7, vector_threshold=0, segment_threshold=-1)
-
 
     @pytest.mark.xfail
     def test_corelate_segments_bad_thresholds(self, vdf_segments: VDFSegment):
