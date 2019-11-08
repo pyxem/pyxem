@@ -196,7 +196,7 @@ class TestVDFSegment:
             corr_threshold=0.7, vector_threshold=0, segment_threshold=-1)
 
     @pytest.mark.xfail
-    def test_correlate_segments_bad_thresholds(self, vdf_segments: VDFSegment):
+    def test_corelate_segments_bad_thresholds(self, vdf_segments: VDFSegment):
         corrsegs = vdf_segments.correlate_vdf_segments(vector_threshold=4,
                                                        segment_threshold=5)
 
@@ -208,16 +208,10 @@ class TestVDFSegment:
             shape=signal_data.axes_manager.signal_shape)
         assert isinstance(vs, ElectronDiffraction2D)
 
-    def test_get_virtual_electron_diffraction_for_single_vectors(
-            self, vdf_segments: VDFSegment, signal_data):
-        vs = vdf_segments.get_virtual_electron_diffraction(
-            calibration=1, sigma=1,
-            shape=signal_data.axes_manager.signal_shape)
-        assert isinstance(vs, ElectronDiffraction2D)
-
     @pytest.mark.xfail(raises=ValueError)
     def test_get_virtual_electron_diffraction_no_intensities(self,
                                                              vdf_segments: VDFSegment,
                                                              signal_data):
         vdf_segments.get_virtual_electron_diffraction(calibration=1, sigma=1,
                                                       shape=signal_data.axes_manager.signal_shape)
+        vdf_segments.intensities = None
