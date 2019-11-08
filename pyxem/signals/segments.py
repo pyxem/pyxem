@@ -56,16 +56,18 @@ class LearningSegment:
         num_comp = np.shape(self.loadings.data)[0]
         ncc_loadings = np.zeros((num_comp, num_comp))
         ncc_factors = np.zeros((num_comp, num_comp))
+        factors = self.factors.map(np.nan_to_num, inplace=False).copy()
+        loadings = self.loadings.map(np.nan_to_num, inplace=False).copy()
         # Iterate through loadings calculating NCC values.
         for i in np.arange(num_comp):
             ncc_loadings[i] = list(map(
-                lambda x: norm_cross_corr(x, template=self.loadings.data[i]),
-                self.loadings.data))
+                lambda x: norm_cross_corr(x, template=loadings.data[i]),
+                loadings.data))
         # Iterate through factors calculating NCC values.
         for i in np.arange(num_comp):
             ncc_factors[i] = list(map(
-                lambda x: norm_cross_corr(x, template=self.factors.data[i]),
-                self.factors.data))
+                lambda x: norm_cross_corr(x, template=factors.data[i]),
+                factors.data))
         # Convert matrix to Signal2D and set axes
         ncc_sig = Signal2D(np.array((ncc_loadings, ncc_factors)))
         ncc_sig.axes_manager.signal_axes[0].name = 'index'
