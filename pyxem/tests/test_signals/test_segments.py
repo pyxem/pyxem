@@ -207,3 +207,18 @@ class TestVDFSegment:
             calibration=1, sigma=1,
             shape=signal_data.axes_manager.signal_shape)
         assert isinstance(vs, ElectronDiffraction2D)
+
+    @pytest.mark.xfail(raises=ValueError)
+    def test_get_virtual_electron_diffraction_no_intensities(self,
+                                                             vdf_segments: VDFSegment,
+                                                             signal_data):
+        vdf_segments.intensities = None
+        vdf_segments.get_virtual_electron_diffraction(calibration=1, sigma=1,
+                                                      shape=signal_data.axes_manager.signal_shape)
+
+    def test_get_virtual_electron_diffraction_for_single_vectors(
+            self, vdf_segments: VDFSegment, signal_data):
+        vs = vdf_segments.get_virtual_electron_diffraction(
+            calibration=1, sigma=1,
+            shape=signal_data.axes_manager.signal_shape)
+        assert isinstance(vs, ElectronDiffraction2D)
