@@ -115,9 +115,6 @@ class VDFImage(Signal2D):
             vectors_of_segments = np.append(
                 vectors_of_segments, np.broadcast_to(vector, (num_segs, 2)))
 
-        if segments.dtype == object:
-            segments = segments.astype(float)
-
         vectors_of_segments = vectors_of_segments.reshape((-1, 2))
         segments = segments.reshape((np.shape(vectors_of_segments)[0],
                                      vdfs.axes_manager.signal_shape[0],
