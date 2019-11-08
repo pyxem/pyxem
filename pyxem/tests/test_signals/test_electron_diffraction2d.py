@@ -56,6 +56,10 @@ class TestSimpleMaps:
                                                         sigma=5,
                                                         square_width=3,
                                                         return_shifts=True)
+        ans = np.array([[-1., -1.],
+                        [-0., -0.],
+                        [-1., -1.],
+                        [-0., -0.]])
         np.testing.assert_almost_equal(shifts, ans)
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
