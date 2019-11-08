@@ -71,6 +71,8 @@ class DiffractionVectors(BaseSignal):
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
+        self.detector_shape = None
+        self.pixel_calibration = None
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
