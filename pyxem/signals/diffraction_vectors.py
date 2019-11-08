@@ -517,9 +517,9 @@ class DiffractionVectors(BaseSignal):
             filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
-            self.data[self.data.T[0] > x_threshold] = 0
-            self.data[self.data.T[1] > y_threshold] = 0
-            filtered_vectors = self.data[np.where(magnitudes)]
+            self.data[np.absolute(self.data.T[0]) > x_threshold] = 0
+            self.data[np.absolute(self.data.T[1]) > y_threshold] = 0
+            filtered_vectors = self.data[np.where(self.data.T[0])]
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
             filtered_vectors.axes_manager.set_signal_dimension(1)
