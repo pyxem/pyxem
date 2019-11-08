@@ -57,7 +57,7 @@ def _create_columns(results_list,left_index,right_index):
 
     return np.vstack([x for x in results_list[left_index:right_index]])
 
-def _combine_list_into_navigation_space(results_list,x_list):
+def _combine_list_into_navigation_space(results_list,x_list,y_list):
     """
     Internal function that combines the results_list into a correctly shaped
     output object.
@@ -67,9 +67,12 @@ def _combine_list_into_navigation_space(results_list,x_list):
     pyxem.utils.big_data_utils.chunked_application_of_UDF
     """
     vert_list = []
-    gap = x_list[1] - x_list[0]
-    for i in np.arange(0,len(x_list)):
-        vert_list.append(_create_columns(results_list,int(x_list[i]),int(x_list[i]+gap)))
+    num_col = len(x_list)
+    num_row = len(y_list)
+    for i in np.arange(0,num_rows): # .arange doesn't include the endpoint
+        left_index  = i * num_rows
+        right_index = (i+1) * num_rows
+        vert_list.append(_create_columns(results_list,left_index,right_index))
 
     np_output = np.hstack([x for x in vert_list])
     return np_output
@@ -106,5 +109,5 @@ def chunked_application_of_UDF(filepath, x_list,y_list,function):
         for y in y_list:
             analysis_output = _factory(filepath,x,y,chunk_size,function)
             results_list.append(analysis_output.data)
-    np_output = _combine_list_into_navigation_space(results_list,x_list)
+    np_output = _combine_list_into_navigation_space(results_list,x_list,y_list)
     return np_output
