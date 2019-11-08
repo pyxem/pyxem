@@ -142,15 +142,10 @@ def filter_vectors_edge_ragged(z, x_threshold, y_threshold):
     filtered_vectors : np.array()
         Diffraction vectors within allowed tolerances.
     """
-    # Calculate norms
-    norms = []
-    for i in z[0]:
-        norms.append(np.linalg.norm(i))
-    norms = np.asarray(norms)
-    # Filter based on norms
-    z[0][z[0].T[0] > x_threshold] = 0
-    z[0][z[0].T[1] > y_threshold] = 0
-    filtered_vectors = z[0][np.where(z[0])]
+    # Filter x / y coordinates
+    z[0][np.absolute(z[0].T[0]) > x_threshold] = 0
+    z[0][np.absolute(z[0].T[1]) > y_threshold] = 0
+    filtered_vectors = z[0][np.where(z[0].T[0])]
 
     return filtered_vectors
 

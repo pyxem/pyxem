@@ -33,6 +33,7 @@ from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_npeaks, filter_vectors_ragged
+from pyxem.utils.vector_utils import filter_vectors_edge_ragged
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
@@ -166,7 +167,6 @@ class DiffractionVectors(BaseSignal):
             The plot as a matplotlib figure.
 
         """
-
         fig = plt.figure()
         ax = fig.add_subplot(111)
         offset, scale = 0., 1.
@@ -507,7 +507,6 @@ class DiffractionVectors(BaseSignal):
         # If ragged the signal axes will not be defined
         if len(self.axes_manager.signal_axes) == 0:
             filtered_vectors = self.map(filter_vectors_edge_ragged,
-                                        detector_shape=self.detector_shape,
                                         x_threshold=x_threshold,
                                         y_threshold=y_threshold,
                                         inplace=False,

@@ -219,11 +219,24 @@ class TestFilterVectors:
                         [0.123566, 0.151468]])
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
+    def test_filter_vector_edge_map_type(self, diffraction_vectors_map):
+        diffraction_vectors_map.detector_shape = (130, 120)
+        diffraction_vectors_map.pixel_calibration = 0.001
+        filtered_vectors=diffraction_vectors_map.filter_vectors_detector_edge(exclude_width=2)
+        assert isinstance(filtered_vectors, DiffractionVectors)
+
     def test_filter_vector_edge_single_type(self, diffraction_vectors_single):
         diffraction_vectors_single.detector_shape = (130, 120)
         diffraction_vectors_single.pixel_calibration = 0.001
-        diffraction_vectors_single.filter_vectors_detector_edge(exclude_width=10)
+        filtered_vectors=diffraction_vectors_single.filter_vectors_detector_edge(exclude_width=10)
         assert isinstance(filtered_vectors, DiffractionVectors)
+
+    def test_filter_vector_edge_map(self, diffraction_vectors_map):
+        diffraction_vectors_map.detector_shape = (130, 120)
+        diffraction_vectors_map.pixel_calibration = 0.001
+        filtered_vectors = diffraction_vectors_map.filter_vectors_detector_edge(exclude_width=2)
+        ans = np.array([[-0.117587,  0.113601]])
+        np.testing.assert_almost_equal(filtered_vectors.data[0,0], ans)
 
     def test_filter_vector_edge_single(self, diffraction_vectors_single):
         diffraction_vectors_single.detector_shape = (130, 120)
