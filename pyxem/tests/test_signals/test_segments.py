@@ -139,6 +139,11 @@ def vdf_segments(signal_data, unique_vectors):
     vdfs = vdfgen.get_vector_vdf_images(radius=1)
     return vdfs.get_vdf_segments()
 
+@pytest.fixture
+def vdf_segments_cropped(vdf_segments):
+    return VDFSegment(vdf_segments.segments.inav[:4],
+                      vdf_segments.vectors_of_segments.inav[:4])
+
 
 class TestVDFSegment:
 
@@ -179,6 +184,12 @@ class TestVDFSegment:
         assert isinstance(corrsegs.vectors_of_segments, DiffractionVectors)
         assert isinstance(corrsegs.intensities, np.ndarray)
 
+    def test_correlate_segments_cropped(self, vdf_segments_cropped: VDFSegment):
+        corrsegs = vdf_segments_cropped.correlate_vdf_segments(0.9, 1, 0)
+        assert isinstance(corrsegs.segments, Signal2D)
+        assert isinstance(corrsegs.vectors_of_segments, DiffractionVectors)
+        assert isinstance(corrsegs.intensities, np.ndarray)
+
     def test_correlate_segments_small_vector_threshold(self, vdf_segments: VDFSegment):
         corrsegs = vdf_segments.correlate_vdf_segments(
             corr_threshold=0.7, vector_threshold=0, segment_threshold=-1)
@@ -186,7 +197,8 @@ class TestVDFSegment:
 
     @pytest.mark.xfail
     def test_corelate_segments_bad_thresholds(self, vdf_segments: VDFSegment):
-        corrsegs = vdf_segments.correlate_vdf_segments(vector_threshold=4,segment_threshold=5)
+        corrsegs = vdf_segments.correlate_vdf_segments(vector_threshold=4,
+                                                       segment_threshold=5)
 
     def test_get_virtual_electron_diffraction(self, vdf_segments: VDFSegment,
                                               signal_data):
