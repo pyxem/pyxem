@@ -57,7 +57,7 @@ def test_core_big_data_functionality(big_electron_diffraction_pattern):
     big_electron_diffraction_pattern.save(filepath)
 
     x_list = [0,2,4,6,8]
-    y_list = np.arange(0,2+1e-5,2)
+    y_list = np.arange(0,4,2)  # [0,2] but as an array
 
     test_output = chunked_application_of_UDF(filepath,x_list,y_list,dp_sqrt)
     assert np.allclose(expected_output,test_output.data)
