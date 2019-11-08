@@ -126,6 +126,35 @@ def filter_vectors_ragged(z, min_magnitude, max_magnitude):
     return filtered_vectors
 
 
+def filter_vectors_edge_ragged(z, x_threshold, y_threshold):
+    """Filters the diffraction vectors to accept only those not within a user
+    specified proximity to detector edge.
+
+    Parameters
+    ----------
+    x_threshold : float
+        Maximum x-coordinate in calibrated units.
+    y_threshold : float
+        Maximum y-coordinate in calibrated units.
+
+    Returns
+    -------
+    filtered_vectors : np.array()
+        Diffraction vectors within allowed tolerances.
+    """
+    # Calculate norms
+    norms = []
+    for i in z[0]:
+        norms.append(np.linalg.norm(i))
+    norms = np.asarray(norms)
+    # Filter based on norms
+    z[0][z[0].T[0] > x_threshold] = 0
+    z[0][z[0].T[1] > y_threshold] = 0
+    filtered_vectors = z[0][np.where(z[0])]
+
+    return filtered_vectors
+
+
 def normalize_or_zero(v):
     """Normalize `v`, or return the vector directly if it has zero length.
 

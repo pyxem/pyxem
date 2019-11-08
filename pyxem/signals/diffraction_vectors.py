@@ -439,7 +439,7 @@ class DiffractionVectors(BaseSignal):
         else:
             return unique_peaks
 
-    def filter_vector_magnitudes(self, min_magnitude, max_magnitude,
+    def filter_vectors_magnitudes(self, min_magnitude, max_magnitude,
                                  *args, **kwargs):
         """Filter the diffraction vectors to accept only those with magnitudes
         within a user specified range.
@@ -475,6 +475,50 @@ class DiffractionVectors(BaseSignal):
             magnitudes = self.get_magnitudes()
             magnitudes.data[magnitudes.data < min_magnitude] = 0
             magnitudes.data[magnitudes.data > max_magnitude] = 0
+            filtered_vectors = self.data[np.where(magnitudes)]
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(1)
+
+        return filtered_vectors
+
+    def filter_vectors_detector_edge(self, exclude_width,
+                                     *args, **kwargs):
+        """Filter the diffraction vectors to accept only those not within a
+        user specified proximity to the detector edge.
+
+        Parameters
+        ----------
+        exclude_width : int
+            The width of the region adjacent to the detector edge from which
+            vectors will be excluded.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
+
+        Returns
+        -------
+        filtered_vectors : DiffractionVectors
+            Diffraction vectors within allowed detector region.
+        """
+        x_threshold = self.pixel_calibration * self.detector_shape[0] - self.pixel_calibration * exclude_width
+        y_threshold = self.pixel_calibration * self.detector_shape[1] - self.pixel_calibration * exclude_width
+        # If ragged the signal axes will not be defined
+        if len(self.axes_manager.signal_axes) == 0:
+            filtered_vectors = self.map(filter_vectors_edge_ragged,
+                                        detector_shape=self.detector_shape,
+                                        x_threshold=x_threshold,
+                                        y_threshold=y_threshold,
+                                        inplace=False,
+                                        *args, **kwargs)
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(0)
+        # Otherwise easier to calculate.
+        else:
+            self.data[self.data.T[0] > x_threshold] = 0
+            self.data[self.data.T[1] > y_threshold] = 0
             filtered_vectors = self.data[np.where(magnitudes)]
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
