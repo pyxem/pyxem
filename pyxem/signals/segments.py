@@ -465,6 +465,7 @@ class VDFSegment:
                              "intensities, required for this method.")
         else:
             intensities = self.intensities
+
         # TODO: Refactor this to use the diffsims simulation to plot functionality
         size_x, size_y = shape[0], shape[1]
         cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
@@ -473,10 +474,18 @@ class VDFSegment:
         virtual_ed = np.zeros((size_x, size_y, num_segments))
 
         for i in range(num_segments):
-            virtual_ed[..., i] = sum(list(map(
-                lambda a, xo, yo: get_gaussian2d(
-                    a, xo, yo, x=x, y=y, sigma=sigma),
-                intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
+            # Allow plotting for segments that are only associated with
+            # one vector.
+            if np.shape(np.shape(vectors[i]))[0] <= 1:
+                virtual_ed[..., i] = get_gaussian2d(
+                    intensities[i], vectors[i][..., 0],
+                    vectors[i][..., 1], x=x, y=y, sigma=sigma)
+            # Allow plotting for segments associated with several vectors.
+            else:
+                virtual_ed[..., i] = sum(list(map(
+                    lambda a, xo, yo: get_gaussian2d(
+                        a, xo, yo, x=x, y=y, sigma=sigma),
+                    intensities[i], vectors[i][..., 0], vectors[i][..., 1])))
 
         virtual_ed = ElectronDiffraction2D(virtual_ed.T)
 
