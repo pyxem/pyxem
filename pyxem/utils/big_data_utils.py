@@ -67,9 +67,9 @@ def _combine_list_into_navigation_space(results_list,x_list,y_list):
     pyxem.utils.big_data_utils.chunked_application_of_UDF
     """
     vert_list = []
-    num_col = len(x_list)
-    num_row = len(y_list)
-    for i in np.arange(0,num_rows): # .arange doesn't include the endpoint
+    num_cols = len(x_list)
+    num_rows = len(y_list)
+    for i in np.arange(0,num_cols): # .arange doesn't include the endpoint
         left_index  = i * num_rows
         right_index = (i+1) * num_rows
         vert_list.append(_create_columns(results_list,left_index,right_index))
