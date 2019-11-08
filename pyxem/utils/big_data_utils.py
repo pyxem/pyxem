@@ -55,7 +55,7 @@ def _factory(fp,x,y,chunk_size,function):
 def _create_columns(results_list,left_index,right_index):
     """ provides the vstack for ._combine_list_into_navigation_space """
 
-    return np.vstack(tuple([x for x in results_list[left_index:right_index]]))
+    return np.vstack([x for x in results_list[left_index:right_index]])
 
 def _combine_list_into_navigation_space(results_list,x_list):
     """
@@ -71,7 +71,7 @@ def _combine_list_into_navigation_space(results_list,x_list):
     for i in np.arange(0,len(x_list)):
         vert_list.append(_create_columns(results_list,int(x_list[i]),int(x_list[i]+gap)))
 
-    np_output = np.hstack(tuple([x for x in vert_list]))
+    np_output = np.hstack([x for x in vert_list])
     return np_output
 
 def chunked_application_of_UDF(filepath, x_list,y_list,function):
