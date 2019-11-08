@@ -440,7 +440,7 @@ class DiffractionVectors(BaseSignal):
             return unique_peaks
 
     def filter_vectors_magnitudes(self, min_magnitude, max_magnitude,
-                                 *args, **kwargs):
+                                  *args, **kwargs):
         """Filter the diffraction vectors to accept only those with magnitudes
         within a user specified range.
 
