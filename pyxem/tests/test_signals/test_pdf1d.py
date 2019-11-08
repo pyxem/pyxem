@@ -18,6 +18,7 @@
 
 import pytest
 import numpy as np
+import warnings
 
 from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 
@@ -27,5 +28,7 @@ def test_generate_signal():
     data = data.reshape(2, 2, 10)
     pdf = PairDistributionFunction1D(data)
     assert isinstance(pdf, PairDistributionFunction1D)
-    pdf.normalise_signal()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        pdf.normalise_signal()
     assert np.equal(pdf, np.ones((2, 2, 10)))

@@ -18,6 +18,7 @@
 
 import pytest
 import numpy as np
+import warnings
 
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
@@ -55,7 +56,9 @@ def test_damp_exponential(RedIntData):
 
 def test_damp_lorch(RedIntData):
     ri = ReducedIntensity1D(RedIntData)
-    ri.damp_lorch(s_max=10)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        ri.damp_lorch(s_max=10)
     compare = np.array([[[0., 0., 0., 0., 0.,
                           0., 0., 0., 0., 0.],
                          [0., 0.98363164, 0.93548928, 0.85839369, 0.75682673,
@@ -70,7 +73,9 @@ def test_damp_lorch(RedIntData):
 
 def test_damp_updated_lorch(RedIntData):
     ri = ReducedIntensity1D(RedIntData)
-    ri.damp_updated_lorch(s_max=10)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        ri.damp_updated_lorch(s_max=10)
     compare = np.array([[[0., 0., 0., 0., 0.,
                           0., 0., 0., 0., 0.],
                          [0., 0.99016512, 0.96107415, 0.91394558, 0.85073648,
@@ -119,7 +124,11 @@ def test_multiple_scatter_correction(RedIntData):
 
 def test_s_max_statements(RedIntData):
     ri = ReducedIntensity1D(RedIntData)
-    ri.damp_lorch()
-    ri.damp_updated_lorch()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        ri.damp_lorch()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        ri.damp_updated_lorch()
     ri.fit_thermal_multiple_scattering_correction(s_max=5, plot=True)
     assert isinstance(ri, ReducedIntensity1D)

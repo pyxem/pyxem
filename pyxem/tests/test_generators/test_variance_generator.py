@@ -18,13 +18,13 @@
 
 import pytest
 import numpy as np
+import warnings
 
 from pyxem.generators.variance_generator import VarianceGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
 from pyxem.signals.diffraction_variance2d import ImageVariance
-
 
 @pytest.fixture
 def variance_generator(diffraction_pattern):
@@ -43,7 +43,9 @@ class TestVarianceGenerator:
             dqe
     ):
 
-        vardps = variance_generator.get_diffraction_variance(dqe)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            vardps = variance_generator.get_diffraction_variance(dqe)
         assert isinstance(vardps, DiffractionVariance2D)
 
         mean_dp = np.array(
@@ -73,7 +75,9 @@ class TestVarianceGenerator:
                 [np.nan, np.nan, np.nan, np.nan, 0.6875 / 0.75 / 0.75, np.nan, np.nan, np.nan],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
                 [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]]).reshape(8, 8)
-        corr_var_dp = var_dp - np.divide(dqe, mean_dp)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            corr_var_dp = var_dp - np.divide(dqe, mean_dp)
         corr_var_dp[np.isinf(corr_var_dp)] = 0
         corr_var_dp[np.isnan(corr_var_dp)] = 0
 
@@ -95,15 +99,21 @@ class TestVarianceGenerator:
              ]]).astype(np.uint8)
 
         variance_test_diffraction_pattern = ElectronDiffraction2D(dp_array)
-        vargen = VarianceGenerator(variance_test_diffraction_pattern)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            vargen = VarianceGenerator(variance_test_diffraction_pattern)
 
-        vardps_8 = vargen.get_diffraction_variance(dqe=1)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            vardps_8 = vargen.get_diffraction_variance(dqe=1)
         assert isinstance(vardps_8, DiffractionVariance2D)
         corr_var_dp_8 = np.array([[-0.08, -0.66857143],
                                   [-0.92213333, -0.88666667]])
         assert np.allclose(vardps_8.data[1, 1], corr_var_dp_8, atol=1e-6, equal_nan=True)
 
-        vardps_16 = vargen.get_diffraction_variance(dqe=1, set_data_type=np.uint16)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            vardps_16 = vargen.get_diffraction_variance(dqe=1, set_data_type=np.uint16)
         assert isinstance(vardps_16, DiffractionVariance2D)
         corr_var_dp_16 = np.array([[-0.08, 0.16734694],
                                    [0.30666667, -0.0333333]])
@@ -119,14 +129,18 @@ class TestVarianceGenerator:
             variance_generator: VarianceGenerator,
             dqe):
 
-        varims = variance_generator.get_image_variance(dqe)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            varims = variance_generator.get_image_variance(dqe)
         assert isinstance(varims, ImageVariance)
 
         mean_im = np.array([[6 / 64, 6 / 64], [8 / 64, 10 / 64]]).reshape(2, 2)
         meansq_im = np.array([[8 / 64, 8 / 64], [12 / 64, 20 / 64]]).reshape(2, 2)
         var_im = np.array([[13.222222222222221, 13.222222222222221],
                            [11.0, 11.8]]).reshape(2, 2)
-        corr_var_im = var_im - np.divide(dqe, mean_im)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            corr_var_im = var_im - np.divide(dqe, mean_im)
 
         assert np.array_equal(varims.data[0, 0], mean_im)
         assert np.array_equal(varims.data[0, 1], meansq_im)
