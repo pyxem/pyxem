@@ -117,12 +117,16 @@ class VDFImage(Signal2D):
         segments = segments.reshape((np.shape(vectors_of_segments)[0],
                                      vdfs.axes_manager.signal_shape[0],
                                      vdfs.axes_manager.signal_shape[1]))
+        # Calculate the total intensities of each segment
+        segment_intensities = np.array([
+            [np.sum(x, axis=(0, 1))] for x in segments], dtype='object')
 
         # if TraitError is raised, it is likely no segments were found
         segments = Signal2D(segments).transpose(navigation_axes=[0],
                                                 signal_axes=[2, 1])
         # Create VDFSegment and transfer axes calibrations
-        vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments))
+        vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments),
+                             segment_intensities)
         vdfsegs.segments = transfer_signal_axes(vdfsegs.segments, vdfs)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
         n.name = 'n'
