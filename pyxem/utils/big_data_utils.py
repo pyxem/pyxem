@@ -82,7 +82,7 @@ def chunked_application_of_UDF(filepath, x_list,y_list,function):
     Parameters
     ----------
     filepath : str
-        Path to the file contain the data to be inverstigated
+        Path to the file contain the data to be investigated
 
     x_list : list or np.array
         Iterable running from the "start" index to the final start "index" with a fixed step
