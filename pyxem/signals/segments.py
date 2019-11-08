@@ -459,11 +459,11 @@ class VDFSegment:
         segments = self.segments.data
         num_segments = np.shape(segments)[0]
 
-        if self.intensities is None:
-            warnings.warn("The VDFSegment does not have the attribute intensities. All intensities will be set to ones.")
-            intensities = np.ones_like(vectors)
-        else:
+        if self.intensities:
             intensities = self.intensities
+        else:
+            raise ValueError("The VDFSegment does not have the attribute  "
+                             "intensities, required for this method.")
 
         # TODO: Refactor this to use the diffsims simulation to plot functionality
         size_x, size_y = shape[0], shape[1]
