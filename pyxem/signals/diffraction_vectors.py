@@ -480,6 +480,8 @@ class DiffractionVectors(BaseSignal):
             filtered_vectors = DiffractionVectors(filtered_vectors)
             filtered_vectors.axes_manager.set_signal_dimension(1)
 
+        transfer_navigation_axes(filtered_vectors, self)
+
         return filtered_vectors
 
     def filter_vectors_detector_edge(self, exclude_width,
@@ -522,6 +524,8 @@ class DiffractionVectors(BaseSignal):
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
             filtered_vectors.axes_manager.set_signal_dimension(1)
+
+        transfer_navigation_axes(filtered_vectors, self)
 
         return filtered_vectors
 
