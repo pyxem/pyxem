@@ -260,6 +260,7 @@ class VDFSegment:
         ncc_matrix : Signal2D
             Normalised correlation coefficient matrix.
         """
+        # TODO: This code should be factored out for reuse in other ncc method.
         # Set up an empty matrix of correct size to store NCC values.
         num_comp = np.shape(self.segments.data)[0]
         ncc_matrix = np.zeros((num_comp, num_comp))
@@ -459,12 +460,11 @@ class VDFSegment:
         segments = self.segments.data
         num_segments = np.shape(segments)[0]
 
-        if self.intensities:
-            intensities = self.intensities
-        else:
+        if self.intensities is None:
             raise ValueError("The VDFSegment does not have the attribute  "
                              "intensities, required for this method.")
-
+        else:
+            intensities = self.intensities
         # TODO: Refactor this to use the diffsims simulation to plot functionality
         size_x, size_y = shape[0], shape[1]
         cx, cy = -size_x / 2 * calibration, -size_y / 2 * calibration
