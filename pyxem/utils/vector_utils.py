@@ -97,6 +97,35 @@ def calculate_norms_ragged(z):
     return np.asarray(norms)
 
 
+def filter_vectors_ragged(z, min_magnitude, max_magnitude):
+    """Filters the diffraction vectors to accept only those with magnitudes
+    within a user specified range.
+
+    Parameters
+    ----------
+    min_magnitude : float
+        Minimum allowed vector magnitude.
+    max_magnitude : float
+        Maximum allowed vector magnitude.
+
+    Returns
+    -------
+    filtered_vectors : np.array()
+        Diffraction vectors within allowed magnitude tolerances.
+    """
+    # Calculate norms
+    norms = []
+    for i in z[0]:
+        norms.append(np.linalg.norm(i))
+    norms = np.asarray(norms)
+    # Filter based on norms
+    norms[norms < min_magnitude] = 0
+    norms[norms > max_magnitude] = 0
+    filtered_vectors = z[0][np.where(norms)]
+
+    return filtered_vectors
+
+
 def normalize_or_zero(v):
     """Normalize `v`, or return the vector directly if it has zero length.
 
