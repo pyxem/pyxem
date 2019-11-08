@@ -51,6 +51,13 @@ class TestSimpleMaps:
                         [0.52, 0.52]])
         np.testing.assert_almost_equal(shifts, ans)
 
+    def test_center_direct_beam_blur_return_shifts(self, diffraction_pattern):
+        shifts = diffraction_pattern.center_direct_beam(method='blur',
+                                                        sigma=5,
+                                                        square_width=3,
+                                                        return_shifts=True)
+        np.testing.assert_almost_equal(shifts, ans)
+
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
         diffraction_pattern.center_direct_beam(method='blur',
