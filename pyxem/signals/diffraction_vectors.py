@@ -504,8 +504,8 @@ class DiffractionVectors(BaseSignal):
         filtered_vectors : DiffractionVectors
             Diffraction vectors within allowed detector region.
         """
-        x_threshold = self.pixel_calibration * self.detector_shape[0] - self.pixel_calibration * exclude_width
-        y_threshold = self.pixel_calibration * self.detector_shape[1] - self.pixel_calibration * exclude_width
+        x_threshold = self.pixel_calibration * (self.detector_shape[0] / 2) - self.pixel_calibration * exclude_width
+        y_threshold = self.pixel_calibration * (self.detector_shape[1] / 2) - self.pixel_calibration * exclude_width
         # If ragged the signal axes will not be defined
         if len(self.axes_manager.signal_axes) == 0:
             filtered_vectors = self.map(filter_vectors_edge_ragged,
@@ -518,9 +518,10 @@ class DiffractionVectors(BaseSignal):
             filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
-            self.data[np.absolute(self.data.T[0]) > x_threshold] = 0
-            self.data[np.absolute(self.data.T[1]) > y_threshold] = 0
-            filtered_vectors = self.data[np.where(self.data.T[0])]
+            tmp_data = self.data.copy()
+            tmp_data[np.absolute(tmp_data.T[0]) > x_threshold] = 0
+            tmp_data[np.absolute(tmp_data.T[1]) > y_threshold] = 0
+            filtered_vectors = self.data[np.where(tmp_data.T[0])]
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
             filtered_vectors.axes_manager.set_signal_dimension(1)
