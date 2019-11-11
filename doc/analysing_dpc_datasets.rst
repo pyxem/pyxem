@@ -4,7 +4,7 @@
 Analysing differential phase contrast data
 ==========================================
 
-Example of this type of data processing: `Strain Anisotropy and Magnetic Domains in Embedded Nanomagnets <https://doi.org/10.1002/smll.201904738>`_.
+Example of a paper doing this type of data processing: `Strain Anisotropy and Magnetic Domains in Embedded Nanomagnets <https://doi.org/10.1002/smll.201904738>`_.
 The data and processing scripts used in this paper is available at Zenodo with the DOI `10.5281/zenodo.3466591 <https://dx.doi.org/10.5281/zenodo.3466591>`_.
 
 Differential phase contrast analysis (DPC) is done using using the DPCSignal classes: :py:class:`~pixstem.pixelated_stem_class.DPCSignal2D`, :py:class:`~pixstem.pixelated_stem_class.DPCSignal1D` and :py:class:`~pixstem.pixelated_stem_class.DPCBaseSignal`.
