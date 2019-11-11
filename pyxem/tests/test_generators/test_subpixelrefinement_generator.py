@@ -102,7 +102,7 @@ class Test_subpixelpeakfinders:
         assert rms_error < 1e-5  # perfect detection for this trivial case
 
     def x_shift_case(self, s):
-        error = s.data[0, 1] - np.asarray([[93, 30]])
+        error = s.data[0, 1] - np.asarray([[93 - 64, 30 - 64]])
         rms_error = np.sqrt(error[0, 0]**2 + error[0, 1]**2)
         assert rms_error < 0.5   # correct to within a pixel
 
@@ -141,3 +141,20 @@ def create_spot_gaussian():
 def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
     spr = SubpixelRefinementGenerator2D(dp, diffraction_vectors)
     s = spr.local_gaussian_method(2)
+
+
+def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
+    """ This was the MWE example code for the issue """
+    dp = get_simulated_disc(100, 20)
+    # translate y by +4
+    shifted = np.pad(dp, ((0, 4), (0, 0)), 'constant')[4:].reshape(1, 1, *dp.shape)
+    signal = ElectronDiffraction2D(shifted)
+    spg = SubpixelrefinementGenerator(signal, np.array([[0, 0]]))
+    peaks = spg.conventional_xc(100, 20, 1).data[0, 0, 0]  # as quoted in the issue
+    np.testing.assert_allclose([0, -4], peaks)
+    """ we also test com method for clarity """
+    peaks = spg.center_of_mass_method(60).data[0, 0, 0]
+    np.testing.assert_allclose([0, -4], peaks, atol=1.5)
+    """ we also test reference_xc """
+    peaks = spg.reference_xc(100, dp, 1).data[0, 0, 0]  # as quoted in the issue
+    np.testing.assert_allclose([0, -4], peaks)

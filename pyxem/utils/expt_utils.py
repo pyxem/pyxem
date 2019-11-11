@@ -150,7 +150,7 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
                              detector=detector, wavelength=wavelength,
                              **kwargs_for_integrator)
     tth, I = ai.integrate1d(z, size_1d, unit=unit,
-                                **kwargs_for_integrate1d)
+                            **kwargs_for_integrate1d)
     return tth, I
 
 

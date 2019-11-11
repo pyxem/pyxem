@@ -359,11 +359,11 @@ class Diffraction2D(Signal2D):
         :func:`pyxem.utils.expt_utils.azimuthal_integrate_fast`
         """
 
-        #Scaling factor is used to output the unit in k instead of q.
-        #It multiplies the scale that comes out of pyFAI integrate1d
+        # Scaling factor is used to output the unit in k instead of q.
+        # It multiplies the scale that comes out of pyFAI integrate1d
         scaling_factor = 1
         if unit == 'k_A^-1':
-            scaling_factor = 1/2/np.pi
+            scaling_factor = 1 / 2 / np.pi
             unit = 'q_A^-1'
 
         if np.array(origin).size == 2:
@@ -388,17 +388,17 @@ class Diffraction2D(Signal2D):
             # this time each centre is read in origin
             # origin is passed as a flattened array in the navigation dimensions
             azimuthal_integrals = self._map_iterate(azimuthal_integrate,
-                                            iterating_kwargs=(('origin',
-                                            origin.reshape(-1, 2)),),
-                                            detector_distance=detector_distance,
-                                            detector=detector,
-                                            wavelength=wavelength,
-                                            size_1d=size_1d,
-                                            unit=unit,
-                                            inplace=inplace,
-                                            kwargs_for_integrator=kwargs_for_integrator,
-                                            kwargs_for_integrate1d=kwargs_for_integrate1d,
-                                            **kwargs_for_map)
+                                                    iterating_kwargs=(('origin',
+                                                                       origin.reshape(-1, 2)),),
+                                                    detector_distance=detector_distance,
+                                                    detector=detector,
+                                                    wavelength=wavelength,
+                                                    size_1d=size_1d,
+                                                    unit=unit,
+                                                    inplace=inplace,
+                                                    kwargs_for_integrator=kwargs_for_integrator,
+                                                    kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                                    **kwargs_for_map)
 
         if len(azimuthal_integrals.data.shape) == 3:
             ap = Diffraction1D(azimuthal_integrals.data[:, 1, :])
@@ -410,6 +410,8 @@ class Diffraction2D(Signal2D):
         offset = tth[0] * scaling_factor
         ap.axes_manager.signal_axes[0].scale = scale
         ap.axes_manager.signal_axes[0].offset = offset
+        ap.axes_manager.signal_axes[0].name = 'scattering'
+        ap.axes_manager.signal_axes[0].units = unit
 
         transfer_navigation_axes(ap, self)
         push_metadata_through(ap, self)
@@ -476,7 +478,6 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur", "interpolate"
-
         **kwargs:
             Keyword arguments to be passed to map().
 
@@ -506,6 +507,7 @@ class Diffraction2D(Signal2D):
     def center_direct_beam(self,
                            method,
                            square_width=None,
+                           return_shifts=False,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
@@ -515,12 +517,12 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of 'cross_correlate', 'blur', 'interpolate'
-
         square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-
+        return_shifts : bool
+            If True, the values of applied shifts are returned
         **kwargs:
             To be passed to method function
 
@@ -546,7 +548,10 @@ class Diffraction2D(Signal2D):
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0)
+        self.align2D(shifts=shifts, crop=False, fill_value=0)
+
+        if return_shifts:
+            return shifts
 
     def remove_background(self, method,
                           **kwargs):
@@ -595,12 +600,13 @@ class Diffraction2D(Signal2D):
         Parameters
         ---------
         method : str
-            Specifies the method, from:
+            Select peak finding algorithm to implement. Available methods are
             {'zaefferer', 'stat', 'laplacian_of_gaussians',
             'difference_of_gaussians', 'xc'}
-        **kwargs :
-            Method specific keyword arguments to be passed to map().
-            If None, the method speicic kward documentation will be returned.
+        *args : arguments
+            Arguments to be passed to the peak finders.
+        **kwargs : arguments
+            Keyword arguments to be passed to the peak finders.
 
         Returns
         -------
@@ -625,38 +631,26 @@ class Diffraction2D(Signal2D):
 
         """
         method_dict = {
-            'zaefferer':
-            {'method': find_peaks_zaefferer,
-             'params': ['grad_threshold', 'window_size', 'distance_cutoff']},
-            'stat':
-            {'method': find_peaks_stat,
-             'params': ['alpha', 'window_raidus', 'convergence_ratio']},
-            'difference_of_gaussians':
-            {'method': find_peaks_dog,
-             'params': ['min_sigma', 'max_sigma', 'sigma_ratio', 'threshold',
-                        'overlap', 'exclude_border']},
-            'laplacian_of_gaussians':
-            {'method': find_peaks_log,
-             'params': ['min_sigma', 'max_sigma', 'num_sigma', 'threshold',
-                        'overlap', 'log_scale', 'exclude_border']},
-            'xc':
-            {'method': find_peaks_xc,
-             'params': ['disc_image', 'min_distance', 'peak_threshold']},
+            'zaefferer': find_peaks_zaefferer,
+            'stat': find_peaks_stat,
+            'laplacian_of_gaussians': find_peaks_log,
+            'difference_of_gaussians': find_peaks_dog,
+            'xc': find_peaks_xc
         }
-
-        if method not in method_dict:
+        if method in method_dict:
+            method = method_dict[method]
+        else:
             raise NotImplementedError("The method `{}` is not implemented. "
                                       "See documentation for available "
                                       "implementations.".format(method))
-        if not kwargs:
-            for kwarg in method_dict[method]['params']:
-                print("You need the `{}` kwarg".format(kwarg))
-            return None
 
-        peak_coordinates = self.map(method_dict[method]['method'], **kwargs,
-                                    inplace=False, ragged=True)
+        peak_coordinates = self.map(method, *args, **kwargs, inplace=False, ragged=True)
         peak_coordinates = DetectorCoordinates2D(peak_coordinates)
         peak_coordinates.axes_manager.set_signal_dimension(0)
+
+        # Set DiffractionVectors attributes
+        peaks.pixel_calibration = self.axes_manager.signal_axes[0].scale
+        peaks.detector_shape = self.axes_manager.signal_shape
 
         transfer_navigation_axes(peak_coordinates, self)
 
