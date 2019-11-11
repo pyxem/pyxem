@@ -16,26 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import pytest
 import numpy as np
+from pyxem.detectors.generic_flat_detector import GenericFlatDetector
+from pyFAI.detectors import Detector
 
-
-def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
-    """Used by hs.map in the PairDistributionFunction1D to normalise the signal
-    to the maximum in the signal.
-
-    Parameters
-    ----------
-    z : np.array
-        A pair distribution function np.array to be transformed
-    index_min : int
-        The minimum scattering vector s to be considered, given as the lowest
-        index in the array to consider for finding the present maximum.
-        This is to prevent the effect of large oscillations at r=0.
-    *args:
-        Arguments to be passed to map().
-    **kwargs:
-        Keyword arguments to be passed to map().
-    """
-
-    max_val = np.max(z[index_min:])
-    return np.divide(z, max_val)
+def test_generic_flat_detector_init():
+    size_x, size_y = 256,256
+    detector = GenericFlatDetector(size_x, size_y)
+    assert isinstance(detector,Detector)
+    assert np.array_equal(detector.max_shape, (size_x,size_y))

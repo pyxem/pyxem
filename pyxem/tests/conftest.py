@@ -26,50 +26,52 @@ from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
 from pyxem.utils.indexation_utils import OrientationResult
 
+
 @pytest.fixture
 def default_structure():
     """An atomic structure represetned using diffpy
     """
-    latt = diffpy.structure.lattice.Lattice(3,3,5,90,90,120)
-    atom = diffpy.structure.atom.Atom(atype='Ni',xyz=[0,0,0],lattice=latt)
-    hexagonal_structure = diffpy.structure.Structure(atoms=[atom],lattice=latt)
+    latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
+    atom = diffpy.structure.atom.Atom(atype='Ni', xyz=[0, 0, 0], lattice=latt)
+    hexagonal_structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
     return hexagonal_structure
 
 
 @pytest.fixture
 def z():
     return np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 2., 1., 0., 0.],
-               [0., 0., 0., 0., 1., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 2.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 1., 2., 1., 0., 0., 0.],
-               [0., 0., 0., 1., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]],
-              [[0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 2., 2., 2., 0., 0.],
-               [0., 0., 0., 0., 2., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.],
-               [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2,2,8,8)
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 1., 0., 0., 0., 0.],
+                      [0., 0., 1., 2., 1., 0., 0., 0.],
+                      [0., 0., 0., 1., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.]],
+                     [[0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 1., 0., 0., 0.],
+                      [0., 0., 0., 1., 2., 1., 0., 0.],
+                      [0., 0., 0., 0., 1., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.]],
+                     [[0., 0., 0., 0., 0., 0., 0., 2.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 1., 0., 0., 0., 0.],
+                      [0., 0., 1., 2., 1., 0., 0., 0.],
+                      [0., 0., 0., 1., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.]],
+                     [[0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 2., 0., 0., 0.],
+                      [0., 0., 0., 2., 2., 2., 0., 0.],
+                      [0., 0., 0., 0., 2., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.],
+                      [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2, 2, 8, 8)
+
 
 @pytest.fixture
 def diffraction_pattern(z):
@@ -77,8 +79,9 @@ def diffraction_pattern(z):
     ElectronDiffraction2D <2,2|8,8>
     """
     dp = ElectronDiffraction2D(z)
-    dp.metadata.Signal.found_from = 'conftest' #dummy metadata
+    dp.metadata.Signal.found_from = 'conftest'  # dummy metadata
     return dp
+
 
 @pytest.fixture
 def electron_diffraction1d(diffraction_pattern):
@@ -87,6 +90,7 @@ def electron_diffraction1d(diffraction_pattern):
     """
     return diffraction_pattern.get_radial_profile()
 
+
 @pytest.fixture
 def vector_match_peaks():
     return np.array([
@@ -94,6 +98,7 @@ def vector_match_peaks():
         [0, 2, 0],
         [1, 2, 3],
     ])
+
 
 @pytest.fixture
 def vector_library():
@@ -115,6 +120,7 @@ def vector_library():
         diffpy.structure.Structure(lattice=lattice)
     ]
     return library
+
 
 @pytest.fixture
 def sp_template_match_result():
@@ -140,13 +146,13 @@ def sp_vector_match_result():
     res[0] = OrientationResult(0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.1, 1.0, 0, 0)
     res[1] = OrientationResult(0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.6, np.array([0.1, 0.10, 0.2]), 0.2, 1.0, 0, 0)
     return res
-    
+
 
 @pytest.fixture
 def dp_vector_match_result():
     res = np.empty(4, dtype="object")
-    res[0] = OrientationResult(0, euler2mat(*np.deg2rad([90, 0,  0]), 'rzxz'), 0.6, np.array([0.1, 0.10, 0.2]), 0.3, 1.0, 0, 0)
+    res[0] = OrientationResult(0, euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz'), 0.6, np.array([0.1, 0.10, 0.2]), 0.3, 1.0, 0, 0)
     res[1] = OrientationResult(0, euler2mat(*np.deg2rad([0, 10, 20]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.4, 1.0, 0, 0)
     res[2] = OrientationResult(1, euler2mat(*np.deg2rad([0, 45, 45]), 'rzxz'), 0.8, np.array([0.1, 0.30, 0.2]), 0.1, 1.0, 0, 0)
-    res[3] = OrientationResult(1, euler2mat(*np.deg2rad([0,  0, 90]), 'rzxz'), 0.7, np.array([0.1, 0.05, 0.1]), 0.2, 1.0, 0, 0)
+    res[3] = OrientationResult(1, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.7, np.array([0.1, 0.05, 0.1]), 0.2, 1.0, 0, 0)
     return res
