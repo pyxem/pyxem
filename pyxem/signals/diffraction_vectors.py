@@ -29,7 +29,7 @@ from sklearn.cluster import DBSCAN
 from warnings import warn
 
 from pyxem.signals import push_metadata_through
-from pyxem.signals import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes, transfer_navigation_axes_to_signal_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_npeaks, filter_vectors_ragged
@@ -551,16 +551,7 @@ class DiffractionVectors(BaseSignal):
         crystim.change_dtype('float')
 
         # Set calibration to same as signal
-        x = crystim.axes_manager.signal_axes[0]
-        y = crystim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        crystim = transfer_navigation_axes_to_signal_axes(crystim,self)
 
         return crystim
 
