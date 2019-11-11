@@ -518,10 +518,9 @@ class DiffractionVectors(BaseSignal):
             filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
-            tmp_data = self.data.copy()
-            tmp_data[np.absolute(tmp_data.T[0]) > x_threshold] = 0
-            tmp_data[np.absolute(tmp_data.T[1]) > y_threshold] = 0
-            filtered_vectors = self.data[np.where(tmp_data.T[0])]
+            x_inbounds = np.absolute(self.data.T[0]) < x_threshold #True if vector is good to go
+            y_inbounds = np.absolute(self.data.T[1]) < y_threshold
+            filtered_vectors = self.data[np.logical_and(x_inbounds,y_inbounds)]
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
             filtered_vectors.axes_manager.set_signal_dimension(1)
