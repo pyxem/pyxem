@@ -52,7 +52,7 @@ def call_ring_pattern(xcenter, ycenter):
     """
     def ring_pattern(pts, scale, amplitude, spread, direct_beam_amplitude,
                      asymmetry, rotation):
-        """Calculats a polycrystalline gold diffraction pattern given a set of
+        """Calculates a polycrystalline gold diffraction pattern given a set of
         pixel coordinates (points). It uses tabulated values of the spacings
         (in reciprocal Angstroms) and relative intensities of rings derived from
         X-ray scattering factors.
