@@ -32,6 +32,8 @@ from skimage.feature import register_translation
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+
 
 """
 This module contains utility functions for processing electron diffraction
@@ -106,6 +108,88 @@ def _polar2cart(r, theta):
     return x, y
 
 
+def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
+                        size_1d, unit, kwargs_for_integrator,
+                        kwargs_for_integrate1d):
+    """Calculate the azimuthal integral of z around a determined origin.
+
+    This method is used for signals where the origin is iterated, compared to
+    azimuthal_integrate_fast which is used when the origin in the data is
+    constant.
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    origin : np.array()
+        A size 2 numpy array containing the position of the origin.
+    detector_distance : float
+        Detector distance in meters passed to pyFAI AzimuthalIntegrator.
+    detector : pyFAI.detectors.Detector object
+        A pyFAI detector used for the AzimuthalIntegrator.
+    wavelength : float
+        The electron wavelength in meters. Used by pyFAI AzimuthalIntegrator.
+    size_1d : int
+        The size of the returned 1D signal. (i.e. number of pixels in the 1D
+        azimuthal integral.)
+    unit : str
+        The unit for for PyFAI integrate1d.
+    *args :
+        Arguments to be passed to AzimuthalIntegrator.
+    **kwargs :
+        Keyword arguments to be passed to AzimuthalIntegrator.
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
+    ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
+                             detector=detector, wavelength=wavelength,
+                             **kwargs_for_integrator)
+    tth, I = ai.integrate1d(z, size_1d, unit=unit,
+                            **kwargs_for_integrate1d)
+    return tth, I
+
+
+def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
+                             kwargs_for_integrate1d):
+    """Calculate the azimuthal integral of z around a determined origin.
+
+    This method is used for signals where the origin is constant, compared to
+    azimuthal_integrate which is used when the origin in the data changes and
+    is iterated over.
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    size_1d : int
+        The size of the returned 1D signal. (i.e. number of pixels in the 1D
+        azimuthal integral.)
+    unit : str
+        The unit for for PyFAI integrate1d.
+    *args :
+        Arguments to be passed to ai.integrate1d.
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate1d.
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    tth, I = azimuthal_integrator.integrate1d(z, size_1d, unit=unit,
+                                              **kwargs_for_integrate1d)
+    return tth, I
+
+
 def radial_average(z, mask=None):
     """Calculate the radial profile by azimuthal averaging about the center.
 
@@ -175,7 +259,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     deadpixels : np.array()
         Array containing the array indices of dead pixels in the diffraction
         pattern.
-    deadvalue : string
+    deadvalue : str
         Specify how deadpixels should be treated, options are;
             'average': takes the average of adjacent pixels
             'nan':  sets the dead pixel to nan
@@ -315,7 +399,7 @@ def subtract_background_dog(z, sigma_min, sigma_max):
     return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
 
 
-def subtract_background_median(z, footprint=19, implementation='scipy'):
+def subtract_background_median(z, footprint):
     """Remove background using a median filter.
 
     Parameters
@@ -324,21 +408,15 @@ def subtract_background_median(z, footprint=19, implementation='scipy'):
         size of the window that is convoluted with the array to determine
         the median. Should be large enough that it is about 3x as big as the
         size of the peaks.
-    implementation: str
-        One of 'scipy', 'skimage'. Skimage is much faster, but it messes with
-        the data format. The scipy implementation is safer, but slower.
 
     Returns
     -------
         Pattern with background subtracted as np.array
     """
 
-    if implementation == 'scipy':
-        bg_subtracted = z - ndi.median_filter(z, size=footprint)
-    elif implementation == 'skimage':
-        selem = morphology.square(footprint)
-        # skimage only accepts input image as uint16
-        bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
+    selem = morphology.square(footprint)
+    # skimage only accepts input image as uint16
+    bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
 
     return np.maximum(bg_subtracted, 0)
 
@@ -359,10 +437,7 @@ def subtract_reference(z, bg):
         Two-dimensional data array containing signal with background removed.
     """
     im = z.astype(np.float64) - bg
-    for i in range(0, z.shape[0]):
-        for j in range(0, z.shape[1]):
-            if im[i, j] < 0:
-                im[i, j] = 0
+    im = np.where(im > 0, im, 0)
     return im
 
 
@@ -420,7 +495,7 @@ def reference_circle(coords, dimX, dimY, radius):
     return img
 
 
-def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, window: int = 10, kind: int = 3) -> float:
+def _find_peak_max(arr, sigma, upsample_factor, kind):
     """Find the index of the pixel corresponding to peak maximum in 1D pattern
 
     Parameters
@@ -437,10 +512,6 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, windo
         interpolation of zeroth, first, second or third order; ‘previous’
         and ‘next’ simply return the previous or next value of the point) or as
         an integer specifying the order of the spline interpolator to use.
-    window : int
-       A box of size 2*window+1 around the first estimate is taken and
-       expanded by `upsample_factor` to to interpolate the pattern to get
-       the peak maximum position with subpixel precision.
 
     Returns
     -------
@@ -451,24 +522,24 @@ def _find_peak_max(arr: np.ndarray, sigma: int, upsample_factor: int = 50, windo
     c1 = np.argmax(y1)  # initial guess for beam center
 
     m = upsample_factor
-    w = window
-    win_len = 2 * w + 1
+    window = 10
+    win_len = 2 * window + 1
 
     try:
-        r1 = np.linspace(c1 - w, c1 + w, win_len)
-        f = interp1d(r1, y1[c1 - w: c1 + w + 1], kind=kind)
-        r2 = np.linspace(c1 - w, c1 + w, win_len * m)  # extrapolate for subpixel accuracy
+        r1 = np.linspace(c1 - window, c1 + window, win_len)
+        f = interp1d(r1, y1[c1 - window: c1 + window + 1], kind=kind)
+        r2 = np.linspace(c1 - window, c1 + window, win_len * m)  # extrapolate for subpixel accuracy
         y2 = f(r2)
         c2 = np.argmax(y2) / m  # find beam center with `m` precision
     except ValueError:  # if c1 is too close to the edges, return initial guess
         center = c1
     else:
-        center = c2 + c1 - w
+        center = c2 + c1 - window
 
     return center
 
 
-def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_factor: int = 100, kind: int = 3) -> (float, float):
+def find_beam_center_interpolate(z, sigma, upsample_factor, kind):
     """Find the center of the primary beam in the image `img` by summing along
     X/Y directions and finding the position along the two directions independently.
 
@@ -492,8 +563,8 @@ def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_fact
     center : np.array
         np.array containing indices of estimated direct beam positon.
     """
-    xx = np.sum(img, axis=1)
-    yy = np.sum(img, axis=0)
+    xx = np.sum(z, axis=1)
+    yy = np.sum(z, axis=0)
 
     cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind)
     cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind)
@@ -502,7 +573,7 @@ def find_beam_center_interpolate(img: np.ndarray, sigma: int = 30, upsample_fact
     return center
 
 
-def find_beam_center_blur(z: np.ndarray, sigma: int = 30) -> np.ndarray:
+def find_beam_center_blur(z, sigma):
     """Estimate direct beam position by blurring the image with a large
     Gaussian kernel and finding the maximum.
 
@@ -521,7 +592,7 @@ def find_beam_center_blur(z: np.ndarray, sigma: int = 30) -> np.ndarray:
     return np.array(center)
 
 
-def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
+def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     """Find the offset of the direct beam from the image center by a cross-correlation algorithm.
     The shift is calculated relative to an circle perimeter. The circle can be
     refined across a range of radii during the centring procedure to improve
@@ -567,6 +638,7 @@ def find_beam_offset_cross_correlation(z, radius_start=4, radius_finish=8):
     shift, error, diffphase = register_translation(ref, im, 100)
 
     return (shift - 0.5)
+
 
 def peaks_as_gvectors(z, center, calibration):
     """Converts peaks found as array indices to calibrated units, for use in a

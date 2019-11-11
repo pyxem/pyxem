@@ -40,7 +40,7 @@ class PairDistributionFunction1D(Signal1D):
         s_min : float
             The minimum scattering vector s to be considered. Values at lower s
             are ignored. This is to prevent the effect of large oscillations at
-            r=0. If not set, the full signal is used. 
+            r=0. If not set, the full signal is used.
         inplace : bool
             If True (default), this signal is overwritten. Otherwise, returns a
             new signal.
@@ -53,5 +53,5 @@ class PairDistributionFunction1D(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         index_min = int(s_min / s_scale)
 
-        return self.map(normalise_pdf_signal_to_max,index_min=index_min,
+        return self.map(normalise_pdf_signal_to_max, index_min=index_min,
                         inplace=inplace, *args, **kwargs)

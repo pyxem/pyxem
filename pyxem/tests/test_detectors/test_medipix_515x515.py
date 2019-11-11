@@ -16,26 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import pytest
+from pyxem.detectors.medipix_515x515 import Medipix515x515Detector
+from pyFAI.detectors import Detector
 import numpy as np
 
+def test_medipix_515x515_init():
+    detector = Medipix515x515Detector()
+    assert isinstance(detector,Detector)
 
-def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
-    """Used by hs.map in the PairDistributionFunction1D to normalise the signal
-    to the maximum in the signal.
-
-    Parameters
-    ----------
-    z : np.array
-        A pair distribution function np.array to be transformed
-    index_min : int
-        The minimum scattering vector s to be considered, given as the lowest
-        index in the array to consider for finding the present maximum.
-        This is to prevent the effect of large oscillations at r=0.
-    *args:
-        Arguments to be passed to map().
-    **kwargs:
-        Keyword arguments to be passed to map().
-    """
-
-    max_val = np.max(z[index_min:])
-    return np.divide(z, max_val)
+def test_medipix_515x515_mask():
+    detector = Medipix515x515Detector()
+    mask = detector.calc_mask()
+    mask_check = np.zeros((515,515))
+    mask_check[255:260,:] = 1
+    mask_check[:,255:260] = 1
+    assert np.array_equal(mask, mask_check)
