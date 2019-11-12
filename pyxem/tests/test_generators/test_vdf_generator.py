@@ -80,9 +80,7 @@ class TestVDFGenerator:
             vdf_generator: VDFGenerator,
             radius, normalize
     ):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            vdfs = vdf_generator.get_vector_vdf_images(radius, normalize)
+        vdfs = vdf_generator.get_vector_vdf_images(radius, normalize)
         assert isinstance(vdfs, VDFImage)
 
     @pytest.mark.parametrize('k_min, k_max, k_steps, normalize', [
@@ -94,9 +92,7 @@ class TestVDFGenerator:
             vdf_generator: VDFGenerator,
             k_min, k_max, k_steps, normalize
     ):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            vdfs = vdf_generator.get_concentric_vdf_images(k_min, k_max, k_steps,
+        vdfs = vdf_generator.get_concentric_vdf_images(k_min, k_max, k_steps,
                                                        normalize)
         assert isinstance(vdfs, VDFImage)
 
