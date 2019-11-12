@@ -22,7 +22,6 @@ i) machine learning (LearningSegment) and ii) VDF images (VDFSegment).
 """
 
 import numpy as np
-from tqdm import tqdm
 
 from hyperspy.signals import Signal2D
 
@@ -32,6 +31,8 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals import transfer_signal_axes
 
 import warnings
+
+import scipy.cluster.hierarchy as sch
 
 
 class LearningSegment:
@@ -56,18 +57,16 @@ class LearningSegment:
         num_comp = np.shape(self.loadings.data)[0]
         ncc_loadings = np.zeros((num_comp, num_comp))
         ncc_factors = np.zeros((num_comp, num_comp))
-        factors = self.factors.map(np.nan_to_num, inplace=False).copy()
-        loadings = self.loadings.map(np.nan_to_num, inplace=False).copy()
         # Iterate through loadings calculating NCC values.
         for i in np.arange(num_comp):
             ncc_loadings[i] = list(map(
-                lambda x: norm_cross_corr(x, template=loadings.data[i]),
-                loadings.data))
+                lambda x: norm_cross_corr(x, template=self.loadings.data[i]),
+                self.loadings.data))
         # Iterate through factors calculating NCC values.
         for i in np.arange(num_comp):
             ncc_factors[i] = list(map(
-                lambda x: norm_cross_corr(x, template=factors.data[i]),
-                factors.data))
+                lambda x: norm_cross_corr(x, template=self.factors.data[i]),
+                self.factors.data))
         # Convert matrix to Signal2D and set axes
         ncc_sig = Signal2D(np.array((ncc_loadings, ncc_factors)))
         ncc_sig.axes_manager.signal_axes[0].name = 'index'
@@ -277,43 +276,54 @@ class VDFSegment:
         return ncc_sig
 
     def correlate_vdf_segments(self, corr_threshold=0.7, vector_threshold=4,
-                               segment_threshold=3):
-        """Iterates through VDF segments and sums those that are
-        associated with the same segment. Summation will be done for
-        those segments that have a normalised cross correlation above
-        corr_threshold. The vectors of each segment sum will be updated
-        accordingly, so that the vectors of each resulting segment sum
-        are all the vectors of the original individual segments. Each
-        vector is assigned an intensity that is the integrated intensity
+                               segment_threshold=3, t_factor=0.5):
+        """Performs correlation matrix clustering of the segments to sum
+        similar segments, subject to threshold criteria. The normalised
+        cross-correlation matrix of the VDF segments and the pairwise
+        Euclidean distances of the correlation matrix are calculated.
+        The distances are used for hierarchical clustering, in order
+        to identify clusters of similar segments. If segments in a cluster
+        have lower correlation score to other segments in the cluster than
+        correlation threshold, they will be discarded. Segments fulfilling
+        the correlation threshold criteria will be summed. The vectors of
+        each segment sum will be updated accordingly, so that the vectors of
+        each resulting segment sum are all the vectors of the original
+        individual segments belonging to the cluster. Each vector is
+        assigned an intensity that is the integrated intensity
         of the segment it originates from.
 
         Parameters
         ----------
         corr_threshold : float
-            Segments will be summed if they have a normalized cross-
-            correlation above corr_threshold. Must be between 0 and 1.
+            Segments in a cluster will be summed if they have a
+            normalized cross-correlation above corr_threshold to all other
+            segments belonging to the cluster, or otherwise the segment will
+            be discarded. Must be between -1 and 1.
         vector_threshold : int, optional
-            Correlated segments having a number of vectors less than
+            Summed segments having a number of vectors less than
             vector_threshold will be discarded.
         segment_threshold : int, optional
-            Correlated segment intensities that lie in a region where
-            a number of segments less than segment_thresholdhave been
+            Summed segment intensities that lie in a region where
+            a number of segments less than segment_threshold have been
             found, are set to 0, i.e. the resulting segment will only
             have intensities above 0 where at least a number of
-            segment_threshold segments have intensitives above 0.
+            segment_threshold segments have intensities above 0.
+        t_factor : float, optional
+            Threshold that will be used to find flat clusters is given by
+            t_factor times to maximum of the distance matrix. See the
+            documentation for scipy.cluster.hierarchy.fcluster for details.
 
         Returns
         -------
         vdfseg : VDFSegment
             The VDFSegment instance updated according to the image
             correlation results.
-        """
-        vectors = self.vectors_of_segments.data
-
+        """       
         if segment_threshold > vector_threshold:
             raise ValueError("segment_threshold must be smaller than or "
                              "equal to vector_threshold.")
 
+        vectors = self.vectors_of_segments.data
         segments = self.segments.data.copy()
         num_vectors = np.shape(vectors)[0]
         gvectors = np.array(np.empty(num_vectors, dtype=object))
@@ -322,70 +332,94 @@ class VDFSegment:
         for i in np.arange(num_vectors):
             gvectors[i] = np.array(vectors[i].copy())
             vector_indices[i] = np.array([i], dtype=int)
+        # Calculate the normalised correlation matrix
+        corr_mat = self.get_ncc_matrix().data
+        # Calculate pairwise Euclidean distances matrix of the correlation matrix
+        corr_dist_mat = sch.distance.pdist(corr_mat, 'euclidean')
+        # Hierarchical clustering of the distances to get linkage
+        links = sch.linkage(corr_dist_mat, method='complete')
+        # Find flat clusters from the linkage
+        clusters = sch.fcluster(links, t_factor * np.max(corr_dist_mat),
+                                'distance')
+        cluster_indices_unique, cluster_counts = np.unique(
+            clusters, return_counts=True)
+        # Check which clusters have more than vector threshold number of entries:
+        cluster_indices = cluster_indices_unique[
+            np.where(cluster_counts >= vector_threshold)]
+        num_clusters = np.shape(cluster_indices)[0]
 
         correlated_segments = np.zeros_like(segments[:1])
         correlated_vectors = np.array([0.], dtype=object)
         correlated_vectors[0] = np.array(np.zeros_like(vectors[:1]))
         correlated_vector_indices = np.array([0], dtype=object)
         correlated_vector_indices[0] = np.array([0])
-        i = 0
-        pbar = tqdm(total=np.shape(segments)[0])
-        while np.shape(segments)[0] > i:
-            # For each segment, calculate the normalized cross-correlation to
-            # all other segments, and define add_indices for those with a value
-            # above corr_threshold.
-            corr_list = list(map(
-                lambda x: norm_cross_corr(x, template=segments[i]),
-                segments))
 
-            corr_add = list(map(lambda x: x > corr_threshold, corr_list))
-            add_indices = np.where(corr_add)
-            # If there are more add_indices than vector_threshold,
-            # sum segments and add their vectors. Otherwise, discard segment.
-            if (np.shape(add_indices[0])[0] >= vector_threshold and
-                    np.shape(add_indices[0])[0] > 1):
-                new_segment = np.array([np.sum(segments[add_indices],
-                                               axis=0)])
-                if segment_threshold > 1:
-                    segment_check = np.zeros_like(segments[add_indices],
-                                                  dtype=int)
-                    segment_check[np.where(segments[add_indices])] = 1
-                    segment_check = np.sum(segment_check, axis=0, dtype=int)
-                    segment_mask = np.zeros_like(segments[0], dtype=bool)
-                    segment_mask[
-                        np.where(segment_check >= segment_threshold)] = 1
-                    new_segment = new_segment * segment_mask
-                correlated_segments = np.append(correlated_segments,
-                                                new_segment, axis=0)
-                add_indices = add_indices[0]
-                new_vectors = np.array([0], dtype=object)
-                new_vectors[0] = np.concatenate(gvectors[add_indices],
-                                                axis=0).reshape(-1, 2)
-                correlated_vectors = np.append(correlated_vectors,
-                                               new_vectors, axis=0)
-                new_indices = np.array([0], dtype=object)
-                new_indices[0] = np.concatenate(vector_indices[add_indices],
-                                                axis=0).reshape(-1, 1)
-                correlated_vector_indices = np.append(correlated_vector_indices,
-                                                      new_indices, axis=0)
-            elif np.shape(add_indices[0])[0] >= vector_threshold:
-                add_indices = add_indices[0]
-                correlated_segments = np.append(correlated_segments,
-                                                segments[add_indices],
-                                                axis=0)
-                correlated_vectors = np.append(correlated_vectors,
-                                               gvectors[add_indices], axis=0)
-                correlated_vector_indices = np.append(correlated_vector_indices,
-                                                      vector_indices[
-                                                          add_indices],
-                                                      axis=0)
-            else:
-                add_indices = i
-            segments = np.delete(segments, add_indices, axis=0)
-            gvectors = np.delete(gvectors, add_indices, axis=0)
-            vector_indices = np.delete(vector_indices, add_indices, axis=0)
+        # Iterate through the segment clusters that have more than
+        # vector_threshold entries
+        for num, cluster_index in zip(np.arange(num_clusters), cluster_indices):
+            segment_cluster_indices = np.where(clusters == cluster_index)
+            # Extract the correlation matrix for only the segments in the cluster
+            corr_mat_cluster = corr_mat[:][np.where(clusters == cluster_index)]
+            corr_mat_cluster = corr_mat_cluster.T[
+                np.where(clusters == cluster_index)].T
+            # Check if there are correlation scores below the correlation threshold
+            if not np.all(
+                    corr_mat_cluster[corr_mat_cluster != 1] < corr_threshold):
+                if np.min(corr_mat_cluster) < corr_threshold:
+                    # If correlation scores are below the threshold, delete
+                    # the segment that gives lowest average value to all the others
+                    while np.min(corr_mat_cluster) < corr_threshold:
+                        corr_mat_cluster_averages = np.average(corr_mat_cluster,
+                                                               axis=1)
+                        delete_index = np.where(
+                            corr_mat_cluster_averages == np.min(
+                                corr_mat_cluster_averages))
+                        corr_mat_cluster = np.delete(corr_mat_cluster,
+                                                     delete_index, axis=0)
+                        corr_mat_cluster = np.delete(corr_mat_cluster,
+                                                     delete_index, axis=1)
+                        segment_cluster_indices = np.delete(
+                            segment_cluster_indices, delete_index, axis=1)
+                # If there are a number of segments remaining that exceeds
+                # or equates the vector threshold, sum the segments in the cluster
+                # and add it to the list of correlated segments. Also collect the
+                # vectors corresponding to the segments.
+                if np.shape(segment_cluster_indices)[0] > 0:
+                    if np.shape(segment_cluster_indices)[1] >= vector_threshold:
+                        new_segment = np.array([np.sum(
+                            segments[segment_cluster_indices[0]], axis=0)])
 
-        pbar.close()
+                        if segment_threshold > 1:
+                            segment_check = np.zeros_like(
+                                segments[segment_cluster_indices[0]],
+                                dtype=int)
+                            segment_check[np.where(
+                                segments[segment_cluster_indices[0]])] = 1
+                            segment_check = np.sum(segment_check, axis=0,
+                                                   dtype=int)
+                            segment_mask = np.zeros_like(segments[0],
+                                                         dtype=bool)
+                            segment_mask[
+                                np.where(
+                                    segment_check >= segment_threshold)] = 1
+                            new_segment = new_segment * segment_mask
+
+                        correlated_segments = np.append(correlated_segments,
+                                                        new_segment, axis=0)
+                        new_vectors = np.array([0], dtype=object)
+                        new_vectors[0] = np.concatenate(
+                            gvectors[segment_cluster_indices[0]],
+                            axis=0).reshape(-1, 2)
+                        correlated_vectors = np.append(correlated_vectors,
+                                                       new_vectors, axis=0)
+                        new_indices = np.array([0], dtype=object)
+                        new_indices[0] = np.concatenate(
+                            vector_indices[segment_cluster_indices[0]],
+                            axis=0).reshape(-1, 1)
+                        correlated_vector_indices = np.append(
+                            correlated_vector_indices,
+                            new_indices, axis=0)
+
         correlated_segments = np.delete(correlated_segments, 0, axis=0)
         correlated_vectors = np.delete(correlated_vectors, 0, axis=0)
         correlated_vector_indices = np.delete(correlated_vector_indices,
