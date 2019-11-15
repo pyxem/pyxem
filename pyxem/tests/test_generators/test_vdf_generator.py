@@ -18,7 +18,6 @@
 
 import pytest
 import numpy as np
-import warnings
 
 from pyxem.generators.vdf_generator import VDFGenerator
 

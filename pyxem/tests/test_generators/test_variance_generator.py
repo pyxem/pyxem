@@ -18,7 +18,6 @@
 
 import pytest
 import numpy as np
-import warnings
 
 from pyxem.generators.variance_generator import VarianceGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D

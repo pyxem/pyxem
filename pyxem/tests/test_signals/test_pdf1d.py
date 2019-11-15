@@ -18,7 +18,6 @@
 
 import pytest
 import numpy as np
-import warnings
 
 from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 

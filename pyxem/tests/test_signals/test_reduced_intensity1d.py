@@ -18,7 +18,6 @@
 
 import pytest
 import numpy as np
-import warnings
 
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
