@@ -79,9 +79,7 @@ class TestVarianceGenerator:
             dqe
     ):
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            vardps = variance_generator.get_diffraction_variance(dqe)
+        vardps = variance_generator.get_diffraction_variance(dqe)
         assert isinstance(vardps, DiffractionVariance2D)
 
         mean_dp = np.array(
