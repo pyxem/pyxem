@@ -72,6 +72,20 @@ class ReducedIntensityGenerator1D():
         """
         self.signal.axes_manager.signal_axes[0].scale = calibration
 
+    def set_diffraction_offset(self, offset):
+        """
+        Defines the offset for the signal axis variable s in terms of
+        A^-1 per pixel. Note that s is defined here as
+        s = 2 sin(theta)/lambda = 1/d, where theta is the scattering angle,
+        lambda the wavelength, and d the reciprocal spacing.
+
+        Parameters
+        ----------
+        offset: float
+                    Scattering vector offset in terms of A^-1 per pixel.
+        """
+        self.signal.axes_manager.signal_axes[0].offset = offset
+
     def set_s_cutoff(self, s_min, s_max):
         """
         Scattering vector cutoff for the purposes of fitting an atomic scattering
