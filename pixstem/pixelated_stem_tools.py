@@ -66,7 +66,8 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     >>> import matplotlib.pyplot as plt
     >>> cax = plt.imshow(image_masked)
     """
-    x, y = np.ogrid[-centerY:imageSizeY - centerY, -centerX:imageSizeX - centerX]
+    x, y = np.ogrid[-centerY:imageSizeY - centerY,
+                    -centerX:imageSizeX - centerX]
     mask = x * x + y * y <= radius * radius
     return (mask)
 
@@ -134,7 +135,8 @@ def _get_corner_values(s, corner_size=0.05):
     s_corner00 = s.isig[:a0_range + 1, :a1_range + 1]
     s_corner01 = s.isig[:a0_range + 1, am[1].high_index - a1_range:]
     s_corner10 = s.isig[am[0].high_index - a0_range:, :a1_range + 1]
-    s_corner11 = s.isig[am[0].high_index - a0_range:, am[1].high_index - a1_range:]
+    s_corner11 = \
+        s.isig[am[0].high_index - a0_range:, am[1].high_index - a1_range:]
 
     corner00 = _get_signal_mean_position_and_value(s_corner00)
     corner01 = _get_signal_mean_position_and_value(s_corner01)

@@ -957,9 +957,9 @@ class TestAngularSliceRadialIntegration:
         assert (s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
         with pytest.raises(ValueError):
-                s.angular_slice_radial_integration(slice_overlap=1.2)
+            s.angular_slice_radial_integration(slice_overlap=1.2)
         with pytest.raises(ValueError):
-                s.angular_slice_radial_integration(slice_overlap=-0.2)
+            s.angular_slice_radial_integration(slice_overlap=-0.2)
 
 
 class TestPixelatedStemVirtualAnnularDarkField:
@@ -1155,6 +1155,7 @@ class TestPixelatedStemTemplateWithBinaryImage:
 class TestPixelatedStemFindPeaks:
 
     method1 = ['dog', 'log']
+
     @pytest.mark.parametrize('methods', method1)
     def test_simple(self, methods):
         s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
@@ -1166,7 +1167,7 @@ class TestPixelatedStemFindPeaks:
     def test_lazy_input(self, methods):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks(method = methods)
+        peak_array = s.find_peaks(method=methods)
         assert s.data.shape[:2] == peak_array.shape
         assert hasattr(peak_array, 'compute')
 
@@ -1174,7 +1175,7 @@ class TestPixelatedStemFindPeaks:
     def test_lazy_output(self, methods):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks(method = methods, lazy_result=False)
+        peak_array = s.find_peaks(method=methods, lazy_result=False)
         assert s.data.shape[:2] == peak_array.shape
         assert not hasattr(peak_array, 'compute')
 
@@ -1225,8 +1226,10 @@ class TestPixelatedStemFindPeaks:
         data[:, :, 49:52, 49:52] = 100
         data[:, :, 19:22, 9:12] = 10
         s = PixelatedSTEM(data)
-        peak_array0 = s.find_peaks(method = methods, normalize_value=100, lazy_result=False)
-        peak_array1 = s.find_peaks(method = methods, normalize_value=10, lazy_result=False)
+        peak_array0 = s.find_peaks(method=methods,
+                                   normalize_value=100, lazy_result=False)
+        peak_array1 = s.find_peaks(method=methods,
+                                   normalize_value=10, lazy_result=False)
         for ix, iy in np.ndindex(peak_array0.shape):
             assert (peak_array0[ix, iy] == [[50, 50]]).all()
             assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
@@ -1237,7 +1240,7 @@ class TestPixelatedStemFindPeaks:
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = PixelatedSTEM(np.random.random(size=shape))
-        peak_array = s.find_peaks(method = methods, lazy_result=False)
+        peak_array = s.find_peaks(method=methods, lazy_result=False)
         assert peak_array.shape == tuple(shape[:-2])
 
 
@@ -1318,13 +1321,16 @@ class TestPixelatedStemShiftDiffraction:
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
 
+
 class TestSubtractingDiffractionBackground():
+
     method1 = ['difference of gaussians', 'median kernel', 'radial median']
 
     @pytest.mark.parametrize('methods', method1)
     def test_simple(self, methods):
         s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
-        s_rem = s.subtract_diffraction_background(method=methods, centre_x = 5, centre_y = 10)
+        s_rem = s.subtract_diffraction_background(method=methods,
+                                                  centre_x=5, centre_y=10)
         assert s_rem.data.shape == s.data.shape
         assert hasattr(s_rem.data, 'compute')
 
@@ -1332,7 +1338,8 @@ class TestSubtractingDiffractionBackground():
     def test_lazy_input(self, methods):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 10, 20)))
-        s_rem = s.subtract_diffraction_background(method=methods, centre_x = 5, centre_y = 10)
+        s_rem = s.subtract_diffraction_background(method=methods,
+                                                  centre_x=5, centre_y=10)
         assert s.data.shape == s_rem.data.shape
         assert hasattr(s_rem.data, 'compute')
 
@@ -1340,8 +1347,9 @@ class TestSubtractingDiffractionBackground():
     def test_lazy_output(self, methods):
         data = np.random.randint(100, size=(3, 2, 20, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 20, 20)))
-        s_rem = s.subtract_diffraction_background(method=methods, lazy_result=False, centre_x = 10, centre_y = 10)
-        assert s.data.shape ==  s_rem.data.shape
+        s_rem = s.subtract_diffraction_background(
+            method=methods, lazy_result=False, centre_x=10, centre_y=10)
+        assert s.data.shape == s_rem.data.shape
         assert not hasattr(s_rem.data, 'compute')
 
     @pytest.mark.parametrize('methods', method1)
@@ -1357,7 +1365,8 @@ class TestSubtractingDiffractionBackground():
         ax_na[0].scale, ax_na[1].scale = 35, 35
         ax_na[0].offset, ax_na[1].offset = 54, 12
         ax_na[0].units, ax_na[1].units = 'nm', 'nm'
-        s_temp = s.subtract_diffraction_background(method=methods, centre_x = 10, centre_y = 10)
+        s_temp = s.subtract_diffraction_background(method=methods,
+                                                   centre_x=10, centre_y=10)
         assert s.data.shape == s_temp.data.shape
         ax_sa_t = s_temp.axes_manager.signal_axes
         ax_na_t = s_temp.axes_manager.navigation_axes
@@ -1385,8 +1394,10 @@ class TestSubtractingDiffractionBackground():
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = PixelatedSTEM(np.random.random(size=shape))
-        st = s.subtract_diffraction_background(method=methods, centre_x = 25, centre_y = 25)
+        st = s.subtract_diffraction_background(method=methods,
+                                               centre_x=25, centre_y=25)
         assert st.data.shape == tuple(shape)
+
 
 class TestPixelatedStemIntensityPeaks():
 
@@ -1409,7 +1420,7 @@ class TestPixelatedStemIntensityPeaks():
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
         peak_array = s.find_peaks()
-        intensity_array = s.intensity_peaks(peak_array,lazy_result=False)
+        intensity_array = s.intensity_peaks(peak_array, lazy_result=False)
         assert s.data.shape[:2] == intensity_array.shape
         assert not hasattr(intensity_array, 'compute')
 
@@ -1467,7 +1478,8 @@ class TestPixelatedStemPeakPositionRefinement():
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
         peak_array = s.find_peaks()
-        refined_peak_array = s.peak_position_refinement_com(peak_array, 4, lazy_result=False)
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False)
         assert s.data.shape[:2] == refined_peak_array.shape
         assert not hasattr(refined_peak_array, 'compute')
 
@@ -1485,7 +1497,8 @@ class TestPixelatedStemPeakPositionRefinement():
         peaks = s.find_peaks(
                 min_sigma=min_sigma, max_sigma=max_sigma,
                 sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
-        refined_peaks = s.peak_position_refinement_com(peaks, 4, lazy_result=False)
+        refined_peaks = s.peak_position_refinement_com(peaks,
+                                                       4, lazy_result=False)
         assert refined_peaks[0, 0][0].tolist() == [50., 20.]
         assert refined_peaks[0, 1][0].tolist() == [51., 21.]
         assert refined_peaks[0, 2][0].tolist() == [52., 22.]
@@ -1493,15 +1506,14 @@ class TestPixelatedStemPeakPositionRefinement():
         assert refined_peaks[1, 1][0].tolist() == [54., 24.]
         assert refined_peaks[1, 2][0].tolist() == [55., 25.]
 
-
-
     @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
     def test_different_dimensions(self, nav_dims):
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = PixelatedSTEM(np.random.random(size=shape))
         peak_array = s.find_peaks()
-        refined_peak_array = s.peak_position_refinement_com(peak_array, 4, lazy_result=False)
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False)
         assert refined_peak_array.shape == tuple(shape[:-2])
 
 

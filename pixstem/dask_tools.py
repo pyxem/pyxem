@@ -818,27 +818,24 @@ def _find_hot_pixels(dask_array, threshold_multiplier=500, mask_array=None):
 def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
     """Intensity of the peaks is calculate by multipying the peaks positions
        with a mask and taking the mean value.
-
     Parameters
     ----------
     frame : NumPy 2D array
     disk : NumPy 2D array
         Must be smaller than frame
-    peaks: NumPy Object 
+        peaks: NumPy Object
         can have multiple peaks per image
-
     Returns
     -------
-    intensity_array : NumPy array with 
-        peak coordinates and intensity of peaks
-
+    intensity_array : NumPy array with
+    peak coordinates and intensity of peaks
     Examples
     --------
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> import pixstem.dask_tools as dt
     >>> peaks = dt._peak_find_dog_single_frame(s.data[0, 0])
     >>> intensity = dt._intensity_peaks_image_single_frame
-        (s.data[0, 0], peaks, 6)
+    ...   (s.data[0, 0], peaks, 6)
 
     """
     array_shape = peaks.shape
@@ -846,15 +843,16 @@ def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
     size = np.shape(frame)
     intensity_array = np.zeros((array_shape[0], 3), dtype='float64')
     for i in range(array_shape[0]):
-        centerx = int(peaks[i, 0])
-        centery = int(peaks[i, 1])
+        cx = int(peaks[i, 0])
+        cy = int(peaks[i, 1])
         intensity_array[i, 0] = peaks[i, 0]
         intensity_array[i, 1] = peaks[i, 1]
-        if ((centerx - r_disk < 0) | (centerx + r_disk + 1 >= size[0])
-            | (centery - r_disk < 0) | (centery + r_disk + 1 >= size[1])):
+        if ((cx - r_disk < 0) | (cx + r_disk + 1 >= size[0])
+                | (cy - r_disk < 0) | (cy + r_disk + 1 >= size[1])):
             intensity_array[i, 2] = 0
         else:
-            subframe = frame[centerx - r_disk:centerx + r_disk + 1, centery - r_disk:centery + r_disk + 1]
+            subframe = \
+                frame[cx - r_disk:cx + r_disk + 1, cy - r_disk:cy + r_disk + 1]
             intensity_array[i, 2] = np.mean(mask * subframe)
 
     return intensity_array
@@ -862,7 +860,6 @@ def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
 
 def _intensity_peaks_image_chunk(data, peak_array, r_disk):
     """Template match a circular disk with a 4D dataset.
-
     Parameters
     ----------
     data : NumPy 4D array
@@ -871,15 +868,16 @@ def _intensity_peaks_image_chunk(data, peak_array, r_disk):
     Returns
     -------
     intensity array : NumPy object with x, y and intensity for every peak
-
     Examples
     --------
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> import pixstem.dask_tools as dt
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
-    >>> intensity_array =  dt.intensity_peaks_image_chunk(s.data, peak_array, 6)
+    >>> intensity_array =  dt.intensity_peaks_image_chunk(
+    ... s.data, peak_array, 6)
 
     """
+
     output_array = np.empty(data.shape[:-2], dtype=np.object)
     # print('data shape: ',data.shape)
     # print('peak array shape: ', peak_array.shape)
@@ -915,7 +913,8 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
     >>> import pixstem.dask_tools as dt
     >>> peak_array = dt._peak_find_dog(dask_array)
-    >>> intensity_array = dt._intensity_peaks_image(dask_array, peak_array, 6)
+    >>> intensity_array = dt._intensity_peaks_image(
+    ... dask_array, peak_array, 6)
     >>> intensity_array_computed = intensity_array.compute()
 
     """
@@ -939,8 +938,9 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
     kwargs_intensity_peaks = {
         'r_disk': r_disk}
     output_array = da.map_blocks(
-        _intensity_peaks_image_chunk, dask_array_rechunked, peak_array_rechunked,
-        drop_axis=drop_axis, dtype=np.object,**kwargs_intensity_peaks)
+        _intensity_peaks_image_chunk, dask_array_rechunked,
+        peak_array_rechunked, drop_axis=drop_axis,
+        dtype=np.object, **kwargs_intensity_peaks)
 
     return output_array
 
@@ -952,7 +952,7 @@ def _background_removal_single_frame_dog(frame, **kwargs):
     ----------
     frame : NumPy 2D array
     **kwargs: min_sigma: float
-              max_sigma: float     
+          max_sigma: float
 
     Returns
     -------
@@ -987,7 +987,7 @@ def _background_removal_chunk_dog(data, **kwargs):
     ----------
     data : NumPy 4D array
     **kwargs: min_sigma: float
-              max_sigma: float     
+          max_sigma: float
 
     Returns
     -------
@@ -1016,7 +1016,7 @@ def _background_removal_dog(dask_array, **kwargs):
     ----------
     dask_array : Dask 4D array
     **kwargs: min_sigma: float
-              max_sigma: float     
+          max_sigma: float
 
     Returns
     -------
@@ -1041,50 +1041,44 @@ def _background_removal_dog(dask_array, **kwargs):
     chunks = tuple(chunks)
     dask_array_rechunked = dask_array.rechunk(chunks=chunks)
     output_array = da.map_blocks(
-        _background_removal_chunk_dog, dask_array_rechunked, dtype=np.float32, **kwargs)
+        _background_removal_chunk_dog, dask_array_rechunked,
+        dtype=np.float32, **kwargs)
     return output_array
 
 
 def _background_removal_single_frame_median(frame, **kwargs):
     """Background removal using median filter.
-
     Parameters
     ----------
     frame : NumPy 2D array
-    **kwargs: footprint: float  
-
+    **kwargs: footprint: float
     Returns
     -------
     background_removed = Numpy 2D array
-
     Examples
     --------
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> import pixstem.dask_tools as dt
     >>> s_rem = _background_removal_single_frame_median(s.data[0, 0])
+
     """
     footprint = 19
-
     if 'footprint' in kwargs.keys():
         footprint = kwargs['footprint']
 
     bg_subtracted = frame - ndi.median_filter(frame, size=footprint)
-
     return bg_subtracted
 
 
 def _background_removal_chunk_median(data, **kwargs):
     """Background removal using median filter.
-
     Parameters
     ----------
     data : NumPy 4D array
-    **kwargs: footprint: float       
-
+    **kwargs: footprint: float
     Returns
     -------
     output_array = Numpy 4D array
-
     Examples
     --------
     >>> s = ps.dummy_data.get_cbed_signal()
@@ -1103,16 +1097,13 @@ def _background_removal_chunk_median(data, **kwargs):
 
 def _background_removal_median(dask_array, **kwargs):
     """Background removal using median filter.
-
     Parameters
     ----------
     dask_array : Dask 4D array
-    **kwargs: footprint: float   
-
+    **kwargs: footprint: float
     Returns
     -------
     output_array = Dask 4D array
-
     Examples
     --------
     >>> s = ps.dummy_data.get_cbed_signal()
@@ -1132,20 +1123,19 @@ def _background_removal_median(dask_array, **kwargs):
     chunks = tuple(chunks)
     dask_array_rechunked = dask_array.rechunk(chunks=chunks)
     output_array = da.map_blocks(
-        _background_removal_chunk_median, dask_array_rechunked
-        , dtype=np.float32, **kwargs)
+        _background_removal_chunk_median, dask_array_rechunked,
+        dtype=np.float32, **kwargs)
     return output_array
 
 
 def _background_removal_single_frame_radial_median(frame, **kwargs):
     """Background removal by subtracting median of pixel at the same
-    radius from the center. 
-
+        radius from the center.
     Parameters
     ----------
     frame : NumPy 2D array
     **kwargs: centre_x: int
-              centre_y: int  
+          centre_y: int
 
     Returns
     -------
@@ -1182,14 +1172,14 @@ def _background_removal_single_frame_radial_median(frame, **kwargs):
 
 def _background_removal_chunk_radial_median(data, **kwargs):
     """Background removal by subtracting median of pixel at the same
-    radius from the center. 
+        radius from the center.
 
     Parameters
     ----------
     data : NumPy 4D array
     **kwargs: centre_x: int
-              centre_y: int  
-              radial_array_size: int
+          centre_y: int
+          radial_array_size: int
 
 
     Returns
@@ -1214,18 +1204,16 @@ def _background_removal_chunk_radial_median(data, **kwargs):
 
 def _background_removal_radial_median(dask_array, **kwargs):
     """Background removal by subtracting median of pixel at the same
-    radius from the center. 
+        radius from the center.
 
     Parameters
     ----------
     dask_array : Dask 4D array
     **kwargs: centre_x: int
-              centre_y: int   
-
+          centre_y: int
     Returns
     -------
     output_array = Dask 4D array
-
     Examples
     --------
     >>> s = ps.dummy_data.get_cbed_signal()
@@ -1245,8 +1233,8 @@ def _background_removal_radial_median(dask_array, **kwargs):
     chunks = tuple(chunks)
     dask_array_rechunked = dask_array.rechunk(chunks=chunks)
     output_array = da.map_blocks(
-        _background_removal_chunk_radial_median, dask_array_rechunked
-        , dtype=np.float32, **kwargs)
+        _background_removal_chunk_radial_median, dask_array_rechunked,
+        dtype=np.float32, **kwargs)
     return output_array
 
 
@@ -1269,12 +1257,12 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
     """
     new_peak = np.zeros(peaks.shape, dtype='float64')
 
-    if (peaks.size == 0):
+    if peaks.size == 0:
         return peaks
     else:
         for i in range(peaks.shape[0]):
-            subframe = pst._com_experimental_square(frame, np.asarray(peaks[i],
-                      dtype=np.uint16), square_size)
+            subframe = pst._com_experimental_square(
+                frame, np.asarray(peaks[i], dtype=np.uint16), square_size)
             if subframe is None:
                 new_peak[i, 0] = peaks[i, 0].astype('float64')
                 new_peak[i, 1] = peaks[i, 1].astype('float64')
@@ -1311,8 +1299,8 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
         islice = np.s_[index]
         frame[:] = data[islice]
         peaks = peak_array[islice][0, 0]
-        output_array[islice] = _peak_refinement_centre_of_mass_frame(frame,
-                             peaks, square_size)
+        output_array[islice] = _peak_refinement_centre_of_mass_frame(
+            frame, peaks, square_size)
     return output_array
 
 
@@ -1326,8 +1314,6 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
         2 dimensions.
     peak_array : Dask array
     square_size : Even integer
-    
-
     Returns
     -------
     peak_array : A dask array with the x and y positions of the refined peaks
@@ -1354,6 +1340,7 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
 
     output_array = da.map_blocks(
         _peak_refinement_centre_of_mass_chunk, dask_array_rechunked,
-        peak_array_rechunked, drop_axis=drop_axis, dtype=np.object, **kwargs_refinement)
+        peak_array_rechunked, drop_axis=drop_axis,
+        dtype=np.object, **kwargs_refinement)
 
     return output_array
