@@ -876,8 +876,8 @@ class PixelatedSTEM(Signal2D):
         >>> s = ps.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks()
         >>> refined_peak_array = s.peak_position_refinement_com(peak_array, 20)
-        >>> refined_peak_array_com =
-        ...     refined_peak_array.compute(show_progressbar=False)
+        >>> refined_peak_array_com = refined_peak_array.compute(
+        ...     show_progressbar=False)
         >>> s.add_peak_array_as_markers(refined_peak_array_com)
         >>> s.plot()
         """
@@ -999,9 +999,9 @@ class PixelatedSTEM(Signal2D):
             --------
             >>> s = ps.dummy_data.get_cbed_signal()
             >>> s_rem = s.subtract_diffraction_background(
-            ...     method = 'median kernel', footprint = 20)
-            >>> s_rem_com = s_rem.compute()
-            >>> s_rem_com.plot()
+            ...     method = 'median kernel', footprint = 20,
+            ...     lazy_result=False)
+            >>> s_rem.plot()
 
         """
         if self._lazy:
