@@ -828,14 +828,7 @@ def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
     Returns
     -------
     intensity_array : NumPy array with
-    peak coordinates and intensity of peaks
-    Examples
-    --------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
-    >>> peaks = dt._peak_find_dog_single_frame(s.data[0, 0])
-    >>> intensity = dt._intensity_peaks_image_single_frame
-    ...   (s.data[0, 0], peaks, 6)
+        peak coordinates and intensity of peaks
 
     """
     array_shape = peaks.shape
@@ -1005,11 +998,6 @@ def _background_removal_dog(dask_array, **kwargs):
     -------
     output_array = Dask 4D array
 
-    Examples
-    --------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
-    >>> s_rem = _background_removal_dog(s.data)
     """
     array_dims = len(dask_array.shape)
     if array_dims < 2:
