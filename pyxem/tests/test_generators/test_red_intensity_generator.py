@@ -42,6 +42,10 @@ def test_scattering_calibration(red_int_generator):
     red_int_generator.set_diffraction_calibration(calibration=calib)
     s_scale = red_int_generator.signal.axes_manager.signal_axes[0].scale
     assert s_scale == calib
+    offset = 0.05
+    red_int_generator.set_diffraction_offset(offset=offset)
+    s_offset = red_int_generator.signal.axes_manager.signal_axes[0].offset
+    assert s_offset == offset
 
 
 def test_fit_atomic_scattering(red_int_generator):

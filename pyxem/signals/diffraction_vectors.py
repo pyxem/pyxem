@@ -32,9 +32,11 @@ from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
-from pyxem.utils.vector_utils import get_npeaks
+from pyxem.utils.vector_utils import get_npeaks, filter_vectors_ragged
+from pyxem.utils.vector_utils import filter_vectors_edge_ragged
 from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
+
 
 """
 Signal class for diffraction vectors.
@@ -70,6 +72,8 @@ class DiffractionVectors(BaseSignal):
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
+        self.detector_shape = None
+        self.pixel_calibration = None
 
     @classmethod
     def from_peaks(cls, peaks, center, calibration):
@@ -115,7 +119,7 @@ class DiffractionVectors(BaseSignal):
         Parameters
         ----------
         xlim : float
-            The maximum x coordinate in reciprocal Angstroms to be plotted.
+            The maximum x coordinate to be plotted.
         ylim : float
             The maximum y coordinate in reciprocal Angstroms to be plotted.
         unique_vectors : DiffractionVectors, optional
@@ -163,7 +167,6 @@ class DiffractionVectors(BaseSignal):
             The plot as a matplotlib figure.
 
         """
-
         fig = plt.figure()
         ax = fig.add_subplot(111)
         offset, scale = 0., 1.
@@ -425,8 +428,7 @@ class DiffractionVectors(BaseSignal):
                 peaks_n_counts_temp = unique_vectors_counts[
                     clusters.labels_ == n]
                 unique_peaks[n] = np.average(
-                    peaks_n_temp, weights=peaks_n_counts_temp,
-                    axis=0)
+                    peaks_n_temp, weights=peaks_n_counts_temp, axis=0)
 
         # Manipulate into DiffractionVectors class
         if unique_peaks.size > 0:
@@ -436,6 +438,97 @@ class DiffractionVectors(BaseSignal):
             return unique_peaks, clusters
         else:
             return unique_peaks
+
+    def filter_vectors_magnitudes(self, min_magnitude, max_magnitude,
+                                  *args, **kwargs):
+        """Filter the diffraction vectors to accept only those with magnitudes
+        within a user specified range.
+
+        Parameters
+        ----------
+        min_magnitude : float
+            Minimum allowed vector magnitude.
+        max_magnitude : float
+            Maximum allowed vector magnitude.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
+
+        Returns
+        -------
+        filtered_vectors : DiffractionVectors
+            Diffraction vectors within allowed magnitude tolerances.
+        """
+        # If ragged the signal axes will not be defined
+        if len(self.axes_manager.signal_axes) == 0:
+            filtered_vectors = self.map(filter_vectors_ragged,
+                                        min_magnitude=min_magnitude,
+                                        max_magnitude=max_magnitude,
+                                        inplace=False,
+                                        *args, **kwargs)
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(0)
+        # Otherwise easier to calculate.
+        else:
+            magnitudes = self.get_magnitudes()
+            magnitudes.data[magnitudes.data < min_magnitude] = 0
+            magnitudes.data[magnitudes.data > max_magnitude] = 0
+            filtered_vectors = self.data[np.where(magnitudes)]
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(1)
+
+        transfer_navigation_axes(filtered_vectors, self)
+
+        return filtered_vectors
+
+    def filter_vectors_detector_edge(self, exclude_width,
+                                     *args, **kwargs):
+        """Filter the diffraction vectors to accept only those not within a
+        user specified proximity to the detector edge.
+
+        Parameters
+        ----------
+        exclude_width : int
+            The width of the region adjacent to the detector edge from which
+            vectors will be excluded.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to map().
+
+        Returns
+        -------
+        filtered_vectors : DiffractionVectors
+            Diffraction vectors within allowed detector region.
+        """
+        x_threshold = self.pixel_calibration * (self.detector_shape[0] / 2) - self.pixel_calibration * exclude_width
+        y_threshold = self.pixel_calibration * (self.detector_shape[1] / 2) - self.pixel_calibration * exclude_width
+        # If ragged the signal axes will not be defined
+        if len(self.axes_manager.signal_axes) == 0:
+            filtered_vectors = self.map(filter_vectors_edge_ragged,
+                                        x_threshold=x_threshold,
+                                        y_threshold=y_threshold,
+                                        inplace=False,
+                                        *args, **kwargs)
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(0)
+        # Otherwise easier to calculate.
+        else:
+            tmp_data = self.data.copy()
+            tmp_data[np.absolute(tmp_data.T[0]) > x_threshold] = 0
+            tmp_data[np.absolute(tmp_data.T[1]) > y_threshold] = 0
+            filtered_vectors = self.data[np.where(tmp_data.T[0])]
+            # Type assignment to DiffractionVectors for return
+            filtered_vectors = DiffractionVectors(filtered_vectors)
+            filtered_vectors.axes_manager.set_signal_dimension(1)
+
+        transfer_navigation_axes(filtered_vectors, self)
+
+        return filtered_vectors
 
     def get_diffracting_pixels_map(self, binary=False):
         """Map of the number of vectors at each navigation position.
@@ -453,7 +546,7 @@ class DiffractionVectors(BaseSignal):
         """
         crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
 
-        if binary == True:
+        if binary is True:
             crystim = crystim == 1
 
         crystim.change_dtype('float')

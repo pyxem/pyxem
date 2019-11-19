@@ -37,8 +37,30 @@ class TestSimpleMaps:
 
     def test_center_direct_beam_cross_correlate(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
-        diffraction_pattern.center_direct_beam(method='cross_correlate', radius_start=1, radius_finish=3)
+        diffraction_pattern.center_direct_beam(method='cross_correlate',
+                                               radius_start=1, radius_finish=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
+
+    def test_center_direct_beam_xc_return_shifts(self, diffraction_pattern):
+        shifts = diffraction_pattern.center_direct_beam(method='cross_correlate',
+                                                        radius_start=1, radius_finish=3,
+                                                        return_shifts=True)
+        ans = np.array([[-0.45, -0.45],
+                        [0.57, 0.57],
+                        [-0.45, -0.45],
+                        [0.52, 0.52]])
+        np.testing.assert_almost_equal(shifts, ans)
+
+    def test_center_direct_beam_blur_return_shifts(self, diffraction_pattern):
+        shifts = diffraction_pattern.center_direct_beam(method='blur',
+                                                        sigma=5,
+                                                        square_width=3,
+                                                        return_shifts=True)
+        ans = np.array([[-1., -1.],
+                        [-0., -0.],
+                        [-1., -1.],
+                        [-0., -0.]])
+        np.testing.assert_almost_equal(shifts, ans)
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
@@ -59,8 +81,10 @@ class TestSimpleMaps:
                       [1.1, 1., 0.],
                       [0., 0., 1.]])
         s = Signal2D(np.asarray([[D, D], [D, D]]))
-        static = diffraction_pattern.apply_affine_transformation(D, inplace=False)
-        dynamic = diffraction_pattern.apply_affine_transformation(s, inplace=False)
+        static = diffraction_pattern.apply_affine_transformation(D,
+                                                                 inplace=False)
+        dynamic = diffraction_pattern.apply_affine_transformation(s,
+                                                                  inplace=False)
         assert np.allclose(static.data, dynamic.data, atol=1e-3)
 
     def test_apply_affine_transformation_with_casting(self, diffraction_pattern):

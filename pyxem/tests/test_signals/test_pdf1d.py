@@ -23,7 +23,7 @@ from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1
 
 
 def test_generate_signal():
-    data = np.ones((1, 10)) * np.arange(4).reshape(4, 1)
+    data = np.ones((1, 10)) * np.arange(1,5).reshape(4, 1)
     data = data.reshape(2, 2, 10)
     pdf = PairDistributionFunction1D(data)
     assert isinstance(pdf, PairDistributionFunction1D)
