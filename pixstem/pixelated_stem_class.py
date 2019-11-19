@@ -997,7 +997,7 @@ class PixelatedSTEM(Signal2D):
             --------
             >>> s = ps.dummy_data.get_cbed_signal()
             >>> s_rem = s.subtract_diffraction_background(
-            ...        method = 'median kernel', footprint = 20)
+            ... method = 'median kernel', footprint = 20)
             >>> s_rem_com = s_rem.compute()
 
         """

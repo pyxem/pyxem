@@ -868,13 +868,6 @@ def _intensity_peaks_image_chunk(data, peak_array, r_disk):
     Returns
     -------
     intensity array : NumPy object with x, y and intensity for every peak
-    Examples
-    --------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
-    >>> peak_array = dt._peak_find_dog_chunk(s.data)
-    >>> intensity_array =  dt.intensity_peaks_image_chunk(
-    ... s.data, peak_array, 6)
 
     """
 
@@ -906,16 +899,6 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
         Same size as the two last dimensions in data.
         The x, y peak positions and intensities are stored in the
         three columns.
-    Examples
-    --------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import dask.array as da
-    >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
-    >>> import pixstem.dask_tools as dt
-    >>> peak_array = dt._peak_find_dog(dask_array)
-    >>> intensity_array = dt._intensity_peaks_image(
-    ... dask_array, peak_array, 6)
-    >>> intensity_array_computed = intensity_array.compute()
 
     """
     array_dims = len(dask_array.shape)
@@ -1104,11 +1087,7 @@ def _background_removal_median(dask_array, **kwargs):
     Returns
     -------
     output_array = Dask 4D array
-    Examples
-    --------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
-    >>> s_rem = _background_removal_dog(s.data)
+
     """
     array_dims = len(dask_array.shape)
     if array_dims < 2:
@@ -1214,11 +1193,7 @@ def _background_removal_radial_median(dask_array, **kwargs):
     Returns
     -------
     output_array = Dask 4D array
-    Examples
-    --------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
-    >>> s_rem = _background_removal_dog(s.data)
+
     """
     array_dims = len(dask_array.shape)
     if array_dims < 2:
