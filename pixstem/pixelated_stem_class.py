@@ -998,9 +998,8 @@ class PixelatedSTEM(Signal2D):
             Examples
             --------
             >>> s = ps.dummy_data.get_cbed_signal()
-            >>> s_rem = s.subtract_diffraction_background(
-            ...     method = 'median kernel', footprint = 20,
-            ...     lazy_result=False)
+            >>> s_rem = s.subtract_diffraction_background(method = 'median kernel',
+            ...     footprint = 20, lazy_result=False, show_progressbar = False)
             >>> s_rem.plot()
 
         """
