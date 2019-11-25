@@ -921,7 +921,7 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
     >>> import dask.array as da
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
-    >>> peak_array = dt._peak_find_dog_chunk(dask_array)
+    >>> peak_array = dt._peak_find_dog(dask_array)
     >>> intensity = dt._intensity_peaks_image_chunk(dask_array, peak_array, 5)
 
     """
@@ -967,8 +967,9 @@ def _background_removal_single_frame_dog(frame, **kwargs):
 
     Examples
     --------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_dog(s.data[0, 0])
     """
 
@@ -992,18 +993,20 @@ def _background_removal_chunk_dog(data, **kwargs):
 
     Parameters
     ----------
-    data : NumPy 4D array
+    data : At least 2 dimensions NumPy array
     **kwargs: min_sigma: float
           max_sigma: float
 
     Returns
     -------
-    output_array = Numpy 4D array
+    output_array: NumPy array, the same dimensions
+        as data
 
     Examples
     --------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_dog(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1021,13 +1024,24 @@ def _background_removal_dog(dask_array, **kwargs):
 
     Parameters
     ----------
-    dask_array : Dask 4D array
+    dask_array : At least 2 dimensions Dask array
     **kwargs: min_sigma: float
           max_sigma: float
 
     Returns
     -------
-    output_array = Dask 4D array
+    output_array: Dask array with the same dimensions
+        as dask_array
+
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> import dask.array as da
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> dask_array = da.from_array(s.data, chunks=(5,5,25, 25))
+    >>> s_rem = ps.PixelatedSTEM(
+    ...     dt._background_removal_dog(dask_array))
 
     """
     array_dims = len(dask_array.shape)
@@ -1062,8 +1076,9 @@ def _background_removal_single_frame_median(frame, **kwargs):
 
     Examples
     --------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """
@@ -1080,17 +1095,19 @@ def _background_removal_chunk_median(data, **kwargs):
 
     Parameters
     ----------
-    data : NumPy 4D array
+    data : At least 2 dimensions NumPy array
     **kwargs: footprint: float
 
     Returns
     -------
-    output_array = Numpy 4D array
+    output_array: NumPy array, the same dimensions
+        as data
 
     Examples
     --------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_median(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1108,12 +1125,23 @@ def _background_removal_median(dask_array, **kwargs):
 
     Parameters
     ----------
-    dask_array : Dask 4D array
+    dask_array : At least 2 dimensions Dask array
     **kwargs: footprint: float
 
     Returns
     -------
-    output_array = Dask 4D array
+    output_array: Dask array, the same dimensions
+        as data
+
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> import dask.array as da
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
+    >>> s_rem = ps.PixelatedSTEM(
+    ...     dt._background_removal_median(dask_array), footprint=20)
 
     """
     array_dims = len(dask_array.shape)
@@ -1146,12 +1174,13 @@ def _background_removal_single_frame_radial_median(frame, **kwargs):
 
     Returns
     -------
-    background_removed = Numpy 2D array
+    background_removed: Numpy 2D array
 
     Examples
     --------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
     """
     centre_x = 128
@@ -1171,7 +1200,8 @@ def _background_removal_single_frame_radial_median(frame, **kwargs):
     r_median = np.zeros(np.max(r) + 1, dtype=np.float64)
 
     for i in range(len(r_median)):
-        r_median[i] = np.median(diff_image_flat[r_flat == i])
+        if(diff_image_flat[r_flat == i].size != 0):
+            r_median[i] = np.median(diff_image_flat[r_flat == i])
     image = frame - r_median[r]
 
     return image
@@ -1183,19 +1213,21 @@ def _background_removal_chunk_radial_median(data, **kwargs):
 
     Parameters
     ----------
-    data : NumPy 4D array
+    data : At least 2 dimensions NumPy array
     **kwargs: centre_x: int
           centre_y: int
           radial_array_size: int
 
     Returns
     -------
-    output_array = Numpy 4D array
+    output_array: NumPy array, the same dimensions
+        as data
 
     Examples
     --------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = _background_removal_chunk_radial_median(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1214,13 +1246,24 @@ def _background_removal_radial_median(dask_array, **kwargs):
 
     Parameters
     ----------
-    dask_array : Dask 4D array
+    dask_array : At least 2 dimensions Dask array
     **kwargs: centre_x: int
           centre_y: int
 
     Returns
     -------
-    output_array = Dask 4D array
+    output_array: Dask array, the same dimensions
+        as data
+
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
+    >>> s_r = ps.PixelatedSTEM(
+    ...     dt._background_removal_radial_median(
+    ...     dask_array, centre_x=128, centre_y=128))
 
     """
     array_dims = len(dask_array.shape)
@@ -1246,16 +1289,22 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
 
     Parameters
     ----------
-    dask_array : Numpy array
-        The two last dimensions are the signal dimensions. Must have at least
-        2 dimensions.
+    frame : Numpy array
     peaks : Numpy array
     square_size : Even Int
 
     Returns
     -------
-    peak_array : A dask array with the x and y positions of the refined peaks
+    peak_array : A Numpy array with the x and y positions of the refined peaks
 
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> peak_array = np.array(([48.,48.],[25.,48.]))
+    >>> r_p_array = dt._peak_refinement_centre_of_mass_frame(
+    ...     s.data[0,0,:,:], peak_array, 20)
 
     """
     new_peak = np.zeros(peaks.shape, dtype='float64')
@@ -1264,12 +1313,13 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
         return peaks
     else:
         for i in range(peaks.shape[0]):
-            subframe = pst._com_experimental_square(
+            subframe = pst._center_of_mass_experimental_square(
                 frame, np.asarray(peaks[i], dtype=np.uint16), square_size)
             if subframe is None:
                 new_peak[i, 0] = peaks[i, 0].astype('float64')
                 new_peak[i, 1] = peaks[i, 1].astype('float64')
             else:
+                subframe = subframe.astype('float64')
                 f_x = (subframe.shape[0]) / 2
                 f_y = (subframe.shape[1]) / 2
                 cx, cy = _center_of_mass_hs(subframe)
@@ -1284,7 +1334,7 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
 
     Parameters
     ----------
-    dask_array : Numpy array
+    data : Numpy array
         The two last dimensions are the signal dimensions. Must have at least
         2 dimensions.
     peak_array : Numpy array
@@ -1292,11 +1342,23 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
 
     Returns
     -------
-    peak_array : A dask array with the x and y positions of the refined peaks
+    peak_array : A NumPy array with the x and y positions of the refined peaks
+
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> peak_array = dt._peak_find_dog_chunk(s.data)
+    >>> r_p_array = dt._peak_refinement_centre_of_mass_chunk(
+    ...     s.data, peak_array, 20)
 
 
     """
     output_array = np.empty(data.shape[:-2], dtype=np.object)
+    if peak_array.ndim != data.ndim:
+        while peak_array.ndim != data.ndim:
+            peak_array = np.expand_dims(peak_array, axis=peak_array.ndim)
     frame = np.zeros(data.shape[-2:])
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
@@ -1321,6 +1383,18 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     Returns
     -------
     peak_array : A dask array with the x and y positions of the refined peaks
+
+    Examples
+    --------
+    >>> import pixstem.api as ps
+    >>> import pixstem.dask_tools as dt
+    >>> import dask.array as da
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
+    >>> peak_array = dt._peak_find_dog(dask_array)
+    >>> r_p_array =dt._peak_refinement_centre_of_mass(
+    ...     dask_array, peak_array, 20)
+    >>> ref_peak_array = r_p_array.compute()
     """
     array_dims = len(dask_array.shape)
     if array_dims < 2:
@@ -1337,6 +1411,11 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
 
     chunks_peak = list(dask_array_rechunked.chunksize[:-2])
     chunks_peak.extend([1, 1])
+
+    if peak_array.ndim != dask_array_rechunked.ndim:
+        while peak_array.ndim != dask_array_rechunked.ndim:
+            peak_array = np.expand_dims(peak_array, axis=peak_array.ndim)
+
     peak_array_rechunked = da.from_array(peak_array, chunks=chunks_peak)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
 
@@ -1356,13 +1435,12 @@ def _center_of_mass_hs(z):
 
     Parameters
     ----------
-    z : np.array (2D)
+    z : 2D NumPy array
 
     Returns
     -------
     cx: The x location of the center of mass
     cy: The y location of the center of mass
-    intensity: mean intensity inside radius_disk of coordinates of com
     """
     s = np.sum(z)
     if s != 0:

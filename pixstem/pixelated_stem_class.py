@@ -854,8 +854,9 @@ class PixelatedSTEM(Signal2D):
 
         Parameters
         ----------
-        peak_array : Numpy object array with x and y
-                    coordinates of the peak positions
+        peak_array : Numpy object array or dask array
+                    object with x and y coordinates
+                    of the peak positions.
         square_size: Even integer, sub image from
                     which the center of mass is
                     calculated.

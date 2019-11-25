@@ -600,6 +600,21 @@ class TestPeakPositionRefinementCOM:
         assert data.shape == (10, 10)
         assert np.sum(data - real_array).sum() == 0
 
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_array_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        chunks = [1] * nav_dims
+        chunks.extend([25, 25])
+        dask_array = da.random.random(size=shape, chunks=chunks)
+        binary_image = sm.disk(5)
+        match_array_dask = dt._template_match_with_binary_image(
+            dask_array, binary_image=binary_image)
+        assert len(dask_array.shape) == nav_dims + 2
+        assert dask_array.shape == match_array_dask.shape
+        match_array = match_array_dask.compute()
+        assert dask_array.shape == match_array.shape
+
 
 class TestBackgroundRemovalDOG:
 
@@ -961,3 +976,31 @@ class TestPeakFindLog:
         dask_array = da.random.random(size=50, chunks=10)
         with pytest.raises(ValueError):
             dt._peak_find_log(dask_array)
+
+
+class TestCenterOfMass():
+
+    def test_centerofmass(self):
+        numpy_array = np.zeros((20, 20))
+        numpy_array[10:15, 5:10] = 1
+        cy, cx = pst._center_of_mass_hs(numpy_array)
+        np.testing.assert_almost_equal(cx, 7)
+        np.testing.assert_almost_equal(cy, 12)
+
+    def test_get_experimental_square(self):
+        numpy_array = np.zeros((20, 20))
+        numpy_array[10:16, 5:11] = 1
+        square_size = 6
+        subf = pst.get_experimental_square(numpy_array, [13, 8], square_size)
+        assert subf.shape[0] == 6
+        assert subf.shape[1] == 6
+        assert subf.all() == 1
+
+    def test_com_experimental_square(self):
+        numpy_array = np.zeros((20, 20))
+        numpy_array[10:16, 5:11] = 1
+        square_size = 6
+        subf = pst._com_experimental_square(numpy_array, [13, 8], square_size)
+        assert subf.shape[0] == 6
+        assert subf.shape[1] == 6
+        assert subf.sum() == (square_size - 1)**2

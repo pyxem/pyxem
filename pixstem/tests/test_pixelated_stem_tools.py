@@ -434,31 +434,3 @@ class TestFindAndRemoveDeadPixels:
         s_orig = s.deepcopy()
         pst.find_and_remove_dead_pixels(s)
         assert (s.data == s_orig.data).all()
-
-
-class TestCenterOfMass():
-
-    def test_centerofmass(self):
-        numpy_array = np.zeros((20, 20))
-        numpy_array[10:15, 5:10] = 1
-        cy, cx = pst._center_of_mass_hs(numpy_array)
-        np.testing.assert_almost_equal(cx, 7)
-        np.testing.assert_almost_equal(cy, 12)
-
-    def test_get_experimental_square(self):
-        numpy_array = np.zeros((20, 20))
-        numpy_array[10:16, 5:11] = 1
-        square_size = 6
-        subf = pst.get_experimental_square(numpy_array, [13, 8], square_size)
-        assert subf.shape[0] == 6
-        assert subf.shape[1] == 6
-        assert subf.all() == 1
-
-    def test_com_experimental_square(self):
-        numpy_array = np.zeros((20, 20))
-        numpy_array[10:16, 5:11] = 1
-        square_size = 6
-        subf = pst._com_experimental_square(numpy_array, [13, 8], square_size)
-        assert subf.shape[0] == 6
-        assert subf.shape[1] == 6
-        assert subf.sum() == (square_size - 1)**2
