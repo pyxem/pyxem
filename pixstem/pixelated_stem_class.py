@@ -834,7 +834,8 @@ class PixelatedSTEM(Signal2D):
             output_array = dt._peak_find_log(
                 dask_array, **kwargs)
         else:
-            print('Method is not a valid name, should be dog or log')
+            raise ValueError(
+                "Method is not a valid name, should be dog or log")
             return
 
         if not lazy_result:
@@ -850,12 +851,14 @@ class PixelatedSTEM(Signal2D):
                                      lazy_result=True, show_progressbar=True):
         """
         Refines the peak postion using the center of mass
+
         Parameters
         ----------
         peak_array : Numpy object array with x and y
                     coordinates of the peak positions
         square_size: Even integer, sub image from
-                    which the com is calculated
+                    which the center of mass is
+                    calculated.
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,
             will compute the result and return a PixelatedSTEM object.
@@ -995,6 +998,7 @@ class PixelatedSTEM(Signal2D):
             Returns
             -------
             s: PixelatedSTEM signal or LazyPixelatedSTEM
+
             Examples
             --------
             >>> s = ps.dummy_data.get_cbed_signal()

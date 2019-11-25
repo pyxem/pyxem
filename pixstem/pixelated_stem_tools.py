@@ -563,34 +563,7 @@ def find_and_remove_dead_pixels(s):
         s.data[..., iy, ix] = value
 
 
-def _center_of_mass_hs(z):
-    """Return the center of mass of an array with coordinates in the
-    hyperspy convention.
-
-    Parameters
-    ----------
-    z : np.array (2D)
-
-    Returns
-    -------
-    cx: The x location of the center of mass
-    cy: The y location of the center of mass
-    intensity: mean intensity inside radius_disk of coordinates of com
-    """
-    s = np.sum(z)
-    if s != 0:
-        z *= 1 / s
-
-    dx = np.sum(z, axis=0)
-    dy = np.sum(z, axis=1)
-    h, w = z.shape
-    cx = np.sum(dx * np.arange(w))
-    cy = np.sum(dy * np.arange(h))
-
-    return cy, cx
-
-
-def _com_experimental_square(z, vector, square_size):
+def _center_of_mass_experimental_square(z, vector, square_size):
     """Wrapper for get_experimental_square that makes the non-zero
     elements symmetrical around the 'unsubpixeled' peak by zeroing a
     'spare' row and column (top and left).
@@ -635,6 +608,13 @@ def get_experimental_square(z, vector, square_size):
     -------
     _z : np.array()
         Of size (L,L) where L = square_size
+
+    Examples
+    --------
+    >>> import pixstem.dummy_data as dd
+    >>> d = dd.get_cbed_signal()
+    >>> import pixstem.pixelated_stem_tools as pst
+    >>> sub_d = pst.get_experimental_square(d.data[0,0,:,:], [50,50], 30)
 
     """
     if square_size % 2 != 0:
