@@ -607,13 +607,16 @@ class TestPeakPositionRefinementCOM:
         chunks = [1] * nav_dims
         chunks.extend([25, 25])
         dask_array = da.random.random(size=shape, chunks=chunks)
-        binary_image = sm.disk(5)
-        match_array_dask = dt._template_match_with_binary_image(
-            dask_array, binary_image=binary_image)
+        peak_array = np.zeros((dask_array.shape[:-2]), dtype=np.object)
+        for index in np.ndindex(dask_array.shape[:-2]):
+            islice = np.s_[index]
+            peak_array[islice] = np.asarray([(27, 27)])
+        square_size = 12
+        match_array_dask = dt._peak_refinement_centre_of_mass(
+            dask_array, peak_array, square_size)
         assert len(dask_array.shape) == nav_dims + 2
-        assert dask_array.shape == match_array_dask.shape
         match_array = match_array_dask.compute()
-        assert dask_array.shape == match_array.shape
+        assert peak_array.shape == match_array.shape
 
 
 class TestBackgroundRemovalDOG:
@@ -682,6 +685,20 @@ class TestBackgroundRemovalDOG:
         assert data.shape == numpy_array.shape
         assert data[:, :, 0, :].all() == 0
 
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_array_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        chunks = [1] * nav_dims
+        chunks.extend([25, 25])
+        dask_array = da.random.random(size=shape, chunks=chunks)
+        match_array_dask = dt._background_removal_dog(
+            dask_array)
+        assert len(dask_array.shape) == nav_dims + 2
+        assert dask_array.shape == match_array_dask.shape
+        match_array = match_array_dask.compute()
+        assert dask_array.shape == match_array.shape
+
 
 class TestBackgroundRemovalMedianFilter:
 
@@ -716,6 +733,20 @@ class TestBackgroundRemovalMedianFilter:
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[:, :, 0, :].all() == 0
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_array_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        chunks = [1] * nav_dims
+        chunks.extend([25, 25])
+        dask_array = da.random.random(size=shape, chunks=chunks)
+        match_array_dask = dt._background_removal_median(
+            dask_array)
+        assert len(dask_array.shape) == nav_dims + 2
+        assert dask_array.shape == match_array_dask.shape
+        match_array = match_array_dask.compute()
+        assert dask_array.shape == match_array.shape
 
 
 class TestBackgroundRemovalRadialMedian:
@@ -755,6 +786,22 @@ class TestBackgroundRemovalRadialMedian:
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert (data[:, :, 0, :]).all() == 0
+
+        @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+        def test_array_different_dimensions(self, nav_dims):
+            centre_x = 25
+            centre_y = 25
+            shape = list(np.random.randint(2, 6, size=nav_dims))
+            shape.extend([50, 50])
+            chunks = [1] * nav_dims
+            chunks.extend([25, 25])
+            dask_array = da.random.random(size=shape, chunks=chunks)
+            match_array_dask = dt._background_removal_radial_median(
+                dask_array, centre_x=centre_x, centre_y=centre_y)
+            assert len(dask_array.shape) == nav_dims + 2
+            assert dask_array.shape == match_array_dask.shape
+            match_array = match_array_dask.compute()
+            assert dask_array.shape == match_array.shape
 
 
 class TestIntensityArray:
@@ -814,6 +861,23 @@ class TestIntensityArray:
         intensity_array_computed = intensity_array.compute()
         assert intensity_array_computed.shape == peak_array.shape
 
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_array_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        chunks = [1] * nav_dims
+        chunks.extend([25, 25])
+        dask_array = da.random.random(size=shape, chunks=chunks)
+        peak_array = np.zeros((dask_array.shape[:-2]), dtype=np.object)
+        for index in np.ndindex(dask_array.shape[:-2]):
+            islice = np.s_[index]
+            peak_array[islice] = np.asarray([(27, 27)])
+        r_disk = 5
+        match_array_dask = dt._intensity_peaks_image(
+            dask_array, peak_array, r_disk)
+        assert len(dask_array.shape) == nav_dims + 2
+        match_array = match_array_dask.compute()
+        assert peak_array.shape == match_array.shape
 
 class TestPeakFindLog:
 
@@ -983,7 +1047,7 @@ class TestCenterOfMass():
     def test_centerofmass(self):
         numpy_array = np.zeros((20, 20))
         numpy_array[10:15, 5:10] = 1
-        cy, cx = pst._center_of_mass_hs(numpy_array)
+        cy, cx = dt._center_of_mass_hs(numpy_array)
         np.testing.assert_almost_equal(cx, 7)
         np.testing.assert_almost_equal(cy, 12)
 
@@ -1000,7 +1064,8 @@ class TestCenterOfMass():
         numpy_array = np.zeros((20, 20))
         numpy_array[10:16, 5:11] = 1
         square_size = 6
-        subf = pst._com_experimental_square(numpy_array, [13, 8], square_size)
+        subf = pst._center_of_mass_experimental_square(
+            numpy_array, [13, 8], square_size)
         assert subf.shape[0] == 6
         assert subf.shape[1] == 6
         assert subf.sum() == (square_size - 1)**2

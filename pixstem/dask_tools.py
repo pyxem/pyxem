@@ -940,6 +940,11 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
 
     chunks_peak = list(dask_array_rechunked.chunksize[:-2])
     chunks_peak.extend([1, 1])
+
+    if peak_array.ndim != dask_array_rechunked.ndim:
+        while peak_array.ndim != dask_array_rechunked.ndim:
+            peak_array = np.expand_dims(peak_array, axis=peak_array.ndim)
+
     peak_array_rechunked = da.from_array(peak_array, chunks=chunks_peak)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     kwargs_intensity_peaks = {
