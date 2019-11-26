@@ -321,6 +321,7 @@ class TestTemplateMatchBinaryImage:
             dask_array, binary_image=disk)
         match_array = match_array_dask.compute()
         assert match_array.shape == data.shape
+        assert match_array.min() >= 0
 
     def test_position(self):
         disk_r = 5
@@ -879,6 +880,7 @@ class TestIntensityArray:
         match_array = match_array_dask.compute()
         assert peak_array.shape == match_array.shape
 
+
 class TestPeakFindLog:
 
     @pytest.mark.parametrize(
@@ -1055,7 +1057,7 @@ class TestCenterOfMass():
         numpy_array = np.zeros((20, 20))
         numpy_array[10:16, 5:11] = 1
         square_size = 6
-        subf = pst.get_experimental_square(numpy_array, [13, 8], square_size)
+        subf = dt.get_experimental_square(numpy_array, [13, 8], square_size)
         assert subf.shape[0] == 6
         assert subf.shape[1] == 6
         assert subf.all() == 1
@@ -1064,7 +1066,7 @@ class TestCenterOfMass():
         numpy_array = np.zeros((20, 20))
         numpy_array[10:16, 5:11] = 1
         square_size = 6
-        subf = pst._center_of_mass_experimental_square(
+        subf = dt._center_of_mass_experimental_square(
             numpy_array, [13, 8], square_size)
         assert subf.shape[0] == 6
         assert subf.shape[1] == 6
