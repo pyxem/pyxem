@@ -849,17 +849,16 @@ class PixelatedSTEM(Signal2D):
 
     def peak_position_refinement_com(self, peak_array, square_size,
                                      lazy_result=True, show_progressbar=True):
-        """
-        Refines the peak postion using the center of mass
+        """Refines the peak position using the center of mass.
 
         Parameters
         ----------
         peak_array : Numpy object array or dask array
-                    object with x and y coordinates
-                    of the peak positions.
+            object with x and y coordinates
+            of the peak positions.
         square_size: Even integer, sub image from
-                    which the center of mass is
-                    calculated.
+            which the center of mass is
+            calculated.
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,
             will compute the result and return a PixelatedSTEM object.
@@ -911,10 +910,12 @@ class PixelatedSTEM(Signal2D):
                 pbar.unregister()
         return output_array
 
-    def intensity_peaks(self, peak_array, r_disk=4,
+    def intensity_peaks(self, peak_array, disk_r=4,
                         lazy_result=True, show_progressbar=True):
         """Mean intensity of a peak in the diffraction data.
-        The mean is chosen inside a radius r_disk.
+        The intensity is calculated by taking the mean of the
+        pixel values inside radius disk_r from the peak
+        position.
 
         Parameters
         ----------
@@ -929,14 +930,14 @@ class PixelatedSTEM(Signal2D):
         Returns
         -------
         intensity_array: Numpy object with navigation
-        shape of PixelatedSTEM, with peak position in
-        x and y coordinates and the mean intensity.
+            shape of PixelatedSTEM, with peak position in
+            x and y coordinates and the mean intensity.
 
         Examples
         --------
         >>> s = ps.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks()
-        >>> intensity_array = s.intensity_peaks(peak_array, r_disk = 6)
+        >>> intensity_array = s.intensity_peaks(peak_array, disk_r = 6)
         >>> intensity_array_computed = intensity_array.compute()
 
         """
@@ -955,7 +956,7 @@ class PixelatedSTEM(Signal2D):
         peak_dask_array = peak_dask_array.reshape(shape)
 
         output_array = dt._intensity_peaks_image(
-            dask_array, peak_dask_array, r_disk)
+            dask_array, peak_dask_array, disk_r)
 
         if not lazy_result:
             if show_progressbar:
@@ -969,43 +970,44 @@ class PixelatedSTEM(Signal2D):
     def subtract_diffraction_background(
             self, method, lazy_result=True, show_progressbar=True, **kwargs):
         """ Background subtraction of the diffraction data using different
-            methods. The methods are difference of gaussians, median kernel and
-            radial median.
-            Parameters
-            ----------
-            method : {difference of gaussians, median kernel, radial median}
-            lazy_result : bool, default True
-                If True, will return a LazyPixelatedSTEM object. If False,
-                will compute the result and return a PixelatedSTEM object.
-            show_progressbar : bool, default True
-            sigma_min : float,optional
-                Standard deviation for the minimum gaussian convolution
-                (difference of gaussians only)
-            sigma_max : float, optional
-                Standard deviation for the maximum gaussian convolution
-                (difference of gaussians only)
-            footprint : int, optional
-                Size of the window that is convoluted with the
-                array to determine the median. Should be large enough
-                that it is about 3x as big as the size of the
-                peaks (median kernel only).
-            centre_x : int, optional
-                Centre x position of the coordinate system on which to map
-                to radial coordinates (radial median only).
-            centre_y : int, optional
-                Centre y position of the coordinate system on which to map
-                to radial coordinates (radial median only).
+        methods. The methods are difference of gaussians, median kernel and
+        radial median.
 
-            Returns
-            -------
-            s: PixelatedSTEM signal or LazyPixelatedSTEM
+        Parameters
+        ----------
+        method : {difference of gaussians, median kernel, radial median}
+        lazy_result : bool, default True
+            If True, will return a LazyPixelatedSTEM object. If False,
+            will compute the result and return a PixelatedSTEM object.
+        show_progressbar : bool, default True
+        sigma_min : float,optional
+            Standard deviation for the minimum gaussian convolution
+            (difference of gaussians only)
+        sigma_max : float, optional
+            Standard deviation for the maximum gaussian convolution
+            (difference of gaussians only)
+        footprint : int, optional
+            Size of the window that is convoluted with the
+            array to determine the median. Should be large enough
+            that it is about 3x as big as the size of the
+            peaks (median kernel only).
+        centre_x : int, optional
+            Centre x position of the coordinate system on which to map
+            to radial coordinates (radial median only).
+        centre_y : int, optional
+            Centre y position of the coordinate system on which to map
+            to radial coordinates (radial median only).
 
-            Examples
-            --------
-            >>> s = ps.dummy_data.get_cbed_signal()
-            >>> s_r = s.subtract_diffraction_background(method='median kernel',
-            ...     footprint=20, lazy_result=False, show_progressbar=False)
-            >>> s_r.plot()
+        Returns
+        -------
+        s: PixelatedSTEM signal or LazyPixelatedSTEM
+
+        Examples
+        --------
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s_r = s.subtract_diffraction_background(method='median kernel',
+        ...     footprint=20, lazy_result=False, show_progressbar=False)
+        >>> s_r.plot()
 
         """
         if self._lazy:

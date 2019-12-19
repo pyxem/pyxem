@@ -1328,33 +1328,31 @@ class TestSubtractingDiffractionBackground():
 
     @pytest.mark.parametrize('methods', method1)
     def test_simple(self, methods):
-        s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
-        s_rem = s.subtract_diffraction_background(method=methods,
-                                                  centre_x=5, centre_y=10)
+        s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 200, 150)))
+        s_rem = s.subtract_diffraction_background(method=methods)
         assert s_rem.data.shape == s.data.shape
         assert hasattr(s_rem.data, 'compute')
 
     @pytest.mark.parametrize('methods', method1)
     def test_lazy_input(self, methods):
-        data = np.random.randint(100, size=(3, 2, 10, 20))
-        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 10, 20)))
-        s_rem = s.subtract_diffraction_background(method=methods,
-                                                  centre_x=5, centre_y=10)
+        data = np.random.randint(100, size=(3, 2, 200, 150))
+        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 20, 10)))
+        s_rem = s.subtract_diffraction_background(method=methods)
         assert s.data.shape == s_rem.data.shape
         assert hasattr(s_rem.data, 'compute')
 
     @pytest.mark.parametrize('methods', method1)
     def test_lazy_output(self, methods):
-        data = np.random.randint(100, size=(3, 2, 20, 20))
+        data = np.random.randint(100, size=(3, 2, 200, 150))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 20, 20)))
         s_rem = s.subtract_diffraction_background(
-            method=methods, lazy_result=False, centre_x=10, centre_y=10)
+            method=methods, lazy_result=False)
         assert s.data.shape == s_rem.data.shape
         assert not hasattr(s_rem.data, 'compute')
 
     @pytest.mark.parametrize('methods', method1)
     def test_axes_manager_copy(self, methods):
-        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 200, 200)))
         ax_sa = s.axes_manager.signal_axes
         ax_na = s.axes_manager.navigation_axes
         ax_sa[0].name, ax_sa[1].name = 'Detector x', 'Detector y'
@@ -1365,8 +1363,7 @@ class TestSubtractingDiffractionBackground():
         ax_na[0].scale, ax_na[1].scale = 35, 35
         ax_na[0].offset, ax_na[1].offset = 54, 12
         ax_na[0].units, ax_na[1].units = 'nm', 'nm'
-        s_temp = s.subtract_diffraction_background(method=methods,
-                                                   centre_x=10, centre_y=10)
+        s_temp = s.subtract_diffraction_background(method=methods)
         assert s.data.shape == s_temp.data.shape
         ax_sa_t = s_temp.axes_manager.signal_axes
         ax_na_t = s_temp.axes_manager.navigation_axes
@@ -1392,10 +1389,9 @@ class TestSubtractingDiffractionBackground():
     @pytest.mark.parametrize('methods', method1)
     def test_different_dimensions(self, nav_dims, methods):
         shape = list(np.random.randint(2, 6, size=nav_dims))
-        shape.extend([50, 50])
+        shape.extend([200, 200])
         s = PixelatedSTEM(np.random.random(size=shape))
-        st = s.subtract_diffraction_background(method=methods,
-                                               centre_x=25, centre_y=25)
+        st = s.subtract_diffraction_background(method=methods)
         assert st.data.shape == tuple(shape)
 
 
@@ -1438,7 +1434,7 @@ class TestPixelatedStemIntensityPeaks():
         peaks = s.find_peaks(
                 min_sigma=min_sigma, max_sigma=max_sigma,
                 sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
-        intensity_array = s.intensity_peaks(peaks, r_disk=1)
+        intensity_array = s.intensity_peaks(peaks, disk_r=1)
         intensity_array = intensity_array.compute()
         np.testing.assert_almost_equal(intensity_array[0, 0][0][2], 100/9)
         np.testing.assert_almost_equal(intensity_array[0, 1][0][2], 200 / 9)
@@ -1453,7 +1449,7 @@ class TestPixelatedStemIntensityPeaks():
         shape.extend([50, 50])
         s = PixelatedSTEM(np.random.random(size=shape))
         peak_array = s.find_peaks()
-        intensity_array = s.intensity_peaks(peak_array, r_disk=1)
+        intensity_array = s.intensity_peaks(peak_array, disk_r=1)
         assert intensity_array.shape == tuple(shape[:-2])
 
 

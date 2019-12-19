@@ -788,21 +788,21 @@ class TestBackgroundRemovalRadialMedian:
         assert data.shape == numpy_array.shape
         assert (data[:, :, 0, :]).all() == 0
 
-        @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
-        def test_array_different_dimensions(self, nav_dims):
-            centre_x = 25
-            centre_y = 25
-            shape = list(np.random.randint(2, 6, size=nav_dims))
-            shape.extend([50, 50])
-            chunks = [1] * nav_dims
-            chunks.extend([25, 25])
-            dask_array = da.random.random(size=shape, chunks=chunks)
-            match_array_dask = dt._background_removal_radial_median(
-                dask_array, centre_x=centre_x, centre_y=centre_y)
-            assert len(dask_array.shape) == nav_dims + 2
-            assert dask_array.shape == match_array_dask.shape
-            match_array = match_array_dask.compute()
-            assert dask_array.shape == match_array.shape
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_array_different_dimensions(self, nav_dims):
+        centre_x = 25
+        centre_y = 25
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        chunks = [1] * nav_dims
+        chunks.extend([25, 25])
+        dask_array = da.random.random(size=shape, chunks=chunks)
+        match_array_dask = dt._background_removal_radial_median(
+            dask_array, centre_x=centre_x, centre_y=centre_y)
+        assert len(dask_array.shape) == nav_dims + 2
+        assert dask_array.shape == match_array_dask.shape
+        match_array = match_array_dask.compute()
+        assert dask_array.shape == match_array.shape
 
 
 class TestIntensityArray:
@@ -902,7 +902,7 @@ class TestPeakFindLog:
             image[x, y] = 654
         min_sigma, max_sigma, num_sigma = 2, 5, 10
         threshold, overlap = 0.01, 1
-        peaks = dt._peak_find_dog_single_frame(
+        peaks = dt._peak_find_log_single_frame(
             image, min_sigma=min_sigma, max_sigma=max_sigma,
             num_sigma=num_sigma, threshold=threshold, overlap=overlap)
         assert len(peaks) == len(peak_list)
@@ -1057,7 +1057,7 @@ class TestCenterOfMass():
         numpy_array = np.zeros((20, 20))
         numpy_array[10:16, 5:11] = 1
         square_size = 6
-        subf = dt.get_experimental_square(numpy_array, [13, 8], square_size)
+        subf = dt._get_experimental_square(numpy_array, [13, 8], square_size)
         assert subf.shape[0] == 6
         assert subf.shape[1] == 6
         assert subf.all() == 1
