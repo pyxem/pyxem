@@ -1,78 +1,72 @@
-all_tests_debian:
+.pixstem_dependencies: &pixstem_dependencies
+- apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-matplotlib python3-skimage python3-pint python3-requests python3-tqdm python3-traits python3-toolz python3-jupyter-client python3-ipython python3-ipykernel python3-pandas python3-patsy python3-pyqt5 python3-sympy python3-sparse python3-imageio python3-ptable python3-llvmlite python3-numba python3-sparse python3-statsmodels
+
+default:
     image: debian:stable
+    before_script:
+        - apt-get update -q
+
+flake8_checks:
     script:
-    - apt-get update -q
-    - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-matplotlib python3-skimage python3-pint python3-requests python3-tqdm python3-traits python3-toolz python3-jupyter-client python3-ipython python3-ipykernel python3-pandas python3-patsy python3-pyqt5 python3-sympy python3-sparse python3-imageio python3-ptable python3-llvmlite python3-numba python3-sparse python3-statsmodels
+    - apt-get install -qy python3-flake8
+    - python3 -m flake8 pixstem/
+
+all_tests_debian:
+    script:
+    - *pixstem_dependencies
     - apt-get install -qy python3-pytest python3-pytest-cov xvfb
     - pip3 install .
     - xvfb-run -a --server-args="-screen 0, 1024x768x24" python3 -m pytest --doctest-modules --cov=pixstem pixstem/
     - xvfb-run -a --server-args="-screen 0, 1024x768x24" python3 -m pytest --doctest-glob="*.rst" doc/
 
-flake8_checks:
-    image: debian:stable
-    script:
-    - apt-get update -q
-    - apt-get install -qy python3-flake8
-    - python3 -m flake8 pixstem/
+.generate_figures: &generate_figures
+- cd doc/images/analysing_holz_datasets/
+- xvfb-run -a python3 testdata.py
+- cd ../analysing_dpc_data/
+- xvfb-run -a python3 make_dpc_analysis_images.py
+- cd ../peak_finding/
+- xvfb-run -a python3 make_peak_finding_images.py
+- cd ../template_match/
+- xvfb-run -a python3 make_template_match_images.py
+- xvfb-run -a python3 make_template_binary_image.py
+- cd ../fem_analysis/
+- xvfb-run -a python3 make_fem_analysis_image.py
+- cd ../frontpage/
+- xvfb-run -a python3 make_frontpage_images.py
+- cd ../../
 
-pages_development_branch:
-    image: debian:stable
+pages_development:
+    rules:
+        - if: '$CI_COMMIT_REF_NAME == "master"'
+          when: on_success
+        - when: never
     stage: deploy
     script:
-    - apt-get update -q
-    - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-matplotlib python3-skimage python3-pint python3-requests python3-tqdm python3-traits python3-toolz python3-jupyter-client python3-ipython python3-ipykernel python3-pandas python3-patsy python3-pyqt5 python3-sympy python3-sparse python3-imageio python3-ptable python3-llvmlite python3-numba python3-sparse python3-statsmodels
+    - *pixstem_dependencies
     - apt-get install -qy xvfb python3-sphinx python3-sphinx-rtd-theme build-essential
     - pip3 install .
-    - cd doc/images/analysing_holz_datasets/
-    - xvfb-run -a python3 testdata.py
-    - cd ../analysing_dpc_data/
-    - xvfb-run -a python3 make_dpc_analysis_images.py
-    - cd ../peak_finding/
-    - xvfb-run -a python3 make_peak_finding_images.py
-    - cd ../template_match/
-    - xvfb-run -a python3 make_template_match_images.py
-    - xvfb-run -a python3 make_template_binary_image.py
-    - cd ../fem_analysis/
-    - xvfb-run -a python3 make_fem_analysis_image.py
-    - cd ../frontpage/
-    - xvfb-run -a python3 make_frontpage_images.py
-    - cd ../../
+    - *generate_figures
     - make html
     - cd ..
-    - mv doc/_build/html pages_development
+    - mv doc/_build/html public_development
     artifacts:
         paths:
-        - pages_development
-    only:
-    - master
+        - public_development
 
 pages:
-    image: debian:stable
+    rules:
+        - if: '$CI_COMMIT_REF_NAME == "release"'
+          when: on_success
+        - when: never
     stage: deploy
     script:
-    - apt-get update -q
-    - apt-get install -qy python3-pip python3-numpy python3-scipy python3-h5py ipython3 python3-natsort python3-sklearn python3-dill python3-ipython-genutils python3-matplotlib python3-skimage python3-pint python3-requests python3-tqdm python3-traits python3-toolz python3-jupyter-client python3-ipython python3-ipykernel python3-pandas python3-patsy python3-pyqt5 python3-sympy python3-sparse python3-imageio python3-ptable python3-llvmlite python3-numba python3-sparse python3-statsmodels
+    - *pixstem_dependencies
     - apt-get install -qy xvfb python3-sphinx python3-sphinx-rtd-theme build-essential
     - pip3 install .
-    - cd doc/images/analysing_holz_datasets/
-    - xvfb-run -a python3 testdata.py
-    - cd ../analysing_dpc_data/
-    - xvfb-run -a python3 make_dpc_analysis_images.py
-    - cd ../peak_finding/
-    - xvfb-run -a python3 make_peak_finding_images.py
-    - cd ../template_match/
-    - xvfb-run -a python3 make_template_match_images.py
-    - xvfb-run -a python3 make_template_binary_image.py
-    - cd ../fem_analysis/
-    - xvfb-run -a python3 make_fem_analysis_image.py
-    - cd ../frontpage/
-    - xvfb-run -a python3 make_frontpage_images.py
-    - cd ../../
+    - *generate_figures
     - make html
     - cd ..
     - mv doc/_build/html public
     artifacts:
         paths:
         - public
-    only:
-    - release
