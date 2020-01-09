@@ -15,7 +15,7 @@ If it is related to an open issue, reference it here.
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
 
-**Are there any known issues? Do you need help?**
+**Are there any known issues? Need help?**
 If the code isn't quite working as you want it to, tell us here so we can help you polish the code.
 
 **Work in progress?**
