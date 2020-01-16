@@ -920,7 +920,7 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         peak_array : Numpy object with navigation shape of PixelatedSTEM
-        r_disk = int
+        disk_r : int
             radius of the disc chosen to take the mean value of
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,

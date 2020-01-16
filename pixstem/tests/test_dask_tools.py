@@ -807,17 +807,17 @@ class TestBackgroundRemovalRadialMedian:
 
 class TestIntensityArray:
 
-    def test_intensity_peaks_image_r_disk(self):
+    def test_intensity_peaks_image_disk_r(self):
         numpy_array = np.zeros((50, 50))
         numpy_array[27, 29] = 2
         numpy_array[11, 15] = 1
         peak = np.array([[27, 29], [11, 15]], np.int32)
-        r_disk0 = 1
-        r_disk1 = 2
+        disk_r0 = 1
+        disk_r1 = 2
         intensity0 = dt._intensity_peaks_image_single_frame(
-            numpy_array, peak, r_disk0)
+            numpy_array, peak, disk_r0)
         intensity1 = dt._intensity_peaks_image_single_frame(
-            numpy_array, peak, r_disk1)
+            numpy_array, peak, disk_r1)
 
         assert intensity0[0].all() == np.array([27., 29., 2 / 9]).all()
         assert intensity0[1].all() == np.array([11., 15., 1 / 9]).all()
@@ -835,9 +835,9 @@ class TestIntensityArray:
             islice = np.s_[index]
             peak_array[islice][0, 0] = np.asarray([(27, 27)])
 
-        r_disk = 2
+        disk_r = 2
         intensity_array = dt._intensity_peaks_image_chunk(
-            numpy_array, peak_array, r_disk)
+            numpy_array, peak_array, disk_r)
 
         assert intensity_array.shape == peak_array.shape[:-2]
 
@@ -856,9 +856,9 @@ class TestIntensityArray:
         dask_peak_array = dask_peak_array.reshape(
             dask_peak_array.shape[0], dask_peak_array.shape[1], 1, 1)
 
-        r_disk = 2
+        disk_r = 2
         intensity_array = dt._intensity_peaks_image(dask_array,
-                                                    dask_peak_array, r_disk)
+                                                    dask_peak_array, disk_r)
         intensity_array_computed = intensity_array.compute()
         assert intensity_array_computed.shape == peak_array.shape
 
@@ -873,9 +873,9 @@ class TestIntensityArray:
         for index in np.ndindex(dask_array.shape[:-2]):
             islice = np.s_[index]
             peak_array[islice] = np.asarray([(27, 27)])
-        r_disk = 5
+        disk_r = 5
         match_array_dask = dt._intensity_peaks_image(
-            dask_array, peak_array, r_disk)
+            dask_array, peak_array, disk_r)
         assert len(dask_array.shape) == nav_dims + 2
         match_array = match_array_dask.compute()
         assert peak_array.shape == match_array.shape

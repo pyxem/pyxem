@@ -639,7 +639,6 @@ def _remove_bad_pixels(dask_array, bad_pixel_array):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_dead_pixel_signal(lazy=True)
     >>> dead_pixels = dt._find_dead_pixels(s.data)
@@ -697,7 +696,6 @@ def _find_dead_pixels(dask_array, dead_pixel_value=0, mask_array=None):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_dead_pixel_signal(lazy=True)
     >>> dead_pixels = dt._find_dead_pixels(s.data)
@@ -775,10 +773,10 @@ def _find_hot_pixels(dask_array, threshold_multiplier=500, mask_array=None):
     return data_threshold
 
 
-def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
+def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
     """Intensity of the peaks is calculated by taking the mean value
-    of the pixel values inside radius r_disk where the centers are the
-    peak positions. If the peak position plus r_disk exceed the detector
+    of the pixel values inside radius disk_r where the centers are the
+    peak positions. If the peak position plus disk_r exceed the detector
     edges, then the intensity for that peak will be put to zero.
 
     Parameters
@@ -797,7 +795,6 @@ def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> peaks = np.array(([50,50],[25,50]))
@@ -806,7 +803,7 @@ def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
 
     """
     array_shape = peaks.shape
-    mask = morphology.disk(r_disk)
+    mask = morphology.disk(disk_r)
     size = np.shape(frame)
     intensity_array = np.zeros((array_shape[0], 3), dtype='float64')
     for i in range(array_shape[0]):
@@ -814,23 +811,24 @@ def _intensity_peaks_image_single_frame(frame, peaks, r_disk):
         cy = int(peaks[i, 1])
         intensity_array[i, 0] = peaks[i, 0]
         intensity_array[i, 1] = peaks[i, 1]
-        if ((cx - r_disk < 0) | (cx + r_disk + 1 >= size[0])
-                | (cy - r_disk < 0) | (cy + r_disk + 1 >= size[1])):
+        if ((cx - disk_r < 0) | (cx + disk_r + 1 >= size[0])
+                | (cy - disk_r < 0) | (cy + disk_r + 1 >= size[1])):
             intensity_array[i, 2] = 0
         else:
             subframe = \
-                frame[cx - r_disk:cx + r_disk + 1, cy - r_disk:cy + r_disk + 1]
+                frame[cx - disk_r:cx + disk_r + 1, cy - disk_r:cy + disk_r + 1]
             intensity_array[i, 2] = np.mean(mask * subframe)
 
     return intensity_array
 
 
-def _intensity_peaks_image_chunk(data, peak_array, r_disk):
+def _intensity_peaks_image_chunk(data, peak_array, disk_r):
     """Intensity of the peaks is calculated by taking the mean value
-    of the pixel values inside radius r_disk where the centers are the
-    peak positions for the entire chunk. If the peak position plus r_disk
+    of the pixel values inside radius disk_r where the centers are the
+    peak positions for the entire chunk. If the peak position plus disk_r
     exceed the detector edges, then the intensity for that peak will be
     put to zero.
+
     Parameters
     ----------
     data : NumPy 4D array
@@ -844,7 +842,6 @@ def _intensity_peaks_image_chunk(data, peak_array, r_disk):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
@@ -861,14 +858,14 @@ def _intensity_peaks_image_chunk(data, peak_array, r_disk):
         islice = np.s_[index]
         peaks = peak_array[islice][0, 0]
         output_array[islice] = _intensity_peaks_image_single_frame(
-            data[islice], peaks, r_disk)
+            data[islice], peaks, disk_r)
     return output_array
 
 
-def _intensity_peaks_image(dask_array, peak_array, r_disk):
+def _intensity_peaks_image(dask_array, peak_array, disk_r):
     """Intensity of the peaks is calculated by taking the mean value
-    of the pixel values inside radius r_disk where the centers are the
-    peak positions for the full dask array. If the peak position plus r_disk
+    of the pixel values inside radius disk_r where the centers are the
+    peak positions for the full dask array. If the peak position plus disk_r
     exceed the detector edges, then the intensity for that peak will be
     put to zero.
 
@@ -881,6 +878,7 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
         In the form [[x0, y0], [x1, y1], [x2, y2], ...]
     r__disk : Integer number which represents the radius of the discs
         peak_array = Numpy object with x and y coordinates peaks
+
     Returns
     -------
     intensity_array : dask object array
@@ -890,7 +888,6 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> import dask.array as da
     >>> s = ps.dummy_data.get_cbed_signal()
@@ -922,7 +919,7 @@ def _intensity_peaks_image(dask_array, peak_array, r_disk):
 
     peak_array_rechunked = da.from_array(peak_array, chunks=chunks_peak)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
-    kwargs_intensity_peaks = {'r_disk': r_disk}
+    kwargs_intensity_peaks = {'disk_r': disk_r}
     output_array = da.map_blocks(
         _intensity_peaks_image_chunk, dask_array_rechunked,
         peak_array_rechunked, drop_axis=drop_axis,
@@ -946,7 +943,6 @@ def _background_removal_single_frame_dog(frame, min_sigma=1, max_sigma=55):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_dog(s.data[0, 0])
@@ -974,7 +970,6 @@ def _background_removal_chunk_dog(data, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_dog(s.data[0:10, 0:10,:,:])
@@ -1005,7 +1000,6 @@ def _background_removal_dog(dask_array, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> import dask.array as da
     >>> s = ps.dummy_data.get_cbed_signal()
@@ -1046,7 +1040,6 @@ def _background_removal_single_frame_median(frame, footprint=19):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
@@ -1072,7 +1065,6 @@ def _background_removal_chunk_median(data, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_median(s.data[0:10, 0:10,:,:])
@@ -1102,7 +1094,6 @@ def _background_removal_median(dask_array, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> import dask.array as da
     >>> s = ps.dummy_data.get_cbed_signal()
@@ -1146,7 +1137,6 @@ def _background_removal_single_frame_radial_median(
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
@@ -1185,7 +1175,6 @@ def _background_removal_chunk_radial_median(data, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = _background_removal_chunk_radial_median(s.data[0:10, 0:10,:,:])
@@ -1217,7 +1206,6 @@ def _background_removal_radial_median(dask_array, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
@@ -1261,7 +1249,6 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> peak_array = np.array(([48.,48.],[25.,48.]))
@@ -1310,7 +1297,6 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
@@ -1353,7 +1339,6 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
 
     Examples
     --------
-    >>> import pixstem.api as ps
     >>> import pixstem.dask_tools as dt
     >>> import dask.array as da
     >>> s = ps.dummy_data.get_cbed_signal()
