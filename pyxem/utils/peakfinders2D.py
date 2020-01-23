@@ -299,7 +299,7 @@ def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
     return centers
 
 
-def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
+def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=int(10),
                    threshold=0.2, overlap=0.5, log_scale=False, exclude_border=False):
     """
     Finds peaks via the Laplacian of Gaussian Matrices method from
