@@ -477,7 +477,7 @@ class Diffraction2D(Signal2D):
 
     def center_direct_beam(self,
                            method,
-                           square_width=None,
+                           half_square_width=None,
                            return_shifts=False,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
@@ -488,7 +488,7 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of 'cross_correlate', 'blur', 'interpolate'
-        square_width  : int
+        half_square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
@@ -507,10 +507,10 @@ class Diffraction2D(Signal2D):
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        if square_width is not None:
-            min_index = np.int(origin_coordinates[0] - square_width)
+        if half_square_width is not None:
+            min_index = np.int(origin_coordinates[0] - half_square_width)
             # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + square_width)
+            max_index = np.int(origin_coordinates[0] + half_square_width)
             cropped = self.isig[min_index:max_index, min_index:max_index]
             shifts = cropped.get_direct_beam_position(method=method, **kwargs)
         else:

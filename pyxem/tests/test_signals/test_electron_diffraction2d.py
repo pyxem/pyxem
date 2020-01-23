@@ -54,7 +54,7 @@ class TestSimpleMaps:
     def test_center_direct_beam_blur_return_shifts(self, diffraction_pattern):
         shifts = diffraction_pattern.center_direct_beam(method='blur',
                                                         sigma=5,
-                                                        square_width=3,
+                                                        half_square_width=3,
                                                         return_shifts=True)
         ans = np.array([[-1., -1.],
                         [-0., -0.],
@@ -66,7 +66,7 @@ class TestSimpleMaps:
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
         diffraction_pattern.center_direct_beam(method='blur',
                                                sigma=int(5),
-                                               square_width=3)
+                                               half_square_width=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     def test_apply_affine_transformation(self, diffraction_pattern):
