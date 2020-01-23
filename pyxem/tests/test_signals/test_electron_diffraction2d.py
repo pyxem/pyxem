@@ -297,8 +297,6 @@ class TestBackgroundMethods:
         ('median', {'footprint': 4, }),
         ('reference_pattern', {'bg': np.ones((8, 8)), })
     ])
-    @pytest.mark.filterwarnings('ignore::FutureWarning')
-    @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
