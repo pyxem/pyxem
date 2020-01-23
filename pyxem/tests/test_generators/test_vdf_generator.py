@@ -38,6 +38,7 @@ def diffraction_vectors(request):
 
 @pytest.fixture
 def vdf_generator(diffraction_pattern, diffraction_vectors):
+    diffraction_pattern.data = np.where(diffraction_pattern.data==0,0.01,diffraction_pattern.data) #avoid divide by zeroes
     return VDFGenerator(diffraction_pattern, diffraction_vectors)
 
 
