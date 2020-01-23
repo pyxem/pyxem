@@ -29,7 +29,7 @@ from sklearn.cluster import DBSCAN
 from warnings import warn
 
 from pyxem.signals import push_metadata_through
-from pyxem.signals import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes, transfer_navigation_axes_to_signal_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_npeaks, filter_vectors_ragged
@@ -518,10 +518,9 @@ class DiffractionVectors(BaseSignal):
             filtered_vectors.axes_manager.set_signal_dimension(0)
         # Otherwise easier to calculate.
         else:
-            tmp_data = self.data.copy()
-            tmp_data[np.absolute(tmp_data.T[0]) > x_threshold] = 0
-            tmp_data[np.absolute(tmp_data.T[1]) > y_threshold] = 0
-            filtered_vectors = self.data[np.where(tmp_data.T[0])]
+            x_inbounds = np.absolute(self.data.T[0]) < x_threshold #True if vector is good to go
+            y_inbounds = np.absolute(self.data.T[1]) < y_threshold
+            filtered_vectors = self.data[np.logical_and(x_inbounds,y_inbounds)]
             # Type assignment to DiffractionVectors for return
             filtered_vectors = DiffractionVectors(filtered_vectors)
             filtered_vectors.axes_manager.set_signal_dimension(1)
@@ -552,16 +551,7 @@ class DiffractionVectors(BaseSignal):
         crystim.change_dtype('float')
 
         # Set calibration to same as signal
-        x = crystim.axes_manager.signal_axes[0]
-        y = crystim.axes_manager.signal_axes[1]
-
-        x.name = 'x'
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
-
-        y.name = 'y'
-        y.scale = self.axes_manager.navigation_axes[0].scale
-        y.units = 'nm'
+        crystim = transfer_navigation_axes_to_signal_axes(crystim,self)
 
         return crystim
 
