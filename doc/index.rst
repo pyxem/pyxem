@@ -28,7 +28,7 @@ About pixStem
 -------------
 
 Library for processing data acquired on a fast pixelated electron detector, acquired using scanning transmission electron microscopy (STEM).
-For more information about this technique and how do analyse it, see the paper `Fast Pixelated Detectors in Scanning Transmission Electron Microscopy. Part I: Data Acquisition, Live Processing and Storage <https://arxiv.org/abs/1911.11560>`_ at arXiv.
+For more information about this technique and how do analyse this type of data, see the paper `Fast Pixelated Detectors in Scanning Transmission Electron Microscopy. Part I: Data Acquisition, Live Processing and Storage <https://arxiv.org/abs/1911.11560>`_ at arXiv.
 
 Install instructions: :ref:`install`.
 
