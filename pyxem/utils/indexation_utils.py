@@ -546,7 +546,7 @@ def peaks_from_best_vector_match(single_match_result, library, rank=0):
     rotation_orientation = mat2euler(best_fit.rotation_matrix)
     # Don't change the original
     structure = library.structures[phase_index]
-    sim = calculate_ed_data(structure,
+    sim = library.diffraction_generator.calculate_ed_data(structure,
                             reciprocal_radius = library.reciprocal_radius,
                             rotation=rotation_orientation,
                             with_direct_beam=False)
