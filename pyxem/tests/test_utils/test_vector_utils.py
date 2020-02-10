@@ -27,6 +27,7 @@ from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 from pyxem.utils.vector_utils import get_angle_cartesian_vec
+from pyxem.utils.vector_utils import get_rotation_matrix_with_angle
 
 
 def test_calculate_norms():
@@ -71,7 +72,6 @@ def test_get_rotation_matrix_with_angle():
     (np.dot(get_rotation_matrix_with_angle(vector, angle), projected_onto))
     assert np.allclose([rotation_matrix_projected_onto_vector],
                                 expected_projection,  atol=1e-15)
-
 
 @pytest.mark.parametrize('from_v1, from_v2, to_v1, to_v2, expected_rotation', [
     # v2 from x to y
