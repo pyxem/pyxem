@@ -60,6 +60,18 @@ def test_detector_to_fourier(wavelength,
     k = detector_to_fourier(detector_coords, wavelength, camera_length)
     np.testing.assert_allclose(k, k_expected)
 
+def test_get_rotation_matrix_with_angle():
+    """ A rotation of 90 degrees counterclockwise about [0.0,1.0,0.0] projected
+    upon [1.0, 0.0, 0.0] should give [0.0, 0.0, -1.0] """
+    vector = np.array([0.0, 1.0, 0.0])
+    angle = (np.pi/2)
+    projected_onto = np.array([1.0, 0.0, 0.0])
+    expected_projection = np.array([0.0, 0.0, -1.0])
+    rotation_matrix_projected_onto_vector  = \
+    (np.dot(get_rotation_matrix_with_angle(vector, angle), projected_onto))
+    assert np.allclose([rotation_matrix_projected_onto_vector],
+                                expected_projection,  atol=1e-15)
+
 
 @pytest.mark.parametrize('from_v1, from_v2, to_v1, to_v2, expected_rotation', [
     # v2 from x to y

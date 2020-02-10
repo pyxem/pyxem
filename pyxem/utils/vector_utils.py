@@ -163,6 +163,39 @@ def normalize_or_zero(v):
     if np.any(nonzero_mask):
         v[nonzero_mask] /= norms[nonzero_mask].reshape(-1, 1)
 
+def get_rotation_matrix_with_angle(vector, angle):
+    """ Returns a rotation matrix given by counterclockwise rotation about
+    the vector direction (given axis) by a given angle.
+
+    Calculated using the Euler–Rodrigues formula:
+    https://en.wikipedia.org/wiki/Euler%E2%80%93Rodrigues_formula
+
+    Parameters
+        ----------
+        vector : np.array [1d]
+            The rotation is done about this axis.
+        angle : float [radians]
+            How much one wants to rotate by. (Counterclockwise)
+
+        Returns
+        -------
+        Rotation matrix : np.array
+            3X3 rotation matrix.
+    """
+    if(len(vector) != 3):
+        raise Exception('Please provide a 3d vector. \
+         Your vector looks like: {}'.format(vector))
+
+    vector = np.asarray(vector)
+    vector = vector / np.sqrt(np.dot(vector, vector))
+    a = np.cos(angle / 2.0)
+    b, c, d = -vector * np.sin(angle / 2.0)
+    aa, bb, cc, dd = a * a, b * b, c * c, d * d
+    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
+    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+
 
 def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
     """Calculates the rotation matrix from one pair of vectors to the other.
