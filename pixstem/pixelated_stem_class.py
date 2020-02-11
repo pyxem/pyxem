@@ -770,23 +770,29 @@ class PixelatedSTEM(Signal2D):
 
     def find_peaks(self, method='dog', lazy_result=True,
                    show_progressbar=True, **kwargs):
-        """Find peaks in the signal dimensions using skimage's blob_dog or blob_log.
+        """Find peaks in the signal dimensions.
+
+        Can use either skimage's blob_dog or blob_log.
 
         Parameters
         ----------
-        method: string 'dog' or 'log'
+        method: string, optional
+            'dog': difference of Gaussians. 'log': Laplacian of Gaussian.
+            Default 'dog'.
         min_sigma : float, optional
         max_sigma : float, optional
-        sigma_ratio : float, optional (for dog)
-        num_sigma: float, optional (for log)
+        sigma_ratio : float, optional
+            For method='dog'
+        num_sigma: float, optional
+            For method='log'
         threshold : float, optional
         overlap : float, optional
         normalize_value : float, optional
             All the values in the signal will be divided by this value.
             If no value is specified, the max value in each individual image
             will be used.
-        max_r: float, maximum radius compared from the
-                center of the diffraction pattern
+        max_r : float
+            Maximum radius compared from the center of the diffraction pattern
         lazy_result : bool, optional
             Default True
         show_progressbar : bool, optional
@@ -817,6 +823,10 @@ class PixelatedSTEM(Signal2D):
         >>> peak_array = s.find_peaks(
         ...     min_sigma=1.2, max_sigma=27, sigma_ratio=2.2, threshold=0.6,
         ...     overlap=0.6, lazy_result=False, show_progressbar=False)
+
+        Using Laplacian of Gaussian
+
+        >>> peak_array = s.find_peaks(method='log')
 
         """
         if self._lazy:
@@ -854,10 +864,9 @@ class PixelatedSTEM(Signal2D):
         Parameters
         ----------
         peak_array : Numpy object array or dask array
-            object with x and y coordinates
-            of the peak positions.
-        square_size: Even integer, sub image from
-            which the center of mass is
+            Object with x and y coordinates of the peak positions.
+        square_size : int
+            Even integer, sub image from which the center of mass is
             calculated.
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,
@@ -866,7 +875,7 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        dask 2D object array
+        output_array : dask 2D object array
             Same size as the two last dimensions in data, in the form
             [[y0, x0], [y1, x1], ...].
             The peak positions themselves are stored in 2D NumPy arrays
@@ -883,6 +892,7 @@ class PixelatedSTEM(Signal2D):
         ...     show_progressbar=False)
         >>> s.add_peak_array_as_markers(refined_peak_array_com)
         >>> s.plot()
+
         """
         if self._lazy:
             dask_array = self.data
@@ -912,16 +922,18 @@ class PixelatedSTEM(Signal2D):
 
     def intensity_peaks(self, peak_array, disk_r=4,
                         lazy_result=True, show_progressbar=True):
-        """Mean intensity of a peak in the diffraction data.
+        """Get intensity of a peak in the diffraction data.
+
         The intensity is calculated by taking the mean of the
         pixel values inside radius disk_r from the peak
         position.
 
         Parameters
         ----------
-        peak_array : Numpy object with navigation shape of PixelatedSTEM
+        peak_array : Numpy array
+            Must have the same navigation shape as this signal.
         disk_r : int
-            radius of the disc chosen to take the mean value of
+            Radius of the disc chosen to take the mean value of
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,
             will compute the result and return a PixelatedSTEM object.
@@ -929,15 +941,15 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        intensity_array: Numpy object with navigation
-            shape of PixelatedSTEM, with peak position in
+        intensity_array: Numpy object
+            Same navigation shape as this signal, with peak position in
             x and y coordinates and the mean intensity.
 
         Examples
         --------
         >>> s = ps.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks()
-        >>> intensity_array = s.intensity_peaks(peak_array, disk_r = 6)
+        >>> intensity_array = s.intensity_peaks(peak_array, disk_r=6)
         >>> intensity_array_computed = intensity_array.compute()
 
         """
@@ -969,23 +981,25 @@ class PixelatedSTEM(Signal2D):
 
     def subtract_diffraction_background(
             self, method, lazy_result=True, show_progressbar=True, **kwargs):
-        """ Background subtraction of the diffraction data using different
-        methods. The methods are difference of gaussians, median kernel and
+        """Background subtraction of the diffraction data.
+
+        Can be done using difference of Gaussians, median kernel and
         radial median.
 
         Parameters
         ----------
-        method : {difference of gaussians, median kernel, radial median}
+        method : string
+            'difference of gaussians', 'median kernel' and 'radial median'.
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,
             will compute the result and return a PixelatedSTEM object.
         show_progressbar : bool, default True
         sigma_min : float,optional
-            Standard deviation for the minimum gaussian convolution
-            (difference of gaussians only)
+            Standard deviation for the minimum Gaussian convolution
+            (difference of Gaussians only)
         sigma_max : float, optional
-            Standard deviation for the maximum gaussian convolution
-            (difference of gaussians only)
+            Standard deviation for the maximum Gaussian convolution
+            (difference of Gaussians only)
         footprint : int, optional
             Size of the window that is convoluted with the
             array to determine the median. Should be large enough
@@ -1000,7 +1014,7 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        s: PixelatedSTEM signal or LazyPixelatedSTEM
+        s : PixelatedSTEM signal or LazyPixelatedSTEM signal
 
         Examples
         --------
@@ -1029,7 +1043,7 @@ class PixelatedSTEM(Signal2D):
         else:
             raise NotImplementedError(
                 "The method specified, '{}', is not implemented. "
-                "The different methods are: difference of gaussians,"
+                "The different methods are: difference of Gaussians,"
                 " median kernel, radial median.".format(
                     method))
 
@@ -1091,7 +1105,7 @@ class PixelatedSTEM(Signal2D):
         """Do radial integration of different angular slices.
         Useful for analysing anisotropy in round diffraction features,
         such as diffraction rings from polycrystalline materials or
-        higher order laue zone rings.
+        higher order Laue zone rings.
 
         Parameters
         ----------
