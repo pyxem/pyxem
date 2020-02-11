@@ -838,11 +838,9 @@ class PixelatedSTEM(Signal2D):
             dask_array = da.from_array(self.data, chunks=chunks)
 
         if (method == 'dog'):
-            output_array = dt._peak_find_dog(
-                dask_array, **kwargs)
+            output_array = dt._peak_find_dog(dask_array, **kwargs)
         elif (method == 'log'):
-            output_array = dt._peak_find_log(
-                dask_array, **kwargs)
+            output_array = dt._peak_find_log(dask_array, **kwargs)
         else:
             raise ValueError(
                 "Method is not a valid name, should be dog or log")
