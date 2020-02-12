@@ -782,9 +782,9 @@ class PixelatedSTEM(Signal2D):
         min_sigma : float, optional
         max_sigma : float, optional
         sigma_ratio : float, optional
-            For method='dog'
+            For method 'dog'
         num_sigma: float, optional
-            For method='log'
+            For method 'log'
         threshold : float, optional
         overlap : float, optional
         normalize_value : float, optional
@@ -814,19 +814,25 @@ class PixelatedSTEM(Signal2D):
         >>> peak_array = s.find_peaks()
         >>> peak_array_computed = peak_array.compute(show_progressbar=False)
         >>> peak02 = peak_array_computed[0, 2]
-        >>> import pixstem.marker_tools as mt
-        >>> mt.add_peak_array_to_signal_as_markers(s, peak_array_computed)
+        >>> s.add_peak_array_as_markers(peak_array_computed)
         >>> s.plot()
 
         Change parameters
 
         >>> peak_array = s.find_peaks(
-        ...     min_sigma=1.2, max_sigma=27, sigma_ratio=2.2, threshold=0.6,
-        ...     overlap=0.6, lazy_result=False, show_progressbar=False)
+        ...     method='dog', min_sigma=1.2, max_sigma=27, sigma_ratio=2.2,
+        ...     threshold=0.6, overlap=0.6, lazy_result=False,
+        ...     show_progressbar=False)
 
         Using Laplacian of Gaussian
 
-        >>> peak_array = s.find_peaks(method='log')
+        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> peak_array = s.find_peaks(
+        ...     method='log', min_sigma=5, max_sigma=55, num_sigma=10,
+        ...     threshold=0.2, overlap=0.86, lazy_result=False,
+        ...     show_progressbar=False)
+        >>> s.add_peak_array_as_markers(peak_array)
+        >>> s.plot()
 
         """
         if self._lazy:
@@ -844,7 +850,6 @@ class PixelatedSTEM(Signal2D):
         else:
             raise ValueError(
                 "Method is not a valid name, should be dog or log")
-            return
 
         if not lazy_result:
             if show_progressbar:

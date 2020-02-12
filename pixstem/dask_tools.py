@@ -403,7 +403,6 @@ def _peak_find_log_single_frame(
                      max_sigma=max_sigma, num_sigma=num_sigma,
                      threshold=threshold, overlap=overlap)
     peak = peaks[:, :2].astype(np.float64)
-
     return peak
 
 
@@ -502,7 +501,6 @@ def _peak_find_log(
     output_array = da.map_blocks(
         _peak_find_log_chunk, dask_array_rechunked, drop_axis=drop_axis,
         dtype=np.object, **kwargs)
-
     return output_array
 
 
