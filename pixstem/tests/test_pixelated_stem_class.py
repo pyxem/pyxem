@@ -294,8 +294,7 @@ class TestFindDeadPixels:
 
     def test_non_lazy_signal(self):
         data = dtd._get_dead_pixel_test_data_2d()
-        data.compute()
-        s = PixelatedSTEM(data)
+        s = PixelatedSTEM(data.compute())
         s_dead_pixels = s.find_dead_pixels()
         assert s_dead_pixels.data.shape == s.data.shape
         assert s_dead_pixels.data[14, 42]
