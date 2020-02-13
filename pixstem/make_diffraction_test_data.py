@@ -39,8 +39,10 @@ def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
     rot = rotation
     xx0 = xx - x
     yy0 = yy - y
-    z0 = ((xx0*np.cos(rot) + yy0*np.sin(rot))**2)/(semi_len0*semi_len0)
-    z1 = ((xx0*np.sin(rot) - yy0*np.cos(rot))**2)/(semi_len1*semi_len1)
+    semi_len02 = semi_len0 * semi_len0
+    semi_len12 = semi_len1 * semi_len1
+    z0 = ((xx0 * np.cos(rot) + yy0 * np.sin(rot)) ** 2) / semi_len02
+    z1 = ((xx0 * np.sin(rot) - yy0 * np.cos(rot)) ** 2) / semi_len12
     zz = z0 + z1
     elli_mask = zz <= 1.
     return elli_mask
@@ -126,11 +128,11 @@ class EllipseRing(object):
 
     def __repr__(self):
         return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
-                ' r: %s, I: %s, lw: %s)>' % (
-                        self.__class__.__name__,
-                        self.x0, self.y0, self.semi_len0, self.semi_len1,
-                        self.rotation, self.intensity, self.lw_r,
-                        )
+               ' r: %s, I: %s, lw: %s)>' % (
+                       self.__class__.__name__,
+                       self.x0, self.y0, self.semi_len0, self.semi_len1,
+                       self.rotation, self.intensity, self.lw_r,
+                       )
 
     def get_signal(self):
         ellipse = _get_elliptical_ring(
@@ -138,7 +140,7 @@ class EllipseRing(object):
                 semi_len0=self.semi_len0, semi_len1=self.semi_len1,
                 rotation=self.rotation, lw_r=self.lw_r)
         self.ellipse = ellipse * self.intensity
-        return(self.ellipse)
+        return self.ellipse
 
 
 class EllipseDisk(object):
@@ -182,10 +184,10 @@ class EllipseDisk(object):
     def __repr__(self):
         return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
                ' r: %s, I: %s)>' % (
-                        self.__class__.__name__,
-                        self.x0, self.y0, self.semi_len0, self.semi_len1,
-                        self.rotation, self.intensity,
-                        )
+                       self.__class__.__name__,
+                       self.x0, self.y0, self.semi_len0, self.semi_len1,
+                       self.rotation, self.intensity,
+                       )
 
     def get_signal(self):
         ellipse = _get_elliptical_disk(
@@ -193,7 +195,7 @@ class EllipseDisk(object):
                 semi_len0=self.semi_len0, semi_len1=self.semi_len1,
                 rotation=self.rotation)
         self.ellipse = ellipse * self.intensity
-        return(self.ellipse)
+        return self.ellipse
 
 
 class Circle(object):
@@ -209,24 +211,24 @@ class Circle(object):
 
     def __repr__(self):
         return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
-            self.__class__.__name__,
-            self.r, self.x0, self.y0, self.intensity,
-            )
+                self.__class__.__name__,
+                self.r, self.x0, self.y0, self.intensity,
+                )
 
     def mask_outside_r(self, scale):
         if self.lw is None:
-            indices = self.circle >= (self.r + scale)**2
+            indices = self.circle >= (self.r + scale) ** 2
         else:
-            indices = self.circle >= (self.r + self.lw + scale)**2
+            indices = self.circle >= (self.r + self.lw + scale) ** 2
         self.circle[indices] = 0
 
     def centre_on_image(self, xx, yy):
         if self.x0 < xx[0][0] or self.x0 > xx[0][-1]:
-            return(False)
+            return False
         elif self.y0 < yy[0][0] or self.y0 > yy[-1][-1]:
-            return(False)
+            return False
         else:
-            return(True)
+            return True
 
     def get_centre_pixel(self, xx, yy, scale):
         """
@@ -262,6 +264,7 @@ class Disk(object):
     """
     Disk object, with outer edge of the ring at r
     """
+
     def __init__(self, xx, yy, scale, x0, y0, r, intensity):
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale)
         self.z.set_uniform_intensity()
@@ -286,7 +289,7 @@ class Disk(object):
                 self.z.circle[y, x] = self.z.intensity  # This is correct
 
     def get_signal(self):
-        return(self.z.circle)
+        return (self.z.circle)
 
     def update_axis(self, xx, yy):
         self.z.update_axis(xx, yy)
@@ -301,11 +304,12 @@ class Ring(object):
     up the ring.
 
     """
+
     def __init__(self, xx, yy, scale, x0, y0, r, intensity, lr):
         if lr > r:
             raise ValueError('Ring line width too big'.format(lr, r))
         self.lr = lr
-        self.lw = 1 + 2*lr  # scalar line width of the ring
+        self.lw = 1 + 2 * lr  # scalar line width of the ring
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale, lw=lr)
         self.mask_inside_r(scale)
         self.z.set_uniform_intensity()
@@ -316,11 +320,11 @@ class Ring(object):
             self.z.intensity,)
 
     def mask_inside_r(self, scale):
-        indices = self.z.circle < (self.z.r - self.lr)**2
+        indices = self.z.circle < (self.z.r - self.lr) ** 2
         self.z.circle[indices] = 0
 
     def get_signal(self):
-        return(self.z.circle)
+        return self.z.circle
 
     def update_axis(self, xx, yy):
         self.z.update_axis(xx, yy)
@@ -381,6 +385,7 @@ class MakeTestData(object):
     >>> test_data.signal.plot()
 
     """
+
     def __init__(
             self, size_x=100, size_y=100, scale=1,
             default=False, blur=True, blur_sigma=1, downscale=True):
@@ -414,12 +419,12 @@ class MakeTestData(object):
         self.to_signal()
 
     def generate_mesh(self):
-        self.X = np.arange(0, self.size_x, self.scale/self.downscale_factor)
-        self.Y = np.arange(0, self.size_y, self.scale/self.downscale_factor)
+        self.X = np.arange(0, self.size_x, self.scale / self.downscale_factor)
+        self.Y = np.arange(0, self.size_y, self.scale / self.downscale_factor)
         self.xx, self.yy = np.meshgrid(self.X, self.Y, sparse=True)
 
     def add_disk(self, x0=50, y0=50, r=5, intensity=10):
-        scale = self.scale/self.downscale_factor
+        scale = self.scale / self.downscale_factor
         self.z_list.append(Disk(self.xx, self.yy, scale, x0, y0, r, intensity))
         self.update_signal()
 
@@ -453,8 +458,8 @@ class MakeTestData(object):
             a ring line width in pixels of 2*lw+1.
 
         """
-        scale = self.scale/self.downscale_factor
-        lr = lw_pix*self.scale  # scalar
+        scale = self.scale / self.downscale_factor
+        lr = lw_pix * self.scale  # scalar
         self.z_list.append(
                 Ring(self.xx, self.yy, scale, x0, y0, r, intensity, lr))
         self.update_signal()
@@ -471,7 +476,7 @@ class MakeTestData(object):
 
     def make_signal(self):
         if len(self.z_list) == 0:
-            self.z = self.xx*0 + self.yy*0
+            self.z = self.xx * 0 + self.yy * 0
         elif len(self.z_list) == 1:
             self.z = self.z_list[0].get_signal()
         elif len(self.z_list) > 1:
@@ -483,12 +488,12 @@ class MakeTestData(object):
     def downscale(self):
         if self.downscale_on:
             shape = (
-                    int(self.z.shape[0]/self.downscale_factor),
-                    int(self.z.shape[1]/self.downscale_factor))
+                    int(self.z.shape[0] / self.downscale_factor),
+                    int(self.z.shape[1] / self.downscale_factor))
             sh = (
                     shape[0],
-                    self.z.shape[0]//shape[0], shape[1],
-                    self.z.shape[1]//shape[1])
+                    self.z.shape[0] // shape[0], shape[1],
+                    self.z.shape[1] // shape[1])
             self.z_downscaled = self.z.reshape(sh).mean(-1).mean(1)
         else:
             self.z_downscaled = self.z
@@ -496,7 +501,7 @@ class MakeTestData(object):
     def blur(self):
         if self.blur_on:
             self.z_blurred = gaussian_filter(
-                    self.z_downscaled, sigma=self.blur_sigma)
+                self.z_downscaled, sigma=self.blur_sigma)
         else:
             self.z_blurred = self.z_downscaled
 
@@ -674,37 +679,37 @@ def generate_4d_data(
     else:
         plot_disk = True
         if not isiterable(disk_x):
-            disk_x = np.ones((probe_size_y, probe_size_x))*disk_x
+            disk_x = np.ones((probe_size_y, probe_size_x)) * disk_x
     if not isiterable(disk_y):
-        disk_y = np.ones((probe_size_y, probe_size_x))*disk_y
+        disk_y = np.ones((probe_size_y, probe_size_x)) * disk_y
     if not isiterable(disk_r):
-        disk_r = np.ones((probe_size_y, probe_size_x))*disk_r
+        disk_r = np.ones((probe_size_y, probe_size_x)) * disk_r
     if not isiterable(disk_I):
-        disk_I = np.ones((probe_size_y, probe_size_x))*disk_I
+        disk_I = np.ones((probe_size_y, probe_size_x)) * disk_I
 
     if ring_x is None:
         plot_ring = False
     else:
         plot_ring = True
         if not isiterable(ring_x):
-            ring_x = np.ones((probe_size_y, probe_size_x))*ring_x
+            ring_x = np.ones((probe_size_y, probe_size_x)) * ring_x
     if not isiterable(ring_y):
-        ring_y = np.ones((probe_size_y, probe_size_x))*ring_y
+        ring_y = np.ones((probe_size_y, probe_size_x)) * ring_y
     if not isiterable(ring_r):
-        ring_r = np.ones((probe_size_y, probe_size_x))*ring_r
+        ring_r = np.ones((probe_size_y, probe_size_x)) * ring_r
     if not isiterable(ring_I):
-        ring_I = np.ones((probe_size_y, probe_size_x))*ring_I
+        ring_I = np.ones((probe_size_y, probe_size_x)) * ring_I
     if not isiterable(ring_lw):
-        ring_lw = np.ones((probe_size_y, probe_size_x))*ring_lw
+        ring_lw = np.ones((probe_size_y, probe_size_x)) * ring_lw
 
     if ring_e_x is None:
         plot_ring_e = False
     else:
         plot_ring_e = True
         if not isiterable(ring_e_x):
-            ring_e_x = np.ones((probe_size_y, probe_size_x))*ring_e_x
+            ring_e_x = np.ones((probe_size_y, probe_size_x)) * ring_e_x
     if not isiterable(ring_e_y):
-        ring_e_y = np.ones((probe_size_y, probe_size_x))*ring_e_y
+        ring_e_y = np.ones((probe_size_y, probe_size_x)) * ring_e_y
     if not isiterable(ring_e_semi_len0):
         ring_e_semi_len0 = np.ones(
                 (probe_size_y, probe_size_x)) * ring_e_semi_len0
@@ -712,11 +717,11 @@ def generate_4d_data(
         ring_e_semi_len1 = np.ones(
                 (probe_size_y, probe_size_x)) * ring_e_semi_len1
     if not isiterable(ring_e_I):
-        ring_e_I = np.ones((probe_size_y, probe_size_x))*ring_e_I
+        ring_e_I = np.ones((probe_size_y, probe_size_x)) * ring_e_I
     if not isiterable(ring_e_lw):
-        ring_e_lw = np.ones((probe_size_y, probe_size_x))*ring_e_lw
+        ring_e_lw = np.ones((probe_size_y, probe_size_x)) * ring_e_lw
     if not isiterable(ring_e_r):
-        ring_e_r = np.ones((probe_size_y, probe_size_x))*ring_e_r
+        ring_e_r = np.ones((probe_size_y, probe_size_x)) * ring_e_r
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
