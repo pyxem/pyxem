@@ -23,7 +23,8 @@ from warnings import warn
 
 from pyxem.signals import push_metadata_through, transfer_navigation_axes
 from pyxem.utils.indexation_utils import peaks_from_best_template
-from pyxem.utils.indexation_utils import peaks_from_best_vector_match
+# TODO Fix peaks_from_best_vector_match
+# from pyxem.utils.indexation_utils import peaks_from_best_vector_match
 from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
@@ -190,34 +191,37 @@ class VectorMatchingResults(BaseSignal):
 
         return vectors
 
-    def plot_best_matching_results_on_signal(self, signal,
-                                             library,
-                                             rank=0,
-                                             permanent_markers=True,
-                                             *args, **kwargs):
-        """Plot the best matching diffraction vectors on a signal.
-
-        Parameters
-        ----------
-        signal : ElectronDiffraction2D
-            The ElectronDiffraction2D signal object on which to plot the peaks.
-            This signal must have the same navigation dimensions as the peaks.
-        library : DiffractionLibrary
-            Diffraction library containing the phases and rotations
-        rank : int
-            Plot results from nth best matching result (default: 0, best match)
-        permanent_markers : bool
-            Permanently save the peaks as markers on the signal. Default True.
-        *args :
-            Arguments passed to signal.plot()
-        **kwargs :
-            Keyword arguments passed to signal.plot()
-        """
-        match_peaks = self.map(peaks_from_best_vector_match,
-                               library=library,
-                               inplace=False)
-        mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
-        signal.plot(*args, **kwargs)
-        for mx, my in zip(mmx, mmy):
-            m = hs.markers.point(x=mx, y=my, color='red', marker='x')
-            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
+# TODO peaks_from_best_vector_match is  dependant on
+# simulate_rotated_structure which was removed in PR #60
+#
+#    def plot_best_matching_results_on_signal(self, signal,
+#                                             library,
+#                                             rank=0,
+#                                             permanent_markers=True,
+#                                             *args, **kwargs):
+#        """Plot the best matching diffraction vectors on a signal.
+#
+#        Parameters
+#        ----------
+#        signal : ElectronDiffraction2D
+#            The ElectronDiffraction2D signal object on which to plot the peaks.
+#            This signal must have the same navigation dimensions as the peaks.
+#        library : DiffractionLibrary
+#            Diffraction library containing the phases and rotations
+#        rank : int
+#            Plot results from nth best matching result (default: 0, best match)
+#        permanent_markers : bool
+#            Permanently save the peaks as markers on the signal. Default True.
+#        *args :
+#            Arguments passed to signal.plot()
+#        **kwargs :
+#            Keyword arguments passed to signal.plot()
+#        """
+#        match_peaks = self.map(peaks_from_best_vector_match,
+#                               library=library,
+#                               inplace=False)
+#        mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
+#        signal.plot(*args, **kwargs)
+#        for mx, my in zip(mmx, mmy):
+#            m = hs.markers.point(x=mx, y=my, color='red', marker='x')
+#            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
