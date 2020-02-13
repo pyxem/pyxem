@@ -24,8 +24,6 @@ from operator import itemgetter, attrgetter
 
 import numpy as np
 
-from diffsims.utils.sim_utils import simulate_rotated_structure
-
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
@@ -523,37 +521,37 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
-
-def peaks_from_best_vector_match(single_match_result, library, rank=0):
-    """Takes a VectorMatchingResults object and return the associated peaks,
-    to be used in combination with map().
-
-    Parameters
-    ----------
-    single_match_result : ndarray
-        An entry in a VectorMatchingResults
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations
-    rank : int
-        Get peaks from nth best orientation (default: 0, best vector match)
-
-    Returns
-    -------
-    peaks : ndarray
-        Coordinates of peaks in the matching results object in calibrated units.
-    """
-    best_fit = get_nth_best_solution(single_match_result, rank=rank)
-    phase_index = best_fit.phase_index
-
-    rotation_matrix = best_fit.rotation_matrix
-    # Don't change the original
-    structure = library.structures[phase_index]
-    sim = simulate_rotated_structure(
-        library.diffraction_generator,
-        structure,
-        rotation_matrix,
-        library.reciprocal_radius,
-        with_direct_beam=False)
-
-    # Cut z
-    return sim.coordinates[:, :2]
+# TODO simulate_rotated_structure was removed in PR #60. This function does thus not work.
+#def peaks_from_best_vector_match(single_match_result, library, rank=0):
+#    """Takes a VectorMatchingResults object and return the associated peaks,
+#    to be used in combination with map().
+#
+#    Parameters
+#    ----------
+#    single_match_result : ndarray
+#        An entry in a VectorMatchingResults
+#    library : DiffractionLibrary
+#        Diffraction library containing the phases and rotations
+#    rank : int
+#        Get peaks from nth best orientation (default: 0, best vector match)
+#
+#    Returns
+#    -------
+#    peaks : ndarray
+#        Coordinates of peaks in the matching results object in calibrated units.
+#    """
+#    best_fit = get_nth_best_solution(single_match_result, rank=rank)
+#    phase_index = best_fit.phase_index
+#
+#    rotation_matrix = best_fit.rotation_matrix
+#    # Don't change the original
+#    structure = library.structures[phase_index]
+#    sim = simulate_rotated_structure(
+#        library.diffraction_generator,
+#        structure,
+#        rotation_matrix,
+#        library.reciprocal_radius,
+#        with_direct_beam=False)
+#
+#    # Cut z
+#    return sim.coordinates[:, :2]
