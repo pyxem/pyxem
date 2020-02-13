@@ -1360,6 +1360,15 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
         raise ValueError(
             "dask_array must be at least two dimensions, not {0}".format(
                 array_dims))
+    if dask_array.shape[:-2] != peak_array.shape:
+        raise ValueError(
+                "peak_array ({0}) must have the same shape as dask_array "
+                "except the two last dimensions ({1})".format(
+                    peak_array.shape, dask_array.shape[:-2]))
+    if not hasattr(dask_array, 'chunks'):
+        raise ValueError("dask_array must be a Dask array")
+    if not hasattr(peak_array, 'chunks'):
+        raise ValueError("peak_array must be a Dask array")
 
     detx, dety = dask_array.shape[-2:]
     chunks = [None] * array_dims
@@ -1368,24 +1377,18 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     chunks = tuple(chunks)
     dask_array_rechunked = dask_array.rechunk(chunks=chunks)
 
-    chunks_peak = list(dask_array_rechunked.chunksize[:-2])
-    chunks_peak.extend([1, 1])
+    peak_array_rechunked = peak_array.rechunk(dask_array_rechunked.chunks[:-2])
+    shape = list(peak_array_rechunked.shape)
+    shape.extend([1, 1])
+    peak_array_rechunked = peak_array_rechunked.reshape(shape)
 
-    if peak_array.ndim < dask_array_rechunked.ndim:
-        dim_dif = dask_array_rechunked.ndim - peak_array.ndim
-        for i in range(dim_dif):
-            peak_array = np.expand_dims(peak_array, axis=peak_array.ndim)
-
-    peak_array_rechunked = da.from_array(peak_array, chunks=chunks_peak)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
-
     kwargs_refinement = {'square_size': square_size}
 
     output_array = da.map_blocks(
-        _peak_refinement_centre_of_mass_chunk, dask_array_rechunked,
-        peak_array_rechunked, drop_axis=drop_axis,
-        dtype=np.object, **kwargs_refinement)
-
+            _peak_refinement_centre_of_mass_chunk, dask_array_rechunked,
+            peak_array_rechunked, drop_axis=drop_axis,
+            dtype=np.object, **kwargs_refinement)
     return output_array
 
 

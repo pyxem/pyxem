@@ -1453,7 +1453,7 @@ class TestPixelatedStemIntensityPeaks:
         assert intensity_array.shape == tuple(shape[:-2])
 
 
-class TestPixelatedStemPeakPositionRefinement():
+class TestPixelatedStemPeakPositionRefinement:
 
     def test_simple(self):
         s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
@@ -1461,6 +1461,12 @@ class TestPixelatedStemPeakPositionRefinement():
         refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
         assert s.data.shape[:2] == refined_peak_array.shape
         assert hasattr(peak_array, 'compute')
+
+    def test_wrong_square_size(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        with pytest.raises(ValueError):
+            s.peak_position_refinement_com(peak_array, square_size=5)
 
     def test_lazy_input(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))

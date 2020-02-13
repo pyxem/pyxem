@@ -866,8 +866,10 @@ class PixelatedSTEM(Signal2D):
 
         Parameters
         ----------
-        peak_array : Numpy object array or dask array
+        peak_array : Numpy or Dask array
             Object with x and y coordinates of the peak positions.
+            Must have the same dimensions as this signal's navigation
+            dimensions.
         square_size : int
             Even integer, sub image from which the center of mass is
             calculated.
@@ -897,6 +899,10 @@ class PixelatedSTEM(Signal2D):
         >>> s.plot()
 
         """
+        if square_size % 2 != 0:  # If odd number, raise error
+            raise ValueError(
+                    "square_size must be even number, not {0}".format(
+                        square_size))
         if self._lazy:
             dask_array = self.data
         else:
@@ -906,13 +912,13 @@ class PixelatedSTEM(Signal2D):
             dask_array = da.from_array(self.data, chunks=chunks)
 
         chunks_peak = dask_array.chunksize[:-2]
-        peak_dask_array = da.from_array(peak_array, chunks=chunks_peak)
-        shape = list(peak_dask_array.shape)
-        shape.extend([1, 1])
-        peak_dask_array = peak_dask_array.reshape(shape)
+        if hasattr(peak_array, 'chunks'):
+            peak_array_dask = da.rechunk(peak_array, chunks=chunks_peak)
+        else:
+            peak_array_dask = da.from_array(peak_array, chunks=chunks_peak)
 
         output_array = dt._peak_refinement_centre_of_mass(
-                        dask_array, peak_dask_array, square_size)
+                dask_array, peak_array_dask, square_size)
 
         if not lazy_result:
             if show_progressbar:
@@ -922,6 +928,7 @@ class PixelatedSTEM(Signal2D):
             if show_progressbar:
                 pbar.unregister()
         return output_array
+
 
     def intensity_peaks(self, peak_array, disk_r=4,
                         lazy_result=True, show_progressbar=True):

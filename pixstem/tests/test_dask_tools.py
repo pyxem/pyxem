@@ -590,8 +590,6 @@ class TestPeakPositionRefinementCOM:
 
         dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
         dask_peak_array = da.from_array(peak_array, chunks=(5, 5))
-        dask_peak_array = dask_peak_array.reshape(
-            dask_peak_array.shape[0], dask_peak_array.shape[1], 1, 1)
 
         square_size = 12
 
@@ -613,11 +611,12 @@ class TestPeakPositionRefinementCOM:
             islice = np.s_[index]
             peak_array[islice] = np.asarray([(27, 27)])
         square_size = 12
+        peak_array_dask = da.from_array(peak_array, chunks=chunks[:-2])
         match_array_dask = dt._peak_refinement_centre_of_mass(
-            dask_array, peak_array, square_size)
+            dask_array, peak_array_dask, square_size)
         assert len(dask_array.shape) == nav_dims + 2
         match_array = match_array_dask.compute()
-        assert peak_array.shape == match_array.shape
+        assert peak_array_dask.shape == match_array.shape
 
 
 class TestBackgroundRemovalDOG:
