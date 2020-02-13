@@ -872,9 +872,13 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
     dask_array : Dask array
         The two last dimensions are the signal dimensions. Must have at least
         2 dimensions.
-    peak_array: NumPy 2D array
+    peak_array: Dask array
+        Must have the same shape as dask_array's navigation dimensions,
+        ergo dask_array's dimensions, except the two last ones.
+        So if dask_array has the shape [10, 15, 50, 50], the peak_array
+        must have the shape [10, 15].
         In the form [[x0, y0], [x1, y1], [x2, y2], ...]
-    r__disk : Integer number which represents the radius of the discs
+    r_disk : Integer number which represents the radius of the discs
         peak_array = Numpy object with x and y coordinates peaks
 
     Returns
@@ -899,6 +903,15 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
         raise ValueError(
             "dask_array must be at least two dimensions, not {0}".format(
                 array_dims))
+    if dask_array.shape[:-2] != peak_array.shape:
+        raise ValueError(
+                "peak_array ({0}) must have the same shape as dask_array "
+                "except the two last dimensions ({1})".format(
+                    peak_array.shape, dask_array.shape[:-2]))
+    if not hasattr(dask_array, 'chunks'):
+        raise ValueError("dask_array must be a Dask array")
+    if not hasattr(peak_array, 'chunks'):
+        raise ValueError("peak_array must be a Dask array")
 
     detx, dety = dask_array.shape[-2:]
     chunks = [None] * array_dims
@@ -907,22 +920,18 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
     chunks = tuple(chunks)
     dask_array_rechunked = dask_array.rechunk(chunks=chunks)
 
-    chunks_peak = list(dask_array_rechunked.chunksize[:-2])
-    chunks_peak.extend([1, 1])
+    peak_array_rechunked = peak_array.rechunk(dask_array_rechunked.chunks[:-2])
+    shape = list(peak_array_rechunked.shape)
+    shape.extend([1, 1])
+    peak_array_rechunked = peak_array_rechunked.reshape(shape)
 
-    if peak_array.ndim < dask_array_rechunked.ndim:
-        dim_dif = dask_array_rechunked.ndim - peak_array.ndim
-        for i in range(dim_dif):
-            peak_array = np.expand_dims(peak_array, axis=peak_array.ndim)
-
-    peak_array_rechunked = da.from_array(peak_array, chunks=chunks_peak)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     kwargs_intensity_peaks = {'disk_r': disk_r}
+
     output_array = da.map_blocks(
         _intensity_peaks_image_chunk, dask_array_rechunked,
         peak_array_rechunked, drop_axis=drop_axis,
         dtype=np.object, **kwargs_intensity_peaks)
-
     return output_array
 
 

@@ -933,7 +933,7 @@ class PixelatedSTEM(Signal2D):
 
         Parameters
         ----------
-        peak_array : Numpy array
+        peak_array : Numpy or Dask array
             Must have the same navigation shape as this signal.
         disk_r : int
             Radius of the disc chosen to take the mean value of
@@ -944,7 +944,7 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        intensity_array: Numpy object
+        intensity_array: Numpy or Dask array
             Same navigation shape as this signal, with peak position in
             x and y coordinates and the mean intensity.
 
@@ -965,13 +965,13 @@ class PixelatedSTEM(Signal2D):
             dask_array = da.from_array(self.data, chunks=chunks)
 
         chunks_peak = dask_array.chunksize[:-2]
-        peak_dask_array = da.from_array(peak_array, chunks=chunks_peak)
-        shape = list(peak_dask_array.shape)
-        shape.extend([1, 1])
-        peak_dask_array = peak_dask_array.reshape(shape)
+        if hasattr(peak_array, 'chunks'):
+            peak_array_dask = da.rechunk(peak_array, chunks=chunks_peak)
+        else:
+            peak_array_dask = da.from_array(peak_array, chunks=chunks_peak)
 
         output_array = dt._intensity_peaks_image(
-            dask_array, peak_dask_array, disk_r)
+            dask_array, peak_array_dask, disk_r)
 
         if not lazy_result:
             if show_progressbar:

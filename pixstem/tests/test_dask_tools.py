@@ -811,13 +811,15 @@ class TestIntensityArray:
         numpy_array = np.zeros((50, 50))
         numpy_array[27, 29] = 2
         numpy_array[11, 15] = 1
+        image = da.from_array(numpy_array, chunks=(50, 50))
         peak = np.array([[27, 29], [11, 15]], np.int32)
+        peak_dask = da.from_array(peak, chunks=(1, 1))
         disk_r0 = 1
         disk_r1 = 2
         intensity0 = dt._intensity_peaks_image_single_frame(
-            numpy_array, peak, disk_r0)
+            image, peak_dask, disk_r0)
         intensity1 = dt._intensity_peaks_image_single_frame(
-            numpy_array, peak, disk_r1)
+            image, peak_dask, disk_r1)
 
         assert intensity0[0].all() == np.array([27., 29., 2 / 9]).all()
         assert intensity0[1].all() == np.array([11., 15., 1 / 9]).all()
@@ -830,16 +832,18 @@ class TestIntensityArray:
         numpy_array[:, :, 27, 27] = 1
 
         peak_array = np.zeros((numpy_array.shape[0],
-                               numpy_array.shape[1], 1, 1), dtype=np.object)
+                               numpy_array.shape[1]), dtype=np.object)
         for index in np.ndindex(numpy_array.shape[:-2]):
             islice = np.s_[index]
-            peak_array[islice][0, 0] = np.asarray([(27, 27)])
+            peak_array[islice] = np.asarray([(27, 27)])
 
+        dask_array = da.from_array(numpy_array, chunks=(1, 1, 25, 25))
+        peak_array_dask = da.from_array(peak_array, chunks=(1, 1))
         disk_r = 2
         intensity_array = dt._intensity_peaks_image_chunk(
-            numpy_array, peak_array, disk_r)
+            dask_array, peak_array_dask, disk_r)
 
-        assert intensity_array.shape == peak_array.shape[:-2]
+        assert intensity_array.shape == peak_array_dask.shape
 
     def test_intensity_peaks_dask(self):
         numpy_array = np.zeros((10, 10, 50, 50))
@@ -853,8 +857,6 @@ class TestIntensityArray:
 
         dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
         dask_peak_array = da.from_array(peak_array, chunks=(5, 5))
-        dask_peak_array = dask_peak_array.reshape(
-            dask_peak_array.shape[0], dask_peak_array.shape[1], 1, 1)
 
         disk_r = 2
         intensity_array = dt._intensity_peaks_image(dask_array,
@@ -873,12 +875,35 @@ class TestIntensityArray:
         for index in np.ndindex(dask_array.shape[:-2]):
             islice = np.s_[index]
             peak_array[islice] = np.asarray([(27, 27)])
-        disk_r = 5
+        peak_array_dask = da.from_array(peak_array, chunks=chunks[:-2])
         match_array_dask = dt._intensity_peaks_image(
-            dask_array, peak_array, disk_r)
+            dask_array, peak_array_dask, 5)
         assert len(dask_array.shape) == nav_dims + 2
         match_array = match_array_dask.compute()
-        assert peak_array.shape == match_array.shape
+        assert peak_array_dask.shape == match_array.shape
+
+    def test_non_dask_array(self):
+        data_array = np.ones((10, 10, 50, 50))
+        data_array_dask = da.ones((10, 10, 50, 50), chunks=(2, 2, 25, 25))
+        peak_array = np.empty((10, 10), dtype=np.object)
+        peak_array_dask = da.from_array(peak_array, chunks=(2, 2))
+        with pytest.raises(ValueError):
+            dt._intensity_peaks_image(data_array, peak_array_dask, 5)
+        with pytest.raises(ValueError):
+            dt._intensity_peaks_image(data_array, peak_array, 5)
+        with pytest.raises(ValueError):
+            dt._intensity_peaks_image(data_array_dask, peak_array, 5)
+        dt._intensity_peaks_image(data_array_dask, peak_array_dask, 5)
+
+    def test_non_square_datasets(self):
+        data_array_dask = da.ones((6, 16, 100, 50), chunks=(2, 2, 25, 25))
+        peak_array_dask = da.empty((6, 16), chunks=(2, 2), dtype=np.object)
+        dt._intensity_peaks_image(data_array_dask, peak_array_dask, 5)
+
+    def test_different_chunks(self):
+        data_array_dask = da.ones((6, 16, 100, 50), chunks=(6, 4, 50, 25))
+        peak_array_dask = da.empty((6, 16), chunks=(3, 2), dtype=np.object)
+        dt._intensity_peaks_image(data_array_dask, peak_array_dask, 5)
 
 
 class TestPeakFindLog:

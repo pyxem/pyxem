@@ -1395,7 +1395,7 @@ class TestSubtractingDiffractionBackground():
         assert st.data.shape == tuple(shape)
 
 
-class TestPixelatedStemIntensityPeaks():
+class TestPixelatedStemIntensityPeaks:
 
     def test_simple(self):
         s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
@@ -1408,7 +1408,7 @@ class TestPixelatedStemIntensityPeaks():
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
         peak_array = s.find_peaks()
-        intensity_array = s.intensity_peaks(peak_array,)
+        intensity_array = s.intensity_peaks(peak_array)
         assert s.data.shape[:2] == intensity_array.shape
         assert hasattr(intensity_array, 'compute')
 
