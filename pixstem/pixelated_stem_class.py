@@ -303,7 +303,10 @@ class PixelatedSTEM(Signal2D):
             mask_array = np.invert(mask_array)
         else:
             mask_array = None
-        dask_array = da.from_array(self.data, chunks=chunk_calculations)
+        if hasattr(self.data, 'chunks'):
+            dask_array = da.rechunk(self.data, chunks=chunk_calculations)
+        else:
+            dask_array = da.from_array(self.data, chunks=chunk_calculations)
         data = dt._center_of_mass_array(
                 dask_array, threshold_value=threshold, mask_array=mask_array)
         if lazy_result:
@@ -929,7 +932,6 @@ class PixelatedSTEM(Signal2D):
                 pbar.unregister()
         return output_array
 
-
     def intensity_peaks(self, peak_array, disk_r=4,
                         lazy_result=True, show_progressbar=True):
         """Get intensity of a peak in the diffraction data.
@@ -990,21 +992,25 @@ class PixelatedSTEM(Signal2D):
         return output_array
 
     def subtract_diffraction_background(
-            self, method, lazy_result=True, show_progressbar=True, **kwargs):
+            self, method='median kernel',
+            lazy_result=True, show_progressbar=True, **kwargs):
         """Background subtraction of the diffraction data.
 
-        Can be done using difference of Gaussians, median kernel and
-        radial median.
+        There are three different methods for doing this:
+        - Difference of Gaussians
+        - Median kernel
+        - Radial median
 
         Parameters
         ----------
         method : string
             'difference of gaussians', 'median kernel' and 'radial median'.
+            Default 'median kernel'.
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,
             will compute the result and return a PixelatedSTEM object.
         show_progressbar : bool, default True
-        sigma_min : float,optional
+        sigma_min : float, optional
             Standard deviation for the minimum Gaussian convolution
             (difference of Gaussians only)
         sigma_max : float, optional
@@ -1024,7 +1030,7 @@ class PixelatedSTEM(Signal2D):
 
         Returns
         -------
-        s : PixelatedSTEM signal or LazyPixelatedSTEM signal
+        s : PixelatedSTEM or LazyPixelatedSTEM signal
 
         Examples
         --------
@@ -1053,8 +1059,8 @@ class PixelatedSTEM(Signal2D):
         else:
             raise NotImplementedError(
                 "The method specified, '{}', is not implemented. "
-                "The different methods are: difference of Gaussians,"
-                " median kernel, radial median.".format(
+                "The different methods are: 'difference of gaussians',"
+                " 'median kernel' or 'radial median'.".format(
                     method))
 
         if not lazy_result:
@@ -1067,9 +1073,7 @@ class PixelatedSTEM(Signal2D):
             s = PixelatedSTEM(output_array)
         else:
             s = LazyPixelatedSTEM(output_array)
-
         pst._copy_signal_all_axes_metadata(self, s)
-
         return s
 
     def angular_mask(

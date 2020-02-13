@@ -6,6 +6,21 @@ import scipy.ndimage as ndi
 from skimage import morphology
 
 
+def _rechunk_signal2d_dim_one_chunk(dask_array):
+    array_dims = len(dask_array.shape)
+    if array_dims < 2:
+        raise ValueError(
+            "dask_array must be at least two dimensions, not {0}".format(
+                array_dims))
+    detx, dety = dask_array.shape[-2:]
+    chunks = [None] * array_dims
+    chunks[-2] = detx
+    chunks[-1] = dety
+    chunks = tuple(chunks)
+    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    return dask_array_rechunked
+
+
 def _mask_array(dask_array, mask_array, fill_value=None):
     """Mask two last dimensions in a dask array.
 
@@ -204,25 +219,15 @@ def _template_match_with_binary_image(dask_array, binary_image):
     >>> from skimage import morphology
     >>> binary_image = morphology.disk(4, np.uint16)
     >>> import pixstem.dask_tools as dt
-    >>> template_match = dt._template_match_binary_image_chunk(
+    >>> template_match = dt._template_match_with_binary_image(
     ...     dask_array, binary_image)
 
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(
-                array_dims))
     if len(binary_image.shape) != 2:
         raise ValueError(
             "binary_image must have two dimensions, not {0}".format(
                 len(binary_image.shape)))
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
         _template_match_binary_image_chunk, dask_array_rechunked,
         binary_image, dtype=np.float32)
@@ -349,17 +354,7 @@ def _peak_find_dog(
     >>> peak_array_computed = peak_array.compute()
 
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least 2-dimensions, not {0}".format(
-                array_dims))
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     output_array = da.map_blocks(
         _peak_find_dog_chunk, dask_array_rechunked, drop_axis=drop_axis,
@@ -486,17 +481,7 @@ def _peak_find_log(
     >>> peak_array_computed = peak_array.compute()
 
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least 2-dimensions, not {0}".format(
-                array_dims))
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     output_array = da.map_blocks(
         _peak_find_log_chunk, dask_array_rechunked, drop_axis=drop_axis,
@@ -898,11 +883,6 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
     >>> intensity = dt._intensity_peaks_image(dask_array, peak_array, 5)
 
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(
-                array_dims))
     if dask_array.shape[:-2] != peak_array.shape:
         raise ValueError(
                 "peak_array ({0}) must have the same shape as dask_array "
@@ -913,12 +893,7 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
     if not hasattr(peak_array, 'chunks'):
         raise ValueError("peak_array must be a Dask array")
 
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
 
     peak_array_rechunked = peak_array.rechunk(dask_array_rechunked.chunks[:-2])
     shape = list(peak_array_rechunked.shape)
@@ -936,44 +911,44 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
 
 
 def _background_removal_single_frame_dog(frame, min_sigma=1, max_sigma=55):
-    """Background removal using difference of gaussians.
+    """Background removal using difference of Gaussians.
 
     Parameters
     ----------
     frame : NumPy 2D array
-    **kwargs: min_sigma: float
-          max_sigma: float
+    min_sigma : float
+    max_sigma : float
 
     Returns
     -------
-    background_removed = Numpy 2D array
+    background_removed : Numpy 2D array
 
     Examples
     --------
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_dog(s.data[0, 0])
-    """
 
+    """
     blur_max = ndi.gaussian_filter(frame, max_sigma)
     blur_min = ndi.gaussian_filter(frame, min_sigma)
-
     return np.maximum(np.where(blur_min > blur_max, frame, 0) - blur_max, 0)
 
 
 def _background_removal_chunk_dog(data, **kwargs):
-    """Background removal using difference of gaussians.
+    """Background removal using difference of Gaussians.
 
     Parameters
     ----------
-    data : At least 2 dimensions NumPy array
-    **kwargs: min_sigma: float
-          max_sigma: float
+    data : NumPy array
+    At least 2 dimensions
+    min_sigma : float
+    max_sigma : float
 
     Returns
     -------
-    output_array: NumPy array, the same dimensions
-        as data
+    output_array : NumPy array
+        Same dimensions as data
 
     Examples
     --------
@@ -992,18 +967,19 @@ def _background_removal_chunk_dog(data, **kwargs):
 
 
 def _background_removal_dog(dask_array, **kwargs):
-    """Background removal using difference of gaussians.
+    """Background removal using difference of Gaussians.
 
     Parameters
     ----------
-    dask_array : At least 2 dimensions Dask array
-    **kwargs: min_sigma: float
-          max_sigma: float
+    dask_array : Dask array
+        At least 2 dimensions
+    min_sigma : float
+    max_sigma : float
 
     Returns
     -------
-    output_array: Dask array with the same dimensions
-        as dask_array
+    output_array : Dask array
+        Same dimensions as dask_array
 
     Examples
     --------
@@ -1015,18 +991,7 @@ def _background_removal_dog(dask_array, **kwargs):
     ...     dt._background_removal_dog(dask_array))
 
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(
-                array_dims))
-
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
         _background_removal_chunk_dog, dask_array_rechunked,
         dtype=np.float32, **kwargs)
@@ -1039,11 +1004,11 @@ def _background_removal_single_frame_median(frame, footprint=19):
     Parameters
     ----------
     frame : NumPy 2D array
-    **kwargs: footprint: float
+    footprint : float
 
     Returns
     -------
-    background_removed: Numpy 2D array
+    background_removed : Numpy 2D array
 
     Examples
     --------
@@ -1052,7 +1017,6 @@ def _background_removal_single_frame_median(frame, footprint=19):
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """
-
     bg_subtracted = frame - ndi.median_filter(frame, size=footprint)
     return bg_subtracted
 
@@ -1062,19 +1026,21 @@ def _background_removal_chunk_median(data, **kwargs):
 
     Parameters
     ----------
-    data : Must be at least 2 dimensions NumPy array
-    **kwargs: footprint: float
+    data : NumPy array
+        Must be at least 2 dimensions
+    footprint : float
 
     Returns
     -------
-    output_array: NumPy array, the same dimensions
-        as data
+    output_array : NumPy array
+        Same dimensions as data
 
     Examples
     --------
     >>> import pixstem.dask_tools as dt
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_median(s.data[0:10, 0:10,:,:])
+
     """
     output_array = np.zeros_like(data, dtype=np.float32)
     frame = np.zeros(data.shape[-2:])
@@ -1091,13 +1057,14 @@ def _background_removal_median(dask_array, **kwargs):
 
     Parameters
     ----------
-    dask_array : Must be at least 2 dimensions Dask array
-    **kwargs: footprint: float
+    dask_array : Dask array
+        Must be at least 2 dimensions
+    footprint : float
 
     Returns
     -------
-    output_array: Dask array, the same dimensions
-        as data
+    output_array : Dask array
+        Same dimensions as dask_array
 
     Examples
     --------
@@ -1109,18 +1076,7 @@ def _background_removal_median(dask_array, **kwargs):
     ...     dt._background_removal_median(dask_array), footprint=20)
 
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(
-                array_dims))
-
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
         _background_removal_chunk_median, dask_array_rechunked,
         dtype=np.float32, **kwargs)
@@ -1130,17 +1086,17 @@ def _background_removal_median(dask_array, **kwargs):
 def _background_removal_single_frame_radial_median(
         frame, centre_x=128, centre_y=128):
     """Background removal by subtracting median of pixel at the same
-        radius from the center.
+    radius from the center.
 
     Parameters
     ----------
     frame : NumPy 2D array
-    **kwargs: centre_x: int
-          centre_y: int
+    centre_x : int
+    centre_y : int
 
     Returns
     -------
-    background_removed: Numpy 2D array
+    background_removed : Numpy 2D array
 
     Examples
     --------
@@ -1150,7 +1106,7 @@ def _background_removal_single_frame_radial_median(
     """
 
     y, x = np.indices((frame.shape))
-    r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
+    r = np.hypot(x - centre_x, y - centre_y)
     r = r.astype(int)
     r_flat = r.ravel()
     diff_image_flat = frame.ravel()
@@ -1166,19 +1122,19 @@ def _background_removal_single_frame_radial_median(
 
 def _background_removal_chunk_radial_median(data, **kwargs):
     """Background removal by subtracting median of pixel at the same
-        radius from the center.
+    radius from the center.
 
     Parameters
     ----------
-    data : Must be at least 2 dimensions NumPy array
-    **kwargs: centre_x: int
-          centre_y: int
-          radial_array_size: int
+    data : NumPy array
+        Must be at least 2 dimensions
+    centre_x : int
+    centre_y : int
 
     Returns
     -------
-    output_array: NumPy array, the same dimensions
-        as data
+    output_array : NumPy array
+        Same dimensions as data
 
     Examples
     --------
@@ -1198,18 +1154,19 @@ def _background_removal_chunk_radial_median(data, **kwargs):
 
 def _background_removal_radial_median(dask_array, **kwargs):
     """Background removal by subtracting median of pixel at the same
-        radius from the center.
+    radius from the center.
 
     Parameters
     ----------
-    dask_array : Must be at least 2 dimensions Dask array
-    **kwargs: centre_x: int
-          centre_y: int
+    dask_array : Dask array
+        Must be at least 2 dimensions
+    centre_x : int
+    centre_y : int
 
     Returns
     -------
-    output_array: Dask array, the same dimensions
-        as data
+    output_array : Dask array
+        Same dimensions as dask_array
 
     Examples
     --------
@@ -1221,18 +1178,7 @@ def _background_removal_radial_median(dask_array, **kwargs):
     ...     dask_array, centre_x=128, centre_y=128))
 
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(
-                array_dims))
-
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
         _background_removal_chunk_radial_median, dask_array_rechunked,
         dtype=np.float32, **kwargs)
@@ -1355,11 +1301,6 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     ...     dask_array, peak_array, 20)
     >>> ref_peak_array = r_p_array.compute()
     """
-    array_dims = len(dask_array.shape)
-    if array_dims < 2:
-        raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(
-                array_dims))
     if dask_array.shape[:-2] != peak_array.shape:
         raise ValueError(
                 "peak_array ({0}) must have the same shape as dask_array "
@@ -1370,12 +1311,7 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     if not hasattr(peak_array, 'chunks'):
         raise ValueError("peak_array must be a Dask array")
 
-    detx, dety = dask_array.shape[-2:]
-    chunks = [None] * array_dims
-    chunks[-2] = detx
-    chunks[-1] = dety
-    chunks = tuple(chunks)
-    dask_array_rechunked = dask_array.rechunk(chunks=chunks)
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
 
     peak_array_rechunked = peak_array.rechunk(dask_array_rechunked.chunks[:-2])
     shape = list(peak_array_rechunked.shape)
