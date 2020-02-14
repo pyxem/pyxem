@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,8 +23,6 @@ import math
 from operator import itemgetter, attrgetter
 
 import numpy as np
-
-from diffsims.utils.sim_utils import simulate_rotated_structure
 
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
@@ -545,15 +543,13 @@ def peaks_from_best_vector_match(single_match_result, library, rank=0):
     best_fit = get_nth_best_solution(single_match_result, rank=rank)
     phase_index = best_fit.phase_index
 
-    rotation_matrix = best_fit.rotation_matrix
+    rotation_orientation = mat2euler(best_fit.rotation_matrix)
     # Don't change the original
     structure = library.structures[phase_index]
-    sim = simulate_rotated_structure(
-        library.diffraction_generator,
-        structure,
-        rotation_matrix,
-        library.reciprocal_radius,
-        with_direct_beam=False)
+    sim = library.diffraction_generator.calculate_ed_data(structure,
+                            reciprocal_radius = library.reciprocal_radius,
+                            rotation=rotation_orientation,
+                            with_direct_beam=False)
 
     # Cut z
     return sim.coordinates[:, :2]
