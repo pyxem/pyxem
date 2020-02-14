@@ -9,7 +9,6 @@ environment:
   matrix:
     - PY_VERSION: 3.8
     - PY_VERSION: 3.7
-    - PY_VERSION: 3.6
 # scripts that run after cloning repository
 install:
   # Activate miniconda root environment
