@@ -26,10 +26,10 @@ before_install:
     hash -r;
   # setup environment
   - source $HOME/miniconda/bin/activate root;
-    conda update -y conda;
-    conda config --append channels conda-forge;
-    conda create -n testenv --yes python=$PYTHON;
-    conda activate testenv;
+  - conda update -y conda;
+  - conda config --append channels conda-forge;
+  - conda create -n testenv --yes python=$PYTHON;
+  - conda activate testenv;
   - conda info -a
   - df -h
 
