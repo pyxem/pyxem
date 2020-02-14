@@ -666,3 +666,44 @@ class TestMake4dPeakArrayTestData:
         pa1 = mdtd._make_4d_peak_array_test_data(p, p, p, p, p, nt=nt1)
         assert len(pa0[0, 0][:, 0]) == nt0
         assert len(pa1[0, 0][:, 0]) == nt1
+
+
+class TestDiffractionImage:
+
+    def test_simple(self):
+        mdtd.DiffractionImage()
+
+    def test_plot(self):
+        di = mdtd.DiffractionImage()
+        di.plot()
+
+    def test_get_signal(self):
+        di = mdtd.DiffractionImage()
+        s = di.get_signal()
+        assert hasattr(s, 'plot')
+
+    def test_get_diffraction_image(self):
+        di = mdtd.DiffractionImage()
+        data = di.get_diffraction_image()
+        assert hasattr(data, '__array__')
+
+    def test_image_x_y(self):
+        x, y = 100, 100
+        di = mdtd.DiffractionImage(image_x=x, image_y=y)
+        data = di.get_diffraction_image()
+        assert data.shape == (100, 100)
+        s = di.get_signal()
+        assert s.axes_manager.signal_shape == (100, 100)
+
+    def test_disk_r(self):
+        di = mdtd.DiffractionImage(image_x=50, image_y=50, disk_r=10,
+                                   intensity_noise=False)
+        di.add_disk(25, 25, intensity=2.)
+        data = di.get_diffraction_image()
+        assert data[0, 0] == 0
+        assert data[-1, 0] == 0
+        assert data[0, -1] == 0
+        assert data[-1, -1] == 0
+        di.disk_r = 40
+        data = di.get_diffraction_image()
+        assert data[0, 0] == 2.

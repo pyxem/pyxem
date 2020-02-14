@@ -1,6 +1,9 @@
 import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import rotate
+from scipy.signal import convolve2d
+from skimage import morphology
 import dask.array as da
 from hyperspy.misc.utils import isiterable
 from pixstem.pixelated_stem_class import PixelatedSTEM
@@ -802,3 +805,160 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
         ellipse_points = ret.make_ellipse_data_points(*params)
         peak_array[iy, ix] = np.fliplr(ellipse_points)
     return peak_array
+
+
+class DiffractionImage(object):
+
+    def __init__(self, disk_r=7, blur=2, image_x=256, image_y=256, rotation=0,
+                 diff_intensity_reduction=1.0, intensity_noise=0.5):
+        self.disk_r = disk_r
+        self.blur = blur
+        self.image_x = image_x
+        self.image_y = image_y
+        self.rotation = rotation
+        self.diff_intensity_reduction = diff_intensity_reduction
+        self.intensity_noise = intensity_noise
+        self._background_lorentz_width = False
+        self._background_lorentz_intensity = None
+        self._x_list = []
+        self._y_list = []
+        self._intensity_list = []
+
+    def __repr__(self):
+        return '<%s, disks:%s, r:%s, rot:%s, im:(%s,%s)>' % (
+                self.__class__.__name__,
+                len(self._x_list),
+                self.disk_r,
+                self.rotation,
+                self.image_x,
+                self.image_y)
+
+    def __copy__(self):
+        d = DiffractionImage(
+                disk_r=self.disk_r, blur=self.blur,
+                image_x=self.image_x, image_y=self.image_y,
+                rotation=self.rotation,
+                diff_intensity_reduction=self.diff_intensity_reduction,
+                intensity_noise=self.intensity_noise)
+        d._background_lorentz_width = self._background_lorentz_width
+        d._background_lorentz_intensity = self._background_lorentz_intensity
+        d._x_list = self._x_list.copy()
+        d._y_list = self._y_list.copy()
+        d._intensity_list = self._intensity_list.copy()
+        return d
+
+    def copy(self):
+        return self.__copy__()
+
+    def add_disk(self, x, y, intensity=1):
+        if not isinstance(x, int):
+            raise ValueError("x needs to be integer, not {0}".format(x))
+        if not isinstance(y, int):
+            raise ValueError("y needs to be integer, not {0}".format(y))
+        self._x_list.append(x)
+        self._y_list.append(y)
+        self._intensity_list.append(intensity)
+
+    def add_background_lorentz(self, width=10, intensity=5):
+        self._background_lorentz_width = 10
+        self._background_lorentz_intensity = 5
+
+    def _get_diff_intensity_reduction(self, dr, i):
+        r_max = np.hypot(self.image_x/2, self.image_y/2)
+        if dr == 0.:
+            dr = 0.00000000001
+        x = np.pi * dr * 1.5 / (r_max * self.diff_intensity_reduction)
+        i_new = np.sin(x) / x * i
+        if i_new < 0:
+            i_new = 0
+        return i_new
+
+    def add_cubic_disks(self, vx, vy, intensity=1, n=1):
+        cx, cy = self.image_x/2, self.image_y/2
+        for px in range(-n, n + 1):
+            for py in range(-n, n + 1):
+                if not (px == 0 and py == 0):
+                    x = int(round(vx * px + cx))
+                    y = int(round(vy * py + cy))
+                    self.add_disk(x, y, intensity=intensity)
+
+    def _get_background_lorentz(self):
+        width = self._background_lorentz_width
+        intensity = self._background_lorentz_intensity
+        x = np.linspace(-width, width, self.image_y)
+        y = np.linspace(-width, width, self.image_x)
+        YY, XX = np.meshgrid(y, x)
+        YY = YY.astype(np.float32)
+        XX = XX.astype(np.float32)
+        b = 1 / (np.pi * (1 + np.hypot(YY, XX)**2)) * intensity
+        return b
+
+    def get_diffraction_image(self, dtype=np.float32):
+        image_x, image_y = self.image_x, self.image_y
+        cx, cy = image_x/2, image_y/2
+        image = np.zeros((image_y, image_x), dtype=np.float32)
+        iterator = zip(self._x_list, self._y_list, self._intensity_list)
+        for x, y, i in iterator:
+            if self.diff_intensity_reduction is not False:
+                dr = np.hypot(x - cx, y - cy)
+                i = self._get_diff_intensity_reduction(dr, i)
+            image[y, x] = i
+        disk = morphology.disk(self.disk_r, dtype=dtype)
+        image = convolve2d(image, disk, mode='same')
+        if self.rotation != 0:
+            image = rotate(image, self.rotation, reshape=False)
+        if self.blur != 0:
+            image = gaussian_filter(image, self.blur)
+        if self._background_lorentz_width is not False:
+            image += self._get_background_lorentz()
+        if self.intensity_noise is not False:
+            noise = np.random.random((image_y, image_x)) * self.intensity_noise
+            image += noise
+        return image
+
+    def get_signal(self):
+        s = PixelatedSTEM(self.get_diffraction_image())
+        return s
+
+    def plot(self):
+        s = self.get_signal()
+        s.plot()
+
+
+class DiffractionDataset(object):
+
+    def __init__(self, probe_x=10, probe_y=10, detector_x=256, detector_y=256,
+                 noise=0.5, dtype=np.float32):
+        self.data = np.zeros(
+                (probe_x, probe_y, detector_x, detector_y), dtype=dtype)
+        self.probe_x = probe_x
+        self.probe_y = probe_y
+        self.detector_x = detector_x
+        self.detector_y = detector_y
+        self.noise = noise
+
+    def __repr__(self):
+        return '<%s, (%s)>' % (
+                self.__class__.__name__,
+                self.data.shape)
+
+    def add_diffraction_image(self, diffraction_image, position_array=None):
+        probe_x, probe_y = self.probe_x, self.probe_y
+        detector_x, detector_y = self.detector_x, self.detector_y
+        image = diffraction_image.get_diffraction_image()
+        if position_array is None:
+            position_array = np.ones((probe_x, probe_y), dtype=np.bool)
+        for ix, iy in np.ndindex(probe_x, probe_y):
+            if position_array[ix, iy]:
+                self.data[ix, iy, :, :] = image
+                if self.noise is not False:
+                    image_noise = np.random.random((detector_x, detector_y))
+                    self.data[ix, iy, :, :] += (image_noise * self.noise)
+
+    def get_signal(self):
+        s = PixelatedSTEM(self.data)
+        return s
+
+    def plot(self):
+        s = self.get_signal()
+        s.plot()
