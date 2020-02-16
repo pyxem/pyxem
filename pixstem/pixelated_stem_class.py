@@ -783,13 +783,17 @@ class PixelatedSTEM(Signal2D):
             'dog': difference of Gaussians. 'log': Laplacian of Gaussian.
             Default 'dog'.
         min_sigma : float, optional
+            Default 0.98.
         max_sigma : float, optional
+            Default 55.
         sigma_ratio : float, optional
-            For method 'dog'
+            For method 'dog'. Default 1.76.
         num_sigma: float, optional
-            For method 'log'
+            For method 'log'. Default 10.
         threshold : float, optional
+            Default 0.36.
         overlap : float, optional
+            Default 0.81.
         normalize_value : float, optional
             All the values in the signal will be divided by this value.
             If no value is specified, the max value in each individual image
@@ -863,7 +867,7 @@ class PixelatedSTEM(Signal2D):
                 pbar.unregister()
         return output_array
 
-    def peak_position_refinement_com(self, peak_array, square_size,
+    def peak_position_refinement_com(self, peak_array, square_size=10,
                                      lazy_result=True, show_progressbar=True):
         """Refines the peak position using the center of mass.
 
@@ -875,7 +879,7 @@ class PixelatedSTEM(Signal2D):
             dimensions.
         square_size : int
             Even integer, sub image from which the center of mass is
-            calculated.
+            calculated. Default 5.
         lazy_result : bool, default True
             If True, will return a LazyPixelatedSTEM object. If False,
             will compute the result and return a PixelatedSTEM object.
