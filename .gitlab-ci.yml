@@ -31,6 +31,8 @@ all_tests_debian:
 - xvfb-run -a python3 make_template_binary_image.py
 - cd ../fem_analysis/
 - xvfb-run -a python3 make_fem_analysis_image.py
+- cd ../analysing_nbed_data/
+- xvfb-run -a python3 analysing_nbed_data.py
 - cd ../frontpage/
 - xvfb-run -a python3 make_frontpage_images.py
 - cd ../../

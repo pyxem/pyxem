@@ -206,6 +206,8 @@ Peak finding
 
 :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_peaks`
 
+For a more extensive example of using this functionality, see :ref:`the nanobeam electron diffraction example <analysing_nbed_data>`.
+
 Use scikit-image's `Difference of Gaussian (DoG) <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_ function to find features in the signal dimensions.
 For more information about the different parameters, see `scikit's documentation <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_.
 
