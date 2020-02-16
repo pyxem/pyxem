@@ -807,10 +807,62 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     return peak_array
 
 
-class DiffractionImage(object):
+class DiffractionTestImage(object):
 
     def __init__(self, disk_r=7, blur=2, image_x=256, image_y=256, rotation=0,
                  diff_intensity_reduction=1.0, intensity_noise=0.5):
+        """Make an artificial diffraction image, similar to NBED data.
+
+        This class is for creating images which are similar to
+        nanobeam electron diffraction patterns, with functionality for
+        adding diffraction disks, Lorentzian background and intensity noise.
+
+        Can be combined with the DiffractionTestDataset class, for creating
+        4-dimensional datasets. Similar to the ones acquired with
+        fast pixelated direct electron detectors in
+        scanning transmission electron microscopy.
+
+        Parameters
+        ----------
+        disk_r : int
+            Radius for all of the disks added. Default 7
+        blur : scalar
+            Amount of Gaussian blur applied to the image.
+            Use False to disable blurring. Default 2.
+        image_x, image_y : int
+            Dimensions for the image. Default 256 for both.
+        rotation : int
+            Rotation of the image in relation to the centre point.
+            For an image with the size (256, 256), the rotation will
+            be around (128, 128).
+        diff_intensity_reduction : scalar
+            In diffraction patterns, the intensity of the disk are
+            reduced with increasing scattering angle. This parameter
+            emulates this, with decreasing the intensity of the disks
+            as a function of distance from the centre point. Default 1.0.
+            Set False to disable.
+        intensity_noise : scalar
+            The width of the Gaussian intensity noise added to the image.
+            Set False to disable. Default 0.5.
+
+
+        Examples
+        --------
+        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> di = mdtd.DiffractionTestImage()
+        >>> di.add_disk(x=128, y=128, intensity=10.)
+        >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
+        >>> di.add_background_lorentz()
+        >>> s = di.get_signal()
+        >>> s.plot()
+
+        Get a slightly rotated version of the diffraction image
+
+        >>> di.rotation = 10
+        >>> s = di.get_signal()
+        >>> s.plot()
+
+        """
         self.disk_r = disk_r
         self.blur = blur
         self.image_x = image_x
@@ -834,7 +886,7 @@ class DiffractionImage(object):
                 self.image_y)
 
     def __copy__(self):
-        d = DiffractionImage(
+        d = DiffractionTestImage(
                 disk_r=self.disk_r, blur=self.blur,
                 image_x=self.image_x, image_y=self.image_y,
                 rotation=self.rotation,
@@ -860,8 +912,8 @@ class DiffractionImage(object):
         self._intensity_list.append(intensity)
 
     def add_background_lorentz(self, width=10, intensity=5):
-        self._background_lorentz_width = 10
-        self._background_lorentz_intensity = 5
+        self._background_lorentz_width = width
+        self._background_lorentz_intensity = intensity
 
     def _get_diff_intensity_reduction(self, dr, i):
         r_max = np.hypot(self.image_x/2, self.image_y/2)
@@ -874,6 +926,16 @@ class DiffractionImage(object):
         return i_new
 
     def add_cubic_disks(self, vx, vy, intensity=1, n=1):
+        """Add disks in a cubic pattern around the centre point of the image.
+
+        Parameters
+        ----------
+        vx, vy : int
+        intensity : scalar
+        n : int
+            Number of orders of diffraction disks.
+            If n=1, 8 disks, if n=2, 24 disks.
+        """
         cx, cy = self.image_x/2, self.image_y/2
         for px in range(-n, n + 1):
             for py in range(-n, n + 1):
@@ -893,7 +955,7 @@ class DiffractionImage(object):
         b = 1 / (np.pi * (1 + np.hypot(YY, XX)**2)) * intensity
         return b
 
-    def get_diffraction_image(self, dtype=np.float32):
+    def get_diffraction_test_image(self, dtype=np.float32):
         image_x, image_y = self.image_x, self.image_y
         cx, cy = image_x/2, image_y/2
         image = np.zeros((image_y, image_x), dtype=np.float32)
@@ -917,7 +979,7 @@ class DiffractionImage(object):
         return image
 
     def get_signal(self):
-        s = PixelatedSTEM(self.get_diffraction_image())
+        s = PixelatedSTEM(self.get_diffraction_test_image())
         return s
 
     def plot(self):
@@ -925,10 +987,39 @@ class DiffractionImage(object):
         s.plot()
 
 
-class DiffractionDataset(object):
+class DiffractionTestDataset(object):
 
     def __init__(self, probe_x=10, probe_y=10, detector_x=256, detector_y=256,
                  noise=0.5, dtype=np.float32):
+        """Make a 4-dimensional dataset similar to NBED.
+
+        This class is for creating datasets which are similar to
+        nanobeam electron diffraction patterns. It is used in combination
+        with one or several DiffractionTestImage objects.
+
+        Parameters
+        ----------
+        probe_x, probe_y : int
+        detector_x, detector_y : int
+        noise : scalar
+
+        Examples
+        --------
+        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> di = mdtd.DiffractionTestImage(intensity_noise=False)
+        >>> di.add_disk(x=128, y=128, intensity=10.)
+        >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
+        >>> di.add_background_lorentz()
+        >>> di_rot = di.copy()
+        >>> di_rot.rotation = 10
+        >>> dtd = mdtd.DiffractionTestDataset(10, 10, 256, 256)
+        >>> position_array = np.ones((10, 10), dtype=np.bool)
+        >>> position_array[:5] = False
+        >>> dtd.add_diffraction_image(di, position_array)
+        >>> dtd.add_diffraction_image(di_rot, np.invert(position_array))
+        >>> s = dtd.get_signal()
+
+        """
         self.data = np.zeros(
                 (probe_x, probe_y, detector_x, detector_y), dtype=dtype)
         self.probe_x = probe_x
@@ -942,10 +1033,24 @@ class DiffractionDataset(object):
                 self.__class__.__name__,
                 self.data.shape)
 
-    def add_diffraction_image(self, diffraction_image, position_array=None):
+    def add_diffraction_image(
+            self, diffraction_test_image, position_array=None):
+        """Add a diffraction image to all or a subset of the dataset.
+
+        See the class docstring for example on how to use this.
+
+        Parameters
+        ----------
+        diffraction_test_image : PixStem DiffractionTestData object
+        position_array : NumPy array
+            Boolean array, specifying which positions in the dataset
+            the diffraction_test_image should be added to. Must have two
+            dimensions, and the same shape as (probe_x, probe_y).
+
+        """
         probe_x, probe_y = self.probe_x, self.probe_y
         detector_x, detector_y = self.detector_x, self.detector_y
-        image = diffraction_image.get_diffraction_image()
+        image = diffraction_test_image.get_diffraction_test_image()
         if position_array is None:
             position_array = np.ones((probe_x, probe_y), dtype=np.bool)
         for ix, iy in np.ndindex(probe_x, probe_y):

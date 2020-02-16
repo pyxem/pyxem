@@ -62,6 +62,10 @@ class TestDummyDataModule:
         s = dd.get_simple_fem_signal()
         s.plot()
 
+    def test_get_nanobeam_electron_diffraction_signal(self):
+        s = dd.get_nanobeam_electron_diffraction_signal()
+        s.plot()
+
     def test_get_generic_fem_signal(self):
         s = dd.get_generic_fem_signal(probe_x=2, probe_y=3, image_x=20,
                                       image_y=25)
