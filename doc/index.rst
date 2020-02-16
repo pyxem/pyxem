@@ -35,10 +35,13 @@ Install instructions: :ref:`install`.
 pixStem is available under the GNU GPL v3 license, and the source code is found in the `GitLab repository <https://gitlab.com/pixstem/pixstem/tree/master/>`_.
 
 .. image:: images/frontpage/stem_diffraction.jpg
-    :scale: 49 %
+    :scale: 32 %
+
+.. image:: images/frontpage/nbed_example.jpg
+    :scale: 32 %
 
 .. image:: images/frontpage/dpc_dummy_data.jpg
-    :scale: 49 %
+    :scale: 32 %
 
 
 .. toctree::
