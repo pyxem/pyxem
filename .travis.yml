@@ -41,6 +41,4 @@ install:
 script:
   - export MPLBACKEND=Agg
   - pytest --pyargs pyxem --cov=pyxem
-
-after_success:
   - coveralls
