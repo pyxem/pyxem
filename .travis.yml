@@ -11,7 +11,8 @@ matrix:
   - env: export PYTHON=3.7
   - env: export PYTHON=3.7
     os: osx
-    language: generic
+    osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4 - taken from https://docs.travis-ci.com/user/languages/python/#examples
+    language: shell
 
 sudo: True #for Miniconda
 
