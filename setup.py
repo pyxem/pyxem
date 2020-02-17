@@ -29,7 +29,7 @@ setup(
             'hyperspy>=1.4',
             'dask',
             'tqdm',
-            'scikit-image>=0.13',
+            'scikit-image>=0.15',
             'scikit-learn',
             ],
         package_data={'pixstem': ['tests/test_data/*.hdf5',
