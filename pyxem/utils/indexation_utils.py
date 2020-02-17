@@ -39,16 +39,18 @@ OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 
-def correlate_library(image, library, n_largest, mask):
+def correlate_library(image, library, n_largest, mask, method):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
     Calculated using the normalised (see return type documentation) dot
     product, or cosine distance,
 
-    .. math::
+    .. math:: FastCorrelation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
 
+    .. math:: NormalizedCorrelation
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\\sum_{Not {j}} avg(T)}}
     for a template T and an experimental pattern P.
 
     Parameters
@@ -62,6 +64,9 @@ def correlate_library(image, library, n_largest, mask):
         The number of well correlated simulations to be retained.
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
+    method : String
+            Name of method used to compute correlation between templates and diffraction patterns. Can be
+            'FastCorrelation' or 'NormalizedCorrelation'. (ADDED 17.02 together with argument)
 
     Returns
     -------
@@ -94,35 +99,81 @@ def correlate_library(image, library, n_largest, mask):
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
 
     if mask == 1:
-        for phase_index, library_entry in enumerate(library.values()):
-            orientations = library_entry['orientations']
-            pixel_coords = library_entry['pixel_coords']
-            intensities = library_entry['intensities']
-            # TODO: This is only applicable some of the time, probably use an if + special_local in the for
-            pattern_norms = library_entry['pattern_norms']
+        if method == 'FastCorrelation':
+            for phase_index, library_entry in enumerate(library.values()):
+                orientations = library_entry['orientations']
+                pixel_coords = library_entry['pixel_coords']
+                intensities = library_entry['intensities']
+                # TODO: This is only applicable some of the time, probably use an if + special_local in the for
+                pattern_norms = library_entry['pattern_norms']
 
-            zip_for_locals = zip(orientations, pixel_coords, intensities, pattern_norms)
+                zip_for_locals = zip(orientations, pixel_coords, intensities, pattern_norms)
 
-            or_saved, corr_saved = np.empty((n_largest, 3)), np.zeros((n_largest, 1))
-            for (or_local, px_local, int_local, pn_local) in zip_for_locals:
-                # TODO: Factorise out the generation of corr_local to a method='mthd' section
-                # Extract experimental intensities from the diffraction image
-                image_intensities = image[px_local[:, 1], px_local[:, 0]]
-                corr_local = np.sum(np.multiply(image_intensities, int_local)) / \
-                    pn_local  # Correlation is the partially normalized dot product
+                or_saved, corr_saved = np.empty((n_largest, 3)), np.zeros((n_largest, 1))
+                for (or_local, px_local, int_local, pn_local) in zip_for_locals:
+                    # TODO: Factorise out the generation of corr_local to a method='mthd' section
+                    # Extract experimental intensities from the diffraction image
+                    image_intensities = image[px_local[:, 1], px_local[:, 0]]
+                    corr_local = np.sum(np.multiply(image_intensities, int_local)) / \
+                        pn_local  # Correlation is the partially normalized dot product
 
-                if corr_local > np.min(corr_saved):
-                    or_saved[np.argmin(corr_saved)] = or_local
-                    corr_saved[np.argmin(corr_saved)] = corr_local
+                    if corr_local > np.min(corr_saved):
+                        or_saved[np.argmin(corr_saved)] = or_local
+                        corr_saved[np.argmin(corr_saved)] = corr_local
 
-                combined_array = np.hstack((or_saved, corr_saved))
-                combined_array = combined_array[np.flip(combined_array[:, 3].argsort())]  # see stackoverflow/2828059 for details
-                top_matches[phase_index, :, 0] = phase_index
-                top_matches[phase_index, :, 2] = combined_array[:, 3]  # correlation
-                for i in np.arange(n_largest):
-                    top_matches[phase_index, i, 1] = combined_array[i, :3]  # orientation
+                    combined_array = np.hstack((or_saved, corr_saved))
+                    combined_array = combined_array[np.flip(combined_array[:, 3].argsort())]  # see stackoverflow/2828059 for details
+                    top_matches[phase_index, :, 0] = phase_index
+                    top_matches[phase_index, :, 2] = combined_array[:, 3]  # correlation
+                    for i in np.arange(n_largest):
+                        top_matches[phase_index, i, 1] = combined_array[i, :3]  # orientation
+
+        elif method == 'NormalizedCorrelation':
+            N = image.shape[0]*image.shape[1]
+            average_image_intensity = np.average(image)
+            image_norm = np.linalg.norm(image) #Can skip this for speed, as it is the same for all patterns.
+            for phase_index, library_entry in enumerate(library.values()):
+                orientations = library_entry['orientations']
+                pixel_coords = library_entry['pixel_coords']
+                intensities = library_entry['intensities']
+                # TODO: This is only applicable some of the time, probably use an if + special_local in the for
+                pattern_norms = library_entry['pattern_norms']
+
+                zip_for_locals = zip(orientations, pixel_coords, intensities, pattern_norms)
+
+                or_saved, corr_saved = np.empty((n_largest, 3)), np.zeros((n_largest, 1))
+                for (or_local, px_local, int_local, pn_local) in zip_for_locals:
+                    # TODO: Factorise out the generation of corr_local to a method='mthd' section
+                    # Extract experimental intensities from the diffraction image
+                    image_intensities = image[px_local[:, 1], px_local[:, 0]]
+                    N_star = len(image_intensities)
+                    average_pattern_intensity = N_star*np.average(int_local)/N
+                    match_numerator = np.sum(np.multiply(image_intensities, int_local))-N*average_pattern_intensity*average_image_intensity
+                    match_denominator = image_norm*np.linalg.norm(int_local-average_pattern_intensity)+(N-N_star)*pow(average_pattern_intensity,2)
+                    if match_denominator == 0:
+                        if average_image_intensity == 0:
+                            corr_local = 1
+                        else:
+                            corr_local = 0
+                    else:
+                        corr_local = match_numerator/match_denominator  # Correlation is the normalized dot product
+
+                    if corr_local > np.min(corr_saved):
+                        or_saved[np.argmin(corr_saved)] = or_local
+                        corr_saved[np.argmin(corr_saved)] = corr_local
+
+                    combined_array = np.hstack((or_saved, corr_saved))
+                    combined_array = combined_array[np.flip(combined_array[:, 3].argsort())]  # see stackoverflow/2828059 for details
+                    top_matches[phase_index, :, 0] = phase_index
+                    top_matches[phase_index, :, 2] = combined_array[:, 3]  # correlation
+                    for i in np.arange(n_largest):
+                        top_matches[phase_index, i, 1] = combined_array[i, :3]  # orientation
+
+        else:
+            NameError('method is not defined')
 
     return top_matches.reshape(-1, 3)
+
 
 
 def index_magnitudes(z, simulation, tolerance):

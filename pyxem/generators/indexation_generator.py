@@ -61,9 +61,11 @@ class IndexationGenerator():
         self.signal = signal
         self.library = diffraction_library
 
-    def correlate(self,
+
+def correlate(self,
                   n_largest=5,
                   mask=None,
+                  method = 'FastCorrelation',
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -75,6 +77,9 @@ class IndexationGenerator():
             The n orientations with the highest correlation values are returned.
         mask : Array
             Array with the same size as signal (in navigation) or None
+        method : String
+            Name of method used to compute correlation between templates and diffraction patterns. Can be
+            'FastCorrelation' or 'NormalizedCorrelation'. (ADDED 17.02 together with argument)
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -96,8 +101,8 @@ class IndexationGenerator():
             mask = 1
 
         # TODO: Add extra methods
-        no_extra_methods_yet = True
-        if no_extra_methods_yet:
+        #no_extra_methods_yet = True
+        if method in ['FastCorrelation','NormalizedCorrelation']:
             # adds a normalisation to library
             for phase in library.keys():
                 norm_array = np.ones(library[phase]['intensities'].shape[0])  # will store the norms
@@ -110,12 +115,17 @@ class IndexationGenerator():
                                  n_largest=n_largest,
                                  mask=mask,
                                  inplace=False,
+                                 method = method,
                                  **kwargs)
+
+        else:
+            NameError('method is not defined')
 
         matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
+
 
 
 class ProfileIndexationGenerator():
