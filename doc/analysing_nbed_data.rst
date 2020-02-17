@@ -35,6 +35,10 @@ Within the datasets, the crystal structure is the same, but contains some grains
 .. image:: images/analysing_nbed_data/s_signal.png
     :scale: 49 %
 
+.. code-block:: python
+    :hide:
+
+    >>> s = s.inav[:1, :1]
 
 Finding the peaks
 -----------------
@@ -47,7 +51,7 @@ For more information about how the parameters affect the peak finding, see skima
 
 .. code-block:: python
 
-    >>> peak_array = s.find_peaks(lazy_result=False)
+    >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
 
 .. image:: images/analysing_nbed_data/s_peak_finding.png
     :scale: 49 %
@@ -81,7 +85,7 @@ The only input parameter is the radius of this disk, ``disk_r``. For this datase
 
 .. code-block:: python
 
-    >>> st = s.template_match_disk(disk_r=5, lazy_result=False)
+    >>> st = s.template_match_disk(disk_r=5, lazy_result=False, show_progressbar=False)
     >>> st.plot()
 
 .. image:: images/analysing_nbed_data/s_template_matching.png
@@ -92,7 +96,7 @@ Here, the disks are much more visible, and we can apply the peak finding directl
 
 .. code-block:: python
 
-    >>> peak_array = st.find_peaks(lazy_result=False)
+    >>> peak_array = st.find_peaks(lazy_result=False, show_progressbar=False)
 
 To visualize them on the template matched signal, we use :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.add_peak_array_as_markers`.
 This ``peak_array`` can also be added to the original signal, to see how well the peak finding worked.
@@ -119,7 +123,7 @@ Refining peak positions
 
 .. code-block:: python
 
-    >>> peak_array_com = s.peak_position_refinement_com(peak_array, lazy_result=False)
+    >>> peak_array_com = s.peak_position_refinement_com(peak_array, lazy_result=False, show_progressbar=False)
 
 We compare before and after by using a different color for the ``peak_array_com``.
 
@@ -141,7 +145,7 @@ There are several ways for removing the background, with a range of parameters: 
 
 .. code-block:: python
 
-    >>> s_rem = s.subtract_diffraction_background(lazy_result=False)
+    >>> s_rem = s.subtract_diffraction_background(lazy_result=False, show_progressbar=False)
     >>> s_rem.plot()
 
 .. image:: images/analysing_nbed_data/s_remove_background.png
@@ -154,7 +158,7 @@ Then we can apply the same center of mass refinement, using the ``peak_array`` w
 
 .. code-block:: python
 
-    >>> peak_array_rem_com = s_rem.peak_position_refinement_com(peak_array, lazy_result=False)
+    >>> peak_array_rem_com = s_rem.peak_position_refinement_com(peak_array, lazy_result=False, show_progressbar=False)
     >>> s_rem.add_peak_array_as_markers(peak_array_rem_com)
     >>> s_rem.plot()
 
@@ -168,7 +172,7 @@ Lastly, we can extract the intensity from each of the diffraction spots.
 
 .. code-block:: python
 
-    >>> peak_array_intensity_rem = s_rem.intensity_peaks(peak_array_rem_com, lazy_result=False)
+    >>> peak_array_intensity_rem = s_rem.intensity_peaks(peak_array_rem_com, lazy_result=False, show_progressbar=False)
 
 This returns a NumPy array similar to the one we've seen earlier, but with an extra column.
 To extract a single peak from a single position:
