@@ -268,7 +268,8 @@ def _peak_find_dog_single_frame(
         normalize_value = np.max(image)
     peaks = blob_dog(image / normalize_value, min_sigma=min_sigma,
                      max_sigma=max_sigma, sigma_ratio=sigma_ratio,
-                     threshold=threshold, overlap=overlap, exclude_border=1)
+                     threshold=threshold, overlap=overlap,
+                     exclude_border=False)
     peak = peaks[:, :2].astype(np.float64)
 
     return peak
@@ -396,7 +397,8 @@ def _peak_find_log_single_frame(
         normalize_value = np.max(image)
     peaks = blob_log(image / normalize_value, min_sigma=min_sigma,
                      max_sigma=max_sigma, num_sigma=num_sigma,
-                     threshold=threshold, overlap=overlap, exclude_border=1)
+                     threshold=threshold, overlap=overlap,
+                     exclude_border=False)
     peak = peaks[:, :2].astype(np.float64)
     return peak
 
