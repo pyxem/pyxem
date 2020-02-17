@@ -62,7 +62,7 @@ class IndexationGenerator():
         self.library = diffraction_library
 
 
-def correlate(self,
+    def correlate(self,
                   n_largest=5,
                   mask=None,
                   method = 'FastCorrelation',
