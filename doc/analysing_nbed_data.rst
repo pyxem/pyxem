@@ -115,11 +115,12 @@ To delete the markers, run: ``del s.metadata.Markers``
     :scale: 49 %
 
 This seems to have worked pretty well!
-Next, we can refine each peak position using centre of mass.
 
 
 Refining peak positions
 -----------------------
+
+Next, we can refine each peak position using centre of mass, using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.peak_position_refinement_com`
 
 .. code-block:: python
 
@@ -140,7 +141,7 @@ This had some effect, but especially towards the very intense centre part of the
 Removing background
 -------------------
 
-The background is removed with :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.add_peak_array_as_markers`.
+The background is removed with :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.subtract_diffraction_background`.
 There are several ways for removing the background, with a range of parameters: ``difference of gaussians``, ``median kernel`` and ``radial median``. Lets go with the default: ``median kernel``.
 
 .. code-block:: python
