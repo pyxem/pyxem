@@ -120,7 +120,7 @@ This seems to have worked pretty well!
 Refining peak positions
 -----------------------
 
-Next, we can refine each peak position using centre of mass, using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.peak_position_refinement_com`
+Next, we can refine each peak position using centre of mass, using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.peak_position_refinement_com`:
 
 .. code-block:: python
 
@@ -169,7 +169,7 @@ Then we can apply the same center of mass refinement, using the ``peak_array`` w
 Extracting disk intensity
 -------------------------
 
-Lastly, we can extract the intensity from each of the diffraction spots.
+Lastly, we can extract the intensity from each of the diffraction spots using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.intensity_peaks`:
 
 .. code-block:: python
 
