@@ -13,17 +13,6 @@ This release includes:
 * Several minor bug-fixes.
 
 
-*2018-12-3: pixStem 0.3.2 released!*
-
-This release includes:
-
-* Data analysis functionality for analysing :ref:`fluctuation electron microscopy data <fem_analysis>`, thanks to Andrew Herzing for the contribution!
-* A new method in the ``PixelatedSTEM`` class for template matching a disk with STEM diffraction data: :ref:`template_match_disk`
-* Another method for locating diffraction spots in STEM diffraction data, using peak finding functionality from ``skimage``: :ref:`peak_finding`
-
-All these rely on the `dask <https://dask.org/>`_ library, so they can be performed on very large datasets.
-
-
 About pixStem
 -------------
 
@@ -63,6 +52,17 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
 
 Old news
 --------
+
+*2018-12-3: pixStem 0.3.2 released!*
+
+This release includes:
+
+* Data analysis functionality for analysing :ref:`fluctuation electron microscopy data <fem_analysis>`, thanks to Andrew Herzing for the contribution!
+* A new method in the ``PixelatedSTEM`` class for template matching a disk with STEM diffraction data: :ref:`template_match_disk`
+* Another method for locating diffraction spots in STEM diffraction data, using peak finding functionality from ``skimage``: :ref:`peak_finding`
+
+All these rely on the `dask <https://dask.org/>`_ library, so they can be performed on very large datasets.
+
 
 *2018-6-28: pixStem 0.3.1 released!*
 
