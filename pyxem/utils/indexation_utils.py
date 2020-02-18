@@ -39,6 +39,26 @@ from collections import namedtuple
 OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
+#Functions used in correlate_library.
+def Fast_Correlation(image_intensities,int_local,pn_local):
+    return np.sum(np.multiply(image_intensities, int_local)) / \
+                pn_local  # Correlation is the partially normalized dot product
+
+def Normalized_Correlation(N,image_norm,average_image_intensity,image_intensities,int_local):
+    N_star = len(image_intensities)
+    average_pattern_intensity = N_star*np.average(int_local)/N
+    match_numerator = np.sum(np.multiply(image_intensities, int_local))-N*average_pattern_intensity*average_image_intensity
+    match_denominator = image_norm*np.linalg.norm(int_local-average_pattern_intensity)+(N-N_star)*pow(average_pattern_intensity,2)
+    if match_denominator == 0:
+        if average_image_intensity == 0:
+            corr_local = 1
+        else:
+            corr_local = 0
+    else:
+        corr_local = match_numerator/match_denominator  # Correlation is the normalized dot product
+
+    return corr_local
+
 
 def correlate_library(image, library, n_largest, mask, method):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -97,9 +117,11 @@ def correlate_library(image, library, n_largest, mask, method):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
-    list_of_methods = ['FastCorrelation','NormalizedCorrelation']
-    if method not in list_of_methods:
-        raise ValueError("Method {} is not defined".format(method))
+
+    methods_dict = { 'FastCorrelation' : Fast_Correlation(image_intensities,int_local,pn_local),
+                     'NormalizedCorrelation' : Normalized_Correlation(N,image_norm,average_image_intensity,
+                                                                      image_intensities,int_local)
+                     }
 
 
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
@@ -123,23 +145,8 @@ def correlate_library(image, library, n_largest, mask, method):
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
-                if method == 'FastCorrelation':
-                    corr_local = np.sum(np.multiply(image_intensities, int_local)) / \
-                        pn_local  # Correlation is the partially normalized dot product
-
-                elif method == 'NormalizedCorrelation':
-                    N_star = len(image_intensities)
-                    average_pattern_intensity = N_star*np.average(int_local)/N
-                    match_numerator = np.sum(np.multiply(image_intensities, int_local))-N*average_pattern_intensity*average_image_intensity
-                    match_denominator = image_norm*np.linalg.norm(int_local-average_pattern_intensity)+(N-N_star)*pow(average_pattern_intensity,2)
-                    if match_denominator == 0:
-                        if average_image_intensity == 0:
-                            corr_local = 1
-                        else:
-                            corr_local = 0
-                    else:
-                        corr_local = match_numerator/match_denominator  # Correlation is the normalized dot product
-
+                corr_local = select_method_from_method_dict(method,methods_dict, image_intensities = image_intensities, int_local = int_local,
+                                                            pn_local = pn_local, N = N,image_norm=image_norm,average_image_intensity = average_image_intensity)
 
                 if corr_local > np.min(corr_saved):
                     or_saved[np.argmin(corr_saved)] = or_local
