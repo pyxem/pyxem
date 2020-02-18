@@ -41,11 +41,11 @@ OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 #Functions used in correlate_library.
-def Fast_Correlation(image_intensities,int_local,pn_local):
+def Fast_Correlation(image_intensities,int_local,pn_local,**kwargs):
     return np.sum(np.multiply(image_intensities, int_local)) / \
                 pn_local  # Correlation is the partially normalized dot product
 
-def Normalized_Correlation(N,image_norm,average_image_intensity,image_intensities,int_local):
+def Normalized_Correlation(N,image_norm,average_image_intensity,image_intensities,int_local,**kwargs):
     N_star = len(image_intensities)
     average_pattern_intensity = N_star*np.average(int_local)/N
     match_numerator = np.sum(np.multiply(image_intensities, int_local))-N*average_pattern_intensity*average_image_intensity
@@ -119,9 +119,8 @@ def correlate_library(image, library, n_largest, mask, method):
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
 
-    methods_dict = { 'FastCorrelation' : Fast_Correlation(image_intensities,int_local,pn_local),
-                     'NormalizedCorrelation' : Normalized_Correlation(N,image_norm,average_image_intensity,
-                                                                      image_intensities,int_local)
+    methods_dict = { 'FastCorrelation' : Fast_Correlation(**kwargs),
+                     'NormalizedCorrelation' : Normalized_Correlation(**kwargs)
                      }
 
 
