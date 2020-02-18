@@ -100,26 +100,21 @@ class IndexationGenerator():
             # Index at all real space pixels
             mask = 1
 
-        list_of_methods = ['FastCorrelation','NormalizedCorrelation']
-        if method in list_of_methods:
-            # adds a normalisation to library
-            for phase in library.keys():
-                norm_array = np.ones(library[phase]['intensities'].shape[0])  # will store the norms
+        # adds a normalisation to library
+        for phase in library.keys():
+            norm_array = np.ones(library[phase]['intensities'].shape[0])  # will store the norms
 
-                for i, intensity_array in enumerate(library[phase]['intensities']):
-                    norm_array[i] = np.linalg.norm(intensity_array)
-                library[phase]['pattern_norms'] = norm_array  # puts this normalisation into the library
+            for i, intensity_array in enumerate(library[phase]['intensities']):
+                norm_array[i] = np.linalg.norm(intensity_array)
+            library[phase]['pattern_norms'] = norm_array  # puts this normalisation into the library
 
-            matches = signal.map(correlate_library,
-                                 library=library,
-                                 n_largest=n_largest,
-                                 mask=mask,
-                                 inplace=False,
-                                 method = method,
-                                 **kwargs)
-
-        else:
-            NameError('method {} is not defined'.format(method))
+        matches = signal.map(correlate_library,
+                             library=library,
+                             n_largest=n_largest,
+                             mask=mask,
+                             inplace=False,
+                             method = method,
+                             **kwargs)
 
         matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)

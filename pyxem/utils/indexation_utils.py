@@ -21,6 +21,7 @@ from heapq import nlargest
 from itertools import combinations
 import math
 from operator import itemgetter, attrgetter
+import sys
 
 import numpy as np
 
@@ -98,7 +99,9 @@ def correlate_library(image, library, n_largest, mask, method):
     """
     list_of_methods = ['FastCorrelation','NormalizedCorrelation']
     if method not in list_of_methods:
-        NameError('method {} is not defined'.format(method))
+        print('method {} is not defined'.format(method))
+        sys.exit(1)
+
 
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
     N = image.shape[0]*image.shape[1]
