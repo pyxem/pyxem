@@ -122,8 +122,6 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     # Create a mask from the input VDF image.
     if threshold:
         th = threshold_li(vdf_temp)
-        if np.isnan(th):
-            th = 0.
         mask = np.zeros_like(vdf_temp)
         mask[vdf_temp > th] = True
     else:
