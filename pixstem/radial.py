@@ -13,11 +13,11 @@ def _centre_comparison(
         s, steps, step_size,
         crop_radial_signal=None, angleN=8):
     """
-    Compare how the centre position affects the radial integration.
+    Compare how the centre position affects the radial average.
     Useful for finding on optimal centre position if one has some
     round feature. Returns a list of image stacks, one image stack
     for each centre position, and the image stack consists of radially
-    integrated segments of an image.
+    averaged segments of an image.
 
     Currently only works with signals with 0 navigation dimensions.
 
@@ -36,7 +36,7 @@ def _centre_comparison(
     s_list = []
     centre_list = get_centre_position_list(s, steps, step_size)
     for centre_x, centre_y in centre_list:
-        s_angle = s.angular_slice_radial_integration(
+        s_angle = s.angular_slice_radial_average(
                 angleN=angleN,
                 centre_x=np.array([centre_x]),
                 centre_y=np.array([centre_y]),
@@ -91,11 +91,11 @@ def get_optimal_centre_position(
         s, radial_signal_span, steps=3, step_size=1, angleN=8,
         show_progressbar=True):
     """
-    Find centre position of a ring by using angle sliced radial integration.
+    Find centre position of a ring by using angle sliced radial average.
 
     Takes signal s, radial span of feature used to determine the centre
-    position. Radially integrates the feature in angleN segments, for
-    each possible centre position. Models this integrated signal
+    position. Radially averages the feature in angleN segments, for
+    each possible centre position. Models this averaged signal
     as a Gaussian and returns array of with the standard deviations
     of these Gaussians.
 
@@ -121,7 +121,7 @@ def get_optimal_centre_position(
         will be checked.
     step_size : int, default 1
     angleN : int, default 8
-        See angular_slice_radial_integration for information about angleN.
+        See angular_slice_radial_average for information about angleN.
 
     Returns
     -------
@@ -213,7 +213,7 @@ def _get_offset_image(model_list, s, steps, step_size):
     Make offset image signal based on difference in Gaussian centre position.
 
     Creates a Signal2D object of the standard deviation of the
-    Gaussians fitted to the radially integrated features, as a
+    Gaussians fitted to the radially averaged features, as a
     function of center coordinate.
 
     Parameters
@@ -252,7 +252,7 @@ def _make_radius_vs_angle_model(
         centre_x=None, centre_y=None,
         prepeak_range=None,
         show_progressbar=True):
-    s_ra = signal.angular_slice_radial_integration(
+    s_ra = signal.angular_slice_radial_average(
             angleN=angleN, centre_x=centre_x, centre_y=centre_y,
             show_progressbar=show_progressbar)
     s_ra = s_ra.isig[radial_signal_span[0]:radial_signal_span[1]]
@@ -293,10 +293,10 @@ def get_radius_vs_angle(
     """
     Get radius of a ring as a function of angle.
 
-    This is done by radially integrating angular slices of the image,
+    This is done by radially averaging angular slices of the image,
     followed by firstly fitting the background around the specified ring,
     then fitting a Gaussian to the remaining intensity in the ring (which
-    gets reduced to a peak due to the radial integration).
+    gets reduced to a peak due to the radial average).
 
     Useful for finding if a ring is circular or elliptical.
     The centre position has be to set using the offset parameter in

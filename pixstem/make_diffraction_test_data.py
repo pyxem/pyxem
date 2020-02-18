@@ -536,7 +536,7 @@ def generate_4d_data(
         show_progressbar=True):
     """Generate a test dataset containing a disk and diffraction ring.
 
-    Useful for checking that radial integration algorithms are working
+    Useful for checking that radial average algorithms are working
     properly.
 
     The centre, intensity and radius position of the ring and disk can vary

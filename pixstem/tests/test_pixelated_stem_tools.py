@@ -11,7 +11,7 @@ class TestRadialIntegrationDaskArray:
     def test_simple(self):
         dask_array = da.zeros((10, 10, 15, 15), chunks=(5, 5, 5, 5))
         centre_x, centre_y = np.ones((2, 100))*7.5
-        data = pst._radial_integration_dask_array(
+        data = pst._radial_average_dask_array(
                 dask_array, return_sig_size=11,
                 centre_x=centre_x, centre_y=centre_y, normalize=False,
                 show_progressbar=False)
@@ -21,7 +21,7 @@ class TestRadialIntegrationDaskArray:
     def test_different_size(self):
         dask_array = da.zeros((5, 10, 12, 15), chunks=(5, 5, 5, 5))
         centre_x, centre_y = np.ones((2, 100))*7.5
-        data = pst._radial_integration_dask_array(
+        data = pst._radial_average_dask_array(
                 dask_array, return_sig_size=11,
                 centre_x=centre_x, centre_y=centre_y, normalize=False,
                 show_progressbar=False)
@@ -34,14 +34,14 @@ class TestRadialIntegrationDaskArray:
         numpy_array[:, :, -1, -1] = 1
         dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
         centre_x, centre_y = np.ones((2, 100))*15
-        data = pst._radial_integration_dask_array(
+        data = pst._radial_average_dask_array(
                 dask_array, return_sig_size=22,
                 centre_x=centre_x, centre_y=centre_y, normalize=False,
                 show_progressbar=False)
         assert data.shape == (10, 10, 22)
         assert (data != 0.0).any()
         mask = pst._make_circular_mask(15, 15, 30, 30, 15)
-        data = pst._radial_integration_dask_array(
+        data = pst._radial_average_dask_array(
                 dask_array, return_sig_size=22,
                 centre_x=centre_x, centre_y=centre_y, normalize=False,
                 mask_array=mask, show_progressbar=False)

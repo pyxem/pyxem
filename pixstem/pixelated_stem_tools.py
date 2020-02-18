@@ -20,7 +20,7 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
     return image
 
 
-def _radial_integration_dask_array(
+def _radial_average_dask_array(
         dask_array, return_sig_size, centre_x, centre_y,
         normalize, mask_array=None, show_progressbar=True):
     func_args = {'mask': mask_array, 'radial_array_size': return_sig_size,
@@ -318,9 +318,9 @@ def _get_lowest_index_radial_array(radial_array):
 
 def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y,
                                       normalize, radial_array_size, mask=None):
-    """Radially integrates a single diffraction image.
+    """Radially average a single diffraction image around a centre position.
 
-    Radially profiles the data, integrating the intensity in rings
+    Radially profiles the data, averaging the intensity in rings
     out from the centre. Unreliable as we approach the edges of the
     image as it just profiles the corners. Less pixels there so become
     effectively zero after a certain point.

@@ -620,7 +620,7 @@ class TestPixelatedStemRadialIntegration:
     def test_simple(self):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert (s0_r.data[:, :, :-1] == 1).all()
 
         data_shape = 2, 2, 11, 11
@@ -629,21 +629,21 @@ class TestPixelatedStemRadialIntegration:
         s1 = PixelatedSTEM(array1)
         s1.axes_manager.signal_axes[0].offset = -5
         s1.axes_manager.signal_axes[1].offset = -5
-        s1_r = s1.radial_integration()
+        s1_r = s1.radial_average()
         assert np.all(s1_r.data[:, :, 0] == 1)
         assert np.all(s1_r.data[:, :, 1:] == 0)
 
     def test_different_shape(self):
         array = np.ones(shape=(7, 9, 30, 40))
         s = PixelatedSTEM(array)
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data[:, :, :-2] == 1).all()
 
     def test_nav_0(self):
         data_shape = (40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_dimension == 0
         assert (s0_r.data[:-1] == 1).all()
 
@@ -651,7 +651,7 @@ class TestPixelatedStemRadialIntegration:
         data_shape = (5, 40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == 1).all()
 
@@ -660,7 +660,7 @@ class TestPixelatedStemRadialIntegration:
         big_value = 50000000
         array0 = np.ones(shape=data_shape)*big_value
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == big_value).all()
 
@@ -673,7 +673,7 @@ class TestPixelatedStemRadialIntegration:
                 blur=True, downscale=False)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert s_r.axes_manager.navigation_shape == (px, py)
         assert (s_r.data.argmax(axis=-1) == 30).all()
 
@@ -687,7 +687,7 @@ class TestPixelatedStemRadialIntegration:
                 blur=True, downscale=False)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data.argmax(axis=-1) == r).all()
 
     def test_correct_disk_x_y_and_radius_random(self):
@@ -701,7 +701,7 @@ class TestPixelatedStemRadialIntegration:
                 ring_x=x, ring_y=y, ring_r=r, ring_I=5,
                 blur=True, downscale=False)
         s_com = s.center_of_mass()
-        s_r = s.radial_integration(
+        s_r = s.radial_average(
                 centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
         s_r = s_r.isig[15:]  # Do not include the disk
         r -= 15  # Need to shift the radius, due to not including the disk
@@ -713,7 +713,7 @@ class TestPixelatedStemRadialIntegrationLazy:
     def test_simple(self):
         array0 = da.ones(shape=(10, 10, 40, 40), chunks=(5, 5, 5, 5))
         s0 = LazyPixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert (s0_r.data[:, :, :-1] == 1).all()
 
         data_shape = 2, 2, 11, 11
@@ -723,21 +723,21 @@ class TestPixelatedStemRadialIntegrationLazy:
         s1 = LazyPixelatedSTEM(dask_array)
         s1.axes_manager.signal_axes[0].offset = -5
         s1.axes_manager.signal_axes[1].offset = -5
-        s1_r = s1.radial_integration()
+        s1_r = s1.radial_average()
         assert np.all(s1_r.data[:, :, 0] == 1)
         assert np.all(s1_r.data[:, :, 1:] == 0)
 
     def test_different_shape(self):
         array = da.ones(shape=(7, 9, 30, 40), chunks=(3, 3, 5, 5))
         s = LazyPixelatedSTEM(array)
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data[:, :, :-2] == 1).all()
 
     def test_nav_1(self):
         data_shape = (5, 40, 40)
         array0 = da.ones(shape=data_shape, chunks=(5, 5, 5))
         s0 = LazyPixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == 1).all()
 
@@ -747,7 +747,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         array0 = np.ones(shape=data_shape)*big_value
         dask_array = da.from_array(array0, chunks=(2, 10, 10))
         s0 = LazyPixelatedSTEM(dask_array)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == big_value).all()
 
@@ -762,7 +762,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         s = LazyPixelatedSTEM(dask_array)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert s_r.axes_manager.navigation_shape == (px, py)
         assert (s_r.data.argmax(axis=-1) == 30).all()
 
@@ -778,7 +778,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         s = LazyPixelatedSTEM(dask_array)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data.argmax(axis=-1) == r).all()
 
     def test_correct_disk_x_y_and_radius_random(self):
@@ -794,7 +794,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         dask_array = da.from_array(s.data, chunks=(4, 4, 50, 50))
         s = LazyPixelatedSTEM(dask_array)
         s_com = s.center_of_mass()
-        s_r = s.radial_integration(
+        s_r = s.radial_average(
                 centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
         s_r = s_r.isig[15:]  # Do not include the disk
         r -= 15  # Need to shift the radius, due to not including the disk
@@ -814,7 +814,7 @@ class TestPixelatedStemAngleSector:
         assert not mask[:, :, 5:, :].any()
         assert not mask[:, :, :, 5:].any()
 
-    def test_get_angle_sector_mask_radial_integration1(self):
+    def test_get_angle_sector_mask_radial_average1(self):
         x, y = 4.5, 4.5
         array = np.zeros((10, 10, 10, 10))
         array[:, :, 0:5, 0:5] = 1
@@ -824,25 +824,25 @@ class TestPixelatedStemAngleSector:
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
         mask0 = s.angular_mask(0.0, 0.5*np.pi)
-        s_r0 = s.radial_integration(
+        s_r0 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask0)
         assert np.all(s_r0.isig[0:6].data == 1.)
 
         mask1 = s.angular_mask(0, np.pi)
-        s_r1 = s.radial_integration(
+        s_r1 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask1)
         assert np.all(s_r1.isig[0:6].data == 0.5)
 
         mask2 = s.angular_mask(0.0, 2*np.pi)
-        s_r2 = s.radial_integration(
+        s_r2 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask2)
         assert np.all(s_r2.isig[0:6].data == 0.25)
 
         mask3 = s.angular_mask(np.pi, 2*np.pi)
-        s_r3 = s.radial_integration(
+        s_r3 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask3)
         assert np.all(s_r3.data == 0.0)
@@ -868,7 +868,7 @@ class TestAngularSliceRadialIntegration:
                 image_size_x=120, image_size_y=100,
                 disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
                 blur=True, downscale=False)
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=20)
         assert s_ar.axes_manager.navigation_shape, (x, y, angleN)
         assert (s_ar.data.argmax(-1) == r).all()
@@ -894,7 +894,7 @@ class TestAngularSliceRadialIntegration:
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
         s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
 
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=4)
         assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
         assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
@@ -922,7 +922,7 @@ class TestAngularSliceRadialIntegration:
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
         s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
 
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=4)
         assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
         assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
@@ -945,20 +945,20 @@ class TestAngularSliceRadialIntegration:
 
         s.data[:, :, y:, :] = s1.data[:, :, y:, :]
 
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=2)
         assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
         assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
-        s_ar1 = s.angular_slice_radial_integration(
+        s_ar1 = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=2, slice_overlap=0.1)
         assert (s_ar1.inav[:, :, 0].data.argmax(axis=-1) == r1).all()
         assert (s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
         with pytest.raises(ValueError):
-            s.angular_slice_radial_integration(slice_overlap=1.2)
+            s.angular_slice_radial_average(slice_overlap=1.2)
         with pytest.raises(ValueError):
-            s.angular_slice_radial_integration(slice_overlap=-0.2)
+            s.angular_slice_radial_average(slice_overlap=-0.2)
 
 
 class TestPixelatedStemVirtualAnnularDarkField:

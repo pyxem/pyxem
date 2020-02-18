@@ -55,16 +55,16 @@ Center of mass
     >>> s_com.plot()
 
 
-Radial integration
-------------------
+Radial average
+--------------
 
-:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_integration`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_average`
 
 .. code-block:: python
 
     >>> s.axes_manager.signal_axes[0].offset = -25
     >>> s.axes_manager.signal_axes[1].offset = -25
-    >>> s_r = s.radial_integration(show_progressbar=False)
+    >>> s_r = s.radial_average(show_progressbar=False)
     >>> s_r.plot()
 
 

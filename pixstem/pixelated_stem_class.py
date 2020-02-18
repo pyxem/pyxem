@@ -534,10 +534,17 @@ class PixelatedSTEM(Signal2D):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_adf
 
-    def radial_integration(
+    def radial_integration(self):
+        raise Exception(
+                "radial_integration has been renamed radial_average")
+
+    def radial_average(
             self, centre_x=None, centre_y=None, mask_array=None,
             normalize=True, parallel=True, show_progressbar=True):
-        """Radially integrates a pixelated STEM diffraction signal.
+        """Radially average a pixelated STEM diffraction signal.
+
+        Done by integrating over the azimuthal dimension, giving a
+        profile of intensity as a function of scattering angle.
 
         Parameters
         ----------
@@ -554,7 +561,7 @@ class PixelatedSTEM(Signal2D):
             Mask with the same shape as the signal.
         normalize : bool, default True
             If true, the returned radial profile will be normalized by the
-            number of bins used for each integration.
+            number of bins used for each average.
         parallel : bool, default True
             If True, run the processing on several cores.
             In most cases this should be True, but for debugging False can be
@@ -570,7 +577,7 @@ class PixelatedSTEM(Signal2D):
         --------
         >>> import pixstem.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
-        >>> s_r = s.radial_integration(centre_x=25, centre_y=25,
+        >>> s_r = s.radial_average(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
         >>> s_r.plot()
 
@@ -578,7 +585,7 @@ class PixelatedSTEM(Signal2D):
 
         >>> s = dd.get_disk_shift_simple_test_signal()
         >>> s_com = s.center_of_mass(threshold=2, show_progressbar=False)
-        >>> s_r = s.radial_integration(
+        >>> s_r = s.radial_average(
         ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data,
         ...     show_progressbar=False)
         >>> s_r.plot()
@@ -605,7 +612,7 @@ class PixelatedSTEM(Signal2D):
             iterating_kwargs.append(('mask', mask_flat))
 
         if self._lazy:
-            data = pst._radial_integration_dask_array(
+            data = pst._radial_average_dask_array(
                 self.data, return_sig_size=radial_array_size,
                 centre_x=centre_x, centre_y=centre_y,
                 mask_array=mask_array, normalize=normalize,
@@ -1117,10 +1124,15 @@ class PixelatedSTEM(Signal2D):
                 centre_y_array=centre_y_array)
         return bool_array
 
-    def angular_slice_radial_integration(
+    def angular_slice_radial_integration(self):
+        raise Exception(
+                "angular_slice_radial_integration has been renamed "
+                "angular_slice_radial_average")
+
+    def angular_slice_radial_average(
             self, angleN=20, centre_x=None, centre_y=None,
             slice_overlap=None, show_progressbar=True):
-        """Do radial integration of different angular slices.
+        """Do radial average of different angular slices.
         Useful for analysing anisotropy in round diffraction features,
         such as diffraction rings from polycrystalline materials or
         higher order Laue zone rings.
@@ -1129,7 +1141,7 @@ class PixelatedSTEM(Signal2D):
         ----------
         angleN : int, default 20
             Number of angular slices. If angleN=4, each slice
-            will be 90 degrees. The integration will start in the top left
+            will be 90 degrees. The average will start in the top left
             corner (0, 0) when plotting using s.plot(), and go clockwise.
         centre_x, centre_y : int or NumPy array, optional
             If given as int, all the diffraction patterns will have the same
@@ -1161,7 +1173,7 @@ class PixelatedSTEM(Signal2D):
         >>> import pixstem.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
-        >>> s_ar = s.angular_slice_radial_integration(
+        >>> s_ar = s.angular_slice_radial_average(
         ...     angleN=10, centre_x=s_com.inav[0].data,
         ...     centre_y=s_com.inav[1].data, slice_overlap=0.2,
         ...     show_progressbar=False)
@@ -1193,7 +1205,7 @@ class PixelatedSTEM(Signal2D):
                     angle[0], angle[1],
                     centre_x_array=centre_x,
                     centre_y_array=centre_y)
-            s_r = self.radial_integration(
+            s_r = self.radial_average(
                     centre_x=centre_x,
                     centre_y=centre_y,
                     mask_array=mask_array,
