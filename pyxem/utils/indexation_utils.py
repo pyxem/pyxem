@@ -99,8 +99,7 @@ def correlate_library(image, library, n_largest, mask, method):
     """
     list_of_methods = ['FastCorrelation','NormalizedCorrelation']
     if method not in list_of_methods:
-        print('pyxem/utils/indexation_utils.py : method {} is not defined'.format(method))
-        sys.exit(1)
+        raise ValueError("Method {} is not defined".format(method))
 
 
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
