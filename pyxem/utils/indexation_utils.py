@@ -96,6 +96,10 @@ def correlate_library(image, library, n_largest, mask, method):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
+    list_of_methods = ['FastCorrelation','NormalizedCorrelation']
+    if method not in list_of_methods:
+        NameError('method {} is not defined'.format(method))
+
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
     N = image.shape[0]*image.shape[1]
     average_image_intensity = np.average(image)
@@ -134,8 +138,6 @@ def correlate_library(image, library, n_largest, mask, method):
                     else:
                         corr_local = match_numerator/match_denominator  # Correlation is the normalized dot product
 
-                else:
-                    NameError('method is not defined')
 
                 if corr_local > np.min(corr_saved):
                     or_saved[np.argmin(corr_saved)] = or_local

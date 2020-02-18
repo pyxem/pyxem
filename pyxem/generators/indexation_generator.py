@@ -119,7 +119,7 @@ class IndexationGenerator():
                                  **kwargs)
 
         else:
-            NameError('method is not defined')
+            NameError('method {} is not defined'.format(method))
 
         matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
