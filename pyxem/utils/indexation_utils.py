@@ -145,7 +145,7 @@ def correlate_library(image, library, n_largest, mask, method):
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
-                corr_local = select_method_from_method_dict(method,methods_dict}(image_intensities = image_intensities, int_local = int_local,
+                corr_local = select_method_from_method_dict(method,methods_dict)(image_intensities = image_intensities, int_local = int_local,
                                                             pn_local = pn_local, N = N,image_norm=image_norm,average_image_intensity = average_image_intensity)
 
                 if corr_local > np.min(corr_saved):
