@@ -41,11 +41,11 @@ OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 #Functions used in correlate_library.
-def Fast_Correlation(image_intensities,int_local,pn_local,**kwargs):
+def Fast_Correlation(image_intensities,int_local,pn_local, **kwargs):
     return np.sum(np.multiply(image_intensities, int_local)) / \
                 pn_local  # Correlation is the partially normalized dot product
 
-def Normalized_Correlation(N,image_norm,average_image_intensity,image_intensities,int_local,**kwargs):
+def Normalized_Correlation(N,image_norm,average_image_intensity,image_intensities,int_local, **kwargs):
     N_star = len(image_intensities)
     average_pattern_intensity = N_star*np.average(int_local)/N
     match_numerator = np.sum(np.multiply(image_intensities, int_local))-N*average_pattern_intensity*average_image_intensity
@@ -145,7 +145,7 @@ def correlate_library(image, library, n_largest, mask, method):
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
-                corr_local = select_method_from_method_dict(method,methods_dict, image_intensities = image_intensities, int_local = int_local,
+                corr_local = select_method_from_method_dict(method,methods_dict}(image_intensities = image_intensities, int_local = int_local,
                                                             pn_local = pn_local, N = N,image_norm=image_norm,average_image_intensity = average_image_intensity)
 
                 if corr_local > np.min(corr_saved):
