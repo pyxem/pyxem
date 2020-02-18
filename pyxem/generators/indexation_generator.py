@@ -79,7 +79,7 @@ class IndexationGenerator():
             Array with the same size as signal (in navigation) or None
         method : String
             Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'FastCorrelation' or 'NormalizedCorrelation'. (ADDED 17.02 together with argument)
+            'FastCorrelation' or 'NormalizedCorrelation'.
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -100,12 +100,12 @@ class IndexationGenerator():
             # Index at all real space pixels
             mask = 1
 
-        # TODO: Add extra methods
-        #no_extra_methods_yet = True
-        if method in ['FastCorrelation','NormalizedCorrelation']:
+        list_of_methods = ['FastCorrelation','NormalizedCorrelation']
+        if method in list_of_methods:
             # adds a normalisation to library
             for phase in library.keys():
                 norm_array = np.ones(library[phase]['intensities'].shape[0])  # will store the norms
+
                 for i, intensity_array in enumerate(library[phase]['intensities']):
                     norm_array[i] = np.linalg.norm(intensity_array)
                 library[phase]['pattern_norms'] = norm_array  # puts this normalisation into the library
