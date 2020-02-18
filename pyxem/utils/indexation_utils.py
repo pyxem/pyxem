@@ -119,8 +119,8 @@ def correlate_library(image, library, n_largest, mask, method):
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
 
-    methods_dict = { 'FastCorrelation' : Fast_Correlation(**kwargs),
-                     'NormalizedCorrelation' : Normalized_Correlation(**kwargs)
+    methods_dict = { 'FastCorrelation' : Fast_Correlation,
+                     'NormalizedCorrelation' : Normalized_Correlation
                      }
 
 
