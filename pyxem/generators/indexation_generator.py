@@ -26,7 +26,7 @@ import hyperspy.api as hs
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 
-from pyxem.signals import transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes,get_method_from_methods_dict
 
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
@@ -64,8 +64,9 @@ class IndexationGenerator():
 
     def correlate(self,
                   n_largest=5,
+                  method = 'fast_correlation',
                   mask=None,
-                  method = 'FastCorrelation',
+                  help = False,
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -75,11 +76,13 @@ class IndexationGenerator():
         ----------
         n_largest : int
             The n orientations with the highest correlation values are returned.
+        method : str
+            Name of method used to compute correlation between templates and diffraction patterns. Can be
+            'fast_correlation' or 'normalized_correlation'.
         mask : Array
             Array with the same size as signal (in navigation) or None
-        method : String
-            Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'FastCorrelation' or 'NormalizedCorrelation'.
+        help : bool
+            Display information about the method used.
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -96,9 +99,15 @@ class IndexationGenerator():
         signal = self.signal
         library = self.library
 
+        methods_dict = { 'fast_correlation' : fast_correlation,
+                     'normalized_correlation' : normalized_correlation
+                     }
+
         if mask is None:
             # Index at all real space pixels
             mask = 1
+
+
 
         # adds a normalisation to library
         for phase in library.keys():
@@ -111,9 +120,9 @@ class IndexationGenerator():
         matches = signal.map(correlate_library,
                              library=library,
                              n_largest=n_largest,
+                             method = method,
                              mask=mask,
                              inplace=False,
-                             method = method,
                              **kwargs)
 
         matching_results = TemplateMatchingResults(matches)

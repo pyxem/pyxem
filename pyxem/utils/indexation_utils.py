@@ -21,14 +21,12 @@ from heapq import nlargest
 from itertools import combinations
 import math
 from operator import itemgetter, attrgetter
-import sys
 
 import numpy as np
 
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
-from pyxem.signals import select_method_from_method_dict
 
 from transforms3d.euler import mat2euler, euler2mat
 from transforms3d.quaternions import mat2quat
@@ -41,15 +39,73 @@ OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 #Functions used in correlate_library.
-def Fast_Correlation(image_intensities,int_local,pn_local, **kwargs):
+def fast_forrelation(image_intensities,int_local,pn_local, **kwargs):
+    """
+    Computes the correlation score between an image and a template, using the formula
+    .. math:: FastCorrelation
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    Parameters
+    ----------
+    image_intensities: list
+        list of intensity values in the image, for pixels where the template has a non-zero intensity
+     int_local: list
+        list of all non-zero intensities in the template
+     pn_local: float
+        pattern norm of the template
+
+    Returns
+    -------
+    corr_local: float
+        correlation score between template and image.
+
+    See also:
+    ---------
+    correlate_library, normalized_correlation
+
+    """
     return np.sum(np.multiply(image_intensities, int_local)) / \
                 pn_local  # Correlation is the partially normalized dot product
 
-def Normalized_Correlation(N,image_norm,average_image_intensity,image_intensities,int_local, **kwargs):
-    N_star = len(image_intensities)
-    average_pattern_intensity = N_star*np.average(int_local)/N
-    match_numerator = np.sum(np.multiply(image_intensities, int_local))-N*average_pattern_intensity*average_image_intensity
-    match_denominator = image_norm*np.linalg.norm(int_local-average_pattern_intensity)+(N-N_star)*pow(average_pattern_intensity,2)
+def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local, **kwargs):
+    """
+    Computes the correlation score between an image and a template, using the formula
+    .. math:: normalized_correlation
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\\sum_{Not {j}} avg(T)}}
+        for a template T and an experimental pattern P.
+
+    Parameters
+    ----------
+    nb_pixels: int
+        total number of pixels in the image
+    image_norm: float
+        norm of all intensities in the image
+    average_image_intensity: float
+        average intensity for the image
+    image_intensities: list
+        list of intensity values in the image, for pixels where the template has a non-zero intensity
+     int_local: list
+        list of all non-zero intensities in the template
+     pn_local: float
+        pattern norm of the template
+
+    Returns
+    -------
+    corr_local: float
+        correlation score between template and image.
+
+    See also:
+    ---------
+    correlate_library, fast_correlation
+
+    """
+
+    nb_pixels_star = len(int_local)
+    average_pattern_intensity = nb_pixels_star*np.average(int_local)/nb_pixels
+
+    match_numerator = np.sum(np.multiply(image_intensities, int_local))-nb_pixels*average_pattern_intensity*average_image_intensity
+    match_denominator = image_norm*(np.linalg.norm(int_local-average_pattern_intensity)+(nb_pixels-nb_pixels_star)*pow(average_pattern_intensity,2))
+
     if match_denominator == 0:
         if average_image_intensity == 0:
             corr_local = 1
@@ -68,12 +124,12 @@ def correlate_library(image, library, n_largest, mask, method):
     Calculated using the normalised (see return type documentation) dot
     product, or cosine distance,
 
-    .. math:: FastCorrelation
+    .. math:: fast_correlation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
 
-    .. math:: NormalizedCorrelation
+    .. math:: normalized_correlation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\\sum_{Not {j}} avg(T)}}
-    for a template T and an experimental pattern P.
+        for a template T and an experimental pattern P.
 
     Parameters
     ----------
@@ -119,15 +175,15 @@ def correlate_library(image, library, n_largest, mask, method):
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
 
-    methods_dict = { 'FastCorrelation' : Fast_Correlation,
-                     'NormalizedCorrelation' : Normalized_Correlation
+    methods_dict = { 'fast_correlation' : fast_correlation,
+                     'normalized_correlation' : normalized_correlation
                      }
 
     if method not in methods_dict.keys():
         raise ValueError("Method {} is not defined".format(method))
 
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
-    N = image.shape[0]*image.shape[1]
+    nb_pixels = image.shape[0]*image.shape[1]
     average_image_intensity = np.average(image)
     image_norm = np.linalg.norm(image) #Can skip this for speed, as it is the same for all patterns.
 
@@ -148,7 +204,7 @@ def correlate_library(image, library, n_largest, mask, method):
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
                 corr_local = methods_dict[method](image_intensities = image_intensities, int_local = int_local,
-                                                            pn_local = pn_local, N = N,image_norm=image_norm,average_image_intensity = average_image_intensity)
+                                                            pn_local = pn_local, nb_pixels = nb_pixels,image_norm=image_norm,average_image_intensity = average_image_intensity)
 
                 if corr_local > np.min(corr_saved):
                     or_saved[np.argmin(corr_saved)] = or_local
