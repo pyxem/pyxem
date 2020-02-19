@@ -96,7 +96,7 @@ The first navigation index is the beam shifts in the x-direction, and the second
 Doing the radial average
 ------------------------
 
-The next step is radially integrating the dataset as a function of distance from the centre position, which is done using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_average`.
+The next step is radially averaging the dataset as a function of distance from the centre position, which is done using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_average`.
 
 .. code-block:: python
 

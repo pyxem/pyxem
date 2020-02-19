@@ -128,7 +128,7 @@ Image offset
 ############
 
 The offset of the image can be set through accessing the **axes_manager** of the **PixelatedSTEM object**.
-This is useful for radial integration.
+This is useful for radial averaging.
 By setting the offset of the axes_manager as below, the coordinates of the centre point of the disks and ring is changed x=0 and y=0.
 
 .. code-block:: python
