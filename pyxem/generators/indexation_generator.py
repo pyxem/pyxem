@@ -26,7 +26,8 @@ import hyperspy.api as hs
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 
-from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
+from pyxem.signals import transfer_navigation_axes
+from pyxem.signals import select_method_from_method_dict
 
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import normalized_correlation
@@ -101,7 +102,7 @@ class IndexationGenerator():
         signal = self.signal
         library = self.library
 
-        methods_dict = { 'fast_correlation' : fast_correlation,
+        method_dict = { 'fast_correlation' : fast_correlation,
                      'normalized_correlation' : normalized_correlation
                      }
 
@@ -109,7 +110,7 @@ class IndexationGenerator():
             # Index at all real space pixels
             mask = 1
 
-        function = select_method_from_methods_dict(method,methods_dict,print_help)
+        function = select_method_from_method_dict(method,method_dict,print_help)
 
         # adds a normalisation to library
         for phase in library.keys():
