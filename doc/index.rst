@@ -13,17 +13,6 @@ This release includes:
 * Several minor bug-fixes.
 
 
-*2018-12-3: pixStem 0.3.2 released!*
-
-This release includes:
-
-* Data analysis functionality for analysing :ref:`fluctuation electron microscopy data <fem_analysis>`, thanks to Andrew Herzing for the contribution!
-* A new method in the ``PixelatedSTEM`` class for template matching a disk with STEM diffraction data: :ref:`template_match_disk`
-* Another method for locating diffraction spots in STEM diffraction data, using peak finding functionality from ``skimage``: :ref:`peak_finding`
-
-All these rely on the `dask <https://dask.org/>`_ library, so they can be performed on very large datasets.
-
-
 About pixStem
 -------------
 
@@ -35,10 +24,13 @@ Install instructions: :ref:`install`.
 pixStem is available under the GNU GPL v3 license, and the source code is found in the `GitLab repository <https://gitlab.com/pixstem/pixstem/tree/master/>`_.
 
 .. image:: images/frontpage/stem_diffraction.jpg
-    :scale: 49 %
+    :scale: 32 %
+
+.. image:: images/frontpage/nbed_example.jpg
+    :scale: 32 %
 
 .. image:: images/frontpage/dpc_dummy_data.jpg
-    :scale: 49 %
+    :scale: 32 %
 
 
 .. toctree::
@@ -47,6 +39,7 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
    loading_data
    using_pixelated_stem_class
    analysing_holz_datasets
+   analysing_nbed_data
    analysing_dpc_datasets
    fem_analysis
    open_datasets
@@ -59,6 +52,17 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
 
 Old news
 --------
+
+*2018-12-3: pixStem 0.3.2 released!*
+
+This release includes:
+
+* Data analysis functionality for analysing :ref:`fluctuation electron microscopy data <fem_analysis>`, thanks to Andrew Herzing for the contribution!
+* A new method in the ``PixelatedSTEM`` class for template matching a disk with STEM diffraction data: :ref:`template_match_disk`
+* Another method for locating diffraction spots in STEM diffraction data, using peak finding functionality from ``skimage``: :ref:`peak_finding`
+
+All these rely on the `dask <https://dask.org/>`_ library, so they can be performed on very large datasets.
+
 
 *2018-6-28: pixStem 0.3.1 released!*
 

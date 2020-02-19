@@ -4,6 +4,7 @@ from hyperspy.components1d import Gaussian
 from scipy.ndimage.filters import gaussian_filter
 from scipy.signal import convolve2d
 from skimage import morphology
+from skimage.draw import polygon
 import pixstem.make_diffraction_test_data as mdtd
 from pixstem.pixelated_stem_class import (
         DPCSignal2D, LazyPixelatedSTEM, PixelatedSTEM)
@@ -543,7 +544,8 @@ def get_cbed_signal():
             data[iy, ix, temp_y, temp_x] = temp_intensity
     for ix, iy in np.ndindex(data.shape[:2]):
         noise = np.random.randint(10, size=(100, 100))
-        data[iy, ix] = convolve2d(data[iy, ix], disk, mode='same') + noise
+        image = convolve2d(data[iy, ix], disk, mode='same') + noise
+        data[iy, ix] = gaussian_filter(image, 1.5)
     s_cbed = PixelatedSTEM(data)
     return s_cbed
 
@@ -570,3 +572,55 @@ def get_simple_ellipse_signal_peak_array():
            xc, yc, semi0, semi1, rot)
     s = PixelatedSTEM(np.zeros((4, 5, 200, 200)))
     return s, peak_array
+
+
+def get_nanobeam_electron_diffraction_signal():
+    """Get a signal emulating a NBED dataset.
+
+    Returns
+    -------
+    signal : PixelatedSTEM
+
+    Example
+    -------
+    >>> s = ps.dummy_data.get_nanobeam_electron_diffraction_signal()
+    >>> s.plot()
+
+    """
+    di0 = mdtd.DiffractionTestImage(intensity_noise=False)
+    di0.add_disk(x=128, y=128, intensity=10.)
+    di0.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
+    di0.add_background_lorentz(intensity=50, width=30)
+
+    di1 = di0.copy()
+    di1.rotation = 10
+    di2 = di0.copy()
+    di2.rotation = -10
+    position_array0 = np.zeros((50, 50), dtype=np.bool)
+
+    r = np.array([15, 15, 0, 0])
+    c = np.array([0, 15, 31, 0])
+    rr, cc = polygon(r, c)
+    position_array0[rr, cc] = True
+
+    r = np.array([10, 19, 29, 40])
+    c = np.array([50, 35, 35, 50])
+    rr, cc = polygon(r, c)
+    position_array0[rr, cc] = True
+    position_array1 = np.zeros((50, 50), dtype=np.bool)
+
+    r = np.array([32, 41, 41, 50, 50])
+    c = np.array([0, 18, 50, 50, 0])
+    rr, cc = polygon(r, c)
+    position_array1[rr, cc] = True
+
+    position_array2 = np.invert(np.bitwise_or(
+        position_array0, position_array1))
+
+    dtd = mdtd.DiffractionTestDataset(50, 50, 256, 256)
+    dtd.add_diffraction_image(di0, position_array0)
+    dtd.add_diffraction_image(di1, position_array1)
+    dtd.add_diffraction_image(di2, position_array2)
+
+    s = dtd.get_signal()
+    return s

@@ -14,22 +14,22 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
     if mask is not None:
         image *= mask
     if threshold is not None:
-        mean_value = measurements.mean(image, mask)*threshold
+        mean_value = measurements.mean(image, mask) * threshold
         image[image <= mean_value] = 0
         image[image > mean_value] = 1
     return image
 
 
-def _radial_integration_dask_array(
+def _radial_average_dask_array(
         dask_array, return_sig_size, centre_x, centre_y,
         normalize, mask_array=None, show_progressbar=True):
     func_args = {'mask': mask_array, 'radial_array_size': return_sig_size,
                  'normalize': normalize}
     func_iterating_args = {'centre_x': centre_x, 'centre_y': centre_y}
     data = lt._calculate_function_on_dask_array(
-            dask_array, _get_radial_profile_of_diff_image, func_args=func_args,
-            func_iterating_args=func_iterating_args,
-            return_sig_size=return_sig_size, show_progressbar=show_progressbar)
+        dask_array, _get_radial_profile_of_diff_image, func_args=func_args,
+        func_iterating_args=func_iterating_args,
+        return_sig_size=return_sig_size, show_progressbar=show_progressbar)
     return data
 
 
@@ -66,9 +66,10 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     >>> import matplotlib.pyplot as plt
     >>> cax = plt.imshow(image_masked)
     """
-    x, y = np.ogrid[-centerY:imageSizeY-centerY, -centerX:imageSizeX-centerX]
-    mask = x*x + y*y <= radius*radius
-    return(mask)
+    x, y = np.ogrid[-centerY:imageSizeY - centerY,
+                    -centerX:imageSizeX - centerX]
+    mask = x * x + y * y <= radius * radius
+    return (mask)
 
 
 def _get_signal_mean_position_and_value(signal):
@@ -107,7 +108,7 @@ def _get_signal_mean_position_and_value(signal):
     x_mean = sam[0].axis.mean()
     y_mean = sam[1].axis.mean()
     value_mean = signal.data.mean()
-    return(x_mean, y_mean, value_mean)
+    return (x_mean, y_mean, value_mean)
 
 
 def _get_corner_values(s, corner_size=0.05):
@@ -127,26 +128,27 @@ def _get_corner_values(s, corner_size=0.05):
     if len(s.axes_manager.signal_axes) != 2:
         raise ValueError("s need to have 2 signal dimensions")
     am = s.axes_manager.signal_axes
-    a0_range = (am[0].high_index - am[0].low_index)*corner_size
-    a1_range = (am[1].high_index - am[1].low_index)*corner_size
+    a0_range = (am[0].high_index - am[0].low_index) * corner_size
+    a1_range = (am[1].high_index - am[1].low_index) * corner_size
     a0_range, a1_range = int(a0_range), int(a1_range)
 
     s_corner00 = s.isig[:a0_range + 1, :a1_range + 1]
-    s_corner01 = s.isig[:a0_range + 1, am[1].high_index-a1_range:]
-    s_corner10 = s.isig[am[0].high_index-a0_range:, :a1_range + 1]
-    s_corner11 = s.isig[am[0].high_index-a0_range:, am[1].high_index-a1_range:]
+    s_corner01 = s.isig[:a0_range + 1, am[1].high_index - a1_range:]
+    s_corner10 = s.isig[am[0].high_index - a0_range:, :a1_range + 1]
+    s_corner11 = \
+        s.isig[am[0].high_index - a0_range:, am[1].high_index - a1_range:]
 
     corner00 = _get_signal_mean_position_and_value(s_corner00)
     corner01 = _get_signal_mean_position_and_value(s_corner01)
     corner10 = _get_signal_mean_position_and_value(s_corner10)
     corner11 = _get_signal_mean_position_and_value(s_corner11)
 
-    return(np.array((corner00, corner01, corner10, corner11)).T)
+    return (np.array((corner00, corner01, corner10, corner11)).T)
 
 
 def _f_min(X, p):
     plane_xyz = p[0:3]
-    distance = (plane_xyz*X.T).sum(axis=1) + p[3]
+    distance = (plane_xyz * X.T).sum(axis=1) + p[3]
     return distance / np.linalg.norm(plane_xyz)
 
 
@@ -166,15 +168,15 @@ def _fit_ramp_to_image(signal, corner_size=0.05):
 
     sam = signal.axes_manager.signal_axes
     xx, yy = np.meshgrid(sam[0].axis, sam[1].axis)
-    zz = (-p[0]*xx-p[1]*yy-p[3])/p[2]
-    return(zz)
+    zz = (-p[0] * xx - p[1] * yy - p[3]) / p[2]
+    return (zz)
 
 
 def normalize_array(np_array, max_number=1.0):
     np_array = copy.deepcopy(np_array)
     np_array -= np_array.min()
     np_array /= np_array.max()
-    return(np_array*max_number)
+    return (np_array * max_number)
 
 
 def _get_limits_from_array(
@@ -183,16 +185,16 @@ def _get_limits_from_array(
         ignore_zeros=False,
         ignore_edges=False):
     if ignore_edges:
-        x_lim = int(data.shape[0]*0.05)
-        y_lim = int(data.shape[1]*0.05)
+        x_lim = int(data.shape[0] * 0.05)
+        y_lim = int(data.shape[1] * 0.05)
         data_array = copy.deepcopy(data[x_lim:-x_lim, y_lim:-y_lim])
     else:
         data_array = copy.deepcopy(data)
     if ignore_zeros:
         data_array = np.ma.masked_values(data_array, 0.0)
     mean = data_array.mean()
-    data_variance = data_array.std()*sigma
-    clim = (mean-data_variance, mean+data_variance)
+    data_variance = data_array.std() * sigma
+    clim = (mean - data_variance, mean + data_variance)
     if data_array.min() > clim[0]:
         clim = list(clim)
         clim[0] = data_array.min()
@@ -201,12 +203,12 @@ def _get_limits_from_array(
         clim = list(clim)
         clim[1] = data_array.max()
         clim = tuple(clim)
-    return(clim)
+    return (clim)
 
 
 def _make_color_wheel(ax, rotation=None):
     x, y = np.mgrid[-2.0:2.0:500j, -2.0:2.0:500j]
-    r = (x**2 + y**2)**0.5
+    r = (x ** 2 + y ** 2) ** 0.5
     t = np.arctan2(x, y)
     del x, y
     if rotation is not None:
@@ -214,7 +216,7 @@ def _make_color_wheel(ax, rotation=None):
         t = (t + np.pi) % (2 * np.pi) - np.pi
 
     r_masked = np.ma.masked_where(
-            (2.0 < r) | (r < 1.0), r)
+        (2.0 < r) | (r < 1.0), r)
     r_masked -= 1.0
 
     mask = r_masked.mask
@@ -227,16 +229,16 @@ def _make_color_wheel(ax, rotation=None):
 
 
 def _get_rgb_phase_array(
-        phase, rotation=None, max_phase=2*np.pi, phase_lim=None):
+        phase, rotation=None, max_phase=2 * np.pi, phase_lim=None):
     phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
-    phase = phase/(2*np.pi)
+    phase = phase / (2 * np.pi)
     S = np.ones_like(phase)
     HSV = np.dstack((phase, S, S))
     RGB = hsv_to_rgb(HSV)
-    return(RGB)
+    return (RGB)
 
 
-def _find_phase(phase, rotation=None, max_phase=2*np.pi):
+def _find_phase(phase, rotation=None, max_phase=2 * np.pi):
     if rotation is not None:
         phase = (phase + math.radians(rotation))
     phase = phase % max_phase
@@ -245,9 +247,9 @@ def _find_phase(phase, rotation=None, max_phase=2*np.pi):
 
 def _get_rgb_phase_magnitude_array(
         phase, magnitude, rotation=None,
-        magnitude_limits=None, max_phase=2*np.pi):
+        magnitude_limits=None, max_phase=2 * np.pi):
     phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
-    phase = phase/(2*np.pi)
+    phase = phase / (2 * np.pi)
 
     if magnitude_limits is not None:
         np.clip(magnitude, magnitude_limits[0], magnitude_limits[1],
@@ -255,42 +257,42 @@ def _get_rgb_phase_magnitude_array(
     magnitude_max = magnitude.max()
     if magnitude_max == 0:
         magnitude_max = 1
-    magnitude = magnitude/magnitude_max
+    magnitude = magnitude / magnitude_max
     S = np.ones_like(phase)
     HSV = np.dstack((phase, S, magnitude))
     RGB = hsv_to_rgb(HSV)
-    return(RGB)
+    return (RGB)
 
 
 def _find_longest_distance(
         imX, imY,
         centreX_min, centreY_min,
         centreX_max, centreY_max,
-        ):
+):
     max_value = max(
-            int(((imX-centreX_min)**2+(imY-centreY_min)**2)**0.5),
-            int(((centreX_max)**2+(imY-centreY_min)**2)**0.5),
-            int(((imX-centreX_min)**2+(centreY_max)**2)**0.5),
-            int((centreX_max**2+centreY_max**2)**0.5))
-    return(max_value)
+        int(((imX - centreX_min) ** 2 + (imY - centreY_min) ** 2) ** 0.5),
+        int(((centreX_max) ** 2 + (imY - centreY_min) ** 2) ** 0.5),
+        int(((imX - centreX_min) ** 2 + (centreY_max) ** 2) ** 0.5),
+        int((centreX_max ** 2 + centreY_max ** 2) ** 0.5))
+    return (max_value)
 
 
 def _make_centre_array_from_signal(signal, x=None, y=None):
     a_m = signal.axes_manager
     shape = a_m.navigation_shape[::-1]
     if x is None:
-        centre_x_array = np.ones(shape)*a_m.signal_axes[0].value2index(0)
+        centre_x_array = np.ones(shape) * a_m.signal_axes[0].value2index(0)
     else:
-        centre_x_array = np.ones(shape)*x
+        centre_x_array = np.ones(shape) * x
     if y is None:
-        centre_y_array = np.ones(shape)*a_m.signal_axes[1].value2index(0)
+        centre_y_array = np.ones(shape) * a_m.signal_axes[1].value2index(0)
     else:
-        centre_y_array = np.ones(shape)*y
+        centre_y_array = np.ones(shape) * y
     if not isiterable(centre_x_array):
         centre_x_array = np.array([centre_x_array])
     if not isiterable(centre_y_array):
         centre_y_array = np.array([centre_y_array])
-    return(centre_x_array, centre_y_array)
+    return (centre_x_array, centre_y_array)
 
 
 def _get_lowest_index_radial_array(radial_array):
@@ -311,14 +313,14 @@ def _get_lowest_index_radial_array(radial_array):
             lowest_index_in_image = np.where(radial_data == 0)[0][0]
             if lowest_index_in_image < lowest_index:
                 lowest_index = lowest_index_in_image
-    return(lowest_index)
+    return (lowest_index)
 
 
 def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y,
                                       normalize, radial_array_size, mask=None):
-    """Radially integrates a single diffraction image.
+    """Radially average a single diffraction image around a centre position.
 
-    Radially profiles the data, integrating the intensity in rings
+    Radially profiles the data, averaging the intensity in rings
     out from the centre. Unreliable as we approach the edges of the
     image as it just profiles the corners. Less pixels there so become
     effectively zero after a certain point.
@@ -343,7 +345,7 @@ def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y,
     """
     radial_array = np.zeros(shape=radial_array_size, dtype=np.float64)
     y, x = np.indices((diff_image.shape))
-    r = np.sqrt((x - centre_x)**2 + (y - centre_y)**2)
+    r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
     r = r.astype(int)
     if mask is None:
         r_flat = r.ravel()
@@ -359,7 +361,7 @@ def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y,
     else:
         radial_profile = tbin
     radial_array[0:len(radial_profile)] = radial_profile
-    return(radial_array)
+    return radial_array
 
 
 def _get_angle_sector_mask(
@@ -394,8 +396,8 @@ def _get_angle_sector_mask(
     """
     if angle0 > angle1:
         raise ValueError(
-                "angle1 ({0}) needs to be larger than angle0 ({1})".format(
-                    angle1, angle0))
+            "angle1 ({0}) needs to be larger than angle0 ({1})".format(
+                angle1, angle0))
 
     bool_array = np.zeros_like(signal.data, dtype=np.bool)
     for s in signal:
@@ -411,11 +413,11 @@ def _get_angle_sector_mask(
                 signal_axes[1].offset = -centre_y_array[0]
             else:
                 signal_axes[1].offset = -centre_y_array[indices]
-        x_size = signal_axes[1].size*1j
-        y_size = signal_axes[0].size*1j
+        x_size = signal_axes[1].size * 1j
+        y_size = signal_axes[0].size * 1j
         x, y = np.mgrid[
-                signal_axes[1].low_value:signal_axes[1].high_value:x_size,
-                signal_axes[0].low_value:signal_axes[0].high_value:y_size]
+               signal_axes[1].low_value:signal_axes[1].high_value:x_size,
+               signal_axes[0].low_value:signal_axes[0].high_value:y_size]
         t = np.arctan2(x, y) + np.pi
         if (angle1 - angle0) >= (2 * np.pi):
             bool_array[indices] = True
@@ -423,70 +425,70 @@ def _get_angle_sector_mask(
             angle0 = angle0 % (2 * np.pi)
             angle1 = angle1 % (2 * np.pi)
             if angle0 < angle1:
-                bool_array[indices] = (t > angle0)*(t < angle1)
+                bool_array[indices] = (t > angle0) * (t < angle1)
             elif angle1 < angle0:
-                bool_array[indices] = (t > angle0)*(t <= (2 * np.pi))
-                bool_array[indices] += (t >= 0)*(t < angle1)
+                bool_array[indices] = (t > angle0) * (t <= (2 * np.pi))
+                bool_array[indices] += (t >= 0) * (t < angle1)
             else:
                 raise ValueError(
                     "Not able to process with angle0: {0}, and angle1: {1}. "
                     "This error should not happen...")
-    return(bool_array)
+    return bool_array
 
 
 def _make_bivariate_histogram(
-            x_position, y_position,
-            histogram_range=None,
-            masked=None,
-            bins=200,
-            spatial_std=3):
-        s0_flat = x_position.flatten()
-        s1_flat = y_position.flatten()
+        x_position, y_position,
+        histogram_range=None,
+        masked=None,
+        bins=200,
+        spatial_std=3):
+    s0_flat = x_position.flatten()
+    s1_flat = y_position.flatten()
 
-        if masked is not None:
-            temp_s0_flat = []
-            temp_s1_flat = []
-            for data0, data1, masked_value in zip(
-                    s0_flat, s1_flat, masked.flatten()):
-                if not masked_value:
-                    temp_s0_flat.append(data0)
-                    temp_s1_flat.append(data1)
-            s0_flat = np.array(temp_s0_flat)
-            s1_flat = np.array(temp_s1_flat)
+    if masked is not None:
+        temp_s0_flat = []
+        temp_s1_flat = []
+        for data0, data1, masked_value in zip(
+                s0_flat, s1_flat, masked.flatten()):
+            if not masked_value:
+                temp_s0_flat.append(data0)
+                temp_s1_flat.append(data1)
+        s0_flat = np.array(temp_s0_flat)
+        s1_flat = np.array(temp_s1_flat)
 
-        if histogram_range is None:
-            if (s0_flat.std() > s1_flat.std()):
-                s0_range = (
-                    s0_flat.mean()-s0_flat.std()*spatial_std,
-                    s0_flat.mean()+s0_flat.std()*spatial_std)
-                s1_range = (
-                    s1_flat.mean()-s0_flat.std()*spatial_std,
-                    s1_flat.mean()+s0_flat.std()*spatial_std)
-            else:
-                s0_range = (
-                    s0_flat.mean()-s1_flat.std()*spatial_std,
-                    s0_flat.mean()+s1_flat.std()*spatial_std)
-                s1_range = (
-                    s1_flat.mean()-s1_flat.std()*spatial_std,
-                    s1_flat.mean()+s1_flat.std()*spatial_std)
+    if histogram_range is None:
+        if (s0_flat.std() > s1_flat.std()):
+            s0_range = (
+                s0_flat.mean() - s0_flat.std() * spatial_std,
+                s0_flat.mean() + s0_flat.std() * spatial_std)
+            s1_range = (
+                s1_flat.mean() - s0_flat.std() * spatial_std,
+                s1_flat.mean() + s0_flat.std() * spatial_std)
         else:
-            s0_range = histogram_range
-            s1_range = histogram_range
+            s0_range = (
+                s0_flat.mean() - s1_flat.std() * spatial_std,
+                s0_flat.mean() + s1_flat.std() * spatial_std)
+            s1_range = (
+                s1_flat.mean() - s1_flat.std() * spatial_std,
+                s1_flat.mean() + s1_flat.std() * spatial_std)
+    else:
+        s0_range = histogram_range
+        s1_range = histogram_range
 
-        hist2d, xedges, yedges = np.histogram2d(
-                s0_flat,
-                s1_flat,
-                bins=bins,
-                range=[
-                    [s0_range[0], s0_range[1]],
-                    [s1_range[0], s1_range[1]]])
+    hist2d, xedges, yedges = np.histogram2d(
+        s0_flat,
+        s1_flat,
+        bins=bins,
+        range=[
+            [s0_range[0], s0_range[1]],
+            [s1_range[0], s1_range[1]]])
 
-        s_hist = Signal2D(hist2d).swap_axes(0, 1)
-        s_hist.axes_manager[0].offset = xedges[0]
-        s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
-        s_hist.axes_manager[1].offset = yedges[0]
-        s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
-        return(s_hist)
+    s_hist = Signal2D(hist2d).swap_axes(0, 1)
+    s_hist.axes_manager[0].offset = xedges[0]
+    s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
+    s_hist.axes_manager[1].offset = yedges[0]
+    s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
+    return s_hist
 
 
 def _copy_signal2d_axes_manager_metadata(signal_original, signal_new):
@@ -506,10 +508,10 @@ def _copy_axes_object_metadata(axes_original, axes_new):
 def _copy_signal_all_axes_metadata(signal_original, signal_new):
     if signal_original.axes_manager.shape != signal_new.axes_manager.shape:
         raise ValueError(
-                "signal_original and signal_new must have the same shape, not "
-                "{0} and {1}".format(
-                    signal_original.axes_manager.shape,
-                    signal_new.axes_manager.shape))
+            "signal_original and signal_new must have the same shape, not "
+            "{0} and {1}".format(
+                signal_original.axes_manager.shape,
+                signal_new.axes_manager.shape))
     for iax in range(len(signal_original.axes_manager.shape)):
         ax_o = signal_original.axes_manager[iax]
         ax_n = signal_new.axes_manager[iax]
@@ -552,7 +554,7 @@ def find_and_remove_dead_pixels(s):
             p1 = s.data[..., iy - 1, ix]
             p2 = s.data[..., iy, ix + 1]
             p3 = s.data[..., iy, ix - 1]
-            value = ((p0 + p1 + p2 + p3)*0.25).astype(s.data.dtype)
+            value = ((p0 + p1 + p2 + p3) * 0.25).astype(s.data.dtype)
             value_list.append(value)
             x_list.append(ix)
             y_list.append(iy)

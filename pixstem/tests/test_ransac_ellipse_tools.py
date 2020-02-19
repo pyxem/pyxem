@@ -264,13 +264,13 @@ class TestGetEllipseModelRansacSingleFrame:
         data = np.vstack((data, [70, 55]))
         model_ransac0, inliers0 = ret.get_ellipse_model_ransac_single_frame(
                 data, xf=50, yf=55, rf_lim=5, semi_len_min=15,
-                semi_len_max=None, semi_len_ratio_lim=None, min_samples=50,
+                semi_len_max=None, semi_len_ratio_lim=None, min_samples=20,
                 residual_threshold=3, max_trails=100)
         assert inliers0[:-1].all()
         assert not inliers0[-1]
         model_ransac1, inliers1 = ret.get_ellipse_model_ransac_single_frame(
                 data, xf=50, yf=55, rf_lim=5, semi_len_min=15,
-                semi_len_max=None, semi_len_ratio_lim=None, min_samples=50,
+                semi_len_max=None, semi_len_ratio_lim=None, min_samples=20,
                 residual_threshold=6, max_trails=100)
         assert inliers1.all()
 

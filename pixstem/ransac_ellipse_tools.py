@@ -279,7 +279,8 @@ def get_ellipse_model_ransac_single_frame(
             is_ellipse_good, xf=xf, yf=yf, rf_lim=rf_lim,
             semi_len_min=semi_len_min, semi_len_max=semi_len_max,
             semi_len_ratio_lim=semi_len_ratio_lim)
-
+    if min_samples > len(data):
+        min_samples = len(data) - 1
     # This for loop is here to avoid the returned model being outside the
     # specified limits especially semi_len_ratio_lim.
     # This can happen if only the ransac function is used with this check.

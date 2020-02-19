@@ -60,13 +60,13 @@ def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
     results = dict()
 
     results['RadialInt'] = (
-        s.radial_integration(centre_x=centre_x, centre_y=centre_y,
-                             normalize=False,
-                             show_progressbar=show_progressbar))
+        s.radial_average(centre_x=centre_x, centre_y=centre_y,
+                         normalize=False,
+                         show_progressbar=show_progressbar))
 
-    radialavgs = s.radial_integration(centre_x=centre_x, centre_y=centre_y,
-                                      normalize=True,
-                                      show_progressbar=show_progressbar)
+    radialavgs = s.radial_average(centre_x=centre_x, centre_y=centre_y,
+                                  normalize=True,
+                                  show_progressbar=show_progressbar)
     if radialavgs.data.min() == 0:
         radialavgs.data += 1
 
@@ -80,7 +80,7 @@ def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
         results['Omega-Vi'] = pixstem.pixelated_stem_class.PixelatedSTEM(
                 results['Omega-Vi'])
 
-        results['Omega-Vk'] = results['Omega-Vi'].radial_integration(
+        results['Omega-Vk'] = results['Omega-Vi'].radial_average(
                 centre_x=centre_x, centre_y=centre_y, normalize=True,
                 show_progressbar=show_progressbar)
 
@@ -115,7 +115,7 @@ def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
                 Vrekdask.compute(progressbar=show_progressbar))
     else:
         results['Omega-Vi'] = ((s ** 2).mean() / (s.mean()) ** 2) - 1
-        results['Omega-Vk'] = results['Omega-Vi'].radial_integration(
+        results['Omega-Vk'] = results['Omega-Vi'].radial_average(
             centre_x=centre_x, centre_y=centre_y, normalize=True,
             show_progressbar=show_progressbar)
         oldshape = None

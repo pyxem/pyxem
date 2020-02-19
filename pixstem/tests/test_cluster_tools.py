@@ -346,6 +346,16 @@ class TestClusterAndSortPeakArray:
         assert len(peak_dict1['centre'][0, 0]) == 5
         assert len(peak_dict1['rest'][0, 0]) == 10
 
+    @pytest.mark.parametrize("ndim", [0, 1, 2, 3, 4, 5, 6])
+    def test_ndim(self, ndim):
+        nav_shape = tuple(np.random.randint(2, 5, size=ndim))
+        shape = nav_shape + (23, 2)
+        peak_array = np.random.randint(99, size=shape)
+        peak_dict = ct._cluster_and_sort_peak_array(peak_array)
+        assert peak_dict['centre'].shape == nav_shape
+        assert peak_dict['rest'].shape == nav_shape
+        assert peak_dict['none'].shape == nav_shape
+
 
 class TestAddPeakDictsToSignal:
 
@@ -356,6 +366,24 @@ class TestAddPeakDictsToSignal:
         peak_dicts['none'] = randint(10, 13, size=(3, 4, 2, 2))
         s = PixelatedSTEM(np.zeros((3, 4, 256, 256)))
         ct._add_peak_dicts_to_signal(s, peak_dicts)
+
+
+class TestGetPeakArrayShape:
+
+    @pytest.mark.parametrize("ndim", [0, 1, 2, 3, 4, 5, 6])
+    def test_dtype_object(self, ndim):
+        shape = tuple(np.random.randint(2, 5, size=ndim))
+        peak_array = np.empty(shape, dtype=np.object)
+        shape_output = ct._get_peak_array_shape(peak_array)
+        assert shape == shape_output
+
+    @pytest.mark.parametrize("ndim", [0, 1, 2, 3, 4, 5, 6])
+    def test_not_dtype_object(self, ndim):
+        nav_shape = tuple(np.random.randint(2, 5, size=ndim))
+        shape = nav_shape + (23, 2)
+        peak_array = np.random.randint(99, size=shape)
+        shape_output = ct._get_peak_array_shape(peak_array)
+        assert nav_shape == shape_output
 
 
 class TestSortedClusterDictToMarkerList:

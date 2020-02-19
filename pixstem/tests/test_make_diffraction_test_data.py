@@ -666,3 +666,162 @@ class TestMake4dPeakArrayTestData:
         pa1 = mdtd._make_4d_peak_array_test_data(p, p, p, p, p, nt=nt1)
         assert len(pa0[0, 0][:, 0]) == nt0
         assert len(pa1[0, 0][:, 0]) == nt1
+
+
+class TestDiffractionTestImage:
+
+    def test_simple(self):
+        mdtd.DiffractionTestImage()
+
+    def test_plot(self):
+        di = mdtd.DiffractionTestImage()
+        di.plot()
+
+    def test_get_signal(self):
+        di = mdtd.DiffractionTestImage()
+        s = di.get_signal()
+        assert hasattr(s, 'plot')
+
+    def test_copy(self):
+        di0 = mdtd.DiffractionTestImage(intensity_noise=False)
+        di0.add_cubic_disks(20, 20)
+        di1 = di0.copy()
+        data0 = di0.get_diffraction_test_image()
+        data1 = di1.get_diffraction_test_image()
+        assert (data0 == data1).all()
+
+    def test_get_diffraction_test_image(self):
+        di = mdtd.DiffractionTestImage()
+        data = di.get_diffraction_test_image()
+        assert hasattr(data, '__array__')
+
+    def test_get_diffraction_test_image_dtype(self):
+        di = mdtd.DiffractionTestImage()
+        data = di.get_diffraction_test_image(dtype=np.float32)
+        assert data.dtype == np.float32
+        data = di.get_diffraction_test_image(dtype=np.float64)
+        assert data.dtype == np.float64
+
+    def test_add_disk(self):
+        di = mdtd.DiffractionTestImage(diff_intensity_reduction=False,
+                                       intensity_noise=False, blur=0)
+        di.add_disk(10, 40, intensity=3.)
+        di.add_disk(128, 128, intensity=4.)
+        data = di.get_diffraction_test_image()
+        assert data[40, 10] == 3.
+        assert data[128, 128] == 4.
+
+    def test_add_cubic_disks_n(self):
+        di = mdtd.DiffractionTestImage(diff_intensity_reduction=False,
+                                       intensity_noise=False, blur=0)
+        di0 = di.copy()
+        di1 = di.copy()
+        di0.add_cubic_disks(20, 20, n=1)
+        di1.add_cubic_disks(20, 20, n=2)
+        data0 = di0.get_diffraction_test_image()
+        data1 = di1.get_diffraction_test_image()
+        assert data0.sum() < data1.sum()
+
+    def test_add_cubic_disks_intensity(self):
+        di = mdtd.DiffractionTestImage(
+                diff_intensity_reduction=False, intensity_noise=False, blur=0,
+                image_x=100, image_y=100)
+        di = di.copy()
+        di.add_cubic_disks(20, 20, intensity=25., n=1)
+        data = di.get_diffraction_test_image()
+        assert data[30, 30] == 25.
+
+    def test_add_background_lorentz(self):
+        di = mdtd.DiffractionTestImage(diff_intensity_reduction=False,
+                                       intensity_noise=False, blur=0)
+        data0 = di.get_diffraction_test_image()
+        di.add_background_lorentz(intensity=10., width=5.)
+        data1 = di.get_diffraction_test_image()
+        assert data0[50, 50] == 0.
+        assert data1[50, 50] != 0.
+        di.add_background_lorentz(intensity=10., width=20.)
+        data2 = di.get_diffraction_test_image()
+        assert data2[50, 50] != data1[50, 50]
+        di.add_background_lorentz(intensity=90., width=20.)
+        data3 = di.get_diffraction_test_image()
+        assert data3[50, 50] > data2[50, 50]
+
+    def test_image_x_y(self):
+        x, y = 100, 100
+        di = mdtd.DiffractionTestImage(image_x=x, image_y=y)
+        data = di.get_diffraction_test_image()
+        assert data.shape == (100, 100)
+        s = di.get_signal()
+        assert s.axes_manager.signal_shape == (100, 100)
+
+    def test_disk_r(self):
+        di = mdtd.DiffractionTestImage(image_x=50, image_y=50, disk_r=10,
+                                       intensity_noise=False)
+        di.add_disk(25, 25, intensity=2.)
+        data = di.get_diffraction_test_image()
+        assert data[0, 0] == 0
+        assert data[-1, 0] == 0
+        assert data[0, -1] == 0
+        assert data[-1, -1] == 0
+        di.disk_r = 40
+        data = di.get_diffraction_test_image()
+        assert data[0, 0] == 2.
+
+    def test_rotation(self):
+        di = mdtd.DiffractionTestImage(diff_intensity_reduction=False,
+                                       intensity_noise=False, blur=0)
+        di.add_disk(10, 10, intensity=2.)
+        data0 = di.get_diffraction_test_image()
+        di.rotation = 180
+        data1 = di.get_diffraction_test_image()
+        assert data0[10, 10] == 2.
+        assert data1[-10, -10] == 2.
+
+    def test_blur(self):
+        di = mdtd.DiffractionTestImage(diff_intensity_reduction=False,
+                                       intensity_noise=False, blur=0)
+        di.add_disk(10, 10, intensity=2.)
+        data0 = di.get_diffraction_test_image()
+        di.blur = 3.
+        data1 = di.get_diffraction_test_image()
+        assert data0[10, 10] == 2.
+        assert data1[10, 10] != 2.
+
+    def test_diff_intensity_reduction(self):
+        di = mdtd.DiffractionTestImage(diff_intensity_reduction=False,
+                                       intensity_noise=False, blur=0)
+        di.add_disk(10, 10, intensity=2.)
+        data0 = di.get_diffraction_test_image()
+        di.diff_intensity_reduction = 1.
+        data1 = di.get_diffraction_test_image()
+        assert data0[10, 10] == 2.
+        assert data1[10, 10] != 2.
+
+
+class TestDiffractionTestDataset:
+
+    def test_simple(self):
+        mdtd.DiffractionTestDataset()
+
+    def test_dataset_size(self):
+        dtd = mdtd.DiffractionTestDataset(
+                probe_x=5, probe_y=15, detector_x=101, detector_y=200)
+        assert dtd.data.shape == (5, 15, 101, 200)
+
+    def test_plot(self):
+        dtd = mdtd.DiffractionTestDataset()
+        dtd.plot()
+
+    def test_get_signal(self):
+        dtd = mdtd.DiffractionTestDataset()
+        s = dtd.get_signal()
+        assert hasattr(s, 'plot')
+
+    def test_add_diffraction_image(self):
+        dtd = mdtd.DiffractionTestDataset(noise=False)
+        di = mdtd.DiffractionTestImage(intensity_noise=False)
+        di.add_cubic_disks(20, 20, n=1)
+        data = di.get_diffraction_test_image()
+        dtd.add_diffraction_image(di)
+        for ix, iy in np.ndindex(dtd.data.shape[:2]):
+            assert (dtd.data[ix, iy] == data).all()

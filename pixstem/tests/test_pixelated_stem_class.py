@@ -1,8 +1,8 @@
 import pytest
-import unittest
 import numpy as np
 from numpy.random import randint
 import dask.array as da
+from skimage import morphology
 from hyperspy.signals import Signal2D
 from pixstem.pixelated_stem_class import PixelatedSTEM
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
@@ -294,8 +294,7 @@ class TestFindDeadPixels:
 
     def test_non_lazy_signal(self):
         data = dtd._get_dead_pixel_test_data_2d()
-        data.compute()
-        s = PixelatedSTEM(data)
+        s = PixelatedSTEM(data.compute())
         s_dead_pixels = s.find_dead_pixels()
         assert s_dead_pixels.data.shape == s.data.shape
         assert s_dead_pixels.data[14, 42]
@@ -621,7 +620,7 @@ class TestPixelatedStemRadialIntegration:
     def test_simple(self):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert (s0_r.data[:, :, :-1] == 1).all()
 
         data_shape = 2, 2, 11, 11
@@ -630,21 +629,21 @@ class TestPixelatedStemRadialIntegration:
         s1 = PixelatedSTEM(array1)
         s1.axes_manager.signal_axes[0].offset = -5
         s1.axes_manager.signal_axes[1].offset = -5
-        s1_r = s1.radial_integration()
+        s1_r = s1.radial_average()
         assert np.all(s1_r.data[:, :, 0] == 1)
         assert np.all(s1_r.data[:, :, 1:] == 0)
 
     def test_different_shape(self):
         array = np.ones(shape=(7, 9, 30, 40))
         s = PixelatedSTEM(array)
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data[:, :, :-2] == 1).all()
 
     def test_nav_0(self):
         data_shape = (40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_dimension == 0
         assert (s0_r.data[:-1] == 1).all()
 
@@ -652,7 +651,7 @@ class TestPixelatedStemRadialIntegration:
         data_shape = (5, 40, 40)
         array0 = np.ones(shape=data_shape)
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == 1).all()
 
@@ -661,7 +660,7 @@ class TestPixelatedStemRadialIntegration:
         big_value = 50000000
         array0 = np.ones(shape=data_shape)*big_value
         s0 = PixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == big_value).all()
 
@@ -674,7 +673,7 @@ class TestPixelatedStemRadialIntegration:
                 blur=True, downscale=False)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert s_r.axes_manager.navigation_shape == (px, py)
         assert (s_r.data.argmax(axis=-1) == 30).all()
 
@@ -688,7 +687,7 @@ class TestPixelatedStemRadialIntegration:
                 blur=True, downscale=False)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data.argmax(axis=-1) == r).all()
 
     def test_correct_disk_x_y_and_radius_random(self):
@@ -702,7 +701,7 @@ class TestPixelatedStemRadialIntegration:
                 ring_x=x, ring_y=y, ring_r=r, ring_I=5,
                 blur=True, downscale=False)
         s_com = s.center_of_mass()
-        s_r = s.radial_integration(
+        s_r = s.radial_average(
                 centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
         s_r = s_r.isig[15:]  # Do not include the disk
         r -= 15  # Need to shift the radius, due to not including the disk
@@ -714,7 +713,7 @@ class TestPixelatedStemRadialIntegrationLazy:
     def test_simple(self):
         array0 = da.ones(shape=(10, 10, 40, 40), chunks=(5, 5, 5, 5))
         s0 = LazyPixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert (s0_r.data[:, :, :-1] == 1).all()
 
         data_shape = 2, 2, 11, 11
@@ -724,21 +723,21 @@ class TestPixelatedStemRadialIntegrationLazy:
         s1 = LazyPixelatedSTEM(dask_array)
         s1.axes_manager.signal_axes[0].offset = -5
         s1.axes_manager.signal_axes[1].offset = -5
-        s1_r = s1.radial_integration()
+        s1_r = s1.radial_average()
         assert np.all(s1_r.data[:, :, 0] == 1)
         assert np.all(s1_r.data[:, :, 1:] == 0)
 
     def test_different_shape(self):
         array = da.ones(shape=(7, 9, 30, 40), chunks=(3, 3, 5, 5))
         s = LazyPixelatedSTEM(array)
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data[:, :, :-2] == 1).all()
 
     def test_nav_1(self):
         data_shape = (5, 40, 40)
         array0 = da.ones(shape=data_shape, chunks=(5, 5, 5))
         s0 = LazyPixelatedSTEM(array0)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == 1).all()
 
@@ -748,7 +747,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         array0 = np.ones(shape=data_shape)*big_value
         dask_array = da.from_array(array0, chunks=(2, 10, 10))
         s0 = LazyPixelatedSTEM(dask_array)
-        s0_r = s0.radial_integration()
+        s0_r = s0.radial_average()
         assert s0_r.axes_manager.navigation_shape == data_shape[:1]
         assert (s0_r.data[:, :-1] == big_value).all()
 
@@ -763,7 +762,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         s = LazyPixelatedSTEM(dask_array)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert s_r.axes_manager.navigation_shape == (px, py)
         assert (s_r.data.argmax(axis=-1) == 30).all()
 
@@ -779,7 +778,7 @@ class TestPixelatedStemRadialIntegrationLazy:
         s = LazyPixelatedSTEM(dask_array)
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
-        s_r = s.radial_integration()
+        s_r = s.radial_average()
         assert (s_r.data.argmax(axis=-1) == r).all()
 
     def test_correct_disk_x_y_and_radius_random(self):
@@ -795,14 +794,14 @@ class TestPixelatedStemRadialIntegrationLazy:
         dask_array = da.from_array(s.data, chunks=(4, 4, 50, 50))
         s = LazyPixelatedSTEM(dask_array)
         s_com = s.center_of_mass()
-        s_r = s.radial_integration(
+        s_r = s.radial_average(
                 centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
         s_r = s_r.isig[15:]  # Do not include the disk
         r -= 15  # Need to shift the radius, due to not including the disk
         assert (s_r.data.argmax(axis=-1) == r).all()
 
 
-class test_pixelated_stem_angle_sector(unittest.TestCase):
+class TestPixelatedStemAngleSector:
 
     def test_get_angle_sector_mask_simple(self):
         array = np.zeros((10, 10, 10, 10))
@@ -815,7 +814,7 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
         assert not mask[:, :, 5:, :].any()
         assert not mask[:, :, :, 5:].any()
 
-    def test_get_angle_sector_mask_radial_integration1(self):
+    def test_get_angle_sector_mask_radial_average1(self):
         x, y = 4.5, 4.5
         array = np.zeros((10, 10, 10, 10))
         array[:, :, 0:5, 0:5] = 1
@@ -825,25 +824,25 @@ class test_pixelated_stem_angle_sector(unittest.TestCase):
         s.axes_manager.signal_axes[0].offset = -x
         s.axes_manager.signal_axes[1].offset = -y
         mask0 = s.angular_mask(0.0, 0.5*np.pi)
-        s_r0 = s.radial_integration(
+        s_r0 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask0)
         assert np.all(s_r0.isig[0:6].data == 1.)
 
         mask1 = s.angular_mask(0, np.pi)
-        s_r1 = s.radial_integration(
+        s_r1 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask1)
         assert np.all(s_r1.isig[0:6].data == 0.5)
 
         mask2 = s.angular_mask(0.0, 2*np.pi)
-        s_r2 = s.radial_integration(
+        s_r2 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask2)
         assert np.all(s_r2.isig[0:6].data == 0.25)
 
         mask3 = s.angular_mask(np.pi, 2*np.pi)
-        s_r3 = s.radial_integration(
+        s_r3 = s.radial_average(
                 centre_x=centre_x_array, centre_y=centre_y_array,
                 mask_array=mask3)
         assert np.all(s_r3.data == 0.0)
@@ -869,7 +868,7 @@ class TestAngularSliceRadialIntegration:
                 image_size_x=120, image_size_y=100,
                 disk_I=0, ring_x=x, ring_y=y, ring_r=r, ring_I=5,
                 blur=True, downscale=False)
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=20)
         assert s_ar.axes_manager.navigation_shape, (x, y, angleN)
         assert (s_ar.data.argmax(-1) == r).all()
@@ -895,7 +894,7 @@ class TestAngularSliceRadialIntegration:
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
         s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
 
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=4)
         assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
         assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
@@ -923,7 +922,7 @@ class TestAngularSliceRadialIntegration:
         s.data[:, :, y:, x:] = s2.data[:, :, y:, x:]
         s.data[:, :, y:, :x] = s3.data[:, :, y:, :x]
 
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=4)
         assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
         assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
@@ -946,23 +945,23 @@ class TestAngularSliceRadialIntegration:
 
         s.data[:, :, y:, :] = s1.data[:, :, y:, :]
 
-        s_ar = s.angular_slice_radial_integration(
+        s_ar = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=2)
         assert (s_ar.inav[:, :, 0].data.argmax(axis=-1) == r0).all()
         assert (s_ar.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
-        s_ar1 = s.angular_slice_radial_integration(
+        s_ar1 = s.angular_slice_radial_average(
                 centre_x=x, centre_y=y, angleN=2, slice_overlap=0.1)
         assert (s_ar1.inav[:, :, 0].data.argmax(axis=-1) == r1).all()
         assert (s_ar1.inav[:, :, 1].data.argmax(axis=-1) == r1).all()
 
         with pytest.raises(ValueError):
-                s.angular_slice_radial_integration(slice_overlap=1.2)
+            s.angular_slice_radial_average(slice_overlap=1.2)
         with pytest.raises(ValueError):
-                s.angular_slice_radial_integration(slice_overlap=-0.2)
+            s.angular_slice_radial_average(slice_overlap=-0.2)
 
 
-class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
+class TestPixelatedStemVirtualAnnularDarkField:
 
     def test_simple(self):
         shape = (5, 9, 12, 14)
@@ -987,7 +986,7 @@ class test_pixelated_stem_virtual_annular_dark_field(unittest.TestCase):
         assert s1.axes_manager.signal_shape == (shape[1], shape[0])
 
 
-class test_pixelated_stem_virtual_bright_field(unittest.TestCase):
+class TestPixelatedStemVirtualBrightField:
 
     def test_simple(self):
         shape = (5, 9, 12, 14)
@@ -1095,25 +1094,87 @@ class TestPixelatedStemTemplateMatchDisk:
         assert st.data.shape == tuple(shape)
 
 
-class TestPixelatedStemFindPeaks:
+class TestPixelatedStemTemplateMatchRing:
 
     def test_simple(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        s_template = s.template_match_ring(r_inner=3, r_outer=5)
+        assert s.data.shape == s_template.data.shape
+        assert s_template._lazy is True
+
+    def test_wrong_input(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 20, 20)))
+        with pytest.raises(ValueError):
+            s.template_match_ring(r_inner=5, r_outer=3)
+        with pytest.raises(ValueError):
+            s.template_match_ring(r_inner=3, r_outer=3)
+
+
+class TestPixelatedStemTemplateWithBinaryImage:
+
+    def test_square_and_disk(self):
+        s = PixelatedSTEM(np.zeros((2, 2, 100, 100)))
+
+        square_image = np.zeros((9, 9))
+        square_image[2:-2, 2:-2] = 1
+        s.data[:, :, 20:29, 40:49] = square_image
+
+        disk = morphology.disk(4, s.data.dtype)
+        s.data[:, :, 60:69, 50:59] = disk
+
+        s_st = s.template_match_with_binary_image(square_image,
+                                                  lazy_result=False)
+        s_dt = s.template_match_with_binary_image(disk, lazy_result=False)
+
+        st_ind = np.unravel_index(
+                np.argmax(s_st.data, axis=None), s_st.data.shape)[-2:]
+        dt_ind = np.unravel_index(
+                np.argmax(s_dt.data, axis=None), s_dt.data.shape)[-2:]
+
+        assert st_ind == (24, 44)
+        assert dt_ind == (64, 54)
+        assert s.data.shape == s_st.data.shape
+        assert s.data.shape == s_dt.data.shape
+
+    def test_wrong_binary_image_input(self):
+        s = PixelatedSTEM(np.random.randint(0, 1000, (2, 2, 20, 20)))
+        template = np.zeros(10)
+        with pytest.raises(ValueError):
+            s.template_match_with_binary_image(template)
+
+        template = np.zeros((10, 5, 5))
+        with pytest.raises(ValueError):
+            s.template_match_with_binary_image(template)
+
+        template = np.zeros((10, 5, 5, 3))
+        with pytest.raises(ValueError):
+            s.template_match_with_binary_image(template)
+
+
+class TestPixelatedStemFindPeaks:
+
+    method1 = ['dog', 'log']
+
+    @pytest.mark.parametrize('methods', method1)
+    def test_simple(self, methods):
         s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method=methods)
         assert s.data.shape[:2] == peak_array.shape
         assert hasattr(peak_array, 'compute')
 
-    def test_lazy_input(self):
+    @pytest.mark.parametrize('methods', method1)
+    def test_lazy_input(self, methods):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method=methods)
         assert s.data.shape[:2] == peak_array.shape
         assert hasattr(peak_array, 'compute')
 
-    def test_lazy_output(self):
+    @pytest.mark.parametrize('methods', method1)
+    def test_lazy_output(self, methods):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks(lazy_result=False)
+        peak_array = s.find_peaks(method=methods, lazy_result=False)
         assert s.data.shape[:2] == peak_array.shape
         assert not hasattr(peak_array, 'compute')
 
@@ -1158,27 +1219,31 @@ class TestPixelatedStemFindPeaks:
         for ix, iy in np.ndindex(peaks1.shape):
             assert len(peaks1[ix, iy]) == 1
 
-    def test_normalize_value(self):
+    @pytest.mark.parametrize('methods', method1)
+    def test_normalize_value(self, methods):
         data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
         data[:, :, 49:52, 49:52] = 100
         data[:, :, 19:22, 9:12] = 10
         s = PixelatedSTEM(data)
-        peak_array0 = s.find_peaks(normalize_value=100, lazy_result=False)
-        peak_array1 = s.find_peaks(normalize_value=10, lazy_result=False)
+        peak_array0 = s.find_peaks(method=methods,
+                                   normalize_value=100, lazy_result=False)
+        peak_array1 = s.find_peaks(method=methods,
+                                   normalize_value=10, lazy_result=False)
         for ix, iy in np.ndindex(peak_array0.shape):
             assert (peak_array0[ix, iy] == [[50, 50]]).all()
             assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
 
     @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
-    def test_different_dimensions(self, nav_dims):
+    @pytest.mark.parametrize('methods', method1)
+    def test_different_dimensions(self, nav_dims, methods):
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = PixelatedSTEM(np.random.random(size=shape))
-        peak_array = s.find_peaks(lazy_result=False)
+        peak_array = s.find_peaks(method=methods, lazy_result=False)
         assert peak_array.shape == tuple(shape[:-2])
 
 
-class test_pixelated_stem_rotate_diffraction(unittest.TestCase):
+class TestPixelatedStemRotateDiffraction:
 
     def test_rotate_diffraction_keep_shape(self):
         shape = (7, 5, 4, 15)
@@ -1254,3 +1319,248 @@ class TestPixelatedStemShiftDiffraction:
         assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
+
+
+class TestSubtractingDiffractionBackground():
+
+    method1 = ['difference of gaussians', 'median kernel', 'radial median']
+
+    @pytest.mark.parametrize('methods', method1)
+    def test_simple(self, methods):
+        s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 200, 150)))
+        s_rem = s.subtract_diffraction_background(method=methods)
+        assert s_rem.data.shape == s.data.shape
+        assert hasattr(s_rem.data, 'compute')
+
+    @pytest.mark.parametrize('methods', method1)
+    def test_lazy_input(self, methods):
+        data = np.random.randint(100, size=(3, 2, 200, 150))
+        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 20, 10)))
+        s_rem = s.subtract_diffraction_background(method=methods)
+        assert s.data.shape == s_rem.data.shape
+        assert hasattr(s_rem.data, 'compute')
+
+    @pytest.mark.parametrize('methods', method1)
+    def test_lazy_output(self, methods):
+        data = np.random.randint(100, size=(3, 2, 200, 150))
+        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 20, 20)))
+        s_rem = s.subtract_diffraction_background(
+            method=methods, lazy_result=False)
+        assert s.data.shape == s_rem.data.shape
+        assert not hasattr(s_rem.data, 'compute')
+
+    @pytest.mark.parametrize('methods', method1)
+    def test_axes_manager_copy(self, methods):
+        s = PixelatedSTEM(np.random.randint(100, size=(5, 5, 200, 200)))
+        ax_sa = s.axes_manager.signal_axes
+        ax_na = s.axes_manager.navigation_axes
+        ax_sa[0].name, ax_sa[1].name = 'Detector x', 'Detector y'
+        ax_sa[0].scale, ax_sa[1].scale = 0.2, 0.2
+        ax_sa[0].offset, ax_sa[1].offset = 10, 20
+        ax_sa[0].units, ax_sa[1].units = 'mrad', 'mrad'
+        ax_na[0].name, ax_na[1].name = 'Probe x', 'Probe y'
+        ax_na[0].scale, ax_na[1].scale = 35, 35
+        ax_na[0].offset, ax_na[1].offset = 54, 12
+        ax_na[0].units, ax_na[1].units = 'nm', 'nm'
+        s_temp = s.subtract_diffraction_background(method=methods)
+        assert s.data.shape == s_temp.data.shape
+        ax_sa_t = s_temp.axes_manager.signal_axes
+        ax_na_t = s_temp.axes_manager.navigation_axes
+        assert ax_sa[0].name == ax_sa_t[0].name
+        assert ax_sa[1].name == ax_sa_t[1].name
+        assert ax_sa[0].scale == ax_sa_t[0].scale
+        assert ax_sa[1].scale == ax_sa_t[1].scale
+        assert ax_sa[0].offset == ax_sa_t[0].offset
+        assert ax_sa[1].offset == ax_sa_t[1].offset
+        assert ax_sa[0].units == ax_sa_t[0].units
+        assert ax_sa[1].units == ax_sa_t[1].units
+
+        assert ax_na[0].name == ax_na_t[0].name
+        assert ax_na[1].name == ax_na_t[1].name
+        assert ax_na[0].scale == ax_na_t[0].scale
+        assert ax_na[1].scale == ax_na_t[1].scale
+        assert ax_na[0].offset == ax_na_t[0].offset
+        assert ax_na[1].offset == ax_na_t[1].offset
+        assert ax_na[0].units == ax_na_t[0].units
+        assert ax_na[1].units == ax_na_t[1].units
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize('methods', method1)
+    def test_different_dimensions(self, nav_dims, methods):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([200, 200])
+        s = PixelatedSTEM(np.random.random(size=shape))
+        st = s.subtract_diffraction_background(method=methods)
+        assert st.data.shape == tuple(shape)
+
+
+class TestPixelatedStemIntensityPeaks:
+
+    def test_simple(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, 'compute')
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, 'compute')
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array, lazy_result=False)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert not hasattr(intensity_array, 'compute')
+
+    def test_with_data(self):
+        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
+        data[0, 0, 50, 20] = 100
+        data[0, 1, 51, 21] = 200
+        data[0, 2, 52, 22] = 100
+        data[1, 0, 53, 23] = 200
+        data[1, 1, 54, 24] = 100
+        data[1, 2, 55, 25] = 200
+        s = PixelatedSTEM(data)
+        min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
+        threshold, overlap = 0.06, 0.01
+        peaks = s.find_peaks(
+                min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        intensity_array = s.intensity_peaks(peaks, disk_r=1)
+        intensity_array = intensity_array.compute()
+        np.testing.assert_almost_equal(intensity_array[0, 0][0][2], 100/9)
+        np.testing.assert_almost_equal(intensity_array[0, 1][0][2], 200 / 9)
+        np.testing.assert_almost_equal(intensity_array[0, 2][0][2], 100 / 9)
+        np.testing.assert_almost_equal(intensity_array[1, 0][0][2], 200 / 9)
+        np.testing.assert_almost_equal(intensity_array[1, 1][0][2], 100 / 9)
+        np.testing.assert_almost_equal(intensity_array[1, 2][0][2], 200 / 9)
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = PixelatedSTEM(np.random.random(size=shape))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array, disk_r=1)
+        assert intensity_array.shape == tuple(shape[:-2])
+
+
+class TestPixelatedStemPeakPositionRefinement:
+
+    def test_simple(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(peak_array, 'compute')
+
+    def test_wrong_square_size(self):
+        s = PixelatedSTEM(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        with pytest.raises(ValueError):
+            s.peak_position_refinement_com(peak_array, square_size=5)
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(refined_peak_array, 'compute')
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyPixelatedSTEM(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert not hasattr(refined_peak_array, 'compute')
+
+    def test_with_data(self):
+        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
+        data[0, 0, 50, 20] = 100
+        data[0, 1, 51, 21] = 100
+        data[0, 2, 52, 22] = 100
+        data[1, 0, 53, 23] = 100
+        data[1, 1, 54, 24] = 100
+        data[1, 2, 55, 25] = 100
+        s = PixelatedSTEM(data)
+        min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
+        threshold, overlap = 0.06, 0.01
+        peaks = s.find_peaks(
+                min_sigma=min_sigma, max_sigma=max_sigma,
+                sigma_ratio=sigma_ratio, threshold=threshold, overlap=overlap)
+        refined_peaks = s.peak_position_refinement_com(peaks,
+                                                       4, lazy_result=False)
+        assert refined_peaks[0, 0][0].tolist() == [50., 20.]
+        assert refined_peaks[0, 1][0].tolist() == [51., 21.]
+        assert refined_peaks[0, 2][0].tolist() == [52., 22.]
+        assert refined_peaks[1, 0][0].tolist() == [53., 23.]
+        assert refined_peaks[1, 1][0].tolist() == [54., 24.]
+        assert refined_peaks[1, 2][0].tolist() == [55., 25.]
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = PixelatedSTEM(np.random.random(size=shape))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False)
+        assert refined_peak_array.shape == tuple(shape[:-2])
+
+
+class TestComputeAndAsLazy:
+
+    def test_2d_data_compute(self):
+        dask_array = da.random.random((100, 150), chunks=(50, 50))
+        s = LazyPixelatedSTEM(dask_array)
+        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        s.axes_manager[0].scale = scale0
+        s.axes_manager[1].scale = scale1
+        s.metadata.Test = metadata_string
+        s.compute()
+        assert s.__class__ == PixelatedSTEM
+        assert not hasattr(s.data, 'compute')
+        assert s.axes_manager[0].scale == scale0
+        assert s.axes_manager[1].scale == scale1
+        assert s.metadata.Test == metadata_string
+        assert dask_array.shape == s.data.shape
+
+    def test_5d_data_compute(self):
+        dask_array = da.random.random((2, 3, 4, 10, 15),
+                                      chunks=(1, 1, 1, 10, 15))
+        s = LazyPixelatedSTEM(dask_array)
+        s.compute()
+        assert s.__class__ == PixelatedSTEM
+        assert dask_array.shape == s.data.shape
+
+    def test_2d_data_as_lazy(self):
+        data = np.random.random((100, 150))
+        s = PixelatedSTEM(data)
+        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        s.axes_manager[0].scale = scale0
+        s.axes_manager[1].scale = scale1
+        s.metadata.Test = metadata_string
+        s_lazy = s.as_lazy()
+        assert s_lazy.__class__ == LazyPixelatedSTEM
+        assert hasattr(s_lazy.data, 'compute')
+        assert s_lazy.axes_manager[0].scale == scale0
+        assert s_lazy.axes_manager[1].scale == scale1
+        assert s_lazy.metadata.Test == metadata_string
+        assert data.shape == s_lazy.data.shape
+
+    def test_5d_data_as_lazy(self):
+        data = np.random.random((2, 3, 4, 10, 15))
+        s = PixelatedSTEM(data)
+        s_lazy = s.as_lazy()
+        assert s_lazy.__class__ == LazyPixelatedSTEM
+        assert data.shape == s_lazy.data.shape

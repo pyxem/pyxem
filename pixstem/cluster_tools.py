@@ -71,10 +71,7 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
     if signal_axes is not None:
         max_x_index = signal_axes[0].high_index
         max_y_index = signal_axes[1].high_index
-    if peak_array.dtype == np.object:
-        peak_array_shape = peak_array.shape
-    else:
-        peak_array_shape = peak_array.shape[:-2]
+    peak_array_shape = _get_peak_array_shape(peak_array)
     peak_array_filtered = np.empty(shape=peak_array_shape, dtype=np.object)
     for index in np.ndindex(peak_array_shape):
         islice = np.s_[index]
@@ -323,13 +320,36 @@ def _sort_cluster_dict(cluster_dict, centre_x=128, centre_y=128):
     return sorted_cluster_dict
 
 
+def _get_peak_array_shape(peak_array):
+    """Find the navigation shape of a peak array
+
+    This is necessary due to the peak_array.shape will be different
+    depending if the array is the more common object dtype, or
+    something else.
+
+    Parameters
+    ----------
+    peak_array : NumPy array
+
+    Returns
+    -------
+    peak_array_shape : tuple
+
+    """
+    if peak_array.dtype == np.object:
+        peak_array_shape = peak_array.shape
+    else:
+        peak_array_shape = peak_array.shape[:-2]
+    return peak_array_shape
+
+
 def _cluster_and_sort_peak_array(
         peak_array, eps=30, min_samples=2, centre_x=128, centre_y=128):
     """Cluster and sort a 4D peak array into centre, rest and unclustered.
 
     Parameters
     ----------
-    peak_array : 4D NumPy array
+    peak_array : NumPy array
     eps : scalar, optional
         Default 30, passed to sklearn's DBSCAN
     min_samples : scalar, optional
@@ -355,26 +375,28 @@ def _cluster_and_sort_peak_array(
     >>> peak_array_none = peak_dicts['none']
 
     """
-    peak_centre_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    peak_rest_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    peak_none_array = np.empty(shape=peak_array.shape[:2], dtype=np.object)
-    for ix, iy in np.ndindex(peak_array.shape[:2]):
+    peak_array_shape = _get_peak_array_shape(peak_array)
+    peak_centre_array = np.empty(shape=peak_array_shape, dtype=np.object)
+    peak_rest_array = np.empty(shape=peak_array_shape, dtype=np.object)
+    peak_none_array = np.empty(shape=peak_array_shape, dtype=np.object)
+    for index in np.ndindex(peak_array_shape):
+        islice = np.s_[index]
         cluster_dict = _get_cluster_dict(
-                peak_array[ix, iy], eps=eps, min_samples=min_samples)
+                peak_array[islice], eps=eps, min_samples=min_samples)
         sorted_cluster_dict = _sort_cluster_dict(
                 cluster_dict, centre_x=centre_x, centre_y=centre_y)
         if 'centre' in sorted_cluster_dict:
-            peak_centre_array[ix, iy] = sorted_cluster_dict['centre']
+            peak_centre_array[islice] = sorted_cluster_dict['centre']
         else:
-            peak_centre_array[ix, iy] = []
+            peak_centre_array[islice] = []
         if 'rest' in sorted_cluster_dict:
-            peak_rest_array[ix, iy] = sorted_cluster_dict['rest']
+            peak_rest_array[islice] = sorted_cluster_dict['rest']
         else:
-            peak_rest_array[ix, iy] = []
+            peak_rest_array[islice] = []
         if 'none' in sorted_cluster_dict:
-            peak_none_array[ix, iy] = sorted_cluster_dict['none']
+            peak_none_array[islice] = sorted_cluster_dict['none']
         else:
-            peak_rest_array[ix, iy] = []
+            peak_rest_array[islice] = []
 
     peak_dicts = {}
     peak_dicts['centre'] = peak_centre_array

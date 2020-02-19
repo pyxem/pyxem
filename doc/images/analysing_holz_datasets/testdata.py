@@ -24,8 +24,8 @@ fig_navigator = s_com._plot.navigator_plot.figure
 fig_signal.savefig("testdata_com_signal.png")
 fig_navigator.savefig("testdata_com_navigator.png")
 
-# Plotting radial integration signal
-s_radial = s.radial_integration(centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
+# Plotting radial average signal
+s_radial = s.radial_average(centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data)
 s_radial.plot()
 fig_signal = s_radial._plot.signal_plot.figure
 fig_navigator = s_radial._plot.navigator_plot.figure

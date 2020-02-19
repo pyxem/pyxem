@@ -1,6 +1,9 @@
 import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import rotate
+from scipy.signal import convolve2d
+from skimage import morphology
 import dask.array as da
 from hyperspy.misc.utils import isiterable
 from pixstem.pixelated_stem_class import PixelatedSTEM
@@ -39,8 +42,10 @@ def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
     rot = rotation
     xx0 = xx - x
     yy0 = yy - y
-    z0 = ((xx0*np.cos(rot) + yy0*np.sin(rot))**2)/(semi_len0*semi_len0)
-    z1 = ((xx0*np.sin(rot) - yy0*np.cos(rot))**2)/(semi_len1*semi_len1)
+    semi_len02 = semi_len0 * semi_len0
+    semi_len12 = semi_len1 * semi_len1
+    z0 = ((xx0 * np.cos(rot) + yy0 * np.sin(rot)) ** 2) / semi_len02
+    z1 = ((xx0 * np.sin(rot) - yy0 * np.cos(rot)) ** 2) / semi_len12
     zz = z0 + z1
     elli_mask = zz <= 1.
     return elli_mask
@@ -126,11 +131,11 @@ class EllipseRing(object):
 
     def __repr__(self):
         return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
-                ' r: %s, I: %s, lw: %s)>' % (
-                        self.__class__.__name__,
-                        self.x0, self.y0, self.semi_len0, self.semi_len1,
-                        self.rotation, self.intensity, self.lw_r,
-                        )
+               ' r: %s, I: %s, lw: %s)>' % (
+                       self.__class__.__name__,
+                       self.x0, self.y0, self.semi_len0, self.semi_len1,
+                       self.rotation, self.intensity, self.lw_r,
+                       )
 
     def get_signal(self):
         ellipse = _get_elliptical_ring(
@@ -138,7 +143,7 @@ class EllipseRing(object):
                 semi_len0=self.semi_len0, semi_len1=self.semi_len1,
                 rotation=self.rotation, lw_r=self.lw_r)
         self.ellipse = ellipse * self.intensity
-        return(self.ellipse)
+        return self.ellipse
 
 
 class EllipseDisk(object):
@@ -182,10 +187,10 @@ class EllipseDisk(object):
     def __repr__(self):
         return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
                ' r: %s, I: %s)>' % (
-                        self.__class__.__name__,
-                        self.x0, self.y0, self.semi_len0, self.semi_len1,
-                        self.rotation, self.intensity,
-                        )
+                       self.__class__.__name__,
+                       self.x0, self.y0, self.semi_len0, self.semi_len1,
+                       self.rotation, self.intensity,
+                       )
 
     def get_signal(self):
         ellipse = _get_elliptical_disk(
@@ -193,7 +198,7 @@ class EllipseDisk(object):
                 semi_len0=self.semi_len0, semi_len1=self.semi_len1,
                 rotation=self.rotation)
         self.ellipse = ellipse * self.intensity
-        return(self.ellipse)
+        return self.ellipse
 
 
 class Circle(object):
@@ -209,24 +214,24 @@ class Circle(object):
 
     def __repr__(self):
         return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
-            self.__class__.__name__,
-            self.r, self.x0, self.y0, self.intensity,
-            )
+                self.__class__.__name__,
+                self.r, self.x0, self.y0, self.intensity,
+                )
 
     def mask_outside_r(self, scale):
         if self.lw is None:
-            indices = self.circle >= (self.r + scale)**2
+            indices = self.circle >= (self.r + scale) ** 2
         else:
-            indices = self.circle >= (self.r + self.lw + scale)**2
+            indices = self.circle >= (self.r + self.lw + scale) ** 2
         self.circle[indices] = 0
 
     def centre_on_image(self, xx, yy):
         if self.x0 < xx[0][0] or self.x0 > xx[0][-1]:
-            return(False)
+            return False
         elif self.y0 < yy[0][0] or self.y0 > yy[-1][-1]:
-            return(False)
+            return False
         else:
-            return(True)
+            return True
 
     def get_centre_pixel(self, xx, yy, scale):
         """
@@ -262,6 +267,7 @@ class Disk(object):
     """
     Disk object, with outer edge of the ring at r
     """
+
     def __init__(self, xx, yy, scale, x0, y0, r, intensity):
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale)
         self.z.set_uniform_intensity()
@@ -286,7 +292,7 @@ class Disk(object):
                 self.z.circle[y, x] = self.z.intensity  # This is correct
 
     def get_signal(self):
-        return(self.z.circle)
+        return (self.z.circle)
 
     def update_axis(self, xx, yy):
         self.z.update_axis(xx, yy)
@@ -301,11 +307,12 @@ class Ring(object):
     up the ring.
 
     """
+
     def __init__(self, xx, yy, scale, x0, y0, r, intensity, lr):
         if lr > r:
             raise ValueError('Ring line width too big'.format(lr, r))
         self.lr = lr
-        self.lw = 1 + 2*lr  # scalar line width of the ring
+        self.lw = 1 + 2 * lr  # scalar line width of the ring
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale, lw=lr)
         self.mask_inside_r(scale)
         self.z.set_uniform_intensity()
@@ -316,11 +323,11 @@ class Ring(object):
             self.z.intensity,)
 
     def mask_inside_r(self, scale):
-        indices = self.z.circle < (self.z.r - self.lr)**2
+        indices = self.z.circle < (self.z.r - self.lr) ** 2
         self.z.circle[indices] = 0
 
     def get_signal(self):
-        return(self.z.circle)
+        return self.z.circle
 
     def update_axis(self, xx, yy):
         self.z.update_axis(xx, yy)
@@ -381,6 +388,7 @@ class MakeTestData(object):
     >>> test_data.signal.plot()
 
     """
+
     def __init__(
             self, size_x=100, size_y=100, scale=1,
             default=False, blur=True, blur_sigma=1, downscale=True):
@@ -414,12 +422,12 @@ class MakeTestData(object):
         self.to_signal()
 
     def generate_mesh(self):
-        self.X = np.arange(0, self.size_x, self.scale/self.downscale_factor)
-        self.Y = np.arange(0, self.size_y, self.scale/self.downscale_factor)
+        self.X = np.arange(0, self.size_x, self.scale / self.downscale_factor)
+        self.Y = np.arange(0, self.size_y, self.scale / self.downscale_factor)
         self.xx, self.yy = np.meshgrid(self.X, self.Y, sparse=True)
 
     def add_disk(self, x0=50, y0=50, r=5, intensity=10):
-        scale = self.scale/self.downscale_factor
+        scale = self.scale / self.downscale_factor
         self.z_list.append(Disk(self.xx, self.yy, scale, x0, y0, r, intensity))
         self.update_signal()
 
@@ -453,8 +461,8 @@ class MakeTestData(object):
             a ring line width in pixels of 2*lw+1.
 
         """
-        scale = self.scale/self.downscale_factor
-        lr = lw_pix*self.scale  # scalar
+        scale = self.scale / self.downscale_factor
+        lr = lw_pix * self.scale  # scalar
         self.z_list.append(
                 Ring(self.xx, self.yy, scale, x0, y0, r, intensity, lr))
         self.update_signal()
@@ -471,7 +479,7 @@ class MakeTestData(object):
 
     def make_signal(self):
         if len(self.z_list) == 0:
-            self.z = self.xx*0 + self.yy*0
+            self.z = self.xx * 0 + self.yy * 0
         elif len(self.z_list) == 1:
             self.z = self.z_list[0].get_signal()
         elif len(self.z_list) > 1:
@@ -483,12 +491,12 @@ class MakeTestData(object):
     def downscale(self):
         if self.downscale_on:
             shape = (
-                    int(self.z.shape[0]/self.downscale_factor),
-                    int(self.z.shape[1]/self.downscale_factor))
+                    int(self.z.shape[0] / self.downscale_factor),
+                    int(self.z.shape[1] / self.downscale_factor))
             sh = (
                     shape[0],
-                    self.z.shape[0]//shape[0], shape[1],
-                    self.z.shape[1]//shape[1])
+                    self.z.shape[0] // shape[0], shape[1],
+                    self.z.shape[1] // shape[1])
             self.z_downscaled = self.z.reshape(sh).mean(-1).mean(1)
         else:
             self.z_downscaled = self.z
@@ -496,7 +504,7 @@ class MakeTestData(object):
     def blur(self):
         if self.blur_on:
             self.z_blurred = gaussian_filter(
-                    self.z_downscaled, sigma=self.blur_sigma)
+                self.z_downscaled, sigma=self.blur_sigma)
         else:
             self.z_blurred = self.z_downscaled
 
@@ -506,11 +514,11 @@ class MakeTestData(object):
         self.signal.axes_manager[1].scale = self.scale
 
     def set_downscale_factor(self, factor):
-            self.downscale_factor = factor
-            self.generate_mesh()
-            for i in self.z_list:
-                i.update_axis(self.xx, self.yy)
-            self.update_signal()
+        self.downscale_factor = factor
+        self.generate_mesh()
+        for i in self.z_list:
+            i.update_axis(self.xx, self.yy)
+        self.update_signal()
 
     def set_signal_zero(self):
         self.z_list = []
@@ -528,7 +536,7 @@ def generate_4d_data(
         show_progressbar=True):
     """Generate a test dataset containing a disk and diffraction ring.
 
-    Useful for checking that radial integration algorithms are working
+    Useful for checking that radial average algorithms are working
     properly.
 
     The centre, intensity and radius position of the ring and disk can vary
@@ -674,37 +682,37 @@ def generate_4d_data(
     else:
         plot_disk = True
         if not isiterable(disk_x):
-            disk_x = np.ones((probe_size_y, probe_size_x))*disk_x
+            disk_x = np.ones((probe_size_y, probe_size_x)) * disk_x
     if not isiterable(disk_y):
-        disk_y = np.ones((probe_size_y, probe_size_x))*disk_y
+        disk_y = np.ones((probe_size_y, probe_size_x)) * disk_y
     if not isiterable(disk_r):
-        disk_r = np.ones((probe_size_y, probe_size_x))*disk_r
+        disk_r = np.ones((probe_size_y, probe_size_x)) * disk_r
     if not isiterable(disk_I):
-        disk_I = np.ones((probe_size_y, probe_size_x))*disk_I
+        disk_I = np.ones((probe_size_y, probe_size_x)) * disk_I
 
     if ring_x is None:
         plot_ring = False
     else:
         plot_ring = True
         if not isiterable(ring_x):
-            ring_x = np.ones((probe_size_y, probe_size_x))*ring_x
+            ring_x = np.ones((probe_size_y, probe_size_x)) * ring_x
     if not isiterable(ring_y):
-        ring_y = np.ones((probe_size_y, probe_size_x))*ring_y
+        ring_y = np.ones((probe_size_y, probe_size_x)) * ring_y
     if not isiterable(ring_r):
-        ring_r = np.ones((probe_size_y, probe_size_x))*ring_r
+        ring_r = np.ones((probe_size_y, probe_size_x)) * ring_r
     if not isiterable(ring_I):
-        ring_I = np.ones((probe_size_y, probe_size_x))*ring_I
+        ring_I = np.ones((probe_size_y, probe_size_x)) * ring_I
     if not isiterable(ring_lw):
-        ring_lw = np.ones((probe_size_y, probe_size_x))*ring_lw
+        ring_lw = np.ones((probe_size_y, probe_size_x)) * ring_lw
 
     if ring_e_x is None:
         plot_ring_e = False
     else:
         plot_ring_e = True
         if not isiterable(ring_e_x):
-            ring_e_x = np.ones((probe_size_y, probe_size_x))*ring_e_x
+            ring_e_x = np.ones((probe_size_y, probe_size_x)) * ring_e_x
     if not isiterable(ring_e_y):
-        ring_e_y = np.ones((probe_size_y, probe_size_x))*ring_e_y
+        ring_e_y = np.ones((probe_size_y, probe_size_x)) * ring_e_y
     if not isiterable(ring_e_semi_len0):
         ring_e_semi_len0 = np.ones(
                 (probe_size_y, probe_size_x)) * ring_e_semi_len0
@@ -712,11 +720,11 @@ def generate_4d_data(
         ring_e_semi_len1 = np.ones(
                 (probe_size_y, probe_size_x)) * ring_e_semi_len1
     if not isiterable(ring_e_I):
-        ring_e_I = np.ones((probe_size_y, probe_size_x))*ring_e_I
+        ring_e_I = np.ones((probe_size_y, probe_size_x)) * ring_e_I
     if not isiterable(ring_e_lw):
-        ring_e_lw = np.ones((probe_size_y, probe_size_x))*ring_e_lw
+        ring_e_lw = np.ones((probe_size_y, probe_size_x)) * ring_e_lw
     if not isiterable(ring_e_r):
-        ring_e_r = np.ones((probe_size_y, probe_size_x))*ring_e_r
+        ring_e_r = np.ones((probe_size_y, probe_size_x)) * ring_e_r
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
@@ -797,3 +805,265 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
         ellipse_points = ret.make_ellipse_data_points(*params)
         peak_array[iy, ix] = np.fliplr(ellipse_points)
     return peak_array
+
+
+class DiffractionTestImage(object):
+
+    def __init__(self, disk_r=7, blur=2, image_x=256, image_y=256, rotation=0,
+                 diff_intensity_reduction=1.0, intensity_noise=0.5):
+        """Make an artificial diffraction image, similar to NBED data.
+
+        This class is for creating images which are similar to
+        nanobeam electron diffraction patterns, with functionality for
+        adding diffraction disks, Lorentzian background and intensity noise.
+
+        Can be combined with the DiffractionTestDataset class, for creating
+        4-dimensional datasets. Similar to the ones acquired with
+        fast pixelated direct electron detectors in
+        scanning transmission electron microscopy.
+
+        Parameters
+        ----------
+        disk_r : int
+            Radius for all of the disks added. Default 7
+        blur : scalar
+            Amount of Gaussian blur applied to the image.
+            Use False to disable blurring. Default 2.
+        image_x, image_y : int
+            Dimensions for the image. Default 256 for both.
+        rotation : int
+            Rotation of the image in relation to the centre point.
+            For an image with the size (256, 256), the rotation will
+            be around (128, 128).
+        diff_intensity_reduction : scalar
+            In diffraction patterns, the intensity of the disk are
+            reduced with increasing scattering angle. This parameter
+            emulates this, with decreasing the intensity of the disks
+            as a function of distance from the centre point. Default 1.0.
+            Set False to disable.
+        intensity_noise : scalar
+            The width of the Gaussian intensity noise added to the image.
+            Set False to disable. Default 0.5.
+
+
+        Examples
+        --------
+        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> di = mdtd.DiffractionTestImage()
+        >>> di.add_disk(x=128, y=128, intensity=10.)
+        >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
+        >>> di.add_background_lorentz()
+        >>> s = di.get_signal()
+        >>> s.plot()
+
+        Get a slightly rotated version of the diffraction image
+
+        >>> di.rotation = 10
+        >>> s = di.get_signal()
+        >>> s.plot()
+
+        """
+        self.disk_r = disk_r
+        self.blur = blur
+        self.image_x = image_x
+        self.image_y = image_y
+        self.rotation = rotation
+        self.diff_intensity_reduction = diff_intensity_reduction
+        self.intensity_noise = intensity_noise
+        self._background_lorentz_width = False
+        self._background_lorentz_intensity = None
+        self._x_list = []
+        self._y_list = []
+        self._intensity_list = []
+
+    def __repr__(self):
+        return '<%s, disks:%s, r:%s, rot:%s, im:(%s,%s)>' % (
+                self.__class__.__name__,
+                len(self._x_list),
+                self.disk_r,
+                self.rotation,
+                self.image_x,
+                self.image_y)
+
+    def __copy__(self):
+        d = DiffractionTestImage(
+                disk_r=self.disk_r, blur=self.blur,
+                image_x=self.image_x, image_y=self.image_y,
+                rotation=self.rotation,
+                diff_intensity_reduction=self.diff_intensity_reduction,
+                intensity_noise=self.intensity_noise)
+        d._background_lorentz_width = self._background_lorentz_width
+        d._background_lorentz_intensity = self._background_lorentz_intensity
+        d._x_list = self._x_list.copy()
+        d._y_list = self._y_list.copy()
+        d._intensity_list = self._intensity_list.copy()
+        return d
+
+    def copy(self):
+        return self.__copy__()
+
+    def add_disk(self, x, y, intensity=1):
+        if not isinstance(x, int):
+            raise ValueError("x needs to be integer, not {0}".format(x))
+        if not isinstance(y, int):
+            raise ValueError("y needs to be integer, not {0}".format(y))
+        self._x_list.append(x)
+        self._y_list.append(y)
+        self._intensity_list.append(intensity)
+
+    def add_background_lorentz(self, width=10, intensity=5):
+        self._background_lorentz_width = width
+        self._background_lorentz_intensity = intensity
+
+    def _get_diff_intensity_reduction(self, dr, i):
+        r_max = np.hypot(self.image_x/2, self.image_y/2)
+        if dr == 0.:
+            dr = 0.00000000001
+        x = np.pi * dr * 1.5 / (r_max * self.diff_intensity_reduction)
+        i_new = np.sin(x) / x * i
+        if i_new < 0:
+            i_new = 0
+        return i_new
+
+    def add_cubic_disks(self, vx, vy, intensity=1, n=1):
+        """Add disks in a cubic pattern around the centre point of the image.
+
+        Parameters
+        ----------
+        vx, vy : int
+        intensity : scalar
+        n : int
+            Number of orders of diffraction disks.
+            If n=1, 8 disks, if n=2, 24 disks.
+        """
+        cx, cy = self.image_x/2, self.image_y/2
+        for px in range(-n, n + 1):
+            for py in range(-n, n + 1):
+                if not (px == 0 and py == 0):
+                    x = int(round(vx * px + cx))
+                    y = int(round(vy * py + cy))
+                    self.add_disk(x, y, intensity=intensity)
+
+    def _get_background_lorentz(self):
+        width = self._background_lorentz_width
+        intensity = self._background_lorentz_intensity
+        x = np.linspace(-width, width, self.image_y)
+        y = np.linspace(-width, width, self.image_x)
+        YY, XX = np.meshgrid(y, x)
+        YY = YY.astype(np.float32)
+        XX = XX.astype(np.float32)
+        b = 1 / (np.pi * (1 + np.hypot(YY, XX)**2)) * intensity
+        return b
+
+    def get_diffraction_test_image(self, dtype=np.float32):
+        image_x, image_y = self.image_x, self.image_y
+        cx, cy = image_x/2, image_y/2
+        image = np.zeros((image_y, image_x), dtype=np.float32)
+        iterator = zip(self._x_list, self._y_list, self._intensity_list)
+        for x, y, i in iterator:
+            if self.diff_intensity_reduction is not False:
+                dr = np.hypot(x - cx, y - cy)
+                i = self._get_diff_intensity_reduction(dr, i)
+            image[y, x] = i
+        disk = morphology.disk(self.disk_r, dtype=dtype)
+        image = convolve2d(image, disk, mode='same')
+        if self.rotation != 0:
+            image = rotate(image, self.rotation, reshape=False)
+        if self.blur != 0:
+            image = gaussian_filter(image, self.blur)
+        if self._background_lorentz_width is not False:
+            image += self._get_background_lorentz()
+        if self.intensity_noise is not False:
+            noise = np.random.random((image_y, image_x)) * self.intensity_noise
+            image += noise
+        return image
+
+    def get_signal(self):
+        s = PixelatedSTEM(self.get_diffraction_test_image())
+        return s
+
+    def plot(self):
+        s = self.get_signal()
+        s.plot()
+
+
+class DiffractionTestDataset(object):
+
+    def __init__(self, probe_x=10, probe_y=10, detector_x=256, detector_y=256,
+                 noise=0.5, dtype=np.float32):
+        """Make a 4-dimensional dataset similar to NBED.
+
+        This class is for creating datasets which are similar to
+        nanobeam electron diffraction patterns. It is used in combination
+        with one or several DiffractionTestImage objects.
+
+        Parameters
+        ----------
+        probe_x, probe_y : int
+        detector_x, detector_y : int
+        noise : scalar
+
+        Examples
+        --------
+        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> di = mdtd.DiffractionTestImage(intensity_noise=False)
+        >>> di.add_disk(x=128, y=128, intensity=10.)
+        >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
+        >>> di.add_background_lorentz()
+        >>> di_rot = di.copy()
+        >>> di_rot.rotation = 10
+        >>> dtd = mdtd.DiffractionTestDataset(10, 10, 256, 256)
+        >>> position_array = np.ones((10, 10), dtype=np.bool)
+        >>> position_array[:5] = False
+        >>> dtd.add_diffraction_image(di, position_array)
+        >>> dtd.add_diffraction_image(di_rot, np.invert(position_array))
+        >>> s = dtd.get_signal()
+
+        """
+        self.data = np.zeros(
+                (probe_x, probe_y, detector_x, detector_y), dtype=dtype)
+        self.probe_x = probe_x
+        self.probe_y = probe_y
+        self.detector_x = detector_x
+        self.detector_y = detector_y
+        self.noise = noise
+
+    def __repr__(self):
+        return '<%s, (%s)>' % (
+                self.__class__.__name__,
+                self.data.shape)
+
+    def add_diffraction_image(
+            self, diffraction_test_image, position_array=None):
+        """Add a diffraction image to all or a subset of the dataset.
+
+        See the class docstring for example on how to use this.
+
+        Parameters
+        ----------
+        diffraction_test_image : PixStem DiffractionTestData object
+        position_array : NumPy array
+            Boolean array, specifying which positions in the dataset
+            the diffraction_test_image should be added to. Must have two
+            dimensions, and the same shape as (probe_x, probe_y).
+
+        """
+        probe_x, probe_y = self.probe_x, self.probe_y
+        detector_x, detector_y = self.detector_x, self.detector_y
+        image = diffraction_test_image.get_diffraction_test_image()
+        if position_array is None:
+            position_array = np.ones((probe_x, probe_y), dtype=np.bool)
+        for ix, iy in np.ndindex(probe_x, probe_y):
+            if position_array[ix, iy]:
+                self.data[ix, iy, :, :] = image
+                if self.noise is not False:
+                    image_noise = np.random.random((detector_x, detector_y))
+                    self.data[ix, iy, :, :] += (image_noise * self.noise)
+
+    def get_signal(self):
+        s = PixelatedSTEM(self.data)
+        return s
+
+    def plot(self):
+        s = self.get_signal()
+        s.plot()

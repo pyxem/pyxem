@@ -55,16 +55,16 @@ Center of mass
     >>> s_com.plot()
 
 
-Radial integration
-------------------
+Radial average
+--------------
 
-:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_integration`
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_average`
 
 .. code-block:: python
 
     >>> s.axes_manager.signal_axes[0].offset = -25
     >>> s.axes_manager.signal_axes[1].offset = -25
-    >>> s_r = s.radial_integration(show_progressbar=False)
+    >>> s_r = s.radial_average(show_progressbar=False)
     >>> s_r.plot()
 
 
@@ -134,8 +134,8 @@ by default, to avoid large datasets using up excessive amount of memory.
 
 .. _template_match_disk:
 
-Template matching with a disk
------------------------------
+Template matching with a disk or ring
+-------------------------------------
 
 :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.template_match_disk`
 
@@ -156,6 +156,48 @@ convergent beam electron diffraction data.
 .. image:: images/template_match/cbed_template.jpg
     :scale: 49 %
 
+This can also be done using a ring template: :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.template_match_ring`
+
+.. code-block:: python
+
+    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s_template = s.template_match_ring(r_inner=3, r_outer=5, lazy_result=False, show_progressbar=False)
+    >>> s_template.plot()
+
+
+.. image:: images/template_match/cbed_ring_template.jpg
+    :scale: 49 %
+
+
+.. _template_match_binary_image:
+
+Template matching with any binary image
+---------------------------------------
+
+:py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.template_match_with_binary_image`
+
+Any shape input image can be used for the template matching.
+
+.. code-block:: python
+
+    >>> import numpy as np
+    >>> data = np.zeros((2, 2, 50, 50))
+    >>> data[:, :, 23:27, 23:27] = 1
+    >>> data[:, :, 13:17, 23:27] = 1
+    >>> data[:, :, 33:37, 23:27] = 1
+    >>> s = ps.PixelatedSTEM(data)
+    >>> binary_image = np.zeros((8, 8))
+    >>> binary_image[2:-2, 2:-2] = 1
+    >>> s_template = s.template_match_with_binary_image(binary_image, show_progressbar=False, lazy_result=False)
+    >>> s_template.plot()
+
+
+.. image:: images/template_match/square_diff.jpg
+    :scale: 49 %
+
+.. image:: images/template_match/square_diff_template.jpg
+    :scale: 49 %
+
 
 .. _peak_finding:
 
@@ -163,6 +205,8 @@ Peak finding
 ------------
 
 :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_peaks`
+
+For a more extensive example of using this functionality, see :ref:`the nanobeam electron diffraction example <analysing_nbed_data>`.
 
 Use scikit-image's `Difference of Gaussian (DoG) <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_ function to find features in the signal dimensions.
 For more information about the different parameters, see `scikit's documentation <http://scikit-image.org/docs/dev/api/skimage.feature.html#blob-dog>`_.

@@ -72,7 +72,7 @@ Changing the contrast makes it much easier to see the ring.
 Finding the centre position
 ---------------------------
 
-To do radial integration of the datasets, we first need to find the centre position of the diffraction patterns.
+To do radial average of the datasets, we first need to find the centre position of the diffraction patterns.
 The easiest way of doing this is using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.center_of_mass`
 
 .. code-block:: python
@@ -93,14 +93,14 @@ For more information about how to use this for analysing magnetic materials see 
 The first navigation index is the beam shifts in the x-direction, and the second is the beam shifts in the y-direction.
 
 
-Doing the radial integration
-----------------------------
+Doing the radial average
+------------------------
 
-The next step is radially integrating the dataset as a function of distance from the centre position, which is done using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_integration`.
+The next step is radially averaging the dataset as a function of distance from the centre position, which is done using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.radial_average`.
 
 .. code-block:: python
 
-    >>> s_radial = s.radial_integration(centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data, show_progressbar=False)
+    >>> s_radial = s.radial_average(centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data, show_progressbar=False)
     >>> s_radial
     <Signal1D, title: , dimensions: (40, 40|62)>
     >>> s_radial.plot()
@@ -128,7 +128,7 @@ Plot the signal, and move the red line in the navigator plot to x=32.
 Modelling the HOLZ ring
 -----------------------
 
-Having reduced the dataset from 4 to 3 dimensions, the HOLZ ring (now a peak, due to the radial integration) can easily be fitting with a Gaussian function.
+Having reduced the dataset from 4 to 3 dimensions, the HOLZ ring (now a peak, due to the radial average) can easily be fitting with a Gaussian function.
 
 Firstly we extract parts of the signal related to the peak, and create a model.
 

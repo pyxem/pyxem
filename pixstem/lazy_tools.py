@@ -42,10 +42,10 @@ def _get_dask_chunk_slice_list(dask_array):
     elif len(temp_slice_list) == 2:
         for slice_t0 in temp_slice_list[0]:
             for slice_t1 in temp_slice_list[1]:
-                    temp_slice = np.s_[
-                            slice_t0[0]:slice_t0[1],
-                            slice_t1[0]:slice_t1[1], :, :]
-                    slice_list.append(temp_slice)
+                temp_slice = np.s_[
+                        slice_t0[0]:slice_t0[1],
+                        slice_t1[0]:slice_t1[1], :, :]
+                slice_list.append(temp_slice)
     return slice_list
 
 

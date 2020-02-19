@@ -1,14 +1,12 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('README.md') as f:
     long_description = f.read()
 
 setup(
         name = 'pixstem',
-        packages = [
-            'pixstem',
-            ],
-        version = '0.3.3',
+        packages = find_packages(),
+        version = '0.3.4.dev1',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a pixelated detector',
         long_description=long_description,
         long_description_content_type='text/markdown',
@@ -31,7 +29,9 @@ setup(
             'hyperspy>=1.4',
             'dask',
             'tqdm',
-            'scikit-image>=0.13',
+            'scikit-image>=0.15',
             'scikit-learn',
             ],
+        package_data={'pixstem': ['tests/test_data/*.hdf5',
+                                  ]},
 )

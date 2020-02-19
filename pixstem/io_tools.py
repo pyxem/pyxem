@@ -5,7 +5,6 @@ import dask.array as da
 from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
-from hyperspy.signals import Signal2D
 from pixstem.pixelated_stem_class import (
         PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D,
         LazyPixelatedSTEM)
@@ -58,8 +57,19 @@ def _get_detector_pixel_size(header_string):
 
 def load_binary_merlin_signal(
         filename, probe_x=None, probe_y=None, chunks=(32, 32, 32, 32),
-        flyback_pixels=1, lazy_result=True):
+        flyback_pixels=1, datatype=None, lazy_result=True):
     """Temporary function for loading Merlin binary data.
+
+    Parameters
+    ----------
+    filename : string
+    probe_x, probe_y : int
+    chunks : tuple
+        Default (32, 32, 32, 32)
+    flyback_pixels : int
+    datatype : string
+         6 bit: ">u1". 12 bit: ">u2". 24 bit: ">u4".
+    lazy_result : bool
 
     This function will be replaced at some point, so do not rely on it for
     other functions!
@@ -77,7 +87,8 @@ def load_binary_merlin_signal(
     header_string = f.read(50).decode()
     f.close()
 
-    datatype = _get_dtype_from_header_string(header_string)
+    if datatype is None:
+        datatype = _get_dtype_from_header_string(header_string)
     det_x, det_y = _get_detector_pixel_size(header_string)
 
     value_between_frames = 192
@@ -123,82 +134,28 @@ def _hspy_checker(filename, attr_substring='fpd_version'):
     return(False)
 
 
-def _load_lazy_fpd_file(filename, chunk_size=(16, 16)):
-    f = h5py.File(filename, mode='r')
-    if 'fpd_expt' in f:
-        data = f['/fpd_expt/fpd_data/data']
-        if len(data.shape) == 5:
-            chunks = (
-                    chunk_size[0], chunk_size[1],
-                    1, data.shape[-2], data.shape[-1])
-            data_lazy = da.from_array(data, chunks=chunks)[:, :, 0, :, :]
-            s_out = LazyPixelatedSTEM(data_lazy)
-        elif len(data.shape) == 4:
-            s_out = _load_fpd_emd_file(filename, lazy=True)
-        else:
-            raise IOError(
-                "Pixelated dataset does not have correct dimensions")
-        return(s_out)
-    else:
-        raise IOError("Pixelated dataset not found")
-
-
 def _load_fpd_sum_im(filename):
-    f = h5py.File(filename, mode='r')
-    if 'fpd_expt' in f:
-        if len(f['/fpd_expt/fpd_sum_im/data'].shape) == 3:
-            data = f['/fpd_expt/fpd_sum_im/data'][:, :, 0]
-        elif len(f['/fpd_expt/fpd_sum_im/data'].shape) == 2:
-            data = f['/fpd_expt/fpd_sum_im/data'][:, :]
-        else:
-            ValueError("fpd_sum_im does not have the correct dimensions")
-        s = Signal2D(data)
-        f.close()
-        return(s)
-    else:
-        raise IOError("Pixelated dataset not found")
+    s = load_with_reader(
+            filename, reader=emd, dataset_name="/fpd_expt/fpd_sum_im")
+    if len(s.axes_manager.shape) == 3:
+        s = s.isig[0, :, :]
+    return s
 
 
 def _load_fpd_sum_dif(filename):
-    f = h5py.File(filename, mode='r')
-    if 'fpd_expt' in f:
-        if len(f['/fpd_expt/fpd_sum_dif/data'].shape) == 3:
-            data = f['fpd_expt/fpd_sum_dif/data'][0, :, :]
-        elif len(f['/fpd_expt/fpd_sum_dif/data'].shape) == 2:
-            data = f['fpd_expt/fpd_sum_dif/data'][:, :]
-        else:
-            ValueError("fpd_sum_dif does not have the correct dimensions")
-        s = Signal2D(data)
-        f.close()
-        return(s)
-    else:
-        raise IOError("Pixelated dataset not found")
+    s = load_with_reader(
+            filename, reader=emd, dataset_name="/fpd_expt/fpd_sum_dif")
+    if len(s.axes_manager.shape) == 3:
+        s = s.isig[:, :, 0]
+    return s
 
 
 def _load_fpd_emd_file(filename, lazy=False):
-    logging.basicConfig(level=logging.ERROR)
-    s_list = load_with_reader(filename, reader=emd, lazy=lazy)
-    if hasattr(s_list, 'data'):
-        s_list = [s_list, ]
-    logging.basicConfig(level=logging.WARNING)
-    temp_s = None
-    longest_dims = 0
-    for s in s_list:
-        if len(s.data.shape) > longest_dims:
-            longest_dims = len(s.data.shape)
-    if longest_dims < 4:
-        raise ValueError("Pixelated dataset not found")
-    for s in s_list:
-        if len(s.data.shape) == longest_dims:
-            temp_s = s
-            break
-    if longest_dims == 4:
-        s = temp_s.transpose(signal_axes=(0, 1))
-    elif longest_dims == 5:
-        s = temp_s.isig[:, :, 0, :, :].transpose(signal_axes=(0, 1))
-    else:
-        raise Exception(
-                "Pixelated dataset not found")
+    s = load_with_reader(
+            filename, reader=emd, lazy=lazy, dataset_name="/fpd_expt/fpd_data")
+    if len(s.axes_manager.shape) == 5:
+        s = s.isig[:, :, 0, :, :]
+    s = s.transpose(signal_axes=(0, 1))
     s._lazy = lazy
     s_new = signal_to_pixelated_stem(s)
     return(s_new)
@@ -270,24 +227,23 @@ def signal_to_pixelated_stem(s):
 
 
 def load_ps_signal(
-        filename, lazy=False, chunk_size=(16, 16),
+        filename, lazy=False, chunk_size=None,
         navigation_signal=None):
     """
     Parameters
     ----------
     filename : string
     lazy : bool, default False
-    chunk_size : tuple, default (16, 16)
-        Used if Lazy is True. Sets the chunk size of the signal in the
-        navigation dimension. Higher number will potentially make the
-        calculations be faster, but use more memory.
+    chunk_size : tuple, optional
+        Used if Lazy is True. Sets the chunk size of the signal.
+        If it is not specified, the file chunking will be used.
+        Higher number will potentially make the calculations be faster,
+        but use more memory.
     navigation_signal : Signal2D
+
     """
     if _fpd_checker(filename, attr_substring='fpd_version'):
-        if lazy:
-            s = _load_lazy_fpd_file(filename, chunk_size=chunk_size)
-        else:
-            s = _load_fpd_emd_file(filename)
+        s = _load_fpd_emd_file(filename, lazy=lazy)
     elif _hspy_checker(filename, attr_substring='HyperSpy'):
         s = _load_other_file(filename, lazy=lazy)
     else:
@@ -313,6 +269,9 @@ def load_ps_signal(
                     "navigation_signal does not have the same shape ({0}) as "
                     "the signal's navigation shape ({1})".format(
                         nav_im_shape, nav_ax_shape))
+    if lazy:
+        if chunk_size is not None:
+            s.data = s.data.rechunk(chunks=chunk_size)
     return s
 
 
