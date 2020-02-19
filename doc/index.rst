@@ -4,24 +4,16 @@ Welcome to pixStem's documentation!
 News
 ----
 
-**2019-3-5: pixStem 0.3.3 released!**
+**2020-2-19: pixStem 0.4.0 released!**
 
-This release includes:
-
+* Several functions for analysing low convergence STEM diffraction data, like nanobeam electron diffraction: :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.peak_position_refinement_com`, :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.subtract_diffraction_background`, :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.intensity_peaks` and a **Laplacian of Gaussian (LoG)** method to :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_peaks`. See :ref:`analysing_nbed_data` or the `Jupyter Notebook <https://gitlab.com/pixstem/pixstem_demos/-/blob/release/analysing_nanobeam_electron_diffraction_data.ipynb>`_ for an extended example. Thanks to `Daen Jannis <https://gitlab.com/daenjannis>`_ for the contribution!
 * Improvements to :ref:`template_match_disk` and :ref:`peak_finding`, so they now work with any number of navigation dimensions, from single diffraction images, line scans and larger. This will be expanded to the other functions in the future, so they will allow for any data dimensionality.
-* Improved documentation for the :ref:`fluctuation electron microscopy analysis <fem_analysis>`. Thanks to `Andrew Herzing <https://gitlab.com/aaherzing>`_ for this contribution!
-* Several minor bug-fixes.
+* Add two new template matching functions: :ref:`template_match_ring <template_match_disk>` and :ref:`template_match_binary_image`
+* Added two new Jupyter Notebooks using data from journal articles with open data: `magnetic characterization with 4-D STEM-DPC <https://gitlab.com/pixstem/pixstem_demos/-/blob/release/4d_stem_analysis_magnetic_samples.ipynb>`_ and `structural characterization with 4-D STEM <https://gitlab.com/pixstem/pixstem_demos/-/blob/master/4d_stem_basic_structural_analysis.ipynb>`_.
 
 
 About pixStem
 -------------
-
-Library for processing data acquired on a fast pixelated electron detector, acquired using scanning transmission electron microscopy (STEM).
-For more information about this technique and how do analyse this type of data, see the paper `Fast Pixelated Detectors in Scanning Transmission Electron Microscopy. Part I: Data Acquisition, Live Processing and Storage <https://arxiv.org/abs/1911.11560>`_ at arXiv.
-
-Install instructions: :ref:`install`.
-
-pixStem is available under the GNU GPL v3 license, and the source code is found in the `GitLab repository <https://gitlab.com/pixstem/pixstem/tree/master/>`_.
 
 .. image:: images/frontpage/stem_diffraction.jpg
     :scale: 32 %
@@ -31,6 +23,13 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
 
 .. image:: images/frontpage/dpc_dummy_data.jpg
     :scale: 32 %
+
+Library for processing data acquired on a fast pixelated electron detector, acquired using scanning transmission electron microscopy (STEM).
+For more information about this technique and how do analyse this type of data, see the paper `Fast Pixelated Detectors in Scanning Transmission Electron Microscopy. Part I: Data Acquisition, Live Processing and Storage <https://arxiv.org/abs/1911.11560>`_ at arXiv.
+
+Install instructions: :ref:`install`.
+
+pixStem is available under the GNU GPL v3 license, and the source code is found at `GitLab repository <https://gitlab.com/pixstem/pixstem/tree/master/>`_.
 
 
 .. toctree::
@@ -52,6 +51,15 @@ pixStem is available under the GNU GPL v3 license, and the source code is found 
 
 Old news
 --------
+
+*2019-3-5: pixStem 0.3.3 released!*
+
+This release includes:
+
+* Improvements to :ref:`template_match_disk <template_match_disk>` and :ref:`peak_finding`, so they now work with any number of navigation dimensions, from single diffraction images, line scans and larger. This will be expanded to the other functions in the future, so they will allow for any data dimensionality.
+* Improved documentation for the :ref:`fluctuation electron microscopy analysis <fem_analysis>`. Thanks to `Andrew Herzing <https://gitlab.com/aaherzing>`_ for this contribution!
+* Several minor bug-fixes.
+
 
 *2018-12-3: pixStem 0.3.2 released!*
 
