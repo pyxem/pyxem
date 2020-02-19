@@ -110,7 +110,7 @@ class IndexationGenerator():
             # Index at all real space pixels
             mask = 1
 
-        function = select_method_from_method_dict(method,method_dict,print_help)
+        chosen_function = select_method_from_method_dict(method,method_dict,print_help)
 
         # adds a normalisation to library
         for phase in library.keys():
@@ -124,7 +124,7 @@ class IndexationGenerator():
                              library=library,
                              n_largest=n_largest,
                              method = method,
-                             function = function,
+                             chosen_function = chosen_function,
                              mask=mask,
                              inplace=False,
                              **kwargs)

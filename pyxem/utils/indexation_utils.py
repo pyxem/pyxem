@@ -117,7 +117,7 @@ def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_in
     return corr_local
 
 
-def correlate_library(image, library, n_largest,method,function, mask):
+def correlate_library(image, library, n_largest, method ,chosen_function, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
@@ -198,7 +198,7 @@ def correlate_library(image, library, n_largest,method,function, mask):
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
-                corr_local = function(image_intensities = image_intensities, int_local = int_local,
+                corr_local = chosen_function(image_intensities = image_intensities, int_local = int_local,
                                                             pn_local = pn_local, nb_pixels = nb_pixels,image_norm=image_norm,average_image_intensity = average_image_intensity)
 
                 if corr_local > np.min(corr_saved):
