@@ -91,7 +91,8 @@ Shifting the diffraction pattern
     >>> s_com = s.center_of_mass(threshold=3., show_progressbar=False)
     >>> s_com -= 25 # To shift the centre spot to (25, 25)
     >>> s_shift = s.shift_diffraction(
-    ...     shift_x=s_com.inav[0].data, shift_y=s_com.inav[1].data, show_progressbar=False)
+    ...     shift_x=s_com.inav[0].data, shift_y=s_com.inav[1].data,
+    ...     interpolation_order=3, show_progressbar=False)
     >>> s_shift.plot()
 
 

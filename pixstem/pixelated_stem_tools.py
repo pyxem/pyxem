@@ -33,8 +33,8 @@ def _radial_average_dask_array(
     return data
 
 
-def _shift_single_frame(im, shift_x, shift_y):
-    im_shifted = shift(im, (-shift_y, -shift_x), order=1)
+def _shift_single_frame(im, shift_x, shift_y, interpolation_order=1):
+    im_shifted = shift(im, (-shift_y, -shift_x), order=interpolation_order)
     return im_shifted
 
 

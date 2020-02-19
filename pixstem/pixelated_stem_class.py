@@ -48,7 +48,7 @@ class PixelatedSTEM(Signal2D):
         return res
 
     def shift_diffraction(
-            self, shift_x, shift_y, parallel=True,
+            self, shift_x, shift_y, interpolation_order=1, parallel=True,
             inplace=False, show_progressbar=True):
         """Shift the diffraction patterns in a pixelated STEM signal.
 
@@ -61,6 +61,12 @@ class PixelatedSTEM(Signal2D):
             shifts. Each diffraction pattern can also have different shifts,
             by passing a NumPy array with the same dimensions as the navigation
             axes.
+        interpolation_order : int
+            When shifting, a spline interpolation is used. This parameter
+            sets the order of this spline. Must be between 0 and 5.
+            Note that in some low-signal and high noise datasets, using a
+            non-zero order might lead to artifacts. See the docstring in
+            scipy.ndimage.shift for more information. Default 1.
         parallel : bool
             If True, run the processing on several cores.
             In most cases this should be True, but for debugging False can be
@@ -87,6 +93,12 @@ class PixelatedSTEM(Signal2D):
         ...     show_progressbar=False)
         >>> s_shift.plot()
 
+        Using a different interpolation order
+
+        >>> s_shift = s.shift_diffraction(
+        ...     s_c.inav[0].data, s_c.inav[1].data, interpolation_order=3,
+        ...     show_progressbar=False)
+
         """
 
         if (not isiterable(shift_x)) or (not isiterable(shift_y)):
@@ -99,7 +111,8 @@ class PixelatedSTEM(Signal2D):
         s_shift = self._map_iterate(
                 pst._shift_single_frame, iterating_kwargs=iterating_kwargs,
                 inplace=inplace, ragged=False, parallel=parallel,
-                show_progressbar=show_progressbar)
+                show_progressbar=show_progressbar,
+                interpolation_order=interpolation_order)
         if not inplace:
             return s_shift
 

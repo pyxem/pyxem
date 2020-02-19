@@ -203,6 +203,19 @@ class TestShiftSingleFrame:
         assert im_shift.max() == 0.25
         assert im_shift.sum() == 1
 
+    def test_interpolation_order(self):
+        im = np.arange(0, 100).reshape((10, 10))
+        x, y = 2.5, -3.5
+        im_shift0 = pst._shift_single_frame(
+                im=im, shift_x=x, shift_y=y, interpolation_order=0)
+        im_shift1 = pst._shift_single_frame(
+                im=im, shift_x=x, shift_y=y, interpolation_order=1)
+        im_shift2 = pst._shift_single_frame(
+                im=im, shift_x=x, shift_y=y, interpolation_order=2)
+        assert not (im_shift0 == im_shift1).all()
+        assert not (im_shift1 == im_shift2).all()
+        assert not (im_shift0 == im_shift2).all()
+
 
 class TestGetAngleSectorMask:
 
