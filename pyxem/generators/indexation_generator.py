@@ -29,6 +29,8 @@ from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 
 from pyxem.utils.indexation_utils import correlate_library
+from pyxem.utils.indexation_utils import normalized_correlation
+from pyxem.utils.indexation_utils import fast_correlation
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
 from pyxem.utils.indexation_utils import OrientationResult

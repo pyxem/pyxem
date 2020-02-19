@@ -39,7 +39,7 @@ OrientationResult = namedtuple("OrientationResult",
                                "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split())
 
 #Functions used in correlate_library.
-def fast_forrelation(image_intensities,int_local,pn_local, **kwargs):
+def fast_correlation(image_intensities,int_local,pn_local, **kwargs):
     """
     Computes the correlation score between an image and a template, using the formula
     .. math:: FastCorrelation
