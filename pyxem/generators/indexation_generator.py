@@ -26,7 +26,7 @@ import hyperspy.api as hs
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 
-from pyxem.signals import transfer_navigation_axes, select_method_from_methods_dict
+from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
