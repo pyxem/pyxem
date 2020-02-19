@@ -26,7 +26,7 @@ import hyperspy.api as hs
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 
-from pyxem.signals import transfer_navigation_axes,get_method_from_methods_dict
+from pyxem.signals import transfer_navigation_axes, select_method_from_methods_dict
 
 from pyxem.utils.indexation_utils import correlate_library
 from pyxem.utils.indexation_utils import index_magnitudes
@@ -66,7 +66,7 @@ class IndexationGenerator():
                   n_largest=5,
                   method = 'fast_correlation',
                   mask=None,
-                  help = False,
+                  print_help = False,
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -81,7 +81,7 @@ class IndexationGenerator():
             'fast_correlation' or 'normalized_correlation'.
         mask : Array
             Array with the same size as signal (in navigation) or None
-        help : bool
+        print_help : bool
             Display information about the method used.
         *args : arguments
             Arguments passed to map().
@@ -107,7 +107,7 @@ class IndexationGenerator():
             # Index at all real space pixels
             mask = 1
 
-
+        function = select_method_from_methods_dict(method,methods_dict,print_help)
 
         # adds a normalisation to library
         for phase in library.keys():
@@ -121,6 +121,7 @@ class IndexationGenerator():
                              library=library,
                              n_largest=n_largest,
                              method = method,
+                             function = function,
                              mask=mask,
                              inplace=False,
                              **kwargs)

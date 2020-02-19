@@ -117,7 +117,7 @@ def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_in
     return corr_local
 
 
-def correlate_library(image, library, n_largest, mask, method):
+def correlate_library(image, library, n_largest,method,function, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
@@ -140,11 +140,12 @@ def correlate_library(image, library, n_largest, mask, method):
         experimental data.
     n_largest : int
         The number of well correlated simulations to be retained.
+    method : String
+        Name of method used to compute correlation between templates and diffraction patterns. Can be
+        'FastCorrelation' or 'NormalizedCorrelation'. (ADDED 17.02 together with argument)
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
-    method : String
-            Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'FastCorrelation' or 'NormalizedCorrelation'. (ADDED 17.02 together with argument)
+
 
     Returns
     -------
@@ -175,12 +176,6 @@ def correlate_library(image, library, n_largest, mask, method):
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
     """
 
-    methods_dict = { 'fast_correlation' : fast_correlation,
-                     'normalized_correlation' : normalized_correlation
-                     }
-
-    if method not in methods_dict.keys():
-        raise ValueError("Method {} is not defined".format(method))
 
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
     nb_pixels = image.shape[0]*image.shape[1]
@@ -203,7 +198,7 @@ def correlate_library(image, library, n_largest, mask, method):
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
-                corr_local = methods_dict[method](image_intensities = image_intensities, int_local = int_local,
+                corr_local = function(image_intensities = image_intensities, int_local = int_local,
                                                             pn_local = pn_local, nb_pixels = nb_pixels,image_norm=image_norm,average_image_intensity = average_image_intensity)
 
                 if corr_local > np.min(corr_saved):

@@ -49,7 +49,7 @@ def push_metadata_through(dummy, *args, **kwargs):
     return dummy, args, kwargs
 
 
-def select_method_from_method_dict(method, method_dict, **kwargs):
+def select_method_from_method_dict(method, method_dict,print_help = True, **kwargs):
     """
     Streamlines the selection of utils to be mapped in class methods
 
@@ -75,7 +75,7 @@ def select_method_from_method_dict(method, method_dict, **kwargs):
         raise NotImplementedError("The method `{}` is not implemented. "
                                   "See documentation for available "
                                   "implementations.".format(method))
-    elif not kwargs:
+    elif print_help:
         help(method_dict[method])
 
     return method_dict[method]
