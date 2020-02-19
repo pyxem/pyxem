@@ -6,7 +6,7 @@ with open('README.md') as f:
 setup(
         name = 'pixstem',
         packages = find_packages(),
-        version = '0.4.0',
+        version = '0.4.1.dev1',
         description = 'Library for processing scanning transmission electron microscopy data acquired using a pixelated detector',
         long_description=long_description,
         long_description_content_type='text/markdown',
