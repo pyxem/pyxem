@@ -203,6 +203,7 @@ def correlate_library(image, library, n_largest, method ,chosen_function, mask):
             for (or_local, px_local, int_local, pn_local) in zip_for_locals:
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
+                image_intensities = image[px_local[:, 1], px_local[:, 0]]
 
                 corr_local = chosen_function(image_intensities = image_intensities, int_local = int_local,
                                                             pn_local = pn_local, **variables_dict)
