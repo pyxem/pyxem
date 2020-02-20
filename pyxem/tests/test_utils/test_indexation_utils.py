@@ -39,6 +39,7 @@ def test_normalized_correlation():
     #np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local2),0)
     #np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm2,average_image_intensity2,image_intensities2,int_local2),1)
 
+
 def test_fast_correlation():
     image_intensities = [1,1,1]
     int_local1 = [1,1,1]
@@ -47,6 +48,7 @@ def test_fast_correlation():
     pn_local2 = np.linalg.norm(int_local2)
     np.testing.assert_approx_equal(fast_correlation(image_intensities,int_local1,pn_local1),np.linalg.norm(image_intensities))
     np.testing.assert_approx_equal(fast_correlation(image_intensities,int_local2,pn_local2),1)
+
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):
     # branch single phase

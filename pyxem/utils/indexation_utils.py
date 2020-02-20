@@ -103,7 +103,7 @@ def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_in
     nb_pixels_star = len(int_local)
     average_pattern_intensity = nb_pixels_star*np.average(int_local)/nb_pixels
 
-    match_numerator = np.sum(np.multiply(image_intensities, int_local))-nb_pixels*average_pattern_intensity*average_image_intensity
+    match_numerator = np.sum(np.multiply(image_intensities, int_local))
     match_denominator = image_norm*(np.linalg.norm(int_local-average_pattern_intensity)+(nb_pixels-nb_pixels_star)*pow(average_pattern_intensity,2))
 
     if match_denominator == 0:
