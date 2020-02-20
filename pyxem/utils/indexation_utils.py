@@ -67,7 +67,7 @@ def fast_correlation(image_intensities,int_local,pn_local, **kwargs):
     return np.sum(np.multiply(image_intensities, int_local)) / \
                 pn_local  # Correlation is the partially normalized dot product
 
-def normalized_correlation(nb_pixels,image_variance,average_image_intensity,image_intensities,int_local, **kwargs):
+def normalized_correlation(nb_pixels,image_std,average_image_intensity,image_intensities,int_local, **kwargs):
     """
     Computes the correlation score between an image and a template, using the formula
     .. math:: normalized_correlation
@@ -78,8 +78,8 @@ def normalized_correlation(nb_pixels,image_variance,average_image_intensity,imag
     ----------
     nb_pixels: int
         total number of pixels in the image
-    image_variance: float
-        variance of intensities in the image
+    image_std: float
+        Standard deviation of intensities in the image.
     average_image_intensity: float
         average intensity for the image
     image_intensities: list
@@ -104,7 +104,7 @@ def normalized_correlation(nb_pixels,image_variance,average_image_intensity,imag
     average_pattern_intensity = nb_pixels_star*np.average(int_local)/nb_pixels
 
     match_numerator = np.sum(np.multiply(image_intensities, int_local))-nb_pixels*average_image_intensity*average_pattern_intensity
-    match_denominator = image_variance*(np.linalg.norm(int_local-average_pattern_intensity)+
+    match_denominator = image_std*(np.linalg.norm(int_local-average_pattern_intensity)+
                         (nb_pixels-nb_pixels_star)*pow(average_pattern_intensity,2))
 
     if match_denominator == 0:
@@ -176,6 +176,9 @@ def correlate_library(image, library, n_largest, method , mask):
     K. Briechle and U.D. Hanebeck, "Template Matching using Fast Normalized Cross Correlation"
     Proc. SPIE 4387, Optical Pattern Recognition XII, (20 March 2001); https://doi.org/10.1117/12.421129
     Formula (1)
+
+    Discussion on Normalized cross correlation (xcdskd):
+    https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
     """
 
 
@@ -186,7 +189,7 @@ def correlate_library(image, library, n_largest, method , mask):
     if method == 'normalized_correlation':
         nb_pixels = image.shape[0]*image.shape[1]
         average_image_intensity = np.average(image)
-        image_variance = np.linalg.norm(image-average_image_intensity) #Can skip this for speed, as it is the same for all patterns.
+        image_std = np.linalg.norm(image-average_image_intensity) #Can skip this for speed, as it is the same for all patterns.
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
@@ -206,7 +209,7 @@ def correlate_library(image, library, n_largest, method , mask):
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
 
                 if method == "normalized_correlation":
-                    corr_local = normalized_correlation(nb_pixels,image_variance,average_image_intensity,
+                    corr_local = normalized_correlation(nb_pixels,image_std,average_image_intensity,
                                                         image_intensities,int_local)
 
                 elif method == "fast_correlation":
