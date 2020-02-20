@@ -103,14 +103,12 @@ def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_in
     nb_pixels_star = len(int_local)
     average_pattern_intensity = nb_pixels_star*np.average(int_local)/nb_pixels
 
-    match_numerator = np.sum(np.multiply(image_intensities, int_local))
-    match_denominator = image_norm*(np.linalg.norm(int_local-average_pattern_intensity)+(nb_pixels-nb_pixels_star)*pow(average_pattern_intensity,2))
+    match_numerator = np.sum(np.multiply(image_intensities, int_local))-nb_pixels*average_image_intensity*average_pattern_intensity
+    match_denominator = np.sqrt(image_norm*(np.linalg.norm(int_local-average_pattern_intensity)+
+                        (nb_pixels-nb_pixels_star)*pow(average_pattern_intensity,2)))
 
     if match_denominator == 0:
-        if average_image_intensity == 0:
-            corr_local = 1
-        else:
-            corr_local = 0
+        corr_local = 0
     else:
         corr_local = match_numerator/match_denominator  # Correlation is the normalized dot product
 
@@ -174,6 +172,10 @@ def correlate_library(image, library, n_largest, method , mask):
     ----------
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
+
+    K. Briechle and U.D. Hanebeck, "Template Matching using Fast Normalized Cross Correlation"
+    Proc. SPIE 4387, Optical Pattern Recognition XII, (20 March 2001); https://doi.org/10.1117/12.421129
+    Formula (1)
     """
 
 
@@ -184,7 +186,7 @@ def correlate_library(image, library, n_largest, method , mask):
     if method == 'normalized_correlation':
         nb_pixels = image.shape[0]*image.shape[1]
         average_image_intensity = np.average(image)
-        image_norm = np.linalg.norm(image) #Can skip this for speed, as it is the same for all patterns.
+        image_norm = np.linalg.norm(image-average_image_intensity) #Can skip this for speed, as it is the same for all patterns.
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
