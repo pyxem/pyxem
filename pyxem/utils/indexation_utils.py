@@ -67,7 +67,7 @@ def fast_correlation(image_intensities,int_local,pn_local, **kwargs):
     return np.sum(np.multiply(image_intensities, int_local)) / \
                 pn_local  # Correlation is the partially normalized dot product
 
-def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local, **kwargs):
+def normalized_correlation(nb_pixels,image_variance,average_image_intensity,image_intensities,int_local, **kwargs):
     """
     Computes the correlation score between an image and a template, using the formula
     .. math:: normalized_correlation
@@ -78,8 +78,8 @@ def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_in
     ----------
     nb_pixels: int
         total number of pixels in the image
-    image_norm: float
-        norm of all intensities in the image
+    image_variance: float
+        variance of intensities in the image
     average_image_intensity: float
         average intensity for the image
     image_intensities: list
@@ -104,7 +104,7 @@ def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_in
     average_pattern_intensity = nb_pixels_star*np.average(int_local)/nb_pixels
 
     match_numerator = np.sum(np.multiply(image_intensities, int_local))-nb_pixels*average_image_intensity*average_pattern_intensity
-    match_denominator = np.sqrt(image_norm*(np.linalg.norm(int_local-average_pattern_intensity)+
+    match_denominator = np.sqrt(image_variance*(np.linalg.norm(int_local-average_pattern_intensity)+
                         (nb_pixels-nb_pixels_star)*pow(average_pattern_intensity,2)))
 
     if match_denominator == 0:
@@ -186,7 +186,7 @@ def correlate_library(image, library, n_largest, method , mask):
     if method == 'normalized_correlation':
         nb_pixels = image.shape[0]*image.shape[1]
         average_image_intensity = np.average(image)
-        image_norm = np.linalg.norm(image-average_image_intensity) #Can skip this for speed, as it is the same for all patterns.
+        image_variance = np.linalg.norm(image-average_image_intensity) #Can skip this for speed, as it is the same for all patterns.
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
@@ -206,7 +206,7 @@ def correlate_library(image, library, n_largest, method , mask):
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
 
                 if method == "normalized_correlation":
-                    corr_local = normalized_correlation(nb_pixels,image_norm,average_image_intensity,
+                    corr_local = normalized_correlation(nb_pixels,image_variance,average_image_intensity,
                                                         image_intensities,int_local)
 
                 elif method == "fast_correlation":
