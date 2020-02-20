@@ -111,6 +111,7 @@ class IndexationGenerator():
             mask = 1
 
         chosen_function = select_method_from_method_dict(method,method_dict,print_help)
+        #Not used, but the function tests if selected method is a valid argument, and can print help for selected method.
 
         # adds a normalisation to library
         for phase in library.keys():
@@ -124,7 +125,6 @@ class IndexationGenerator():
                              library=library,
                              n_largest=n_largest,
                              method = method,
-                             chosen_function = chosen_function,
                              mask=mask,
                              inplace=False,
                              **kwargs)

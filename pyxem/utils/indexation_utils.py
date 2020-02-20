@@ -117,7 +117,7 @@ def normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_in
     return corr_local
 
 
-def correlate_library(image, library, n_largest, method ,chosen_function, mask):
+def correlate_library(image, library, n_largest, method , mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
@@ -143,8 +143,6 @@ def correlate_library(image, library, n_largest, method ,chosen_function, mask):
     method : String
         Name of method used to compute correlation between templates and diffraction patterns. Can be
         'fast_correlation' or 'normalized_correlation'. (ADDED in pyxem 0.11.0)
-    chosen_function: function
-        The function used to evaluate correlation scores. See fast_correlation() and normalized_correlation()
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
 
@@ -184,9 +182,9 @@ def correlate_library(image, library, n_largest, method ,chosen_function, mask):
     variables_dict = {}
 
     if method == 'normalized_correlation':
-        variables_dict['nb_pixels'] = image.shape[0]*image.shape[1]
-        variables_dict['average_image_intensity'] = np.average(image)
-        variables_dict['image_norm'] = np.linalg.norm(image) #Can skip this for speed, as it is the same for all patterns.
+        nb_pixels = image.shape[0]*image.shape[1]
+        average_image_intensity = np.average(image)
+        image_norm = np.linalg.norm(image) #Can skip this for speed, as it is the same for all patterns.
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
@@ -205,8 +203,12 @@ def correlate_library(image, library, n_largest, method ,chosen_function, mask):
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
 
-                corr_local = chosen_function(image_intensities = image_intensities, int_local = int_local,
-                                                            pn_local = pn_local, **variables_dict)
+                if method == "normalized_correlation":
+                    corr_local = normalized_correlation(nb_pixels,image_norm,average_image_intensity,
+                                                        image_intensities,int_local)
+
+                elif method == "fast_correlation":
+                    corr_local = fast_correlation(image_intensities,int_local,pn_local)
 
                 if corr_local > np.min(corr_saved):
                     or_saved[np.argmin(corr_saved)] = or_local
