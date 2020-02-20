@@ -20,8 +20,30 @@ import numpy as np
 
 from pyxem.utils.indexation_utils import (crystal_from_template_matching,
                                           crystal_from_vector_matching,
-                                          match_vectors)
+                                          match_vectors,
+                                          normalized_correlation,
+                                          fast_correlation)
 
+
+def test_normalized_correlation():
+    nb_pixels = 3
+    image_intensities = [1,1,1]
+    image_norm = np.linalg.norm(image_intensities)
+    average_image_intensity = np.average(image_intensities)
+    int_local1 = [1,1,1]
+    int_local2 = [0,0,0]
+    np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local1),1)
+    np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local2),0)
+
+
+def test_fast_correlation():
+    image_intensities = [1,1,1]
+    int_local1 = [1,1,1]
+    int_local2 = [1,0,0]
+    pn_local1 = np.linalg.norm(int_local1)
+    pn_local2 = np.linalg.norm(int_local2)
+    np.testing.assert_approx_equal(fast_correlation(image_intensities,int_local1,pn_local1),np.linalg.norm(image_intensities))
+    np.testing.assert_approx_equal(fast_correlation(image_intensities,int_local2,pn_local2),1)
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):
     # branch single phase
