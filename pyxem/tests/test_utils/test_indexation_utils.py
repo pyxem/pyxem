@@ -28,13 +28,16 @@ from pyxem.utils.indexation_utils import (crystal_from_template_matching,
 def test_normalized_correlation():
     nb_pixels = 3
     image_intensities = [1,1,1]
+    image_intensities2 = [0,0,0]
     image_norm = np.linalg.norm(image_intensities)
+    image_norm2 = np.linalg.norm(image_intensities2)
     average_image_intensity = np.average(image_intensities)
+    average_image_intensity2 = np.average(image_intensities2)
     int_local1 = [1,1,1]
     int_local2 = [0,0,0]
     np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local1),1)
     np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local2),0)
-
+    np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm2,average_image_intensity2,image_intensities2,int_local2),1)
 
 def test_fast_correlation():
     image_intensities = [1,1,1]
