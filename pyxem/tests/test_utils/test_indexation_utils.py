@@ -38,7 +38,7 @@ def test_normalized_correlation():
     var_int = np.linalg.norm(int_local1-np.average(int_local1))
     var_image = np.linalg.norm(image_intensities-np.average(image_intensities))
     cross_corr1 = (np.sum(np.multiply(int_local1,image_intensities))-3*np.average(int_local1)
-              *np.average(image_intensities))/(3*np.sqrt(var_int*var_image))
+              *np.average(image_intensities))/np.sqrt(var_int*var_image)
     np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local1),cross_corr1)
     np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm,average_image_intensity,image_intensities,int_local2),0)
     np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_norm2,average_image_intensity2,image_intensities2,int_local2),0)
