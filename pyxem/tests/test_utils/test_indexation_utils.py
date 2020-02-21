@@ -21,12 +21,12 @@ import numpy as np
 from pyxem.utils.indexation_utils import (crystal_from_template_matching,
                                           crystal_from_vector_matching,
                                           match_vectors,
-                                          normalized_correlation,
+                                          zero_mean_normalized_correlation,
                                           fast_correlation)
 
 
-def test_normalized_correlation():
-    np.testing.assert_approx_equal(normalized_correlation(3,1,1/3,[1,0,0],[1,0,0]),1)
+def test_zero_mean_normalized_correlation():
+    np.testing.assert_approx_equal(zero_mean_normalized_correlation(3,1,1/3,[1,0,0],[1,0,0]),1)
 
 def test_fast_correlation():
     np.testing.assert_approx_equal(fast_correlation([1,1,1],[1,1,1],np.sqrt(3)),np.sqrt(3))
