@@ -26,28 +26,11 @@ from pyxem.utils.indexation_utils import (crystal_from_template_matching,
 
 
 def test_normalized_correlation():
-    nb_pixels = 3
-    image_intensities = [1,0,0]
-    image_intensities2 = [0,0,0]
-    average_image_intensity = np.average(image_intensities)
-    average_image_intensity2 = np.average(image_intensities2)
-    image_variance = np.linalg.norm(image_intensities-average_image_intensity)
-    image_variance2 = np.linalg.norm(image_intensities2-average_image_intensity2)
-    int_local1 = [1,0,0]
-    int_local2 = [0,0,0]
-    np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_variance,average_image_intensity,image_intensities,int_local1),1)
-    np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_variance,average_image_intensity,image_intensities,int_local2),0)
-    np.testing.assert_approx_equal(normalized_correlation(nb_pixels,image_variance2,average_image_intensity2,image_intensities2,int_local2),0)
-
+    np.testing.assert_approx_equal(normalized_correlation(3,1,1/3,[1,0,0],[1,0,0]),1)
 
 def test_fast_correlation():
-    image_intensities = [1,1,1]
-    int_local1 = [1,1,1]
-    int_local2 = [1,0,0]
-    pn_local1 = np.linalg.norm(int_local1)
-    pn_local2 = np.linalg.norm(int_local2)
-    np.testing.assert_approx_equal(fast_correlation(image_intensities,int_local1,pn_local1),np.linalg.norm(image_intensities))
-    np.testing.assert_approx_equal(fast_correlation(image_intensities,int_local2,pn_local2),1)
+    np.testing.assert_approx_equal(fast_correlation([1,1,1],[1,1,1],np.sqrt(3)),np.sqrt(3))
+    np.testing.assert_approx_equal(fast_correlation([1,1,1],[1,0,0],1),1)
 
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):

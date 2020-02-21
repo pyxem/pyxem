@@ -30,7 +30,7 @@ from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import select_method_from_method_dict
 
 from pyxem.utils.indexation_utils import correlate_library
-from pyxem.utils.indexation_utils import normalized_correlation
+from pyxem.utils.indexation_utils import zero_mean_normalized_correlation
 from pyxem.utils.indexation_utils import fast_correlation
 from pyxem.utils.indexation_utils import index_magnitudes
 from pyxem.utils.indexation_utils import match_vectors
@@ -81,7 +81,7 @@ class IndexationGenerator():
             The n orientations with the highest correlation values are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'fast_correlation' or 'normalized_correlation'.
+            'fast_correlation' or 'zero_mean_normalized_correlation'.
         mask : Array
             Array with the same size as signal (in navigation) or None
         print_help : bool
@@ -103,15 +103,15 @@ class IndexationGenerator():
         library = self.library
 
         method_dict = { 'fast_correlation' : fast_correlation,
-                     'normalized_correlation' : normalized_correlation
+                     'zero_mean_normalized_correlation' : zero_mean_normalized_correlation
                      }
 
         if mask is None:
             # Index at all real space pixels
             mask = 1
 
+        #tests if selected method is a valid argument, and can print help for selected method.
         chosen_function = select_method_from_method_dict(method,method_dict,print_help)
-        #Not used, but the function tests if selected method is a valid argument, and can print help for selected method.
 
         # adds a normalisation to library
         for phase in library.keys():

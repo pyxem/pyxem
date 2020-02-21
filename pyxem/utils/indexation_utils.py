@@ -61,16 +61,16 @@ def fast_correlation(image_intensities,int_local,pn_local, **kwargs):
 
     See also:
     ---------
-    correlate_library, normalized_correlation
+    correlate_library, zero_mean_normalized_correlation
 
     """
     return np.sum(np.multiply(image_intensities, int_local)) / \
                 pn_local  # Correlation is the partially normalized dot product
 
-def normalized_correlation(nb_pixels,image_std,average_image_intensity,image_intensities,int_local, **kwargs):
+def zero_mean_normalized_correlation(nb_pixels,image_std,average_image_intensity,image_intensities,int_local, **kwargs):
     """
     Computes the correlation score between an image and a template, using the formula
-    .. math:: normalized_correlation
+    .. math:: zero_mean_normalized_correlation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\\sum_{Not {j}} avg(T)}}
         for a template T and an experimental pattern P.
 
@@ -125,7 +125,7 @@ def correlate_library(image, library, n_largest, method , mask):
     .. math:: fast_correlation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
 
-    .. math:: normalized_correlation
+    .. math:: zero_mean_normalized_correlation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\sum_{j=1}^m P(x_j,y_j)-avg(P)}}
         for a template T and an experimental pattern P.
 
@@ -138,9 +138,9 @@ def correlate_library(image, library, n_largest, method , mask):
         experimental data.
     n_largest : int
         The number of well correlated simulations to be retained.
-    method : String
+    method : str
         Name of method used to compute correlation between templates and diffraction patterns. Can be
-        'fast_correlation' or 'normalized_correlation'. (ADDED in pyxem 0.11.0)
+        'fast_correlation' or 'zero_mean_normalized_correlation'. (ADDED in pyxem 0.11.0)
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
 
@@ -173,9 +173,9 @@ def correlate_library(image, library, n_largest, method , mask):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
 
-    K. Briechle and U.D. Hanebeck, "Template Matching using Fast Normalized Cross Correlation"
-    Proc. SPIE 4387, Optical Pattern Recognition XII, (20 March 2001); https://doi.org/10.1117/12.421129
-    Formula (1)
+    A. Nakhmani and  A. Tannenbaum, "A New Distance Measure Based on Generalized Image Normalized Cross-Correlation
+    for Robust Video Tracking and Image Recognition"
+    Pattern Recognit Lett. 2013 Feb 1; 34(3): 315–321; doi: 10.1016/j.patrec.2012.10.025
 
     Discussion on Normalized cross correlation (xcdskd):
     https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
@@ -184,9 +184,7 @@ def correlate_library(image, library, n_largest, method , mask):
 
     top_matches = np.empty((len(library), n_largest, 3), dtype='object')
 
-    variables_dict = {}
-
-    if method == 'normalized_correlation':
+    if method == 'zero_mean_normalized_correlation':
         nb_pixels = image.shape[0]*image.shape[1]
         average_image_intensity = np.average(image)
         image_std = np.linalg.norm(image-average_image_intensity) #Can skip this for speed, as it is the same for all patterns.
@@ -208,8 +206,8 @@ def correlate_library(image, library, n_largest, method , mask):
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[px_local[:, 1], px_local[:, 0]]
 
-                if method == "normalized_correlation":
-                    corr_local = normalized_correlation(nb_pixels,image_std,average_image_intensity,
+                if method == "zero_mean_normalized_correlation":
+                    corr_local = zero_mean_normalized_correlation(nb_pixels,image_std,average_image_intensity,
                                                         image_intensities,int_local)
 
                 elif method == "fast_correlation":

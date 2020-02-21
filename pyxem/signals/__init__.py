@@ -64,6 +64,9 @@ def select_method_from_method_dict(method, method_dict,print_help = True, **kwar
     kwargs : dict
         Parameters for the method, if empty help is return
 
+    print_help : bool
+        If True: Prints information about the chosen method.
+
     Returns
     -------
     method_function :
@@ -75,7 +78,7 @@ def select_method_from_method_dict(method, method_dict,print_help = True, **kwar
         raise NotImplementedError("The method `{}` is not implemented. "
                                   "See documentation for available "
                                   "implementations.".format(method))
-    elif print_help:
+    elif print_help and not kwargs:
         help(method_dict[method])
 
     return method_dict[method]
