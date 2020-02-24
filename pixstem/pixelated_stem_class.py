@@ -938,7 +938,7 @@ class PixelatedSTEM(Signal2D):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
 
-        chunks_peak = dask_array.chunksize[:-2]
+        chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, 'chunks'):
             peak_array_dask = da.rechunk(peak_array, chunks=chunks_peak)
         else:
@@ -997,7 +997,7 @@ class PixelatedSTEM(Signal2D):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
 
-        chunks_peak = dask_array.chunksize[:-2]
+        chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, 'chunks'):
             peak_array_dask = da.rechunk(peak_array, chunks=chunks_peak)
         else:
