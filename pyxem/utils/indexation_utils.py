@@ -187,8 +187,7 @@ def correlate_library(image, library, n_largest, method , mask):
     if method == 'zero_mean_normalized_correlation':
         nb_pixels = image.shape[0]*image.shape[1]
         average_image_intensity = np.average(image)
-        image_std = np.linalg.norm(image-average_image_intensity) #Can skip this for speed, as it is the same for all patterns.
-
+        image_std = np.linalg.norm(image-average_image_intensity)
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
             orientations = library_entry['orientations']
