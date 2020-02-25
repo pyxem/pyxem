@@ -29,13 +29,9 @@ from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import select_method_from_method_dict
 
-from pyxem.utils.indexation_utils import correlate_library
-from pyxem.utils.indexation_utils import zero_mean_normalized_correlation
-from pyxem.utils.indexation_utils import fast_correlation
-from pyxem.utils.indexation_utils import index_magnitudes
-from pyxem.utils.indexation_utils import match_vectors
-from pyxem.utils.indexation_utils import OrientationResult
-from pyxem.utils.indexation_utils import get_nth_best_solution
+from pyxem.utils.indexation_utils import correlate_library, zero_mean_normalized_correlation, \
+                                         fast_correlation, index_magnitudes, match_vectors, \
+                                         OrientationResult, get_nth_best_solution
 
 from collections import namedtuple
 from operator import attrgetter
