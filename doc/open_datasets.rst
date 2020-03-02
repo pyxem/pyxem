@@ -6,7 +6,7 @@ Open datasets
 
 .. _holz_data0:
 
-Higher order laue zone analysis
+Higher order Laue zone analysis
 -------------------------------
 
 * Zenodo DOI: `10.5281/zenodo.3476746 <https://dx.doi.org/10.5281/zenodo.3476746>`_

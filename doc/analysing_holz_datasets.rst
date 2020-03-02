@@ -10,7 +10,7 @@ This guide will show how to extract the size, intensity and width of HOLZ rings.
 These parameters can then be used to infer information about the crystal structure of a crystalline material.
 
 Example of this type of data processing: `Three-dimensional subnanoscale imaging of unit cell doubling due to octahedral tilting and cation modulation in strained perovskite thin films <https://doi.org/10.1103/PhysRevMaterials.3.063605>`_.
-The data and processing scripts used in this paper is available at Zenodo with the DOI `10.5281/zenodo.3476746 <https://dx.doi.org/10.5281/zenodo.3476746>`_, and Medipix3 dataset can be downloaded directly: https://zenodo.org/record/3476746/files/m004_LSMO_LFO_STO_medipix.hdf5?download=1.
+The data and processing scripts used in this paper is available at Zenodo with the DOI `10.5281/zenodo.3476746 <https://dx.doi.org/10.5281/zenodo.3476746>`_, and an optimized Medipix3 dataset can be downloaded directly at: https://zenodo.org/record/3687144/files/m004_LSMO_LFO_STO_medipix_rechunked.hspy.
 
 Loading dataset
 ---------------
@@ -31,8 +31,18 @@ Your own data can be loaded using :py:func:`pixstem.io_tools.load_ps_signal`:
     >>> import pixstem.api as ps
     >>> s = ps.load_ps_signal(yourfilname)  # doctest: +SKIP
 
+If you want to work with a real dataset, you can download the HOLZ dataset from Zenodo mentioned above.
+Note that this will download a 500 MB file.
+
+.. code-block:: python
+
+    >>> import urllib.request
+    >>> urllib.request.urlretrieve('https://zenodo.org/record/3687144/files/m004_LSMO_LFO_STO_medipix_rechunked.hspy', 'm004_LSMO_LFO_STO_medipix_rechunked.hspy')  # doctest: +SKIP
+    >>> import pixstem.api as ps
+    >>> s = ps.load_ps_signal('m004_LSMO_LFO_STO_medipix_rechunked.hspy', lazy=True)  # doctest: +SKIP
+
 In some cases, the datasets might be too large to load into memory.
-For these datasets,  lazy loading can be used.
+For these datasets, lazy loading can be used.
 For more information on this, see :ref:`loading_data`.
 
 
@@ -46,6 +56,8 @@ All functions which are present Signal2D is also in the PixelatedSTEM class.
 
     >>> s
     <PixelatedSTEM, title: , dimensions: (40, 40|80, 80)>
+
+The **(40, 40|80, 80)** shows the dimensions of the dataset: 40 x 40 probe positions, and 80 x 80 detector pixels.
 
 To visualize the dataset, we use:
 
@@ -68,6 +80,39 @@ Changing the contrast makes it much easier to see the ring.
 .. image:: images/analysing_holz_datasets/testdata_better_contrast_signal.png
     :scale: 49 %
 
+Removing dead pixels
+--------------------
+
+Most detectors will have some dead pixels, with zero counts.
+There are several ways to locate them.
+The easiest being summing all the probe positions and then seeing which pixels have zero counts.
+Alternatively, an image with a flat illumination can be acquired on the detectors, and the dead pixels can be found from this.
+
+The dataset from ``dummy_data`` has no "dead pixels", so this processing won't do much.
+The dataset from Zenodo has several dead pixels.
+
+Use the function :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_dead_pixels`:
+
+.. code-block:: python
+
+    >>> s_dif = s.mean(axis=(0, 1)) 
+    >>> s_dead_pixels = s_dif.find_dead_pixels(lazy_result=False, show_progressbar=False)
+    >>> s_dead_pixels.plot()
+
+For some datasets, like the one from Zenodo, ``s_dead_pixels`` will also show dead pixels at the corners of the detectors.
+This is due to no electrons hitting the detectors at these high scattering angles, caused by the pole piece of microscope blocking these.
+However, since this region is (typically) not very interesting, it does not matter that the algorithm incorrectly thinks these positions are dead pixels.
+
+To correct for these dead pixels, use :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.correct_bad_pixels`.
+This function can also be used to correct for hot pixels, using :py:meth:`~pixstem.pixelated_stem_class.PixelatedSTEM.find_hot_pixels`.
+
+.. code-block:: python
+
+    >>> s = s.correct_bad_pixels(s_dead_pixels)
+
+By default this returns a lazy signal, which can be used in further processing.
+If for some reason processing this new signal is really slow and too big to process in memory, one trick can be to save it first with with an appropriate chunking (``s.save("data_saved.hpsy, chunks=(32, 32, 32, 32))``), then load it again (``s = hs.load("data_saved.hspy", lazy=True)``).
+
 
 Finding the centre position
 ---------------------------
@@ -88,7 +133,7 @@ The easiest way of doing this is using :py:meth:`~pixstem.pixelated_stem_class.P
     :scale: 49 %
 
 This returns a :py:class:`~pixstem.pixelated_stem_class.DPCSignal2D` object, which is another specialized class for analysing disk shifts (for example from magnetic materials).
-For more information about how to use this for analysing magnetic materials see (TO BE WRITTEN).
+For more information about how to use this for analysing magnetic materials see the Jupyter notebook link from :ref:`feal_data`.
 
 The first navigation index is the beam shifts in the x-direction, and the second is the beam shifts in the y-direction.
 
