@@ -4,7 +4,7 @@
 Analysing HOLZ datasets
 =======================
 
-In pixelated scanning transmission electron microscopy (STEM) datasets the higher order laue zone (HOLZ) rings can be used to get information about the structure parallel to the electron beam.
+In pixelated scanning transmission electron microscopy (STEM) datasets the higher order Laue zone (HOLZ) rings can be used to get information about the structure parallel to the electron beam.
 The radius of these rings are proportional to the square root of the size of the crystal's unit cell size.
 This guide will show how to extract the size, intensity and width of HOLZ rings.
 These parameters can then be used to infer information about the crystal structure of a crystalline material.

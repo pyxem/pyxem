@@ -20,7 +20,7 @@ In this prompt run:
 
     $ conda install pixstem hyperspy-gui-traitsui hyperspy-gui-ipywidgets -c conda-forge
 
-If everything installed, continue to :ref:`starting pixStem in Windows <start_pixstem_windows>`.
+If everything installs correctly, continue to :ref:`starting pixStem in Windows <start_pixstem_windows>`.
 If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
 
@@ -38,7 +38,7 @@ folder should contain the "WinPython prompt". Start the "WinPython prompt". This
 
     pip install pixstem
 
-If everything installed, continue to :ref:`starting pixStem in Windows <start_pixstem_windows>`.
+If everything installs correctly, continue to :ref:`starting pixStem in Windows <start_pixstem_windows>`.
 If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
 
@@ -51,7 +51,7 @@ Install the Anaconda python environment: `Anaconda environment <https://www.cont
 
     $ conda install pixstem hyperspy-gui-traitsui hyperspy-gui-ipywidgets -c conda-forge
 
-If everything installed, continue to :ref:`starting pixStem in MacOS <start_pixstem_macos>`.
+If everything installs correctly, continue to :ref:`starting pixStem in MacOS <start_pixstem_macos>`.
 If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
 
@@ -71,7 +71,7 @@ Ubuntu 18.04
     $ sudo apt-get install ipython3 python3-pip python3-numpy python3-scipy python3-matplotlib python3-sklearn python3-skimage python3-h5py python3-dask python3-traits python3-tqdm python3-pint python3-dask python3-pyqt5 python3-lxml python3-sympy python3-sparse python3-statsmodels python3-numexpr python3-ipykernel python3-jupyter-client python3-requests python3-dill python3-natsort
     $ pip3 install --user pixstem
 
-If everything installed, continue to :ref:`starting pixStem in Linux <start_pixstem_linux>`.
+If everything installs directly, continue to :ref:`starting pixStem in Linux <start_pixstem_linux>`.
 If you got some kind of error, please report it as a New issue on the `pixStem GitLab <https://gitlab.com/pixstem/pixstem/issues>`_.
 
 

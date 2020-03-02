@@ -14,7 +14,7 @@ Data is loaded by using two specialized loading functions:
 
 Both these functions are accessible through :py:mod:`pixstem.api`.
 
-Real datasets (and sometimes processing scripts) you can use for testing the functionality is found in :ref:`open_datasets`.
+Real datasets (and sometimes processing scripts) you can use for testing the functionality are found in :ref:`open_datasets`.
 
 Pixelated STEM
 --------------
@@ -74,7 +74,7 @@ The :py:class:`~pixstem.pixelated_stem_class.PixelatedSTEM` class can also be cr
     >>> s
     <PixelatedSTEM, title: , dimensions: (15, 10|35, 30)>
 
-Note that dimension 0/1 and 2/3 is flipped in the PixelatedSTEM signal, and the NumPy array.
+Note that dimensions 0/1 and 2/3 are flipped in the PixelatedSTEM signal and the NumPy array.
 This is due to how HyperSpy handles the input data.
 In this case it leads to the signal x-dimension having a size of 35, and a y-dimension a size of 30.
 While the navigation x-dimension has a size of 15, and a y-size of 10.
@@ -123,7 +123,7 @@ The signal dimensions must be either two, one or zero, giving either :py:class:`
 
 Files saved using HyperSpy can also be opened directly, as long as the dataset has one navigation dimension with a shape of 2.
 
-You can either use generated test dataset, or your own data.
+You can either use a generated test dataset, or your own data.
 To generate a test DPC dataset:
 
 .. code-block:: python

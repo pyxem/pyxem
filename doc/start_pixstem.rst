@@ -101,13 +101,13 @@ Tutorials
 To get you started on using pixStem there are tutorials available.
 The first tutorial :ref:`loading_data` shows how to load the data, while :ref:`using_pixelated_stem_class` shows how to use the ``PixelatedSTEM`` class, which contains most of pixStem's functionality.
 
-The `>>>` used in the tutorials and documentation means the comment should be typed inside some kind of Python prompt, and can be copy-pasted directly into the *Jupyter Notebooks*.
+The `>>>` used in the tutorials and documentation means the comment should be typed inside some kind of Python prompt, and can be copy-pasted directly into the *Jupyter Notebooks* (without the >>>).
 
 
 pixStem demos
 ^^^^^^^^^^^^
 
 In addition to the guides on this webpage, another good resource is the `Introduction to pixStem notebook <https://gitlab.com/pixstem/pixstem_demos/blob/release/introduction_to_pixstem.ipynb>`_.
-This is a pre-filled Jupyter Notebooks showing various aspects of pixStem's functionality.
+This is a pre-filled Jupyter Notebook showing various aspects of pixStem's functionality.
 
 The Jupyter Notebooks can also be `downloaded <https://gitlab.com/pixstem/pixstem_demos/-/archive/release/pixstem_demos-release.zip>`_, and run locally on your computer.
