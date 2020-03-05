@@ -365,7 +365,6 @@ def _add_crosses(a):
     a_shape = a.shape
 
     len_a_shape = len(a_shape)
-    print(len_a_shape)
     if len_a_shape == 4:
         a = a.reshape(a_shape[0] * a_shape[1], a_shape[2], a_shape[3])
         a_shape = a.shape
@@ -383,9 +382,7 @@ def _add_crosses(a):
     b = da.concatenate((b[:, :a_half[0], :], z_array2, b[:, a_half[0]:, :]), axis=-2)
 
     if len(original_shape) == 4:
-        print('reshaping to the original shape')
         b = b.reshape(original_shape[0], original_shape[1], original_shape[2] + 3, original_shape[3] + 3)
-
     return b
 
 
@@ -854,7 +851,7 @@ def _h5_chunk_write(data, saving_path):
             hf['data_stack'][-data.shape[0]:, :, :] = data
     else:
         hf = h5py.File(saving_path, 'w')
-        print('creating the h5 file')
+        print('creating the h5 file for the stack')
         hf.create_dataset('data_stack', data=data, maxshape=(None, data.shape[1], data.shape[2]), compression='gzip')
     return
 
@@ -1014,7 +1011,7 @@ def reshape_4DSTEM_SumFrames(data):
     data_skip.get_dimensions_from_data()
     print('Reshaping using the frame intensity sums of the first 20 lines')
     print('Number of frames skipped at the beginning: ', skip_ind)
-    # Croppimg the flyaback pixel at the start
+    # Cropping the flyaback pixel at the start
     data_skip = data_skip.inav[1:]
     return data_skip
 
