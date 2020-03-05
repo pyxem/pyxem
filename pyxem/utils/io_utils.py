@@ -359,8 +359,7 @@ def _parse_hdr(fp):
 
 def _add_crosses(a):
     """
-    Adds 3 pixel buffer cross to quad chip data. the input can be a stack or a reshaped 4DSTEM dask object. It returns
-    the object with the same number of axes.
+    Adds 3 pixel buffer cross to quad chip data.
 
     Parameters
     ----------
