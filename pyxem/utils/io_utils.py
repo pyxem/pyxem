@@ -567,12 +567,12 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read=0.1):
     """
     width = hdr_info['width']
     height = hdr_info['height']
-    depth = get_mib_depth(hdr_info, fp)
+    depth = _get_mib_depth(hdr_info, fp)
 
     record_by = hdr_info['record-by']
 
-    data = mib_to_daskarr(hdr_info, fp)
-    hdr_bits = get_hdr_bits(hdr_info)
+    data = _mib_to_daskarr(hdr_info, fp)
+    hdr_bits = _get_hdr_bits(hdr_info)
 
     if record_by == 'vector':  # spectral image
         size = (height, width, depth)
@@ -728,10 +728,10 @@ def mib_to_h5stack(fp, save_path, mmap_mode='r'):
     height = hdr_info['height']
 
     record_by = hdr_info['record-by']
-    depth = get_mib_depth(hdr_info, fp)
+    depth = _get_mib_depth(hdr_info, fp)
 
-    data = mib_to_daskarr(hdr_info, fp)
-    hdr_bits = get_hdr_bits(hdr_info)
+    data = _mib_to_daskarr(hdr_info, fp)
+    hdr_bits = _get_hdr_bits(hdr_info)
 
     if record_by == 'vector':  # spectral image
         size = (height, width, depth)
@@ -771,7 +771,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
     None
     """
     stack_num = 100
-    hdr_bits = get_hdr_bits(hdr_info)
+    hdr_bits = _get_hdr_bits(hdr_info)
     width = hdr_info['width']
     height = hdr_info['height']
     width_height = width * height
@@ -867,7 +867,7 @@ def _untangle_raw(data, hdr_info, stack_size):
     --------
         data: dask array object - as stack with the detector array unreshaped, e.g. for a
         single frame 512*512: (1, 262144)
-        hdr_info: dict, with the info read from the header- ouput of the parse_hdr function
+        hdr_info: dict, with the info read from the header- ouput of the _parse_hdr function
         stack_size: The number of frames in the data
 
     Outputs
@@ -919,7 +919,7 @@ def reshape_4DSTEM_FlyBack(data):
 
     Parameters
     ----------
-    data : hyperspy lazy Signal2D
+    data : pyxem / hyperspy lazy Signal2D
         Lazy loaded electron diffraction data: <framenumbers | det_size, det_size>
         the data metadata contains flyback info as:
             ├── General
@@ -1043,8 +1043,8 @@ def h5stack_to_pxm(h5_path, mib_path):
     x = da.from_array(data, chunks=chunks)
     data_pxm = LazyElectronDiffraction2D(data)
 
-    exp_times_list = read_exposures(hdr_info, mib_path)
-    data_dict = STEM_flag_dict(exp_times_list)
+    exp_times_list = _read_exposures(hdr_info, mib_path)
+    data_dict = _STEM_flag_dict(exp_times_list)
 
     # Tranferring dict info to metadata
     if data_dict['STEM_flag'] == 1:
