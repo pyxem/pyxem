@@ -269,22 +269,35 @@ def _parse_hdr(fp):
     -------
     hdr_info : dict
         Dictionary containing header info extracted from .mib file.
-    Example:
-    RAW mib data
-    {'width': 512,
-    'height': 512,
-    'Assembly Size': '2x2',
-    'offset': 768,
-    'data-type': 'unsigned',
-    'data-length': '1',
-    'Counter Depth (number)': 1,
-    'raw': 'R64',
-    'byte-order': 'dont-care',
-    'record-by': 'image',
-    'title': '/dls/e02/data/2020/cm26481-1/Merlin/testing/20200204 115306/test',
-    'date': '20200204',
-    'time': '11:53:32.295336',
-    'data offset': 768}
+        the entries of the dictionary are as follows:
+        'width': int
+            pixels, detector number of pixels in x direction,
+        'height': int
+            pixels detector number of pixels in y direction,
+        'Assembly Size': str
+            configuration of the detector chips, e.g. '2x2' for quad,
+        'offset': int
+            number of characters in the header before the first frame starts,
+        'data-type': str
+            always 'unsigned',
+        'data-length': str
+            identifying dtype,
+        'Counter Depth (number)': int
+            counter bit depth,
+        'raw': str
+            regular binary 'MIB' or raw binary 'R64',
+        'byte-order': str
+            always 'dont-care',
+        'record-by': str
+            'image' or 'vector' - only 'image' encountered,
+        'title': str
+            path of the mib file without extension, e.g. '/dls/e02/data/2020/cm26481-1/Merlin/testing/20200204 115306/test',
+        'date': str
+            date created, e.g. '20200204',
+        'time': str
+            time created, e.g. '11:53:32.295336',
+        'data offset': int
+            number of characters at the header.
     """
     hdr_info = {}
 
@@ -345,7 +358,8 @@ def _parse_hdr(fp):
 
 
 def _add_crosses(a):
-    """ Adds 3 pixel buffer cross to quad chip data. the input can be a stack or a reshaped 4DSTEM dask object. It returns
+    """
+    Adds 3 pixel buffer cross to quad chip data. the input can be a stack or a reshaped 4DSTEM dask object. It returns
     the object with the same number of axes.
 
     Parameters
@@ -359,30 +373,29 @@ def _add_crosses(a):
     b : dask.array
         Stack of frames or reshaped 4DSTEM object including 3 pixel buffer cross in the diffraction plane.
     """
-    # Determine dimensions of raw frame data
-    a_type = a.dtype
     original_shape = a.shape
-    a_shape = a.shape
 
-    len_a_shape = len(a_shape)
-    if len_a_shape == 4:
-        a = a.reshape(a_shape[0] * a_shape[1], a_shape[2], a_shape[3])
-        a_shape = a.shape
-        len_a_shape = len(a_shape)
+    if len(original_shape) == 4:
+        a = a.reshape(original_shape[0] * original_shape[1], original_shape[2], original_shape[3])
 
-    img_axes = len_a_shape - 2, len_a_shape - 1
-    a_half = int(a_shape[img_axes[0]] / 2), int(a_shape[img_axes[1]] / 2)
+    a_half = int(original_shape[-1] / 2), int(original_shape[-2] / 2)
     # Define 3 pixel wide cross of zeros to pad raw data
-    z_array = da.zeros((a_shape[0], a_shape[1], 3), dtype=a_type)
-    z_array2 = da.zeros((a_shape[0], 3, a_shape[img_axes[1]] + 3), dtype=a_type)
-    # Insert blank cross into raw data
+    if len(original_shape) == 4:
+        z_array = da.zeros((original_shape[0] * original_shape[1], original_shape[-2], 3), dtype=a.dtype)
+        z_array2 = da.zeros((original_shape[0] * original_shape[1], 3, original_shape[-1] + 3), dtype=a.dtype)
+    else:
+        z_array = da.zeros((original_shape[0], original_shape[-2], 3), dtype=a.dtype)
+        z_array2 = da.zeros((original_shape[0], 3, original_shape[-1] + 3), dtype=a.dtype)
 
+    # Insert blank cross into raw data
     b = da.concatenate((a[:, :, :a_half[1]], z_array, a[:, :, a_half[1]:]), axis=-1)
 
     b = da.concatenate((b[:, :a_half[0], :], z_array2, b[:, a_half[0]:, :]), axis=-2)
 
     if len(original_shape) == 4:
+        print('reshaping to the original shape')
         b = b.reshape(original_shape[0], original_shape[1], original_shape[2] + 3, original_shape[3] + 3)
+
     return b
 
 
@@ -448,13 +461,8 @@ def _mib_to_daskarr(hdr_info, fp, mmap_mode='r'):
         memmpap read mode - default is 'r'
     Returns
     --------------
-    data_da: data as a dask array object
-
-    Example
-    --------------
-    returned object when passed the parameters for a 1 bit 256*256 (65536) stack of frames
-    dask.array<array, shape=(2197815296,), dtype=uint8, chunksize=(68681728,), chunktype=numpy.ndarray>
-
+    data_da: dask array
+        data as a dask array object
     """
     data_length = hdr_info['data-length']
     data_type = hdr_info['data-type']
@@ -494,18 +502,13 @@ def _get_hdr_bits(hdr_info):
     gets the number of character bits for the header for each frame given the data type
     Parameters
     ----------
-    hdr_info: dict - output of the parse_hdr function
+    hdr_info: dict
+        output of the parse_hdr function
 
     Returns
     -------
-    hdr_bits: int - number of characters in the header
-
-    Example
-    -------
-    for 1 bit RAW mib data:
-
-    768
-
+    hdr_bits: int
+        number of characters in the header
     """
     data_length = hdr_info['data-length']
     data_type = hdr_info['data-type']
@@ -542,11 +545,9 @@ def _get_hdr_bits(hdr_info):
 
 def _read_exposures(hdr_info, fp, pct_frames_to_read=0.1):
     """
-    Looks into the frame times of the first 10 pct of the frames to see if they are
-    all the same (TEM) or there is a more intense flyback (4D-STEM). This works due to the way we trigger the
-    4DSTEM acquisitions at ePSIC.
-    For this to work, the tick in the Merlin software to print exp time into header
-    must be selected!
+    Looks into the frame times of the first frames to see if they are all the same (TEM) or there is a more intense
+    flyback (4D-STEM). This works due to the way we trigger the 4DSTEM acquisitions at ePSIC.
+    For this to work, the tick in the Merlin software to print exp time into header must be selected!
 
     Parameters
     -------------
@@ -641,15 +642,17 @@ def _STEM_flag_dict(exp_times_list):
     Returns
     -------
     output : dict
-        Dictionary containing - STEM_flag, scan_X, exposure_time,
-                                number_of_frames_to_skip, flyback_times
-    Example
-    -------
-    {'STEM_flag': 1,
-     'scan_X': 256,
-     'exposure time': 0.0007,
-     'number of frames_to_skip': 136,
-     'flyback_times': [0.0392, 0.0413, 0.012625, 0.042]}
+        Dictionary containing the following entries:
+        'STEM_flag': boolean
+            1 if STEM data detected,
+         'scan_X': int
+            number of probe positions in a line,
+         'exposure time': float
+            exposure time detected per frame in seconds,
+         'number of frames_to_skip': int
+            number of frames to skip at the beginning before reshaping,
+         'flyback_times': list of floats
+            list of detected overexposed flyback frames as list
     """
     output = {}
     times_set = set(exp_times_list)
@@ -710,8 +713,10 @@ def mib_to_h5stack(fp, save_path, mmap_mode='r'):
     ----------
     fp: str
         Filepath of .mib file to be loaded.
-    save_path: str, h5 filename path to save the h5 file stack
-    mmap_mode: default 'r' - {None, 'r+', 'r', 'w+', 'c'}, optional
+    save_path: str
+        h5 filename path to save the h5 file stack
+    mmap_mode: str
+        default 'r' - {None, 'r+', 'r', 'w+', 'c'}, optional
         If not None, then memory-map the file, using the given mode
         (see `numpy.memmap`).  The mode has no effect for pickled or
         zipped files.
@@ -758,15 +763,19 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
 
     Parameters
     ----------
-    data: dask array object
-    hdr_info: dict, header info parsed by the parse_hdr function
-    saving_path: str, h5 file name and path
-    raw_binary: default False - Need to be True for binary RAW data
+    data: dask array
+    hdr_info: dict
+        header info parsed by the parse_hdr function
+    saving_path: str
+        h5 file name and path
+    raw_binary: boolean
+        default False - Need to be True for binary RAW data
 
     Returns
     -------
     None
     """
+    # TODO: optimise this stack_num
     stack_num = 100
     hdr_bits = _get_hdr_bits(hdr_info)
     width = hdr_info['width']
@@ -837,8 +846,9 @@ def _h5_chunk_write(data, saving_path):
 
     Parameters
     ----------
-    data: dask array object
-    saving_path: str, path and name of the h5 file
+    data: dask array
+    saving_path: str
+        path and name of the h5 file
 
     Returns
     -------
@@ -860,17 +870,20 @@ def _untangle_raw(data, hdr_info, stack_size):
     """
     Corrects for the tangled raw mib format - Only the case for quad chip is considered here.
 
-    Inputs
+    Parameters
     --------
-        data: dask array object - as stack with the detector array unreshaped, e.g. for a
-        single frame 512*512: (1, 262144)
-        hdr_info: dict, with the info read from the header- ouput of the _parse_hdr function
-        stack_size: The number of frames in the data
+        data: dask array
+            as stack with the detector array unreshaped, e.g. for a single frame 512*512: (1, 262144)
+        hdr_info: dict
+            info read from the header- ouput of the _parse_hdr function
+        stack_size: int
+            The number of frames in the data
 
     Outputs
     ----------
-    untangled_data: corrected dask array object reshaped on the detector plane, e.g. for a
-    single frame case as above: (1, 512, 512)
+    untangled_data: dask array
+        corrected dask array object reshaped on the detector plane, e.g. for a single frame case
+        as above: (1, 512, 512)
     """
     width = hdr_info['width']
     height = hdr_info['height']
@@ -965,11 +978,13 @@ def reshape_4DSTEM_SumFrames(data):
 
     Parameters
     ----------
-    data : pyxem LazyElectronDiffraction2D imported mib file with diensions of: framenumbers|Det_X, Det_Y
+    data : pyxem LazyElectronDiffraction2D
+        imported mib file with diensions of: framenumbers|Det_X, Det_Y
 
     Returns
     -------
-    data_reshaped : reshaped data (x, y | Det_X, Det_Y)
+    data_reshaped : pyxem.signals.LazyElectronDiffraction2D
+        reshaped data (x, y | Det_X, Det_Y)
     """
     # Assuming sacn_x, i.e. number of probe positions in a line is square root
     # of total number of frames
@@ -1023,12 +1038,14 @@ def h5stack_to_pxm(h5_path, mib_path):
 
     Parameters
     ----------
-    h5_path: str, full path and name of the h5 stack file
-    mib_path: str, full path and name of the mib file
+    h5_path: str
+        full path and name of the h5 stack file
+    mib_path: str
+        full path and name of the mib file
 
     Returns
     -------
-    data_pxm: pyxem.signals.LazyElectronDiffraction2D object
+    data_pxm: pyxem.signals.LazyElectronDiffraction2D
     """
     hdr_info = _parse_hdr(mib_path)
     f = h5py.File(h5_path, 'r')
@@ -1080,7 +1097,7 @@ def h5stack_to_pxm(h5_path, mib_path):
 
 
 def load_mib(mib_path, reshape=True, h5_stack_path=None):
-    """Read a .mib file using dask and return as a lazy pyXem / hyperspy signal.
+    """Read a .mib file or an h5 stack file using dask and return as a lazy pyXem / hyperspy signal.
 
     Parameters
     ----------
@@ -1089,8 +1106,9 @@ def load_mib(mib_path, reshape=True, h5_stack_path=None):
     reshape: boolean
         keywork argument to control reshaping of the stack (default is True).
         It attepmts to reshape using the flyback pixel.
-    h5_stack_path: str, default None
-        this is the h5 file path that we can read the data from in the case of large scan arrays
+    h5_stack_path: str
+    default None. this is the h5 file path that we can read the data from in the case of large scan arrays.
+
     Returns
     -------
     data_pxm : pyxem.signals.LazyElectronDiffraction2D
