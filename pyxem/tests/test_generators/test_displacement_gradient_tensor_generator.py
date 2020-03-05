@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -50,12 +50,15 @@ def rotation(z):
     R = np.asarray(([c, -s], [s, c]))
     return vector_operation(z, R)
 
+
 def uniform_expansion(z):
     return (1.1 * z)
+
 
 def stretch_in_x(z):
     M = np.asarray([[1.1, 0], [0, 1]])
     return vector_operation(z, M)
+
 
 def generate_test_vectors(v):
     """
@@ -65,30 +68,38 @@ def generate_test_vectors(v):
     return np.asarray([[v, rotation(v)],
                        [uniform_expansion(v), stretch_in_x(v)]])
 
+
 def generate_strain_map(vectors):
     deformed = hs.signals.Signal2D(generate_test_vectors(vectors))
     return get_DisplacementGradientMap(deformed, vectors).get_strain_maps()
+
 
 @pytest.fixture()
 def xy_vectors():
     xy = np.asarray([[1, 0], [0, 1]])
     return generate_strain_map(xy)
 
+
 @pytest.fixture()
 def left_handed():
     not_xy = np.asarray(([1, 1], [1, -1.2]))
     return generate_strain_map(not_xy)
+
 
 @pytest.fixture()
 def multi_vector():
     four_vectors = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
     return generate_strain_map(four_vectors)
 
+
 """ Each of these basis should return the same results, in an xy basis"""
+
+
 def test_results_returned_correctly_in_same_basis(xy_vectors, left_handed, multi_vector):
     """ Basic test of the summary statement for this section """
     np.testing.assert_almost_equal(xy_vectors.data, left_handed.data, decimal=2)
     np.testing.assert_almost_equal(xy_vectors.data, multi_vector.data, decimal=2)
+
 
 def test_trivial_weight_function_case(xy_vectors):
     """ If weights are [1,1,1,1] the result should be the same as weights=None"""
@@ -97,6 +108,7 @@ def test_trivial_weight_function_case(xy_vectors):
     deformed = hs.signals.Signal2D(generate_test_vectors(four_vectors))
     weight_strain_map = get_DisplacementGradientMap(deformed, four_vectors, weights=weights).get_strain_maps()
     np.testing.assert_almost_equal(xy_vectors.data, weight_strain_map.data, decimal=2)
+
 
 def test_weight_function_behaviour():
     """ Confirms that  a weight function [1,1,2,2] on [a,a,b,b] gives (2a+4b)/6 as the strain"""

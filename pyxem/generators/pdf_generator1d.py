@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -79,26 +79,26 @@ class PDFGenerator1D():
         r_values = r_values.reshape(1, r_values.size)
         s_limits = [int(s_min / s_scale), int(s_max / s_scale)]
 
-        #check that these aren't out of bounds
+        # check that these aren't out of bounds
         if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
             raise ValueError('User specified s_max is larger than the maximum '
-                    'scattering vector magnitude in the data. Please reduce '
-                    's_max or use s_max=None to use the full scattering range.')
+                             'scattering vector magnitude in the data. Please reduce '
+                             's_max or use s_max=None to use the full scattering range.')
         s_values = np.arange(s_limits[0], s_limits[1], 1) * s_scale
         s_values = s_values.reshape(s_values.size, 1)  # column vector
 
         limited_red_int = self.signal.isig[s_limits[0]:s_limits[1]].data
 
-        pdf_sine = np.sin(2 * np.pi * np.matmul(s_values,r_values))
+        pdf_sine = np.sin(2 * np.pi * np.matmul(s_values, r_values))
         # creates a vector of the pdf
         rpdf = PairDistributionFunction1D(8 * np.pi * s_scale
-                                    * np.matmul(limited_red_int,pdf_sine))
+                                          * np.matmul(limited_red_int, pdf_sine))
 
         signal_axis = rpdf.axes_manager.signal_axes[0]
         pdf_scaling = r_increment
         signal_axis.scale = pdf_scaling
         signal_axis.name = 'Radius r'
         signal_axis.units = '$Å$'
-        rpdf = transfer_navigation_axes(rpdf,self.signal)
+        rpdf = transfer_navigation_axes(rpdf, self.signal)
 
         return rpdf

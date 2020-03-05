@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -94,7 +94,7 @@ class VarianceGenerator():
 
         dv = DiffractionVariance2D(vardps.data.reshape((2, 2, sig_x, sig_y)))
 
-        dv = transfer_signal_axes(dv,self.signal)
+        dv = transfer_signal_axes(dv, self.signal)
 
         return dv
 
@@ -125,7 +125,7 @@ class VarianceGenerator():
         """
         im = self.signal.T
         mean_im = im.mean((0, 1))
-        meansq_im = Signal2D(np.square(im.data.astype(np.uint16))).mean((0, 1))
+        meansq_im = Signal2D(np.square(im.data)).mean((0, 1))
         normvar = (meansq_im.data / np.square(mean_im.data)) - 1.
         var_im = Signal2D(normvar)
         corr_var_array = normvar - (np.divide(dqe, mean_im.data))
@@ -136,6 +136,6 @@ class VarianceGenerator():
         sig_x = varims.data.shape[1]
         sig_y = varims.data.shape[2]
         iv = ImageVariance(varims.data.reshape((2, 2, sig_x, sig_y)))
-        iv = transfer_navigation_axes_to_signal_axes(iv,self.signal)
+        iv = transfer_navigation_axes_to_signal_axes(iv, self.signal)
 
         return iv

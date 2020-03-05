@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -47,7 +47,7 @@ def load_mtex_map(filename):
 
     Parameters
     ----------
-    filename : string
+    filename : str
         Path to the file to be loaded.
 
     Returns
@@ -86,7 +86,7 @@ def _euler2axangle_signal(euler):
 
     """
     euler = euler[0]  # TODO: euler is a 1-element ndarray(dtype=object) with a tuple
-    return np.rad2deg(euler2axangle(euler[0], euler[1], euler[2])[1])
+    return np.rad2deg(euler2axangle(np.deg2rad(euler[0]), np.deg2rad(euler[1]), np.deg2rad(euler[2]))[1])
 
 
 def _distance_from_fixed_angle(angle, fixed_angle):
@@ -132,7 +132,7 @@ def _metric_from_dict(metric_dict, metric):
     ----------
     metric_dict : dict
         Dictionary to retrieve entry from
-    metrics : string
+    metrics : str
         Name of the entry
 
     Returns
@@ -166,7 +166,7 @@ class CrystallographicMap(BaseSignal):
 
     Attributes
     ----------
-    method : string
+    method : str
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
@@ -214,7 +214,7 @@ class CrystallographicMap(BaseSignal):
 
         Parameters
         ----------
-        metric : string
+        metric : str
             String identifier for the indexation / matching metric to be
             mapped, for template matching valid metrics are {'correlation',
             'orientation_reliability', 'phase_reliability'}. For vector matching
@@ -332,7 +332,7 @@ class CrystallographicMap(BaseSignal):
 
         Parameters
         ----------
-        filename : string
+        filename : str
             Name of file to save the crystal map to
         """
         x_size_nav = self.data.shape[1]

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,12 +27,11 @@ from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
 
 from pyxem.signals import transfer_navigation_axes
+from pyxem.signals import select_method_from_method_dict
 
-from pyxem.utils.indexation_utils import correlate_library
-from pyxem.utils.indexation_utils import index_magnitudes
-from pyxem.utils.indexation_utils import match_vectors
-from pyxem.utils.indexation_utils import OrientationResult
-from pyxem.utils.indexation_utils import get_nth_best_solution
+from pyxem.utils.indexation_utils import correlate_library, zero_mean_normalized_correlation, \
+                                         fast_correlation, index_magnitudes, match_vectors, \
+                                         OrientationResult, get_nth_best_solution
 
 from collections import namedtuple
 from operator import attrgetter
@@ -61,9 +60,12 @@ class IndexationGenerator():
         self.signal = signal
         self.library = diffraction_library
 
+
     def correlate(self,
                   n_largest=5,
+                  method = 'fast_correlation',
                   mask=None,
+                  print_help = False,
                   *args,
                   **kwargs):
         """Correlates the library of simulated diffraction patterns with the
@@ -73,8 +75,13 @@ class IndexationGenerator():
         ----------
         n_largest : int
             The n orientations with the highest correlation values are returned.
+        method : str
+            Name of method used to compute correlation between templates and diffraction patterns. Can be
+            'fast_correlation' or 'zero_mean_normalized_correlation'.
         mask : Array
             Array with the same size as signal (in navigation) or None
+        print_help : bool
+            Display information about the method used.
         *args : arguments
             Arguments passed to map().
         **kwargs : arguments
@@ -91,24 +98,29 @@ class IndexationGenerator():
         signal = self.signal
         library = self.library
 
+        method_dict = { 'fast_correlation' : fast_correlation,
+                     'zero_mean_normalized_correlation' : zero_mean_normalized_correlation
+                     }
+
         if mask is None:
             # Index at all real space pixels
             mask = 1
 
-        #TODO: Add extra methods
-        no_extra_methods_yet = True
-        if no_extra_methods_yet:
-            #adds a normalisation to library
-            for phase in library.keys():
-                norm_array = np.ones(library[phase]['intensities'].shape[0]) #will store the norms
-                for i,intensity_array in enumerate(library[phase]['intensities']):
-                    norm_array[i] = np.linalg.norm(intensity_array)
-                library[phase]['pattern_norms'] = norm_array #puts this normalisation into the library
+        #tests if selected method is a valid argument, and can print help for selected method.
+        chosen_function = select_method_from_method_dict(method,method_dict,print_help)
 
+        # adds a normalisation to library
+        for phase in library.keys():
+            norm_array = np.ones(library[phase]['intensities'].shape[0])  # will store the norms
 
-            matches = signal.map(correlate_library,
+            for i, intensity_array in enumerate(library[phase]['intensities']):
+                norm_array[i] = np.linalg.norm(intensity_array)
+            library[phase]['pattern_norms'] = norm_array  # puts this normalisation into the library
+
+        matches = signal.map(correlate_library,
                              library=library,
                              n_largest=n_largest,
+                             method = method,
                              mask=mask,
                              inplace=False,
                              **kwargs)
@@ -117,6 +129,7 @@ class IndexationGenerator():
         matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
+
 
 
 class ProfileIndexationGenerator():

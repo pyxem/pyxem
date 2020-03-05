@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -412,7 +412,7 @@ class CalibrationGenerator():
 
         Parameters
         ----------
-        data_to_plot : string
+        data_to_plot : str
             Specify the calibrated data to be plotted. Valid options are:
             {'au_x_grating_dp', 'au_x_grating_im', 'moo3_dp', 'moo3_im',
             'rotation_overlay'}

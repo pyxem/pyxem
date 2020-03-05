@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -72,6 +72,20 @@ class ReducedIntensityGenerator1D():
         """
         self.signal.axes_manager.signal_axes[0].scale = calibration
 
+    def set_diffraction_offset(self, offset):
+        """
+        Defines the offset for the signal axis variable s in terms of
+        A^-1 per pixel. Note that s is defined here as
+        s = 2 sin(theta)/lambda = 1/d, where theta is the scattering angle,
+        lambda the wavelength, and d the reciprocal spacing.
+
+        Parameters
+        ----------
+        offset: float
+                    Scattering vector offset in terms of A^-1 per pixel.
+        """
+        self.signal.axes_manager.signal_axes[0].offset = offset
+
     def set_s_cutoff(self, s_min, s_max):
         """
         Scattering vector cutoff for the purposes of fitting an atomic scattering
@@ -126,7 +140,7 @@ class ReducedIntensityGenerator1D():
 
         fit_model = self.signal.create_model()
         background = scattering_factor_dictionary[scattering_factor](elements,
-                                                fracs, N, C)
+                                                                     fracs, N, C)
 
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
@@ -166,10 +180,10 @@ class ReducedIntensityGenerator1D():
             Keyword arguments to be passed to map().
         """
         return self.signal.map(subtract_pattern, pattern=bkgd_pattern,
-                                inplace=inplace, *args, **kwargs)
+                               inplace=inplace, *args, **kwargs)
 
     def mask_from_bkgd_pattern(self, mask_pattern, mask_threshold=1,
-                                inplace=True, *args, **kwargs):
+                               inplace=True, *args, **kwargs):
         """Uses a background pattern with a threshold, and sets that part of
         the signal to zero, effectively adding a mask. This can be used to mask
         the central beam.
@@ -195,11 +209,11 @@ class ReducedIntensityGenerator1D():
         mask_array = mask_pattern < mask_threshold
 
         return self.signal.map(mask_from_pattern,
-                                pattern=mask_array.astype(float),
-                                inplace=inplace, *args, **kwargs)
+                               pattern=mask_array.astype(float),
+                               inplace=inplace, *args, **kwargs)
 
     def mask_reduced_intensity(self, mask_pattern, inplace=True, *args,
-                                **kwargs):
+                               **kwargs):
         """Masks the reduced intensity signal by multiplying it with a pattern
         consisting of only zeroes and ones. This can be used to mask
         the central beam.
@@ -228,7 +242,7 @@ class ReducedIntensityGenerator1D():
             raise ValueError('Masking array does not consist of zeroes and ones.')
 
         return self.signal.map(mask_from_pattern, pattern=mask_array,
-                                    inplace=inplace, *args, **kwargs)
+                               inplace=inplace, *args, **kwargs)
 
     def get_reduced_intensity(self):
         """Obtains a reduced intensity profile from the radial profile.
@@ -253,7 +267,7 @@ class ReducedIntensityGenerator1D():
                                        self.normalisation))
 
         ri = ReducedIntensity1D(reduced_intensity)
-        ri = transfer_navigation_axes(ri,self.signal)
-        ri = transfer_signal_axes(ri,self.signal)
+        ri = transfer_navigation_axes(ri, self.signal)
+        ri = transfer_signal_axes(ri, self.signal)
 
         return ri

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -35,27 +35,38 @@ def test_init():
 class TestSimpleMaps:
     # Confirms that maps run without error.
 
-    @pytest.mark.parametrize('method', ('cross_correlate', 'blur', 'interpolate'))
-    def test_get_direct_beam_postion(self, diffraction_pattern, method):
-        shifts = diffraction_pattern.get_direct_beam_position(method=method, radius_start=1, radius_finish=3)
-
-    @pytest.mark.parametrize('method', ('cross_correlate', 'blur', 'interpolate'))
-    def test_center_direct_beam(self, diffraction_pattern, method):
-        # before inplace transform applied
+    def test_center_direct_beam_cross_correlate(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
-        diffraction_pattern.center_direct_beam(method=method, radius_start=1, radius_finish=3)
-        # after inplace transform applied
+        diffraction_pattern.center_direct_beam(method='cross_correlate',
+                                               radius_start=1, radius_finish=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
-    @pytest.mark.xfail(raises=ValueError)
-    def test_center_direct_beam_fail(self, diffraction_pattern):
-        diffraction_pattern.center_direct_beam(method="Invalid value")
+    def test_center_direct_beam_xc_return_shifts(self, diffraction_pattern):
+        shifts = diffraction_pattern.center_direct_beam(method='cross_correlate',
+                                                        radius_start=1, radius_finish=3,
+                                                        return_shifts=True)
+        ans = np.array([[-0.45, -0.45],
+                        [0.57, 0.57],
+                        [-0.45, -0.45],
+                        [0.52, 0.52]])
+        np.testing.assert_almost_equal(shifts, ans)
+
+    def test_center_direct_beam_blur_return_shifts(self, diffraction_pattern):
+        shifts = diffraction_pattern.center_direct_beam(method='blur',
+                                                        sigma=5,
+                                                        half_square_width=3,
+                                                        return_shifts=True)
+        ans = np.array([[-1., -1.],
+                        [-0., -0.],
+                        [-1., -1.],
+                        [-0., -0.]])
+        np.testing.assert_almost_equal(shifts, ans)
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
-        diffraction_pattern.center_direct_beam(radius_start=1,
-                                               radius_finish=3,
-                                               square_width=3)
+        diffraction_pattern.center_direct_beam(method='blur',
+                                               sigma=int(5),
+                                               half_square_width=3)
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     def test_apply_affine_transformation(self, diffraction_pattern):
@@ -70,8 +81,10 @@ class TestSimpleMaps:
                       [1.1, 1., 0.],
                       [0., 0., 1.]])
         s = Signal2D(np.asarray([[D, D], [D, D]]))
-        static = diffraction_pattern.apply_affine_transformation(D, inplace=False)
-        dynamic = diffraction_pattern.apply_affine_transformation(s, inplace=False)
+        static = diffraction_pattern.apply_affine_transformation(D,
+                                                                 inplace=False)
+        dynamic = diffraction_pattern.apply_affine_transformation(s,
+                                                                  inplace=False)
         assert np.allclose(static.data, dynamic.data, atol=1e-3)
 
     def test_apply_affine_transformation_with_casting(self, diffraction_pattern):
@@ -284,19 +297,16 @@ class TestBackgroundMethods:
         ('median', {'footprint': 4, }),
         ('reference_pattern', {'bg': np.ones((8, 8)), })
     ])
-    # skimage being warned by numpy, not for us
-    @pytest.mark.filterwarnings('ignore::FutureWarning')
-    # we don't care about precision loss here
-    @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_remove_background(self, diffraction_pattern,
                                method, kwargs):
         bgr = diffraction_pattern.remove_background(method=method, **kwargs)
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
-    def test_no_kwarg(self,diffraction_pattern):
+    @pytest.mark.xfail(raises=TypeError)
+    def test_no_kwarg(self, diffraction_pattern):
         bgr = diffraction_pattern.remove_background(method='h-dome')
-        assert bgr is None
+
 
 class TestPeakFinding:
     # This is assertion free testing

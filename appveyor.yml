@@ -2,13 +2,13 @@
 environment:
 
   global:
-    DEPS: "hyperspy-base diffsims lmfit"
+    DEPS: "hyperspy-base diffsims lmfit pyfai"
     TEST_DEPS: "pytest"
     MPLBACKEND: "agg"
 
   matrix:
+    - PY_VERSION: 3.8
     - PY_VERSION: 3.7
-    - PY_VERSION: 3.6
 # scripts that run after cloning repository
 install:
   # Activate miniconda root environment

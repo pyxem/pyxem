@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+
 
 def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
     """Used by hs.map in the PairDistributionFunction1D to normalise the signal
@@ -37,4 +38,4 @@ def normalise_pdf_signal_to_max(z, index_min, *args, **kwargs):
     """
 
     max_val = np.max(z[index_min:])
-    return np.divide(z,max_val)
+    return np.divide(z, max_val)

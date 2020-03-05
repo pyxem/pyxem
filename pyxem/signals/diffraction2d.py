@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,16 +27,19 @@ from hyperspy.api import interactive
 from hyperspy.signals import Signal1D, Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
+from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import push_metadata_through
+from pyxem.signals import push_metadata_through, transfer_navigation_axes, \
+    select_method_from_method_dict
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, gain_normalise, remove_dead,\
-    regional_filter, subtract_background_dog, subtract_background_median, \
-    subtract_reference, circular_mask, find_beam_offset_cross_correlation, \
-    peaks_as_gvectors, convert_affine_to_transform, apply_transformation, \
-    find_beam_center_blur, find_beam_center_interpolate
+    radial_average, azimuthal_integrate, azimuthal_integrate_fast, \
+    gain_normalise, remove_dead, regional_filter, subtract_background_dog, \
+    subtract_background_median, subtract_reference, circular_mask, \
+    find_beam_offset_cross_correlation, peaks_as_gvectors, \
+    convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
+    find_beam_center_interpolate
 
 from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
     find_peaks_dog, find_peaks_log, find_peaks_xc
@@ -46,6 +49,8 @@ from pyxem.utils import peakfinder2D_gui
 from skimage import filters
 from skimage import transform as tf
 from skimage.morphology import square
+
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D):
@@ -252,7 +257,7 @@ class Diffraction2D(Signal2D):
         ----------
         deadpixels : list
             List of deadpixels to be removed.
-        deadvalue : string
+        deadvalue : str
             Specify how deadpixels should be treated. 'average' sets the dead
             pixel value to the average of adjacent pixels. 'nan' sets the dead
             pixel to nan
@@ -271,6 +276,118 @@ class Diffraction2D(Signal2D):
                         inplace=inplace,
                         show_progressbar=progress_bar,
                         *args, **kwargs)
+
+    def get_azimuthal_integral(self, origin, detector, detector_distance,
+                               wavelength, size_1d, unit='k_A^-1',
+                               inplace=False,
+                               kwargs_for_map={}, kwargs_for_integrator={},
+                               kwargs_for_integrate1d={}):
+        """
+        Returns the azimuthal integral of the diffraction pattern as a
+        Diffraction1D signal.
+
+        Parameters
+        ----------
+        origin : np.array_like
+            This parameter should either be a list or numpy.array with two
+            coordinates ([x_origin,y_origin]), or an array of the same shape as
+            the navigation axes, with an origin (with the shape
+            [x_origin,y_origin]) at each navigation location.
+        detector : pyFAI.detectors.Detector object
+            A pyFAI detector used for the AzimuthalIntegrator.
+        detector_distance : float
+            Detector distance in meters passed to pyFAI AzimuthalIntegrator.
+        wavelength : float
+            The electron wavelength in meters. Used by pyFAI AzimuthalIntegrator
+        size_1d : int
+            The size of the returned 1D signal. (i.e. number of pixels in the
+            1D azimuthal integral.)
+        unit : str
+            The unit for for PyFAI integrate1d. The default "k_A^-1" gives k in
+            inverse Angstroms and is not natively in PyFAI. The other options
+            are from PyFAI and are can be "q_nm^-1", "q_A^-1", "2th_deg",
+            "2th_rad", and "r_mm".
+        inplace : bool
+            If True (default False), this signal is overwritten. Otherwise,
+            returns anew signal.
+        kwargs_for_map : dictionary
+            Keyword arguments to be passed to self.map().
+        kwargs_for_integrator : dictionary
+            Keyword arguments to be passed to pyFAI AzimuthalIntegrator().
+        kwargs_for_integrate1d : dictionary
+            Keyword arguments to be passed to pyFAI ai.integrate1d().
+
+
+        Returns
+        -------
+        radial_profile: :obj:`pyxem.signals.ElectronDiffraction1D`
+            The radial average profile of each diffraction pattern in the
+            ElectronDiffraction2D signal as an ElectronDiffraction1D.
+
+        See also
+        --------
+        :func:`pyxem.utils.expt_utils.azimuthal_integrate`
+        :func:`pyxem.utils.expt_utils.azimuthal_integrate_fast`
+        """
+
+        # Scaling factor is used to output the unit in k instead of q.
+        # It multiplies the scale that comes out of pyFAI integrate1d
+        scaling_factor = 1
+        if unit == 'k_A^-1':
+            scaling_factor = 1 / 2 / np.pi
+            unit = 'q_A^-1'
+
+        if np.array(origin).size == 2:
+            # single origin
+            # The AzimuthalIntegrator can be defined once and repeatedly used,
+            # making for a fast integration
+            # this uses azimuthal_integrate_fast
+
+            p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
+            ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
+                                     detector=detector, wavelength=wavelength,
+                                     **kwargs_for_integrator)
+
+            azimuthal_integrals = self.map(azimuthal_integrate_fast,
+                                           azimuthal_integrator=ai,
+                                           size_1d=size_1d, unit=unit,
+                                           inplace=inplace,
+                                           kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                           **kwargs_for_map)
+
+        else:
+            # this time each centre is read in origin
+            # origin is passed as a flattened array in the navigation dimensions
+            azimuthal_integrals = self._map_iterate(azimuthal_integrate,
+                                                    iterating_kwargs=(('origin',
+                                                                       origin.reshape(-1, 2)),),
+                                                    detector_distance=detector_distance,
+                                                    detector=detector,
+                                                    wavelength=wavelength,
+                                                    size_1d=size_1d,
+                                                    unit=unit,
+                                                    inplace=inplace,
+                                                    kwargs_for_integrator=kwargs_for_integrator,
+                                                    kwargs_for_integrate1d=kwargs_for_integrate1d,
+                                                    **kwargs_for_map)
+
+        if len(azimuthal_integrals.data.shape) == 3:
+            ap = Diffraction1D(azimuthal_integrals.data[:, 1, :])
+            tth = azimuthal_integrals.data[0, 0, :]  # tth is the signal axis
+        else:
+            ap = Diffraction1D(azimuthal_integrals.data[:, :, 1, :])
+            tth = azimuthal_integrals.data[0, 0, 0, :]  # tth is the signal axis
+        scale = (tth[1] - tth[0]) * scaling_factor
+        offset = tth[0] * scaling_factor
+        ap.axes_manager.signal_axes[0].scale = scale
+        ap.axes_manager.signal_axes[0].offset = offset
+        ap.axes_manager.signal_axes[0].name = 'scattering'
+        ap.axes_manager.signal_axes[0].units = unit
+
+        transfer_navigation_axes(ap, self)
+        push_metadata_through(ap, self)
+
+        return ap
 
     def get_radial_profile(self, mask_array=None, inplace=False,
                            *args, **kwargs):
@@ -324,13 +441,7 @@ class Diffraction2D(Signal2D):
 
         return rp
 
-    def get_direct_beam_position(self, method="cross_correlate",
-                                 radius_start=4,
-                                 radius_finish=8,
-                                 sigma=30,
-                                 upsample_factor=100,
-                                 kind=3,
-                                 *args, **kwargs):
+    def get_direct_beam_position(self, method, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -338,71 +449,36 @@ class Diffraction2D(Signal2D):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur", "interpolate"
-            The default is "cross_correlate"
-        radius_start : int (cross_correlate)
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int (cross_correlate)
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
-        sigma : float (blur, interpolate)
-            Sigma value for Gaussian blurring kernel.
-        upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will
-            be found with a precision of 1 / upsample_factor of a pixel.
-        kind : str or int, optional (interpolate)
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
-            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
-            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-            interpolation of zeroth, first, second or third order; ‘previous’
-            and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use.
-        *args:
-            Arguments to be passed to map().
         **kwargs:
             Keyword arguments to be passed to map().
 
         Returns
         -------
-        centers : ndarray
-            Array containing the centers for each SED pattern.
+        shifts : ndarray
+            Array containing the shifts for each SED pattern.
 
         """
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        methods = "cross_correlate", "blur", "interpolate"
+        method_dict = {'cross_correlate': find_beam_offset_cross_correlation,
+                       'blur': find_beam_center_blur,
+                       'interpolate': find_beam_center_interpolate}
 
-        if method == "cross_correlate":
-            shifts = self.map(find_beam_offset_cross_correlation,
-                              radius_start=radius_start,
-                              radius_finish=radius_finish,
-                              inplace=False, *args, **kwargs)
-        elif method == "blur":
-            centers = self.map(find_beam_center_blur,
-                               sigma=sigma,
-                               inplace=False, *args, **kwargs)
+        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
+
+        if method == 'cross_correlate':
+            shifts = self.map(method_function, inplace=False, **kwargs)
+        elif method == 'blur' or method == 'interpolate':
+            centers = self.map(method_function, inplace=False, **kwargs)
             shifts = origin_coordinates - centers
-        elif method == "interpolate":
-            centers = self.map(find_beam_center_interpolate,
-                               sigma=sigma,
-                               upsample_factor=upsample_factor,
-                               kind=kind,
-                               inplace=False, *args, **kwargs)
-            shifts = origin_coordinates - centers
-        else:
-            raise ValueError(f"`method` must be one of {methods}")
 
         return shifts
 
     def center_direct_beam(self,
-                           method="cross_correlate",
-                           radius_start=4,
-                           radius_finish=8,
-                           sigma=30,
-                           upsample_factor=100,
-                           kind=3,
-                           square_width=None,
+                           method,
+                           half_square_width=None,
+                           return_shifts=False,
                            *args, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
@@ -411,34 +487,15 @@ class Diffraction2D(Signal2D):
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur", "interpolate"
-            The default is "cross_correlate"
-        radius_start : int (cross_correlate)
-            The lower bound for the radius of the central disc to be used in the
-            alignment.
-        radius_finish : int (cross_correlate)
-            The upper bounds for the radius of the central disc to be used in
-            the alignment.
-        sigma : float (blur, interpolate)
-            Sigma value for Gaussian blurring kernel.
-        upsample_factor : int (interpolate)
-            Upsample factor for subpixel beam center finding, i.e. the center will
-            be found with a precision of 1 / upsample_factor of a pixel.
-        kind : str or int, optional (interpolate)
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’,
-            ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where
-            ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-            interpolation of zeroth, first, second or third order; ‘previous’
-            and ‘next’ simply return the previous or next value of the point) or as
-            an integer specifying the order of the spline interpolator to use.
-        square_width  : int
+            Must be one of 'cross_correlate', 'blur', 'interpolate'
+        half_square_width  : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-        *args:
-            Arguments to be passed to align2D().
+        return_shifts : bool
+            If True, the values of applied shifts are returned
         **kwargs:
-            Keyword arguments to be passed to align2D().
+            To be passed to method function
 
         Returns
         -------
@@ -450,32 +507,22 @@ class Diffraction2D(Signal2D):
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        if square_width is not None:
-            min_index = np.int(origin_coordinates[0] - square_width)
+        if half_square_width is not None:
+            min_index = np.int(origin_coordinates[0] - half_square_width)
             # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + square_width)
+            max_index = np.int(origin_coordinates[0] + half_square_width)
             cropped = self.isig[min_index:max_index, min_index:max_index]
-            shifts = cropped.get_direct_beam_position(method=method,
-                                                      radius_start=radius_start,
-                                                      radius_finish=radius_finish,
-                                                      sigma=sigma,
-                                                      upsample_factor=upsample_factor,
-                                                      kind=kind,
-                                                      *args, **kwargs)
+            shifts = cropped.get_direct_beam_position(method=method, **kwargs)
         else:
-            shifts = self.get_direct_beam_position(method=method,
-                                                   radius_start=radius_start,
-                                                   radius_finish=radius_finish,
-                                                   sigma=sigma,
-                                                   upsample_factor=upsample_factor,
-                                                   kind=kind,
-                                                   *args, **kwargs)
+            shifts = self.get_direct_beam_position(method=method, **kwargs)
 
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        return self.align2D(shifts=shifts, crop=False, fill_value=0,
-                            *args, **kwargs)
+        self.align2D(shifts=shifts, crop=False, fill_value=0)
+
+        if return_shifts:
+            return shifts
 
     def remove_background(self, method,
                           **kwargs):
@@ -483,57 +530,34 @@ class Diffraction2D(Signal2D):
 
         Parameters
         ----------
-        method : string
+        method : str
             Specifies the method, from:
             {'h-dome','gaussian_difference','median','reference_pattern'}
         **kwargs:
             Keyword arguments to be passed to map(), including method specific ones,
-            running a method with no kwargs will tell you which kwargs you need
+            running a method with no kwargs will return help
 
         Returns
         -------
         bg_subtracted : :obj:`ElectronDiffraction2D`
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
-
-        Notes
-        -----
-        Further details on the methods can be found by looking at the docstrings
-        for the associated utils, these can be accessed by:
-        >>> from pyxem.utils.expt_utils import regional_filter
-        and likewise for: subtract_background_dog
-                          subtract_background_median
-                          subtract_reference
-
         """
-        method_dict = {
-            'h-dome':
-            {'method':'h-dome','params':['h']},
-            'gaussian_difference':
-            {'method':subtract_background_dog,'params':['sigma_min','sigma_max']},
-            'median':
-            {'method':subtract_background_median,'params':['footprint']},
-            'reference_pattern':
-            {'method':subtract_reference,'params':['bg']},
-            }
+        method_dict = {'h-dome': regional_filter,
+                       'gaussian_difference': subtract_background_dog,
+                       'median': subtract_background_median,
+                       'reference_pattern': subtract_reference, }
 
-        if method not in method_dict:
-            raise NotImplementedError("The method `{}` is not implemented. "
-                                         "See documentation for available "
-                                         "implementations.".format(method))
-        if not kwargs:
-            for kwarg in method_dict[method]['params']:
-                print("You need the `{}` kwarg".format(kwarg))
-            return None
+        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
         if method != 'h-dome':
-            bg_subtracted = self.map(method_dict[method]['method'],
-                                     inplace=False,**kwargs)
-        else:
+            bg_subtracted = self.map(method_function,
+                                     inplace=False, **kwargs)
+        elif method == 'h-dome':
             scale = self.data.max()
             self.data = self.data / scale
-            bg_subtracted = self.map(regional_filter,
-                                     inplace=False,**kwargs)
+            bg_subtracted = self.map(method_function,
+                                     inplace=False, **kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
@@ -601,6 +625,10 @@ class Diffraction2D(Signal2D):
                   calibration=self.axes_manager.signal_axes[0].scale)
         peaks = DiffractionVectors(peaks)
         peaks.axes_manager.set_signal_dimension(0)
+
+        # Set DiffractionVectors attributes
+        peaks.pixel_calibration = self.axes_manager.signal_axes[0].scale
+        peaks.detector_shape = self.axes_manager.signal_shape
 
         # Set calibration to same as signal
         x = peaks.axes_manager.navigation_axes[0]

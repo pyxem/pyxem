@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -35,7 +35,7 @@ def _polar_decomposition(image, side):
     ----------
     image : np.array()
         Matrix on which to form polar decomposition.
-    side : string
+    side : str
         'left' or 'right' the side on which to perform polar decomposition.
 
     Returns

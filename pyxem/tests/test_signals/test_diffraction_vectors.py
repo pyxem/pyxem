@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from sklearn.cluster.dbscan_ import DBSCAN
+from sklearn.cluster import DBSCAN
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
 # all of equal length, and the ragged case. A fixture is defined for each of
@@ -186,6 +186,64 @@ class TestUniqueVectors:
         unique_vectors = diffraction_vectors_map.get_unique_vectors(
             distance_threshold=distance_threshold, method='DBSCAN')
         np.testing.assert_almost_equal(unique_vectors.data, answer)
+
+
+class TestFilterVectors:
+
+    def test_filter_vector_magnitudes_map_type(self, diffraction_vectors_map):
+        filtered_vectors = diffraction_vectors_map.filter_vectors_magnitudes(0.1, 1.0)
+        assert isinstance(filtered_vectors, DiffractionVectors)
+
+    def test_filter_vector_magnitudes_single_type(self, diffraction_vectors_single):
+        filtered_vectors = diffraction_vectors_single.filter_vectors_magnitudes(0.1, 1.0)
+        assert isinstance(filtered_vectors, DiffractionVectors)
+
+    def test_filter_vector_magnitudes_map(self, diffraction_vectors_map):
+        filtered_vectors = diffraction_vectors_map.filter_vectors_magnitudes(0.1, 1.0)
+        ans = np.array([[0.089685, 0.292971],
+                        [0.017937, 0.277027],
+                        [-0.069755, 0.257097],
+                        [-0.165419, 0.241153],
+                        [0.049825, 0.149475],
+                        [-0.037867, 0.129545],
+                        [-0.117587, 0.113601],
+                        [0.149475, 0.065769],
+                        [0.229195, 0.045839],
+                        [0.141503, 0.025909]])
+        np.testing.assert_almost_equal(filtered_vectors.data[0][1], ans)
+
+    def test_filter_vector_magnitudes_single(self, diffraction_vectors_single):
+        filtered_vectors = diffraction_vectors_single.filter_vectors_magnitudes(0.15, 1.0)
+        ans = np.array([[-0.115594, 0.123566],
+                        [0.103636, -0.11958],
+                        [0.123566, 0.151468]])
+        np.testing.assert_almost_equal(filtered_vectors.data, ans)
+
+    def test_filter_vector_edge_map_type(self, diffraction_vectors_map):
+        diffraction_vectors_map.detector_shape = (260, 240)
+        diffraction_vectors_map.pixel_calibration = 0.001
+        filtered_vectors = diffraction_vectors_map.filter_vectors_detector_edge(exclude_width=2)
+        assert isinstance(filtered_vectors, DiffractionVectors)
+
+    def test_filter_vector_edge_single_type(self, diffraction_vectors_single):
+        diffraction_vectors_single.detector_shape = (260, 240)
+        diffraction_vectors_single.pixel_calibration = 0.001
+        filtered_vectors = diffraction_vectors_single.filter_vectors_detector_edge(exclude_width=10)
+        assert isinstance(filtered_vectors, DiffractionVectors)
+
+    def test_filter_vector_edge_map(self, diffraction_vectors_map):
+        diffraction_vectors_map.detector_shape = (260, 240)
+        diffraction_vectors_map.pixel_calibration = 0.001
+        filtered_vectors = diffraction_vectors_map.filter_vectors_detector_edge(exclude_width=2)
+        ans = np.array([[-0.117587, 0.113601]])
+        np.testing.assert_almost_equal(filtered_vectors.data[0, 0], ans)
+
+    def test_filter_vector_edge_single(self, diffraction_vectors_single):
+        diffraction_vectors_single.detector_shape = (260, 240)
+        diffraction_vectors_single.pixel_calibration = 0.001
+        filtered_vectors = diffraction_vectors_single.filter_vectors_detector_edge(exclude_width=10)
+        ans = np.array([[0.063776, 0.011958]])
+        np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
 
 class TestDiffractingPixelMaps:

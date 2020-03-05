@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -43,12 +43,12 @@ def test_load_function_core(class_to_test, meta_string):
     """
     to_save = class_to_test(np.zeros((2, 2, 2, 2)))
     to_save.metadata.Signal.tracker = meta_string
-    to_save.save('tempfile.hspy')
-    from_save = pxm.load('tempfile.hspy')
+    to_save.save('tempfile_for_load_and_save.hspy')
+    from_save = pxm.load('tempfile_for_load_and_save.hspy')
     assert isinstance(from_save, class_to_test)
     assert from_save.metadata.Signal.tracker == meta_string
     assert np.allclose(to_save.data, from_save.data)
-    os.remove('tempfile.hspy')
+    os.remove('tempfile_for_load_and_save.hspy')
 
 
 @pytest.fixture()

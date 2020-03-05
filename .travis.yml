@@ -2,16 +2,17 @@ language: python
 
 env:
   global:
-    - DEPS="hyperspy-base diffsims lmfit"
+    - DEPS="hyperspy-base diffsims lmfit pyfai"
     - TEST_DEPS="pytest pytest-cov coveralls"
 
 matrix:
   include:
+  - env: export PYTHON=3.8        
   - env: export PYTHON=3.7
-  - env: export PYTHON=3.6
   - env: export PYTHON=3.7
     os: osx
-    language: generic
+    osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4 - taken from https://docs.travis-ci.com/user/languages/python/#examples
+    language: shell
 
 sudo: True #for Miniconda
 
@@ -26,10 +27,10 @@ before_install:
     hash -r;
   # setup environment
   - source $HOME/miniconda/bin/activate root;
-    conda update -y conda;
-    conda config --append channels conda-forge;
-    conda create -n testenv --yes python=$PYTHON;
-    conda activate testenv;
+  - conda update -y conda;
+  - conda config --append channels conda-forge;
+  - conda create -n testenv --yes python=$PYTHON;
+  - conda activate testenv;
   - conda info -a
   - df -h
 
@@ -40,6 +41,6 @@ install:
 script:
   - export MPLBACKEND=Agg
   - pytest --pyargs pyxem --cov=pyxem
-
+  
 after_success:
   - coveralls
