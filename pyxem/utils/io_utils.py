@@ -1142,7 +1142,7 @@ def load_mib(mib_path, reshape=True, h5_stack_path=None):
         data = h5stack_to_pxm(h5_stack_path, mib_path)
         data = data.data
 
-    exp_times_list = _read_exposures(hdr_stuff, mib_filename)
+    exp_times_list = _read_exposures(hdr_stuff, mib_path)
     data_dict = _STEM_flag_dict(exp_times_list)
 
     if hdr_stuff['Assembly Size'] == '2x2':
