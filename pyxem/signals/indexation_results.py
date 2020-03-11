@@ -108,6 +108,29 @@ class TemplateMatchingResults(BaseSignal):
 
         return cryst_map
 
+    def save_1D(self, filename):
+        """
+        Save current 1D template matching result to "filename".npy. The data is saved
+        using the save function of numpy, and can be loaded using
+        load_1D_template_matching_results(filename)
+
+        Parameters
+        ----------
+        filename : str
+            Name of the file to be created, including path to the desired storing directory.
+        """
+        ax_1, ax_2, ax_3 = self.data.shape
+        data_array = np.zeros((ax_1,ax_2,ax_3+2))
+        for i in range(ax_1):
+            for j in range(ax_2):
+                data_array[i,j,0] = self.data[i,j,0]
+                data_array[i,j,-1] = self.data[i,j,-1]
+                data_array[i,j,1] = self.data[i,j,1][0]
+                data_array[i,j,2] = self.data[i,j,1][1]
+                data_array[i,j,3] = self.data[i,j,1][2]
+
+        np.save(filename,data_array)
+
 
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal

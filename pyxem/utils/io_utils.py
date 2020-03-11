@@ -199,6 +199,40 @@ def load_mib(mib_filename, reshape=True):
     return data_pxm
 
 
+def load_1D_template_matching_results(filename):
+    """
+    Reads a .npy file and returns a TemplateMatchingResults object.
+
+    Parameters
+    ----------
+    filename : str
+        The name of the .npy file to be read
+
+    Returns
+    -------
+    match_results : TemplateMatchingResults
+        A TemplateMatchingResults object containing the loaded data
+    """
+    try:
+        loaded_numpy_array =  np.load(filename)
+    except ValueError:
+        raise ValueError('Could not open file: {}'.format(filename))
+
+    ax_1, ax_2, ax_3 = loaded_numpy_array.shape
+    match_results_data = np.zeros((ax_1, ax_2, ax_3-2), dtype = object)
+    for i in range(ax_1):
+        for j in range(ax_2):
+            match_results_data[i, j, 0] = int(loaded_numpy_array[i, j, 0])
+            match_results_data[i, j, -1] = loaded_numpy_array[i, j, -1]
+            my_array = np.asarray([loaded_numpy_array[i, j, 1],
+                                   loaded_numpy_array[i, j, 2],
+                                   loaded_numpy_array[i, j, 3]])
+            match_results_data[i, j, 1] = my_array
+
+    match_results = TemplateMatchingResults(match_results_data)
+    return match_results
+
+
 def _manageHeader(fname):
     """Get necessary information from the header of the .mib file.
 
