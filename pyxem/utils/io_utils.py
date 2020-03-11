@@ -230,6 +230,7 @@ def load_1D_template_matching_results(filename):
             match_results_data[i, j, 1] = my_array
 
     match_results = TemplateMatchingResults(match_results_data)
+
     return match_results
 
 
