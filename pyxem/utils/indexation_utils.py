@@ -600,7 +600,7 @@ def peaks_from_best_n_templates(match_results, library, n = None):
     peaks_and_intensities = []
 
     for j in range(n):
-        best_fit = get_nth_best_solution(match_results.data, rank=j)
+        best_fit = get_nth_best_solution(match_results, rank=j)
         phase_names = list(library.keys())
         phase_index = int(best_fit[0])
         phase = phase_names[phase_index]
