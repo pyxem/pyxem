@@ -107,7 +107,7 @@ class IndexTracker(object):
 
         self.signal = signal.data
 
-        self.slices = signal.shape[0]
+        self.slices = self.signal.shape[0]
         self.ind = self.slices//2
         self.rank = 0
         self.max_rank = len(storage[0])
