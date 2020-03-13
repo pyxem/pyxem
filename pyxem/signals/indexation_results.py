@@ -30,6 +30,7 @@ from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.indexation_utils import peaks_from_best_n_templates
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
+from pyxem.utils.plot import IndexTracker
 
 from pyxem import CrystallographicMap
 
