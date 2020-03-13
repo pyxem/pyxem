@@ -18,14 +18,17 @@
 
 import numpy as np
 import hyperspy.api as hs
+import matplotlib.pyplot as plt
 from hyperspy.signal import BaseSignal
 from warnings import warn
+
 
 from pyxem.signals import push_metadata_through, transfer_navigation_axes
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import peaks_from_best_vector_match
 from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
+from pyxem.utils.indexation_utils import peaks_from_best_n_templates
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 from pyxem import CrystallographicMap
@@ -72,6 +75,42 @@ class TemplateMatchingResults(BaseSignal):
         for mx, my in zip(mmx, mmy):
             m = hs.markers.point(x=mx, y=my, color='red', marker='x')
             signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
+
+    def plot_best_n_templates_on_1D_signal(self,
+                                           signal,
+                                           library,
+                                           kwargs_for_signal = {},
+                                           kwargs_for_template_scatter = {}
+                                           ):
+        """Plot the n best matching diffraction templates on a signal. To select next-best
+        template use mouseclick. To scroll to next signal index, use mousewheel.
+
+        Parameters
+        ----------
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
+            This signal must have the same navigation dimensions as the peaks.
+        library : DiffractionLibrary
+            Diffraction library containing the phases and rotations
+        permanent_markers : bool
+            Permanently save the peaks as markers on the signal
+        *args :
+            Arguments passed to signal.plot()
+        **kwargs :
+            Keyword arguments passed to signal.plot()
+        """
+
+        storage = peaks_from_best_n_templates(self, library)
+
+        fig, [ax1,ax2,ax3] = plt.subplots(1, 3)
+
+        tracker = IndexTracker(ax1, ax2, ax3, signal, storage, kwargs_for_signal = kwargs_for_signal,
+                               kwargs_for_template_scatter = kwargs_for_template_scatter)
+        fig.canvas.mpl_connect('scroll_event', tracker.onscroll)
+        fig.canvas.mpl_connect('button_press_event', tracker.click)
+        plt.show()
+
+        return tracker
 
     def get_crystallographic_map(self,
                                  *args, **kwargs):

@@ -70,3 +70,107 @@ def generate_marker_inputs_from_peaks(peaks):
     y = xy_cords[1]
 
     return x, y
+
+class IndexTracker(object):
+    """
+    Class for keeping track of indices for the function plot_templates_on_1D_signal, using
+    matplotlib.figure.canvas.mpl_connect()
+    """
+
+    def __init__(self, ax1, ax2, ax3, signal, storage, kwargs_for_signal = {}, kwargs_for_template_scatter = {}):
+        """
+        Set initial parameters for IndexTracker class.
+
+        Parameters
+        ----------
+        ax1,ax2,ax3 : matplotlib.axes._subplots.AxesSubplot
+            Image axes for figure which will be updated by the IndexTracker class
+
+        signal : pyxem.signals.electron_diffraction2d.ElectronDiffraction2D
+            1D ElectronDiffraction2D object. The hyperspy generator for ElectronDiffraction1D does not
+            produce the expected result for np.arrays of dimensions (30,512,512) therefore ElectronDiffraction2D
+            is chosen.
+
+        storage : list
+            List containing phase information, angle, correlation score, template coordinates and template intensities
+            for every match result.
+
+        kwargs_for_signal : dict
+            Arguments passed on to ax.imshow() used to plot the signal.
+
+        kwargs_for_template_scatter : dict
+            Arguments passed on to ax.scatter() used to plot template data.
+        """
+        self.ax1 = ax1
+        self.ax2 = ax2
+        self.ax3 = ax3
+
+        self.signal = signal
+
+        self.slices = signal.shape[0]
+        self.ind = self.slices//2
+        self.rank = 0
+        self.max_rank = len(storage[0])
+        self.storage = storage
+
+        coordinates = self.storage[self.ind][self.rank][3]
+        intensities = self.storage[self.ind][self.rank][4]
+        x,y = zip(*coordinates)
+
+        self.im = ax1.imshow(self.signal[self.ind], **kwargs_for_signal)
+        self.im2 = ax2.imshow(self.signal[self.ind], **kwargs_for_signal)
+        self.im3 = ax3.imshow(self.signal[self.ind], **kwargs_for_signal)
+        self.line1 = ax2.scatter(x = x, y = y, c = intensities, **kwargs_for_template_scatter)
+        self.line2 = ax3.scatter(x = x, y = y, c = 'r', **kwargs_for_template_scatter)
+        self.update()
+
+    def onscroll(self, event):
+        """
+        Updates the index of the tracker object upon detecting a mouse scroll event. Plot is updated when
+        an event is detected.
+        """
+        if event.button == 'up':
+            self.ind = (self.ind + 1) % self.slices
+        else:
+            self.ind = (self.ind - 1) % self.slices
+        self.update()
+
+    def click(self, event):
+        """
+        Updates the rank index of the tracker object upon detecting a mouse click event. Plot is updated when
+        an event is detected.
+        """
+        self.rank = (self.rank + 1) % self.max_rank
+        self.update()
+
+    def update(self):
+        """
+        Updates the current plot after detecting an event.
+        """
+        self.im.set_data(self.signal[self.ind,:,:])
+        self.ax1.set_ylabel('slice %s' % self.ind)
+        self.ax1.set_title('Signal')
+        self.im.axes.figure.canvas.draw()
+
+        phase = self.storage[self.ind][self.rank][0]
+        angle = self.storage[self.ind][self.rank][1]
+        correlation_score = self.storage[self.ind][self.rank][2]
+        coordinates = self.storage[self.ind][self.rank][3]
+        intensities = self.storage[self.ind][self.rank][4]
+
+        self.im2.set_data(self.signal[self.ind,:,:])
+        self.line1.set_offsets(coordinates)
+        self.line1.set_array(intensities)
+        self.ax2.set_title('Euler Angle: ({0:.0f},{1:.0f},{2:.0f}) Phase: {3}'.format(angle[0],
+                                                                                     angle[1],
+                                                                                     angle[2],
+                                                                                     phase))
+
+        self.im2.axes.figure.canvas.draw()
+
+        self.im3.set_data(self.signal[self.ind,:,:])
+        self.line2.set_offsets(coordinates)
+        self.ax3.set_title('Rank: {0}, Correlation score: {1:.3f}'.format(self.rank,
+                                                                    correlation_score))
+        self.im3.axes.figure.canvas.draw()
+
