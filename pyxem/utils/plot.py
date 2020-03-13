@@ -105,7 +105,7 @@ class IndexTracker(object):
         self.ax2 = ax2
         self.ax3 = ax3
 
-        self.signal = signal
+        self.signal = signal.data
 
         self.slices = signal.shape[0]
         self.ind = self.slices//2
