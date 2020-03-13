@@ -105,9 +105,9 @@ class IndexTracker(object):
         self.ax2 = ax2
         self.ax3 = ax3
 
-        self.signal = signal.data
+        self.signal_data = signal.data
 
-        self.slices = self.signal.shape[0]
+        self.slices = self.signal_data.shape[0]
         self.ind = self.slices//2
         self.rank = 0
         self.max_rank = len(storage[0])
@@ -117,9 +117,9 @@ class IndexTracker(object):
         intensities = self.storage[self.ind][self.rank][4]
         x,y = zip(*coordinates)
 
-        self.im = ax1.imshow(self.signal[self.ind], **kwargs_for_signal)
-        self.im2 = ax2.imshow(self.signal[self.ind], **kwargs_for_signal)
-        self.im3 = ax3.imshow(self.signal[self.ind], **kwargs_for_signal)
+        self.im = ax1.imshow(self.signal_data[self.ind], **kwargs_for_signal)
+        self.im2 = ax2.imshow(self.signal_data[self.ind], **kwargs_for_signal)
+        self.im3 = ax3.imshow(self.signal_data[self.ind], **kwargs_for_signal)
         self.line1 = ax2.scatter(x = x, y = y, c = intensities, **kwargs_for_template_scatter)
         self.line2 = ax3.scatter(x = x, y = y, c = 'r', **kwargs_for_template_scatter)
         self.update()
@@ -147,7 +147,7 @@ class IndexTracker(object):
         """
         Updates the current plot after detecting an event.
         """
-        self.im.set_data(self.signal[self.ind,:,:])
+        self.im.set_data(self.signal_data[self.ind,:,:])
         self.ax1.set_ylabel('slice %s' % self.ind)
         self.ax1.set_title('Signal')
         self.im.axes.figure.canvas.draw()
@@ -158,7 +158,7 @@ class IndexTracker(object):
         coordinates = self.storage[self.ind][self.rank][3]
         intensities = self.storage[self.ind][self.rank][4]
 
-        self.im2.set_data(self.signal[self.ind,:,:])
+        self.im2.set_data(self.signal_data[self.ind,:,:])
         self.line1.set_offsets(coordinates)
         self.line1.set_array(intensities)
         self.ax2.set_title('Euler Angle: ({0:.0f},{1:.0f},{2:.0f}) Phase: {3}'.format(angle[0],
@@ -168,7 +168,7 @@ class IndexTracker(object):
 
         self.im2.axes.figure.canvas.draw()
 
-        self.im3.set_data(self.signal[self.ind,:,:])
+        self.im3.set_data(self.signal_data[self.ind,:,:])
         self.line2.set_offsets(coordinates)
         self.ax3.set_title('Rank: {0}, Correlation score: {1:.3f}'.format(self.rank,
                                                                     correlation_score))
