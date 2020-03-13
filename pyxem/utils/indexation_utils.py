@@ -594,24 +594,28 @@ def crystal_from_vector_matching(z_matches):
     return results_array
 
 def peaks_from_best_n_templates(match_results, library, n = None):
+    number_of_templates = match_results.data.shape[0]
     if n == None:
         n = match_results.data.shape[1]
 
-    peaks_and_intensities = []
+    storage = []
+    for i in range(number_of_templates):
+        peaks_and_intensities = []
 
-    for j in range(n):
-        best_fit = get_nth_best_solution(match_results, rank=j)
-        phase_names = list(library.keys())
-        phase_index = int(best_fit[0])
-        phase = phase_names[phase_index]
-        simulation = library.get_library_entry(
-            phase=phase,
-            angle=tuple(best_fit[1]))
-        peaks = simulation['pixel_coords']
-        intensities = simulation['intensities']
-        peaks_and_intensities.append([phase, best_fit[1], best_fit[2], peaks, intensities])
-
-    return peaks_and_intensities
+        for j in range(n):
+            best_fit = get_nth_best_solution(match_results.data[i], rank=j)
+            phase_names = list(library.keys())
+            phase_index = int(best_fit[0])
+            phase = phase_names[phase_index]
+            simulation = library.get_library_entry(
+                phase=phase,
+                angle=tuple(best_fit[1]))
+            peaks = simulation['pixel_coords']
+            intensities = simulation['intensities']
+            peaks_and_intensities.append([phase, best_fit[1], best_fit[2], peaks, intensities])
+        storage.append(peaks_and_intensities)
+        
+    return storage
 
 def peaks_from_best_template(single_match_result, library, rank=0):
     """ Takes a TemplateMatchingResults object and return the associated peaks,

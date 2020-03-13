@@ -101,9 +101,9 @@ class TemplateMatchingResults(BaseSignal):
             Keyword arguments passed to signal.plot()
         """
 
-        storage = self.map(peaks_from_best_n_templates,
-                           library=library
-                           )
+        storage = peaks_from_best_n_templates(self,
+                                              library=library
+                                              )
 
         fig, [ax1,ax2,ax3] = plt.subplots(1, 3)
 
