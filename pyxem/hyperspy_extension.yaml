@@ -18,7 +18,7 @@
 
 signals:
   Diffraction1D:
-    signal_type: "Diffraction1D"
+    signal_type: Diffraction1D
     signal_dimension: 1
     dtype: real
     lazy: False
@@ -30,7 +30,7 @@ signals:
     lazy: False
     module: pyxem.signals.diffraction2d
   LazyDiffraction1D:
-    signal_type: "LazyDiffraction1D"
+    signal_type: Diffraction1D
     signal_dimension: 1
     dtype: real
     lazy: True

@@ -30,7 +30,7 @@ from pyxem.signals import push_metadata_through
 
 
 class Diffraction1D(Signal1D):
-    _signal_type = "diffraction1d"
+    _signal_type = "Diffraction1D"
 
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
@@ -118,30 +118,6 @@ class Diffraction1D(Signal1D):
 
         return vdfim
 
-    def as_lazy(self, *args, **kwargs):
-        """Create a copy of the Diffraction1D object as a
-        :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction1D`.
-
-        Parameters
-        ----------
-        copy_variance : bool
-            If True variance from the original Diffraction1D object is copied to
-            the new LazyDiffraction1D object.
-
-        Returns
-        -------
-        res : :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction1D`.
-            The lazy signal.
-        """
-        res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyDiffraction1D
-        res.__init__(**res._to_dictionary())
-        return res
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = Diffraction1D
-
 
 class LazyDiffraction1D(LazySignal, Diffraction1D):
 
@@ -149,12 +125,3 @@ class LazyDiffraction1D(LazySignal, Diffraction1D):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def compute(self, *args, **kwargs):
-        super().compute(*args, **kwargs)
-        self.__class__ = Diffraction1D
-        self.__init__(**self._to_dictionary())
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = LazyDiffraction1D
