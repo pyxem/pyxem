@@ -30,7 +30,7 @@ from hyperspy._signals.lazy import LazySignal
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import push_metadata_through, transfer_navigation_axes, \
+from pyxem.signals import transfer_navigation_axes, push_metadata_through, \
     select_method_from_method_dict
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
@@ -55,23 +55,6 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 class Diffraction2D(Signal2D):
     _signal_type = "diffraction2d"
-
-    def __init__(self, *args, **kwargs):
-        """
-        Create an Diffraction2D object from a hs.Signal2D or np.array.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Signal2D. The first arg should be
-            either a numpy.ndarray or a Signal2D
-        **kwargs :
-            Passed to the __init__ of Signal2D
-        """
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
-        super().__init__(*args, **kwargs)
-
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
     def plot_interactive_virtual_image(self, roi, **kwargs):
         """Plots an interactive virtual image formed with a specified and
@@ -671,7 +654,4 @@ class Diffraction2D(Signal2D):
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
 
-    _lazy = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass

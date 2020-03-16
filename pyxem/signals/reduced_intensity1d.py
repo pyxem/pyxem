@@ -31,9 +31,6 @@ from pyxem.utils.ri_utils import damp_ri_exponential, damp_ri_lorch, \
 class ReducedIntensity1D(Signal1D):
     _signal_type = "reduced_intensity1d"
 
-    def __init__(self, *args, **kwargs):
-        Signal1D.__init__(self, *args, **kwargs)
-
     def damp_exponential(self, b, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of exp(-b*(s^2)), where b is the damping parameter.

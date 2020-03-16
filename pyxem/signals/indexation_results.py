@@ -22,7 +22,7 @@ from hyperspy.signal import BaseSignal
 from hyperspy.signals import Signal2D
 from warnings import warn
 
-from pyxem.signals import push_metadata_through, transfer_navigation_axes
+from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import peaks_from_best_vector_match
 from pyxem.utils.indexation_utils import crystal_from_template_matching
@@ -37,10 +37,6 @@ class TemplateMatchingResults(Signal2D):
     phase and orientation at each navigation position with associated metrics.
     """
     _signal_type = "template_matching"
-
-    def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
-        super().__init__(*args, **kwargs)
 
     def plot_best_matching_results_on_signal(self, signal,
                                              library,

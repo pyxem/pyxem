@@ -17,17 +17,13 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from tqdm import tqdm
 
 from hyperspy.signals import BaseSignal
-from hyperspy.signals import Signal2D
 
 from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 
-from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import transfer_navigation_axes_to_signal_axes
-from pyxem.signals import push_metadata_through
 
 """
 Signal class for crystallographic phase and orientation maps.
@@ -174,7 +170,6 @@ class CrystallographicMap(BaseSignal):
     _signal_type = "crystallographic_map"
 
     def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.axes_manager.set_signal_dimension(1)
         self.method = None

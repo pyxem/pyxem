@@ -22,7 +22,6 @@ import numpy as np
 from hyperspy.signals import BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction2d import Diffraction2D
 
 
@@ -37,11 +36,10 @@ class ElectronDiffraction2D(Diffraction2D):
         ----------
         *args :
             Passed to the __init__ of Diffraction2D. The first arg should be
-            either a numpy.ndarray or a Signal2D
+            either a numpy.ndarray
         **kwargs :
             Passed to the __init__ of Diffraction2D
         """
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
         # Set default attributes
@@ -156,7 +154,4 @@ class ElectronDiffraction2D(Diffraction2D):
 
 class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):
 
-    _lazy = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass

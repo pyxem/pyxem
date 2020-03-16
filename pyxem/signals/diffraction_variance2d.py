@@ -31,9 +31,6 @@ import numpy as np
 class DiffractionVariance2D(Signal2D):
     _signal_type = "diffraction_variance2d"
 
-    def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
-
     def get_radial_profile(self, inplace=False, **kwargs):
         """Return the radial profile of the diffraction variance signals.
 
@@ -65,7 +62,7 @@ class DiffractionVariance2D(Signal2D):
         rp_axis = rp.axes_manager.signal_axes[0]
         rp_axis.name = 'q'
         rp_axis.scale = self.axes_manager.signal_axes[0].scale
-        rp_axis.units = '$A^{-1}$'
+        rp_axis.units = '$Å^{-1}$'
 
         return rp
 
@@ -73,5 +70,4 @@ class DiffractionVariance2D(Signal2D):
 class ImageVariance(Signal2D):
     _signal_type = "image_variance"
 
-    def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
+    pass

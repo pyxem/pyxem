@@ -27,9 +27,6 @@ from pyxem.utils.pdf_utils import normalise_pdf_signal_to_max
 class PairDistributionFunction1D(Signal1D):
     _signal_type = "pair_distribution_function1d"
 
-    def __init__(self, *args, **kwargs):
-        Signal1D.__init__(self, *args, **kwargs)
-
     def normalise_signal(self, s_min=0, inplace=False, *args, **kwargs):
         """
         Normalises the Reduced PDF signal to having a maximum of 1.

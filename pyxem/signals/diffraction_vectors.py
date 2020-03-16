@@ -28,7 +28,6 @@ from sklearn.cluster import DBSCAN
 
 from warnings import warn
 
-from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes, transfer_navigation_axes_to_signal_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
@@ -69,7 +68,6 @@ class DiffractionVectors(BaseSignal):
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
