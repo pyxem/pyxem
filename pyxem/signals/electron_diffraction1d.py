@@ -25,7 +25,7 @@ from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class ElectronDiffraction1D(Diffraction1D):
-    _signal_type = "ElectronDiffraction1D"
+    _signal_type = "electron_diffraction_1d"
 
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)
