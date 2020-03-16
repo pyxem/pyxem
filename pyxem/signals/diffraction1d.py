@@ -30,7 +30,7 @@ from pyxem.signals import push_metadata_through
 
 
 class Diffraction1D(Signal1D):
-    _signal_type = "diffraction_1d"
+    _signal_type = "diffraction1d"
 
     def __init__(self, *args, **kwargs):
         self, args, kwargs = push_metadata_through(self, *args, **kwargs)

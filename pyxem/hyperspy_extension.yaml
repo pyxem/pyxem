@@ -18,49 +18,49 @@
 
 signals:
   Diffraction1D:
-    signal_type: diffraction_1d
+    signal_type: diffraction1d
     signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction1d
   Diffraction2D:
-    signal_type: diffraction_2d
+    signal_type: diffraction2d
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction2d
   LazyDiffraction1D:
-    signal_type: diffraction_1d
+    signal_type: diffraction1d
     signal_dimension: 1
     dtype: real
     lazy: True
     module: pyxem.signals.diffraction1d
   LazyDiffraction2D:
-    signal_type: diffraction_2d
+    signal_type: diffraction2d
     signal_dimension: 2
     dtype: real
     lazy: True
     module: pyxem.signals.diffraction2d
   ElectronDiffraction1D:
-    signal_type: electron_diffraction_1d
+    signal_type: electron_diffraction1d
     signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.electron_diffraction1d
   ElectronDiffraction2D:
-    signal_type: electron_diffraction_2d
+    signal_type: electron_diffraction2d
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.electron_diffraction2d
   LazyElectronDiffraction1D:
-    signal_type: electron_diffraction_1d
+    signal_type: electron_diffraction1d
     signal_dimension: 1
     dtype: real
     lazy: True
     module: pyxem.signals.electron_diffraction1d
   LazyElectronDiffraction2D:
-    signal_type: electron_diffraction_2d
+    signal_type: electron_diffraction2d
     signal_dimension: 2
     dtype: real
     lazy: True

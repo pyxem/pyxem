@@ -27,7 +27,7 @@ from pyxem.signals.diffraction2d import Diffraction2D
 
 
 class ElectronDiffraction2D(Diffraction2D):
-    _signal_type = "electron_diffraction_2d"
+    _signal_type = "electron_diffraction2d"
 
     def __init__(self, *args, **kwargs):
         """

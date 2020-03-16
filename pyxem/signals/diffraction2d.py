@@ -54,7 +54,7 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D):
-    _signal_type = "diffraction_2d"
+    _signal_type = "diffraction2d"
 
     def __init__(self, *args, **kwargs):
         """
