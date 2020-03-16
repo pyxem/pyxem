@@ -371,7 +371,7 @@ class DiffractionVectors(BaseSignal):
         # A distance_threshold of 0 implies a strict comparison. So in that
         # case, a warning is raised unless the specified method is 'strict'.
         if distance_threshold == 0:
-            if method is not 'strict':
+            if method != 'strict':
                 warn(message='distance_threshold=0 was given, and therefore ' +
                      'a strict comparison is used, even though the ' +
                      'specified method was ' + method + '.')
