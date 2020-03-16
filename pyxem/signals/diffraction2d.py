@@ -54,7 +54,7 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D):
-    _signal_type = "diffraction2d"
+    _signal_type = "Diffraction2D"
 
     def __init__(self, *args, **kwargs):
         """
@@ -668,30 +668,6 @@ class Diffraction2D(Signal2D):
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
 
-    def as_lazy(self, *args, **kwargs):
-        """Create a copy of the Diffraction2D object as a
-        :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
-
-        Parameters
-        ----------
-        copy_variance : bool
-            If True variance from the original Diffraction2D object is copied to
-            the new LazyDiffraction2D object.
-
-        Returns
-        -------
-        res : :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
-            The lazy signal.
-        """
-        res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyDiffraction2D
-        res.__init__(**res._to_dictionary())
-        return res
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = Diffraction2D
-
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
 
@@ -699,12 +675,3 @@ class LazyDiffraction2D(LazySignal, Diffraction2D):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def compute(self, *args, **kwargs):
-        super().compute(*args, **kwargs)
-        self.__class__ = Diffraction2D
-        self.__init__(**self._to_dictionary())
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = LazyDiffraction2D
