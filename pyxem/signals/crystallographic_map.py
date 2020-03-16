@@ -170,6 +170,7 @@ class CrystallographicMap(BaseSignal):
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
+    _signal_dimension = 1
     _signal_type = "crystallographic_map"
 
     def __init__(self, *args, **kwargs):

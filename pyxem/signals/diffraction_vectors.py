@@ -65,6 +65,7 @@ class DiffractionVectors(BaseSignal):
         Array of Miller indices associated with each diffraction vector
         following indexation.
     """
+    _signal_dimension = 0
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):

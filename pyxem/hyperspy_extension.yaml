@@ -67,25 +67,25 @@ signals:
     module: pyxem.signals.electron_diffraction2d
   DiffractionVectors:
     signal_type: diffraction_vectors
-    signal_dimension: None
+    signal_dimension: 0
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
   TemplateMatchingResults:
     signal_type: template_matching
-    signal_dimension: None
+    signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
   VectorMatchingResults:
     signal_type: vector_matching
-    signal_dimension: None
+    signal_dimension: 0
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
   CrystallographicMap:
     signal_type: crystallographic_map
-    signal_dimension: None
+    signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.crystallographic_map
