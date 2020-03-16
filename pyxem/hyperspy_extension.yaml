@@ -48,7 +48,7 @@ signals:
     lazy: False
     module: pyxem.signals.electron_diffraction1d
   ElectronDiffraction2D:
-    signal_type: "ElectronDiffraction2D"
+    signal_type: ElectronDiffraction2D
     signal_dimension: 2
     dtype: real
     lazy: False
@@ -60,7 +60,7 @@ signals:
     lazy: True
     module: pyxem.signals.electron_diffraction1d
   LazyElectronDiffraction2D:
-    signal_type: "LazyElectronDiffraction2D"
+    signal_type: ElectronDiffraction2D
     signal_dimension: 2
     dtype: real
     lazy: True

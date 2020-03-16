@@ -27,7 +27,7 @@ from pyxem.signals.diffraction2d import Diffraction2D
 
 
 class ElectronDiffraction2D(Diffraction2D):
-    _signal_type = "electron_diffraction2d"
+    _signal_type = "ElectronDiffraction2D"
 
     def __init__(self, *args, **kwargs):
         """
@@ -153,30 +153,6 @@ class ElectronDiffraction2D(Diffraction2D):
         y.scale = calibration
         y.units = 'nm'
 
-    def as_lazy(self, *args, **kwargs):
-        """Create a copy of the ElectronDiffraction2D object as a
-        :py:class:`~pyxem.signals.electron_diffraction2d.LazyElectronDiffraction2D`.
-
-        Parameters
-        ----------
-        copy_variance : bool
-            If True variance from the original ElectronDiffraction2D object is
-            copied to the new LazyElectronDiffraction2D object.
-
-        Returns
-        -------
-        res : :py:class:`~pyxem.signals.electron_diffraction2d.LazyElectronDiffraction2D`.
-            The lazy signal.
-        """
-        res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyElectronDiffraction2D
-        res.__init__(**res._to_dictionary())
-        return res
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = ElectronDiffraction2D
-
 
 class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):
 
@@ -184,12 +160,3 @@ class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def compute(self, *args, **kwargs):
-        super().compute(*args, **kwargs)
-        self.__class__ = ElectronDiffraction2D
-        self.__init__(**self._to_dictionary())
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = LazyElectronDiffraction2D
