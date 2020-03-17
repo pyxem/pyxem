@@ -167,6 +167,7 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
                 └── Signal
                     ├── binned = False
                     ├── exposure_time = 0.001
+                    ├── flip = True
                     ├── flyback_times = [0.066, 0.071, 0.065, 0.017825]
                     ├── frames_number_skipped = 90
                     ├── scan_X = 256
@@ -848,9 +849,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
     for i in range(iters_num):
         if (i + 1) * stack_num < data.shape[0]:
             if i == 0:
-                print(i)
                 data_dump0 = data[:(i + 1) * stack_num, :]
-                print(data_dump0.shape)
                 if raw_binary is True:
                     data_dump1 = np.unpackbits(data_dump0)
                     data_dump1.reshape(data_dump0.shape[0], data_dump0.shape[1] * 8)
@@ -863,9 +862,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
                 del data_dump0
                 del data_dump1
             else:
-                print(i)
                 data_dump0 = data[i * stack_num:(i + 1) * stack_num, :]
-                print(data_dump0.shape)
                 if raw_binary is True:
                     data_dump1 = np.unpackbits(data_dump0)
                     data_dump1.reshape(data_dump0.shape[0], data_dump0.shape[1] * 8)
@@ -873,13 +870,10 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
                 else:
                     data_dump1 = _untangle_raw(data_dump0, hdr_info, data_dump0.shape[0])
                 _h5_chunk_write(data_dump1, saving_path)
-                print(data_dump1.shape)
                 del data_dump0
                 del data_dump1
         else:
-            print(i)
             data_dump0 = data[i * stack_num:, :]
-            print(data_dump0.shape)
             if raw_binary is True:
                 data_dump1 = np.unpackbits(data_dump0)
                 data_dump1.reshape(data_dump0.shape[0], data_dump0.shape[1] * 8)
@@ -887,7 +881,6 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
             else:
                 data_dump1 = _untangle_raw(data_dump0, hdr_info, data_dump0.shape[0])
             _h5_chunk_write(data_dump1, saving_path)
-            print(data_dump1.shape)
             del data_dump0
             del data_dump1
             return
