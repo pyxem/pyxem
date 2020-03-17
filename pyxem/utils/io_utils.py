@@ -668,17 +668,33 @@ def _read_exposures(hdr_info, fp, pct_frames_to_read=0.1):
                         exp_time.append(float(''.join(str_list)))
             except ValueError:
                 print('Frame exposure times are not appearing in header!')
-        # TODO complete the cases for the non-RAW scenarios
-        else:
+        elif hdr_info['raw'] == 'MIB':
             try:
-                data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
-                data = data[:, ]
-                data_crop = data[:int(depth * pct_frames_to_read)]
-                d = data_crop.compute()
-                exp_time = []
-                for line in range(d.shape[0]):
-                    str_list = [chr(d[line][n]) for n in range(d.shape[1])]
-                    exp_time.append(float(''.join(str_list)))
+                # the header for the case of 12 bit data should be unpacked first
+                if hdr_info['Counter Depth (number)'] == 12:
+                    data = data.reshape(-1, width_height + hdr_bits)[:, :68]
+                    data_crop = data[:int(depth * pct_frames_to_read)]
+                    d = data_crop.compute()
+                    exp_time = []
+                    for frame in range(d.shape[0]):
+                        frame_text = str()
+                        for item in d[frame]:
+                            temp = unpack('cc', item)
+                            c1 = temp[1].decode('ascii')
+                            c2 = temp[0].decode('ascii')
+                            frame_text = frame_text + c1
+                            frame_text = frame_text + c2
+                        exp_time.append(float(frame_text[71:79]))
+                # all the other cases are 8 bit
+                else:
+                    data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
+                    data = data[:, ]
+                    data_crop = data[:int(depth * pct_frames_to_read)]
+                    d = data_crop.compute()
+                    exp_time = []
+                    for line in range(d.shape[0]):
+                        str_list = [chr(d[line][n]) for n in range(d.shape[1])]
+                        exp_time.append(float(''.join(str_list)))
             except ValueError:
                 print('Frame exposure times are not appearing in header!')
     return exp_time
