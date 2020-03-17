@@ -136,21 +136,31 @@ def load_hspy(filename, lazy=False, assign_to=None):
 
     return s
 
-
-def load_mib(mib_filename, reshape=True):
-    """Read a .mib file using dask and return as LazyElectronDiffraction2D.
+def load_mib(mib_path, reshape=True, flip, True, h5_stack_path=None):
+    """Read a .mib file or an h5 stack file using dask and return as a lazy pyXem / hyperspy signal.
 
     Parameters
     ----------
-    mib_filename : str
-        The name of the .mib file to be read.
-    reshape : boolean
+    mib_path : str
+        The full path of the .mib file to be read.
+    reshape: boolean
         keywork argument to control reshaping of the stack (default is True).
         It attepmts to reshape using the flyback pixel.
+    flip: boolean
+        keyword argument to vertically flip the diffraction signal (default)
+        or return unchanged. The metadata is updated accordingly.
+    h5_stack_path: str
+    default None. this is the h5 file path that we can read the data from in the case of large scan arrays.
+    flip: boolean
+        keyword argument to vertically flip the diffraction signal (default)
 
     Returns
     -------
     data_pxm : pyxem.signals.LazyElectronDiffraction2D
+    If the data is detected to be STEM is reshaped using two functions, one using the
+    exposure times appearing on the header and if no exposure times available using the
+    sum frames and detecting the flyback frames. If TEM data, a single frame or if
+    reshaping the STEM fails, the stack is returned.
                 The metadata adds the following domains:
                 General
                 │   └── title =
@@ -161,13 +171,42 @@ def load_mib(mib_filename, reshape=True):
                     ├── frames_number_skipped = 90
                     ├── scan_X = 256
                     └── signal_type = STEM
+
     """
-    hdr_stuff = _parse_hdr(mib_filename)
-    data = _read_mib(mib_filename, hdr_stuff)
-    exp_times_list = _read_exposures(hdr_stuff, mib_filename)
+    hdr_stuff = _parse_hdr(mib_path)
+    width = hdr_stuff['width']
+    height = hdr_stuff['height']
+    width_height = width * height
+    if h5_stack_path is None:
+        data = _mib_to_daskarr(hdr_stuff, mib_path)
+        depth = _get_mib_depth(hdr_stuff, mib_path)
+        hdr_bits = _get_hdr_bits(hdr_stuff)
+        if hdr_stuff['Counter Depth (number)'] == 1:
+            # RAW 1 bit data: the header bits are written as uint8 but the frames
+            # are binary and need to be unpacked as such.
+            data = data.reshape(-1, int(width_height / 8 + hdr_bits))
+            data = data[:, hdr_bits:]
+            # get the shape axis 1 before unpackbit
+            s0 = data.shape[0]
+            s1 = data.shape[1]
+            data = np.unpackbits(data)
+            data.reshape(s0, s1 * 8)
+        else:
+            data = data.reshape(-1, int(width_height + hdr_bits))
+            data = data[:, hdr_bits:]
+        if hdr_stuff['raw'] == 'R64':
+            data = _untangle_raw(data, hdr_stuff, depth)
+        elif hdr_stuff['raw'] == 'MIB':
+            data = data.reshape(depth, width, height)
+    else:
+        data = h5stack_to_pxm(h5_stack_path, mib_path)
+        data = data.data
+
+    exp_times_list = _read_exposures(hdr_stuff, mib_path)
     data_dict = _STEM_flag_dict(exp_times_list)
 
     if hdr_stuff['Assembly Size'] == '2x2':
+        # add_crosses expects a dask array object
         data = _add_crosses(data)
 
     data_pxm = LazyElectronDiffraction2D(data)
@@ -181,23 +220,40 @@ def load_mib(mib_filename, reshape=True):
     data_pxm.metadata.Signal.exposure_time = data_dict['exposure time']
     data_pxm.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
     data_pxm.metadata.Signal.flyback_times = data_dict['flyback_times']
-
-    if data_pxm.metadata.Signal.signal_type is 'TEM' and data_pxm.metadata.Signal.exposure_time is not None:
-        print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
-        return data_pxm
-    try:
-        if reshape:
-            # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
-            # to reshape otherwise use reshape_4DSTEM_FlyBack function
-            if data_pxm.metadata.Signal.exposure_time is None:
-                data_pxm = reshape_4DSTEM_SumFrames(data_pxm)
-            else:
-                data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
-    except TypeError:
-        raise ValueError('Reshaping did not work. Get the stack by passing reshape=False')
-    except ValueError:
-        raise ValueError('Reshaping did not work. Get the stack by passing reshape=False')
-
+    if reshape:
+    # only attempt reshaping if it is not already reshaped!
+        if len(data_pxm.data.shape) == 3:
+            try:
+                if data_pxm.metadata.Signal.signal_type == 'TEM':
+                    print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
+                    return data_pxm
+                # to catch single frames:
+                if data_pxm.axes_manager[0].size == 1:
+                    print('This mib file is a single frame.')
+                    return data_pxm
+                # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
+                # to reshape otherwise use reshape_4DSTEM_FlyBack function
+                if data_pxm.metadata.Signal.signal_type == 'STEM' and data_pxm.metadata.Signal.exposure_time is None:
+                    print('reshaping using sum frames intensity')
+                    (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
+                    data_pxm.metadata.Signal.signal_type = 'STEM'
+                    data_pxm.metadata.Signal.frames_number_skipped = skip_ind
+                else:
+                    print('reshaping using flyback pixel')
+                    data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
+            except TypeError:
+                print(
+                    'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+                return data_pxm
+            except ValueError:
+                print(
+                    'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+                return data_pxm
+    if flip:
+        data_pxm.data = np.flip(data_pxm.data, axis=2)
+        data_pxm.metadata.Signal.flip = True
+    else:
+        data_pxm.metadata.Signal.flip = False
     return data_pxm
 
 
@@ -1095,112 +1151,3 @@ def h5stack_to_pxm(h5_path, mib_path):
     return data_pxm
 
 
-def load_mib(mib_path, reshape=True, h5_stack_path=None):
-    """Read a .mib file or an h5 stack file using dask and return as a lazy pyXem / hyperspy signal.
-
-    Parameters
-    ----------
-    mib_path : str
-        The full path of the .mib file to be read.
-    reshape: boolean
-        keywork argument to control reshaping of the stack (default is True).
-        It attepmts to reshape using the flyback pixel.
-    h5_stack_path: str
-    default None. this is the h5 file path that we can read the data from in the case of large scan arrays.
-
-    Returns
-    -------
-    data_pxm : pyxem.signals.LazyElectronDiffraction2D
-    If the data is detected to be STEM is reshaped using two functions, one using the
-    exposure times appearing on the header and if no exposure times available using the
-    sum frames and detecting the flyback frames. If TEM data, a single frame or if
-    reshaping the STEM fails, the stack is returned.
-                The metadata adds the following domains:
-                General
-                │   └── title =
-                └── Signal
-                    ├── binned = False
-                    ├── exposure_time = 0.001
-                    ├── flyback_times = [0.066, 0.071, 0.065, 0.017825]
-                    ├── frames_number_skipped = 90
-                    ├── scan_X = 256
-                    └── signal_type = STEM
-
-    """
-    hdr_stuff = _parse_hdr(mib_path)
-    width = hdr_stuff['width']
-    height = hdr_stuff['height']
-    width_height = width * height
-    if h5_stack_path is None:
-        data = _mib_to_daskarr(hdr_stuff, mib_path)
-        depth = _get_mib_depth(hdr_stuff, mib_path)
-        hdr_bits = _get_hdr_bits(hdr_stuff)
-        if hdr_stuff['Counter Depth (number)'] == 1:
-            # RAW 1 bit data: the header bits are written as uint8 but the frames
-            # are binary and need to be unpacked as such.
-            data = data.reshape(-1, int(width_height / 8 + hdr_bits))
-            data = data[:, hdr_bits:]
-            # get the shape axis 1 before unpackbit
-            s0 = data.shape[0]
-            s1 = data.shape[1]
-            data = np.unpackbits(data)
-            data.reshape(s0, s1 * 8)
-        else:
-            data = data.reshape(-1, int(width_height + hdr_bits))
-            data = data[:, hdr_bits:]
-        if hdr_stuff['raw'] == 'R64':
-            data = _untangle_raw(data, hdr_stuff, depth)
-        elif hdr_stuff['raw'] == 'MIB':
-            data = data.reshape(depth, width, height)
-    else:
-        data = h5stack_to_pxm(h5_stack_path, mib_path)
-        data = data.data
-
-    exp_times_list = _read_exposures(hdr_stuff, mib_path)
-    data_dict = _STEM_flag_dict(exp_times_list)
-
-    if hdr_stuff['Assembly Size'] == '2x2':
-        # add_crosses expects a dask array object
-        data = _add_crosses(data)
-
-    data_pxm = LazyElectronDiffraction2D(data)
-
-    # Tranferring dict info to metadata
-    if data_dict['STEM_flag'] == 1:
-        data_pxm.metadata.Signal.signal_type = 'STEM'
-    else:
-        data_pxm.metadata.Signal.signal_type = 'TEM'
-    data_pxm.metadata.Signal.scan_X = data_dict['scan_X']
-    data_pxm.metadata.Signal.exposure_time = data_dict['exposure time']
-    data_pxm.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
-    data_pxm.metadata.Signal.flyback_times = data_dict['flyback_times']
-    if reshape:
-    # only attempt reshaping if it is not already reshaped!
-        if len(data_pxm.data.shape) == 3:
-            try:
-                if data_pxm.metadata.Signal.signal_type == 'TEM':
-                    print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
-                    return data_pxm
-                # to catch single frames:
-                if data_pxm.axes_manager[0].size == 1:
-                    print('This mib file is a single frame.')
-                    return data_pxm
-                # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
-                # to reshape otherwise use reshape_4DSTEM_FlyBack function
-                if data_pxm.metadata.Signal.signal_type == 'STEM' and data_pxm.metadata.Signal.exposure_time is None:
-                    print('reshaping using sum frames intensity')
-                    (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
-                    data_pxm.metadata.Signal.signal_type = 'STEM'
-                    data_pxm.metadata.Signal.frames_number_skipped = skip_ind
-                else:
-                    print('reshaping using flyback pixel')
-                    data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
-            except TypeError:
-                print(
-                    'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
-                return data_pxm
-            except ValueError:
-                print(
-                    'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
-                return data_pxm
-    return data_pxm
