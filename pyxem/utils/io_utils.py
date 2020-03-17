@@ -448,7 +448,6 @@ def _add_crosses(a):
     b = da.concatenate((b[:, :a_half[0], :], z_array2, b[:, a_half[0]:, :]), axis=-2)
 
     if len(original_shape) == 4:
-        print('reshaping to the original shape')
         b = b.reshape(original_shape[0], original_shape[1], original_shape[2] + 3, original_shape[3] + 3)
 
     return b
@@ -748,7 +747,7 @@ def _STEM_flag_dict(exp_times_list):
         # Check that the smallest time is the majority of the values
         exp_time = max(times_set, key=exp_times_list.count)
         if exp_times_list.count(exp_time) < int(0.9 * len(exp_times_list)):
-            print('Something wrong with the triggering!')
+            print('Something gone wrong with the triggering!')
         peaks = [i for i, e in enumerate(exp_times_list) if e != exp_time]
         # Diff between consecutive elements of the array
         lines = np.ediff1d(peaks)
@@ -825,14 +824,12 @@ def mib_to_h5stack(fp, save_path, mmap_mode='r'):
                 else:
                     # All the other counter depths RAW format
                     _stack_h5dump(data, hdr_info, save_path)
-        # none RAW case - not tested
-        # TODO: test this for none RAW files - also single chip data!
         elif hdr_info['raw'] == 'MIB':
             _stack_h5dump(data, hdr_info, save_path)
     return
 
 
-def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
+def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False, stack_num=1000):
     """
     Incremental reading of a large stack dask array object and saving it in a h5 file.
 
@@ -845,13 +842,13 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
         h5 file name and path
     raw_binary: boolean
         default False - Need to be True for binary RAW data
+    stack_num: int
+        number of frames written to the h5 file in each iteration. default set at 1000
 
     Returns
     -------
     None
     """
-    # TODO: optimise this stack_num
-    stack_num = 100
     hdr_bits = _get_hdr_bits(hdr_info)
     width = hdr_info['width']
     height = hdr_info['height']
@@ -877,7 +874,6 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False):
                     data_dump1 = _untangle_raw(data_dump0, hdr_info, data_dump0.shape[0])
 
                 _h5_chunk_write(data_dump1, saving_path)
-                print(data_dump1.shape)
                 del data_dump0
                 del data_dump1
             else:
@@ -922,13 +918,13 @@ def _h5_chunk_write(data, saving_path):
     None
     """
     if os.path.exists(saving_path):
+        print('appending to existing dataset')
         with h5py.File(saving_path, 'a') as hf:
-            print('appending to existing dataset')
             hf['data_stack'].resize((hf['data_stack'].shape[0] + data.shape[0]), axis=0)
             hf['data_stack'][-data.shape[0]:, :, :] = data
     else:
         hf = h5py.File(saving_path, 'w')
-        print('creating the h5 file for the stack')
+        print('creating the h5 file for the data_stack')
         hf.create_dataset('data_stack', data=data, maxshape=(None, data.shape[1], data.shape[2]), compression='gzip')
     return
 
