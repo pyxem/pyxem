@@ -160,7 +160,7 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
     exposure times appearing on the header and if no exposure times available using the
     sum frames and detecting the flyback frames. If TEM data, a single frame or if
     reshaping the STEM fails, the stack is returned.
-                The metadata adds the following domains:
+                The metadata adds the following domains for STEM mib file:
                 General
                 │   └── title =
                 └── Signal
@@ -171,7 +171,16 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
                     ├── frames_number_skipped = 90
                     ├── scan_X = 256
                     └── signal_type = STEM
-
+                The returned metadata for TEM mib file:
+                General
+                │   └── title =
+                └── Signal
+                    ├── binned = False
+                    ├── exposure_time = [0.0001]
+                    ├── flyback_times = None
+                    ├── frames_number_skipped = None
+                    ├── scan_X = None
+                    └── signal_type = TEM
     """
     hdr_stuff = _parse_hdr(mib_path)
     width = hdr_stuff['width']
