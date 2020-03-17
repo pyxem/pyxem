@@ -781,6 +781,10 @@ def mib_to_h5stack(fp, save_path, mmap_mode='r'):
     -------
     None
     """
+    # check to see if the h5 path already exists and if so raise warning
+    if os.path.exists(save_path):
+        print('The h5 path provided already exists. Change file name to avoid overwrite.')
+        return
     hdr_info = _parse_hdr(fp)
     width = hdr_info['width']
     height = hdr_info['height']
