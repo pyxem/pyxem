@@ -144,15 +144,14 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
     mib_path : str
         The full path of the .mib file to be read.
     reshape: boolean
-        keywork argument to control reshaping of the stack (default is True).
+        Keyword argument to control reshaping of the stack (default is True).
         It attepmts to reshape using the flyback pixel.
     flip: boolean
-        keyword argument to vertically flip the diffraction signal (default)
+        Keyword argument to vertically flip the diffraction signal (default)
         or return unchanged. The metadata is updated accordingly.
     h5_stack_path: str
-    default None. this is the h5 file path that we can read the data from in the case of large scan arrays.
-    flip: boolean
-        keyword argument to vertically flip the diffraction signal (default)
+        Default None. this is the h5 file path that we can read the data from in the case of large scan arrays
+        using the pxm.utils.io_utils.mib_to_h5stack function.
 
     Returns
     -------
