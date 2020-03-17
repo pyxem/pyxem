@@ -136,7 +136,7 @@ def load_hspy(filename, lazy=False, assign_to=None):
 
     return s
 
-def load_mib(mib_path, reshape=True, flip, True, h5_stack_path=None):
+def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
     """Read a .mib file or an h5 stack file using dask and return as a lazy pyXem / hyperspy signal.
 
     Parameters
