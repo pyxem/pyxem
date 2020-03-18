@@ -123,7 +123,8 @@ class VDFImage(Signal2D):
         segments = Signal2D(segments).transpose(navigation_axes=[0],
                                                 signal_axes=[2, 1])
         # Create VDFSegment and transfer axes calibrations
-        vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments),
+        vdfsegs = VDFSegment(segments,
+                             DiffractionVectors(vectors_of_segments),
                              segment_intensities)
         vdfsegs.segments = transfer_signal_axes(vdfsegs.segments, vdfs)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]

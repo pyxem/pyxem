@@ -71,6 +71,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
+  DiffractionVectors2D:
+    signal_type: diffraction_vectors
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.diffraction_vectors
   TemplateMatchingResults:
     signal_type: template_matching
     signal_dimension: 2

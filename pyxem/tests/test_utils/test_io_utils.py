@@ -24,15 +24,17 @@ import os
 from pyxem.signals.crystallographic_map import CrystallographicMap
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals.diffraction_vectors import (DiffractionVectors,
+                                               DiffractionVectors2D)
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.vdf_image import VDFImage
 
 
 @pytest.mark.parametrize("class_to_test,meta_string", [(ElectronDiffraction2D, 'string1'),
                                                        (TemplateMatchingResults, 'string2'),
-                                                       (DiffractionVectors, 'string3_sig_dim0'),
-                                                       (CrystallographicMap, 'string4_sig'),
+                                                       (DiffractionVectors, 'string3'),
+                                                       (DiffractionVectors2D, 'string3'),
+                                                       (CrystallographicMap, 'string4'),
                                                        (ElectronDiffraction1D, 'string5'),
                                                        (VDFImage, 'string6')])
 def test_load_function_core(class_to_test, meta_string):
@@ -41,8 +43,10 @@ def test_load_function_core(class_to_test, meta_string):
     """
     to_save = class_to_test(np.zeros((2, 2, 2, 2)))
     to_save.metadata.Signal.tracker = meta_string
-    if 'sig_dim0' in meta_string:
+    if class_to_test is DiffractionVectors:
         to_save.axes_manager.set_signal_dimension(0)
+    if class_to_test is DiffractionVectors2D:
+        to_save.axes_manager.set_signal_dimension(2)
     to_save.save('tempfile_for_load_and_save.hspy', overwrite=True)
     from_save = pxm.load('tempfile_for_load_and_save.hspy')
     assert isinstance(from_save, class_to_test)

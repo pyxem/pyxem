@@ -30,7 +30,6 @@ from scipy.ndimage.measurements import center_of_mass
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
-import warnings
 
 
 def _get_intensities(z, vectors, radius=1):
@@ -164,12 +163,11 @@ def _get_intensities_summation_method(z,
                   f"I: {inty:.2f} | Sigma(I): {sigma:.2f} | SNR(I): {snr:.2f} | I/pix: {inty/n_pix:.2f} \n"
                   f"i: {i:.2f} | j: {j:.2f} | dX: {dX:.2f} | dY: {dY:.2f} | X: {X:.2f} | Y: {Y:.2f} ")
             # for debugging purposes
-            plot = True
-            if plot:
-                plt.imshow(signal)
-                plt.plot(dY + box_inner, dX + box_inner, "r+")  # center_of_mass
-                plt.plot(box_inner, box_inner, "g+")        # input
-                plt.show()
+            import matploltib.pyplot as plt
+            plt.imshow(signal)
+            plt.plot(dY + box_inner, dX + box_inner, "r+")  # center_of_mass
+            plt.plot(box_inner, box_inner, "g+")        # input
+            plt.show()
 
         if n_pix > n_max:  # pragma: no cover
             continue
@@ -292,7 +290,9 @@ class IntegrationGenerator():
         intensities = result.map(_take_ragged, indices=2, _axis=1, inplace=False, ragged=True)
         sigma = result.map(_take_ragged, indices=3, _axis=1, inplace=False, ragged=True)
 
-        vectors = DiffractionVectors.from_peaks(peaks, calibration=self.calibration, center=self.center)
+        vectors = DiffractionVectors.from_peaks(peaks,
+                                                calibration=self.calibration,
+                                                center=self.center)
         vectors.intensities = intensities
         vectors.sigma = sigma
         vectors.snr = intensities / sigma

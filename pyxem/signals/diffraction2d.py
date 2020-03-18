@@ -606,8 +606,7 @@ class Diffraction2D(Signal2D):
         peaks.map(peaks_as_gvectors,
                   center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
                   calibration=self.axes_manager.signal_axes[0].scale)
-        peaks = DiffractionVectors(peaks)
-        peaks.axes_manager.set_signal_dimension(0)
+        peaks.set_signal_type('diffraction_vectors')
 
         # Set DiffractionVectors attributes
         peaks.pixel_calibration = self.axes_manager.signal_axes[0].scale
