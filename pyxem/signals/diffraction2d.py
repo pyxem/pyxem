@@ -68,7 +68,7 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
-    _signal_type = "diffraction2d"
+    _signal_type = "diffraction"
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.

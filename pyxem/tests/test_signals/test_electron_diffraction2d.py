@@ -143,45 +143,6 @@ class TestSimpleHyperspy:
             )
 
 
-class TestVirtualImaging:
-    # Tests that virtual imaging runs without failure
-
-    @pytest.mark.parametrize('stack', [True, False])
-    def test_plot_interactive_virtual_image(self, stack, diffraction_pattern):
-        if stack:
-            diffraction_pattern = hs.stack([diffraction_pattern] * 3)
-        roi = hs.roi.CircleROI(3, 3, 5)
-        diffraction_pattern.plot_interactive_virtual_image(roi)
-
-    def test_get_virtual_image(self, diffraction_pattern):
-        roi = hs.roi.CircleROI(3, 3, 5)
-        vi = diffraction_pattern.get_virtual_image(roi)
-        assert vi.data.shape == (2, 2)
-        assert vi.axes_manager.signal_dimension == 2
-        assert vi.axes_manager.navigation_dimension == 0
-
-    @pytest.mark.parametrize('out_signal_axes',
-                             [None, (0, 1), (1, 2), ('x', 'y')])
-    def test_get_virtual_image_stack(self, diffraction_pattern,
-                                      out_signal_axes):
-        s = hs.stack([diffraction_pattern] * 3)
-        s.axes_manager.navigation_axes[0].name = 'x'
-        s.axes_manager.navigation_axes[1].name = 'y'
-
-        roi = hs.roi.CircleROI(3, 3, 5)
-        vi = s.get_virtual_image(roi, out_signal_axes)
-        assert vi.axes_manager.signal_dimension == 2
-        assert vi.axes_manager.navigation_dimension == 1
-        if out_signal_axes == (1, 2):
-            assert vi.data.shape == (2, 3, 2)
-            assert vi.axes_manager.navigation_size == 2
-            assert vi.axes_manager.signal_shape == (2, 3)
-        else:
-            assert vi.data.shape == (3, 2, 2)
-            assert vi.axes_manager.navigation_size == 3
-            assert vi.axes_manager.signal_shape == (2, 2)
-
-
 class TestGainNormalisation:
     @pytest.mark.parametrize(
         "dark_reference, bright_reference", [(-1, 1), (0, 1), (0, 256),]
