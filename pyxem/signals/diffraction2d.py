@@ -31,7 +31,8 @@ from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import push_metadata_through
+from pyxem.signals import push_metadata_through, transfer_navigation_axes, \
+    select_method_from_method_dict
 
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, azimuthal_integrate, azimuthal_integrate_fast, \
