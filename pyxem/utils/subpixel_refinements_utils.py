@@ -1,4 +1,4 @@
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 # -*- coding: utf-8 -*-
 #
 # This file is part of pyXem.
@@ -27,8 +27,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
 def get_experimental_square(z, vector, square_size):
-    """Defines a square region around a given diffraction vector and returns an
-    upsampled copy.
+    """Defines a square region around a given diffraction vector and returns.
 
     Parameters
     ----------

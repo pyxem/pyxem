@@ -20,7 +20,19 @@ import numpy as np
 
 from pyxem.utils.indexation_utils import (crystal_from_template_matching,
                                           crystal_from_vector_matching,
-                                          match_vectors)
+                                          match_vectors,
+                                          zero_mean_normalized_correlation,
+                                          fast_correlation)
+
+
+def test_zero_mean_normalized_correlation():
+    np.testing.assert_approx_equal(zero_mean_normalized_correlation(3,np.linalg.norm([2/3,1/3,1/3]),1/3,[1,0,0],[1,0,0]),1)
+    #nb_pixels,image_std,average_image_intensity,image_intensities,int_local
+    assert zero_mean_normalized_correlation(3,0,1,[1,1,1],[0,0,1]) == 0 
+
+def test_fast_correlation():
+    np.testing.assert_approx_equal(fast_correlation([1,1,1],[1,1,1],np.sqrt(3)),np.sqrt(3))
+    np.testing.assert_approx_equal(fast_correlation([1,1,1],[1,0,0],1),1)
 
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):

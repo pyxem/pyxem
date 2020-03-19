@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from sklearn.cluster.dbscan_ import DBSCAN
+from sklearn.cluster import DBSCAN
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
 # all of equal length, and the ragged case. A fixture is defined for each of

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -49,7 +49,7 @@ def push_metadata_through(dummy, *args, **kwargs):
     return dummy, args, kwargs
 
 
-def select_method_from_method_dict(method, method_dict, **kwargs):
+def select_method_from_method_dict(method, method_dict,print_help = True, **kwargs):
     """
     Streamlines the selection of utils to be mapped in class methods
 
@@ -64,6 +64,9 @@ def select_method_from_method_dict(method, method_dict, **kwargs):
     kwargs : dict
         Parameters for the method, if empty help is return
 
+    print_help : bool
+        If True: Prints information about the chosen method.
+
     Returns
     -------
     method_function :
@@ -75,7 +78,7 @@ def select_method_from_method_dict(method, method_dict, **kwargs):
         raise NotImplementedError("The method `{}` is not implemented. "
                                   "See documentation for available "
                                   "implementations.".format(method))
-    elif not kwargs:
+    elif print_help and not kwargs:
         help(method_dict[method])
 
     return method_dict[method]

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -91,7 +91,7 @@ def get_template_match_results(structure,edc, rot_list, mask=None):
     dp = generate_diffraction_patterns(structure,edc)
     library = get_template_library(structure, rot_list, edc)
     indexer = IndexationGenerator(dp, library)
-    return indexer.correlate(mask=mask)
+    return indexer.correlate(mask=mask,method='zero_mean_normalized_correlation')
 
 """ Tests for template matching """
 

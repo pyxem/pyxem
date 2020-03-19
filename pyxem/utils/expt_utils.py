@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -26,7 +26,6 @@ from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square, opening
-from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from scipy.optimize import curve_fit
