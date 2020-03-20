@@ -84,6 +84,49 @@ def diffraction_pattern(z):
 
 
 @pytest.fixture
+def diffraction_pattern_for_azimuthal(self):
+    """
+    Two diffraction patterns with easy to see radial profiles, wrapped
+    in Diffraction2D  <2|8,8>
+    """
+    dp = Diffraction2D(np.zeros((2, 8, 8)))
+    dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
+                           [0., 2., 3., 3., 3., 3., 2., 0.],
+                           [2., 3., 3., 4., 4., 3., 3., 2.],
+                           [2., 3., 4., 5., 5., 4., 3., 2.],
+                           [2., 3., 4., 5., 5., 4., 3., 2.],
+                           [2., 3., 3., 4., 4., 3., 3., 2.],
+                           [0., 2., 3., 3., 3., 3., 2., 0.],
+                           [0., 0., 2., 2., 2., 2., 0., 0.]])
+
+    dp.data[1] = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
+                           [0., 0., 0., 0., 0., 0., 0., 0.],
+                           [0., 0., 0., 0., 0., 0., 0., 0.],
+                           [1., 1., 1., 1., 1., 1., 1., 1.],
+                           [1., 1., 1., 1., 1., 1., 1., 1.],
+                           [0., 0., 0., 0., 0., 0., 0., 0.],
+                           [0., 0., 0., 0., 0., 0., 0., 0.],
+                           [0., 0., 0., 0., 0., 0., 0., 0.]])
+
+    return dp
+
+
+@pytest.fixture
+def diffraction_pattern_for_origin_variation(self):
+    """
+    Two diffraction patterns with easy to see radial profiles, wrapped
+    in Diffraction2D  <2,2|3,3>
+    """
+    dp = Diffraction2D(np.zeros((2, 2, 4, 4)))
+    dp.data = np.array(
+        [[[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+          [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]],
+            [[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]]])
+    return dp
+
+
+@pytest.fixture
 def electron_diffraction1d(diffraction_pattern):
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffraction1D <2,2|12>

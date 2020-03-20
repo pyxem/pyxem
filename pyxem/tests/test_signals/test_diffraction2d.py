@@ -74,6 +74,7 @@ class TestComputeAndAsLazy2D:
 
 
 class TestDecomposition:
+
     def test_decomposition_is_performed(self, diffraction_pattern):
         s = Diffraction2D(diffraction_pattern)
         s.decomposition()
@@ -86,33 +87,6 @@ class TestDecomposition:
 
 
 class TestAzimuthalIntegral:
-
-    @pytest.fixture
-    def diffraction_pattern_for_azimuthal(self):
-        """
-        Two diffraction patterns with easy to see radial profiles, wrapped
-        in Diffraction2D  <2|8,8>
-        """
-        dp = Diffraction2D(np.zeros((2, 8, 8)))
-        dp.data[0] = np.array([[0., 0., 2., 2., 2., 2., 0., 0.],
-                               [0., 2., 3., 3., 3., 3., 2., 0.],
-                               [2., 3., 3., 4., 4., 3., 3., 2.],
-                               [2., 3., 4., 5., 5., 4., 3., 2.],
-                               [2., 3., 4., 5., 5., 4., 3., 2.],
-                               [2., 3., 3., 4., 4., 3., 3., 2.],
-                               [0., 2., 3., 3., 3., 3., 2., 0.],
-                               [0., 0., 2., 2., 2., 2., 0., 0.]])
-
-        dp.data[1] = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
-                               [0., 0., 0., 0., 0., 0., 0., 0.],
-                               [0., 0., 0., 0., 0., 0., 0., 0.],
-                               [1., 1., 1., 1., 1., 1., 1., 1.],
-                               [1., 1., 1., 1., 1., 1., 1., 1.],
-                               [0., 0., 0., 0., 0., 0., 0., 0.],
-                               [0., 0., 0., 0., 0., 0., 0., 0.],
-                               [0., 0., 0., 0., 0., 0., 0., 0.]])
-
-        return dp
 
     def test_azimuthal_integral_signal_type(self,
                                             diffraction_pattern_for_azimuthal):
@@ -142,9 +116,7 @@ class TestAzimuthalIntegral:
 
     @pytest.fixture
     def axes_test_dp(self):
-        """
-        Two diffraction patterns with easy to see radial profiles, wrapped
-        in Diffraction2D  <2,2|3,3>
+        """Empty diffraction pattern for axes test.
         """
         dp = Diffraction2D(np.zeros((2, 2, 3, 3)))
         return dp
@@ -194,20 +166,6 @@ class TestAzimuthalIntegral:
                                                                       detector_distance=1e9,
                                                                       wavelength=1, size_1d=6)
         assert np.allclose(ap.data, expected, atol=1e-3)
-
-    @pytest.fixture
-    def diffraction_pattern_for_origin_variation(self):
-        """
-        Two diffraction patterns with easy to see radial profiles, wrapped
-        in Diffraction2D  <2,2|3,3>
-        """
-        dp = Diffraction2D(np.zeros((2, 2, 4, 4)))
-        dp.data = np.array(
-            [[[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-              [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]],
-                [[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                 [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]]])
-        return dp
 
     def test_azimuthal_integral_slow(self,
                                      diffraction_pattern_for_origin_variation):
