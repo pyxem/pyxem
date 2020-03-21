@@ -260,10 +260,7 @@ def reproject_polar(z, dr=1, dt=None, jacobian=False):
     origin = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
     # bottom-left coordinate system requires numpy image to be np.flipud
     data = np.flipud(z)
-
     ny, nx = data.shape[:2]
-    if origin is None:
-        origin = (nx//2, ny//2)
 
     # Determine that the min and max r and theta coords will be...
     x, y = _index_coords(z, origin=origin)  # (x,y) coordinates of each pixel

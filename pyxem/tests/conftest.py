@@ -30,7 +30,7 @@ from pyxem.utils.indexation_utils import OrientationResult
 
 @pytest.fixture
 def default_structure():
-    """An atomic structure represetned using diffpy
+    """An atomic structure represented using diffpy
     """
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
     atom = diffpy.structure.atom.Atom(atype='Ni', xyz=[0, 0, 0], lattice=latt)
@@ -85,7 +85,7 @@ def diffraction_pattern(z):
 
 
 @pytest.fixture
-def diffraction_pattern_for_azimuthal():
+def dp_for_azimuthal():
     """
     Two diffraction patterns with easy to see radial profiles, wrapped
     in Diffraction2D  <2|8,8>
@@ -113,7 +113,7 @@ def diffraction_pattern_for_azimuthal():
 
 
 @pytest.fixture
-def diffraction_pattern_for_origin_variation():
+def dp_for_origin_variation():
     """
     Two diffraction patterns with easy to see radial profiles, wrapped
     in Diffraction2D  <2,2|3,3>

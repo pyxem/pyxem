@@ -21,6 +21,7 @@ import numpy as np
 import dask.array as da
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
+from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.detectors.generic_flat_detector import GenericFlatDetector
 from pyxem.signals.diffraction1d import Diffraction1D
 
@@ -89,20 +90,20 @@ class TestDecomposition:
 class TestAzimuthalIntegral:
 
     def test_azimuthal_integral_signal_type(self,
-                                            diffraction_pattern_for_azimuthal):
+                                            dp_for_azimuthal):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8, 8)
         diffraction_pattern_for_azimuthal.metadata.General.title = 'A Title'
         diffraction_pattern_for_azimuthal.axes_manager[0].name = 'x'
-        ap = diffraction_pattern_for_azimuthal.get_azimuthal_integral(origin,
-                                                                      detector=detector,
-                                                                      detector_distance=1,
-                                                                      wavelength=1, size_1d=5)
+        ap = dp_for_azimuthal.get_azimuthal_integral(origin,
+                                                     detector=detector,
+                                                     detector_distance=1,
+                                                     wavelength=1, size_1d=5)
 
         assert isinstance(ap, Diffraction1D)
-        assert diffraction_pattern_for_azimuthal.metadata.General.title == \
+        assert dp_for_azimuthal.metadata.General.title == \
             ap.metadata.General.title
-        assert diffraction_pattern_for_azimuthal.axes_manager[0].name == \
+        assert dp_for_azimuthal.axes_manager[0].name == \
             ap.axes_manager[0].name
 
     @pytest.fixture
@@ -163,21 +164,21 @@ class TestAzimuthalIntegral:
             [[4.5, 3.73302794, 2.76374221, 1.87174165, 0.83391893, 0.],
              [0.75, 0.46369326, 0.24536559, 0.15187129, 0.06550021, 0.]]
         ))])
-    def test_azimuthal_integral_fast(self, diffraction_pattern_for_azimuthal,
+    def test_azimuthal_integral_fast(self, dp_for_azimuthal,
                                      expected):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8, 8)
-        ap = diffraction_pattern_for_azimuthal.get_azimuthal_integral(origin,
-                                                                      detector=detector,
-                                                                      detector_distance=1e9,
-                                                                      wavelength=1, size_1d=6)
+        ap = dp_for_azimuthal.get_azimuthal_integral(origin,
+                                                     detector=detector,
+                                                     detector_distance=1e9,
+                                                     wavelength=1, size_1d=6)
         assert np.allclose(ap.data, expected, atol=1e-3)
 
     def test_azimuthal_integral_slow(self,
-                                     diffraction_pattern_for_origin_variation):
+                                     dp_for_origin_variation):
         origin = np.array([[[0, 0], [1, 1]], [[1.5, 1.5], [2, 3]]])
         detector = GenericFlatDetector(4, 4)
-        ap = diffraction_pattern_for_origin_variation.get_azimuthal_integral(
+        ap = dp_for_origin_variation.get_azimuthal_integral(
             origin,
             detector=detector,
             detector_distance=1e9,
@@ -187,3 +188,11 @@ class TestAzimuthalIntegral:
                              [[6.20952725e-01, 2.99225271e-01, 4.63002026e-02, 0.00000000e+00],
                               [5.00000000e-01, 3.43071640e-01, 1.27089232e-01, 0.00000000e+00]]])
         assert np.allclose(ap.data, expected, atol=1e-5)
+
+
+class TestPolarReprojection:
+
+    def test_reproject_polar_signal_type(self,
+                                         dp_for_azimuthal):
+        polar = dp_for_azimuthal.as_polar_diffraction2d()
+        assert isinstance(polar, PolarDiffraction2D)

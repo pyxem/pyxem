@@ -120,26 +120,6 @@ def test_remove_dead_pixels(diffraction_pattern_one_dimension, method):
     dead_removed = remove_dead(z, [[3, 3]], deadvalue=method)
     assert z[3, 3] != dead_removed[3, 3]
 
-def test_reproject_polar(diffraction_pattern_one_dimension):
-    z = diffraction_pattern_one_dimension.data
-    polar = reproject_polar(z)
-    correct_answer = np.array([[-4.76647043e-03, -9.53082887e-04,  2.29168886e-03,
-                                1.57668292e-04, -2.25377803e-04, -1.16148765e-04,
-                                -2.67402071e-03,  1.23632508e-03],
-                               [ 1.72265615e-01, -6.70150422e-02,  4.95300096e-01,
-                                 1.51786794e+00,  3.74089740e-01, -6.61576106e-02,
-                                 2.66020741e-01,  1.49057863e+00],
-                               [-3.31084317e-02,  2.00822510e-02, -8.11515633e-02,
-                                 1.88403514e+00, -9.43454824e-02,  2.62205621e-02,
-                                -7.07187367e-02,  1.82428137e+00],
-                                [-1.66709278e-03, -9.04784390e-03, -4.37196718e-02,
-                                  4.45232456e-01, -3.20271874e-02, -4.45885236e-03,
-                                 -1.72254131e-02,  4.97117268e-01],
-                                [ 0.00000000e+00,  1.32550695e-03,  0.00000000e+00,
-                                 -1.07289949e-01,  0.00000000e+00,  3.25581444e-03,
-                                 0.00000000e+00, -5.43693326e-02]])
-    assert np.allclose(polar, correct_answer)
-
 def test_investigate_dog_background_removal_interactive(diffraction_pattern_one_dimension):
     """ Test that this function runs without error """
     z = diffraction_pattern_one_dimension
@@ -148,6 +128,36 @@ def test_investigate_dog_background_removal_interactive(diffraction_pattern_one_
     investigate_dog_background_removal_interactive(z, sigma_max_list, sigma_min_list)
     plt.close('all')
     assert True
+
+
+class TestReprojectPolar:
+
+    def test_reproject_polar(self, diffraction_pattern_one_dimension):
+        z = diffraction_pattern_one_dimension.data
+        polar = reproject_polar(z)
+        correct_answer = np.array([[-4.76647043e-03, -9.53082887e-04,  2.29168886e-03,
+                                    1.57668292e-04, -2.25377803e-04, -1.16148765e-04,
+                                    -2.67402071e-03,  1.23632508e-03],
+                                   [ 1.72265615e-01, -6.70150422e-02,  4.95300096e-01,
+                                     1.51786794e+00,  3.74089740e-01, -6.61576106e-02,
+                                     2.66020741e-01,  1.49057863e+00],
+                                   [-3.31084317e-02,  2.00822510e-02, -8.11515633e-02,
+                                     1.88403514e+00, -9.43454824e-02,  2.62205621e-02,
+                                    -7.07187367e-02,  1.82428137e+00],
+                                    [-1.66709278e-03, -9.04784390e-03, -4.37196718e-02,
+                                      4.45232456e-01, -3.20271874e-02, -4.45885236e-03,
+                                     -1.72254131e-02,  4.97117268e-01],
+                                    [ 0.00000000e+00,  1.32550695e-03,  0.00000000e+00,
+                                     -1.07289949e-01,  0.00000000e+00,  3.25581444e-03,
+                                     0.00000000e+00, -5.43693326e-02]])
+        assert np.allclose(polar, correct_answer)
+
+    def test_reproject_polar_wt_jacobian(self,
+                                         diffraction_pattern_one_dimension):
+        pass
+
+    def test_reproject_polar_wt_dt(self, diffraction_pattern_one_dimension):
+        pass
 
 
 class TestCenteringAlgorithm:
