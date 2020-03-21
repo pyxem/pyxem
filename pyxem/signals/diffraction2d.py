@@ -29,7 +29,7 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals import transfer_navigation_axes, push_metadata_through, \
+from pyxem.signals import transfer_navigation_axes, \
     select_method_from_method_dict
 
 from pyxem.utils.expt_utils import radial_average, azimuthal_integrate, \
@@ -351,12 +351,14 @@ class Diffraction2D(Signal2D):
                                                     kwargs_for_integrate1d=kwargs_for_integrate1d,
                                                     **kwargs_for_map)
 
-        if len(azimuthal_integrals.data.shape) == 3:
-            ap = Diffraction1D(azimuthal_integrals.data[:, 1, :])
-            tth = azimuthal_integrals.data[0, 0, :]  # tth is the signal axis
-        else:
-            ap = Diffraction1D(azimuthal_integrals.data[:, :, 1, :])
-            tth = azimuthal_integrals.data[0, 0, 0, :]  # tth is the signal axis
+        ap = Diffraction1D(azimuthal_integrals.data[..., 1, :],
+                           metadata=self.metadata.as_dictionary())
+        # Get a single slice of the last axis
+        indices = [0, ] * len(azimuthal_integrals.data.shape)
+        indices[-1] = slice(None)
+        # Use tuple to use numpy basic slicing
+        tth = azimuthal_integrals.data[tuple(indices)]
+
         scale = (tth[1] - tth[0]) * scaling_factor
         offset = tth[0] * scaling_factor
         ap.axes_manager.signal_axes[0].scale = scale
@@ -365,7 +367,6 @@ class Diffraction2D(Signal2D):
         ap.axes_manager.signal_axes[0].units = unit
 
         transfer_navigation_axes(ap, self)
-        push_metadata_through(ap, self)
 
         return ap
 
