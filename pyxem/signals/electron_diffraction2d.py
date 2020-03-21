@@ -15,7 +15,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for two-dimensional electron diffraction data.
+"""
+Signal class for two-dimensional electron diffraction data in Cartesian
+coordinates.
 """
 
 import numpy as np

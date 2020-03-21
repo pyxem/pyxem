@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Signal base class for two-dimensional diffraction data.
+Signal class for two-dimensional diffraction data in Cartesian coordinates.
 """
 
 import numpy as np
