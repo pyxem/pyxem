@@ -21,6 +21,7 @@ import diffpy.structure
 import numpy as np
 from transforms3d.euler import euler2mat
 
+from pyxem.signals.diffraction2d import Diffraction2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
