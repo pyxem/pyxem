@@ -32,11 +32,22 @@ class TestDiffractionVariance:
         difvar = DiffractionVariance2D(diffraction_pattern)
         assert isinstance(difvar, DiffractionVariance2D)
 
+    @pytest.mark.parametrize("inplace", [True, False])
     def test_get_dif_var_radial_profile(self,
-                                        diffraction_pattern):
+                                        diffraction_pattern,
+                                        inplace):
         difvar = DiffractionVariance2D(diffraction_pattern)
-        rp = difvar.get_radial_profile()
+        difvar.metadata.General.title = 'A Title'
+        difvar.axes_manager.navigation_axes[0].name = "x"
+        difvar_copy = difvar.deepcopy()
+        rp = difvar.get_radial_profile(inplace=inplace)
+        if inplace:
+            rp = difvar
+
         assert isinstance(rp, DiffractionVariance1D)
+        assert difvar_copy.metadata.General.title == rp.metadata.General.title
+        assert difvar_copy.axes_manager.navigation_axes[0].name == \
+            rp.axes_manager.navigation_axes[0].name
 
     @pytest.fixture
     def axes_test_dp(self):

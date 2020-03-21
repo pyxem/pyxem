@@ -21,18 +21,11 @@
 
 from hyperspy.signals import Signal2D
 
-from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
-from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.expt_utils import radial_average
-
-import numpy as np
 
 
 class DiffractionVariance2D(Signal2D):
-    _signal_type = "diffraction_variance2d"
-
-    def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
+    _signal_type = "diffraction_variance"
 
     def get_radial_profile(self, inplace=False, **kwargs):
         """Return the radial profile of the diffraction variance signals.
@@ -43,6 +36,9 @@ class DiffractionVariance2D(Signal2D):
             radial_profile: :obj:`pyxem.signals.DiffractionVariance1D`
             The radial profile of each diffraction variance pattern in the
             DiffractionVariance2D signal.
+        **kwargs
+            Keyword argument to be passed to the
+            py:func:`hyperspy.signal.BaseSignal.map` method.
 
         See also
         --------
@@ -54,24 +50,25 @@ class DiffractionVariance2D(Signal2D):
             profiles = ed.get_radial_profile()
             profiles.plot()
         """
-        radial_profiles = self.map(radial_average,
-                                   inplace=inplace, **kwargs)
+        radial_profiles = self.map(radial_average, inplace=inplace, **kwargs)
+        if inplace:
+            # when using inplace, map return None
+            radial_profiles = self
 
-        radial_profiles.axes_manager.signal_axes[0].offset = 0
+        # Assign to the correct class after the signal dimension was reduced
+        radial_profiles.set_signal_type(
+            radial_profiles.metadata.Signal.signal_type)
+
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
+        signal_axis.offset = 0
+        signal_axis.name = 'q'
+        signal_axis.units = '$Å^{-1}$'
 
-        rp = DiffractionVariance1D(radial_profiles.as_signal1D(signal_axis))
-        rp = transfer_navigation_axes(rp, self)
-        rp_axis = rp.axes_manager.signal_axes[0]
-        rp_axis.name = 'q'
-        rp_axis.scale = self.axes_manager.signal_axes[0].scale
-        rp_axis.units = '$A^{-1}$'
-
-        return rp
+        if not inplace:
+            return radial_profiles
 
 
 class ImageVariance(Signal2D):
     _signal_type = "image_variance"
 
-    def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
+    pass

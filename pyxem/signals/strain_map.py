@@ -18,7 +18,7 @@
 
 from hyperspy.signals import Signal2D
 import numpy as np
-from pyxem.signals import push_metadata_through, transfer_signal_axes
+from pyxem.signals import transfer_signal_axes
 
 
 def _get_rotation_matrix(x_new):
@@ -55,7 +55,6 @@ class StrainMap(Signal2D):
     _signal_type = "strain_map"
 
     def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
         # check init dimension are correct

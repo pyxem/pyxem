@@ -23,10 +23,7 @@ from matplotlib import pyplot as plt
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, gain_normalise, remove_dead, apply_transformation, \
-    regional_filter, subtract_background_dog, subtract_background_median, \
-    subtract_reference, circular_mask, reference_circle, \
-    find_beam_offset_cross_correlation, peaks_as_gvectors, \
+    remove_dead, find_beam_offset_cross_correlation, peaks_as_gvectors, \
     investigate_dog_background_removal_interactive, \
     find_beam_center_blur, find_beam_center_interpolate
 

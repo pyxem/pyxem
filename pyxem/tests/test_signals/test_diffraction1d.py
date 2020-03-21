@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
 import numpy as np
 import dask.array as da
 
@@ -33,7 +32,7 @@ class TestComputeAndAsLazy1D:
         s.axes_manager[1].scale = scale1
         s.metadata.Test = metadata_string
         s.compute()
-        assert s.__class__ == Diffraction1D
+        assert isinstance(s, Diffraction1D)
         assert not hasattr(s.data, 'compute')
         assert s.axes_manager[0].scale == scale0
         assert s.axes_manager[1].scale == scale1
@@ -45,7 +44,7 @@ class TestComputeAndAsLazy1D:
                                       chunks=(1, 10, 15))
         s = LazyDiffraction1D(dask_array)
         s.compute()
-        assert s.__class__ == Diffraction1D
+        assert isinstance(s, Diffraction1D)
         assert dask_array.shape == s.data.shape
 
     def test_2d_data_as_lazy(self):
@@ -56,7 +55,7 @@ class TestComputeAndAsLazy1D:
         s.axes_manager[1].scale = scale1
         s.metadata.Test = metadata_string
         s_lazy = s.as_lazy()
-        assert s_lazy.__class__ == LazyDiffraction1D
+        assert isinstance(s_lazy, LazyDiffraction1D)
         assert hasattr(s_lazy.data, 'compute')
         assert s_lazy.axes_manager[0].scale == scale0
         assert s_lazy.axes_manager[1].scale == scale1
@@ -67,7 +66,7 @@ class TestComputeAndAsLazy1D:
         data = np.random.random((4, 10, 15))
         s = Diffraction1D(data)
         s_lazy = s.as_lazy()
-        assert s_lazy.__class__ == LazyDiffraction1D
+        assert isinstance(s_lazy, LazyDiffraction1D)
         assert data.shape == s_lazy.data.shape
 
 

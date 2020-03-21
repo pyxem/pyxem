@@ -79,6 +79,7 @@ def diffraction_vectors_single(request):
 def diffraction_vectors_map(request):
     dvm = DiffractionVectors(request.param)
     dvm.axes_manager.set_signal_dimension(0)
+    dvm.axes_manager[0].name = 'x'
     return dvm
 
 
@@ -96,10 +97,12 @@ def test_get_cartesian_coordinates(diffraction_vectors_map):
     accelerating_voltage = 200
     camera_length = 0.2
     diffraction_vectors_map.calculate_cartesian_coordinates(accelerating_voltage,
-                                                            camera_length)
+                                                            camera_length) 
     # Coordinate conversion is tested in vector_utils. Just test that the
     # result is stored correctly
     assert diffraction_vectors_map.cartesian is not None
+    assert diffraction_vectors_map.axes_manager[0].name == \
+        diffraction_vectors_map.cartesian.axes_manager[0].name
 
 
 class TestMagnitudes:

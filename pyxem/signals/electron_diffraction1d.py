@@ -20,16 +20,11 @@
 """
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class ElectronDiffraction1D(Diffraction1D):
-    _signal_type = "electron_diffraction1d"
-
-    def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
-        super().__init__(*args, **kwargs)
+    _signal_type = "electron_diffraction"
 
     def set_experimental_parameters(self,
                                     accelerating_voltage=None,
@@ -117,43 +112,7 @@ class ElectronDiffraction1D(Diffraction1D):
         y.scale = calibration
         y.units = 'nm'
 
-    def as_lazy(self, *args, **kwargs):
-        """Create a copy of the ElectronDiffraction1D object as a
-        :py:class:`~pyxem.signals.electron_diffraction1d.LazyElectronDiffraction1D`.
-
-        Parameters
-        ----------
-        copy_variance : bool
-            If True variance from the original ElectronDiffraction1D object is
-            copied to the new LazyElectronDiffraction1D object.
-
-        Returns
-        -------
-        res : :py:class:`~pyxem.signals.electron_diffraction1d.LazyElectronDiffraction1D`.
-            The lazy signal.
-        """
-        res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyElectronDiffraction1D
-        res.__init__(**res._to_dictionary())
-        return res
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = ElectronDiffraction1D
-
 
 class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction1D):
 
-    _lazy = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def compute(self, *args, **kwargs):
-        super().compute(*args, **kwargs)
-        self.__class__ = ElectronDiffraction1D
-        self.__init__(**self._to_dictionary())
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = LazyElectronDiffraction1D
+    pass

@@ -21,7 +21,6 @@
 """
 
 import numpy as np
-import hyperspy.api as hs
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
@@ -33,8 +32,6 @@ from pyxem.utils.indexation_utils import correlate_library, zero_mean_normalized
                                          fast_correlation, index_magnitudes, match_vectors, \
                                          OrientationResult, get_nth_best_solution
 
-from collections import namedtuple
-from operator import attrgetter
 
 from transforms3d.euler import mat2euler, euler2mat
 from pyxem.utils.vector_utils import detector_to_fourier
