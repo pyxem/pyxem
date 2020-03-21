@@ -29,13 +29,8 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-<<<<<<< HEAD
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import push_metadata_through, transfer_navigation_axes, \
-=======
 from pyxem.signals import transfer_navigation_axes, \
->>>>>>> master
     select_method_from_method_dict
 
 from pyxem.utils.expt_utils import radial_average, azimuthal_integrate, \
@@ -708,33 +703,6 @@ class Diffraction2D(Signal2D):
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
 
-<<<<<<< HEAD
-    def as_lazy(self, *args, **kwargs):
-        """Create a copy of the Diffraction2D object as a
-        :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
-
-        Parameters
-        ----------
-        copy_variance : bool
-            If True variance from the original Diffraction2D object is copied to
-            the new LazyDiffraction2D object.
-
-        Returns
-        -------
-        res : :py:class:`~pyxem.signals.diffraction2d.LazyDiffraction2D`.
-            The lazy signal.
-        """
-        res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyDiffraction2D
-        res.__init__(**res._to_dictionary())
-        return res
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = Diffraction2D
-
-=======
->>>>>>> master
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
 
