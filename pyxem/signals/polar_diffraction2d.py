@@ -148,6 +148,5 @@ class PolarDiffraction2D(Signal2D):
             pow.axes_manager.signal_axes[1].unit = "a.u"
             pow.axes_manager.signal_axes[1].offset = 0.5
         return pow
-    def
 
 

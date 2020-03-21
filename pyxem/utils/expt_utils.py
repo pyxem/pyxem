@@ -711,4 +711,3 @@ def investigate_dog_background_removal_interactive(sample_dp,
     dp_gaussian.plot(cmap='viridis')
     return None
 
-def correlation(z, )
