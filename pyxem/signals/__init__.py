@@ -17,39 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-def push_metadata_through(dummy, *args, **kwargs):
-    """
-    This function pushes loaded metadata through to pyxem objects, it is to be used for one
-    purpose, see the __init__ of ElectronDiffraction2D for an example.
-
-    Parameters
-    ----------
-    dummy :
-        This will always be the "self" of the object to be initialised
-
-    args : list
-        This will always be the "args" of the object to be initialised
-
-    kwargs : dict
-        This will always be the "args" of the object to be initialised
-
-    Returns
-    -------
-    dummy,args,kwargs :
-        The input variables, adjusted correctly
-    """
-    try:
-        meta_dict = args[0].metadata.as_dictionary()
-        kwargs.update({'metadata': meta_dict})
-    except AttributeError:
-        pass  # this is because a numpy array has been passed
-    except IndexError:
-        pass  # this means that map continues to work.
-
-    return dummy, args, kwargs
-
-
-def select_method_from_method_dict(method, method_dict,print_help = True, **kwargs):
+def select_method_from_method_dict(method, method_dict, print_help=True,
+                                   **kwargs):
     """
     Streamlines the selection of utils to be mapped in class methods
 
@@ -71,7 +40,8 @@ def select_method_from_method_dict(method, method_dict,print_help = True, **kwar
     -------
     method_function :
         The utility function that corresponds the given method string, unless
-        kwargs is empty, in which case the help for the utility function is returned.
+        kwargs is empty, in which case the help for the utility function is
+        returned.
     """
 
     if method not in method_dict:

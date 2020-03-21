@@ -28,7 +28,6 @@ from sklearn.cluster import DBSCAN
 
 from warnings import warn
 
-from pyxem.signals import push_metadata_through
 from pyxem.signals import transfer_navigation_axes, transfer_navigation_axes_to_signal_axes
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
@@ -65,10 +64,10 @@ class DiffractionVectors(BaseSignal):
         Array of Miller indices associated with each diffraction vector
         following indexation.
     """
+    _signal_dimension = 0
     _signal_type = "diffraction_vectors"
 
     def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.cartesian = None
         self.hkls = None
@@ -371,7 +370,7 @@ class DiffractionVectors(BaseSignal):
         # A distance_threshold of 0 implies a strict comparison. So in that
         # case, a warning is raised unless the specified method is 'strict'.
         if distance_threshold == 0:
-            if method is not 'strict':
+            if method != 'strict':
                 warn(message='distance_threshold=0 was given, and therefore ' +
                      'a strict comparison is used, even though the ' +
                      'specified method was ' + method + '.')
@@ -575,4 +574,24 @@ class DiffractionVectors(BaseSignal):
                                   inplace=False,
                                   parallel=False,  # TODO: For testing
                                   *args, **kwargs)
-        transfer_navigation_axes(self.cartesian, self)
+
+
+class DiffractionVectors2D(DiffractionVectors):
+    """Crystallographic mapping results containing the best matching crystal
+    phase and orientation at each navigation position with associated metrics.
+
+    Attributes
+    ----------
+    cartesian : np.array()
+        Array of 3-vectors describing Cartesian coordinates associated with
+        each diffraction vector.
+    hkls : np.array()
+        Array of Miller indices associated with each diffraction vector
+        following indexation.
+    """
+    _signal_dimension = 2
+
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        if self.axes_manager.signal_dimension != 2:
+            self.axes_manager.set_signal_dimension(2)

@@ -25,7 +25,6 @@ from hyperspy.signals import Signal2D
 from pyxem.utils.segment_utils import separate_watershed
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import transfer_signal_axes
-from pyxem.signals import push_metadata_through
 from pyxem.signals.segments import VDFSegment
 
 
@@ -33,7 +32,6 @@ class VDFImage(Signal2D):
     _signal_type = "vdf_image"
 
     def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.vectors = None
 
@@ -125,7 +123,8 @@ class VDFImage(Signal2D):
         segments = Signal2D(segments).transpose(navigation_axes=[0],
                                                 signal_axes=[2, 1])
         # Create VDFSegment and transfer axes calibrations
-        vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments),
+        vdfsegs = VDFSegment(segments,
+                             DiffractionVectors(vectors_of_segments),
                              segment_intensities)
         vdfsegs.segments = transfer_signal_axes(vdfsegs.segments, vdfs)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]

@@ -24,21 +24,24 @@ import numpy as np
 from warnings import warn
 
 from hyperspy.api import interactive
-from hyperspy.signals import Signal1D, Signal2D, BaseSignal
+from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
+<<<<<<< HEAD
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import push_metadata_through, transfer_navigation_axes, \
+=======
+from pyxem.signals import transfer_navigation_axes, \
+>>>>>>> master
     select_method_from_method_dict
 
-from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, azimuthal_integrate, azimuthal_integrate_fast, \
-    gain_normalise, remove_dead, regional_filter, subtract_background_dog, \
-    subtract_background_median, subtract_reference, circular_mask, \
-    find_beam_offset_cross_correlation, peaks_as_gvectors, \
+from pyxem.utils.expt_utils import radial_average, azimuthal_integrate, \
+    azimuthal_integrate_fast, gain_normalise, remove_dead, regional_filter, \
+    subtract_background_dog, subtract_background_median, subtract_reference, \
+    circular_mask, find_beam_offset_cross_correlation, peaks_as_gvectors, \
     convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
     find_beam_center_interpolate, reproject_polar
 
@@ -48,31 +51,13 @@ from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
 from pyxem.utils import peakfinder2D_gui
 
 from skimage import filters
-from skimage import transform as tf
 from skimage.morphology import square
 
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D):
-    _signal_type = "diffraction2d"
-
-    def __init__(self, *args, **kwargs):
-        """
-        Create an Diffraction2D object from a hs.Signal2D or np.array.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Signal2D. The first arg should be
-            either a numpy.ndarray or a Signal2D
-        **kwargs :
-            Passed to the __init__ of Signal2D
-        """
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
-        super().__init__(*args, **kwargs)
-
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
+    _signal_type = "diffraction"
 
     def plot_interactive_virtual_image(self, roi, **kwargs):
         """Plots an interactive virtual image formed with a specified and
@@ -310,7 +295,7 @@ class Diffraction2D(Signal2D):
             "2th_rad", and "r_mm".
         inplace : bool
             If True (default False), this signal is overwritten. Otherwise,
-            returns anew signal.
+            returns a new signal.
         kwargs_for_map : dictionary
             Keyword arguments to be passed to self.map().
         kwargs_for_integrator : dictionary
@@ -372,12 +357,14 @@ class Diffraction2D(Signal2D):
                                                     kwargs_for_integrate1d=kwargs_for_integrate1d,
                                                     **kwargs_for_map)
 
-        if len(azimuthal_integrals.data.shape) == 3:
-            ap = Diffraction1D(azimuthal_integrals.data[:, 1, :])
-            tth = azimuthal_integrals.data[0, 0, :]  # tth is the signal axis
-        else:
-            ap = Diffraction1D(azimuthal_integrals.data[:, :, 1, :])
-            tth = azimuthal_integrals.data[0, 0, 0, :]  # tth is the signal axis
+        ap = Diffraction1D(azimuthal_integrals.data[..., 1, :],
+                           metadata=self.metadata.as_dictionary())
+        # Get a single slice of the last axis
+        indices = [0, ] * len(azimuthal_integrals.data.shape)
+        indices[-1] = slice(None)
+        # Use tuple to use numpy basic slicing
+        tth = azimuthal_integrals.data[tuple(indices)]
+
         scale = (tth[1] - tth[0]) * scaling_factor
         offset = tth[0] * scaling_factor
         ap.axes_manager.signal_axes[0].scale = scale
@@ -386,7 +373,6 @@ class Diffraction2D(Signal2D):
         ap.axes_manager.signal_axes[0].units = unit
 
         transfer_navigation_axes(ap, self)
-        push_metadata_through(ap, self)
 
         return ap
 
@@ -678,8 +664,7 @@ class Diffraction2D(Signal2D):
         peaks.map(peaks_as_gvectors,
                   center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
                   calibration=self.axes_manager.signal_axes[0].scale)
-        peaks = DiffractionVectors(peaks)
-        peaks.axes_manager.set_signal_dimension(0)
+        peaks.set_signal_type('diffraction_vectors')
 
         # Set DiffractionVectors attributes
         peaks.pixel_calibration = self.axes_manager.signal_axes[0].scale
@@ -723,6 +708,7 @@ class Diffraction2D(Signal2D):
             disc_image=disc_image, imshow_kwargs=imshow_kwargs)
         peakfinder.interactive(self)
 
+<<<<<<< HEAD
     def as_lazy(self, *args, **kwargs):
         """Create a copy of the Diffraction2D object as a
         :py:class:`~pyxem.signals.diffraction1d.LazyDiffraction2D`.
@@ -747,19 +733,9 @@ class Diffraction2D(Signal2D):
         super().decomposition(*args, **kwargs)
         self.__class__ = Diffraction2D
 
+=======
+>>>>>>> master
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
 
-    _lazy = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def compute(self, *args, **kwargs):
-        super().compute(*args, **kwargs)
-        self.__class__ = Diffraction2D
-        self.__init__(**self._to_dictionary())
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = LazyDiffraction2D
+    pass

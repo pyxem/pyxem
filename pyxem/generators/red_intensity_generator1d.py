@@ -21,18 +21,10 @@
 
 """
 import numpy as np
-import matplotlib.pyplot as plt
-
-from hyperspy.signals import Signal1D
-
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.components.scattering_fit_component_xtables import ScatteringFitComponentXTables
 from pyxem.components.scattering_fit_component_lobato import ScatteringFitComponentLobato
 from pyxem.utils.ri_utils import subtract_pattern, mask_from_pattern
-from pyxem.signals import transfer_navigation_axes
-from pyxem.signals import transfer_signal_axes
 
 scattering_factor_dictionary = {'lobato': ScatteringFitComponentLobato,
                                 'xtables': ScatteringFitComponentXTables}
@@ -257,17 +249,15 @@ class ReducedIntensityGenerator1D():
         ri : ReducedIntensity1D
         """
 
-        s_scale = self.signal.axes_manager.signal_axes[0].scale
         s = np.arange(self.signal.axes_manager.signal_axes[0].size,
                       dtype='float64')
         s *= self.signal.axes_manager.signal_axes[0].scale
 
-        reduced_intensity = (2 * np.pi * s *
-                             np.divide((self.signal.data - self.background_fit),
-                                       self.normalisation))
-
-        ri = ReducedIntensity1D(reduced_intensity)
-        ri = transfer_navigation_axes(ri, self.signal)
-        ri = transfer_signal_axes(ri, self.signal)
+        ri = self.signal._deepcopy_with_new_data((2 * np.pi * s *
+            np.divide((self.signal.data - self.background_fit),
+            self.normalisation)))
+        ri.set_signal_type('reduced_intensity')
+        title = self.signal.metadata.General.title
+        ri.metadata.General.title = f"Reduce intensity of {title}"
 
         return ri

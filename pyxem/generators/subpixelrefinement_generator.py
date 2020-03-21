@@ -23,8 +23,6 @@ Generating subpixel resolution on diffraction vectors.
 import numpy as np
 
 from skimage.feature import register_translation
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.utils.expt_utils import peaks_as_gvectors
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
@@ -119,15 +117,15 @@ class SubpixelrefinementGenerator():
             return (((vectors + shifts) - center) * calibration)
 
         sim_disc = get_simulated_disc(square_size, disc_radius)
-        self.vectors_out = DiffractionVectors(
-            self.dp.map(_conventional_xc_map,
-                        vectors=self.vector_pixels,
-                        sim_disc=sim_disc,
-                        upsample_factor=upsample_factor,
-                        center=self.center,
-                        calibration=self.calibration,
-                        inplace=False))
-        self.vectors_out.axes_manager.set_signal_dimension(0)
+        self.vectors_out = self.dp.map(_conventional_xc_map,
+                                       vectors=self.vector_pixels,
+                                       sim_disc=sim_disc,
+                                       upsample_factor=upsample_factor,
+                                       center=self.center,
+                                       calibration=self.calibration,
+                                       inplace=False)
+        self.vectors_out.set_signal_type('diffraction_vectors')
+
         self.last_method = "conventional_xc"
         return self.vectors_out
 
@@ -160,14 +158,14 @@ class SubpixelrefinementGenerator():
                 shifts[i] = _conventional_xc(expt_disc, ref_disc, upsample_factor)
             return (((vectors + shifts) - center) * calibration)
 
-        self.vectors_out = DiffractionVectors(
-            self.dp.map(_reference_xc_map,
-                        vectors=self.vector_pixels,
-                        upsample_factor=upsample_factor,
-                        center=self.center,
-                        calibration=self.calibration,
-                        inplace=False))
-        self.vectors_out.axes_manager.set_signal_dimension(0)
+        self.vectors_out = self.dp.map(_reference_xc_map,
+                                       vectors=self.vector_pixels,
+                                       upsample_factor=upsample_factor,
+                                       center=self.center,
+                                       calibration=self.calibration,
+                                       inplace=False)
+        self.vectors_out.set_signal_type('diffraction_vectors')
+
         self.last_method = "reference_xc"
         return self.vectors_out
 
@@ -244,14 +242,13 @@ class SubpixelrefinementGenerator():
                 shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
             return ((vectors + shifts) - center) * calibration
 
-        self.vectors_out = DiffractionVectors(
-            self.dp.map(_center_of_mass_map,
-                        vectors=self.vector_pixels,
-                        square_size=square_size,
-                        center=self.center,
-                        calibration=self.calibration,
-                        inplace=False))
-        self.vectors_out.axes_manager.set_signal_dimension(0)
+        self.vectors_out = self.dp.map(_center_of_mass_map,
+                                       vectors=self.vector_pixels,
+                                       square_size=square_size,
+                                       center=self.center,
+                                       calibration=self.calibration,
+                                       inplace=False)
+        self.vectors_out.set_signal_type('diffraction_vectors')
 
         self.last_method = "center_of_mass_method"
         return self.vectors_out
@@ -314,12 +311,13 @@ class SubpixelrefinementGenerator():
 
             return (((vectors + shifts) - center) * calibration)
 
-        self.vectors_out = DiffractionVectors(self.dp.map(_lg_map,
-                                                          vectors=self.vector_pixels,
-                                                          square_size=square_size,
-                                                          center=self.center,
-                                                          calibration=self.calibration,
-                                                          inplace=False))
+        self.vectors_out = self.dp.map(_lg_map,
+                                       vectors=self.vector_pixels,
+                                       square_size=square_size,
+                                       center=self.center,
+                                       calibration=self.calibration,
+                                       inplace=False)
+        self.vectors_out.set_signal_type('diffraction_vectors')
 
         # check for unrefined peaks
         def check_bad_square(z):
@@ -348,6 +346,5 @@ class SubpixelrefinementGenerator():
             warnings.warn("You have a peak in your pattern that lies on the edge of the square. \
                           Consider increasing the square size")
 
-        self.vectors_out.axes_manager.set_signal_dimension(0)
         self.last_method = "lg_method"
         return self.vectors_out
