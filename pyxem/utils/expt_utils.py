@@ -20,6 +20,7 @@ import numpy as np
 import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
 
+from pyxem.detectors import GenericFlatDetector
 from scipy.ndimage.interpolation import shift
 from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit, minimize
@@ -146,7 +147,7 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
     """
     p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
     ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
-                             detector=detector, wavelength=wavelength,
+                             detector=detector, wavelength=wavelength,size_1d=5
                              **kwargs_for_integrator)
     tth, I = ai.integrate1d(z, size_1d, unit=unit,
                             **kwargs_for_integrate1d)
@@ -154,7 +155,7 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
 
 
 def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
-                             kwargs_for_integrate1d):
+                             **kwargs_for_integrate1d):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -709,3 +710,5 @@ def investigate_dog_background_removal_interactive(sample_dp,
 
     dp_gaussian.plot(cmap='viridis')
     return None
+
+def correlation(z, )

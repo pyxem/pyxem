@@ -20,15 +20,18 @@ import pytest
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 from matplotlib import pyplot as plt
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.detectors import GenericFlatDetector
 from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     radial_average, gain_normalise, remove_dead, apply_transformation, \
     regional_filter, subtract_background_dog, subtract_background_median, \
     subtract_reference, circular_mask, reference_circle, \
     find_beam_offset_cross_correlation, peaks_as_gvectors, \
     investigate_dog_background_removal_interactive, \
-    find_beam_center_blur, find_beam_center_interpolate
+    find_beam_center_blur, find_beam_center_interpolate,\
+    azimuthal_integrate_fast2d, azimuthal_integrate, azimuthal_integrate_fast
 
 
 @pytest.fixture(params=[
@@ -190,3 +193,70 @@ def test_find_beam_center_interpolate_2(center_expected, sigma):
     z = gaussian_filter(z, sigma=sigma)
     centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)
+
+
+class TestAzimuthalIntegration:
+    @pytest.fixture
+    def ring(self):
+        from skimage.draw import circle
+        test_img = np.zeros(shape=(100, 100))
+        #rr,cc = circle(r=50, c=50, radius=20, shape=(100,100))
+        #test_img[rr,cc] = 10
+        test_img[10,10]=10
+        test_img[20, 20] = 10
+        test_img[50, 30] = 10
+        return test_img
+
+    def test_azimuthal_integration_fast(self, ring):
+        detector = GenericFlatDetector(size_x=100, size_y=100)
+        integration = azimuthal_integrate(ring,origin=(0,0),detector_distance=1.0,
+                                          detector=detector,wavelength=1.0,
+                                          size_1d=200, unit="q_nm^-1",
+                                          kwargs_for_integrate1d=None, kwargs_for_integrator=None)
+        print(integration)
+
+    def test_azimuthal_integration(self,ring):
+        d = np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
+                  [0., 0., 0., 0., 0., 0., 0., 0.],
+                  [0., 0., 0., 1., 1., 0., 0., 0.],
+                  [0., 0., 1., 0., 0., 1., 0., 0.],
+                  [0., 0., 1., 0., 0., 1., 0., 0.],
+                  [0., 0., 0., 1., 1., 0., 0., 0.],
+                  [0., 0., 0., 0., 0., 0., 0., 0.],
+                  [0., 0., 0., 0., 0., 0., 0., 0.]])
+        detector = GenericFlatDetector(size_x=8, size_y=8)
+
+        origin = [4.0,4.0] # off by 0.5 error
+        p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
+        ai = AzimuthalIntegrator(dist=1, poni1=p1, poni2=p2,
+                                 detector=detector, wavelength=1)
+        integration = azimuthal_integrate_fast(d,azimuthal_integrator=ai,size_1d=10, unit="q_nm^-1",
+                                               correctSolidAngle=False)
+        print(integration)
+
+    def test_azimuthal_integration2d(self, ring):
+        d = np.zeros(shape=(100, 100))
+        detector = GenericFlatDetector(size_x=100, size_y=100)
+        d[10,10]= .1
+        d[20,20] = 500000
+        d[30,30] = 1000
+        origin = [49.5,49.5] # off by 0.5 error
+        p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
+        ai = AzimuthalIntegrator(dist=1, poni1=p1, poni2=p2,
+                                 detector=detector, wavelength=1)
+        integration = azimuthal_integrate_fast2d(z=d, azimuthal_integrator=ai,
+                                                 num_radius=200, num_angles=90,
+                                                 unit="q_nm^-1",correctSolidAngle=False)
+        print(integration)
+        plt.imshow(integration)
+        plt.show()
+        """plt.imshow(ring)
+        plt.show()
+        polar = azimuthal_integrate2d(ring,  npt_rad=100, npt_azim=180, method="splitpixel")
+        plt.imshow(polar)
+        plt.show()
+        summed_polar = np.sum(polar[:,:],axis=0)
+        plt.plot(summed_polar)
+        plt.show()"""
+
+
