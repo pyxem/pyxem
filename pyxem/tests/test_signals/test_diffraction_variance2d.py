@@ -35,8 +35,14 @@ class TestDiffractionVariance:
     def test_get_dif_var_radial_profile(self,
                                         diffraction_pattern):
         difvar = DiffractionVariance2D(diffraction_pattern)
+        difvar.metadata.General.title = 'A Title'
+        difvar.axes_manager.navigation_axes[0].name = "x"
         rp = difvar.get_radial_profile()
+
         assert isinstance(rp, DiffractionVariance1D)
+        assert difvar.metadata.General.title == rp.metadata.General.title
+        assert difvar.axes_manager.navigation_axes[0].name == \
+            rp.axes_manager.navigation_axes[0].name
 
     @pytest.fixture
     def axes_test_dp(self):

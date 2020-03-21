@@ -31,8 +31,6 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals import transfer_signal_axes
 
-import warnings
-
 
 class LearningSegment:
     _signal_type = "learning_segment"

@@ -127,7 +127,7 @@ signals:
     module: pyxem.signals.diffraction_variance1d
   DiffractionVariance2D:
     signal_type: diffraction_variance
-    signal_dimension: 1
+    signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_variance2d
