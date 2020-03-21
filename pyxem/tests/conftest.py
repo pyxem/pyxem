@@ -84,7 +84,7 @@ def diffraction_pattern(z):
 
 
 @pytest.fixture
-def diffraction_pattern_for_azimuthal(self):
+def diffraction_pattern_for_azimuthal():
     """
     Two diffraction patterns with easy to see radial profiles, wrapped
     in Diffraction2D  <2|8,8>
@@ -112,7 +112,7 @@ def diffraction_pattern_for_azimuthal(self):
 
 
 @pytest.fixture
-def diffraction_pattern_for_origin_variation(self):
+def diffraction_pattern_for_origin_variation():
     """
     Two diffraction patterns with easy to see radial profiles, wrapped
     in Diffraction2D  <2,2|3,3>
