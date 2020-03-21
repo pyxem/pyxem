@@ -93,8 +93,8 @@ class TestAzimuthalIntegral:
                                             dp_for_azimuthal):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8, 8)
-        diffraction_pattern_for_azimuthal.metadata.General.title = 'A Title'
-        diffraction_pattern_for_azimuthal.axes_manager[0].name = 'x'
+        dp_for_azimuthal.metadata.General.title = 'A Title'
+        dp_for_azimuthal.axes_manager[0].name = 'x'
         ap = dp_for_azimuthal.get_azimuthal_integral(origin,
                                                      detector=detector,
                                                      detector_distance=1,
@@ -194,5 +194,5 @@ class TestPolarReprojection:
 
     def test_reproject_polar_signal_type(self,
                                          dp_for_azimuthal):
-        polar = dp_for_azimuthal.as_polar_diffraction2d()
+        polar = dp_for_azimuthal.as_polar()
         assert isinstance(polar, PolarDiffraction2D)

@@ -545,10 +545,10 @@ class Diffraction2D(Signal2D):
 
         return bg_subtracted
 
-    def as_polar_diffraction2D(self,
-                               dr=1., dt=None,
-                               jacobian=False,
-                               *args, **kwargs):
+    def as_polar(self,
+                 dr=1., dt=None,
+                 jacobian=False,
+                 *args, **kwargs):
         """Reprojects two-dimensional diffraction data from cartesian to polar
         coordinates.
 
