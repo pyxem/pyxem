@@ -574,7 +574,6 @@ class DiffractionVectors(BaseSignal):
                                   inplace=False,
                                   parallel=False,  # TODO: For testing
                                   *args, **kwargs)
-        transfer_navigation_axes(self.cartesian, self)
 
 
 class DiffractionVectors2D(DiffractionVectors):
