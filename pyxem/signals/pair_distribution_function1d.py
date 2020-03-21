@@ -25,7 +25,7 @@ from pyxem.utils.pdf_utils import normalise_pdf_signal_to_max
 
 
 class PairDistributionFunction1D(Signal1D):
-    _signal_type = "pair_distribution_function1d"
+    _signal_type = "pair_distribution_function"
 
     def normalise_signal(self, s_min=0, inplace=False, *args, **kwargs):
         """

@@ -28,7 +28,7 @@ from hyperspy.roi import SpanROI
 
 
 class Diffraction1D(Signal1D):
-    _signal_type = "diffraction1d"
+    _signal_type = "diffraction"
 
     def plot_interactive_virtual_image(self, left, right, **kwargs):
         """Plots an interactive virtual image formed by integrating scatterered

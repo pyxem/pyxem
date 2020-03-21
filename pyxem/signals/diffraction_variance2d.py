@@ -29,7 +29,7 @@ import numpy as np
 
 
 class DiffractionVariance2D(Signal2D):
-    _signal_type = "diffraction_variance2d"
+    _signal_type = "diffraction_variance"
 
     def get_radial_profile(self, inplace=False, **kwargs):
         """Return the radial profile of the diffraction variance signals.

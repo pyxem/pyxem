@@ -26,17 +26,17 @@ from pyxem.signals.diffraction2d import Diffraction2D
 
 
 class ElectronDiffraction2D(Diffraction2D):
-    _signal_type = "electron_diffraction2d"
+    _signal_type = "electron_diffraction"
 
     def __init__(self, *args, **kwargs):
         """
-        Create an ElectronDiffraction2D object from a hs.Signal2D or np.array.
+        Create an ElectronDiffraction2D object from numpy.ndarray.
 
         Parameters
         ----------
         *args :
             Passed to the __init__ of Diffraction2D. The first arg should be
-            either a numpy.ndarray
+            numpy.ndarray
         **kwargs :
             Passed to the __init__ of Diffraction2D
         """

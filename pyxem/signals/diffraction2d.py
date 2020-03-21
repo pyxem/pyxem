@@ -24,20 +24,18 @@ import numpy as np
 from warnings import warn
 
 from hyperspy.api import interactive
-from hyperspy.signals import Signal1D, Signal2D, BaseSignal
+from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import transfer_navigation_axes, push_metadata_through, \
     select_method_from_method_dict
 
-from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, azimuthal_integrate, azimuthal_integrate_fast, \
-    gain_normalise, remove_dead, regional_filter, subtract_background_dog, \
-    subtract_background_median, subtract_reference, circular_mask, \
-    find_beam_offset_cross_correlation, peaks_as_gvectors, \
+from pyxem.utils.expt_utils import radial_average, azimuthal_integrate, \
+    azimuthal_integrate_fast, gain_normalise, remove_dead, regional_filter, \
+    subtract_background_dog, subtract_background_median, subtract_reference, \
+    circular_mask, find_beam_offset_cross_correlation, peaks_as_gvectors, \
     convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
     find_beam_center_interpolate
 
@@ -47,14 +45,13 @@ from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
 from pyxem.utils import peakfinder2D_gui
 
 from skimage import filters
-from skimage import transform as tf
 from skimage.morphology import square
 
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 class Diffraction2D(Signal2D):
-    _signal_type = "diffraction2d"
+    _signal_type = "diffraction"
 
     def plot_interactive_virtual_image(self, roi, **kwargs):
         """Plots an interactive virtual image formed with a specified and
@@ -292,7 +289,7 @@ class Diffraction2D(Signal2D):
             "2th_rad", and "r_mm".
         inplace : bool
             If True (default False), this signal is overwritten. Otherwise,
-            returns anew signal.
+            returns a new signal.
         kwargs_for_map : dictionary
             Keyword arguments to be passed to self.map().
         kwargs_for_integrator : dictionary

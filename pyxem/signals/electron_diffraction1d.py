@@ -24,7 +24,7 @@ from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class ElectronDiffraction1D(Diffraction1D):
-    _signal_type = "electron_diffraction1d"
+    _signal_type = "electron_diffraction"
 
     def set_experimental_parameters(self,
                                     accelerating_voltage=None,
