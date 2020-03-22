@@ -196,3 +196,11 @@ class TestPolarReprojection:
                                          dp_for_azimuthal):
         polar = dp_for_azimuthal.as_polar()
         assert isinstance(polar, PolarDiffraction2D)
+
+    def test_reproject_polar_axes(self,
+                                  dp_for_azimuthal):
+        polar = dp_for_azimuthal.as_polar()
+
+    def test_reproject_polar_values(self,
+                                    dp_for_azimuthal):
+        polar = dp_for_azimuthal.as_polar()

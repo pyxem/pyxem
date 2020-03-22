@@ -29,24 +29,7 @@ from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
     reproject_polar
 
 
-@pytest.fixture(params=[
-    np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
-              [0., 0., 1., 0., 0., 0., 0., 0.],
-              [0., 1., 2., 1., 0., 0., 0., 0.],
-              [0., 0., 1., 0., 0., 0., 0., 0.],
-              [0., 0., 0., 0., 0., 1., 0., 0.],
-              [0., 0., 0., 0., 1., 2., 1., 0.],
-              [0., 0., 0., 0., 0., 1., 0., 0.],
-              [0., 0., 0., 0., 0., 0., 0., 0.]])
-])
-def diffraction_pattern_one_dimension(request):
-    """
-    1D (in navigation space) diffraction pattern <1|8,8>
-    """
-    return ElectronDiffraction2D(request.param)
-
-
-def test_index_coords(diffraction_pattern_one_dimension):
+def test_index_coords(dp_single):
     x = np.array([[-4., -3., -2., -1., 0., 1., 2., 3.],
                   [-4., -3., -2., -1., 0., 1., 2., 3.],
                   [-4., -3., -2., -1., 0., 1., 2., 3.],
@@ -63,13 +46,13 @@ def test_index_coords(diffraction_pattern_one_dimension):
                   [1., 1., 1., 1., 1., 1., 1., 1.],
                   [2., 2., 2., 2., 2., 2., 2., 2.],
                   [3., 3., 3., 3., 3., 3., 3., 3.]])
-    xc, yc = _index_coords(diffraction_pattern_one_dimension.data)
+    xc, yc = _index_coords(dp_single.data)
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
 
-def test_index_coords_non_centeral(diffraction_pattern_one_dimension):
-    xc, yc = _index_coords(diffraction_pattern_one_dimension.data, origin=(0, 0))
+def test_index_coords_non_centeral(dp_single):
+    xc, yc = _index_coords(dp_single.data, origin=(0, 0))
     assert xc[0, 0] == 0
     assert yc[0, 0] == 0
     assert xc[0, 5] == 5
@@ -115,49 +98,52 @@ methods = ['average', 'nan']
 
 
 @pytest.mark.parametrize('method', methods)
-def test_remove_dead_pixels(diffraction_pattern_one_dimension, method):
-    z = diffraction_pattern_one_dimension.data
+def test_remove_dead_pixels(dp_single, method):
+    z = dp_single.data
     dead_removed = remove_dead(z, [[3, 3]], deadvalue=method)
     assert z[3, 3] != dead_removed[3, 3]
 
-def test_investigate_dog_background_removal_interactive(diffraction_pattern_one_dimension):
+def test_dog_background_removal_interactive(dp_single):
     """ Test that this function runs without error """
-    z = diffraction_pattern_one_dimension
+    z = dp_single
     sigma_max_list = np.arange(10, 20, 4)
     sigma_min_list = np.arange(5, 15, 6)
-    investigate_dog_background_removal_interactive(z, sigma_max_list, sigma_min_list)
+    investigate_dog_background_removal_interactive(z, sigma_max_list,
+                                                   sigma_min_list)
     plt.close('all')
     assert True
 
 
 class TestReprojectPolar:
 
-    def test_reproject_polar(self, diffraction_pattern_one_dimension):
-        z = diffraction_pattern_one_dimension.data
+    def test_reproject_polar(self, dp_single):
+        z = dp_single.data
         polar = reproject_polar(z)
-        correct_answer = np.array([[-4.76647043e-03, -9.53082887e-04,  2.29168886e-03,
-                                    1.57668292e-04, -2.25377803e-04, -1.16148765e-04,
-                                    -2.67402071e-03,  1.23632508e-03],
-                                   [ 1.72265615e-01, -6.70150422e-02,  4.95300096e-01,
-                                     1.51786794e+00,  3.74089740e-01, -6.61576106e-02,
-                                     2.66020741e-01,  1.49057863e+00],
-                                   [-3.31084317e-02,  2.00822510e-02, -8.11515633e-02,
-                                     1.88403514e+00, -9.43454824e-02,  2.62205621e-02,
-                                    -7.07187367e-02,  1.82428137e+00],
-                                    [-1.66709278e-03, -9.04784390e-03, -4.37196718e-02,
-                                      4.45232456e-01, -3.20271874e-02, -4.45885236e-03,
-                                     -1.72254131e-02,  4.97117268e-01],
-                                    [ 0.00000000e+00,  1.32550695e-03,  0.00000000e+00,
-                                     -1.07289949e-01,  0.00000000e+00,  3.25581444e-03,
-                                     0.00000000e+00, -5.43693326e-02]])
-        assert np.allclose(polar, correct_answer)
+        answer = np.array([[-4.76647043e-03, -9.53082887e-04,  2.29168886e-03,
+                             1.57668292e-04, -2.25377803e-04, -1.16148765e-04,
+                            -2.67402071e-03,  1.23632508e-03],
+                           [ 1.72265615e-01, -6.70150422e-02,  4.95300096e-01,
+                             1.51786794e+00,  3.74089740e-01, -6.61576106e-02,
+                             2.66020741e-01,  1.49057863e+00],
+                           [-3.31084317e-02,  2.00822510e-02, -8.11515633e-02,
+                             1.88403514e+00, -9.43454824e-02,  2.62205621e-02,
+                            -7.07187367e-02,  1.82428137e+00],
+                           [-1.66709278e-03, -9.04784390e-03, -4.37196718e-02,
+                             4.45232456e-01, -3.20271874e-02, -4.45885236e-03,
+                            -1.72254131e-02,  4.97117268e-01],
+                           [ 0.00000000e+00,  1.32550695e-03,  0.00000000e+00,
+                            -1.07289949e-01,  0.00000000e+00,  3.25581444e-03,
+                             0.00000000e+00, -5.43693326e-02]])
+        assert np.allclose(polar, answer)
 
     def test_reproject_polar_wt_jacobian(self,
-                                         diffraction_pattern_one_dimension):
-        pass
+                                         dp_single):
+        z = dp_single.data
+        polar = reproject_polar(z, dt=0.01)
 
-    def test_reproject_polar_wt_dt(self, diffraction_pattern_one_dimension):
-        pass
+    def test_reproject_polar_wt_dt(self, dp_single):
+        z = dp_single.data
+        polar = reproject_polar(z, jacobian=True)
 
 
 class TestCenteringAlgorithm:
@@ -204,7 +190,8 @@ def test_find_beam_center_interpolate_1(center_expected, sigma):
     z = np.zeros((50, 50))
     z[28:31, 24:28] = 1
     z = gaussian_filter(z, sigma=sigma)
-    centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
+    centers = find_beam_center_interpolate(z, sigma=5,
+                                           upsample_factor=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)
 
 
@@ -215,5 +202,6 @@ def test_find_beam_center_interpolate_2(center_expected, sigma):
     z = np.zeros((50, 50))
     z[5:15, 41:46] = 1
     z = gaussian_filter(z, sigma=sigma)
-    centers = find_beam_center_interpolate(z, sigma=5, upsample_factor=100, kind=3)
+    centers = find_beam_center_interpolate(z, sigma=5,
+                                           upsample_factor=100, kind=3)
     assert np.allclose(centers, center_expected, atol=0.2)

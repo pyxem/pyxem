@@ -84,6 +84,23 @@ def diffraction_pattern(z):
     return dp
 
 
+@pytest.fixture(params=[
+    np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 1., 2., 1., 0., 0., 0., 0.],
+              [0., 0., 1., 0., 0., 0., 0., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 1., 2., 1., 0.],
+              [0., 0., 0., 0., 0., 1., 0., 0.],
+              [0., 0., 0., 0., 0., 0., 0., 0.]])
+])
+def dp_single(request):
+    """
+    1D (in navigation space) diffraction pattern <1|8,8>
+    """
+    return ElectronDiffraction2D(request.param)
+
+
 @pytest.fixture
 def dp_for_azimuthal():
     """
