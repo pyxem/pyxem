@@ -281,12 +281,12 @@ class CalibrationGenerator():
                                           inplace=True)
         dpegm = dpegs.mean((0, 1))
         # Define line roi along which to take trace for calibration
-        line = Line2DROI(x1=5, y1=5, x2=250, y2=250, linewidth=linewidth)
+        line = Line2DROI(x1=5, y1=5, x2=510, y2=510, linewidth=linewidth)
         # Obtain line trace
         trace = line(dpegm)
         trace = trace.as_signal1D(0)
         # Find peaks in line trace either side of direct beam
-        db = (np.sqrt(2) * 128) - (5 * np.sqrt(2))
+        db = (np.sqrt(2) * 256) - (5 * np.sqrt(2))
         pka = trace.isig[db + mask_length:].find_peaks1D_ohaver()[0]['position']
         pkb = trace.isig[:db - mask_length].find_peaks1D_ohaver()[0]['position']
         # Determine predicted position of 022 peak of Au pattern d022=1.437
