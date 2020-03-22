@@ -577,13 +577,13 @@ class Diffraction2D(Signal2D):
             Two-dimensional diffraction data in polar coordinates (k, theta).
 
         """
-        polar_signal = self.map(reproject_polar,
-                                dr=dr, dt=dt,
-                                jacobian=jacobian,
-                                inplace=False,
-                                *args, **kwargs)
+        polar = self.map(reproject_polar,
+                         dr=dr, dt=dt,
+                         jacobian=jacobian,
+                         inplace=False,
+                         *args, **kwargs)
         # Assign to appropriate signal
-        polar = PolarDiffraction2D(polar_signal)
+        polar.set_signal_type("polar_diffraction")
         # Transfer navigation_axes
         transfer_navigation_axes(polar, self)
         # Set signal axes parameters (Theta)
@@ -594,8 +594,8 @@ class Diffraction2D(Signal2D):
         # Set signal axes parameters (magnitude)
         polar_k_axis = polar.axes_manager.signal_axes[1]
         polar_k_axis.name = 'k'
-        #polar_k_axis.scale = self.axes_manager.signal_axes[0].scale,
-        polar_k_axis.units = self.axes_manager.signal_axes[0].units
+        polar_k_axis.scale = 2 * np.pi / polar_k_axis.size
+        polar_k_axis.units = '$rad$'
 
         return polar
 
