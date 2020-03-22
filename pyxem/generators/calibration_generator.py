@@ -281,7 +281,7 @@ class CalibrationGenerator():
                                           inplace=True)
         dpegm = dpegs.mean((0, 1))
         # Define line roi along which to take trace for calibration
-        line = Line2DROI(x1=5, y1=5, x2=size-5, y2=size-5, linewidth=linewidth)
+        line = Line2DROI(x1=5, y1=5, x2=size-6, y2=size-6, linewidth=linewidth)
         # Obtain line trace
         trace = line(dpegm)
         trace = trace.as_signal1D(0)
