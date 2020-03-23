@@ -574,11 +574,14 @@ class DiffractionVectors(BaseSignal):
 
         return filtered_vectors
 
-    def get_diffracting_pixels_map(self, binary=False):
+    def get_diffracting_pixels_map(self, in_range=None, binary=False):
         """Map of the number of vectors at each navigation position.
 
         Parameters
         ----------
+        in_range : tuple
+            Tuple (min_magnitude, max_magnitude) the minimum and maximum
+            magnitude of vectors to be used to form the map.
         binary : boolean
             If True a binary image with diffracting pixels taking value == 1 is
             returned.
@@ -588,13 +591,14 @@ class DiffractionVectors(BaseSignal):
         crystim : Signal2D
             2D map of diffracting pixels.
         """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
-
+        if in_range:
+            filtered = self.filter_magnitude(in_range[0], in_range[1])
+            crystim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+        else:
+            crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+        # Make binary if specified
         if binary is True:
-            crystim = crystim == 1
-
-        crystim.change_dtype("float")
-
+            crystim = crystim == 1.0
         # Set calibration to same as signal
         crystim = transfer_navigation_axes_to_signal_axes(crystim, self)
 
