@@ -30,18 +30,35 @@ from hyperspy._signals.lazy import LazySignal
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals import transfer_navigation_axes, \
-    select_method_from_method_dict
+from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 
-from pyxem.utils.expt_utils import radial_average, azimuthal_integrate, \
-    azimuthal_integrate_fast, gain_normalise, remove_dead, regional_filter, \
-    subtract_background_dog, subtract_background_median, subtract_reference, \
-    circular_mask, find_beam_offset_cross_correlation, peaks_as_gvectors, \
-    convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
-    find_beam_center_interpolate, reproject_polar
+from pyxem.utils.expt_utils import (
+    radial_average,
+    azimuthal_integrate,
+    azimuthal_integrate_fast,
+    gain_normalise,
+    remove_dead,
+    regional_filter,
+    subtract_background_dog,
+    subtract_background_median,
+    subtract_reference,
+    circular_mask,
+    find_beam_offset_cross_correlation,
+    peaks_as_gvectors,
+    convert_affine_to_transform,
+    apply_transformation,
+    find_beam_center_blur,
+    find_beam_center_interpolate,
+    reproject_polar,
+)
 
-from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
-    find_peaks_dog, find_peaks_log, find_peaks_xc
+from pyxem.utils.peakfinders2D import (
+    find_peaks_zaefferer,
+    find_peaks_stat,
+    find_peaks_dog,
+    find_peaks_log,
+    find_peaks_xc,
+)
 
 from pyxem.utils import peakfinder2D_gui
 
@@ -567,10 +584,7 @@ class Diffraction2D(Signal2D):
 
         return bg_subtracted
 
-    def as_polar(self,
-                 dr=1., dt=None,
-                 jacobian=False,
-                 *args, **kwargs):
+    def as_polar(self, dr=1.0, dt=None, jacobian=False, *args, **kwargs):
         """Reprojects two-dimensional diffraction data from cartesian to polar
         coordinates.
 
@@ -599,25 +613,29 @@ class Diffraction2D(Signal2D):
             Two-dimensional diffraction data in polar coordinates (k, theta).
 
         """
-        polar = self.map(reproject_polar,
-                         dr=dr, dt=dt,
-                         jacobian=jacobian,
-                         inplace=False,
-                         *args, **kwargs)
+        polar = self.map(
+            reproject_polar,
+            dr=dr,
+            dt=dt,
+            jacobian=jacobian,
+            inplace=False,
+            *args,
+            **kwargs
+        )
         # Assign to appropriate signal
         polar.set_signal_type("polar_diffraction")
         # Transfer navigation_axes
         transfer_navigation_axes(polar, self)
         # Set signal axes parameters (Theta)
         polar_t_axis = polar.axes_manager.signal_axes[0]
-        polar_t_axis.name = 'theta'
+        polar_t_axis.name = "theta"
         polar_t_axis.scale = 2 * np.pi / polar_t_axis.size
-        polar_t_axis.units = '$rad$'
+        polar_t_axis.units = "$rad$"
         # Set signal axes parameters (magnitude)
         polar_k_axis = polar.axes_manager.signal_axes[1]
-        polar_k_axis.name = 'k'
+        polar_k_axis.name = "k"
         polar_k_axis.scale = 2 * np.pi / polar_k_axis.size
-        polar_k_axis.units = '$rad$'
+        polar_k_axis.units = "$rad$"
 
         return polar
 

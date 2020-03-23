@@ -280,13 +280,13 @@ def reproject_polar(z, dr=1, dt=None, jacobian=False):
     x, y = _index_coords(z, origin=origin)  # (x,y) coordinates of each pixel
     r, theta = _cart2polar(x, y)  # convert (x,y) -> (r,θ), note θ=0 is vertical
 
-    nr = np.int(np.ceil((r.max()-r.min())/dr))
+    nr = np.int(np.ceil((r.max() - r.min()) / dr))
 
     if dt is None:
         nt = max(nx, ny)
     else:
         # dt in radians
-        nt = np.int(np.ceil((theta.max()-theta.min())/dt))
+        nt = np.int(np.ceil((theta.max() - theta.min()) / dt))
 
     # Make a regular (in polar space) grid based on the min and max r & theta
     r_i = np.linspace(r.min(), r.max(), nr, endpoint=False)
@@ -305,7 +305,7 @@ def reproject_polar(z, dr=1, dt=None, jacobian=False):
     output = zi.reshape((nr, nt))
 
     if jacobian:
-        output = output*r_i[:, np.newaxis]
+        output = output * r_i[:, np.newaxis]
 
     return output
 

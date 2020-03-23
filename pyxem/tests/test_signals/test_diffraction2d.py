@@ -73,7 +73,6 @@ class TestComputeAndAsLazy2D:
 
 
 class TestDecomposition:
-
     def test_decomposition_is_performed(self, diffraction_pattern):
         s = Diffraction2D(diffraction_pattern)
         s.decomposition()
@@ -86,23 +85,18 @@ class TestDecomposition:
 
 
 class TestAzimuthalIntegral:
-
-    def test_azimuthal_integral_signal_type(self,
-                                            dp_for_azimuthal):
+    def test_azimuthal_integral_signal_type(self, dp_for_azimuthal):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8, 8)
-        dp_for_azimuthal.metadata.General.title = 'A Title'
-        dp_for_azimuthal.axes_manager[0].name = 'x'
-        ap = dp_for_azimuthal.get_azimuthal_integral(origin,
-                                                     detector=detector,
-                                                     detector_distance=1,
-                                                     wavelength=1, size_1d=5)
+        dp_for_azimuthal.metadata.General.title = "A Title"
+        dp_for_azimuthal.axes_manager[0].name = "x"
+        ap = dp_for_azimuthal.get_azimuthal_integral(
+            origin, detector=detector, detector_distance=1, wavelength=1, size_1d=5
+        )
 
         assert isinstance(ap, Diffraction1D)
-        assert dp_for_azimuthal.metadata.General.title == \
-            ap.metadata.General.title
-        assert dp_for_azimuthal.axes_manager[0].name == \
-            ap.axes_manager[0].name
+        assert dp_for_azimuthal.metadata.General.title == ap.metadata.General.title
+        assert dp_for_azimuthal.axes_manager[0].name == ap.axes_manager[0].name
 
     @pytest.fixture
     def test_dp4D(self):
@@ -155,39 +149,49 @@ class TestAzimuthalIntegral:
         assert name == rp_units_y
         assert units == rp_name_y
 
-    @pytest.mark.parametrize('expected', [
-        (np.array(
-            [[4.5, 3.73302794, 2.76374221, 1.87174165, 0.83391893, 0.],
-             [0.75, 0.46369326, 0.24536559, 0.15187129, 0.06550021, 0.]]
-        ))])
-    def test_azimuthal_integral_fast(self, dp_for_azimuthal,
-                                     expected):
+    @pytest.mark.parametrize(
+        "expected",
+        [
+            (
+                np.array(
+                    [
+                        [4.5, 3.73302794, 2.76374221, 1.87174165, 0.83391893, 0.0],
+                        [0.75, 0.46369326, 0.24536559, 0.15187129, 0.06550021, 0.0],
+                    ]
+                )
+            )
+        ],
+    )
+    def test_azimuthal_integral_fast(self, dp_for_azimuthal, expected):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8, 8)
-        ap = dp_for_azimuthal.get_azimuthal_integral(origin,
-                                                     detector=detector,
-                                                     detector_distance=1e9,
-                                                     wavelength=1, size_1d=6)
+        ap = dp_for_azimuthal.get_azimuthal_integral(
+            origin, detector=detector, detector_distance=1e9, wavelength=1, size_1d=6
+        )
         assert np.allclose(ap.data, expected, atol=1e-3)
 
-    def test_azimuthal_integral_slow(self,
-                                     dp_for_origin_variation):
+    def test_azimuthal_integral_slow(self, dp_for_origin_variation):
         origin = np.array([[[0, 0], [1, 1]], [[1.5, 1.5], [2, 3]]])
         detector = GenericFlatDetector(4, 4)
         ap = dp_for_origin_variation.get_azimuthal_integral(
-            origin,
-            detector=detector,
-            detector_distance=1e9,
-            wavelength=1, size_1d=4)
-        expected = np.array([[[1.01127149e-07, 4.08790171e-01, 2.93595970e-01, 0.00000000e+00],
-                              [2.80096084e-01, 4.43606853e-01, 1.14749573e-01, 0.00000000e+00]],
-                             [[6.20952725e-01, 2.99225271e-01, 4.63002026e-02, 0.00000000e+00],
-                              [5.00000000e-01, 3.43071640e-01, 1.27089232e-01, 0.00000000e+00]]])
+            origin, detector=detector, detector_distance=1e9, wavelength=1, size_1d=4
+        )
+        expected = np.array(
+            [
+                [
+                    [1.01127149e-07, 4.08790171e-01, 2.93595970e-01, 0.00000000e00],
+                    [2.80096084e-01, 4.43606853e-01, 1.14749573e-01, 0.00000000e00],
+                ],
+                [
+                    [6.20952725e-01, 2.99225271e-01, 4.63002026e-02, 0.00000000e00],
+                    [5.00000000e-01, 3.43071640e-01, 1.27089232e-01, 0.00000000e00],
+                ],
+            ]
+        )
         assert np.allclose(ap.data, expected, atol=1e-5)
 
 
 class TestPolarReprojection:
-
     def test_reproject_polar_signal_type(self, diffraction_pattern):
         polar = diffraction_pattern.as_polar()
         assert isinstance(polar, PolarDiffraction2D)
@@ -196,10 +200,10 @@ class TestPolarReprojection:
         n_scale = 0.5
         diffraction_pattern.axes_manager.navigation_axes[0].scale = n_scale
         diffraction_pattern.axes_manager.navigation_axes[1].scale = 2 * n_scale
-        name = 'real_space'
+        name = "real_space"
         diffraction_pattern.axes_manager.navigation_axes[0].name = name
         diffraction_pattern.axes_manager.navigation_axes[1].units = name
-        units = 'nm'
+        units = "nm"
         diffraction_pattern.axes_manager.navigation_axes[1].name = units
         diffraction_pattern.axes_manager.navigation_axes[0].units = units
 
@@ -222,7 +226,7 @@ class TestPolarReprojection:
         assert name == polar_units_y
         assert units == polar_name_y
 
-        assert polar_t_axis.name == 'theta'
-        assert polar_t_axis.units == '$rad$'
-        assert polar_k_axis.name == 'k'
-        assert polar_k_axis.units == '$rad$'
+        assert polar_t_axis.name == "theta"
+        assert polar_t_axis.units == "$rad$"
+        assert polar_k_axis.name == "k"
+        assert polar_k_axis.units == "$rad$"
