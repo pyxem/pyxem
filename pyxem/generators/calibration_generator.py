@@ -267,7 +267,7 @@ class CalibrationGenerator:
         dpegm.plot(*args, **kwargs)
         # add reference circle if specified
         if reference_circle is True:
-            circ = CircleROI(cx=128, cy=128, r=53.5, r_inner=0)
+            circ = CircleROI(cx=size/2, cy=size/2, r=size/5, r_inner=0)
             circ.add_widget(dpegm)
 
     def get_diffraction_calibration(self, mask_length, linewidth):
