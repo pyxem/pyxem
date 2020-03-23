@@ -59,42 +59,51 @@ def test_index_coords_non_centeral(dp_single):
     assert yc[0, 5] == 0
 
 
-@pytest.mark.parametrize('x, y, r, theta', [
-    (2, 2, 2.8284271247461903, -0.78539816339744828),
-    (1, -2, 2.2360679774997898, 1.1071487177940904),
-    (-3, 1, 3.1622776601683795, -2.81984209919315),
-])
+@pytest.mark.parametrize(
+    "x, y, r, theta",
+    [
+        (2, 2, 2.8284271247461903, -0.78539816339744828),
+        (1, -2, 2.2360679774997898, 1.1071487177940904),
+        (-3, 1, 3.1622776601683795, -2.81984209919315),
+    ],
+)
 def test_cart2polar(x, y, r, theta):
     rc, thetac = _cart2polar(x=x, y=y)
     np.testing.assert_almost_equal(rc, r)
     np.testing.assert_almost_equal(thetac, theta)
 
 
-@pytest.mark.parametrize('r, theta, x, y', [
-    (2.82842712, -0.78539816, 2, 2),
-    (2.2360679774997898, 1.1071487177940904, 1, -2),
-    (3.1622776601683795, -2.819842099193151, -3, 1),
-])
+@pytest.mark.parametrize(
+    "r, theta, x, y",
+    [
+        (2.82842712, -0.78539816, 2, 2),
+        (2.2360679774997898, 1.1071487177940904, 1, -2),
+        (3.1622776601683795, -2.819842099193151, -3, 1),
+    ],
+)
 def test_polar2cart(r, theta, x, y):
     xc, yc = _polar2cart(r=r, theta=theta)
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
 
-@pytest.mark.parametrize('z, center, calibration, g', [
-    (np.array([[100, 100],
-               [200, 200],
-               [150, -150]]),
-     np.array((127.5, 127.5)),
-     0.0039,
-     np.array([-0.10725, -0.10725])),
-])
+@pytest.mark.parametrize(
+    "z, center, calibration, g",
+    [
+        (
+            np.array([[100, 100], [200, 200], [150, -150]]),
+            np.array((127.5, 127.5)),
+            0.0039,
+            np.array([-0.10725, -0.10725]),
+        ),
+    ],
+)
 def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
 
 
-methods = ['average', 'nan']
+methods = ["average", "nan"]
 
 
 @pytest.mark.parametrize('method', methods)
@@ -163,7 +172,6 @@ class TestReprojectPolar:
 
 
 class TestCenteringAlgorithm:
-
     @pytest.mark.parametrize("shifts_expected", [(0, 0)])
     def test_perfectly_centered_spot(self, shifts_expected):
         z = np.zeros((50, 50))

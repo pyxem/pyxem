@@ -24,35 +24,38 @@ from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
-def test_template_get_crystallographic_map(dp_template_match_result,
-                                           sp_template_match_result):
+def test_template_get_crystallographic_map(
+    dp_template_match_result, sp_template_match_result
+):
     # Assertion free test, as the tests in test_indexation_utils do the heavy
     # lifting
-    match_results = np.array(np.vstack((dp_template_match_result[0], sp_template_match_result[0])))
+    match_results = np.array(
+        np.vstack((dp_template_match_result[0], sp_template_match_result[0]))
+    )
     match_results = TemplateMatchingResults(match_results)
     cryst_map = match_results.get_crystallographic_map()
-    assert cryst_map.method == 'template_matching'
+    assert cryst_map.method == "template_matching"
 
 
-def test_vector_get_crystallographic_map(dp_vector_match_result,
-                                         sp_vector_match_result):
+def test_vector_get_crystallographic_map(
+    dp_vector_match_result, sp_vector_match_result
+):
     # Assertion free test, as the tests in test_indexation_utils do the heavy
     # lifting
     match_results = np.hstack([dp_vector_match_result, sp_vector_match_result])
     match_results = VectorMatchingResults(match_results)
     match_results.axes_manager.set_signal_dimension(1)
     cryst_map = match_results.get_crystallographic_map()
-    assert cryst_map.method == 'vector_matching'
+    assert cryst_map.method == "vector_matching"
 
 
-@pytest.mark.parametrize('overwrite, result_hkl, current_hkl, expected_hkl', [
-    (True, [0, 0, 1], None, [0, 0, 1]),
-    (False, [0, 0, 1], None, [0, 0, 1]),
-])
-def test_vector_get_indexed_diffraction_vectors(overwrite,
-                                                result_hkl,
-                                                current_hkl,
-                                                expected_hkl):
+@pytest.mark.parametrize(
+    "overwrite, result_hkl, current_hkl, expected_hkl",
+    [(True, [0, 0, 1], None, [0, 0, 1]), (False, [0, 0, 1], None, [0, 0, 1]),],
+)
+def test_vector_get_indexed_diffraction_vectors(
+    overwrite, result_hkl, current_hkl, expected_hkl
+):
     match_results = VectorMatchingResults(np.array([[1], [2]]))
     match_results.hkls = result_hkl
     vectors = DiffractionVectors(np.array([[1], [2]]))

@@ -45,22 +45,25 @@ class ElectronDiffraction2D(Diffraction2D):
         super().__init__(*args, **kwargs)
 
         # Set default attributes
-        if 'Acquisition_instrument' in self.metadata.as_dictionary():
-            if 'SEM' in self.metadata.as_dictionary()['Acquisition_instrument']:
+        if "Acquisition_instrument" in self.metadata.as_dictionary():
+            if "SEM" in self.metadata.as_dictionary()["Acquisition_instrument"]:
                 self.metadata.set_item(
                     "Acquisition_instrument.TEM",
-                    self.metadata.Acquisition_instrument.SEM)
+                    self.metadata.Acquisition_instrument.SEM,
+                )
                 del self.metadata.Acquisition_instrument.SEM
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def set_experimental_parameters(self,
-                                    accelerating_voltage=None,
-                                    camera_length=None,
-                                    scan_rotation=None,
-                                    convergence_angle=None,
-                                    rocking_angle=None,
-                                    rocking_frequency=None,
-                                    exposure_time=None):
+    def set_experimental_parameters(
+        self,
+        accelerating_voltage=None,
+        camera_length=None,
+        scan_rotation=None,
+        convergence_angle=None,
+        rocking_angle=None,
+        rocking_frequency=None,
+        exposure_time=None,
+    ):
         """Set experimental parameters in metadata.
 
         Parameters
@@ -83,28 +86,31 @@ class ElectronDiffraction2D(Diffraction2D):
         md = self.metadata
 
         if accelerating_voltage is not None:
-            md.set_item("Acquisition_instrument.TEM.accelerating_voltage",
-                        accelerating_voltage)
+            md.set_item(
+                "Acquisition_instrument.TEM.accelerating_voltage", accelerating_voltage
+            )
         if camera_length is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
-                camera_length)
+                camera_length,
+            )
         if scan_rotation is not None:
-            md.set_item("Acquisition_instrument.TEM.scan_rotation",
-                        scan_rotation)
+            md.set_item("Acquisition_instrument.TEM.scan_rotation", scan_rotation)
         if convergence_angle is not None:
-            md.set_item("Acquisition_instrument.TEM.convergence_angle",
-                        convergence_angle)
+            md.set_item(
+                "Acquisition_instrument.TEM.convergence_angle", convergence_angle
+            )
         if rocking_angle is not None:
-            md.set_item("Acquisition_instrument.TEM.rocking_angle",
-                        rocking_angle)
+            md.set_item("Acquisition_instrument.TEM.rocking_angle", rocking_angle)
         if rocking_frequency is not None:
-            md.set_item("Acquisition_instrument.TEM.rocking_frequency",
-                        rocking_frequency)
+            md.set_item(
+                "Acquisition_instrument.TEM.rocking_frequency", rocking_frequency
+            )
         if exposure_time is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
-                exposure_time)
+                exposure_time,
+            )
 
     def set_diffraction_calibration(self, calibration, center=None):
         """Set diffraction pattern pixel size in reciprocal Angstroms and origin
@@ -124,15 +130,15 @@ class ElectronDiffraction2D(Diffraction2D):
         dx = self.axes_manager.signal_axes[0]
         dy = self.axes_manager.signal_axes[1]
 
-        dx.name = 'kx'
+        dx.name = "kx"
         dx.scale = calibration
         dx.offset = -center[0]
-        dx.units = '$A^{-1}$'
+        dx.units = "$A^{-1}$"
 
-        dy.name = 'ky'
+        dy.name = "ky"
         dy.scale = calibration
         dy.offset = -center[1]
-        dy.units = '$A^{-1}$'
+        dy.units = "$A^{-1}$"
 
     def set_scan_calibration(self, calibration):
         """Set scan pixel size in nanometres.
@@ -145,13 +151,13 @@ class ElectronDiffraction2D(Diffraction2D):
         x = self.axes_manager.navigation_axes[0]
         y = self.axes_manager.navigation_axes[1]
 
-        x.name = 'x'
+        x.name = "x"
         x.scale = calibration
-        x.units = 'nm'
+        x.units = "nm"
 
-        y.name = 'y'
+        y.name = "y"
         y.scale = calibration
-        y.units = 'nm'
+        y.units = "nm"
 
 
 class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):

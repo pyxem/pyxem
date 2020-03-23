@@ -17,8 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-def select_method_from_method_dict(method, method_dict, print_help=True,
-                                   **kwargs):
+def select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
     """
     Streamlines the selection of utils to be mapped in class methods
 
@@ -45,9 +44,11 @@ def select_method_from_method_dict(method, method_dict, print_help=True,
     """
 
     if method not in method_dict:
-        raise NotImplementedError("The method `{}` is not implemented. "
-                                  "See documentation for available "
-                                  "implementations.".format(method))
+        raise NotImplementedError(
+            "The method `{}` is not implemented. "
+            "See documentation for available "
+            "implementations.".format(method)
+        )
     elif print_help and not kwargs:
         help(method_dict[method])
 
@@ -98,10 +99,15 @@ def transfer_navigation_axes(new_signal, old_signal):
         The new signal with calibrated navigation axes.
     """
     new_signal.axes_manager.set_signal_dimension(
-        len(new_signal.data.shape) - old_signal.axes_manager.navigation_dimension)
+        len(new_signal.data.shape) - old_signal.axes_manager.navigation_dimension
+    )
 
-    for i in range(min(new_signal.axes_manager.navigation_dimension,
-                       old_signal.axes_manager.navigation_dimension)):
+    for i in range(
+        min(
+            new_signal.axes_manager.navigation_dimension,
+            old_signal.axes_manager.navigation_dimension,
+        )
+    ):
         ax_new = new_signal.axes_manager.navigation_axes[i]
         ax_old = old_signal.axes_manager.navigation_axes[i]
         ax_new.name = ax_old.name
@@ -130,8 +136,12 @@ def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
     new_signal : Signal
         The new signal with calibrated signal axes.
     """
-    for i in range(min(new_signal.axes_manager.signal_dimension,
-                       old_signal.axes_manager.navigation_dimension)):
+    for i in range(
+        min(
+            new_signal.axes_manager.signal_dimension,
+            old_signal.axes_manager.navigation_dimension,
+        )
+    ):
         ax_new = new_signal.axes_manager.signal_axes[i]
         ax_old = old_signal.axes_manager.navigation_axes[i]
         ax_new.name = ax_old.name

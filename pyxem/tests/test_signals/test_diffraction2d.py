@@ -27,25 +27,23 @@ from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class TestComputeAndAsLazy2D:
-
     def test_2d_data_compute(self):
         dask_array = da.random.random((100, 150), chunks=(50, 50))
         s = LazyDiffraction2D(dask_array)
-        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        scale0, scale1, metadata_string = 0.5, 1.5, "test"
         s.axes_manager[0].scale = scale0
         s.axes_manager[1].scale = scale1
         s.metadata.Test = metadata_string
         s.compute()
         assert isinstance(s, Diffraction2D)
-        assert not hasattr(s.data, 'compute')
+        assert not hasattr(s.data, "compute")
         assert s.axes_manager[0].scale == scale0
         assert s.axes_manager[1].scale == scale1
         assert s.metadata.Test == metadata_string
         assert dask_array.shape == s.data.shape
 
     def test_4d_data_compute(self):
-        dask_array = da.random.random((4, 4, 10, 15),
-                                      chunks=(1, 1, 10, 15))
+        dask_array = da.random.random((4, 4, 10, 15), chunks=(1, 1, 10, 15))
         s = LazyDiffraction2D(dask_array)
         s.compute()
         assert isinstance(s, Diffraction2D)
@@ -54,13 +52,13 @@ class TestComputeAndAsLazy2D:
     def test_2d_data_as_lazy(self):
         data = np.random.random((100, 150))
         s = Diffraction2D(data)
-        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        scale0, scale1, metadata_string = 0.5, 1.5, "test"
         s.axes_manager[0].scale = scale0
         s.axes_manager[1].scale = scale1
         s.metadata.Test = metadata_string
         s_lazy = s.as_lazy()
         assert isinstance(s_lazy, LazyDiffraction2D)
-        assert hasattr(s_lazy.data, 'compute')
+        assert hasattr(s_lazy.data, "compute")
         assert s_lazy.axes_manager[0].scale == scale0
         assert s_lazy.axes_manager[1].scale == scale1
         assert s_lazy.metadata.Test == metadata_string
@@ -114,10 +112,9 @@ class TestAzimuthalIntegral:
     def test_azimuthal_integral_4D(self, test_dp4D):
         origin = [2, 2]
         detector = GenericFlatDetector(5, 5)
-        ap = test_dp4D.get_azimuthal_integral(origin,
-                                              detector=detector,
-                                              detector_distance=1e6,
-                                              wavelength=1, size_1d=4)
+        ap = test_dp4D.get_azimuthal_integral(
+            origin, detector=detector, detector_distance=1e6, wavelength=1, size_1d=4
+        )
         assert isinstance(ap, Diffraction1D)
         assert np.array_equal(ap.data, np.ones((5, 5, 4)))
 
@@ -132,19 +129,18 @@ class TestAzimuthalIntegral:
         n_scale = 0.5
         axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
         axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
-        name = 'real_space'
+        name = "real_space"
         axes_test_dp.axes_manager.navigation_axes[0].name = name
         axes_test_dp.axes_manager.navigation_axes[1].units = name
-        units = 'um'
+        units = "um"
         axes_test_dp.axes_manager.navigation_axes[1].name = units
         axes_test_dp.axes_manager.navigation_axes[0].units = units
 
         origin = [1, 1]
         detector = GenericFlatDetector(3, 3)
-        ap = axes_test_dp.get_azimuthal_integral(origin,
-                                                 detector=detector,
-                                                 detector_distance=1,
-                                                 wavelength=1, size_1d=5)
+        ap = axes_test_dp.get_azimuthal_integral(
+            origin, detector=detector, detector_distance=1, wavelength=1, size_1d=5
+        )
         rp_scale_x = ap.axes_manager.navigation_axes[0].scale
         rp_scale_y = ap.axes_manager.navigation_axes[1].scale
         rp_units_x = ap.axes_manager.navigation_axes[0].units
