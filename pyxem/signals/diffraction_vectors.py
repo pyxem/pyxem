@@ -601,7 +601,7 @@ class DiffractionVectors(BaseSignal):
             xim = xim >= 1.0
         # Set properties
         xim = transfer_navigation_axes_to_signal_axes(xim, self)
-        xim.change_dtype('float')
+        xim.change_dtype("float")
         xim.set_signal_type("signal2d")
         xim.metadata.General.title = "Diffracting Pixels Map"
 

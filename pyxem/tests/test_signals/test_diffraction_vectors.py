@@ -270,9 +270,7 @@ class TestFilterVectors:
         assert isinstance(filtered_vectors, DiffractionVectors)
 
     def test_filter_magnitude_single_type(self, diffraction_vectors_single):
-        filtered_vectors = diffraction_vectors_single.filter_magnitude(
-            0.1, 1.0
-        )
+        filtered_vectors = diffraction_vectors_single.filter_magnitude(0.1, 1.0)
         assert isinstance(filtered_vectors, DiffractionVectors)
 
     def test_filter_magnitude_map(self, diffraction_vectors_map):
@@ -294,9 +292,7 @@ class TestFilterVectors:
         np.testing.assert_almost_equal(filtered_vectors.data[0][1], ans)
 
     def test_filter_magnitude_single(self, diffraction_vectors_single):
-        filtered_vectors = diffraction_vectors_single.filter_magnitude(
-            0.15, 1.0
-        )
+        filtered_vectors = diffraction_vectors_single.filter_magnitude(0.15, 1.0)
         ans = np.array(
             [[-0.115594, 0.123566], [0.103636, -0.11958], [0.123566, 0.151468]]
         )
@@ -305,9 +301,7 @@ class TestFilterVectors:
     def test_filter_detector_edge_map_type(self, diffraction_vectors_map):
         diffraction_vectors_map.detector_shape = (260, 240)
         diffraction_vectors_map.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_map.filter_detector_edge(
-            exclude_width=2
-        )
+        filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
         assert isinstance(filtered_vectors, DiffractionVectors)
 
     def test_filter_detector_edge_single_type(self, diffraction_vectors_single):
@@ -321,9 +315,7 @@ class TestFilterVectors:
     def test_filter_detector_edge_map(self, diffraction_vectors_map):
         diffraction_vectors_map.detector_shape = (260, 240)
         diffraction_vectors_map.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_map.filter_detector_edge(
-            exclude_width=2
-        )
+        filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
         ans = np.array([[-0.117587, 0.113601]])
         np.testing.assert_almost_equal(filtered_vectors.data[0, 0], ans)
 
@@ -338,10 +330,8 @@ class TestFilterVectors:
 
 
 class TestDiffractingPixelsMap:
-
     def test_get_dpm_values(self, diffraction_vectors_map):
-        answer = np.array([[ 7., 13.],
-                           [11.,  1.]])
+        answer = np.array([[7.0, 13.0], [11.0, 1.0]])
         xim = diffraction_vectors_map.get_diffracting_pixels_map()
         assert np.allclose(xim, answer)
 
@@ -354,13 +344,11 @@ class TestDiffractingPixelsMap:
         assert xim.metadata.General.title == "Diffracting Pixels Map"
 
     def test_get_dpm_in_range(self, diffraction_vectors_map):
-        answer = np.array([[0., 3.],
-                           [1., 1.]])
+        answer = np.array([[0.0, 3.0], [1.0, 1.0]])
         xim = diffraction_vectors_map.get_diffracting_pixels_map(in_range=(0, 0.1))
         assert np.allclose(xim, answer)
 
     def test_get_dpm_binary(self, diffraction_vectors_map):
-        answer = np.array([[1., 1.],
-                           [1.,  1.]])
+        answer = np.array([[1.0, 1.0], [1.0, 1.0]])
         xim = diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
         assert np.allclose(xim, answer)
