@@ -21,7 +21,6 @@
 """
 
 import numpy as np
-import hyperspy.api as hs
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
@@ -29,16 +28,16 @@ from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import select_method_from_method_dict
 
-from pyxem.utils.indexation_utils import correlate_library
-from pyxem.utils.indexation_utils import zero_mean_normalized_correlation
-from pyxem.utils.indexation_utils import fast_correlation
-from pyxem.utils.indexation_utils import index_magnitudes
-from pyxem.utils.indexation_utils import match_vectors
-from pyxem.utils.indexation_utils import OrientationResult
-from pyxem.utils.indexation_utils import get_nth_best_solution
+from pyxem.utils.indexation_utils import (
+    correlate_library,
+    zero_mean_normalized_correlation,
+    fast_correlation,
+    index_magnitudes,
+    match_vectors,
+    OrientationResult,
+    get_nth_best_solution,
+)
 
-from collections import namedtuple
-from operator import attrgetter
 
 from transforms3d.euler import mat2euler, euler2mat
 from pyxem.utils.vector_utils import detector_to_fourier
@@ -47,7 +46,7 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 import lmfit
 
 
-class IndexationGenerator():
+class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
     Parameters
@@ -58,20 +57,19 @@ class IndexationGenerator():
         The library of simulated diffraction patterns for indexation.
     """
 
-    def __init__(self,
-                 signal,
-                 diffraction_library):
+    def __init__(self, signal, diffraction_library):
         self.signal = signal
         self.library = diffraction_library
 
-
-    def correlate(self,
-                  n_largest=5,
-                  method = 'fast_correlation',
-                  mask=None,
-                  print_help = False,
-                  *args,
-                  **kwargs):
+    def correlate(
+        self,
+        n_largest=5,
+        method="fast_correlation",
+        mask=None,
+        print_help=False,
+        *args,
+        **kwargs,
+    ):
         """Correlates the library of simulated diffraction patterns with the
         electron diffraction signal.
 
@@ -102,32 +100,41 @@ class IndexationGenerator():
         signal = self.signal
         library = self.library
 
-        method_dict = { 'fast_correlation' : fast_correlation,
-                     'zero_mean_normalized_correlation' : zero_mean_normalized_correlation
-                     }
+        method_dict = {
+            "fast_correlation": fast_correlation,
+            "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
+        }
 
         if mask is None:
             # Index at all real space pixels
             mask = 1
 
-        #tests if selected method is a valid argument, and can print help for selected method.
-        chosen_function = select_method_from_method_dict(method,method_dict,print_help)
+        # tests if selected method is a valid argument, and can print help for selected method.
+        chosen_function = select_method_from_method_dict(
+            method, method_dict, print_help
+        )
 
         # adds a normalisation to library
         for phase in library.keys():
-            norm_array = np.ones(library[phase]['intensities'].shape[0])  # will store the norms
+            norm_array = np.ones(
+                library[phase]["intensities"].shape[0]
+            )  # will store the norms
 
-            for i, intensity_array in enumerate(library[phase]['intensities']):
+            for i, intensity_array in enumerate(library[phase]["intensities"]):
                 norm_array[i] = np.linalg.norm(intensity_array)
-            library[phase]['pattern_norms'] = norm_array  # puts this normalisation into the library
+            library[phase][
+                "pattern_norms"
+            ] = norm_array  # puts this normalisation into the library
 
-        matches = signal.map(correlate_library,
-                             library=library,
-                             n_largest=n_largest,
-                             method = method,
-                             mask=mask,
-                             inplace=False,
-                             **kwargs)
+        matches = signal.map(
+            correlate_library,
+            library=library,
+            n_largest=n_largest,
+            method=method,
+            mask=mask,
+            inplace=False,
+            **kwargs,
+        )
 
         matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
@@ -135,8 +142,7 @@ class IndexationGenerator():
         return matching_results
 
 
-
-class ProfileIndexationGenerator():
+class ProfileIndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
     Parameters
@@ -153,10 +159,7 @@ class ProfileIndexationGenerator():
         self.magnitudes = magnitudes
         self.simulation = simulation
 
-    def index_peaks(self,
-                    tolerance=0.1,
-                    *args,
-                    **kwargs):
+    def index_peaks(self, tolerance=0.1, *args, **kwargs):
         """Assigns hkl indices to peaks in the diffraction profile.
 
         Parameters
@@ -181,20 +184,21 @@ class ProfileIndexationGenerator():
         return index_magnitudes(np.array(self.magnitudes), self.simulation, tolerance)
 
 
-def _refine_best_orientations(single_match_result,
-                              vectors,
-                              library,
-                              accelarating_voltage,
-                              camera_length,
-                              n_best=5,
-                              rank=0,
-                              index_error_tol=0.2,
-                              method="leastsq",
-                              vary_angles=True,
-                              vary_center=False,
-                              vary_scale=False,
-                              verbose=False
-                              ):
+def _refine_best_orientations(
+    single_match_result,
+    vectors,
+    library,
+    accelarating_voltage,
+    camera_length,
+    n_best=5,
+    rank=0,
+    index_error_tol=0.2,
+    method="leastsq",
+    vary_angles=True,
+    vary_center=False,
+    vary_scale=False,
+    verbose=False,
+):
     """
     Refine a single orientation agains the given cartesian vector coordinates.
 
@@ -252,17 +256,19 @@ def _refine_best_orientations(single_match_result,
 
         solution = get_nth_best_solution(single_match_result, rank=i)
 
-        result = _refine_orientation(solution,
-                                     vectors,
-                                     library,
-                                     accelarating_voltage=accelarating_voltage,
-                                     camera_length=camera_length,
-                                     index_error_tol=index_error_tol,
-                                     method=method,
-                                     vary_angles=vary_angles,
-                                     vary_center=vary_center,
-                                     vary_scale=vary_scale,
-                                     verbose=verbose)
+        result = _refine_orientation(
+            solution,
+            vectors,
+            library,
+            accelarating_voltage=accelarating_voltage,
+            camera_length=camera_length,
+            index_error_tol=index_error_tol,
+            method=method,
+            vary_angles=vary_angles,
+            vary_center=vary_center,
+            vary_scale=vary_scale,
+            verbose=verbose,
+        )
 
         top_matches[i] = result[0]
         res_rhkls.append(result[1])
@@ -273,18 +279,19 @@ def _refine_best_orientations(single_match_result,
     return res
 
 
-def _refine_orientation(solution,
-                        k_xy,
-                        structure_library,
-                        accelarating_voltage,
-                        camera_length,
-                        index_error_tol=0.2,
-                        method="leastsq",
-                        vary_angles=True,
-                        vary_center=False,
-                        vary_scale=False,
-                        verbose=False,
-                        ):
+def _refine_orientation(
+    solution,
+    k_xy,
+    structure_library,
+    accelarating_voltage,
+    camera_length,
+    index_error_tol=0.2,
+    method="leastsq",
+    vary_angles=True,
+    vary_center=False,
+    vary_scale=False,
+    verbose=False,
+):
     """
     Refine a single orientation agains the given cartesian vector coordinates.
 
@@ -334,7 +341,7 @@ def _refine_orientation(solution,
 
         rotmat = euler2mat(ai, aj, ak)
 
-        k_xy = (k_xy + np.array((cx, cy)) * scale)
+        k_xy = k_xy + np.array((cx, cy)) * scale
         cart = detector_to_fourier(k_xy, wavelength, camera_length)
 
         intermediate = cart.dot(rotmat.T)  # Must use the transpose here
@@ -373,7 +380,7 @@ def _refine_orientation(solution,
 
     rotation_matrix = euler2mat(ai, aj, ak)
 
-    k_xy = (k_xy + np.array((center_x, center_y)) * scale)
+    k_xy = k_xy + np.array((center_x, center_y)) * scale
     cart = detector_to_fourier(k_xy, wavelength=wavelength, camera_length=camera_length)
 
     intermediate = cart.dot(rotation_matrix.T)  # Must use the transpose here
@@ -391,14 +398,16 @@ def _refine_orientation(solution,
 
     match_rate = (valid_peak_count * (1 / num_peaks)) if num_peaks else 0
 
-    orientation = OrientationResult(phase_index=solution.phase_index,
-                                    rotation_matrix=rotation_matrix,
-                                    match_rate=match_rate,
-                                    error_hkls=error_hkls,
-                                    total_error=error_mean,
-                                    scale=scale,
-                                    center_x=center_x,
-                                    center_y=center_y)
+    orientation = OrientationResult(
+        phase_index=solution.phase_index,
+        rotation_matrix=rotation_matrix,
+        match_rate=match_rate,
+        error_hkls=error_hkls,
+        total_error=error_mean,
+        scale=scale,
+        center_x=center_x,
+        center_y=center_y,
+    )
 
     res = np.empty(2, dtype=np.object)
     res[0] = orientation
@@ -407,7 +416,7 @@ def _refine_orientation(solution,
     return res
 
 
-class VectorIndexationGenerator():
+class VectorIndexationGenerator:
     """Generates an indexer for DiffractionVectors using a number of methods.
 
     Attributes
@@ -427,25 +436,27 @@ class VectorIndexationGenerator():
         angles for indexation.
     """
 
-    def __init__(self,
-                 vectors,
-                 vector_library):
+    def __init__(self, vectors, vector_library):
         if vectors.cartesian is None:
-            raise ValueError("Cartesian coordinates are required in order to index "
-                             "diffraction vectors. Use the calculate_cartesian_coordinates "
-                             "method of DiffractionVectors to obtain these.")
+            raise ValueError(
+                "Cartesian coordinates are required in order to index "
+                "diffraction vectors. Use the calculate_cartesian_coordinates "
+                "method of DiffractionVectors to obtain these."
+            )
         else:
             self.vectors = vectors
             self.library = vector_library
 
-    def index_vectors(self,
-                      mag_tol,
-                      angle_tol,
-                      index_error_tol,
-                      n_peaks_to_index,
-                      n_best,
-                      *args,
-                      **kwargs):
+    def index_vectors(
+        self,
+        mag_tol,
+        angle_tol,
+        index_error_tol,
+        n_peaks_to_index,
+        n_best,
+        *args,
+        **kwargs,
+    ):
         """Assigns hkl indices to diffraction vectors.
 
         Parameters
@@ -477,39 +488,44 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        matched = vectors.cartesian.map(match_vectors,
-                                        library=library,
-                                        mag_tol=mag_tol,
-                                        angle_tol=np.deg2rad(angle_tol),
-                                        index_error_tol=index_error_tol,
-                                        n_peaks_to_index=n_peaks_to_index,
-                                        n_best=n_best,
-                                        inplace=False,
-                                        *args,
-                                        **kwargs)
+        matched = vectors.cartesian.map(
+            match_vectors,
+            library=library,
+            mag_tol=mag_tol,
+            angle_tol=np.deg2rad(angle_tol),
+            index_error_tol=index_error_tol,
+            n_peaks_to_index=n_peaks_to_index,
+            n_best=n_best,
+            inplace=False,
+            *args,
+            **kwargs,
+        )
         indexation = matched.isig[0]
         rhkls = matched.isig[1].data
 
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
-        indexation_results = transfer_navigation_axes(indexation_results,
-                                                      vectors.cartesian)
+        indexation_results = transfer_navigation_axes(
+            indexation_results, vectors.cartesian
+        )
 
         vectors.hkls = rhkls
 
         return indexation_results
 
-    def refine_best_orientation(self,
-                                orientations,
-                                accelarating_voltage,
-                                camera_length,
-                                rank=0,
-                                index_error_tol=0.2,
-                                vary_angles=True,
-                                vary_center=False,
-                                vary_scale=False,
-                                method="leastsq"):
+    def refine_best_orientation(
+        self,
+        orientations,
+        accelarating_voltage,
+        camera_length,
+        rank=0,
+        index_error_tol=0.2,
+        vary_angles=True,
+        vary_center=False,
+        vary_scale=False,
+        method="leastsq",
+    ):
         """Refines the best orientation and assigns hkl indices to diffraction vectors.
 
         Parameters
@@ -540,28 +556,32 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        return self.refine_n_best_orientations(orientations,
-                                               accelarating_voltage=accelarating_voltage,
-                                               camera_length=camera_length,
-                                               n_best=1,
-                                               rank=rank,
-                                               index_error_tol=index_error_tol,
-                                               method=method,
-                                               vary_angles=vary_angles,
-                                               vary_center=vary_center,
-                                               vary_scale=vary_scale)
+        return self.refine_n_best_orientations(
+            orientations,
+            accelarating_voltage=accelarating_voltage,
+            camera_length=camera_length,
+            n_best=1,
+            rank=rank,
+            index_error_tol=index_error_tol,
+            method=method,
+            vary_angles=vary_angles,
+            vary_center=vary_center,
+            vary_scale=vary_scale,
+        )
 
-    def refine_n_best_orientations(self,
-                                   orientations,
-                                   accelarating_voltage,
-                                   camera_length,
-                                   n_best=0,
-                                   rank=0,
-                                   index_error_tol=0.2,
-                                   vary_angles=True,
-                                   vary_center=False,
-                                   vary_scale=False,
-                                   method="leastsq"):
+    def refine_n_best_orientations(
+        self,
+        orientations,
+        accelarating_voltage,
+        camera_length,
+        n_best=0,
+        rank=0,
+        index_error_tol=0.2,
+        vary_angles=True,
+        vary_center=False,
+        vary_scale=False,
+        method="leastsq",
+    ):
         """Refines the best orientation and assigns hkl indices to diffraction vectors.
 
         Parameters
@@ -601,19 +621,22 @@ class VectorIndexationGenerator():
         vectors = self.vectors
         library = self.library
 
-        matched = orientations.map(_refine_best_orientations,
-                                   vectors=vectors,
-                                   library=library,
-                                   accelarating_voltage=accelarating_voltage,
-                                   camera_length=camera_length,
-                                   n_best=n_best,
-                                   rank=rank,
-                                   method="leastsq",
-                                   verbose=False,
-                                   vary_angles=vary_angles,
-                                   vary_center=vary_center,
-                                   vary_scale=vary_scale,
-                                   inplace=False, parallel=False)
+        matched = orientations.map(
+            _refine_best_orientations,
+            vectors=vectors,
+            library=library,
+            accelarating_voltage=accelarating_voltage,
+            camera_length=camera_length,
+            n_best=n_best,
+            rank=rank,
+            method="leastsq",
+            verbose=False,
+            vary_angles=vary_angles,
+            vary_center=vary_center,
+            vary_scale=vary_scale,
+            inplace=False,
+            parallel=False,
+        )
 
         indexation = matched.isig[0]
         rhkls = matched.isig[1].data
@@ -621,7 +644,8 @@ class VectorIndexationGenerator():
         indexation_results = VectorMatchingResults(indexation)
         indexation_results.vectors = vectors
         indexation_results.hkls = rhkls
-        indexation_results = transfer_navigation_axes(indexation_results,
-                                                      vectors.cartesian)
+        indexation_results = transfer_navigation_axes(
+            indexation_results, vectors.cartesian
+        )
 
         return indexation_results
