@@ -62,6 +62,7 @@ class CommonDiffraction:
         # Create the interactive signal
         interactive(sliced_signal.sum,
                     axis=sliced_signal.axes_manager.signal_axes,
+                    event=roi.events.changed,
                     recompute_out_event=None,
                     out=out,
         )
