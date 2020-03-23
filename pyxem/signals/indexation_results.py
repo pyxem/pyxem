@@ -142,7 +142,7 @@ class TemplateMatchingResults(BaseSignal):
                 for j in range (dimensions[1]):
                     for k in range (dimensions[2]):
                         data_array[i, j, k, 0] = self.data[i, j, k, 0]
-                        data_array[i, j, k, -1] = self.data[i, k, j, -1]
+                        data_array[i, j, k, -1] = self.data[i, j, k, -1]
                         data_array[i, j, k, 1] = self.data[i, j, k, 1][0]
                         data_array[i, j, k, 2] = self.data[i, j, k, 1][1]
                         data_array[i, j, k, 3] = self.data[i, j, k, 1][2]
