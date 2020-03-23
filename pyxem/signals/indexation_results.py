@@ -133,7 +133,6 @@ class TemplateMatchingResults(BaseSignal):
                     data_array[i, j, 3] = self.data[i, j, 1][2]
 
             np.save(filename,data_array)
-            return 0
 
         elif len(dimensions) == 4:
             # 2D navigation space
@@ -148,11 +147,9 @@ class TemplateMatchingResults(BaseSignal):
                         data_array[i, j, k, 3] = self.data[i, j, k, 1][2]
 
             np.save(filename, data_array)
-            return 0
 
         else:
             raise ValueError('Could not save file of dimensions {}'.format(dimensions))
-            return -1
 
 
 class VectorMatchingResults(BaseSignal):
