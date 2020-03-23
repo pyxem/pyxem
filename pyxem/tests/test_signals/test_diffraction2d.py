@@ -258,7 +258,7 @@ class TestAzimuthalIntegral:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    @pytest.mark.parametrize('stack', [True, False])
+    @pytest.mark.parametrize("stack", [True, False])
     def test_plot_interactive_virtual_image(self, stack, diffraction_pattern):
         if stack:
             diffraction_pattern = hs.stack([diffraction_pattern] * 3)
@@ -272,18 +272,17 @@ class TestVirtualImaging:
         assert vi.axes_manager.signal_dimension == 2
         assert vi.axes_manager.navigation_dimension == 0
 
-    @pytest.mark.parametrize('out_signal_axes',
-                             [None, (0, 1), (1, 2), ('x', 'y')])
-    def test_get_virtual_image_stack(self, diffraction_pattern,
-                                      out_signal_axes):
+    @pytest.mark.parametrize("out_signal_axes", [None, (0, 1), (1, 2), ("x", "y")])
+    def test_get_virtual_image_stack(self, diffraction_pattern, out_signal_axes):
         s = hs.stack([diffraction_pattern] * 3)
-        s.axes_manager.navigation_axes[0].name = 'x'
-        s.axes_manager.navigation_axes[1].name = 'y'
+        s.axes_manager.navigation_axes[0].name = "x"
+        s.axes_manager.navigation_axes[1].name = "y"
 
         roi = hs.roi.CircleROI(3, 3, 5)
         vi = s.get_virtual_image(roi, out_signal_axes)
         assert vi.axes_manager.signal_dimension == 2
         assert vi.axes_manager.navigation_dimension == 1
+        assert "Virtual image" in vi.metadata.General.title
         if out_signal_axes == (1, 2):
             assert vi.data.shape == (2, 3, 2)
             assert vi.axes_manager.navigation_size == 2
@@ -293,3 +292,26 @@ class TestVirtualImaging:
             assert vi.axes_manager.navigation_size == 3
             assert vi.axes_manager.signal_shape == (2, 2)
 
+    def test_get_virtual_image_out_signal_axes(self, diffraction_pattern):
+        s = hs.stack([diffraction_pattern] * 3)
+        roi = hs.roi.CircleROI(3, 3, 5)
+        vi = s.get_virtual_image(roi, out_signal_axes=(0, 1, 2))
+        assert vi.axes_manager.signal_dimension == 3
+        assert vi.axes_manager.navigation_dimension == 0
+        assert vi.metadata.General.title.strip() == f"({roi})"
+
+    def test_get_virtual_image_error(
+        self, diffraction_pattern, out_signal_axes=(0, 1, 2)
+    ):
+        roi = hs.roi.CircleROI(3, 3, 5)
+        with pytest.raises(ValueError):
+            vi = diffraction_pattern.get_virtual_image(roi, out_signal_axes)
+
+    def test_get_virtual_image_linescan(self, diffraction_pattern):
+        s = diffraction_pattern.inav[0, :]
+        roi = hs.roi.CircleROI(3, 3, 5)
+        vi = s.get_virtual_image(roi)
+        assert vi.data.shape == (2,)
+        assert "Virtual profile" in vi.metadata.General.title
+        assert vi.axes_manager.signal_dimension == 1
+        assert vi.axes_manager.navigation_dimension == 0

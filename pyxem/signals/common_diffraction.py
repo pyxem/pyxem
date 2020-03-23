@@ -4,16 +4,18 @@ from hyperspy.api import interactive
 
 
 class CommonDiffraction:
-
     @staticmethod
     def _get_sum_signal(signal, out_signal_axes=None):
         out = signal.sum(signal.axes_manager.signal_axes)
         if out_signal_axes is None:
             out_signal_axes = list(
-                np.arange(min(signal.axes_manager.navigation_dimension, 2)))
+                np.arange(min(signal.axes_manager.navigation_dimension, 2))
+            )
         if len(out_signal_axes) > signal.axes_manager.navigation_dimension:
-            raise ValueError("The length of 'out_signal_axes' can't be longer"
-                             "than the navigation dimension of the signal.")
+            raise ValueError(
+                "The length of 'out_signal_axes' can't be longer"
+                "than the navigation dimension of the signal."
+            )
         out.set_signal_type("")
         return out.transpose(out_signal_axes)
 
@@ -22,13 +24,12 @@ class CommonDiffraction:
         if out.axes_manager.signal_dimension == 1:
             label = "Virtual profile"
         elif out.axes_manager.signal_dimension == 2:
-            label = "Virtual image"        
+            label = "Virtual image"
         else:
-            label = ""        
+            label = ""
         return label
 
-    def plot_interactive_virtual_image(self, roi, out_signal_axes=None,
-                                       **kwargs):
+    def plot_interactive_virtual_image(self, roi, out_signal_axes=None, **kwargs):
         """Plots an interactive virtual image formed with a specified and
         adjustable roi
 
@@ -63,19 +64,19 @@ class CommonDiffraction:
             self.plot()
 
         # Get the sliced signal from the roi
-        sliced_signal = roi.interactive(self,
-                                        axes=self.axes_manager.signal_axes)
+        sliced_signal = roi.interactive(self, axes=self.axes_manager.signal_axes)
 
         # Create an output signal for the virtual dark-field calculation.
         out = self._get_sum_signal(self, out_signal_axes)
         out.metadata.General.title = self._get_title_label(out)
 
         # Create the interactive signal
-        interactive(sliced_signal.sum,
-                    axis=sliced_signal.axes_manager.signal_axes,
-                    event=roi.events.changed,
-                    recompute_out_event=None,
-                    out=out,
+        interactive(
+            sliced_signal.sum,
+            axis=sliced_signal.axes_manager.signal_axes,
+            event=roi.events.changed,
+            recompute_out_event=None,
+            out=out,
         )
 
         # Plot the result
@@ -117,6 +118,6 @@ class CommonDiffraction:
         dark_field_sum = self._get_sum_signal(dark_field, out_signal_axes)
         dark_field_sum.metadata.General.title = (
             f"{self._get_title_label(dark_field_sum)} ({roi})"
-            )
+        )
 
         return dark_field_sum
