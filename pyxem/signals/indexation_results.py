@@ -121,7 +121,7 @@ class TemplateMatchingResults(BaseSignal):
         """
         dimensions = self.data.shape
 
-        if len(dimensions == 3):
+        if len(dimensions) == 3:
             # 1D navigation space
             data_array = np.zeros((dimensions[0], dimensions[1], dimensions[2]+2))
             for i in range(dimensions[0]):
@@ -135,7 +135,7 @@ class TemplateMatchingResults(BaseSignal):
             np.save(filename,data_array)
             return 0
 
-        elif len(dimensions == 4):
+        elif len(dimensions) == 4:
             # 2D navigation space
             data_array = np.zeros((dimensions[0], dimensions[1], dimensions[2], dimensions[3]+2))
             for i in range (dimensions[0]):
