@@ -30,12 +30,14 @@ from skimage.transform import rotate
 
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.utils.calibration_utils import call_ring_pattern, \
-    calc_radius_with_distortion, \
-    generate_ring_pattern
+from pyxem.utils.calibration_utils import (
+    call_ring_pattern,
+    calc_radius_with_distortion,
+    generate_ring_pattern,
+)
 
 
-class CalibrationGenerator():
+class CalibrationGenerator:
     """Obtains calibration information from common reference standards.
 
     Parameters
@@ -55,9 +57,16 @@ class CalibrationGenerator():
         self.diffraction_calibration = None
         self.navigation_calibration = None
 
-    def get_elliptical_distortion(self, mask_radius, scale=100, amplitude=1000,
-                                  spread=2, direct_beam_amplitude=500,
-                                  asymmetry=1, rotation=0):
+    def get_elliptical_distortion(
+        self,
+        mask_radius,
+        scale=100,
+        amplitude=1000,
+        spread=2,
+        direct_beam_amplitude=500,
+        asymmetry=1,
+        rotation=0,
+    ):
         """Determine elliptical distortion of the diffraction pattern.
 
         Parameters
@@ -101,9 +110,11 @@ class CalibrationGenerator():
         """
         # Check that necessary calibration data is provided
         if self.calibration_data.au_x_grating_dp is None:
-            raise ValueError("This method requires an Au X-grating diffraction "
-                             "pattern to be provided. Please update the "
-                             "CalibrationDataLibrary.")
+            raise ValueError(
+                "This method requires an Au X-grating diffraction "
+                "pattern to be provided. Please update the "
+                "CalibrationDataLibrary."
+            )
         # Set diffraction pattern variable
         standard_dp = self.calibration_data.au_x_grating_dp
         # Define grid values and center indices for ring pattern evaluation
@@ -114,8 +125,9 @@ class CalibrationGenerator():
         xcenter = (image_size - 1) / 2
         ycenter = (image_size - 1) / 2
         # Calculate eliptical parameters
-        mask = calc_radius_with_distortion(x, y, (image_size - 1) / 2,
-                                           (image_size - 1) / 2, 1, 0)
+        mask = calc_radius_with_distortion(
+            x, y, (image_size - 1) / 2, (image_size - 1) / 2, 1, 0
+        )
         # Mask direct beam
         mask[mask > mask_radius] = 0
         standard_dp.data[mask > 0] *= 0
@@ -123,28 +135,29 @@ class CalibrationGenerator():
         ref = standard_dp.data[standard_dp.data > 0]
         ref = ref.ravel()
         # Define points for fitting
-        pts = np.array([x[standard_dp.data > 0].ravel(),
-                        y[standard_dp.data > 0].ravel()]).ravel()
+        pts = np.array(
+            [x[standard_dp.data > 0].ravel(), y[standard_dp.data > 0].ravel()]
+        ).ravel()
         # Set initial parameters for fitting
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
         # Fit ring pattern to experimental data
-        xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter),
-                            pts, ref, p0=x0)
+        xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter), pts, ref, p0=x0)
         # Set ring fitting parameters to attribute
         self.ring_params = xf
         # Calculate affine transform parameters from fit parameters
-        scaling = np.array([[1, 0],
-                            [0, xf[4]**-0.5]])
+        scaling = np.array([[1, 0], [0, xf[4] ** -0.5]])
 
-        rotation = np.array([[cos(xf[5]), -sin(xf[5])],
-                             [sin(xf[5]), cos(xf[5])]])
+        rotation = np.array([[cos(xf[5]), -sin(xf[5])], [sin(xf[5]), cos(xf[5])]])
 
-        correction = np.linalg.inv(np.dot(rotation.T,
-                                          np.dot(scaling, rotation)))
+        correction = np.linalg.inv(np.dot(rotation.T, np.dot(scaling, rotation)))
 
-        affine = np.array([[correction[0, 0], correction[0, 1], 0.00],
-                           [correction[1, 0], correction[1, 1], 0.00],
-                           [0.00, 0.00, 1.00]])
+        affine = np.array(
+            [
+                [correction[0, 0], correction[0, 1], 0.00],
+                [correction[1, 0], correction[1, 1], 0.00],
+                [0.00, 0.00, 1.00],
+            ]
+        )
         # Set affine matrix to attribute
         self.affine_matrix = affine
 
@@ -172,30 +185,38 @@ class CalibrationGenerator():
         """
         # Check all required parameters are defined as attributes
         if self.calibration_data.au_x_grating_dp is None:
-            raise ValueError("This method requires an Au X-grating diffraction "
-                             "pattern to be provided. Please update the "
-                             "CalibrationDataLibrary.")
+            raise ValueError(
+                "This method requires an Au X-grating diffraction "
+                "pattern to be provided. Please update the "
+                "CalibrationDataLibrary."
+            )
         if self.affine_matrix is None:
-            raise ValueError("This method requires a distortion matrix to have "
-                             "been determined. Use get_elliptical_distortion "
-                             "to determine this matrix.")
+            raise ValueError(
+                "This method requires a distortion matrix to have "
+                "been determined. Use get_elliptical_distortion "
+                "to determine this matrix."
+            )
         # Set name for experimental data pattern
         dpeg = self.calibration_data.au_x_grating_dp
         ringP = self.ring_params
         size = dpeg.data.shape[0]
-        dpref = generate_ring_pattern(image_size=size,
-                                      mask=True, mask_radius=mask_radius,
-                                      scale=ringP[0],
-                                      amplitude=ringP[1],
-                                      spread=spread,
-                                      direct_beam_amplitude=ringP[3],
-                                      asymmetry=1, rotation=ringP[5])
+        dpref = generate_ring_pattern(
+            image_size=size,
+            mask=True,
+            mask_radius=mask_radius,
+            scale=ringP[0],
+            amplitude=ringP[1],
+            spread=spread,
+            direct_beam_amplitude=ringP[3],
+            asymmetry=1,
+            rotation=ringP[5],
+        )
         # Apply distortion corrections to experimental data
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-        dpegs.apply_affine_transformation(self.affine_matrix,
-                                          preserve_range=True,
-                                          inplace=True)
+        dpegs.apply_affine_transformation(
+            self.affine_matrix, preserve_range=True, inplace=True
+        )
         # Calculate residuals to be returned
         diff_init = ElectronDiffraction2D(dpeg.data - dpref.data)
         diff_end = ElectronDiffraction2D(dpegs.inav[0, 0].data - dpref.data)
@@ -203,8 +224,9 @@ class CalibrationGenerator():
 
         return ElectronDiffraction2D(residuals)
 
-    def plot_corrected_diffraction_pattern(self, reference_circle=True,
-                                           *args, **kwargs):
+    def plot_corrected_diffraction_pattern(
+        self, reference_circle=True, *args, **kwargs
+    ):
         """Plot the distortion corrected diffraction pattern with an optional
         reference circle.
 
@@ -220,22 +242,26 @@ class CalibrationGenerator():
         """
         # Check all required parameters are defined as attributes
         if self.calibration_data.au_x_grating_dp is None:
-            raise ValueError("This method requires an Au X-grating diffraction "
-                             "pattern to be provided. Please update the "
-                             "CalibrationDataLibrary.")
+            raise ValueError(
+                "This method requires an Au X-grating diffraction "
+                "pattern to be provided. Please update the "
+                "CalibrationDataLibrary."
+            )
         if self.affine_matrix is None:
-            raise ValueError("This method requires a distortion matrix to have "
-                             "been determined. Use get_elliptical_distortion "
-                             "to determine this matrix.")
+            raise ValueError(
+                "This method requires a distortion matrix to have "
+                "been determined. Use get_elliptical_distortion "
+                "to determine this matrix."
+            )
         # Set name for experimental data pattern
         dpeg = self.calibration_data.au_x_grating_dp
         # Apply distortion corrections to experimental data
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-        dpegs.apply_affine_transformation(self.affine_matrix,
-                                          preserve_range=True,
-                                          inplace=True)
+        dpegs.apply_affine_transformation(
+            self.affine_matrix, preserve_range=True, inplace=True
+        )
         dpegm = dpegs.mean((0, 1))
         # Plot distortion corrected data
         dpegm.plot(*args, **kwargs)
@@ -265,20 +291,24 @@ class CalibrationGenerator():
         """
         # Check that necessary calibration data is provided
         if self.calibration_data.au_x_grating_dp is None:
-            raise ValueError("This method requires an Au X-grating diffraction "
-                             "pattern to be provided. Please update the "
-                             "CalibrationDataLibrary.")
+            raise ValueError(
+                "This method requires an Au X-grating diffraction "
+                "pattern to be provided. Please update the "
+                "CalibrationDataLibrary."
+            )
         if self.affine_matrix is None:
-            raise ValueError("This method requires a distortion matrix to have "
-                             "been determined. Use get_elliptical_distortion "
-                             "to determine this matrix.")
+            raise ValueError(
+                "This method requires a distortion matrix to have "
+                "been determined. Use get_elliptical_distortion "
+                "to determine this matrix."
+            )
         dpeg = self.calibration_data.au_x_grating_dp
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-        dpegs.apply_affine_transformation(self.affine_matrix,
-                                          preserve_range=True,
-                                          inplace=True)
+        dpegs.apply_affine_transformation(
+            self.affine_matrix, preserve_range=True, inplace=True
+        )
         dpegm = dpegs.mean((0, 1))
         # Define line roi along which to take trace for calibration
         line = Line2DROI(x1=5, y1=5, x2=250, y2=250, linewidth=linewidth)
@@ -287,8 +317,8 @@ class CalibrationGenerator():
         trace = trace.as_signal1D(0)
         # Find peaks in line trace either side of direct beam
         db = (np.sqrt(2) * 128) - (5 * np.sqrt(2))
-        pka = trace.isig[db + mask_length:].find_peaks1D_ohaver()[0]['position']
-        pkb = trace.isig[:db - mask_length].find_peaks1D_ohaver()[0]['position']
+        pka = trace.isig[db + mask_length :].find_peaks1D_ohaver()[0]["position"]
+        pkb = trace.isig[: db - mask_length].find_peaks1D_ohaver()[0]["position"]
         # Determine predicted position of 022 peak of Au pattern d022=1.437
         au_pre = db - (self.ring_params[0] / 1.437)
         au_post = db + (self.ring_params[0] / 1.437)
@@ -296,14 +326,15 @@ class CalibrationGenerator():
         prediff = np.abs(pkb - au_pre)
         postdiff = np.abs(pka - au_post)
         # Calculate new calibration value based on most accurate peak positions
-        dc = (2 / 1.437) / (pka[postdiff == min(postdiff)] - pkb[prediff == min(prediff)])
+        dc = (2 / 1.437) / (
+            pka[postdiff == min(postdiff)] - pkb[prediff == min(prediff)]
+        )
         # Store diffraction calibration value as attribute
         self.diffraction_calibration = dc[0]
 
         return dc[0]
 
-    def get_navigation_calibration(self, line_roi, x1, x2, n, xspace,
-                                   *args, **kwargs):
+    def get_navigation_calibration(self, line_roi, x1, x2, n, xspace, *args, **kwargs):
         """Determine the navigation space pixel size calibration, nm per pixel.
 
         Parameters
@@ -331,13 +362,15 @@ class CalibrationGenerator():
         """
         # Check that necessary calibration data is provided
         if self.calibration_data.au_x_grating_im is None:
-            raise ValueError("This method requires an Au X-grating image to be "
-                             "provided. Please update the "
-                             "CalibrationDataLibrary.")
+            raise ValueError(
+                "This method requires an Au X-grating image to be "
+                "provided. Please update the "
+                "CalibrationDataLibrary."
+            )
         # Obtain line trace
         trace = line_roi(self.calibration_data.au_x_grating_im).as_signal1D(0)
         # Find peaks in line trace
-        pk = trace.find_peaks1D_ohaver(*args, **kwargs)[0]['position']
+        pk = trace.find_peaks1D_ohaver(*args, **kwargs)[0]["position"]
         # Determine peak positions
         dif1 = np.abs(pk - x1)
         dif2 = np.abs(pk - x2)
@@ -381,33 +414,36 @@ class CalibrationGenerator():
 
         """
         if self.affine_matrix is None and self.rotation_angle is None:
-            raise ValueError("This method requires either an affine matrix to "
-                             "correct distortion or a rotation angle between "
-                             "real and reciprocal space to have been "
-                             "determined. Please determine these parameters.")
+            raise ValueError(
+                "This method requires either an affine matrix to "
+                "correct distortion or a rotation angle between "
+                "real and reciprocal space to have been "
+                "determined. Please determine these parameters."
+            )
         # Only distortion correction case
         elif self.rotation_angle is None:
             correction_matrix = self.affine_matrix
         # Only rotation correction case
         elif self.affine_matrix is None:
             theta = self.rotation_angle / 180 * np.pi
-            correction_matrix = np.array([[cos(theta), -sin(theta), 0],
-                                          [sin(theta), cos(theta), 0],
-                                          [0, 0, 1]])
+            correction_matrix = np.array(
+                [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]]
+            )
         # Otherwise both corrections required, distortion applied first
         else:
             theta = self.rotation_angle / 180 * np.pi
-            rotation_matrix = np.array([[cos(theta), -sin(theta), 0],
-                                        [sin(theta), cos(theta), 0],
-                                        [0, 0, 1]])
+            rotation_matrix = np.array(
+                [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]]
+            )
             correction_matrix = np.matmul(rotation_matrix, self.affine_matrix)
         # Set the correction matrix attribute
         self.correction_matrix = correction_matrix
         # Return the correction matrix
         return correction_matrix
 
-    def plot_calibrated_data(self, data_to_plot, line=None,
-                             *args, **kwargs):  # pragma: no cover
+    def plot_calibrated_data(
+        self, data_to_plot, line=None, *args, **kwargs
+    ):  # pragma: no cover
         """ Plot calibrated data for visual inspection.
 
         Parameters
@@ -427,52 +463,52 @@ class CalibrationGenerator():
         """
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
-        if data_to_plot == 'au_x_grating_dp':
+        if data_to_plot == "au_x_grating_dp":
             dpeg = self.calibration_data.au_x_grating_dp
             size = dpeg.data.shape[0]
             if self.correction_matrix is None:
                 self.get_correction_matrix()
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
             dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-            dpegs.apply_affine_transformation(self.correction_matrix,
-                                              preserve_range=True,
-                                              inplace=True)
+            dpegs.apply_affine_transformation(
+                self.correction_matrix, preserve_range=True, inplace=True
+            )
             data = dpegs.mean((0, 1))
             data.set_diffraction_calibration(self.diffraction_calibration)
             # Plot the calibrated diffraction data
             data.plot(*args, **kwargs)
-        elif data_to_plot == 'au_x_grating_im':
+        elif data_to_plot == "au_x_grating_im":
             data = self.calibration_data.au_x_grating_im
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
-        elif data_to_plot == 'moo3_dp':
+        elif data_to_plot == "moo3_dp":
             dpeg = self.calibration_data.moo3_dp
             size = dpeg.data.shape[0]
             if self.correction_matrix is None:
                 self.get_correction_matrix()
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
             dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-            dpegs.apply_affine_transformation(self.correction_matrix,
-                                              preserve_range=True,
-                                              inplace=True)
+            dpegs.apply_affine_transformation(
+                self.correction_matrix, preserve_range=True, inplace=True
+            )
             data = dpegs.mean((0, 1))
             data.set_diffraction_calibration(self.diffraction_calibration)
             # Plot the calibrated diffraction data
             data.plot(*args, **kwargs)
-        elif data_to_plot == 'moo3_im':
+        elif data_to_plot == "moo3_im":
             data = self.calibration_data.moo3_im
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
-        elif data_to_plot == 'rotation_overlay':
+        elif data_to_plot == "rotation_overlay":
             dpeg = self.calibration_data.moo3_dp
             size = dpeg.data.shape[0]
             if self.correction_matrix is None:
                 self.get_correction_matrix()
             dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
             dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
-            dpegs.apply_affine_transformation(self.correction_matrix,
-                                              preserve_range=True,
-                                              inplace=True)
+            dpegs.apply_affine_transformation(
+                self.correction_matrix, preserve_range=True, inplace=True
+            )
             dp = dpegs.mean((0, 1))
             im = self.calibration_data.moo3_im.rebin(dp.data.shape)
             stack1 = np.zeros((dp.data.shape[0], dp.data.shape[1], 3))
@@ -482,6 +518,6 @@ class CalibrationGenerator():
             plt.imshow(stack1)
         if line:
             line.add_widget(data, axes=data.axes_manager.signal_axes)
-            trace = line.interactive(data, navigation_signal='same')
+            trace = line.interactive(data, navigation_signal="same")
             trace.plot()
             return trace

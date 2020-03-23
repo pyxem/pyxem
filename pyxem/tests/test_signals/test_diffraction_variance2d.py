@@ -26,18 +26,14 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 
 class TestDiffractionVariance:
-
-    def test_get_diffraction_variance_signal(self,
-                                             diffraction_pattern):
+    def test_get_diffraction_variance_signal(self, diffraction_pattern):
         difvar = DiffractionVariance2D(diffraction_pattern)
         assert isinstance(difvar, DiffractionVariance2D)
 
     @pytest.mark.parametrize("inplace", [True, False])
-    def test_get_dif_var_radial_profile(self,
-                                        diffraction_pattern,
-                                        inplace):
+    def test_get_dif_var_radial_profile(self, diffraction_pattern, inplace):
         difvar = DiffractionVariance2D(diffraction_pattern)
-        difvar.metadata.General.title = 'A Title'
+        difvar.metadata.General.title = "A Title"
         difvar.axes_manager.navigation_axes[0].name = "x"
         difvar_copy = difvar.deepcopy()
         rp = difvar.get_radial_profile(inplace=inplace)
@@ -46,8 +42,10 @@ class TestDiffractionVariance:
 
         assert isinstance(rp, DiffractionVariance1D)
         assert difvar_copy.metadata.General.title == rp.metadata.General.title
-        assert difvar_copy.axes_manager.navigation_axes[0].name == \
-            rp.axes_manager.navigation_axes[0].name
+        assert (
+            difvar_copy.axes_manager.navigation_axes[0].name
+            == rp.axes_manager.navigation_axes[0].name
+        )
 
     @pytest.fixture
     def axes_test_dp(self):
@@ -57,8 +55,8 @@ class TestDiffractionVariance:
 
     def test_radial_profile_axes(self, axes_test_dp):
         n_scale = 0.5
-        name = 'real_space'
-        units = 'um'
+        name = "real_space"
+        units = "um"
 
         axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
         axes_test_dp.axes_manager.navigation_axes[0].name = name
@@ -86,8 +84,6 @@ class TestDiffractionVariance:
 
 
 class TestImageVariance:
-
-    def test_get_image_variance_signal(self,
-                                       diffraction_pattern):
+    def test_get_image_variance_signal(self, diffraction_pattern):
         imvar = ImageVariance(diffraction_pattern)
         assert isinstance(imvar, ImageVariance)

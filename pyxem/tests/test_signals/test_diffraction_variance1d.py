@@ -24,7 +24,6 @@ from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
 
 
 class TestDiffractionVariance1D:
-
     def test_get_electron_diffraction1D(self):
         rad_signal = Signal1D(np.array([0, 4, 3, 5, 1, 4, 6, 2]))
         difprof = DiffractionVariance1D(rad_signal)

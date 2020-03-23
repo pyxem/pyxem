@@ -29,18 +29,34 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals import transfer_navigation_axes, \
-    select_method_from_method_dict
+from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 
-from pyxem.utils.expt_utils import radial_average, azimuthal_integrate, \
-    azimuthal_integrate_fast, gain_normalise, remove_dead, regional_filter, \
-    subtract_background_dog, subtract_background_median, subtract_reference, \
-    circular_mask, find_beam_offset_cross_correlation, peaks_as_gvectors, \
-    convert_affine_to_transform, apply_transformation, find_beam_center_blur, \
-    find_beam_center_interpolate
+from pyxem.utils.expt_utils import (
+    radial_average,
+    azimuthal_integrate,
+    azimuthal_integrate_fast,
+    gain_normalise,
+    remove_dead,
+    regional_filter,
+    subtract_background_dog,
+    subtract_background_median,
+    subtract_reference,
+    circular_mask,
+    find_beam_offset_cross_correlation,
+    peaks_as_gvectors,
+    convert_affine_to_transform,
+    apply_transformation,
+    find_beam_center_blur,
+    find_beam_center_interpolate,
+)
 
-from pyxem.utils.peakfinders2D import find_peaks_zaefferer, find_peaks_stat, \
-    find_peaks_dog, find_peaks_log, find_peaks_xc
+from pyxem.utils.peakfinders2D import (
+    find_peaks_zaefferer,
+    find_peaks_stat,
+    find_peaks_dog,
+    find_peaks_log,
+    find_peaks_xc,
+)
 
 from pyxem.utils import peakfinder2D_gui
 
@@ -76,9 +92,10 @@ class Diffraction2D(Signal2D):
         self.plot(**kwargs)
         roi.add_widget(self, axes=self.axes_manager.signal_axes)
         # Add the ROI to the appropriate signal axes.
-        dark_field = roi.interactive(self, navigation_signal='same')
-        dark_field_placeholder = \
-            BaseSignal(np.zeros(self.axes_manager.navigation_shape[::-1]))
+        dark_field = roi.interactive(self, navigation_signal="same")
+        dark_field_placeholder = BaseSignal(
+            np.zeros(self.axes_manager.navigation_shape[::-1])
+        )
         # Create an output signal for the virtual dark-field calculation.
         dark_field_sum = interactive(
             # Create an interactive signal
@@ -91,8 +108,8 @@ class Diffraction2D(Signal2D):
             # And outputs into the prepared placeholder.
         )
         dark_field_sum.axes_manager.update_axes_attributes_from(
-            self.axes_manager.navigation_axes,
-            ['scale', 'offset', 'units', 'name'])
+            self.axes_manager.navigation_axes, ["scale", "offset", "units", "name"]
+        )
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
         # Set the parameters
         dark_field_sum.plot()  # Plot the result
@@ -120,9 +137,7 @@ class Diffraction2D(Signal2D):
 
         """
         dark_field = roi(self, axes=self.axes_manager.signal_axes)
-        dark_field_sum = dark_field.sum(
-            axis=dark_field.axes_manager.signal_axes
-        )
+        dark_field_sum = dark_field.sum(axis=dark_field.axes_manager.signal_axes)
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
         vdfim = dark_field_sum.as_signal2D((0, 1))
 
@@ -144,18 +159,13 @@ class Diffraction2D(Signal2D):
         shape = self.axes_manager.signal_shape
         center = (shape[1] - 1) / 2, (shape[0] - 1) / 2
 
-        signal_mask = Signal2D(circular_mask(shape=shape,
-                                             radius=radius,
-                                             center=center))
+        signal_mask = Signal2D(circular_mask(shape=shape, radius=radius, center=center))
 
         return signal_mask
 
-    def apply_affine_transformation(self,
-                                    D,
-                                    order=3,
-                                    keep_dtype=False,
-                                    inplace=True,
-                                    *args, **kwargs):
+    def apply_affine_transformation(
+        self, D, order=3, keep_dtype=False, inplace=True, *args, **kwargs
+    ):
         """Correct geometric distortion by applying an affine transformation.
 
         Parameters
@@ -187,20 +197,23 @@ class Diffraction2D(Signal2D):
         if isinstance(D, np.ndarray):
             transformation = convert_affine_to_transform(D, shape)
         else:
-            transformation = D.map(convert_affine_to_transform, shape=shape, inplace=False)
+            transformation = D.map(
+                convert_affine_to_transform, shape=shape, inplace=False
+            )
 
-        return self.map(apply_transformation,
-                        transformation=transformation,
-                        order=order,
-                        keep_dtype=keep_dtype,
-                        inplace=inplace,
-                        *args, **kwargs)
+        return self.map(
+            apply_transformation,
+            transformation=transformation,
+            order=order,
+            keep_dtype=keep_dtype,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )
 
-    def apply_gain_normalisation(self,
-                                 dark_reference,
-                                 bright_reference,
-                                 inplace=True,
-                                 *args, **kwargs):
+    def apply_gain_normalisation(
+        self, dark_reference, bright_reference, inplace=True, *args, **kwargs
+    ):
         """Apply gain normalization to experimentally acquired electron
         diffraction patterns.
 
@@ -219,18 +232,24 @@ class Diffraction2D(Signal2D):
             Keyword arguments to be passed to map().
 
         """
-        return self.map(gain_normalise,
-                        dref=dark_reference,
-                        bref=bright_reference,
-                        inplace=inplace,
-                        *args, **kwargs)
+        return self.map(
+            gain_normalise,
+            dref=dark_reference,
+            bref=bright_reference,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )
 
-    def remove_deadpixels(self,
-                          deadpixels,
-                          deadvalue='average',
-                          inplace=True,
-                          progress_bar=True,
-                          *args, **kwargs):
+    def remove_deadpixels(
+        self,
+        deadpixels,
+        deadvalue="average",
+        inplace=True,
+        progress_bar=True,
+        *args,
+        **kwargs
+    ):
         """Remove deadpixels from experimentally acquired diffraction patterns.
 
         Parameters
@@ -250,18 +269,29 @@ class Diffraction2D(Signal2D):
             Keyword arguments to be passed to map().
 
         """
-        return self.map(remove_dead,
-                        deadpixels=deadpixels,
-                        deadvalue=deadvalue,
-                        inplace=inplace,
-                        show_progressbar=progress_bar,
-                        *args, **kwargs)
+        return self.map(
+            remove_dead,
+            deadpixels=deadpixels,
+            deadvalue=deadvalue,
+            inplace=inplace,
+            show_progressbar=progress_bar,
+            *args,
+            **kwargs
+        )
 
-    def get_azimuthal_integral(self, origin, detector, detector_distance,
-                               wavelength, size_1d, unit='k_A^-1',
-                               inplace=False,
-                               kwargs_for_map={}, kwargs_for_integrator={},
-                               kwargs_for_integrate1d={}):
+    def get_azimuthal_integral(
+        self,
+        origin,
+        detector,
+        detector_distance,
+        wavelength,
+        size_1d,
+        unit="k_A^-1",
+        inplace=False,
+        kwargs_for_map={},
+        kwargs_for_integrator={},
+        kwargs_for_integrate1d={},
+    ):
         """
         Returns the azimuthal integral of the diffraction pattern as a
         Diffraction1D signal.
@@ -313,9 +343,9 @@ class Diffraction2D(Signal2D):
         # Scaling factor is used to output the unit in k instead of q.
         # It multiplies the scale that comes out of pyFAI integrate1d
         scaling_factor = 1
-        if unit == 'k_A^-1':
+        if unit == "k_A^-1":
             scaling_factor = 1 / 2 / np.pi
-            unit = 'q_A^-1'
+            unit = "q_A^-1"
 
         if np.array(origin).size == 2:
             # single origin
@@ -324,37 +354,47 @@ class Diffraction2D(Signal2D):
             # this uses azimuthal_integrate_fast
 
             p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
-            ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
-                                     detector=detector, wavelength=wavelength,
-                                     **kwargs_for_integrator)
+            ai = AzimuthalIntegrator(
+                dist=detector_distance,
+                poni1=p1,
+                poni2=p2,
+                detector=detector,
+                wavelength=wavelength,
+                **kwargs_for_integrator
+            )
 
-            azimuthal_integrals = self.map(azimuthal_integrate_fast,
-                                           azimuthal_integrator=ai,
-                                           size_1d=size_1d, unit=unit,
-                                           inplace=inplace,
-                                           kwargs_for_integrate1d=kwargs_for_integrate1d,
-                                           **kwargs_for_map)
+            azimuthal_integrals = self.map(
+                azimuthal_integrate_fast,
+                azimuthal_integrator=ai,
+                size_1d=size_1d,
+                unit=unit,
+                inplace=inplace,
+                kwargs_for_integrate1d=kwargs_for_integrate1d,
+                **kwargs_for_map
+            )
 
         else:
             # this time each centre is read in origin
             # origin is passed as a flattened array in the navigation dimensions
-            azimuthal_integrals = self._map_iterate(azimuthal_integrate,
-                                                    iterating_kwargs=(('origin',
-                                                                       origin.reshape(-1, 2)),),
-                                                    detector_distance=detector_distance,
-                                                    detector=detector,
-                                                    wavelength=wavelength,
-                                                    size_1d=size_1d,
-                                                    unit=unit,
-                                                    inplace=inplace,
-                                                    kwargs_for_integrator=kwargs_for_integrator,
-                                                    kwargs_for_integrate1d=kwargs_for_integrate1d,
-                                                    **kwargs_for_map)
+            azimuthal_integrals = self._map_iterate(
+                azimuthal_integrate,
+                iterating_kwargs=(("origin", origin.reshape(-1, 2)),),
+                detector_distance=detector_distance,
+                detector=detector,
+                wavelength=wavelength,
+                size_1d=size_1d,
+                unit=unit,
+                inplace=inplace,
+                kwargs_for_integrator=kwargs_for_integrator,
+                kwargs_for_integrate1d=kwargs_for_integrate1d,
+                **kwargs_for_map
+            )
 
-        ap = Diffraction1D(azimuthal_integrals.data[..., 1, :],
-                           metadata=self.metadata.as_dictionary())
+        ap = Diffraction1D(
+            azimuthal_integrals.data[..., 1, :], metadata=self.metadata.as_dictionary()
+        )
         # Get a single slice of the last axis
-        indices = [0, ] * len(azimuthal_integrals.data.shape)
+        indices = [0,] * len(azimuthal_integrals.data.shape)
         indices[-1] = slice(None)
         # Use tuple to use numpy basic slicing
         tth = azimuthal_integrals.data[tuple(indices)]
@@ -363,15 +403,14 @@ class Diffraction2D(Signal2D):
         offset = tth[0] * scaling_factor
         ap.axes_manager.signal_axes[0].scale = scale
         ap.axes_manager.signal_axes[0].offset = offset
-        ap.axes_manager.signal_axes[0].name = 'scattering'
+        ap.axes_manager.signal_axes[0].name = "scattering"
         ap.axes_manager.signal_axes[0].units = unit
 
         transfer_navigation_axes(ap, self)
 
         return ap
 
-    def get_radial_profile(self, mask_array=None, inplace=False,
-                           *args, **kwargs):
+    def get_radial_profile(self, mask_array=None, inplace=False, *args, **kwargs):
         """Return the radial profile of the diffraction pattern.
 
         Parameters
@@ -399,9 +438,9 @@ class Diffraction2D(Signal2D):
         :func:`pyxem.utils.expt_utils.radial_average`
 
         """
-        radial_profiles = self.map(radial_average, mask=mask_array,
-                                   inplace=inplace,
-                                   *args, **kwargs)
+        radial_profiles = self.map(
+            radial_average, mask=mask_array, inplace=inplace, *args, **kwargs
+        )
 
         radial_profiles.axes_manager.signal_axes[0].offset = 0
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
@@ -416,9 +455,9 @@ class Diffraction2D(Signal2D):
             rp.axes_manager.navigation_axes[1].units = ax_old[1].units
             rp.axes_manager.navigation_axes[1].name = ax_old[1].name
         rp_axis = rp.axes_manager.signal_axes[0]
-        rp_axis.name = 'k'
+        rp_axis.name = "k"
         rp_axis.scale = self.axes_manager.signal_axes[0].scale
-        rp_axis.units = '$A^{-1}$'
+        rp_axis.units = "$A^{-1}$"
 
         return rp
 
@@ -442,25 +481,25 @@ class Diffraction2D(Signal2D):
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        method_dict = {'cross_correlate': find_beam_offset_cross_correlation,
-                       'blur': find_beam_center_blur,
-                       'interpolate': find_beam_center_interpolate}
+        method_dict = {
+            "cross_correlate": find_beam_offset_cross_correlation,
+            "blur": find_beam_center_blur,
+            "interpolate": find_beam_center_interpolate,
+        }
 
         method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
-        if method == 'cross_correlate':
+        if method == "cross_correlate":
             shifts = self.map(method_function, inplace=False, **kwargs)
-        elif method == 'blur' or method == 'interpolate':
+        elif method == "blur" or method == "interpolate":
             centers = self.map(method_function, inplace=False, **kwargs)
             shifts = origin_coordinates - centers
 
         return shifts
 
-    def center_direct_beam(self,
-                           method,
-                           half_square_width=None,
-                           return_shifts=False,
-                           *args, **kwargs):
+    def center_direct_beam(
+        self, method, half_square_width=None, return_shifts=False, *args, **kwargs
+    ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
         image square.
@@ -505,8 +544,7 @@ class Diffraction2D(Signal2D):
         if return_shifts:
             return shifts
 
-    def remove_background(self, method,
-                          **kwargs):
+    def remove_background(self, method, **kwargs):
         """Perform background subtraction via multiple methods.
 
         Parameters
@@ -524,21 +562,21 @@ class Diffraction2D(Signal2D):
             A copy of the data with the background subtracted. Be aware that
             this function will only return inplace.
         """
-        method_dict = {'h-dome': regional_filter,
-                       'gaussian_difference': subtract_background_dog,
-                       'median': subtract_background_median,
-                       'reference_pattern': subtract_reference, }
+        method_dict = {
+            "h-dome": regional_filter,
+            "gaussian_difference": subtract_background_dog,
+            "median": subtract_background_median,
+            "reference_pattern": subtract_reference,
+        }
 
         method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
-        if method != 'h-dome':
-            bg_subtracted = self.map(method_function,
-                                     inplace=False, **kwargs)
-        elif method == 'h-dome':
+        if method != "h-dome":
+            bg_subtracted = self.map(method_function, inplace=False, **kwargs)
+        elif method == "h-dome":
             scale = self.data.max()
             self.data = self.data / scale
-            bg_subtracted = self.map(method_function,
-                                     inplace=False, **kwargs)
+            bg_subtracted = self.map(method_function, inplace=False, **kwargs)
             bg_subtracted.map(filters.rank.mean, selem=square(3))
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
@@ -587,24 +625,28 @@ class Diffraction2D(Signal2D):
 
         """
         method_dict = {
-            'zaefferer': find_peaks_zaefferer,
-            'stat': find_peaks_stat,
-            'laplacian_of_gaussians': find_peaks_log,
-            'difference_of_gaussians': find_peaks_dog,
-            'xc': find_peaks_xc
+            "zaefferer": find_peaks_zaefferer,
+            "stat": find_peaks_stat,
+            "laplacian_of_gaussians": find_peaks_log,
+            "difference_of_gaussians": find_peaks_dog,
+            "xc": find_peaks_xc,
         }
         if method in method_dict:
             method = method_dict[method]
         else:
-            raise NotImplementedError("The method `{}` is not implemented. "
-                                      "See documentation for available "
-                                      "implementations.".format(method))
+            raise NotImplementedError(
+                "The method `{}` is not implemented. "
+                "See documentation for available "
+                "implementations.".format(method)
+            )
 
         peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-        peaks.map(peaks_as_gvectors,
-                  center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
-                  calibration=self.axes_manager.signal_axes[0].scale)
-        peaks.set_signal_type('diffraction_vectors')
+        peaks.map(
+            peaks_as_gvectors,
+            center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
+            calibration=self.axes_manager.signal_axes[0].scale,
+        )
+        peaks.set_signal_type("diffraction_vectors")
 
         # Set DiffractionVectors attributes
         peaks.pixel_calibration = self.axes_manager.signal_axes[0].scale
@@ -614,13 +656,13 @@ class Diffraction2D(Signal2D):
         x = peaks.axes_manager.navigation_axes[0]
         y = peaks.axes_manager.navigation_axes[1]
 
-        x.name = 'x'
+        x.name = "x"
         x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = 'nm'
+        x.units = "nm"
 
-        y.name = 'y'
+        y.name = "y"
         y.scale = self.axes_manager.navigation_axes[1].scale
-        y.units = 'nm'
+        y.units = "nm"
 
         return peaks
 
@@ -641,11 +683,14 @@ class Diffraction2D(Signal2D):
 
         """
         if disc_image is None:
-            warn("You have not specified a disc image, as such you will not "
-                 "be able to use the xc method in this session")
+            warn(
+                "You have not specified a disc image, as such you will not "
+                "be able to use the xc method in this session"
+            )
 
         peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
-            disc_image=disc_image, imshow_kwargs=imshow_kwargs)
+            disc_image=disc_image, imshow_kwargs=imshow_kwargs
+        )
         peakfinder.interactive(self)
 
 

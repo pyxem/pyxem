@@ -49,18 +49,13 @@ class ScalableReferencePattern(Component):
 
     """
 
-    def __init__(self, signal2D,
-                 d11=1., d12=0.,
-                 d21=0., d22=1.,
-                 t1=0., t2=0.,
-                 order=3
-                 ):
+    def __init__(
+        self, signal2D, d11=1.0, d12=0.0, d21=0.0, d22=1.0, t1=0.0, t2=0.0, order=3
+    ):
 
-        Component.__init__(self, ['d11', 'd12',
-                                  'd21', 'd22',
-                                  't1', 't2'])
+        Component.__init__(self, ["d11", "d12", "d21", "d22", "t1", "t2"])
 
-        self._whitelist['signal2D'] = ('init,sig', signal2D)
+        self._whitelist["signal2D"] = ("init,sig", signal2D)
         self.signal = signal2D
         self.order = order
         self.d11.value = d11
@@ -81,9 +76,7 @@ class ScalableReferencePattern(Component):
         t1 = self.t1.value
         t2 = self.t2.value
 
-        D = np.array([[d11, d12, t1],
-                      [d21, d22, t2],
-                      [0., 0., 1.]])
+        D = np.array([[d11, d12, t1], [d21, d22, t2], [0.0, 0.0, 1.0]])
 
         shifty, shiftx = np.array(signal2D.shape[:2]) / 2
 
@@ -91,8 +84,9 @@ class ScalableReferencePattern(Component):
         tform = tf.AffineTransform(matrix=D)
         shift_inv = tf.SimilarityTransform(translation=[shiftx, shifty])
 
-        transformed = tf.warp(signal2D, (shift + (tform + shift_inv)).inverse,
-                              order=order)
+        transformed = tf.warp(
+            signal2D, (shift + (tform + shift_inv)).inverse, order=order
+        )
 
         return transformed
 
@@ -109,17 +103,16 @@ class ScalableReferencePattern(Component):
             navigation postion.
 
         """
-        D = DisplacementGradientMap(np.ones(np.append(self.d11.map.shape,
-                                                      (3, 3))))
+        D = DisplacementGradientMap(np.ones(np.append(self.d11.map.shape, (3, 3))))
 
-        D.data[:, :, 0, 0] = self.d11.map['values']
-        D.data[:, :, 1, 0] = self.d12.map['values']
-        D.data[:, :, 2, 0] = 0.
-        D.data[:, :, 0, 1] = self.d21.map['values']
-        D.data[:, :, 1, 1] = self.d22.map['values']
-        D.data[:, :, 2, 1] = 0.
-        D.data[:, :, 0, 2] = 0.
-        D.data[:, :, 1, 2] = 0.
-        D.data[:, :, 2, 2] = 1.
+        D.data[:, :, 0, 0] = self.d11.map["values"]
+        D.data[:, :, 1, 0] = self.d12.map["values"]
+        D.data[:, :, 2, 0] = 0.0
+        D.data[:, :, 0, 1] = self.d21.map["values"]
+        D.data[:, :, 1, 1] = self.d22.map["values"]
+        D.data[:, :, 2, 1] = 0.0
+        D.data[:, :, 0, 2] = 0.0
+        D.data[:, :, 1, 2] = 0.0
+        D.data[:, :, 2, 2] = 1.0
 
         return D
