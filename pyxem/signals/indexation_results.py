@@ -112,7 +112,7 @@ class TemplateMatchingResults(BaseSignal):
         """
         Save current template matching result to "filename".npy. The data is saved
         using the save function of numpy, and can be loaded using
-        pxm.load_1D_template_matching_results(filename.npy)
+        pxm.load_template_matching_results(filename.npy)
 
         Parameters
         ----------
