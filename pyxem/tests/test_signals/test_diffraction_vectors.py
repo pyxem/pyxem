@@ -20,6 +20,7 @@ import pytest
 import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from sklearn.cluster import DBSCAN
+from hyperspy.signals import Signal2D
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
 # all of equal length, and the ragged case. A fixture is defined for each of
@@ -109,6 +110,7 @@ def diffraction_vectors_map(request):
     dvm = DiffractionVectors(request.param)
     dvm.axes_manager.set_signal_dimension(0)
     dvm.axes_manager[0].name = "x"
+    dvm.axes_manager[1].name = "y"
     return dvm
 
 
@@ -335,13 +337,21 @@ class TestFilterVectors:
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
 
-class TestDiffractingPixelsMaps:
+class TestDiffractingPixelsMap:
 
     def test_get_dpm_values(self, diffraction_vectors_map):
         answer = np.array([[ 7., 13.],
                            [11.,  1.]])
         xim = diffraction_vectors_map.get_diffracting_pixels_map()
         assert np.allclose(xim, answer)
+
+    def test_get_dpm_type(self, diffraction_vectors_map):
+        xim = diffraction_vectors_map.get_diffracting_pixels_map()
+        assert isinstance(xim, Signal2D)
+
+    def test_get_dpm_title(self, diffraction_vectors_map):
+        xim = diffraction_vectors_map.get_diffracting_pixels_map()
+        assert xim.metadata.General.title == "Diffracting Pixels Map"
 
     def test_get_dpm_in_range(self, diffraction_vectors_map):
         answer = np.array([[0., 3.],
