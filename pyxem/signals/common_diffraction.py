@@ -14,7 +14,18 @@ class CommonDiffraction:
         if len(out_signal_axes) > signal.axes_manager.navigation_dimension:
             raise ValueError("The length of 'out_signal_axes' can't be longer"
                              "than the navigation dimension of the signal.")
+        out.set_signal_type("")
         return out.transpose(out_signal_axes)
+
+    @staticmethod
+    def _get_title_label(out):
+        if out.axes_manager.signal_dimension == 1:
+            label = "Virtual profile"
+        elif out.axes_manager.signal_dimension == 2:
+            label = "Virtual image"        
+        else:
+            label = ""        
+        return label
 
     def plot_interactive_virtual_image(self, roi, out_signal_axes=None,
                                        **kwargs):
@@ -38,13 +49,13 @@ class CommonDiffraction:
 
             >>> # For 1D diffraction signal, we can use a SpanROI
             >>> roi = hs.roi.SpanROI(left=1., right=2.)
-            >>> rp.plot_interactive_virtual_image(roi)
+            >>> dp.plot_interactive_virtual_image(roi)
 
         .. code-block:: python
 
             >>> # For 2D diffraction signal,we can use a CircleROI
             >>> roi = hs.roi.CircleROI(3, 3, 5)
-            >>> rp.plot_interactive_virtual_image(roi)
+            >>> dp.plot_interactive_virtual_image(roi)
 
         """
         # Plot signal when necessary
@@ -57,7 +68,7 @@ class CommonDiffraction:
 
         # Create an output signal for the virtual dark-field calculation.
         out = self._get_sum_signal(self, out_signal_axes)
-        out.metadata.General.title = "Virtual Dark Field"
+        out.metadata.General.title = self._get_title_label(out)
 
         # Create the interactive signal
         interactive(sliced_signal.sum,
@@ -83,7 +94,7 @@ class CommonDiffraction:
 
         Returns
         -------
-        dark_field_sum : :obj:`hyperspy.signals.Signal2D` or :obj:`hyperspy.signals.Signal1D`
+        virtual_image : :obj:`hyperspy.signals.Signal2D` or :obj:`hyperspy.signals.Signal1D`
             The virtual image signal associated with the specified scattering
             range.
 
@@ -91,11 +102,21 @@ class CommonDiffraction:
         --------
         .. code-block:: python
 
-            rp.get_virtual_image(left=0.5, right=0.7)
+            >>> # For 1D diffraction signal, we can use a SpanROI
+            >>> roi = hs.roi.SpanROI(left=1., right=2.)
+            >>> virtual_image = dp.get_virtual_image(roi)
+
+        .. code-block:: python
+
+            >>> # For 2D diffraction signal,we can use a CircleROI
+            >>> roi = hs.roi.CircleROI(3, 3, 5)
+            >>> virtual_image = dp.get_virtual_image(roi)
 
         """
         dark_field = roi(self, axes=self.axes_manager.signal_axes)
         dark_field_sum = self._get_sum_signal(dark_field, out_signal_axes)
-        dark_field_sum.metadata.General.title = f"Virtual Dark Field ({roi})"
+        dark_field_sum.metadata.General.title = (
+            f"{self._get_title_label(dark_field_sum)} ({roi})"
+            )
 
         return dark_field_sum
