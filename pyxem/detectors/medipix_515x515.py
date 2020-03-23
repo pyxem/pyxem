@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -26,8 +26,9 @@ and the surrounding ones are "masked".
 from pyFAI.detectors import Detector
 import numpy as np
 
+
 class Medipix515x515Detector(Detector):
-    '''
+    """
     A PyFAI Detector class for a 515x515 pixel Medipix Quad direct electron
     detector. A central 5x5 cross is not intepretable, and is stored as a
     calc_mask method.
@@ -42,25 +43,26 @@ class Medipix515x515Detector(Detector):
     >>> detector
     Detector Medipix515x515Detector	 Spline= None
     PixelSize= 5.500e-05, 5.500e-05 m
-    '''
+    """
+
     IS_FLAT = False  # this detector is not flat
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents
     API_VERSION = "1.0"
     aliases = ["Medipix515x515Detector"]
-    MAX_SHAPE=515,515
+    MAX_SHAPE = 515, 515
 
     def __init__(self):
-        pixel1=55e-6 #55 micron pixel size in x
-        pixel2=55e-6 #55 micron pixel size in y
+        pixel1 = 55e-6  # 55 micron pixel size in x
+        pixel2 = 55e-6  # 55 micron pixel size in y
         Detector.__init__(self, pixel1=pixel1, pixel2=pixel2)
 
     def calc_mask(self):
-        '''Defines a function to define a mask of missing and uninterpretable
+        """Defines a function to define a mask of missing and uninterpretable
         pixels in the detector plane, following
         The missing segment is a 5-wide cross in the middle of the detector.
-        '''
+        """
 
-        mask = np.zeros((515,515))
-        mask[255:260,:] = 1
-        mask[:,255:260] = 1
+        mask = np.zeros((515, 515))
+        mask[255:260, :] = 1
+        mask[:, 255:260] = 1
         return mask.astype(np.int8)

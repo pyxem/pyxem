@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -46,8 +46,7 @@ def clean_peaks(peaks):
         return peaks
 
 
-def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
-                         distance_cutoff=50.):
+def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40, distance_cutoff=50.0):
     """Method to locate positive peaks in an image based on gradient
     thresholding and subsequent refinement within masked regions.
 
@@ -84,9 +83,11 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
         x_max = min(x_max, x + a)
         y_min = max(0, y - a)
         y_max = min(y_max, y + a)
-        return np.array(
-            np.meshgrid(range(x_min, x_max), range(y_min, y_max))).reshape(
-            2, -1).T
+        return (
+            np.array(np.meshgrid(range(x_min, x_max), range(y_min, y_max)))
+            .reshape(2, -1)
+            .T
+        )
 
     def get_max(image, box):
         """Finds the coordinates of the maximum of 'image' in 'box'."""
@@ -112,8 +113,7 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
 
         """
         gradient_of_image = np.gradient(image)
-        gradient_of_image = gradient_of_image[0] ** 2 + gradient_of_image[
-            1] ** 2
+        gradient_of_image = gradient_of_image[0] ** 2 + gradient_of_image[1] ** 2
         return gradient_of_image
 
     # Generate an ordered list of matrix coordinates.
@@ -126,8 +126,7 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
     peaks = []
     for coordinate in coordinates[gradient_is_above_threshold.flatten()]:
         # Iterate over coordinates where the gradient is high enough.
-        b = box(coordinate[0], coordinate[1], window_size, z.shape[0],
-                z.shape[1])
+        b = box(coordinate[0], coordinate[1], window_size, z.shape[0], z.shape[1])
         p_old = np.array([0, 0])
         p_new = get_max(z, b)
         while np.all(p_old != p_new):
@@ -141,7 +140,7 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40,
     return clean_peaks(peaks)
 
 
-def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
+def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
     """Locate positive peaks in an image based on statistical refinement and
     difference with respect to mean intensity.
 
@@ -183,7 +182,7 @@ def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
 
     def _local_stat(image, radius, func):
         """Calculates rolling method 'func' over a circular kernel."""
-        x, y = np.ogrid[-radius:radius + 1, -radius:radius + 1]
+        x, y = np.ogrid[-radius : radius + 1, -radius : radius + 1]
         kernel = np.hypot(x, y) < radius
         stat = generic_filter(image, func, footprint=kernel)
         return stat
@@ -225,9 +224,8 @@ def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
 
     def separate_peaks(binarised_image):
         """Identify adjacent 'on' coordinates via DBSCAN."""
-        bi = binarised_image.astype('bool')
-        coordinates = np.indices(bi.shape).reshape(2, -1).T[
-            bi.flatten()]
+        bi = binarised_image.astype("bool")
+        coordinates = np.indices(bi.shape).reshape(2, -1).T[bi.flatten()]
         db = DBSCAN(2, 3)
         peaks = []
         labeled_points = db.fit_predict(coordinates)
@@ -256,15 +254,21 @@ def find_peaks_stat(z, alpha=1., window_radius=10, convergence_ratio=0.05):
             image, peaks = _peak_find_once(image)
             m_peaks = len(peaks)
         """
-        peak_centers = np.array(
-            [np.mean(peak, axis=0) for peak in peaks])  # 7
+        peak_centers = np.array([np.mean(peak, axis=0) for peak in peaks])  # 7
         return peak_centers
 
     return clean_peaks(stat_peak_finder(z))
 
 
-def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
-                   threshold=0.2, overlap=0.5, exclude_border=False):
+def find_peaks_dog(
+    z,
+    min_sigma=1.0,
+    max_sigma=50.0,
+    sigma_ratio=1.6,
+    threshold=0.2,
+    overlap=0.5,
+    exclude_border=False,
+):
     """
     Finds peaks via the difference of Gaussian Matrices method from
     `scikit-image`.
@@ -290,17 +294,31 @@ def find_peaks_dog(z, min_sigma=1., max_sigma=50., sigma_ratio=1.6,
 
     """
     from skimage.feature import blob_dog
+
     z = z / np.max(z)
-    blobs = blob_dog(z, min_sigma=min_sigma, max_sigma=max_sigma,
-                     sigma_ratio=sigma_ratio, threshold=threshold,
-                     overlap=overlap)
+    blobs = blob_dog(
+        z,
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        sigma_ratio=sigma_ratio,
+        threshold=threshold,
+        overlap=overlap,
+    )
 
     centers = blobs[:, :2]
     return centers
 
 
-def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
-                   threshold=0.2, overlap=0.5, log_scale=False, exclude_border=False):
+def find_peaks_log(
+    z,
+    min_sigma=1.0,
+    max_sigma=50.0,
+    num_sigma=int(10),
+    threshold=0.2,
+    overlap=0.5,
+    log_scale=False,
+    exclude_border=False,
+):
     """
     Finds peaks via the Laplacian of Gaussian Matrices method from
     `scikit-image`.
@@ -322,10 +340,17 @@ def find_peaks_log(z, min_sigma=1., max_sigma=50., num_sigma=10.,
 
     """
     from skimage.feature import blob_log
+
     z = z / np.max(z)
-    blobs = blob_log(z, min_sigma=min_sigma, max_sigma=max_sigma,
-                     num_sigma=num_sigma, threshold=threshold, overlap=overlap,
-                     log_scale=log_scale)
+    blobs = blob_log(
+        z,
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        num_sigma=num_sigma,
+        threshold=threshold,
+        overlap=overlap,
+        log_scale=log_scale,
+    )
 
     centers = blobs[:, :2]
     return centers
@@ -355,9 +380,9 @@ def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
 
     """
     response_image = match_template(z, disc_image, pad_input=True)
-    peaks = corner_peaks(response_image,
-                         min_distance=min_distance,
-                         threshold_rel=peak_threshold)
+    peaks = corner_peaks(
+        response_image, min_distance=min_distance, threshold_rel=peak_threshold
+    )
     # make return format the same as the other peak finders
     peaks -= 1
 

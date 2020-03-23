@@ -1,4 +1,4 @@
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 # -*- coding: utf-8 -*-
 #
 # This file is part of pyXem.
@@ -27,8 +27,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
 def get_experimental_square(z, vector, square_size):
-    """Defines a square region around a given diffraction vector and returns an
-    upsampled copy.
+    """Defines a square region around a given diffraction vector and returns.
 
     Parameters
     ----------
@@ -50,7 +49,7 @@ def get_experimental_square(z, vector, square_size):
 
     cx, cy, half_ss = vector[0], vector[1], int(square_size / 2)
     # select square with correct x,y see PR for details
-    _z = z[cy - half_ss:cy + half_ss, cx - half_ss:cx + half_ss]
+    _z = z[cy - half_ss : cy + half_ss, cx - half_ss : cx + half_ss]
     return _z
 
 
@@ -76,8 +75,9 @@ def get_simulated_disc(square_size, disc_radius):
 
     ss = int(square_size)
     arr = np.zeros((ss, ss))
-    rr, cc = draw.circle(int(ss / 2), int(ss / 2), radius=disc_radius,
-                         shape=arr.shape)  # is the thin disc a good idea
+    rr, cc = draw.circle(
+        int(ss / 2), int(ss / 2), radius=disc_radius, shape=arr.shape
+    )  # is the thin disc a good idea
     arr[rr, cc] = 1
     return arr
 
@@ -106,25 +106,38 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
     def _floor(vectors, calibration, center):
         if vectors.shape == (1,) and vectors.dtype == np.object:
             vectors = vectors[0]
-        return np.floor((vectors.astype(np.float64) / calibration) + center).astype(np.int)
+        return np.floor((vectors.astype(np.float64) / calibration) + center).astype(
+            np.int
+        )
 
     if isinstance(vectors, DiffractionVectors):
         if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
-            raise ValueError('Vectors with shape {} must have the same navigation shape '
-                             'as the diffraction patterns which has shape {}.'.format(
-                                 vectors.axes_manager.navigation_shape, dp.axes_manager.navigation_shape))
-        vector_pixels = vectors.map(_floor,
-                                    calibration=calibration,
-                                    center=center,
-                                    inplace=False)
+            raise ValueError(
+                "Vectors with shape {} must have the same navigation shape "
+                "as the diffraction patterns which has shape {}.".format(
+                    vectors.axes_manager.navigation_shape,
+                    dp.axes_manager.navigation_shape,
+                )
+            )
+        vector_pixels = vectors.map(
+            _floor, calibration=calibration, center=center, inplace=False
+        )
     else:
         vector_pixels = _floor(vectors, calibration, center)
 
     if isinstance(vector_pixels, DiffractionVectors):
-        if np.any(vector_pixels.data > (np.max(dp.data.shape) - 1)) or (np.any(vector_pixels.data < 0)):
-            raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+        if np.any(vector_pixels.data > (np.max(dp.data.shape) - 1)) or (
+            np.any(vector_pixels.data < 0)
+        ):
+            raise ValueError(
+                "Some of your vectors do not lie within your diffraction pattern, check your calibration"
+            )
     elif isinstance(vector_pixels, np.ndarray):
-        if np.any((vector_pixels > np.max(dp.data.shape) - 1)) or (np.any(vector_pixels < 0)):
-            raise ValueError('Some of your vectors do not lie within your diffraction pattern, check your calibration')
+        if np.any((vector_pixels > np.max(dp.data.shape) - 1)) or (
+            np.any(vector_pixels < 0)
+        ):
+            raise ValueError(
+                "Some of your vectors do not lie within your diffraction pattern, check your calibration"
+            )
 
     return vector_pixels

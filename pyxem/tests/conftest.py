@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -32,45 +32,57 @@ def default_structure():
     """An atomic structure represetned using diffpy
     """
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
-    atom = diffpy.structure.atom.Atom(atype='Ni', xyz=[0, 0, 0], lattice=latt)
+    atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
     hexagonal_structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
     return hexagonal_structure
 
 
 @pytest.fixture
 def z():
-    return np.array([[[0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 1., 0., 0., 0., 0.],
-                      [0., 0., 1., 2., 1., 0., 0., 0.],
-                      [0., 0., 0., 1., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.]],
-                     [[0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 1., 0., 0., 0.],
-                      [0., 0., 0., 1., 2., 1., 0., 0.],
-                      [0., 0., 0., 0., 1., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.]],
-                     [[0., 0., 0., 0., 0., 0., 0., 2.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 1., 0., 0., 0., 0.],
-                      [0., 0., 1., 2., 1., 0., 0., 0.],
-                      [0., 0., 0., 1., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.]],
-                     [[0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 2., 0., 0., 0.],
-                      [0., 0., 0., 2., 2., 2., 0., 0.],
-                      [0., 0., 0., 0., 2., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.],
-                      [0., 0., 0., 0., 0., 0., 0., 0.]]]).reshape(2, 2, 8, 8)
+    return np.array(
+        [
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ],
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ],
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ],
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 2.0, 2.0, 2.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ],
+        ]
+    ).reshape(2, 2, 8, 8)
 
 
 @pytest.fixture
@@ -79,7 +91,7 @@ def diffraction_pattern(z):
     ElectronDiffraction2D <2,2|8,8>
     """
     dp = ElectronDiffraction2D(z)
-    dp.metadata.Signal.found_from = 'conftest'  # dummy metadata
+    dp.metadata.Signal.found_from = "conftest"  # dummy metadata
     return dp
 
 
@@ -93,49 +105,43 @@ def electron_diffraction1d(diffraction_pattern):
 
 @pytest.fixture
 def vector_match_peaks():
-    return np.array([
-        [1, 0.1, 0],
-        [0, 2, 0],
-        [1, 2, 3],
-    ])
+    return np.array([[1, 0.1, 0], [0, 2, 0], [1, 2, 3],])
 
 
 @pytest.fixture
 def vector_library():
     library = DiffractionVectorLibrary()
-    library['A'] = {
-        'indices': np.array([
-            [[0, 2, 0], [1, 0, 0]],
-            [[1, 2, 3], [0, 2, 0]],
-            [[1, 2, 3], [1, 0, 0]],
-        ]),
-        'measurements': np.array([
-            [2, 1, np.pi / 2],
-            [np.sqrt(14), 2, 1.006853685],
-            [np.sqrt(14), 1, 1.300246564],
-        ])
+    library["A"] = {
+        "indices": np.array(
+            [[[0, 2, 0], [1, 0, 0]], [[1, 2, 3], [0, 2, 0]], [[1, 2, 3], [1, 0, 0]],]
+        ),
+        "measurements": np.array(
+            [
+                [2, 1, np.pi / 2],
+                [np.sqrt(14), 2, 1.006853685],
+                [np.sqrt(14), 1, 1.300246564],
+            ]
+        ),
     }
     lattice = diffpy.structure.Lattice(1, 1, 1, 90, 90, 90)
-    library.structures = [
-        diffpy.structure.Structure(lattice=lattice)
-    ]
+    library.structures = [diffpy.structure.Structure(lattice=lattice)]
     return library
 
 
 @pytest.fixture
 def sp_template_match_result():
-    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype='object')
-    row_2 = np.array([0, np.array([2, 3, 5]), 0.6], dtype='object')
+    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype="object")
+    row_2 = np.array([0, np.array([2, 3, 5]), 0.6], dtype="object")
     # note we require (correlation of row_1 > correlation row_2)
     return np.vstack((row_1, row_2))
 
 
 @pytest.fixture
 def dp_template_match_result():
-    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype='object')
-    row_2 = np.array([0, np.array([2, 3, 5]), 0.8], dtype='object')
-    row_3 = np.array([1, np.array([2, 3, 4]), 0.5], dtype='object')
-    row_4 = np.array([1, np.array([2, 3, 5]), 0.3], dtype='object')
+    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype="object")
+    row_2 = np.array([0, np.array([2, 3, 5]), 0.8], dtype="object")
+    row_3 = np.array([1, np.array([2, 3, 4]), 0.5], dtype="object")
+    row_4 = np.array([1, np.array([2, 3, 5]), 0.3], dtype="object")
     return np.vstack((row_1, row_2, row_3, row_4))
 
 
@@ -143,16 +149,70 @@ def dp_template_match_result():
 def sp_vector_match_result():
     # We require (total_error of row_1 > correlation row_2)
     res = np.empty(2, dtype="object")
-    res[0] = OrientationResult(0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.1, 1.0, 0, 0)
-    res[1] = OrientationResult(0, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.6, np.array([0.1, 0.10, 0.2]), 0.2, 1.0, 0, 0)
+    res[0] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.5,
+        np.array([0.1, 0.05, 0.2]),
+        0.1,
+        1.0,
+        0,
+        0,
+    )
+    res[1] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.6,
+        np.array([0.1, 0.10, 0.2]),
+        0.2,
+        1.0,
+        0,
+        0,
+    )
     return res
 
 
 @pytest.fixture
 def dp_vector_match_result():
     res = np.empty(4, dtype="object")
-    res[0] = OrientationResult(0, euler2mat(*np.deg2rad([90, 0, 0]), 'rzxz'), 0.6, np.array([0.1, 0.10, 0.2]), 0.3, 1.0, 0, 0)
-    res[1] = OrientationResult(0, euler2mat(*np.deg2rad([0, 10, 20]), 'rzxz'), 0.5, np.array([0.1, 0.05, 0.2]), 0.4, 1.0, 0, 0)
-    res[2] = OrientationResult(1, euler2mat(*np.deg2rad([0, 45, 45]), 'rzxz'), 0.8, np.array([0.1, 0.30, 0.2]), 0.1, 1.0, 0, 0)
-    res[3] = OrientationResult(1, euler2mat(*np.deg2rad([0, 0, 90]), 'rzxz'), 0.7, np.array([0.1, 0.05, 0.1]), 0.2, 1.0, 0, 0)
+    res[0] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([90, 0, 0]), "rzxz"),
+        0.6,
+        np.array([0.1, 0.10, 0.2]),
+        0.3,
+        1.0,
+        0,
+        0,
+    )
+    res[1] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 10, 20]), "rzxz"),
+        0.5,
+        np.array([0.1, 0.05, 0.2]),
+        0.4,
+        1.0,
+        0,
+        0,
+    )
+    res[2] = OrientationResult(
+        1,
+        euler2mat(*np.deg2rad([0, 45, 45]), "rzxz"),
+        0.8,
+        np.array([0.1, 0.30, 0.2]),
+        0.1,
+        1.0,
+        0,
+        0,
+    )
+    res[3] = OrientationResult(
+        1,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.7,
+        np.array([0.1, 0.05, 0.1]),
+        0.2,
+        1.0,
+        0,
+        0,
+    )
     return res

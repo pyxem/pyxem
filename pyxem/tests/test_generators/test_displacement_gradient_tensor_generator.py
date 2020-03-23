@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,8 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyxem.generators.displacement_gradient_tensor_generator import \
-    get_DisplacementGradientMap, get_single_DisplacementGradientTensor
+from pyxem.generators.displacement_gradient_tensor_generator import (
+    get_DisplacementGradientMap,
+    get_single_DisplacementGradientTensor,
+)
 import hyperspy.api as hs
 import pytest
 import numpy as np
@@ -52,7 +54,7 @@ def rotation(z):
 
 
 def uniform_expansion(z):
-    return (1.1 * z)
+    return 1.1 * z
 
 
 def stretch_in_x(z):
@@ -65,8 +67,7 @@ def generate_test_vectors(v):
     We imagine we measured 4 sets of vectors, from 4 regions of sample, normal,
     rotated, uniform expansion and uniaxial expansion.
     """
-    return np.asarray([[v, rotation(v)],
-                       [uniform_expansion(v), stretch_in_x(v)]])
+    return np.asarray([[v, rotation(v)], [uniform_expansion(v), stretch_in_x(v)]])
 
 
 def generate_strain_map(vectors):
@@ -95,7 +96,9 @@ def multi_vector():
 """ Each of these basis should return the same results, in an xy basis"""
 
 
-def test_results_returned_correctly_in_same_basis(xy_vectors, left_handed, multi_vector):
+def test_results_returned_correctly_in_same_basis(
+    xy_vectors, left_handed, multi_vector
+):
     """ Basic test of the summary statement for this section """
     np.testing.assert_almost_equal(xy_vectors.data, left_handed.data, decimal=2)
     np.testing.assert_almost_equal(xy_vectors.data, multi_vector.data, decimal=2)
@@ -106,17 +109,29 @@ def test_trivial_weight_function_case(xy_vectors):
     weights = [1, 1, 1, 1]
     four_vectors = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
     deformed = hs.signals.Signal2D(generate_test_vectors(four_vectors))
-    weight_strain_map = get_DisplacementGradientMap(deformed, four_vectors, weights=weights).get_strain_maps()
+    weight_strain_map = get_DisplacementGradientMap(
+        deformed, four_vectors, weights=weights
+    ).get_strain_maps()
     np.testing.assert_almost_equal(xy_vectors.data, weight_strain_map.data, decimal=2)
 
 
 def test_weight_function_behaviour():
     """ Confirms that  a weight function [1,1,2,2] on [a,a,b,b] gives (2a+4b)/6 as the strain"""
     multi_vector_array = np.asarray([[1, 0, 1, 1], [0, 1, -1, 1]])
-    strained_by_1pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.01, 0], [0, 1]]))  # first  2
-    strained_by_2pc_in_x = vector_operation(multi_vector_array, np.asarray([[1.02, 0], [0, 1]]))  # second 2
+    strained_by_1pc_in_x = vector_operation(
+        multi_vector_array, np.asarray([[1.01, 0], [0, 1]])
+    )  # first  2
+    strained_by_2pc_in_x = vector_operation(
+        multi_vector_array, np.asarray([[1.02, 0], [0, 1]])
+    )  # second 2
     weights = [1, 1, 2, 2]  # ((0.1*2 + 0.2*4)/6) = 0.166666
-    vectors = np.concatenate((strained_by_1pc_in_x[:, :2], strained_by_2pc_in_x[:, 2:]), axis=1)
+    vectors = np.concatenate(
+        (strained_by_1pc_in_x[:, :2], strained_by_2pc_in_x[:, 2:]), axis=1
+    )
     deformed = hs.signals.Signal2D(np.asarray([[vectors, vectors], [vectors, vectors]]))
-    strain_map = get_DisplacementGradientMap(deformed, multi_vector_array, weights=weights).get_strain_maps()
-    np.testing.assert_almost_equal(strain_map.inav[0].isig[0, 0].data[0], -1.0166666 + 1, decimal=2)
+    strain_map = get_DisplacementGradientMap(
+        deformed, multi_vector_array, weights=weights
+    ).get_strain_maps()
+    np.testing.assert_almost_equal(
+        strain_map.inav[0].isig[0, 0].data[0], -1.0166666 + 1, decimal=2
+    )

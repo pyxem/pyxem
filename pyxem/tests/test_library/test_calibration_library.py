@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -30,10 +30,9 @@ from pyxem.libraries.calibration_library import CalibrationDataLibrary
 def library(diffraction_pattern):
     dp = diffraction_pattern.mean((0, 1))
     im = Signal2D(np.ones((10, 10)))
-    cdl = CalibrationDataLibrary(au_x_grating_dp=dp,
-                                 au_x_grating_im=im,
-                                 moo3_dp=dp,
-                                 moo3_im=im)
+    cdl = CalibrationDataLibrary(
+        au_x_grating_dp=dp, au_x_grating_im=im, moo3_dp=dp, moo3_im=im
+    )
     return cdl
 
 
@@ -42,24 +41,22 @@ def test_initialization_dtype(library):
 
 
 class TestPlotData:
-
     def test_plot_au_x_grating_dp(self, library):
-        library.plot_calibration_data(data_to_plot='au_x_grating_dp')
+        library.plot_calibration_data(data_to_plot="au_x_grating_dp")
 
     def test_plot_au_x_grating_im(self, library):
-        library.plot_calibration_data(data_to_plot='au_x_grating_im')
+        library.plot_calibration_data(data_to_plot="au_x_grating_im")
 
     def test_plot_moo3_dp(self, library):
-        library.plot_calibration_data(data_to_plot='moo3_dp')
+        library.plot_calibration_data(data_to_plot="moo3_dp")
 
     def test_plot_moo3_im(self, library):
-        library.plot_calibration_data(data_to_plot='moo3_im')
+        library.plot_calibration_data(data_to_plot="moo3_im")
 
     @pytest.mark.xfail(raises=ValueError)
     def test_plot_invalid(self, library):
-        library.plot_calibration_data(data_to_plot='no_data')
+        library.plot_calibration_data(data_to_plot="no_data")
 
     def test_plot_au_x_grating_dp_with_roi(self, library):
-        line = Line2DROI(x1=1, y1=1, x2=3, y2=3, linewidth=1.)
-        library.plot_calibration_data(data_to_plot='au_x_grating_dp',
-                                      roi=line)
+        line = Line2DROI(x1=1, y1=1, x2=3, y2=3, linewidth=1.0)
+        library.plot_calibration_data(data_to_plot="au_x_grating_dp", roi=line)

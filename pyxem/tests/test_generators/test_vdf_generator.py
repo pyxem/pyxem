@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -26,10 +26,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.vdf_image import VDFImage
 
 
-@pytest.fixture(params=[
-    np.array([[1, 1],
-              [2, 2]])
-])
+@pytest.fixture(params=[np.array([[1, 1], [2, 2]])])
 def diffraction_vectors(request):
     dvec = DiffractionVectors(request.param)
     dvec.axes_manager.set_signal_dimension(1)
@@ -38,21 +35,23 @@ def diffraction_vectors(request):
 
 @pytest.fixture
 def vdf_generator(diffraction_pattern, diffraction_vectors):
+    diffraction_pattern.data = np.where(
+        diffraction_pattern.data == 0, 0.01, diffraction_pattern.data
+    )  # avoid divide by zeroes
     return VDFGenerator(diffraction_pattern, diffraction_vectors)
 
 
 class TestVDFGenerator:
-
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
-        dvm = DiffractionVectors(np.array([[np.array([[1, 1],
-                                                      [2, 2]]),
-                                            np.array([[1, 1],
-                                                      [2, 2],
-                                                      [1, 2]])],
-                                           [np.array([[1, 1],
-                                                      [2, 2]]),
-                                            np.array([[1, 1],
-                                                      [2, 2]])]], dtype=object))
+        dvm = DiffractionVectors(
+            np.array(
+                [
+                    [np.array([[1, 1], [2, 2]]), np.array([[1, 1], [2, 2], [1, 2]])],
+                    [np.array([[1, 1], [2, 2]]), np.array([[1, 1], [2, 2]])],
+                ],
+                dtype=object,
+            )
+        )
         dvm.axes_manager.set_signal_dimension(0)
 
         vdfgen = VDFGenerator(diffraction_pattern, dvm)
@@ -68,44 +67,35 @@ class TestVDFGenerator:
     @pytest.mark.xfail(raises=ValueError)
     def test_vector_vdfs_without_vectors(self, diffraction_pattern):
         vdfgen = VDFGenerator(diffraction_pattern)
-        vdfgen.get_vector_vdf_images(radius=2.)
+        vdfgen.get_vector_vdf_images(radius=2.0)
 
-    @pytest.mark.parametrize('radius, normalize', [
-        (4., False),
-        (4., True)
-    ])
+    @pytest.mark.parametrize("radius, normalize", [(4.0, False), (4.0, True)])
     def test_get_vector_vdf_images(
-            self,
-            vdf_generator: VDFGenerator,
-            radius, normalize
+        self, vdf_generator: VDFGenerator, radius, normalize
     ):
         vdfs = vdf_generator.get_vector_vdf_images(radius, normalize)
         assert isinstance(vdfs, VDFImage)
 
-    @pytest.mark.parametrize('k_min, k_max, k_steps, normalize', [
-        (0., 4., 2, False),
-        (0., 4., 2, True)
-    ])
+    @pytest.mark.parametrize(
+        "k_min, k_max, k_steps, normalize", [(0.0, 4.0, 2, False), (0.0, 4.0, 2, True)]
+    )
     def test_get_concentric_vdf_images(
-            self,
-            vdf_generator: VDFGenerator,
-            k_min, k_max, k_steps, normalize
+        self, vdf_generator: VDFGenerator, k_min, k_max, k_steps, normalize
     ):
-        vdfs = vdf_generator.get_concentric_vdf_images(k_min, k_max, k_steps,
-                                                       normalize)
+        vdfs = vdf_generator.get_concentric_vdf_images(k_min, k_max, k_steps, normalize)
         assert isinstance(vdfs, VDFImage)
 
 
 def test_vdf_generator_from_map(diffraction_pattern):
-    dvm = DiffractionVectors(np.array([[np.array([[1, 1],
-                                                  [2, 2]]),
-                                        np.array([[1, 1],
-                                                  [2, 2],
-                                                  [1, 2]])],
-                                       [np.array([[1, 1],
-                                                  [2, 2]]),
-                                        np.array([[1, 1],
-                                                  [2, 2]])]], dtype=object))
+    dvm = DiffractionVectors(
+        np.array(
+            [
+                [np.array([[1, 1], [2, 2]]), np.array([[1, 1], [2, 2], [1, 2]])],
+                [np.array([[1, 1], [2, 2]]), np.array([[1, 1], [2, 2]])],
+            ],
+            dtype=object,
+        )
+    )
     dvm.axes_manager.set_signal_dimension(0)
 
     vdfgen = VDFGenerator(diffraction_pattern, dvm)

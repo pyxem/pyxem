@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -37,6 +37,7 @@ from scipy.ndimage import gaussian_filter
 #     i,j = pixel_positions.T
 #     pattern[i, j] = 1
 #     return pattern
+
 
 @pytest.mark.parametrize("radius, offset", [[1, 0], [2, 1], [3, 2]])
 # @pytest.mark.parametrize("offset", [0, 1, 2])

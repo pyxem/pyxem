@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,17 +19,17 @@
 import pytest
 import numpy as np
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.components.scattering_fit_component_xtables import ScatteringFitComponentXTables
+from pyxem.components.scattering_fit_component_xtables import (
+    ScatteringFitComponentXTables,
+)
 
 
 def test_scattering_component_init_xtables():
-    ref = ScatteringFitComponentXTables(['Cu'], [1], N=1., C=0.)
+    ref = ScatteringFitComponentXTables(["Cu"], [1], N=1.0, C=0.0)
     assert isinstance(ref, ScatteringFitComponentXTables)
 
 
-@pytest.fixture(params=[
-    np.array([4., 3., 2., 2., 1., 1., 1., 0.])
-])
+@pytest.fixture(params=[np.array([4.0, 3.0, 2.0, 2.0, 1.0, 1.0, 1.0, 0.0])])
 def ri_model(request):
     ri = ReducedIntensity1D(request.param)
     m = ri.create_model()
@@ -37,8 +37,8 @@ def ri_model(request):
 
 
 def test_function_xtables(ri_model):
-    elements = ['Cu']
+    elements = ["Cu"]
     fracs = [1]
-    sc_component = ScatteringFitComponentXTables(elements, fracs, N=1., C=0.)
+    sc_component = ScatteringFitComponentXTables(elements, fracs, N=1.0, C=0.0)
     ri_model.append(sc_component)
     ri_model.fit()

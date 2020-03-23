@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,14 +22,8 @@
 
 import numpy as np
 
-from hyperspy.signals import Signal1D
 
-from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
-from pyxem.signals import transfer_navigation_axes
-
-
-class PDFGenerator1D():
+class PDFGenerator1D:
     """Generates a PairDistributionFunction1D signal from a specified
         ReducedIntensity1D signal.
 
@@ -43,13 +37,7 @@ class PDFGenerator1D():
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
 
-    def get_pdf(self,
-                s_min,
-                s_max=None,
-                r_min=0,
-                r_max=20,
-                r_increment=0.01
-                ):
+    def get_pdf(self, s_min, s_max=None, r_min=0, r_max=20, r_increment=0.01):
         """ Calculates the pdf from the reduced intensity signal.
 
         Parameters
@@ -73,7 +61,7 @@ class PDFGenerator1D():
         s_scale = self.signal.axes_manager.signal_axes[0].scale
         if s_max is None:
             s_max = self.signal.axes_manager.signal_axes[0].size * s_scale
-            print('s_max set to maximum of signal.')
+            print("s_max set to maximum of signal.")
 
         r_values = np.arange(r_min, r_max, r_increment)
         r_values = r_values.reshape(1, r_values.size)
@@ -81,24 +69,29 @@ class PDFGenerator1D():
 
         # check that these aren't out of bounds
         if s_limits[1] > self.signal.axes_manager.signal_axes[0].size:
-            raise ValueError('User specified s_max is larger than the maximum '
-                             'scattering vector magnitude in the data. Please reduce '
-                             's_max or use s_max=None to use the full scattering range.')
+            raise ValueError(
+                "User specified s_max is larger than the maximum "
+                "scattering vector magnitude in the data. Please reduce "
+                "s_max or use s_max=None to use the full scattering range."
+            )
         s_values = np.arange(s_limits[0], s_limits[1], 1) * s_scale
         s_values = s_values.reshape(s_values.size, 1)  # column vector
 
-        limited_red_int = self.signal.isig[s_limits[0]:s_limits[1]].data
+        limited_red_int = self.signal.isig[s_limits[0] : s_limits[1]].data
 
         pdf_sine = np.sin(2 * np.pi * np.matmul(s_values, r_values))
         # creates a vector of the pdf
-        rpdf = PairDistributionFunction1D(8 * np.pi * s_scale
-                                          * np.matmul(limited_red_int, pdf_sine))
+        rpdf = self.signal._deepcopy_with_new_data(
+            8 * np.pi * s_scale * np.matmul(limited_red_int, pdf_sine)
+        )
+        rpdf.set_signal_type("pair_distribution_function")
 
         signal_axis = rpdf.axes_manager.signal_axes[0]
-        pdf_scaling = r_increment
-        signal_axis.scale = pdf_scaling
-        signal_axis.name = 'Radius r'
-        signal_axis.units = '$Å$'
-        rpdf = transfer_navigation_axes(rpdf, self.signal)
+        signal_axis.scale = r_increment
+        signal_axis.name = "Radius r"
+        signal_axis.units = "$Å$"
+
+        title = self.signal.metadata.General.title
+        rpdf.metadata.General.title = f"Pair distribution function of {title}"
 
         return rpdf

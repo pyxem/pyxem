@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -56,7 +56,7 @@ def test_s_limit_failure(reduced_intensity1d):
 
 
 def test_signal_size():
-    spectrum = np.array([5., 4., 3., 2., 2., 1., 1., 1., 0., 0.])
+    spectrum = np.array([5.0, 4.0, 3.0, 2.0, 2.0, 1.0, 1.0, 1.0, 0.0, 0.0])
     ri = ReducedIntensity1D(spectrum)
     pdfgen = PDFGenerator1D(ri)
     pdf = pdfgen.get_pdf(s_min=0, s_max=10)

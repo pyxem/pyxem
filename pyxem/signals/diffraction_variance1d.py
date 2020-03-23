@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,7 +23,6 @@ from hyperspy.signals import Signal1D
 
 
 class DiffractionVariance1D(Signal1D):
-    _signal_type = "diffraction_variance1d"
+    _signal_type = "diffraction_variance"
 
-    def __init__(self, *args, **kwargs):
-        Signal1D.__init__(self, *args, **kwargs)
+    pass

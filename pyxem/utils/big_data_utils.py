@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -29,7 +29,9 @@ def _get_chunk_size(x_list, y_list):
     epsilon = 1e-5  # np.arange returns excluding the endpoint argument
     if not np.allclose(x_list, np.arange(x_list[0], x_list[-1] + epsilon, chunk_size)):
         raise ValueError("There is a problem with your x_list")
-    elif not np.allclose(y_list, np.arange(y_list[0], y_list[-1] + epsilon, chunk_size)):
+    elif not np.allclose(
+        y_list, np.arange(y_list[0], y_list[-1] + epsilon, chunk_size)
+    ):
         raise ValueError("There is a problem with your y_list")
 
     return chunk_size
@@ -38,7 +40,7 @@ def _get_chunk_size(x_list, y_list):
 def _load_and_cast(filepath, x, y, chunk_size):
     """ Loads a chunk of a larger diffraction pattern"""
     s = hs.load(filepath, lazy=True)
-    s = s.inav[x:x + chunk_size, y:y + chunk_size]
+    s = s.inav[x : x + chunk_size, y : y + chunk_size]
     s.compute()
     return pxm.ElectronDiffraction2D(s)
 

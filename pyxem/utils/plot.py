@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,9 +19,6 @@
 import numpy as np
 import itertools
 
-from mpl_toolkits.axisartist.floating_axes import GridHelperCurveLinear, \
-    FloatingSubplot
-
 
 def _find_max_length_peaks(peaks):
     """Worker function for generate_marker_inputs_from_peaks.
@@ -37,8 +34,10 @@ def _find_max_length_peaks(peaks):
         The length of the longest peak list.
 
     """
-    # FIX ME
-    x_size, y_size = peaks.axes_manager.navigation_shape[0], peaks.axes_manager.navigation_shape[1]
+    x_size, y_size = (
+        peaks.axes_manager.navigation_shape[0],
+        peaks.axes_manager.navigation_shape[1],
+    )
     length_of_longest_peaks_list = 0
     for x in np.arange(0, x_size):
         for y in np.arange(0, y_size):
@@ -67,9 +66,14 @@ def generate_marker_inputs_from_peaks(peaks):
             dp.add_marker(m,plot_marker=True,permanent=False)
 
     """
-    # XXX: non-square signals
     max_peak_len = _find_max_length_peaks(peaks)
-    pad = np.array(list(itertools.zip_longest(*np.concatenate(peaks.data), fillvalue=[np.nan, np.nan])))
+    pad = np.array(
+        list(
+            itertools.zip_longest(
+                *np.concatenate(peaks.data), fillvalue=[np.nan, np.nan]
+            )
+        )
+    )
     pad = pad.reshape((max_peak_len), peaks.data.shape[0], peaks.data.shape[1], 2)
     xy_cords = np.transpose(pad, [3, 0, 1, 2])  # move the x,y pairs to the front
     x = xy_cords[0]

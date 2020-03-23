@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,8 +24,9 @@ operations using the pyFAI AzimuthalIntegrator for a
 
 from pyFAI.detectors import Detector
 
+
 class GenericFlatDetector(Detector):
-    '''
+    """
     A PyFAI Detector class for an arbitrarily sized flat detector (i.e. the
     calibration is assumed to be constant across the detector plane)
 
@@ -50,11 +51,13 @@ class GenericFlatDetector(Detector):
     >>> detector
     Detector GenericFlatDetector	 Spline= None
     PixelSize= 1.000e+00, 1.000e+00 m
-    '''
+    """
+
     IS_FLAT = True  # this detector is flat
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents
     API_VERSION = "1.0"
     aliases = ["GenericFlatDetector"]
+
     def __init__(self, size_x, size_y):
-        MAX_SHAPE = size_x,size_y
+        MAX_SHAPE = size_x, size_y
         Detector.__init__(self, pixel1=1, pixel2=1, max_shape=MAX_SHAPE)

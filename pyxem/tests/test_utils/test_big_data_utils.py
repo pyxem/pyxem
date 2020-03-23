@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -40,6 +40,8 @@ class Test_bad_xy_lists:
 This runs a simple case of square rooting all elements of a pattern,
 the chunked version is compared with doing the entire operation in memory.
 """
+
+
 @pytest.fixture()
 def big_electron_diffraction_pattern():
     z = np.arange(0, 160, step=1).reshape(4, 10, 2, 2)  # x_size=10, y_size=4 in hspy
@@ -58,7 +60,7 @@ def dp_sqrt(dp):
 
 def test_core_big_data_functionality(big_electron_diffraction_pattern):
     expected_output = np.sqrt(big_electron_diffraction_pattern.data)
-    filepath = 'files_for_tests/tempfile_for_big_data_util_testing.hspy'
+    filepath = "files_for_tests/tempfile_for_big_data_util_testing.hspy"
     big_electron_diffraction_pattern.save(filepath)
 
     x_list = [0, 2, 4, 6, 8]

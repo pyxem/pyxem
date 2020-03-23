@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -47,16 +47,25 @@ class ElectronDiffractionForwardModel(Component):
 
     """
 
-    def __init__(self, electron_diffraction_calculator,
-                 structure,
-                 calibration,
-                 reciprocal_radius,
-                 d11=1., d12=0., d13=0.,
-                 d21=0., d22=1., d23=0.,
-                 d31=0., d32=0., d33=1.):
-        Component.__init__(self, ['d11', 'd12', 'd13',
-                                  'd21', 'd22', 'd23',
-                                  'd31', 'd32', 'd33', ])
+    def __init__(
+        self,
+        electron_diffraction_calculator,
+        structure,
+        calibration,
+        reciprocal_radius,
+        d11=1.0,
+        d12=0.0,
+        d13=0.0,
+        d21=0.0,
+        d22=1.0,
+        d23=0.0,
+        d31=0.0,
+        d32=0.0,
+        d33=1.0,
+    ):
+        Component.__init__(
+            self, ["d11", "d12", "d13", "d21", "d22", "d23", "d31", "d32", "d33",]
+        )
         self.electron_diffraction_calculator = electron_diffraction_calculator
         self.structure = structure
         self.reciprocal_radius = reciprocal_radius
@@ -98,12 +107,9 @@ class ElectronDiffractionForwardModel(Component):
         d32 = self.d32.value
         d33 = self.d33.value
 
-        deformation = np.asarray([[d11, d12, d13],
-                                  [d21, d22, d23],
-                                  [d31, d32, d33]])
+        deformation = np.asarray([[d11, d12, d13], [d21, d22, d23], [d31, d32, d33]])
 
         structure.lattice.setLatPar(baserot=deformation)
-        simulation = diffractor.calculate_ed_data(structure,
-                                                  reciprocal_radius)
+        simulation = diffractor.calculate_ed_data(structure, reciprocal_radius)
         simulation.calibration = calibration
         return simulation

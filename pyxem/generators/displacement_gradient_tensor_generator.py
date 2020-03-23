@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -61,8 +61,12 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
 
     """
     # Calculate displacement gradient tensor across map.
-    D = strained_vectors.map(get_single_DisplacementGradientTensor,
-                             Vu=unstrained_vectors, weights=weights, inplace=False)
+    D = strained_vectors.map(
+        get_single_DisplacementGradientTensor,
+        Vu=unstrained_vectors,
+        weights=weights,
+        inplace=False,
+    )
 
     return DisplacementGradientMap(D)
 
@@ -102,12 +106,16 @@ def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
         # see https://stackoverflow.com/questions/27128688
         weights = np.asarray(weights)
         # Need vectors normalized to the unstrained region otherwise the weighting breaks down
-        Vs = (np.divide(Vs, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)).T  # transpose for conventions
+        Vs = (
+            np.divide(Vs, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)
+        ).T  # transpose for conventions
         Vu = (np.divide(Vu, np.linalg.norm(Vu, axis=0)) * np.sqrt(weights)).T
     else:
         Vs, Vu = Vs.T, Vu.T
 
-    L = np.linalg.lstsq(Vu, Vs, rcond=-1)[0]  # only need the return array, see np,linalg.lstsq docs
+    L = np.linalg.lstsq(Vu, Vs, rcond=-1)[
+        0
+    ]  # only need the return array, see np,linalg.lstsq docs
     # Put caculated matrix values into 3 x 3 matrix to be returned.
     D = np.eye(3)
     D[0:2, 0:2] = L

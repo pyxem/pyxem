@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,8 +27,7 @@ from diffsims.utils.atomic_scattering_params import ATOMIC_SCATTERING_PARAMS
 
 
 class ScatteringFitComponentXTables(Component):
-
-    def __init__(self, elements, fracs, N=1., C=0.):
+    def __init__(self, elements, fracs, N=1.0, C=0.0):
         """
         A scattering component to fit background atomic scattering.
         Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
@@ -64,9 +63,9 @@ class ScatteringFitComponentXTables(Component):
         Vol. C, table 4.3.2.3.
 
         """
-        Component.__init__(self, ['N', 'C'])
-        self._whitelist['elements'] = ('init,sig', elements)
-        self._whitelist['fracs'] = ('init,sig', fracs)
+        Component.__init__(self, ["N", "C"])
+        self._whitelist["elements"] = ("init,sig", elements)
+        self._whitelist["fracs"] = ("init,sig", fracs)
         self.elements = elements
         self.fracs = fracs
         params = []

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,7 +18,7 @@
 
 from hyperspy.signals import Signal2D
 import numpy as np
-from pyxem.signals import push_metadata_through, transfer_signal_axes
+from pyxem.signals import transfer_signal_axes
 
 
 def _get_rotation_matrix(x_new):
@@ -40,8 +40,12 @@ def _get_rotation_matrix(x_new):
         rotation_angle = np.deg2rad(90)
 
     # angle sign agrees with https://en.wikipedia.org/wiki/Rotation_matrix
-    R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
-                  [np.sin(rotation_angle), np.cos(rotation_angle)]])
+    R = np.array(
+        [
+            [np.cos(rotation_angle), -np.sin(rotation_angle)],
+            [np.sin(rotation_angle), np.cos(rotation_angle)],
+        ]
+    )
     return R
 
 
@@ -55,17 +59,18 @@ class StrainMap(Signal2D):
     _signal_type = "strain_map"
 
     def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
         # check init dimension are correct
 
-        if 'current_basis_x' in kwargs.keys():
-            self.current_basis_x = kwargs['current_basis_x']
+        if "current_basis_x" in kwargs.keys():
+            self.current_basis_x = kwargs["current_basis_x"]
         else:
             self.current_basis_x = [1, 0]
 
-        self.current_basis_y = np.matmul(np.asarray([[0, 1], [-1, 0]]), self.current_basis_x)
+        self.current_basis_y = np.matmul(
+            np.asarray([[0, 1], [-1, 0]]), self.current_basis_x
+        )
 
     def rotate_strain_basis(self, x_new):
         """ Rotates a strain map to a new basis.
@@ -94,8 +99,7 @@ class StrainMap(Signal2D):
             sigmayy_old = transposed_strain_map[1]
             sigmaxy_old = transposed_strain_map[2]
 
-            z = np.asarray([[sigmaxx_old, sigmaxy_old],
-                            [sigmaxy_old, sigmayy_old]])
+            z = np.asarray([[sigmaxx_old, sigmaxy_old], [sigmaxy_old, sigmayy_old]])
 
             new = np.matmul(R.T, np.matmul(z, R))
             return [new[0, 0], new[1, 1], new[0, 1], transposed_strain_map[3]]
@@ -103,6 +107,7 @@ class StrainMap(Signal2D):
         def apply_rotation_complete(self, R):
             """ Mapping solution to return a (unclassed) strain map in a new basis """
             from hyperspy.api import transpose
+
             transposed = transpose(self)[0]
             transposed_to_new_basis = transposed.map(apply_rotation, R=R, inplace=False)
             return transposed_to_new_basis.T
@@ -120,5 +125,7 @@ class StrainMap(Signal2D):
         transposed_to_new_basis = apply_rotation_complete(strain_map_core, R)
         meta_dict = self.metadata.as_dictionary()
 
-        strainmap = StrainMap(transposed_to_new_basis, current_basis_x=x_new, metadata=meta_dict)
+        strainmap = StrainMap(
+            transposed_to_new_basis, current_basis_x=x_new, metadata=meta_dict
+        )
         return transfer_signal_axes(strainmap, self)

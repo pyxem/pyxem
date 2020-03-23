@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -25,35 +25,40 @@ from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem.components.diffraction_component import ElectronDiffractionForwardModel
 
 
-@pytest.fixture(params=[
-    (300, 0.02, None),
-])
+@pytest.fixture(
+    params=[(300, 0.02, None),]
+)
 def diffraction_calculator(request):
     return DiffractionGenerator(*request.param)
 
 
-def test_electron_diffraction_component_init(diffraction_calculator,
-                                             default_structure):
-    ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          default_structure,
-                                          reciprocal_radius=1.,
-                                          calibration=0.01)
+def test_electron_diffraction_component_init(diffraction_calculator, default_structure):
+    ref = ElectronDiffractionForwardModel(
+        diffraction_calculator,
+        default_structure,
+        reciprocal_radius=1.0,
+        calibration=0.01,
+    )
     assert isinstance(ref, ElectronDiffractionForwardModel)
 
 
 def test_function(diffraction_calculator, default_structure):
-    ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          default_structure,
-                                          reciprocal_radius=1.,
-                                          calibration=0.01)
+    ref = ElectronDiffractionForwardModel(
+        diffraction_calculator,
+        default_structure,
+        reciprocal_radius=1.0,
+        calibration=0.01,
+    )
     func = ref.function()
     np.testing.assert_almost_equal(func, 1)
 
 
 def test_simulate(diffraction_calculator, default_structure):
-    ref = ElectronDiffractionForwardModel(diffraction_calculator,
-                                          default_structure,
-                                          reciprocal_radius=1.,
-                                          calibration=0.01)
+    ref = ElectronDiffractionForwardModel(
+        diffraction_calculator,
+        default_structure,
+        reciprocal_radius=1.0,
+        calibration=0.01,
+    )
     sim = ref.simulate()
     assert isinstance(sim, DiffractionSimulation)
