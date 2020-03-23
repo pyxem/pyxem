@@ -12,7 +12,8 @@ class CommonDiffraction:
             out_signal_axes = list(
                 np.arange(min(signal.axes_manager.navigation_dimension, 2)))
         if len(out_signal_axes) > signal.axes_manager.navigation_dimension:
-            raise ValueError("The length of 'out_signal_axes' can't be")
+            raise ValueError("The length of 'out_signal_axes' can't be longer"
+                             "than the navigation dimension of the signal.")
         return out.transpose(out_signal_axes)
 
     def plot_interactive_virtual_image(self, roi, out_signal_axes=None,
@@ -35,7 +36,15 @@ class CommonDiffraction:
         --------
         .. code-block:: python
 
-            rp.plot_interactive_virtual_image(left=0.5, right=0.7)
+            >>> # For 1D diffraction signal, we can use a SpanROI
+            >>> roi = hs.roi.SpanROI(left=1., right=2.)
+            >>> rp.plot_interactive_virtual_image(roi)
+
+        .. code-block:: python
+
+            >>> # For 2D diffraction signal,we can use a CircleROI
+            >>> roi = hs.roi.CircleROI(3, 3, 5)
+            >>> rp.plot_interactive_virtual_image(roi)
 
         """
         # Plot signal when necessary
