@@ -21,8 +21,9 @@ import numpy as np
 from pyxem.detectors.generic_flat_detector import GenericFlatDetector
 from pyFAI.detectors import Detector
 
+
 def test_generic_flat_detector_init():
-    size_x, size_y = 256,256
+    size_x, size_y = 256, 256
     detector = GenericFlatDetector(size_x, size_y)
-    assert isinstance(detector,Detector)
-    assert np.array_equal(detector.max_shape, (size_x,size_y))
+    assert isinstance(detector, Detector)
+    assert np.array_equal(detector.max_shape, (size_x, size_y))

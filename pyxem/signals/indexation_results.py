@@ -36,12 +36,12 @@ class TemplateMatchingResults(Signal2D):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
     """
+
     _signal_type = "template_matching"
 
-    def plot_best_matching_results_on_signal(self, signal,
-                                             library,
-                                             permanent_markers=True,
-                                             *args, **kwargs):
+    def plot_best_matching_results_on_signal(
+        self, signal, library, permanent_markers=True, *args, **kwargs
+    ):
         """Plot the best matching diffraction vectors on a signal.
 
         Parameters
@@ -58,17 +58,14 @@ class TemplateMatchingResults(Signal2D):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = self.map(peaks_from_best_template,
-                               library=library,
-                               inplace=False)
+        match_peaks = self.map(peaks_from_best_template, library=library, inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
-            m = hs.markers.point(x=mx, y=my, color='red', marker='x')
+            m = hs.markers.point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
 
-    def get_crystallographic_map(self,
-                                 *args, **kwargs):
+    def get_crystallographic_map(self, *args, **kwargs):
         """Obtain a crystallographic map specifying the best matching phase and
         orientation at each probe position with corresponding metrics.
 
@@ -92,13 +89,13 @@ class TemplateMatchingResults(Signal2D):
 
         """
         # TODO: Add alternative methods beyond highest correlation score.
-        crystal_map = self.map(crystal_from_template_matching,
-                               inplace=False,
-                               *args, **kwargs)
+        crystal_map = self.map(
+            crystal_from_template_matching, inplace=False, *args, **kwargs
+        )
 
         cryst_map = CrystallographicMap(crystal_map)
         cryst_map = transfer_navigation_axes(cryst_map, self)
-        cryst_map.method = 'template_matching'
+        cryst_map.method = "template_matching"
 
         return cryst_map
 
@@ -114,6 +111,7 @@ class VectorMatchingResults(BaseSignal):
     hkls : BaseSignal
         Miller indices associated with each diffraction vector.
     """
+
     _signal_dimension = 0
     _signal_type = "vector_matching"
 
@@ -123,8 +121,7 @@ class VectorMatchingResults(BaseSignal):
         self.vectors = None
         self.hkls = None
 
-    def get_crystallographic_map(self,
-                                 *args, **kwargs):
+    def get_crystallographic_map(self, *args, **kwargs):
         """Obtain a crystallographic map specifying the best matching phase and
         orientation at each probe position with corresponding metrics.
 
@@ -147,20 +144,19 @@ class VectorMatchingResults(BaseSignal):
                 'orientation_reliability'
                 'phase_reliability'
         """
-        crystal_map = self.map(crystal_from_vector_matching,
-                               inplace=False,
-                               *args, **kwargs)
+        crystal_map = self.map(
+            crystal_from_vector_matching, inplace=False, *args, **kwargs
+        )
 
         cryst_map = CrystallographicMap(crystal_map)
         cryst_map = transfer_navigation_axes(cryst_map, self)
-        cryst_map.method = 'vector_matching'
+        cryst_map.method = "vector_matching"
 
         return cryst_map
 
-    def get_indexed_diffraction_vectors(self,
-                                        vectors,
-                                        overwrite=False,
-                                        *args, **kwargs):
+    def get_indexed_diffraction_vectors(
+        self, vectors, overwrite=False, *args, **kwargs
+    ):
         """Obtain an indexed diffraction vectors object.
 
         Parameters
@@ -175,8 +171,10 @@ class VectorMatchingResults(BaseSignal):
         """
         if overwrite == False:
             if vectors.hkls is not None:
-                warn("The vectors supplied are already associated with hkls set "
-                     "overwrite=True to replace these hkls.")
+                warn(
+                    "The vectors supplied are already associated with hkls set "
+                    "overwrite=True to replace these hkls."
+                )
             else:
                 vectors.hkls = self.hkls
 
@@ -185,11 +183,9 @@ class VectorMatchingResults(BaseSignal):
 
         return vectors
 
-    def plot_best_matching_results_on_signal(self, signal,
-                                             library,
-                                             rank=0,
-                                             permanent_markers=True,
-                                             *args, **kwargs):
+    def plot_best_matching_results_on_signal(
+        self, signal, library, rank=0, permanent_markers=True, *args, **kwargs
+    ):
         """Plot the best matching diffraction vectors on a signal.
 
         Parameters
@@ -208,11 +204,11 @@ class VectorMatchingResults(BaseSignal):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = self.map(peaks_from_best_vector_match,
-                               library=library,
-                               inplace=False)
+        match_peaks = self.map(
+            peaks_from_best_vector_match, library=library, inplace=False
+        )
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
-            m = hs.markers.point(x=mx, y=my, color='red', marker='x')
+            m = hs.markers.point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=permanent_markers)

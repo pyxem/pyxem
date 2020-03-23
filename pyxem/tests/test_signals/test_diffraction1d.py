@@ -23,25 +23,23 @@ from pyxem.signals.diffraction1d import Diffraction1D, LazyDiffraction1D
 
 
 class TestComputeAndAsLazy1D:
-
     def test_2d_data_compute(self):
         dask_array = da.random.random((100, 150), chunks=(50, 50))
         s = LazyDiffraction1D(dask_array)
-        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        scale0, scale1, metadata_string = 0.5, 1.5, "test"
         s.axes_manager[0].scale = scale0
         s.axes_manager[1].scale = scale1
         s.metadata.Test = metadata_string
         s.compute()
         assert isinstance(s, Diffraction1D)
-        assert not hasattr(s.data, 'compute')
+        assert not hasattr(s.data, "compute")
         assert s.axes_manager[0].scale == scale0
         assert s.axes_manager[1].scale == scale1
         assert s.metadata.Test == metadata_string
         assert dask_array.shape == s.data.shape
 
     def test_3d_data_compute(self):
-        dask_array = da.random.random((4, 10, 15),
-                                      chunks=(1, 10, 15))
+        dask_array = da.random.random((4, 10, 15), chunks=(1, 10, 15))
         s = LazyDiffraction1D(dask_array)
         s.compute()
         assert isinstance(s, Diffraction1D)
@@ -50,13 +48,13 @@ class TestComputeAndAsLazy1D:
     def test_2d_data_as_lazy(self):
         data = np.random.random((100, 150))
         s = Diffraction1D(data)
-        scale0, scale1, metadata_string = 0.5, 1.5, 'test'
+        scale0, scale1, metadata_string = 0.5, 1.5, "test"
         s.axes_manager[0].scale = scale0
         s.axes_manager[1].scale = scale1
         s.metadata.Test = metadata_string
         s_lazy = s.as_lazy()
         assert isinstance(s_lazy, LazyDiffraction1D)
-        assert hasattr(s_lazy.data, 'compute')
+        assert hasattr(s_lazy.data, "compute")
         assert s_lazy.axes_manager[0].scale == scale0
         assert s_lazy.axes_manager[1].scale == scale1
         assert s_lazy.metadata.Test == metadata_string

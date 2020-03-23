@@ -31,7 +31,6 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
 
-
 def _get_intensities(z, vectors, radius=1):
     """Basic intensity integration routine, takes the maximum value at the
     given vector positions with the number of pixels given by `radius`.
@@ -61,7 +60,7 @@ def _get_intensities(z, vectors, radius=1):
     return np.array(intensities)
 
 
-def _take_ragged(z, indices, _axis=None, out=None, mode='raise'):
+def _take_ragged(z, indices, _axis=None, out=None, mode="raise"):
     """Like `np.take` for ragged arrays, see `np.take` for documentation."""
     return np.take(z[0], indices, axis=_axis, out=out, mode=mode)
 
@@ -76,14 +75,16 @@ def _get_largest_connected_region(segmentation):
     return (labels == largest).astype(int)
 
 
-def _get_intensities_summation_method(z,
-                                      vectors,
-                                      box_inner: int = 7,
-                                      box_outer: int = 10,
-                                      n_min: int = 5,
-                                      n_max: int = None,
-                                      snr_thresh=3.0,
-                                      verbose: bool = False):
+def _get_intensities_summation_method(
+    z,
+    vectors,
+    box_inner: int = 7,
+    box_outer: int = 10,
+    n_min: int = 5,
+    n_max: int = None,
+    snr_thresh=3.0,
+    verbose: bool = False,
+):
     """Integrate reflections using the summation method. Two boxes are defined,
     the inner box is used to define the integration area. The outer box is used
     to calculate the average signal-to-noise ratio (SNR).
@@ -129,13 +130,16 @@ def _get_intensities_summation_method(z,
     peaks = []
 
     for i, j in vectors:
-        box = z[j - box_inner:j + box_inner, i - box_inner:i + box_inner].copy()
+        box = z[j - box_inner : j + box_inner, i - box_inner : i + box_inner].copy()
 
-        bkg = np.hstack([
-            z[j - box_outer:j + box_outer, i - box_outer:i - box_inner].ravel(),
-            z[j - box_outer:j + box_outer, i + box_inner:i + box_outer].ravel(),
-            z[j - box_outer:j - box_inner, i - box_inner:i + box_inner].ravel(),
-            z[j + box_inner:j + box_outer, i - box_inner:i + box_inner].ravel()])
+        bkg = np.hstack(
+            [
+                z[j - box_outer : j + box_outer, i - box_outer : i - box_inner].ravel(),
+                z[j - box_outer : j + box_outer, i + box_inner : i + box_outer].ravel(),
+                z[j - box_outer : j - box_inner, i - box_inner : i + box_inner].ravel(),
+                z[j + box_inner : j + box_outer, i - box_inner : i + box_inner].ravel(),
+            ]
+        )
 
         bkg_mean = bkg.mean()
         bkg_std = bkg.std()
@@ -159,14 +163,17 @@ def _get_intensities_summation_method(z,
         Y = j + dY
 
         if verbose:  # pragma: no cover
-            print(f"\nMean(I): {bkg_mean:.2f} | Std(I): {bkg_std:.2f} | n_pix: {n_pix} \n"
-                  f"I: {inty:.2f} | Sigma(I): {sigma:.2f} | SNR(I): {snr:.2f} | I/pix: {inty/n_pix:.2f} \n"
-                  f"i: {i:.2f} | j: {j:.2f} | dX: {dX:.2f} | dY: {dY:.2f} | X: {X:.2f} | Y: {Y:.2f} ")
+            print(
+                f"\nMean(I): {bkg_mean:.2f} | Std(I): {bkg_std:.2f} | n_pix: {n_pix} \n"
+                f"I: {inty:.2f} | Sigma(I): {sigma:.2f} | SNR(I): {snr:.2f} | I/pix: {inty/n_pix:.2f} \n"
+                f"i: {i:.2f} | j: {j:.2f} | dX: {dX:.2f} | dY: {dY:.2f} | X: {X:.2f} | Y: {Y:.2f} "
+            )
             # for debugging purposes
             import matploltib.pyplot as plt
+
             plt.imshow(signal)
             plt.plot(dY + box_inner, dX + box_inner, "r+")  # center_of_mass
-            plt.plot(box_inner, box_inner, "g+")        # input
+            plt.plot(box_inner, box_inner, "g+")  # input
             plt.show()
 
         if n_pix > n_max:  # pragma: no cover
@@ -182,7 +189,7 @@ def _get_intensities_summation_method(z,
     return np.array(peaks)
 
 
-class IntegrationGenerator():
+class IntegrationGenerator:
     """Integrates reflections at the given vector positions.
 
     Parameters
@@ -205,10 +212,9 @@ class IntegrationGenerator():
         self.calibration = [sig_ax[0].scale, sig_ax[1].scale]
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
-        self.vector_pixels = _get_pixel_vectors(dp,
-                                                vectors,
-                                                calibration=self.calibration,
-                                                center=self.center)
+        self.vector_pixels = _get_pixel_vectors(
+            dp, vectors, calibration=self.calibration, center=self.center
+        )
 
     def extract_intensities(self, radius: int = 1):
         """Basic intensity integration routine, takes the maximum value at the
@@ -224,22 +230,23 @@ class IntegrationGenerator():
         intensities : :obj:`hyperspy.signals.BaseSignal`
             List of extracted intensities
         """
-        intensities = self.dp.map(_get_intensities,
-                                  vectors=self.vector_pixels,
-                                  radius=radius,
-                                  inplace=False)
+        intensities = self.dp.map(
+            _get_intensities, vectors=self.vector_pixels, radius=radius, inplace=False
+        )
 
         intensities = BaseSignal(intensities)
         intensities.axes_manager.set_signal_dimension(0)
 
         return intensities
 
-    def extract_intensities_summation_method(self,
-                                             box_inner: int = 7,
-                                             box_outer: int = 10,
-                                             n_min: int = 5,
-                                             n_max: int = 1000,
-                                             snr_thresh: float = 3.0):
+    def extract_intensities_summation_method(
+        self,
+        box_inner: int = 7,
+        box_outer: int = 10,
+        n_min: int = 5,
+        n_max: int = 1000,
+        snr_thresh: float = 3.0,
+    ):
         """Integrate reflections using the summation method. Two boxes are defined,
         the inner box is used to define the integration area. The outer box is used
         to calculate the average signal-to-noise ratio (SNR).
@@ -276,23 +283,29 @@ class IntegrationGenerator():
         Implementation based on Barty et al, J. Appl. Cryst. (2014). 47, 1118-1131
                                 Lesli, Acta Cryst. (2006). D62, 48-57
         """
-        result = self.dp.map(_get_intensities_summation_method,
-                             vectors=self.vector_pixels,
-                             box_inner=box_inner,
-                             box_outer=box_outer,
-                             n_min=n_min,
-                             n_max=n_max,
-                             snr_thresh=snr_thresh,
-                             inplace=False,
-                             ragged=True)
+        result = self.dp.map(
+            _get_intensities_summation_method,
+            vectors=self.vector_pixels,
+            box_inner=box_inner,
+            box_outer=box_outer,
+            n_min=n_min,
+            n_max=n_max,
+            snr_thresh=snr_thresh,
+            inplace=False,
+            ragged=True,
+        )
 
-        peaks = result.map(_take_ragged, indices=[0, 1], _axis=1, inplace=False, ragged=True)
-        intensities = result.map(_take_ragged, indices=2, _axis=1, inplace=False, ragged=True)
+        peaks = result.map(
+            _take_ragged, indices=[0, 1], _axis=1, inplace=False, ragged=True
+        )
+        intensities = result.map(
+            _take_ragged, indices=2, _axis=1, inplace=False, ragged=True
+        )
         sigma = result.map(_take_ragged, indices=3, _axis=1, inplace=False, ragged=True)
 
-        vectors = DiffractionVectors.from_peaks(peaks,
-                                                calibration=self.calibration,
-                                                center=self.center)
+        vectors = DiffractionVectors.from_peaks(
+            peaks, calibration=self.calibration, center=self.center
+        )
         vectors.intensities = intensities
         vectors.sigma = sigma
         vectors.snr = intensities / sigma

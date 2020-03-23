@@ -52,18 +52,19 @@ def load_mtex_map(filename):
         Crystallographic map loaded from the specified file.
 
     """
-    load_array = np.loadtxt(filename, delimiter='\t')
+    load_array = np.loadtxt(filename, delimiter="\t")
     # Add one for zero indexing
     x_max = np.max(load_array[:, 5]).astype(int) + 1
     y_max = np.max(load_array[:, 6]).astype(int) + 1
-    crystal_data = np.empty((y_max, x_max, 3), dtype='object')
+    crystal_data = np.empty((y_max, x_max, 3), dtype="object")
     for y in range(y_max):
         for x in range(x_max):
             load_index = y * x_max + x
             crystal_data[y, x] = [
                 load_array[load_index, 0],
                 load_array[load_index, 1:4],
-                {'correlation': load_array[load_index, 4]}]
+                {"correlation": load_array[load_index, 4]},
+            ]
     return CrystallographicMap(crystal_data)
 
 
@@ -82,7 +83,11 @@ def _euler2axangle_signal(euler):
 
     """
     euler = euler[0]  # TODO: euler is a 1-element ndarray(dtype=object) with a tuple
-    return np.rad2deg(euler2axangle(np.deg2rad(euler[0]), np.deg2rad(euler[1]), np.deg2rad(euler[2]))[1])
+    return np.rad2deg(
+        euler2axangle(np.deg2rad(euler[0]), np.deg2rad(euler[1]), np.deg2rad(euler[2]))[
+            1
+        ]
+    )
 
 
 def _distance_from_fixed_angle(angle, fixed_angle):
@@ -107,11 +112,11 @@ def _distance_from_fixed_angle(angle, fixed_angle):
 
     """
     angle = angle[0]
-    q_data = euler2quat(*np.deg2rad(angle), axes='rzxz')
-    q_fixed = euler2quat(*np.deg2rad(fixed_angle), axes='rzxz')
-    if np.abs(2 * (np.dot(q_data, q_fixed))**2 - 1) < 1:  # arcos will work
+    q_data = euler2quat(*np.deg2rad(angle), axes="rzxz")
+    q_fixed = euler2quat(*np.deg2rad(fixed_angle), axes="rzxz")
+    if np.abs(2 * (np.dot(q_data, q_fixed)) ** 2 - 1) < 1:  # arcos will work
         # https://math.stackexchange.com/questions/90081/quaternion-distance
-        theta = np.arccos(2 * (np.dot(q_data, q_fixed))**2 - 1)
+        theta = np.arccos(2 * (np.dot(q_data, q_fixed)) ** 2 - 1)
     else:  # slower, but also good
         q_from_mode = qmult(qinverse(q_fixed), q_data)
         axis, theta = quat2axangle(q_from_mode)
@@ -166,6 +171,7 @@ class CrystallographicMap(BaseSignal):
         Method used to obtain crystallographic mapping results, may be
         'template_matching' or 'vector_matching'.
     """
+
     _signal_dimension = 1
     _signal_type = "crystallographic_map"
 
@@ -200,7 +206,7 @@ class CrystallographicMap(BaseSignal):
         orientation_map = transfer_navigation_axes_to_signal_axes(orientation_map, self)
         # Since vector matching results returns in object form, eulers inherits
         # it.
-        orientation_map.change_dtype('float')
+        orientation_map.change_dtype("float")
 
         return orientation_map
 
@@ -235,44 +241,52 @@ class CrystallographicMap(BaseSignal):
             100 * (1 - lowest_error/lowest_error_of_other_phase)
 
         """
-        if self.method == 'template_matching':
+        if self.method == "template_matching":
             template_metrics = [
-                'correlation',
-                'orientation_reliability',
-                'phase_reliability',
+                "correlation",
+                "orientation_reliability",
+                "phase_reliability",
             ]
             if metric in template_metrics:
-                metric_map = self.isig[2].map(
-                    _metric_from_dict,
-                    metric=metric,
-                    inplace=False).as_signal2D((0, 1))
+                metric_map = (
+                    self.isig[2]
+                    .map(_metric_from_dict, metric=metric, inplace=False)
+                    .as_signal2D((0, 1))
+                )
 
             else:
-                raise ValueError("The metric `{}` is not valid for template "
-                                 "matching results.".format(metric))
+                raise ValueError(
+                    "The metric `{}` is not valid for template "
+                    "matching results.".format(metric)
+                )
 
-        elif self.method == 'vector_matching':
+        elif self.method == "vector_matching":
             vector_metrics = [
-                'match_rate',
-                'ehkls',
-                'total_error',
-                'orientation_reliability',
-                'phase_reliability',
+                "match_rate",
+                "ehkls",
+                "total_error",
+                "orientation_reliability",
+                "phase_reliability",
             ]
             if metric in vector_metrics:
-                metric_map = self.isig[2].map(
-                    _metric_from_dict,
-                    metric=metric,
-                    inplace=False).as_signal2D((0, 1))
+                metric_map = (
+                    self.isig[2]
+                    .map(_metric_from_dict, metric=metric, inplace=False)
+                    .as_signal2D((0, 1))
+                )
 
             else:
-                raise ValueError("The metric `{}` is not valid for vector "
-                                 "matching results.".format(metric))
+                raise ValueError(
+                    "The metric `{}` is not valid for vector "
+                    "matching results.".format(metric)
+                )
 
         else:
-            raise ValueError("The crystallographic mapping method must be "
-                             "specified, as an attribute, as either "
-                             "template_matching or vector_matching.")
+            raise ValueError(
+                "The crystallographic mapping method must be "
+                "specified, as an attribute, as either "
+                "template_matching or vector_matching."
+            )
 
         metric_map = transfer_navigation_axes_to_signal_axes(metric_map, self)
 
@@ -312,8 +326,9 @@ class CrystallographicMap(BaseSignal):
             method: save_mtex_map
         """
         modal_angle = self.get_modal_angles()[0]
-        return self.isig[1].map(_distance_from_fixed_angle,
-                                fixed_angle=modal_angle, inplace=False)
+        return self.isig[1].map(
+            _distance_from_fixed_angle, fixed_angle=modal_angle, inplace=False
+        )
 
     def save_mtex_map(self, filename):
         """Save map in a format such that it can be imported into MTEX
@@ -336,9 +351,13 @@ class CrystallographicMap(BaseSignal):
         results_array = np.zeros((x_size_nav * y_size_nav, 7))
         results_array[:, 0] = self.isig[0].data.ravel()
         results_array[:, 1:4] = np.array(self.isig[1].data.tolist()).reshape(-1, 3)
-        score_metric = 'correlation' if self.method == 'template_matching' else 'match_rate'
+        score_metric = (
+            "correlation" if self.method == "template_matching" else "match_rate"
+        )
         results_array[:, 4] = self.get_metric_map(score_metric).data.ravel()
         x_indices = np.arange(x_size_nav)
         y_indices = np.arange(y_size_nav)
-        results_array[:, 5:7] = np.array(np.meshgrid(x_indices, y_indices)).T.reshape(-1, 2)
+        results_array[:, 5:7] = np.array(np.meshgrid(x_indices, y_indices)).T.reshape(
+            -1, 2
+        )
         np.savetxt(filename, results_array, delimiter="\t", newline="\r\n")

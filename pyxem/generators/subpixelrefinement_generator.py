@@ -56,7 +56,7 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     return shifts
 
 
-class SubpixelrefinementGenerator():
+class SubpixelrefinementGenerator:
     """Generates subpixel refinement of DiffractionVectors.
 
     Parameters
@@ -84,10 +84,9 @@ class SubpixelrefinementGenerator():
         self.calibration = [sig_ax[0].scale, sig_ax[1].scale]
         self.center = [sig_ax[0].size / 2, sig_ax[1].size / 2]
 
-        self.vector_pixels = _get_pixel_vectors(dp,
-                                                vectors,
-                                                calibration=self.calibration,
-                                                center=self.center)
+        self.vector_pixels = _get_pixel_vectors(
+            dp, vectors, calibration=self.calibration, center=self.center
+        )
 
     def conventional_xc(self, square_size, disc_radius, upsample_factor):
         """Refines the peaks using (phase) cross correlation.
@@ -109,22 +108,27 @@ class SubpixelrefinementGenerator():
             units with the same navigation shape as the diffraction patterns.
 
         """
-        def _conventional_xc_map(dp, vectors, sim_disc, upsample_factor, center, calibration):
+
+        def _conventional_xc_map(
+            dp, vectors, sim_disc, upsample_factor, center, calibration
+        ):
             shifts = np.zeros_like(vectors, dtype=np.float64)
             for i, vector in enumerate(vectors):
                 expt_disc = get_experimental_square(dp, vector, square_size)
                 shifts[i] = _conventional_xc(expt_disc, sim_disc, upsample_factor)
-            return (((vectors + shifts) - center) * calibration)
+            return ((vectors + shifts) - center) * calibration
 
         sim_disc = get_simulated_disc(square_size, disc_radius)
-        self.vectors_out = self.dp.map(_conventional_xc_map,
-                                       vectors=self.vector_pixels,
-                                       sim_disc=sim_disc,
-                                       upsample_factor=upsample_factor,
-                                       center=self.center,
-                                       calibration=self.calibration,
-                                       inplace=False)
-        self.vectors_out.set_signal_type('diffraction_vectors')
+        self.vectors_out = self.dp.map(
+            _conventional_xc_map,
+            vectors=self.vector_pixels,
+            sim_disc=sim_disc,
+            upsample_factor=upsample_factor,
+            center=self.center,
+            calibration=self.calibration,
+            inplace=False,
+        )
+        self.vectors_out.set_signal_type("diffraction_vectors")
 
         self.last_method = "conventional_xc"
         return self.vectors_out
@@ -150,21 +154,24 @@ class SubpixelrefinementGenerator():
             units with the same navigation shape as the diffraction patterns.
 
         """
+
         def _reference_xc_map(dp, vectors, upsample_factor, center, calibration):
             shifts = np.zeros_like(vectors, dtype=np.float64)
             for i, vector in enumerate(vectors):
                 ref_disc = get_experimental_square(reference_dp, vector, square_size)
                 expt_disc = get_experimental_square(dp, vector, square_size)
                 shifts[i] = _conventional_xc(expt_disc, ref_disc, upsample_factor)
-            return (((vectors + shifts) - center) * calibration)
+            return ((vectors + shifts) - center) * calibration
 
-        self.vectors_out = self.dp.map(_reference_xc_map,
-                                       vectors=self.vector_pixels,
-                                       upsample_factor=upsample_factor,
-                                       center=self.center,
-                                       calibration=self.calibration,
-                                       inplace=False)
-        self.vectors_out.set_signal_type('diffraction_vectors')
+        self.vectors_out = self.dp.map(
+            _reference_xc_map,
+            vectors=self.vector_pixels,
+            upsample_factor=upsample_factor,
+            center=self.center,
+            calibration=self.calibration,
+            inplace=False,
+        )
+        self.vectors_out.set_signal_type("diffraction_vectors")
 
         self.last_method = "reference_xc"
         return self.vectors_out
@@ -230,7 +237,9 @@ class SubpixelrefinementGenerator():
                 z, but with row and column zero set to 0
             """
             # Copy to make sure we don't change the dp
-            z_adpt = np.copy(get_experimental_square(z, vector=vector, square_size=square_size))
+            z_adpt = np.copy(
+                get_experimental_square(z, vector=vector, square_size=square_size)
+            )
             z_adpt[:, 0] = 0
             z_adpt[0, :] = 0
             return z_adpt
@@ -242,13 +251,15 @@ class SubpixelrefinementGenerator():
                 shifts[i] = [a - square_size / 2 for a in _center_of_mass_hs(expt_disc)]
             return ((vectors + shifts) - center) * calibration
 
-        self.vectors_out = self.dp.map(_center_of_mass_map,
-                                       vectors=self.vector_pixels,
-                                       square_size=square_size,
-                                       center=self.center,
-                                       calibration=self.calibration,
-                                       inplace=False)
-        self.vectors_out.set_signal_type('diffraction_vectors')
+        self.vectors_out = self.dp.map(
+            _center_of_mass_map,
+            vectors=self.vector_pixels,
+            square_size=square_size,
+            center=self.center,
+            calibration=self.calibration,
+            inplace=False,
+        )
+        self.vectors_out.set_signal_type("diffraction_vectors")
 
         self.last_method = "center_of_mass_method"
         return self.vectors_out
@@ -293,7 +304,7 @@ class SubpixelrefinementGenerator():
                 Containing subpixel resolved values for the center
             """
             si = np.unravel_index(np.argmax(z), z.shape)
-            z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
+            z_ref = z[si[0] - 1 : si[0] + 2, si[1] - 1 : si[1] + 2]
             if z_ref.shape != (3, 3):
                 return (si[1] - z.shape[1] // 2, si[0] - z.shape[0] // 2)
             M = z_ref[1, 1]
@@ -309,20 +320,22 @@ class SubpixelrefinementGenerator():
                 expt_disc = get_experimental_square(dp, vector, square_size)
                 shifts[i] = _new_lg_idea(expt_disc)
 
-            return (((vectors + shifts) - center) * calibration)
+            return ((vectors + shifts) - center) * calibration
 
-        self.vectors_out = self.dp.map(_lg_map,
-                                       vectors=self.vector_pixels,
-                                       square_size=square_size,
-                                       center=self.center,
-                                       calibration=self.calibration,
-                                       inplace=False)
-        self.vectors_out.set_signal_type('diffraction_vectors')
+        self.vectors_out = self.dp.map(
+            _lg_map,
+            vectors=self.vector_pixels,
+            square_size=square_size,
+            center=self.center,
+            calibration=self.calibration,
+            inplace=False,
+        )
+        self.vectors_out.set_signal_type("diffraction_vectors")
 
         # check for unrefined peaks
         def check_bad_square(z):
             si = np.unravel_index(np.argmax(z), z.shape)
-            z_ref = z[si[0] - 1:si[0] + 2, si[1] - 1:si[1] + 2]
+            z_ref = z[si[0] - 1 : si[0] + 2, si[1] - 1 : si[1] + 2]
             if z_ref.shape == (3, 3):
                 return False
             else:
@@ -337,14 +350,18 @@ class SubpixelrefinementGenerator():
                     return True
             return False
 
-        bad_squares = self.dp.map(_check_bad_square_map,
-                                  vectors=self.vector_pixels,
-                                  square_size=square_size,
-                                  inplace=False)
+        bad_squares = self.dp.map(
+            _check_bad_square_map,
+            vectors=self.vector_pixels,
+            square_size=square_size,
+            inplace=False,
+        )
 
         if np.any(bad_squares):
-            warnings.warn("You have a peak in your pattern that lies on the edge of the square. \
-                          Consider increasing the square size")
+            warnings.warn(
+                "You have a peak in your pattern that lies on the edge of the square. \
+                          Consider increasing the square size"
+            )
 
         self.last_method = "lg_method"
         return self.vectors_out
