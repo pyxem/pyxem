@@ -339,5 +339,8 @@ class TestDiffractingPixelMaps:
     def test_get_dpm_map(self, diffraction_vectors_map):
         diffraction_vectors_map.get_diffracting_pixels_map()
 
+    def test_get_dpm_map_in_range(self, diffraction_vectors_map):
+        diffraction_vectors_map.get_diffracting_pixels_map(in_range=(0, 0.5))
+
     def test_get_dpm_map_binary(self, diffraction_vectors_map):
         diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
