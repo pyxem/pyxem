@@ -335,12 +335,22 @@ class TestFilterVectors:
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
 
-class TestDiffractingPixelMaps:
-    def test_get_dpm_map(self, diffraction_vectors_map):
-        diffraction_vectors_map.get_diffracting_pixels_map()
+class TestDiffractingPixelsMaps:
 
-    def test_get_dpm_map_in_range(self, diffraction_vectors_map):
-        diffraction_vectors_map.get_diffracting_pixels_map(in_range=(0, 0.5))
+    def test_get_dpm_values(self, diffraction_vectors_map):
+        answer = np.array([[ 7., 13.],
+                           [11.,  1.]])
+        xim = diffraction_vectors_map.get_diffracting_pixels_map()
+        assert np.allclose(xim, answer)
 
-    def test_get_dpm_map_binary(self, diffraction_vectors_map):
-        diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
+    def test_get_dpm_in_range(self, diffraction_vectors_map):
+        answer = np.array([[0., 3.],
+                           [1., 1.]])
+        xim = diffraction_vectors_map.get_diffracting_pixels_map(in_range=(0, 0.1))
+        assert np.allclose(xim, answer)
+
+    def test_get_dpm_binary(self, diffraction_vectors_map):
+        answer = np.array([[1., 1.],
+                           [1.,  1.]])
+        xim = diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
+        assert np.allclose(xim, answer)

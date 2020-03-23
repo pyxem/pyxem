@@ -593,16 +593,19 @@ class DiffractionVectors(BaseSignal):
         """
         if in_range:
             filtered = self.filter_magnitude(in_range[0], in_range[1])
-            crystim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
         else:
-            crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+            xim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
         # Make binary if specified
         if binary is True:
-            crystim = crystim == 1.0
-        # Set calibration to same as signal
-        crystim = transfer_navigation_axes_to_signal_axes(crystim, self)
+            xim = xim >= 1.0
+        # Set properties
+        xim = transfer_navigation_axes_to_signal_axes(xim, self)
+        xim.change_dtype('float')
+        xim.set_signal_type("signal2d")
+        xim.metadata.General.title = "Diffracting Pixels Map"
 
-        return crystim
+        return xim
 
     def calculate_cartesian_coordinates(
         self, accelerating_voltage, camera_length, *args, **kwargs
