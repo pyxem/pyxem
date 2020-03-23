@@ -38,6 +38,7 @@ from scipy.ndimage import gaussian_filter
 #     pattern[i, j] = 1
 #     return pattern
 
+
 @pytest.mark.parametrize("radius, offset", [[1, 0], [2, 1], [3, 2]])
 # @pytest.mark.parametrize("offset", [0, 1, 2])
 def test_integration_generator(radius, offset):

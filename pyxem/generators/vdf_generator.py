@@ -79,8 +79,7 @@ class VDFGenerator:
             vdfs = []
             for v in self.vectors.data:
                 disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
-                vdf = disk(self.signal,
-                           axes=self.signal.axes_manager.signal_axes)
+                vdf = disk(self.signal, axes=self.signal.axes_manager.signal_axes)
                 vdfs.append(vdf.sum((2, 3)).as_signal2D((0, 1)).data)
 
             vdfim = VDFImage(np.asarray(vdfs))
@@ -89,8 +88,10 @@ class VDFGenerator:
                 vdfim.map(normalize_vdf)
 
         else:
-            raise ValueError("DiffractionVectors non-specified by user. Please "
-                             "initialize VDFGenerator with some vectors. ")
+            raise ValueError(
+                "DiffractionVectors non-specified by user. Please "
+                "initialize VDFGenerator with some vectors. "
+            )
 
         # Set calibration to same as signal
         vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
@@ -135,8 +136,7 @@ class VDFGenerator:
         vdfs = []
         for k in ks:
             annulus = roi.CircleROI(cx=0, cy=0, r=k[1], r_inner=k[0])
-            vdf = annulus(self.signal,
-                          axes=self.signal.axes_manager.signal_axes)
+            vdf = annulus(self.signal, axes=self.signal.axes_manager.signal_axes)
             vdfs.append(vdf.sum((2, 3)).as_signal2D((0, 1)).data)
 
         vdfim = VDFImage(np.asarray(vdfs))

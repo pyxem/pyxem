@@ -56,13 +56,12 @@ class DiffractionVariance2D(Signal2D):
             radial_profiles = self
 
         # Assign to the correct class after the signal dimension was reduced
-        radial_profiles.set_signal_type(
-            radial_profiles.metadata.Signal.signal_type)
+        radial_profiles.set_signal_type(radial_profiles.metadata.Signal.signal_type)
 
         signal_axis = radial_profiles.axes_manager.signal_axes[0]
         signal_axis.offset = 0
-        signal_axis.name = 'q'
-        signal_axis.units = '$Å^{-1}$'
+        signal_axis.name = "q"
+        signal_axis.units = "$Å^{-1}$"
 
         if not inplace:
             return radial_profiles
