@@ -199,7 +199,7 @@ def load_mib(mib_filename, reshape=True):
     return data_pxm
 
 
-def load_1D_template_matching_results(filename):
+def load_template_matching_results(filename):
     """
     Reads a .npy file and returns a TemplateMatchingResults object.
 
@@ -214,24 +214,40 @@ def load_1D_template_matching_results(filename):
         A TemplateMatchingResults object containing the loaded data
     """
     try:
-        loaded_numpy_array =  np.load(filename)
+        loaded_numpy_array = np.load(filename)
     except ValueError:
         raise ValueError('Could not open file: {}'.format(filename))
 
-    ax_1, ax_2, ax_3 = loaded_numpy_array.shape
-    match_results_data = np.zeros((ax_1, ax_2, ax_3-2), dtype = object)
-    for i in range(ax_1):
-        for j in range(ax_2):
-            match_results_data[i, j, 0] = int(loaded_numpy_array[i, j, 0])
-            match_results_data[i, j, -1] = loaded_numpy_array[i, j, -1]
-            my_array = np.asarray([loaded_numpy_array[i, j, 1],
-                                   loaded_numpy_array[i, j, 2],
-                                   loaded_numpy_array[i, j, 3]])
-            match_results_data[i, j, 1] = my_array
+    dimensions = loaded_numpy_array.shape
+    if len(dimensions) == 3:
+        match_results_data = np.zeros((dimensions[0], dimensions[1], dimensions[2] - 2), dtype = object)
+        for i in range(dimensions[0]):
+            for j in range(dimensions[1]):
+                match_results_data[i, j, 0] = int(loaded_numpy_array[i, j, 0])
+                match_results_data[i, j, -1] = loaded_numpy_array[i, j, -1]
+                my_array = np.asarray([loaded_numpy_array[i, j, 1],
+                                       loaded_numpy_array[i, j, 2],
+                                       loaded_numpy_array[i, j, 3]])
+                match_results_data[i, j, 1] = my_array
 
-    match_results = TemplateMatchingResults(match_results_data)
+        return TemplateMatchingResults(match_results_data)
 
-    return match_results
+    elif len(dimensions) == 4:
+        match_results_data = np.zeros((dimensions[0], dimensions[1], dimensions[2], dimensions[3] - 2), dtype = object)
+        for i in range(dimensions[0]):
+            for j in range(dimensions[1]):
+                for k in range(dimensions[2]):
+                    match_results_data[i, j, k, 0] = int(loaded_numpy_array[i, j, k, 0])
+                    match_results_data[i, j, k, -1] = loaded_numpy_array[i, j, k, -1]
+                    my_array = np.asarray([loaded_numpy_array[i, j, k, 1],
+                                           loaded_numpy_array[i, j, k, 2],
+                                           loaded_numpy_array[i, j, k, 3]])
+                    match_results_data[i, j, k, 1] = my_array
+
+        return TemplateMatchingResults(match_results_data)
+
+    else:
+        raise ValueError('Could not load file of dimensions {}'.format(dimensions))
 
 
 def _manageHeader(fname):
