@@ -1,6 +1,7 @@
 import numpy as np
 
-def _correlation(z, axis=1, mask=None, wrap=True, normalize=True, ):
+
+def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     """A generic function for applying a correlation with a mask.
 
      Takes a nd image and then preforms a auto-correlation on some axis.
@@ -10,6 +11,8 @@ def _correlation(z, axis=1, mask=None, wrap=True, normalize=True, ):
     ----------
     z: np.array
         A nd numpy array
+    axis: int
+        The axis to apply the correlation to
     mask: np.array
         A boolean array of the same size as z
     wrap: bool
@@ -19,7 +22,7 @@ def _correlation(z, axis=1, mask=None, wrap=True, normalize=True, ):
         Subtract <I(\theta)>^2 and divide by <I(\theta)>^2
     """
     m = mask
-    if wrap:
+    if wrap is False:
         z_shape = np.shape(z)
         padder = [(0,0)]*len(z_shape)
         pad = z_shape[axis]//2  #  This will be faster if the length of the axis
@@ -54,24 +57,70 @@ def _correlation(z, axis=1, mask=None, wrap=True, normalize=True, ):
         row_mean[row_mean == 0] = 1
         np.expand_dims(row_mean, axis=axis)
         a = np.divide(np.subtract(a, row_mean), row_mean)
-    if wrap:
+    if wrap is False:
         a = a[slicer]
     return a
 
+def _power(z, axis=0, mask=None, wrap=True, normalize=True):
+    """The power spectrum of the correlation.
 
-def angular_correlation(z, mask=None, normalize=True, radial_bin=1, angular_bin=1):
+    This method is a little more complex if mask is not None due to
+    the extra calculations necessary to ignore some of the pixels
+    during the calculations.
+
+    Parameters
+    ----------------
+    z: np.array
+        Some n-d array to get the power spectrum from.
+    axis: int
+        The axis to preform the operation on.
+    mask: np.array
+        A boolean mask to be applied.
+    wrap: bool
+        Choose if the function should wrap.  In most cases this will be True
+        when calculating the power of some function
+    normalize: bool
+        Choose to normalize the function by the mean.
+
+    Returns
+    -----------------
+    power: np.array
+        The power spectrum along some axis
+    """
+    if mask is None:  # This might not normalize things as well
+        I_fft = np.fft.fft(z, axis=axis)
+        return I_fft * np.conjugate(I_fft)
+    return np.power(np.fft.fft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)),2)
+
+
+def angular_correlation(z, mask=None, normalize=True):
     """ Performs some radial correlation on some image z. Assumes that
     the angular direction is axis=1 for z.
 
     Parameters
     -----------
     z: np.array
-        The image
-    :param z:
-    :param mask:
-    :param normalize:
-    :param radial_bin:
-    :param angular_bin:
-    :return:
+        A nd numpy array
+    mask: np.array
+        A boolean array of the same size as z
+    normalize: bool
+        Subtract <I(\theta)>^2 and divide by <I(\theta)>^2
     """
-    pass
+    return _correlation(z, axis=1, mask=mask, normalize=normalize, wrap=True)
+
+
+def angular_power(z, mask=None, normalize=True):
+    """ Returns the power of the angular correlation on some image z. Assumes that
+    the angular direction is axis=1 for z.
+
+    Parameters
+    -----------
+    z: np.array
+        A nd numpy array
+    mask: np.array
+        A boolean array of the same size as z
+    normalize: bool
+        Subtract <I(\theta)>^2 and divide by <I(\theta)>^2
+    """
+    return _power(z,axis=1, mask=mask, normalize=normalize, wrap=True)
+
