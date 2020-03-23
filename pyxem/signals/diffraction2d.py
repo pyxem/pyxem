@@ -66,7 +66,6 @@ from skimage.morphology import square
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
-
 class Diffraction2D(Signal2D, CommonDiffraction):
     _signal_type = "diffraction"
 

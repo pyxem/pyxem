@@ -85,31 +85,30 @@ class TestDecomposition:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    @pytest.mark.parametrize('stack', [True, False])
-    def test_plot_interactive_virtual_image(self, stack,
-                                            electron_diffraction1d):
+    @pytest.mark.parametrize("stack", [True, False])
+    def test_plot_integrated_intensity(self, stack, electron_diffraction1d):
         if stack:
             electron_diffraction1d = hs.stack([electron_diffraction1d] * 3)
-        roi = hs.roi.SpanROI(left=1., right=2.)
-        electron_diffraction1d.plot_interactive_virtual_image(roi)
+        roi = hs.roi.SpanROI(left=1.0, right=2.0)
+        electron_diffraction1d.plot_integrated_intensity(roi)
 
-    def test_get_virtual_image(self, electron_diffraction1d):
-        roi = hs.roi.SpanROI(left=1., right=2.)
-        vi = electron_diffraction1d.get_virtual_image(roi)
+    def test_get_integrated_intensity(self, electron_diffraction1d):
+        roi = hs.roi.SpanROI(left=1.0, right=2.0)
+        vi = electron_diffraction1d.get_integrated_intensity(roi)
         assert vi.data.shape == (2, 2)
         assert vi.axes_manager.signal_dimension == 2
         assert vi.axes_manager.navigation_dimension == 0
 
-    @pytest.mark.parametrize('out_signal_axes',
-                             [None, (0, 1), (1, 2), ('x', 'y')])
-    def test_get_virtual_image_stack(self, electron_diffraction1d,
-                                     out_signal_axes):
+    @pytest.mark.parametrize("out_signal_axes", [None, (0, 1), (1, 2), ("x", "y")])
+    def test_get_integrated_intensity_stack(
+        self, electron_diffraction1d, out_signal_axes
+    ):
         s = hs.stack([electron_diffraction1d] * 3)
-        s.axes_manager.navigation_axes[0].name = 'x'
-        s.axes_manager.navigation_axes[1].name = 'y'
+        s.axes_manager.navigation_axes[0].name = "x"
+        s.axes_manager.navigation_axes[1].name = "y"
 
-        roi = hs.roi.SpanROI(left=1., right=2.)
-        vi = s.get_virtual_image(roi, out_signal_axes)
+        roi = hs.roi.SpanROI(left=1.0, right=2.0)
+        vi = s.get_integrated_intensity(roi, out_signal_axes)
         assert vi.axes_manager.signal_dimension == 2
         assert vi.axes_manager.navigation_dimension == 1
         if out_signal_axes == (1, 2):
@@ -120,4 +119,3 @@ class TestVirtualImaging:
             assert vi.data.shape == (3, 2, 2)
             assert vi.axes_manager.navigation_size == 3
             assert vi.axes_manager.signal_shape == (2, 2)
-
