@@ -50,5 +50,10 @@ class PairDistributionFunction1D(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         index_min = int(s_min / s_scale)
 
-        return self.map(normalise_pdf_signal_to_max, index_min=index_min,
-                        inplace=inplace, *args, **kwargs)
+        return self.map(
+            normalise_pdf_signal_to_max,
+            index_min=index_min,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )

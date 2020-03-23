@@ -57,9 +57,10 @@ class Diffraction1D(Signal1D):
         # Add the ROI to the appropriate signal axes.
         roi.add_widget(self, axes=self.axes_manager.signal_axes)
         # Create an output signal for the virtual dark-field calculation.
-        dark_field = roi.interactive(self, navigation_signal='same')
-        dark_field_placeholder = \
-            BaseSignal(np.zeros(self.axes_manager.navigation_shape[::-1]))
+        dark_field = roi.interactive(self, navigation_signal="same")
+        dark_field_placeholder = BaseSignal(
+            np.zeros(self.axes_manager.navigation_shape[::-1])
+        )
         # Create an interactive signal
         dark_field_sum = interactive(
             # Formed from the sum of the pixels in the dark-field signal
@@ -72,8 +73,8 @@ class Diffraction1D(Signal1D):
         )
         # Set the parameters
         dark_field_sum.axes_manager.update_axes_attributes_from(
-            self.axes_manager.navigation_axes,
-            ['scale', 'offset', 'units', 'name'])
+            self.axes_manager.navigation_axes, ["scale", "offset", "units", "name"]
+        )
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
         # Plot the result
         dark_field_sum.plot()
@@ -104,9 +105,7 @@ class Diffraction1D(Signal1D):
         # Define ROI
         roi = SpanROI(left=left, right=right)
         dark_field = roi(self, axes=self.axes_manager.signal_axes)
-        dark_field_sum = dark_field.sum(
-            axis=dark_field.axes_manager.signal_axes
-        )
+        dark_field_sum = dark_field.sum(axis=dark_field.axes_manager.signal_axes)
         dark_field_sum.metadata.General.title = "Virtual Dark Field"
         vdfim = dark_field_sum.as_signal2D((0, 1))
 
