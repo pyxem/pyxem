@@ -109,3 +109,21 @@ src/
 
 # VScode project settings
 .vscode/
+
+# From pixStem, might need some pruning
+*.pyc
+*.hdf5
+*.png
+*.jpg
+*.dm3
+*.egg-info
+*.swp
+*.swo
+.cache
+*.jpg
+*.png
+*.hdf5
+*.hspy
+build/
+dist/
+.pytest_cache
