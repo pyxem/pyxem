@@ -51,9 +51,11 @@ from .signals.crystallographic_map import CrystallographicMap
 from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
 from .generators.pdf_generator1d import PDFGenerator1D
 from .generators.variance_generator import VarianceGenerator
+
 from .signals.diffraction_variance1d import DiffractionVariance1D
 from .signals.diffraction_variance2d import DiffractionVariance2D
-
+from .signals.differential_phase_contrast import (
+        DPCBaseSignal, DPCSignal1D, DPCSignal2D)
 from .signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
 from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
@@ -61,15 +63,14 @@ from .signals.pair_distribution_function1d import PairDistributionFunction1D
 from .signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.utils.io_utils import load_mib
+from pixstem.io_tools import load_ps_signal, load_dpc_signal
+import pixstem.io_tools as io_tools
 
 from pixstem.pixelated_stem_class import LazyPixelatedSTEM
 from pixstem.pixelated_stem_class import PixelatedSTEM
-from pixstem.pixelated_stem_class import (
-        DPCBaseSignal, DPCSignal1D, DPCSignal2D)
-from pixstem.io_tools import load_ps_signal, load_dpc_signal
+
 import pixstem.radial as radial
 import pixstem.dummy_data as dummy_data
-import pixstem.io_tools as io_tools
 
 from . import release_info
 
