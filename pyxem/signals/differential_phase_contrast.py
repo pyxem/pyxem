@@ -19,6 +19,8 @@
 import copy
 import numpy as np
 
+import pyxem.dpc_utils import make_bivariate_histogram
+
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 
@@ -93,12 +95,12 @@ class DPCSignal1D(Signal1D):
         """
         x_position = self.inav[0].data
         y_position = self.inav[1].data
-        s_hist = pst._make_bivariate_histogram(
-                x_position, y_position,
-                histogram_range=histogram_range,
-                masked=masked,
-                bins=bins,
-                spatial_std=spatial_std)
+        s_hist = make_bivariate_histogram(x_position, y_position,
+                                          histogram_range=histogram_range,
+                                          masked=masked,
+                                          bins=bins,
+                                          spatial_std=spatial_std)
+
         return s_hist
 
 
