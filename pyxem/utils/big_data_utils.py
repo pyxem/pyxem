@@ -41,8 +41,9 @@ def _load_and_cast(filepath, x, y, chunk_size):
     """ Loads a chunk of a larger diffraction pattern"""
     s = hs.load(filepath, lazy=True)
     s = s.inav[x : x + chunk_size, y : y + chunk_size]
-    s.compute()
-    return pxm.ElectronDiffraction2D(s)
+    s.compute(close_file=True)
+    s.set_signal_type('electron_diffraction')
+    return s
 
 
 def _factory(fp, x, y, chunk_size, function):
