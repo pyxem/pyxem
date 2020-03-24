@@ -1,4 +1,0 @@
-[flake8]
-exclude =
-    pixstem/api.py
-    pixstem/conftest.py
