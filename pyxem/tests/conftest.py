@@ -16,6 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+# Use agg backend to avoid displaying figure when running tests
+import matplotlib
+matplotlib.use('agg')
+
 import pytest
 import diffpy.structure
 import numpy as np
