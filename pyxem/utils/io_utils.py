@@ -321,7 +321,7 @@ def mib_to_h5stack(fp, save_path, mmap_mode='r'):
     return
 
 
-def h5stack_to_pxm(h5_path, mib_path):
+def h5stack_to_pxm(h5_path, mib_path, flip=True):
     """
     this function reads the saved stack h5 file into a reshaped pyxem.signals.LazyElectronDiffraction2D object
     chunks are defined as (100, det_x, det_y)
@@ -332,6 +332,9 @@ def h5stack_to_pxm(h5_path, mib_path):
         full path and name of the h5 stack file
     mib_path: str
         full path and name of the mib file
+    flip: boolean
+        Keyword argument to vertically flip the diffraction signal (default)
+        or return unchanged. The metadata is updated accordingly.
 
     Returns
     -------
@@ -386,6 +389,11 @@ def h5stack_to_pxm(h5_path, mib_path):
     except ValueError:
         print(
             'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+    if flip:
+        data_pxm.data = np.flip(data_pxm.data, axis=2)
+        data_pxm.metadata.Signal.flip = True
+    else:
+        data_pxm.metadata.Signal.flip = False
     return data_pxm
 
 
