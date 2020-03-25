@@ -298,7 +298,10 @@ class TestVirtualImaging:
         assert vi.axes_manager.signal_dimension == 3
         assert vi.axes_manager.navigation_dimension == 0
         assert vi.metadata.General.title == "Integrated intensity"
-        assert vi.metadata.Diffraction.intergrated_range == "CircleROI(cx=3, cy=3, r=5) of Stack of "
+        assert (
+            vi.metadata.Diffraction.intergrated_range
+            == "CircleROI(cx=3, cy=3, r=5) of Stack of "
+        )
 
     def test_get_integrated_intensity_error(
         self, diffraction_pattern, out_signal_axes=(0, 1, 2)

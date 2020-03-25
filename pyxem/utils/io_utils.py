@@ -74,14 +74,14 @@ def load_mib(mib_path, reshape=True, flip=True):
                     └── signal_type = TEM
     """
     hdr_stuff = _parse_hdr(mib_path)
-    width = hdr_stuff['width']
-    height = hdr_stuff['height']
+    width = hdr_stuff["width"]
+    height = hdr_stuff["height"]
     width_height = width * height
 
     data = _mib_to_daskarr(mib_path)
     depth = _get_mib_depth(hdr_stuff, mib_path)
     hdr_bits = _get_hdr_bits(hdr_stuff)
-    if hdr_stuff['Counter Depth (number)'] == 1:
+    if hdr_stuff["Counter Depth (number)"] == 1:
         # RAW 1 bit data: the header bits are written as uint8 but the frames
         # are binary and need to be unpacked as such.
         data = data.reshape(-1, int(width_height / 8 + hdr_bits))
@@ -94,9 +94,9 @@ def load_mib(mib_path, reshape=True, flip=True):
     else:
         data = data.reshape(-1, int(width_height + hdr_bits))
         data = data[:, hdr_bits:]
-    if hdr_stuff['raw'] == 'R64':
+    if hdr_stuff["raw"] == "R64":
         data = _untangle_raw(data, hdr_stuff, depth)
-    elif hdr_stuff['raw'] == 'MIB':
+    elif hdr_stuff["raw"] == "MIB":
         data = data.reshape(depth, width, height)
 
     # if small mib file read all the exposure times otherwise just the 10% default
@@ -106,7 +106,7 @@ def load_mib(mib_path, reshape=True, flip=True):
         exp_times_list = _read_exposures(mib_path)
     data_dict = _STEM_flag_dict(exp_times_list)
 
-    if hdr_stuff['Assembly Size'] == '2x2':
+    if hdr_stuff["Assembly Size"] == "2x2":
         # add_crosses expects a dask array object
         data = _add_crosses(data)
 
@@ -116,39 +116,48 @@ def load_mib(mib_path, reshape=True, flip=True):
     if data_dict["STEM_flag"] == 1:
         data_pxm.metadata.Signal.signal_type = "STEM"
     else:
-        data_pxm.metadata.Signal.signal_type = 'TEM'
-    data_pxm.metadata.Signal.scan_X = data_dict['scan_X']
-    data_pxm.metadata.Signal.exposure_time = data_dict['exposure time']
-    data_pxm.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
-    data_pxm.metadata.Signal.flyback_times = data_dict['flyback_times']
+        data_pxm.metadata.Signal.signal_type = "TEM"
+    data_pxm.metadata.Signal.scan_X = data_dict["scan_X"]
+    data_pxm.metadata.Signal.exposure_time = data_dict["exposure time"]
+    data_pxm.metadata.Signal.frames_number_skipped = data_dict[
+        "number of frames_to_skip"
+    ]
+    data_pxm.metadata.Signal.flyback_times = data_dict["flyback_times"]
     if reshape:
-    # only attempt reshaping if it is not already reshaped!
+        # only attempt reshaping if it is not already reshaped!
         if len(data_pxm.data.shape) == 3:
             try:
-                if data_pxm.metadata.Signal.signal_type == 'TEM':
-                    print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
+                if data_pxm.metadata.Signal.signal_type == "TEM":
+                    print(
+                        "This mib file appears to be TEM data. The stack is returned with no reshaping."
+                    )
                     return data_pxm
                 # to catch single frames:
                 if data_pxm.axes_manager[0].size == 1:
-                    print('This mib file is a single frame.')
+                    print("This mib file is a single frame.")
                     return data_pxm
                 # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
                 # to reshape otherwise use reshape_4DSTEM_FlyBack function
-                if data_pxm.metadata.Signal.signal_type == 'STEM' and data_pxm.metadata.Signal.exposure_time is None:
-                    print('reshaping using sum frames intensity')
+                if (
+                    data_pxm.metadata.Signal.signal_type == "STEM"
+                    and data_pxm.metadata.Signal.exposure_time is None
+                ):
+                    print("reshaping using sum frames intensity")
                     (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
-                    data_pxm.metadata.Signal.signal_type = 'STEM'
+                    data_pxm.metadata.Signal.signal_type = "STEM"
                     data_pxm.metadata.Signal.frames_number_skipped = skip_ind
                 else:
-                    print('reshaping using flyback pixel')
+                    print("reshaping using flyback pixel")
                     data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
             except TypeError:
                 print(
-                    'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+                    "Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!"
+                )
                 return data_pxm
             except ValueError:
                 print(
-                    'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+                    "Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!"
+                )
                 return data_pxm
     if flip:
         data_pxm.data = np.flip(data_pxm.data, axis=2)
@@ -158,7 +167,7 @@ def load_mib(mib_path, reshape=True, flip=True):
     return data_pxm
 
 
-def mib_to_h5stack(fp, save_path, mmap_mode='r'):
+def mib_to_h5stack(fp, save_path, mmap_mode="r"):
     """
     Read a .mib file using memory mapping where the array
     is stored on disk and not directly loaded, but may be treated
@@ -182,34 +191,36 @@ def mib_to_h5stack(fp, save_path, mmap_mode='r'):
     """
     # check to see if the h5 path already exists and if so raise warning
     if os.path.exists(save_path):
-        print('The h5 path provided already exists. Change file name to avoid overwrite.')
+        print(
+            "The h5 path provided already exists. Change file name to avoid overwrite."
+        )
         return
     hdr_info = _parse_hdr(fp)
-    width = hdr_info['width']
-    height = hdr_info['height']
+    width = hdr_info["width"]
+    height = hdr_info["height"]
 
-    record_by = hdr_info['record-by']
+    record_by = hdr_info["record-by"]
     depth = _get_mib_depth(hdr_info, fp)
 
     data = _mib_to_daskarr(fp)
     hdr_bits = _get_hdr_bits(hdr_info)
 
-    if record_by == 'vector':  # spectral image
+    if record_by == "vector":  # spectral image
         size = (height, width, depth)
         data = data.reshape(size)
 
-    elif record_by == 'image':  # stack of images
+    elif record_by == "image":  # stack of images
         width_height = width * height
 
         # remove headers at the beginning of each frame and reshape
-        if hdr_info['raw'] == 'R64':
-            if hdr_info['Assembly Size'] == '2x2':
-                if hdr_info['Counter Depth (number)'] == 1:
+        if hdr_info["raw"] == "R64":
+            if hdr_info["Assembly Size"] == "2x2":
+                if hdr_info["Counter Depth (number)"] == 1:
                     _stack_h5dump(data, hdr_info, save_path, raw_binary=True)
                 else:
                     # All the other counter depths RAW format
                     _stack_h5dump(data, hdr_info, save_path)
-        elif hdr_info['raw'] == 'MIB':
+        elif hdr_info["raw"] == "MIB":
             _stack_h5dump(data, hdr_info, save_path)
     return
 
@@ -234,16 +245,16 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
     data_pxm: pyxem.signals.LazyElectronDiffraction2D
     """
     hdr_info = _parse_hdr(mib_path)
-    f = h5py.File(h5_path, 'r')
+    f = h5py.File(h5_path, "r")
 
-    data = f['data_stack']
+    data = f["data_stack"]
 
-    chunks = (100, hdr_info['width'], hdr_info['height'])
+    chunks = (100, hdr_info["width"], hdr_info["height"])
 
     x = da.from_array(data, chunks=chunks)
     data_pxm = LazyElectronDiffraction2D(data)
 
-    if hdr_info['Assembly Size'] == '2x2':
+    if hdr_info["Assembly Size"] == "2x2":
         data = data_pxm.data
         # add_crosses expects a dask array object
         data = _add_crosses(data)
@@ -256,38 +267,47 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
     data_dict = _STEM_flag_dict(exp_times_list)
 
     # Tranferring dict info to metadata
-    if data_dict['STEM_flag'] == 1:
-        data_pxm.metadata.Signal.signal_type = 'STEM'
+    if data_dict["STEM_flag"] == 1:
+        data_pxm.metadata.Signal.signal_type = "STEM"
     else:
-        data_pxm.metadata.Signal.signal_type = 'TEM'
-    data_pxm.metadata.Signal.scan_X = data_dict['scan_X']
-    data_pxm.metadata.Signal.exposure_time = data_dict['exposure time']
-    data_pxm.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
-    data_pxm.metadata.Signal.flyback_times = data_dict['flyback_times']
+        data_pxm.metadata.Signal.signal_type = "TEM"
+    data_pxm.metadata.Signal.scan_X = data_dict["scan_X"]
+    data_pxm.metadata.Signal.exposure_time = data_dict["exposure time"]
+    data_pxm.metadata.Signal.frames_number_skipped = data_dict[
+        "number of frames_to_skip"
+    ]
+    data_pxm.metadata.Signal.flyback_times = data_dict["flyback_times"]
 
-    if data_pxm.metadata.Signal.signal_type == 'TEM' and data_pxm.metadata.Signal.exposure_time != None:
-        print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
+    if (
+        data_pxm.metadata.Signal.signal_type == "TEM"
+        and data_pxm.metadata.Signal.exposure_time != None
+    ):
+        print(
+            "This mib file appears to be TEM data. The stack is returned with no reshaping."
+        )
 
     # to catch single frames:
     if data_pxm.axes_manager[0].size == 1:
-        print('This mib file is a single frame.')
- 
+        print("This mib file is a single frame.")
+
     try:
         # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
         # to reshape otherwise use reshape_4DSTEM_FlyBack function
         if data_pxm.metadata.Signal.exposure_time is None:
             (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
-            data_pxm.metadata.Signal.signal_type = 'STEM'
+            data_pxm.metadata.Signal.signal_type = "STEM"
             data_pxm.metadata.Signal.frames_number_skipped = skip_ind
         else:
-            print('reshaping using flyback pixel')
+            print("reshaping using flyback pixel")
             data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
     except TypeError:
         print(
-            'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+            "Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!"
+        )
     except ValueError:
         print(
-            'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+            "Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!"
+        )
     if flip:
         data_pxm.data = np.flip(data_pxm.data, axis=2)
         data_pxm.metadata.Signal.flip = True
@@ -505,7 +525,12 @@ def _add_crosses(a):
     b = da.concatenate((b[:, : a_half[0], :], z_array2, b[:, a_half[0] :, :]), axis=-2)
 
     if len(original_shape) == 4:
-        b = b.reshape(original_shape[0], original_shape[1], original_shape[2] + 3, original_shape[3] + 3)
+        b = b.reshape(
+            original_shape[0],
+            original_shape[1],
+            original_shape[2] + 3,
+            original_shape[3] + 3,
+        )
 
     return b
 
@@ -560,7 +585,7 @@ def _get_mib_depth(hdr_info, fp):
     return depth
 
 
-def _mib_to_daskarr(fp, mmap_mode='r'):
+def _mib_to_daskarr(fp, mmap_mode="r"):
     """
     Reads the binary mib file into a numpy memmap object and returns as dask array object
 
@@ -576,9 +601,9 @@ def _mib_to_daskarr(fp, mmap_mode='r'):
         data as a dask array object
     """
     hdr_info = _parse_hdr(fp)
-    data_length = hdr_info['data-length']
-    data_type = hdr_info['data-type']
-    endian = hdr_info['byte-order']
+    data_length = hdr_info["data-length"]
+    data_type = hdr_info["data-type"]
+    endian = hdr_info["byte-order"]
     read_offset = 0
 
     if data_type == "signed":
@@ -671,8 +696,8 @@ def _read_exposures(fp, pct_frames_to_read=0.1):
         List of frame exposure times in seconds
     """
     hdr_info = _parse_hdr(fp)
-    width = hdr_info['width']
-    height = hdr_info['height']
+    width = hdr_info["width"]
+    height = hdr_info["height"]
     depth = _get_mib_depth(hdr_info, fp)
 
     record_by = hdr_info["record-by"]
@@ -722,34 +747,36 @@ def _read_exposures(fp, pct_frames_to_read=0.1):
                         str_list = [chr(d[line][n]) for n in range(d.shape[1])]
                         exp_time.append(float("".join(str_list)))
             except ValueError:
-                print('Frame exposure times are not appearing in header!')
-        elif hdr_info['raw'] == 'MIB':
+                print("Frame exposure times are not appearing in header!")
+        elif hdr_info["raw"] == "MIB":
             try:
                 # the header for the case of 12 bit data should be unpacked first
-                if hdr_info['Counter Depth (number)'] == 12:
+                if hdr_info["Counter Depth (number)"] == 12:
                     data = data.reshape(-1, width_height + hdr_bits)[:, :68]
-                    data_crop = data[:int(depth * pct_frames_to_read)]
+                    data_crop = data[: int(depth * pct_frames_to_read)]
                     d = data_crop.compute()
                     exp_time = []
                     for frame in range(d.shape[0]):
                         frame_text = str()
                         for item in d[frame]:
-                            temp = unpack('cc', item)
-                            c1 = temp[1].decode('ascii')
-                            c2 = temp[0].decode('ascii')
+                            temp = unpack("cc", item)
+                            c1 = temp[1].decode("ascii")
+                            c2 = temp[0].decode("ascii")
                             frame_text = frame_text + c1
                             frame_text = frame_text + c2
                         exp_time.append(float(frame_text[71:79]))
                 # all the other cases are 8 bit
                 else:
                     data = data.reshape(-1, width_height + hdr_bits)[:, 71:79]
-                    data = data[:, ]
-                    data_crop = data[:int(depth * pct_frames_to_read)]
+                    data = data[
+                        :,
+                    ]
+                    data_crop = data[: int(depth * pct_frames_to_read)]
                     d = data_crop.compute()
                     exp_time = []
                     for line in range(d.shape[0]):
                         str_list = [chr(d[line][n]) for n in range(d.shape[1])]
-                        exp_time.append(float(''.join(str_list)))
+                        exp_time.append(float("".join(str_list)))
             except ValueError:
                 print("Frame exposure times are not appearing in header!")
     return exp_time
@@ -803,7 +830,7 @@ def _STEM_flag_dict(exp_times_list):
         # Check that the smallest time is the majority of the values
         exp_time = max(times_set, key=exp_times_list.count)
         if exp_times_list.count(exp_time) < int(0.9 * len(exp_times_list)):
-            print('Something has gone wrong with the triggering!')
+            print("Something has gone wrong with the triggering!")
         peaks = [i for i, e in enumerate(exp_times_list) if e != exp_time]
         # Diff between consecutive elements of the array
         lines = np.ediff1d(peaks)
@@ -866,7 +893,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False, stack_num=1000)
     for i in range(iters_num):
         if (i + 1) * stack_num < data.shape[0]:
             if i == 0:
-                data_dump0 = data[:(i + 1) * stack_num, :]
+                data_dump0 = data[: (i + 1) * stack_num, :]
                 if raw_binary is True:
                     data_dump1 = np.unpackbits(data_dump0)
                     data_dump1.reshape(data_dump0.shape[0], data_dump0.shape[1] * 8)
@@ -882,7 +909,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False, stack_num=1000)
                 del data_dump0
                 del data_dump1
             else:
-                data_dump0 = data[i * stack_num:(i + 1) * stack_num, :]
+                data_dump0 = data[i * stack_num : (i + 1) * stack_num, :]
                 if raw_binary is True:
                     data_dump1 = np.unpackbits(data_dump0)
                     data_dump1.reshape(data_dump0.shape[0], data_dump0.shape[1] * 8)
@@ -897,7 +924,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False, stack_num=1000)
                 del data_dump0
                 del data_dump1
         else:
-            data_dump0 = data[i * stack_num:, :]
+            data_dump0 = data[i * stack_num :, :]
             if raw_binary is True:
                 data_dump1 = np.unpackbits(data_dump0)
                 data_dump1.reshape(data_dump0.shape[0], data_dump0.shape[1] * 8)
@@ -927,14 +954,19 @@ def _h5_chunk_write(data, saving_path):
     None
     """
     if os.path.exists(saving_path):
-        print('appending to existing dataset')
-        with h5py.File(saving_path, 'a') as hf:
-            hf['data_stack'].resize((hf['data_stack'].shape[0] + data.shape[0]), axis=0)
-            hf['data_stack'][-data.shape[0]:, :, :] = data
+        print("appending to existing dataset")
+        with h5py.File(saving_path, "a") as hf:
+            hf["data_stack"].resize((hf["data_stack"].shape[0] + data.shape[0]), axis=0)
+            hf["data_stack"][-data.shape[0] :, :, :] = data
     else:
-        hf = h5py.File(saving_path, 'w')
-        print('creating the h5 file for the data_stack')
-        hf.create_dataset('data_stack', data=data, maxshape=(None, data.shape[1], data.shape[2]), compression='gzip')
+        hf = h5py.File(saving_path, "w")
+        print("creating the h5 file for the data_stack")
+        hf.create_dataset(
+            "data_stack",
+            data=data,
+            maxshape=(None, data.shape[1], data.shape[2]),
+            compression="gzip",
+        )
     return
 
 

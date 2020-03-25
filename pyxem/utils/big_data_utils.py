@@ -42,7 +42,7 @@ def _load_and_cast(filepath, x, y, chunk_size):
     s = hs.load(filepath, lazy=True)
     s = s.inav[x : x + chunk_size, y : y + chunk_size]
     s.compute(close_file=True)
-    s.set_signal_type('electron_diffraction')
+    s.set_signal_type("electron_diffraction")
     return s
 
 

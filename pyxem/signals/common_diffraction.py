@@ -110,10 +110,8 @@ class CommonDiffraction:
         dark_field_sum = self._get_sum_signal(dark_field, out_signal_axes)
         dark_field_sum.metadata.General.title = "Integrated intensity"
         roi_info = f"{roi}"
-        if self.metadata.get_item('General.title') not in ("", None):
+        if self.metadata.get_item("General.title") not in ("", None):
             roi_info += f" of {self.metadata.General.title}"
-        dark_field_sum.metadata.set_item(
-            'Diffraction.intergrated_range', roi_info
-            )
+        dark_field_sum.metadata.set_item("Diffraction.intergrated_range", roi_info)
 
         return dark_field_sum
