@@ -45,6 +45,8 @@ from .signals.electron_diffraction1d import ElectronDiffraction1D
 from .signals.electron_diffraction2d import ElectronDiffraction2D
 from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
+from .signals.polar_diffraction2d import PolarDiffraction2D
+from .signals.polar_diffraction2d import LazyPolarDiffraction2D
 
 from .signals.crystallographic_map import CrystallographicMap
 

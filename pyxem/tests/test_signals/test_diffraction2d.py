@@ -22,6 +22,7 @@ import dask.array as da
 import hyperspy.api as hs
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
+from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.detectors.generic_flat_detector import GenericFlatDetector
 from pyxem.signals.diffraction1d import Diffraction1D
 
@@ -85,59 +86,18 @@ class TestDecomposition:
 
 
 class TestAzimuthalIntegral:
-    @pytest.fixture
-    def diffraction_pattern_for_azimuthal(self):
-        """
-        Two diffraction patterns with easy to see radial profiles, wrapped
-        in Diffraction2D  <2|8,8>
-        """
-        dp = Diffraction2D(np.zeros((2, 8, 8)))
-        dp.data[0] = np.array(
-            [
-                [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
-                [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
-                [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
-                [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
-                [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
-                [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
-                [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
-                [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
-            ]
-        )
-
-        dp.data[1] = np.array(
-            [
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            ]
-        )
-
-        return dp
-
-    def test_azimuthal_integral_signal_type(self, diffraction_pattern_for_azimuthal):
+    def test_azimuthal_integral_signal_type(self, dp_for_azimuthal):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8, 8)
-        diffraction_pattern_for_azimuthal.metadata.General.title = "A Title"
-        diffraction_pattern_for_azimuthal.axes_manager[0].name = "x"
-        ap = diffraction_pattern_for_azimuthal.get_azimuthal_integral(
+        dp_for_azimuthal.metadata.General.title = "A Title"
+        dp_for_azimuthal.axes_manager[0].name = "x"
+        ap = dp_for_azimuthal.get_azimuthal_integral(
             origin, detector=detector, detector_distance=1, wavelength=1, size_1d=5
         )
 
         assert isinstance(ap, Diffraction1D)
-        assert (
-            diffraction_pattern_for_azimuthal.metadata.General.title
-            == ap.metadata.General.title
-        )
-        assert (
-            diffraction_pattern_for_azimuthal.axes_manager[0].name
-            == ap.axes_manager[0].name
-        )
+        assert dp_for_azimuthal.metadata.General.title == ap.metadata.General.title
+        assert dp_for_azimuthal.axes_manager[0].name == ap.axes_manager[0].name
 
     @pytest.fixture
     def test_dp4D(self):
@@ -154,28 +114,26 @@ class TestAzimuthalIntegral:
         assert np.array_equal(ap.data, np.ones((5, 5, 4)))
 
     @pytest.fixture
-    def axes_test_dp(self):
-        """
-        Two diffraction patterns with easy to see radial profiles, wrapped
-        in Diffraction2D  <2,2|3,3>
+    def dp_for_axes_transfer(self):
+        """Empty diffraction pattern for axes test.
         """
         dp = Diffraction2D(np.zeros((2, 2, 3, 3)))
         return dp
 
-    def test_azimuthal_integral_axes(self, axes_test_dp):
+    def test_azimuthal_integral_axes(self, dp_for_axes_transfer):
         n_scale = 0.5
-        axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
-        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
+        dp_for_axes_transfer.axes_manager.navigation_axes[0].scale = n_scale
+        dp_for_axes_transfer.axes_manager.navigation_axes[1].scale = 2 * n_scale
         name = "real_space"
-        axes_test_dp.axes_manager.navigation_axes[0].name = name
-        axes_test_dp.axes_manager.navigation_axes[1].units = name
+        dp_for_axes_transfer.axes_manager.navigation_axes[0].name = name
+        dp_for_axes_transfer.axes_manager.navigation_axes[1].units = name
         units = "um"
-        axes_test_dp.axes_manager.navigation_axes[1].name = units
-        axes_test_dp.axes_manager.navigation_axes[0].units = units
+        dp_for_axes_transfer.axes_manager.navigation_axes[1].name = units
+        dp_for_axes_transfer.axes_manager.navigation_axes[0].units = units
 
         origin = [1, 1]
         detector = GenericFlatDetector(3, 3)
-        ap = axes_test_dp.get_azimuthal_integral(
+        ap = dp_for_axes_transfer.get_azimuthal_integral(
             origin, detector=detector, detector_distance=1, wavelength=1, size_1d=5
         )
         rp_scale_x = ap.axes_manager.navigation_axes[0].scale
@@ -205,39 +163,18 @@ class TestAzimuthalIntegral:
             )
         ],
     )
-    def test_azimuthal_integral_fast(self, diffraction_pattern_for_azimuthal, expected):
+    def test_azimuthal_integral_fast(self, dp_for_azimuthal, expected):
         origin = [3.5, 3.5]
         detector = GenericFlatDetector(8, 8)
-        ap = diffraction_pattern_for_azimuthal.get_azimuthal_integral(
+        ap = dp_for_azimuthal.get_azimuthal_integral(
             origin, detector=detector, detector_distance=1e9, wavelength=1, size_1d=6
         )
         assert np.allclose(ap.data, expected, atol=1e-3)
 
-    @pytest.fixture
-    def diffraction_pattern_for_origin_variation(self):
-        """
-        Two diffraction patterns with easy to see radial profiles, wrapped
-        in Diffraction2D  <2,2|3,3>
-        """
-        dp = Diffraction2D(np.zeros((2, 2, 4, 4)))
-        dp.data = np.array(
-            [
-                [
-                    [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                    [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                ],
-                [
-                    [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                    [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                ],
-            ]
-        )
-        return dp
-
-    def test_azimuthal_integral_slow(self, diffraction_pattern_for_origin_variation):
+    def test_azimuthal_integral_slow(self, dp_for_origin_variation):
         origin = np.array([[[0, 0], [1, 1]], [[1.5, 1.5], [2, 3]]])
         detector = GenericFlatDetector(4, 4)
-        ap = diffraction_pattern_for_origin_variation.get_azimuthal_integral(
+        ap = dp_for_origin_variation.get_azimuthal_integral(
             origin, detector=detector, detector_distance=1e9, wavelength=1, size_1d=4
         )
         expected = np.array(
@@ -253,6 +190,47 @@ class TestAzimuthalIntegral:
             ]
         )
         assert np.allclose(ap.data, expected, atol=1e-5)
+
+
+class TestPolarReprojection:
+    def test_reproject_polar_signal_type(self, diffraction_pattern):
+        polar = diffraction_pattern.as_polar()
+        assert isinstance(polar, PolarDiffraction2D)
+
+    def test_reproject_polar_axes(self, diffraction_pattern):
+        n_scale = 0.5
+        diffraction_pattern.axes_manager.navigation_axes[0].scale = n_scale
+        diffraction_pattern.axes_manager.navigation_axes[1].scale = 2 * n_scale
+        name = "real_space"
+        diffraction_pattern.axes_manager.navigation_axes[0].name = name
+        diffraction_pattern.axes_manager.navigation_axes[1].units = name
+        units = "nm"
+        diffraction_pattern.axes_manager.navigation_axes[1].name = units
+        diffraction_pattern.axes_manager.navigation_axes[0].units = units
+
+        polar = diffraction_pattern.as_polar()
+
+        polar_scale_x = polar.axes_manager.navigation_axes[0].scale
+        polar_scale_y = polar.axes_manager.navigation_axes[1].scale
+        polar_units_x = polar.axes_manager.navigation_axes[0].units
+        polar_name_x = polar.axes_manager.navigation_axes[0].name
+        polar_units_y = polar.axes_manager.navigation_axes[1].units
+        polar_name_y = polar.axes_manager.navigation_axes[1].name
+
+        polar_t_axis = polar.axes_manager.signal_axes[0]
+        polar_k_axis = polar.axes_manager.signal_axes[1]
+
+        assert n_scale == polar_scale_x
+        assert 2 * n_scale == polar_scale_y
+        assert units == polar_units_x
+        assert name == polar_name_x
+        assert name == polar_units_y
+        assert units == polar_name_y
+
+        assert polar_t_axis.name == "theta"
+        assert polar_t_axis.units == "$rad$"
+        assert polar_k_axis.name == "k"
+        assert polar_k_axis.units == "$rad$"
 
 
 class TestVirtualImaging:
@@ -298,7 +276,10 @@ class TestVirtualImaging:
         assert vi.axes_manager.signal_dimension == 3
         assert vi.axes_manager.navigation_dimension == 0
         assert vi.metadata.General.title == "Integrated intensity"
-        assert vi.metadata.Diffraction.intergrated_range == "CircleROI(cx=3, cy=3, r=5) of Stack of "
+        assert (
+            vi.metadata.Diffraction.intergrated_range
+            == "CircleROI(cx=3, cy=3, r=5) of Stack of "
+        )
 
     def test_get_integrated_intensity_error(
         self, diffraction_pattern, out_signal_axes=(0, 1, 2)

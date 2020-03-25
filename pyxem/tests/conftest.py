@@ -18,13 +18,15 @@
 
 # Use agg backend to avoid displaying figure when running tests
 import matplotlib
-matplotlib.use('agg')
+
+matplotlib.use("agg")
 
 import pytest
 import diffpy.structure
 import numpy as np
 from transforms3d.euler import euler2mat
 
+from pyxem.signals.diffraction2d import Diffraction2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
@@ -33,7 +35,7 @@ from pyxem.utils.indexation_utils import OrientationResult
 
 @pytest.fixture
 def default_structure():
-    """An atomic structure represetned using diffpy
+    """An atomic structure represented using diffpy
     """
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
     atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
@@ -96,6 +98,87 @@ def diffraction_pattern(z):
     """
     dp = ElectronDiffraction2D(z)
     dp.metadata.Signal.found_from = "conftest"  # dummy metadata
+    return dp
+
+
+@pytest.fixture(
+    params=[
+        np.array(
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ]
+        )
+    ]
+)
+def dp_single(request):
+    """
+    1D (in navigation space) diffraction pattern <1|8,8>
+    """
+    return ElectronDiffraction2D(request.param)
+
+
+@pytest.fixture
+def dp_for_azimuthal():
+    """
+    Two diffraction patterns with easy to see radial profiles, wrapped
+    in Diffraction2D  <2|8,8>
+    """
+    dp = Diffraction2D(np.zeros((2, 8, 8)))
+    dp.data[0] = np.array(
+        [
+            [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
+            [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
+            [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
+            [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
+            [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
+            [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
+            [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
+            [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
+        ]
+    )
+
+    dp.data[1] = np.array(
+        [
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+
+    return dp
+
+
+@pytest.fixture
+def dp_for_origin_variation():
+    """
+    Two diffraction patterns with easy to see radial profiles, wrapped
+    in Diffraction2D  <2,2|3,3>
+    """
+    dp = Diffraction2D(np.zeros((2, 2, 4, 4)))
+    dp.data = np.array(
+        [
+            [
+                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+            ],
+            [
+                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+            ],
+        ]
+    )
     return dp
 
 

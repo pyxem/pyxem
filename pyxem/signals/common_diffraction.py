@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import numpy as np
 
 from hyperspy.api import interactive
@@ -74,7 +92,7 @@ class CommonDiffraction:
         out.plot(**kwargs)
 
     def get_integrated_intensity(self, roi, out_signal_axes=None):
-        """Obtains the intensity integrated over the scattering range as 
+        """Obtains the intensity integrated over the scattering range as
         defined by the roi.
 
         Parameters
@@ -110,10 +128,8 @@ class CommonDiffraction:
         dark_field_sum = self._get_sum_signal(dark_field, out_signal_axes)
         dark_field_sum.metadata.General.title = "Integrated intensity"
         roi_info = f"{roi}"
-        if self.metadata.get_item('General.title') not in ("", None):
+        if self.metadata.get_item("General.title") not in ("", None):
             roi_info += f" of {self.metadata.General.title}"
-        dark_field_sum.metadata.set_item(
-            'Diffraction.intergrated_range', roi_info
-            )
+        dark_field_sum.metadata.set_item("Diffraction.intergrated_range", roi_info)
 
         return dark_field_sum

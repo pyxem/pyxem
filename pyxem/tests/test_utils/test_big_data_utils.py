@@ -62,11 +62,11 @@ def dp_sqrt(dp):
 def test_core_big_data_functionality(big_electron_diffraction_pattern):
     expected_output = np.sqrt(big_electron_diffraction_pattern.data)
     with tempfile.TemporaryDirectory() as tmp:
-        filepath = os.path.join(tmp, 'tempfile_for_big_data_util_testing.hspy')
+        filepath = os.path.join(tmp, "tempfile_for_big_data_util_testing.hspy")
         big_electron_diffraction_pattern.save(filepath)
-    
+
         x_list = [0, 2, 4, 6, 8]
         y_list = np.arange(0, 4, 2)  # [0,2] but as an array
-    
+
         test_output = chunked_application_of_UDF(filepath, x_list, y_list, dp_sqrt)
         assert np.allclose(expected_output, test_output.data)
