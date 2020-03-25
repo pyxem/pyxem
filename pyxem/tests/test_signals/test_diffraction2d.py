@@ -114,26 +114,26 @@ class TestAzimuthalIntegral:
         assert np.array_equal(ap.data, np.ones((5, 5, 4)))
 
     @pytest.fixture
-    def axes_test_dp(self):
+    def dp_for_axes_transfer(self):
         """Empty diffraction pattern for axes test.
         """
         dp = Diffraction2D(np.zeros((2, 2, 3, 3)))
         return dp
 
-    def test_azimuthal_integral_axes(self, axes_test_dp):
+    def test_azimuthal_integral_axes(self, dp_for_axes_transfer):
         n_scale = 0.5
-        axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
-        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
+        dp_for_axes_transfer.axes_manager.navigation_axes[0].scale = n_scale
+        dp_for_axes_transfer.axes_manager.navigation_axes[1].scale = 2 * n_scale
         name = "real_space"
-        axes_test_dp.axes_manager.navigation_axes[0].name = name
-        axes_test_dp.axes_manager.navigation_axes[1].units = name
+        dp_for_axes_transfer.axes_manager.navigation_axes[0].name = name
+        dp_for_axes_transfer.axes_manager.navigation_axes[1].units = name
         units = "um"
-        axes_test_dp.axes_manager.navigation_axes[1].name = units
-        axes_test_dp.axes_manager.navigation_axes[0].units = units
+        dp_for_axes_transfer.axes_manager.navigation_axes[1].name = units
+        dp_for_axes_transfer.axes_manager.navigation_axes[0].units = units
 
         origin = [1, 1]
         detector = GenericFlatDetector(3, 3)
-        ap = axes_test_dp.get_azimuthal_integral(
+        ap = dp_for_axes_transfer.get_azimuthal_integral(
             origin, detector=detector, detector_distance=1, wavelength=1, size_1d=5
         )
         rp_scale_x = ap.axes_manager.navigation_axes[0].scale
