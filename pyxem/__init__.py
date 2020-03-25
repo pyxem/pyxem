@@ -22,9 +22,8 @@ import logging
 import os
 import warnings
 
-from hyperspy.io import load as hyperspyload
+from hyperspy.io import load
 from hyperspy.api import roi
-from pyxem.signals import push_metadata_through
 
 import numpy as np
 
@@ -55,13 +54,13 @@ from .generators.variance_generator import VarianceGenerator
 from .signals.diffraction_variance1d import DiffractionVariance1D
 from .signals.diffraction_variance2d import DiffractionVariance2D
 
-from .signals.diffraction_vectors import DiffractionVectors
+from .signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
 from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
 from .signals.pair_distribution_function1d import PairDistributionFunction1D
 from .signals.reduced_intensity1d import ReducedIntensity1D
 
-from pyxem.utils.io_utils import load, load_mib, load_hspy
+from pyxem.utils.io_utils import load_mib
 
 from . import release_info
 

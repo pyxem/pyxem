@@ -1,4 +1,4 @@
-|Travis|_ |AppVeyor|_ |Coveralls|_ |pypi_version|_  |doi|_ |downloads|_
+|Travis|_ |AppVeyor|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
 
 .. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
 .. _Travis: https://travis-ci.org/pyxem/pyxem
@@ -15,8 +15,11 @@
 .. |doi| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2649351.svg
 .. _doi: https://doi.org/10.5281/zenodo.2649351
 
-.. |downloads| image:: https://anaconda.org/conda-forge/pyxem/badges/downloads.svg   
+.. |downloads| image:: https://anaconda.org/conda-forge/pyxem/badges/downloads.svg
 .. _downloads: https://anaconda.org/conda-forge/pyxem
+
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+.. _black: https://github.com/psf/black
 
 pyXem is an open-source python library for crystallographic diffraction microscopy.
 

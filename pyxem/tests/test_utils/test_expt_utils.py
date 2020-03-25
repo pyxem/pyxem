@@ -22,25 +22,35 @@ from scipy.ndimage.filters import gaussian_filter
 from matplotlib import pyplot as plt
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.utils.expt_utils import _index_coords, _cart2polar, _polar2cart, \
-    radial_average, gain_normalise, remove_dead, apply_transformation, \
-    regional_filter, subtract_background_dog, subtract_background_median, \
-    subtract_reference, circular_mask, reference_circle, \
-    find_beam_offset_cross_correlation, peaks_as_gvectors, \
-    investigate_dog_background_removal_interactive, \
-    find_beam_center_blur, find_beam_center_interpolate
+from pyxem.utils.expt_utils import (
+    _index_coords,
+    _cart2polar,
+    _polar2cart,
+    remove_dead,
+    find_beam_offset_cross_correlation,
+    peaks_as_gvectors,
+    investigate_dog_background_removal_interactive,
+    find_beam_center_blur,
+    find_beam_center_interpolate,
+)
 
 
-@pytest.fixture(params=[
-    np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
-              [0., 0., 1., 0., 0., 0., 0., 0.],
-              [0., 1., 2., 1., 0., 0., 0., 0.],
-              [0., 0., 1., 0., 0., 0., 0., 0.],
-              [0., 0., 0., 0., 0., 1., 0., 0.],
-              [0., 0., 0., 0., 1., 2., 1., 0.],
-              [0., 0., 0., 0., 0., 1., 0., 0.],
-              [0., 0., 0., 0., 0., 0., 0., 0.]])
-])
+@pytest.fixture(
+    params=[
+        np.array(
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ]
+        )
+    ]
+)
 def diffraction_pattern_one_dimension(request):
     """
     1D (in navigation space) diffraction pattern <1|8,8>
@@ -49,22 +59,30 @@ def diffraction_pattern_one_dimension(request):
 
 
 def test_index_coords(diffraction_pattern_one_dimension):
-    x = np.array([[-4., -3., -2., -1., 0., 1., 2., 3.],
-                  [-4., -3., -2., -1., 0., 1., 2., 3.],
-                  [-4., -3., -2., -1., 0., 1., 2., 3.],
-                  [-4., -3., -2., -1., 0., 1., 2., 3.],
-                  [-4., -3., -2., -1., 0., 1., 2., 3.],
-                  [-4., -3., -2., -1., 0., 1., 2., 3.],
-                  [-4., -3., -2., -1., 0., 1., 2., 3.],
-                  [-4., -3., -2., -1., 0., 1., 2., 3.]])
-    y = np.array([[-4., -4., -4., -4., -4., -4., -4., -4.],
-                  [-3., -3., -3., -3., -3., -3., -3., -3.],
-                  [-2., -2., -2., -2., -2., -2., -2., -2.],
-                  [-1., -1., -1., -1., -1., -1., -1., -1.],
-                  [0., 0., 0., 0., 0., 0., 0., 0.],
-                  [1., 1., 1., 1., 1., 1., 1., 1.],
-                  [2., 2., 2., 2., 2., 2., 2., 2.],
-                  [3., 3., 3., 3., 3., 3., 3., 3.]])
+    x = np.array(
+        [
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+            [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0],
+        ]
+    )
+    y = np.array(
+        [
+            [-4.0, -4.0, -4.0, -4.0, -4.0, -4.0, -4.0, -4.0],
+            [-3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0],
+            [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+            [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+            [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0],
+        ]
+    )
     xc, yc = _index_coords(diffraction_pattern_one_dimension.data)
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
@@ -78,63 +96,73 @@ def test_index_coords_non_centeral(diffraction_pattern_one_dimension):
     assert yc[0, 5] == 0
 
 
-@pytest.mark.parametrize('x, y, r, theta', [
-    (2, 2, 2.8284271247461903, -0.78539816339744828),
-    (1, -2, 2.2360679774997898, 1.1071487177940904),
-    (-3, 1, 3.1622776601683795, -2.81984209919315),
-])
+@pytest.mark.parametrize(
+    "x, y, r, theta",
+    [
+        (2, 2, 2.8284271247461903, -0.78539816339744828),
+        (1, -2, 2.2360679774997898, 1.1071487177940904),
+        (-3, 1, 3.1622776601683795, -2.81984209919315),
+    ],
+)
 def test_cart2polar(x, y, r, theta):
     rc, thetac = _cart2polar(x=x, y=y)
     np.testing.assert_almost_equal(rc, r)
     np.testing.assert_almost_equal(thetac, theta)
 
 
-@pytest.mark.parametrize('r, theta, x, y', [
-    (2.82842712, -0.78539816, 2, 2),
-    (2.2360679774997898, 1.1071487177940904, 1, -2),
-    (3.1622776601683795, -2.819842099193151, -3, 1),
-])
+@pytest.mark.parametrize(
+    "r, theta, x, y",
+    [
+        (2.82842712, -0.78539816, 2, 2),
+        (2.2360679774997898, 1.1071487177940904, 1, -2),
+        (3.1622776601683795, -2.819842099193151, -3, 1),
+    ],
+)
 def test_polar2cart(r, theta, x, y):
     xc, yc = _polar2cart(r=r, theta=theta)
     np.testing.assert_almost_equal(xc, x)
     np.testing.assert_almost_equal(yc, y)
 
 
-@pytest.mark.parametrize('z, center, calibration, g', [
-    (np.array([[100, 100],
-               [200, 200],
-               [150, -150]]),
-     np.array((127.5, 127.5)),
-     0.0039,
-     np.array([-0.10725, -0.10725])),
-])
+@pytest.mark.parametrize(
+    "z, center, calibration, g",
+    [
+        (
+            np.array([[100, 100], [200, 200], [150, -150]]),
+            np.array((127.5, 127.5)),
+            0.0039,
+            np.array([-0.10725, -0.10725]),
+        ),
+    ],
+)
 def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
 
 
-methods = ['average', 'nan']
+methods = ["average", "nan"]
 
 
-@pytest.mark.parametrize('method', methods)
+@pytest.mark.parametrize("method", methods)
 def test_remove_dead_pixels(diffraction_pattern_one_dimension, method):
     z = diffraction_pattern_one_dimension.data
     dead_removed = remove_dead(z, [[3, 3]], deadvalue=method)
     assert z[3, 3] != dead_removed[3, 3]
 
 
-def test_investigate_dog_background_removal_interactive(diffraction_pattern_one_dimension):
+def test_investigate_dog_background_removal_interactive(
+    diffraction_pattern_one_dimension,
+):
     """ Test that this function runs without error """
     z = diffraction_pattern_one_dimension
     sigma_max_list = np.arange(10, 20, 4)
     sigma_min_list = np.arange(5, 15, 6)
     investigate_dog_background_removal_interactive(z, sigma_max_list, sigma_min_list)
-    plt.close('all')
+    plt.close("all")
     assert True
 
 
 class TestCenteringAlgorithm:
-
     @pytest.mark.parametrize("shifts_expected", [(0, 0)])
     def test_perfectly_centered_spot(self, shifts_expected):
         z = np.zeros((50, 50))

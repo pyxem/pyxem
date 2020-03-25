@@ -45,8 +45,10 @@ def sim_as_signal(diffsim, size, sigma, max_r):
     """
     l, delta_l = np.linspace(-max_r, max_r, size, retstep=True)
 
-    mask_for_max_r = np.logical_and(np.abs(diffsim.coordinates[:, 0]) < max_r,
-                                    np.abs(diffsim.coordinates[:, 1]) < max_r)
+    mask_for_max_r = np.logical_and(
+        np.abs(diffsim.coordinates[:, 0]) < max_r,
+        np.abs(diffsim.coordinates[:, 1]) < max_r,
+    )
 
     coords = diffsim.coordinates[mask_for_max_r]
     inten = diffsim.intensities[mask_for_max_r]

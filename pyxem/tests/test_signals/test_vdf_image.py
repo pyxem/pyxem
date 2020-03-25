@@ -28,11 +28,22 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.segments import VDFSegment
 
 
-@pytest.fixture(params=[
-    np.array([np.array([0, 0]), np.array([3, 0]), np.array([3, 5]),
-              np.array([0, 5]), np.array([0, 3]), np.array([3, 3]),
-              np.array([5, 3]), np.array([5, 5])])
-])
+@pytest.fixture(
+    params=[
+        np.array(
+            [
+                np.array([0, 0]),
+                np.array([3, 0]),
+                np.array([3, 5]),
+                np.array([0, 5]),
+                np.array([0, 3]),
+                np.array([3, 3]),
+                np.array([5, 3]),
+                np.array([5, 5]),
+            ]
+        )
+    ]
+)
 def unique_vectors(request):
     uv = DiffractionVectors(request.param)
     uv.axes_manager.set_signal_dimension(0)
@@ -75,19 +86,32 @@ def vdf_vector_images_seg(vdf_generator_seg):
 
 
 class TestVDFImage:
-
-    @pytest.mark.parametrize('min_distance, min_size, max_size,'
-                             'max_number_of_grains, marker_radius,'
-                             'threshold, exclude_border',
-                             [(1, 1, 20, 5, 1, False, 0),
-                              (2, 3, 200, 10, 2, True, 1)])
+    @pytest.mark.parametrize(
+        "min_distance, min_size, max_size,"
+        "max_number_of_grains, marker_radius,"
+        "threshold, exclude_border",
+        [(1, 1, 20, 5, 1, False, 0), (2, 3, 200, 10, 2, True, 1)],
+    )
     def test_get_vdf_segments(
-            self, vdf_vector_images_seg,
-            min_distance, min_size, max_size, max_number_of_grains,
-            marker_radius, threshold, exclude_border):
+        self,
+        vdf_vector_images_seg,
+        min_distance,
+        min_size,
+        max_size,
+        max_number_of_grains,
+        marker_radius,
+        threshold,
+        exclude_border,
+    ):
         segs = vdf_vector_images_seg.get_vdf_segments(
-            min_distance, min_size, max_size, max_number_of_grains,
-            marker_radius, threshold, exclude_border)
+            min_distance,
+            min_size,
+            max_size,
+            max_number_of_grains,
+            marker_radius,
+            threshold,
+            exclude_border,
+        )
         assert isinstance(segs, VDFSegment)
         assert isinstance(segs.segments, Signal2D)
         assert isinstance(segs.vectors_of_segments, DiffractionVectors)

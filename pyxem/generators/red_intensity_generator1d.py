@@ -21,24 +21,22 @@
 
 """
 import numpy as np
-import matplotlib.pyplot as plt
 
-from hyperspy.signals import Signal1D
-
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-
-from pyxem.components.scattering_fit_component_xtables import ScatteringFitComponentXTables
-from pyxem.components.scattering_fit_component_lobato import ScatteringFitComponentLobato
+from pyxem.components.scattering_fit_component_xtables import (
+    ScatteringFitComponentXTables,
+)
+from pyxem.components.scattering_fit_component_lobato import (
+    ScatteringFitComponentLobato,
+)
 from pyxem.utils.ri_utils import subtract_pattern, mask_from_pattern
-from pyxem.signals import transfer_navigation_axes
-from pyxem.signals import transfer_signal_axes
 
-scattering_factor_dictionary = {'lobato': ScatteringFitComponentLobato,
-                                'xtables': ScatteringFitComponentXTables}
+scattering_factor_dictionary = {
+    "lobato": ScatteringFitComponentLobato,
+    "xtables": ScatteringFitComponentXTables,
+}
 
 
-class ReducedIntensityGenerator1D():
+class ReducedIntensityGenerator1D:
     """Generates a reduced intensity 1D profile for a specified diffraction radial
     profile.
 
@@ -52,8 +50,10 @@ class ReducedIntensityGenerator1D():
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
         self.cutoff = [0, signal.axes_manager.signal_axes[0].size - 1]
-        self.nav_size = [signal.axes_manager.navigation_axes[0].size,
-                         signal.axes_manager.navigation_axes[1].size]
+        self.nav_size = [
+            signal.axes_manager.navigation_axes[0].size,
+            signal.axes_manager.navigation_axes[1].size,
+        ]
         self.sig_size = [signal.axes_manager.signal_axes[0].size]
         self.background_fit = None  # added in one of the fits below.
         self.normalisation = None
@@ -103,9 +103,17 @@ class ReducedIntensityGenerator1D():
         self.cutoff = [s_min, s_max]
         return
 
-    def fit_atomic_scattering(self, elements, fracs,
-                              N=1., C=0., scattering_factor='lobato',
-                              plot_fit=True, *args, **kwargs):
+    def fit_atomic_scattering(
+        self,
+        elements,
+        fracs,
+        N=1.0,
+        C=0.0,
+        scattering_factor="lobato",
+        plot_fit=True,
+        *args,
+        **kwargs,
+    ):
         """Fits a diffraction intensity profile to the background using
         FIT = N * sum(ci * (fi^2) + C)
 
@@ -139,8 +147,9 @@ class ReducedIntensityGenerator1D():
         """
 
         fit_model = self.signal.create_model()
-        background = scattering_factor_dictionary[scattering_factor](elements,
-                                                                     fracs, N, C)
+        background = scattering_factor_dictionary[scattering_factor](
+            elements, fracs, N, C
+        )
 
         fit_model.append(background)
         fit_model.set_signal_range(self.cutoff)
@@ -161,8 +170,7 @@ class ReducedIntensityGenerator1D():
         self.background_fit = fit
         return
 
-    def subtract_bkgd_pattern(self, bkgd_pattern, inplace=True,
-                              *args, **kwargs):
+    def subtract_bkgd_pattern(self, bkgd_pattern, inplace=True, *args, **kwargs):
         """Subtracts a background pattern from the signal. This method will edit
         self.signal.
 
@@ -179,11 +187,13 @@ class ReducedIntensityGenerator1D():
         **kwargs:
             Keyword arguments to be passed to map().
         """
-        return self.signal.map(subtract_pattern, pattern=bkgd_pattern,
-                               inplace=inplace, *args, **kwargs)
+        return self.signal.map(
+            subtract_pattern, pattern=bkgd_pattern, inplace=inplace, *args, **kwargs
+        )
 
-    def mask_from_bkgd_pattern(self, mask_pattern, mask_threshold=1,
-                               inplace=True, *args, **kwargs):
+    def mask_from_bkgd_pattern(
+        self, mask_pattern, mask_threshold=1, inplace=True, *args, **kwargs
+    ):
         """Uses a background pattern with a threshold, and sets that part of
         the signal to zero, effectively adding a mask. This can be used to mask
         the central beam.
@@ -208,12 +218,15 @@ class ReducedIntensityGenerator1D():
 
         mask_array = mask_pattern < mask_threshold
 
-        return self.signal.map(mask_from_pattern,
-                               pattern=mask_array.astype(float),
-                               inplace=inplace, *args, **kwargs)
+        return self.signal.map(
+            mask_from_pattern,
+            pattern=mask_array.astype(float),
+            inplace=inplace,
+            *args,
+            **kwargs,
+        )
 
-    def mask_reduced_intensity(self, mask_pattern, inplace=True, *args,
-                               **kwargs):
+    def mask_reduced_intensity(self, mask_pattern, inplace=True, *args, **kwargs):
         """Masks the reduced intensity signal by multiplying it with a pattern
         consisting of only zeroes and ones. This can be used to mask
         the central beam.
@@ -239,10 +252,11 @@ class ReducedIntensityGenerator1D():
 
         mask_array = mask_pattern.astype(np.uint8)
         if np.max(mask_array) != 1 or np.min(mask_array) != 0:
-            raise ValueError('Masking array does not consist of zeroes and ones.')
+            raise ValueError("Masking array does not consist of zeroes and ones.")
 
-        return self.signal.map(mask_from_pattern, pattern=mask_array,
-                               inplace=inplace, *args, **kwargs)
+        return self.signal.map(
+            mask_from_pattern, pattern=mask_array, inplace=inplace, *args, **kwargs
+        )
 
     def get_reduced_intensity(self):
         """Obtains a reduced intensity profile from the radial profile.
@@ -257,17 +271,21 @@ class ReducedIntensityGenerator1D():
         ri : ReducedIntensity1D
         """
 
-        s_scale = self.signal.axes_manager.signal_axes[0].scale
-        s = np.arange(self.signal.axes_manager.signal_axes[0].size,
-                      dtype='float64')
+        s = np.arange(self.signal.axes_manager.signal_axes[0].size, dtype="float64")
         s *= self.signal.axes_manager.signal_axes[0].scale
 
-        reduced_intensity = (2 * np.pi * s *
-                             np.divide((self.signal.data - self.background_fit),
-                                       self.normalisation))
-
-        ri = ReducedIntensity1D(reduced_intensity)
-        ri = transfer_navigation_axes(ri, self.signal)
-        ri = transfer_signal_axes(ri, self.signal)
+        ri = self.signal._deepcopy_with_new_data(
+            (
+                2
+                * np.pi
+                * s
+                * np.divide(
+                    (self.signal.data - self.background_fit), self.normalisation
+                )
+            )
+        )
+        ri.set_signal_type("reduced_intensity")
+        title = self.signal.metadata.General.title
+        ri.metadata.General.title = f"Reduce intensity of {title}"
 
         return ri
