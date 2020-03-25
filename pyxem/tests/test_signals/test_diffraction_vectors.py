@@ -20,6 +20,7 @@ import pytest
 import numpy as np
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from sklearn.cluster import DBSCAN
+from hyperspy.signals import Signal2D
 
 # DiffractionVectors correspond to a single list of vectors, a map of vectors
 # all of equal length, and the ragged case. A fixture is defined for each of
@@ -109,6 +110,7 @@ def diffraction_vectors_map(request):
     dvm = DiffractionVectors(request.param)
     dvm.axes_manager.set_signal_dimension(0)
     dvm.axes_manager[0].name = "x"
+    dvm.axes_manager[1].name = "y"
     return dvm
 
 
@@ -263,18 +265,16 @@ class TestUniqueVectors:
 
 
 class TestFilterVectors:
-    def test_filter_vector_magnitudes_map_type(self, diffraction_vectors_map):
-        filtered_vectors = diffraction_vectors_map.filter_vectors_magnitudes(0.1, 1.0)
+    def test_filter_magnitude_map_type(self, diffraction_vectors_map):
+        filtered_vectors = diffraction_vectors_map.filter_magnitude(0.1, 1.0)
         assert isinstance(filtered_vectors, DiffractionVectors)
 
-    def test_filter_vector_magnitudes_single_type(self, diffraction_vectors_single):
-        filtered_vectors = diffraction_vectors_single.filter_vectors_magnitudes(
-            0.1, 1.0
-        )
+    def test_filter_magnitude_single_type(self, diffraction_vectors_single):
+        filtered_vectors = diffraction_vectors_single.filter_magnitude(0.1, 1.0)
         assert isinstance(filtered_vectors, DiffractionVectors)
 
-    def test_filter_vector_magnitudes_map(self, diffraction_vectors_map):
-        filtered_vectors = diffraction_vectors_map.filter_vectors_magnitudes(0.1, 1.0)
+    def test_filter_magnitude_map(self, diffraction_vectors_map):
+        filtered_vectors = diffraction_vectors_map.filter_magnitude(0.1, 1.0)
         ans = np.array(
             [
                 [0.089685, 0.292971],
@@ -291,53 +291,64 @@ class TestFilterVectors:
         )
         np.testing.assert_almost_equal(filtered_vectors.data[0][1], ans)
 
-    def test_filter_vector_magnitudes_single(self, diffraction_vectors_single):
-        filtered_vectors = diffraction_vectors_single.filter_vectors_magnitudes(
-            0.15, 1.0
-        )
+    def test_filter_magnitude_single(self, diffraction_vectors_single):
+        filtered_vectors = diffraction_vectors_single.filter_magnitude(0.15, 1.0)
         ans = np.array(
             [[-0.115594, 0.123566], [0.103636, -0.11958], [0.123566, 0.151468]]
         )
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
-    def test_filter_vector_edge_map_type(self, diffraction_vectors_map):
+    def test_filter_detector_edge_map_type(self, diffraction_vectors_map):
         diffraction_vectors_map.detector_shape = (260, 240)
         diffraction_vectors_map.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_map.filter_vectors_detector_edge(
-            exclude_width=2
-        )
+        filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
         assert isinstance(filtered_vectors, DiffractionVectors)
 
-    def test_filter_vector_edge_single_type(self, diffraction_vectors_single):
+    def test_filter_detector_edge_single_type(self, diffraction_vectors_single):
         diffraction_vectors_single.detector_shape = (260, 240)
         diffraction_vectors_single.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_single.filter_vectors_detector_edge(
+        filtered_vectors = diffraction_vectors_single.filter_detector_edge(
             exclude_width=10
         )
         assert isinstance(filtered_vectors, DiffractionVectors)
 
-    def test_filter_vector_edge_map(self, diffraction_vectors_map):
+    def test_filter_detector_edge_map(self, diffraction_vectors_map):
         diffraction_vectors_map.detector_shape = (260, 240)
         diffraction_vectors_map.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_map.filter_vectors_detector_edge(
-            exclude_width=2
-        )
+        filtered_vectors = diffraction_vectors_map.filter_detector_edge(exclude_width=2)
         ans = np.array([[-0.117587, 0.113601]])
         np.testing.assert_almost_equal(filtered_vectors.data[0, 0], ans)
 
-    def test_filter_vector_edge_single(self, diffraction_vectors_single):
+    def test_filter_detector_edge_single(self, diffraction_vectors_single):
         diffraction_vectors_single.detector_shape = (260, 240)
         diffraction_vectors_single.pixel_calibration = 0.001
-        filtered_vectors = diffraction_vectors_single.filter_vectors_detector_edge(
+        filtered_vectors = diffraction_vectors_single.filter_detector_edge(
             exclude_width=10
         )
         ans = np.array([[0.063776, 0.011958]])
         np.testing.assert_almost_equal(filtered_vectors.data, ans)
 
 
-class TestDiffractingPixelMaps:
-    def test_get_dpm_map(self, diffraction_vectors_map):
-        diffraction_vectors_map.get_diffracting_pixels_map()
+class TestDiffractingPixelsMap:
+    def test_get_dpm_values(self, diffraction_vectors_map):
+        answer = np.array([[7.0, 13.0], [11.0, 1.0]])
+        xim = diffraction_vectors_map.get_diffracting_pixels_map()
+        assert np.allclose(xim, answer)
 
-    def test_get_dpm_map_binary(self, diffraction_vectors_map):
-        diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
+    def test_get_dpm_type(self, diffraction_vectors_map):
+        xim = diffraction_vectors_map.get_diffracting_pixels_map()
+        assert isinstance(xim, Signal2D)
+
+    def test_get_dpm_title(self, diffraction_vectors_map):
+        xim = diffraction_vectors_map.get_diffracting_pixels_map()
+        assert xim.metadata.General.title == "Diffracting Pixels Map"
+
+    def test_get_dpm_in_range(self, diffraction_vectors_map):
+        answer = np.array([[0.0, 3.0], [1.0, 1.0]])
+        xim = diffraction_vectors_map.get_diffracting_pixels_map(in_range=(0, 0.1))
+        assert np.allclose(xim, answer)
+
+    def test_get_dpm_binary(self, diffraction_vectors_map):
+        answer = np.array([[1.0, 1.0], [1.0, 1.0]])
+        xim = diffraction_vectors_map.get_diffracting_pixels_map(binary=True)
+        assert np.allclose(xim, answer)

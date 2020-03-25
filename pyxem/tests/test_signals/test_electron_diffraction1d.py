@@ -50,16 +50,6 @@ class TestSimpleHyperspy:
         assert dx.scale == calibration
 
 
-class TestVirtualImaging:
-    # Tests that virtual imaging runs without failure
-
-    def test_plot_interactive_virtual_image(self, electron_diffraction1d):
-        electron_diffraction1d.plot_interactive_virtual_image(left=1.0, right=2.0)
-
-    def test_get_virtual_image(self, electron_diffraction1d):
-        electron_diffraction1d.get_virtual_image(left=1.0, right=2.0)
-
-
 class TestComputeAndAsLazyElectron1D:
     def test_2d_data_compute(self):
         dask_array = da.random.random((100, 150), chunks=(50, 50))
