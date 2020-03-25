@@ -298,18 +298,21 @@ class TestVirtualImaging:
         assert vi.axes_manager.signal_dimension == 3
         assert vi.axes_manager.navigation_dimension == 0
         assert vi.metadata.General.title == "Integrated intensity"
+        assert vi.metadata.Diffraction.intergrated_range == "CircleROI(cx=3, cy=3, r=5) of Stack of "
 
     def test_get_integrated_intensity_error(
         self, diffraction_pattern, out_signal_axes=(0, 1, 2)
     ):
         roi = hs.roi.CircleROI(3, 3, 5)
         with pytest.raises(ValueError):
-            vi = diffraction_pattern.get_integrated_intensity(roi, out_signal_axes)
+            _ = diffraction_pattern.get_integrated_intensity(roi, out_signal_axes)
 
     def test_get_integrated_intensity_linescan(self, diffraction_pattern):
         s = diffraction_pattern.inav[0, :]
+        s.metadata.General.title = ""
         roi = hs.roi.CircleROI(3, 3, 5)
         vi = s.get_integrated_intensity(roi)
         assert vi.data.shape == (2,)
         assert vi.axes_manager.signal_dimension == 1
         assert vi.axes_manager.navigation_dimension == 0
+        assert vi.metadata.Diffraction.intergrated_range == "CircleROI(cx=3, cy=3, r=5)"
