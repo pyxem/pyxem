@@ -18,7 +18,8 @@
 
 # Use agg backend to avoid displaying figure when running tests
 import matplotlib
-matplotlib.use('agg')
+
+matplotlib.use("agg")
 
 import pytest
 import diffpy.structure
