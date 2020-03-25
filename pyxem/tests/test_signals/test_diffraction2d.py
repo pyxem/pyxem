@@ -19,6 +19,7 @@
 import pytest
 import numpy as np
 import dask.array as da
+import hyperspy.api as hs
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D

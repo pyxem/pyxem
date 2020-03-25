@@ -23,14 +23,14 @@ Signal class for two-dimensional diffraction data in Cartesian coordinates.
 import numpy as np
 from warnings import warn
 
-from hyperspy.api import interactive
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
+from pyxem.signals.common_diffraction import CommonDiffraction
 
 from pyxem.utils.expt_utils import (
     radial_average,
@@ -68,82 +68,8 @@ from skimage.morphology import square
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
-class Diffraction2D(Signal2D):
+class Diffraction2D(Signal2D, CommonDiffraction):
     _signal_type = "diffraction"
-
-    def plot_interactive_virtual_image(self, roi, **kwargs):
-        """Plots an interactive virtual image formed with a specified and
-        adjustable roi.
-
-        Parameters
-        ----------
-        roi : :obj:`hyperspy.roi.BaseInteractiveROI`
-            Any interactive ROI detailed in HyperSpy.
-        **kwargs:
-            Keyword arguments to be passed to `Diffraction2D.plot`
-
-        Examples
-        --------
-        .. code-block:: python
-
-            import hyperspy.api as hs
-            roi = hs.roi.CircleROI(0, 0, 0.2)
-            data.plot_interactive_virtual_image(roi)
-
-        """
-        self.plot(**kwargs)
-        roi.add_widget(self, axes=self.axes_manager.signal_axes)
-        # Add the ROI to the appropriate signal axes.
-        dark_field = roi.interactive(self, navigation_signal="same")
-        dark_field_placeholder = BaseSignal(
-            np.zeros(self.axes_manager.navigation_shape[::-1])
-        )
-        # Create an output signal for the virtual dark-field calculation.
-        dark_field_sum = interactive(
-            # Create an interactive signal
-            dark_field.sum,
-            # Formed from the sum of the pixels in the dark-field signal
-            event=dark_field.axes_manager.events.any_axis_changed,
-            # That updates whenever the widget is moved
-            axis=dark_field.axes_manager.signal_axes,
-            out=dark_field_placeholder,
-            # And outputs into the prepared placeholder.
-        )
-        dark_field_sum.axes_manager.update_axes_attributes_from(
-            self.axes_manager.navigation_axes, ["scale", "offset", "units", "name"]
-        )
-        dark_field_sum.metadata.General.title = "Virtual Dark Field"
-        # Set the parameters
-        dark_field_sum.plot()  # Plot the result
-
-    def get_virtual_image(self, roi):
-        """Obtains a virtual image associated with a specified ROI.
-
-        Parameters
-        ----------
-        roi: :obj:`hyperspy.roi.BaseInteractiveROI`
-            Any interactive ROI detailed in HyperSpy.
-
-        Returns
-        -------
-        dark_field_sum : :obj:`hyperspy.signals.BaseSignal`
-            The virtual image signal associated with the specified roi.
-
-        Examples
-        --------
-        .. code-block:: python
-
-            import hyperspy.api as hs
-            roi = hs.roi.CircleROI(0, 0, 0.2)
-            data.get_virtual_image(roi)
-
-        """
-        dark_field = roi(self, axes=self.axes_manager.signal_axes)
-        dark_field_sum = dark_field.sum(axis=dark_field.axes_manager.signal_axes)
-        dark_field_sum.metadata.General.title = "Virtual Dark Field"
-        vdfim = dark_field_sum.as_signal2D((0, 1))
-
-        return vdfim
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.

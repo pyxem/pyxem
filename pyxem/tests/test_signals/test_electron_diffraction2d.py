@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 import dask.array as da
-import pyxem as pxm
+import hyperspy.api as hs
 
 from hyperspy.signals import Signal1D, Signal2D
 
@@ -141,18 +141,6 @@ class TestSimpleHyperspy:
                 diffraction_pattern.isig[0.0, 0.0].data
                 == diffraction_pattern.isig[center[0], center[1]].data
             )
-
-
-class TestVirtualImaging:
-    # Tests that virtual imaging runs without failure
-
-    def test_plot_interactive_virtual_image(self, diffraction_pattern):
-        roi = pxm.roi.CircleROI(3, 3, 5)
-        diffraction_pattern.plot_interactive_virtual_image(roi)
-
-    def test_get_virtual_image(self, diffraction_pattern):
-        roi = pxm.roi.CircleROI(3, 3, 5)
-        diffraction_pattern.get_virtual_image(roi)
 
 
 class TestGainNormalisation:

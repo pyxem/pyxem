@@ -472,8 +472,8 @@ class DiffractionVectors(BaseSignal):
         else:
             return unique_peaks
 
-    def filter_vectors_magnitudes(self, min_magnitude, max_magnitude, *args, **kwargs):
-        """Filter the diffraction vectors to accept only those with magnitudes
+    def filter_magnitude(self, min_magnitude, max_magnitude, *args, **kwargs):
+        """Filter the diffraction vectors to accept only those with a magnitude
         within a user specified range.
 
         Parameters
@@ -519,7 +519,7 @@ class DiffractionVectors(BaseSignal):
 
         return filtered_vectors
 
-    def filter_vectors_detector_edge(self, exclude_width, *args, **kwargs):
+    def filter_detector_edge(self, exclude_width, *args, **kwargs):
         """Filter the diffraction vectors to accept only those not within a
         user specified proximity to the detector edge.
 
@@ -574,11 +574,14 @@ class DiffractionVectors(BaseSignal):
 
         return filtered_vectors
 
-    def get_diffracting_pixels_map(self, binary=False):
+    def get_diffracting_pixels_map(self, in_range=None, binary=False):
         """Map of the number of vectors at each navigation position.
 
         Parameters
         ----------
+        in_range : tuple
+            Tuple (min_magnitude, max_magnitude) the minimum and maximum
+            magnitude of vectors to be used to form the map.
         binary : boolean
             If True a binary image with diffracting pixels taking value == 1 is
             returned.
@@ -588,17 +591,21 @@ class DiffractionVectors(BaseSignal):
         crystim : Signal2D
             2D map of diffracting pixels.
         """
-        crystim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
-
+        if in_range:
+            filtered = self.filter_magnitude(in_range[0], in_range[1])
+            xim = filtered.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+        else:
+            xim = self.map(get_npeaks, inplace=False).as_signal2D((0, 1))
+        # Make binary if specified
         if binary is True:
-            crystim = crystim == 1
+            xim = xim >= 1.0
+        # Set properties
+        xim = transfer_navigation_axes_to_signal_axes(xim, self)
+        xim.change_dtype("float")
+        xim.set_signal_type("signal2d")
+        xim.metadata.General.title = "Diffracting Pixels Map"
 
-        crystim.change_dtype("float")
-
-        # Set calibration to same as signal
-        crystim = transfer_navigation_axes_to_signal_axes(crystim, self)
-
-        return crystim
+        return xim
 
     def calculate_cartesian_coordinates(
         self, accelerating_voltage, camera_length, *args, **kwargs
