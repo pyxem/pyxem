@@ -350,6 +350,12 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
     x = da.from_array(data, chunks=chunks)
     data_pxm = LazyElectronDiffraction2D(data)
 
+    if hdr_info['Assembly Size'] == '2x2':
+        data = data_pxm.data
+        # add_crosses expects a dask array object
+        data = _add_crosses(data)
+        data_pxm = LazyElectronDiffraction2D(data)
+
     if os.stat(mib_path).st_size * 1e9 < 0.1:
         exp_times_list = _read_exposures(mib_path, pct_frames_to_read=1.0)
     else:
@@ -389,6 +395,7 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
     except ValueError:
         print(
             'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+
     if flip:
         data_pxm.data = np.flip(data_pxm.data, axis=2)
         data_pxm.metadata.Signal.flip = True
