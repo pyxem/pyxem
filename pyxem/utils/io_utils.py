@@ -137,7 +137,7 @@ def load_hspy(filename, lazy=False, assign_to=None):
     return s
 
 
-def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
+def load_mib(mib_path, reshape=True, flip=True):
     """Read a .mib file or an h5 stack file using dask and return as a lazy pyXem / hyperspy signal.
 
     Parameters
@@ -150,9 +150,6 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
     flip: boolean
         Keyword argument to vertically flip the diffraction signal (default)
         or return unchanged. The metadata is updated accordingly.
-    h5_stack_path: str
-        Default None. this is the h5 file path that we can read the data from in the case of large scan arrays
-        using the pxm.utils.io_utils.mib_to_h5stack function.
 
     Returns
     -------
@@ -187,30 +184,28 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
     width = hdr_stuff['width']
     height = hdr_stuff['height']
     width_height = width * height
-    if h5_stack_path is None:
-        data = _mib_to_daskarr(mib_path)
-        depth = _get_mib_depth(hdr_stuff, mib_path)
-        hdr_bits = _get_hdr_bits(hdr_stuff)
-        if hdr_stuff['Counter Depth (number)'] == 1:
-            # RAW 1 bit data: the header bits are written as uint8 but the frames
-            # are binary and need to be unpacked as such.
-            data = data.reshape(-1, int(width_height / 8 + hdr_bits))
-            data = data[:, hdr_bits:]
-            # get the shape axis 1 before unpackbit
-            s0 = data.shape[0]
-            s1 = data.shape[1]
-            data = np.unpackbits(data)
-            data.reshape(s0, s1 * 8)
-        else:
-            data = data.reshape(-1, int(width_height + hdr_bits))
-            data = data[:, hdr_bits:]
-        if hdr_stuff['raw'] == 'R64':
-            data = _untangle_raw(data, hdr_stuff, depth)
-        elif hdr_stuff['raw'] == 'MIB':
-            data = data.reshape(depth, width, height)
+
+    data = _mib_to_daskarr(mib_path)
+    depth = _get_mib_depth(hdr_stuff, mib_path)
+    hdr_bits = _get_hdr_bits(hdr_stuff)
+    if hdr_stuff['Counter Depth (number)'] == 1:
+        # RAW 1 bit data: the header bits are written as uint8 but the frames
+        # are binary and need to be unpacked as such.
+        data = data.reshape(-1, int(width_height / 8 + hdr_bits))
+        data = data[:, hdr_bits:]
+        # get the shape axis 1 before unpackbit
+        s0 = data.shape[0]
+        s1 = data.shape[1]
+        data = np.unpackbits(data)
+        data.reshape(s0, s1 * 8)
     else:
-        data = h5stack_to_pxm(h5_stack_path, mib_path)
-        data = data.data
+        data = data.reshape(-1, int(width_height + hdr_bits))
+        data = data[:, hdr_bits:]
+    if hdr_stuff['raw'] == 'R64':
+        data = _untangle_raw(data, hdr_stuff, depth)
+    elif hdr_stuff['raw'] == 'MIB':
+        data = data.reshape(depth, width, height)
+
     # if small mib file read all the exposure times otherwise just the 10% default
     if os.stat(mib_path).st_size * 1e9 < 0.1:
         exp_times_list = _read_exposures(mib_path, pct_frames_to_read=1.0)
