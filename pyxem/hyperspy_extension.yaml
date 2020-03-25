@@ -53,6 +53,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.electron_diffraction2d
+  PolarDiffraction2D:
+    signal_type: polar_diffraction
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.polar_diffraction2d
   LazyElectronDiffraction1D:
     signal_type: electron_diffraction
     signal_dimension: 1
@@ -65,6 +71,12 @@ signals:
     dtype: real
     lazy: True
     module: pyxem.signals.electron_diffraction2d
+  LazyPolarDiffraction2D:
+    signal_type: polar_diffraction
+    signal_dimension: 2
+    dtype: real
+    lazy: True
+    module: pyxem.signals.polar_diffraction2d
   DiffractionVectors:
     signal_type: diffraction_vectors
     signal_dimension: 0
