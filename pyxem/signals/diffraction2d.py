@@ -510,7 +510,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return bg_subtracted
 
-    def as_polar(self, dr=1.0, dt=None, jacobian=False, *args, **kwargs):
+    def as_polar(self, dr=1.0, dt=None, jacobian=True, **kwargs):
         """Reprojects two-dimensional diffraction data from cartesian to polar
         coordinates.
 
@@ -520,16 +520,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Radial coordinate spacing for the grid interpolation
             tests show that there is not much point in going below 0.5
         dt : float
-            Angular coordinate spacing (in radians)
-            if ``dt=None``, dt will be set such that the number of theta values
-            is equal to the maximum value between the height or the width of
-            the image.
-        Jacobian : boolean
+            Angular coordinate spacing (in radians). If ``dt=None``, dt is set
+            such that the number of theta values is equal to the largest
+            dimension of the data array.
+        jacobian : boolean
             Include ``r`` intensity scaling in the coordinate transform.
             This should be included to account for the changing pixel size that
             occurs during the transform.
-        *args : arguments
-            Arguments passed to the hyperspy map function.
         **kwargs : keyord arguments
             Keyword arguments passed to the hyperspy map function.
 
@@ -545,7 +542,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             dt=dt,
             jacobian=jacobian,
             inplace=False,
-            *args,
             **kwargs
         )
         # Assign to appropriate signal
