@@ -537,12 +537,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         polar = self.map(
-            reproject_polar,
-            dr=dr,
-            dt=dt,
-            jacobian=jacobian,
-            inplace=False,
-            **kwargs
+            reproject_polar, dr=dr, dt=dt, jacobian=jacobian, inplace=False, **kwargs
         )
         # Assign to appropriate signal
         polar.set_signal_type("polar_diffraction")
