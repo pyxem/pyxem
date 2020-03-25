@@ -241,9 +241,9 @@ def radial_average(z, mask=None):
     return averaged
 
 
-def reproject_polar(z, dr=1, dt=None, jacobian=False):
-    """
-    Reprojects a 2D diffraction pattern into a polar coordinate system.
+def reproject_polar(z, dr=1, dt=None, jacobian=True):
+    """Reprojects two-dimensional diffraction data from cartesian to polar
+    coordinates.
 
     Parameters
     ----------
@@ -251,26 +251,25 @@ def reproject_polar(z, dr=1, dt=None, jacobian=False):
         Radial coordinate spacing for the grid interpolation
         tests show that there is not much point in going below 0.5
     dt : float
-        Angular coordinate spacing (in radians)
-        if ``dt=None``, dt will be set such that the number of theta values
-        is equal to the maximum value between the height or the width of
-        the image.
-    Jacobian : boolean
+        Angular coordinate spacing (in radians). If ``dt=None``, dt is set
+        such that the number of theta values is equal to the largest
+        dimension of the data array.
+    jacobian : boolean
         Include ``r`` intensity scaling in the coordinate transform.
         This should be included to account for the changing pixel size that
         occurs during the transform.
 
     Returns
     -------
-    output : 2D np.array
-        The polar image (r, theta)
+    output : numpy.array
+        The polar diffraction pattern (r, theta)
 
     Notes
     -----
     Adapted from: PyAbel, www.github.com/PyAbel/PyAbel
 
     """
-    # geometric shape work, not 0 indexing
+    # geometric shape work, note 0 indexing
     origin = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
     # bottom-left coordinate system requires numpy image to be np.flipud
     data = np.flipud(z)
