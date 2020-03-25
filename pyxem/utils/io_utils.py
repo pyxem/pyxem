@@ -216,7 +216,7 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
         exp_times_list = _read_exposures(mib_path, pct_frames_to_read=1.0)
     else:
         exp_times_list = _read_exposures(mib_path)
-    data_dict = _STEM_flagf_dict(exp_times_list)
+    data_dict = _STEM_flag_dict(exp_times_list)
 
     if hdr_stuff['Assembly Size'] == '2x2':
         # add_crosses expects a dask array object
@@ -267,6 +267,130 @@ def load_mib(mib_path, reshape=True, flip=True, h5_stack_path=None):
         data_pxm.metadata.Signal.flip = True
     else:
         data_pxm.metadata.Signal.flip = False
+    return data_pxm
+
+
+def mib_to_h5stack(fp, save_path, mmap_mode='r'):
+    """
+    Read a .mib file using memory mapping where the array
+    is stored on disk and not directly loaded, but may be treated
+    like a dask array. It writes the data in chunks into an h5 file.
+
+    Parameters
+    ----------
+    fp: str
+        Filepath of .mib file to be loaded.
+    save_path: str
+        h5 filename path to save the h5 file stack
+    mmap_mode: str
+        default 'r' - {None, 'r+', 'r', 'w+', 'c'}, optional
+        If not None, then memory-map the file, using the given mode
+        (see `numpy.memmap`).  The mode has no effect for pickled or
+        zipped files.
+
+    Returns
+    -------
+    None
+    """
+    # check to see if the h5 path already exists and if so raise warning
+    if os.path.exists(save_path):
+        print('The h5 path provided already exists. Change file name to avoid overwrite.')
+        return
+    hdr_info = _parse_hdr(fp)
+    width = hdr_info['width']
+    height = hdr_info['height']
+
+    record_by = hdr_info['record-by']
+    depth = _get_mib_depth(hdr_info, fp)
+
+    data = _mib_to_daskarr(fp)
+    hdr_bits = _get_hdr_bits(hdr_info)
+
+    if record_by == 'vector':  # spectral image
+        size = (height, width, depth)
+        data = data.reshape(size)
+
+    elif record_by == 'image':  # stack of images
+        width_height = width * height
+
+        # remove headers at the beginning of each frame and reshape
+        if hdr_info['raw'] == 'R64':
+            if hdr_info['Assembly Size'] == '2x2':
+                if hdr_info['Counter Depth (number)'] == 1:
+                    _stack_h5dump(data, hdr_info, save_path, raw_binary=True)
+                else:
+                    # All the other counter depths RAW format
+                    _stack_h5dump(data, hdr_info, save_path)
+        elif hdr_info['raw'] == 'MIB':
+            _stack_h5dump(data, hdr_info, save_path)
+    return
+
+
+def h5stack_to_pxm(h5_path, mib_path):
+    """
+    this function reads the saved stack h5 file into a reshaped pyxem.signals.LazyElectronDiffraction2D object
+    chunks are defined as (100, det_x, det_y)
+
+    Parameters
+    ----------
+    h5_path: str
+        full path and name of the h5 stack file
+    mib_path: str
+        full path and name of the mib file
+
+    Returns
+    -------
+    data_pxm: pyxem.signals.LazyElectronDiffraction2D
+    """
+    hdr_info = _parse_hdr(mib_path)
+    f = h5py.File(h5_path, 'r')
+
+    data = f['data_stack']
+
+    chunks = (100, hdr_info['width'], hdr_info['height'])
+
+    x = da.from_array(data, chunks=chunks)
+    data_pxm = LazyElectronDiffraction2D(data)
+
+    if os.stat(mib_path).st_size * 1e9 < 0.1:
+        exp_times_list = _read_exposures(mib_path, pct_frames_to_read=1.0)
+    else:
+        exp_times_list = _read_exposures(mib_path)
+    data_dict = _STEM_flag_dict(exp_times_list)
+
+    # Tranferring dict info to metadata
+    if data_dict['STEM_flag'] == 1:
+        data_pxm.metadata.Signal.signal_type = 'STEM'
+    else:
+        data_pxm.metadata.Signal.signal_type = 'TEM'
+    data_pxm.metadata.Signal.scan_X = data_dict['scan_X']
+    data_pxm.metadata.Signal.exposure_time = data_dict['exposure time']
+    data_pxm.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
+    data_pxm.metadata.Signal.flyback_times = data_dict['flyback_times']
+
+    if data_pxm.metadata.Signal.signal_type == 'TEM' and data_pxm.metadata.Signal.exposure_time != None:
+        print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
+
+    # to catch single frames:
+    if data_pxm.axes_manager[0].size == 1:
+        print('This mib file is a single frame.')
+
+    try:
+        # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
+        # to reshape otherwise use reshape_4DSTEM_FlyBack function
+        if data_pxm.metadata.Signal.exposure_time is None:
+            (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
+            data_pxm.metadata.Signal.signal_type = 'STEM'
+            data_pxm.metadata.Signal.frames_number_skipped = skip_ind
+        else:
+            print('reshaping using flyback pixel')
+            data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
+    except TypeError:
+        print(
+            'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
+    except ValueError:
+        print(
+            'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
     return data_pxm
 
 
@@ -784,61 +908,6 @@ def _STEM_flag_dict(exp_times_list):
 
     return output
 
-def mib_to_h5stack(fp, save_path, mmap_mode='r'):
-    """
-    Read a .mib file using memory mapping where the array
-    is stored on disk and not directly loaded, but may be treated
-    like a dask array. It writes the data in chunks into an h5 file.
-
-    Parameters
-    ----------
-    fp: str
-        Filepath of .mib file to be loaded.
-    save_path: str
-        h5 filename path to save the h5 file stack
-    mmap_mode: str
-        default 'r' - {None, 'r+', 'r', 'w+', 'c'}, optional
-        If not None, then memory-map the file, using the given mode
-        (see `numpy.memmap`).  The mode has no effect for pickled or
-        zipped files.
-
-    Returns
-    -------
-    None
-    """
-    # check to see if the h5 path already exists and if so raise warning
-    if os.path.exists(save_path):
-        print('The h5 path provided already exists. Change file name to avoid overwrite.')
-        return
-    hdr_info = _parse_hdr(fp)
-    width = hdr_info['width']
-    height = hdr_info['height']
-
-    record_by = hdr_info['record-by']
-    depth = _get_mib_depth(hdr_info, fp)
-
-    data = _mib_to_daskarr(fp)
-    hdr_bits = _get_hdr_bits(hdr_info)
-
-    if record_by == 'vector':  # spectral image
-        size = (height, width, depth)
-        data = data.reshape(size)
-
-    elif record_by == 'image':  # stack of images
-        width_height = width * height
-
-        # remove headers at the beginning of each frame and reshape
-        if hdr_info['raw'] == 'R64':
-            if hdr_info['Assembly Size'] == '2x2':
-                if hdr_info['Counter Depth (number)'] == 1:
-                    _stack_h5dump(data, hdr_info, save_path, raw_binary=True)
-                else:
-                    # All the other counter depths RAW format
-                    _stack_h5dump(data, hdr_info, save_path)
-        elif hdr_info['raw'] == 'MIB':
-            _stack_h5dump(data, hdr_info, save_path)
-    return
-
 
 def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False, stack_num=1000):
     """
@@ -1103,71 +1172,3 @@ def reshape_4DSTEM_SumFrames(data):
     # Cropping the flyaback pixel at the start
     data_skip = data_skip.inav[1:]
     return data_skip
-
-
-def h5stack_to_pxm(h5_path, mib_path):
-    """
-    this function reads the saved stack h5 file into a reshaped pyxem.signals.LazyElectronDiffraction2D object
-    chunks are defined as (100, det_x, det_y)
-
-    Parameters
-    ----------
-    h5_path: str
-        full path and name of the h5 stack file
-    mib_path: str
-        full path and name of the mib file
-
-    Returns
-    -------
-    data_pxm: pyxem.signals.LazyElectronDiffraction2D
-    """
-    hdr_info = _parse_hdr(mib_path)
-    f = h5py.File(h5_path, 'r')
-
-    data = f['data_stack']
-
-    chunks = (100, hdr_info['width'], hdr_info['height'])
-
-    x = da.from_array(data, chunks=chunks)
-    data_pxm = LazyElectronDiffraction2D(data)
-
-    if os.stat(mib_path).st_size * 1e9 < 0.1:
-        exp_times_list = _read_exposures(mib_path, pct_frames_to_read=1.0)
-    else:
-        exp_times_list = _read_exposures(mib_path)
-    data_dict = _STEM_flag_dict(exp_times_list)
-
-    # Tranferring dict info to metadata
-    if data_dict['STEM_flag'] == 1:
-        data_pxm.metadata.Signal.signal_type = 'STEM'
-    else:
-        data_pxm.metadata.Signal.signal_type = 'TEM'
-    data_pxm.metadata.Signal.scan_X = data_dict['scan_X']
-    data_pxm.metadata.Signal.exposure_time = data_dict['exposure time']
-    data_pxm.metadata.Signal.frames_number_skipped = data_dict['number of frames_to_skip']
-    data_pxm.metadata.Signal.flyback_times = data_dict['flyback_times']
-
-    if data_pxm.metadata.Signal.signal_type == 'TEM' and data_pxm.metadata.Signal.exposure_time != None:
-        print('This mib file appears to be TEM data. The stack is returned with no reshaping.')
-
-    # to catch single frames:
-    if data_pxm.axes_manager[0].size == 1:
-        print('This mib file is a single frame.')
-
-    try:
-        # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
-        # to reshape otherwise use reshape_4DSTEM_FlyBack function
-        if data_pxm.metadata.Signal.exposure_time is None:
-            (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
-            data_pxm.metadata.Signal.signal_type = 'STEM'
-            data_pxm.metadata.Signal.frames_number_skipped = skip_ind
-        else:
-            print('reshaping using flyback pixel')
-            data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
-    except TypeError:
-        print(
-            'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
-    except ValueError:
-        print(
-            'Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!')
-    return data_pxm
