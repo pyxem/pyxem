@@ -27,9 +27,8 @@ from hyperspy.component import Component
 
 
 class ReducedIntensityCorrectionComponent(Component):
-
-    def __init__(self, a=0., b=0., c=0., d=0.):
-        '''
+    def __init__(self, a=0.0, b=0.0, c=0.0, d=0.0):
+        """
         Parameters
         ----------
         a : float
@@ -43,9 +42,9 @@ class ReducedIntensityCorrectionComponent(Component):
         -------
         p : polynomial of the form ax + bx^2 + cx^3 + dx^4
 
-        '''
+        """
 
-        Component.__init__(self, ('a', 'b', 'c', 'd'))
+        Component.__init__(self, ("a", "b", "c", "d"))
 
     def function(self, x):
         a = self.a.value
@@ -53,5 +52,5 @@ class ReducedIntensityCorrectionComponent(Component):
         c = self.c.value
         d = self.d.value
 
-        p = a * x + b * (x**2) + c * (x**3) + d * (x**4)
+        p = a * x + b * (x ** 2) + c * (x ** 3) + d * (x ** 4)
         return p

@@ -16,12 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import hyperspy.api as hs
+import os
+import tempfile
+
 import numpy as np
 import pytest
 import pyxem as pxm
 from pyxem.utils.big_data_utils import chunked_application_of_UDF, _get_chunk_size
-import os
 
 
 @pytest.mark.xfail(raises=ValueError, strict=True)
@@ -40,6 +41,8 @@ class Test_bad_xy_lists:
 This runs a simple case of square rooting all elements of a pattern,
 the chunked version is compared with doing the entire operation in memory.
 """
+
+
 @pytest.fixture()
 def big_electron_diffraction_pattern():
     z = np.arange(0, 160, step=1).reshape(4, 10, 2, 2)  # x_size=10, y_size=4 in hspy
@@ -58,11 +61,12 @@ def dp_sqrt(dp):
 
 def test_core_big_data_functionality(big_electron_diffraction_pattern):
     expected_output = np.sqrt(big_electron_diffraction_pattern.data)
-    filepath = 'files_for_tests/tempfile_for_big_data_util_testing.hspy'
-    big_electron_diffraction_pattern.save(filepath)
-
-    x_list = [0, 2, 4, 6, 8]
-    y_list = np.arange(0, 4, 2)  # [0,2] but as an array
-
-    test_output = chunked_application_of_UDF(filepath, x_list, y_list, dp_sqrt)
-    assert np.allclose(expected_output, test_output.data)
+    with tempfile.TemporaryDirectory() as tmp:
+        filepath = os.path.join(tmp, 'tempfile_for_big_data_util_testing.hspy')
+        big_electron_diffraction_pattern.save(filepath)
+    
+        x_list = [0, 2, 4, 6, 8]
+        y_list = np.arange(0, 4, 2)  # [0,2] but as an array
+    
+        test_output = chunked_application_of_UDF(filepath, x_list, y_list, dp_sqrt)
+        assert np.allclose(expected_output, test_output.data)
