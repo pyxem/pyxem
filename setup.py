@@ -31,6 +31,13 @@ setup(
     license=license,
     url="https://github.com/pyxem/pyxem",
     long_description=open("README.rst").read(),
+    keywords=[
+        "data analysis",
+        "diffraction",
+        "microscopy",
+        "electron diffraction",
+        "electron microscopy",
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
