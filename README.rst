@@ -25,6 +25,8 @@ pyXem is an open-source python library for crystallographic diffraction microsco
 
 The package defines objects and functions for the analysis of numerous diffraction patterns and has been primarily developed as a platform for hybrid diffraction-microscopy based on 4D scanning diffraction microscopy data in which a 2D diffraction pattern is recorded at every position in a 2D scan of a specimen.
 
+pyXem is an extension of the HyperSpy library for multi-dimensional data analysis and defines application specific Signal classes.
+
 **Installation instructions, documentation and tutorial examples are available** `here <https://pyxem.github.io/pyxem-website>`__ .
 
 If analysis using pyXem forms a part of published work please cite the DOI at the top of this page.
