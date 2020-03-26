@@ -68,7 +68,7 @@ class DisplacementGradientMap(Signal2D):
     _signal_type = "tensor_field"
 
     def __init__(self, *args, **kwargs):
-        Signal2D.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Check that the signal dimensions are (3,3) for it to be a valid
         # TensorField
 
@@ -86,9 +86,7 @@ class DisplacementGradientMap(Signal2D):
             The strain tensor field.
 
         """
-        RU = self.map(_polar_decomposition,
-                      side='right',
-                      inplace=False)
+        RU = self.map(_polar_decomposition, side="right", inplace=False)
         return RU.isig[:, :, 0], RU.isig[:, :, 1]
 
     def get_strain_maps(self):

@@ -23,16 +23,19 @@ vector.
 from hyperspy.signals import Signal1D
 import numpy as np
 
-from pyxem.components.reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
-from pyxem.utils.ri_utils import damp_ri_exponential, damp_ri_lorch, \
-    damp_ri_updated_lorch, damp_ri_low_q_region_erfc
+from pyxem.components.reduced_intensity_correction_component import (
+    ReducedIntensityCorrectionComponent,
+)
+from pyxem.utils.ri_utils import (
+    damp_ri_exponential,
+    damp_ri_lorch,
+    damp_ri_updated_lorch,
+    damp_ri_low_q_region_erfc,
+)
 
 
 class ReducedIntensity1D(Signal1D):
-    _signal_type = "reduced_intensity1d"
-
-    def __init__(self, *args, **kwargs):
-        Signal1D.__init__(self, *args, **kwargs)
+    _signal_type = "reduced_intensity"
 
     def damp_exponential(self, b, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
@@ -55,9 +58,16 @@ class ReducedIntensity1D(Signal1D):
         s_size = self.axes_manager.signal_axes[0].size
         s_offset = self.axes_manager.signal_axes[0].offset
 
-        return self.map(damp_ri_exponential, b=b, s_scale=s_scale,
-                        s_size=s_size, s_offset=s_offset,
-                        inplace=inplace, *args, **kwargs)
+        return self.map(
+            damp_ri_exponential,
+            b=b,
+            s_scale=s_scale,
+            s_size=s_size,
+            s_offset=s_offset,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )
 
     def damp_lorch(self, s_max=None, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
@@ -88,9 +98,16 @@ class ReducedIntensity1D(Signal1D):
         if not s_max:
             s_max = s_scale * s_size + s_offset
 
-        return self.map(damp_ri_lorch, s_max=s_max, s_scale=s_scale,
-                        s_size=s_size, s_offset=s_offset, inplace=inplace,
-                        *args, **kwargs)
+        return self.map(
+            damp_ri_lorch,
+            s_max=s_max,
+            s_scale=s_scale,
+            s_size=s_size,
+            s_offset=s_offset,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )
 
     def damp_updated_lorch(self, s_max=None, inplace=True, *args, **kwargs):
         """ Damps the reduced intensity signal to reduce noise in the high s
@@ -122,12 +139,20 @@ class ReducedIntensity1D(Signal1D):
         if not s_max:
             s_max = s_scale * s_size + s_offset
 
-        return self.map(damp_ri_updated_lorch, s_max=s_max, s_scale=s_scale,
-                        s_size=s_size, s_offset=s_offset, inplace=inplace,
-                        *args, **kwargs)
+        return self.map(
+            damp_ri_updated_lorch,
+            s_max=s_max,
+            s_scale=s_scale,
+            s_size=s_size,
+            s_offset=s_offset,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )
 
-    def damp_low_q_region_erfc(self, scale=20, offset=1.3, inplace=True, *args,
-                               **kwargs):
+    def damp_low_q_region_erfc(
+        self, scale=20, offset=1.3, inplace=True, *args, **kwargs
+    ):
         """ Damps the reduced intensity signal in the low q region as a
         correction to central beam effects. The reduced intensity profile is
         damped by (erf(scale * s - offset) + 1) / 2
@@ -150,12 +175,19 @@ class ReducedIntensity1D(Signal1D):
         s_size = self.axes_manager.signal_axes[0].size
         s_offset = self.axes_manager.signal_axes[0].offset
 
-        return self.map(damp_ri_low_q_region_erfc, scale=scale, offset=offset,
-                        s_scale=s_scale, s_size=s_size, s_offset=s_offset,
-                        inplace=inplace, *args, **kwargs)
+        return self.map(
+            damp_ri_low_q_region_erfc,
+            scale=scale,
+            offset=offset,
+            s_scale=s_scale,
+            s_size=s_size,
+            s_offset=s_offset,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )
 
-    def fit_thermal_multiple_scattering_correction(self, s_max=None,
-                                                   plot=False):
+    def fit_thermal_multiple_scattering_correction(self, s_max=None, plot=False):
         """ Fits a 4th order polynomial function to the reduced intensity.
         This is used to calculate the error in the reduced intensity due to
         the effects of multiple and thermal diffuse scattering, which
@@ -195,7 +227,7 @@ class ReducedIntensity1D(Signal1D):
         if not s_max:
             s_max = s_scale * (s_size + 1) + s_offset
 
-        #scattering_axis = s_scale * np.arange(s_size,dtype='float64')
+        # scattering_axis = s_scale * np.arange(s_size,dtype='float64')
         fit_model = self.create_model()
         fit_model.append(ReducedIntensityCorrectionComponent())
         fit_model.set_signal_range([0, s_max])

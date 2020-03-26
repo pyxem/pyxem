@@ -18,110 +18,128 @@
 
 signals:
   Diffraction1D:
-    signal_type: "Diffraction1D"
+    signal_type: diffraction
     signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction1d
   Diffraction2D:
-    signal_type: "Diffraction2D"
+    signal_type: diffraction
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction2d
   LazyDiffraction1D:
-    signal_type: "LazyDiffraction1D"
+    signal_type: diffraction
     signal_dimension: 1
     dtype: real
     lazy: True
     module: pyxem.signals.diffraction1d
   LazyDiffraction2D:
-    signal_type: "LazyDiffraction2D"
+    signal_type: diffraction
     signal_dimension: 2
     dtype: real
     lazy: True
     module: pyxem.signals.diffraction2d
   ElectronDiffraction1D:
-    signal_type: "ElectronDiffraction1D"
+    signal_type: electron_diffraction
     signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.electron_diffraction1d
   ElectronDiffraction2D:
-    signal_type: "ElectronDiffraction2D"
+    signal_type: electron_diffraction
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.electron_diffraction2d
+  PolarDiffraction2D:
+    signal_type: polar_diffraction
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.polar_diffraction2d
   LazyElectronDiffraction1D:
-    signal_type: "LazyElectronDiffraction1D"
+    signal_type: electron_diffraction
     signal_dimension: 1
     dtype: real
     lazy: True
     module: pyxem.signals.electron_diffraction1d
   LazyElectronDiffraction2D:
-    signal_type: "LazyElectronDiffraction2D"
+    signal_type: electron_diffraction
     signal_dimension: 2
     dtype: real
     lazy: True
     module: pyxem.signals.electron_diffraction2d
+  LazyPolarDiffraction2D:
+    signal_type: polar_diffraction
+    signal_dimension: 2
+    dtype: real
+    lazy: True
+    module: pyxem.signals.polar_diffraction2d
   DiffractionVectors:
-    signal_type: "DiffractionVectors"
-    signal_dimension: None
+    signal_type: diffraction_vectors
+    signal_dimension: 0
+    dtype: real
+    lazy: False
+    module: pyxem.signals.diffraction_vectors
+  DiffractionVectors2D:
+    signal_type: diffraction_vectors
+    signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
   TemplateMatchingResults:
-    signal_type: "TemplateMatchingResults"
-    signal_dimension: None
+    signal_type: template_matching
+    signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
   VectorMatchingResults:
-    signal_type: "VectorMatchingResults"
-    signal_dimension: None
+    signal_type: vector_matching
+    signal_dimension: 0
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
   CrystallographicMap:
-    signal_type: "CrystallographicMap"
-    signal_dimension: None
+    signal_type: crystallographic_map
+    signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.crystallographic_map
   DisplacementGradientMap:
-    signal_type: "DisplacementGradientMap"
+    signal_type: tensor_field
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.tensor_field
   VDFImage:
-    signal_type: "VDFImage"
+    signal_type: vdf_image
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.vdf_image
   ReducedIntensity1D:
-    signal_type: "ReducedIntensity1D"
+    signal_type: reduced_intensity
     signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.reduced_intensity1d
   PairDistributionFunction1D:
-    signal_type: "PairDistributionFunction1D"
+    signal_type: pair_distribution_function
     signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.pair_distribution_function1d
   DiffractionVariance1D:
-    signal_type: "DiffractionVariance1D"
+    signal_type: diffraction_variance
     signal_dimension: 1
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_variance1d
   DiffractionVariance2D:
-    signal_type: "DiffractionVariance2D"
-    signal_dimension: 1
+    signal_type: diffraction_variance
+    signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_variance2d

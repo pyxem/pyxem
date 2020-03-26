@@ -20,7 +20,6 @@ import numpy as np
 import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
 
-from pyxem.detectors import GenericFlatDetector
 from scipy.ndimage.interpolation import shift
 from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit, minimize
@@ -84,7 +83,7 @@ def _cart2polar(x, y):
         Polar coordinates
 
     """
-    r = np.sqrt(x**2 + y**2)
+    r = np.sqrt(x ** 2 + y ** 2)
     theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
@@ -108,9 +107,17 @@ def _polar2cart(r, theta):
     return x, y
 
 
-def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
-                        size_1d, unit, kwargs_for_integrator,
-                        kwargs_for_integrate1d):
+def azimuthal_integrate(
+    z,
+    origin,
+    detector_distance,
+    detector,
+    wavelength,
+    size_1d,
+    unit,
+    kwargs_for_integrator,
+    kwargs_for_integrate1d,
+):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is iterated, compared to
@@ -146,16 +153,21 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
         One-dimensional azimuthal integral of z.
     """
     p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
-    ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
-                             detector=detector, wavelength=wavelength,size_1d=5
-                             **kwargs_for_integrator)
-    tth, I = ai.integrate1d(z, size_1d, unit=unit,
-                            **kwargs_for_integrate1d)
+    ai = AzimuthalIntegrator(
+        dist=detector_distance,
+        poni1=p1,
+        poni2=p2,
+        detector=detector,
+        wavelength=wavelength,
+        **kwargs_for_integrator
+    )
+    tth, I = ai.integrate1d(z, size_1d, unit=unit, **kwargs_for_integrate1d)
     return tth, I
 
 
-def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
-                             **kwargs_for_integrate1d):
+def azimuthal_integrate_fast(
+    z, azimuthal_integrator, size_1d, unit, kwargs_for_integrate1d
+):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -185,8 +197,9 @@ def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    tth, I = azimuthal_integrator.integrate1d(z, size_1d, unit=unit,
-                                              **kwargs_for_integrate1d)
+    tth, I = azimuthal_integrator.integrate1d(
+        z, size_1d, unit=unit, **kwargs_for_integrate1d
+    )
     return tth, I
 
 
@@ -210,7 +223,7 @@ def radial_average(z, mask=None):
     center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
 
     y, x = np.indices(z.shape)
-    r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
+    r = np.sqrt((x - center[1]) ** 2 + (y - center[0]) ** 2)
     r = np.rint(r - 0.5).astype(np.int)
     # the subtraction of 0.5 gets the 0 in the correct place
 
@@ -226,6 +239,74 @@ def radial_average(z, mask=None):
     averaged = np.nan_to_num(tbin / nr)
 
     return averaged
+
+
+def reproject_polar(z, dr=1, dt=None, jacobian=True):
+    """Reprojects two-dimensional diffraction data from cartesian to polar
+    coordinates.
+
+    Parameters
+    ----------
+    dr : float
+        Radial coordinate spacing for the grid interpolation
+        tests show that there is not much point in going below 0.5
+    dt : float
+        Angular coordinate spacing (in radians). If ``dt=None``, dt is set
+        such that the number of theta values is equal to the largest
+        dimension of the data array.
+    jacobian : boolean
+        Include ``r`` intensity scaling in the coordinate transform.
+        This should be included to account for the changing pixel size that
+        occurs during the transform.
+
+    Returns
+    -------
+    output : numpy.array
+        The polar diffraction pattern (r, theta)
+
+    Notes
+    -----
+    Adapted from: PyAbel, www.github.com/PyAbel/PyAbel
+
+    """
+    # geometric shape work, note 0 indexing
+    origin = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
+    # bottom-left coordinate system requires numpy image to be np.flipud
+    data = np.flipud(z)
+    ny, nx = data.shape[:2]
+
+    # Determine that the min and max r and theta coords will be...
+    x, y = _index_coords(z, origin=origin)  # (x,y) coordinates of each pixel
+    r, theta = _cart2polar(x, y)  # convert (x,y) -> (r,θ), note θ=0 is vertical
+
+    nr = np.int(np.ceil((r.max() - r.min()) / dr))
+
+    if dt is None:
+        nt = max(nx, ny)
+    else:
+        # dt in radians
+        nt = np.int(np.ceil((theta.max() - theta.min()) / dt))
+
+    # Make a regular (in polar space) grid based on the min and max r & theta
+    r_i = np.linspace(r.min(), r.max(), nr, endpoint=False)
+    theta_i = np.linspace(theta.min(), theta.max(), nt, endpoint=False)
+    theta_grid, r_grid = np.meshgrid(theta_i, r_i)
+
+    # Project the r and theta grid back into pixel coordinates
+    X, Y = _polar2cart(r_grid, theta_grid)
+
+    X += origin[0]  # We need to shift the origin
+    Y += origin[1]  # back to the bottom-left corner...
+    xi, yi = X.flatten(), Y.flatten()
+    coords = np.vstack((yi, xi))  # (map_coordinates requires a 2xn array)
+
+    zi = ndi.map_coordinates(z, coords)
+    output = zi.reshape((nr, nt))
+
+    if jacobian:
+        output = output * r_i[:, np.newaxis]
+
+    return output
 
 
 def gain_normalise(z, dref, bref):
@@ -270,18 +351,20 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
         Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
-    if deadvalue == 'average':
+    if deadvalue == "average":
         for (i, j) in deadpixels:
-            neighbours = z[i - d:i + d + 1, j - d:j + d + 1].flatten()
+            neighbours = z[i - d : i + d + 1, j - d : j + d + 1].flatten()
             z_bar[i, j] = np.mean(neighbours)
 
-    elif deadvalue == 'nan':
+    elif deadvalue == "nan":
         for (i, j) in deadpixels:
             z_bar[i, j] = np.nan
     else:
-        raise NotImplementedError("The method specified is not implemented. "
-                                  "See documentation for available "
-                                  "implementations.")
+        raise NotImplementedError(
+            "The method specified is not implemented. "
+            "See documentation for available "
+            "implementations."
+        )
 
     return z_bar
 
@@ -348,11 +431,11 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
     Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
     if keep_dtype == False:
-        trans = tf.warp(z, transformation,
-                        order=order, *args, **kwargs)
+        trans = tf.warp(z, transformation, order=order, *args, **kwargs)
     if keep_dtype == True:
-        trans = tf.warp(z, transformation,
-                        order=order, preserve_range=True, *args, **kwargs)
+        trans = tf.warp(
+            z, transformation, order=order, preserve_range=True, *args, **kwargs
+        )
         trans = trans.astype(z.dtype)
 
     return trans
@@ -374,7 +457,7 @@ def regional_filter(z, h):
     seed = np.copy(z)
     seed = z - h
     mask = z
-    dilated = morphology.reconstruction(seed, mask, method='dilation')
+    dilated = morphology.reconstruction(seed, mask, method="dilation")
 
     return z - dilated
 
@@ -527,8 +610,10 @@ def _find_peak_max(arr, sigma, upsample_factor, kind):
 
     try:
         r1 = np.linspace(c1 - window, c1 + window, win_len)
-        f = interp1d(r1, y1[c1 - window: c1 + window + 1], kind=kind)
-        r2 = np.linspace(c1 - window, c1 + window, win_len * m)  # extrapolate for subpixel accuracy
+        f = interp1d(r1, y1[c1 - window : c1 + window + 1], kind=kind)
+        r2 = np.linspace(
+            c1 - window, c1 + window, win_len * m
+        )  # extrapolate for subpixel accuracy
         y2 = f(r2)
         c2 = np.argmax(y2) / m  # find beam center with `m` precision
     except ValueError:  # if c1 is too close to the edges, return initial guess
@@ -587,7 +672,7 @@ def find_beam_center_blur(z, sigma):
     center : np.array
         np.array containing indices of estimated direct beam positon.
     """
-    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
+    blurred = ndi.gaussian_filter(z, sigma, mode="wrap")
     center = np.unravel_index(blurred.argmax(), blurred.shape)
     return np.array(center)
 
@@ -614,8 +699,10 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
         np.array containing offset (from center) of the direct beam positon.
     """
     radiusList = np.arange(radius_start, radius_finish)
-    errRecord = np.zeros_like(radiusList, dtype='single')
-    origin = np.array([[round(np.size(z, axis=-2) / 2), round(np.size(z, axis=-1) / 2)]])
+    errRecord = np.zeros_like(radiusList, dtype="single")
+    origin = np.array(
+        [[round(np.size(z, axis=-2) / 2), round(np.size(z, axis=-1) / 2)]]
+    )
 
     for ind in np.arange(0, np.size(radiusList)):
         radius = radiusList[ind]
@@ -629,7 +716,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
 
-    ref = reference_circle(origin, np.size(z, axis=-2), np.size(z, axis=-1), radiusList[index_min])
+    ref = reference_circle(
+        origin, np.size(z, axis=-2), np.size(z, axis=-1), radiusList[index_min]
+    )
     h0 = np.hanning(np.size(ref, 0))
     h1 = np.hanning(np.size(ref, 1))
     hann2d = np.sqrt(np.outer(h0, h1))
@@ -637,7 +726,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     im = hann2d * z
     shift, error, diffphase = register_translation(ref, im, 100)
 
-    return (shift - 0.5)
+    return shift - 0.5
 
 
 def peaks_as_gvectors(z, center, calibration):
@@ -663,9 +752,9 @@ def peaks_as_gvectors(z, center, calibration):
     return np.array([g[0].T[1], g[0].T[0]]).T
 
 
-def investigate_dog_background_removal_interactive(sample_dp,
-                                                   std_dev_maxs,
-                                                   std_dev_mins):
+def investigate_dog_background_removal_interactive(
+    sample_dp, std_dev_maxs, std_dev_mins
+):
     """Utility function to help the parameter selection for the difference of
     gaussians (dog) background subtraction method
 
@@ -689,25 +778,30 @@ def investigate_dog_background_removal_interactive(sample_dp,
     np.arange : Produces suitable objects for std_dev_maxs
 
     """
-    gauss_processed = np.empty((
-        len(std_dev_maxs),
-        len(std_dev_mins),
-        *sample_dp.axes_manager.signal_shape))
+    gauss_processed = np.empty(
+        (len(std_dev_maxs), len(std_dev_mins), *sample_dp.axes_manager.signal_shape)
+    )
 
     for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
         for j, std_dev_min in enumerate(std_dev_mins):
-            gauss_processed[i, j] = sample_dp.remove_background('gaussian_difference',
-                                                                sigma_min=std_dev_min, sigma_max=std_dev_max,
-                                                                show_progressbar=False)
+            gauss_processed[i, j] = sample_dp.remove_background(
+                "gaussian_difference",
+                sigma_min=std_dev_min,
+                sigma_max=std_dev_max,
+                show_progressbar=False,
+            )
     dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
-    dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
-    dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
-    dp_gaussian.axes_manager.navigation_axes[1].name = r'$\sigma_{\mathrm{max}}$'
+    dp_gaussian.metadata.General.title = "Gaussian preprocessed"
+    dp_gaussian.axes_manager.navigation_axes[0].name = r"$\sigma_{\mathrm{min}}$"
+    dp_gaussian.axes_manager.navigation_axes[1].name = r"$\sigma_{\mathrm{max}}$"
     for axes_number, axes_value_list in [(0, std_dev_mins), (1, std_dev_maxs)]:
-        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[0]
-        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = axes_value_list[1] - axes_value_list[0]
-        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
+        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[
+            0
+        ]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = (
+            axes_value_list[1] - axes_value_list[0]
+        )
+        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ""
 
-    dp_gaussian.plot(cmap='viridis')
+    dp_gaussian.plot(cmap="viridis")
     return None
-

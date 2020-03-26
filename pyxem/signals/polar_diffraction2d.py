@@ -15,13 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Electron Diffraction radial profiles
 
 """
+Signal class for two-dimensional diffraction data in polar coordinates.
+"""
 
-import numpy as np
-
-from hyperspy.api import interactive
 from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
@@ -30,21 +28,20 @@ from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, vari
 
 
 class PolarDiffraction2D(Signal2D):
-    _signal_type = "polar_diffraction2d"
+    _signal_type = "polar_diffraction"
 
     def __init__(self, *args, **kwargs):
         """
-        Create an PolarDiffraction2D object from a hs.Signal2D or np.array.
+        Create a PolarDiffraction2D object from a numpy.ndarray.
 
         Parameters
         ----------
         *args :
             Passed to the __init__ of Signal2D. The first arg should be
-            either a numpy.ndarray or a Signal2D
+            a numpy.ndarray
         **kwargs :
             Passed to the __init__ of Signal2D
         """
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
@@ -175,3 +172,7 @@ class PolarDiffraction2D(Signal2D):
             return
 
         return var
+
+class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
+
+    pass
