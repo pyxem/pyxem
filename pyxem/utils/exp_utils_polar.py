@@ -124,3 +124,44 @@ def angular_power(z, mask=None, normalize=True):
     """
     return _power(z,axis=1, mask=mask, normalize=normalize, wrap=True)
 
+
+def variance(z, mask=None, axis=0):
+    """Calculates the variance along some axis while applying some mask.
+
+    Parameters
+    ----------------
+    z: np.array
+        The array to be operated on
+    mask: None or np.array
+        A boolean mask masking some values
+    axis: The axis to calculate the variance along.
+
+    Returns
+    --------------
+    v: np.array
+        The variance along some axis
+    """
+    if mask is not None:
+        z[mask] = 0
+        num_valid = np.shape(z)[axis] - np.sum(mask, axis=axis)
+        num_valid[num_valid == 0] = 1
+        bottom_mean = np.power(np.sum(z, axis=axis)/num_valid,2)
+        top_mean = np.sum(np.power(z,2), axis=axis)/num_valid
+    else:
+        bottom_mean = np.power(np.mean(z, axis=axis),2)
+        top_mean = np.mean(np.power(z,2))
+    v = np.subtract(np.divide(top_mean,bottom_mean)-1)
+    return v
+
+
+def mean_mask(z, mask, axis):
+    """Calculates the mean using a mask along some axis for the array z
+
+    This method needs to be explicit to overcome the problems with defining a mask
+    for a dask array.
+    """
+    z[mask] = 0
+    num_valid = np.shape(z)[axis] - np.sum(mask, axis=axis)
+    num_valid[num_valid == 0] = 1
+    return np.sum(z, axis=axis) / num_valid
+

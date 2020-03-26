@@ -26,7 +26,7 @@ from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals import push_metadata_through
-from pyxem.utils.exp_utils_polar import angular_correlation, angular_power
+from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, variance, mean_mask
 
 
 class PolarDiffraction2D(Signal2D):
@@ -49,8 +49,7 @@ class PolarDiffraction2D(Signal2D):
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def get_angular_correlation(self, mask=None, normalize=True,
-                                inplace=False, **kwargs):
+    def get_angular_correlation(self, mask=None, normalize=True, inplace=False, **kwargs):
         """
         Returns the angular auto-correlation function in the form of a Signal2D class.
 
@@ -68,6 +67,9 @@ class PolarDiffraction2D(Signal2D):
             Normalize the radial correlation by the average value at some radius.
         kwargs: dict
             Any additional options for the hyperspy.BaseSignal.map() function
+        inplace: bool
+            From hyperspy.signal.map(). inplace=True means the signal is
+            overwritten.
         Returns
         --------------
         correlation: Signal2D
@@ -102,17 +104,20 @@ class PolarDiffraction2D(Signal2D):
              A mask of values to ignore of shape equal to the signal shape
          normalize: bool
              Normalize the radial correlation by the average value at some radius.
+        inplace: bool
+            From hyperspy.signal.map(). inplace=True means the signal is
+            overwritten.
          Returns
          --------------
          power: Signal2D
              The power spectrum of the Signal2D"""
 
         if self.axes_manager.signal_shape() == np.shape(mask): # for a static mask
-            pow = self.map(angular_power, mask=mask,normalize=normalize,inplace=inplace)
+            pow = self.map(angular_power, mask=mask,normalize=normalize, inplace=inplace, **kwargs)
         elif self.axes_manager.shape() == np.shape(mask):  # for a changing mask
             mask = np.reshape(mask, newshape=(-1, *reversed(self.axes_manager.signal_shape)))
             pow = self._map_iterate(angular_power,iterating_kwargs=(('mask', mask),),
-                                    normalize=True, inplace=inplace)
+                                    normalize=True, inplace=inplace, **kwargs)
 
         if inplace:
             self.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
@@ -130,4 +135,43 @@ class PolarDiffraction2D(Signal2D):
             pow.axes_manager.signal_axes[1].offset = 0.5
         return pow
 
+    def get_variance(self,method="interpattern", mask=None, inplace=False):
+        """ Returns the variance for some spectrum.
 
+        This measures the Fluctuations either within every pattern or within
+        the entire dataset. These two measure the structure in one pattern
+        or the structure in the entire dataset.
+
+        Parameters
+        --------------
+        method: "interpattern" or "intrapattern"
+            Either interpattern (between pattern) variance is calculated as a function
+            of radius of "intrapattern" (within pattern) variance is calculated as a function
+            of radius
+        mask: Numpy array or Signal2D
+            A mask of values to ignore of shape equal to the signal shape
+        normalize: bool
+            Normalize the variance
+        inplace: bool
+            From hyperspy.signal.map(). inplace=True means the signal is
+            overwritten.
+
+        Returns
+        -------------
+        variance: Signal1D
+            The variance for the signal
+        """
+        if method is "interpattern":
+            mean = self.map(mean_mask, mask=mask, axis=1, inplace=inplace)
+            if inplace:
+                mean=mean.
+
+        elif method is "intrapattern":
+            var = self.map(variance,mask=mask, axis=1, inplace=inplace)
+
+        else:
+            print("The method must be either \"interpattern\" or \"intrapattern\". Check the documentation"
+                  "for more details.")
+            return
+
+        return var
