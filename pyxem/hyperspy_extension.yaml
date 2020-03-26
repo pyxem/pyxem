@@ -144,7 +144,6 @@ signals:
     lazy: False
     module: pyxem.signals.diffraction_variance2d
 
-
 components2D:
     DiffractionComponent:
       module: pyxem.components.diffraction_component
