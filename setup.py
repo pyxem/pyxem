@@ -19,18 +19,18 @@
 
 from setuptools import setup, find_packages
 
-exec(open('pyxem/release_info.py').read())  # grab version info
+exec(open("pyxem/release_info.py").read())  # grab version info
 
 
 setup(
     name=name,
     version=version,
-    description='Crystallographic Diffraction Microscopy in Python.',
+    description="Crystallographic Diffraction Microscopy in Python.",
     author=author,
     author_email=email,
     license=license,
     url="https://github.com/pyxem/pyxem",
-    long_description=open('README.rst').read(),
+    long_description=open("README.rst").read(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
@@ -43,21 +43,20 @@ setup(
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-
     packages=find_packages(),
     # adjust the tabbing
     install_requires=[
-        'scikit-image >= 0.15.0',   # exclude_border argument in peak_finder laplacian (PR #436)
-        'matplotlib >= 3.1.1',     # 3.1.0 failed
-        'scikit-learn >= 0.19',     # reason unknown
-        'hyperspy >= 1.5.2',        # earlier versions incompatible with numpy >= 1.17.0
-        'diffsims > 0.2.1',        # Makes use of functionality introduced in this release
-        'lmfit >= 0.9.12',
-        'pyfai'
+        "scikit-image >= 0.15.0",  # exclude_border argument in peak_finder laplacian (PR #436)
+        "matplotlib >= 3.1.1",  # 3.1.0 failed
+        "scikit-learn >= 0.19",  # reason unknown
+        "hyperspy >= 1.5.2",  # earlier versions incompatible with numpy >= 1.17.0
+        "diffsims > 0.2.1",  # Makes use of functionality introduced in this release
+        "lmfit >= 0.9.12",
+        "pyfai",
     ],
     package_data={
         "": ["LICENSE", "readme.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],
     },
-    entry_points={'hyperspy.extensions': ['pyxem = pyxem']},
+    entry_points={"hyperspy.extensions": ["pyxem = pyxem"]},
 )
