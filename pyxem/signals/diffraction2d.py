@@ -31,6 +31,7 @@ from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 from pyxem.signals.common_diffraction import CommonDiffraction
+from pyxem.utils.cood_utils import get_displacements
 
 from pyxem.utils.expt_utils import (
     radial_average,
@@ -545,7 +546,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             from pyFAI.detectors import Detector
             from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
             dect = Detector(pixel1=1e-4, pixel2=1e-4)
-            ai = AzimuthalIntegrator(detector=dect, dist=0.1)
+            ai = AzimuthalIntegrator(detector=dect, dist=0.1) # for even spaced dist and directDist must
+            # be the same (dist is in m and directDist is in mm_
             if center is None:
                 center = self.axes_manager.signal_shape/2
             elif isinstance(center[0], float) or isinstance(center[1], float):
@@ -554,9 +556,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             else:
                 pass
             ai.setFit2D(directDist=100, centerX=center[0],centerY=center[1])  # Setting the integrator to use
+            if affine is not None:
+                dx,dy = get_displacements(affine,self.axes_manager.signal_shape)
+                dect.set_dx()
+                dect.set_dy()
             # pixel based center representation.
         polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
-                         npt_azim=npt_azim,inplace = inplace, **integrate2d_kwargs, **map_kwargs)
+                         npt_azim=npt_azim,inplace=inplace, **integrate2d_kwargs, **map_kwargs)
         return polar
 
     def as_polar(self, dr=1.0, dt=None, jacobian=True, **kwargs):
