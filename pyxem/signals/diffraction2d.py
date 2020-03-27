@@ -550,6 +550,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             # be the same (dist is in m and directDist is in mm_
             if center is None:
                 center = self.axes_manager.signal_shape/2
+            elif len(center) == np.prod(self.self.axes_manager.signal_shape): # if there are centers for every nav axis
+                
+
             elif isinstance(center[0], float) or isinstance(center[1], float):
                 center[0] = self.axes_manager.signal_axes[-1].value2index(center[0])
                 center[1] = self.axes_manager.signal_axes[-1].value2index(center[1])
@@ -557,12 +560,26 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 pass
             ai.setFit2D(directDist=100, centerX=center[0],centerY=center[1])  # Setting the integrator to use
             if affine is not None:
-                dx,dy = get_displacements(affine, self.axes_manager.signal_shape)
+                dx,dy = get_displacements(affine, self.axes_manager.signal_shape)  #
                 dect.set_dx(dx)
                 dect.set_dy(dy)
             # pixel based center representation.
         polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
                          npt_azim=npt_azim,inplace=inplace, **integrate2d_kwargs, **map_kwargs)
+        if inplace:
+            polar_t_axis = self.axes_manager.signal_axes[0]
+            polar_k_axis = self.axes_manager.signal_axes[1]
+        else:
+            polar_t_axis = polar.axes_manager.signal_axes[0]
+            polar_k_axis = polar.axes_manager.signal_axes[1]
+            transfer_navigation_axes(polar, self)
+        polar_t_axis.name = "theta"
+        polar_t_axis.scale = np.pi*2/npt_azim
+        polar_t_axis.units = "$rad$"
+        # Set signal axes parameters (magnitude)
+        polar_k_axis.name = "k"
+        polar_k_axis.scale = polar_k_axis.scale # Need to figure out how to keep this consistent with moving center
+        polar_k_axis.units = "$$"
         return polar
 
     def as_polar(self, dr=1.0, dt=None, jacobian=True, **kwargs):
