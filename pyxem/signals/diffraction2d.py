@@ -557,9 +557,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 pass
             ai.setFit2D(directDist=100, centerX=center[0],centerY=center[1])  # Setting the integrator to use
             if affine is not None:
-                dx,dy = get_displacements(affine,self.axes_manager.signal_shape)
-                dect.set_dx()
-                dect.set_dy()
+                dx,dy = get_displacements(affine, self.axes_manager.signal_shape)
+                dect.set_dx(dx)
+                dect.set_dy(dy)
             # pixel based center representation.
         polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
                          npt_azim=npt_azim,inplace=inplace, **integrate2d_kwargs, **map_kwargs)
