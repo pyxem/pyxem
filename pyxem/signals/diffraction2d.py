@@ -36,6 +36,8 @@ from pyxem.utils.expt_utils import (
     radial_average,
     azimuthal_integrate,
     azimuthal_integrate_fast,
+    azimuthal_integrate2d,
+    azimuthal_integrate_fast2d,
     gain_normalise,
     remove_dead,
     regional_filter,
@@ -509,6 +511,53 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
         return bg_subtracted
+
+    def azimuthal_integrate2d(self, npt_rad, npt_azim=360, center=None, affine=None,
+                              ai=None, inplace=False, map_kwargs={}, integrate2d_kwargs={}):
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
+
+        This function can work with a generic detector setup or with a special detector
+        set-up as described by pyFAI.  To do this create your own azimuthal integrator object
+
+        Parameters
+        ---------------
+        npt_rad: int
+            The number of radial points to calculate
+        npt_azim: int
+            The number of azimuthal points to consider.
+        ai: None or pyFai.integrate.AzimuthalIntegrator
+            The detector to consider
+        center: None or (x,y) or [(x,y),(x,y)...]
+            The center of the pattern in pixels or in real units to preform the integration around
+        affine: 3x3 array
+            An affine transformation to apply during the transformation (creates a spline map that is used by pyFAI)
+        map_kwargs: dict
+            Any other keyword arguments for hyperspys map function
+        integrate2d_kwargs:dict
+            Any keyword arguements for PyFAI's integrate2d function
+
+        Returns
+        ----------
+        polar: PolarDiffraction2D
+            A polar diffraction signal
+        """
+        if ai is None:  # Building a generic integrator.
+            from pyFAI.detectors import Detector
+            from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+            dect = Detector(pixel1=1e-4, pixel2=1e-4)
+            ai = AzimuthalIntegrator(detector=dect, dist=0.1)
+            if center is None:
+                center = self.axes_manager.signal_shape/2
+            elif isinstance(center[0], float) or isinstance(center[1], float):
+                center[0] = self.axes_manager.signal_axes[-1].value2index(center[0])
+                center[1] = self.axes_manager.signal_axes[-1].value2index(center[1])
+            else:
+                pass
+            ai.setFit2D(directDist=100, centerX=center[0],centerY=center[1])  # Setting the integrator to use
+            # pixel based center representation.
+        polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
+                         npt_azim=npt_azim,inplace = inplace, **integrate2d_kwargs, **map_kwargs)
+        return polar
 
     def as_polar(self, dr=1.0, dt=None, jacobian=True, **kwargs):
         """Reprojects two-dimensional diffraction data from cartesian to polar
