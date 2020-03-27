@@ -551,7 +551,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             if center is None:
                 center = self.axes_manager.signal_shape/2
             elif len(center) == np.prod(self.self.axes_manager.signal_shape): # if there are centers for every nav axis
-                
+                center=center
 
             elif isinstance(center[0], float) or isinstance(center[1], float):
                 center[0] = self.axes_manager.signal_axes[-1].value2index(center[0])
