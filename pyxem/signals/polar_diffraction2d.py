@@ -20,12 +20,11 @@
 Signal class for two-dimensional diffraction data in polar coordinates.
 """
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals import push_metadata_through
 from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, variance, mean_mask
-
+import numpy as np
 
 class PolarDiffraction2D(Signal2D):
     _signal_type = "polar_diffraction"
@@ -72,17 +71,17 @@ class PolarDiffraction2D(Signal2D):
         correlation: Signal2D
             The radial correlation for the signal2D
         """
-        if self.axes_manager.signal_shape() == np.shape(mask): # for a static mask
+        if self.axes_manager.signal_shape == np.shape(mask) or mask is None: # for a static mask
             correlation = self.map(angular_correlation, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
-        elif self.axes_manager.shape() == np.shape(mask):  # for a changing mask
+        else:  # for a changing mask
             mask = np.reshape(mask, newshape=(-1, *reversed(self.axes_manager.signal_shape)))
             correlation = self._map_iterate(angular_correlation,iterating_kwargs=(('mask', mask),),
                                             normalize=True, inplace=inplace, **kwargs)
-
         if inplace:
             self.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
             self.axes_manager.signal_axes[1].name = "Angular Correlation, $/phi$"
         else:
+            print(correlation)
             correlation.axes_manager.signal_axes[1].name = "Angular Correlation, $/phi$"
 
         return correlation
@@ -131,47 +130,6 @@ class PolarDiffraction2D(Signal2D):
             pow.axes_manager.signal_axes[1].unit = "a.u"
             pow.axes_manager.signal_axes[1].offset = 0.5
         return pow
-
-    def get_variance(self,method="interpattern", mask=None, inplace=False):
-        """ Returns the variance for some spectrum.
-
-        This measures the Fluctuations either within every pattern or within
-        the entire dataset. These two measure the structure in one pattern
-        or the structure in the entire dataset.
-
-        Parameters
-        --------------
-        method: "interpattern" or "intrapattern"
-            Either interpattern (between pattern) variance is calculated as a function
-            of radius of "intrapattern" (within pattern) variance is calculated as a function
-            of radius
-        mask: Numpy array or Signal2D
-            A mask of values to ignore of shape equal to the signal shape
-        normalize: bool
-            Normalize the variance
-        inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
-            overwritten.
-
-        Returns
-        -------------
-        variance: Signal1D
-            The variance for the signal
-        """
-        if method is "interpattern":
-            mean = self.map(mean_mask, mask=mask, axis=1, inplace=inplace)
-            if inplace:
-                mean=mean.
-
-        elif method is "intrapattern":
-            var = self.map(variance,mask=mask, axis=1, inplace=inplace)
-
-        else:
-            print("The method must be either \"interpattern\" or \"intrapattern\". Check the documentation"
-                  "for more details.")
-            return
-
-        return var
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
 

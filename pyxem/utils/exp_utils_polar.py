@@ -45,7 +45,8 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         z[m] = 0
 
     # fast method uses a FFT and is a process which is O(n) = n log(n)
-    z = np.pad(z, padder, 'constant')
+    if wrap is False:
+        z = np.pad(z, padder, 'constant')
     I_fft = np.fft.fft(z, axis=axis)
     a = np.fft.ifft(I_fft * np.conjugate(I_fft), axis=axis).real
 
@@ -55,7 +56,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     if normalize:
         row_mean = np.mean(a, axis=axis)
         row_mean[row_mean == 0] = 1
-        np.expand_dims(row_mean, axis=axis)
+        row_mean = np.expand_dims(row_mean, axis=axis)
         a = np.divide(np.subtract(a, row_mean), row_mean)
     if wrap is False:
         a = a[slicer]

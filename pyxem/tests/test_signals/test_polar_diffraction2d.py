@@ -68,6 +68,17 @@ class TestComputeAndAsLazy2D:
         assert s_lazy.__class__ == LazyPolarDiffraction2D
         assert data.shape == s_lazy.data.shape
 
+class TestCorrelations:
+    @pytest.fixture
+    def polar_pattern(self):
+        theta=np.linspace(0,np.pi*2,45)
+        inten = np.sin(theta)
+        data = [inten,]*20
+        return PolarDiffraction2D(data=data)
+    def test_correlation(self, polar_pattern):
+        ac = polar_pattern.get_angular_correlation()
+        print(ac)
+
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):
