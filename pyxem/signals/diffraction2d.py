@@ -23,7 +23,7 @@ Signal class for two-dimensional diffraction data in Cartesian coordinates.
 import numpy as np
 from warnings import warn
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction1d import Diffraction1D
@@ -340,6 +340,88 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         transfer_navigation_axes(ap, self)
 
         return ap
+    def get_azimuthal_integral2d(self, npt_rad, npt_azim=360, center=None, affine=None,
+                              ai=None, inplace=False, map_kwargs={}, integrate2d_kwargs={}):
+        self,
+        origin,
+        detector,
+        detector_distance,
+        wavelength,
+        size_1d,
+        unit="k_A^-1",
+        inplace=False,
+        kwargs_for_map={},
+        kwargs_for_integrator={},
+        kwargs_for_integrate1d={},
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
+
+        This function can work with a generic detector setup or with a special detector
+        set-up as described by pyFAI.  To do this create your own azimuthal integrator object
+
+        Parameters
+        ---------------
+        npt_rad: int
+            The number of radial points to calculate
+        npt_azim: int
+            The number of azimuthal points to consider.
+        ai: None or pyFai.integrate.AzimuthalIntegrator
+            The detector to consider
+        center: None or (x,y) or BaseSignal
+            The center of the pattern in pixels or in real units to preform the integration around
+        affine: 3x3 array or BaseSignal
+            An affine transformation to apply during the transformation (creates a spline map that is used by pyFAI)
+        map_kwargs: dict
+            Any other keyword arguments for hyperspys map function
+        integrate2d_kwargs:dict
+            Any keyword arguements for PyFAI's integrate2d function
+
+        Returns
+        ----------
+        polar: PolarDiffraction2D
+            A polar diffraction signal
+        """
+        if ai is None:  # Building a generic integrator.
+            from pyFAI.detectors import Detector
+            from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+            dect = Detector(pixel1=1e-4, pixel2=1e-4)
+            ai = AzimuthalIntegrator(detector=dect, dist=0.1) # for even spaced dist and directDist must
+            # be the same (dist is in m and directDist is in mm_
+            if center is None:
+                center = self.axes_manager.signal_shape/2
+            elif isinstance(center[0], float) or isinstance(center[1], float):
+                center[0] = self.axes_manager.signal_axes[-1].value2index(center[0])
+                center[1] = self.axes_manager.signal_axes[-1].value2index(center[1])
+            else:
+                pass
+            ai.setFit2D(directDist=100, centerX=center[0],centerY=center[1])  # Setting the integrator to use
+            if affine is not None:
+                dx,dy = get_displacements(affine, self.axes_manager.signal_shape)  #
+                dect.set_dx(dx)
+                dect.set_dy(dy)
+            # pixel based center representation.
+        if isinstance(center,BaseSignal) or isinstance(affine,BaseSignal):
+            # Create a new ai for every 2D signal
+            polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
+                             npt_azim=npt_azim, inplace=inplace, **integrate2d_kwargs, **map_kwargs)
+        else:  # using one ai for every 2D signal
+            polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
+                         npt_azim=npt_azim,inplace=inplace, **integrate2d_kwargs, **map_kwargs)
+
+        if inplace:
+            polar_t_axis = self.axes_manager.signal_axes[0]
+            polar_k_axis = self.axes_manager.signal_axes[1]
+        else:
+            polar_t_axis = polar.axes_manager.signal_axes[0]
+            polar_k_axis = polar.axes_manager.signal_axes[1]
+            transfer_navigation_axes(polar, self)
+        polar_t_axis.name = "theta"
+        polar_t_axis.scale = np.pi*2/npt_azim
+        polar_t_axis.units = "$rad$"
+        # Set signal axes parameters (magnitude)
+        polar_k_axis.name = "k"
+        polar_k_axis.scale = polar_k_axis.scale # Need to figure out how to keep this consistent with moving center
+        polar_k_axis.units = "$$"
+        return polar
 
     def get_radial_profile(self, mask_array=None, inplace=False, *args, **kwargs):
         """Return the radial profile of the diffraction pattern.
@@ -512,75 +594,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
         return bg_subtracted
-
-    def azimuthal_integrate2d(self, npt_rad, npt_azim=360, center=None, affine=None,
-                              ai=None, inplace=False, map_kwargs={}, integrate2d_kwargs={}):
-        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
-
-        This function can work with a generic detector setup or with a special detector
-        set-up as described by pyFAI.  To do this create your own azimuthal integrator object
-
-        Parameters
-        ---------------
-        npt_rad: int
-            The number of radial points to calculate
-        npt_azim: int
-            The number of azimuthal points to consider.
-        ai: None or pyFai.integrate.AzimuthalIntegrator
-            The detector to consider
-        center: None or (x,y) or [(x,y),(x,y)...]
-            The center of the pattern in pixels or in real units to preform the integration around
-        affine: 3x3 array
-            An affine transformation to apply during the transformation (creates a spline map that is used by pyFAI)
-        map_kwargs: dict
-            Any other keyword arguments for hyperspys map function
-        integrate2d_kwargs:dict
-            Any keyword arguements for PyFAI's integrate2d function
-
-        Returns
-        ----------
-        polar: PolarDiffraction2D
-            A polar diffraction signal
-        """
-        if ai is None:  # Building a generic integrator.
-            from pyFAI.detectors import Detector
-            from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
-            dect = Detector(pixel1=1e-4, pixel2=1e-4)
-            ai = AzimuthalIntegrator(detector=dect, dist=0.1) # for even spaced dist and directDist must
-            # be the same (dist is in m and directDist is in mm_
-            if center is None:
-                center = self.axes_manager.signal_shape/2
-            elif len(center) == np.prod(self.self.axes_manager.signal_shape): # if there are centers for every nav axis
-                center=center
-
-            elif isinstance(center[0], float) or isinstance(center[1], float):
-                center[0] = self.axes_manager.signal_axes[-1].value2index(center[0])
-                center[1] = self.axes_manager.signal_axes[-1].value2index(center[1])
-            else:
-                pass
-            ai.setFit2D(directDist=100, centerX=center[0],centerY=center[1])  # Setting the integrator to use
-            if affine is not None:
-                dx,dy = get_displacements(affine, self.axes_manager.signal_shape)  #
-                dect.set_dx(dx)
-                dect.set_dy(dy)
-            # pixel based center representation.
-        polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
-                         npt_azim=npt_azim,inplace=inplace, **integrate2d_kwargs, **map_kwargs)
-        if inplace:
-            polar_t_axis = self.axes_manager.signal_axes[0]
-            polar_k_axis = self.axes_manager.signal_axes[1]
-        else:
-            polar_t_axis = polar.axes_manager.signal_axes[0]
-            polar_k_axis = polar.axes_manager.signal_axes[1]
-            transfer_navigation_axes(polar, self)
-        polar_t_axis.name = "theta"
-        polar_t_axis.scale = np.pi*2/npt_azim
-        polar_t_axis.units = "$rad$"
-        # Set signal axes parameters (magnitude)
-        polar_k_axis.name = "k"
-        polar_k_axis.scale = polar_k_axis.scale # Need to figure out how to keep this consistent with moving center
-        polar_k_axis.units = "$$"
-        return polar
 
     def as_polar(self, dr=1.0, dt=None, jacobian=True, **kwargs):
         """Reprojects two-dimensional diffraction data from cartesian to polar
