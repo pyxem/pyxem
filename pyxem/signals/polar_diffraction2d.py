@@ -79,10 +79,10 @@ class PolarDiffraction2D(Signal2D):
                                             normalize=True, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
-            self.axes_manager.signal_axes[1].name = "Angular Correlation, $/phi$"
+            self.axes_manager.signal_axes[0].name = "Angular Correlation, $/phi$"
         else:
             print(correlation)
-            correlation.axes_manager.signal_axes[1].name = "Angular Correlation, $/phi$"
+            correlation.axes_manager.signal_axes[0].name = "Angular Correlation, $/phi$"
 
         return correlation
 
@@ -107,10 +107,9 @@ class PolarDiffraction2D(Signal2D):
          --------------
          power: Signal2D
              The power spectrum of the Signal2D"""
-
-        if self.axes_manager.signal_shape() == np.shape(mask): # for a static mask
+        if self.axes_manager.signal_shape == np.shape(mask) or mask is None: # for a static mask
             pow = self.map(angular_power, mask=mask,normalize=normalize, inplace=inplace, **kwargs)
-        elif self.axes_manager.shape() == np.shape(mask):  # for a changing mask
+        else:  # for a changing mask
             mask = np.reshape(mask, newshape=(-1, *reversed(self.axes_manager.signal_shape)))
             pow = self._map_iterate(angular_power,iterating_kwargs=(('mask', mask),),
                                     normalize=True, inplace=inplace, **kwargs)

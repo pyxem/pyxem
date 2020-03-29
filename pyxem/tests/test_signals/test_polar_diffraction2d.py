@@ -70,15 +70,28 @@ class TestComputeAndAsLazy2D:
 
 class TestCorrelations:
     @pytest.fixture
-    def polar_pattern(self):
-        theta=np.linspace(0,np.pi*2,45)
-        inten = np.sin(theta)
-        data = [inten,]*20
-        return PolarDiffraction2D(data=data)
-    def test_correlation(self, polar_pattern):
-        ac = polar_pattern.get_angular_correlation()
-        print(ac)
+    def flat_pattern(self):
+        pd = PolarDiffraction2D(data=np.ones(shape=(10, 20)))
+        pd.axes_manager.signal_axes[0].scale = .5
+        pd.axes_manager.signal_axes[0].name = "theta"
+        pd.axes_manager.signal_axes[1].scale = 2
+        pd.axes_manager.signal_axes[1].name = "k"
+        return pd
 
+    def test_get_correlation(self, flat_pattern):
+        ac = flat_pattern.get_angular_correlation()
+        assert(ac.axes_manager.signal_shape ==flat_pattern.axes_manager.signal_shape)
+
+    def test_axes_transfer(self, flat_pattern):
+        ac = flat_pattern.get_angular_correlation()
+        assert(ac.axes_manager.signal_axes[0].scale ==
+               flat_pattern.axes_manager.signal_axes[0].scale)
+        assert (ac.axes_manager.signal_axes[0].scale ==
+                flat_pattern.axes_manager.signal_axes[0].scale)
+
+    def test_axes_transfer(self, flat_pattern):
+        ap = flat_pattern.get_angular_power()
+        print(ap)
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):
