@@ -326,28 +326,28 @@ def test_find_beam_center_interpolate_2(center_expected, sigma):
 class TestAzimuthalIntegration:
     @pytest.fixture
     def radial_pattern(self):
-        x,y = np.ogrid[-50:51,-50:51]
+        x,y = np.ogrid[-10:10,-10:10]
         radial = (x**2+y**2)*np.pi
         radial[radial==0]=1
-        return 1000/radial
+        return 100/radial
 
-    def test_2dintegrate(self,radial_pattern):
+    def test_2d_integrate(self,radial_pattern):
         import matplotlib
         matplotlib.use('TkAgg', warn=False, force=True)
         import matplotlib.pyplot as plt
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
         ai = AzimuthalIntegrator(detector=dect, dist=0.1)
-        ai.setFit2D(100, 50.5, 50.5)
+        ai.setFit2D(100, 10.5, 10.5)
         print(ai)
-        integation = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=10, npt_azim=45, safe=True,
-                                                method="splitpixel",unit="2th_deg")
-        print(integation[0])
+        integration = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=20, npt_azim=45, safe=True,
+                                                 method="splitpixel", unit="2th_deg", correctSolidAngle=False)
+        print(integration[0])
         plt.imshow(radial_pattern)
         plt.show()
-        plt.imshow(integation[0])
+        plt.imshow(integration[0])
         plt.show()
 
-    def test_2dintegrate_data(self,radial_pattern):
+    def test_2d_integrate_data(self,radial_pattern):
         import hyperspy.api as hs
         import matplotlib
         matplotlib.use('TkAgg', warn=False, force=True)
@@ -359,16 +359,17 @@ class TestAzimuthalIntegration:
         print(d)
         d.axes_manager.signal_axes[0].scale = 1
         d.axes_manager.signal_axes[1].scale = 1
-        d.inav[1, 1].plot()
-        plt.show()
-        integation = azimuthal_integrate_fast2d(d.inav[1,1].data, ai, npt_rad=400, npt_azim=360, safe=True,
-                                               method="splitpixel", correctSolidAngle=True, unit="2th_deg")
+        #d.inav[1, 1].plot()
+        #plt.show()
+
+        integration = azimuthal_integrate_fast2d(d.inav[1,1].data, ai, npt_rad=400, npt_azim=360, safe=True,
+                                                 method="splitpixel", correctSolidAngle=True, unit="2th_deg")
         #integation = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=50, npt_azim=360, safe=True,
-        #                                        method="splitpixel", correctSolidAngle=False)
-        print(integation[0])
-        print(integation[1])
+        #
+        #
         #plt.imshow(radial_pattern)
         #plt.show()
-        plt.imshow(integation[0])
+        print(np.sum(d.inav[1,1].data),np.sum(integration[0]))
+        plt.imshow(integration[0])
         plt.show()
 
