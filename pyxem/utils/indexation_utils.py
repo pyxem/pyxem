@@ -349,8 +349,8 @@ def get_nth_best_solution(
                 single_match_result.tolist(), key=attrgetter(key), reverse=descending
             )[rank]
     if mode == 'template':
-        srt_idx = np.argsort(single_match_result[:, 2])[rank]
-        best_fit = single_match_result[rank]
+        srt_idx = np.argsort(single_match_result[:, 2])[::-1][rank]
+        best_fit = single_match_result[srt_idx]
 
     return best_fit
 
