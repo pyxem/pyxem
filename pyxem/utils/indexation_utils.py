@@ -312,7 +312,7 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
 
 
 def get_nth_best_solution(
-    single_match_result, rank=0, key="match_rate", descending=True
+    single_match_result, mode, rank=0, key="match_rate", descending=True
 ):
     """Get the nth best solution by match_rate from a pool of solutions
 
@@ -320,6 +320,8 @@ def get_nth_best_solution(
     ----------
     single_match_result : VectorMatchingResults, TemplateMatchingResults
         Pool of solutions from the vector matching algorithm
+    mode : str
+        'vector' or 'template'
     rank : int
         The rank of the solution, i.e. rank=2 returns the third best solution
     key : str
@@ -337,7 +339,7 @@ def get_nth_best_solution(
             Parameters for the best fitting orientation
             Library Number , [z, x, z], Correlation Score
     """
-    try:
+    if mode == 'vector':
         try:
             best_fit = sorted(
                 single_match_result[0].tolist(), key=attrgetter(key), reverse=descending
@@ -346,9 +348,10 @@ def get_nth_best_solution(
             best_fit = sorted(
                 single_match_result.tolist(), key=attrgetter(key), reverse=descending
             )[rank]
-    except BaseException:
+    if mode == 'template':
         srt_idx = np.argsort(single_match_result[:, 2])[rank]
         best_fit = single_match_result[rank]
+
     return best_fit
 
 
