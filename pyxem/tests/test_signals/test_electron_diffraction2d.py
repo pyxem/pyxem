@@ -108,13 +108,13 @@ class TestSimpleHyperspy:
 
     def test_set_experimental_parameters(self, diffraction_pattern):
         diffraction_pattern.set_experimental_parameters(
-            accelerating_voltage=3,
-            camera_length=3,
-            scan_rotation=1,
-            convergence_angle=1,
-            rocking_angle=1,
-            rocking_frequency=1,
-            exposure_time=1,
+            beam_energy=3.0,
+            camera_length=3.0,
+            scan_rotation=1.0,
+            convergence_angle=1.0,
+            rocking_angle=1.0,
+            rocking_frequency=1.0,
+            exposure_time=1.0,
         )
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 

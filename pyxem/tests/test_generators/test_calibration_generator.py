@@ -111,7 +111,7 @@ class TestCalibrationGenerator:
 
     def test_get_diffraction_calibration(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30, linewidth=5)
-        np.testing.assert_almost_equal(cal_dist.diffraction_calibration, 0.010648)
+        np.testing.assert_almost_equal(cal_dist.diffraction_calibration, 0.01061096)
 
     def test_get_navigation_calibration(self, calgen):
         line = Line2DROI(x1=2.5, y1=13.0, x2=193.0, y2=12.5, linewidth=3.5)
