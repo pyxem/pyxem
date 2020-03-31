@@ -254,7 +254,7 @@ def _refine_best_orientations(
         if verbose:  # pragma: no cover
             print(f"# {i}/{n_best} ({n_matches})")
 
-        solution = get_nth_best_solution(single_match_result, rank=i)
+        solution = get_nth_best_solution(single_match_result, 'vector', rank=i)
 
         result = _refine_orientation(
             solution,
