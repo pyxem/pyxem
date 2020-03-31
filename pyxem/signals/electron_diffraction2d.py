@@ -86,9 +86,7 @@ class ElectronDiffraction2D(Diffraction2D):
         md = self.metadata
 
         if beam_energy is not None:
-            md.set_item(
-                "Acquisition_instrument.TEM.beam_energy", beam_energy
-            )
+            md.set_item("Acquisition_instrument.TEM.beam_energy", beam_energy)
         if camera_length is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
