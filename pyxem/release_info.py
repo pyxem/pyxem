@@ -14,7 +14,7 @@ credits = [
     "Eric Prestat",
     "Sean Collins",
     "Mohsen Danaie",
-    "Hakon Aines",
+    "Håkon Wiik Ånes",
     "Tiarnan Doherty",
     "Affan Iqbal",
     "Jedrzej Morzy",
