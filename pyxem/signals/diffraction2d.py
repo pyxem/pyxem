@@ -31,7 +31,7 @@ from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 from pyxem.signals.common_diffraction import CommonDiffraction
-from pyxem.utils.cood_utils import get_displacements
+from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_radial_extent
 
 from pyxem.utils.expt_utils import (
     radial_average,
@@ -340,23 +340,21 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         transfer_navigation_axes(ap, self)
 
         return ap
+
     def get_azimuthal_integral2d(self, npt_rad, npt_azim=360, center=None, affine=None,
-                              ai=None, inplace=False, map_kwargs={}, integrate2d_kwargs={}):
-        self,
-        origin,
-        detector,
-        detector_distance,
-        wavelength,
-        size_1d,
-        unit="k_A^-1",
-        inplace=False,
-        kwargs_for_map={},
-        kwargs_for_integrator={},
-        kwargs_for_integrate1d={},
+                                 mask=None, radial_range=None, azimuth_range=None, wavelength=None,
+                                 unit="pyxem", inplace=False, map_kwargs={},
+                                 detector=None, detector_distance=None,
+                                 ai_kwargs={} ,integrate2d_kwargs={}):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
 
-        This function can work with a generic detector setup or with a special detector
-        set-up as described by pyFAI.  To do this create your own azimuthal integrator object
+        This function is designed to be fairly flexible to account for 2 different cases:
+
+        1 - If the unit is "pyxem" then it lets pyXEM take the lead. If wavelength is none in that case
+        it doesn't account for the Ewald sphere.
+
+        2 - If unit is any of the options from pyFAI then detector cannot be None and the handling of
+        units is passed to pyxem and those units are used.
 
         Parameters
         ---------------
@@ -364,12 +362,32 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The number of radial points to calculate
         npt_azim: int
             The number of azimuthal points to consider.
-        ai: None or pyFai.integrate.AzimuthalIntegrator
-            The detector to consider
         center: None or (x,y) or BaseSignal
-            The center of the pattern in pixels or in real units to preform the integration around
+            The center of the pattern in pixels to preform the integration around
         affine: 3x3 array or BaseSignal
-            An affine transformation to apply during the transformation (creates a spline map that is used by pyFAI)
+            An affine transformation to apply during the transformation
+             (creates a spline map that is used by pyFAI)
+        mask:  boolean array or BaseSignal
+            A boolean mask to apply to the data to exclude some points.
+            If mask is a baseSignal then it is itereated over as well.
+        radial_range: None or (float, float)
+            The radial range over which to perform the integration. Default is
+            the full frame
+        azim_ range:None or (float, float)
+            The azimuthal range over which to perform the integration. Default is
+            from -pi to pi
+        wavelength: None or float
+            The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
+            it to properly work.
+        unit: str
+            The unit can be "pyxem" to use the pyxem units and “q_nm^-1”, “q_A^-1”, “2th_deg”, “2th_rad”, “r_mm”
+            if pyFAI is used for unit handling
+        inplace: bool
+            If the signal is overwritten or copied to a new signal
+        detector: pyFai.detector.Detector
+            The detector set up to be used by the integrator
+        detector_distance: float
+            distance sample - detector plan (orthogonal distance, not along the beam), in meter.
         map_kwargs: dict
             Any other keyword arguments for hyperspys map function
         integrate2d_kwargs:dict
@@ -380,33 +398,58 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         polar: PolarDiffraction2D
             A polar diffraction signal
         """
-        if ai is None:  # Building a generic integrator.
+        pyxem_units = False
+        if unit is "pyxem":  # Case 1
+            # Just changing the pixel size to make flat assumption or to fit with wavelength.
             from pyFAI.detectors import Detector
-            from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
-            dect = Detector(pixel1=1e-4, pixel2=1e-4)
-            ai = AzimuthalIntegrator(detector=dect, dist=0.1) # for even spaced dist and directDist must
-            # be the same (dist is in m and directDist is in mm_
-            if center is None:
-                center = self.axes_manager.signal_shape/2
-            elif isinstance(center[0], float) or isinstance(center[1], float):
-                center[0] = self.axes_manager.signal_axes[-1].value2index(center[0])
-                center[1] = self.axes_manager.signal_axes[-1].value2index(center[1])
-            else:
-                pass
-            ai.setFit2D(directDist=100, centerX=center[0],centerY=center[1])  # Setting the integrator to use
-            if affine is not None:
-                dx,dy = get_displacements(affine, self.axes_manager.signal_shape)  #
-                dect.set_dx(dx)
-                dect.set_dy(dy)
-            # pixel based center representation.
-        if isinstance(center,BaseSignal) or isinstance(affine,BaseSignal):
-            # Create a new ai for every 2D signal
-            polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
-                             npt_azim=npt_azim, inplace=inplace, **integrate2d_kwargs, **map_kwargs)
-        else:  # using one ai for every 2D signal
-            polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
-                         npt_azim=npt_azim,inplace=inplace, **integrate2d_kwargs, **map_kwargs)
+            if wavelength is None:  # Flat (or almost flat Ewald Sphere)
+                detector_distance = 100000 # very far away so angles are small and sphere appears "flat"
+                detector = Detector(pixel1=1e-4, pixel2=1e-4)  # generic pixel size
+                if radial_range is not None:   # Shifting the radial range to agree with new set up
+                    num_pix = np.multiply(radial_range,self.axes_manager.signal_axes[0].scale)
+                    radial_range = (np.tan(detector_distance/(1e4*num_pix[0])),
+                                    np.tan(detector_distance/(1e4*num_pix[2]))) # resetting radial range to radians
 
+            else:
+                detector_distance = 1
+                angle1 = np.arcsin(wavelength * self.axes_manager.signal_axes[0].scale)  # scale and wavelength same
+                angle2 = np.arcsin(wavelength * self.axes_manager.signal_axes[1].scale)  # scale and wavelength same
+                pixel_1_size = np.tan(angle1)/detector_distance
+                pixel_2_size = np.tan(angle2)/detector_distance
+                detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
+            unit = "2th_deg"  # Need to calculate real scale later using the wavelength
+            pyxem_units = True
+
+        if isinstance(mask,BaseSignal) or isinstance(affine,BaseSignal) or isinstance(center, BaseSignal):
+            # _map_iterate used instead of regular map function. Uses slow integrate method.
+            if isinstance(center,BaseSignal) and radial_range is None: # need to have a set radial range so
+                # scale is constant
+                ai = get_azimuthal_integrator(detector=detector,
+                                              detector_distance=detector_distance,
+                                              shape=self.axes_manager.signal_shape,
+                                              center=center.inav[0].data)  # take 1st center
+                radial_range = _get_radial_extent(ai=ai, shape=self.axes_manager.signal_shape, unit=unit)
+
+            polar = self.map(azimuthal_integrate2d, detector=detector,
+                             center=center, mask=mask, affine=affine,
+                             detector_distance=detector_distance,
+                             npt_rad=npt_rad, npt_azim=npt_azim,
+                             radial_range=radial_range, inplace=inplace,
+                             unit=unit,
+                             **integrate2d_kwargs, **map_kwargs)  # Uses slow methodology
+
+        else:  # much simpler and no changing integrator without using map iterate
+            ai = get_azimuthal_integrator(detector=detector,detector_distance=detector_distance,
+                                          shape=self.axes_manager.signal_shape, center=center,
+                                          affine=affine, mask=mask, **ai_kwargs)
+            polar = self.map(azimuthal_integrate_fast2d, azimuthal_integrator=ai, npt_rad=npt_rad,
+                             npt_azim=npt_azim,azimuth_range=azimuth_range,
+                             radial_range=radial_range,
+                             inplace=inplace, unit=unit, **integrate2d_kwargs, **map_kwargs)
+            if radial_range is None:
+                radial_range =_get_radial_extent(ai=ai,shape=self.axes_manager.signal_shape, center=center)
+
+        # Dealing with axis changes
         if inplace:
             polar_t_axis = self.axes_manager.signal_axes[0]
             polar_k_axis = self.axes_manager.signal_axes[1]
@@ -414,13 +457,24 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             polar_t_axis = polar.axes_manager.signal_axes[0]
             polar_k_axis = polar.axes_manager.signal_axes[1]
             transfer_navigation_axes(polar, self)
+
         polar_t_axis.name = "theta"
-        polar_t_axis.scale = np.pi*2/npt_azim
-        polar_t_axis.units = "$rad$"
-        # Set signal axes parameters (magnitude)
-        polar_k_axis.name = "k"
-        polar_k_axis.scale = polar_k_axis.scale # Need to figure out how to keep this consistent with moving center
-        polar_k_axis.units = "$$"
+        if azimuth_range is not None:
+            polar_t_axis.scale = (azimuth_range[1] - azimuth_range[0])/ (npt_rad-1)
+            polar_t_axis.offset = azimuth_range[0]
+        else:
+            polar_t_axis.scale = np.pi*2/npt_azim
+        polar_k_axis.units = "$radius$"
+        if pyxem_units:
+            if wavelength:
+                polar_k_axis.scale = (((2 * np.sin(radial_range[1])/wavelength) -
+                                       (2 * np.sin(radial_range[0])/wavelength))/ npt_rad)
+            else: # we could find the pixel based range.
+                if num_pix is None:
+                    num_pix = [np.arctan(radial_range[0])*1e-4/detector_distance,
+                               np.arctan(radial_range[2])*1e-4/detector_distance]
+                polar_k_axis.scale = ((num_pix[1]-num_pix[0])/npt_rad) * self.axes_manager.signal_axes[1].scale
+                polar_k_axis.offset = num_pix[0] * self.axes_manager.signal_axes[1].scale
         return polar
 
     def get_radial_profile(self, mask_array=None, inplace=False, *args, **kwargs):

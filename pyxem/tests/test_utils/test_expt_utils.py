@@ -331,16 +331,18 @@ class TestAzimuthalIntegration:
         radial[radial==0]=1
         return 100/radial
 
+
     def test_2d_integrate(self,radial_pattern):
         import matplotlib
         matplotlib.use('TkAgg', warn=False, force=True)
         import matplotlib.pyplot as plt
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
         ai = AzimuthalIntegrator(detector=dect, dist=0.1)
+        print(np.shape(radial_pattern))
         ai.setFit2D(100, 10.5, 10.5)
         print(ai)
-        integration = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=20, npt_azim=45, safe=True,
-                                                 method="splitpixel", unit="2th_deg", correctSolidAngle=False)
+        integration = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=100, npt_azim=100, safe=True,
+                                                 method="splitpixel", unit="2th_deg", correctSolidAngle=True)
         print(integration[0])
         plt.imshow(radial_pattern)
         plt.show()
@@ -353,17 +355,25 @@ class TestAzimuthalIntegration:
         matplotlib.use('TkAgg', warn=False, force=True)
         import matplotlib.pyplot as plt
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = AzimuthalIntegrator(detector=dect, dist=0.1)
-        ai.setFit2D(100, 300, 256)
+        ai = AzimuthalIntegrator(detector=dect, dist=0.01)
+        ai.setFit2D(1000, 300, 256)
         d = hs.load("/Users/shaw/Data/test_data/pos1-1.emi")
         print(d)
         d.axes_manager.signal_axes[0].scale = 1
         d.axes_manager.signal_axes[1].scale = 1
         #d.inav[1, 1].plot()
         #plt.show()
+        d.inav[1,1].isig[0,:] = 10000
+        d.inav[1, 1].isig[-10:-1, :] = 10000
+        d.inav[1, 1].isig[:, -10:-1] = 10000
+        d.inav[1, 1].isig[:, 0] = 10000
 
         integration = azimuthal_integrate_fast2d(d.inav[1,1].data, ai, npt_rad=400, npt_azim=360, safe=True,
                                                  method="splitpixel", correctSolidAngle=True, unit="2th_deg")
+        print("Radial Range:", np.min(integration[1]), np.max(integration[1]))
+        from pyxem.utils.pyfai_utils import _get_radial_extent
+        print("Radial Range 2:",_get_radial_extent(ai,shape=(512,512), unit="2th_deg"))
+        #print(integration[2])
         #integation = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=50, npt_azim=360, safe=True,
         #
         #
