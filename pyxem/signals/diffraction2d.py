@@ -63,6 +63,11 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_xc,
 )
 
+units_table = {"q_nm^-1" : [1e-9, 1, "q_nm^-1"],
+               "q_A^-1" : [1e-10, 1, "q_A^-1"],
+               "k_nm^-1" : [1e-9, 2*np.pi, "q_nm^-1"],
+               "k_A^-1" : [1e-10, 2*np.pi, "q_A^-1"]}
+
 from pyxem.utils import peakfinder2D_gui
 
 from skimage import filters
@@ -73,6 +78,24 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 class Diffraction2D(Signal2D, CommonDiffraction):
     _signal_type = "diffraction"
+
+    @property
+    def unit(self):
+        if self.metadata.has_item("Sample.Unit.unit"):
+            return self.metadata.Sample.Unit.unit
+        else:
+            return None
+
+    @unit.setter
+    def unit(self, unit):
+        """Set the unit to help with azimuthal integration
+
+        unit: str
+            The unit can be as follows: “q_nm^-1”, “q_A^-1”,“k_nm^-1”, “k_A^-1”, “2th_deg”, “2th_rad”
+        """
+        if not self.metadata.has_item("Sample.unit"):
+            self.metadata.add_node("Sample.unit")
+        self.metadata.Sample.Unit.unit = unit
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
@@ -425,15 +448,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                                         np.arctan((detector.pixel2 * pix_range[1])/detector_distance))# resetting radial range to radians
                 unit = "2th_rad"  # Need to calculate real scale later
             else:
+                if self.unit is None or "2th_deg" or "2th_rad":
+                    print ("You must first set the unit before you can use the wavelength keyword")
+                    return
+                else:
+                    wavelength_scale = units_table[self.unit][0]
+                    scale_factor = units_table[self.unit][1]
+                    unit = units_table[self.unit][0]
                 detector_distance = 1
-                #angle1 = np.arcsin(wavelength/1e-9 * 2 * self.axes_manager.signal_axes[0].scale)  # scale and wavelength same
-                #angle2 = np.arcsin(wavelength/1e-9 * 2 * self.axes_manager.signal_axes[1].scale)  # scale and wavelength same
-                #pixel_1_size = np.tan(angle1)/detector_distance
-                #pixel_2_size = np.tan(angle2)/detector_distance
-                pixel_1_size = self.axes_manager.signal_axes[0].scale * (wavelength/1e-9) * detector_distance
-                pixel_2_size = self.axes_manager.signal_axes[1].scale * (wavelength / 1e-9) * detector_distance
+                pixel_1_size = self.axes_manager.signal_axes[0].scale * (wavelength/wavelength_scale) * detector_distance
+                pixel_2_size = self.axes_manager.signal_axes[1].scale * (wavelength /wavelength_scale) * detector_distance
                 detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
-                unit = "q_nm^-1"  # Need to calculate real scale later using the wavelength
             pyxem_units = True
 
         if isinstance(mask,BaseSignal) or isinstance(affine, BaseSignal) or isinstance(center, BaseSignal):
@@ -483,7 +508,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             polar_t_axis.scale = np.pi*2/npt_azim
         if pyxem_units:
             if wavelength:
-                polar_k_axis.scale = ((radial_range[1]- radial_range[0])/npt_rad)/np.pi  # need to think about k vs q
+                polar_k_axis.scale = ((radial_range[1]- radial_range[0])/npt_rad)/scale_factor # need to think about k vs q
             else: # we could find the pixel based range.
                 if pix_range is None:
                     pix_range = [np.arctan(radial_range[0])*1e-4/detector_distance,
