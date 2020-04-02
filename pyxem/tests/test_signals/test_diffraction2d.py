@@ -202,6 +202,7 @@ class Test_Azimuthal_integral_2d:
         ones_diff.axes_manager.signal_axes[1].name = "ky"
         ones_diff.axes_manager.signal_axes[0].units = "$nm^-1$"
         ones_diff.axes_manager.signal_axes[1].units = "$nm^-1$"
+        ones_diff.unit = "k_nm^-1"
         return ones_diff
 
     def test_2d_azimuthal_integral_fast(self, ones):
@@ -229,7 +230,7 @@ class Test_Azimuthal_integral_2d:
         print(az1.axes_manager)
 
     def test_2d_azimuthal_integral_fast(self, ones):
-        az = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10, method="BBox",wavelength=1e-9,  correctSolidAngle=False)
+        az = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10, method="BBox", wavelength=1e-9,  correctSolidAngle=False)
         print(az.axes_manager)
 
 
