@@ -31,7 +31,7 @@ from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 from pyxem.signals.common_diffraction import CommonDiffraction
-from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_radial_extent
+from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_radial_extent, _get_flat_setup, _get_curved_setup
 
 from pyxem.utils.expt_utils import (
     azimuthal_integrate1d_slow,
@@ -288,46 +288,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         pyxem_units = False
         if unit is "pyxem":  # Case 1
-            pix_range = None
-            # Just changing the pixel size to make flat assumption or to fit with wavelength.
-            from pyFAI.detectors import Detector
-            if wavelength is None:  # Flat (or almost flat Ewald Sphere)
-                detector_distance = 100000  # very far away so angles are small and sphere appears "flat"
-                detector = Detector(pixel1=1e-4, pixel2=1e-4)  # generic pixel size
-                if radial_range is not None:  # Shifting the radial range to agree with new set up
-                    if isinstance(radial_range[0], float) or isinstance(radial_range[1], float):
-                        pix_range = [radial_range[0] / self.axes_manager.signal_axes[0].scale,
-                                     radial_range[1] / self.axes_manager.signal_axes[1].scale]
-                    else:
-                        pix_range = radial_range
-                    if pix_range[0] == 0:
-                        radial_range = (0,
-                                        np.arctan((detector.pixel1 * pix_range[
-                                            1]) / detector_distance))  # resetting radial range to radians
-                    else:
-                        radial_range = (np.arctan((detector.pixel1 * pix_range[0]) / detector_distance),
-                                        np.arctan((detector.pixel2 * pix_range[
-                                            1]) / detector_distance))  # resetting radial range to radians
-                unit = "2th_rad"  # Need to calculate real scale later
-            else:
-                if self.unit is None or self.unit is "2th_deg" or self.unit is "2th_rad":
-                    print("You must first set the unit before you can use the wavelength keyword")
-                    return
-                else:
-                    units_table = {"q_nm^-1": [1e-9, 1, "q_nm^-1"],
-                                   "q_A^-1": [1e-10, 1, "q_A^-1"],
-                                   "k_nm^-1": [1e-9, 2 * np.pi, "q_nm^-1"],
-                                   "k_A^-1": [1e-10, 2 * np.pi, "q_A^-1"]}
-                    wavelength_scale = units_table[self.unit][0]
-                    scale_factor = units_table[self.unit][1]
-                    unit = units_table[self.unit][2]
-                detector_distance = 1
-                pixel_1_size = self.axes_manager.signal_axes[0].scale * (
-                            wavelength / wavelength_scale) * detector_distance
-                pixel_2_size = self.axes_manager.signal_axes[1].scale * (
-                            wavelength / wavelength_scale) * detector_distance
-                detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
             pyxem_units = True
+            pixel_scale = [self.axes_manager.signal_axes[0].scale,
+                           self.axes_manager.signal_axes[1].scale]
+            if wavelength is not None:
+                flat_setup = _get_flat_setup(radial_range=radial_range,
+                                             pixel_scale=pixel_scale)
+                detector, detector_distance, radial_range, unit, pix_range = flat_setup
+            else:
+                curve_setup = _get_curved_setup(wavelength=wavelength, pyxem_unit=self.unit,
+                                                pixel_scale=pixel_scale, radial_range=radial_range)
+                detector, detector_distance, radial_range, unit, scale_factor = curve_setup
 
         if isinstance(mask, BaseSignal) or isinstance(affine, BaseSignal) or isinstance(center, BaseSignal):
             # _map_iterate used instead of regular map function. Uses slow integrate method.
@@ -340,13 +311,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 radial_range = _get_radial_extent(ai=ai, shape=self.axes_manager.signal_shape, unit=unit)
 
             integration = self.map(azimuthal_integrate1d_slow, detector=detector,
-                             center=center, mask=mask, affine=affine,
-                             detector_distance=detector_distance,
-                             npt_rad=npt_rad,
-                             radial_range=radial_range, inplace=inplace,
-                             unit=unit, method=method, correctSolidAngle=correctSolidAngle,
-                             **integrate1d_kwargs,
-                             **map_kwargs)  # Uses slow methodology
+                                   center=center, mask=mask, affine=affine,
+                                   detector_distance=detector_distance,
+                                   npt_rad=npt_rad,
+                                   radial_range=radial_range, inplace=inplace,
+                                   unit=unit, method=method, correctSolidAngle=correctSolidAngle,
+                                   **integrate1d_kwargs,
+                                   **map_kwargs)  # Uses slow methodology
 
         else:  # much simpler and no changing integrator without using map iterate
             ai = get_azimuthal_integrator(detector=detector, detector_distance=detector_distance,
