@@ -312,7 +312,7 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
 
 
 def get_nth_best_solution(
-    single_match_result, rank=0, key="match_rate", descending=True
+    single_match_result, mode, rank=0, key="match_rate", descending=True
 ):
     """Get the nth best solution by match_rate from a pool of solutions
 
@@ -320,6 +320,8 @@ def get_nth_best_solution(
     ----------
     single_match_result : VectorMatchingResults, TemplateMatchingResults
         Pool of solutions from the vector matching algorithm
+    mode : str
+        'vector' or 'template'
     rank : int
         The rank of the solution, i.e. rank=2 returns the third best solution
     key : str
@@ -337,7 +339,7 @@ def get_nth_best_solution(
             Parameters for the best fitting orientation
             Library Number , [z, x, z], Correlation Score
     """
-    try:
+    if mode == "vector":
         try:
             best_fit = sorted(
                 single_match_result[0].tolist(), key=attrgetter(key), reverse=descending
@@ -346,9 +348,10 @@ def get_nth_best_solution(
             best_fit = sorted(
                 single_match_result.tolist(), key=attrgetter(key), reverse=descending
             )[rank]
-    except BaseException:
-        srt_idx = np.argsort(single_match_result[:, 2])[rank]
-        best_fit = single_match_result[rank]
+    if mode == "template":
+        srt_idx = np.argsort(single_match_result[:, 2])[::-1][rank]
+        best_fit = single_match_result[srt_idx]
+
     return best_fit
 
 
@@ -618,7 +621,9 @@ def crystal_from_vector_matching(z_matches):
     results_array = np.empty(3, dtype="object")
 
     # get best matching phase
-    best_match = get_nth_best_solution(z_matches, key="total_error", descending=False)
+    best_match = get_nth_best_solution(
+        z_matches, "vector", key="total_error", descending=False
+    )
     results_array[0] = best_match.phase_index
 
     # get best matching orientation Euler angles
@@ -654,7 +659,7 @@ def crystal_from_vector_matching(z_matches):
     else:
         # get second best matching orientation for orientation_reliability
         second_match = get_nth_best_solution(
-            z_matches, rank=1, key="total_error", descending=False
+            z_matches, "vector", rank=1, key="total_error", descending=False
         )
 
     metrics["orientation_reliability"] = 100 * (
@@ -684,7 +689,7 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     peaks : array
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    best_fit = get_nth_best_solution(single_match_result, rank=rank)
+    best_fit = get_nth_best_solution(single_match_result, "template", rank=rank)
 
     phase_names = list(library.keys())
     phase_index = int(best_fit[0])
@@ -713,7 +718,7 @@ def peaks_from_best_vector_match(single_match_result, library, rank=0):
     peaks : ndarray
         Coordinates of peaks in the matching results object in calibrated units.
     """
-    best_fit = get_nth_best_solution(single_match_result, rank=rank)
+    best_fit = get_nth_best_solution(single_match_result, "vector", rank=rank)
     phase_index = best_fit.phase_index
 
     rotation_orientation = mat2euler(best_fit.rotation_matrix)

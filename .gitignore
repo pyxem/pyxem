@@ -110,7 +110,7 @@ src/
 # VScode project settings
 .vscode/
 
-# From pixStem, might need some pruning
+# Data files and distribution
 *.pyc
 *.hdf5
 *.png
