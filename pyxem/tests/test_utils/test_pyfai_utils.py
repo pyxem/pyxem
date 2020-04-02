@@ -17,12 +17,26 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import numpy as np
-from pyxem.utils.pyfai_utils import _get_radial_azim_extent
+
+from pyxem.utils.pyfai_utils import _get_radial_extent,get_azimuthal_integrator,_get_displacements
 from pyFAI.detectors import Detector
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+import numpy as np
 
 class Test_PyFai_integration:
+
+    def test_get_azimuthal_integrator(self):
+        dect = Detector(pixel1=1e-4, pixel2=1e-4)
+        ai = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20,20), center=(10.5,10.5))
+        ai_mask = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20, 20), center=(10.5, 10.5),
+                                           mask=np.zeros((20,20)))
+        aff = [[1,0,0],[0,1,0],[0,0,1]]
+        ai_affine = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20, 20), center=(10.5, 10.5),
+                                             mask=np.zeros((20,20)), affine=aff)
+    def test_get_displacements(self):
+        aff = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        dis = _get_displacements((10.5,10.5),shape=(20,20),affine=aff)
+        np.testing.assert_array_equal(dis, np.zeros(shape=(2,20,20)))
 
     def test_get_extent(self):
         dect = Detector(pixel1=1e-4, pixel2=1e-4)

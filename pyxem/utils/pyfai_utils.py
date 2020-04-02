@@ -27,6 +27,7 @@ def get_azimuthal_integrator(detector, detector_distance, shape, center=None, af
         center = shape/ 2  # Center is middle of the image
     if affine is not None:
         dx, dy = _get_displacements(center=center, shape=shape,affine=affine)  # creating spline
+        detector.max_shape=shape
         detector.set_dx(dx)
         detector.set_dy(dy)
     ai = AzimuthalIntegrator(detector=detector, **kwargs)
@@ -73,9 +74,11 @@ def _get_displacements(center, shape, affine):
         The displacement in the y direction of shape = shape
     """
     difference=np.subtract(shape,center)
-    xx,yy = np.mgrid[center[0]:difference[0],center[1]:difference[1]]  # all x and y coordinates on the grid
+    xx,yy = np.mgrid[0:shape[0],0:shape[1]]# all x and y coordinates on the grid
+    xx = np.subtract(xx, center[0])
+    yy = np.subtract(yy, center[1])
     coord = np.array([xx.flatten(), yy.flatten(), np.ones(shape[0]*shape[1])])
-    corrected = np.matmul(coord.T, affine)
-    dx = xx - corrected[:, 0]
-    dy = yy - corrected[:, 1]
+    corrected = np.reshape(np.matmul(coord.T, affine), newshape=(*shape,-1))
+    dx = xx - corrected[:, :, 0]
+    dy = yy - corrected[:, :, 1]
     return dx,dy
