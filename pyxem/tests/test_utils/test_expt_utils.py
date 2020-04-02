@@ -36,7 +36,11 @@ from pyxem.utils.expt_utils import (
     investigate_dog_background_removal_interactive,
     find_beam_center_blur,
     find_beam_center_interpolate,
-    reproject_polar,azimuthal_integrate_fast2d
+    reproject_polar,
+    azimuthal_integrate1d_slow,
+    azimuthal_integrate1d_fast,
+    azimuthal_integrate2d_slow,
+    azimuthal_integrate2d_fast
 )
 
 
@@ -326,60 +330,27 @@ def test_find_beam_center_interpolate_2(center_expected, sigma):
 class TestAzimuthalIntegration:
     @pytest.fixture
     def radial_pattern(self):
-        x,y = np.ogrid[-10:10,-10:10]
+        x,y = np.ogrid[-5:5,-5:5]
         radial = (x**2+y**2)*np.pi
-        radial[radial==0]=1
+        radial[radial == 0]=1
         return 100/radial
 
-
-    def test_2d_integrate(self,radial_pattern):
-        import matplotlib
-        matplotlib.use('TkAgg', warn=False, force=True)
-        import matplotlib.pyplot as plt
+    def test_1d_integrate_fast(self,radial_pattern):
+        from pyxem.utils.pyfai_utils import get_azimuthal_integrator
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = AzimuthalIntegrator(detector=dect, dist=0.1)
-        print(np.shape(radial_pattern))
-        ai.setFit2D(100, 10.5, 10.5)
-        print(ai)
-        integration = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=100, npt_azim=100, safe=True,
-                                                 method="splitpixel", unit="2th_deg", correctSolidAngle=True)
-        print(integration[0])
-        plt.imshow(radial_pattern)
-        plt.show()
-        plt.imshow(integration[0])
-        plt.show()
+        ai = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=np.shape(radial_pattern))
+        integration = azimuthal_integrate1d_fast(radial_pattern, ai, npt_rad=100, method="numpy", unit="2th_rad",
+                                                 correctSolidAngle=True)
 
-    def test_2d_integrate_data(self,radial_pattern):
-        import hyperspy.api as hs
-        import matplotlib
-        matplotlib.use('TkAgg', warn=False, force=True)
-        import matplotlib.pyplot as plt
+    def test_2d_integrate_fast(self,radial_pattern):
+        from pyxem.utils.pyfai_utils import get_azimuthal_integrator
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = AzimuthalIntegrator(detector=dect, dist=0.01)
-        ai.setFit2D(1000, 300, 256)
-        d = hs.load("/Users/shaw/Data/test_data/pos1-1.emi")
-        print(d)
-        d.axes_manager.signal_axes[0].scale = 1
-        d.axes_manager.signal_axes[1].scale = 1
-        #d.inav[1, 1].plot()
-        #plt.show()
-        d.inav[1,1].isig[0,:] = 10000
-        d.inav[1, 1].isig[-10:-1, :] = 10000
-        d.inav[1, 1].isig[:, -10:-1] = 10000
-        d.inav[1, 1].isig[:, 0] = 10000
+        ai = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=np.shape(radial_pattern))
+        integration = azimuthal_integrate2d_fast(radial_pattern, ai, npt_rad=100, npt_azim=100,
+                                                 method="numpy", unit="2th_rad", correctSolidAngle=True)
 
-        integration = azimuthal_integrate_fast2d(d.inav[1,1].data, ai, npt_rad=400, npt_azim=360, safe=True,
-                                                 method="splitpixel", correctSolidAngle=True, unit="2th_deg")
-        print("Radial Range:", np.min(integration[1]), np.max(integration[1]))
-        from pyxem.utils.pyfai_utils import _get_radial_extent
-        print("Radial Range 2:",_get_radial_extent(ai,shape=(512,512), unit="2th_deg"))
-        #print(integration[2])
-        #integation = azimuthal_integrate_fast2d(radial_pattern, ai, npt_rad=50, npt_azim=360, safe=True,
-        #
-        #
-        #plt.imshow(radial_pattern)
-        #plt.show()
-        print(np.sum(d.inav[1,1].data),np.sum(integration[0]))
-        plt.imshow(integration[0])
-        plt.show()
+    def test_2d_integrate_slow(self,radial_pattern):
+        dect = Detector(pixel1=1e-4, pixel2=1e-4)
+        integration = azimuthal_integrate2d_slow(radial_pattern, detector=dect, detector_distance=1, npt_rad=100)
+
 

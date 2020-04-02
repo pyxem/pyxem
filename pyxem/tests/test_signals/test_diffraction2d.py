@@ -192,6 +192,48 @@ class TestAzimuthalIntegral:
         assert np.allclose(ap.data, expected, atol=1e-5)
 
 
+class Test_Azimuthal_integral_2d:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = Diffraction2D(data=np.ones(shape=(10,10)))
+        ones_diff.axes_manager.signal_axes[0].scale = .1
+        ones_diff.axes_manager.signal_axes[1].scale = .1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.axes_manager.signal_axes[0].units = "$nm^-1$"
+        ones_diff.axes_manager.signal_axes[1].units = "$nm^-1$"
+        return ones_diff
+
+    def test_2d_azimuthal_integral_fast(self, ones):
+        az = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10, method="BBox", correctSolidAngle=False)
+        print(az.data)
+        np.testing.assert_array_equal(az.data[0:8,:], np.ones((8,10)))
+
+    def test_2d_azimuthal_integral_fast_slicing(self, ones):
+        az1 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10,
+                                            center=(5.5,5.5), radial_range=[.0,1.], method="splitpixel")
+        az2 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10,
+                                            center=(5.5,5.5), radial_range=[0, 10], method="splitpixel")
+        np.testing.assert_array_equal(az1.data, az2.data)
+
+    def test_2d_axes_continuity(self, ones):
+        import matplotlib.pyplot as plt
+        az1 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=20, center=(5.5,5.5),
+                                            radial_range=[.0,1.], method="splitpixel")
+        print(az1.axes_manager)
+
+    def test_2d_axes_solid_angle(self, ones):
+        import matplotlib.pyplot as plt
+        az1 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=20, center=(5.5,5.5),
+                                            radial_range=[.0,1.], method="splitpixel")
+        print(az1.axes_manager)
+
+    def test_2d_azimuthal_integral_fast(self, ones):
+        az = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10, method="BBox",wavelength=1e-9,  correctSolidAngle=False)
+        print(az.axes_manager)
+
+
+
 class TestPolarReprojection:
     def test_reproject_polar_signal_type(self, diffraction_pattern):
         polar = diffraction_pattern.as_polar()

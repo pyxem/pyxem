@@ -23,7 +23,7 @@ from pyFAI.detectors import Detector
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 import numpy as np
 
-class Test_PyFai_integration:
+class Test_PyFai_utils:
 
     def test_get_azimuthal_integrator(self):
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
@@ -33,6 +33,7 @@ class Test_PyFai_integration:
         aff = [[1,0,0],[0,1,0],[0,0,1]]
         ai_affine = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20, 20), center=(10.5, 10.5),
                                              mask=np.zeros((20,20)), affine=aff)
+
     def test_get_displacements(self):
         aff = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         dis = _get_displacements((10.5,10.5),shape=(20,20),affine=aff)
@@ -42,4 +43,7 @@ class Test_PyFai_integration:
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
         ai = AzimuthalIntegrator(detector=dect, dist=0.1)
         ai.setFit2D(directDist=1000, centerX=50.5, centerY=50.5)
-        _get_radial_azim_extent(ai=ai,shape=(100,100), unit="2th_deg")
+        extent = _get_radial_extent(ai=ai,shape=(100,100), unit="2th_rad")
+        max_rad = 50*np.sqrt(2)
+        calc_extent = np.arctan(max_rad*1e-4/1)
+        np.testing.assert_almost_equal(extent[1], calc_extent,)

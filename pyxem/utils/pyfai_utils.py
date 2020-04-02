@@ -3,7 +3,8 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 import pyFAI.units as units
 
 
-def get_azimuthal_integrator(detector, detector_distance, shape, center=None, affine=None, mask=None, **kwargs):
+def get_azimuthal_integrator(detector, detector_distance, shape, center=None, affine=None, mask=None, wavelength=None,
+                             **kwargs):
     """ This is a basic method for creating a azimuthal integrator.
 
     This helps to deal with taking some of the pyXEM standards and apply them to pyFAI
@@ -24,16 +25,18 @@ def get_azimuthal_integrator(detector, detector_distance, shape, center=None, af
         Any additional arguments to the Azimuthal Integrator class
     """
     if center is None:
-        center = shape/ 2  # Center is middle of the image
+        center = np.divide(shape,2)  # Center is middle of the image
     if affine is not None:
         dx, dy = _get_displacements(center=center, shape=shape,affine=affine)  # creating spline
         detector.max_shape=shape
         detector.set_dx(dx)
         detector.set_dy(dy)
-    ai = AzimuthalIntegrator(detector=detector, **kwargs)
+    ai = AzimuthalIntegrator(detector=detector, dist=detector_distance, wavelength=wavelength, **kwargs)
     if mask is not None:
         ai.set_mask(None)
-    ai.setFit2D(directDist=detector_distance, centerX=center[0], centerY=center[1])
+    if wavelength is not None:
+        ai.wavelength=wavelength
+    ai.setFit2D(directDist=detector_distance*1000, centerX=center[0], centerY=center[1])
     return ai
 
 
