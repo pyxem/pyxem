@@ -25,7 +25,7 @@ exec(open("pyxem/release_info.py").read())  # grab version info
 setup(
     name=name,
     version=version,
-    description="Multi-dimensional Diffraction Microscopy in Python.",
+    description="multi-dimensional diffraction microscopy",
     author=author,
     author_email=email,
     license=license,
