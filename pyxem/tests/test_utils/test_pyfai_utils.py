@@ -18,7 +18,7 @@
 
 import pytest
 
-from pyxem.utils.pyfai_utils import _get_radial_extent,get_azimuthal_integrator,_get_displacements
+from pyxem.utils.pyfai_utils import _get_radial_extent,get_azimuthal_integrator,_get_displacements,_get_curved_setup, _get_flat_setup
 from pyFAI.detectors import Detector
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 import numpy as np
@@ -47,3 +47,11 @@ class Test_PyFai_utils:
         max_rad = 50*np.sqrt(2)
         calc_extent = np.arctan(max_rad*1e-4/1)
         np.testing.assert_almost_equal(extent[1], calc_extent,)
+
+    def test_get_curved_setup(self):
+        _get_curved_setup(wavelength=1,pyxem_unit="2th_deg", pixel_scale=[1,1])
+
+    def test_get_curved_setup(self):
+        _get_curved_setup(wavelength=1,pyxem_unit="q_nm^-1", pixel_scale=[1,1],radial_range=[0,1])
+
+

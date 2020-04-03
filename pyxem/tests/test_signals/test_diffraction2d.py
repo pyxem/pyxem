@@ -339,7 +339,7 @@ class TestAzimuthalIntegral2d:
                                           affine=aff_bs,
                                           center=center_bs,
                                           mask=mask_bs)
-    
+
     def test_2d_azimuthal_integral_pyfai(self, ones):
         from pyFAI.detectors import Detector
         d = Detector(pixel1=1e-4,pixel2=1e-4)
