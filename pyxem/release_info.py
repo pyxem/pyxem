@@ -22,6 +22,7 @@ credits = [
     "Rob Tovey",
     "Matt von Lany",
     "Endre Jacobsen",
+    "Tim Poon"
 ]
 license = "GPLv3"
 maintainer = "Duncan Johnstone, Phillip Crout"
