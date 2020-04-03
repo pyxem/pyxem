@@ -1,7 +1,7 @@
 name = "pyxem"
 version = "0.11.0"
 author = "Duncan Johnstone, Phillip Crout"
-copyright = "Copyright 2017-2020, The pyXem Developers"
+copyright = "copyright 2017-2020, the pyxem developers"
 credits = [
     "Duncan Johnstone",
     "Phillip Crout",
@@ -26,4 +26,4 @@ credits = [
 license = "GPLv3"
 maintainer = "Duncan Johnstone, Phillip Crout"
 email = "pyxem.team@gmail.com"
-status = "Development"
+status = "development"
