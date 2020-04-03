@@ -82,7 +82,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     def unit(self):
         try:
             return self.metadata.Signal["unit"]
-        except (KeyError):
+        except AttributeError:
             print("No unit set for this signal")
 
     @unit.setter

@@ -85,6 +85,8 @@ class TestDecomposition:
         assert isinstance(s, Diffraction2D)
 
 
+
+
 class TestAzimuthalIntegral1d:
     @pytest.fixture
     def ones(self):
@@ -98,10 +100,23 @@ class TestAzimuthalIntegral1d:
         ones_diff.unit = "k_nm^-1"
         return ones_diff
 
+    def test_unit(self):
+        dif = Diffraction2D(data=[[1,1],[1,1]])
+        dif.unit
+
     def test_1d_azimuthal_integral_fast(self, ones):
         az = ones.get_azimuthal_integral1d(npt_rad=10, method="BBox", correctSolidAngle=False)
-        print(az.data)
         np.testing.assert_array_equal(az.data[0:8], np.ones((8)))
+
+    def test_1d_azimuthal_integral_fast(self, ones):
+        az = ones.get_azimuthal_integral1d(npt_rad=10, method="BBox", correctSolidAngle=False)
+        np.testing.assert_array_equal(az.data[0:8], np.ones((8)))
+
+
+    def test_1d_azimuthal_integral_inplace(self, ones):
+        az = ones.get_azimuthal_integral1d(npt_rad=10, method="BBox", correctSolidAngle=False, inplace=True)
+        assert isinstance(ones, Diffraction1D)
+        assert az is None
 
     def test_1d_azimuthal_integral_fast_slicing(self, ones):
         az1 = ones.get_azimuthal_integral1d(
@@ -192,6 +207,17 @@ class TestAzimuthalIntegral1d:
                                           affine=aff_bs,
                                           center=center_bs,
                                           mask=mask_bs)
+
+    def test_1d_azimuthal_integral_pyfai(self, ones):
+        from pyFAI.detectors import Detector
+        d = Detector(pixel1=1e-4,pixel2=1e-4)
+        ones.get_azimuthal_integral1d(npt_rad=10,
+                                      detector=d,
+                                      detector_dist=1,
+                                      method="BBox",
+                                      wavelength=1e-9,
+                                      correctSolidAngle=False,
+                                      unit="q_nm^-1")
 class TestAzimuthalIntegral2d:
     @pytest.fixture
     def ones(self):
@@ -313,6 +339,17 @@ class TestAzimuthalIntegral2d:
                                           affine=aff_bs,
                                           center=center_bs,
                                           mask=mask_bs)
+    
+    def test_2d_azimuthal_integral_pyfai(self, ones):
+        from pyFAI.detectors import Detector
+        d = Detector(pixel1=1e-4,pixel2=1e-4)
+        ones.get_azimuthal_integral2d(npt_rad=10,
+                                      detector=d,
+                                      detector_dist=1,
+                                      method="BBox",
+                                      wavelength=1e-9,
+                                      correctSolidAngle=False,
+                                      unit="q_nm^-1")
 
 class TestPolarReprojection:
     def test_reproject_polar_signal_type(self, diffraction_pattern):
