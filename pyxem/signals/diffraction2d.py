@@ -231,6 +231,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs
         )
 
+
     def get_azimuthal_integral1d(
         self,
         npt_rad,
@@ -248,9 +249,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         detector_dist=None,
         correctSolidAngle=True,
         ai_kwargs={},
-        integrate1d_kwargs={},
+        integrate2d_kwargs={},
     ):
-        """Creates a 1d Integration using pyFAI's azimuthal integrate 1d.
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
 
         This function is designed to be fairly flexible to account for 2 different cases:
 
@@ -264,8 +265,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ---------------
         npt_rad: int
             The number of radial points to calculate
-        npt_azim: int
-            The number of azimuthal points to consider.
         center: None or (x,y) or BaseSignal
             The center of the pattern in pixels to preform the integration around
         affine: 3x3 array or BaseSignal
@@ -277,7 +276,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range: None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
-        azimuth_range:None or (float, float)
+        azim_range:None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
         wavelength: None or float
@@ -293,9 +292,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         detector_dist: float
             distance sample - detector plan (orthogonal distance, not along the beam), in meter.
         map_kwargs: dict
-            Any other keyword arguments for hyperspy's map function
-        integrate1d_kwargs:dict
-            Any keyword arguments for PyFAI's integrate2d function
+            Any other keyword arguments for hyperspys map function
+        integrate2d_kwargs:dict
+            Any keyword arguements for PyFAI's integrate2d function
 
         Returns
         ----------
@@ -318,7 +317,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> from pyFAI.detectors import Detector
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
         >>> ds.get_azimuthal_integral1d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
-
         """
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
@@ -328,7 +326,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 self.axes_manager.signal_axes[0].scale,
                 self.axes_manager.signal_axes[1].scale,
             ]
-            if wavelength is not None:
+            if wavelength is None:
                 flat_setup = _get_flat_setup(
                     radial_range=radial_range, pixel_scale=pixel_scale
                 )
@@ -341,7 +339,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     radial_range=radial_range,
                 )
                 detector, detector_dist, radial_range, unit, scale_factor = curve_setup
-
+        print("Affine is:", affine)
         if (
             isinstance(mask, BaseSignal)
             or isinstance(affine, BaseSignal)
@@ -349,14 +347,26 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ):
             # _map_iterate used instead of regular map function. Uses slow integrate method.
             if isinstance(center, BaseSignal) and radial_range is None:
-                # need to have a set radial range so scale is constant
+                # scale is constant
+                ind =(0,) * len(self.axes_manager.navigation_shape)
                 ai = get_azimuthal_integrator(
                     detector=detector,
                     detector_distance=detector_dist,
-                    shape=self.axes_manager.signal_shape,
-                    center=center.inav[0].data,
+                    shape=sig_shape,
+                    center=center.inav[ind].data,
+                    wavelength=wavelength
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+            else:
+                ai = get_azimuthal_integrator(
+                    detector=detector,
+                    detector_distance=detector_dist,
+                    shape=sig_shape,
+                    center=center,
+                    wavelength=wavelength
+                )  # take 1st center
+                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+
             integration = self.map(
                 azimuthal_integrate1d_slow,
                 detector=detector,
@@ -365,12 +375,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 affine=affine,
                 detector_distance=detector_dist,
                 npt_rad=npt_rad,
+                wavelength=wavelength,
                 radial_range=radial_range,
+                azimuth_range=azimuth_range,
                 inplace=inplace,
                 unit=unit,
                 method=method,
                 correctSolidAngle=correctSolidAngle,
-                **integrate1d_kwargs,
+                **integrate2d_kwargs,
                 **map_kwargs
             )  # Uses slow methodology
 
@@ -385,7 +397,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 wavelength=wavelength,
                 **ai_kwargs
             )
-            print(radial_range)
             integration = self.map(
                 azimuthal_integrate1d_fast,
                 azimuthal_integrator=ai,
@@ -396,7 +407,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 inplace=inplace,
                 unit=unit,
                 correctSolidAngle=correctSolidAngle,
-                **integrate1d_kwargs,
+                **integrate2d_kwargs,
                 **map_kwargs
             )
             if radial_range is None:
@@ -404,33 +415,32 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         # Dealing with axis changes
         if inplace:
-            integration_k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type("polar_diffraction")
+            k_axis = self.axes_manager.signal_axes[0]
+            self.set_signal_type("diffraction")
         else:
-            integration_k_axis = integration.axes_manager.signal_axes[1]
+            k_axis = integration.axes_manager.signal_axes[0]
             integration.set_signal_type("diffraction")
             transfer_navigation_axes(integration, self)
 
         if pyxem_units:
             if wavelength:
-                integration_k_axis.scale = (
-                    (radial_range[1] - radial_range[0]) / npt_rad
-                ) / scale_factor  # need to think about k vs q
+                k_axis.scale = (
+                    (radial_range[1] - radial_range[0]) / npt_rad / scale_factor
+                )
             else:  # we could find the pixel based range.
                 if pix_range is None:
                     pix_range = [
                         np.arctan(radial_range[0]) * 1e-4 / detector_dist,
                         np.arctan(radial_range[1]) * 1e-4 / detector_dist,
                     ]
-                integration_k_axis.scale = (
-                    (pix_range[1] - pix_range[0]) / npt_rad * pixel_scale[1]
-                )
-                integration_k_axis.offset = pix_range[0] * pixel_scale[1]
-                integration_k_axis.units = integration_k_axis.units
+                k_axis.scale = (pix_range[1] - pix_range[0]) / npt_rad * pixel_scale[1]
+                k_axis.offset = pix_range[0] * pixel_scale[1]
+                k_axis.units = k_axis.units
         else:
-            integration_k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
-            integration_k_axis.units = unit
-            integration_k_axis.offset = radial_range[0]
+            k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
+            k_axis.units = unit
+            k_axis.offset = radial_range[0]
+
         return integration
 
     def get_azimuthal_integral2d(

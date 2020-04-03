@@ -37,7 +37,7 @@ class Test_PyFai_utils:
     def test_get_displacements(self):
         aff = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         dis = _get_displacements((10.5,10.5),shape=(20,20),affine=aff)
-        np.testing.assert_array_equal(dis, np.zeros(shape=(2,20,20)))
+        np.testing.assert_array_equal(dis, np.zeros(shape=(2,21,21)))
 
     def test_get_extent(self):
         dect = Detector(pixel1=1e-4, pixel2=1e-4)

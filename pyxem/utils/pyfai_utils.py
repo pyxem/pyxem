@@ -136,7 +136,7 @@ def _get_flat_setup(radial_range=None, pixel_scale=[1, 1]):
                 np.arctan((detector.pixel1 * pix_range[0]) / detector_distance),
                 np.arctan((detector.pixel2 * pix_range[1]) / detector_distance),
             )
-        unit = "2th_rad"
+    unit = "2th_rad"
     return detector, detector_distance, radial_range, unit, pix_range
 
 
