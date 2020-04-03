@@ -185,8 +185,8 @@ def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
 
 def azimuthal_integrate2d_slow(z, detector_distance, detector, npt_rad,
                                npt_azim=360, wavelength=None, unit="2th_rad",
-                               origin=None, mask=None, affine=None, method="splitpixel",
-                               correctSolidAngle=True,
+                               center=None, mask=None, affine=None, method="splitpixel",
+                               correctSolidAngle=True, radial_range=None, azimuth_range=None,
                                azimuthal_kwargs={}, integrate_kwargs={}):
     """Calculate the azimuthal integral in 2d around a determined origin.
 
@@ -224,13 +224,15 @@ def azimuthal_integrate2d_slow(z, detector_distance, detector, npt_rad,
     """
     shape = np.shape(z)
     ai = get_azimuthal_integrator(detector=detector, detector_distance=detector_distance, shape=shape,
-                                  center=origin, affine=affine, mask=mask, wavelength=wavelength, **azimuthal_kwargs)
-    output = ai.integrate2d(z, npt_rad=npt_rad,npt_azim=npt_azim, method=method, unit=unit,
-                            correctSolidAngle=correctSolidAngle, **integrate_kwargs)
+                                  center=center, affine=affine, mask=mask, wavelength=wavelength, **azimuthal_kwargs)
+    print(ai.wavelength)
+    output = ai.integrate2d(z, npt_rad=npt_rad, npt_azim=npt_azim, method=method, unit=unit,
+                            correctSolidAngle=correctSolidAngle, azimuth_range=azimuth_range,
+                            radial_range=radial_range, **integrate_kwargs)
     return np.transpose(output[0])
 
 
-def azimuthal_integrate2d_fast(z, azimuthal_integrator, npt_rad, npt_azim=None,correctSolidAngle=True, **kwargs):
+def azimuthal_integrate2d_fast(z, azimuthal_integrator, npt_rad, npt_azim=None, correctSolidAngle=True, **kwargs):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to

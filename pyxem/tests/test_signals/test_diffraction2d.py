@@ -195,9 +195,9 @@ class TestAzimuthalIntegral:
 class Test_Azimuthal_integral_2d:
     @pytest.fixture
     def ones(self):
-        ones_diff = Diffraction2D(data=np.ones(shape=(10,10)))
-        ones_diff.axes_manager.signal_axes[0].scale = .1
-        ones_diff.axes_manager.signal_axes[1].scale = .1
+        ones_diff = Diffraction2D(data=np.ones(shape=(10, 10)))
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
         ones_diff.axes_manager.signal_axes[0].name = "kx"
         ones_diff.axes_manager.signal_axes[1].name = "ky"
         ones_diff.axes_manager.signal_axes[0].units = "$nm^-1$"
@@ -206,34 +206,113 @@ class Test_Azimuthal_integral_2d:
         return ones_diff
 
     def test_2d_azimuthal_integral_fast(self, ones):
-        az = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10, method="BBox", correctSolidAngle=False)
+        az = ones.get_azimuthal_integral2d(
+            npt_rad=10, npt_azim=10, method="BBox", correctSolidAngle=False
+        )
         print(az.data)
-        np.testing.assert_array_equal(az.data[0:8,:], np.ones((8,10)))
+        np.testing.assert_array_equal(az.data[0:8, :], np.ones((8, 10)))
 
     def test_2d_azimuthal_integral_fast_slicing(self, ones):
-        az1 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10,
-                                            center=(5.5,5.5), radial_range=[.0,1.], method="splitpixel")
-        az2 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10,
-                                            center=(5.5,5.5), radial_range=[0, 10], method="splitpixel")
+        az1 = ones.get_azimuthal_integral2d(
+            npt_rad=10,
+            npt_azim=10,
+            center=(5.5, 5.5),
+            radial_range=[0.0, 1.0],
+            method="splitpixel",
+        )
+        az2 = ones.get_azimuthal_integral2d(
+            npt_rad=10,
+            npt_azim=10,
+            center=(5.5, 5.5),
+            radial_range=[0, 10],
+            method="splitpixel"
+        )
         np.testing.assert_array_equal(az1.data, az2.data)
 
     def test_2d_axes_continuity(self, ones):
-        import matplotlib.pyplot as plt
-        az1 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=20, center=(5.5,5.5),
-                                            radial_range=[.0,1.], method="splitpixel")
-        print(az1.axes_manager)
+        az1 = ones.get_azimuthal_integral2d(
+            npt_rad=10,
+            npt_azim=20,
+            center=(5.5, 5.5),
+            radial_range=[0.0, 1.0],
+            method="splitpixel",
+        )
+        assert np.allclose(az1.axes_manager.signal_axes[1].scale, 0.1)
 
     def test_2d_axes_solid_angle(self, ones):
         import matplotlib.pyplot as plt
-        az1 = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=20, center=(5.5,5.5),
-                                            radial_range=[.0,1.], method="splitpixel")
+
+        az1 = ones.get_azimuthal_integral2d(
+            npt_rad=10,
+            npt_azim=20,
+            center=(5.5, 5.5),
+            radial_range=[0.0, 1.0],
+            method="splitpixel",
+        )
         print(az1.axes_manager)
 
     def test_2d_azimuthal_integral_fast(self, ones):
-        az = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=10, method="BBox", wavelength=1e-9,  correctSolidAngle=False)
+        az = ones.get_azimuthal_integral2d(
+            npt_rad=10,
+            npt_azim=10,
+            method="BBox",
+            wavelength=1e-9,
+            correctSolidAngle=False,
+        )
         print(az.axes_manager)
 
+    def test_2d_azimuthal_integral_affine(self,ones):
+        from hyperspy.signals import BaseSignal
+        aff = [[1,0,0],[0,1,0],[0,0,1]]
+        aff_bs = BaseSignal(data=aff)
+        ones.get_azimuthal_integral2d(npt_rad=10,
+                                      npt_azim=10,
+                                      method="BBox",
+                                      wavelength=1e-9,
+                                      correctSolidAngle=False,
+                                      affine=aff)
 
+    def test_2d_azimuthal_integral_slow(self,ones):
+        from hyperspy.signals import BaseSignal
+        aff = [[1,1,0],[0,1,0],[0,0,1]]
+        aff_bs = BaseSignal(data=aff)
+        ones.get_azimuthal_integral2d(npt_rad=10,
+                                      npt_azim=10,
+                                      method="BBox",
+                                      wavelength=1e-9,
+                                      correctSolidAngle=False,
+                                      affine=aff_bs)
+
+    def test_2d_azimuthal_integral_slow_shifted_center(self,ones):
+        from hyperspy.signals import BaseSignal
+        aff = [[1,1,0],[0,1,0],[0,0,1]]
+        aff_bs = BaseSignal(data=aff)
+        center = [1,1]
+        center_bs = BaseSignal(data=center)
+        ones.get_azimuthal_integral2d(npt_rad=10,
+                                      npt_azim=10,
+                                      method="BBox",
+                                      wavelength=1e-9,
+                                      correctSolidAngle=False,
+                                      affine=aff_bs,
+                                      center=center_bs)
+
+    def test_2d_azimuthal_integral_slow_mask(self, ones):
+        from hyperspy.signals import BaseSignal
+        aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
+        aff_bs = BaseSignal(data=aff)
+        center = [1, 1]
+        center_bs = BaseSignal(data=center)
+        mask = np.zeros((10,10))
+        mask_bs = BaseSignal(data=mask)
+        ones.get_azimuthal_integral2d(npt_rad=10,
+                                          npt_azim=10,
+                                          method="BBox",
+                                          wavelength=1e-9,
+                                          correctSolidAngle=False,
+                                          affine=aff_bs,
+                                          center=center_bs,
+                                          mask=mask_bs)
 
 class TestPolarReprojection:
     def test_reproject_polar_signal_type(self, diffraction_pattern):
