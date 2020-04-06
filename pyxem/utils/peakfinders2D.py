@@ -132,34 +132,26 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40, distance_cutoff=
         x_max = min(x_max, x + a)
         y_min = max(0, y - a)
         y_max = min(y_max, y + a)
-        return (
-            np.array(np.meshgrid(range(x_min, x_max), range(y_min, y_max)))
-            .reshape(2, -1)
-            .T
-        )
+        return np.mgrid[x_min:x_max, y_min:y_max].reshape(2, -1, order="F")
 
     def get_max(image, box):
         """Finds the coordinates of the maximum of 'image' in 'box'."""
-        vals = image[box[:, 0], box[:, 1]]
-        max_position = box[np.argmax(vals)]
-        return max_position
+        vals = image[tuple(box)]
+        ind = np.argmax(vals)
+        return tuple(box[:, ind])
 
-    def distance(x, y):
-        """Calculates the distance between two points."""
-        v = x - y
-        return np.sqrt(np.sum(np.square(v)))
+    def squared_distance(x, y):
+        """Calculates the squared distance between two points."""
+        return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2
 
     def gradient(image):
         """Calculates the square of the 2-d partial gradient.
-
         Parameters
         ----------
         image : numpy.ndarray
-
         Returns
         -------
         numpy.ndarray
-
         """
         gradient_of_image = np.gradient(image)
         gradient_of_image = gradient_of_image[0] ** 2 + gradient_of_image[1] ** 2
@@ -168,24 +160,33 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40, distance_cutoff=
     # Generate an ordered list of matrix coordinates.
     z = z / np.max(z)
     coordinates = np.indices(z.data.shape).reshape(2, -1).T
+
     # Calculate the gradient at every point.
     image_gradient = gradient(z)
+
     # Boolean matrix of high-gradient points.
-    gradient_is_above_threshold = image_gradient >= grad_threshold
+    coordinates = coordinates[(image_gradient >= grad_threshold).flatten()]
+
+    # Compare against squared distance (avoids repeated sqrt calls)
+    distance_cutoff_sq = distance_cutoff ** 2
+
     peaks = []
-    for coordinate in coordinates[gradient_is_above_threshold.flatten()]:
+
+    for coordinate in coordinates:
         # Iterate over coordinates where the gradient is high enough.
         b = box(coordinate[0], coordinate[1], window_size, z.shape[0], z.shape[1])
-        p_old = np.array([0, 0])
+        p_old = (0, 0)
         p_new = get_max(z, b)
-        while np.all(p_old != p_new):
+
+        while p_old[0] != p_new[0] and p_old[1] != p_new[1]:
             p_old = p_new
             b = box(p_old[0], p_old[1], window_size, z.shape[0], z.shape[1])
             p_new = get_max(z, b)
-            if distance(coordinate, p_new) > distance_cutoff:
+            if squared_distance(coordinate, p_new) > distance_cutoff_sq:
                 break
-            peaks.append(tuple(p_new))
-    peaks = np.array([np.array(p) for p in set(peaks)])
+            peaks.append(p_new)
+
+    peaks = np.array([p for p in set(peaks)])
     return clean_peaks(peaks)
 
 
