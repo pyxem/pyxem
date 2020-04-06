@@ -40,7 +40,6 @@ def get_azimuthal_integrator(
     """
     if center is None:
         center = np.divide(shape, 2)  # Center is middle of the image
-    print("the center is:", center)
     if affine is not None:
         # create spline representation with (dx,dy) displacements
         dx, dy = _get_displacements(center=center, shape=shape, affine=affine)
@@ -48,17 +47,15 @@ def get_azimuthal_integrator(
         detector.shape = shape
         detector.set_dx(dx)
         detector.set_dy(dy)
-    print(detector)
-    print("The detector shape is:", detector.shape)
     ai = AzimuthalIntegrator(
         detector=detector, dist=detector_distance, wavelength=wavelength, **kwargs
     )
     if mask is not None:
-        ai.set_mask(None)
+        ai.set_mask(mask)
     if wavelength is not None:
         ai.wavelength = wavelength
     ai.setFit2D(
-        directDist=detector_distance * 1000, centerX=center[0], centerY=center[1]
+        directDist=detector_distance * 1000, centerX=center[1], centerY=center[0]
     )
     return ai
 
@@ -101,9 +98,11 @@ def _get_displacements(center, shape, affine):
     """
     # all x and y coordinates on the grid
     shape_plus = np.add(shape,1)
-    xx, yy = np.mgrid[0: shape_plus[0], 0: shape_plus[1]]
-    xx = np.subtract(xx, center[0])
-    yy = np.subtract(yy, center[1])
+    x = range(shape_plus[0],0, -1)
+    y = range(shape_plus[1], 0, -1)
+    xx, yy = np.meshgrid(x,y)
+    xx = np.subtract(xx, center[1])
+    yy = np.subtract(yy, center[0])
     coord = np.array([xx.flatten(), yy.flatten(), np.ones((shape_plus[0]) * (shape_plus[1]))])
     corrected = np.reshape(np.matmul(coord.T, affine), newshape=(*shape_plus, -1))
     dx = xx - corrected[:, :, 0]

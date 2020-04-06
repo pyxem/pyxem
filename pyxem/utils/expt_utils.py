@@ -235,7 +235,7 @@ def azimuthal_integrate2d_slow(z, detector_distance, detector, npt_rad,
     return np.transpose(output[0])
 
 
-def azimuthal_integrate2d_fast(z, azimuthal_integrator, npt_rad, npt_azim=None, correctSolidAngle=True, **kwargs):
+def azimuthal_integrate2d_fast(z, azimuthal_integrator, npt_rad, npt_azim=None, **kwargs):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -260,8 +260,7 @@ def azimuthal_integrate2d_fast(z, azimuthal_integrator, npt_rad, npt_azim=None, 
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.integrate2d(z, npt_rad=npt_rad, npt_azim=npt_azim,
-                                              correctSolidAngle=correctSolidAngle, **kwargs)
+    output = azimuthal_integrator.integrate2d(z, npt_rad=npt_rad, npt_azim=npt_azim, **kwargs)
     return np.transpose(output[0])
 
 

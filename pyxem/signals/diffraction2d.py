@@ -93,7 +93,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The unit can be as follows: “q_nm^-1”, “q_A^-1”,“k_nm^-1”, “k_A^-1”, “2th_deg”, “2th_rad”
         """
         self.metadata.Signal["unit"] = unit
-        print(self.metadata)
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
@@ -339,7 +338,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     radial_range=radial_range,
                 )
                 detector, detector_dist, radial_range, unit, scale_factor = curve_setup
-        print("Affine is:", affine)
         if (
             isinstance(mask, BaseSignal)
             or isinstance(affine, BaseSignal)
@@ -357,6 +355,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     wavelength=wavelength
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+                radial_range[0]=0
             else:
                 ai = get_azimuthal_integrator(
                     detector=detector,
@@ -397,6 +396,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 wavelength=wavelength,
                 **ai_kwargs
             )
+            if radial_range is None:
+                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+                radial_range[0] = 0
+
             integration = self.map(
                 azimuthal_integrate1d_fast,
                 azimuthal_integrator=ai,
@@ -410,23 +413,23 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **integrate2d_kwargs,
                 **map_kwargs
             )
-            if radial_range is None:
-                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+
 
         # Dealing with axis changes
         if inplace:
             k_axis = self.axes_manager.signal_axes[0]
             self.set_signal_type("diffraction")
         else:
-            k_axis = integration.axes_manager.signal_axes[0]
             integration.set_signal_type("diffraction")
             transfer_navigation_axes(integration, self)
-
+            k_axis = integration.axes_manager.signal_axes[0]
+        k_axis.name = "Radius"
         if pyxem_units:
             if wavelength:
                 k_axis.scale = (
                     (radial_range[1] - radial_range[0]) / npt_rad / scale_factor
                 )
+                k_axis.offset = radial_range[0]/scale_factor
             else:  # we could find the pixel based range.
                 if pix_range is None:
                     pix_range = [
@@ -536,7 +539,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     radial_range=radial_range,
                 )
                 detector, detector_dist, radial_range, unit, scale_factor = curve_setup
-        print("Affine is:", affine)
         if (
             isinstance(mask, BaseSignal)
             or isinstance(affine, BaseSignal)
@@ -554,6 +556,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     wavelength=wavelength
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+                radial_range[0] = 0
             else:
                 ai = get_azimuthal_integrator(
                     detector=detector,
@@ -563,6 +566,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     wavelength=wavelength
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+                radial_range[0] = 0
 
             polar = self.map(
                 azimuthal_integrate2d_slow,
@@ -595,6 +599,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 wavelength=wavelength,
                 **ai_kwargs
             )
+            if radial_range is None:
+                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+                radial_range[0]=0
             polar = self.map(
                 azimuthal_integrate2d_fast,
                 azimuthal_integrator=ai,
@@ -609,8 +616,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **integrate2d_kwargs,
                 **map_kwargs
             )
-            if radial_range is None:
-                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+
 
         # Dealing with axis changes
         if inplace:
@@ -618,22 +624,25 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis = self.axes_manager.signal_axes[1]
             self.set_signal_type("polar_diffraction")
         else:
+            transfer_navigation_axes(polar, self)
+            polar.set_signal_type("polar_diffraction")
             t_axis = polar.axes_manager.signal_axes[0]
             k_axis = polar.axes_manager.signal_axes[1]
-            polar.set_signal_type("polar_diffraction")
-            transfer_navigation_axes(polar, self)
 
         t_axis.name = "theta"
+        t_axis.offset = -np.pi
         if azimuth_range is not None:
             t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / (npt_rad - 1)
             t_axis.offset = azimuth_range[0]
         else:
             t_axis.scale = np.pi * 2 / npt_azim
+        k_axis.name = "Radius"
         if pyxem_units:
             if wavelength:
                 k_axis.scale = (
                     (radial_range[1] - radial_range[0]) / npt_rad / scale_factor
                 )
+                k_axis.offset = radial_range[0] * scale_factor
             else:  # we could find the pixel based range.
                 if pix_range is None:
                     pix_range = [
@@ -648,7 +657,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
             k_axis.units = unit
             k_axis.offset = radial_range[0]
-
         return polar
 
     def get_radial_profile(self, mask_array=None, inplace=False, *args, **kwargs):
