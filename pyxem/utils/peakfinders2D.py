@@ -28,11 +28,47 @@ NO_PEAKS = np.array([[np.nan, np.nan]])
 
 @njit(cache=True)
 def _fast_mean(X):
+    """JIT-compiled mean of array.
+
+    Parameters
+    ----------
+    X : numpy.ndarray
+        Input array.
+
+    Returns
+    -------
+    float
+        Mean of X.
+
+    Notes
+    -----
+    Used by scipy.ndimage.generic_filter in the find_peaks_stat
+    method to reduce overhead of repeated Python function calls.
+    See https://github.com/scipy/scipy/issues/8916 for more details.
+    """
     return np.mean(X)
 
 
 @njit(cache=True)
 def _fast_std(X):
+    """JIT-compiled standard deviation of array.
+
+    Parameters
+    ----------
+    X : numpy.ndarray
+        Input array.
+
+    Returns
+    -------
+    float
+        Standard deviation of X.
+
+    Notes
+    -----
+    Used by scipy.ndimage.generic_filter in the find_peaks_stat
+    method to reduce overhead of repeated Python function calls.
+    See https://github.com/scipy/scipy/issues/8916 for more details.
+    """
     return np.std(X)
 
 
