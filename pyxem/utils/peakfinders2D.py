@@ -27,13 +27,13 @@ NO_PEAKS = np.array([[np.nan, np.nan]])
 
 
 @njit(cache=True)
-def mean_thresholding(window):
-    return np.mean(window)
+def _fast_mean(X):
+    return np.mean(X)
 
 
 @njit(cache=True)
-def std_thresholding(window):
-    return np.std(window)
+def _fast_std(X):
+    return np.std(X)
 
 
 def clean_peaks(peaks):
@@ -199,16 +199,16 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
 
     def local_mean(image, radius):
         """Calculates rolling mean over a circular kernel."""
-        return _local_stat(image, radius, np.mean)
+        return _local_stat(image, radius, _fast_mean)
 
     def local_std(image, radius):
         """Calculates rolling standard deviation over a circular kernel."""
-        return _local_stat(image, radius, np.std)
+        return _local_stat(image, radius, _fast_std)
 
     def single_pixel_desensitize(image):
         """Reduces single-pixel anomalies by nearest-neighbor smoothing."""
         kernel = np.array([[0.5, 1, 0.5], [1, 1, 1], [0.5, 1, 0.5]])
-        smoothed_image = ndi.filters.generic_filter(image, np.mean, footprint=kernel)
+        smoothed_image = ndi.filters.generic_filter(image, _fast_mean, footprint=kernel)
         return smoothed_image
 
     def stat_binarise(image):
