@@ -18,9 +18,22 @@
 
 import numpy as np
 import scipy.ndimage as ndi
-from skimage.feature import match_template, corner_peaks
+from numba import njit
+from skimage.feature import blob_dog, blob_log, corner_peaks, match_template
+from sklearn.cluster import DBSCAN
+
 
 NO_PEAKS = np.array([[np.nan, np.nan]])
+
+
+@njit(cache=True)
+def mean_thresholding(window):
+    return np.mean(window)
+
+
+@njit(cache=True)
+def std_thresholding(window):
+    return np.std(window)
 
 
 def clean_peaks(peaks):
@@ -172,9 +185,6 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
     This version by Ben Martineau (2016), with minor modifications to the
     original where methods were ambiguous or unclear.
     """
-    from scipy.ndimage.filters import generic_filter
-    from scipy.ndimage.filters import uniform_filter
-    from sklearn.cluster import DBSCAN
 
     def normalize(image):
         """Scales the image to intensities between 0 and 1."""
@@ -184,7 +194,7 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
         """Calculates rolling method 'func' over a circular kernel."""
         x, y = np.ogrid[-radius : radius + 1, -radius : radius + 1]
         kernel = np.hypot(x, y) < radius
-        stat = generic_filter(image, func, footprint=kernel)
+        stat = ndi.filters.generic_filter(image, func, footprint=kernel)
         return stat
 
     def local_mean(image, radius):
@@ -198,7 +208,7 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
     def single_pixel_desensitize(image):
         """Reduces single-pixel anomalies by nearest-neighbor smoothing."""
         kernel = np.array([[0.5, 1, 0.5], [1, 1, 1], [0.5, 1, 0.5]])
-        smoothed_image = generic_filter(image, np.mean, footprint=kernel)
+        smoothed_image = ndi.filters.generic_filter(image, np.mean, footprint=kernel)
         return smoothed_image
 
     def stat_binarise(image):
@@ -213,8 +223,8 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
 
     def smooth(image):
         """Image convolved twice using a uniform 3x3 kernel."""
-        image = uniform_filter(image, size=3)
-        image = uniform_filter(image, size=3)
+        image = ndi.filters.uniform_filter(image, size=3)
+        image = ndi.filters.uniform_filter(image, size=3)
         return image
 
     def half_binarise(image):
@@ -293,8 +303,6 @@ def find_peaks_dog(
     sensitive to fluctuations in intensity near the edges of the image.
 
     """
-    from skimage.feature import blob_dog
-
     z = z / np.max(z)
     blobs = blob_dog(
         z,
@@ -339,8 +347,6 @@ def find_peaks_log(
         Array of peak coordinates.
 
     """
-    from skimage.feature import blob_log
-
     z = z / np.max(z)
     blobs = blob_log(
         z,
