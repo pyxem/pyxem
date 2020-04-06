@@ -104,14 +104,9 @@ class TestAzimuthalIntegral1d:
         dif = Diffraction2D(data=[[1,1],[1,1]])
         dif.unit
 
-    def test_1d_azimuthal_integral_fast(self, ones):
+    def test_1d_azimuthal_integral_fast_1(self, ones):
         az = ones.get_azimuthal_integral1d(npt_rad=10, method="BBox", correctSolidAngle=False)
         np.testing.assert_array_equal(az.data[0:8], np.ones((8)))
-
-    def test_1d_azimuthal_integral_fast(self, ones):
-        az = ones.get_azimuthal_integral1d(npt_rad=10, method="BBox", correctSolidAngle=False)
-        np.testing.assert_array_equal(az.data[0:8], np.ones((8)))
-
 
     def test_1d_azimuthal_integral_inplace(self, ones):
         az = ones.get_azimuthal_integral1d(npt_rad=10, method="BBox", correctSolidAngle=False, inplace=True)
@@ -149,6 +144,15 @@ class TestAzimuthalIntegral1d:
             radial_range=[0.0, 1.0],
             method="splitpixel",
         )
+
+    def test_1d_azimuthal_integral_fast(self, ones):
+        az = ones.get_azimuthal_integral1d(
+            npt_rad=10,
+            method="BBox",
+            wavelength=1e-9,
+            correctSolidAngle=False,
+        )
+        print(az.axes_manager)
 
     def test_1d_azimuthal_integral_fast(self, ones):
         az = ones.get_azimuthal_integral1d(
@@ -285,7 +289,27 @@ class TestAzimuthalIntegral2d:
             wavelength=1e-9,
             correctSolidAngle=False,
         )
-        print(az.axes_manager)
+
+    def test_2d_azimuthal_integral_inplace(self, ones):
+        az = ones.get_azimuthal_integral2d(
+            npt_rad=10,
+            npt_azim=10,
+            method="BBox",
+            wavelength=1e-9,
+            correctSolidAngle=False,
+            inplace=True
+        )
+        assert az is None
+
+    def test_2d_azimuthal_integral_azim_range(self, ones):
+        az = ones.get_azimuthal_integral2d(
+            npt_rad=10,
+            npt_azim=10,
+            azimuth_range=[-np.pi,np.pi],
+            method="BBox",
+            wavelength=1e-9,
+            correctSolidAngle=False,
+        )
 
     def test_2d_azimuthal_integral_affine(self,ones):
         from hyperspy.signals import BaseSignal

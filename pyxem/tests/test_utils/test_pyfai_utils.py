@@ -26,8 +26,13 @@ import numpy as np
 class Test_PyFai_utils:
 
     def test_get_azimuthal_integrator(self):
-        dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20,20), center=(10.5,10.5))
+        dect = Detector(pixel1=1e-4, pixel2=1e-4,max_shape=(20,20))
+        ai = get_azimuthal_integrator(detector=dect, detector_distance=.001, shape=(20,20), center=(10.5,10.5))
+        print(ai.get_correct_solid_angle_for_spline())
+        import matplotlib.pyplot as plt
+        plt.imshow(ai.solidAngleArray())
+        plt.show()
+        print()
         ai_mask = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20, 20), center=(10.5, 10.5),
                                            mask=np.zeros((20,20)))
         aff = [[1,0,0],[0,1,0],[0,0,1]]

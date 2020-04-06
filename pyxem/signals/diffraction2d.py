@@ -644,11 +644,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 )
                 k_axis.offset = radial_range[0] * scale_factor
             else:  # we could find the pixel based range.
-                if pix_range is None:
-                    pix_range = [
-                        np.arctan(radial_range[0]) * 1e-4 / detector_dist,
-                        np.arctan(radial_range[1]) * 1e-4 / detector_dist,
-                    ]
                 k_axis.scale = (pix_range[1] - pix_range[0]) / npt_rad * pixel_scale[1]
                 k_axis.offset = pix_range[0] * pixel_scale[1]
                 k_axis.units = k_axis.units
