@@ -154,15 +154,6 @@ class TestAzimuthalIntegral1d:
         )
         print(az.axes_manager)
 
-    def test_1d_azimuthal_integral_fast(self, ones):
-        az = ones.get_azimuthal_integral1d(
-            npt_rad=10,
-            method="BBox",
-            wavelength=1e-9,
-            correctSolidAngle=False,
-        )
-        print(az.axes_manager)
-
     def test_1d_azimuthal_integral_affine(self,ones):
         from hyperspy.signals import BaseSignal
         aff = [[1,0,0],[0,1,0],[0,0,1]]
@@ -310,6 +301,15 @@ class TestAzimuthalIntegral2d:
             wavelength=1e-9,
             correctSolidAngle=False,
         )
+
+    def test_2d_azimuthal_integral_affine(self,ones):
+        aff = [[1,0,0],[0,1,0],[0,0,1]]
+        ones.get_azimuthal_integral2d(npt_rad=10,
+                                      npt_azim=10,
+                                      radial_range=[0,10],
+                                      method="BBox",
+                                      correctSolidAngle=False,
+                                      affine=aff)
 
     def test_2d_azimuthal_integral_affine(self,ones):
         from hyperspy.signals import BaseSignal
