@@ -31,8 +31,10 @@ from pyxem.utils.peakfinders2D import (
 
 def test_mean_std():
     x = np.array([1, 2, 3, 4, 5, 6])
+    np.testing.assert_allclose(_fast_mean(x), _fast_mean.py_func(x))
     np.testing.assert_allclose(_fast_mean(x), np.mean(x))
     np.testing.assert_allclose(_fast_mean(x), 3.5)
+    np.testing.assert_allclose(_fast_std(x), _fast_std.py_func(x))
     np.testing.assert_allclose(_fast_std(x), np.std(x))
     np.testing.assert_allclose(_fast_std(x), 1.707825)
 
