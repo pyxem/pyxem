@@ -109,11 +109,23 @@ def _polar2cart(r, theta):
     return x, y
 
 
-def azimuthal_integrate1d_slow(z, detector_distance, detector, npt_rad,
-                               wavelength=None, unit="2th_rad",
-                               center=None, mask=None, affine=None, method="splitpixel",
-                               correctSolidAngle=True, radial_range=None, azimuth_range=None,
-                               azimuthal_kwargs={}, integrate_kwargs={}):
+def azimuthal_integrate1d_slow(
+    z,
+    detector_distance,
+    detector,
+    npt_rad,
+    wavelength=None,
+    unit="2th_rad",
+    center=None,
+    mask=None,
+    affine=None,
+    method="splitpixel",
+    correctSolidAngle=True,
+    radial_range=None,
+    azimuth_range=None,
+    azimuthal_kwargs={},
+    integrate_kwargs={},
+):
     """Calculate the azimuthal integral in 2d around a determined origin.
 
     This method is used for signals where the origin is iterated, compared to
@@ -149,11 +161,26 @@ def azimuthal_integrate1d_slow(z, detector_distance, detector, npt_rad,
         One-dimensional azimuthal integral of z.
     """
     shape = np.shape(z)
-    ai = get_azimuthal_integrator(detector=detector, detector_distance=detector_distance, shape=shape,
-                                  center=center, affine=affine, mask=mask, wavelength=wavelength, **azimuthal_kwargs)
-    output = ai.integrate1d(z, npt=npt_rad, method=method, unit=unit,
-                           correctSolidAngle=correctSolidAngle, azimuth_range=azimuth_range,
-                           radial_range=radial_range, **integrate_kwargs)
+    ai = get_azimuthal_integrator(
+        detector=detector,
+        detector_distance=detector_distance,
+        shape=shape,
+        center=center,
+        affine=affine,
+        mask=mask,
+        wavelength=wavelength,
+        **azimuthal_kwargs
+    )
+    output = ai.integrate1d(
+        z,
+        npt=npt_rad,
+        method=method,
+        unit=unit,
+        correctSolidAngle=correctSolidAngle,
+        azimuth_range=azimuth_range,
+        radial_range=radial_range,
+        **integrate_kwargs
+    )
     return output[1]
 
 
@@ -186,11 +213,24 @@ def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
     return output[1]
 
 
-def azimuthal_integrate2d_slow(z, detector_distance, detector, npt_rad,
-                               npt_azim=360, wavelength=None, unit="2th_rad",
-                               center=None, mask=None, affine=None, method="splitpixel",
-                               correctSolidAngle=True, radial_range=None, azimuth_range=None,
-                               azimuthal_kwargs={}, integrate_kwargs={}):
+def azimuthal_integrate2d_slow(
+    z,
+    detector_distance,
+    detector,
+    npt_rad,
+    npt_azim=360,
+    wavelength=None,
+    unit="2th_rad",
+    center=None,
+    mask=None,
+    affine=None,
+    method="splitpixel",
+    correctSolidAngle=True,
+    radial_range=None,
+    azimuth_range=None,
+    azimuthal_kwargs={},
+    integrate_kwargs={},
+):
     """Calculate the azimuthal integral in 2d around a determined origin.
 
     This method is used for signals where the origin is iterated, compared to
@@ -226,16 +266,34 @@ def azimuthal_integrate2d_slow(z, detector_distance, detector, npt_rad,
         One-dimensional azimuthal integral of z.
     """
     shape = np.shape(z)
-    ai = get_azimuthal_integrator(detector=detector, detector_distance=detector_distance, shape=shape,
-                                  center=center, affine=affine, mask=mask, wavelength=wavelength, **azimuthal_kwargs)
+    ai = get_azimuthal_integrator(
+        detector=detector,
+        detector_distance=detector_distance,
+        shape=shape,
+        center=center,
+        affine=affine,
+        mask=mask,
+        wavelength=wavelength,
+        **azimuthal_kwargs
+    )
 
-    output = ai.integrate2d(z, npt_rad=npt_rad, npt_azim=npt_azim, method=method, unit=unit,
-                            correctSolidAngle=correctSolidAngle, azimuth_range=azimuth_range,
-                            radial_range=radial_range, **integrate_kwargs)
+    output = ai.integrate2d(
+        z,
+        npt_rad=npt_rad,
+        npt_azim=npt_azim,
+        method=method,
+        unit=unit,
+        correctSolidAngle=correctSolidAngle,
+        azimuth_range=azimuth_range,
+        radial_range=radial_range,
+        **integrate_kwargs
+    )
     return np.transpose(output[0])
 
 
-def azimuthal_integrate2d_fast(z, azimuthal_integrator, npt_rad, npt_azim=None, **kwargs):
+def azimuthal_integrate2d_fast(
+    z, azimuthal_integrator, npt_rad, npt_azim=None, **kwargs
+):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -260,7 +318,9 @@ def azimuthal_integrate2d_fast(z, azimuthal_integrator, npt_rad, npt_azim=None, 
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.integrate2d(z, npt_rad=npt_rad, npt_azim=npt_azim, **kwargs)
+    output = azimuthal_integrator.integrate2d(
+        z, npt_rad=npt_rad, npt_azim=npt_azim, **kwargs
+    )
     return np.transpose(output[0])
 
 

@@ -40,7 +40,7 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate1d_slow,
     azimuthal_integrate1d_fast,
     azimuthal_integrate2d_slow,
-    azimuthal_integrate2d_fast
+    azimuthal_integrate2d_fast,
 )
 
 
@@ -330,27 +330,46 @@ def test_find_beam_center_interpolate_2(center_expected, sigma):
 class TestAzimuthalIntegration:
     @pytest.fixture
     def radial_pattern(self):
-        x,y = np.ogrid[-5:5,-5:5]
-        radial = (x**2+y**2)*np.pi
-        radial[radial == 0]=1
-        return 100/radial
+        x, y = np.ogrid[-5:5, -5:5]
+        radial = (x ** 2 + y ** 2) * np.pi
+        radial[radial == 0] = 1
+        return 100 / radial
 
-    def test_1d_integrate_fast(self,radial_pattern):
+    def test_1d_integrate_fast(self, radial_pattern):
         from pyxem.utils.pyfai_utils import get_azimuthal_integrator
-        dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=np.shape(radial_pattern))
-        integration = azimuthal_integrate1d_fast(radial_pattern, ai, npt_rad=100, method="numpy", unit="2th_rad",
-                                                 correctSolidAngle=True)
 
-    def test_2d_integrate_fast(self,radial_pattern):
+        dect = Detector(pixel1=1e-4, pixel2=1e-4)
+        ai = get_azimuthal_integrator(
+            detector=dect, detector_distance=1, shape=np.shape(radial_pattern)
+        )
+        integration = azimuthal_integrate1d_fast(
+            radial_pattern,
+            ai,
+            npt_rad=100,
+            method="numpy",
+            unit="2th_rad",
+            correctSolidAngle=True,
+        )
+
+    def test_2d_integrate_fast(self, radial_pattern):
         from pyxem.utils.pyfai_utils import get_azimuthal_integrator
+
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        ai = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=np.shape(radial_pattern))
-        integration = azimuthal_integrate2d_fast(radial_pattern, ai, npt_rad=100, npt_azim=100,
-                                                 method="numpy", unit="2th_rad", correctSolidAngle=True)
+        ai = get_azimuthal_integrator(
+            detector=dect, detector_distance=1, shape=np.shape(radial_pattern)
+        )
+        integration = azimuthal_integrate2d_fast(
+            radial_pattern,
+            ai,
+            npt_rad=100,
+            npt_azim=100,
+            method="numpy",
+            unit="2th_rad",
+            correctSolidAngle=True,
+        )
 
-    def test_2d_integrate_slow(self,radial_pattern):
+    def test_2d_integrate_slow(self, radial_pattern):
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        integration = azimuthal_integrate2d_slow(radial_pattern, detector=dect, detector_distance=1, npt_rad=100)
-
-
+        integration = azimuthal_integrate2d_slow(
+            radial_pattern, detector=dect, detector_distance=1, npt_rad=100
+        )

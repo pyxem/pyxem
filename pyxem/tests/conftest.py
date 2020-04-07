@@ -161,28 +161,6 @@ def dp_for_azimuthal():
 
 
 @pytest.fixture
-def dp_for_origin_variation():
-    """
-    Two diffraction patterns with easy to see radial profiles, wrapped
-    in Diffraction2D  <2,2|3,3>
-    """
-    dp = Diffraction2D(np.zeros((2, 2, 4, 4)))
-    dp.data = np.array(
-        [
-            [
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-            ],
-            [
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-            ],
-        ]
-    )
-    return dp
-
-
-@pytest.fixture
 def electron_diffraction1d(diffraction_pattern):
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffraction1D <2,2|12>

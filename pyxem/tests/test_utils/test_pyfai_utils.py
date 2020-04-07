@@ -18,45 +18,72 @@
 
 import pytest
 
-from pyxem.utils.pyfai_utils import _get_radial_extent,get_azimuthal_integrator,_get_displacements,_get_curved_setup, _get_flat_setup
+from pyxem.utils.pyfai_utils import (
+    _get_radial_extent,
+    get_azimuthal_integrator,
+    _get_displacements,
+    _get_curved_setup,
+    _get_flat_setup,
+)
 from pyFAI.detectors import Detector
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 import numpy as np
 
-class Test_PyFai_utils:
 
+class Test_PyFai_utils:
     def test_get_azimuthal_integrator(self):
-        dect = Detector(pixel1=1e-4, pixel2=1e-4,max_shape=(20,20))
-        ai = get_azimuthal_integrator(detector=dect, detector_distance=.001, shape=(20,20), center=(10.5,10.5))
-        print(ai.get_correct_solid_angle_for_spline())
-        import matplotlib.pyplot as plt
-        plt.imshow(ai.solidAngleArray())
-        plt.show()
-        print()
-        ai_mask = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20, 20), center=(10.5, 10.5),
-                                           mask=np.zeros((20,20)))
-        aff = [[1,0,0],[0,1,0],[0,0,1]]
-        ai_affine = get_azimuthal_integrator(detector=dect, detector_distance=1, shape=(20, 20), center=(10.5, 10.5),
-                                             mask=np.zeros((20,20)), affine=aff)
+        dect = Detector(pixel1=1e-4, pixel2=1e-4, max_shape=(20, 20))
+        ai = get_azimuthal_integrator(
+            detector=dect, detector_distance=0.001, shape=(20, 20), center=(10.5, 10.5)
+        )
+        assert isinstance(ai, AzimuthalIntegrator)
+        ai_mask = get_azimuthal_integrator(
+            detector=dect,
+            detector_distance=1,
+            shape=(20, 20),
+            center=(10.5, 10.5),
+            mask=np.zeros((20, 20)),
+        )
+        assert isinstance(ai_mask, AzimuthalIntegrator)
+        aff = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        ai_affine = get_azimuthal_integrator(
+            detector=dect,
+            detector_distance=1,
+            shape=(20, 20),
+            center=(10.5, 10.5),
+            mask=np.zeros((20, 20)),
+            affine=aff,
+        )
+        assert isinstance(ai_affine, AzimuthalIntegrator)
 
     def test_get_displacements(self):
         aff = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        dis = _get_displacements((10.5,10.5),shape=(20,20),affine=aff)
-        np.testing.assert_array_equal(dis, np.zeros(shape=(2,21,21)))
+        dis = _get_displacements((10.5, 10.5), shape=(20, 20), affine=aff)
+        np.testing.assert_array_equal(dis, np.zeros(shape=(2, 21, 21)))
 
     def test_get_extent(self):
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
         ai = AzimuthalIntegrator(detector=dect, dist=0.1)
         ai.setFit2D(directDist=1000, centerX=50.5, centerY=50.5)
-        extent = _get_radial_extent(ai=ai,shape=(100,100), unit="2th_rad")
-        max_rad = 50*np.sqrt(2)
-        calc_extent = np.arctan(max_rad*1e-4/1)
-        np.testing.assert_almost_equal(extent[1], calc_extent,)
+        extent = _get_radial_extent(ai=ai, shape=(100, 100), unit="2th_rad")
+        max_rad = 50 * np.sqrt(2)
+        calc_extent = np.arctan(max_rad * 1e-4 / 1)
+        np.testing.assert_almost_equal(
+            extent[1], calc_extent,
+        )
 
     def test_get_curved_setup_2th(self):
-        _get_curved_setup(wavelength=1,pyxem_unit="2th_deg", pixel_scale=[1,1])
+        curve = _get_curved_setup(
+            wavelength=1, pyxem_unit="2th_deg", pixel_scale=[1, 1]
+        )
+        assert curve is None
 
     def test_get_curved_setup_nm(self):
-        _get_curved_setup(wavelength=1,pyxem_unit="q_nm^-1", pixel_scale=[1,1],radial_range=[0,1])
-
-
+        curve = _get_curved_setup(
+            wavelength=1, pyxem_unit="q_nm^-1", pixel_scale=[1, 1], radial_range=[0, 1]
+        )
+        assert isinstance(curve[0], Detector)
+        assert curve[1] == 1
+        np.testing.assert_array_equal([0, 1], curve[2])
+        assert curve[3] == "q_nm^-1"
+        assert curve[4] is 1

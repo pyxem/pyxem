@@ -84,6 +84,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             return self.metadata.Signal["unit"]
         except AttributeError:
             print("No unit set for this signal")
+            return
 
     @unit.setter
     def unit(self, unit):
@@ -230,7 +231,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs
         )
 
-
     def get_azimuthal_integral1d(
         self,
         npt_rad,
@@ -346,23 +346,23 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             # _map_iterate used instead of regular map function. Uses slow integrate method.
             if isinstance(center, BaseSignal) and radial_range is None:
                 # scale is constant
-                ind =(0,) * len(self.axes_manager.navigation_shape)
+                ind = (0,) * len(self.axes_manager.navigation_shape)
                 ai = get_azimuthal_integrator(
                     detector=detector,
                     detector_distance=detector_dist,
                     shape=sig_shape,
                     center=center.inav[ind].data,
-                    wavelength=wavelength
+                    wavelength=wavelength,
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
-                radial_range[0]=0
+                radial_range[0] = 0
             else:
                 ai = get_azimuthal_integrator(
                     detector=detector,
                     detector_distance=detector_dist,
                     shape=sig_shape,
                     center=center,
-                    wavelength=wavelength
+                    wavelength=wavelength,
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
 
@@ -414,7 +414,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **map_kwargs
             )
 
-
         # Dealing with axis changes
         if inplace:
             k_axis = self.axes_manager.signal_axes[0]
@@ -429,7 +428,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 k_axis.scale = (
                     (radial_range[1] - radial_range[0]) / npt_rad / scale_factor
                 )
-                k_axis.offset = radial_range[0]/scale_factor
+                k_axis.offset = radial_range[0] / scale_factor
             else:  # we could find the pixel based range.
                 if pix_range is None:
                     pix_range = [
@@ -547,13 +546,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             # _map_iterate used instead of regular map function. Uses slow integrate method.
             if isinstance(center, BaseSignal) and radial_range is None:
                 # scale is constant
-                ind =(0,) * len(self.axes_manager.navigation_shape)
+                ind = (0,) * len(self.axes_manager.navigation_shape)
                 ai = get_azimuthal_integrator(
                     detector=detector,
                     detector_distance=detector_dist,
                     shape=sig_shape,
                     center=center.inav[ind].data,
-                    wavelength=wavelength
+                    wavelength=wavelength,
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
                 radial_range[0] = 0
@@ -563,7 +562,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     detector_distance=detector_dist,
                     shape=sig_shape,
                     center=center,
-                    wavelength=wavelength
+                    wavelength=wavelength,
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
                 radial_range[0] = 0
@@ -601,7 +600,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             if radial_range is None:
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
-                radial_range[0]=0
+                radial_range[0] = 0
             polar = self.map(
                 azimuthal_integrate2d_fast,
                 azimuthal_integrator=ai,
@@ -616,7 +615,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **integrate2d_kwargs,
                 **map_kwargs
             )
-
 
         # Dealing with axis changes
         if inplace:
