@@ -53,10 +53,10 @@ class Test_PyFai_utils:
         calc_extent = np.arctan(max_rad*1e-4/1)
         np.testing.assert_almost_equal(extent[1], calc_extent,)
 
-    def test_get_curved_setup(self):
+    def test_get_curved_setup_2th(self):
         _get_curved_setup(wavelength=1,pyxem_unit="2th_deg", pixel_scale=[1,1])
 
-    def test_get_curved_setup(self):
+    def test_get_curved_setup_nm(self):
         _get_curved_setup(wavelength=1,pyxem_unit="q_nm^-1", pixel_scale=[1,1],radial_range=[0,1])
 
 
