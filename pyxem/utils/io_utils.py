@@ -249,9 +249,6 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
 
     data = f["data_stack"]
 
-    chunks = (100, hdr_info["width"], hdr_info["height"])
-
-    x = da.from_array(data, chunks=chunks)
     data_pxm = LazyElectronDiffraction2D(data)
 
     if hdr_info["Assembly Size"] == "2x2":
