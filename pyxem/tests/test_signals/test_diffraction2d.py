@@ -306,7 +306,7 @@ class TestAzimuthalIntegral2d:
             correctSolidAngle=False,
         )
 
-    def test_2d_azimuthal_integral_pix_range(self,ones):
+    def test_2d_azimuthal_integral_pix_range_affine(self,ones):
         aff = [[1,0,0],[0,1,0],[0,0,1]]
         ones.get_azimuthal_integral2d(npt_rad=10,
                                       npt_azim=10,
