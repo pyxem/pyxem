@@ -142,7 +142,7 @@ def _get_flat_setup(radial_range=None, pixel_scale=[1, 1]):
 def _get_curved_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
     """Returns a generic set up for a flat detector with accounting for Ewald sphere effects
     """
-    if pyxem_unit is None or pyxem_unit is "2th_deg" or pyxem_unit is "2th_rad":
+    if pyxem_unit is None or pyxem_unit == "2th_deg" or pyxem_unit == "2th_rad":
         print("You must first set the unit before you can use the wavelength keyword")
         return
     else:

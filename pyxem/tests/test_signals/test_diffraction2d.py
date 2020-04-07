@@ -165,9 +165,8 @@ class TestAzimuthalIntegral1d:
         )
         if inplace:
             assert isinstance(ones, Diffraction1D)
-            if
         else:
-            assert  isinstance(az, Diffraction1D)
+            assert isinstance(az, Diffraction1D)
 
 
 

@@ -319,7 +319,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
-        if unit is "pyxem":  # Case 1
+        if unit == "pyxem":  # Case 1
             pyxem_units = True
             pixel_scale = [
                 self.axes_manager.signal_axes[0].scale,
@@ -519,7 +519,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
-        if unit is "pyxem":  # Case 1
+        if unit == "pyxem":  # Case 1
             pyxem_units = True
             pixel_scale = [
                 self.axes_manager.signal_axes[0].scale,
