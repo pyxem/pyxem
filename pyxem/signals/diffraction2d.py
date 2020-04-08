@@ -660,57 +660,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis.offset = radial_range[0]
         return polar
 
-    def get_radial_profile(self, mask_array=None, inplace=False, *args, **kwargs):
-        """Return the radial profile of the diffraction pattern.
-
-        Parameters
-        ----------
-        mask_array : numpy.array
-            Optional array with the same dimensions as the signal axes.
-            Consists of 0s for excluded pixels and 1s for non-excluded
-            pixels. The 0-pixels are excluded from the radial average.
-        inplace : bool
-            If True (default), this signal is overwritten. Otherwise, returns a
-            new signal.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to be passed to map().
-
-        Returns
-        -------
-        radial_profile: :obj:`pyxem.signals.ElectronDiffraction1D`
-            The radial average profile of each diffraction pattern in the
-            ElectronDiffraction2D signal as an ElectronDiffraction1D.
-
-        See also
-        --------
-        :func:`pyxem.utils.expt_utils.radial_average`
-
-        """
-        radial_profiles = self.map(
-            radial_average, mask=mask_array, inplace=inplace, *args, **kwargs
-        )
-
-        radial_profiles.axes_manager.signal_axes[0].offset = 0
-        signal_axis = radial_profiles.axes_manager.signal_axes[0]
-
-        rp = ElectronDiffraction1D(radial_profiles.as_signal1D(signal_axis))
-        ax_old = self.axes_manager.navigation_axes
-        rp.axes_manager.navigation_axes[0].scale = ax_old[0].scale
-        rp.axes_manager.navigation_axes[0].units = ax_old[0].units
-        rp.axes_manager.navigation_axes[0].name = ax_old[0].name
-        if len(ax_old) > 1:
-            rp.axes_manager.navigation_axes[1].scale = ax_old[1].scale
-            rp.axes_manager.navigation_axes[1].units = ax_old[1].units
-            rp.axes_manager.navigation_axes[1].name = ax_old[1].name
-        rp_axis = rp.axes_manager.signal_axes[0]
-        rp_axis.name = "k"
-        rp_axis.scale = self.axes_manager.signal_axes[0].scale
-        rp_axis.units = "$A^{-1}$"
-
-        return rp
-
     def get_direct_beam_position(self, method, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
