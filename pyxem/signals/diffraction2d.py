@@ -43,7 +43,6 @@ from pyxem.utils.expt_utils import (
     azimuthal_integrate1d_fast,
     azimuthal_integrate2d_slow,
     azimuthal_integrate2d_fast,
-    radial_average,
     gain_normalise,
     remove_dead,
     regional_filter,
@@ -57,7 +56,6 @@ from pyxem.utils.expt_utils import (
     apply_transformation,
     find_beam_center_blur,
     find_beam_center_interpolate,
-    reproject_polar,
 )
 
 from pyxem.utils.peakfinders2D import (

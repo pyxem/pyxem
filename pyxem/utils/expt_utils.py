@@ -37,7 +37,7 @@ from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 """
-This module contains utility functions for processing electron diffraction
+This module contains utility functions for processing experimental diffraction
 patterns.
 """
 
@@ -322,112 +322,6 @@ def azimuthal_integrate2d_fast(
         z, npt_rad=npt_rad, npt_azim=npt_azim, **kwargs
     )
     return np.transpose(output[0])
-
-
-def radial_average(z, mask=None):
-    """Calculate the radial profile by azimuthal averaging about the center.
-
-    Parameters
-    ----------
-    z : np.array()
-        Two-dimensional data array containing signal.
-    mask : np.array()
-        Array with the same dimensions as z comprizing 0s for excluded pixels
-        and 1s for non-excluded pixels.
-
-    Returns
-    -------
-    radial_profile : np.array()
-        One-dimensional radial profile of z.
-    """
-    # geometric shape work, not 0 indexing
-    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
-
-    y, x = np.indices(z.shape)
-    r = np.sqrt((x - center[1]) ** 2 + (y - center[0]) ** 2)
-    r = np.rint(r - 0.5).astype(np.int)
-    # the subtraction of 0.5 gets the 0 in the correct place
-
-    if mask is None:
-        tbin = np.bincount(r.ravel(), z.ravel())
-        nr = np.bincount(r.ravel())
-    else:
-        # the mask is applied on the z array.
-        masked_array = z * mask
-        tbin = np.bincount(r.ravel(), masked_array.ravel())
-        nr = np.bincount(r.ravel(), mask.ravel())
-
-    averaged = np.nan_to_num(tbin / nr)
-
-    return averaged
-
-
-def reproject_polar(z, dr=1, dt=None, jacobian=True):
-    """Reprojects two-dimensional diffraction data from cartesian to polar
-    coordinates.
-
-    Parameters
-    ----------
-    dr : float
-        Radial coordinate spacing for the grid interpolation
-        tests show that there is not much point in going below 0.5
-    dt : float
-        Angular coordinate spacing (in radians). If ``dt=None``, dt is set
-        such that the number of theta values is equal to the largest
-        dimension of the data array.
-    jacobian : boolean
-        Include ``r`` intensity scaling in the coordinate transform.
-        This should be included to account for the changing pixel size that
-        occurs during the transform.
-
-    Returns
-    -------
-    output : numpy.array
-        The polar diffraction pattern (r, theta)
-
-    Notes
-    -----
-    Adapted from: PyAbel, www.github.com/PyAbel/PyAbel
-
-    """
-    # geometric shape work, note 0 indexing
-    origin = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
-    # bottom-left coordinate system requires numpy image to be np.flipud
-    data = np.flipud(z)
-    ny, nx = data.shape[:2]
-
-    # Determine that the min and max r and theta coords will be...
-    x, y = _index_coords(z, origin=origin)  # (x,y) coordinates of each pixel
-    r, theta = _cart2polar(x, y)  # convert (x,y) -> (r,θ), note θ=0 is vertical
-
-    nr = np.int(np.ceil((r.max() - r.min()) / dr))
-
-    if dt is None:
-        nt = max(nx, ny)
-    else:
-        # dt in radians
-        nt = np.int(np.ceil((theta.max() - theta.min()) / dt))
-
-    # Make a regular (in polar space) grid based on the min and max r & theta
-    r_i = np.linspace(r.min(), r.max(), nr, endpoint=False)
-    theta_i = np.linspace(theta.min(), theta.max(), nt, endpoint=False)
-    theta_grid, r_grid = np.meshgrid(theta_i, r_i)
-
-    # Project the r and theta grid back into pixel coordinates
-    X, Y = _polar2cart(r_grid, theta_grid)
-
-    X += origin[0]  # We need to shift the origin
-    Y += origin[1]  # back to the bottom-left corner...
-    xi, yi = X.flatten(), Y.flatten()
-    coords = np.vstack((yi, xi))  # (map_coordinates requires a 2xn array)
-
-    zi = ndi.map_coordinates(z, coords)
-    output = zi.reshape((nr, nt))
-
-    if jacobian:
-        output = output * r_i[:, np.newaxis]
-
-    return output
 
 
 def gain_normalise(z, dref, bref):
