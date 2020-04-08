@@ -499,8 +499,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
         wavelength: None or float
-            The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
-            it to properly work.
+            The wavelength of for the microscope. Has to be in the same units as
+            the pyxem units if you want it to properly work.
         unit: str
             The unit can be "pyxem" to use the pyxem units and “q_nm^-1”, “q_A^-1”, “2th_deg”, “2th_rad”, “r_mm”
             if pyFAI is used for unit handling

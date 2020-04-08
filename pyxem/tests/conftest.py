@@ -165,7 +165,7 @@ def electron_diffraction1d(diffraction_pattern):
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffraction1D <2,2|12>
     """
-    return diffraction_pattern.get_radial_profile()
+    return diffraction_pattern.get_azimuthal_integral1d()
 
 
 @pytest.fixture
