@@ -28,6 +28,7 @@ from transforms3d.euler import euler2mat
 
 from pyxem.signals.diffraction2d import Diffraction2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
 from pyxem.utils.indexation_utils import OrientationResult
@@ -161,11 +162,17 @@ def dp_for_azimuthal():
 
 
 @pytest.fixture
-def electron_diffraction1d(diffraction_pattern):
+def electron_diffraction1d():
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffraction1D <2,2|12>
     """
-    return diffraction_pattern.get_azimuthal_integral1d()
+    data = np.array([[[1.        , 0.25      , 0.        , 0.        , 0.        ],
+        [1.        , 0.25      , 0.        , 0.        , 0.        ]],
+
+       [[1.        , 0.25      , 0.        , 0.        , 0.16666667],
+        [1.5       , 0.5       , 0.        , 0.        , 0.        ]]])
+
+    return ElectronDiffraction1D(data)
 
 
 @pytest.fixture
