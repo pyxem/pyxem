@@ -133,3 +133,4 @@ class CommonDiffraction:
         dark_field_sum.metadata.set_item("Diffraction.intergrated_range", roi_info)
 
         return dark_field_sum
+
