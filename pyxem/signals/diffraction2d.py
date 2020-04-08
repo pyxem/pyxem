@@ -781,52 +781,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return bg_subtracted
 
-    def as_polar(self, dr=1.0, dt=None, jacobian=True, **kwargs):
-        """Reprojects two-dimensional diffraction data from cartesian to polar
-        coordinates.
-
-        Parameters
-        ----------
-        dr : float
-            Radial coordinate spacing for the grid interpolation
-            tests show that there is not much point in going below 0.5
-        dt : float
-            Angular coordinate spacing (in radians). If ``dt=None``, dt is set
-            such that the number of theta values is equal to the largest
-            dimension of the data array.
-        jacobian : boolean
-            Include ``r`` intensity scaling in the coordinate transform.
-            This should be included to account for the changing pixel size that
-            occurs during the transform.
-        **kwargs : keyord arguments
-            Keyword arguments passed to the hyperspy map function.
-
-        Returns
-        -------
-        polar : PolarDiffraction2D
-            Two-dimensional diffraction data in polar coordinates (k, theta).
-
-        """
-        polar = self.map(
-            reproject_polar, dr=dr, dt=dt, jacobian=jacobian, inplace=False, **kwargs
-        )
-        # Assign to appropriate signal
-        polar.set_signal_type("polar_diffraction")
-        # Transfer navigation_axes
-        transfer_navigation_axes(polar, self)
-        # Set signal axes parameters (Theta)
-        polar_t_axis = polar.axes_manager.signal_axes[0]
-        polar_t_axis.name = "theta"
-        polar_t_axis.scale = 2 * np.pi / polar_t_axis.size
-        polar_t_axis.units = "$rad$"
-        # Set signal axes parameters (magnitude)
-        polar_k_axis = polar.axes_manager.signal_axes[1]
-        polar_k_axis.name = "k"
-        polar_k_axis.scale = 2 * np.pi / polar_k_axis.size
-        polar_k_axis.units = "$rad$"
-
-        return polar
-
     def find_peaks(self, method, *args, **kwargs):
         """Find the position of diffraction peaks.
 
