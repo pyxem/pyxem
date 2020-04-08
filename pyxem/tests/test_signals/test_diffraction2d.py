@@ -140,7 +140,7 @@ class TestAzimuthalIntegral1d:
     @pytest.mark.parametrize("correctSolidAngle", [True, False])
     @pytest.mark.parametrize("center", [None, [9, 9]])
     @pytest.mark.parametrize("affine", [None, [[1, 0, 0], [0, 1, 0], [0, 0, 1]]])
-    @pytest.mark.parametrize("inplace", [True,False])
+    @pytest.mark.parametrize("inplace", [True, False])
     def test_1d_integration(
         self,
         ones,
@@ -161,14 +161,12 @@ class TestAzimuthalIntegral1d:
             center=center,
             affine=affine,
             correctSolidAngle=correctSolidAngle,
-            inplace=inplace
+            inplace=inplace,
         )
         if inplace:
             assert isinstance(ones, Diffraction1D)
         else:
             assert isinstance(az, Diffraction1D)
-
-
 
     def test_1d_azimuthal_integral_slow(self, ones):
         from hyperspy.signals import BaseSignal

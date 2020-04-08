@@ -97,13 +97,15 @@ def _get_displacements(center, shape, affine):
         The displacement in the y direction of shape = shape
     """
     # all x and y coordinates on the grid
-    shape_plus = np.add(shape,1)
-    x = range(shape_plus[0],0, -1)
+    shape_plus = np.add(shape, 1)
+    x = range(shape_plus[0], 0, -1)
     y = range(shape_plus[1], 0, -1)
-    xx, yy = np.meshgrid(x,y)
+    xx, yy = np.meshgrid(x, y)
     xx = np.subtract(xx, center[1])
     yy = np.subtract(yy, center[0])
-    coord = np.array([xx.flatten(), yy.flatten(), np.ones((shape_plus[0]) * (shape_plus[1]))])
+    coord = np.array(
+        [xx.flatten(), yy.flatten(), np.ones((shape_plus[0]) * (shape_plus[1]))]
+    )
     corrected = np.reshape(np.matmul(coord.T, affine), newshape=(*shape_plus, -1))
     dx = xx - corrected[:, :, 0]
     dy = yy - corrected[:, :, 1]

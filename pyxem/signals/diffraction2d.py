@@ -83,15 +83,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         try:
             return self.metadata.Signal["unit"]
         except AttributeError:
-            print("No unit set for this signal")
+            print("No units set for this signal")
             return
 
     @unit.setter
     def unit(self, unit):
-        """Set the unit to help with azimuthal integration
+        """Set the units
 
-        unit: str
-            The unit can be as follows: “q_nm^-1”, “q_A^-1”,“k_nm^-1”, “k_A^-1”, “2th_deg”, “2th_rad”
+        Parameters
+        ----------
+        unit : str
+            The diffraction units, from:
+                “q_nm^-1”, “q_A^-1”,“k_nm^-1”, “k_A^-1”, “2th_deg”, “2th_rad”
         """
         self.metadata.Signal["unit"] = unit
 
