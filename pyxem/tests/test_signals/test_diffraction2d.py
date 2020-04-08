@@ -379,47 +379,6 @@ class TestAzimuthalIntegral2d:
         )
 
 
-class TestPolarReprojection:
-    def test_reproject_polar_signal_type(self, diffraction_pattern):
-        polar = diffraction_pattern.as_polar()
-        assert isinstance(polar, PolarDiffraction2D)
-
-    def test_reproject_polar_axes(self, diffraction_pattern):
-        n_scale = 0.5
-        diffraction_pattern.axes_manager.navigation_axes[0].scale = n_scale
-        diffraction_pattern.axes_manager.navigation_axes[1].scale = 2 * n_scale
-        name = "real_space"
-        diffraction_pattern.axes_manager.navigation_axes[0].name = name
-        diffraction_pattern.axes_manager.navigation_axes[1].units = name
-        units = "nm"
-        diffraction_pattern.axes_manager.navigation_axes[1].name = units
-        diffraction_pattern.axes_manager.navigation_axes[0].units = units
-
-        polar = diffraction_pattern.as_polar()
-
-        polar_scale_x = polar.axes_manager.navigation_axes[0].scale
-        polar_scale_y = polar.axes_manager.navigation_axes[1].scale
-        polar_units_x = polar.axes_manager.navigation_axes[0].units
-        polar_name_x = polar.axes_manager.navigation_axes[0].name
-        polar_units_y = polar.axes_manager.navigation_axes[1].units
-        polar_name_y = polar.axes_manager.navigation_axes[1].name
-
-        polar_t_axis = polar.axes_manager.signal_axes[0]
-        polar_k_axis = polar.axes_manager.signal_axes[1]
-
-        assert n_scale == polar_scale_x
-        assert 2 * n_scale == polar_scale_y
-        assert units == polar_units_x
-        assert name == polar_name_x
-        assert name == polar_units_y
-        assert units == polar_name_y
-
-        assert polar_t_axis.name == "theta"
-        assert polar_t_axis.units == "$rad$"
-        assert polar_k_axis.name == "k"
-        assert polar_k_axis.units == "$rad$"
-
-
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
