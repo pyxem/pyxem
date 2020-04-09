@@ -166,11 +166,12 @@ def electron_diffraction1d():
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffraction1D <2,2|12>
     """
-    data = np.array([[[1.        , 0.25      , 0.        , 0.        , 0.        ],
-        [1.        , 0.25      , 0.        , 0.        , 0.        ]],
-
-       [[1.        , 0.25      , 0.        , 0.        , 0.16666667],
-        [1.5       , 0.5       , 0.        , 0.        , 0.        ]]])
+    data = np.array(
+        [
+            [[1.0, 0.25, 0.0, 0.0, 0.0], [1.0, 0.25, 0.0, 0.0, 0.0]],
+            [[1.0, 0.25, 0.0, 0.0, 0.16666667], [1.5, 0.5, 0.0, 0.0, 0.0]],
+        ]
+    )
 
     return ElectronDiffraction1D(data)
 
