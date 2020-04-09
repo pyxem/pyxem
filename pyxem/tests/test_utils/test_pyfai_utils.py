@@ -43,7 +43,6 @@ class Test_PyFai_utils:
             center=(10.5, 10.5),
             mask=np.zeros((20, 20)),
         )
-        print(ai.units)
 
         assert isinstance(ai_mask, AzimuthalIntegrator)
         aff = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
