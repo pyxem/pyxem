@@ -70,37 +70,10 @@ from pyxem.utils import peakfinder2D_gui
 
 from skimage import filters
 from skimage.morphology import square
-from traits.trait_base import Undefined
+
 
 class Diffraction2D(Signal2D, CommonDiffraction):
     _signal_type = "diffraction"
-
-    @property
-    def unit(self):
-        if self.axes_manager.signal_axes[0].units is Undefined:
-            print("The unit hasn't been set yet")
-            return
-        else:
-            return self.axes_manager.signal_axes[0].units
-
-    @unit.setter
-    def unit(self, unit):
-        """Set the units
-
-        Parameters
-        ----------
-        unit : "q_nm^-1", "q_A^-1","k_nm^-1","k_A^-1","2th_deg", "2th_rad"
-            The diffraction units
-        """
-        acceptable = ["q_nm^-1", "q_A^-1", "k_nm^-1", "k_A^-1", "2th_deg", "2th_rad"]
-        if unit in acceptable:
-            self.axes_manager.signal_axes[0].units = unit
-            self.axes_manager.signal_axes[1].units = unit
-        else:
-            print(
-                'The unit must be "q_nm^-1", "q_A^-1","k_nm^-1",'
-                '"k_A^-1","2th_deg", "2th_rad"'
-            )
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.

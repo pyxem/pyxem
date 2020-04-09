@@ -20,8 +20,40 @@ import numpy as np
 
 from hyperspy.api import interactive
 
+from traits.trait_base import Undefined
+
 
 class CommonDiffraction:
+    @property
+    def unit(self):
+        if self.axes_manager.signal_axes[0].units is Undefined:
+            print("The unit hasn't been set yet")
+            return
+        else:
+            return self.axes_manager.signal_axes[0].units
+
+    @unit.setter
+    def unit(self, unit):
+        """Set the units
+
+        Parameters
+        ----------
+        unit : "q_nm^-1", "q_A^-1","k_nm^-1","k_A^-1","2th_deg", "2th_rad"
+            The diffraction units
+        """
+        acceptable = ["q_nm^-1", "q_A^-1", "k_nm^-1", "k_A^-1", "2th_deg", "2th_rad"]
+        if unit in acceptable:
+            self.axes_manager.signal_axes[0].units = unit
+            self.axes_manager.signal_axes[1].units = unit
+        else:
+            print(
+                'The unit must be "q_nm^-1", "q_A^-1","k_nm^-1",'
+                '"k_A^-1","2th_deg", "2th_rad"'
+            )
+
+
+
+
     @staticmethod
     def _get_sum_signal(signal, out_signal_axes=None):
         out = signal.sum(signal.axes_manager.signal_axes)

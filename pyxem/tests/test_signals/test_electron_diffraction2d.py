@@ -319,3 +319,22 @@ class TestDecomposition:
     def test_decomposition_class_assignment(self, diffraction_pattern):
         diffraction_pattern.decomposition()
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
+
+class TestAffineTransformation:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = ElectronDiffraction2D(data=np.ones(shape=(5, 5)))
+        ones_diff.diffraction_calibration = 0.1
+        ones_diff.beam_energy = 200
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "k_nm^-1"
+        return ones_diff
+
+    def test_1d_azimuthal_integration(self, ones):
+        integration = ones.get_azimuthal_integral1d(npt_rad=10)
+        print(integration)
+    def test_2d_azimuthal_integration(self, ones):
+        integration = ones.get_azimuthal_integral2d(npt_rad=10)
+        print(integration)
+

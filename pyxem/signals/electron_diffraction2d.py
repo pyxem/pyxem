@@ -25,6 +25,7 @@ from hyperspy.signals import BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction2d import Diffraction2D
+from diffsims.utils.sim_utils import get_electron_wavelength
 
 
 class ElectronDiffraction2D(Diffraction2D):
@@ -53,6 +54,66 @@ class ElectronDiffraction2D(Diffraction2D):
                 )
                 del self.metadata.Acquisition_instrument.SEM
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
+
+    @property
+    def beam_energy(self):
+        try:
+            return self.metadata.Acquisition_instrument.TEM["beam_energy"]
+        except:
+            return
+
+    @beam_energy.setter
+    def beam_energy(self, energy):
+        self.metadata.set_item("Acquisition_instrument.TEM.beam_energy", energy)
+
+    @property
+    def camera_length(self):
+        try:
+            return self.metadata.Acquisition_instrument.TEM["camera_length"]
+        except:
+            return
+
+    @camera_length.setter
+    def camera_length(self, length):
+        self.metadata.set_item("Acquisition_instrument.TEM.camera_length", length)
+
+    @property
+    def diffraction_calibration(self):
+        return self.axes_manager.signal_axes[0].scale
+
+    @diffraction_calibration.setter
+    def diffraction_calibration(self, calibration):
+        self.axes_manager.signal_axes[0].scale = calibration
+        self.axes_manager.signal_axes[1].scale = calibration
+
+    @property
+    def scan_calibration(self):
+        return self.axes_manager.navigation_axes[0].scale
+
+    @scan_calibration.setter
+    def scan_calibration(self, calibration):
+        self.axes_manager.navigation_axes[0].scale = calibration
+        self.axes_manager.navigation_axes[1].scale = calibration
+
+    def get_azimuthal_integral1d(self,npt_rad, beam_energy=None,**kwargs):
+        if beam_energy is None and self.beam_energy is not None:
+            beam_energy = self.beam_energy
+        if beam_energy is not None:
+            wavelength = get_electron_wavelength(self.beam_energy)
+        else:
+            wavelength = None
+        integration = super().get_azimuthal_integral1d(npt_rad=npt_rad, wavelength=wavelength, **kwargs)
+        return integration
+
+    def get_azimuthal_integral2d(self, npt_rad, beam_energy=None,**kwargs):
+        if beam_energy is None and self.beam_energy is not None:
+            beam_energy = self.beam_energy
+        if beam_energy is not None:
+            wavelength = get_electron_wavelength(self.beam_energy)
+        else:
+            wavelength = None
+        integration = super().get_azimuthal_integral2d(npt_rad=npt_rad, wavelength=wavelength, **kwargs)
+        return integration
 
     def set_experimental_parameters(
         self,
