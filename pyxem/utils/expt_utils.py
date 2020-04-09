@@ -324,44 +324,6 @@ def azimuthal_integrate2d_fast(
     return np.transpose(output[0])
 
 
-def radial_average(z, mask=None):
-    """Calculate the radial profile by azimuthal averaging about the center.
-
-    Parameters
-    ----------
-    z : np.array()
-        Two-dimensional data array containing signal.
-    mask : np.array()
-        Array with the same dimensions as z comprizing 0s for excluded pixels
-        and 1s for non-excluded pixels.
-
-    Returns
-    -------
-    radial_profile : np.array()
-        One-dimensional radial profile of z.
-    """
-    # geometric shape work, not 0 indexing
-    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
-
-    y, x = np.indices(z.shape)
-    r = np.sqrt((x - center[1]) ** 2 + (y - center[0]) ** 2)
-    r = np.rint(r - 0.5).astype(np.int)
-    # the subtraction of 0.5 gets the 0 in the correct place
-
-    if mask is None:
-        tbin = np.bincount(r.ravel(), z.ravel())
-        nr = np.bincount(r.ravel())
-    else:
-        # the mask is applied on the z array.
-        masked_array = z * mask
-        tbin = np.bincount(r.ravel(), masked_array.ravel())
-        nr = np.bincount(r.ravel(), mask.ravel())
-
-    averaged = np.nan_to_num(tbin / nr)
-
-    return averaged
-
-
 def gain_normalise(z, dref, bref):
     """Apply gain normalization to experimentally acquired electron
     diffraction pattern.
