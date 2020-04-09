@@ -1,7 +1,6 @@
 import numpy as np
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.detectors import Detector
-import pyFAI.units as units
 
 
 def get_azimuthal_integrator(
@@ -112,55 +111,33 @@ def _get_displacements(center, shape, affine):
     return dx, dy
 
 
-def _get_flat_setup(radial_range=None, pixel_scale=[1, 1]):
-    """Returns a generic set up for a flat detector without accounting for Ewald sphere effects
-    """
-    pix_range = None
-    # very far away so angles are small and sphere appears "flat"
-    detector_distance = 100000
-    detector = Detector(pixel1=1e-4, pixel2=1e-4)  # generic pixel size
-    if radial_range is not None:  # Shifting the radial range to agree with new set up
-        if isinstance(radial_range[0], float) or isinstance(radial_range[1], float):
-            pix_range = [
-                radial_range[0] / pixel_scale[0],
-                radial_range[1] / pixel_scale[1],
-            ]
-        else:
-            pix_range = radial_range
-        if pix_range[0] is 0:
-            radial_range = (
-                0,
-                np.arctan((detector.pixel1 * pix_range[1]) / detector_distance),
-            )
-        else:
-            radial_range = (
-                np.arctan((detector.pixel1 * pix_range[0]) / detector_distance),
-                np.arctan((detector.pixel2 * pix_range[1]) / detector_distance),
-            )
-    unit = "2th_rad"
-    return detector, detector_distance, radial_range, unit, pix_range
-
-
-def _get_curved_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
+def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
     """Returns a generic set up for a flat detector with accounting for Ewald sphere effects
     """
-    if pyxem_unit is None or pyxem_unit == "2th_deg" or pyxem_unit == "2th_rad":
-        print("You must first set the unit before you can use the wavelength keyword")
-        return
-    else:
-        units_table = {
-            "q_nm^-1": [1e-9, 1, "q_nm^-1"],
-            "q_A^-1": [1e-10, 1, "q_A^-1"],
-            "k_nm^-1": [1e-9, 2 * np.pi, "q_nm^-1"],
-            "k_A^-1": [1e-10, 2 * np.pi, "q_A^-1"],
+    units_table = {
+        "2th_deg": [None, 1, "2th_deg"],
+        "2th_rad": [None, 1, "2th_rad"],
+        "q_nm^-1": [1e-9, 1, "q_nm^-1"],
+        "q_A^-1": [1e-10, 1, "q_A^-1"],
+        "k_nm^-1": [1e-9, 2 * np.pi, "q_nm^-1"],  # add to pyFAI
+        "k_A^-1": [1e-10, 2 * np.pi, "q_A^-1"],  # add to pyFAI
         }
-        wavelength_scale = units_table[pyxem_unit][0]
-        scale_factor = units_table[pyxem_unit][1]
-        unit = units_table[pyxem_unit][2]
+    wavelength_scale = units_table[pyxem_unit][0]
+    scale_factor = units_table[pyxem_unit][1]
+    unit = units_table[pyxem_unit][2]
     detector_distance = 1
-    pixel_1_size = pixel_scale[0] * (wavelength / wavelength_scale) * detector_distance
-    pixel_2_size = pixel_scale[1] * (wavelength / wavelength_scale) * detector_distance
+    if wavelength_scale is None:
+        if pyxem_unit == "2th_deg":
+            pixel_1_size = np.tan((pixel_scale[0]/180)*np.pi)
+            pixel_2_size = np.tan((pixel_scale[1]/180)*np.pi)
+        if pyxem_unit == "2th_rad":
+            pixel_1_size = np.tan(pixel_scale[0])
+            pixel_2_size = np.tan(pixel_scale[1])
+    else:
+        pixel_1_size = pixel_scale[0] * (wavelength / wavelength_scale) * detector_distance
+        pixel_2_size = pixel_scale[1] * (wavelength / wavelength_scale) * detector_distance
     detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
     if radial_range is not None:
-        radial_range = [radial_range[0] * scale_factor, radial_range[1] * scale_factor]
+        radial_range = [radial_range[0]*scale_factor,
+                        radial_range[1]*scale_factor]
     return detector, detector_distance, radial_range, unit, scale_factor

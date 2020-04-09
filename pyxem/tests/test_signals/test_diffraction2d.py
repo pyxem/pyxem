@@ -93,80 +93,74 @@ class TestAzimuthalIntegral1d:
         ones_diff.axes_manager.signal_axes[1].scale = 0.1
         ones_diff.axes_manager.signal_axes[0].name = "kx"
         ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.axes_manager.signal_axes[0].units = "$nm^-1$"
-        ones_diff.axes_manager.signal_axes[1].units = "$nm^-1$"
-        ones_diff.unit = "k_nm^-1"
+        ones_diff.unit = "2th_deg"
         return ones_diff
 
-    def test_unit(self):
+    def test_unit(self,ones):
         dif = Diffraction2D(data=[[1, 1], [1, 1]])
         assert dif.unit is None
 
     def test_unit_set(self, ones):
-        assert ones.unit == "k_nm^-1"
-
-    def test_1d_azimuthal_integral_fast_1(self, ones):
-        az = ones.get_azimuthal_integral1d(
-            npt_rad=10, method="BBox", correctSolidAngle=False
-        )
-        np.testing.assert_array_equal(az.data[0:8], np.ones((8)))
+        assert ones.unit == "2th_deg"
+    @pytest.mark.parametrize("unit", ["q_nm^-1", "q_A^-1", "k_nm^-1",
+                                      "k_A^-1", "2th_deg", "2th_rad"])
+    def test_1d_azimuthal_integral_fast_2th_units(self, ones, unit):
+        ones.unit = unit
+        az = ones.get_azimuthal_integral1d(npt_rad=10, wavelength=1e-9, correctSolidAngle=False)
+        np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
     def test_1d_azimuthal_integral_inplace(self, ones):
         az = ones.get_azimuthal_integral1d(
-            npt_rad=10, method="BBox", correctSolidAngle=False, inplace=True
+            npt_rad=10, correctSolidAngle=False, inplace=True,
         )
         assert isinstance(ones, Diffraction1D)
         np.testing.assert_array_equal(ones.data[0:8], np.ones((8)))
         assert az is None
 
     def test_1d_azimuthal_integral_fast_slicing(self, ones):
-        az1 = ones.get_azimuthal_integral1d(
-            npt_rad=10, center=(5.5, 5.5), radial_range=[0.0, 1.0], method="splitpixel",
+        ones.unit = "2th_rad"
+        az = ones.get_azimuthal_integral1d(npt_rad=10,
+                                            center=(5.5, 5.5),
+                                            method="BBox",
+                                            correctSolidAngle=False,
+                                            radial_range=[0.0,1.0]
         )
-        az2 = ones.get_azimuthal_integral1d(
-            npt_rad=10, center=(5.5, 5.5), radial_range=[0, 10], method="splitpixel"
-        )
-        np.testing.assert_array_equal(az1.data, az2.data)
-
-    def test_1d_axes_continuity(self, ones):
-        az1 = ones.get_azimuthal_integral1d(
-            npt_rad=10, center=(5.5, 5.5), radial_range=[0.0, 1.0], method="splitpixel",
-        )
+        np.testing.assert_array_equal(az.data[0:7], np.ones(7))
+    @pytest.mark.parametrize("unit", ["q_nm^-1", "q_A^-1", "k_nm^-1",
+                                      "k_A^-1", "2th_deg", "2th_rad"])
+    def test_1d_axes_continuity(self, ones, unit):
+        ones.unit=unit
+        az1 = ones.get_azimuthal_integral1d(wavelength=1e-9,
+                                            npt_rad=10,
+                                            center=(5.5, 5.5),
+                                            radial_range=[0.0, 1.0],
+                                            method="splitpixel")
         assert np.allclose(az1.axes_manager.signal_axes[0].scale, 0.1)
 
-    @pytest.mark.parametrize("wavelength", [None, 1e-9])
-    @pytest.mark.parametrize("radial_range", [None, [0, 10], [0.0, 1.0]])
+    @pytest.mark.parametrize("radial_range", [None,[0.0, 1.0]])
     @pytest.mark.parametrize("azimuth_range", [None, [-np.pi, np.pi]])
-    @pytest.mark.parametrize("correctSolidAngle", [True, False])
     @pytest.mark.parametrize("center", [None, [9, 9]])
     @pytest.mark.parametrize("affine", [None, [[1, 0, 0], [0, 1, 0], [0, 0, 1]]])
-    @pytest.mark.parametrize("inplace", [True, False])
     def test_1d_integration(
         self,
         ones,
-        wavelength,
         radial_range,
         azimuth_range,
         center,
         affine,
-        correctSolidAngle,
-        inplace,
     ):
         az = ones.get_azimuthal_integral1d(
             npt_rad=10,
             method="BBox",
-            wavelength=wavelength,
+            wavelength=1e-9,
             radial_range=radial_range,
             azimuth_range=azimuth_range,
             center=center,
             affine=affine,
-            correctSolidAngle=correctSolidAngle,
-            inplace=inplace,
+            correctSolidAngle=False,
+            inplace=False,
         )
-        if inplace:
-            assert isinstance(ones, Diffraction1D)
-        else:
-            assert isinstance(az, Diffraction1D)
+        assert isinstance(az, Diffraction1D)
 
     def test_1d_azimuthal_integral_slow(self, ones):
         from hyperspy.signals import BaseSignal
@@ -199,7 +193,6 @@ class TestAzimuthalIntegral1d:
 
     def test_1d_azimuthal_integral_slow_mask(self, ones):
         from hyperspy.signals import BaseSignal
-
         aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
         aff_bs = BaseSignal(data=aff)
         center = [1, 1]
@@ -239,9 +232,7 @@ class TestAzimuthalIntegral2d:
         ones_diff.axes_manager.signal_axes[1].scale = 0.1
         ones_diff.axes_manager.signal_axes[0].name = "kx"
         ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.axes_manager.signal_axes[0].units = "$nm^-1$"
-        ones_diff.axes_manager.signal_axes[1].units = "$nm^-1$"
-        ones_diff.unit = "k_nm^-1"
+        ones_diff.unit = "2th_deg"
         return ones_diff
 
     def test_2d_azimuthal_integral_fast(self, ones):
@@ -257,18 +248,16 @@ class TestAzimuthalIntegral2d:
             center=(5.5, 5.5),
             radial_range=[0.0, 1.0],
             method="splitpixel",
+            correctSolidAngle=False
         )
-        az2 = ones.get_azimuthal_integral2d(
-            npt_rad=10,
-            npt_azim=10,
-            center=(5.5, 5.5),
-            radial_range=[0, 10],
-            method="splitpixel",
-        )
-        np.testing.assert_array_equal(az1.data, az2.data)
+        np.testing.assert_array_equal(az1.data[8:,:], np.zeros(shape=(2,10)))
 
-    def test_2d_axes_continuity(self, ones):
+    @pytest.mark.parametrize("unit", ["q_nm^-1", "q_A^-1", "k_nm^-1",
+                                      "k_A^-1", "2th_deg", "2th_rad"])
+    def test_2d_axes_continuity(self, ones, unit):
+        ones.unit = unit
         az1 = ones.get_azimuthal_integral2d(
+            wavelength=1e-9,
             npt_rad=10,
             npt_azim=20,
             center=(5.5, 5.5),
@@ -277,41 +266,29 @@ class TestAzimuthalIntegral2d:
         )
         assert np.allclose(az1.axes_manager.signal_axes[1].scale, 0.1)
 
-    @pytest.mark.parametrize("wavelength", [None, 1e-9])
-    @pytest.mark.parametrize("radial_range", [None, [0, 10], [0.0, 1.0]])
+    @pytest.mark.parametrize("radial_range", [None, [0, 1.0]])
     @pytest.mark.parametrize("azimuth_range", [None, [-np.pi, 0]])
     @pytest.mark.parametrize("correctSolidAngle", [True, False])
     @pytest.mark.parametrize("center", [None, [7, 7]])
     @pytest.mark.parametrize("affine", [None, [[1, 0, 0], [0, 1, 0], [0, 0, 1]]])
-    @pytest.mark.parametrize("inplace", [True, False])
-    def test_2d_azimuthal_integral_fast_params(
-        self,
-        ones,
-        wavelength,
-        radial_range,
-        azimuth_range,
-        correctSolidAngle,
-        center,
-        affine,
-        inplace,
-    ):
+    def test_2d_azimuthal_integral_fast_params(self,ones,
+                                               radial_range,
+                                               azimuth_range,
+                                               correctSolidAngle,
+                                               center,
+                                               affine):
         az = ones.get_azimuthal_integral2d(
             npt_rad=10,
-            npt_azim=90,
-            wavelength=wavelength,
+            npt_azim=10,
+            wavelength=1e-9,
             radial_range=radial_range,
             azimuth_range=azimuth_range,
             correctSolidAngle=correctSolidAngle,
             center=center,
             affine=affine,
-            inplace=inplace,
             method="BBox",
         )
-        if inplace:
-            assert isinstance(ones, PolarDiffraction2D)
-            assert az is None
-        else:
-            assert isinstance(az, PolarDiffraction2D)
+        assert isinstance(az, PolarDiffraction2D)
 
     def test_2d_azimuthal_integral_slow(self, ones):
         from hyperspy.signals import BaseSignal

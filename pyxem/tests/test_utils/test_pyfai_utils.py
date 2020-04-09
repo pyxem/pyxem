@@ -22,8 +22,7 @@ from pyxem.utils.pyfai_utils import (
     _get_radial_extent,
     get_azimuthal_integrator,
     _get_displacements,
-    _get_curved_setup,
-    _get_flat_setup,
+    _get_setup
 )
 from pyFAI.detectors import Detector
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
@@ -44,6 +43,8 @@ class Test_PyFai_utils:
             center=(10.5, 10.5),
             mask=np.zeros((20, 20)),
         )
+        print(ai.units)
+
         assert isinstance(ai_mask, AzimuthalIntegrator)
         aff = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         ai_affine = get_azimuthal_integrator(
@@ -72,18 +73,8 @@ class Test_PyFai_utils:
             extent[1], calc_extent,
         )
 
-    def test_get_curved_setup_2th(self):
-        curve = _get_curved_setup(
-            wavelength=1, pyxem_unit="2th_deg", pixel_scale=[1, 1]
-        )
-        assert curve is None
+    @pytest.mark.parametrize("wavelength",[0, 1e-9])
+    @pytest.mark.parametrize("unit",["2th_deg","2th_rad","q_nm^-1","q_A^-1","k_nm^-1","k_A^-1"])
+    def test_get_setup(self,wavelength,unit):
+        curve = _get_setup(wavelength=wavelength, pyxem_unit=unit, pixel_scale=[1, 1], radial_range=[0, 1])
 
-    def test_get_curved_setup_nm(self):
-        curve = _get_curved_setup(
-            wavelength=1, pyxem_unit="q_nm^-1", pixel_scale=[1, 1], radial_range=[0, 1]
-        )
-        assert isinstance(curve[0], Detector)
-        assert curve[1] == 1
-        np.testing.assert_array_equal([0, 1], curve[2])
-        assert curve[3] == "q_nm^-1"
-        assert curve[4] is 1
