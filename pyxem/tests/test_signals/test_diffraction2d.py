@@ -99,9 +99,12 @@ class TestAzimuthalIntegral1d:
     def test_unit(self,ones):
         dif = Diffraction2D(data=[[1, 1], [1, 1]])
         assert dif.unit is None
+        dif.unit = "!23"
+        assert dif.unit is None
 
     def test_unit_set(self, ones):
         assert ones.unit == "2th_deg"
+
     @pytest.mark.parametrize("unit", ["q_nm^-1", "q_A^-1", "k_nm^-1",
                                       "k_A^-1", "2th_deg", "2th_rad"])
     def test_1d_azimuthal_integral_fast_2th_units(self, ones, unit):
@@ -223,6 +226,12 @@ class TestAzimuthalIntegral1d:
             unit="q_nm^-1",
         )
 
+    def test_1d_azimuthal_integral_failure(self, ones):
+        ones.unit ="k_nm^-1"
+        integration = ones.get_azimuthal_integral1d(npt_rad=10)
+        assert integration is None
+
+
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture
@@ -266,6 +275,14 @@ class TestAzimuthalIntegral2d:
         )
         assert np.allclose(az1.axes_manager.signal_axes[1].scale, 0.1)
 
+    def test_2d_azimuthal_integral_inplace(self, ones):
+        az = ones.get_azimuthal_integral2d(
+            npt_rad=10,npt_azim=10, correctSolidAngle=False, inplace=True,method="BBox",
+        )
+        assert isinstance(ones, PolarDiffraction2D)
+        np.testing.assert_array_equal(ones.data[0:8, :], np.ones((8, 10)))
+        assert az is None
+
     @pytest.mark.parametrize("radial_range", [None, [0, 1.0]])
     @pytest.mark.parametrize("azimuth_range", [None, [-np.pi, 0]])
     @pytest.mark.parametrize("correctSolidAngle", [True, False])
@@ -289,6 +306,11 @@ class TestAzimuthalIntegral2d:
             method="BBox",
         )
         assert isinstance(az, PolarDiffraction2D)
+
+    def test_2d_azimuthal_integral_failure(self, ones):
+        ones.unit ="k_nm^-1"
+        integration = ones.get_azimuthal_integral2d(npt_rad=10)
+        assert integration is None
 
     def test_2d_azimuthal_integral_slow(self, ones):
         from hyperspy.signals import BaseSignal

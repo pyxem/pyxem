@@ -313,6 +313,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     'if the unit is not "2th_deg", "2th_rad"'
                     "then a wavelength must be given. "
                 )
+                return None
             setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
             detector, detector_dist, radial_range, unit, scale_factor = setup
         use_iterate = any(
@@ -511,6 +512,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     'if the unit is not "2th_deg", "2th_rad"'
                     "then a wavelength must be given. "
                 )
+                return
             setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
             detector, detector_dist, radial_range, unit, scale_factor = setup
         use_iterate = any(

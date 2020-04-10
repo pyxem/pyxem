@@ -25,6 +25,7 @@ from hyperspy.signals import BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction2d import Diffraction2D
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from diffsims.utils.sim_utils import get_electron_wavelength
 
 
@@ -59,8 +60,8 @@ class ElectronDiffraction2D(Diffraction2D):
     def beam_energy(self):
         try:
             return self.metadata.Acquisition_instrument.TEM["beam_energy"]
-        except:
-            return
+        except(AttributeError):
+            return None
 
     @beam_energy.setter
     def beam_energy(self, energy):
@@ -70,8 +71,8 @@ class ElectronDiffraction2D(Diffraction2D):
     def camera_length(self):
         try:
             return self.metadata.Acquisition_instrument.TEM["camera_length"]
-        except:
-            return
+        except(AttributeError):
+            return None
 
     @camera_length.setter
     def camera_length(self, length):
@@ -103,6 +104,7 @@ class ElectronDiffraction2D(Diffraction2D):
         else:
             wavelength = None
         integration = super().get_azimuthal_integral1d(npt_rad=npt_rad, wavelength=wavelength, **kwargs)
+        integration.set_signal_type("electron_diffraction")
         return integration
 
     def get_azimuthal_integral2d(self, npt_rad, beam_energy=None,**kwargs):

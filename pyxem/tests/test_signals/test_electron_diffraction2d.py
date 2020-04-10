@@ -24,6 +24,8 @@ import hyperspy.api as hs
 from hyperspy.signals import Signal1D, Signal2D
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
+from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 
@@ -320,21 +322,50 @@ class TestDecomposition:
         diffraction_pattern.decomposition()
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
-class TestAffineTransformation:
+
+class TestIntegration:
     @pytest.fixture
     def ones(self):
         ones_diff = ElectronDiffraction2D(data=np.ones(shape=(5, 5)))
-        ones_diff.diffraction_calibration = 0.1
-        ones_diff.beam_energy = 200
         ones_diff.axes_manager.signal_axes[0].name = "kx"
         ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "k_nm^-1"
+        ones_diff.unit = "2th_rad"
         return ones_diff
 
-    def test_1d_azimuthal_integration(self, ones):
+    @pytest.mark.parametrize("energy",[None,200])
+    def test_1d_azimuthal_integration(self, ones, energy):
+        ones.beam_energy = energy
         integration = ones.get_azimuthal_integral1d(npt_rad=10)
-        print(integration)
-    def test_2d_azimuthal_integration(self, ones):
-        integration = ones.get_azimuthal_integral2d(npt_rad=10)
-        print(integration)
+        assert isinstance(integration,ElectronDiffraction1D)
 
+    @pytest.mark.parametrize("energy", [None, 200])
+    def test_2d_azimuthal_integration(self, ones,energy):
+        ones.beam_energy = energy
+        integration = ones.get_azimuthal_integral2d(npt_rad=10)
+        assert isinstance(integration,PolarDiffraction2D)
+
+    def test_set_scan_calibration(self):
+        ones = ElectronDiffraction2D(data=np.ones((3,3,3,3)))
+        ones.scan_calibration=0.9
+        assert ones.axes_manager.navigation_axes[0].scale == 0.9
+        assert ones.axes_manager.navigation_axes[1].scale == 0.9
+        assert ones.scan_calibration ==0.9
+
+    def test_set_diffraction_calibration(self):
+        ones = ElectronDiffraction2D(data=np.ones((3,3,3,3)))
+        ones.diffraction_calibration =0.9
+        assert ones.axes_manager.signal_axes[0].scale == 0.9
+        assert ones.axes_manager.signal_axes[1].scale == 0.9
+        assert ones.diffraction_calibration ==0.9
+
+    def test_set_camera_length(self,ones):
+        assert ones.camera_length is None
+        ones.camera_length = 1.5
+        assert ones.metadata.Acquisition_instrument.TEM["camera_length"] == 1.5
+        assert ones.camera_length == 1.5
+
+    def test_set_beam_energy(self,ones):
+        assert ones.beam_energy is None
+        ones.beam_energy = 1.5
+        assert ones.metadata.Acquisition_instrument.TEM["beam_energy"] == 1.5
+        assert ones.beam_energy == 1.5
