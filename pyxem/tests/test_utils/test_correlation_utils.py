@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.utils.exp_utils_polar import _correlation
+from pyxem.utils.correlation_utils import _correlation
 
 
 class TestCorrelations:
