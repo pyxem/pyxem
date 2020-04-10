@@ -97,4 +97,4 @@ class TestDecomposition:
     def test_decomposition_class_assignment(self, diffraction_pattern):
         s = Power2D(diffraction_pattern)
         s.decomposition()
-        assert isinstance(s, Correlation2D)
+        assert isinstance(s, Power2D)
