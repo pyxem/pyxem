@@ -82,3 +82,4 @@ class TestCorrelations:
         result[0::2, :] = 2.26087665
         result[1::2, :] = -0.93478899
         np.testing.assert_array_almost_equal(c, result)
+

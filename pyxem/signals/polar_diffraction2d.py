@@ -23,7 +23,7 @@ Signal class for two-dimensional diffraction data in polar coordinates.
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, _power
+from pyxem.utils.exp_utils_polar import _correlation, _power
 import numpy as np
 
 class PolarDiffraction2D(Signal2D):
@@ -77,14 +77,14 @@ class PolarDiffraction2D(Signal2D):
         Angular correlation with a static matst for
 
         """
-        correlation = self.map(angular_correlation, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
+        correlation = self.map(_correlation, axis=1, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("correlation")
             correlation_axis = self.axes_manager.signal_axes[0]
         else:
             correlation.set_signal_type("correlation")
             correlation_axis = correlation.axes_manager.signal_axes[0]
-        correlation_axis.name= "Angular Correlation, $/phi$"
+        correlation_axis.name = "Angular Correlation, $/phi$"
         return correlation
 
     def get_angular_power(self, mask=None, normalize=True, inplace=False, ** kwargs):

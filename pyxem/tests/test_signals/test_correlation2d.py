@@ -86,6 +86,19 @@ class TestGetPower:
         power = flat_pattern.get_angular_power()
         assert isinstance(power, Power2D)
 
+    def test_power_signal_inplace(self, flat_pattern):
+        power = flat_pattern.get_angular_power(inplace=True)
+        assert isinstance(flat_pattern, Power2D)
+        assert power is None
+
+    def test_summed_power_signal(self, flat_pattern):
+        power = flat_pattern.get_summed_angular_power(inplace=False)
+        assert isinstance(power, Power2D)
+
+    def test_summed_power_signal_inplace(self, flat_pattern):
+        power = flat_pattern.get_summed_angular_power(inplace=True)
+        assert isinstance(flat_pattern, Power2D)
+        assert power is None
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):

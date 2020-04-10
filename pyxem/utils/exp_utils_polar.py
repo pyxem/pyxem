@@ -96,82 +96,10 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
     if mask is None:  # This might not normalize things as well
         I_fft = np.fft.rfft(z, axis=axis)
         return (I_fft * np.conjugate(I_fft)).real
-    return np.power(np.fft.rfft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)), 2).real
+    else:
+        return np.power(np.fft.rfft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)), 2).real
 
-
-def angular_correlation(z, mask=None, normalize=True):
-    """ Performs some radial correlation on some image z. Assumes that
-    the angular direction is axis=1 for z.
-
-    Parameters
-    -----------
-    z: np.array
-        A nd numpy array
-    mask: np.array
-        A boolean array of the same size as z
-    normalize: bool
-        Subtract <I(\theta)>^2 and divide by <I(\theta)>^2
-    """
-    return _correlation(z, axis=1, mask=mask, normalize=normalize, wrap=True)
-
-
-def angular_power(z, mask=None, normalize=True):
-    """ Returns the power of the angular correlation on some image z. Assumes that
-    the angular direction is axis=1 for z.
-
-    Parameters
-    -----------
-    z: np.array
-        A nd numpy array
-    mask: np.array
-        A boolean array of the same size as z
-    normalize: bool
-        Subtract <I(\theta)>^2 and divide by <I(\theta)>^2
-    """
-    p = _power(z, axis=1, mask=mask, normalize=normalize, wrap=True)
-    return p
 
 def corr_to_power(z):
-    return np.fft.rfft(z,axis=1).real
-
-
-def variance(z, mask=None, axis=0):
-    """Calculates the variance along some axis while applying some mask.
-
-    Parameters
-    ----------------
-    z: np.array
-        The array to be operated on
-    mask: None or np.array
-        A boolean mask masking some values
-    axis: The axis to calculate the variance along.
-
-    Returns
-    --------------
-    v: np.array
-        The variance along some axis
-    """
-    if mask is not None:
-        z[mask] = 0
-        num_valid = np.shape(z)[axis] - np.sum(mask, axis=axis)
-        num_valid[num_valid == 0] = 1
-        bottom_mean = np.power(np.sum(z, axis=axis)/num_valid,2)
-        top_mean = np.sum(np.power(z,2), axis=axis)/num_valid
-    else:
-        bottom_mean = np.power(np.mean(z, axis=axis),2)
-        top_mean = np.mean(np.power(z,2))
-    v = np.subtract(np.divide(top_mean,bottom_mean)-1)
-    return v
-
-
-def mean_mask(z, mask, axis):
-    """Calculates the mean using a mask along some axis for the array z
-
-    This method needs to be explicit to overcome the problems with defining a mask
-    for a dask array.
-    """
-    z[mask] = 0
-    num_valid = np.shape(z)[axis] - np.sum(mask, axis=axis)
-    num_valid[num_valid == 0] = 1
-    return np.sum(z, axis=axis) / num_valid
+    return np.fft.rfft(z, axis=1).real
 

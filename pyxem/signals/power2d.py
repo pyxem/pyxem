@@ -23,7 +23,6 @@ Signal class for two-dimensional diffraction data in polar coordinates.
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, variance, mean_mask
 import numpy as np
 from hyperspy.drawing.utils import plot_images
 
