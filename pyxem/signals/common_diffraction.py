@@ -43,8 +43,8 @@ class CommonDiffraction:
         """
         acceptable = ["q_nm^-1", "q_A^-1", "k_nm^-1", "k_A^-1", "2th_deg", "2th_rad"]
         if unit in acceptable:
-            self.axes_manager.signal_axes[0].units = unit
-            self.axes_manager.signal_axes[1].units = unit
+            for axes in self.axes_manager.signal_axes:
+                axes.units = unit
         else:
             print(
                 'The unit must be "q_nm^-1", "q_A^-1","k_nm^-1",'
