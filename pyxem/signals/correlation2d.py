@@ -23,7 +23,7 @@ Signal class for two-dimensional diffraction data in polar coordinates.
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.exp_utils_polar import angular_power
+from pyxem.utils.exp_utils_polar import corr_to_power
 from pyxem.signals.common_diffraction import CommonDiffraction
 import numpy as np
 
@@ -47,7 +47,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def get_angular_power(self,inplace, ** kwargs):
+    def get_angular_power(self, inplace=False, ** kwargs):
         """ Returns the power spectrum of the angular auto-correlation function
          in the form of a Signal2D class.
 
@@ -69,7 +69,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
          --------------
          power: Signal2D
              The power spectrum of the Signal2D"""
-        power = self.map(np.fft.fft, axis=1, inplace=inplace, **kwargs)
+        power = self.map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
             fourier_axis = self.axes_manager.signal_axes[1]
@@ -80,7 +80,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         fourier_axis.units = "a.u"
         fourier_axis.offset = 0.5
         fourier_axis.scale = 1
-        return pow
+        return power
 
     def get_summed_angular_power(self, inplace=False, ** kwargs):
         """Returns the power spectrum of the summed angular auto-correlation function
@@ -95,7 +95,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
          --------------
          power: Power2D
              The power spectrum of summed angular correlation"""
-        power = self.sum().map(np.fft.fft, axis=1, inplace=inplace, **kwargs)
+        power = self.sum().map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
             fourier_axis = self.axes_manager.signal_axes[1]
@@ -106,7 +106,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         fourier_axis.units = "a.u"
         fourier_axis.offset = 0.5
         fourier_axis.scale = 1
-        return pow
+        return power
 
 
 class LazyCorrelation2D(LazySignal, Correlation2D):

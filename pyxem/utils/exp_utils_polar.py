@@ -131,6 +131,9 @@ def angular_power(z, mask=None, normalize=True):
     p = _power(z, axis=1, mask=mask, normalize=normalize, wrap=True)
     return p
 
+def corr_to_power(z):
+    return np.fft.fft(z,axis=1).real
+
 
 def variance(z, mask=None, axis=0):
     """Calculates the variance along some axis while applying some mask.
