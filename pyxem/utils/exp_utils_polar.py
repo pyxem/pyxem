@@ -43,14 +43,14 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
             m = np.pad(m, padder,'constant')  # all the zeros are masked (should account for padding
             #  when normalized.
             mask_boolean = np.pad(mask_boolean, padder,'constant')
-        mask_fft = np.fft.fft(mask_boolean, axis=axis)
-        number_unmasked = np.fft.ifft(mask_fft*np.conjugate(mask_fft), axis=axis).real
+        mask_fft = np.fft.rfft(mask_boolean, axis=axis)
+        number_unmasked = np.fft.irfft(mask_fft*np.conjugate(mask_fft), axis=axis).real
         number_unmasked[number_unmasked < 1] = 1  # get rid of divide by zero error for completely masked rows
         z[m] = 0
 
     # fast method uses a FFT and is a process which is O(n) = n log(n)
-    I_fft = np.fft.fft(z, axis=axis)
-    a = np.fft.ifft(I_fft * np.conjugate(I_fft), axis=axis).real
+    I_fft = np.fft.rfft(z, axis=axis)
+    a = np.fft.irfft(I_fft * np.conjugate(I_fft), axis=axis)
 
     if mask is not None:
         a = np.multiply(np.divide(a, number_unmasked), np.shape(z)[0])
@@ -94,9 +94,9 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         The power spectrum along some axis
     """
     if mask is None:  # This might not normalize things as well
-        I_fft = np.fft.fft(z, axis=axis)
+        I_fft = np.fft.rfft(z, axis=axis)
         return (I_fft * np.conjugate(I_fft)).real
-    return np.power(np.fft.fft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)),2).real
+    return np.power(np.fft.rfft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)), 2).real
 
 
 def angular_correlation(z, mask=None, normalize=True):
@@ -132,7 +132,7 @@ def angular_power(z, mask=None, normalize=True):
     return p
 
 def corr_to_power(z):
-    return np.fft.fft(z,axis=1).real
+    return np.fft.rfft(z,axis=1).real
 
 
 def variance(z, mask=None, axis=0):
