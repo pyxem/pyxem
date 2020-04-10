@@ -113,6 +113,6 @@ class Power2D(Signal2D):
         l = ["summed"] + [str(i) +"-fold" for i in symmetry]
         plot_images(images=maps, label=l, *args, **kwargs)
 
-class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
+class LazyPolarDiffraction2D(LazySignal, Power2D):
 
     pass

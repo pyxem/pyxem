@@ -23,7 +23,7 @@ Signal class for two-dimensional diffraction data in polar coordinates.
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, variance, mean_mask
+from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, _power
 import numpy as np
 
 class PolarDiffraction2D(Signal2D):
@@ -56,9 +56,8 @@ class PolarDiffraction2D(Signal2D):
         Parameters
         ---------------
         mask: Numpy array or Signal2D
-            A bool mask of values to ignore of shape equal to the signal shape.  If it is equal
-            to the size of the array a different mask is applied for every signal. Used for bad
-             pixels or beam stop.
+            A bool mask of values to ignore of shape equal to the signal shape.  If the mask
+            is a BaseSignal than it is iterated with the polar signal
         normalize: bool
             Normalize the radial correlation by the average value at some radius.
         kwargs: dict
@@ -70,23 +69,25 @@ class PolarDiffraction2D(Signal2D):
         --------------
         correlation: Signal2D
             The radial correlation for the signal2D
-        """
-        if self.axes_manager.signal_shape == np.shape(mask) or mask is None: # for a static mask
-            correlation = self.map(angular_correlation, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
-        else:  # for a changing mask
-            mask = np.reshape(mask, newshape=(-1, *reversed(self.axes_manager.signal_shape)))
-            correlation = self._map_iterate(angular_correlation,iterating_kwargs=(('mask', mask),),
-                                            normalize=True, inplace=inplace, **kwargs)
-        if inplace:
-            self.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
-            self.axes_manager.signal_axes[0].name = "Angular Correlation, $/phi$"
-        else:
-            print(correlation)
-            correlation.axes_manager.signal_axes[0].name = "Angular Correlation, $/phi$"
 
+        Examples
+        --------------
+        Basic example, no mask applied and normalization applied.
+        >polar.get_angular_correlation()
+        Angular correlation with a static matst for
+
+        """
+        correlation = self.map(angular_correlation, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
+        if inplace:
+            self.set_signal_type("correlation")
+            correlation_axis = self.axes_manager.signal_axes[0]
+        else:
+            correlation.set_signal_type("correlation")
+            correlation_axis = correlation.axes_manager.signal_axes[0]
+        correlation_axis.name= "Angular Correlation, $/phi$"
         return correlation
 
-    def get_angular_power(self, mask=None, normalize=True, inplace=False,** kwargs):
+    def get_angular_power(self, mask=None, normalize=True, inplace=False, ** kwargs):
         """ Returns the power spectrum of the angular auto-correlation function
          in the form of a Signal2D class.
 
@@ -96,8 +97,9 @@ class PolarDiffraction2D(Signal2D):
 
          Parameters
          ---------------
-         mask: Numpy array or Signal2D
-             A mask of values to ignore of shape equal to the signal shape
+        mask: Numpy array or Signal2D
+            A bool mask of values to ignore of shape equal to the signal shape.  If the mask
+            is a BaseSignal than it is iterated with the polar signal
          normalize: bool
              Normalize the radial correlation by the average value at some radius.
         inplace: bool
@@ -107,28 +109,19 @@ class PolarDiffraction2D(Signal2D):
          --------------
          power: Signal2D
              The power spectrum of the Signal2D"""
-        if self.axes_manager.signal_shape == np.shape(mask) or mask is None: # for a static mask
-            pow = self.map(angular_power, mask=mask,normalize=normalize, inplace=inplace, **kwargs)
-        else:  # for a changing mask
-            mask = np.reshape(mask, newshape=(-1, *reversed(self.axes_manager.signal_shape)))
-            pow = self._map_iterate(angular_power,iterating_kwargs=(('mask', mask),),
-                                    normalize=True, inplace=inplace, **kwargs)
-
+        power = self.map(_power, axis=1, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
         if inplace:
-            self.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
-            self.axes_manager.signal_axes[0].scale = self.axes_manager.signal_axes[0].scale
-            self.axes_manager.signal_axes[1].scale = 1
-            self.axes_manager.signal_axes[1].name = "Fourier Coefficient"
-            self.axes_manager.signal_axes[1].unit = "a.u"
-            self.axes_manager.signal_axes[1].offset = 0.5
+            self.set_signal_type("power")
+            fourier_axis = self.axes_manager.signal_axes[0]
         else:
-            pow.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
-            pow.axes_manager.signal_axes[0].scale = self.axes_manager.signal_axes[0].scale
-            pow.axes_manager.signal_axes[1].scale = 1
-            pow.axes_manager.signal_axes[1].name = "Fourier Coefficient"
-            pow.axes_manager.signal_axes[1].unit = "a.u"
-            pow.axes_manager.signal_axes[1].offset = 0.5
-        return pow
+            power.set_signal_type("power")
+            fourier_axis = power.axes_manager.signal_axes[0]
+        fourier_axis.name = "Fourier Coefficient"
+        fourier_axis.units = "a.u"
+        fourier_axis.offset = 0.5
+        fourier_axis.scale = 1
+        return power
+
 
 class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
 

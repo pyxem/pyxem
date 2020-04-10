@@ -23,11 +23,12 @@ Signal class for two-dimensional diffraction data in polar coordinates.
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.exp_utils_polar import angular_correlation, angular_power, variance, mean_mask
+from pyxem.utils.exp_utils_polar import angular_power
+from pyxem.signals.common_diffraction import CommonDiffraction
 import numpy as np
 
 
-class Correlation2D(Signal2D):
+class Correlation2D(Signal2D, CommonDiffraction):
     _signal_type = "correlation"
 
     def __init__(self, *args, **kwargs):
@@ -46,39 +47,8 @@ class Correlation2D(Signal2D):
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def get_angular_power(self, ** kwargs):
-        """
-        Calculate a power spectrum from the correlation signal
-
-        Parameters
-        ----------
-        method : str
-            'FFT' gives fourier transformation of the angular power spectrum.  Currently the only method available
-        """
-        power_signal = self.map(power_spectrum,
-                                method=method,
-                                inplace=False,
-                                show_progressbar=False)
-        passed_meta_data = self.metadata.as_dictionary()
-        if self.metadata.has_item('Masks'):
-            del (passed_meta_data['Masks'])
-        power = Power2D(power_signal)
-        power.axes_manager.navigation_axes = self.axes_manager.navigation_axes
-
-        power.set_axes(-2,
-                       name="FourierCoefficient",
-                       scale=1,
-                       units="a.u.",
-                       offset=.5)
-        power.set_axes(-1,
-                       name="k",
-                       scale=self.axes_manager[-1].scale,
-                       units=self.axes_manager[-1].units,
-                       offset=self.axes_manager[-1].offset)
-        return power
-
-    def get_summed_angular_power(self, ** kwargs):
-        """Returns the power spectrum of the angular auto-correlation function
+    def get_angular_power(self,inplace, ** kwargs):
+        """ Returns the power spectrum of the angular auto-correlation function
          in the form of a Signal2D class.
 
          This gives the fourier decomposition of the radial correlation. Due to
@@ -87,8 +57,9 @@ class Correlation2D(Signal2D):
 
          Parameters
          ---------------
-         mask: Numpy array or Signal2D
-             A mask of values to ignore of shape equal to the signal shape
+        mask: Numpy array or Signal2D
+            A bool mask of values to ignore of shape equal to the signal shape.  If the mask
+            is a BaseSignal than it is iterated with the polar signal
          normalize: bool
              Normalize the radial correlation by the average value at some radius.
         inplace: bool
@@ -98,23 +69,49 @@ class Correlation2D(Signal2D):
          --------------
          power: Signal2D
              The power spectrum of the Signal2D"""
-        pow = self.map(angular_power, mask=mask,normalize=normalize, inplace=inplace, **kwargs)
+        power = self.map(np.fft.fft, axis=1, inplace=inplace, **kwargs)
         if inplace:
-            self.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
-            self.axes_manager.signal_axes[0].scale = self.axes_manager.signal_axes[0].scale
-            self.axes_manager.signal_axes[1].scale = 1
-            self.axes_manager.signal_axes[1].name = "Fourier Coefficient"
-            self.axes_manager.signal_axes[1].unit = "a.u"
-            self.axes_manager.signal_axes[1].offset = 0.5
+            self.set_signal_type("power")
+            fourier_axis = self.axes_manager.signal_axes[1]
         else:
-            pow.set_signal_type("Signal2D")  # It should already be a Signal 2D object...
-            pow.axes_manager.signal_axes[0].scale = self.axes_manager.signal_axes[0].scale
-            pow.axes_manager.signal_axes[1].scale = 1
-            pow.axes_manager.signal_axes[1].name = "Fourier Coefficient"
-            pow.axes_manager.signal_axes[1].unit = "a.u"
-            pow.axes_manager.signal_axes[1].offset = 0.5
+            power.set_signal_type("power")
+            fourier_axis = self.axes_manager.signal_axes[1]
+        fourier_axis.name = "Fourier Coefficient"
+        fourier_axis.units = "a.u"
+        fourier_axis.offset = 0.5
+        fourier_axis.scale = 1
         return pow
 
-class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
+    def get_summed_angular_power(self, inplace=False, ** kwargs):
+        """Returns the power spectrum of the summed angular auto-correlation function
+        over all real space positions.  Averages the angular correlation.
 
-    pass
+         Parameters
+         ---------------
+        inplace: bool
+            From hyperspy.signal.map(). inplace=True means the signal is
+            overwritten.
+         Returns
+         --------------
+         power: Power2D
+             The power spectrum of summed angular correlation"""
+        power = self.sum().map(np.fft.fft, axis=1, inplace=inplace, **kwargs)
+        if inplace:
+            self.set_signal_type("power")
+            fourier_axis = self.axes_manager.signal_axes[1]
+        else:
+            power.set_signal_type("power")
+            fourier_axis = self.axes_manager.signal_axes[1]
+        fourier_axis.name = "Fourier Coefficient"
+        fourier_axis.units = "a.u"
+        fourier_axis.offset = 0.5
+        fourier_axis.scale = 1
+        return pow
+
+
+class LazyCorrelation2D(LazySignal, Correlation2D):
+
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

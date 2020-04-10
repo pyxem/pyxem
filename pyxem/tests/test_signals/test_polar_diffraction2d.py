@@ -20,7 +20,11 @@ import pytest
 import numpy as np
 import dask.array as da
 
+from hyperspy.signals import Signal2D
+
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D, LazyPolarDiffraction2D
+from pyxem.signals.correlation2d import Correlation2D
+from pyxem.signals.power2d import Power2D
 
 
 class TestComputeAndAsLazy2D:
@@ -71,27 +75,59 @@ class TestComputeAndAsLazy2D:
 class TestCorrelations:
     @pytest.fixture
     def flat_pattern(self):
-        pd = PolarDiffraction2D(data=np.ones(shape=(10, 20)))
+        pd = PolarDiffraction2D(data=np.ones(shape=(2,2,5,5)))
         pd.axes_manager.signal_axes[0].scale = .5
         pd.axes_manager.signal_axes[0].name = "theta"
         pd.axes_manager.signal_axes[1].scale = 2
         pd.axes_manager.signal_axes[1].name = "k"
         return pd
 
-    def test_get_correlation(self, flat_pattern):
+    def test_correlation_signal(self, flat_pattern):
         ac = flat_pattern.get_angular_correlation()
-        assert(ac.axes_manager.signal_shape ==flat_pattern.axes_manager.signal_shape)
+        assert isinstance(ac, Correlation2D)
 
     def test_axes_transfer(self, flat_pattern):
         ac = flat_pattern.get_angular_correlation()
         assert(ac.axes_manager.signal_axes[0].scale ==
                flat_pattern.axes_manager.signal_axes[0].scale)
-        assert (ac.axes_manager.signal_axes[0].scale ==
-                flat_pattern.axes_manager.signal_axes[0].scale)
+        assert(ac.axes_manager.signal_axes[1].scale ==
+               flat_pattern.axes_manager.signal_axes[1].scale)
+        assert(ac.axes_manager.signal_axes[1].name ==
+               flat_pattern.axes_manager.signal_axes[1].name)
 
-    def test_axes_transfer(self, flat_pattern):
-        ap = flat_pattern.get_angular_power()
+    @pytest.mark.parametrize("mask", [None,
+                                      np.zeros(shape=(5,5)),
+                                      Signal2D(np.zeros(shape=(2,2,5,5)))])
+    def test_masking_correlation(self, flat_pattern, mask):
+        ap = flat_pattern.get_angular_correlation(mask=mask)
+        assert isinstance(ap, Correlation2D)
+
+    def test_correlation_inplace(self, flat_pattern):
+        ac = flat_pattern.get_angular_correlation(inplace=True)
+        assert ac is None
+        assert isinstance(flat_pattern,Correlation2D)
+
+    @pytest.mark.parametrize("mask", [None,
+                                      np.zeros(shape=(5,5)),
+                                      Signal2D(np.zeros(shape=(2,2,5,5)))])
+    def test_masking_angular_power(self, flat_pattern, mask):
+        ap = flat_pattern.get_angular_power(mask=mask)
         print(ap)
+        assert isinstance(ap, Power2D)
+
+    def test_axes_transfer_power(self, flat_pattern):
+        ac = flat_pattern.get_angular_power()
+        assert(ac.axes_manager.signal_axes[0].scale ==1)
+        assert(ac.axes_manager.signal_axes[1].scale ==
+               flat_pattern.axes_manager.signal_axes[1].scale)
+        assert(ac.axes_manager.signal_axes[1].name ==
+               flat_pattern.axes_manager.signal_axes[1].name)
+
+    def test_power_inplace(self, flat_pattern):
+        ac = flat_pattern.get_angular_power(inplace=True)
+        assert ac is None
+        assert isinstance(flat_pattern,Power2D)
+
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):

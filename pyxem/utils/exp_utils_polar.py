@@ -53,8 +53,6 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     a = np.fft.ifft(I_fft * np.conjugate(I_fft), axis=axis).real
 
     if mask is not None:
-        print("The number unmasked",number_unmasked)
-        print(np.shape(z)[0])
         a = np.multiply(np.divide(a, number_unmasked), np.shape(z)[0])
 
     if normalize:  # simplified way to calculate the normalization
@@ -67,6 +65,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         print(slicer)
         a = a[slicer]
     return a
+
 
 def _power(z, axis=0, mask=None, wrap=True, normalize=True):
     """The power spectrum of the correlation.
@@ -96,8 +95,8 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
     """
     if mask is None:  # This might not normalize things as well
         I_fft = np.fft.fft(z, axis=axis)
-        return I_fft * np.conjugate(I_fft)
-    return np.power(np.fft.fft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)),2)
+        return (I_fft * np.conjugate(I_fft)).real
+    return np.power(np.fft.fft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)),2).real
 
 
 def angular_correlation(z, mask=None, normalize=True):
@@ -129,7 +128,8 @@ def angular_power(z, mask=None, normalize=True):
     normalize: bool
         Subtract <I(\theta)>^2 and divide by <I(\theta)>^2
     """
-    return _power(z,axis=1, mask=mask, normalize=normalize, wrap=True)
+    p = _power(z, axis=1, mask=mask, normalize=normalize, wrap=True)
+    return p
 
 
 def variance(z, mask=None, axis=0):
