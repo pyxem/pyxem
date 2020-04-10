@@ -194,4 +194,4 @@ def test_plot_best_vector_matching_results_on_signal(structure, rot_list, edc):
         (match_results.data, match_results.data)
     )  # Hyperspy can only add markers to square signals
     dp = ElectronDiffraction2D(2 * [2 * [np.zeros((144, 144))]])
-    match_results.plot_best_matching_results_on_signal(dp, library=library)
+    match_results.plot_best_matching_results_on_signal(dp)

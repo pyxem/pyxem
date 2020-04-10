@@ -56,7 +56,7 @@ class ElectronDiffraction2D(Diffraction2D):
 
     def set_experimental_parameters(
         self,
-        accelerating_voltage=None,
+        beam_energy=None,
         camera_length=None,
         scan_rotation=None,
         convergence_angle=None,
@@ -68,8 +68,8 @@ class ElectronDiffraction2D(Diffraction2D):
 
         Parameters
         ----------
-        accelerating_voltage : float
-            Accelerating voltage in kV
+        beam_energy : float
+            Beam energy in keV
         camera_length: float
             Camera length in cm
         scan_rotation : float
@@ -85,10 +85,8 @@ class ElectronDiffraction2D(Diffraction2D):
         """
         md = self.metadata
 
-        if accelerating_voltage is not None:
-            md.set_item(
-                "Acquisition_instrument.TEM.accelerating_voltage", accelerating_voltage
-            )
+        if beam_energy is not None:
+            md.set_item("Acquisition_instrument.TEM.beam_energy", beam_energy)
         if camera_length is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",

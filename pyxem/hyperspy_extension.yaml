@@ -168,7 +168,6 @@ signals:
     lazy: True
     module: pyxem.signals.power2d
 
-
 components2D:
     DiffractionComponent:
       module: pyxem.components.diffraction_component

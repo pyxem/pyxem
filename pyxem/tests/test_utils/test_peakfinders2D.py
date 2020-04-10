@@ -24,7 +24,20 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_dog,
     find_peaks_log,
     find_peaks_xc,
+    _fast_mean,
+    _fast_std,
 )
+
+
+def test_mean_std():
+    x = np.array([1, 2, 3, 4, 5, 6])
+    np.testing.assert_allclose(_fast_mean(x), _fast_mean.py_func(x))
+    np.testing.assert_allclose(_fast_mean(x), np.mean(x))
+    np.testing.assert_allclose(_fast_mean(x), 3.5)
+    np.testing.assert_allclose(_fast_std(x), _fast_std.py_func(x))
+    np.testing.assert_allclose(_fast_std(x), np.std(x))
+    np.testing.assert_allclose(_fast_std(x), 1.707825)
+
 
 # see https://stackoverflow.com/questions/9205081/
 dispatcher = {

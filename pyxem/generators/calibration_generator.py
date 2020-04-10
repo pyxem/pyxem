@@ -319,14 +319,16 @@ class CalibrationGenerator:
         db = (np.sqrt(2) * (size / 2)) - (5 * np.sqrt(2))
         pka = trace.isig[db + mask_length :].find_peaks1D_ohaver()[0]["position"]
         pkb = trace.isig[: db - mask_length].find_peaks1D_ohaver()[0]["position"]
-        # Determine predicted position of 022 peak of Au pattern d022=1.437
-        au_pre = db - (self.ring_params[0] / 1.437)
-        au_post = db + (self.ring_params[0] / 1.437)
+        # Define Au 220 interplanar spacing (in Angstroms)
+        d220 = 1.442
+        # Determine predicted position of Au 220 peak
+        au_pre = db - (self.ring_params[0] / d220)
+        au_post = db + (self.ring_params[0] / d220)
         # Calculate differences between predicted and measured positions
         prediff = np.abs(pkb - au_pre)
         postdiff = np.abs(pka - au_post)
         # Calculate new calibration value based on most accurate peak positions
-        dc = (2 / 1.437) / (
+        dc = (2 / d220) / (
             pka[postdiff == min(postdiff)] - pkb[prediff == min(prediff)]
         )
         # Store diffraction calibration value as attribute

@@ -158,5 +158,5 @@ as shown in `this example <https://github.com/numpy/numpy/blob/master/doc/exampl
 Learn more
 ==========
 
-1. HyperSpy's `contribution guide <http://hyperspy.org/hyperspy-doc/current/dev_guide.html#developer-guide>`__: a lot of nice information on how to contribute to a scientific Python project.
+1. HyperSpy's `contribution guide <https://hyperspy.readthedocs.io/en/latest/dev_guide/index.html>`__: a lot of nice information on how to contribute to a scientific Python project.
 2. The Python programming language, `for beginners <https://www.python.org/about/gettingstarted/>`__.
