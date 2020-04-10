@@ -301,6 +301,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
+        signal_type =self._signal_type
 
         if unit == "pyxem":  # Case 1
             pyxem_units = True
@@ -391,9 +392,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         # Dealing with axis changes
         if inplace:
             k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type("diffraction")
+            self.set_signal_type(signal_type)
         else:
-            integration.set_signal_type("diffraction")
+            integration.set_signal_type(signal_type)
             transfer_navigation_axes(integration, self)
             k_axis = integration.axes_manager.signal_axes[0]
         k_axis.name = "Radius"

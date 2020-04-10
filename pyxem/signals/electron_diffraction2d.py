@@ -104,7 +104,6 @@ class ElectronDiffraction2D(Diffraction2D):
         else:
             wavelength = None
         integration = super().get_azimuthal_integral1d(npt_rad=npt_rad, wavelength=wavelength, **kwargs)
-        integration.set_signal_type("electron_diffraction")
         return integration
 
     def get_azimuthal_integral2d(self, npt_rad, beam_energy=None,**kwargs):
