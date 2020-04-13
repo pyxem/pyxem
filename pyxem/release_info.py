@@ -6,13 +6,13 @@ credits = [
     "Duncan Johnstone",
     "Phillip Crout",
     "Joonatan Laulainen",
-    "Simon Hogas",
+    "Simon Høgås",
     "Ben Martineau",
     "Tina Bergh",
     "Stef Smeets",
     "Eirik Opheim",
-    "Carter Francis",
     "Eric Prestat",
+    "Carter Francis",
     "Sean Collins",
     "Mohsen Danaie",
     "Tom Furnival",
@@ -23,8 +23,8 @@ credits = [
     "Tomas Ostasevicius",
     "Rob Tovey",
     "Matt von Lany",
-    "Endre Jacobsen",
     "Tim Poon",
+    "Endre Jacobsen",
 ]
 license = "GPLv3"
 maintainer = "Duncan Johnstone, Phillip Crout"
