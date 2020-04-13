@@ -132,34 +132,71 @@ def zero_mean_normalized_correlation(
 
     return corr_local
 
-def full_frame_correlation(image, template_coordinates, template_intensities):
+def full_frame_correlation(image_FT, template_coordinates, template_intensities):
+    """
+    Computes the correlation score between an image and a template in Fourier space.
 
-    image_x = image.shape[0]
-    image_y = image.shape[1]
+    Parameters:
+    -----------
+    image: numpy.ndarray
+        Intensities of the image, stored in a NxM numpy array
+    template_coordinates: numpy array
+        Array containing coordinates for non-zero intensities in the template
+    template_intensities: list
+        List of intensity values for the template.
+
+    Returns:
+    --------
+    corr_local: float
+        Correlation score between image and template.
+
+    See also:
+    ---------
+    correlate_library, fast_correlation, zero_mean_normalized_correlation
+
+    Reference:
+    ----------
+    A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
+     a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
+    """
+
+    image_x = image_FT.shape[0]
+    image_y = image_FT.shape[1]
     template = np.zeros((image_x, image_y))
     template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
 
     #Fourier transform. Division is done to account for differences in Fourier definitions between numpy and the reference article.
-    F_image = np.fft.fft2(image) / np.sqrt(image_x * image_y)
-    G_template = np.fft.fft2(template) / np.sqrt(image_x * image_y)
+    template_FT = np.fft.fft2(template) / np.sqrt(image_x * image_y)
 
-    x_0, y_0 = 0, 0 #If we do not thrust that the beam is centered, these parameters are to be used. For now, I leave them at 0.
+    x_0, y_0 = 0, 0 #If we do not thrust that the beam is centered, these parameters can be used. For now, I leave them at 0.
 
     #Low pass and high pass filter can be applied here. Take user input, or standard LP/HP?
 
     #Compute r_jg - Should I make a unique function for this? It will called multiple times if x_0, y_0 != 0.
-    r_jg = 0. + 0.j
-    core_sum = 0. + 0.j
-    for i in range(image_x):
-        for j in range (image_y):
-            exp_term = np.exp( - 2 * np.pi * 1.j * ( (i * x_0 / image_x) + (j * y_0 / image_y)))
-            r_jg += F_image[i,i] * np.conj(G_template[i,j]) * exp_term
-            core_sum += 2 * np.pi * i / image_x * np.conj(F_image[i, j]) * G_template[i, j] * exp_term
+
+    r_jg = _r_jg(x_0, y_0, image_FT, template_FT, image_x, image_y)
+    core_sum = _core_sum(image_FT, template_FT, image_x, image_y)
 
     corr_local = 2 * np.imag(core_sum * r_jg)
 
     return corr_local
 
+def _r_jg(x_0, y_0, F_image, G_template, image_x, image_y):
+    r_jg = 0. + 0.j
+    for i in range(image_x):
+        for j in range (image_y):
+            exp_term = np.exp( - 2 * np.pi * 1.j * ( (i * x_0 / image_x) + (j * y_0 / image_y)))
+            r_jg += F_image[i,i] * np.conj(G_template[i,j]) * exp_term
+    return r_jg
+
+def _core_sum(F_image, G_template, image_x, image_y):
+    core_sum = 0. + 0.j
+    for i in range(image_x):
+        for j in range (image_y):
+            exp_term = np.exp( - 2 * np.pi * 1.j * ( (i * x_0 / image_x) + (j * y_0 / image_y)))
+            core_sum += 2 * np.pi * i / image_x * np.conj(F_image[i, j]) * G_template[i, j] * exp_term
+
+    return core_sum
 
 
 def correlate_library(image, library, n_largest, method, mask):
@@ -187,7 +224,7 @@ def correlate_library(image, library, n_largest, method, mask):
         The number of well correlated simulations to be retained.
     method : str
         Name of method used to compute correlation between templates and diffraction patterns. Can be
-        'fast_correlation' or 'zero_mean_normalized_correlation'. (ADDED in pyxem 0.11.0)
+        'fast_correlation', 'full_frame_correlation' or 'zero_mean_normalized_correlation'. (ADDED in pyxem 0.11.0)
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
 
@@ -235,6 +272,9 @@ def correlate_library(image, library, n_largest, method, mask):
         average_image_intensity = np.average(image)
         image_std = np.linalg.norm(image - average_image_intensity)
 
+    if method == "full_frame_correlation":
+        image_FT = np.fft.fft2(image) / np.sqrt(image.shape[0] * image.shape[1])
+
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
             orientations = library_entry["orientations"]
@@ -268,7 +308,7 @@ def correlate_library(image, library, n_largest, method, mask):
 
                 elif method == "full_frame_correlation":
                     corr_local = full_frame_correlation(
-                        image, px_local, int_local
+                        image_FT, px_local, int_local
                     )
 
                 if corr_local > np.min(corr_saved):
