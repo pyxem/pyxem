@@ -172,10 +172,10 @@ def full_frame_correlation(image_FT, template_coordinates, template_intensities)
 
     #Low pass and high pass filter can be applied here. Take user input, or standard LP/HP?
 
-    #Compute r_jg - Should I make a unique function for this? It will called multiple times if x_0, y_0 != 0.
+    #Compute r_jg - It will called multiple times if x_0, y_0 != 0. 
 
     r_jg = _r_jg(x_0, y_0, image_FT, template_FT, image_x, image_y)
-    core_sum = _core_sum(image_FT, template_FT, image_x, image_y)
+    core_sum = _core_sum(x_0, y_0, image_FT, template_FT, image_x, image_y)
 
     corr_local = 2 * np.imag(core_sum * r_jg)
 
