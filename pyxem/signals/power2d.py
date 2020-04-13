@@ -61,20 +61,31 @@ class Power2D(Signal2D):
             2 dimensional map of from the power spectrum
         """
         if k_region is None:
-            k_region = [0,-1]
+            k_region = [0, -1]
         if symmetry is None:
-            sym_map = self.isig[:, k_region[0]:k_region[1]].sum(axis=[-1, -2]).transpose()
+            sym_map = (
+                self.isig[:, k_region[0] : k_region[1]].sum(axis=[-1, -2]).transpose()
+            )
 
         elif isinstance(symmetry, int):
-            sym_map = self.isig[symmetry, k_region[0]:k_region[1]].sum(axis=[-1]).transpose()
+            sym_map = (
+                self.isig[symmetry, k_region[0] : k_region[1]]
+                .sum(axis=[-1])
+                .transpose()
+            )
 
         else:
             sym_map = Signal2D(data=np.zeros(self.axes_manager.navigation_shape))
             for sym in symmetry:
-                sym_map = self.isig[sym, k_region[0]:k_region[1]].sum(axis=[-1]).transpose() + sym_map
+                sym_map = (
+                    self.isig[sym, k_region[0] : k_region[1]].sum(axis=[-1]).transpose()
+                    + sym_map
+                )
         return sym_map
 
-    def plot_symmetries(self, k_region=None, symmetry=[2, 4, 6, 8, 10], *args, **kwargs):
+    def plot_symmetries(
+        self, k_region=None, symmetry=[2, 4, 6, 8, 10], *args, **kwargs
+    ):
         """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguements that imshow does.
 
         Parameters
@@ -85,10 +96,10 @@ class Power2D(Signal2D):
             specific integers or list of symmetries to average over when creating the map of the correlations.
         """
         if k_region is None:
-            k_region = [0,-1]
+            k_region = [0, -1]
         summed = [self.get_map(k_region=k_region)]
         maps = summed + [self.get_map(k_region=k_region, symmetry=i) for i in symmetry]
-        l = ["summed"] + [str(i) +"-fold" for i in symmetry]
+        l = ["summed"] + [str(i) + "-fold" for i in symmetry]
         plot_images(images=maps, label=l, *args, **kwargs)
 
 

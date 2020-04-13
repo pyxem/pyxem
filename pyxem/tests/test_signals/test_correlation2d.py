@@ -22,7 +22,7 @@ import dask.array as da
 
 from hyperspy.signals import Signal2D
 
-from pyxem.signals.correlation2d import Correlation2D,LazyCorrelation2D
+from pyxem.signals.correlation2d import Correlation2D, LazyCorrelation2D
 from pyxem.signals.power2d import Power2D
 
 
@@ -75,8 +75,8 @@ class TestComputeAndAsLazy2D:
 class TestGetPower:
     @pytest.fixture
     def flat_pattern(self):
-        pd = Correlation2D(data=np.ones(shape=(2,2,5,5)))
-        pd.axes_manager.signal_axes[0].scale = .5
+        pd = Correlation2D(data=np.ones(shape=(2, 2, 5, 5)))
+        pd.axes_manager.signal_axes[0].scale = 0.5
         pd.axes_manager.signal_axes[0].name = "theta"
         pd.axes_manager.signal_axes[1].scale = 2
         pd.axes_manager.signal_axes[1].name = "k"
@@ -99,6 +99,7 @@ class TestGetPower:
         power = flat_pattern.get_summed_angular_power(inplace=True)
         assert isinstance(flat_pattern, Power2D)
         assert power is None
+
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):

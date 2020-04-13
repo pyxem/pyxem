@@ -72,11 +72,12 @@ class TestComputeAndAsLazy2D:
         assert s_lazy.__class__ == LazyPolarDiffraction2D
         assert data.shape == s_lazy.data.shape
 
+
 class TestCorrelations:
     @pytest.fixture
     def flat_pattern(self):
-        pd = PolarDiffraction2D(data=np.ones(shape=(2,2,5,5)))
-        pd.axes_manager.signal_axes[0].scale = .5
+        pd = PolarDiffraction2D(data=np.ones(shape=(2, 2, 5, 5)))
+        pd.axes_manager.signal_axes[0].scale = 0.5
         pd.axes_manager.signal_axes[0].name = "theta"
         pd.axes_manager.signal_axes[1].scale = 2
         pd.axes_manager.signal_axes[1].name = "k"
@@ -88,16 +89,22 @@ class TestCorrelations:
 
     def test_axes_transfer(self, flat_pattern):
         ac = flat_pattern.get_angular_correlation()
-        assert(ac.axes_manager.signal_axes[0].scale ==
-               flat_pattern.axes_manager.signal_axes[0].scale)
-        assert(ac.axes_manager.signal_axes[1].scale ==
-               flat_pattern.axes_manager.signal_axes[1].scale)
-        assert(ac.axes_manager.signal_axes[1].name ==
-               flat_pattern.axes_manager.signal_axes[1].name)
+        assert (
+            ac.axes_manager.signal_axes[0].scale
+            == flat_pattern.axes_manager.signal_axes[0].scale
+        )
+        assert (
+            ac.axes_manager.signal_axes[1].scale
+            == flat_pattern.axes_manager.signal_axes[1].scale
+        )
+        assert (
+            ac.axes_manager.signal_axes[1].name
+            == flat_pattern.axes_manager.signal_axes[1].name
+        )
 
-    @pytest.mark.parametrize("mask", [None,
-                                      np.zeros(shape=(5,5)),
-                                      Signal2D(np.zeros(shape=(2,2,5,5)))])
+    @pytest.mark.parametrize(
+        "mask", [None, np.zeros(shape=(5, 5)), Signal2D(np.zeros(shape=(2, 2, 5, 5)))]
+    )
     def test_masking_correlation(self, flat_pattern, mask):
         ap = flat_pattern.get_angular_correlation(mask=mask)
         assert isinstance(ap, Correlation2D)
@@ -105,11 +112,11 @@ class TestCorrelations:
     def test_correlation_inplace(self, flat_pattern):
         ac = flat_pattern.get_angular_correlation(inplace=True)
         assert ac is None
-        assert isinstance(flat_pattern,Correlation2D)
+        assert isinstance(flat_pattern, Correlation2D)
 
-    @pytest.mark.parametrize("mask", [None,
-                                      np.zeros(shape=(5,5)),
-                                      Signal2D(np.zeros(shape=(2,2,5,5)))])
+    @pytest.mark.parametrize(
+        "mask", [None, np.zeros(shape=(5, 5)), Signal2D(np.zeros(shape=(2, 2, 5, 5)))]
+    )
     def test_masking_angular_power(self, flat_pattern, mask):
         ap = flat_pattern.get_angular_power(mask=mask)
         print(ap)
@@ -117,16 +124,20 @@ class TestCorrelations:
 
     def test_axes_transfer_power(self, flat_pattern):
         ac = flat_pattern.get_angular_power()
-        assert(ac.axes_manager.signal_axes[0].scale ==1)
-        assert(ac.axes_manager.signal_axes[1].scale ==
-               flat_pattern.axes_manager.signal_axes[1].scale)
-        assert(ac.axes_manager.signal_axes[1].name ==
-               flat_pattern.axes_manager.signal_axes[1].name)
+        assert ac.axes_manager.signal_axes[0].scale == 1
+        assert (
+            ac.axes_manager.signal_axes[1].scale
+            == flat_pattern.axes_manager.signal_axes[1].scale
+        )
+        assert (
+            ac.axes_manager.signal_axes[1].name
+            == flat_pattern.axes_manager.signal_axes[1].name
+        )
 
     def test_power_inplace(self, flat_pattern):
         ac = flat_pattern.get_angular_power(inplace=True)
         assert ac is None
-        assert isinstance(flat_pattern,Power2D)
+        assert isinstance(flat_pattern, Power2D)
 
 
 class TestDecomposition:

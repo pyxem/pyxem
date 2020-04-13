@@ -26,6 +26,7 @@ from hyperspy._signals.lazy import LazySignal
 from pyxem.utils.correlation_utils import _correlation, _power
 import numpy as np
 
+
 class PolarDiffraction2D(Signal2D):
     _signal_type = "polar_diffraction"
 
@@ -45,7 +46,9 @@ class PolarDiffraction2D(Signal2D):
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def get_angular_correlation(self, mask=None, normalize=True, inplace=False, **kwargs):
+    def get_angular_correlation(
+        self, mask=None, normalize=True, inplace=False, **kwargs
+    ):
         """
         Returns the angular auto-correlation function in the form of a Signal2D class.
 
@@ -77,7 +80,14 @@ class PolarDiffraction2D(Signal2D):
         Angular correlation with a static matst for
 
         """
-        correlation = self.map(_correlation, axis=1, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
+        correlation = self.map(
+            _correlation,
+            axis=1,
+            mask=mask,
+            normalize=normalize,
+            inplace=inplace,
+            **kwargs
+        )
         if inplace:
             self.set_signal_type("correlation")
             correlation_axis = self.axes_manager.signal_axes[0]
@@ -87,7 +97,7 @@ class PolarDiffraction2D(Signal2D):
         correlation_axis.name = "Angular Correlation, $/phi$"
         return correlation
 
-    def get_angular_power(self, mask=None, normalize=True, inplace=False, ** kwargs):
+    def get_angular_power(self, mask=None, normalize=True, inplace=False, **kwargs):
         """ Returns the power spectrum of the angular auto-correlation function
          in the form of a Signal2D class.
 
@@ -109,7 +119,9 @@ class PolarDiffraction2D(Signal2D):
          --------------
          power: Signal2D
              The power spectrum of the Signal2D"""
-        power = self.map(_power, axis=1, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
+        power = self.map(
+            _power, axis=1, mask=mask, normalize=normalize, inplace=inplace, **kwargs
+        )
         if inplace:
             self.set_signal_type("power")
             fourier_axis = self.axes_manager.signal_axes[0]

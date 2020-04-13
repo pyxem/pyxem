@@ -23,29 +23,35 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     """
     if wrap is False:
         z_shape = np.shape(z)
-        padder = [(0,0)]*len(z_shape)
+        padder = [(0, 0)] * len(z_shape)
         pad = z_shape[axis]  #  This will be faster if the length of the axis
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)
-        slicer = [slice(None),]*len(z_shape)
-        slicer[axis] = slice(0,- 2 * pad)  # creating the proper slices
+        slicer = [slice(None),] * len(z_shape)
+        slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
-        z = np.pad(z, padder, 'constant')
+        z = np.pad(z, padder, "constant")
 
     if mask is not None or wrap is False:  # Need to scale for wrapping properly
         m = np.array(mask, dtype=bool)  # make sure it is a boolean array
         # this is to determine how many of the variables were non zero... This is really dumb.  but...
         # it works and I should stop trying to fix it (wreak it)
-        mask_boolean = ~ m  # inverting the boolean mask
+        mask_boolean = ~m  # inverting the boolean mask
         if wrap is False:  # padding with zeros to the function along some axis
-            m = np.pad(m, padder,'constant')  # all the zeros are masked (should account for padding
+            m = np.pad(
+                m, padder, "constant"
+            )  # all the zeros are masked (should account for padding
             #  when normalized.
-            mask_boolean = np.pad(mask_boolean, padder,'constant')
+            mask_boolean = np.pad(mask_boolean, padder, "constant")
         mask_fft = np.fft.rfft(mask_boolean, axis=axis)
-        number_unmasked = np.fft.irfft(mask_fft*np.conjugate(mask_fft), axis=axis).real
-        number_unmasked[number_unmasked < 1] = 1  # get rid of divide by zero error for completely masked rows
+        number_unmasked = np.fft.irfft(
+            mask_fft * np.conjugate(mask_fft), axis=axis
+        ).real
+        number_unmasked[
+            number_unmasked < 1
+        ] = 1  # get rid of divide by zero error for completely masked rows
         z[m] = 0
 
     # fast method uses a FFT and is a process which is O(n) = n log(n)
@@ -97,9 +103,13 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         I_fft = np.fft.rfft(z, axis=axis)
         return (I_fft * np.conjugate(I_fft)).real
     else:
-        return np.power(np.fft.rfft(_correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)), 2).real
+        return np.power(
+            np.fft.rfft(
+                _correlation(z=z, axis=axis, mask=mask, wrap=wrap, normalize=normalize)
+            ),
+            2,
+        ).real
 
 
 def corr_to_power(z):
     return np.fft.rfft(z, axis=1).real
-

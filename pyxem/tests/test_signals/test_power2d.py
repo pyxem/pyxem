@@ -74,17 +74,17 @@ class TestComputeAndAsLazy2D:
 class TestPower:
     @pytest.fixture
     def flat_pattern(self):
-        pd = Power2D(data=np.ones(shape=(2,2,5,5)))
+        pd = Power2D(data=np.ones(shape=(2, 2, 5, 5)))
         return pd
 
     @pytest.mark.parametrize("k_region", [None, [2.0, 4.0]])
-    @pytest.mark.parametrize("sym", [None, 4,[2,4]])
-    def test_power_signal_get_map(self, flat_pattern, k_region,sym):
+    @pytest.mark.parametrize("sym", [None, 4, [2, 4]])
+    def test_power_signal_get_map(self, flat_pattern, k_region, sym):
         flat_pattern.get_map(k_region=k_region, symmetry=sym)
 
     @pytest.mark.parametrize("k_region", [None, [2.0, 4.0]])
-    @pytest.mark.parametrize("sym", [[2,4]])
-    def test_power_signal_plot_symmetries(self, flat_pattern, k_region,sym):
+    @pytest.mark.parametrize("sym", [[2, 4]])
+    def test_power_signal_plot_symmetries(self, flat_pattern, k_region, sym):
         flat_pattern.plot_symmetries(k_region=k_region, symmetry=sym)
 
 

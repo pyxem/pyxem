@@ -56,8 +56,8 @@ class TestCorrelations:
     def test_correlations_normalization(self, ones_hundred):
         c = _correlation(ones_hundred, axis=0, normalize=True)
         result = np.zeros((10, 20))
-        result[1::2, :] = -.96078816
-        result[0::2, :] = .96078816
+        result[1::2, :] = -0.96078816
+        result[0::2, :] = 0.96078816
         np.testing.assert_array_almost_equal(c, result)
         c = _correlation(ones_hundred, axis=1, normalize=True)
         result = np.zeros((10, 20))
@@ -69,11 +69,13 @@ class TestCorrelations:
         c = _correlation(ones_hundred, axis=0, normalize=True, mask=m)
         print(c)
         result = np.zeros((10, 20))
-        result[1::2, :] = -.96078816
-        result[0::2, :] = .96078816
+        result[1::2, :] = -0.96078816
+        result[0::2, :] = 0.96078816
         np.testing.assert_array_almost_equal(c, result)
 
-    def test_correlations_wrapping(self, ones_hundred):  # Need to do extra checks to assure this is correct
+    def test_correlations_wrapping(
+        self, ones_hundred
+    ):  # Need to do extra checks to assure this is correct
         m = np.zeros((10, 20))
         m[2:4, :] = 1
         c = _correlation(ones_hundred, axis=0, normalize=True, wrap=False)
@@ -82,4 +84,3 @@ class TestCorrelations:
         result[0::2, :] = 2.26087665
         result[1::2, :] = -0.93478899
         np.testing.assert_array_almost_equal(c, result)
-

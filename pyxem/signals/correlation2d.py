@@ -47,7 +47,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def get_angular_power(self, inplace=False, ** kwargs):
+    def get_angular_power(self, inplace=False, **kwargs):
         """ Returns the power spectrum of the angular auto-correlation function
          in the form of a Signal2D class.
 
@@ -82,7 +82,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         fourier_axis.scale = 1
         return power
 
-    def get_summed_angular_power(self, inplace=False, ** kwargs):
+    def get_summed_angular_power(self, inplace=False, **kwargs):
         """Returns the power spectrum of the summed angular auto-correlation function
         over all real space positions.  Averages the angular correlation.
 
