@@ -100,7 +100,7 @@ class ElectronDiffraction2D(Diffraction2D):
         if beam_energy is None and self.beam_energy is not None:
             beam_energy = self.beam_energy
         if beam_energy is not None:
-            wavelength = get_electron_wavelength(self.beam_energy)
+            wavelength = get_electron_wavelength(self.beam_energy) * 1e-10
         else:
             wavelength = None
         integration = super().get_azimuthal_integral1d(
@@ -112,7 +112,7 @@ class ElectronDiffraction2D(Diffraction2D):
         if beam_energy is None and self.beam_energy is not None:
             beam_energy = self.beam_energy
         if beam_energy is not None:
-            wavelength = get_electron_wavelength(self.beam_energy)
+            wavelength = get_electron_wavelength(self.beam_energy) * 1e-10
         else:
             wavelength = None
         integration = super().get_azimuthal_integral2d(
