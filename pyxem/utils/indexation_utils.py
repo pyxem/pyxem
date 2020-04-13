@@ -189,7 +189,7 @@ def _r_jg(x_0, y_0, F_image, G_template, image_x, image_y):
             r_jg += F_image[i,i] * np.conj(G_template[i,j]) * exp_term
     return r_jg
 
-def _core_sum(F_image, G_template, image_x, image_y):
+def _core_sum(x_0, y_0, F_image, G_template, image_x, image_y):
     core_sum = 0. + 0.j
     for i in range(image_x):
         for j in range (image_y):
