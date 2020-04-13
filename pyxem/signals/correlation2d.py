@@ -23,11 +23,13 @@ Signal class for two-dimensional diffraction data in polar coordinates.
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.utils.correlation_utils import _correlation, _power
+from pyxem.utils.correlation_utils import corr_to_power
+from pyxem.signals.common_diffraction import CommonDiffraction
 import numpy as np
 
-class PolarDiffraction2D(Signal2D):
-    _signal_type = "polar_diffraction"
+
+class Correlation2D(Signal2D, CommonDiffraction):
+    _signal_type = "correlation"
 
     def __init__(self, *args, **kwargs):
         """
@@ -45,49 +47,7 @@ class PolarDiffraction2D(Signal2D):
 
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def get_angular_correlation(self, mask=None, normalize=True, inplace=False, **kwargs):
-        """
-        Returns the angular auto-correlation function in the form of a Signal2D class.
-
-        The angular correlation measures the angular symmetry by computing the self or auto
-        correlation. The equation being calculated is
-        $ C(\phi,k,n)= \frac{ <I(\theta,k,n)*I(\theta+\phi,k,n)>_\theta-<I(\theta,k,n)>^2}{<I(\theta,k,n)>^2}$
-
-        Parameters
-        ---------------
-        mask: Numpy array or Signal2D
-            A bool mask of values to ignore of shape equal to the signal shape.  If the mask
-            is a BaseSignal than it is iterated with the polar signal
-        normalize: bool
-            Normalize the radial correlation by the average value at some radius.
-        kwargs: dict
-            Any additional options for the hyperspy.BaseSignal.map() function
-        inplace: bool
-            From hyperspy.signal.map(). inplace=True means the signal is
-            overwritten.
-        Returns
-        --------------
-        correlation: Signal2D
-            The radial correlation for the signal2D
-
-        Examples
-        --------------
-        Basic example, no mask applied and normalization applied.
-        >polar.get_angular_correlation()
-        Angular correlation with a static matst for
-
-        """
-        correlation = self.map(_correlation, axis=1, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
-        if inplace:
-            self.set_signal_type("correlation")
-            correlation_axis = self.axes_manager.signal_axes[0]
-        else:
-            correlation.set_signal_type("correlation")
-            correlation_axis = correlation.axes_manager.signal_axes[0]
-        correlation_axis.name = "Angular Correlation, $/phi$"
-        return correlation
-
-    def get_angular_power(self, mask=None, normalize=True, inplace=False, ** kwargs):
+    def get_angular_power(self, inplace=False, ** kwargs):
         """ Returns the power spectrum of the angular auto-correlation function
          in the form of a Signal2D class.
 
@@ -109,13 +69,39 @@ class PolarDiffraction2D(Signal2D):
          --------------
          power: Signal2D
              The power spectrum of the Signal2D"""
-        power = self.map(_power, axis=1, mask=mask, normalize=normalize,inplace=inplace, **kwargs)
+        power = self.map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[0]
+            fourier_axis = self.axes_manager.signal_axes[1]
         else:
             power.set_signal_type("power")
-            fourier_axis = power.axes_manager.signal_axes[0]
+            fourier_axis = self.axes_manager.signal_axes[1]
+        fourier_axis.name = "Fourier Coefficient"
+        fourier_axis.units = "a.u"
+        fourier_axis.offset = 0.5
+        fourier_axis.scale = 1
+        return power
+
+    def get_summed_angular_power(self, inplace=False, ** kwargs):
+        """Returns the power spectrum of the summed angular auto-correlation function
+        over all real space positions.  Averages the angular correlation.
+
+         Parameters
+         ---------------
+        inplace: bool
+            From hyperspy.signal.map(). inplace=True means the signal is
+            overwritten.
+         Returns
+         --------------
+         power: Power2D
+             The power spectrum of summed angular correlation"""
+        power = self.sum().map(corr_to_power, inplace=inplace, **kwargs)
+        if inplace:
+            self.set_signal_type("power")
+            fourier_axis = self.axes_manager.signal_axes[1]
+        else:
+            power.set_signal_type("power")
+            fourier_axis = self.axes_manager.signal_axes[1]
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
         fourier_axis.offset = 0.5
@@ -123,6 +109,9 @@ class PolarDiffraction2D(Signal2D):
         return power
 
 
-class LazyPolarDiffraction2D(LazySignal, PolarDiffraction2D):
+class LazyCorrelation2D(LazySignal, Correlation2D):
 
-    pass
+    _lazy = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

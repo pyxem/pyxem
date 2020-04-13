@@ -94,6 +94,7 @@ class VarianceGenerator:
 
         dv = DiffractionVariance2D(vardps.data.reshape((2, 2, sig_x, sig_y)))
 
+
         dv = transfer_signal_axes(dv, self.signal)
 
         return dv
