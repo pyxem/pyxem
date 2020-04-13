@@ -1,4 +1,4 @@
-|Travis|_ |AppVeyor|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
+|Travis|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
 
 .. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
 .. _Travis: https://travis-ci.org/pyxem/pyxem
