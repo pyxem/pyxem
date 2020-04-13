@@ -7,7 +7,7 @@ env:
 
 matrix:
   include:
-  - env: export PYTHON=3.8        
+  - env: export PYTHON=3.8
   - env: export PYTHON=3.7
   - env: export PYTHON=3.7
     os: osx
@@ -18,10 +18,7 @@ sudo: True #for Miniconda
 
 before_install:
   # Install miniconda
-  - if [ $TRAVIS_OS_NAME = osx ]; then
-      curl "https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh" -o miniconda.sh;
-    else wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - chmod +x miniconda.sh;
     ./miniconda.sh -b -p $HOME/miniconda;
     hash -r;
@@ -41,6 +38,6 @@ install:
 script:
   - export MPLBACKEND=Agg
   - pytest --pyargs pyxem --cov=pyxem
-  
+
 after_success:
   - coveralls
