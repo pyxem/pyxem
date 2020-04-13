@@ -28,6 +28,7 @@ from transforms3d.euler import euler2mat
 
 from pyxem.signals.diffraction2d import Diffraction2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
 from pyxem.utils.indexation_utils import OrientationResult
@@ -125,69 +126,18 @@ def dp_single(request):
 
 
 @pytest.fixture
-def dp_for_azimuthal():
-    """
-    Two diffraction patterns with easy to see radial profiles, wrapped
-    in Diffraction2D  <2|8,8>
-    """
-    dp = Diffraction2D(np.zeros((2, 8, 8)))
-    dp.data[0] = np.array(
-        [
-            [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
-            [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
-            [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
-            [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
-            [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
-            [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
-            [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
-            [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
-        ]
-    )
-
-    dp.data[1] = np.array(
-        [
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        ]
-    )
-
-    return dp
-
-
-@pytest.fixture
-def dp_for_origin_variation():
-    """
-    Two diffraction patterns with easy to see radial profiles, wrapped
-    in Diffraction2D  <2,2|3,3>
-    """
-    dp = Diffraction2D(np.zeros((2, 2, 4, 4)))
-    dp.data = np.array(
-        [
-            [
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-            ],
-            [
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-                [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-            ],
-        ]
-    )
-    return dp
-
-
-@pytest.fixture
-def electron_diffraction1d(diffraction_pattern):
+def electron_diffraction1d():
     """A simple, multiuse diffraction profile, with dimensions:
     ElectronDiffraction1D <2,2|12>
     """
-    return diffraction_pattern.get_radial_profile()
+    data = np.array(
+        [
+            [[1.0, 0.25, 0.0, 0.0, 0.0], [1.0, 0.25, 0.0, 0.0, 0.0]],
+            [[1.0, 0.25, 0.0, 0.0, 0.16666667], [1.5, 0.5, 0.0, 0.0, 0.0]],
+        ]
+    )
+
+    return ElectronDiffraction1D(data)
 
 
 @pytest.fixture

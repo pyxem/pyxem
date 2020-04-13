@@ -1,5 +1,5 @@
 name = "pyxem"
-version = "0.11.0dev"
+version = "0.11.0"
 author = "Duncan Johnstone, Phillip Crout"
 copyright = "Copyright 2017-2020, The pyXem Developers"
 credits = [
@@ -11,9 +11,11 @@ credits = [
     "Tina Bergh",
     "Stef Smeets",
     "Eirik Opheim",
+    "Carter Francis",
     "Eric Prestat",
     "Sean Collins",
     "Mohsen Danaie",
+    "Tom Furnival",
     "Håkon Wiik Ånes",
     "Tiarnan Doherty",
     "Affan Iqbal",
@@ -22,7 +24,6 @@ credits = [
     "Rob Tovey",
     "Matt von Lany",
     "Endre Jacobsen",
-    "Tom Furnival",
 ]
 license = "GPLv3"
 maintainer = "Duncan Johnstone, Phillip Crout"
