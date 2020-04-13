@@ -51,9 +51,6 @@ class CommonDiffraction:
                 '"k_A^-1","2th_deg", "2th_rad"'
             )
 
-
-
-
     @staticmethod
     def _get_sum_signal(signal, out_signal_axes=None):
         out = signal.sum(signal.axes_manager.signal_axes)

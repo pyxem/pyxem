@@ -60,7 +60,7 @@ class ElectronDiffraction2D(Diffraction2D):
     def beam_energy(self):
         try:
             return self.metadata.Acquisition_instrument.TEM["beam_energy"]
-        except(AttributeError):
+        except (AttributeError):
             return None
 
     @beam_energy.setter
@@ -71,7 +71,7 @@ class ElectronDiffraction2D(Diffraction2D):
     def camera_length(self):
         try:
             return self.metadata.Acquisition_instrument.TEM["camera_length"]
-        except(AttributeError):
+        except (AttributeError):
             return None
 
     @camera_length.setter
@@ -96,24 +96,28 @@ class ElectronDiffraction2D(Diffraction2D):
         self.axes_manager.navigation_axes[0].scale = calibration
         self.axes_manager.navigation_axes[1].scale = calibration
 
-    def get_azimuthal_integral1d(self,npt_rad, beam_energy=None,**kwargs):
+    def get_azimuthal_integral1d(self, npt_rad, beam_energy=None, **kwargs):
         if beam_energy is None and self.beam_energy is not None:
             beam_energy = self.beam_energy
         if beam_energy is not None:
             wavelength = get_electron_wavelength(self.beam_energy)
         else:
             wavelength = None
-        integration = super().get_azimuthal_integral1d(npt_rad=npt_rad, wavelength=wavelength, **kwargs)
+        integration = super().get_azimuthal_integral1d(
+            npt_rad=npt_rad, wavelength=wavelength, **kwargs
+        )
         return integration
 
-    def get_azimuthal_integral2d(self, npt_rad, beam_energy=None,**kwargs):
+    def get_azimuthal_integral2d(self, npt_rad, beam_energy=None, **kwargs):
         if beam_energy is None and self.beam_energy is not None:
             beam_energy = self.beam_energy
         if beam_energy is not None:
             wavelength = get_electron_wavelength(self.beam_energy)
         else:
             wavelength = None
-        integration = super().get_azimuthal_integral2d(npt_rad=npt_rad, wavelength=wavelength, **kwargs)
+        integration = super().get_azimuthal_integral2d(
+            npt_rad=npt_rad, wavelength=wavelength, **kwargs
+        )
         return integration
 
     def set_experimental_parameters(

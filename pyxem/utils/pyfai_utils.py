@@ -121,23 +121,26 @@ def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
         "q_A^-1": [1e-10, 1, "q_A^-1"],
         "k_nm^-1": [1e-9, 2 * np.pi, "q_nm^-1"],  # add to pyFAI
         "k_A^-1": [1e-10, 2 * np.pi, "q_A^-1"],  # add to pyFAI
-        }
+    }
     wavelength_scale = units_table[pyxem_unit][0]
     scale_factor = units_table[pyxem_unit][1]
     unit = units_table[pyxem_unit][2]
     detector_distance = 1
     if wavelength_scale is None:
         if pyxem_unit == "2th_deg":
-            pixel_1_size = np.tan((pixel_scale[0]/180)*np.pi)
-            pixel_2_size = np.tan((pixel_scale[1]/180)*np.pi)
+            pixel_1_size = np.tan((pixel_scale[0] / 180) * np.pi)
+            pixel_2_size = np.tan((pixel_scale[1] / 180) * np.pi)
         if pyxem_unit == "2th_rad":
             pixel_1_size = np.tan(pixel_scale[0])
             pixel_2_size = np.tan(pixel_scale[1])
     else:
-        pixel_1_size = pixel_scale[0] * (wavelength / wavelength_scale) * detector_distance
-        pixel_2_size = pixel_scale[1] * (wavelength / wavelength_scale) * detector_distance
+        pixel_1_size = (
+            pixel_scale[0] * (wavelength / wavelength_scale) * detector_distance
+        )
+        pixel_2_size = (
+            pixel_scale[1] * (wavelength / wavelength_scale) * detector_distance
+        )
     detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
     if radial_range is not None:
-        radial_range = [radial_range[0]*scale_factor,
-                        radial_range[1]*scale_factor]
+        radial_range = [radial_range[0] * scale_factor, radial_range[1] * scale_factor]
     return detector, detector_distance, radial_range, unit, scale_factor
