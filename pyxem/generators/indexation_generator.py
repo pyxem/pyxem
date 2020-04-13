@@ -32,6 +32,7 @@ from pyxem.utils.indexation_utils import (
     correlate_library,
     zero_mean_normalized_correlation,
     fast_correlation,
+    full_frame_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
@@ -103,6 +104,7 @@ class IndexationGenerator:
         method_dict = {
             "fast_correlation": fast_correlation,
             "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
+            "full_frame_correlation": full_frame_correlation,
         }
 
         if mask is None:

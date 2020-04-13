@@ -132,6 +132,35 @@ def zero_mean_normalized_correlation(
 
     return corr_local
 
+def full_frame_correlation(image, template_coordinates, template_intensities):
+
+    image_x = image.shape[0]
+    image_y = image.shape[1]
+    template = np.zeros((image_x, image_y))
+    template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
+
+    #Fourier transform. Division is done to account for differences in Fourier definitions between numpy and the reference article.
+    F_image = np.fft.fft2(image) / np.sqrt(image_x * image_y)
+    G_template = np.fft.fft2(template) / np.sqrt(image_x * image_y)
+
+    x_0, y_0 = 0, 0 #If we do not thrust that the beam is centered, these parameters are to be used. For now, I leave them at 0.
+
+    #Low pass and high pass filter can be applied here. Take user input, or standard LP/HP?
+
+    #Compute r_jg - Should I make a unique function for this? It will called multiple times if x_0, y_0 != 0.
+    r_jg = 0. + 0.j
+    core_sum = 0. + 0.j
+    for i in range(image_x):
+        for j in range (image_y):
+            exp_term = np.exp( - 2 * np.pi * 1.j * ( (i * x_0 / image_x) + (j * y_0 / image_y)))
+            r_jg += F_image[i,i] * np.conj(G_template[i,j]) * exp_term
+            core_sum += 2 * np.pi * i / image_x * np.conj(F_image[i, j]) * G_template[i, j] * exp_term
+
+    corr_local = 2 * np.imag(core_sum * r_jg)
+
+    return corr_local
+
+
 
 def correlate_library(image, library, n_largest, method, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -205,6 +234,7 @@ def correlate_library(image, library, n_largest, method, mask):
         nb_pixels = image.shape[0] * image.shape[1]
         average_image_intensity = np.average(image)
         image_std = np.linalg.norm(image - average_image_intensity)
+
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
             orientations = library_entry["orientations"]
@@ -220,7 +250,7 @@ def correlate_library(image, library, n_largest, method, mask):
             for (or_local, px_local, int_local, pn_local) in zip_for_locals:
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
-                image_intensities = image[px_local[:, 1], px_local[:, 0]]
+                image_intensities = image[px_local[:, 1], px_local[:, 0]] # Counter intuitive indexing? Why is it not px_local[:, 0], px_local[:, 1]?
 
                 if method == "zero_mean_normalized_correlation":
                     corr_local = zero_mean_normalized_correlation(
@@ -234,6 +264,11 @@ def correlate_library(image, library, n_largest, method, mask):
                 elif method == "fast_correlation":
                     corr_local = fast_correlation(
                         image_intensities, int_local, pn_local
+                    )
+
+                elif method == "full_frame_correlation":
+                    corr_local = full_frame_correlation(
+                        image, px_local, int_local
                     )
 
                 if corr_local > np.min(corr_saved):
