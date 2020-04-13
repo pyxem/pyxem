@@ -78,12 +78,12 @@ def clean_peaks(peaks):
     Parameters
     ----------
     peaks : numpy.ndarray
-        Result of peak finding
+        Array of peak pixel coordinates with shape (n_peaks, 2).
 
     Returns
     -------
     peaks : numpy.ndarray
-        Result of peak finding
+        Array of peak pixel coordinates with shape (n_peaks, 2).
 
     NO_PEAKS : str
         Flag indicating no peaks found.
@@ -218,10 +218,28 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
 
     Notes
     -----
-    Implemented as described in the PhD thesis of Thomas White (2009) the
-    algorithm was developed by Gordon Ball during a summer project in
-    Cambridge. Some minor modifactions have been incoporated where the original
-    methods were ambiguous or unclear.
+    Implemented as described in the PhD thesis of Thomas White, University of
+    Cambridge, 2009, with minor modifications to resolve ambiguities.
+
+    The algorithm is as follows:
+
+    1. Adjust the contrast and intensity bias of the image so that all pixels
+       have values between 0 and 1.
+    2. For each pixel, determine the mean and standard deviation of all pixels
+       inside a circle of radius 10 pixels centered on that pixel.
+    3. If the value of the pixel is greater than the mean of the pixels in the
+       circle by more than one standard deviation, set that pixel to have an
+       intensity of 1. Otherwise, set the intensity to 0.
+    4. Smooth the image by convovling it twice with a flat 3x3 kernel.
+    5. Let k = (1/2 - mu)/sigma where mu and sigma are the mean and standard
+       deviations of all the pixel intensities in the image.
+    6. For each pixel in the image, if the value of the pixel is greater than
+       mu + k*sigma set that pixel to have an intensity of 1. Otherwise, set the
+       intensity to 0.
+    7. Detect peaks in the image by locating the centers of gravity of regions
+       of adjacent pixels with a value of 1.
+    8. Repeat #4-7 until the number of peaks found in the previous step
+       converges to within 5%.
     """
 
     def normalize(image):
@@ -331,8 +349,8 @@ def find_peaks_dog(
 
     Returns
     -------
-    numpy.ndarray
-        Array of peak coordinates of shape `(n_peaks, 2)`
+    peaks : numpy.ndarray
+        Array of peak pixel coordinates with shape (n_peaks, 2).
 
     Notes
     -----
@@ -379,9 +397,8 @@ def find_peaks_log(
 
     Returns
     -------
-    numpy.ndarray
-        (n_peaks, 2)
-        Array of peak coordinates.
+    peaks : numpy.ndarray
+        Array of peak pixel coordinates with shape (n_peaks, 2).
 
     """
     z = z / np.max(z)
@@ -417,9 +434,8 @@ def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
 
     Returns
     -------
-    numpy.ndarray
-        (n_peaks, 2)
-        Array of peak coordinates.
+    peaks : numpy.ndarray
+        Array of peak pixel coordinates with shape (n_peaks, 2).
 
     """
     response_image = match_template(z, disc_image, pad_input=True)
