@@ -115,8 +115,7 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40, distance_cutoff=
     Returns
     -------
     peaks : numpy.ndarray
-        (n_peaks, 2)
-        Peak pixel coordinates.
+        Array of peak pixel coordinates with shape (n_peaks, 2).
 
     Notes
     -----
@@ -145,13 +144,17 @@ def find_peaks_zaefferer(z, grad_threshold=0.1, window_size=40, distance_cutoff=
         return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2
 
     def gradient(image):
-        """Calculates the square of the 2-d partial gradient.
+        """Calculates the square of the 2D partial gradient.
+
         Parameters
         ----------
         image : numpy.ndarray
+            Array of image intensities.
+
         Returns
         -------
-        numpy.ndarray
+        image_gradient : numpy.ndarray
+            Array of image gradient intensities.
         """
         gradient_of_image = np.gradient(image)
         gradient_of_image = gradient_of_image[0] ** 2 + gradient_of_image[1] ** 2
@@ -210,17 +213,15 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
 
     Returns
     -------
-    numpy.ndarray
-        (n_peaks, 2)
-        Array of peak coordinates.
+    peaks : numpy.ndarray
+        Array of peak pixel coordinates with shape (n_peaks, 2).
 
     Notes
     -----
     Implemented as described in the PhD thesis of Thomas White (2009) the
     algorithm was developed by Gordon Ball during a summer project in
-    Cambridge.
-    This version by Ben Martineau (2016), with minor modifications to the
-    original where methods were ambiguous or unclear.
+    Cambridge. Some minor modifactions have been incoporated where the original
+    methods were ambiguous or unclear.
     """
 
     def normalize(image):
@@ -287,7 +288,7 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
         peaks = separate_peaks(image)
         return image, peaks
 
-    def stat_peak_finder(image):
+    def stat_peak_finder(image, convergence_ratio):
         """Find peaks in image. Algorithm stages in comments."""
         image = normalize(image)  # 1
         image = stat_binarise(image)  # 2, 3
@@ -295,16 +296,15 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
         image, peaks = _peak_find_once(image)  # 4-6
         m_peaks = len(peaks)  # Actual number of peaks
 
-        # Algorithm branch not currently used
-        # while (n_peaks - m_peaks) / n_peaks > convergence_ratio:  # 8
-        #     n_peaks = m_peaks
-        #     image, peaks = _peak_find_once(image)
-        #     m_peaks = len(peaks)
+        while (n_peaks - m_peaks) / n_peaks > convergence_ratio:  # 8
+            n_peaks = m_peaks
+            image, peaks = _peak_find_once(image)
+            m_peaks = len(peaks)
 
         peak_centers = np.array([np.mean(peak, axis=0) for peak in peaks])  # 7
         return peak_centers
 
-    return clean_peaks(stat_peak_finder(z))
+    return clean_peaks(stat_peak_finder(z, convergence_ratio))
 
 
 def find_peaks_dog(
