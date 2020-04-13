@@ -301,26 +301,30 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
 
     def _peak_find_once(image):
         """Smooth, binarise, and find peaks according to main algorithm."""
-        image = smooth(image)
-        image = half_binarise(image)
-        peaks = separate_peaks(image)
-        return image, peaks
+        image = smooth(image) # 4
+        image = half_binarise(image) # 5
+        peaks = separate_peaks(image) # 6
+        centers = np.array([np.mean(peak, axis=0) for peak in peaks]) # 7
+        return image, centers
 
     def stat_peak_finder(image, convergence_ratio):
         """Find peaks in image. Algorithm stages in comments."""
+        # Image preparation
         image = normalize(image)  # 1
         image = stat_binarise(image)  # 2, 3
-        n_peaks = np.infty  # Initial number of peaks
-        image, peaks = _peak_find_once(image)  # 4-6
-        m_peaks = len(peaks)  # Actual number of peaks
-
+        # Perform first iteration of peak finding
+        image, peaks_prev = _peak_find_once(image)  # 4-7
+        image, peaks_curr = _peak_find_once(image)  # 4-7
+        n_peaks = len(peaks_prev)
+        m_peaks = len(peaks_curr)
+        # Repeat peak finding with more blurring to convergence
         while (n_peaks - m_peaks) / n_peaks > convergence_ratio:  # 8
             n_peaks = m_peaks
-            image, peaks = _peak_find_once(image)
-            m_peaks = len(peaks)
+            peaks_prev = peaks_curr
+            image, peaks_curr = _peak_find_once(image)
+            m_peaks = len(peaks_curr)
 
-        peak_centers = np.array([np.mean(peak, axis=0) for peak in peaks])  # 7
-        return peak_centers
+        return peaks_curr
 
     return clean_peaks(stat_peak_finder(z, convergence_ratio))
 
