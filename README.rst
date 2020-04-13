@@ -1,4 +1,4 @@
-|Travis|_ |AppVeyor|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
+|Travis|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
 
 .. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
 .. _Travis: https://travis-ci.org/pyxem/pyxem
@@ -18,14 +18,14 @@
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
 .. _black: https://github.com/psf/black
 
-pyXem is an open-source python library for multi-dimensional diffraction microscopy.
+pyxem is an open-source python library for multi-dimensional diffraction microscopy.
 
 The package defines objects and functions for the analysis of numerous diffraction patterns. It has been primarily developed as a platform for hybrid diffraction-microscopy based on 4D scanning diffraction microscopy data in which a 2D diffraction pattern is recorded at every position in a 2D scan of a specimen.
 
-pyXem is an extension of the HyperSpy library for multi-dimensional data analysis and defines diffraction specific Signal classes.
+pyxem is an extension of the hyperspy library for multi-dimensional data analysis and defines diffraction specific Signal classes.
 
 **Installation instructions, documentation and tutorial examples are available** `here <https://pyxem.github.io/pyxem-website>`__ .
 
-If analysis using pyXem forms a part of published work please cite the DOI at the top of this page.
+If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
 
-pyXem is released under the GPL v3 license.
+pyxem is released under the GPL v3 license.
