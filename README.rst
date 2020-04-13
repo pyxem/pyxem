@@ -3,9 +3,6 @@
 .. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
 .. _Travis: https://travis-ci.org/pyxem/pyxem
 
-.. |AppVeyor| image:: https://ci.appveyor.com/api/projects/status/github/pyxem/pyxem?svg=true&branch=master
-.. _AppVeyor: https://ci.appveyor.com/project/dnjohnstone/pyxem/branch/master
-
 .. |Coveralls| image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
 .. _Coveralls: https://coveralls.io/github/pyxem/pyxem?branch=master
 
