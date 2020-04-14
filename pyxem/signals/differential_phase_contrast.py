@@ -20,6 +20,7 @@ import copy
 import numpy as np
 
 from pyxem.utils.dpc_utils import make_bivariate_histogram
+import pyxem.utils.pixelated_stem_tools as pst
 
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
