@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import copy
 import math
 import numpy as np
@@ -6,7 +24,7 @@ from scipy.optimize import leastsq
 from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
-import pixstem.lazy_tools as lt
+import pyexm.utils.lazy_tools as lt
 
 
 def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
@@ -72,7 +90,7 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     Examples
     --------
     >>> import numpy as np
-    >>> import pixstem.pixelated_stem_tools as pst
+    >>> import pyxem.utils.pixelated_stem_tools as pst
     >>> image = np.ones((9, 9))
     >>> mask = pst._make_circular_mask(4, 4, 9, 9, 2)
     >>> image_masked = image*mask
@@ -106,7 +124,7 @@ def _get_signal_mean_position_and_value(signal):
     --------
     >>> import numpy as np
     >>> import hyperspy.api as hs
-    >>> import pixstem.pixelated_stem_tools as pst
+    >>> import pyxem.utils.pixelated_stem_tools as pst
     >>> s = hs.signals.Signal2D(np.zeros((10, 10)))
     >>> pst._get_signal_mean_position_and_value(s)
     (4.5, 4.5, 0.0)
@@ -391,7 +409,7 @@ def _get_angle_sector_mask(
     Examples
     --------
     >>> import numpy as np
-    >>> import pixstem.pixelated_stem_tools as pst
+    >>> import pyxem.utils.pixelated_stem_tools as pst
     >>> s = ps.PixelatedSTEM(np.arange(100).reshape(10, 10))
     >>> s.axes_manager.signal_axes[0].offset = -5
     >>> s.axes_manager.signal_axes[1].offset = -5
@@ -481,7 +499,7 @@ def find_and_remove_dead_pixels(s):
     Examples
     --------
     >>> s = ps.dummy_data.get_dead_pixel_signal()
-    >>> import pixstem.pixelated_stem_tools as pst
+    >>> import pyxem.utils.pixelated_stem_tools as pst
     >>> pst.find_and_remove_dead_pixels(s)
 
     """
