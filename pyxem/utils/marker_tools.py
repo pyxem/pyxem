@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import numpy as np
 import hyperspy.utils.markers as hm
 
@@ -33,9 +51,9 @@ def _get_4d_points_marker_list(
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
-    >>> import pixstem.marker_tools as mt
+    >>> import pyxem.utils.marker_tools as mt
     >>> marker_list = mt._get_4d_points_marker_list(
     ...     peak_array, s.axes_manager.signal_axes)
 
@@ -257,9 +275,9 @@ def _add_permanent_markers_to_signal(signal, marker_list):
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
-    >>> import pixstem.marker_tools as mt
+    >>> import pyxem.utils.marker_tools as mt
     >>> marker_list = mt._get_4d_points_marker_list(
     ...     peak_array, s.axes_manager.signal_axes)
     >>> mt._add_permanent_markers_to_signal(s, marker_list)
@@ -294,9 +312,9 @@ def add_peak_array_to_signal_as_markers(
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
-    >>> import pixstem.marker_tools as mt
+    >>> import pyxem.utils.marker_tools as mt
     >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)
     >>> s.plot()
 

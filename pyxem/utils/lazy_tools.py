@@ -96,7 +96,7 @@ def _calculate_function_on_dask_array(
     >>> import dask.array as da
     >>> dask_data = da.random.random(
     ...     (64, 64, 100, 100), chunks=(8, 8, 100, 100))
-    >>> import pixstem.pixelated_stem_tools as pst
+    >>> import pyxem.utils.pixelated_stem_tools as pst
     >>> import pyxem.utils.lazy_tools as lt
     >>> out_data = lt._calculate_function_on_dask_array(
     ...     dask_data, np.sum,
