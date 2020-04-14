@@ -23,10 +23,11 @@ from scipy.ndimage import rotate
 from scipy.signal import convolve2d
 from skimage import morphology
 import dask.array as da
+
 from hyperspy.misc.utils import isiterable
-from pixstem.pixelated_stem_class import PixelatedSTEM
-from pixstem.pixelated_stem_class import LazyPixelatedSTEM
-import pixstem.ransac_ellipse_tools as ret
+
+from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
+import pyxem.utils.ransac_ellipse_tools as ret
 
 
 def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
@@ -585,7 +586,7 @@ class MakeTestData(object):
             self.z_blurred = self.z_downscaled
 
     def to_signal(self):
-        self.signal = PixelatedSTEM(self.z_blurred)
+        self.signal = Diffraction2D(self.z_blurred)
         self.signal.axes_manager[0].scale = self.scale
         self.signal.axes_manager[1].scale = self.scale
 
@@ -822,7 +823,7 @@ def generate_4d_data(
         ring_e_r = np.ones((probe_size_y, probe_size_x)) * ring_e_r
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
-    s = PixelatedSTEM(np.zeros(shape=signal_shape))
+    s = Diffraction2D(np.zeros(shape=signal_shape))
     for i in tqdm(s, desc="Make test data", disable=not show_progressbar):
         index = s.axes_manager.indices[::-1]
         test_data = MakeTestData(
@@ -864,7 +865,7 @@ def generate_4d_data(
         if lazy_chunks is None:
             lazy_chunks = 10, 10, 10, 10
         data_lazy = da.from_array(s.data, lazy_chunks)
-        s = LazyPixelatedSTEM(data_lazy)
+        s = LazyDiffraction2D(data_lazy)
     return s
 
 
@@ -899,7 +900,7 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     >>> rot = np.random.random(size=(4, 5)) * 0.2
     >>> peak_array = mdtd._make_4d_peak_array_test_data(
     ...        xf, yf, semi0, semi1, rot)
-    >>> s = ps.PixelatedSTEM(np.zeros(shape=(4, 5, 200, 210)))
+    >>> s = ps.Diffraction2D(np.zeros(shape=(4, 5, 200, 210)))
     >>> import pixstem.marker_tools as mt
     >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)
 
@@ -1095,7 +1096,7 @@ class DiffractionTestImage(object):
         return image
 
     def get_signal(self):
-        s = PixelatedSTEM(self.get_diffraction_test_image())
+        s = Diffraction2D(self.get_diffraction_test_image())
         return s
 
     def plot(self):
@@ -1179,7 +1180,7 @@ class DiffractionTestDataset(object):
                     self.data[ix, iy, :, :] += image_noise * self.noise
 
     def get_signal(self):
-        s = PixelatedSTEM(self.data)
+        s = Diffraction2D(self.data)
         return s
 
     def plot(self):
