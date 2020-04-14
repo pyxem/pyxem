@@ -42,7 +42,7 @@ def _find_max_indices_4D_peak_array(peak_array):
 
     Examples
     --------
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> peak_array0 = np.random.randint(10, 255, size=(3, 4, 5000, 1))
     >>> peak_array1 = np.random.randint(5, 127, size=(3, 4, 5000, 1))
     >>> peak_array = np.concatenate((peak_array0, peak_array1), axis=3)
@@ -76,7 +76,7 @@ def _filter_4D_peak_array(
 
     Examples
     --------
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> peak_array = np.random.randint(0, 255, size=(3, 4, 100, 2))
     >>> peak_array_filtered = ct._filter_4D_peak_array(peak_array)
 
@@ -117,7 +117,7 @@ def _filter_peak_list(peak_list, max_x_index=255, max_y_index=255):
 
     Examples
     --------
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> peak_list = [[128, 129], [10, 52], [0, 120], [255, 123], [123, 255]]
     >>> ct._filter_peak_list(peak_list)
     [[128, 129], [10, 52]]
@@ -205,7 +205,7 @@ def _filter_peak_list_radius(peak_list, xc, yc, r_min=None, r_max=None):
 
     Examples
     --------
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> peak_list = np.array([[128, 32], [128, 127]])
     >>> ct._filter_peak_list_radius(peak_list, 128, 128, r_min=10)
     array([[128,  32]])
@@ -260,7 +260,7 @@ def _get_cluster_dict(peak_array, eps=30, min_samples=2):
     -------
     >>> import numpy as np
     >>> peak_array = np.random.randint(1000, size=(100, 2))
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> cluster_dict = ct._get_cluster_dict(peak_array)
     >>> cluster0 = cluster_dict[0]
 
@@ -304,7 +304,7 @@ def _sort_cluster_dict(cluster_dict, centre_x=128, centre_y=128):
     >>> peak_array0 = np.random.randint(6, size=(100, 2)) + 128
     >>> peak_array1 = np.random.randint(6, size=(100, 2)) + 200
     >>> peak_array = np.vstack((peak_array0, peak_array1, [[100, 0], ]))
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> cluster_dict = ct._get_cluster_dict(peak_array)
     >>> sorted_cluster_dict = ct._sort_cluster_dict(cluster_dict)
     >>> cluster_centre = sorted_cluster_dict['centre']
@@ -387,7 +387,7 @@ def _cluster_and_sort_peak_array(
     >>> peak_array0 = np.random.randint(124, 132, size=(2, 4, 10, 2))
     >>> peak_array1 = np.random.randint(204, 208, size=(2, 4, 10, 2))
     >>> peak_array = np.concatenate((peak_array0, peak_array1), axis=2)
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> peak_dicts = ct._cluster_and_sort_peak_array(peak_array)
     >>> peak_array_centre = peak_dicts['centre']
     >>> peak_array_rest = peak_dicts['rest']
@@ -451,8 +451,8 @@ def _add_peak_dicts_to_signal(
     >>> peak_dicts['centre'] = np.random.randint(99, size=(2, 3, 10, 2))
     >>> peak_dicts['rest'] = np.random.randint(99, size=(2, 3, 3, 2))
     >>> peak_dicts['none'] = np.random.randint(99, size=(2, 3, 2, 2))
-    >>> s = ps.PixelatedSTEM(np.random.random((2, 3, 100, 100)))
-    >>> import pixstem.cluster_tools as ct
+    >>> s = pxm.Diffraction2D(np.random.random((2, 3, 100, 100)))
+    >>> import pyxem.utils.cluster_tools as ct
     >>> ct._add_peak_dicts_to_signal(s, peak_dicts)
     >>> s.plot()
 
@@ -500,11 +500,11 @@ def _sorted_cluster_dict_to_marker_list(
     >>> sorted_cluster_dict['centre'] = randint(10, size=(3, 4, 10, 2))
     >>> sorted_cluster_dict['rest'] = randint(50, 60, size=(3, 4, 10, 2))
     >>> sorted_cluster_dict['none'] = randint(90, size=(3, 4, 2, 2))
-    >>> import pixstem.cluster_tools as ct
+    >>> import pyxem.utils.cluster_tools as ct
     >>> marker_list = ct._sorted_cluster_dict_to_marker_list(
     ...     sorted_cluster_dict)
-    >>> import pixstem.marker_tools as mt
-    >>> s = ps.PixelatedSTEM(np.random.random((3, 4, 100, 100)))
+    >>> import pyxem.utils.marker_tools as mt
+    >>> s = pxm.Diffraction2D(np.random.random((3, 4, 100, 100)))
     >>> mt._add_permanent_markers_to_signal(s, marker_list)
 
     Different colors
