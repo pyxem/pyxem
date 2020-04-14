@@ -1,10 +1,28 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 from tqdm import tqdm
 import math
 from functools import partial
 import numpy as np
 from skimage.measure import EllipseModel, ransac
 from hyperspy.misc.utils import isiterable
-import pixstem.marker_tools as mt
+import pyxem.utils.marker_tools as mt
 
 
 def is_ellipse_good(
@@ -41,7 +59,7 @@ def is_ellipse_good(
 
     Examples
     --------
-    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> model = ret.EllipseModel()
     >>> model.params = ret._make_ellipse_model_params_focus(30, 50, 30, 20, 0)
     >>> is_good = ret.is_ellipse_good(
@@ -89,7 +107,7 @@ def _ellipse_centre_to_focus(x, y, a, b, r):
 
     Examples
     --------
-    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> f0, f1 = ret._ellipse_centre_to_focus(20, 32, 12, 9, 0.2)
 
     """
@@ -123,7 +141,7 @@ def _get_closest_focus(x, y, xc, yc, a, b, r):
 
     Examples
     --------
-    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> xf, yf = ret._get_closest_focus(25, 30, 20, 32, 12, 9, 0.2)
 
     """
@@ -161,7 +179,7 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
 
     Examples
     --------
-    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> data = ret.make_ellipse_data_points(5, 9, 8, 4, np.pi/3)
 
     Using all the arguments
@@ -282,7 +300,7 @@ def get_ellipse_model_ransac_single_frame(
 
     Examples
     --------
-    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> data = ret.EllipseModel().predict_xy(
     ...        np.arange(0, 2*np.pi, 0.5), params=(128, 130, 50, 60, 0.2))
     >>> ellipse_model, inliers = ret.get_ellipse_model_ransac_single_frame(
@@ -429,7 +447,7 @@ def _get_lines_list_from_ellipse_params(ellipse_params, nr=20):
 
     Examples
     --------
-    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> ellipse_params = (30, 70, 10, 20, 0.5)
     >>> lines_list = ret._get_lines_list_from_ellipse_params(ellipse_params)
 
@@ -466,7 +484,7 @@ def _get_lines_array_from_ellipse_array(ellipse_array, nr=20):
 
     Examples
     --------
-    >>> import pixstem.ransac_ellipse_tools as ret
+    >>> import pyxem.utils.ransac_ellipse_tools as ret
     >>> ellipse_array = np.empty((2, 3), dtype=np.object)
     >>> ellipse_array[0, 0] = (30, 70, 10, 20, 0.5)
     >>> ellipse_array[1, 0] = (31, 69, 10, 21, 0.5)

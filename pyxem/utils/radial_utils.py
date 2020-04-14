@@ -152,7 +152,7 @@ def get_optimal_centre_position(
     >>> s = dd.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
-    >>> import pyxem.utils.radial_tools as ra
+    >>> import pyxem.utils.radial_utils as ra
     >>> s_ocp = ra.get_optimal_centre_position(s, (35, 45), steps=2)
     >>> centre_pos = ra.get_coordinate_of_min(s_ocp)
 
@@ -208,7 +208,7 @@ def refine_signal_centre_position(
     Example
     -------
     >>> import pyxem.dummy_data.dummy_data as dd
-    >>> import pyxem.utils.radial_tools as ra
+    >>> import pyxem.utils.radial_utils as ra
     >>> s = dd.get_single_ring_diffraction_signal()
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -103, -69
     >>> ra.refine_signal_centre_position(s, (32., 48.), angleN=4)
@@ -352,7 +352,7 @@ def get_radius_vs_angle(
     >>> s = dd.get_single_ring_diffraction_signal()
     >>> s.axes_manager.signal_axes[0].offset = -105
     >>> s.axes_manager.signal_axes[1].offset = -67
-    >>> import pyxem.utils.radial_tools as ra
+    >>> import pyxem.utils.radial_utils as ra
     >>> s_centre = ra.get_radius_vs_angle(s, (35, 45), show_progressbar=False)
 
     """
@@ -407,7 +407,7 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     >>> s1 = test_data1.signal
     >>> s0.axes_manager[0].offset, s0.axes_manager[1].offset = -150, -150
     >>> s1.axes_manager[0].offset, s1.axes_manager[1].offset = -150, -150
-    >>> import pyxem.utils.radial_tools as ra
+    >>> import pyxem.utils.radial_utils as ra
     >>> s = ra.get_angle_image_comparison(s0, s1)
     >>> s.plot()
 
@@ -456,7 +456,7 @@ def _get_holz_angle(electron_wavelength, lattice_parameter):
 
     Examples
     --------
-    >>> import pyxem.utils.radial_tools as ra
+    >>> import pyxem.utils.radial_utils as ra
     >>> lattice_size = 0.3905 # STO-(001) in nm
     >>> wavelength = 2.51/1000 # Electron wavelength for 200 kV
     >>> angle = ra._get_holz_angle(wavelength, lattice_size)
@@ -488,7 +488,7 @@ def _scattering_angle_to_lattice_parameter(electron_wavelength, angle):
 
     Examples
     --------
-    >>> import pyxem.utils.radial_tools as ra
+    >>> import pyxem.utils.radial_utils as ra
     >>> angle_list = [0.1, 0.1, 0.1, 0.1] # in radians
     >>> wavelength = 2.51/1000 # Electron wavelength for 200 kV
     >>> lattice_size = ra._scattering_angle_to_lattice_parameter(
@@ -666,7 +666,7 @@ def fit_single_ellipse_to_signal(
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
     >>> ellipse_ring = mdtd._get_elliptical_ring(xx, yy, 0, 0, 50, 70, 0.8)
     >>> s.data += ellipse_ring
-    >>> from pyxem.utils.radial_tools import fit_single_ellipse_to_signal
+    >>> from pyxem.utils.radial_utils import fit_single_ellipse_to_signal
     >>> output = fit_single_ellipse_to_signal(
     ...     s, (40, 80), angleN=30, show_progressbar=False)
 
