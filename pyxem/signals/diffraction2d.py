@@ -904,7 +904,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        shifted_signal : PixelatedSTEM signal
+        shifted_signal : Diffraction2D signal
 
         Examples
         --------
@@ -962,7 +962,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        s_out : PixelatedSTEM signal
+        s_out : Diffraction2D signal
 
         Examples
         --------
@@ -1011,7 +1011,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        rotated_signal : PixelatedSTEM class
+        rotated_signal : Diffraction2D class
 
         Examples
         --------
@@ -1044,7 +1044,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        flipped_signal : PixelatedSTEM signal
+        flipped_signal : Diffraction2D signal
 
         Example
         -------
@@ -1075,7 +1075,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        flipped_signal : PixelatedSTEM signal
+        flipped_signal : Diffraction2D signal
 
         Example
         -------
@@ -1535,13 +1535,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         disk_r : scalar, optional
             Radius of the disk. Default 4.
         lazy_result : bool, default True
-            If True, will return a LazyPixelatedSTEM object. If False,
-            will compute the result and return a PixelatedSTEM object.
+            If True, will return a LazyDiffraction2D object. If False,
+            will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
 
         Returns
         -------
-        template_match : PixelatedSTEM object
+        template_match : Diffraction2D object
 
         Examples
         --------
@@ -1575,13 +1575,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         r_inner, r_outer : scalar, optional
             Inner and outer radius of the rings.
         lazy_result : bool, default True
-            If True, will return a LazyPixelatedSTEM object. If False,
-            will compute the result and return a PixelatedSTEM object.
+            If True, will return a LazyDiffraction2D object. If False,
+            will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
 
         Returns
         -------
-        template_match : PixelatedSTEM object
+        template_match : Diffraction2D object
 
         Examples
         --------
@@ -1627,13 +1627,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         binary_image : 2-D NumPy array
         lazy_result : bool, default True
-            If True, will return a LazyPixelatedSTEM object. If False,
-            will compute the result and return a PixelatedSTEM object.
+            If True, will return a LazyDiffraction2D object. If False,
+            will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
 
         Returns
         -------
-        template_match : PixelatedSTEM object
+        template_match : Diffraction2D object
 
         Examples
         --------
@@ -1664,9 +1664,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             output_array = output_array.compute()
             if show_progressbar:
                 pbar.unregister()
-            s = PixelatedSTEM(output_array)
+            s = Diffraction2D(output_array)
         else:
-            s = LazyPixelatedSTEM(output_array)
+            s = LazyDiffraction2D(output_array)
         pst._copy_signal_all_axes_metadata(self, s)
         return s
 
@@ -1781,8 +1781,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Even integer, sub image from which the center of mass is
             calculated. Default 5.
         lazy_result : bool, default True
-            If True, will return a LazyPixelatedSTEM object. If False,
-            will compute the result and return a PixelatedSTEM object.
+            If True, will return a LazyDiffraction2D object. If False,
+            will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
 
         Returns
@@ -1853,8 +1853,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         disk_r : int
             Radius of the disc chosen to take the mean value of
         lazy_result : bool, default True
-            If True, will return a LazyPixelatedSTEM object. If False,
-            will compute the result and return a PixelatedSTEM object.
+            If True, will return a LazyDiffraction2D object. If False,
+            will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
 
         Returns
@@ -1912,8 +1912,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             'difference of gaussians', 'median kernel' and 'radial median'.
             Default 'median kernel'.
         lazy_result : bool, default True
-            If True, will return a LazyPixelatedSTEM object. If False,
-            will compute the result and return a PixelatedSTEM object.
+            If True, will return a LazyDiffraction2D object. If False,
+            will compute the result and return a Diffraction2D object.
         show_progressbar : bool, default True
         sigma_min : float, optional
             Standard deviation for the minimum Gaussian convolution
@@ -1935,7 +1935,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        s : PixelatedSTEM or LazyPixelatedSTEM signal
+        s : Diffraction2D or LazyDiffraction2D signal
 
         Examples
         --------
@@ -1973,9 +1973,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             output_array = output_array.compute()
             if show_progressbar:
                 pbar.unregister()
-            s = PixelatedSTEM(output_array)
+            s = Diffraction2D(output_array)
         else:
-            s = LazyPixelatedSTEM(output_array)
+            s = LazyDiffraction2D(output_array)
         pst._copy_signal_all_axes_metadata(self, s)
         return s
 
@@ -2272,7 +2272,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        signal_corrected : PixelatedSTEM or LazyPixelatedSTEM
+        signal_corrected : Diffraction2D or LazyDiffraction2D
 
         Examples
         --------
@@ -2307,7 +2307,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             chunks.extend(sig_chunks)
             dask_array = da.from_array(self.data, chunks=chunks)
         bad_pixel_removed = dt._remove_bad_pixels(dask_array, bad_pixel_array.data)
-        s_bad_pixel_removed = LazyPixelatedSTEM(bad_pixel_removed)
+        s_bad_pixel_removed = LazyDiffraction2D(bad_pixel_removed)
         pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)
         if not lazy_result:
             s_bad_pixel_removed.compute(progressbar=show_progressbar)
