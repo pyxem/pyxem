@@ -47,7 +47,7 @@ def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
     Examples
     --------
     >>> from hyperspy.signals import Signal2D
-    >>> import pixstem.make_diffraction_test_data as mdtd
+    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
     >>> xx, yy = np.meshgrid(
@@ -88,7 +88,7 @@ def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
     Examples
     --------
     >>> from hyperspy.signals import Signal2D
-    >>> import pixstem.make_diffraction_test_data as mdtd
+    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
     >>> xx, yy = np.meshgrid(
@@ -135,7 +135,7 @@ class EllipseRing(object):
 
         Examples
         --------
-        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
         >>> ellipse = mdtd.EllipseRing(
         ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
         ...     rotation=1.57, intensity=10, lw_r=2)
@@ -202,7 +202,7 @@ class EllipseDisk(object):
 
         Examples
         --------
-        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
         >>> ellipse_disk = mdtd.EllipseDisk(
         ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
         ...     rotation=1.57, intensity=10)
@@ -422,7 +422,7 @@ class MakeTestData(object):
 
     Default settings
 
-    >>> from pixstem.make_diffraction_test_data import MakeTestData
+    >>> from pyxem.dummy_data.make_diffraction_test_data import MakeTestData
     >>> test_data = MakeTestData()
     >>> test_data.signal.plot()
 
@@ -719,7 +719,7 @@ def generate_4d_data(
 
     Examples
     --------
-    >>> import pixstem.make_diffraction_test_data as mdtd
+    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
     >>> s = mdtd.generate_4d_data(show_progressbar=False)
     >>> s.plot()
 
@@ -891,8 +891,8 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
 
     Examples
     --------
-    >>> import pixstem.api as ps
-    >>> import pixstem.make_diffraction_test_data as mdtd
+    >>> import pyxem as pxm
+    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
     >>> xf = np.random.randint(65, 70, size=(4, 5))
     >>> yf = np.random.randint(115, 120, size=(4, 5))
     >>> semi0 = np.random.randint(35, 40, size=(4, 5))
@@ -900,8 +900,8 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     >>> rot = np.random.random(size=(4, 5)) * 0.2
     >>> peak_array = mdtd._make_4d_peak_array_test_data(
     ...        xf, yf, semi0, semi1, rot)
-    >>> s = ps.Diffraction2D(np.zeros(shape=(4, 5, 200, 210)))
-    >>> import pixstem.marker_tools as mt
+    >>> s = pxm.Diffraction2D(np.zeros(shape=(4, 5, 200, 210)))
+    >>> import pyxem.utils.marker_tools as mt
     >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)
 
     """
@@ -961,7 +961,7 @@ class DiffractionTestImage(object):
 
         Examples
         --------
-        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
         >>> di = mdtd.DiffractionTestImage()
         >>> di.add_disk(x=128, y=128, intensity=10.)
         >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
@@ -1128,7 +1128,7 @@ class DiffractionTestDataset(object):
 
         Examples
         --------
-        >>> import pixstem.make_diffraction_test_data as mdtd
+        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
         >>> di = mdtd.DiffractionTestImage(intensity_noise=False)
         >>> di.add_disk(x=128, y=128, intensity=10.)
         >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
@@ -1160,8 +1160,8 @@ class DiffractionTestDataset(object):
 
         Parameters
         ----------
-        diffraction_test_image : PixStem DiffractionTestData object
-        position_array : NumPy array
+        diffraction_test_image : DiffractionTestData
+        position_array : numpy.ndarray
             Boolean array, specifying which positions in the dataset
             the diffraction_test_image should be added to. Must have two
             dimensions, and the same shape as (probe_x, probe_y).
