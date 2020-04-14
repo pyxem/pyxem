@@ -32,7 +32,7 @@ def _get_hot_pixel_test_data_2d():
     >>> data = dtd._get_hot_pixel_test_data_2d()
 
     """
-    data = np.ones((40, 50))*50
+    data = np.ones((40, 50)) * 50
     data[21, 11] = 50000
     data[5, 38] = 50000
     dask_array = da.from_array(data, chunks=(5, 5))
@@ -51,7 +51,7 @@ def _get_hot_pixel_test_data_3d():
     >>> data = dtd._get_hot_pixel_test_data_3d()
 
     """
-    data = np.ones((5, 40, 50))*50
+    data = np.ones((5, 40, 50)) * 50
     data[2, 21, 11] = 50000
     data[1, 5, 38] = 50000
     dask_array = da.from_array(data, chunks=(5, 5, 5))
@@ -70,7 +70,7 @@ def _get_hot_pixel_test_data_4d():
     >>> data = dtd._get_hot_pixel_test_data_4d()
 
     """
-    data = np.ones((10, 5, 40, 50))*50
+    data = np.ones((10, 5, 40, 50)) * 50
     data[4, 2, 21, 11] = 50000
     data[6, 1, 5, 38] = 50000
     dask_array = da.from_array(data, chunks=(5, 5, 5, 5))
@@ -89,7 +89,7 @@ def _get_dead_pixel_test_data_2d():
     >>> data = dtd._get_dead_pixel_test_data_2d()
 
     """
-    data = np.ones((40, 50))*50
+    data = np.ones((40, 50)) * 50
     data[14, 42] = 0
     data[2, 12] = 0
     dask_array = da.from_array(data, chunks=(5, 5))
@@ -108,7 +108,7 @@ def _get_dead_pixel_test_data_3d():
     >>> data = dtd._get_dead_pixel_test_data_3d()
 
     """
-    data = np.ones((5, 40, 50))*50
+    data = np.ones((5, 40, 50)) * 50
     data[:, 14, 42] = 0
     data[:, 2, 12] = 0
     dask_array = da.from_array(data, chunks=(5, 5, 5))
@@ -127,7 +127,7 @@ def _get_dead_pixel_test_data_4d():
     >>> data = dtd._get_dead_pixel_test_data_4d()
 
     """
-    data = np.ones((10, 5, 40, 50))*50
+    data = np.ones((10, 5, 40, 50)) * 50
     data[:, :, 14, 42] = 0
     data[:, :, 2, 12] = 0
     dask_array = da.from_array(data, chunks=(5, 5, 5, 5))

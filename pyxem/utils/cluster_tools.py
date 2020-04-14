@@ -44,8 +44,9 @@ def _find_max_indices_4D_peak_array(peak_array):
     return max_x_index, max_y_index
 
 
-def _filter_4D_peak_array(peak_array, signal_axes=None,
-                          max_x_index=255, max_y_index=255):
+def _filter_4D_peak_array(
+    peak_array, signal_axes=None, max_x_index=255, max_y_index=255
+):
     """Remove false positives at the outer edges.
 
     Parameters
@@ -76,8 +77,8 @@ def _filter_4D_peak_array(peak_array, signal_axes=None,
     for index in np.ndindex(peak_array_shape):
         islice = np.s_[index]
         peak_list_filtered = _filter_peak_list(
-                peak_array[islice],
-                max_x_index=max_x_index, max_y_index=max_y_index)
+            peak_array[islice], max_x_index=max_x_index, max_y_index=max_y_index
+        )
         peak_array_filtered[islice] = np.array(peak_list_filtered)
     return peak_array_filtered
 
@@ -159,8 +160,8 @@ def _filter_peak_array_radius(peak_array, xc, yc, r_min=None, r_max=None):
     for iy, ix in np.ndindex(peak_array.shape[:2]):
         temp_xc, temp_yc = xc[iy, ix], yc[iy, ix]
         peak_list_filtered = _filter_peak_list_radius(
-                peak_array[iy, ix], xc=temp_xc, yc=temp_yc,
-                r_min=r_min, r_max=r_max)
+            peak_array[iy, ix], xc=temp_xc, yc=temp_yc, r_min=r_min, r_max=r_max
+        )
         peak_array_filtered[iy, ix] = np.array(peak_list_filtered)
     return peak_array_filtered
 
@@ -204,8 +205,8 @@ def _filter_peak_list_radius(peak_list, xc, yc, r_min=None, r_max=None):
     if (r_min is not None) and (r_max is not None):
         if r_max < r_min:
             raise ValueError(
-                    "r_min ({0}) must be smaller than r_max ({1})".format(
-                        r_min, r_max))
+                "r_min ({0}) must be smaller than r_max ({1})".format(r_min, r_max)
+            )
     filter_list = np.ones_like(dist, dtype=np.bool)
     if r_min is not None:
         temp_filter_list = dist > r_min
@@ -302,21 +303,20 @@ def _sort_cluster_dict(cluster_dict, centre_x=128, centre_y=128):
     for label, cluster_list in cluster_dict.items():
         label_list.append(label)
         cluster_array = np.array(cluster_list)
-        r = np.hypot(cluster_array[:, 0] - centre_x,
-                     cluster_array[:, 1] - centre_y)
+        r = np.hypot(cluster_array[:, 0] - centre_x, cluster_array[:, 1] - centre_y)
         closest_list.append(_find_nearest(r, 0))
 
     icentre_label = np.argmin(closest_list)
     centre_label = label_list[icentre_label]
 
-    sorted_cluster_dict = {'none': [], 'centre': [], 'rest': []}
+    sorted_cluster_dict = {"none": [], "centre": [], "rest": []}
     for label, cluster_list in cluster_dict.items():
         if label == -1:
-            sorted_cluster_dict['none'] = cluster_list
+            sorted_cluster_dict["none"] = cluster_list
         elif label == centre_label:
-            sorted_cluster_dict['centre'] = cluster_list
+            sorted_cluster_dict["centre"] = cluster_list
         else:
-            sorted_cluster_dict['rest'].extend(cluster_list)
+            sorted_cluster_dict["rest"].extend(cluster_list)
     return sorted_cluster_dict
 
 
@@ -344,7 +344,8 @@ def _get_peak_array_shape(peak_array):
 
 
 def _cluster_and_sort_peak_array(
-        peak_array, eps=30, min_samples=2, centre_x=128, centre_y=128):
+    peak_array, eps=30, min_samples=2, centre_x=128, centre_y=128
+):
     """Cluster and sort a 4D peak array into centre, rest and unclustered.
 
     Parameters
@@ -382,32 +383,39 @@ def _cluster_and_sort_peak_array(
     for index in np.ndindex(peak_array_shape):
         islice = np.s_[index]
         cluster_dict = _get_cluster_dict(
-                peak_array[islice], eps=eps, min_samples=min_samples)
+            peak_array[islice], eps=eps, min_samples=min_samples
+        )
         sorted_cluster_dict = _sort_cluster_dict(
-                cluster_dict, centre_x=centre_x, centre_y=centre_y)
-        if 'centre' in sorted_cluster_dict:
-            peak_centre_array[islice] = sorted_cluster_dict['centre']
+            cluster_dict, centre_x=centre_x, centre_y=centre_y
+        )
+        if "centre" in sorted_cluster_dict:
+            peak_centre_array[islice] = sorted_cluster_dict["centre"]
         else:
             peak_centre_array[islice] = []
-        if 'rest' in sorted_cluster_dict:
-            peak_rest_array[islice] = sorted_cluster_dict['rest']
+        if "rest" in sorted_cluster_dict:
+            peak_rest_array[islice] = sorted_cluster_dict["rest"]
         else:
             peak_rest_array[islice] = []
-        if 'none' in sorted_cluster_dict:
-            peak_none_array[islice] = sorted_cluster_dict['none']
+        if "none" in sorted_cluster_dict:
+            peak_none_array[islice] = sorted_cluster_dict["none"]
         else:
             peak_rest_array[islice] = []
 
     peak_dicts = {}
-    peak_dicts['centre'] = peak_centre_array
-    peak_dicts['rest'] = peak_rest_array
-    peak_dicts['none'] = peak_none_array
+    peak_dicts["centre"] = peak_centre_array
+    peak_dicts["rest"] = peak_rest_array
+    peak_dicts["none"] = peak_none_array
     return peak_dicts
 
 
 def _add_peak_dicts_to_signal(
-        signal, peak_dicts, color_centre='red', color_rest='blue',
-        color_none='cyan', size=20):
+    signal,
+    peak_dicts,
+    color_centre="red",
+    color_rest="blue",
+    color_none="cyan",
+    size=20,
+):
     """Visualize the results of peak_dicts through markers in a Signal.
 
     Parameters
@@ -432,16 +440,24 @@ def _add_peak_dicts_to_signal(
 
     """
     mt.add_peak_array_to_signal_as_markers(
-            signal, peak_dicts['centre'], color=color_centre, size=size)
+        signal, peak_dicts["centre"], color=color_centre, size=size
+    )
     mt.add_peak_array_to_signal_as_markers(
-            signal, peak_dicts['rest'], color=color_rest, size=size)
+        signal, peak_dicts["rest"], color=color_rest, size=size
+    )
     mt.add_peak_array_to_signal_as_markers(
-            signal, peak_dicts['none'], color=color_none, size=size)
+        signal, peak_dicts["none"], color=color_none, size=size
+    )
 
 
 def _sorted_cluster_dict_to_marker_list(
-        sorted_cluster_dict, signal_axes=None,
-        color_centre='blue', color_rest='red', color_none='green', size=20):
+    sorted_cluster_dict,
+    signal_axes=None,
+    color_centre="blue",
+    color_rest="red",
+    color_none="green",
+    size=20,
+):
     """Make a list of markers with different colors from a sorted cluster dict
 
     Parameters
@@ -482,15 +498,16 @@ def _sorted_cluster_dict_to_marker_list(
     """
     marker_list = []
     for label, cluster_list in sorted_cluster_dict.items():
-        if label == 'centre':
+        if label == "centre":
             color = color_centre
-        elif label == 'rest':
+        elif label == "rest":
             color = color_rest
-        elif label == 'none':
+        elif label == "none":
             color = color_none
         else:
-            color = 'cyan'
+            color = "cyan"
         temp_markers = mt._get_4d_points_marker_list(
-                cluster_list, signal_axes=signal_axes, color=color, size=size)
+            cluster_list, signal_axes=signal_axes, color=color, size=size
+        )
         marker_list.extend(temp_markers)
     return marker_list

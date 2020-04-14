@@ -2,8 +2,14 @@ import numpy as np
 import hyperspy.utils.markers as hm
 
 
-def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
-                               size=20, bool_array=None, bool_invert=False):
+def _get_4d_points_marker_list(
+    peaks_list,
+    signal_axes=None,
+    color="red",
+    size=20,
+    bool_array=None,
+    bool_invert=False,
+):
     """Get a list of 4 dimensional point markers.
 
     The markers will be displayed on the signal dimensions.
@@ -36,7 +42,8 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
     """
     if bool_array is not None:
         peaks_list = _filter_peak_array_with_bool_array(
-                peaks_list, bool_array, bool_invert=bool_invert)
+            peaks_list, bool_array, bool_invert=bool_invert
+        )
     max_peaks = 0
     if peaks_list.dtype == np.object:
         peaks_list_shape = peaks_list.shape
@@ -80,8 +87,8 @@ def _get_4d_points_marker_list(peaks_list, signal_axes=None, color='red',
     marker_list = []
     for i_p in range(max_peaks):
         marker = hm.point(
-                marker_x_array[..., i_p], marker_y_array[..., i_p],
-                color=color, size=size)
+            marker_x_array[..., i_p], marker_y_array[..., i_p], color=color, size=size
+        )
         marker_list.append(marker)
     return marker_list
 
@@ -93,12 +100,12 @@ def _pixel_to_scaled_value(axis, pixel_value):
     return scaled_value
 
 
-def _filter_peak_array_with_bool_array(
-        peak_array, bool_array, bool_invert=False):
+def _filter_peak_array_with_bool_array(peak_array, bool_array, bool_invert=False):
     if bool_array.shape != peak_array.shape:
         raise ValueError(
-                "bool_array {0} and peak_array {1} must have the"
-                " same shape".format(bool_array.shape, peak_array.shape))
+            "bool_array {0} and peak_array {1} must have the"
+            " same shape".format(bool_array.shape, peak_array.shape)
+        )
     peak_array_filter = np.empty(shape=(peak_array.shape[:2]), dtype=np.object)
     for ix, iy in np.ndindex(peak_array.shape[:2]):
         peak_list = np.array(peak_array[ix, iy])
@@ -114,8 +121,9 @@ def _filter_peak_array_with_bool_array(
     return peak_array_filter
 
 
-def _get_4d_line_segment_list(lines_array, signal_axes=None, color='red',
-                              linewidth=1, linestyle='solid'):
+def _get_4d_line_segment_list(
+    lines_array, signal_axes=None, color="red", linewidth=1, linestyle="solid"
+):
     """Get a list of 4 dimensional line segments markers.
 
     The markers will be displayed on the signal dimensions.
@@ -144,8 +152,7 @@ def _get_4d_line_segment_list(lines_array, signal_axes=None, color='red',
             if n_lines > max_lines:
                 max_lines = n_lines
 
-    marker_array_shape = (lines_array.shape[0], lines_array.shape[1],
-                          max_lines)
+    marker_array_shape = (lines_array.shape[0], lines_array.shape[1], max_lines)
     marker_x1_array = np.ones(marker_array_shape) * -1000
     marker_y1_array = np.ones(marker_array_shape) * -1000
     marker_x2_array = np.ones(marker_array_shape) * -1000
@@ -171,9 +178,14 @@ def _get_4d_line_segment_list(lines_array, signal_axes=None, color='red',
     marker_list = []
     for i_p in range(max_lines):
         marker = hm.line_segment(
-                marker_x1_array[..., i_p], marker_y1_array[..., i_p],
-                marker_x2_array[..., i_p], marker_y2_array[..., i_p],
-                color=color, linewidth=linewidth, linestyle=linestyle)
+            marker_x1_array[..., i_p],
+            marker_y1_array[..., i_p],
+            marker_x2_array[..., i_p],
+            marker_y2_array[..., i_p],
+            color=color,
+            linewidth=linewidth,
+            linestyle=linestyle,
+        )
         marker_list.append(marker)
     return marker_list
 
@@ -202,8 +214,9 @@ def _check_line_segment_inside(signal_axes, line):
     return True
 
 
-def _get_2d_line_segment_list(lines_list, signal_axes=None, color='red',
-                              linewidth=1, linestyle='solid'):
+def _get_2d_line_segment_list(
+    lines_list, signal_axes=None, color="red", linewidth=1, linestyle="solid"
+):
     """Get a list of 2d dimensional line segments markers.
 
     The markers will be displayed on the signal dimensions.
@@ -227,8 +240,9 @@ def _get_2d_line_segment_list(lines_list, signal_axes=None, color='red',
     """
     marker_list = []
     for x1, y1, x2, y2 in lines_list:
-        marker = hm.line_segment(x1, y1, x2, y2, color=color,
-                                 linewidth=linewidth, linestyle=linestyle)
+        marker = hm.line_segment(
+            x1, y1, x2, y2, color=color, linewidth=linewidth, linestyle=linestyle
+        )
         marker_list.append(marker)
     return marker_list
 
@@ -252,17 +266,17 @@ def _add_permanent_markers_to_signal(signal, marker_list):
     >>> s.plot()
 
     """
-    if not hasattr(signal.metadata, 'Markers'):
-        signal.metadata.add_node('Markers')
+    if not hasattr(signal.metadata, "Markers"):
+        signal.metadata.add_node("Markers")
     marker_extra = len(signal.metadata.Markers)
     for imarker, marker in enumerate(marker_list):
-        marker_name = 'marker{0}'.format(imarker + marker_extra)
+        marker_name = "marker{0}".format(imarker + marker_extra)
         signal.metadata.Markers[marker_name] = marker
 
 
 def add_peak_array_to_signal_as_markers(
-        signal, peak_array, color='red', size=20, bool_array=None,
-        bool_invert=False):
+    signal, peak_array, color="red", size=20, bool_array=None, bool_invert=False
+):
     """Add an array of points to a signal as HyperSpy markers.
 
     Parameters
@@ -287,10 +301,17 @@ def add_peak_array_to_signal_as_markers(
     >>> s.plot()
 
     """
-    if hasattr(peak_array, 'chunks'):
-        raise ValueError("peak_array must be a NumPy array, not dask array. "
-                         "Run peak_array_computed = peak_array.compute()")
+    if hasattr(peak_array, "chunks"):
+        raise ValueError(
+            "peak_array must be a NumPy array, not dask array. "
+            "Run peak_array_computed = peak_array.compute()"
+        )
     marker_list = _get_4d_points_marker_list(
-            peak_array, signal.axes_manager.signal_axes, color=color,
-            size=size, bool_array=bool_array, bool_invert=bool_invert)
+        peak_array,
+        signal.axes_manager.signal_axes,
+        color=color,
+        size=size,
+        bool_array=bool_array,
+        bool_invert=bool_invert,
+    )
     _add_permanent_markers_to_signal(signal, marker_list)

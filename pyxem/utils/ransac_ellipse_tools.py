@@ -8,8 +8,15 @@ import pixstem.marker_tools as mt
 
 
 def is_ellipse_good(
-        ellipse_model, data, xf, yf, rf_lim,
-        semi_len_min=None, semi_len_max=None, semi_len_ratio_lim=None):
+    ellipse_model,
+    data,
+    xf,
+    yf,
+    rf_lim,
+    semi_len_min=None,
+    semi_len_max=None,
+    semi_len_ratio_lim=None,
+):
     """Check if an ellipse model is within parameters.
 
     Parameters
@@ -57,7 +64,7 @@ def is_ellipse_good(
         if b > semi_len_max:
             return False
     if semi_len_ratio_lim is not None:
-        semi_len_ratio = max(a, b)/min(a, b)
+        semi_len_ratio = max(a, b) / min(a, b)
         if semi_len_ratio > semi_len_ratio_lim:
             return False
     return True
@@ -87,12 +94,12 @@ def _ellipse_centre_to_focus(x, y, a, b, r):
 
     """
     if a < b:
-        r += math.pi/2
+        r += math.pi / 2
         a, b = b, a
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xf0, yf0 = x + c * math.cos(r), y + c * math.sin(r)
     xf1, yf1 = x - c * math.cos(r), y - c * math.sin(r)
-    return((xf0, yf0), (xf1, yf1))
+    return ((xf0, yf0), (xf1, yf1))
 
 
 def _get_closest_focus(x, y, xc, yc, a, b, r):
@@ -167,7 +174,7 @@ def make_ellipse_data_points(x, y, a, b, r, nt=20, use_focus=True):
         params = _make_ellipse_model_params_focus(x, y, a, b, r)
     else:
         params = (x, y, a, b, r)
-    theta_array = np.arange(0, 2*np.pi, 2*np.pi/nt)
+    theta_array = np.arange(0, 2 * np.pi, 2 * np.pi / nt)
     data = EllipseModel().predict_xy(theta_array, params=params)
     return data
 
@@ -217,7 +224,7 @@ def _make_ellipse_model_params_focus(xf, yf, a, b, r):
 
     """
     if a < b:
-        r += math.pi/2
+        r += math.pi / 2
         a, b = b, a
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xc = xf - c * math.cos(r)
@@ -227,9 +234,17 @@ def _make_ellipse_model_params_focus(xf, yf, a, b, r):
 
 
 def get_ellipse_model_ransac_single_frame(
-        data, xf=128, yf=128, rf_lim=30, semi_len_min=50, semi_len_max=90,
-        semi_len_ratio_lim=1.2, min_samples=6, residual_threshold=10,
-        max_trails=500):
+    data,
+    xf=128,
+    yf=128,
+    rf_lim=30,
+    semi_len_min=50,
+    semi_len_max=90,
+    semi_len_ratio_lim=1.2,
+    min_samples=6,
+    residual_threshold=10,
+    max_trails=500,
+):
     """Pick a random number of data points to fit an ellipse to.
 
     The ellipse's constraints can be specified.
@@ -276,9 +291,14 @@ def get_ellipse_model_ransac_single_frame(
 
     """
     is_model_valid = partial(
-            is_ellipse_good, xf=xf, yf=yf, rf_lim=rf_lim,
-            semi_len_min=semi_len_min, semi_len_max=semi_len_max,
-            semi_len_ratio_lim=semi_len_ratio_lim)
+        is_ellipse_good,
+        xf=xf,
+        yf=yf,
+        rf_lim=rf_lim,
+        semi_len_min=semi_len_min,
+        semi_len_max=semi_len_max,
+        semi_len_ratio_lim=semi_len_ratio_lim,
+    )
     if min_samples > len(data):
         min_samples = len(data) - 1
     # This for loop is here to avoid the returned model being outside the
@@ -288,10 +308,13 @@ def get_ellipse_model_ransac_single_frame(
     # additional inliers are found afterwards.
     for i in range(3):
         model_ransac, inliers = ransac(
-                data.astype(np.float32), EllipseModel, min_samples=min_samples,
-                residual_threshold=residual_threshold, max_trials=max_trails,
-                is_model_valid=is_model_valid,
-                )
+            data.astype(np.float32),
+            EllipseModel,
+            min_samples=min_samples,
+            residual_threshold=residual_threshold,
+            max_trials=max_trails,
+            is_model_valid=is_model_valid,
+        )
         if model_ransac is not None:
             if is_model_valid(model_ransac, None):
                 break
@@ -303,9 +326,18 @@ def get_ellipse_model_ransac_single_frame(
 
 
 def get_ellipse_model_ransac(
-        data, xf=128, yf=128, rf_lim=30, semi_len_min=70, semi_len_max=90,
-        semi_len_ratio_lim=1.2, min_samples=6, residual_threshold=10,
-        max_trails=500, show_progressbar=True):
+    data,
+    xf=128,
+    yf=128,
+    rf_lim=30,
+    semi_len_min=70,
+    semi_len_max=90,
+    semi_len_ratio_lim=1.2,
+    min_samples=6,
+    residual_threshold=10,
+    max_trails=500,
+    show_progressbar=True,
+):
     """Pick a random number of data points to fit an ellipse to.
 
     The ellipse's constraints can be specified.
@@ -354,16 +386,21 @@ def get_ellipse_model_ransac(
     ellipse_array = np.zeros(data.shape[:2], dtype=np.object)
     inlier_array = np.zeros(data.shape[:2], dtype=np.object)
     num_total = data.shape[0] * data.shape[1]
-    t = tqdm(np.ndindex(data.shape[:2]), disable=not show_progressbar,
-             total=num_total)
+    t = tqdm(np.ndindex(data.shape[:2]), disable=not show_progressbar, total=num_total)
     for iy, ix in t:
         temp_xf, temp_yf = xf[iy, ix], yf[iy, ix]
         ellipse_model, inliers = get_ellipse_model_ransac_single_frame(
-                data[iy, ix], xf=temp_yf, yf=temp_xf, rf_lim=rf_lim,
-                semi_len_min=semi_len_min, semi_len_max=semi_len_max,
-                semi_len_ratio_lim=semi_len_ratio_lim,
-                min_samples=min_samples, residual_threshold=residual_threshold,
-                max_trails=max_trails)
+            data[iy, ix],
+            xf=temp_yf,
+            yf=temp_xf,
+            rf_lim=rf_lim,
+            semi_len_min=semi_len_min,
+            semi_len_max=semi_len_max,
+            semi_len_ratio_lim=semi_len_ratio_lim,
+            min_samples=min_samples,
+            residual_threshold=residual_threshold,
+            max_trails=max_trails,
+        )
         if ellipse_model is not None:
             params = ellipse_model.params
         else:
@@ -398,9 +435,10 @@ def _get_lines_list_from_ellipse_params(ellipse_params, nr=20):
 
     """
     ellipse_data_array = make_ellipse_data_points(
-            *ellipse_params, nt=nr, use_focus=False)
+        *ellipse_params, nt=nr, use_focus=False
+    )
     lines_list = []
-    for i in range(len(ellipse_data_array)-1):
+    for i in range(len(ellipse_data_array) - 1):
         pos0 = ellipse_data_array[i]
         pos1 = ellipse_data_array[i + 1]
         lines_list.append([pos0[0], pos0[1], pos1[0], pos1[1]])
@@ -443,8 +481,7 @@ def _get_lines_array_from_ellipse_array(ellipse_array, nr=20):
     for ix, iy in np.ndindex(ellipse_array.shape[:2]):
         ellipse_params = ellipse_array[ix, iy]
         if ellipse_params is not None:
-            lines_list = _get_lines_list_from_ellipse_params(ellipse_params,
-                                                             nr=nr)
+            lines_list = _get_lines_list_from_ellipse_params(ellipse_params, nr=nr)
             lines_array[ix, iy] = lines_list
         else:
             lines_array[ix, iy] = None
@@ -469,32 +506,53 @@ def _get_inlier_outlier_peak_arrays(peak_array, inlier_array):
 
 
 def _get_ellipse_marker_list_from_ellipse_array(
-        ellipse_array, nr=20, signal_axes=None, color='red',
-        linewidth=1, linestyle='solid'):
-    lines_array = _get_lines_array_from_ellipse_array(
-            ellipse_array, nr=nr)
+    ellipse_array, nr=20, signal_axes=None, color="red", linewidth=1, linestyle="solid"
+):
+    lines_array = _get_lines_array_from_ellipse_array(ellipse_array, nr=nr)
     marker_lines_list = mt._get_4d_line_segment_list(
-            lines_array, signal_axes=signal_axes,
-            color=color, linewidth=linewidth, linestyle=linestyle)
+        lines_array,
+        signal_axes=signal_axes,
+        color=color,
+        linewidth=linewidth,
+        linestyle=linestyle,
+    )
     return marker_lines_list
 
 
 def _get_ellipse_markers(
-        ellipse_array, inlier_array=None, peak_array=None, nr=20,
-        signal_axes=None, color_ellipse='blue', linewidth=1, linestyle='solid',
-        color_inlier='blue', color_outlier='red', point_size=20):
+    ellipse_array,
+    inlier_array=None,
+    peak_array=None,
+    nr=20,
+    signal_axes=None,
+    color_ellipse="blue",
+    linewidth=1,
+    linestyle="solid",
+    color_inlier="blue",
+    color_outlier="red",
+    point_size=20,
+):
     marker_list = _get_ellipse_marker_list_from_ellipse_array(
-            ellipse_array, nr=nr, signal_axes=signal_axes,
-            color=color_ellipse, linewidth=linewidth, linestyle=linestyle)
+        ellipse_array,
+        nr=nr,
+        signal_axes=signal_axes,
+        color=color_ellipse,
+        linewidth=linewidth,
+        linestyle=linestyle,
+    )
     if inlier_array is not None:
         inlier_parray, outlier_parray = _get_inlier_outlier_peak_arrays(
-                peak_array, inlier_array)
+            peak_array, inlier_array
+        )
         marker_in_list = mt._get_4d_points_marker_list(
-                inlier_parray, signal_axes=signal_axes, color=color_inlier,
-                size=point_size)
+            inlier_parray, signal_axes=signal_axes, color=color_inlier, size=point_size
+        )
         marker_out_list = mt._get_4d_points_marker_list(
-                outlier_parray, signal_axes=signal_axes, color=color_outlier,
-                size=point_size)
+            outlier_parray,
+            signal_axes=signal_axes,
+            color=color_outlier,
+            size=point_size,
+        )
         marker_list.extend(marker_in_list)
         marker_list.extend(marker_out_list)
     return marker_list

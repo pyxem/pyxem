@@ -9,9 +9,7 @@ from hyperspy.misc.utils import isiterable
 import pixstem.pixelated_stem_tools as pst
 
 
-def _centre_comparison(
-        s, steps, step_size,
-        crop_radial_signal=None, angleN=8):
+def _centre_comparison(s, steps, step_size, crop_radial_signal=None, angleN=8):
     """
     Compare how the centre position affects the radial average.
     Useful for finding on optimal centre position if one has some
@@ -31,23 +29,25 @@ def _centre_comparison(
     """
     if s.axes_manager.navigation_dimension != 0:
         raise ValueError(
-                "centre_comparison only works for pixelatedSTEM "
-                "signals with 0 navigation dimensions")
+            "centre_comparison only works for pixelatedSTEM "
+            "signals with 0 navigation dimensions"
+        )
     s_list = []
     centre_list = get_centre_position_list(s, steps, step_size)
     for centre_x, centre_y in centre_list:
         s_angle = s.angular_slice_radial_average(
-                angleN=angleN,
-                centre_x=np.array([centre_x]),
-                centre_y=np.array([centre_y]),
-                show_progressbar=False)
+            angleN=angleN,
+            centre_x=np.array([centre_x]),
+            centre_y=np.array([centre_y]),
+            show_progressbar=False,
+        )
         if crop_radial_signal is not None:
-            s_angle = s_angle.isig[crop_radial_signal[0]:crop_radial_signal[1]]
+            s_angle = s_angle.isig[crop_radial_signal[0] : crop_radial_signal[1]]
         s_angle.metadata.add_node("Angle_slice_processing")
         s_angle.metadata.Angle_slice_processing.centre_x = centre_x
         s_angle.metadata.Angle_slice_processing.centre_y = centre_y
         s_list.append(s_angle)
-    return(s_list)
+    return s_list
 
 
 def get_coordinate_of_min(s):
@@ -58,7 +58,7 @@ def get_coordinate_of_min(s):
     idx = np.argwhere(z == np.min(z))
     x = s.axes_manager[0].index2value(idx[0][1])
     y = s.axes_manager[1].index2value(idx[0][0])
-    return(x, y)
+    return (x, y)
 
 
 def get_centre_position_list(s, steps, step_size):
@@ -69,27 +69,27 @@ def get_centre_position_list(s, steps, step_size):
     """
     scale_x = s.axes_manager.signal_axes[0].scale
     scale_y = s.axes_manager.signal_axes[1].scale
-    d1_x = scale_x*steps*step_size
-    d2_x = scale_x*(steps + 1)*step_size
-    d1_y = scale_y*steps*step_size
-    d2_y = scale_y*(steps + 1)*step_size
+    d1_x = scale_x * steps * step_size
+    d2_x = scale_x * (steps + 1) * step_size
+    d1_y = scale_y * steps * step_size
+    d2_y = scale_y * (steps + 1) * step_size
 
     x0 = -s.axes_manager[0].offset
     y0 = -s.axes_manager[1].offset
     centre_x_list, centre_y_list = [], []
-    range_x = np.arange(x0 - d1_x, x0 + d2_x, step_size*scale_x)
-    range_y = np.arange(y0 - d1_y, y0 + d2_y, step_size*scale_y)
+    range_x = np.arange(x0 - d1_x, x0 + d2_x, step_size * scale_x)
+    range_y = np.arange(y0 - d1_y, y0 + d2_y, step_size * scale_y)
     for x in range_x:
         for y in range_y:
             centre_x_list.append(x)
             centre_y_list.append(y)
     centre_list = zip(centre_x_list, centre_y_list)
-    return(centre_list)
+    return centre_list
 
 
 def get_optimal_centre_position(
-        s, radial_signal_span, steps=3, step_size=1, angleN=8,
-        show_progressbar=True):
+    s, radial_signal_span, steps=3, step_size=1, angleN=8, show_progressbar=True
+):
     """
     Find centre position of a ring by using angle sliced radial average.
 
@@ -139,33 +139,31 @@ def get_optimal_centre_position(
 
     """
     s_list = _centre_comparison(
-            s, steps, step_size, crop_radial_signal=radial_signal_span,
-            angleN=angleN)
+        s, steps, step_size, crop_radial_signal=radial_signal_span, angleN=angleN
+    )
 
     m_list = []
     for temp_s in tqdm(s_list, disable=(not show_progressbar)):
-        temp_s.change_dtype('float64')
+        temp_s.change_dtype("float64")
         temp_s = temp_s - temp_s.data.min()
-        temp_s = temp_s/temp_s.data.max()
+        temp_s = temp_s / temp_s.data.max()
         am = temp_s.axes_manager
-        g_centre = temp_s.inav[0].data.argmax()*am[-1].scale + am[-1].offset
+        g_centre = temp_s.inav[0].data.argmax() * am[-1].scale + am[-1].offset
         g_sigma = 3
-        g_A = temp_s.data.max()*2*g_sigma
+        g_A = temp_s.data.max() * 2 * g_sigma
 
         m = temp_s.create_model()
-        g = Gaussian(
-                A=g_A,
-                centre=g_centre,
-                sigma=g_sigma)
+        g = Gaussian(A=g_A, centre=g_centre, sigma=g_sigma)
         m.append(g)
         m.multifit(show_progressbar=False)
         m_list.append(m)
     s_centre_std_array = _get_offset_image(m_list, s, steps, step_size)
-    return(s_centre_std_array)
+    return s_centre_std_array
 
 
 def refine_signal_centre_position(
-        s, radial_signal_span, refine_step_size=None, **kwargs):
+    s, radial_signal_span, refine_step_size=None, **kwargs
+):
     """Refine centre position of a diffraction signal by using round feature.
 
     This function simply calls get_optimal_centre_position with a
@@ -199,11 +197,11 @@ def refine_signal_centre_position(
 
     """
     if refine_step_size is None:
-        refine_step_size = [1., 0.5, 0.25]
+        refine_step_size = [1.0, 0.5, 0.25]
     for step_size in refine_step_size:
         s_centre = get_optimal_centre_position(
-                s=s, radial_signal_span=radial_signal_span,
-                step_size=step_size, **kwargs)
+            s=s, radial_signal_span=radial_signal_span, step_size=step_size, **kwargs
+        )
         x, y = get_coordinate_of_min(s_centre)
         s.axes_manager[0].offset, s.axes_manager[1].offset = -x, -y
 
@@ -228,7 +226,7 @@ def _get_offset_image(model_list, s, steps, step_size):
     offset_signal : HyperSpy 2D signal
 
     """
-    s_offset = Signal2D(np.zeros(shape=((steps*2)+1, (steps*2)+1)))
+    s_offset = Signal2D(np.zeros(shape=((steps * 2) + 1, (steps * 2) + 1)))
     am = s.axes_manager.signal_axes
 
     offset_x0 = -am[0].offset - (steps * step_size)
@@ -248,14 +246,21 @@ def _get_offset_image(model_list, s, steps, step_size):
 
 
 def _make_radius_vs_angle_model(
-        signal, radial_signal_span, angleN=15,
-        centre_x=None, centre_y=None,
-        prepeak_range=None,
-        show_progressbar=True):
+    signal,
+    radial_signal_span,
+    angleN=15,
+    centre_x=None,
+    centre_y=None,
+    prepeak_range=None,
+    show_progressbar=True,
+):
     s_ra = signal.angular_slice_radial_average(
-            angleN=angleN, centre_x=centre_x, centre_y=centre_y,
-            show_progressbar=show_progressbar)
-    s_ra = s_ra.isig[radial_signal_span[0]:radial_signal_span[1]]
+        angleN=angleN,
+        centre_x=centre_x,
+        centre_y=centre_y,
+        show_progressbar=show_progressbar,
+    )
+    s_ra = s_ra.isig[radial_signal_span[0] : radial_signal_span[1]]
 
     m_ra = s_ra.create_model()
 
@@ -274,7 +279,7 @@ def _make_radius_vs_angle_model(
     m_ra.reset_signal_range()
 
     # Fit Gaussian to diffraction ring
-    centre_initial = (sa.high_value + sa.low_value)*0.5
+    centre_initial = (sa.high_value + sa.low_value) * 0.5
     sigma = 3
     A = (s_ra - s_ra.min(axis=1)).data.max() * 2 * sigma
 
@@ -286,10 +291,14 @@ def _make_radius_vs_angle_model(
 
 
 def get_radius_vs_angle(
-        signal, radial_signal_span, angleN=15,
-        centre_x=None, centre_y=None,
-        prepeak_range=None,
-        show_progressbar=True):
+    signal,
+    radial_signal_span,
+    angleN=15,
+    centre_x=None,
+    centre_y=None,
+    prepeak_range=None,
+    show_progressbar=True,
+):
     """
     Get radius of a ring as a function of angle.
 
@@ -329,12 +338,15 @@ def get_radius_vs_angle(
 
     """
     m_ra = _make_radius_vs_angle_model(
-        signal=signal, radial_signal_span=radial_signal_span, angleN=angleN,
-        centre_x=centre_x, centre_y=centre_y,
+        signal=signal,
+        radial_signal_span=radial_signal_span,
+        angleN=angleN,
+        centre_x=centre_x,
+        centre_y=centre_y,
         prepeak_range=prepeak_range,
-        show_progressbar=show_progressbar)
-    m_ra.multifit(fitter='mpfit', bounded=True,
-                  show_progressbar=show_progressbar)
+        show_progressbar=show_progressbar,
+    )
+    m_ra.multifit(fitter="mpfit", bounded=True, show_progressbar=show_progressbar)
 
     s_centre = m_ra.components.Gaussian.centre.as_signal()
     return s_centre
@@ -388,18 +400,22 @@ def get_angle_image_comparison(s0, s1, angleN=12, mask_radius=None):
     if s0.axes_manager.shape != s1.axes_manager.shape:
         raise ValueError("s0 and s1 need to have the same shape")
     s = s0.deepcopy()
-    angle_array = np.ogrid[0:2*np.pi:(1+angleN)*1j]
+    angle_array = np.ogrid[0 : 2 * np.pi : (1 + angleN) * 1j]
     for i in range(len(angle_array[:-1])):
         if i % 2:
-            angle0, angle1 = angle_array[i:i+2]
+            angle0, angle1 = angle_array[i : i + 2]
             bool_array = pst._get_angle_sector_mask(s, angle0, angle1)
             s.data[bool_array] = s1.data[bool_array]
 
     if mask_radius is not None:
         am = s.axes_manager
         mask = pst._make_circular_mask(
-                am[0].value2index(0.0),  am[1].value2index(0.0),
-                am[0].size, am[1].size, mask_radius)
+            am[0].value2index(0.0),
+            am[1].value2index(0.0),
+            am[0].size,
+            am[1].size,
+            mask_radius,
+        )
         mask = np.invert(mask)
         s.data *= mask
     return s
@@ -427,12 +443,12 @@ def _get_holz_angle(electron_wavelength, lattice_parameter):
     >>> angle = ra._get_holz_angle(wavelength, lattice_size)
 
     """
-    k0 = 1./electron_wavelength
-    kz = 1./lattice_parameter
-    in_root = kz*((2*k0)-kz)
-    sin_angle = (in_root**0.5)/k0
+    k0 = 1.0 / electron_wavelength
+    kz = 1.0 / lattice_parameter
+    in_root = kz * ((2 * k0) - kz)
+    sin_angle = (in_root ** 0.5) / k0
     angle = math.asin(sin_angle)
-    return(angle)
+    return angle
 
 
 def _scattering_angle_to_lattice_parameter(electron_wavelength, angle):
@@ -461,22 +477,22 @@ def _scattering_angle_to_lattice_parameter(electron_wavelength, angle):
 
     """
 
-    k0 = 1./electron_wavelength
-    kz = k0 - (k0*((1-(np.sin(angle)**2))**0.5))
-    return(1/kz)
+    k0 = 1.0 / electron_wavelength
+    kz = k0 - (k0 * ((1 - (np.sin(angle) ** 2)) ** 0.5))
+    return 1 / kz
 
 
 def _get_xy_points_from_radius_angle_plot(s_ra):
     x_list = []
     y_list = []
     for angle, radius in zip(s_ra.axes_manager[0].axis, s_ra.data):
-        dx = -math.cos(angle)*radius
-        dy = -math.sin(angle)*radius
+        dx = -math.cos(angle) * radius
+        dy = -math.sin(angle) * radius
         x_list.append(dx)
         y_list.append(dy)
     x_list = np.array(x_list)
     y_list = np.array(y_list)
-    return(x_list, y_list)
+    return (x_list, y_list)
 
 
 def _fit_ellipse_to_xy_points(x, y):
@@ -491,9 +507,9 @@ def _fit_ellipse_to_xy_points(x, y):
     ellipse_parameters : NumPy array
 
     """
-    xx = x*x
-    yy = y*y
-    xy = x*y
+    xx = x * x
+    yy = y * y
+    xy = x * y
     ones = np.ones_like(x)
     D = np.vstack((xx, xy, yy, x, y, ones))
     S = np.dot(D, D.T)
@@ -503,7 +519,7 @@ def _fit_ellipse_to_xy_points(x, y):
     A, B = la.eig(np.dot(la.inv(S), C))
     i = np.argmax(np.abs(A))
     g = B[:, i]
-    return(g)
+    return g
 
 
 def _get_ellipse_parameters(g):
@@ -533,57 +549,57 @@ def _get_ellipse_parameters(g):
     http://mathworld.wolfram.com/Ellipse.html
 
     """
-    a, b, c, d, f, g = g[0], g[1]/2, g[2], g[3]/2, g[4]/2, g[5]
-    b2ac = b*b - a*c
-    xC = (c*d - b*f)/b2ac
-    yC = (a*f - b*d)/b2ac
-    frac_top = 2*(a*f*f + c*d*d + g*b*b - 2*b*d*f - a*c*g)
-    frac_square_bot = (a - c)*(a - c) + 4*b*b
-    semi_len0 = math.sqrt(
-            frac_top/(b2ac*(math.sqrt(frac_square_bot) - (a + c))))
-    semi_len1 = math.sqrt(
-            frac_top/(b2ac*(-math.sqrt(frac_square_bot) - (a + c))))
+    a, b, c, d, f, g = g[0], g[1] / 2, g[2], g[3] / 2, g[4] / 2, g[5]
+    b2ac = b * b - a * c
+    xC = (c * d - b * f) / b2ac
+    yC = (a * f - b * d) / b2ac
+    frac_top = 2 * (a * f * f + c * d * d + g * b * b - 2 * b * d * f - a * c * g)
+    frac_square_bot = (a - c) * (a - c) + 4 * b * b
+    semi_len0 = math.sqrt(frac_top / (b2ac * (math.sqrt(frac_square_bot) - (a + c))))
+    semi_len1 = math.sqrt(frac_top / (b2ac * (-math.sqrt(frac_square_bot) - (a + c))))
     if b == 0:
         if a < c:
             rot = 0
         else:
-            rot = math.pi*0.5
+            rot = math.pi * 0.5
     else:
         if a < c:
-            rot = math.atan((2*b)/(a - c))/2
+            rot = math.atan((2 * b) / (a - c)) / 2
         else:
-            rot = math.pi/2 + (math.atan((2*b)/(a - c))/2)
+            rot = math.pi / 2 + (math.atan((2 * b) / (a - c)) / 2)
     rot = rot % np.pi
-    eccen = math.sqrt(1-((b*b)/(a*a)))
-    return(xC, yC, semi_len0, semi_len1, rot, eccen)
+    eccen = math.sqrt(1 - ((b * b) / (a * a)))
+    return (xC, yC, semi_len0, semi_len1, rot, eccen)
 
 
-def _get_ellipse_from_parameters(
-        x, y, semi_len0, semi_len1, rot, r_scale=0.05):
-    R = np.arange(0, 2*np.pi, r_scale)
-    xx = x + semi_len0*np.cos(R)*np.cos(rot) - semi_len1*np.sin(R)*np.sin(rot)
-    yy = y + semi_len0*np.cos(R)*np.sin(rot) + semi_len1*np.sin(R)*np.cos(rot)
-    return(xx, yy)
+def _get_ellipse_from_parameters(x, y, semi_len0, semi_len1, rot, r_scale=0.05):
+    R = np.arange(0, 2 * np.pi, r_scale)
+    xx = x + semi_len0 * np.cos(R) * np.cos(rot) - semi_len1 * np.sin(R) * np.sin(rot)
+    yy = y + semi_len0 * np.cos(R) * np.sin(rot) + semi_len1 * np.sin(R) * np.cos(rot)
+    return (xx, yy)
 
 
 def _get_marker_list(
-        ellipse_parameters, x_list=None, y_list=None, name=None, r_scale=0.05):
+    ellipse_parameters, x_list=None, y_list=None, name=None, r_scale=0.05
+):
     xC, yC, semi_len0, semi_len1, rot, ecce = _get_ellipse_parameters(
-            ellipse_parameters)
+        ellipse_parameters
+    )
     xx, yy = _get_ellipse_from_parameters(
-            xC, yC, semi_len0, semi_len1, rot, r_scale=r_scale)
+        xC, yC, semi_len0, semi_len1, rot, r_scale=r_scale
+    )
     marker_list = []
     if x_list is not None:
         for x, y in zip(x_list, y_list):
-            point_marker = point(x, y, color='red')
+            point_marker = point(x, y, color="red")
             if name is not None:
                 point_marker.name = name + "_" + point_marker.name
             marker_list.append(point_marker)
     for i in range(len(xx)):
         if i == (len(xx) - 1):
-            line = line_segment(xx[i], yy[i], xx[0], yy[0], color='green')
+            line = line_segment(xx[i], yy[i], xx[0], yy[0], color="green")
         else:
-            line = line_segment(xx[i], yy[i], xx[i+1], yy[i+1], color='green')
+            line = line_segment(xx[i], yy[i], xx[i + 1], yy[i + 1], color="green")
         if name is not None:
             line.name = name + "_" + line.name
         marker_list.append(line)
@@ -591,8 +607,8 @@ def _get_marker_list(
 
 
 def fit_single_ellipse_to_signal(
-        s, radial_signal_span, prepeak_range=None,
-        angleN=20, show_progressbar=True):
+    s, radial_signal_span, prepeak_range=None, angleN=20, show_progressbar=True
+):
     """
     Parameters
     ----------
@@ -637,13 +653,15 @@ def fit_single_ellipse_to_signal(
 
     """
     s_ra = get_radius_vs_angle(
-            s, radial_signal_span, angleN=angleN,
-            prepeak_range=prepeak_range,
-            show_progressbar=show_progressbar)
+        s,
+        radial_signal_span,
+        angleN=angleN,
+        prepeak_range=prepeak_range,
+        show_progressbar=show_progressbar,
+    )
     x, y = _get_xy_points_from_radius_angle_plot(s_ra)
     ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
-    xC, yC, semi0, semi1, rot, ecc = _get_ellipse_parameters(
-            ellipse_parameters)
+    xC, yC, semi0, semi1, rot, ecc = _get_ellipse_parameters(ellipse_parameters)
     marker_list = _get_marker_list(ellipse_parameters, x_list=x, y_list=y)
     s_m = s.deepcopy()
     s_m.add_marker(marker_list, permanent=True, plot_marker=False)
@@ -651,9 +669,8 @@ def fit_single_ellipse_to_signal(
 
 
 def fit_ellipses_to_signal(
-        s, radial_signal_span_list,
-        prepeak_range=None,
-        angleN=20, show_progressbar=True):
+    s, radial_signal_span_list, prepeak_range=None, angleN=20, show_progressbar=True
+):
     """
     Parameters
     ----------
@@ -696,27 +713,31 @@ def fit_ellipses_to_signal(
 
     """
     if not isiterable(angleN):
-        angleN = [angleN]*len(radial_signal_span_list)
+        angleN = [angleN] * len(radial_signal_span_list)
     else:
         if len(angleN) != len(radial_signal_span_list):
             raise ValueError(
-                    "angleN and radial_signal_span_list needs to have "
-                    "the same length")
+                "angleN and radial_signal_span_list needs to have " "the same length"
+            )
     marker_list = []
     ellipse_list = []
-    for i, (radial_signal_span, aN) in enumerate(zip(
-            radial_signal_span_list, angleN)):
+    for i, (radial_signal_span, aN) in enumerate(zip(radial_signal_span_list, angleN)):
         s_ra = get_radius_vs_angle(
-                s, radial_signal_span, angleN=aN,
-                prepeak_range=prepeak_range,
-                show_progressbar=show_progressbar)
+            s,
+            radial_signal_span,
+            angleN=aN,
+            prepeak_range=prepeak_range,
+            show_progressbar=show_progressbar,
+        )
         x, y = _get_xy_points_from_radius_angle_plot(s_ra)
         ellipse_parameters = _fit_ellipse_to_xy_points(x, y)
         output = _get_ellipse_parameters(ellipse_parameters)
         ellipse_list.append(output)
-        marker_list.extend(_get_marker_list(
-                ellipse_parameters, x_list=x, y_list=y,
-                name='circle' + str(i)))
+        marker_list.extend(
+            _get_marker_list(
+                ellipse_parameters, x_list=x, y_list=y, name="circle" + str(i)
+            )
+        )
     s_m = s.deepcopy()
     s_m.add_marker(marker_list, permanent=True, plot_marker=False)
     return s_m, ellipse_list

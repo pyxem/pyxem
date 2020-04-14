@@ -3,7 +3,6 @@ import numpy as np
 
 
 class TestGetLimitsFromArray:
-
     def test_simple(self):
         data_array0 = np.array((5, 10))
         clim0 = pst._get_limits_from_array(data_array0, sigma=4)
@@ -41,10 +40,10 @@ class TestGetLimitsFromArray:
         clim0_1 = pst._get_limits_from_array(data_array0, sigma=0)
         assert (data_array0.mean(), data_array0.mean()) == clim0_1
         clim0_2 = pst._get_limits_from_array(data_array0, sigma=1)
-        assert (0., 20.) == clim0_2
+        assert (0.0, 20.0) == clim0_2
 
     def test_ignore_edges(self):
-        data_array = np.ones(shape=(100, 100))*5000
+        data_array = np.ones(shape=(100, 100)) * 5000
         value = 50
         data_array[1:-1, 1:-1] = value
         clim0 = pst._get_limits_from_array(data_array, ignore_edges=True)

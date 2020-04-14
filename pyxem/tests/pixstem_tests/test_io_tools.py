@@ -11,7 +11,6 @@ my_path = os.path.dirname(__file__)
 
 
 class TestDpcsignalIo:
-
     def setup_method(self):
         self.tmpdir = TemporaryDirectory()
 
@@ -19,38 +18,35 @@ class TestDpcsignalIo:
         self.tmpdir.cleanup()
 
     def test_load_basesignal(self):
-        filename = os.path.join(
-                my_path, "test_data", "dpcbasesignal_test.hdf5")
+        filename = os.path.join(my_path, "test_data", "dpcbasesignal_test.hdf5")
         ps.load_dpc_signal(filename)
 
     def test_load_signal1d(self):
-        filename = os.path.join(
-                my_path, "test_data", "dpcsignal1d_test.hdf5")
+        filename = os.path.join(my_path, "test_data", "dpcsignal1d_test.hdf5")
         ps.load_dpc_signal(filename)
 
     def test_load_signal2d(self):
-        filename = os.path.join(
-                my_path, "test_data", "dpcsignal2d_test.hdf5")
+        filename = os.path.join(my_path, "test_data", "dpcsignal2d_test.hdf5")
         ps.load_dpc_signal(filename)
 
     def test_load_signal2d_too_many_nav_dim(self):
         filename = os.path.join(
-                my_path, "test_data", "dpcsignal2d_test_too_many_nav_dim.hdf5")
+            my_path, "test_data", "dpcsignal2d_test_too_many_nav_dim.hdf5"
+        )
         with pytest.raises(Exception):
             ps.load_dpc_signal(filename)
 
     def test_load_basesignal_too_many_signal_dim(self):
         filename = os.path.join(
-                my_path,
-                "test_data",
-                "dpcbasesignal_test_too_many_signal_dims.hdf5")
+            my_path, "test_data", "dpcbasesignal_test_too_many_signal_dims.hdf5"
+        )
         with pytest.raises(NotImplementedError):
             ps.load_dpc_signal(filename)
 
     def test_retain_metadata(self):
         s = ps.DPCSignal2D(np.ones((2, 10, 5)))
         s.metadata.General.title = "test_data"
-        filename = os.path.join(self.tmpdir.name, 'test_metadata.hspy')
+        filename = os.path.join(self.tmpdir.name, "test_metadata.hspy")
         s.save(filename)
         s_load = ps.load_dpc_signal(filename)
         assert s_load.metadata.General.title == "test_data"
@@ -61,7 +57,7 @@ class TestDpcsignalIo:
         s_sa1 = s.axes_manager.signal_axes[1]
         s_sa0.offset, s_sa1.offset, s_sa0.scale, s_sa1.scale = 20, 10, 0.2, 0.3
         s_sa0.units, s_sa1.units, s_sa0.name, s_sa1.name = "a", "b", "e", "f"
-        filename = os.path.join(self.tmpdir.name, 'test_axes_manager.hspy')
+        filename = os.path.join(self.tmpdir.name, "test_axes_manager.hspy")
         s.save(filename)
         s_load = ps.load_dpc_signal(filename)
         assert s_load.axes_manager[1].offset == 20
@@ -75,44 +71,37 @@ class TestDpcsignalIo:
 
 
 class TestPixelatedstemSignalIo:
-
     def test_load_hspy_signal(self):
         # Has shape (2, 5, 4, 3)
-        filename = os.path.join(
-                my_path, "test_data", "pixelated_stem_test.hdf5")
+        filename = os.path.join(my_path, "test_data", "pixelated_stem_test.hdf5")
         s = ps.load_ps_signal(filename)
         assert s.axes_manager.shape == (2, 5, 4, 3)
 
     def test_load_hspy_signal_generated(self):
         shape = (7, 6, 3, 5)
         tmpdir = TemporaryDirectory()
-        filename = os.path.join(
-                tmpdir.name, "test.hdf5")
+        filename = os.path.join(tmpdir.name, "test.hdf5")
         s = ps.PixelatedSTEM(np.zeros(shape))
         s.save(filename)
 
         sl = ps.load_ps_signal(filename, lazy=False)
-        assert sl.axes_manager.shape == (
-                shape[1], shape[0], shape[3], shape[2])
+        assert sl.axes_manager.shape == (shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
 
     def test_load_hspy_signal_generated_lazy(self):
         shape = (3, 5, 7, 9)
         tmpdir = TemporaryDirectory()
-        filename = os.path.join(
-                tmpdir.name, "test_lazy.hdf5")
+        filename = os.path.join(tmpdir.name, "test_lazy.hdf5")
         s = ps.PixelatedSTEM(np.zeros(shape))
         s.save(filename)
 
         sl = ps.load_ps_signal(filename, lazy=True)
-        assert sl.axes_manager.shape == (
-                shape[1], shape[0], shape[3], shape[2])
+        assert sl.axes_manager.shape == (shape[1], shape[0], shape[3], shape[2])
         tmpdir.cleanup()
 
     def test_load_ps_signal(self):
         # Dataset has known size (2, 2, 256, 256)
-        filename = os.path.join(
-                my_path, "test_data", "fpd_file_test.hdf5")
+        filename = os.path.join(my_path, "test_data", "fpd_file_test.hdf5")
         s = ps.load_ps_signal(filename)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
@@ -121,8 +110,7 @@ class TestPixelatedstemSignalIo:
 
     def test_navigation_signal(self):
         # Dataset has known size (2, 2, 256, 256)
-        filename = os.path.join(
-                my_path, "test_data", "fpd_file_test.hdf5")
+        filename = os.path.join(my_path, "test_data", "fpd_file_test.hdf5")
         s = ps.load_ps_signal(filename)
         assert s.axes_manager.shape == (2, 2, 256, 256)
 
@@ -132,12 +120,10 @@ class TestPixelatedstemSignalIo:
 
         s_nav1 = hs.signals.Signal2D(np.zeros((2, 4)))
         with pytest.raises(ValueError):
-            s = ps.load_ps_signal(
-                    filename, lazy=True, navigation_signal=s_nav1)
+            s = ps.load_ps_signal(filename, lazy=True, navigation_signal=s_nav1)
 
 
 class TestSignalToPixelatedStem:
-
     def test_conserve_signal_axes_metadata(self):
         x_nav, y_nav, x_sig, y_sig = 9, 8, 5, 7
         x_nav_scale, y_nav_scale, x_sig_scale, y_sig_scale = 0.5, 0.2, 1.2, 3.2
@@ -186,26 +172,25 @@ class TestSignalToPixelatedStem:
 
 
 class TestCopyAxesPsToDpc:
-
     def test_simple(self):
         s_ps = ps.PixelatedSTEM(np.zeros((10, 13, 5, 4)))
         s_dp = ps.DPCSignal2D(np.zeros((2, 10, 13)))
         it._copy_axes_ps_to_dpc(s_ps, s_dp)
 
     def test_copy_value(self):
-        dpc_nav_name = 'q'
-        dpc_nav_units = 'x'
+        dpc_nav_name = "q"
+        dpc_nav_units = "x"
         dpc_nav_offse = 32
         dpc_nav_scale = 0.2
 
         ps_sig0_scale, ps_sig1_scale = 1.3, 5.2
         ps_sig0_offse, ps_sig1_offse = -40, 52
-        ps_sig0_units, ps_sig1_units = 'sa', 'sb'
-        ps_sig0_name, ps_sig1_name = 'sc', 'sd'
+        ps_sig0_units, ps_sig1_units = "sa", "sb"
+        ps_sig0_name, ps_sig1_name = "sc", "sd"
         ps_nav0_scale, ps_nav1_scale = 0.2, 4
         ps_nav0_offse, ps_nav1_offse = 20, -12
-        ps_nav0_units, ps_nav1_units = 'na', 'nb'
-        ps_nav0_name, ps_nav1_name = 'nc', 'nd'
+        ps_nav0_units, ps_nav1_units = "na", "nb"
+        ps_nav0_name, ps_nav1_name = "nc", "nd"
 
         s_ps = ps.PixelatedSTEM(np.zeros((10, 13, 5, 4)))
         s_ps.axes_manager.navigation_axes[0].scale = ps_nav0_scale

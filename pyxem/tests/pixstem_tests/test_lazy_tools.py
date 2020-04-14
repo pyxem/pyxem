@@ -5,7 +5,6 @@ import pixstem.lazy_tools as lt
 
 
 class TestGetDaskChunkSliceList:
-
     def test_simple(self):
         dask_array = da.zeros((10, 10, 50, 50), chunks=(5, 5, 25, 25))
         slice_list = lt._get_dask_chunk_slice_list(dask_array)
@@ -54,7 +53,7 @@ class TestGetDaskChunkSliceList:
 
 
 def sum_frame(image, multiplier=1):
-    data = image.sum()*multiplier
+    data = image.sum() * multiplier
     return data
 
 
@@ -64,37 +63,41 @@ def return_two_value(image):
 
 
 class TestCalculateFunctionOnDaskArray:
-
     def test_simple(self):
         dask_array = da.ones((10, 10, 50, 50), chunks=(5, 5, 25, 25))
         data = lt._calculate_function_on_dask_array(
-                dask_array, sum_frame, show_progressbar=False)
+            dask_array, sum_frame, show_progressbar=False
+        )
         assert data.shape == (10, 10)
-        assert (data == (np.ones((10, 10))*50*50)).all()
+        assert (data == (np.ones((10, 10)) * 50 * 50)).all()
 
     def test_1d_nav(self):
         dask_array = da.ones((10, 50, 50), chunks=(5, 25, 25))
         data = lt._calculate_function_on_dask_array(
-                dask_array, sum_frame, show_progressbar=False)
-        assert data.shape == (10, )
-        assert (data == (np.ones((10, ))*50*50)).all()
+            dask_array, sum_frame, show_progressbar=False
+        )
+        assert data.shape == (10,)
+        assert (data == (np.ones((10,)) * 50 * 50)).all()
 
     def test_2_dim_error(self):
         dask_array = da.ones((50, 50), chunks=(25, 25))
         with pytest.raises(NotImplementedError):
             lt._calculate_function_on_dask_array(
-                    dask_array, sum_frame, show_progressbar=False)
+                dask_array, sum_frame, show_progressbar=False
+            )
 
     def test_5_dim_error(self):
         dask_array = da.ones((4, 4, 6, 50, 50), chunks=(2, 2, 2, 25, 25))
         with pytest.raises(NotImplementedError):
             lt._calculate_function_on_dask_array(
-                    dask_array, sum_frame, show_progressbar=False)
+                dask_array, sum_frame, show_progressbar=False
+            )
 
     def test_nav_size(self):
         dask_array = da.ones((6, 9, 10, 10), chunks=(3, 3, 10, 10))
         data = lt._calculate_function_on_dask_array(
-                dask_array, sum_frame, show_progressbar=False)
+            dask_array, sum_frame, show_progressbar=False
+        )
         assert data.shape == (6, 9)
 
     def test_value(self):
@@ -102,7 +105,8 @@ class TestCalculateFunctionOnDaskArray:
         numpy_array[0, 0, :, :] += 1
         dask_array = da.from_array(numpy_array, chunks=(3, 3, 10, 10))
         data = lt._calculate_function_on_dask_array(
-                dask_array, sum_frame, show_progressbar=False)
+            dask_array, sum_frame, show_progressbar=False
+        )
         assert data.shape == (6, 9)
         assert data[0, 0] == 100
         data[0, 0] = 0
@@ -111,16 +115,17 @@ class TestCalculateFunctionOnDaskArray:
     def test_return_sig_size(self):
         dask_array = da.ones((10, 10, 50, 50), chunks=(5, 5, 25, 25))
         data0 = lt._calculate_function_on_dask_array(
-                dask_array, return_two_value, return_sig_size=2,
-                show_progressbar=False)
+            dask_array, return_two_value, return_sig_size=2, show_progressbar=False
+        )
         assert data0.shape == (10, 10, 2)
         data1 = lt._calculate_function_on_dask_array(
-                dask_array, sum_frame, show_progressbar=False)
+            dask_array, sum_frame, show_progressbar=False
+        )
         assert data1.shape == (10, 10)
 
     def test_return_sig_size_wrong(self):
         dask_array = da.ones((10, 10, 50, 50), chunks=(5, 5, 25, 25))
         with pytest.raises(ValueError):
             lt._calculate_function_on_dask_array(
-                    dask_array, return_two_value, return_sig_size=1,
-                    show_progressbar=False)
+                dask_array, return_two_value, return_sig_size=1, show_progressbar=False
+            )

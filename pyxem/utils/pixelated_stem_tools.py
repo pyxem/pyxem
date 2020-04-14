@@ -21,15 +21,28 @@ def _threshold_and_mask_single_frame(im, threshold=None, mask=None):
 
 
 def _radial_average_dask_array(
-        dask_array, return_sig_size, centre_x, centre_y,
-        normalize, mask_array=None, show_progressbar=True):
-    func_args = {'mask': mask_array, 'radial_array_size': return_sig_size,
-                 'normalize': normalize}
-    func_iterating_args = {'centre_x': centre_x, 'centre_y': centre_y}
+    dask_array,
+    return_sig_size,
+    centre_x,
+    centre_y,
+    normalize,
+    mask_array=None,
+    show_progressbar=True,
+):
+    func_args = {
+        "mask": mask_array,
+        "radial_array_size": return_sig_size,
+        "normalize": normalize,
+    }
+    func_iterating_args = {"centre_x": centre_x, "centre_y": centre_y}
     data = lt._calculate_function_on_dask_array(
-        dask_array, _get_radial_profile_of_diff_image, func_args=func_args,
+        dask_array,
+        _get_radial_profile_of_diff_image,
+        func_args=func_args,
         func_iterating_args=func_iterating_args,
-        return_sig_size=return_sig_size, show_progressbar=show_progressbar)
+        return_sig_size=return_sig_size,
+        show_progressbar=show_progressbar,
+    )
     return data
 
 
@@ -66,10 +79,9 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
     >>> import matplotlib.pyplot as plt
     >>> cax = plt.imshow(image_masked)
     """
-    x, y = np.ogrid[-centerY:imageSizeY - centerY,
-                    -centerX:imageSizeX - centerX]
+    x, y = np.ogrid[-centerY : imageSizeY - centerY, -centerX : imageSizeX - centerX]
     mask = x * x + y * y <= radius * radius
-    return (mask)
+    return mask
 
 
 def _get_signal_mean_position_and_value(signal):
@@ -132,18 +144,17 @@ def _get_corner_values(s, corner_size=0.05):
     a1_range = (am[1].high_index - am[1].low_index) * corner_size
     a0_range, a1_range = int(a0_range), int(a1_range)
 
-    s_corner00 = s.isig[:a0_range + 1, :a1_range + 1]
-    s_corner01 = s.isig[:a0_range + 1, am[1].high_index - a1_range:]
-    s_corner10 = s.isig[am[0].high_index - a0_range:, :a1_range + 1]
-    s_corner11 = \
-        s.isig[am[0].high_index - a0_range:, am[1].high_index - a1_range:]
+    s_corner00 = s.isig[: a0_range + 1, : a1_range + 1]
+    s_corner01 = s.isig[: a0_range + 1, am[1].high_index - a1_range :]
+    s_corner10 = s.isig[am[0].high_index - a0_range :, : a1_range + 1]
+    s_corner11 = s.isig[am[0].high_index - a0_range :, am[1].high_index - a1_range :]
 
     corner00 = _get_signal_mean_position_and_value(s_corner00)
     corner01 = _get_signal_mean_position_and_value(s_corner01)
     corner10 = _get_signal_mean_position_and_value(s_corner10)
     corner11 = _get_signal_mean_position_and_value(s_corner11)
 
-    return (np.array((corner00, corner01, corner10, corner11)).T)
+    return np.array((corner00, corner01, corner10, corner11)).T
 
 
 def _f_min(X, p):
@@ -169,21 +180,17 @@ def _fit_ramp_to_image(signal, corner_size=0.05):
     sam = signal.axes_manager.signal_axes
     xx, yy = np.meshgrid(sam[0].axis, sam[1].axis)
     zz = (-p[0] * xx - p[1] * yy - p[3]) / p[2]
-    return (zz)
+    return zz
 
 
 def normalize_array(np_array, max_number=1.0):
     np_array = copy.deepcopy(np_array)
     np_array -= np_array.min()
     np_array /= np_array.max()
-    return (np_array * max_number)
+    return np_array * max_number
 
 
-def _get_limits_from_array(
-        data,
-        sigma=4,
-        ignore_zeros=False,
-        ignore_edges=False):
+def _get_limits_from_array(data, sigma=4, ignore_zeros=False, ignore_edges=False):
     if ignore_edges:
         x_lim = int(data.shape[0] * 0.05)
         y_lim = int(data.shape[1] * 0.05)
@@ -203,7 +210,7 @@ def _get_limits_from_array(
         clim = list(clim)
         clim[1] = data_array.max()
         clim = tuple(clim)
-    return (clim)
+    return clim
 
 
 def _make_color_wheel(ax, rotation=None):
@@ -215,8 +222,7 @@ def _make_color_wheel(ax, rotation=None):
         t += math.radians(rotation)
         t = (t + np.pi) % (2 * np.pi) - np.pi
 
-    r_masked = np.ma.masked_where(
-        (2.0 < r) | (r < 1.0), r)
+    r_masked = np.ma.masked_where((2.0 < r) | (r < 1.0), r)
     r_masked -= 1.0
 
     mask = r_masked.mask
@@ -224,36 +230,34 @@ def _make_color_wheel(ax, rotation=None):
     rgb_array = _get_rgb_phase_magnitude_array(t, r_masked.data)
     rgb_array = np.dstack((rgb_array, np.invert(mask)))
 
-    ax.imshow(rgb_array, interpolation='quadric', origin='lower')
+    ax.imshow(rgb_array, interpolation="quadric", origin="lower")
     ax.set_axis_off()
 
 
-def _get_rgb_phase_array(
-        phase, rotation=None, max_phase=2 * np.pi, phase_lim=None):
+def _get_rgb_phase_array(phase, rotation=None, max_phase=2 * np.pi, phase_lim=None):
     phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
     phase = phase / (2 * np.pi)
     S = np.ones_like(phase)
     HSV = np.dstack((phase, S, S))
     RGB = hsv_to_rgb(HSV)
-    return (RGB)
+    return RGB
 
 
 def _find_phase(phase, rotation=None, max_phase=2 * np.pi):
     if rotation is not None:
-        phase = (phase + math.radians(rotation))
+        phase = phase + math.radians(rotation)
     phase = phase % max_phase
     return phase
 
 
 def _get_rgb_phase_magnitude_array(
-        phase, magnitude, rotation=None,
-        magnitude_limits=None, max_phase=2 * np.pi):
+    phase, magnitude, rotation=None, magnitude_limits=None, max_phase=2 * np.pi
+):
     phase = _find_phase(phase, rotation=rotation, max_phase=max_phase)
     phase = phase / (2 * np.pi)
 
     if magnitude_limits is not None:
-        np.clip(magnitude, magnitude_limits[0], magnitude_limits[1],
-                out=magnitude)
+        np.clip(magnitude, magnitude_limits[0], magnitude_limits[1], out=magnitude)
     magnitude_max = magnitude.max()
     if magnitude_max == 0:
         magnitude_max = 1
@@ -261,20 +265,19 @@ def _get_rgb_phase_magnitude_array(
     S = np.ones_like(phase)
     HSV = np.dstack((phase, S, magnitude))
     RGB = hsv_to_rgb(HSV)
-    return (RGB)
+    return RGB
 
 
 def _find_longest_distance(
-        imX, imY,
-        centreX_min, centreY_min,
-        centreX_max, centreY_max,
+    imX, imY, centreX_min, centreY_min, centreX_max, centreY_max,
 ):
     max_value = max(
         int(((imX - centreX_min) ** 2 + (imY - centreY_min) ** 2) ** 0.5),
         int(((centreX_max) ** 2 + (imY - centreY_min) ** 2) ** 0.5),
         int(((imX - centreX_min) ** 2 + (centreY_max) ** 2) ** 0.5),
-        int((centreX_max ** 2 + centreY_max ** 2) ** 0.5))
-    return (max_value)
+        int((centreX_max ** 2 + centreY_max ** 2) ** 0.5),
+    )
+    return max_value
 
 
 def _make_centre_array_from_signal(signal, x=None, y=None):
@@ -313,11 +316,12 @@ def _get_lowest_index_radial_array(radial_array):
             lowest_index_in_image = np.where(radial_data == 0)[0][0]
             if lowest_index_in_image < lowest_index:
                 lowest_index = lowest_index_in_image
-    return (lowest_index)
+    return lowest_index
 
 
-def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y,
-                                      normalize, radial_array_size, mask=None):
+def _get_radial_profile_of_diff_image(
+    diff_image, centre_x, centre_y, normalize, radial_array_size, mask=None
+):
     """Radially average a single diffraction image around a centre position.
 
     Radially profiles the data, averaging the intensity in rings
@@ -360,13 +364,13 @@ def _get_radial_profile_of_diff_image(diff_image, centre_x, centre_y,
         radial_profile = tbin / nr
     else:
         radial_profile = tbin
-    radial_array[0:len(radial_profile)] = radial_profile
+    radial_array[0 : len(radial_profile)] = radial_profile
     return radial_array
 
 
 def _get_angle_sector_mask(
-        signal, angle0, angle1,
-        centre_x_array=None, centre_y_array=None):
+    signal, angle0, angle1, centre_x_array=None, centre_y_array=None
+):
     """Get a bool array with True values between angle0 and angle1.
     Will use the (0, 0) point as given by the signal as the centre,
     giving an "angular" slice. Useful for analysing anisotropy in
@@ -396,8 +400,8 @@ def _get_angle_sector_mask(
     """
     if angle0 > angle1:
         raise ValueError(
-            "angle1 ({0}) needs to be larger than angle0 ({1})".format(
-                angle1, angle0))
+            "angle1 ({0}) needs to be larger than angle0 ({1})".format(angle1, angle0)
+        )
 
     bool_array = np.zeros_like(signal.data, dtype=np.bool)
     for s in signal:
@@ -416,8 +420,9 @@ def _get_angle_sector_mask(
         x_size = signal_axes[1].size * 1j
         y_size = signal_axes[0].size * 1j
         x, y = np.mgrid[
-               signal_axes[1].low_value:signal_axes[1].high_value:x_size,
-               signal_axes[0].low_value:signal_axes[0].high_value:y_size]
+            signal_axes[1].low_value : signal_axes[1].high_value : x_size,
+            signal_axes[0].low_value : signal_axes[0].high_value : y_size,
+        ]
         t = np.arctan2(x, y) + np.pi
         if (angle1 - angle0) >= (2 * np.pi):
             bool_array[indices] = True
@@ -432,7 +437,8 @@ def _get_angle_sector_mask(
             else:
                 raise ValueError(
                     "Not able to process with angle0: {0}, and angle1: {1}. "
-                    "This error should not happen...")
+                    "This error should not happen..."
+                )
     return bool_array
 
 
@@ -455,8 +461,9 @@ def _copy_signal_all_axes_metadata(signal_original, signal_new):
         raise ValueError(
             "signal_original and signal_new must have the same shape, not "
             "{0} and {1}".format(
-                signal_original.axes_manager.shape,
-                signal_new.axes_manager.shape))
+                signal_original.axes_manager.shape, signal_new.axes_manager.shape
+            )
+        )
     for iax in range(len(signal_original.axes_manager.shape)):
         ax_o = signal_original.axes_manager[iax]
         ax_n = signal_new.axes_manager[iax]

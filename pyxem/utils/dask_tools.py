@@ -10,8 +10,8 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     array_dims = len(dask_array.shape)
     if array_dims < 2:
         raise ValueError(
-            "dask_array must be at least two dimensions, not {0}".format(
-                array_dims))
+            "dask_array must be at least two dimensions, not {0}".format(array_dims)
+        )
     detx, dety = dask_array.shape[-2:]
     chunks = [None] * array_dims
     chunks[-2] = detx
@@ -59,11 +59,14 @@ def _mask_array(dask_array, mask_array, fill_value=None):
         raise ValueError(
             "mask_array ({0}) and last two dimensions in the "
             "dask_array ({1}) need to have the same shape.".format(
-                mask_array.shape, dask_array.shape[-2:]))
+                mask_array.shape, dask_array.shape[-2:]
+            )
+        )
     mask_array_4d = da.ones_like(dask_array, dtype=np.bool)
     mask_array_4d = mask_array_4d[:, :] * mask_array
     dask_array_masked = da.ma.masked_array(
-        dask_array, mask_array_4d, fill_value=fill_value)
+        dask_array, mask_array_4d, fill_value=fill_value
+    )
     return dask_array_masked
 
 
@@ -127,7 +130,8 @@ def _threshold_array(dask_array, threshold_value=1, mask_array=None):
     else:
         raise ValueError(
             "dask_array need to have either 2, 3, or 4 dimensions. "
-            "The input has {0} dimensions".format(len(dask_array.shape)))
+            "The input has {0} dimensions".format(len(dask_array.shape))
+        )
     thresholded_array = da.ma.getdata(thresholded_array)
     return thresholded_array
 
@@ -191,7 +195,8 @@ def _template_match_binary_image_chunk(data, binary_image):
         islice = np.s_[index]
         frame[:] = data[islice]
         output_array[islice] = _template_match_binary_image_single_frame(
-            frame, binary_image)
+            frame, binary_image
+        )
     return output_array
 
 
@@ -226,17 +231,28 @@ def _template_match_with_binary_image(dask_array, binary_image):
     if len(binary_image.shape) != 2:
         raise ValueError(
             "binary_image must have two dimensions, not {0}".format(
-                len(binary_image.shape)))
+                len(binary_image.shape)
+            )
+        )
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
-        _template_match_binary_image_chunk, dask_array_rechunked,
-        binary_image, dtype=np.float32)
+        _template_match_binary_image_chunk,
+        dask_array_rechunked,
+        binary_image,
+        dtype=np.float32,
+    )
     return output_array
 
 
 def _peak_find_dog_single_frame(
-        image, min_sigma=0.98, max_sigma=55, sigma_ratio=1.76, threshold=0.36,
-        overlap=0.81, normalize_value=None):
+    image,
+    min_sigma=0.98,
+    max_sigma=55,
+    sigma_ratio=1.76,
+    threshold=0.36,
+    overlap=0.81,
+    normalize_value=None,
+):
     """Find peaks in a single frame using skimage's blob_dog function.
 
     Parameters
@@ -266,17 +282,21 @@ def _peak_find_dog_single_frame(
 
     if normalize_value is None:
         normalize_value = np.max(image)
-    peaks = blob_dog(image / normalize_value, min_sigma=min_sigma,
-                     max_sigma=max_sigma, sigma_ratio=sigma_ratio,
-                     threshold=threshold, overlap=overlap,
-                     exclude_border=False)
+    peaks = blob_dog(
+        image / normalize_value,
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        sigma_ratio=sigma_ratio,
+        threshold=threshold,
+        overlap=overlap,
+        exclude_border=False,
+    )
     peak = peaks[:, :2].astype(np.float64)
 
     return peak
 
 
-def _peak_find_dog_chunk(
-        data, **kwargs):
+def _peak_find_dog_chunk(data, **kwargs):
     """Find peaks in a chunk using skimage's blob_dog function.
 
     Parameters
@@ -310,16 +330,14 @@ def _peak_find_dog_chunk(
     >>> peaks23 = peak_array[2, 3]
 
     """
-    output_array = np.empty(data.shape[:-2], dtype='object')
+    output_array = np.empty(data.shape[:-2], dtype="object")
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
-        output_array[islice] = _peak_find_dog_single_frame(
-            image=data[islice], **kwargs)
+        output_array[islice] = _peak_find_dog_single_frame(image=data[islice], **kwargs)
     return output_array
 
 
-def _peak_find_dog(
-        dask_array, **kwargs):
+def _peak_find_dog(dask_array, **kwargs):
     """Find peaks in a dask array using skimage's blob_dog function.
 
     Parameters
@@ -358,14 +376,24 @@ def _peak_find_dog(
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     output_array = da.map_blocks(
-        _peak_find_dog_chunk, dask_array_rechunked, drop_axis=drop_axis,
-        dtype=np.object, **kwargs)
+        _peak_find_dog_chunk,
+        dask_array_rechunked,
+        drop_axis=drop_axis,
+        dtype=np.object,
+        **kwargs
+    )
     return output_array
 
 
 def _peak_find_log_single_frame(
-        image, min_sigma=0.98, max_sigma=55, num_sigma=10, threshold=0.36,
-        overlap=0.81, normalize_value=None):
+    image,
+    min_sigma=0.98,
+    max_sigma=55,
+    num_sigma=10,
+    threshold=0.36,
+    overlap=0.81,
+    normalize_value=None,
+):
     """Find peaks in a single frame using skimage's blob_log function.
 
     Parameters
@@ -395,16 +423,20 @@ def _peak_find_log_single_frame(
 
     if normalize_value is None:
         normalize_value = np.max(image)
-    peaks = blob_log(image / normalize_value, min_sigma=min_sigma,
-                     max_sigma=max_sigma, num_sigma=num_sigma,
-                     threshold=threshold, overlap=overlap,
-                     exclude_border=False)
+    peaks = blob_log(
+        image / normalize_value,
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        num_sigma=num_sigma,
+        threshold=threshold,
+        overlap=overlap,
+        exclude_border=False,
+    )
     peak = peaks[:, :2].astype(np.float64)
     return peak
 
 
-def _peak_find_log_chunk(
-        data, **kwargs):
+def _peak_find_log_chunk(data, **kwargs):
     """Find peaks in a chunk using skimage's blob_log function.
 
     Parameters
@@ -438,16 +470,14 @@ def _peak_find_log_chunk(
     >>> peaks23 = peak_array[2, 3]
 
     """
-    output_array = np.empty(data.shape[:-2], dtype='object')
+    output_array = np.empty(data.shape[:-2], dtype="object")
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
-        output_array[islice] = _peak_find_log_single_frame(
-            image=data[islice], **kwargs)
+        output_array[islice] = _peak_find_log_single_frame(image=data[islice], **kwargs)
     return output_array
 
 
-def _peak_find_log(
-        dask_array, **kwargs):
+def _peak_find_log(dask_array, **kwargs):
     """Find peaks in a dask array using skimage's blob_log function.
 
     Parameters
@@ -486,8 +516,12 @@ def _peak_find_log(
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     output_array = da.map_blocks(
-        _peak_find_log_chunk, dask_array_rechunked, drop_axis=drop_axis,
-        dtype=np.object, **kwargs)
+        _peak_find_log_chunk,
+        dask_array_rechunked,
+        drop_axis=drop_axis,
+        dtype=np.object,
+        **kwargs
+    )
     return output_array
 
 
@@ -534,7 +568,7 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
 
     """
     det_shape = dask_array.shape[-2:]
-    y_grad, x_grad = np.mgrid[0:det_shape[0], 0:det_shape[1]]
+    y_grad, x_grad = np.mgrid[0 : det_shape[0], 0 : det_shape[1]]
     y_grad, x_grad = y_grad.astype(np.float64), x_grad.astype(np.float64)
     sum_array = np.ones_like(x_grad)
 
@@ -542,15 +576,15 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
         if not mask_array.shape == det_shape:
             raise ValueError(
                 "mask_array ({0}) must have same shape as last two "
-                "dimensions of the dask_array ({1})".format(
-                    mask_array.shape, det_shape))
+                "dimensions of the dask_array ({1})".format(mask_array.shape, det_shape)
+            )
         x_grad = x_grad * np.invert(mask_array)
         y_grad = y_grad * np.invert(mask_array)
         sum_array = sum_array * np.invert(mask_array)
     if threshold_value is not None:
         dask_array = _threshold_array(
-            dask_array, threshold_value=threshold_value,
-            mask_array=mask_array)
+            dask_array, threshold_value=threshold_value, mask_array=mask_array
+        )
 
     x_shift = da.multiply(dask_array, x_grad, dtype=np.float64)
     y_shift = da.multiply(dask_array, y_grad, dtype=np.float64)
@@ -631,8 +665,9 @@ def _remove_bad_pixels(dask_array, bad_pixel_array):
 
     """
     if len(dask_array.shape) < 2:
-        raise ValueError("dask_array {0} must be at least 2 dimensions".format(
-            dask_array.shape))
+        raise ValueError(
+            "dask_array {0} must be at least 2 dimensions".format(dask_array.shape)
+        )
     if bad_pixel_array.shape == dask_array.shape:
         pass
     elif bad_pixel_array.shape == dask_array.shape[-2:]:
@@ -643,8 +678,9 @@ def _remove_bad_pixels(dask_array, bad_pixel_array):
             "bad_pixel_array {0} must either 2-D and have the same shape "
             "as the two last dimensions in dask_array {1}. Or be "
             "the same shape as dask_array {2}".format(
-                bad_pixel_array.shape,
-                dask_array.shape[-2:], dask_array.shape))
+                bad_pixel_array.shape, dask_array.shape[-2:], dask_array.shape
+            )
+        )
     dif0 = da.roll(dask_array, shift=1, axis=-2)
     dif1 = da.roll(dask_array, shift=-1, axis=-2)
     dif2 = da.roll(dask_array, shift=1, axis=-1)
@@ -732,7 +768,7 @@ def _find_hot_pixels(dask_array, threshold_multiplier=500, mask_array=None):
     if len(dask_array.shape) < 2:
         raise ValueError("dask_array must have at least 2 dimensions")
 
-    dask_array = dask_array.astype('float64')
+    dask_array = dask_array.astype("float64")
     dif0 = da.roll(dask_array, shift=1, axis=-2)
     dif1 = da.roll(dask_array, shift=-1, axis=-2)
     dif2 = da.roll(dask_array, shift=1, axis=-1)
@@ -790,18 +826,23 @@ def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
     array_shape = peaks.shape
     mask = morphology.disk(disk_r)
     size = np.shape(frame)
-    intensity_array = np.zeros((array_shape[0], 3), dtype='float64')
+    intensity_array = np.zeros((array_shape[0], 3), dtype="float64")
     for i in range(array_shape[0]):
         cx = int(peaks[i, 0])
         cy = int(peaks[i, 1])
         intensity_array[i, 0] = peaks[i, 0]
         intensity_array[i, 1] = peaks[i, 1]
-        if ((cx - disk_r < 0) | (cx + disk_r + 1 >= size[0])
-                | (cy - disk_r < 0) | (cy + disk_r + 1 >= size[1])):
+        if (
+            (cx - disk_r < 0)
+            | (cx + disk_r + 1 >= size[0])
+            | (cy - disk_r < 0)
+            | (cy + disk_r + 1 >= size[1])
+        ):
             intensity_array[i, 2] = 0
         else:
-            subframe = \
-                frame[cx - disk_r:cx + disk_r + 1, cy - disk_r:cy + disk_r + 1]
+            subframe = frame[
+                cx - disk_r : cx + disk_r + 1, cy - disk_r : cy + disk_r + 1
+            ]
             intensity_array[i, 2] = np.mean(mask * subframe)
 
     return intensity_array
@@ -843,7 +884,8 @@ def _intensity_peaks_image_chunk(data, peak_array, disk_r):
         islice = np.s_[index]
         peaks = peak_array[islice][0, 0]
         output_array[islice] = _intensity_peaks_image_single_frame(
-            data[islice], peaks, disk_r)
+            data[islice], peaks, disk_r
+        )
     return output_array
 
 
@@ -887,12 +929,14 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
     """
     if dask_array.shape[:-2] != peak_array.shape:
         raise ValueError(
-                "peak_array ({0}) must have the same shape as dask_array "
-                "except the two last dimensions ({1})".format(
-                    peak_array.shape, dask_array.shape[:-2]))
-    if not hasattr(dask_array, 'chunks'):
+            "peak_array ({0}) must have the same shape as dask_array "
+            "except the two last dimensions ({1})".format(
+                peak_array.shape, dask_array.shape[:-2]
+            )
+        )
+    if not hasattr(dask_array, "chunks"):
         raise ValueError("dask_array must be a Dask array")
-    if not hasattr(peak_array, 'chunks'):
+    if not hasattr(peak_array, "chunks"):
         raise ValueError("peak_array must be a Dask array")
 
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
@@ -903,12 +947,16 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
     peak_array_rechunked = peak_array_rechunked.reshape(shape)
 
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
-    kwargs_intensity_peaks = {'disk_r': disk_r}
+    kwargs_intensity_peaks = {"disk_r": disk_r}
 
     output_array = da.map_blocks(
-        _intensity_peaks_image_chunk, dask_array_rechunked,
-        peak_array_rechunked, drop_axis=drop_axis,
-        dtype=np.object, **kwargs_intensity_peaks)
+        _intensity_peaks_image_chunk,
+        dask_array_rechunked,
+        peak_array_rechunked,
+        drop_axis=drop_axis,
+        dtype=np.object,
+        **kwargs_intensity_peaks
+    )
     return output_array
 
 
@@ -963,8 +1011,7 @@ def _background_removal_chunk_dog(data, **kwargs):
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
         frame[:] = data[islice]
-        output_array[islice] = _background_removal_single_frame_dog(
-            frame, **kwargs)
+        output_array[islice] = _background_removal_single_frame_dog(frame, **kwargs)
     return output_array
 
 
@@ -995,8 +1042,8 @@ def _background_removal_dog(dask_array, **kwargs):
     """
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
-        _background_removal_chunk_dog, dask_array_rechunked,
-        dtype=np.float32, **kwargs)
+        _background_removal_chunk_dog, dask_array_rechunked, dtype=np.float32, **kwargs
+    )
     return output_array
 
 
@@ -1049,8 +1096,7 @@ def _background_removal_chunk_median(data, **kwargs):
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
         frame[:] = data[islice]
-        output_array[islice] = _background_removal_single_frame_median(
-            frame, **kwargs)
+        output_array[islice] = _background_removal_single_frame_median(frame, **kwargs)
     return output_array
 
 
@@ -1080,13 +1126,15 @@ def _background_removal_median(dask_array, **kwargs):
     """
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
-        _background_removal_chunk_median, dask_array_rechunked,
-        dtype=np.float32, **kwargs)
+        _background_removal_chunk_median,
+        dask_array_rechunked,
+        dtype=np.float32,
+        **kwargs
+    )
     return output_array
 
 
-def _background_removal_single_frame_radial_median(
-        frame, centre_x=128, centre_y=128):
+def _background_removal_single_frame_radial_median(frame, centre_x=128, centre_y=128):
     """Background removal by subtracting median of pixel at the same
     radius from the center.
 
@@ -1115,7 +1163,7 @@ def _background_removal_single_frame_radial_median(
     r_median = np.zeros(np.max(r) + 1, dtype=np.float64)
 
     for i in range(len(r_median)):
-        if (diff_image_flat[r_flat == i].size != 0):
+        if diff_image_flat[r_flat == i].size != 0:
             r_median[i] = np.median(diff_image_flat[r_flat == i])
     image = frame - r_median[r]
 
@@ -1150,7 +1198,8 @@ def _background_removal_chunk_radial_median(data, **kwargs):
         islice = np.s_[index]
         frame[:] = data[islice]
         output_array[islice] = _background_removal_single_frame_radial_median(
-            frame, **kwargs)
+            frame, **kwargs
+        )
     return output_array
 
 
@@ -1182,8 +1231,11 @@ def _background_removal_radial_median(dask_array, **kwargs):
     """
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
-        _background_removal_chunk_radial_median, dask_array_rechunked,
-        dtype=np.float32, **kwargs)
+        _background_removal_chunk_radial_median,
+        dask_array_rechunked,
+        dtype=np.float32,
+        **kwargs
+    )
     return output_array
 
 
@@ -1211,24 +1263,25 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
     ...     s.data[0,0,:,:], peak_array, 20)
 
     """
-    new_peak = np.zeros(peaks.shape, dtype='float64')
+    new_peak = np.zeros(peaks.shape, dtype="float64")
 
     if peaks.size == 0:
         return peaks
     else:
         for i in range(peaks.shape[0]):
             subframe = _center_of_mass_experimental_square(
-                frame, np.asarray(peaks[i], dtype=np.uint16), square_size)
+                frame, np.asarray(peaks[i], dtype=np.uint16), square_size
+            )
             if subframe is None:
-                new_peak[i, 0] = peaks[i, 0].astype('float64')
-                new_peak[i, 1] = peaks[i, 1].astype('float64')
+                new_peak[i, 0] = peaks[i, 0].astype("float64")
+                new_peak[i, 1] = peaks[i, 1].astype("float64")
             else:
-                subframe = subframe.astype('float64')
+                subframe = subframe.astype("float64")
                 f_x = (subframe.shape[0]) / 2
                 f_y = (subframe.shape[1]) / 2
                 cx, cy = _center_of_mass_hs(subframe)
-                new_peak[i, 0] = peaks[i, 0].astype('float64') + (cx - f_x)
-                new_peak[i, 1] = peaks[i, 1].astype('float64') + (cy - f_y)
+                new_peak[i, 0] = peaks[i, 0].astype("float64") + (cx - f_x)
+                new_peak[i, 1] = peaks[i, 1].astype("float64") + (cy - f_y)
 
         return new_peak
 
@@ -1271,7 +1324,8 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
         frame[:] = data[islice]
         peaks = peak_array[islice][0, 0]
         output_array[islice] = _peak_refinement_centre_of_mass_frame(
-            frame, peaks, square_size)
+            frame, peaks, square_size
+        )
     return output_array
 
 
@@ -1305,12 +1359,14 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     """
     if dask_array.shape[:-2] != peak_array.shape:
         raise ValueError(
-                "peak_array ({0}) must have the same shape as dask_array "
-                "except the two last dimensions ({1})".format(
-                    peak_array.shape, dask_array.shape[:-2]))
-    if not hasattr(dask_array, 'chunks'):
+            "peak_array ({0}) must have the same shape as dask_array "
+            "except the two last dimensions ({1})".format(
+                peak_array.shape, dask_array.shape[:-2]
+            )
+        )
+    if not hasattr(dask_array, "chunks"):
         raise ValueError("dask_array must be a Dask array")
-    if not hasattr(peak_array, 'chunks'):
+    if not hasattr(peak_array, "chunks"):
         raise ValueError("peak_array must be a Dask array")
 
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
@@ -1321,12 +1377,16 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     peak_array_rechunked = peak_array_rechunked.reshape(shape)
 
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
-    kwargs_refinement = {'square_size': square_size}
+    kwargs_refinement = {"square_size": square_size}
 
     output_array = da.map_blocks(
-            _peak_refinement_centre_of_mass_chunk, dask_array_rechunked,
-            peak_array_rechunked, drop_axis=drop_axis,
-            dtype=np.object, **kwargs_refinement)
+        _peak_refinement_centre_of_mass_chunk,
+        dask_array_rechunked,
+        peak_array_rechunked,
+        drop_axis=drop_axis,
+        dtype=np.object,
+        **kwargs_refinement
+    )
     return output_array
 
 
@@ -1373,8 +1433,9 @@ def _center_of_mass_experimental_square(z, vector, square_size):
         z, but with row and column zero set to 0
     """
 
-    z_adpt = np.copy(_get_experimental_square(z, vector=vector,
-                                              square_size=square_size))
+    z_adpt = np.copy(
+        _get_experimental_square(z, vector=vector, square_size=square_size)
+    )
 
     if z_adpt.size == 0:
         return None
@@ -1414,5 +1475,5 @@ def _get_experimental_square(z, vector, square_size):
         raise ValueError("'square_size' must be an even number")
 
     cx, cy, half_ss = (vector[1]), (vector[0]), int(square_size / 2)
-    _z = z[cy - half_ss:cy + half_ss, cx - half_ss:cx + half_ss]
+    _z = z[cy - half_ss : cy + half_ss, cx - half_ss : cx + half_ss]
     return _z

@@ -6,22 +6,25 @@ from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
 from pixstem.pixelated_stem_class import (
-        PixelatedSTEM, DPCBaseSignal, DPCSignal1D, DPCSignal2D,
-        LazyPixelatedSTEM)
+    PixelatedSTEM,
+    DPCBaseSignal,
+    DPCSignal1D,
+    DPCSignal2D,
+    LazyPixelatedSTEM,
+)
 
 
 def _get_dtype_from_header_string(header_string):
     header_split_list = header_string.split(",")
     dtype_string = header_split_list[6]
-    if dtype_string == 'U08':
+    if dtype_string == "U08":
         dtype = ">u1"
-    elif dtype_string == 'U16':
+    elif dtype_string == "U16":
         dtype = ">u2"
-    elif dtype_string == 'U32':
+    elif dtype_string == "U32":
         dtype = ">u4"
     else:
-        print("dtype {0} not recognized, trying unsigned 16 bit".format(
-            dtype_string))
+        print("dtype {0} not recognized, trying unsigned 16 bit".format(dtype_string))
         dtype = ">u2"
     return dtype
 
@@ -35,8 +38,9 @@ def _get_detector_pixel_size(header_string):
         det_y = int(det_y_string)
     except NameError:
         print(
-                "detector size strings {0} and {1} not recognized, "
-                "trying 256 x 256".format(det_x_string, det_y_string))
+            "detector size strings {0} and {1} not recognized, "
+            "trying 256 x 256".format(det_x_string, det_y_string)
+        )
         det_x, det_y = 256, 256
     if det_x == 256:
         det_x_value = det_x
@@ -52,12 +56,18 @@ def _get_detector_pixel_size(header_string):
     else:
         print("detector y size {0} not recognized, trying 256".format(det_y))
         det_y_value = 256
-    return(det_x_value, det_y_value)
+    return (det_x_value, det_y_value)
 
 
 def load_binary_merlin_signal(
-        filename, probe_x=None, probe_y=None, chunks=(32, 32, 32, 32),
-        flyback_pixels=1, datatype=None, lazy_result=True):
+    filename,
+    probe_x=None,
+    probe_y=None,
+    chunks=(32, 32, 32, 32),
+    flyback_pixels=1,
+    datatype=None,
+    lazy_result=True,
+):
     """Temporary function for loading Merlin binary data.
 
     Parameters
@@ -83,7 +93,7 @@ def load_binary_merlin_signal(
     if probe_y is None:
         probe_y = 1
 
-    f = open(filename, 'rb')
+    f = open(filename, "rb")
     header_string = f.read(50).decode()
     f.close()
 
@@ -94,17 +104,19 @@ def load_binary_merlin_signal(
     value_between_frames = 192
 
     frametype = np.dtype(
-            [
-                ('head', np.uint8, value_between_frames*2),
-                ('data', datatype, (det_x, det_y))])
+        [
+            ("head", np.uint8, value_between_frames * 2),
+            ("data", datatype, (det_x, det_y)),
+        ]
+    )
 
     data_with_HF = np.memmap(
-            filename, frametype, mode='r',
-            shape=(probe_y, probe_x + flyback_pixels))
+        filename, frametype, mode="r", shape=(probe_y, probe_x + flyback_pixels)
+    )
     if flyback_pixels != 0:
         data_with_HF = data_with_HF[:, 0:-flyback_pixels]
 
-    data_array = data_with_HF['data']
+    data_array = data_with_HF["data"]
 
     dask_array = da.from_array(data_array, chunks=chunks)
     dask_array = dask_array.squeeze()
@@ -115,36 +127,34 @@ def load_binary_merlin_signal(
     return s
 
 
-def _fpd_checker(filename, attr_substring='fpd_version'):
+def _fpd_checker(filename, attr_substring="fpd_version"):
     if h5py.is_hdf5(filename):
-        hdf5_file = h5py.File(filename, mode='r')
+        hdf5_file = h5py.File(filename, mode="r")
         for attr in hdf5_file.attrs:
             if attr_substring in attr:
-                return(True)
-    return(False)
+                return True
+    return False
 
 
-def _hspy_checker(filename, attr_substring='fpd_version'):
+def _hspy_checker(filename, attr_substring="fpd_version"):
     if h5py.is_hdf5(filename):
-        hdf5_file = h5py.File(filename, mode='r')
+        hdf5_file = h5py.File(filename, mode="r")
         for attr in hdf5_file.attrs:
-            if 'file_format' in attr:
-                if hdf5_file.attrs['file_format'] == 'HyperSpy':
-                    return(True)
-    return(False)
+            if "file_format" in attr:
+                if hdf5_file.attrs["file_format"] == "HyperSpy":
+                    return True
+    return False
 
 
 def _load_fpd_sum_im(filename):
-    s = load_with_reader(
-            filename, reader=emd, dataset_name="/fpd_expt/fpd_sum_im")
+    s = load_with_reader(filename, reader=emd, dataset_name="/fpd_expt/fpd_sum_im")
     if len(s.axes_manager.shape) == 3:
         s = s.isig[0, :, :]
     return s
 
 
 def _load_fpd_sum_dif(filename):
-    s = load_with_reader(
-            filename, reader=emd, dataset_name="/fpd_expt/fpd_sum_dif")
+    s = load_with_reader(filename, reader=emd, dataset_name="/fpd_expt/fpd_sum_dif")
     if len(s.axes_manager.shape) == 3:
         s = s.isig[:, :, 0]
     return s
@@ -152,13 +162,14 @@ def _load_fpd_sum_dif(filename):
 
 def _load_fpd_emd_file(filename, lazy=False):
     s = load_with_reader(
-            filename, reader=emd, lazy=lazy, dataset_name="/fpd_expt/fpd_data")
+        filename, reader=emd, lazy=lazy, dataset_name="/fpd_expt/fpd_data"
+    )
     if len(s.axes_manager.shape) == 5:
         s = s.isig[:, :, 0, :, :]
     s = s.transpose(signal_axes=(0, 1))
     s._lazy = lazy
     s_new = signal_to_pixelated_stem(s)
-    return(s_new)
+    return s_new
 
 
 def _load_other_file(filename, lazy=False):
@@ -170,14 +181,16 @@ def _load_other_file(filename, lazy=False):
 def _copy_axes_ps_to_dpc(s_ps, s_dpc):
     if s_ps.axes_manager.navigation_dimension > 2:
         raise ValueError(
-                "s_ps can not have more than 2 navigation dimensions, "
-                "not {0}".format(s_ps.axes_manager.navigation_dimension))
+            "s_ps can not have more than 2 navigation dimensions, "
+            "not {0}".format(s_ps.axes_manager.navigation_dimension)
+        )
     if s_ps.axes_manager.navigation_shape != s_dpc.axes_manager.signal_shape:
         raise ValueError(
-                "s_ps navigation shape {0}, must be the same "
-                "as s_dpc signal shape {1}".format(
-                    s_ps.axes_manager.navigation_shape,
-                    s_dpc.axes_manager.signal_shape))
+            "s_ps navigation shape {0}, must be the same "
+            "as s_dpc signal shape {1}".format(
+                s_ps.axes_manager.navigation_shape, s_dpc.axes_manager.signal_shape
+            )
+        )
     ps_a_list = s_ps.axes_manager.navigation_axes
     dp_a_list = s_dpc.axes_manager.signal_axes
     for ps_a, dp_a in zip(ps_a_list, dp_a_list):
@@ -226,9 +239,7 @@ def signal_to_pixelated_stem(s):
     return s_new
 
 
-def load_ps_signal(
-        filename, lazy=False, chunk_size=None,
-        navigation_signal=None):
+def load_ps_signal(filename, lazy=False, chunk_size=None, navigation_signal=None):
     """
     Parameters
     ----------
@@ -242,9 +253,9 @@ def load_ps_signal(
     navigation_signal : Signal2D
 
     """
-    if _fpd_checker(filename, attr_substring='fpd_version'):
+    if _fpd_checker(filename, attr_substring="fpd_version"):
         s = _load_fpd_emd_file(filename, lazy=lazy)
-    elif _hspy_checker(filename, attr_substring='HyperSpy'):
+    elif _hspy_checker(filename, attr_substring="HyperSpy"):
         s = _load_other_file(filename, lazy=lazy)
     else:
         # Attempt to load non-fpd and non-HyperSpy signal
@@ -266,9 +277,9 @@ def load_ps_signal(
             s.navigation_signal = navigation_signal
         else:
             raise ValueError(
-                    "navigation_signal does not have the same shape ({0}) as "
-                    "the signal's navigation shape ({1})".format(
-                        nav_im_shape, nav_ax_shape))
+                "navigation_signal does not have the same shape ({0}) as "
+                "the signal's navigation shape ({1})".format(nav_im_shape, nav_ax_shape)
+            )
     if lazy:
         if chunk_size is not None:
             s.data = s.data.rechunk(chunks=chunk_size)
@@ -324,8 +335,8 @@ def load_dpc_signal(filename):
     s = load(filename)
     if s.axes_manager.navigation_shape != (2,):
         raise Exception(
-                "DPC signal needs to have 1 navigation "
-                "dimension with a size of 2.")
+            "DPC signal needs to have 1 navigation " "dimension with a size of 2."
+        )
     if s.axes_manager.signal_dimension == 0:
         s_out = DPCBaseSignal(s).T
     elif s.axes_manager.signal_dimension == 1:
@@ -334,7 +345,8 @@ def load_dpc_signal(filename):
         s_out = DPCSignal2D(s)
     else:
         raise NotImplementedError(
-                "DPC signals only support 0, 1 and 2 signal dimensions")
+            "DPC signals only support 0, 1 and 2 signal dimensions"
+        )
     s_out.metadata = s.metadata.deepcopy()
     s_out.axes_manager = s.axes_manager.deepcopy()
     return s_out

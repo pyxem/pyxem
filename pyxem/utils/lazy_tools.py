@@ -23,8 +23,7 @@ def _get_dask_chunk_slice_list(dask_array):
     """
     chunk_list_dim = dask_array.shape
     if (len(chunk_list_dim) == 2) or (len(chunk_list_dim) > 4):
-        raise NotImplementedError(
-                "dask_array must have either 3 or 4 dimensions")
+        raise NotImplementedError("dask_array must have either 3 or 4 dimensions")
     temp_slice_list = []
     for chunk_list in dask_array.chunks[:-2]:
         temp_slice_dim = []
@@ -37,21 +36,26 @@ def _get_dask_chunk_slice_list(dask_array):
     slice_list = []
     if len(temp_slice_list) == 1:
         for slice_t in temp_slice_list[0]:
-            temp_slice = np.s_[slice_t[0]:slice_t[1], :, :]
+            temp_slice = np.s_[slice_t[0] : slice_t[1], :, :]
             slice_list.append(temp_slice)
     elif len(temp_slice_list) == 2:
         for slice_t0 in temp_slice_list[0]:
             for slice_t1 in temp_slice_list[1]:
                 temp_slice = np.s_[
-                        slice_t0[0]:slice_t0[1],
-                        slice_t1[0]:slice_t1[1], :, :]
+                    slice_t0[0] : slice_t0[1], slice_t1[0] : slice_t1[1], :, :
+                ]
                 slice_list.append(temp_slice)
     return slice_list
 
 
 def _calculate_function_on_dask_array(
-        dask_array, function, func_args=None, func_iterating_args=None,
-        return_sig_size=1, show_progressbar=True):
+    dask_array,
+    function,
+    func_args=None,
+    func_iterating_args=None,
+    return_sig_size=1,
+    show_progressbar=True,
+):
     """Apply a function to a dask array, immediately returning the results.
 
     Parameters
@@ -82,14 +86,13 @@ def _calculate_function_on_dask_array(
 
     """
     if (len(dask_array.shape) == 2) or (len(dask_array.shape) > 4):
-        raise NotImplementedError(
-                "dask_array must have either 3 or 4 dimensions")
+        raise NotImplementedError("dask_array must have either 3 or 4 dimensions")
     if func_args is None:
         func_args = {}
     if func_iterating_args is None:
         func_iterating_args = {}
     if return_sig_size == 1:
-        return_data = np.zeros((*dask_array.shape[:-2], ))
+        return_data = np.zeros((*dask_array.shape[:-2],))
     else:
         return_data = np.zeros((*dask_array.shape[:-2], return_sig_size))
     slice_list = _get_dask_chunk_slice_list(dask_array)
@@ -120,7 +123,7 @@ def _calculate_function_on_dask_array(
                 i_x = slice_chunk[0].start + im_slice[0]
                 i_y = slice_chunk[1].start + im_slice[1]
                 for k, v in func_iterating_args.items():
-                    i = return_data.shape[1]*i_x + i_y
+                    i = return_data.shape[1] * i_x + i_y
                     func_args[k] = v[i]
                 out_data = function(im, **func_args)
                 if return_sig_size == 1:

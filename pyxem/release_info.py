@@ -5,8 +5,7 @@ copyright = "Copyright 2017-2020, The pyXem Developers"
 credits = [
     "Duncan Johnstone",
     "Phillip Crout",
-    "Magnus Nord"
-    "Joonatan Laulainen",
+    "Magnus Nord" "Joonatan Laulainen",
     "Simon Hogas",
     "Ben Martineau",
     "Tina Bergh",

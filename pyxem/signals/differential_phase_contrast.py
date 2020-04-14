@@ -19,7 +19,7 @@
 import copy
 import numpy as np
 
-import pyxem.dpc_utils import make_bivariate_histogram
+from pyxem.utils.dpc_utils import make_bivariate_histogram
 
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
@@ -43,7 +43,9 @@ class DPCBaseSignal(BaseSignal):
     and the second navigation is the y-shift (s.inav[1]).
 
     """
+
     _signal_type = "dpc"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -61,14 +63,12 @@ class DPCSignal1D(Signal1D):
     and the second navigation is the y-shift (s.inav[1]).
 
     """
+
     _signal_type = "dpc"
 
     def get_bivariate_histogram(
-            self,
-            histogram_range=None,
-            masked=None,
-            bins=200,
-            spatial_std=3):
+        self, histogram_range=None, masked=None, bins=200, spatial_std=3
+    ):
         """
         Useful for finding the distribution of magnetic vectors(?).
 
@@ -95,11 +95,14 @@ class DPCSignal1D(Signal1D):
         """
         x_position = self.inav[0].data
         y_position = self.inav[1].data
-        s_hist = make_bivariate_histogram(x_position, y_position,
-                                          histogram_range=histogram_range,
-                                          masked=masked,
-                                          bins=bins,
-                                          spatial_std=spatial_std)
+        s_hist = make_bivariate_histogram(
+            x_position,
+            y_position,
+            histogram_range=histogram_range,
+            masked=masked,
+            bins=bins,
+            spatial_std=spatial_std,
+        )
 
         return s_hist
 
@@ -117,6 +120,7 @@ class DPCSignal2D(Signal2D):
     and the second navigation is the y-shift (s.inav[1]).
 
     """
+
     _signal_type = "dpc"
 
     def correct_ramp(self, corner_size=0.05, only_offset=False, out=None):
@@ -206,10 +210,9 @@ class DPCSignal2D(Signal2D):
         magnitude_limits = None
         if autolim:
             magnitude_limits = pst._get_limits_from_array(
-                    magnitude, sigma=autolim_sigma)
-            np.clip(
-                    magnitude, magnitude_limits[0],
-                    magnitude_limits[1], out=magnitude)
+                magnitude, sigma=autolim_sigma
+            )
+            np.clip(magnitude, magnitude_limits[0], magnitude_limits[1], out=magnitude)
 
         signal = Signal2D(magnitude)
         pst._copy_signal2d_axes_manager_metadata(self, signal)
@@ -261,8 +264,7 @@ class DPCSignal2D(Signal2D):
         pst._copy_signal2d_axes_manager_metadata(self, signal_rgb)
         return signal_rgb
 
-    def get_color_signal(
-            self, rotation=None, autolim=True, autolim_sigma=4):
+    def get_color_signal(self, rotation=None, autolim=True, autolim_sigma=4):
         """Get DPC image visualized using continuous color scale.
 
         Converts the x and y beam shifts into an RGB array, showing the
@@ -312,10 +314,14 @@ class DPCSignal2D(Signal2D):
         magnitude_limits = None
         if autolim:
             magnitude_limits = pst._get_limits_from_array(
-                    magnitude, sigma=autolim_sigma)
+                magnitude, sigma=autolim_sigma
+            )
         rgb_array = pst._get_rgb_phase_magnitude_array(
-                phase=phase, magnitude=magnitude, rotation=rotation,
-                magnitude_limits=magnitude_limits)
+            phase=phase,
+            magnitude=magnitude,
+            rotation=rotation,
+            magnitude_limits=magnitude_limits,
+        )
         signal_rgb = Signal1D(rgb_array * (2 ** 16 - 1))
         signal_rgb.change_dtype("uint16")
         signal_rgb.change_dtype("rgb16")
@@ -323,9 +329,16 @@ class DPCSignal2D(Signal2D):
         return signal_rgb
 
     def get_color_image_with_indicator(
-            self, phase_rotation=0, indicator_rotation=0, only_phase=False,
-            autolim=True, autolim_sigma=4, scalebar_size=None, ax=None,
-            ax_indicator=None):
+        self,
+        phase_rotation=0,
+        indicator_rotation=0,
+        only_phase=False,
+        autolim=True,
+        autolim_sigma=4,
+        scalebar_size=None,
+        ax=None,
+        ax_indicator=None,
+    ):
         """Make a matplotlib figure showing DPC contrast.
 
         Parameters
@@ -377,36 +390,31 @@ class DPCSignal2D(Signal2D):
             s = self.get_phase_signal(rotation=phase_rotation)
         else:
             s = self.get_color_signal(
-                    rotation=phase_rotation, autolim=autolim,
-                    autolim_sigma=autolim_sigma)
-        s.change_dtype('uint16')
-        s.change_dtype('float64')
+                rotation=phase_rotation, autolim=autolim, autolim_sigma=autolim_sigma
+            )
+        s.change_dtype("uint16")
+        s.change_dtype("float64")
         extent = self.axes_manager.signal_extent
         extent = [extent[0], extent[1], extent[3], extent[2]]
-        ax.imshow(s.data / 65536., extent=extent)
+        ax.imshow(s.data / 65536.0, extent=extent)
         if ax_indicator is not False:
             if ax_indicator is None:
                 ax_indicator = fig.add_subplot(331)
             pst._make_color_wheel(
-                    ax_indicator,
-                    rotation=indicator_rotation + phase_rotation)
+                ax_indicator, rotation=indicator_rotation + phase_rotation
+            )
         ax.set_axis_off()
         if scalebar_size is not None:
-            scalebar_label = '{0} {1}'.format(
-                    scalebar_size, s.axes_manager[0].units)
-            sb = AnchoredSizeBar(
-                    ax.transData, scalebar_size, scalebar_label, loc=4)
+            scalebar_label = "{0} {1}".format(scalebar_size, s.axes_manager[0].units)
+            sb = AnchoredSizeBar(ax.transData, scalebar_size, scalebar_label, loc=4)
             ax.add_artist(sb)
         if set_fig:
             fig.subplots_adjust(0, 0, 1, 1)
         return fig
 
     def get_bivariate_histogram(
-            self,
-            histogram_range=None,
-            masked=None,
-            bins=200,
-            spatial_std=3):
+        self, histogram_range=None, masked=None, bins=200, spatial_std=3
+    ):
         """
         Useful for finding the distribution of magnetic vectors(?).
 
@@ -440,13 +448,16 @@ class DPCSignal2D(Signal2D):
         x_position = self.inav[0].data
         y_position = self.inav[1].data
         s_hist = pst._make_bivariate_histogram(
-                x_position, y_position,
-                histogram_range=histogram_range,
-                masked=masked,
-                bins=bins,
-                spatial_std=spatial_std)
+            x_position,
+            y_position,
+            histogram_range=histogram_range,
+            masked=masked,
+            bins=bins,
+            spatial_std=spatial_std,
+        )
         s_hist.metadata.General.title = "Bivariate histogram of {0}".format(
-                self.metadata.General.title)
+            self.metadata.General.title
+        )
         return s_hist
 
     def flip_axis_90_degrees(self, flips=1):
@@ -513,9 +524,8 @@ class DPCSignal2D(Signal2D):
 
         """
         s_new = self.map(
-                rotate, show_progressbar=False,
-                inplace=False, reshape=reshape,
-                angle=-angle)
+            rotate, show_progressbar=False, inplace=False, reshape=reshape, angle=-angle
+        )
         return s_new
 
     def rotate_beam_shifts(self, angle):

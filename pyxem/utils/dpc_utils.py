@@ -19,20 +19,17 @@
 import scipy.constants as sc
 import pixstem.diffraction_tools as dt
 
+
 def make_bivariate_histogram(
-        x_position, y_position,
-        histogram_range=None,
-        masked=None,
-        bins=200,
-        spatial_std=3):
+    x_position, y_position, histogram_range=None, masked=None, bins=200, spatial_std=3
+):
     s0_flat = x_position.flatten()
     s1_flat = y_position.flatten()
 
     if masked is not None:
         temp_s0_flat = []
         temp_s1_flat = []
-        for data0, data1, masked_value in zip(
-                s0_flat, s1_flat, masked.flatten()):
+        for data0, data1, masked_value in zip(s0_flat, s1_flat, masked.flatten()):
             if not masked_value:
                 temp_s0_flat.append(data0)
                 temp_s1_flat.append(data1)
@@ -40,20 +37,24 @@ def make_bivariate_histogram(
         s1_flat = np.array(temp_s1_flat)
 
     if histogram_range is None:
-        if (s0_flat.std() > s1_flat.std()):
+        if s0_flat.std() > s1_flat.std():
             s0_range = (
                 s0_flat.mean() - s0_flat.std() * spatial_std,
-                s0_flat.mean() + s0_flat.std() * spatial_std)
+                s0_flat.mean() + s0_flat.std() * spatial_std,
+            )
             s1_range = (
                 s1_flat.mean() - s0_flat.std() * spatial_std,
-                s1_flat.mean() + s0_flat.std() * spatial_std)
+                s1_flat.mean() + s0_flat.std() * spatial_std,
+            )
         else:
             s0_range = (
                 s0_flat.mean() - s1_flat.std() * spatial_std,
-                s0_flat.mean() + s1_flat.std() * spatial_std)
+                s0_flat.mean() + s1_flat.std() * spatial_std,
+            )
             s1_range = (
                 s1_flat.mean() - s1_flat.std() * spatial_std,
-                s1_flat.mean() + s1_flat.std() * spatial_std)
+                s1_flat.mean() + s1_flat.std() * spatial_std,
+            )
     else:
         s0_range = histogram_range
         s1_range = histogram_range
@@ -62,9 +63,8 @@ def make_bivariate_histogram(
         s0_flat,
         s1_flat,
         bins=bins,
-        range=[
-            [s0_range[0], s0_range[1]],
-            [s1_range[0], s1_range[1]]])
+        range=[[s0_range[0], s0_range[1]], [s1_range[0], s1_range[1]]],
+    )
 
     s_hist = Signal2D(hist2d).swap_axes(0, 1)
     s_hist.axes_manager[0].offset = xedges[0]
@@ -72,6 +72,7 @@ def make_bivariate_histogram(
     s_hist.axes_manager[1].offset = yedges[0]
     s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
     return s_hist
+
 
 def bst_to_beta(bst, acceleration_voltage):
     """Calculate beam deflection (beta) values from Bs * t.
@@ -101,7 +102,7 @@ def bst_to_beta(bst, acceleration_voltage):
     wavelength = dt.acceleration_voltage_to_wavelength(av)
     e = sc.elementary_charge
     h = sc.Planck
-    beta = e*wavelength*bst/h
+    beta = e * wavelength * bst / h
     return beta
 
 
@@ -133,7 +134,7 @@ def beta_to_bst(beam_deflection, acceleration_voltage):
     beta = beam_deflection
     e = sc.elementary_charge
     h = sc.Planck
-    Bst = beta*h/(wavelength*e)
+    Bst = beta * h / (wavelength * e)
     return Bst
 
 
@@ -158,7 +159,7 @@ def tesla_to_am(data):
     >>> data_am = dpct.tesla_to_am(data_T)
 
     """
-    return data/sc.mu_0
+    return data / sc.mu_0
 
 
 def acceleration_voltage_to_velocity(acceleration_voltage):
@@ -186,8 +187,8 @@ def acceleration_voltage_to_velocity(acceleration_voltage):
     av = acceleration_voltage
     e = sc.elementary_charge
     me = sc.electron_mass
-    part1 = (1 + (av * e)/(me * c**2))**2
-    v = c * (1 - (1/part1))**0.5
+    part1 = (1 + (av * e) / (me * c ** 2)) ** 2
+    v = c * (1 - (1 / part1)) ** 0.5
     return v
 
 
@@ -214,8 +215,8 @@ def acceleration_voltage_to_relativistic_mass(acceleration_voltage):
     c = sc.speed_of_light
     v = acceleration_voltage_to_velocity(av)
     me = sc.electron_mass
-    part1 = (1 - (v**2)/(c**2))
-    mr = me / (part1)**0.5
+    part1 = 1 - (v ** 2) / (c ** 2)
+    mr = me / (part1) ** 0.5
     return mr
 
 
@@ -249,8 +250,8 @@ def et_to_beta(et, acceleration_voltage):
     m = acceleration_voltage_to_relativistic_mass(av)
     h = sc.Planck
 
-    wavelength2 = wavelength**2
-    h2 = h**2
+    wavelength2 = wavelength ** 2
+    h2 = h ** 2
 
-    beta = e*wavelength2*m*et/h2
+    beta = e * wavelength2 * m * et / h2
     return beta

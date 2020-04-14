@@ -65,7 +65,7 @@ def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
     z0 = ((xx0 * np.cos(rot) + yy0 * np.sin(rot)) ** 2) / semi_len02
     z1 = ((xx0 * np.sin(rot) - yy0 * np.cos(rot)) ** 2) / semi_len12
     zz = z0 + z1
-    elli_mask = zz <= 1.
+    elli_mask = zz <= 1.0
     return elli_mask
 
 
@@ -100,19 +100,20 @@ def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
 
     """
     mask_outer = _get_elliptical_disk(
-            xx, yy, x, y, semi_len0 + lw_r, semi_len1 + lw_r, rotation)
+        xx, yy, x, y, semi_len0 + lw_r, semi_len1 + lw_r, rotation
+    )
     mask_inner = _get_elliptical_disk(
-            xx, yy, x, y, semi_len0 - lw_r, semi_len1 - lw_r, rotation)
+        xx, yy, x, y, semi_len0 - lw_r, semi_len1 - lw_r, rotation
+    )
     ellipse = np.logical_xor(mask_outer, mask_inner)
-    ellipse = ellipse.astype('uint32')
+    ellipse = ellipse.astype("uint32")
     return ellipse
 
 
 class EllipseRing(object):
-
     def __init__(
-            self, xx, yy, x0, y0, semi_len0, semi_len1, rotation,
-            intensity, lw_r=1):
+        self, xx, yy, x0, y0, semi_len0, semi_len1, rotation, intensity, lw_r=1
+    ):
         """
 
         Parameters
@@ -148,27 +149,38 @@ class EllipseRing(object):
         self.lw_r = lw_r
 
     def __repr__(self):
-        return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
-               ' r: %s, I: %s, lw: %s)>' % (
-                       self.__class__.__name__,
-                       self.x0, self.y0, self.semi_len0, self.semi_len1,
-                       self.rotation, self.intensity, self.lw_r,
-                       )
+        return (
+            "<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),"
+            " r: %s, I: %s, lw: %s)>"
+            % (
+                self.__class__.__name__,
+                self.x0,
+                self.y0,
+                self.semi_len0,
+                self.semi_len1,
+                self.rotation,
+                self.intensity,
+                self.lw_r,
+            )
+        )
 
     def get_signal(self):
         ellipse = _get_elliptical_ring(
-                xx=self.xx, yy=self.yy, x=self.x0, y=self.y0,
-                semi_len0=self.semi_len0, semi_len1=self.semi_len1,
-                rotation=self.rotation, lw_r=self.lw_r)
+            xx=self.xx,
+            yy=self.yy,
+            x=self.x0,
+            y=self.y0,
+            semi_len0=self.semi_len0,
+            semi_len1=self.semi_len1,
+            rotation=self.rotation,
+            lw_r=self.lw_r,
+        )
         self.ellipse = ellipse * self.intensity
         return self.ellipse
 
 
 class EllipseDisk(object):
-
-    def __init__(
-            self, xx, yy, x0, y0, semi_len0, semi_len1, rotation,
-            intensity):
+    def __init__(self, xx, yy, x0, y0, semi_len0, semi_len1, rotation, intensity):
         """
 
         Parameters
@@ -203,18 +215,26 @@ class EllipseDisk(object):
         self.xx, self.yy = xx, yy
 
     def __repr__(self):
-        return '<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s),' \
-               ' r: %s, I: %s)>' % (
-                       self.__class__.__name__,
-                       self.x0, self.y0, self.semi_len0, self.semi_len1,
-                       self.rotation, self.intensity,
-                       )
+        return "<%s, ((x0, y0): (%s, %s), (sl0, sl1): (%s, %s)," " r: %s, I: %s)>" % (
+            self.__class__.__name__,
+            self.x0,
+            self.y0,
+            self.semi_len0,
+            self.semi_len1,
+            self.rotation,
+            self.intensity,
+        )
 
     def get_signal(self):
         ellipse = _get_elliptical_disk(
-                xx=self.xx, yy=self.yy, x=self.x0, y=self.y0,
-                semi_len0=self.semi_len0, semi_len1=self.semi_len1,
-                rotation=self.rotation)
+            xx=self.xx,
+            yy=self.yy,
+            x=self.x0,
+            y=self.y0,
+            semi_len0=self.semi_len0,
+            semi_len1=self.semi_len1,
+            rotation=self.rotation,
+        )
         self.ellipse = ellipse * self.intensity
         return self.ellipse
 
@@ -231,10 +251,13 @@ class Circle(object):
         self.get_centre_pixel(xx, yy, scale)
 
     def __repr__(self):
-        return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
-                self.__class__.__name__,
-                self.r, self.x0, self.y0, self.intensity,
-                )
+        return "<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>" % (
+            self.__class__.__name__,
+            self.r,
+            self.x0,
+            self.y0,
+            self.intensity,
+        )
 
     def mask_outside_r(self, scale):
         if self.lw is None:
@@ -292,13 +315,13 @@ class Disk(object):
         self.set_centre_intensity()
 
     def __repr__(self):
-        return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
+        return "<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>" % (
             self.__class__.__name__,
             self.z.r,
             self.z.x0,
             self.z.y0,
             self.z.intensity,
-            )
+        )
 
     def set_centre_intensity(self):
         """
@@ -310,7 +333,7 @@ class Disk(object):
                 self.z.circle[y, x] = self.z.intensity  # This is correct
 
     def get_signal(self):
-        return (self.z.circle)
+        return self.z.circle
 
     def update_axis(self, xx, yy):
         self.z.update_axis(xx, yy)
@@ -328,7 +351,7 @@ class Ring(object):
 
     def __init__(self, xx, yy, scale, x0, y0, r, intensity, lr):
         if lr > r:
-            raise ValueError('Ring line width too big'.format(lr, r))
+            raise ValueError("Ring line width too big".format(lr, r))
         self.lr = lr
         self.lw = 1 + 2 * lr  # scalar line width of the ring
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale, lw=lr)
@@ -336,9 +359,13 @@ class Ring(object):
         self.z.set_uniform_intensity()
 
     def __repr__(self):
-        return '<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>' % (
-            self.__class__.__name__, self.z.r, self.z.x0, self.z.y0,
-            self.z.intensity,)
+        return "<%s, (r: %s, (x0, y0): (%s, %s), I: %s)>" % (
+            self.__class__.__name__,
+            self.z.r,
+            self.z.x0,
+            self.z.y0,
+            self.z.intensity,
+        )
 
     def mask_inside_r(self, scale):
         indices = self.z.circle < (self.z.r - self.lr) ** 2
@@ -408,8 +435,15 @@ class MakeTestData(object):
     """
 
     def __init__(
-            self, size_x=100, size_y=100, scale=1,
-            default=False, blur=True, blur_sigma=1, downscale=True):
+        self,
+        size_x=100,
+        size_y=100,
+        scale=1,
+        default=False,
+        blur=True,
+        blur_sigma=1,
+        downscale=True,
+    ):
         self.scale = scale
         self.blur_on = blur
         self.blur_sigma = blur_sigma
@@ -427,11 +461,13 @@ class MakeTestData(object):
             self.update_signal()
 
     def __repr__(self):
-        return '<%s, ((x, y): (%s, %s), s: %s, z: %s)>' % (
+        return "<%s, ((x, y): (%s, %s), s: %s, z: %s)>" % (
             self.__class__.__name__,
-            self.size_x, self.size_y,
-            self.scale, len(self.z_list),
-            )
+            self.size_x,
+            self.size_y,
+            self.scale,
+            len(self.z_list),
+        )
 
     def update_signal(self):
         self.make_signal()
@@ -450,11 +486,18 @@ class MakeTestData(object):
         self.update_signal()
 
     def add_disk_ellipse(
-            self, x0=50, y0=50, semi_len0=5, semi_len1=8, rotation=0.78,
-            intensity=10):
+        self, x0=50, y0=50, semi_len0=5, semi_len1=8, rotation=0.78, intensity=10
+    ):
         ellipse = EllipseDisk(
-                xx=self.xx, yy=self.yy, x0=x0, y0=y0, semi_len0=semi_len0,
-                semi_len1=semi_len1, rotation=rotation, intensity=intensity)
+            xx=self.xx,
+            yy=self.yy,
+            x0=x0,
+            y0=y0,
+            semi_len0=semi_len0,
+            semi_len1=semi_len1,
+            rotation=rotation,
+            intensity=intensity,
+        )
         self.z_list.append(ellipse)
         self.update_signal()
 
@@ -481,17 +524,30 @@ class MakeTestData(object):
         """
         scale = self.scale / self.downscale_factor
         lr = lw_pix * self.scale  # scalar
-        self.z_list.append(
-                Ring(self.xx, self.yy, scale, x0, y0, r, intensity, lr))
+        self.z_list.append(Ring(self.xx, self.yy, scale, x0, y0, r, intensity, lr))
         self.update_signal()
 
     def add_ring_ellipse(
-            self, x0=50, y0=50, semi_len0=11, semi_len1=13, rotation=0.78,
-            intensity=10, lw_r=2):
+        self,
+        x0=50,
+        y0=50,
+        semi_len0=11,
+        semi_len1=13,
+        rotation=0.78,
+        intensity=10,
+        lw_r=2,
+    ):
         ellipse = EllipseRing(
-                xx=self.xx, yy=self.yy, x0=x0, y0=y0, semi_len0=semi_len0,
-                semi_len1=semi_len1, rotation=rotation, intensity=intensity,
-                lw_r=lw_r)
+            xx=self.xx,
+            yy=self.yy,
+            x0=x0,
+            y0=y0,
+            semi_len0=semi_len0,
+            semi_len1=semi_len1,
+            rotation=rotation,
+            intensity=intensity,
+            lw_r=lw_r,
+        )
         self.z_list.append(ellipse)
         self.update_signal()
 
@@ -509,20 +565,22 @@ class MakeTestData(object):
     def downscale(self):
         if self.downscale_on:
             shape = (
-                    int(self.z.shape[0] / self.downscale_factor),
-                    int(self.z.shape[1] / self.downscale_factor))
+                int(self.z.shape[0] / self.downscale_factor),
+                int(self.z.shape[1] / self.downscale_factor),
+            )
             sh = (
-                    shape[0],
-                    self.z.shape[0] // shape[0], shape[1],
-                    self.z.shape[1] // shape[1])
+                shape[0],
+                self.z.shape[0] // shape[0],
+                shape[1],
+                self.z.shape[1] // shape[1],
+            )
             self.z_downscaled = self.z.reshape(sh).mean(-1).mean(1)
         else:
             self.z_downscaled = self.z
 
     def blur(self):
         if self.blur_on:
-            self.z_blurred = gaussian_filter(
-                self.z_downscaled, sigma=self.blur_sigma)
+            self.z_blurred = gaussian_filter(self.z_downscaled, sigma=self.blur_sigma)
         else:
             self.z_blurred = self.z_downscaled
 
@@ -544,14 +602,35 @@ class MakeTestData(object):
 
 
 def generate_4d_data(
-        probe_size_x=10, probe_size_y=10, image_size_x=50, image_size_y=50,
-        disk_x=25, disk_y=25, disk_r=5, disk_I=20,
-        ring_x=25, ring_y=25, ring_r=20, ring_I=6, ring_lw=0,
-        ring_e_x=None, ring_e_y=25, ring_e_semi_len0=15, ring_e_semi_len1=15,
-        ring_e_r=0, ring_e_I=6, ring_e_lw=1,
-        blur=True, blur_sigma=1, downscale=True, add_noise=False,
-        noise_amplitude=1, lazy=False, lazy_chunks=None,
-        show_progressbar=True):
+    probe_size_x=10,
+    probe_size_y=10,
+    image_size_x=50,
+    image_size_y=50,
+    disk_x=25,
+    disk_y=25,
+    disk_r=5,
+    disk_I=20,
+    ring_x=25,
+    ring_y=25,
+    ring_r=20,
+    ring_I=6,
+    ring_lw=0,
+    ring_e_x=None,
+    ring_e_y=25,
+    ring_e_semi_len0=15,
+    ring_e_semi_len1=15,
+    ring_e_r=0,
+    ring_e_I=6,
+    ring_e_lw=1,
+    blur=True,
+    blur_sigma=1,
+    downscale=True,
+    add_noise=False,
+    noise_amplitude=1,
+    lazy=False,
+    lazy_chunks=None,
+    show_progressbar=True,
+):
     """Generate a test dataset containing a disk and diffraction ring.
 
     Useful for checking that radial average algorithms are working
@@ -732,11 +811,9 @@ def generate_4d_data(
     if not isiterable(ring_e_y):
         ring_e_y = np.ones((probe_size_y, probe_size_x)) * ring_e_y
     if not isiterable(ring_e_semi_len0):
-        ring_e_semi_len0 = np.ones(
-                (probe_size_y, probe_size_x)) * ring_e_semi_len0
+        ring_e_semi_len0 = np.ones((probe_size_y, probe_size_x)) * ring_e_semi_len0
     if not isiterable(ring_e_semi_len1):
-        ring_e_semi_len1 = np.ones(
-                (probe_size_y, probe_size_x)) * ring_e_semi_len1
+        ring_e_semi_len1 = np.ones((probe_size_y, probe_size_x)) * ring_e_semi_len1
     if not isiterable(ring_e_I):
         ring_e_I = np.ones((probe_size_y, probe_size_x)) * ring_e_I
     if not isiterable(ring_e_lw):
@@ -746,12 +823,16 @@ def generate_4d_data(
 
     signal_shape = (probe_size_y, probe_size_x, image_size_y, image_size_x)
     s = PixelatedSTEM(np.zeros(shape=signal_shape))
-    for i in tqdm(s, desc='Make test data', disable=not show_progressbar):
+    for i in tqdm(s, desc="Make test data", disable=not show_progressbar):
         index = s.axes_manager.indices[::-1]
         test_data = MakeTestData(
-                size_x=image_size_x, size_y=image_size_y,
-                default=False, blur=blur, blur_sigma=blur_sigma,
-                downscale=downscale)
+            size_x=image_size_x,
+            size_y=image_size_y,
+            default=False,
+            blur=blur,
+            blur_sigma=blur_sigma,
+            downscale=downscale,
+        )
         if plot_disk:
             dx, dy, dr = disk_x[index], disk_y[index], disk_r[index]
             dI = disk_I[index]
@@ -765,12 +846,19 @@ def generate_4d_data(
             resl0, resl1 = ring_e_semi_len0[index], ring_e_semi_len1[index]
             reI, reLW, rer = ring_e_I[index], ring_e_lw[index], ring_e_r[index]
             test_data.add_ring_ellipse(
-                    x0=rex, y0=rey, semi_len0=resl0, semi_len1=resl1,
-                    rotation=rer, intensity=reI, lw_r=reLW)
+                x0=rex,
+                y0=rey,
+                semi_len0=resl0,
+                semi_len1=resl1,
+                rotation=rer,
+                intensity=reI,
+                lw_r=reLW,
+            )
         s.data[index][:] = test_data.signal.data[:]
         if add_noise:
-            s.data[index][:] += np.random.random(
-                    size=(image_size_y, image_size_x)) * noise_amplitude
+            s.data[index][:] += (
+                np.random.random(size=(image_size_y, image_size_x)) * noise_amplitude
+            )
     s.axes_manager.indices = [0] * s.axes_manager.navigation_dimension
     if lazy:
         if lazy_chunks is None:
@@ -818,17 +906,23 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     """
     peak_array = np.empty_like(xf, dtype=np.object)
     for iy, ix in np.ndindex(peak_array.shape):
-        params = (xf[iy, ix], yf[iy, ix],
-                  semi0[iy, ix], semi1[iy, ix], rot[iy, ix], nt)
+        params = (xf[iy, ix], yf[iy, ix], semi0[iy, ix], semi1[iy, ix], rot[iy, ix], nt)
         ellipse_points = ret.make_ellipse_data_points(*params)
         peak_array[iy, ix] = np.fliplr(ellipse_points)
     return peak_array
 
 
 class DiffractionTestImage(object):
-
-    def __init__(self, disk_r=7, blur=2, image_x=256, image_y=256, rotation=0,
-                 diff_intensity_reduction=1.0, intensity_noise=0.5):
+    def __init__(
+        self,
+        disk_r=7,
+        blur=2,
+        image_x=256,
+        image_y=256,
+        rotation=0,
+        diff_intensity_reduction=1.0,
+        intensity_noise=0.5,
+    ):
         """Make an artificial diffraction image, similar to NBED data.
 
         This class is for creating images which are similar to
@@ -895,21 +989,25 @@ class DiffractionTestImage(object):
         self._intensity_list = []
 
     def __repr__(self):
-        return '<%s, disks:%s, r:%s, rot:%s, im:(%s,%s)>' % (
-                self.__class__.__name__,
-                len(self._x_list),
-                self.disk_r,
-                self.rotation,
-                self.image_x,
-                self.image_y)
+        return "<%s, disks:%s, r:%s, rot:%s, im:(%s,%s)>" % (
+            self.__class__.__name__,
+            len(self._x_list),
+            self.disk_r,
+            self.rotation,
+            self.image_x,
+            self.image_y,
+        )
 
     def __copy__(self):
         d = DiffractionTestImage(
-                disk_r=self.disk_r, blur=self.blur,
-                image_x=self.image_x, image_y=self.image_y,
-                rotation=self.rotation,
-                diff_intensity_reduction=self.diff_intensity_reduction,
-                intensity_noise=self.intensity_noise)
+            disk_r=self.disk_r,
+            blur=self.blur,
+            image_x=self.image_x,
+            image_y=self.image_y,
+            rotation=self.rotation,
+            diff_intensity_reduction=self.diff_intensity_reduction,
+            intensity_noise=self.intensity_noise,
+        )
         d._background_lorentz_width = self._background_lorentz_width
         d._background_lorentz_intensity = self._background_lorentz_intensity
         d._x_list = self._x_list.copy()
@@ -934,8 +1032,8 @@ class DiffractionTestImage(object):
         self._background_lorentz_intensity = intensity
 
     def _get_diff_intensity_reduction(self, dr, i):
-        r_max = np.hypot(self.image_x/2, self.image_y/2)
-        if dr == 0.:
+        r_max = np.hypot(self.image_x / 2, self.image_y / 2)
+        if dr == 0.0:
             dr = 0.00000000001
         x = np.pi * dr * 1.5 / (r_max * self.diff_intensity_reduction)
         i_new = np.sin(x) / x * i
@@ -954,7 +1052,7 @@ class DiffractionTestImage(object):
             Number of orders of diffraction disks.
             If n=1, 8 disks, if n=2, 24 disks.
         """
-        cx, cy = self.image_x/2, self.image_y/2
+        cx, cy = self.image_x / 2, self.image_y / 2
         for px in range(-n, n + 1):
             for py in range(-n, n + 1):
                 if not (px == 0 and py == 0):
@@ -970,12 +1068,12 @@ class DiffractionTestImage(object):
         YY, XX = np.meshgrid(y, x)
         YY = YY.astype(np.float32)
         XX = XX.astype(np.float32)
-        b = 1 / (np.pi * (1 + np.hypot(YY, XX)**2)) * intensity
+        b = 1 / (np.pi * (1 + np.hypot(YY, XX) ** 2)) * intensity
         return b
 
     def get_diffraction_test_image(self, dtype=np.float32):
         image_x, image_y = self.image_x, self.image_y
-        cx, cy = image_x/2, image_y/2
+        cx, cy = image_x / 2, image_y / 2
         image = np.zeros((image_y, image_x), dtype=np.float32)
         iterator = zip(self._x_list, self._y_list, self._intensity_list)
         for x, y, i in iterator:
@@ -984,7 +1082,7 @@ class DiffractionTestImage(object):
                 i = self._get_diff_intensity_reduction(dr, i)
             image[y, x] = i
         disk = morphology.disk(self.disk_r, dtype=dtype)
-        image = convolve2d(image, disk, mode='same')
+        image = convolve2d(image, disk, mode="same")
         if self.rotation != 0:
             image = rotate(image, self.rotation, reshape=False)
         if self.blur != 0:
@@ -1006,9 +1104,15 @@ class DiffractionTestImage(object):
 
 
 class DiffractionTestDataset(object):
-
-    def __init__(self, probe_x=10, probe_y=10, detector_x=256, detector_y=256,
-                 noise=0.5, dtype=np.float32):
+    def __init__(
+        self,
+        probe_x=10,
+        probe_y=10,
+        detector_x=256,
+        detector_y=256,
+        noise=0.5,
+        dtype=np.float32,
+    ):
         """Make a 4-dimensional dataset similar to NBED.
 
         This class is for creating datasets which are similar to
@@ -1038,8 +1142,7 @@ class DiffractionTestDataset(object):
         >>> s = dtd.get_signal()
 
         """
-        self.data = np.zeros(
-                (probe_x, probe_y, detector_x, detector_y), dtype=dtype)
+        self.data = np.zeros((probe_x, probe_y, detector_x, detector_y), dtype=dtype)
         self.probe_x = probe_x
         self.probe_y = probe_y
         self.detector_x = detector_x
@@ -1047,12 +1150,9 @@ class DiffractionTestDataset(object):
         self.noise = noise
 
     def __repr__(self):
-        return '<%s, (%s)>' % (
-                self.__class__.__name__,
-                self.data.shape)
+        return "<%s, (%s)>" % (self.__class__.__name__, self.data.shape)
 
-    def add_diffraction_image(
-            self, diffraction_test_image, position_array=None):
+    def add_diffraction_image(self, diffraction_test_image, position_array=None):
         """Add a diffraction image to all or a subset of the dataset.
 
         See the class docstring for example on how to use this.
@@ -1076,7 +1176,7 @@ class DiffractionTestDataset(object):
                 self.data[ix, iy, :, :] = image
                 if self.noise is not False:
                     image_noise = np.random.random((detector_x, detector_y))
-                    self.data[ix, iy, :, :] += (image_noise * self.noise)
+                    self.data[ix, iy, :, :] += image_noise * self.noise
 
     def get_signal(self):
         s = PixelatedSTEM(self.data)
