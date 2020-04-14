@@ -1,4 +1,4 @@
-import copy
+pxm.Diffraction2Dpxm.dummy_data.dummy_datapyxem.utils.dask_toolsimport copy
 import numpy as np
 import dask.array as da
 from skimage.feature import match_template, blob_dog, blob_log
@@ -40,7 +40,7 @@ def _mask_array(dask_array, mask_array, fill_value=None):
     Examples
     --------
     >>> import dask.array as da
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> data = da.random.random(
     ...     size=(32, 32, 128, 128), chunks=(16, 16, 128, 128))
     >>> mask_array = np.ones(shape=(128, 128), dtype=bool)
@@ -90,7 +90,7 @@ def _threshold_array(dask_array, threshold_value=1, mask_array=None):
     Examples
     --------
     >>> import dask.array as da
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> data = da.random.random(
     ...     size=(32, 32, 128, 128), chunks=(16, 16, 128, 128))
     >>> output_dask = dt._threshold_array(data)
@@ -155,7 +155,7 @@ def _template_match_binary_image_single_frame(frame, binary_image):
     >>> frame = np.random.randint(1000, size=(256, 256))
     >>> from skimage import morphology
     >>> binary_image = morphology.disk(4, np.uint16)
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> template_match = dt._template_match_binary_image_single_frame(
     ...     frame, binary_image)
 
@@ -184,7 +184,7 @@ def _template_match_binary_image_chunk(data, binary_image):
     >>> data = np.random.randint(1000, size=(10, 10, 256, 256))
     >>> from skimage import morphology
     >>> binary_image = morphology.disk(4, np.uint16)
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> template_match = dt._template_match_binary_image_chunk(
     ...     data, binary_image)
 
@@ -223,7 +223,7 @@ def _template_match_with_binary_image(dask_array, binary_image):
     >>> dask_array = da.from_array(data, chunks=(5, 5, 128, 128))
     >>> from skimage import morphology
     >>> binary_image = morphology.disk(4, np.uint16)
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> template_match = dt._template_match_with_binary_image(
     ...     dask_array, binary_image)
 
@@ -274,8 +274,8 @@ def _peak_find_dog_single_frame(
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
     >>> peaks = _peak_find_dog_single_frame(s.data[0, 0])
 
     """
@@ -323,8 +323,8 @@ def _peak_find_dog_chunk(data, **kwargs):
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
     >>> peaks00 = peak_array[0, 0]
     >>> peaks23 = peak_array[2, 3]
@@ -365,10 +365,10 @@ def _peak_find_dog(dask_array, **kwargs):
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> import dask.array as da
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> peak_array = _peak_find_dog(dask_array)
     >>> peak_array_computed = peak_array.compute()
 
@@ -415,8 +415,8 @@ def _peak_find_log_single_frame(
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
     >>> peaks = dt._peak_find_log_single_frame(s.data[0, 0])
 
     """
@@ -463,8 +463,8 @@ def _peak_find_log_chunk(data, **kwargs):
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
     >>> peak_array = dt._peak_find_log_chunk(s.data)
     >>> peaks00 = peak_array[0, 0]
     >>> peaks23 = peak_array[2, 3]
@@ -505,10 +505,10 @@ def _peak_find_log(dask_array, **kwargs):
 
     Example
     -------
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> import dask.array as da
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> peak_array = dt._peak_find_log(dask_array)
     >>> peak_array_computed = peak_array.compute()
 
@@ -547,7 +547,7 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     Examples
     --------
     >>> import dask.array as da
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> data = da.random.random(
     ...     size=(64, 64, 128, 128), chunks=(16, 16, 128, 128))
     >>> output_dask = dt._center_of_mass_array(data)
@@ -612,7 +612,7 @@ def _get_border_slices(nav_dim_size):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> s_mi, s_xp, s_xm, s_yp, s_ym = dt._get_border_slices(2)
 
     """
@@ -658,8 +658,8 @@ def _remove_bad_pixels(dask_array, bad_pixel_array):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_dead_pixel_signal(lazy=True)
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_dead_pixel_signal(lazy=True)
     >>> dead_pixels = dt._find_dead_pixels(s.data)
     >>> data_output = dt._remove_bad_pixels(s.data, dead_pixels)
 
@@ -717,8 +717,8 @@ def _find_dead_pixels(dask_array, dead_pixel_value=0, mask_array=None):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_dead_pixel_signal(lazy=True)
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_dead_pixel_signal(lazy=True)
     >>> dead_pixels = dt._find_dead_pixels(s.data)
 
     With a mask
@@ -816,8 +816,8 @@ def _intensity_peaks_image_single_frame(frame, peaks, disk_r):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> peaks = np.array(([50,50],[25,50]))
     >>> intensity = dt._intensity_peaks_image_single_frame(
     ...     s.data[0,0,:,:], peaks, 5)
@@ -868,8 +868,8 @@ def _intensity_peaks_image_chunk(data, peak_array, disk_r):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
     >>> intensity = dt._intensity_peaks_image_chunk(s.data, peak_array, 5)
     """
@@ -919,9 +919,9 @@ def _intensity_peaks_image(dask_array, peak_array, disk_r):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
     >>> peak_array = dt._peak_find_dog(dask_array)
     >>> intensity = dt._intensity_peaks_image(dask_array, peak_array, 5)
@@ -975,8 +975,8 @@ def _background_removal_single_frame_dog(frame, min_sigma=1, max_sigma=55):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_dog(s.data[0, 0])
 
     """
@@ -1002,8 +1002,8 @@ def _background_removal_chunk_dog(data, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_dog(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1032,11 +1032,11 @@ def _background_removal_dog(dask_array, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5,5,25, 25))
-    >>> s_rem = ps.PixelatedSTEM(
+    >>> s_rem = pxm.Diffraction2D(
     ...     dt._background_removal_dog(dask_array))
 
     """
@@ -1061,8 +1061,8 @@ def _background_removal_single_frame_median(frame, footprint=19):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """
@@ -1086,8 +1086,8 @@ def _background_removal_chunk_median(data, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_median(s.data[0:10, 0:10,:,:])
 
     """
@@ -1116,11 +1116,11 @@ def _background_removal_median(dask_array, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_rem = ps.PixelatedSTEM(
+    >>> s_rem = pxm.Diffraction2D(
     ...     dt._background_removal_median(dask_array), footprint=20)
 
     """
@@ -1150,8 +1150,8 @@ def _background_removal_single_frame_radial_median(frame, centre_x=128, centre_y
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
     """
 
@@ -1188,8 +1188,8 @@ def _background_removal_chunk_radial_median(data, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> s_rem = _background_removal_chunk_radial_median(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1221,10 +1221,10 @@ def _background_removal_radial_median(dask_array, **kwargs):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_r = ps.PixelatedSTEM(
+    >>> s_r = pxm.Diffraction2D(
     ...     dt._background_removal_radial_median(
     ...     dask_array, centre_x=128, centre_y=128))
 
@@ -1256,8 +1256,8 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> peak_array = np.array(([48.,48.],[25.,48.]))
     >>> r_p_array = dt._peak_refinement_centre_of_mass_frame(
     ...     s.data[0,0,:,:], peak_array, 20)
@@ -1305,8 +1305,8 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
     >>> r_p_array = dt._peak_refinement_centre_of_mass_chunk(
     ...     s.data, peak_array, 20)
@@ -1348,7 +1348,7 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
 
     Examples
     --------
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
     >>> s = ps.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
@@ -1465,9 +1465,9 @@ def _get_experimental_square(z, vector, square_size):
 
     Examples
     --------
-    >>> import pixstem.dummy_data as dd
+    >>> import pyxem.dummy_data.dummy_data as dd
     >>> d = dd.get_cbed_signal()
-    >>> import pixstem.dask_tools as dt
+    >>> import pyxem.utils.dask_tools as dt
     >>> sub_d = dt._get_experimental_square(d.data[0,0,:,:], [50,50], 30)
 
     """
