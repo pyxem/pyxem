@@ -966,7 +966,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pixstem.dummy_data as dd
+        >>> import pyxem.dummy_data.dummy_data as dd
         >>> s = dd.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_out = s.threshold_and_mask(
@@ -1131,7 +1131,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
 
-        >>> import pixstem.dummy_data as dd
+        >>> import pyxem.dummy_data.dummy_data as dd
         >>> s = dd.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
@@ -1262,7 +1262,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Examples
         --------
         >>> s, parray = ps.dummy_data.get_simple_ellipse_signal_peak_array()
-        >>> import pixstem.ransac_ellipse_tools as ret
+        >>> import pyxem.utils.ransac_ellipse_tools as ret
         >>> ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
         ...     parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
         ...     semi_len_max=100, semi_len_ratio_lim=5, max_trails=50)
@@ -1455,7 +1455,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pixstem.dummy_data as dd
+        >>> import pyxem.dummy_data.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
         >>> s_r = s.radial_average(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
@@ -2000,7 +2000,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pixstem.dummy_data as dd
+        >>> import pyxem.dummy_data.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
@@ -2069,7 +2069,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pixstem.dummy_data as dd
+        >>> import pyxem.dummy_data.dummy_data as dd
         >>> s = dd.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_average(
