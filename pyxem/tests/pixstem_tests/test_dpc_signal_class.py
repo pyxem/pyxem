@@ -1,10 +1,28 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import pytest
 from pytest import approx
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
-from pixstem.pixelated_stem_class import DPCBaseSignal, DPCSignal1D, DPCSignal2D
-import pixstem.dummy_data as dd
-import pixstem.pixelated_stem_tools as pst
+from pxyem.signals.differential_phase_contrast import DPCBaseSignal, DPCSignal1D, DPCSignal2D
+import pyxem.dummy_data.dummy_data as dd
+import pyxem.utils.pixelated_stem_tools as pst
 
 
 class TestDpcBasesignalCreate:
