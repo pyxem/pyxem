@@ -30,57 +30,11 @@ class TestDiffractionVariance:
         difvar = DiffractionVariance2D(diffraction_pattern)
         assert isinstance(difvar, DiffractionVariance2D)
 
-    @pytest.mark.parametrize("inplace", [True, False])
-    def test_get_dif_var_radial_profile(self, diffraction_pattern, inplace):
-        difvar = DiffractionVariance2D(diffraction_pattern)
-        difvar.metadata.General.title = "A Title"
-        difvar.axes_manager.navigation_axes[0].name = "x"
-        difvar_copy = difvar.deepcopy()
-        rp = difvar.get_radial_profile(inplace=inplace)
-        if inplace:
-            rp = difvar
-
-        assert isinstance(rp, DiffractionVariance1D)
-        assert difvar_copy.metadata.General.title == rp.metadata.General.title
-        assert (
-            difvar_copy.axes_manager.navigation_axes[0].name
-            == rp.axes_manager.navigation_axes[0].name
-        )
-
-    @pytest.fixture
-    def axes_test_dp(self):
-        dp_data = np.random.randint(0, 10, (2, 2, 10, 10))
-        dp = ElectronDiffraction2D(dp_data)
-        return dp
-
-    def test_radial_profile_axes(self, axes_test_dp):
-        n_scale = 0.5
-        name = "real_space"
-        units = "um"
-
-        axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
-        axes_test_dp.axes_manager.navigation_axes[0].name = name
-        axes_test_dp.axes_manager.navigation_axes[0].units = units
-        # name and units are flipped to make sure everything follows
-        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
-        axes_test_dp.axes_manager.navigation_axes[1].name = units
-        axes_test_dp.axes_manager.navigation_axes[1].units = name
-
-        rp = axes_test_dp.get_radial_profile()
-        rp_scale_x = rp.axes_manager.navigation_axes[0].scale
-        rp_units_x = rp.axes_manager.navigation_axes[0].units
-        rp_name_x = rp.axes_manager.navigation_axes[0].name
-
-        rp_scale_y = rp.axes_manager.navigation_axes[1].scale
-        rp_units_y = rp.axes_manager.navigation_axes[1].units
-        rp_name_y = rp.axes_manager.navigation_axes[1].name
-
-        assert n_scale == rp_scale_x
-        assert 2 * n_scale == rp_scale_y
-        assert units == rp_units_x
-        assert name == rp_name_x
-        assert name == rp_units_y
-        assert units == rp_name_y
+    def test_1d_azimuthal_integration(self):
+        var = DiffractionVariance2D(data=np.ones((3, 3, 3, 3,)))
+        var.unit = "2th_rad"
+        integration = var.get_azimuthal_integral1d(npt_rad=10)
+        assert isinstance(integration, DiffractionVariance1D)
 
 
 class TestImageVariance:

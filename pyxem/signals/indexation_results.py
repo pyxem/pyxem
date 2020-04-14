@@ -184,7 +184,7 @@ class VectorMatchingResults(BaseSignal):
         return vectors
 
     def plot_best_matching_results_on_signal(
-        self, signal, library, rank=0, permanent_markers=True, *args, **kwargs
+        self, signal, permanent_markers=True, *args, **kwargs
     ):
         """Plot the best matching diffraction vectors on a signal.
 
@@ -193,10 +193,6 @@ class VectorMatchingResults(BaseSignal):
         signal : ElectronDiffraction2D
             The ElectronDiffraction2D signal object on which to plot the peaks.
             This signal must have the same navigation dimensions as the peaks.
-        library : DiffractionLibrary
-            Diffraction library containing the phases and rotations
-        rank : int
-            Plot results from nth best matching result (default: 0, best match)
         permanent_markers : bool
             Permanently save the peaks as markers on the signal. Default True.
         *args :
@@ -204,9 +200,7 @@ class VectorMatchingResults(BaseSignal):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = self.map(
-            peaks_from_best_vector_match, library=library, inplace=False
-        )
+        match_peaks = self.vectors
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):

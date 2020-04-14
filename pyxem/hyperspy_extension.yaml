@@ -161,6 +161,30 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.differential_phase_contrast
+  Correlation2D:
+    signal_type: correlation
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.correlation2d
+  LazyCorrelation2D:
+    signal_type: correlation
+    signal_dimension: 2
+    dtype: real
+    lazy: True
+    module: pyxem.signals.correlation2d
+  Power2D:
+    signal_type: power
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.power2d
+  LazyPower2D:
+    signal_type: power
+    signal_dimension: 2
+    dtype: real
+    lazy: True
+    module: pyxem.signals.power2d
 
 components2D:
     DiffractionComponent:
