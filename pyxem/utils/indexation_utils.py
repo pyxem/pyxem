@@ -169,9 +169,9 @@ def full_frame_correlation(image_FT, image_FT_normalization, template_coordinate
 
     #Filters can be applied here. Take user input, or standard LP/HP?
 
-    template_FT_normalization = np.sqrt(np.real(np.max(np.ifft2(np.multiply(template_FT, template_FT)))))
+    template_FT_normalization = np.sqrt(np.real(np.max(np.fft.ifft2(np.multiply(template_FT, template_FT)))))
 
-    res_matrix = np.ifft2(np.multiply(template_FT, image_FT)/ (template_FT_normalization * image_FT_normalization))
+    res_matrix = np.fft.ifft2(np.multiply(template_FT, image_FT)/ (template_FT_normalization * image_FT_normalization))
     corr_local = np.real(np.max(res_matrix))
 
     #Sub-pixel refinement - WIP - Equation (5) in reference article.
@@ -277,7 +277,7 @@ def correlate_library(image, library, n_largest, method, mask):
     if method == "full_frame_correlation":
         image_FT = np.fft.fft2(image) / np.sqrt(image.shape[0] * image.shape[1])
         #Filters can be applied here
-        image_FT_normalization = np.sqrt(np.real(np.max(np.ifft2(np.multiply(image_FT, image_FT)))))
+        image_FT_normalization = np.sqrt(np.real(np.max(np.fft.ifft2(np.multiply(image_FT, image_FT)))))
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
