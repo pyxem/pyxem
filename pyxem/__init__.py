@@ -64,14 +64,7 @@ from .signals.pair_distribution_function1d import PairDistributionFunction1D
 from .signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.utils.io_utils import load_mib
-from pixstem.io_tools import load_ps_signal, load_dpc_signal
-import pixstem.io_tools as io_tools
-
-from pixstem.pixelated_stem_class import LazyPixelatedSTEM
-from pixstem.pixelated_stem_class import PixelatedSTEM
-
-import pixstem.radial as radial
-import pixstem.dummy_data as dummy_data
+from pyxem.utils.io_tools import load_ps_signal, load_dpc_signal
 
 from . import release_info
 
