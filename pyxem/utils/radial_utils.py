@@ -6,7 +6,7 @@ from hyperspy.components1d import Polynomial, Gaussian
 from hyperspy.signals import Signal2D
 from hyperspy.utils.markers import point, line_segment
 from hyperspy.misc.utils import isiterable
-import pixstem.pixelated_stem_tools as pst
+import pyxem.utils.pixelated_stem_tools as pst
 
 
 def _centre_comparison(s, steps, step_size, crop_radial_signal=None, angleN=8):

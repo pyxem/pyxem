@@ -1,8 +1,26 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import pytest
 import numpy as np
 import dask.array as da
-from pixstem.pixelated_stem_class import PixelatedSTEM
-import pixstem.pixelated_stem_tools as pst
+from pyxem.signals.diffraction2d import Diffraction2D
+import pyxem.utils.pixelated_stem_tools as pst
 from hyperspy.signals import Signal2D
 
 
@@ -257,7 +275,7 @@ class TestGetAngleSectorMask:
     def test_0d_com(self):
         data_shape = (10, 8)
         data = np.zeros(data_shape)
-        s = PixelatedSTEM(data)
+        s = Diffraction2D(data)
         s.data[4, 5] = 5.0
         s_com = s.center_of_mass()
         pst._get_angle_sector_mask(
@@ -435,20 +453,20 @@ class TestAxesManagerMetadataCopying:
 
 class TestFindAndRemoveDeadPixels:
     def test_no_changes(self):
-        s = PixelatedSTEM(np.ones((10, 10, 10, 10)))
+        s = Diffraction2D(np.ones((10, 10, 10, 10)))
         s_orig = s.deepcopy()
         pst.find_and_remove_dead_pixels(s)
         assert (s.data == s_orig.data).all()
 
     def test_some_dead_pixels(self):
-        s = PixelatedSTEM(np.ones((10, 10, 10, 10)))
+        s = Diffraction2D(np.ones((10, 10, 10, 10)))
         s.data[:, :, 5, 2] = 0
         s.data[:, :, 2, 4] = 0
         pst.find_and_remove_dead_pixels(s)
         assert len(np.where(s.data == 0)[0]) == 0
 
     def test_dead_pixel_camera_edge(self):
-        s = PixelatedSTEM(np.ones((10, 10, 10, 10)))
+        s = Diffraction2D(np.ones((10, 10, 10, 10)))
         s.data[:, :, 0, 5] = 0
         s.data[:, :, 2, 0] = 0
         s.data[:, :, 2, -1] = 0

@@ -1,27 +1,45 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import pytest
 from pytest import approx
 import numpy as np
-import pixstem.api as ps
-import pixstem.radial as ra
-import pixstem.make_diffraction_test_data as mdtd
+from pyxem.signals.diffraction2d import Diffraction2D
+import pyxem.utils.radial_utils as ra
+import pyxem.dummy_data.make_diffraction_test_data as mdtd
 
 
 class TestRadialModule:
     def test_centre_comparison(self):
-        s = ps.PixelatedSTEM(np.ones((20, 20)))
+        s = Diffraction2D(np.ones((20, 20)))
         s_list = ra._centre_comparison(s, 1, 1)
         assert len(s_list) == 9
 
-        s1 = ps.PixelatedSTEM(np.ones((5, 20, 20)))
+        s1 = Diffraction2D(np.ones((5, 20, 20)))
         with pytest.raises(ValueError):
             ra._centre_comparison(s1, 1, 1)
 
-        s2 = ps.PixelatedSTEM(np.ones((30, 30)))
+        s2 = Diffraction2D(np.ones((30, 30)))
         s2_list = ra._centre_comparison(s2, 1, 1, angleN=20)
         for temp_s in s2_list:
             assert temp_s.axes_manager.navigation_shape == (20,)
 
-        s3 = ps.PixelatedSTEM(np.ones((40, 40)))
+        s3 = Diffraction2D(np.ones((40, 40)))
         s3_list = ra._centre_comparison(s3, 1, 1, angleN=10, crop_radial_signal=(3, 8))
         for temp_s in s3_list:
             assert temp_s.axes_manager.signal_shape == (5,)
@@ -31,7 +49,7 @@ class TestRadialModule:
         array = np.ones((10, 10)) * 10
         x, y = 7, 5
         array[y, x] = 1  # In NumPy the order is [y, x]
-        s = ps.PixelatedSTEM(array)
+        s = Diffraction2D(array)
         s.axes_manager[0].offset = 55
         s.axes_manager[1].offset = 50
         s.axes_manager[0].scale = 0.5
@@ -186,7 +204,7 @@ class TestGetAngleImageComparison:
 class TestFitEllipse:
     def setup_method(self):
         axis1, axis2 = 40, 70
-        s = ps.PixelatedSTEM(np.zeros((200, 220)))
+        s = Diffraction2D(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
         xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_ring = mdtd._get_elliptical_ring(
@@ -218,7 +236,7 @@ class TestFitEllipse:
         ra._get_marker_list(ellipse_parameters, x_list=x, y_list=y)
 
     def test_fit_single_ellipse_to_signal(self):
-        s = ps.PixelatedSTEM(np.zeros((200, 220)))
+        s = Diffraction2D(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
         xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_ring = mdtd._get_elliptical_ring(xx, yy, 0, 0, 60, 60, 0.8, lw_r=1)
@@ -252,7 +270,7 @@ class TestFitEllipse:
             np.pi * 3.2,
         ]
         for rot in rot_list:
-            s = ps.PixelatedSTEM(np.zeros((200, 200)))
+            s = Diffraction2D(np.zeros((200, 200)))
             s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
             xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
             s.data += mdtd._get_elliptical_ring(xx, yy, 0, 0, 70, 60, rot, lw_r=1)
@@ -262,7 +280,7 @@ class TestFitEllipse:
             output_rot = output[5] % np.pi
             assert approx(output_rot, abs=0.1) == (rot % np.pi)
         for rot in rot_list:
-            s = ps.PixelatedSTEM(np.zeros((200, 200)))
+            s = Diffraction2D(np.zeros((200, 200)))
             s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -100
             xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
             s.data += mdtd._get_elliptical_ring(xx, yy, 0, 0, 60, 70, rot, lw_r=1)
@@ -273,7 +291,7 @@ class TestFitEllipse:
             assert approx(output_rot, abs=0.1) == (rot % np.pi)
 
     def test_fit_ellipses_to_signal(self):
-        s = ps.PixelatedSTEM(np.zeros((200, 220)))
+        s = Diffraction2D(np.zeros((200, 220)))
         s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
         xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
         ellipse_ring0 = mdtd._get_elliptical_ring(xx, yy, 2, -1, 60, 60, 0.8)
