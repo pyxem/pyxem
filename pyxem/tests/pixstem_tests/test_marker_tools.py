@@ -1,9 +1,27 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import pytest
 import numpy as np
 from numpy.testing import assert_equal
 import dask.array as da
-import pixstem.api as ps
-import pixstem.marker_tools as mt
+from pyxem.signals.diffraction2d import Diffraction2D
+import pyxem.utils.marker_tools as mt
 
 
 class TestGet4DMarkerList:
@@ -15,7 +33,7 @@ class TestGet4DMarkerList:
         peak_array[1, 0] = [[3, 1]]
         peak_array[1, 1] = [[9, 1]]
         peak_array[1, 2] = [[6, 3]]
-        s = ps.PixelatedSTEM(np.zeros(shape=(2, 3, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(2, 3, 10, 10)))
         marker_list = mt._get_4d_points_marker_list(
             peak_array, s.axes_manager.signal_axes, color="red"
         )
@@ -34,7 +52,7 @@ class TestGet4DMarkerList:
     def test_color(self):
         color = "blue"
         peak_array = np.zeros(shape=(3, 2, 1, 2))
-        s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(3, 2, 10, 10)))
         marker_list = mt._get_4d_points_marker_list(
             peak_array, s.axes_manager.signal_axes, color=color
         )
@@ -43,7 +61,7 @@ class TestGet4DMarkerList:
     def test_size(self):
         size = 12
         peak_array = np.zeros(shape=(3, 2, 1, 2))
-        s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(3, 2, 10, 10)))
         marker_list = mt._get_4d_points_marker_list(
             peak_array, s.axes_manager.signal_axes, size=size
         )
@@ -51,7 +69,7 @@ class TestGet4DMarkerList:
 
     def test_several_markers(self):
         peak_array = np.zeros(shape=(3, 2, 3, 2))
-        s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(3, 2, 10, 10)))
         marker_list = mt._get_4d_points_marker_list(
             peak_array, s.axes_manager.signal_axes
         )
@@ -61,7 +79,7 @@ class TestGet4DMarkerList:
         peak_array = np.empty((2, 3), dtype=np.object)
         peak_array[0, 0] = [[2, 4], [1, 9]]
         peak_array[0, 1] = [[8, 2]]
-        s = ps.PixelatedSTEM(np.zeros(shape=(2, 3, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(2, 3, 10, 10)))
         marker_list = mt._get_4d_points_marker_list(
             peak_array, s.axes_manager.signal_axes, color="red"
         )
@@ -106,14 +124,14 @@ class TestFilterPeakArrayListBoolArray:
 class TestAddPeakArrayToSignalAsMarkers:
     def test_simple(self):
         peak_array = np.zeros(shape=(3, 2, 3, 2))
-        s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(3, 2, 10, 10)))
         mt.add_peak_array_to_signal_as_markers(s, peak_array)
         assert len(s.metadata.Markers) == 3
 
     def test_color(self):
         color = "blue"
         peak_array = np.zeros(shape=(3, 2, 3, 2))
-        s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(3, 2, 10, 10)))
         mt.add_peak_array_to_signal_as_markers(s, peak_array, color=color)
         marker = list(s.metadata.Markers)[0][1]
         assert marker.marker_properties["color"] == color
@@ -121,13 +139,13 @@ class TestAddPeakArrayToSignalAsMarkers:
     def test_size(self):
         size = 17
         peak_array = np.zeros(shape=(3, 2, 3, 2))
-        s = ps.PixelatedSTEM(np.zeros(shape=(3, 2, 10, 10)))
+        s = Diffraction2D(np.zeros(shape=(3, 2, 10, 10)))
         mt.add_peak_array_to_signal_as_markers(s, peak_array, size=size)
         marker = list(s.metadata.Markers)[0][1]
         assert marker.get_data_position("size") == size
 
     def test_dask_input(self):
-        s = ps.PixelatedSTEM(np.zeros((2, 3, 20, 20)))
+        s = Diffraction2D(np.zeros((2, 3, 20, 20)))
         peak_array = da.zeros((2, 3, 10, 2), chunks=(1, 1, 10, 2))
         with pytest.raises(ValueError):
             s.add_peak_array_as_markers(peak_array)
@@ -143,7 +161,7 @@ def test_peak_finding_to_marker():
     data[1, 1, 2, 3] = 1
     data[2, 0, 3, 6] = 1
     data[2, 1, 2, 2] = 1
-    s = ps.PixelatedSTEM(data)
+    s = Diffraction2D(data)
     peak_array = s.find_peaks(
         min_sigma=0.1, max_sigma=2, threshold=0.01, lazy_result=False
     )
@@ -160,27 +178,27 @@ def test_peak_finding_to_marker():
 
 class TestPixelToScaledValue:
     def test_simple(self):
-        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        s = Diffraction2D(np.zeros((50, 60)))
         axis = s.axes_manager[-1]
         value = mt._pixel_to_scaled_value(axis, 4.5)
         assert value == 4.5
 
     def test_scale(self):
-        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        s = Diffraction2D(np.zeros((50, 60)))
         axis = s.axes_manager[-1]
         axis.scale = 0.5
         value = mt._pixel_to_scaled_value(axis, 4.5)
         assert value == 2.25
 
     def test_offset(self):
-        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        s = Diffraction2D(np.zeros((50, 60)))
         axis = s.axes_manager[-1]
         axis.offset = 6
         value = mt._pixel_to_scaled_value(axis, 4.5)
         assert value == 10.5
 
     def test_scale_offset(self):
-        s = ps.PixelatedSTEM(np.zeros((50, 60)))
+        s = Diffraction2D(np.zeros((50, 60)))
         axis = s.axes_manager[-1]
         axis.scale = 0.5
         axis.offset = 6
