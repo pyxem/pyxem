@@ -18,13 +18,16 @@
 
 import numpy as np
 import dask.array as da
-from hyperspy.components1d import Gaussian
 from scipy.ndimage.filters import gaussian_filter
 from scipy.signal import convolve2d
 from skimage import morphology
 from skimage.draw import polygon
-import pixstem.make_diffraction_test_data as mdtd
-from pixstem.pixelated_stem_class import DPCSignal2D, LazyPixelatedSTEM, PixelatedSTEM
+
+from hyperspy.components1d import Gaussian
+
+import pyxem.dummy_data.make_diffraction_test_data as mdtd
+from pyxem.signals.differential_phase_contrast import DPCSignal2D
+from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 
 
 def get_disk_shift_simple_test_signal(lazy=False):
@@ -39,7 +42,7 @@ def get_disk_shift_simple_test_signal(lazy=False):
 
     Returns
     -------
-    disk_shift_signal : PixelatedSTEM signal
+    disk_shift_signal : Diffraction2D
 
     Examples
     --------
@@ -80,7 +83,7 @@ def get_holz_simple_test_signal(lazy=False):
 
     Returns
     -------
-    holz_signal : PixelatedSTEM signal
+    holz_signal : Diffraction2D
 
     Examples
     --------
@@ -178,7 +181,7 @@ def get_single_ring_diffraction_signal():
 
 
 def get_dead_pixel_signal(lazy=False):
-    """Get 2D PixelatedSTEM signal with a disk in the middle.
+    """Get Diffraction2D signal with a disk in the middle.
 
     Has 4 pixels with value equal to 0, to simulate dead pixels.
 
@@ -201,15 +204,15 @@ def get_dead_pixel_signal(lazy=False):
     s.data[88, 88] = 0
     s.data[112, 20] = 0
     if lazy:
-        s = LazyPixelatedSTEM(s)
+        s = LazyDiffraction2D(s)
         s.data = da.from_array(s.data, chunks=(64, 64))
     else:
-        s = PixelatedSTEM(s)
+        s = Diffraction2D(s)
     return s
 
 
 def get_hot_pixel_signal(lazy=False):
-    """Get 2D PixelatedSTEM signal with a disk in the middle.
+    """Get Diffraction2D signal with a disk in the middle.
 
     Has 4 pixels with value equal to 50000, to simulate hot pixels.
 
@@ -232,10 +235,10 @@ def get_hot_pixel_signal(lazy=False):
     s.data[32, 10] = 50000
     s.data[120, 61] = 50000
     if lazy:
-        s = LazyPixelatedSTEM(s)
+        s = LazyDiffraction2D(s)
         s.data = da.from_array(s.data, chunks=(64, 64))
     else:
-        s = PixelatedSTEM(s)
+        s = Diffraction2D(s)
     return s
 
 
@@ -336,7 +339,7 @@ def get_fem_signal(lazy=False):
 
     Returns
     -------
-    fem_signal : PixelatedSTEM
+    fem_signal : Diffraction2D
 
     Examples
     --------
@@ -429,7 +432,7 @@ def get_simple_fem_signal(lazy=False):
 
     Returns
     -------
-    fem_signal : PixelatedSTEM
+    fem_signal : Diffraction2D
 
     Examples
     --------
@@ -532,7 +535,7 @@ def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50, lazy=Fa
 
     Returns
     -------
-    fem_signal : PixelatedSTEM
+    fem_signal : Diffraction2D
 
     Examples
     --------
@@ -622,7 +625,7 @@ def get_cbed_signal():
 
     Returns
     -------
-    cbed_signal : PixelatedSTEM signal
+    cbed_signal : Diffraction2D
 
     Example
     -------
@@ -660,7 +663,7 @@ def get_cbed_signal():
         noise = np.random.randint(10, size=(100, 100))
         image = convolve2d(data[iy, ix], disk, mode="same") + noise
         data[iy, ix] = gaussian_filter(image, 1.5)
-    s_cbed = PixelatedSTEM(data)
+    s_cbed = Diffraction2D(data)
     return s_cbed
 
 
@@ -683,7 +686,7 @@ def get_simple_ellipse_signal_peak_array():
     semi1 = np.random.randint(75, 80, size=(4, 5))
     rot = np.random.random(size=(4, 5)) * np.pi
     peak_array = mdtd._make_4d_peak_array_test_data(xc, yc, semi0, semi1, rot)
-    s = PixelatedSTEM(np.zeros((4, 5, 200, 200)))
+    s = Diffraction2D(np.zeros((4, 5, 200, 200)))
     return s, peak_array
 
 
@@ -692,7 +695,7 @@ def get_nanobeam_electron_diffraction_signal():
 
     Returns
     -------
-    signal : PixelatedSTEM
+    signal : Diffraction2D
 
     Example
     -------
