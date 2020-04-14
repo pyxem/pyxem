@@ -36,6 +36,7 @@ from dask import delayed
 from tqdm import tqdm
 import hyperspy.api as hs
 
+
 def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
     """Perform analysis of fluctuation electron microscopy (FEM) data
     as outlined in:
@@ -191,6 +192,7 @@ def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
     if offset:
         s.data -= 1  # Undo previous addition of 1 to input data
     return results
+
 
 class VarianceGenerator:
     """Generates variance images for a specified signal and set of aperture
