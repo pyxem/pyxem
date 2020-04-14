@@ -1,12 +1,31 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 from pytest import approx, mark
 import math
 import numpy as np
 from numpy.testing import assert_allclose
 from scipy.signal import convolve2d
 from skimage import morphology
-import pixstem.make_diffraction_test_data as mdtd
-import pixstem.ransac_ellipse_tools as ret
-from pixstem.pixelated_stem_class import PixelatedSTEM
+
+import pyxem.dummy_data.make_diffraction_test_data as mdtd
+import pyxem.utils.ransac_ellipse_tools as ret
+from pyxem.signals.diffraction2d import Diffraction2D
 
 
 class TestIsEllipseGood:
@@ -912,7 +931,7 @@ def test_full_ellipse_ransac_processing():
     data = np.zeros((2, 3, 210, 200), dtype=np.float32)
     data[:, :] = image.T
 
-    s = PixelatedSTEM(data)
+    s = Diffraction2D(data)
     s_t = s.template_match_disk(disk_r=5)
     peak_array = s_t.find_peaks(lazy_result=False)
 
