@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 from tqdm import tqdm
 import numpy as np
 
@@ -17,7 +35,7 @@ def _get_dask_chunk_slice_list(dask_array):
     --------
     >>> import dask.array as da
     >>> data = da.random.random((64, 64, 100, 100), chunks=(8, 8, 100, 100))
-    >>> import pixstem.lazy_tools as lt
+    >>> import pyxem.utils.lazy_tools as lt
     >>> slice_list = lt._get_dask_chunk_slice_list(data)
 
     """
@@ -79,7 +97,7 @@ def _calculate_function_on_dask_array(
     >>> dask_data = da.random.random(
     ...     (64, 64, 100, 100), chunks=(8, 8, 100, 100))
     >>> import pixstem.pixelated_stem_tools as pst
-    >>> import pixstem.lazy_tools as lt
+    >>> import pyxem.utils.lazy_tools as lt
     >>> out_data = lt._calculate_function_on_dask_array(
     ...     dask_data, np.sum,
     ...     return_sig_size=1, show_progressbar=False)
