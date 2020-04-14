@@ -24,7 +24,7 @@ from scipy.optimize import leastsq
 from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
-import pyexm.utils.lazy_tools as lt
+import pyxem.utils.lazy_tools as lt
 
 
 def _threshold_and_mask_single_frame(im, threshold=None, mask=None):

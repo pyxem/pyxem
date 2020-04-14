@@ -20,7 +20,7 @@ import pytest
 from pytest import approx
 import numpy as np
 import scipy.constants as sc
-import pyxem.utils.dpc_tools as dpct
+import pyxem.utils.dpc_utils as dpct
 
 
 class TestBetaToBst:
