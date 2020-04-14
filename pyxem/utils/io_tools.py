@@ -200,45 +200,6 @@ def _copy_axes_ps_to_dpc(s_ps, s_dpc):
         dp_a.name = ps_a.name
 
 
-def signal_to_pixelated_stem(s):
-    """Make a PixelatedSTEM object from a HyperSpy signal.
-
-    This will retain both the axes information and the metadata.
-    If the signal is lazy, the function will return LazyPixelatedSTEM.
-
-    Parameters
-    ----------
-    s : HyperSpy signal
-        Should work for any HyperSpy signal.
-
-    Returns
-    -------
-    pixelated_stem_signal : PixelatedSTEM or LazyPixelatedSTEM object
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> import hyperspy.api as hs
-    >>> s = hs.signals.Signal2D(np.random.random((8, 11, 21, 13)))
-    >>> s.metadata.General.title = "test dataset"
-    >>> s
-    <Signal2D, title: test dataset, dimensions: (11, 8|13, 21)>
-    >>> from pixstem.io_tools import signal_to_pixelated_stem
-    >>> s_new = signal_to_pixelated_stem(s)
-    >>> s_new
-    <PixelatedSTEM, title: test dataset, dimensions: (11, 8|13, 21)>
-
-    """
-    # Sorting axes as a function of its index
-    axes_list = [x for _, x in sorted(s.axes_manager.as_dictionary().items())]
-    metadata = s.metadata.as_dictionary()
-    if s._lazy:
-        s_new = LazyPixelatedSTEM(s.data, axes=axes_list, metadata=metadata)
-    else:
-        s_new = PixelatedSTEM(s.data, axes=axes_list, metadata=metadata)
-    return s_new
-
-
 def load_ps_signal(filename, lazy=False, chunk_size=None, navigation_signal=None):
     """
     Parameters
