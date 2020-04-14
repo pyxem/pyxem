@@ -64,7 +64,7 @@ from .signals.pair_distribution_function1d import PairDistributionFunction1D
 from .signals.reduced_intensity1d import ReducedIntensity1D
 
 from pyxem.utils.io_utils import load_mib
-from pyxem.utils.io_tools import load_ps_signal, load_dpc_signal
+from pyxem.utils.io_tools import load_ps_signal
 
 from . import release_info
 
