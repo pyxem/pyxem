@@ -30,6 +30,167 @@ from pyxem.signals.diffraction_variance2d import ImageVariance
 from pyxem.signals import transfer_signal_axes
 from pyxem.signals import transfer_navigation_axes_to_signal_axes
 
+import matplotlib.pylab as plt
+import numpy as np
+from dask import delayed
+from tqdm import tqdm
+import hyperspy.api as hs
+
+def fem_calc(s, centre_x=None, centre_y=None, show_progressbar=True):
+    """Perform analysis of fluctuation electron microscopy (FEM) data
+    as outlined in:
+
+    T. L. Daulton, et al., Ultramicroscopy 110 (2010) 1279-1289.
+    doi:10.1016/j.ultramic.2010.05.010
+
+    Parameters
+    ----------
+    s : PixelatedSTEM
+        Signal on which FEM analysis was performed
+    centre_x, centre_y : int, optional
+        All the diffraction patterns assumed to have the same
+        centre position.
+
+    show_progressbar : bool
+        Default True
+
+    Returns
+    -------
+    results : Python dictionary
+        Results of FEM data analysis, including the normalized variance
+        of the annular mean (V-Omegak), mean of normalized variances of
+        rings (V-rk), normalized variance of ring ensemble (Vrek),
+        the normalized variance image (Omega-Vi), and annular mean of
+        the variance image (Omega-Vk).
+
+    Examples
+    --------
+    >>> import pixstem.dummy_data as dd
+    >>> import pixstem.fem_tools as femt
+    >>> s = dd.get_fem_signal()
+    >>> fem_results = femt.fem_calc(
+    ...     s,
+    ...     centre_x=128,
+    ...     centre_y=128,
+    ...     show_progressbar=False)
+    >>> fem_results['V-Omegak'].plot()
+
+    """
+    offset = False
+
+    if centre_x is None:
+        centre_x = np.int(s.axes_manager.signal_shape[0] / 2)
+
+    if centre_y is None:
+        centre_y = np.int(s.axes_manager.signal_shape[1] / 2)
+
+    if s.data.min() == 0:
+        s.data += 1  # To avoid division by 0
+        offset = True
+    results = dict()
+
+    results["RadialInt"] = s.radial_average(
+        centre_x=centre_x,
+        centre_y=centre_y,
+        normalize=False,
+        show_progressbar=show_progressbar,
+    )
+
+    radialavgs = s.radial_average(
+        centre_x=centre_x,
+        centre_y=centre_y,
+        normalize=True,
+        show_progressbar=show_progressbar,
+    )
+    if radialavgs.data.min() == 0:
+        radialavgs.data += 1
+
+    results["V-Omegak"] = ((radialavgs ** 2).mean() / (radialavgs.mean()) ** 2) - 1
+    results["RadialAvg"] = radialavgs.mean()
+
+    if s._lazy:
+        results["Omega-Vi"] = ((s ** 2).mean() / (s.mean()) ** 2) - 1
+        results["Omega-Vi"].compute(progressbar=show_progressbar)
+        results["Omega-Vi"] = pixstem.pixelated_stem_class.PixelatedSTEM(
+            results["Omega-Vi"]
+        )
+
+        results["Omega-Vk"] = results["Omega-Vi"].radial_average(
+            centre_x=centre_x,
+            centre_y=centre_y,
+            normalize=True,
+            show_progressbar=show_progressbar,
+        )
+
+        oldshape = None
+        if len(s.data.shape) == 4:
+            oldshape = s.data.shape
+            s.data = s.data.reshape(
+                s.data.shape[0] * s.data.shape[1], s.data.shape[2], s.data.shape[3]
+            )
+        y, x = np.indices(s.data.shape[-2:])
+        r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
+        r = r.astype(np.int)
+
+        nr = np.bincount(r.ravel())
+        Vrklist = []
+        Vreklist = []
+
+        for k in tqdm(range(0, len(nr)), disable=(not show_progressbar)):
+            locs = np.where(r == k)
+            vals = s.data.vindex[:, locs[0], locs[1]].T
+            Vrklist.append(np.mean((np.mean(vals ** 2, 1) / np.mean(vals, 1) ** 2) - 1))
+            Vreklist.append(np.mean(vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1)
+
+        Vrkdask = delayed(Vrklist)
+        Vrekdask = delayed(Vreklist)
+
+        results["Vrk"] = hs.signals.Signal1D(
+            Vrkdask.compute(progressbar=show_progressbar)
+        )
+        results["Vrek"] = hs.signals.Signal1D(
+            Vrekdask.compute(progressbar=show_progressbar)
+        )
+    else:
+        results["Omega-Vi"] = ((s ** 2).mean() / (s.mean()) ** 2) - 1
+        results["Omega-Vk"] = results["Omega-Vi"].radial_average(
+            centre_x=centre_x,
+            centre_y=centre_y,
+            normalize=True,
+            show_progressbar=show_progressbar,
+        )
+        oldshape = None
+        if len(s.data.shape) == 4:
+            oldshape = s.data.shape
+            s.data = s.data.reshape(
+                s.data.shape[0] * s.data.shape[1], s.data.shape[2], s.data.shape[3]
+            )
+        y, x = np.indices(s.data.shape[-2:])
+        r = np.sqrt((x - centre_x) ** 2 + (y - centre_y) ** 2)
+        r = r.astype(np.int)
+
+        nr = np.bincount(r.ravel())
+        results["Vrk"] = np.zeros(len(nr))
+        results["Vrek"] = np.zeros(len(nr))
+
+        for k in tqdm(range(0, len(nr)), disable=(not show_progressbar)):
+            locs = np.where(r == k)
+            vals = s.data[:, locs[0], locs[1]]
+            results["Vrk"][k] = np.mean(
+                (np.mean(vals ** 2, 1) / np.mean(vals, 1) ** 2) - 1
+            )
+            results["Vrek"][k] = (
+                np.mean(vals.ravel() ** 2) / np.mean(vals.ravel()) ** 2 - 1
+            )
+
+        results["Vrk"] = hs.signals.Signal1D(results["Vrk"])
+        results["Vrek"] = hs.signals.Signal1D(results["Vrek"])
+
+    if oldshape:
+        s.data = s.data.reshape(oldshape)
+    if offset:
+        s.data -= 1  # Undo previous addition of 1 to input data
+    return results
 
 class VarianceGenerator:
     """Generates variance images for a specified signal and set of aperture
