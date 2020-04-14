@@ -28,7 +28,7 @@ def _get_hot_pixel_test_data_2d():
 
     Examples
     --------
-    >>> import pixstem.dask_test_data as dtd
+    >>> import pyxem.dummy_data.dask_test_data as dtd
     >>> data = dtd._get_hot_pixel_test_data_2d()
 
     """
@@ -47,7 +47,7 @@ def _get_hot_pixel_test_data_3d():
 
     Examples
     --------
-    >>> import pixstem.dask_test_data as dtd
+    >>> import pyxem.dummy_data.dask_test_data as dtd
     >>> data = dtd._get_hot_pixel_test_data_3d()
 
     """
@@ -66,7 +66,7 @@ def _get_hot_pixel_test_data_4d():
 
     Examples
     --------
-    >>> import pixstem.dask_test_data as dtd
+    >>> import pyxem.dummy_data.dask_test_data as dtd
     >>> data = dtd._get_hot_pixel_test_data_4d()
 
     """
@@ -85,7 +85,7 @@ def _get_dead_pixel_test_data_2d():
 
     Examples
     --------
-    >>> import pixstem.dask_test_data as dtd
+    >>> import pyxem.dummy_data.dask_test_data as dtd
     >>> data = dtd._get_dead_pixel_test_data_2d()
 
     """
@@ -104,7 +104,7 @@ def _get_dead_pixel_test_data_3d():
 
     Examples
     --------
-    >>> import pixstem.dask_test_data as dtd
+    >>> import pyxem.dummy_data.dask_test_data as dtd
     >>> data = dtd._get_dead_pixel_test_data_3d()
 
     """
@@ -123,7 +123,7 @@ def _get_dead_pixel_test_data_4d():
 
     Examples
     --------
-    >>> import pixstem.dask_test_data as dtd
+    >>> import pyxem.dummy_data.dask_test_data as dtd
     >>> data = dtd._get_dead_pixel_test_data_4d()
 
     """
