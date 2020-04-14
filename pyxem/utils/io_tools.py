@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# Copyright 2017-2020 The pyXem developers
+#
+# This file is part of pyXem.
+#
+# pyXem is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyXem is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
 import h5py
 import logging
 import numpy as np
@@ -5,13 +23,9 @@ import dask.array as da
 from hyperspy.io_plugins import emd
 from hyperspy.io import load_with_reader
 from hyperspy.io import load
-from pixstem.pixelated_stem_class import (
-    PixelatedSTEM,
-    DPCBaseSignal,
-    DPCSignal1D,
-    DPCSignal2D,
-    LazyPixelatedSTEM,
-)
+
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 
 def _get_dtype_from_header_string(header_string):
@@ -177,69 +191,3 @@ def load_ps_signal(filename, lazy=False, chunk_size=None, navigation_signal=None
         if chunk_size is not None:
             s.data = s.data.rechunk(chunks=chunk_size)
     return s
-
-
-def load_dpc_signal(filename):
-    """Load a differential phase contrast style signal.
-
-    This function can both files saved directly using HyperSpy,
-    and saved using this library. The only requirement is that
-    the signal has one navigation dimension, with this one dimension
-    having a size of two. The first navigation index is the x-shift,
-    while the second is the y-shift.
-    The signal dimension contains the spatial dimension(s), i.e. the
-    probe positions.
-
-    The return signal depends on the dimensions of the input file:
-    - If two signal dimensions: DPCSignal2D
-    - If one signal dimension: DPCSignal1D
-    - If zero signal dimension: DPCBaseSignal
-
-    Parameters
-    ----------
-    filename : string
-
-    Returns
-    -------
-    dpc_signal : DPCBaseSignal, DPCSignal1D, DPCSignal2D
-        The type of return signal depends on the signal dimensions of the
-        input file.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> s = ps.DPCSignal2D(np.random.random((2, 90, 50)))
-    >>> s.save("test_dpc_signal2d.hspy", overwrite=True)
-    >>> s_dpc = ps.load_dpc_signal("test_dpc_signal2d.hspy")
-    >>> s_dpc
-    <DPCSignal2D, title: , dimensions: (2|50, 90)>
-    >>> s_dpc.plot()
-
-    Saving a HyperSpy signal
-
-    >>> import hyperspy.api as hs
-    >>> s = hs.signals.Signal1D(np.random.random((2, 10)))
-    >>> s.save("test_dpc_signal1d.hspy", overwrite=True)
-    >>> s_dpc_1d = ps.load_dpc_signal("test_dpc_signal1d.hspy")
-    >>> s_dpc_1d
-    <DPCSignal1D, title: , dimensions: (2|10)>
-
-    """
-    s = load(filename)
-    if s.axes_manager.navigation_shape != (2,):
-        raise Exception(
-            "DPC signal needs to have 1 navigation " "dimension with a size of 2."
-        )
-    if s.axes_manager.signal_dimension == 0:
-        s_out = DPCBaseSignal(s).T
-    elif s.axes_manager.signal_dimension == 1:
-        s_out = DPCSignal1D(s)
-    elif s.axes_manager.signal_dimension == 2:
-        s_out = DPCSignal2D(s)
-    else:
-        raise NotImplementedError(
-            "DPC signals only support 0, 1 and 2 signal dimensions"
-        )
-    s_out.metadata = s.metadata.deepcopy()
-    s_out.axes_manager = s.axes_manager.deepcopy()
-    return s_out
