@@ -69,7 +69,7 @@ class TestRadialModule:
         s_centre_position = ra.get_optimal_centre_position(
             s, radial_signal_span=(180, 210), steps=2, step_size=1
         )
-        x, y = ps.radial.get_coordinate_of_min(s_centre_position)
+        x, y = ra.get_coordinate_of_min(s_centre_position)
         assert (x0 - 0.5) <= x and x <= (x0 + 0.5)
         assert (x0 - 0.5) <= x and x <= (x0 + 0.5)
 
