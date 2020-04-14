@@ -73,7 +73,6 @@ from pyxem.utils.peakfinders2D import (
 from pyxem.utils import peakfinder2D_gui
 
 import pyxem.utils.pixelated_stem_tools as pst
-import pyxem.utils.fem_tools as femt
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
@@ -2120,47 +2119,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         signal.axes_manager["Angle slice"].units = "Radians"
         signal.axes_manager[-1].name = "Scattering angle"
         return signal
-
-    def fem_analysis(self, centre_x=None, centre_y=None, show_progressbar=True):
-        """Perform analysis of fluctuation electron microscopy (FEM) data.
-
-        This is outlined in:
-        T. L. Daulton, et al., Ultramicroscopy 110 (2010) 1279-1289.
-        doi:10.1016/j.ultramic.2010.05.010
-
-        Parameters
-        ----------
-        centre_x, centre_y : int, optional
-            All the diffraction patterns assumed to have the same
-            centre position.
-        show_progressbar : bool, optional
-            Default True
-
-        Returns
-        -------
-        results : Python dictionary
-            Results of FEM data analysis, including the normalized variance
-            of the annular mean (V-Omegak), mean of normalized variances of
-            rings (V-rk), normalized variance of ring ensemble (Vrek),
-            the normalized variance image (Omega-Vi), and annular mean of
-            the variance image (Omega-Vk).
-
-        Examples
-        --------
-        >>> s = ps.dummy_data.get_fem_signal()
-        >>> fem_results = s.fem_analysis(
-        ...     centre_x=50, centre_y=50,
-        ...     show_progressbar=False)
-        >>> fem_results['V-Omegak'].plot()
-
-        """
-        results = femt.fem_calc(
-            self,
-            centre_x=centre_x,
-            centre_y=centre_y,
-            show_progressbar=show_progressbar,
-        )
-        return results
 
     def find_dead_pixels(
         self,
