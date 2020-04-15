@@ -448,7 +448,7 @@ class DPCSignal2D(Signal2D):
         """
         x_position = self.inav[0].data
         y_position = self.inav[1].data
-        s_hist = pst._make_bivariate_histogram(
+        s_hist = make_bivariate_histogram(
             x_position,
             y_position,
             histogram_range=histogram_range,

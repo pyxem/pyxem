@@ -27,6 +27,7 @@ from pyxem.signals.differential_phase_contrast import (
 )
 import pyxem.dummy_data.dummy_data as dd
 import pyxem.utils.pixelated_stem_tools as pst
+from pyxem.utils.dpc_utils import make_bivariate_histogram
 
 
 class TestDpcBasesignalCreate:
@@ -219,7 +220,7 @@ class TestDpcSignal2dBivariateHistogram:
 
     def test_make_bivariate_histogram(self):
         x, y = np.ones((100, 100)), np.ones((100, 100))
-        pst._make_bivariate_histogram(
+        make_bivariate_histogram(
             x_position=x,
             y_position=y,
             histogram_range=None,
