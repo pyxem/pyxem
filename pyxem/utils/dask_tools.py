@@ -39,6 +39,30 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
+def _find_peak_chunk(data, func_find_peak, args_find_peak, kwargs_find_peak):
+    output_array = np.empty(data.shape[:-2], dtype='object')
+    for index in np.ndindex(data.shape[:-2]):
+        islice = np.s_[index]
+        output_array[islice] = func_find_peak(
+            z=data[islice], *args_find_peak, **kwargs_find_peak)
+    return output_array
+
+
+def _find_peak_dask_array(
+        dask_array, func_find_peak, args_find_peak, kwargs_find_peak):
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
+    drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
+    output_array = da.map_blocks(
+        _find_peak_chunk,
+        dask_array_rechunked,
+        drop_axis=drop_axis,
+        dtype=np.object,
+        func_find_peak=func_find_peak,
+        args_find_peak=args_find_peak,
+        kwargs_find_peak=kwargs_find_peak)
+    return output_array
+
+
 def _mask_array(dask_array, mask_array, fill_value=None):
     """Mask two last dimensions in a dask array.
 
