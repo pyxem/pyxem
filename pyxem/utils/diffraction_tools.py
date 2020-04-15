@@ -19,6 +19,7 @@
 import numpy as np
 import scipy.constants as sc
 
+
 def acceleration_voltage_to_wavelength(acceleration_voltage):
     """Get electron wavelength from the acceleration voltage.
 
@@ -41,12 +42,13 @@ def acceleration_voltage_to_wavelength(acceleration_voltage):
     >>> wavelength_picometer = wavelength*10**12
 
     """
-    E = acceleration_voltage*sc.elementary_charge
+    E = acceleration_voltage * sc.elementary_charge
     h = sc.Planck
     m0 = sc.electron_mass
     c = sc.speed_of_light
-    wavelength = h/(2*m0*E*(1 + (E/(2*m0*c**2))))**0.5
+    wavelength = h / (2 * m0 * E * (1 + (E / (2 * m0 * c ** 2)))) ** 0.5
     return wavelength
+
 
 def diffraction_scattering_angle(acceleration_voltage, lattice_size, miller_index):
     """Get electron scattering angle from a crystal lattice.
@@ -88,6 +90,6 @@ def diffraction_scattering_angle(acceleration_voltage, lattice_size, miller_inde
     wavelength = acceleration_voltage_to_wavelength(acceleration_voltage)
     H, K, L = miller_index
     a = lattice_size
-    d = a/(H**2 + K**2 + L**2)**0.5
+    d = a / (H ** 2 + K ** 2 + L ** 2) ** 0.5
     scattering_angle = 2 * np.arcsin(wavelength / (2 * d))
     return scattering_angle

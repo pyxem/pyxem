@@ -34,8 +34,16 @@ from hyperspy.misc.utils import isiterable
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals.differential_phase_contrast import DPCBaseSignal, DPCSignal1D, DPCSignal2D
-from pyxem.signals.differential_phase_contrast import LazyDPCBaseSignal, LazyDPCSignal1D, LazyDPCSignal2D
+from pyxem.signals.differential_phase_contrast import (
+    DPCBaseSignal,
+    DPCSignal1D,
+    DPCSignal2D,
+)
+from pyxem.signals.differential_phase_contrast import (
+    LazyDPCBaseSignal,
+    LazyDPCSignal1D,
+    LazyDPCSignal2D,
+)
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils.pyfai_utils import (
@@ -797,29 +805,29 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             * 'xc' - A cross correlation peakfinder
 
         """
-        #if self._lazy:
+        # if self._lazy:
         #    dask_array = self.data
-        #else:
+        # else:
         #    sig_chunks = list(self.axes_manager.signal_shape)[::-1]
         #    chunks = [8] * len(self.axes_manager.navigation_shape)
         #    chunks.extend(sig_chunks)
         #    dask_array = da.from_array(self.data, chunks=chunks)
         #
-        #if method == "dog":
+        # if method == "dog":
         #    output_array = dt._peak_find_dog(dask_array, **kwargs)
-        #elif method == "log":
+        # elif method == "log":
         #    output_array = dt._peak_find_log(dask_array, **kwargs)
-        #else:
+        # else:
         #    raise ValueError("Method is not a valid name, should be dog or log")
         #
-        #if not lazy_result:
+        # if not lazy_result:
         #    if show_progressbar:
         #        pbar = ProgressBar()
         #        pbar.register()
         #    output_array = output_array.compute()
         #    if show_progressbar:
         #        pbar.unregister()
-        #return output_array
+        # return output_array
         method_dict = {
             "zaefferer": find_peaks_zaefferer,
             "stat": find_peaks_stat,
