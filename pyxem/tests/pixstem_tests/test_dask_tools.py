@@ -509,42 +509,6 @@ class TestPeakFindDog:
         assert (peaks0 == [[50, 50]]).all()
         assert (peaks1 == [[50, 50], [20, 10]]).all()
 
-    def test_chunk(self):
-        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
-        data[0, 0, 50, 20] = 100
-        data[0, 1, 51, 21] = 100
-        data[0, 2, 52, 22] = 100
-        data[1, 0, 53, 23] = 100
-        data[1, 1, 54, 24] = 100
-        data[1, 2, 55, 25] = 100
-        min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
-        threshold, overlap = 0.06, 0.01
-        peaks = dt._peak_find_dog_chunk(
-            data,
-            min_sigma=min_sigma,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert peaks[0, 0][0].tolist() == [50, 20]
-        assert peaks[0, 1][0].tolist() == [51, 21]
-        assert peaks[0, 2][0].tolist() == [52, 22]
-        assert peaks[1, 0][0].tolist() == [53, 23]
-        assert peaks[1, 1][0].tolist() == [54, 24]
-        assert peaks[1, 2][0].tolist() == [55, 25]
-
-    def test_chunk_normalize_value(self):
-        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
-        data[:, :, 49:52, 49:52] = 100
-        data[:, :, 19:22, 9:12] = 10
-
-        peak_array0 = dt._peak_find_dog_chunk(data, normalize_value=100)
-        peak_array1 = dt._peak_find_dog_chunk(data, normalize_value=10)
-        for ix, iy in np.ndindex(peak_array0.shape):
-            assert (peak_array0[ix, iy] == [[50, 50]]).all()
-            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
-
     def test_dask_array(self):
         data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
         data[0, 0, 50, 20] = 100
@@ -1077,42 +1041,6 @@ class TestPeakFindLog:
         peaks1 = dt._peak_find_log_single_frame(image, normalize_value=10)
         assert (peaks0 == [[50, 50]]).all()
         assert (peaks1 == [[50, 50], [20, 10]]).all()
-
-    def test_chunk(self):
-        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
-        data[0, 0, 50, 20] = 100
-        data[0, 1, 51, 21] = 100
-        data[0, 2, 52, 22] = 100
-        data[1, 0, 53, 23] = 100
-        data[1, 1, 54, 24] = 100
-        data[1, 2, 55, 25] = 100
-        min_sigma, max_sigma, num_sigma = 0.08, 1, 10
-        threshold, overlap = 0.06, 0.01
-        peaks = dt._peak_find_log_chunk(
-            data,
-            min_sigma=min_sigma,
-            max_sigma=max_sigma,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert peaks[0, 0][0].tolist() == [50, 20]
-        assert peaks[0, 1][0].tolist() == [51, 21]
-        assert peaks[0, 2][0].tolist() == [52, 22]
-        assert peaks[1, 0][0].tolist() == [53, 23]
-        assert peaks[1, 1][0].tolist() == [54, 24]
-        assert peaks[1, 2][0].tolist() == [55, 25]
-
-    def test_chunk_normalize_value(self):
-        data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
-        data[:, :, 49:52, 49:52] = 100
-        data[:, :, 19:22, 9:12] = 10
-
-        peak_array0 = dt._peak_find_log_chunk(data, normalize_value=100)
-        peak_array1 = dt._peak_find_log_chunk(data, normalize_value=10)
-        for ix, iy in np.ndindex(peak_array0.shape):
-            assert (peak_array0[ix, iy] == [[50, 50]]).all()
-            assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
 
     def test_dask_array(self):
         data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
