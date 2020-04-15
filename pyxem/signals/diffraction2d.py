@@ -755,7 +755,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return bg_subtracted
 
-    def find_peaks(self, method, *args, **kwargs):
+    def find_peaks(self, method, show_progressbar=True, *args, **kwargs):
         """Find the position of diffraction peaks.
 
         Function to locate the positive peaks in an image using various, user
@@ -813,7 +813,28 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 "implementations.".format(method)
             )
 
-        peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
+        if self._lazy:
+            dask_array = self.data
+        else:
+            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
+            chunks = [8] * len(self.axes_manager.navigation_shape)
+            chunks.extend(sig_chunks)
+            dask_array = da.from_array(self.data, chunks=chunks)
+
+        output_array = dt._find_peak_dask_array(
+                dask_array,
+                method,
+                args_find_peak=args,
+                kwargs_find_peak=kwargs)
+
+        if show_progressbar:
+            pbar = ProgressBar()
+            pbar.register()
+        output_array_computed = output_array.compute()
+        if show_progressbar:
+            pbar.unregister()
+        peaks = hs.signals.BaseSignal(output_array_computed).T
+
         peaks.map(
             peaks_as_gvectors,
             center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,

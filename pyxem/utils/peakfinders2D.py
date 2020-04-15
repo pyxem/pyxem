@@ -315,6 +315,7 @@ def find_peaks_dog(
     threshold=0.2,
     overlap=0.5,
     exclude_border=False,
+    normalize=True,
 ):
     """
     Finds peaks via the difference of Gaussian Matrices method from
@@ -340,7 +341,9 @@ def find_peaks_dog(
     sensitive to fluctuations in intensity near the edges of the image.
 
     """
-    z = z / np.max(z)
+    z = z.astype(np.float32)
+    if normalize:
+        z = z / np.max(z)
     blobs = blob_dog(
         z,
         min_sigma=min_sigma,
@@ -363,6 +366,7 @@ def find_peaks_log(
     overlap=0.5,
     log_scale=False,
     exclude_border=False,
+    normalize=True,
 ):
     """
     Finds peaks via the Laplacian of Gaussian Matrices method from
@@ -384,7 +388,9 @@ def find_peaks_log(
         Array of peak coordinates.
 
     """
-    z = z / np.max(z)
+    z = z.astype(np.float32)
+    if normalize:
+        z = z / np.max(z)
     blobs = blob_log(
         z,
         min_sigma=min_sigma,
