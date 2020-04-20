@@ -115,9 +115,10 @@ def diffraction_vectors_map(request):
 
 
 def test_plot_diffraction_vectors(diffraction_vectors_map):
-    diffraction_vectors_map.plot_diffraction_vectors(
-        xlim=1.0, ylim=1.0, distance_threshold=0
-    )
+    with pytest.warns(UserWarning, match="distance_threshold=0 was given"):
+        diffraction_vectors_map.plot_diffraction_vectors(
+            xlim=1.0, ylim=1.0, distance_threshold=0
+        )
 
 
 def test_plot_diffraction_vectors_on_signal(

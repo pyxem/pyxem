@@ -85,14 +85,20 @@ class TestSimpleMaps:
 
     def test_apply_affine_transformation_with_casting(self, diffraction_pattern):
         diffraction_pattern.change_dtype("uint8")
-        transformed_dp = ElectronDiffraction2D(
-            diffraction_pattern
-        ).apply_affine_transformation(
-            D=np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.2]]),
-            order=2,
-            keep_dtype=True,
-            inplace=False,
-        )
+
+        with pytest.warns(
+            UserWarning,
+            match="Bi-quadratic interpolation behavior has changed due to a bug in the implementation of scikit-image",
+        ):
+            transformed_dp = ElectronDiffraction2D(
+                diffraction_pattern
+            ).apply_affine_transformation(
+                D=np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.2]]),
+                order=2,
+                keep_dtype=True,
+                inplace=False,
+            )
+
         assert transformed_dp.data.dtype == "uint8"
 
     methods = ["average", "nan"]
