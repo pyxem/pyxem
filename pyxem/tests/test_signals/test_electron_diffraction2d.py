@@ -202,9 +202,11 @@ class TestBackgroundMethods:
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
-    @pytest.mark.xfail(raises=TypeError)
     def test_no_kwarg(self, diffraction_pattern):
-        bgr = diffraction_pattern.remove_background(method="h-dome")
+        with pytest.raises(
+            TypeError, match="missing 1 required positional argument: 'h'",
+        ):
+            bgr = diffraction_pattern.remove_background(method="h-dome")
 
 
 class TestPeakFinding:
@@ -257,18 +259,31 @@ class TestsAssertionless:
         plt.close("all")
 
 
-@pytest.mark.xfail(raises=NotImplementedError)
 class TestNotImplemented:
     def test_failing_run(self, diffraction_pattern):
-        diffraction_pattern.find_peaks(method="no_such_method_exists")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            NotImplementedError,
+            match=r"The method .* is not implemented. See documentation for available implementations",
+        ):
+            diffraction_pattern.find_peaks(method="no_such_method_exists")
 
     def test_remove_dead_pixels_failing(self, diffraction_pattern):
-        dpr = diffraction_pattern.remove_deadpixels(
-            [[1, 2], [5, 6]], "fake_method", inplace=False, progress_bar=False
-        )
+        with pytest.raises(
+            NotImplementedError,
+            match="The method specified is not implemented. See documentation for available implementations",
+        ):
+            dpr = diffraction_pattern.remove_deadpixels(
+                [[1, 2], [5, 6]], "fake_method", inplace=False, progress_bar=False
+            )
 
     def test_remove_background_fake_method(self, diffraction_pattern):
-        bgr = diffraction_pattern.remove_background(method="fake_method")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            NotImplementedError,
+            match=r"The method .* is not implemented. See documentation for available implementations",
+        ):
+            bgr = diffraction_pattern.remove_background(method="fake_method")
 
 
 class TestComputeAndAsLazyElectron2D:

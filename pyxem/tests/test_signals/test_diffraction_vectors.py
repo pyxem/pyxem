@@ -162,7 +162,6 @@ class TestUniqueVectors:
         unique_vectors = diffraction_vectors_map.get_unique_vectors()
         assert isinstance(unique_vectors, DiffractionVectors)
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_unique_vectors_single(self, diffraction_vectors_single):
         diffraction_vectors_single.get_unique_vectors()
 
