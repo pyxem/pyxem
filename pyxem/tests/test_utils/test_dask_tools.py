@@ -25,6 +25,47 @@ import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.dummy_data.dask_test_data as dtd
 
 
+class TestFindPeakChunk:
+    def test_simple(self):
+        def function(z):
+            return([1, 2])
+        data = np.zeros((2, 2, 10, 10))
+        output = dt._find_peak_chunk(data, function)
+        for iy, ix in np.ndindex(output.shape):
+            assert output[iy, ix] == [1, 2]
+
+    def test_args(self):
+        def function(z, m, n):
+            return([1*m, 2*n])
+        data = np.zeros((2, 2, 10, 10))
+        m, n = 4, 5
+        output = dt._find_peak_chunk(data, function, args_find_peak=[m, n])
+        for iy, ix in np.ndindex(output.shape):
+            assert output[iy, ix] == [1*m, 2*n]
+
+    def test_kwargs(self):
+        def function(z, k=1, l=1):
+            return([1*k, 2*l])
+        data = np.zeros((2, 2, 10, 10))
+        k, l = 4, 3
+        output0 = dt._find_peak_chunk(data, function)
+        output1 = dt._find_peak_chunk(data, function,
+                                      kwargs_find_peak={'k': k, 'l': l})
+        for iy, ix in np.ndindex(output0.shape):
+            assert output0[iy, ix] == [1, 2]
+            assert output1[iy, ix] == [1*k, 2*l]
+
+    def test_args_kwargs(self):
+        def function(z, m, k=1):
+            return([1*m, 2*k])
+        data = np.zeros((2, 2, 10, 10))
+        m, k = 4, 3
+        output = dt._find_peak_chunk(data, function, args_find_peak=[m, ],
+                                      kwargs_find_peak={'k': k})
+        for iy, ix in np.ndindex(output.shape):
+            assert output[iy, ix] == [1*m, 2*k]
+
+
 class TestCenterOfMassArray:
     def test_simple(self):
         numpy_array = np.zeros((10, 10, 50, 50))
