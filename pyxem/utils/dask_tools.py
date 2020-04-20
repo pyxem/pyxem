@@ -39,12 +39,16 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
-def _find_peak_chunk(data, func_find_peak, args_find_peak, kwargs_find_peak):
+def _find_peak_chunk(data, func_find_peak, args_find_peak=None, kwargs_find_peak=None):
+    if args_find_peak is None:
+        args_find_peak = []
+    if kwargs_find_peak is None:
+        kwargs_find_peak = {}
     output_array = np.empty(data.shape[:-2], dtype='object')
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
         output_array[islice] = func_find_peak(
-            z=data[islice], *args_find_peak, **kwargs_find_peak)
+            data[islice], *args_find_peak, **kwargs_find_peak)
     return output_array
 
 
