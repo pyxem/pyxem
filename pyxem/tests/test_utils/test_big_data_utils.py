@@ -25,16 +25,20 @@ import pyxem as pxm
 from pyxem.utils.big_data_utils import chunked_application_of_UDF, _get_chunk_size
 
 
-@pytest.mark.xfail(raises=ValueError, strict=True)
 class Test_bad_xy_lists:
     def test_two_chunksizes(self):
-        _get_chunk_size([0, 10], [0, 5])
+        with pytest.raises(
+            ValueError, match="x_list and y_list need to have the same chunksize"
+        ):
+            _get_chunk_size([0, 10], [0, 5])
 
     def test_bad_x_list(self):
-        _get_chunk_size([0, 2, 5], [0, 2])
+        with pytest.raises(ValueError, match="There is a problem with your x_list"):
+            _get_chunk_size([0, 2, 5], [0, 2])
 
     def test_bad_y_list(self):
-        _get_chunk_size([0, 2], [0, 2, 5])
+        with pytest.raises(ValueError, match="There is a problem with your y_list"):
+            _get_chunk_size([0, 2], [0, 2, 5])
 
 
 """

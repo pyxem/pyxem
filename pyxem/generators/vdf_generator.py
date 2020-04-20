@@ -89,7 +89,7 @@ class VDFGenerator:
 
         else:
             raise ValueError(
-                "DiffractionVectors non-specified by user. Please "
+                "DiffractionVectors not specified by user. Please "
                 "initialize VDFGenerator with some vectors. "
             )
 
