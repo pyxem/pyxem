@@ -90,6 +90,77 @@ class TestFindPeakChunk:
             dt._find_peak_chunk(data, function, k=3)
 
 
+class TestFindPeakDaskArray:
+    def test_simple(self):
+        def function(z):
+            return([1, 2])
+        dask_array = da.zeros((4, 6, 10, 10), chunks=(2, 2, 10, 10))
+        output = dt._find_peak_dask_array(dask_array, function)
+        output_compute = output.compute()
+        for iy, ix in np.ndindex(output.shape):
+            assert output_compute[iy, ix] == [1, 2]
+
+    def test_args(self):
+        def function(z, m):
+            return([1*m, 2])
+        m = 5
+        dask_array = da.zeros((4, 6, 10, 10), chunks=(2, 2, 10, 10))
+        output = dt._find_peak_dask_array(dask_array, function, m)
+        output_compute = output.compute()
+        for iy, ix in np.ndindex(output.shape):
+            assert output_compute[iy, ix] == [1*m, 2]
+
+    def test_kwargs(self):
+        def function(z, k=2):
+            return([1, 2*k])
+        k = 5
+        dask_array = da.zeros((4, 6, 10, 10), chunks=(2, 2, 10, 10))
+        output0 = dt._find_peak_dask_array(dask_array, function, k=k)
+        output1 = dt._find_peak_dask_array(dask_array, function)
+        output0_compute = output0.compute()
+        output1_compute = output1.compute()
+        for iy, ix in np.ndindex(output0.shape):
+            assert output0_compute[iy, ix] == [1, 2*k]
+            assert output1_compute[iy, ix] == [1, 4]
+
+    def test_args_kwargs(self):
+        def function(z, m, k=2):
+            return([1*m, 2*k])
+        m, k = 3, 5
+        dask_array = da.zeros((4, 6, 10, 10), chunks=(2, 2, 10, 10))
+        output = dt._find_peak_dask_array(dask_array, function, m, k=k)
+        output_compute = output.compute()
+        for iy, ix in np.ndindex(output.shape):
+            assert output_compute[iy, ix] == [1*m, 2*k]
+
+    def test_non_square_chunk(self):
+        def function(z):
+            return([z[0, 0], ])
+        data = np.ones((4, 6, 10, 10))
+        for iy, ix in np.ndindex(data.shape[:-2]):
+            data[iy, ix] = iy + ix
+        dask_array = da.from_array(data, chunks=(2, 2, 10, 10))
+        output = dt._find_peak_dask_array(dask_array, function)
+        output_compute = output.compute()
+        for iy, ix in np.ndindex(output.shape):
+            assert output_compute[iy, ix][0] == iy + ix
+
+    def test_missing_arg(self):
+        def function(z, m):
+            return([1*m, 2])
+        dask_array = da.zeros((4, 6, 10, 10), chunks=(2, 2, 10, 10))
+        with pytest.raises(TypeError):
+            output = dt._find_peak_dask_array(dask_array, function)
+            output.compute()
+
+    def test_extra_kwarg(self):
+        def function(z):
+            return([1, 2])
+        dask_array = da.zeros((4, 6, 10, 10), chunks=(2, 2, 10, 10))
+        with pytest.raises(TypeError):
+            output = dt._find_peak_dask_array(dask_array, function, k=3)
+            output.compute()
+
 
 class TestCenterOfMassArray:
     def test_simple(self):

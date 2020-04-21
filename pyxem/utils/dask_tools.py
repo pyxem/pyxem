@@ -53,7 +53,7 @@ def _find_peak_chunk(data, func_find_peak, args_find_peak=None, kwargs_find_peak
 
 
 def _find_peak_dask_array(
-        dask_array, func_find_peak, args_find_peak, kwargs_find_peak):
+        dask_array, func_find_peak, *args_find_peak, **kwargs_find_peak):
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     drop_axis = (dask_array_rechunked.ndim - 2, dask_array_rechunked.ndim - 1)
     output_array = da.map_blocks(
