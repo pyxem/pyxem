@@ -65,6 +65,16 @@ class TestFindPeakChunk:
         for iy, ix in np.ndindex(output.shape):
             assert output[iy, ix] == [1*m, 2*k]
 
+    def test_non_square_chunk(self):
+        def function(z):
+            return([z[0, 0], ])
+        data = np.ones((2, 3, 10, 10))
+        for iy, ix in np.ndindex(data.shape[:-2]):
+            data[iy, ix] = iy + ix
+        output = dt._find_peak_chunk(data, function)
+        for iy, ix in np.ndindex(output.shape):
+            assert output[iy, ix][0] == iy + ix
+
 
 class TestCenterOfMassArray:
     def test_simple(self):
