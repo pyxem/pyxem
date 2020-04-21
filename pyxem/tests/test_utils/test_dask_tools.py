@@ -61,7 +61,7 @@ class TestFindPeakChunk:
         data = np.zeros((2, 2, 10, 10))
         m, k = 4, 3
         output = dt._find_peak_chunk(data, function, args_find_peak=[m, ],
-                                      kwargs_find_peak={'k': k})
+                                     kwargs_find_peak={'k': k})
         for iy, ix in np.ndindex(output.shape):
             assert output[iy, ix] == [1*m, 2*k]
 
@@ -74,6 +74,21 @@ class TestFindPeakChunk:
         output = dt._find_peak_chunk(data, function)
         for iy, ix in np.ndindex(output.shape):
             assert output[iy, ix][0] == iy + ix
+
+    def test_missing_arg(self):
+        def function(z, m):
+            return([1*m, 2])
+        data = np.zeros((2, 2, 10, 10))
+        with pytest.raises(TypeError):
+            dt._find_peak_chunk(data, function)
+
+    def test_extra_karg(self):
+        def function(z):
+            return([1, 2])
+        data = np.zeros((2, 2, 10, 10))
+        with pytest.raises(TypeError):
+            dt._find_peak_chunk(data, function, k=3)
+
 
 
 class TestCenterOfMassArray:
