@@ -1334,12 +1334,13 @@ class TestDiffraction2DTemplateWithBinaryImage:
 
 class TestDiffraction2DFindPeaks:
 
-    method1 = ["dog", "log"]
+    method1 = ["difference_of_gaussians", "laplacian_of_gaussians"]
 
     @pytest.mark.parametrize("methods", method1)
     def test_simple(self, methods):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
         peak_array = s.find_peaks(method=methods)
+        peak_array = peak_array.data
         assert s.data.shape[:2] == peak_array.shape
         assert hasattr(peak_array, "compute")
 
@@ -1348,6 +1349,7 @@ class TestDiffraction2DFindPeaks:
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
         peak_array = s.find_peaks(method=methods)
+        peak_array = peak_array.data
         assert s.data.shape[:2] == peak_array.shape
         assert hasattr(peak_array, "compute")
 
@@ -1356,6 +1358,7 @@ class TestDiffraction2DFindPeaks:
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
         peak_array = s.find_peaks(method=methods, lazy_result=False)
+        peak_array = peak_array.data
         assert s.data.shape[:2] == peak_array.shape
         assert not hasattr(peak_array, "compute")
 
@@ -1371,12 +1374,14 @@ class TestDiffraction2DFindPeaks:
         min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
         threshold, overlap = 0.06, 0.01
         peaks = s.find_peaks(
+            method='difference_of_gaussians',
             min_sigma=min_sigma,
             max_sigma=max_sigma,
             sigma_ratio=sigma_ratio,
             threshold=threshold,
             overlap=overlap,
         )
+        peaks = peaks.data
         peaks = peaks.compute()
         assert peaks[0, 0][0].tolist() == [50, 20]
         assert peaks[0, 1][0].tolist() == [51, 21]
@@ -1392,6 +1397,7 @@ class TestDiffraction2DFindPeaks:
         s = Diffraction2D(data)
         min_sigma, max_sigma, sigma_ratio, overlap = 2, 5, 5, 1
         peaks0 = s.find_peaks(
+            method='difference_of_gaussians',
             min_sigma=min_sigma,
             max_sigma=max_sigma,
             sigma_ratio=sigma_ratio,
@@ -1399,9 +1405,11 @@ class TestDiffraction2DFindPeaks:
             overlap=overlap,
             lazy_result=False,
         )
+        peaks0 = peaks0.data
         for ix, iy in np.ndindex(peaks0.shape):
             assert len(peaks0[ix, iy]) == 2
         peaks1 = s.find_peaks(
+            method='difference_of_gaussians',
             min_sigma=min_sigma,
             max_sigma=max_sigma,
             sigma_ratio=sigma_ratio,
@@ -1409,6 +1417,7 @@ class TestDiffraction2DFindPeaks:
             overlap=overlap,
             lazy_result=False,
         )
+        peaks1 = peaks1.data
         for ix, iy in np.ndindex(peaks1.shape):
             assert len(peaks1[ix, iy]) == 1
 
@@ -1421,9 +1430,11 @@ class TestDiffraction2DFindPeaks:
         peak_array0 = s.find_peaks(
             method=methods, normalize_value=100, lazy_result=False
         )
+        peak_array0 = peak_array0.data
         peak_array1 = s.find_peaks(
             method=methods, normalize_value=10, lazy_result=False
         )
+        peak_array1 = peak_array1.data
         for ix, iy in np.ndindex(peak_array0.shape):
             assert (peak_array0[ix, iy] == [[50, 50]]).all()
             assert (peak_array1[ix, iy] == [[50, 50], [20, 10]]).all()
@@ -1435,6 +1446,7 @@ class TestDiffraction2DFindPeaks:
         shape.extend([50, 50])
         s = Diffraction2D(np.random.random(size=shape))
         peak_array = s.find_peaks(method=methods, lazy_result=False)
+        peak_array = peak_array.data
         assert peak_array.shape == tuple(shape[:-2])
 
 
@@ -1599,7 +1611,8 @@ class TestSubtractingDiffractionBackground:
 class TestDiffraction2DIntensityPeaks:
     def test_simple(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         intensity_array = s.intensity_peaks(peak_array)
         assert s.data.shape[:2] == intensity_array.shape
         assert hasattr(intensity_array, "compute")
@@ -1607,7 +1620,8 @@ class TestDiffraction2DIntensityPeaks:
     def test_lazy_input(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         intensity_array = s.intensity_peaks(peak_array)
         assert s.data.shape[:2] == intensity_array.shape
         assert hasattr(intensity_array, "compute")
@@ -1615,7 +1629,8 @@ class TestDiffraction2DIntensityPeaks:
     def test_lazy_output(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         intensity_array = s.intensity_peaks(peak_array, lazy_result=False)
         assert s.data.shape[:2] == intensity_array.shape
         assert not hasattr(intensity_array, "compute")
@@ -1632,12 +1647,14 @@ class TestDiffraction2DIntensityPeaks:
         min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
         threshold, overlap = 0.06, 0.01
         peaks = s.find_peaks(
+            method='difference_of_gaussians',
             min_sigma=min_sigma,
             max_sigma=max_sigma,
             sigma_ratio=sigma_ratio,
             threshold=threshold,
             overlap=overlap,
         )
+        peaks = peaks.data
         intensity_array = s.intensity_peaks(peaks, disk_r=1)
         intensity_array = intensity_array.compute()
         np.testing.assert_almost_equal(intensity_array[0, 0][0][2], 100 / 9)
@@ -1652,7 +1669,8 @@ class TestDiffraction2DIntensityPeaks:
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = Diffraction2D(np.random.random(size=shape))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         intensity_array = s.intensity_peaks(peak_array, disk_r=1)
         assert intensity_array.shape == tuple(shape[:-2])
 
@@ -1660,21 +1678,24 @@ class TestDiffraction2DIntensityPeaks:
 class TestDiffraction2DPeakPositionRefinement:
     def test_simple(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
         assert s.data.shape[:2] == refined_peak_array.shape
         assert hasattr(peak_array, "compute")
 
     def test_wrong_square_size(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         with pytest.raises(ValueError):
             s.peak_position_refinement_com(peak_array, square_size=5)
 
     def test_lazy_input(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
         assert s.data.shape[:2] == refined_peak_array.shape
         assert hasattr(refined_peak_array, "compute")
@@ -1682,7 +1703,8 @@ class TestDiffraction2DPeakPositionRefinement:
     def test_lazy_output(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         refined_peak_array = s.peak_position_refinement_com(
             peak_array, 4, lazy_result=False
         )
@@ -1701,12 +1723,14 @@ class TestDiffraction2DPeakPositionRefinement:
         min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
         threshold, overlap = 0.06, 0.01
         peaks = s.find_peaks(
+            method='difference_of_gaussians',
             min_sigma=min_sigma,
             max_sigma=max_sigma,
             sigma_ratio=sigma_ratio,
             threshold=threshold,
             overlap=overlap,
         )
+        peaks = peaks.data
         refined_peaks = s.peak_position_refinement_com(peaks, 4, lazy_result=False)
         assert refined_peaks[0, 0][0].tolist() == [50.0, 20.0]
         assert refined_peaks[0, 1][0].tolist() == [51.0, 21.0]
@@ -1720,7 +1744,8 @@ class TestDiffraction2DPeakPositionRefinement:
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = Diffraction2D(np.random.random(size=shape))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(method='difference_of_gaussians')
+        peak_array = peak_array.data
         refined_peak_array = s.peak_position_refinement_com(
             peak_array, 4, lazy_result=False
         )
