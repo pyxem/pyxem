@@ -22,7 +22,7 @@ from pyxem.utils.pyfai_utils import (
     _get_radial_extent,
     get_azimuthal_integrator,
     _get_displacements,
-    _get_setup
+    _get_setup,
 )
 from pyFAI.detectors import Detector
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
@@ -72,8 +72,14 @@ class Test_PyFai_utils:
             extent[1], calc_extent,
         )
 
-    @pytest.mark.parametrize("wavelength",[0, 1e-9])
-    @pytest.mark.parametrize("unit",["2th_deg","2th_rad","q_nm^-1","q_A^-1","k_nm^-1","k_A^-1"])
-    def test_get_setup(self,wavelength,unit):
-        curve = _get_setup(wavelength=wavelength, pyxem_unit=unit, pixel_scale=[1, 1], radial_range=[0, 1])
-
+    @pytest.mark.parametrize("wavelength", [0, 1e-9])
+    @pytest.mark.parametrize(
+        "unit", ["2th_deg", "2th_rad", "q_nm^-1", "q_A^-1", "k_nm^-1", "k_A^-1"]
+    )
+    def test_get_setup(self, wavelength, unit):
+        curve = _get_setup(
+            wavelength=wavelength,
+            pyxem_unit=unit,
+            pixel_scale=[1, 1],
+            radial_range=[0, 1],
+        )

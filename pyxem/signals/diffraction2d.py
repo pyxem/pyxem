@@ -301,7 +301,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
-        signal_type =self._signal_type
+        signal_type = self._signal_type
 
         if unit == "pyxem":  # Case 1
             pyxem_units = True
@@ -330,12 +330,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     ind = (0,) * len(self.axes_manager.navigation_shape)
                     cen = center.inav[ind].data
                 else:
-                    cen =center
+                    cen = center
                 ai = get_azimuthal_integrator(
                     detector=detector,
                     detector_distance=detector_dist,
                     shape=sig_shape,
-                    center= cen,
+                    center=cen,
                     wavelength=wavelength,
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
@@ -529,12 +529,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                     ind = (0,) * len(self.axes_manager.navigation_shape)
                     cen = center.inav[ind].data
                 else:
-                    cen =center
+                    cen = center
                 ai = get_azimuthal_integrator(
                     detector=detector,
                     detector_distance=detector_dist,
                     shape=sig_shape,
-                    center= cen,
+                    center=cen,
                     wavelength=wavelength,
                 )  # take 1st center
                 radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
@@ -601,10 +601,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis = integration.axes_manager.signal_axes[1]
         t_axis.name = "Radians"
         if azimuth_range is None:
-            t_axis.scale = np.pi*2 / npt_azim
-            t_axis.offset = - np.pi
+            t_axis.scale = np.pi * 2 / npt_azim
+            t_axis.offset = -np.pi
         else:
-            t_axis.scale =  (azimuth_range[1]-azimuth_range[0])/npt_rad
+            t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt_rad
             t_axis.offset = azimuth_range[0]
         k_axis.name = "Radius"
         if pyxem_units:

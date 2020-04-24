@@ -31,10 +31,10 @@ class TestDiffractionVariance:
         assert isinstance(difvar, DiffractionVariance2D)
 
     def test_1d_azimuthal_integration(self):
-        var = DiffractionVariance2D(data =np.ones((3,3,3,3,)))
+        var = DiffractionVariance2D(data=np.ones((3, 3, 3, 3,)))
         var.unit = "2th_rad"
         integration = var.get_azimuthal_integral1d(npt_rad=10)
-        assert isinstance(integration,DiffractionVariance1D)
+        assert isinstance(integration, DiffractionVariance1D)
 
 
 class TestImageVariance:

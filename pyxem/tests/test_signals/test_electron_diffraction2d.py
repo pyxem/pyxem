@@ -332,39 +332,39 @@ class TestIntegration:
         ones_diff.unit = "2th_rad"
         return ones_diff
 
-    @pytest.mark.parametrize("energy",[None,200])
+    @pytest.mark.parametrize("energy", [None, 200])
     def test_1d_azimuthal_integration(self, ones, energy):
         ones.beam_energy = energy
         integration = ones.get_azimuthal_integral1d(npt_rad=10)
-        assert isinstance(integration,ElectronDiffraction1D)
+        assert isinstance(integration, ElectronDiffraction1D)
 
     @pytest.mark.parametrize("energy", [None, 200])
-    def test_2d_azimuthal_integration(self, ones,energy):
+    def test_2d_azimuthal_integration(self, ones, energy):
         ones.beam_energy = energy
         integration = ones.get_azimuthal_integral2d(npt_rad=10)
-        assert isinstance(integration,PolarDiffraction2D)
+        assert isinstance(integration, PolarDiffraction2D)
 
     def test_set_scan_calibration(self):
-        ones = ElectronDiffraction2D(data=np.ones((3,3,3,3)))
-        ones.scan_calibration=0.9
+        ones = ElectronDiffraction2D(data=np.ones((3, 3, 3, 3)))
+        ones.scan_calibration = 0.9
         assert ones.axes_manager.navigation_axes[0].scale == 0.9
         assert ones.axes_manager.navigation_axes[1].scale == 0.9
-        assert ones.scan_calibration ==0.9
+        assert ones.scan_calibration == 0.9
 
     def test_set_diffraction_calibration(self):
-        ones = ElectronDiffraction2D(data=np.ones((3,3,3,3)))
-        ones.diffraction_calibration =0.9
+        ones = ElectronDiffraction2D(data=np.ones((3, 3, 3, 3)))
+        ones.diffraction_calibration = 0.9
         assert ones.axes_manager.signal_axes[0].scale == 0.9
         assert ones.axes_manager.signal_axes[1].scale == 0.9
-        assert ones.diffraction_calibration ==0.9
+        assert ones.diffraction_calibration == 0.9
 
-    def test_set_camera_length(self,ones):
+    def test_set_camera_length(self, ones):
         assert ones.camera_length is None
         ones.camera_length = 1.5
         assert ones.metadata.Acquisition_instrument.TEM["camera_length"] == 1.5
         assert ones.camera_length == 1.5
 
-    def test_set_beam_energy(self,ones):
+    def test_set_beam_energy(self, ones):
         assert ones.beam_energy is None
         ones.beam_energy = 1.5
         assert ones.metadata.Acquisition_instrument.TEM["beam_energy"] == 1.5
