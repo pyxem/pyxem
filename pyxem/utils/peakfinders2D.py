@@ -301,10 +301,10 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
 
     def _peak_find_once(image):
         """Smooth, binarise, and find peaks according to main algorithm."""
-        image = smooth(image) # 4
-        image = half_binarise(image) # 5
-        peaks = separate_peaks(image) # 6
-        centers = np.array([np.mean(peak, axis=0) for peak in peaks]) # 7
+        image = smooth(image)  # 4
+        image = half_binarise(image)  # 5
+        peaks = separate_peaks(image)  # 6
+        centers = np.array([np.mean(peak, axis=0) for peak in peaks])  # 7
         return image, centers
 
     def stat_peak_finder(image, convergence_ratio):
