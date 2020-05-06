@@ -1339,7 +1339,7 @@ class TestDiffraction2DFindPeaks:
     @pytest.mark.parametrize("methods", method1)
     def test_simple(self, methods):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks(method=methods)
+        peak_array = s.find_peaks(method=methods, lazy_result=True)
         peak_array = peak_array.data
         assert s.data.shape[:2] == peak_array.shape
         assert hasattr(peak_array, "compute")
@@ -1348,7 +1348,7 @@ class TestDiffraction2DFindPeaks:
     def test_lazy_input(self, methods):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks(method=methods)
+        peak_array = s.find_peaks(method=methods, lazy_result=True)
         peak_array = peak_array.data
         assert s.data.shape[:2] == peak_array.shape
         assert hasattr(peak_array, "compute")
@@ -1380,6 +1380,7 @@ class TestDiffraction2DFindPeaks:
             sigma_ratio=sigma_ratio,
             threshold=threshold,
             overlap=overlap,
+            lazy_result=True,
         )
         peaks = peaks.data
         peaks = peaks.compute()
@@ -1422,17 +1423,17 @@ class TestDiffraction2DFindPeaks:
             assert len(peaks1[ix, iy]) == 1
 
     @pytest.mark.parametrize("methods", method1)
-    def test_normalize_value(self, methods):
+    def test_normalize(self, methods):
         data = np.zeros((2, 3, 100, 100), dtype=np.uint16)
         data[:, :, 49:52, 49:52] = 100
         data[:, :, 19:22, 9:12] = 10
         s = Diffraction2D(data)
         peak_array0 = s.find_peaks(
-            method=methods, normalize_value=100, lazy_result=False
+            method=methods, normalize=100, lazy_result=False
         )
         peak_array0 = peak_array0.data
         peak_array1 = s.find_peaks(
-            method=methods, normalize_value=10, lazy_result=False
+            method=methods, normalize=10, lazy_result=False
         )
         peak_array1 = peak_array1.data
         for ix, iy in np.ndindex(peak_array0.shape):
