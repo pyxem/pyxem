@@ -341,9 +341,10 @@ def find_peaks_dog(
     sensitive to fluctuations in intensity near the edges of the image.
 
     """
-    z = z.astype(np.float32)
+    if np.issubdtype(z.dtype, np.integer):
+        z = z.astype(np.float32)
     if normalize:
-        z = z / np.max(z)
+        z = np.divide(z, np.max(z), dtype=z.dtype)
     blobs = blob_dog(
         z,
         min_sigma=min_sigma,
@@ -388,9 +389,10 @@ def find_peaks_log(
         Array of peak coordinates.
 
     """
-    z = z.astype(np.float32)
+    if np.issubdtype(z.dtype, np.integer):
+        z = z.astype(np.float32)
     if normalize:
-        z = z / np.max(z)
+        z = np.divide(z, np.max(z), dtype=z.dtype)
     blobs = blob_log(
         z,
         min_sigma=min_sigma,
