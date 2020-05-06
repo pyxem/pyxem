@@ -294,9 +294,10 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
         coordinates = np.indices(bi.shape).reshape(2, -1).T[bi.flatten()]
         db = DBSCAN(2, 3)
         peaks = []
-        labeled_points = db.fit_predict(coordinates)
-        for peak_label in list(set(labeled_points)):
-            peaks.append(coordinates[labeled_points == peak_label])
+        if coordinates.shape[0] > 0: #we have at least some peaks
+            labeled_points = db.fit_predict(coordinates)
+            for peak_label in list(set(labeled_points)):
+                peaks.append(coordinates[labeled_points == peak_label])
         return peaks
 
     def _peak_find_once(image):
@@ -313,16 +314,19 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
         image = normalize(image)  # 1
         image = stat_binarise(image)  # 2, 3
         # Perform first iteration of peak finding
-        image, peaks_prev = _peak_find_once(image)  # 4-7
         image, peaks_curr = _peak_find_once(image)  # 4-7
-        n_peaks = len(peaks_prev)
-        m_peaks = len(peaks_curr)
+        n_peaks = len(peaks_curr)
+        if n_peaks == 0: #pragma: no cover
+            return peaks_curr
+
+        m_peaks = 0
         # Repeat peak finding with more blurring to convergence
         while (n_peaks - m_peaks) / n_peaks > convergence_ratio:  # 8
-            n_peaks = m_peaks
-            peaks_prev = peaks_curr
+            m_peaks = n_peaks
             image, peaks_curr = _peak_find_once(image)
-            m_peaks = len(peaks_curr)
+            n_peaks = len(peaks_curr)
+            if n_peaks == 0:
+                return peaks_curr
 
         return peaks_curr
 

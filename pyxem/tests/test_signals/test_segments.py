@@ -332,11 +332,14 @@ class TestVDFSegment:
             corr_threshold=0.7, vector_threshold=0, segment_threshold=-1
         )
 
-    @pytest.mark.xfail
-    def test_corelate_segments_bad_thresholds(self, vdf_segments: VDFSegment):
-        corrsegs = vdf_segments.correlate_vdf_segments(
-            vector_threshold=4, segment_threshold=5
-        )
+    def test_correlate_segments_bad_thresholds(self, vdf_segments: VDFSegment):
+        with pytest.raises(
+            ValueError,
+            match="segment_threshold must be smaller than or equal to vector_threshold",
+        ):
+            corrsegs = vdf_segments.correlate_vdf_segments(
+                vector_threshold=4, segment_threshold=5
+            )
 
     def test_get_virtual_electron_diffraction(
         self, vdf_segments: VDFSegment, signal_data
@@ -347,14 +350,17 @@ class TestVDFSegment:
         )
         assert isinstance(vs, ElectronDiffraction2D)
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_virtual_electron_diffraction_no_intensities(
         self, vdf_segments: VDFSegment, signal_data
     ):
         vdf_segments.intensities = None
-        vdf_segments.get_virtual_electron_diffraction(
-            calibration=1, sigma=1, shape=signal_data.axes_manager.signal_shape
-        )
+        with pytest.raises(
+            ValueError,
+            match="VDFSegment does not have the attribute intensities, required for this method",
+        ):
+            vdf_segments.get_virtual_electron_diffraction(
+                calibration=1, sigma=1, shape=signal_data.axes_manager.signal_shape
+            )
 
     def test_get_virtual_electron_diffraction_for_single_vectors(
         self, vdf_segments: VDFSegment, signal_data

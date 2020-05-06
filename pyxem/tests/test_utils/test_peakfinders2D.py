@@ -83,7 +83,7 @@ def test_no_peak_case(no_peak, method):
     assert np.isnan(peaks[0, 1])
 
 
-methods = ["zaf", "log", "dog", "stat"]
+methods = ["zaf", "log", "dog"]
 
 
 @pytest.mark.parametrize("method", methods)

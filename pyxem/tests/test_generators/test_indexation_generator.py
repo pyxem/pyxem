@@ -132,11 +132,15 @@ def test_vector_indexation_generator_init():
     assert vector_indexation_generator.library == vector_library
 
 
-@pytest.mark.xfail(raises=ValueError)
 def test_vector_indexation_generator_cartesian_check():
     vectors = DiffractionVectors([[1], [2]])
     vector_library = DiffractionVectorLibrary()
-    vector_indexation_generator = VectorIndexationGenerator(vectors, vector_library)
+
+    with pytest.raises(
+        ValueError,
+        match="Cartesian coordinates are required in order to index diffraction vectors",
+    ):
+        vector_indexation_generator = VectorIndexationGenerator(vectors, vector_library)
 
 
 def test_vector_indexation_generator_index_vectors(vector_match_peaks, vector_library):
