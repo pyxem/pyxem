@@ -24,6 +24,8 @@ import hyperspy.api as hs
 from hyperspy.signals import Signal1D, Signal2D
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
+from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 
@@ -83,14 +85,20 @@ class TestSimpleMaps:
 
     def test_apply_affine_transformation_with_casting(self, diffraction_pattern):
         diffraction_pattern.change_dtype("uint8")
-        transformed_dp = ElectronDiffraction2D(
-            diffraction_pattern
-        ).apply_affine_transformation(
-            D=np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.2]]),
-            order=2,
-            keep_dtype=True,
-            inplace=False,
-        )
+
+        with pytest.warns(
+            UserWarning,
+            match="Bi-quadratic interpolation behavior has changed due to a bug in the implementation of scikit-image",
+        ):
+            transformed_dp = ElectronDiffraction2D(
+                diffraction_pattern
+            ).apply_affine_transformation(
+                D=np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.2]]),
+                order=2,
+                keep_dtype=True,
+                inplace=False,
+            )
+
         assert transformed_dp.data.dtype == "uint8"
 
     methods = ["average", "nan"]
@@ -108,13 +116,13 @@ class TestSimpleHyperspy:
 
     def test_set_experimental_parameters(self, diffraction_pattern):
         diffraction_pattern.set_experimental_parameters(
-            accelerating_voltage=3,
-            camera_length=3,
-            scan_rotation=1,
-            convergence_angle=1,
-            rocking_angle=1,
-            rocking_frequency=1,
-            exposure_time=1,
+            beam_energy=3.0,
+            camera_length=3.0,
+            scan_rotation=1.0,
+            convergence_angle=1.0,
+            rocking_angle=1.0,
+            rocking_frequency=1.0,
+            exposure_time=1.0,
         )
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
@@ -185,123 +193,6 @@ class TestDirectBeamMethods:
         assert np.equal(mask_calculated, mask_expected)
 
 
-class TestRadialProfile:
-    @pytest.fixture
-    def diffraction_pattern_for_radial(self):
-        """
-        Two diffraction patterns with easy to see radial profiles, wrapped
-        in ElectronDiffraction2D  <2|8,8>
-        """
-        dp = ElectronDiffraction2D(np.zeros((2, 8, 8)))
-        dp.data[0] = np.array(
-            [
-                [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
-                [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
-                [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
-                [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
-                [2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0],
-                [2.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 2.0],
-                [0.0, 2.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0],
-                [0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0],
-            ]
-        )
-
-        dp.data[1] = np.array(
-            [
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            ]
-        )
-
-        return dp
-
-    @pytest.fixture
-    def mask_for_radial(self):
-        """
-        An 8x8 mask array, to test that part of the radial average code.
-        """
-        mask = np.array(
-            [
-                [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-                [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-            ]
-        )
-
-        return mask
-
-    def test_radial_profile_signal_type(
-        self, diffraction_pattern_for_radial, mask_for_radial
-    ):
-        rp = diffraction_pattern_for_radial.get_radial_profile()
-        rp_mask = diffraction_pattern_for_radial.get_radial_profile(
-            mask_array=mask_for_radial
-        )
-
-        assert isinstance(rp, Signal1D)
-        assert isinstance(rp_mask, Signal1D)
-
-    @pytest.fixture
-    def axes_test_dp(self):
-        dp_data = np.random.randint(0, 10, (2, 2, 10, 10))
-        dp = ElectronDiffraction2D(dp_data)
-        return dp
-
-    def test_radial_profile_axes(self, axes_test_dp):
-        n_scale = 0.5
-        axes_test_dp.axes_manager.navigation_axes[0].scale = n_scale
-        axes_test_dp.axes_manager.navigation_axes[1].scale = 2 * n_scale
-        name = "real_space"
-        axes_test_dp.axes_manager.navigation_axes[0].name = name
-        axes_test_dp.axes_manager.navigation_axes[1].units = name
-        units = "um"
-        axes_test_dp.axes_manager.navigation_axes[1].name = units
-        axes_test_dp.axes_manager.navigation_axes[0].units = units
-
-        rp = axes_test_dp.get_radial_profile()
-        rp_scale_x = rp.axes_manager.navigation_axes[0].scale
-        rp_scale_y = rp.axes_manager.navigation_axes[1].scale
-        rp_units_x = rp.axes_manager.navigation_axes[0].units
-        rp_name_x = rp.axes_manager.navigation_axes[0].name
-        rp_units_y = rp.axes_manager.navigation_axes[1].units
-        rp_name_y = rp.axes_manager.navigation_axes[1].name
-
-        assert n_scale == rp_scale_x
-        assert 2 * n_scale == rp_scale_y
-        assert units == rp_units_x
-        assert name == rp_name_x
-        assert name == rp_units_y
-        assert units == rp_name_y
-
-    @pytest.mark.parametrize(
-        "expected", [(np.array([[5.0, 4.0, 3.0, 2.0, 0.0], [1.0, 0.5, 0.2, 0.2, 0.0]]))]
-    )
-    @pytest.mark.parametrize(
-        "expected_mask",
-        [(np.array([[5.0, 4.0, 3.0, 2.0, 0.0], [1.0, 0.5, 0.125, 0.25, 0.0]]))],
-    )
-    def test_radial_profile(
-        self, diffraction_pattern_for_radial, expected, mask_for_radial, expected_mask
-    ):
-        rp = diffraction_pattern_for_radial.get_radial_profile()
-        rp_mask = diffraction_pattern_for_radial.get_radial_profile(
-            mask_array=mask_for_radial
-        )
-        assert np.allclose(rp.data, expected, atol=1e-3)
-        assert np.allclose(rp_mask.data, expected_mask, atol=1e-3)
-
-
 class TestBackgroundMethods:
     @pytest.mark.parametrize(
         "method, kwargs",
@@ -317,9 +208,11 @@ class TestBackgroundMethods:
         assert bgr.data.shape == diffraction_pattern.data.shape
         assert bgr.max() <= diffraction_pattern.max()
 
-    @pytest.mark.xfail(raises=TypeError)
     def test_no_kwarg(self, diffraction_pattern):
-        bgr = diffraction_pattern.remove_background(method="h-dome")
+        with pytest.raises(
+            TypeError, match="missing 1 required positional argument: 'h'",
+        ):
+            bgr = diffraction_pattern.remove_background(method="h-dome")
 
 
 class TestPeakFinding:
@@ -372,18 +265,31 @@ class TestsAssertionless:
         plt.close("all")
 
 
-@pytest.mark.xfail(raises=NotImplementedError)
 class TestNotImplemented:
     def test_failing_run(self, diffraction_pattern):
-        diffraction_pattern.find_peaks(method="no_such_method_exists")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            NotImplementedError,
+            match=r"The method .* is not implemented. See documentation for available implementations",
+        ):
+            diffraction_pattern.find_peaks(method="no_such_method_exists")
 
     def test_remove_dead_pixels_failing(self, diffraction_pattern):
-        dpr = diffraction_pattern.remove_deadpixels(
-            [[1, 2], [5, 6]], "fake_method", inplace=False, progress_bar=False
-        )
+        with pytest.raises(
+            NotImplementedError,
+            match="The method specified is not implemented. See documentation for available implementations",
+        ):
+            dpr = diffraction_pattern.remove_deadpixels(
+                [[1, 2], [5, 6]], "fake_method", inplace=False, progress_bar=False
+            )
 
     def test_remove_background_fake_method(self, diffraction_pattern):
-        bgr = diffraction_pattern.remove_background(method="fake_method")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            NotImplementedError,
+            match=r"The method .* is not implemented. See documentation for available implementations",
+        ):
+            bgr = diffraction_pattern.remove_background(method="fake_method")
 
 
 class TestComputeAndAsLazyElectron2D:
@@ -436,3 +342,51 @@ class TestDecomposition:
     def test_decomposition_class_assignment(self, diffraction_pattern):
         diffraction_pattern.decomposition()
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
+
+
+class TestIntegration:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = ElectronDiffraction2D(data=np.ones(shape=(5, 5)))
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_rad"
+        return ones_diff
+
+    @pytest.mark.parametrize("energy", [None, 200])
+    def test_1d_azimuthal_integration(self, ones, energy):
+        ones.beam_energy = energy
+        integration = ones.get_azimuthal_integral1d(npt_rad=10)
+        assert isinstance(integration, ElectronDiffraction1D)
+
+    @pytest.mark.parametrize("energy", [None, 200])
+    def test_2d_azimuthal_integration(self, ones, energy):
+        ones.beam_energy = energy
+        integration = ones.get_azimuthal_integral2d(npt_rad=10)
+        assert isinstance(integration, PolarDiffraction2D)
+
+    def test_set_scan_calibration(self):
+        ones = ElectronDiffraction2D(data=np.ones((3, 3, 3, 3)))
+        ones.scan_calibration = 0.9
+        assert ones.axes_manager.navigation_axes[0].scale == 0.9
+        assert ones.axes_manager.navigation_axes[1].scale == 0.9
+        assert ones.scan_calibration == 0.9
+
+    def test_set_diffraction_calibration(self):
+        ones = ElectronDiffraction2D(data=np.ones((3, 3, 3, 3)))
+        ones.diffraction_calibration = 0.9
+        assert ones.axes_manager.signal_axes[0].scale == 0.9
+        assert ones.axes_manager.signal_axes[1].scale == 0.9
+        assert ones.diffraction_calibration == 0.9
+
+    def test_set_camera_length(self, ones):
+        assert ones.camera_length is None
+        ones.camera_length = 1.5
+        assert ones.metadata.Acquisition_instrument.TEM["camera_length"] == 1.5
+        assert ones.camera_length == 1.5
+
+    def test_set_beam_energy(self, ones):
+        assert ones.beam_energy is None
+        ones.beam_energy = 1.5
+        assert ones.metadata.Acquisition_instrument.TEM["beam_energy"] == 1.5
+        assert ones.beam_energy == 1.5

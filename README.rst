@@ -1,10 +1,7 @@
-|Travis|_ |AppVeyor|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
+|Travis|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
 
 .. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
 .. _Travis: https://travis-ci.org/pyxem/pyxem
-
-.. |AppVeyor| image:: https://ci.appveyor.com/api/projects/status/github/pyxem/pyxem?svg=true&branch=master
-.. _AppVeyor: https://ci.appveyor.com/project/dnjohnstone/pyxem/branch/master
 
 .. |Coveralls| image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
 .. _Coveralls: https://coveralls.io/github/pyxem/pyxem?branch=master
@@ -21,12 +18,14 @@
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
 .. _black: https://github.com/psf/black
 
-pyXem is an open-source python library for crystallographic diffraction microscopy.
+pyxem is an open-source python library for multi-dimensional diffraction microscopy.
 
-The package defines objects and functions for the analysis of numerous diffraction patterns and has been primarily developed as a platform for hybrid diffraction-microscopy based on 4D scanning diffraction microscopy data in which a 2D diffraction pattern is recorded at every position in a 2D scan of a specimen.
+The package defines objects and functions for the analysis of numerous diffraction patterns. It has been primarily developed as a platform for hybrid diffraction-microscopy based on 4D scanning diffraction microscopy data in which a 2D diffraction pattern is recorded at every position in a 2D scan of a specimen.
+
+pyxem is an extension of the hyperspy library for multi-dimensional data analysis and defines diffraction specific Signal classes.
 
 **Installation instructions, documentation and tutorial examples are available** `here <https://pyxem.github.io/pyxem-website>`__ .
 
-If analysis using pyXem forms a part of published work please cite the DOI at the top of this page.
+If analysis using pyxem forms a part of published work please cite the DOI at the top of this page.
 
-pyXem is released under the GPL v3 license.
+pyxem is released under the GPL v3 license.

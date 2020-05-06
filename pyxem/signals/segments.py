@@ -512,7 +512,7 @@ class VDFSegment:
 
         if self.intensities is None:
             raise ValueError(
-                "The VDFSegment does not have the attribute  "
+                "The VDFSegment does not have the attribute "
                 "intensities, required for this method."
             )
         else:

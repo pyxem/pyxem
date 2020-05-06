@@ -111,7 +111,7 @@ class TestCalibrationGenerator:
 
     def test_get_diffraction_calibration(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30, linewidth=5)
-        np.testing.assert_almost_equal(cal_dist.diffraction_calibration, 0.010648)
+        np.testing.assert_almost_equal(cal_dist.diffraction_calibration, 0.01061096)
 
     def test_get_navigation_calibration(self, calgen):
         line = Line2DROI(x1=2.5, y1=13.0, x2=193.0, y2=12.5, linewidth=3.5)
@@ -201,9 +201,11 @@ class TestGetCorrectionMatrix:
             ),
         )
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_no_attributes_correction_matrix(self, calgen):
-        calgen.get_correction_matrix()
+        with pytest.raises(
+            ValueError, match="requires either an affine matrix to correct distortion",
+        ):
+            calgen.get_correction_matrix()
 
 
 @pytest.fixture
@@ -216,41 +218,49 @@ def empty_calgen(request, empty_calibration_library):
     return CalibrationGenerator(calibration_data=empty_calibration_library)
 
 
-@pytest.mark.xfail(raises=ValueError)
 class TestEmptyCalibrationGenerator:
     def test_get_elliptical_distortion(
         self, empty_calgen, input_parameters, affine_answer
     ):
-        empty_calgen.get_elliptical_distortion(
-            mask_radius=10,
-            direct_beam_amplitude=450,
-            scale=95,
-            amplitude=1200,
-            asymmetry=1.5,
-            spread=2.8,
-            rotation=10,
-        )
+        with pytest.raises(ValueError, match="requires an Au X-grating diffraction"):
+            empty_calgen.get_elliptical_distortion(
+                mask_radius=10,
+                direct_beam_amplitude=450,
+                scale=95,
+                amplitude=1200,
+                asymmetry=1.5,
+                spread=2.8,
+                rotation=10,
+            )
 
     def test_get_distortion_residuals_no_data(self, empty_calgen):
-        empty_calgen.get_distortion_residuals(mask_radius=10, spread=2)
+        with pytest.raises(ValueError, match="requires an Au X-grating diffraction"):
+            empty_calgen.get_distortion_residuals(mask_radius=10, spread=2)
 
     def test_get_distortion_residuals_no_affine(self, calgen):
-        calgen.get_distortion_residuals(mask_radius=10, spread=2)
+        with pytest.raises(ValueError, match="requires a distortion matrix"):
+            calgen.get_distortion_residuals(mask_radius=10, spread=2)
 
     def test_plot_corrected_diffraction_pattern_no_data(self, empty_calgen):
-        empty_calgen.plot_corrected_diffraction_pattern()
+        with pytest.raises(ValueError, match="requires an Au X-grating diffraction"):
+            empty_calgen.plot_corrected_diffraction_pattern()
 
     def test_plot_corrected_diffraction_pattern_no_affine(self, calgen):
-        calgen.plot_corrected_diffraction_pattern()
+        with pytest.raises(ValueError, match="requires a distortion matrix"):
+            calgen.plot_corrected_diffraction_pattern()
 
     def test_get_diffraction_calibration_no_data(self, empty_calgen):
-        empty_calgen.get_diffraction_calibration(mask_length=30, linewidth=5)
+        with pytest.raises(ValueError, match="requires an Au X-grating diffraction"):
+            empty_calgen.get_diffraction_calibration(mask_length=30, linewidth=5)
 
     def test_get_diffraction_calibration_no_affine(self, calgen):
-        calgen.get_diffraction_calibration(mask_length=30, linewidth=5)
+        with pytest.raises(ValueError, match="requires a distortion matrix"):
+            calgen.get_diffraction_calibration(mask_length=30, linewidth=5)
 
     def test_get_navigation_calibration_no_data(self, empty_calgen):
         line = Line2DROI(x1=2.5, y1=13.0, x2=193.0, y2=12.5, linewidth=3.5)
-        empty_calgen.get_navigation_calibration(
-            line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
-        )
+
+        with pytest.raises(ValueError, match="requires an Au X-grating image"):
+            empty_calgen.get_navigation_calibration(
+                line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
+            )
