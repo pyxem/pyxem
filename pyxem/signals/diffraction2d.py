@@ -847,16 +847,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         peaks.detector_shape = self.axes_manager.signal_shape
 
         # Set calibration to same as signal
-        x = peaks.axes_manager.navigation_axes[0]
-        y = peaks.axes_manager.navigation_axes[1]
-
-        x.name = "x"
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = "nm"
-
-        y.name = "y"
-        y.scale = self.axes_manager.navigation_axes[1].scale
-        y.units = "nm"
+        for ia, axis_self in enumerate(self.axes_manager.navigation_axes):
+            axis_peaks = peaks.axes_manager.navigation_axes[ia]
+            axis_peaks.name = axis_self.name
+            axis_peaks.units = axis_self.units
+            axis_peaks.scale = axis_self.scale
 
         return peaks
 
