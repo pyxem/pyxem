@@ -294,7 +294,7 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
         coordinates = np.indices(bi.shape).reshape(2, -1).T[bi.flatten()]
         db = DBSCAN(2, 3)
         peaks = []
-        if coordinates.shape[0] > 0: #we have at least some peaks
+        if coordinates.shape[0] > 0:  # we have at least some peaks
             labeled_points = db.fit_predict(coordinates)
             for peak_label in list(set(labeled_points)):
                 peaks.append(coordinates[labeled_points == peak_label])
@@ -316,7 +316,7 @@ def find_peaks_stat(z, alpha=1.0, window_radius=10, convergence_ratio=0.05):
         # Perform first iteration of peak finding
         image, peaks_curr = _peak_find_once(image)  # 4-7
         n_peaks = len(peaks_curr)
-        if n_peaks == 0: #pragma: no cover
+        if n_peaks == 0:  # pragma: no cover
             return peaks_curr
 
         m_peaks = 0

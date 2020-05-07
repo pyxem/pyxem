@@ -21,6 +21,8 @@
 """
 
 import numpy as np
+from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
+from pyxem.signals import transfer_navigation_axes
 
 
 class PDFGenerator1D:
@@ -81,15 +83,15 @@ class PDFGenerator1D:
 
         pdf_sine = np.sin(2 * np.pi * np.matmul(s_values, r_values))
         # creates a vector of the pdf
-        rpdf = self.signal._deepcopy_with_new_data(
+        rpdf = PairDistributionFunction1D(
             8 * np.pi * s_scale * np.matmul(limited_red_int, pdf_sine)
         )
-        rpdf.set_signal_type("pair_distribution_function")
 
         signal_axis = rpdf.axes_manager.signal_axes[0]
         signal_axis.scale = r_increment
         signal_axis.name = "Radius r"
         signal_axis.units = "$Å$"
+        rpdf = transfer_navigation_axes(rpdf, self.signal)
 
         title = self.signal.metadata.General.title
         rpdf.metadata.General.title = f"Pair distribution function of {title}"
