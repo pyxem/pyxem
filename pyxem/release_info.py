@@ -1,7 +1,7 @@
 name = "pyxem"
 version = "0.11.0"
 author = "Duncan Johnstone, Phillip Crout"
-copyright = "copyright 2017-2020, the pyxem developers"
+copyright = "copyright 2016-2020, the pyxem developers"
 credits = [
     "Duncan Johnstone",
     "Phillip Crout",
