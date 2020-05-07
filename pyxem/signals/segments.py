@@ -268,7 +268,9 @@ class LearningSegment:
         # if TraitError is raised, it is likely no segements were found
         segments = Signal2D(segments).transpose(navigation_axes=[0], signal_axes=[2, 1])
         factors_of_segments = Signal2D(factors_of_segments)
-        learning_segment = LearningSegment(factors=factors_of_segments, loadings=segments)
+        learning_segment = LearningSegment(
+            factors=factors_of_segments, loadings=segments
+        )
         return learning_segment
 
 
