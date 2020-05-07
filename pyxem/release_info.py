@@ -7,12 +7,12 @@ credits = [
     "Phillip Crout",
     "Magnus Nord",
     "Joonatan Laulainen",
-    "Simon Hogas",
+    "Simon Høgås",
     "Ben Martineau",
     "Tina Bergh",
     "Stef Smeets",
-    "Eirik Opheim",
     "Carter Francis",
+    "Eirik Opheim",
     "Eric Prestat",
     "Sean Collins",
     "Mohsen Danaie",
@@ -24,9 +24,10 @@ credits = [
     "Tomas Ostasevicius",
     "Rob Tovey",
     "Matt von Lany",
+    "Tim Poon",
     "Endre Jacobsen",
 ]
 license = "GPLv3"
 maintainer = "Duncan Johnstone, Phillip Crout, Magnus Nord"
 email = "pyxem.team@gmail.com"
-status = "Development"
+status = "development"

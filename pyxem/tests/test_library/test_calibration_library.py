@@ -53,9 +53,9 @@ class TestPlotData:
     def test_plot_moo3_im(self, library):
         library.plot_calibration_data(data_to_plot="moo3_im")
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_plot_invalid(self, library):
-        library.plot_calibration_data(data_to_plot="no_data")
+        with pytest.raises(ValueError, match="Please specify valid data_to_plot"):
+            library.plot_calibration_data(data_to_plot="no_data")
 
     def test_plot_au_x_grating_dp_with_roi(self, library):
         line = Line2DROI(x1=1, y1=1, x2=3, y2=3, linewidth=1.0)

@@ -359,8 +359,8 @@ class SubpixelrefinementGenerator:
 
         if np.any(bad_squares):
             warnings.warn(
-                "You have a peak in your pattern that lies on the edge of the square. \
-                          Consider increasing the square size"
+                "You have a peak in your pattern that lies on the edge of the square. "
+                "Consider increasing the square size."
             )
 
         self.last_method = "lg_method"
