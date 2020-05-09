@@ -23,6 +23,7 @@ import math
 from operator import itemgetter, attrgetter
 
 import numpy as np
+from scipy.fftpack import next_fast_len
 
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
@@ -132,7 +133,7 @@ def zero_mean_normalized_correlation(
 
     return corr_local
 
-def full_frame_correlation(image_FT, image_FT_normalization, template_coordinates, template_intensities):
+def full_frame_correlation(image_FT, image_norm, fsize, template_coordinates, template_intensities):
     """
     Computes the correlation score between an image and a template in Fourier space.
 
@@ -165,40 +166,18 @@ def full_frame_correlation(image_FT, image_FT_normalization, template_coordinate
     template = np.zeros((image_x, image_y))
     template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
 
-    template_FT = np.fft.fft2(template)
+    template_FT = np.fft.fftshift(np.fft.fftn(template,fsize))
 
-    #Filters can be applied here. Take user input, or standard LP/HP?
+    fprod = template_Ft * image_FT
 
-    template_FT_normalization = np.sqrt(np.real(np.max(np.fft.ifft2(np.multiply(template_FT, template_FT)))))
-
-    res_matrix = np.fft.ifft2(np.multiply(template_FT, image_FT)/ (template_FT_normalization * image_FT_normalization))
-    corr_local = np.real(np.max(res_matrix))
-
-    #Sub-pixel refinement - WIP - Equation (5) in reference article.
-    #x_0, y_0 = 0, 0
-    #r_jg = _r_jg(x_0, y_0, image_FT, template_FT, image_x, image_y)
-    #core_sum = _core_sum(x_0, y_0, image_FT, template_FT, image_x, image_y)
-    #d_x = 2 * np.imag(core_sum * r_jg)
+    res_matrix = np.fft.ifftn(fprod)
+    corr_local = np.real(np.max(res_matrix[fsize[0]//2-3:fsize[0]//2+3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
+    template_norm = np.linalg.norm(template)
+    corr_local = corr_local / (image_norm * template_norm)
+        
+    #Sub-pixel refinement - WIP - Equation (5) in reference article
 
     return corr_local
-
-#Utilities for sub-pixel refinement
-def _r_jg(x_0, y_0, F_image, G_template, image_x, image_y):
-    r_jg = 0. + 0.j
-    for i in range(image_x):
-        for j in range (image_y):
-            exp_term = np.exp( - 2 * np.pi * 1.j * ( (i * x_0 / image_x) + (j * y_0 / image_y)))
-            r_jg += F_image[i,i] * np.conj(G_template[i,j]) * exp_term
-    return r_jg
-
-def _core_sum(x_0, y_0, F_image, G_template, image_x, image_y):
-    core_sum = 0. + 0.j
-    for i in range(image_x):
-        for j in range (image_y):
-            exp_term = np.exp( - 2 * np.pi * 1.j * ( (i * x_0 / image_x) + (j * y_0 / image_y)))
-            core_sum += 2 * np.pi * i / image_x * np.conj(F_image[i, j]) * G_template[i, j] * exp_term
-
-    return core_sum
 
 
 def correlate_library(image, library, n_largest, method, mask):
@@ -275,9 +254,10 @@ def correlate_library(image, library, n_largest, method, mask):
         image_std = np.linalg.norm(image - average_image_intensity)
 
     if method == "full_frame_correlation":
-        image_FT = np.fft.fft2(image) / np.sqrt(image.shape[0] * image.shape[1])
-        #Filters can be applied here
-        image_FT_normalization = np.sqrt(np.real(np.max(np.fft.ifft2(np.multiply(image_FT, image_FT)))))
+        size = 2 * np.array(image.shape) - 1
+        fsize = [next_fast_len(a) for a in (size)]
+        image_FT = np.fft.fftshift(np.fft.fftn(image, fsize))  #/ np.sqrt(image.shape[0] * image.shape[1])
+        norm_image = np.linalg.norm(image)
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
@@ -312,7 +292,7 @@ def correlate_library(image, library, n_largest, method, mask):
 
                 elif method == "full_frame_correlation":
                     corr_local = full_frame_correlation(
-                        image_FT, image_FT_normalization, px_local, int_local
+                        image_FT, image_norm, fsize, px_local, int_local
                     )
 
                 if corr_local > np.min(corr_saved):
