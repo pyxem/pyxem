@@ -287,12 +287,18 @@ def correlate_library(image, library, n_largest, method, mask):
 
                 elif method == "fast_correlation":
                     corr_local = fast_correlation(
-                        image_intensities, int_local, pn_local
+                        image_intensities,
+                        int_local,
+                        pn_local
                     )
 
                 elif method == "full_frame_correlation":
                     corr_local = full_frame_correlation(
-                        image_FT, image_norm, fsize, px_local, int_local
+                        image_FT,
+                        image_norm,
+                        fsize,
+                        px_local,
+                        int_local
                     )
 
                 if corr_local > np.min(corr_saved):
