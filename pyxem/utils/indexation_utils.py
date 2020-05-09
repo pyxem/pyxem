@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2017-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -140,11 +140,7 @@ def full_frame_correlation(image_FT, image_norm, fsize, template_coordinates, te
     Parameters:
     -----------
     image: numpy.ndarray
-        Intensities of the image in fourier space, stored in a NxM numpy array
-    image_norm: float
-        The norm of the real space image, corresponding to image_FT
-    fsize: numpy.ndarray
-        The size of image_FT, for us in transform of template.
+        Intensities of the image, stored in a NxM numpy array
     template_coordinates: numpy array
         Array containing coordinates for non-zero intensities in the template
     template_intensities: list
@@ -172,15 +168,14 @@ def full_frame_correlation(image_FT, image_norm, fsize, template_coordinates, te
 
     template_FT = np.fft.fftshift(np.fft.fftn(template,fsize))
 
-    fprod = template_FT * image_FT
+    fprod = template_Ft * image_FT
 
     res_matrix = np.fft.ifftn(fprod)
     corr_local = np.real(np.max(res_matrix[fsize[0]//2-3:fsize[0]//2+3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
     template_norm = np.linalg.norm(template)
-    if (image_norm > 0 and template_norm > 0):
-        corr_local = corr_local / (image_norm * template_norm)
-
-    #Sub-pixel refinement can be done here - Equation (5) in reference article
+    corr_local = corr_local / (image_norm * template_norm)
+        
+    #Sub-pixel refinement - WIP - Equation (5) in reference article
 
     return corr_local
 
@@ -249,10 +244,6 @@ def correlate_library(image, library, n_largest, method, mask):
 
     Discussion on Normalized cross correlation (xcdskd):
     https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
-
-    full_frame_correlation:
-    A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
-     a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
     """
 
     top_matches = np.empty((len(library), n_largest, 3), dtype="object")
@@ -265,8 +256,8 @@ def correlate_library(image, library, n_largest, method, mask):
     if method == "full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
         fsize = [next_fast_len(a) for a in (size)]
-        image_FT = np.fft.fftshift(np.fft.fftn(image, fsize))
-        image_norm = np.linalg.norm(image)
+        image_FT = np.fft.fftshift(np.fft.fftn(image, fsize))  #/ np.sqrt(image.shape[0] * image.shape[1])
+        norm_image = np.linalg.norm(image)
 
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
@@ -296,18 +287,12 @@ def correlate_library(image, library, n_largest, method, mask):
 
                 elif method == "fast_correlation":
                     corr_local = fast_correlation(
-                        image_intensities,
-                        int_local,
-                        pn_local
+                        image_intensities, int_local, pn_local
                     )
 
                 elif method == "full_frame_correlation":
                     corr_local = full_frame_correlation(
-                        image_FT,
-                        image_norm,
-                        fsize,
-                        px_local,
-                        int_local
+                        image_FT, image_norm, fsize, px_local, int_local
                     )
 
                 if corr_local > np.min(corr_saved):
@@ -743,25 +728,6 @@ def crystal_from_vector_matching(z_matches):
     results_array[2] = metrics
 
     return results_array
-
-
-def get_phase_name_and_index(library):
-
-    """ Get a dictionary of phase names and its corresponding index value in library.keys().
-
-     Parameters
-    ----------
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations
-
-    Returns
-    -------
-    phase_name_index_dict : Dictionary {str : int}
-    typically on the form {'phase_name 1' : 0, 'phase_name 2': 1, ...}
-    """
-
-    phase_name_index_dict = dict([(y, x) for x, y in enumerate(list(library.keys()))])
-    return phase_name_index_dict
 
 
 def peaks_from_best_template(single_match_result, library, rank=0):
