@@ -24,6 +24,7 @@ from pyxem.utils.indexation_utils import (
     match_vectors,
     zero_mean_normalized_correlation,
     fast_correlation,
+    full_frame_correlation
 )
 
 
@@ -44,6 +45,18 @@ def test_fast_correlation():
     )
     np.testing.assert_approx_equal(fast_correlation([1, 1, 1], [1, 0, 0], 1), 1)
 
+def test_full_frame_correlation():
+    #Define testing parameters.
+    in1 = np.ones((10,10))
+    image_norm = np.linalg.norm(in1)
+    next_fast_len = np.array([20, 20])
+    in1_FT = np.fft.fftn(in1, next_fast_len)
+    np.testing.assert_approx_equal(
+        full_frame_correlation(in1_FT, image_norm, next_fast_len, np.array([[5, 5],[5, 5]]), [1, 1]), 0.1
+    )
+    np.testing.assert_approx_equal(
+        full_frame_correlation(in1_FT, image_norm, next_fast_len, np.array([[5, 5], [5, 5]]), [0, 0]), 0
+    )
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):
     # branch single phase
