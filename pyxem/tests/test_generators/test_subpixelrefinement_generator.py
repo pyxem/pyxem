@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -28,29 +28,45 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 class Test_init_xfails:
-    """ Tests (both cases) that putting vectors that lie outside of the
-    diffraction patterns raises a ValueError"""
-
     def test_out_of_range_vectors_numpy(self):
+        """Test that putting vectors that lie outside of the
+        diffraction patterns raises a ValueError"""
         vector = np.array([[1, -100]])
         dp = ElectronDiffraction2D(np.ones((20, 20)))
-        sprg = SubpixelrefinementGenerator(dp, vector)
+
+        with pytest.raises(
+            ValueError,
+            match="Some of your vectors do not lie within your diffraction pattern",
+        ):
+            sprg = SubpixelrefinementGenerator(dp, vector)
 
     def test_out_of_range_vectors_DiffractionVectors(self):
+        """Test that putting vectors that lie outside of the
+        diffraction patterns raises a ValueError"""
         vectors = DiffractionVectors(np.array([[1, -100]]))
         dp = ElectronDiffraction2D(np.ones((20, 20)))
-        sprg = SubpixelrefinementGenerator(dp, vectors)
 
-    """ Tests that navigation dimensions must be appropriate too """
+        with pytest.raises(
+            ValueError,
+            match="Some of your vectors do not lie within your diffraction pattern",
+        ):
+            sprg = SubpixelrefinementGenerator(dp, vectors)
 
     def test_wrong_navigation_dimensions(self):
+        """Tests that navigation dimensions must be appropriate too."""
         dp = ElectronDiffraction2D(np.zeros((2, 2, 8, 8)))
         vectors = DiffractionVectors(np.zeros((1, 2)))
         dp.axes_manager.set_signal_dimension(2)
         vectors.axes_manager.set_signal_dimension(0)
-        SPR_generator = SubpixelrefinementGenerator(dp, vectors)
+
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            ValueError,
+            match=r"Vectors with shape .* must have the same navigation shape as .*",
+        ):
+            sprg = SubpixelrefinementGenerator(dp, vectors)
 
 
 class set_up_for_subpixelpeakfinders:
@@ -123,7 +139,12 @@ class Test_subpixelpeakfinders:
         self.x_shift_case(subpixelsfound)
 
     def test_assertioned_log(self, diffraction_vectors):
-        subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
+        with pytest.warns(
+            UserWarning,
+            match="peak in your pattern that lies on the edge of the square",
+        ):
+            subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
+
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 

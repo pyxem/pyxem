@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -256,18 +256,27 @@ class TestMapCreation:
         metric_map = dp_cryst_map_vector.get_metric_map(metric)
         assert np.allclose(metric_map.isig[0, 0], value)
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_template_match_bad_metric(self, sp_cryst_map):
-        metric_map = sp_cryst_map.get_metric_map("no metric")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            ValueError, match=r"metric .* is not valid for template matching"
+        ):
+            metric_map = sp_cryst_map.get_metric_map("no metric")
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_vector_match_bad_metric(self, dp_cryst_map_vector):
-        metric_map = dp_cryst_map_vector.get_metric_map("no metric")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            ValueError, match=r"metric .* is not valid for vector matching"
+        ):
+            metric_map = dp_cryst_map_vector.get_metric_map("no metric")
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_no_method(self):
         crystal_map = CrystallographicMap(np.array([[1]]))
-        metric_map = crystal_map.get_metric_map("no metric")
+
+        with pytest.raises(
+            ValueError, match="crystallographic mapping method must be specified"
+        ):
+            metric_map = crystal_map.get_metric_map("no metric")
 
 
 class TestMTEXIO:

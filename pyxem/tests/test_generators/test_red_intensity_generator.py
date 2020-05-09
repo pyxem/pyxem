@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -216,12 +216,14 @@ def test_mask_reduced_intensity(red_int_generator):
     assert np.array_equal(red_int_generator.signal.data, expected)
 
 
-@pytest.mark.xfail(raises=ValueError)
 def test_incorrect_mask(red_int_generator):
     mask_pattern = np.ones(10)
     mask_pattern[:4] = 0
     mask_pattern[8] = 2
-    red_int_generator.mask_reduced_intensity(mask_pattern)
+    with pytest.raises(
+        ValueError, match="Masking array does not consist of zeroes and ones"
+    ):
+        red_int_generator.mask_reduced_intensity(mask_pattern)
 
 
 def test_get_reduced_intensity(red_int_generator):
