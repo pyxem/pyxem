@@ -168,7 +168,7 @@ def full_frame_correlation(image_FT, image_norm, fsize, template_coordinates, te
 
     template_FT = np.fft.fftshift(np.fft.fftn(template,fsize))
 
-    fprod = template_Ft * image_FT
+    fprod = template_FT * image_FT
 
     res_matrix = np.fft.ifftn(fprod)
     corr_local = np.real(np.max(res_matrix[fsize[0]//2-3:fsize[0]//2+3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
