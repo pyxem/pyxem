@@ -49,59 +49,6 @@ def get_distance_between_two_angles_longform(angle_1, angle_2):
     axis, angle = quat2axangle(q_from_mode)
     return np.rad2deg(angle)
 
-@pytest.fixture()
-def test_plot_phase_map():
-    """
-    Generates a CrystallographicMap with two phases and a corresponding DiffractionLibraryself
-    and tests the CrystallographicMap member function plot_phase_map.
-    """
-    base = np.empty((4, 3), dtype="object")
-    base[0] = [
-        0,
-        np.array([5, 17, 6]),
-        {
-            "correlation": 3e-17,
-            "orientation_reliability": 0.5,
-            "phase_reliability": 0.6,
-        },
-        ]
-    base[1] = [
-        1,
-        np.array([6, 17, 6]),
-        {
-            "correlation": 2e-17,
-            "orientation_reliability": 0.4,
-            "phase_reliability": 0.7,
-        },
-        ]
-    base[2] = [
-        1,
-        np.array([12, 3, 6]),
-        {
-            "correlation": 4e-17,
-            "orientation_reliability": 0.3,
-            "phase_reliability": 0.1,
-        },
-        ]
-    base[3] = [
-        0,
-        np.array([12, 3, 5]),
-        {
-            "correlation": 8e-16,
-            "orientation_reliability": 0.2,
-            "phase_reliability": 0.8,
-        },
-        ]
-
-    crystal_map = CrystallographicMap(base.reshape((2, 2, 3)))
-    crystal_map.method = "template_matching"
-
-    #Create DiffractionLibrary with two entries
-    lib = DiffractionLibrary()
-    lib['Al'] = ''
-    lib['Si'] = ''
-
-    crystal_map.plot_phase_map(lib)
 
 @pytest.fixture()
 def sp_cryst_map():
@@ -281,6 +228,19 @@ class TestMapCreation:
     def test_get_phase_map(self, sp_cryst_map):
         phasemap = sp_cryst_map.get_phase_map()
         assert phasemap.isig[0, 0] == 0
+
+    def test_plot_phase_map():
+        """
+        Generates a CrystallographicMap with two phases and a corresponding DiffractionLibraryself
+        and tests the CrystallographicMap member function plot_phase_map.
+        """
+        crystal_map = dp_cryst_map()
+        #Create DiffractionLibrary with two entries
+        lib = DiffractionLibrary()
+        lib['Al'] = ''
+        lib['Si'] = ''
+
+        assert crystal_map.plot_phase_map(lib) == None
 
     def test_get_orientation_map(self, sp_cryst_map):
         orimap = sp_cryst_map.get_orientation_map()
