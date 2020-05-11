@@ -234,7 +234,7 @@ class TestMapCreation:
         Generates a CrystallographicMap with two phases and a corresponding DiffractionLibraryself
         and tests the CrystallographicMap member function plot_phase_map.
         """
-        crystal_map = dp_cryst_map()
+        crystal_map = dp_cryst_map
         #Create DiffractionLibrary with two entries
         lib = DiffractionLibrary()
         lib['Al'] = ''
