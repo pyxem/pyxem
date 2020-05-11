@@ -195,30 +195,29 @@ class CrystallographicMap(BaseSignal):
 
         return phase_map
 
-def plot_phase_map(self, library, **kwargs):
+    def plot_phase_map(self, library, **kwargs):
 
-    phase_map = self.get_phase_map()
-    phase_name_index = get_phase_name_and_index(library)
+        phase_map = self.get_phase_map()
+        phase_name_index = get_phase_name_and_index(library)
 
-    plt.figure()
+        plt.figure()
 
-    image = plt.imshow(phase_map)
+        image = plt.imshow(phase_map)
 
-    colors = [ image.cmap(image.norm(value)) for value in phase_name_index.values()]
-    patches = [
-    mpatches.Patch(color=colors[i], //
-    label="{l}".format(l=list(library.keys())[i]) ) //
-    for i in range(len(phase_name_index.keys())) 
-    ]
+        colors = [ image.cmap(image.norm(value)) for value in phase_name_index.values()]
+        patches = [ mpatches.Patch(color=colors[i], \
+        label="{l}".format(l=list(library.keys())[i]) ) \
+        for i in range(len(phase_name_index.keys()))
+        ]
 
-    plt.legend(handles=patches, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0. )
-    plt.xlabel('x axis (nm)')
-    plt.ylabel('y axis (nm)')
-    plt.xticks([])
-    plt.yticks([])
-    plt.title('Phase map')
-    plt.tight_layout()
-    plt.show()
+        plt.legend(handles=patches, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0. )
+        plt.xlabel('x axis (nm)')
+        plt.ylabel('y axis (nm)')
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Phase map')
+        plt.tight_layout()
+        plt.show()
 
     def get_orientation_map(self):
         """Obtain a map of the rotational angle associated with the best
