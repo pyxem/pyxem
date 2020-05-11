@@ -203,7 +203,7 @@ class CrystallographicMap(BaseSignal):
         plt.figure()
 
         image = plt.imshow(phase_map)
-        colors = [ image.cmap(image.norm(value-1)) for value in phase_name_index.values()]
+        colors = [ image.cmap(image.norm(value)) for value in phase_name_index.values()]
 
         patches = [ mpatches.Patch(color=colors[i], label="{l}".format(l=list(library.keys())[i]) ) for i in range(len(phase_name_index.keys())) ]
         plt.legend(handles=patches, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0. )
