@@ -229,7 +229,7 @@ class TestMapCreation:
         phasemap = sp_cryst_map.get_phase_map()
         assert phasemap.isig[0, 0] == 0
 
-    def test_plot_phase_map():
+    def test_plot_phase_map(self, dp_cryst_map):
         """
         Generates a CrystallographicMap with two phases and a corresponding DiffractionLibraryself
         and tests the CrystallographicMap member function plot_phase_map.
