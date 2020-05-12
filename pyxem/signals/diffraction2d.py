@@ -654,7 +654,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return shifts
 
     def center_direct_beam(
-        self, method, half_square_width=None, return_shifts=False, *args, **kwargs
+        self,
+        method,
+        half_square_width=None,
+        return_shifts=False,
+        align_kwargs={},
+        *args,
+        **kwargs
     ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
@@ -670,6 +676,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             diffracted spots brighter than the direct beam.
         return_shifts : bool
             If True, the values of applied shifts are returned
+        align_kwargs : dict
+            To be passed to .align2D() function
         **kwargs:
             To be passed to method function
 
@@ -695,7 +703,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        self.align2D(shifts=shifts, crop=False, fill_value=0)
+        self.align2D(shifts=shifts, crop=False, fill_value=0, **align_kwargs)
 
         if return_shifts:
             return shifts
