@@ -654,7 +654,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return shifts
 
     def center_direct_beam(
-        self, method, half_square_width=None, return_shifts=False, *args, **kwargs
+        self,
+        method,
+        half_square_width=None,
+        return_shifts=False,
+        align_kwargs={},
+        *args,
+        **kwargs
     ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
@@ -662,14 +668,16 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        method : str,
-            Must be one of 'cross_correlate', 'blur', 'interpolate'
-        half_square_width  : int
+        method : str {'cross_correlate', 'blur', 'interpolate'}
+            Method used to estimate the direct beam position
+        half_square_width : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-        return_shifts : bool
+        return_shifts : bool, default False
             If True, the values of applied shifts are returned
+        align_kwargs : dict
+            To be passed to .align2D() function
         **kwargs:
             To be passed to method function
 
@@ -695,7 +703,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
 
-        self.align2D(shifts=shifts, crop=False, fill_value=0)
+        # Preserve existing behaviour by overriding
+        # crop & fill_value
+        align_kwargs.pop("crop", None)
+        align_kwargs.pop("fill_value", None)
+
+        self.align2D(shifts=shifts, crop=False, fill_value=0, **align_kwargs)
 
         if return_shifts:
             return shifts
