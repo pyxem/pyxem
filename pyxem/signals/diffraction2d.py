@@ -668,13 +668,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        method : str,
-            Must be one of 'cross_correlate', 'blur', 'interpolate'
-        half_square_width  : int
+        method : str {'cross_correlate', 'blur', 'interpolate'}
+            Method used to estimate the direct beam position
+        half_square_width : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
-        return_shifts : bool
+        return_shifts : bool, default False
             If True, the values of applied shifts are returned
         align_kwargs : dict
             To be passed to .align2D() function
@@ -702,6 +702,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         shifts = -1 * shifts.data
         shifts = shifts.reshape(nav_size, 2)
+
+        # Preserve existing behaviour by overriding
+        # crop & fill_value
+        align_kwargs.pop("crop", None)
+        align_kwargs.pop("fill_value", None)
 
         self.align2D(shifts=shifts, crop=False, fill_value=0, **align_kwargs)
 
