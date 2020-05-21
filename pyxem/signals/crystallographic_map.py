@@ -184,7 +184,7 @@ class CrystallographicMap(BaseSignal):
         self.axes_manager.set_signal_dimension(1)
         self.method = None
 
-    #def get_phase_names(self, library)
+    # def get_phase_names(self, library)
 
     def get_phase_map(self):
         """Obtain a map of the best matching phase at each navigation position.
@@ -204,18 +204,20 @@ class CrystallographicMap(BaseSignal):
 
         image = plt.imshow(phase_map)
 
-        colors = [ image.cmap(image.norm(value)) for value in phase_name_index.values()]
-        patches = [ mpatches.Patch(color=colors[i], \
-        label="{l}".format(l=list(library.keys())[i]) ) \
-        for i in range(len(phase_name_index.keys()))
+        colors = [image.cmap(image.norm(value)) for value in phase_name_index.values()]
+        patches = [
+            mpatches.Patch(
+                color=colors[i], label="{l}".format(l=list(library.keys())[i])
+            )
+            for i in range(len(phase_name_index.keys()))
         ]
 
-        plt.legend(handles=patches, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0. )
-        plt.xlabel('x axis (nm)')
-        plt.ylabel('y axis (nm)')
+        plt.legend(handles=patches, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0.0)
+        plt.xlabel("x axis (nm)")
+        plt.ylabel("y axis (nm)")
         plt.xticks([])
         plt.yticks([])
-        plt.title('Phase map')
+        plt.title("Phase map")
         plt.tight_layout()
         plt.show()
 

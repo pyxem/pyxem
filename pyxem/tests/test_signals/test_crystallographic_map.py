@@ -235,10 +235,10 @@ class TestMapCreation:
         and tests the CrystallographicMap member function plot_phase_map.
         """
         crystal_map = dp_cryst_map
-        #Create DiffractionLibrary with two entries
+        # Create DiffractionLibrary with two entries
         lib = DiffractionLibrary()
-        lib['Al'] = ''
-        lib['Si'] = ''
+        lib["Al"] = ""
+        lib["Si"] = ""
 
         assert crystal_map.plot_phase_map(lib) == None
 
