@@ -53,7 +53,6 @@ class VarianceGenerator:
 
         Parameters
         ----------
-
         dqe : float
             Detective quantum efficiency of the detector for Poisson noise
             correction.
@@ -65,11 +64,8 @@ class VarianceGenerator:
             result in an overflow error that is difficult to distinguish. Hence
             the data can be converted to a different data type to accommodate.
 
-
-
         Returns
         -------
-
         vardps : DiffractionVariance2D
             A DiffractionVariance2D object containing the mean DP, mean
             squared DP, and variance DP.
