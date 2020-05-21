@@ -69,8 +69,8 @@ class TestDpcSignal2dCorrectRamp:
         s_y = DPCSignal2D(data_y)
         s_x_corr = s_x.correct_ramp(corner_size=0.05)
         s_y_corr = s_y.correct_ramp(corner_size=0.05)
-        assert_allclose(s_x_corr.data, np.zeros_like(data_x), atol=1e-8)
-        assert_allclose(s_y_corr.data, np.zeros_like(data_y), atol=1e-8)
+        assert_allclose(s_x_corr.data, np.zeros_like(data_x), atol=1e-6)
+        assert_allclose(s_y_corr.data, np.zeros_like(data_y), atol=1e-6)
 
         data_xy = np.swapaxes(np.dstack((array_x, array_y)), 0, 2).astype("float64")
         data_yx = np.swapaxes(np.dstack((array_y, array_x)), 0, 2).astype("float64")
@@ -86,9 +86,9 @@ class TestDpcSignal2dCorrectRamp:
         ).astype("float64")
         s_tilt = DPCSignal2D(data_tilt)
         s_tilt_corr = s_tilt.correct_ramp()
-        assert_allclose(s_tilt_corr.data, np.zeros_like(data_tilt), atol=1e-8)
+        assert_allclose(s_tilt_corr.data, np.zeros_like(data_tilt), atol=1e-6)
         s_tilt.correct_ramp(out=s_tilt)
-        assert_allclose(s_tilt.data, np.zeros_like(data_tilt), atol=1e-8)
+        assert_allclose(s_tilt.data, np.zeros_like(data_tilt), atol=1e-6)
 
     def test_correct_ramp_random(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
