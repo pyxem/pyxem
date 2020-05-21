@@ -69,8 +69,8 @@ class TestDpcSignal2dCorrectRamp:
         s_y = DPCSignal2D(data_y)
         s_x_corr = s_x.correct_ramp(corner_size=0.05)
         s_y_corr = s_y.correct_ramp(corner_size=0.05)
-        assert_allclose(s_x_corr.data, np.zeros_like(data_x), atol=1e-8)
-        assert_allclose(s_y_corr.data, np.zeros_like(data_y), atol=1e-8)
+        assert_allclose(s_x_corr.data, np.zeros_like(data_x), atol=1e-6)
+        assert_allclose(s_y_corr.data, np.zeros_like(data_y), atol=1e-6)
 
         data_xy = np.swapaxes(np.dstack((array_x, array_y)), 0, 2).astype("float64")
         data_yx = np.swapaxes(np.dstack((array_y, array_x)), 0, 2).astype("float64")
