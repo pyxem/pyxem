@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -669,6 +669,24 @@ def crystal_from_vector_matching(z_matches):
     results_array[2] = metrics
 
     return results_array
+
+def get_phase_name_and_index(library):
+
+    """ Get a dictionary of phase names and its corresponding index value in library.keys().
+
+     Parameters
+    ----------
+    library : DiffractionLibrary
+        Diffraction library containing the phases and rotations
+
+    Returns
+    -------
+    phase_name_index_dict : Dictionary {str : int}
+    typically on the form {'phase_name 1' : 0, 'phase_name 2': 1, ...}
+    """
+    
+    phase_name_index_dict = dict([(y,x) for x,y in enumerate(list(library.keys()))])
+    return phase_name_index_dict
 
 
 def peaks_from_best_template(single_match_result, library, rank=0):

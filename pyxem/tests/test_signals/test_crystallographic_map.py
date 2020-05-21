@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,6 +21,9 @@ import pytest
 from pyxem.signals.crystallographic_map import CrystallographicMap
 from pyxem.signals.crystallographic_map import load_mtex_map
 from pyxem.signals.crystallographic_map import _distance_from_fixed_angle
+
+from diffsims.libraries.diffraction_library import DiffractionLibrary
+
 from transforms3d.euler import euler2quat, quat2axangle
 from transforms3d.quaternions import qmult, qinverse
 import os
@@ -225,6 +228,19 @@ class TestMapCreation:
     def test_get_phase_map(self, sp_cryst_map):
         phasemap = sp_cryst_map.get_phase_map()
         assert phasemap.isig[0, 0] == 0
+
+    def test_plot_phase_map(self, dp_cryst_map):
+        """
+        Generates a CrystallographicMap with two phases and a corresponding DiffractionLibraryself
+        and tests the CrystallographicMap member function plot_phase_map.
+        """
+        crystal_map = dp_cryst_map
+        #Create DiffractionLibrary with two entries
+        lib = DiffractionLibrary()
+        lib['Al'] = ''
+        lib['Si'] = ''
+
+        assert crystal_map.plot_phase_map(lib) == None
 
     def test_get_orientation_map(self, sp_cryst_map):
         orimap = sp_cryst_map.get_orientation_map()

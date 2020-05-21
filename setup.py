@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -60,6 +60,7 @@ setup(
         "diffsims >= 0.2.3",  # Makes use of functionality introduced in this release
         "lmfit >= 0.9.12",
         "pyfai",
+        "ipywidgets",
         "numba",
     ],
     package_data={

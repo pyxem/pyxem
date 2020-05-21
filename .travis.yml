@@ -2,7 +2,7 @@ language: shell
 
 env:
   global:
-    - DEPS="hyperspy-base diffsims lmfit pyfai"
+    - DEPS="hyperspy-base diffsims lmfit pyfai ipywidgets"
     - TEST_DEPS="pytest>=5.0 pytest-cov>=2.8.1 coveralls>=1.10 coverage>=5.0"
 
 matrix:

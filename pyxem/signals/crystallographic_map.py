@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,11 +18,15 @@
 
 import numpy as np
 
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+
 from hyperspy.signals import BaseSignal
 
 from transforms3d.euler import euler2quat, quat2axangle, euler2axangle
 from transforms3d.quaternions import qmult, qinverse
 
+from pyxem.utils.indexation_utils import get_phase_name_and_index
 from pyxem.signals import transfer_navigation_axes_to_signal_axes
 
 """
@@ -180,6 +184,8 @@ class CrystallographicMap(BaseSignal):
         self.axes_manager.set_signal_dimension(1)
         self.method = None
 
+    #def get_phase_names(self, library)
+
     def get_phase_map(self):
         """Obtain a map of the best matching phase at each navigation position.
         """
@@ -188,6 +194,30 @@ class CrystallographicMap(BaseSignal):
         phase_map.change_dtype(np.int)
 
         return phase_map
+
+    def plot_phase_map(self, library, **kwargs):
+
+        phase_map = self.get_phase_map()
+        phase_name_index = get_phase_name_and_index(library)
+
+        plt.figure()
+
+        image = plt.imshow(phase_map)
+
+        colors = [ image.cmap(image.norm(value)) for value in phase_name_index.values()]
+        patches = [ mpatches.Patch(color=colors[i], \
+        label="{l}".format(l=list(library.keys())[i]) ) \
+        for i in range(len(phase_name_index.keys()))
+        ]
+
+        plt.legend(handles=patches, bbox_to_anchor=(1, 1), loc=2, borderaxespad=0. )
+        plt.xlabel('x axis (nm)')
+        plt.ylabel('y axis (nm)')
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Phase map')
+        plt.tight_layout()
+        plt.show()
 
     def get_orientation_map(self):
         """Obtain a map of the rotational angle associated with the best
