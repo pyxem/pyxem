@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -162,7 +162,7 @@ def test_peak_finding_to_marker():
     data[2, 0, 3, 6] = 1
     data[2, 1, 2, 2] = 1
     s = Diffraction2D(data)
-    peak_array = s.find_peaks(
+    peak_array = s.find_peaks_lazy(
         min_sigma=0.1, max_sigma=2, threshold=0.01, lazy_result=False
     )
     marker_list = mt._get_4d_points_marker_list(peak_array, s.axes_manager.signal_axes)

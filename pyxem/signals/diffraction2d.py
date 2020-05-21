@@ -34,8 +34,16 @@ from hyperspy.misc.utils import isiterable
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals.differential_phase_contrast import DPCBaseSignal, DPCSignal1D, DPCSignal2D
-from pyxem.signals.differential_phase_contrast import LazyDPCBaseSignal, LazyDPCSignal1D, LazyDPCSignal2D
+from pyxem.signals.differential_phase_contrast import (
+    DPCBaseSignal,
+    DPCSignal1D,
+    DPCSignal2D,
+)
+from pyxem.signals.differential_phase_contrast import (
+    LazyDPCBaseSignal,
+    LazyDPCSignal1D,
+    LazyDPCSignal2D,
+)
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils.pyfai_utils import (
@@ -1704,7 +1712,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         pst._copy_signal_all_axes_metadata(self, s)
         return s
 
-    def find_peaks(
+    def find_peaks_lazy(
         self, method="dog", lazy_result=True, show_progressbar=True, **kwargs
     ):
         """Find peaks in the signal dimensions.
@@ -1752,7 +1760,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Example
         -------
         >>> s = ps.dummy_data.get_cbed_signal()
-        >>> peak_array = s.find_peaks()
+        >>> peak_array = s.find_peaks_lazy()
         >>> peak_array_computed = peak_array.compute(show_progressbar=False)
         >>> peak02 = peak_array_computed[0, 2]
         >>> s.add_peak_array_as_markers(peak_array_computed)
@@ -1760,7 +1768,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Change parameters
 
-        >>> peak_array = s.find_peaks(
+        >>> peak_array = s.find_peaks_lazy(
         ...     method='dog', min_sigma=1.2, max_sigma=27, sigma_ratio=2.2,
         ...     threshold=0.6, overlap=0.6, lazy_result=False,
         ...     show_progressbar=False)
@@ -1768,7 +1776,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Using Laplacian of Gaussian
 
         >>> s = ps.dummy_data.get_cbed_signal()
-        >>> peak_array = s.find_peaks(
+        >>> peak_array = s.find_peaks_lazy(
         ...     method='log', min_sigma=5, max_sigma=55, num_sigma=10,
         ...     threshold=0.2, overlap=0.86, lazy_result=False,
         ...     show_progressbar=False)
@@ -1832,7 +1840,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Examples
         --------
         >>> s = ps.dummy_data.get_cbed_signal()
-        >>> peak_array = s.find_peaks()
+        >>> peak_array = s.find_peaks_lazy()
         >>> refined_peak_array = s.peak_position_refinement_com(peak_array, 20)
         >>> refined_peak_array_com = refined_peak_array.compute(
         ...     show_progressbar=False)
@@ -1900,7 +1908,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Examples
         --------
         >>> s = ps.dummy_data.get_cbed_signal()
-        >>> peak_array = s.find_peaks()
+        >>> peak_array = s.find_peaks_lazy()
         >>> intensity_array = s.intensity_peaks(peak_array, disk_r=6)
         >>> intensity_array_computed = intensity_array.compute()
 
