@@ -34,8 +34,16 @@ from hyperspy.misc.utils import isiterable
 from pyxem.signals.diffraction1d import Diffraction1D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals.differential_phase_contrast import DPCBaseSignal, DPCSignal1D, DPCSignal2D
-from pyxem.signals.differential_phase_contrast import LazyDPCBaseSignal, LazyDPCSignal1D, LazyDPCSignal2D
+from pyxem.signals.differential_phase_contrast import (
+    DPCBaseSignal,
+    DPCSignal1D,
+    DPCSignal2D,
+)
+from pyxem.signals.differential_phase_contrast import (
+    LazyDPCBaseSignal,
+    LazyDPCSignal1D,
+    LazyDPCSignal2D,
+)
 from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
 from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils.pyfai_utils import (

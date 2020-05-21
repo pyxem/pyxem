@@ -670,6 +670,7 @@ def crystal_from_vector_matching(z_matches):
 
     return results_array
 
+
 def get_phase_name_and_index(library):
 
     """ Get a dictionary of phase names and its corresponding index value in library.keys().
@@ -684,8 +685,8 @@ def get_phase_name_and_index(library):
     phase_name_index_dict : Dictionary {str : int}
     typically on the form {'phase_name 1' : 0, 'phase_name 2': 1, ...}
     """
-    
-    phase_name_index_dict = dict([(y,x) for x,y in enumerate(list(library.keys()))])
+
+    phase_name_index_dict = dict([(y, x) for x, y in enumerate(list(library.keys()))])
     return phase_name_index_dict
 
 
