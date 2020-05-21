@@ -933,7 +933,7 @@ def test_full_ellipse_ransac_processing():
 
     s = Diffraction2D(data)
     s_t = s.template_match_disk(disk_r=5)
-    peak_array = s_t.find_peaks(lazy_result=False)
+    peak_array = s_t.find_peaks_lazy(lazy_result=False)
 
     c = math.sqrt(math.pow(a, 2) - math.pow(b, 2))
     xc, yc = xf - c * math.cos(r), yf - c * math.sin(r)
