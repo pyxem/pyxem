@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -624,7 +624,7 @@ def _mib_to_daskarr(fp, mmap_mode="r"):
     data_type = data_type.newbyteorder(endian)
 
     data_mem = np.memmap(fp, offset=read_offset, dtype=data_type, mode=mmap_mode)
-    data_da = da.from_array(data_mem)
+    data_da = da.from_array(data_mem, chunks='auto')
     return data_da
 
 

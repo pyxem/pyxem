@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -49,10 +49,13 @@ def test_s_limits(reduced_intensity1d):
     assert np.array_equal(pdf.data, pdf2.data)
 
 
-@pytest.mark.xfail(raises=ValueError)
 def test_s_limit_failure(reduced_intensity1d):
     pdfgen = PDFGenerator1D(reduced_intensity1d)
-    pdf3 = pdfgen.get_pdf(s_min=0, s_max=15)
+
+    with pytest.raises(
+        ValueError, match="User specified s_max is larger than the maximum"
+    ):
+        pdf3 = pdfgen.get_pdf(s_min=0, s_max=15)
 
 
 def test_signal_size():

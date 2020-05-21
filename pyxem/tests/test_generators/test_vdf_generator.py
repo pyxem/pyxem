@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -64,10 +64,12 @@ class TestVDFGenerator:
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
         assert isinstance(vdfgen.vectors, type(None))
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_vector_vdfs_without_vectors(self, diffraction_pattern):
         vdfgen = VDFGenerator(diffraction_pattern)
-        vdfgen.get_vector_vdf_images(radius=2.0)
+        with pytest.raises(
+            ValueError, match="DiffractionVectors not specified by user"
+        ):
+            vdfgen.get_vector_vdf_images(radius=2.0)
 
     @pytest.mark.parametrize("radius, normalize", [(4.0, False), (4.0, True)])
     def test_get_vector_vdf_images(

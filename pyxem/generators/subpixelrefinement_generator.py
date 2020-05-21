@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -359,8 +359,8 @@ class SubpixelrefinementGenerator:
 
         if np.any(bad_squares):
             warnings.warn(
-                "You have a peak in your pattern that lies on the edge of the square. \
-                          Consider increasing the square size"
+                "You have a peak in your pattern that lies on the edge of the square. "
+                "Consider increasing the square size."
             )
 
         self.last_method = "lg_method"

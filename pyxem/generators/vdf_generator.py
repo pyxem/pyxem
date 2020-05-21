@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -89,7 +89,7 @@ class VDFGenerator:
 
         else:
             raise ValueError(
-                "DiffractionVectors non-specified by user. Please "
+                "DiffractionVectors not specified by user. Please "
                 "initialize VDFGenerator with some vectors. "
             )
 

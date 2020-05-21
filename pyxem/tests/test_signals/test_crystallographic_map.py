@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,6 +21,9 @@ import pytest
 from pyxem.signals.crystallographic_map import CrystallographicMap
 from pyxem.signals.crystallographic_map import load_mtex_map
 from pyxem.signals.crystallographic_map import _distance_from_fixed_angle
+
+from diffsims.libraries.diffraction_library import DiffractionLibrary
+
 from transforms3d.euler import euler2quat, quat2axangle
 from transforms3d.quaternions import qmult, qinverse
 import os
@@ -226,6 +229,19 @@ class TestMapCreation:
         phasemap = sp_cryst_map.get_phase_map()
         assert phasemap.isig[0, 0] == 0
 
+    def test_plot_phase_map(self, dp_cryst_map):
+        """
+        Generates a CrystallographicMap with two phases and a corresponding DiffractionLibraryself
+        and tests the CrystallographicMap member function plot_phase_map.
+        """
+        crystal_map = dp_cryst_map
+        #Create DiffractionLibrary with two entries
+        lib = DiffractionLibrary()
+        lib['Al'] = ''
+        lib['Si'] = ''
+
+        assert crystal_map.plot_phase_map(lib) == None
+
     def test_get_orientation_map(self, sp_cryst_map):
         orimap = sp_cryst_map.get_orientation_map()
         assert orimap.isig[0, 0] == 0
@@ -256,18 +272,27 @@ class TestMapCreation:
         metric_map = dp_cryst_map_vector.get_metric_map(metric)
         assert np.allclose(metric_map.isig[0, 0], value)
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_template_match_bad_metric(self, sp_cryst_map):
-        metric_map = sp_cryst_map.get_metric_map("no metric")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            ValueError, match=r"metric .* is not valid for template matching"
+        ):
+            metric_map = sp_cryst_map.get_metric_map("no metric")
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_vector_match_bad_metric(self, dp_cryst_map_vector):
-        metric_map = dp_cryst_map_vector.get_metric_map("no metric")
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            ValueError, match=r"metric .* is not valid for vector matching"
+        ):
+            metric_map = dp_cryst_map_vector.get_metric_map("no metric")
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_no_method(self):
         crystal_map = CrystallographicMap(np.array([[1]]))
-        metric_map = crystal_map.get_metric_map("no metric")
+
+        with pytest.raises(
+            ValueError, match="crystallographic mapping method must be specified"
+        ):
+            metric_map = crystal_map.get_metric_map("no metric")
 
 
 class TestMTEXIO:
