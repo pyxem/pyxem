@@ -245,7 +245,7 @@ def _get_cluster_dict(peak_array, eps=30, min_samples=2):
     Parameters
     ----------
     peak_array : 2D numpy array
-        In the form [[x0, y0], [x1, y1], ...]
+        In the form [[x0, y0], [x1, y1], ...], i.e. shape = 2
     eps : scalar
         For the DBSCAN clustering algorithm
     min_samples : int
@@ -265,8 +265,6 @@ def _get_cluster_dict(peak_array, eps=30, min_samples=2):
     >>> cluster0 = cluster_dict[0]
 
     """
-    if len(peak_array.shape) != 2:
-        raise ValueError("peak_array must have 2 dimensions")
     dbscan = cluster.DBSCAN(eps=eps, min_samples=min_samples)
     dbscan.fit(peak_array)
     label_list = dbscan.labels_
