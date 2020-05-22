@@ -166,7 +166,7 @@ class IndexationGenerator:
             shape = signal.data.shape[1:]
             size = 2 * np.array(shape) - 1
             fsize = [next_fast_len(a) for a in (size)]
-            library_FT_dict = get_library_FT_dict(template_library, shape, fsize)
+            library_FT_dict = get_library_FT_dict(library, shape, fsize)
 
             matches = signal.map(
                 correlate_library_from_dict,
