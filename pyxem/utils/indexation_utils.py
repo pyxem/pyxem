@@ -226,7 +226,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
      a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
     """
 
-    top_matches = np.empty((len(library), n_largest, 3), dtype="object")
+    top_matches = np.empty((len(template_dict), n_largest, 3), dtype="object")
 
     if method == "full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
