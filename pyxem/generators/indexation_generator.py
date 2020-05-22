@@ -38,6 +38,7 @@ from pyxem.utils.indexation_utils import (
     match_vectors,
     OrientationResult,
     get_nth_best_solution,
+    correlate_library_from_dict,
 )
 
 
