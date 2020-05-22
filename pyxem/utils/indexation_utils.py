@@ -251,7 +251,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
                         image_FT,
                         image_norm,
                         pat_local,
-                        px_local
+                        pn_local
                     )
 
                 if corr_local > np.min(corr_saved):
