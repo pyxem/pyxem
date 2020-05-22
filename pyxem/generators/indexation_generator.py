@@ -21,6 +21,7 @@
 """
 
 import numpy as np
+from scipy.fftpack import next_fast_len
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
