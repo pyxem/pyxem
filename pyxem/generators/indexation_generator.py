@@ -46,6 +46,29 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 
 import lmfit
 
+def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
+    template = np.zeros((shape))
+    template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
+    template_FT = np.fft.fftshift(np.fft.fftn(template,fsize))
+    template_norm = np.linalg.norm(template)
+    return template_FT, template_norm
+
+def get_library_FT_dict(template_library, shape, fsize):
+    library_FT_dict = {}
+    for entry, library_entry in enumerate(template_library.values()):
+        orientations = library_entry["orientations"]
+        pixel_coords = library_entry["pixel_coords"]
+        intensities = library_entry["intensities"]
+        template_FTs = []
+        pattern_norms = []
+        for coord, intensity in zip(pixel_coords, intensities):
+            template_FT, pattern_norm = get_fourier_transform(coord, intensity, shape, fsize)
+            template_FTs.append(template_FT)
+            pattern_norms.append(pattern_norm)
+
+        library_FT_dict[entry] = {"orientations" : orientations, "patterns" : template_FTs, "pattern_norms" : pattern_norms}
+
+    return library_FT_dict
 
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
@@ -115,28 +138,44 @@ class IndexationGenerator:
         chosen_function = select_method_from_method_dict(
             method, method_dict, print_help
         )
+        if method in ["fast_correlation", "zero_mean_normalized_correlation"]:
+            # adds a normalisation to library
+            for phase in library.keys():
+                norm_array = np.ones(
+                    library[phase]["intensities"].shape[0]
+                )  # will store the norms
 
-        # adds a normalisation to library
-        for phase in library.keys():
-            norm_array = np.ones(
-                library[phase]["intensities"].shape[0]
-            )  # will store the norms
+                for i, intensity_array in enumerate(library[phase]["intensities"]):
+                    norm_array[i] = np.linalg.norm(intensity_array)
+                library[phase][
+                    "pattern_norms"
+                ] = norm_array  # puts this normalisation into the library
 
-            for i, intensity_array in enumerate(library[phase]["intensities"]):
-                norm_array[i] = np.linalg.norm(intensity_array)
-            library[phase][
-                "pattern_norms"
-            ] = norm_array  # puts this normalisation into the library
+            matches = signal.map(
+                correlate_library,
+                library=library,
+                n_largest=n_largest,
+                method=method,
+                mask=mask,
+                inplace=False,
+                **kwargs,
+            )
 
-        matches = signal.map(
-            correlate_library,
-            library=library,
-            n_largest=n_largest,
-            method=method,
-            mask=mask,
-            inplace=False,
-            **kwargs,
-        )
+        elif method in ["full_frame_correlation"] :
+            shape = signal.data.shape[1:]
+            size = 2 * np.array(shape) - 1
+            fsize = [next_fast_len(a) for a in (size)]
+            library_FT_dict = get_library_FT_dict(template_library, shape, fsize)
+
+            matches = signal.map(
+                correlate_library_from_dict,
+                template_dict = library_FT_dict,
+                n_largest=n_largest,
+                method=method,
+                mask=mask,
+                inplace=False,
+                **kwargs,
+            )
 
         matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
