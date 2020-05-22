@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -83,7 +83,7 @@ def test_no_peak_case(no_peak, method):
     assert np.isnan(peaks[0, 1])
 
 
-methods = ["zaf", "log", "dog", "stat"]
+methods = ["zaf", "log", "dog"]
 
 
 @pytest.mark.parametrize("method", methods)

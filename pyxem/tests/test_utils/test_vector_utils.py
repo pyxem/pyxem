@@ -125,6 +125,10 @@ def test_get_angle_cartesian_vec(a, b, expected_angles):
     np.testing.assert_allclose(angles, expected_angles)
 
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_get_angle_cartesian_vec_input_validation():
-    get_angle_cartesian_vec(np.empty((2, 3)), np.empty((5, 3)))
+    # Note - uses regex via re.search()
+    with pytest.raises(
+        ValueError, match=r"shape of a .* and b .* must be the same",
+    ):
+        get_angle_cartesian_vec(np.empty((2, 3)), np.empty((5, 3)))

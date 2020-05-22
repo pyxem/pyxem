@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -397,11 +397,9 @@ class DiffractionVectors(BaseSignal):
         if distance_threshold == 0:
             if method != "strict":
                 warn(
-                    message="distance_threshold=0 was given, and therefore "
-                    + "a strict comparison is used, even though the "
-                    + "specified method was "
-                    + method
-                    + "."
+                    "distance_threshold=0 was given, and therefore "
+                    "a strict comparison is used, even though the "
+                    "specified method was {}".format(method)
                 )
                 method = "strict"
 
