@@ -4,6 +4,7 @@ include = */pyxem/*
 omit =
      */pyxem/__init__.py
      */pyxem/utils/io_utils.py
+     */pyxem/utils/io_tools.py
      */pyxem/utils/peakfinder2D_gui.py
      */pyxem/version.py
      */pyxem/utils/__init__.py

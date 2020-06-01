@@ -143,6 +143,24 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_variance2d
+  DPCBaseSignal:
+    signal_type: "dpc"
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.differential_phase_contrast
+  DPCSignal1D:
+    signal_type: "dpc"
+    signal_dimension: 1
+    dtype: real
+    lazy: False
+    module: pyxem.signals.differential_phase_contrast
+  DPCSignal2D:
+    signal_type: "dpc"
+    signal_dimension: 2
+    dtype: real
+    lazy: False
+    module: pyxem.signals.differential_phase_contrast
   Correlation2D:
     signal_type: correlation
     signal_dimension: 2

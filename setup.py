@@ -60,6 +60,7 @@ setup(
         "diffsims >= 0.2.3",  # Makes use of functionality introduced in this release
         "lmfit >= 0.9.12",
         "pyfai",
+        "ipywidgets",
         "numba",
     ],
     package_data={
