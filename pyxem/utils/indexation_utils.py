@@ -385,7 +385,7 @@ def correlate_library(image, library, n_largest, method, mask):
     if method == "full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
         fsize = [optimal_fft_size(a, real = True) for a in (size)]
-        image_FT = np.fft.fftshift(np.fft.fftn(image, fsize))
+        image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
         image_norm = np.linalg.norm(image)
 
     if mask == 1:
