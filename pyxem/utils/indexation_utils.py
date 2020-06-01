@@ -112,7 +112,7 @@ def zero_mean_normalized_correlation(
     image_intensities,
     int_local,
     **kwargs
-    ):
+):
     """
     Computes the correlation score between an image and a template, using the formula
     .. math:: zero_mean_normalized_correlation
@@ -202,8 +202,7 @@ def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
 
     res_matrix = np.fft.ifftn(fprod)
     fsize = res_matrix.shape
-    corr_local = np.max(np.real(res_matrix[ max(fsize[0] // 2 - 3, 0) : min(fsize[0] // 2 + 3, fsize[0]),\
-                                        max(fsize[1] // 2 - 3, 0) : min(fsize[1] // 2 + 3, fsize[1])]))
+    corr_local = np.max(np.real(res_matrix[fsize[0] // 2 - 3 : fsize[0] // 2 + 3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
     if (image_norm > 0 and pattern_norm > 0):
         corr_local = corr_local / (image_norm * pattern_norm)
 
@@ -267,7 +266,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
         size = 2 * np.array(image.shape) - 1
         fsize = [optimal_fft_size(a, real = True) for a in (size)]
         image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
-        image_norm = np.sqrt(full_frame_correlation(image_FT, 1, image_FT, 1))
+        image_norm = np.linalg.norm(image)
 
     if mask == 1:
         for phase_index, library_entry in enumerate(template_dict.values()):
@@ -869,6 +868,25 @@ def crystal_from_vector_matching(z_matches):
     results_array[2] = metrics
 
     return results_array
+
+
+def get_phase_name_and_index(library):
+
+    """ Get a dictionary of phase names and its corresponding index value in library.keys().
+
+     Parameters
+    ----------
+    library : DiffractionLibrary
+        Diffraction library containing the phases and rotations
+
+    Returns
+    -------
+    phase_name_index_dict : Dictionary {str : int}
+    typically on the form {'phase_name 1' : 0, 'phase_name 2': 1, ...}
+    """
+
+    phase_name_index_dict = dict([(y, x) for x, y in enumerate(list(library.keys()))])
+    return phase_name_index_dict
 
 
 def peaks_from_best_template(single_match_result, library, rank=0):

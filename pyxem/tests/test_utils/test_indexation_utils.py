@@ -18,19 +18,13 @@
 
 import numpy as np
 
-from diffsims.libraries.diffraction_library import DiffractionLibrary
-
-from pyxem.generators.indexation_generator import get_library_FT_dict
-
 from pyxem.utils.indexation_utils import (
     crystal_from_template_matching,
     crystal_from_vector_matching,
     match_vectors,
     zero_mean_normalized_correlation,
     fast_correlation,
-    full_frame_correlation,
-    optimal_fft_size,
-    correlate_library_from_dict
+    full_frame_correlation
 )
 
 
@@ -54,44 +48,15 @@ def test_fast_correlation():
 def test_full_frame_correlation():
     #Define testing parameters.
     in1 = np.zeros((10,10))
-    in2 = np.zeros((10,10))
-    in1[5,5] = 1
-    in1[7,7] = 1
-    in1[3,7] = 1
-    in1[7,3] = 1
-    in1_FT = np.fft.fftshift(np.fft.rfftn(in1, (20,20)))
-    norm_1 = np.sqrt(np.max(np.real(np.fft.ifftn(in1_FT ** 2))))
-    in2_FT = np.fft.fftshift(np.fft.rfftn(in2, (20,20)))
-    norm_2 = np.sqrt(np.max(np.real(np.fft.ifftn(in2_FT ** 2))))
+    image_norm = np.linalg.norm(in1)
+    next_fast_len = np.array([20, 20])
+    in1_FT = np.fft.fftn(in1, next_fast_len)
     np.testing.assert_approx_equal(
-        full_frame_correlation(in1_FT, norm_1, in1_FT, norm_1), 1
+        full_frame_correlation(in1_FT, image_norm, next_fast_len, np.array([[5, 5],[5, 5]]), [1, 1]), 0.1
     )
     np.testing.assert_approx_equal(
-        full_frame_correlation(in1_FT, norm_1, in2_FT, norm_2), 0
+        full_frame_correlation(in1_FT, image_norm, next_fast_len, np.array([[5, 5], [5, 5]]), [0, 0]), 0
     )
-
-def test_optimal_fft_size():
-    np.testing.assert_approx_equal(
-        optimal_fft_size(8), 8
-    )
-    np.testing.assert_approx_equal(
-        optimal_fft_size(20), 20
-    )
-
-def test_correlate_library_from_dict():
-    new_template_library = DiffractionLibrary()
-    new_template_library["GaSb"] = {"orientations" : np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]) ,
-                                    "pixel_coords" : np.array([np.asarray([[1,1]]), np.asarray([[2,2],[1,1]])]),
-                                    "intensities" : np.array([np.array([1,]), np.array([1, 1])])}
-    shape = (3,3)
-    fsize = (5,5)
-    new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
-    image = np.zeros((3,3))
-    image[1,1] = 1
-    match_results = correlate_library_from_dict(image, new_template_dict,n_largest =  1, method = "full_frame_correlation", mask = 1)
-    np.testing.assert_approx_equal(match_results[0][1][1], 0.0)
-    np.testing.assert_approx_equal(match_results[0][2], 1.0)
-
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):
     # branch single phase
