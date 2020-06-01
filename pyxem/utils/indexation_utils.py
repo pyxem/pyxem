@@ -23,7 +23,6 @@ import math
 from operator import itemgetter, attrgetter
 
 import numpy as np
-from scipy.fftpack import next_fast_len
 
 from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
@@ -40,6 +39,40 @@ OrientationResult = namedtuple(
     "OrientationResult",
     "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split(),
 )
+
+def optimal_fft_size(target, real = False):
+    """Wrapper around scipy function next_fast_len() for calculating optimal FFT padding.
+    scipy.fft was only added in 1.4.0, so we fall back to scipy.fftpack
+    if it is not available. The main difference is that next_fast_len()
+    does not take a second argument in the older implementation.
+
+    Parameters
+    ----------
+    target : int
+        Length to start searching from. Must be a positive integer.
+    real : bool, optional
+        True if the FFT involves real input or output, only available
+        for scipy > 1.4.0
+    Returns
+    -------
+    int
+        Optimal FFT size.
+    """
+
+    try:
+        from scipy.fft import next_fast_len
+
+        support_real = True
+
+    except ImportError:
+        from scipy.fftpack import next_fast_len
+
+        support_real = False
+
+    if support_real:
+        return next_fast_len(target, real)
+    else:
+        return next_fast_len(target)
 
 # Functions used in correlate_library.
 def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
@@ -169,7 +202,7 @@ def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
 
     res_matrix = np.fft.ifftn(fprod)
     fsize = res_matrix.shape
-    corr_local = np.real(np.max(res_matrix[fsize[0]//2-3:fsize[0]//2+3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
+    corr_local = np.max(np.real(res_matrix[fsize[0]//2-3:fsize[0]//2+3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
     if (image_norm > 0 and pattern_norm > 0):
         corr_local = corr_local / (image_norm * pattern_norm)
 
@@ -231,8 +264,8 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
 
     if method == "full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
-        fsize = [next_fast_len(a) for a in (size)]
-        image_FT = np.fft.fftshift(np.fft.fftn(image, fsize))
+        fsize = [optimal_fft_size(a, real = True) for a in (size)]
+        image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
         image_norm = np.linalg.norm(image)
 
     if mask == 1:
@@ -351,7 +384,7 @@ def correlate_library(image, library, n_largest, method, mask):
 
     if method == "full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
-        fsize = [next_fast_len(a) for a in (size)]
+        fsize = [optimal_fft_size(a, real = True) for a in (size)]
         image_FT = np.fft.fftshift(np.fft.fftn(image, fsize))
         image_norm = np.linalg.norm(image)
 
