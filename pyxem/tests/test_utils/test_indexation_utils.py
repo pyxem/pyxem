@@ -48,7 +48,6 @@ def test_fast_correlation():
 def test_full_frame_correlation():
     #Define testing parameters.
     in1 = np.zeros((10,10))
-    image_norm = np.linalg.norm(in1)
     next_fast_len = np.array([20, 20])
     in1_FT = np.fft.fftn(in1, next_fast_len)
     np.testing.assert_approx_equal(
