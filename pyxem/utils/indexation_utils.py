@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2020 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -202,7 +202,7 @@ def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
 
     res_matrix = np.fft.ifftn(fprod)
     fsize = res_matrix.shape
-    corr_local = np.max(np.real(res_matrix[fsize[0]//2-5:fsize[0]//2+5, fsize[1] // 2 - 5 : fsize[1] // 2 + 5]))
+    corr_local = np.max(np.real(res_matrix[fsize[0]//2-3:fsize[0]//2+3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
     if (image_norm > 0 and pattern_norm > 0):
         corr_local = corr_local / (image_norm * pattern_norm)
 
