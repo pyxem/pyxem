@@ -21,7 +21,6 @@
 """
 
 import numpy as np
-from scipy.fftpack import next_fast_len
 
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.indexation_results import VectorMatchingResults
@@ -39,6 +38,7 @@ from pyxem.utils.indexation_utils import (
     OrientationResult,
     get_nth_best_solution,
     correlate_library_from_dict,
+    optimal_fft_size,
 )
 
 
@@ -51,7 +51,7 @@ import lmfit
 def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
     template = np.zeros((shape))
     template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
-    template_FT = np.fft.fftshift(np.fft.fftn(template,fsize))
+    template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
     template_norm = np.linalg.norm(template)
     return template_FT, template_norm
 
@@ -166,7 +166,7 @@ class IndexationGenerator:
         elif method in ["full_frame_correlation"] :
             shape = signal.data.shape[1:]
             size = 2 * np.array(shape) - 1
-            fsize = [next_fast_len(a) for a in (size)]
+            fsize = [optimal_fft_size(a, real = True) for a in (size)]
             library_FT_dict = get_library_FT_dict(library, shape, fsize)
 
             matches = signal.map(
