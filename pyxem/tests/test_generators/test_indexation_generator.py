@@ -131,7 +131,7 @@ def test_get_fouriet_transform():
     template_intensities = np.asarray([1])
     transform, norm = get_fourier_transform(template_coordinates, template_intensities, shape, fsize)
     test_value = np.real(transform[1,1])
-    np.testing.assert_approx_equal(test_vale, 1)
+    np.testing.assert_approx_equal(test_value, 1)
     np.testing.assert_approx_equal(norm, 1)
 
 def test_get_library_FT_dict():
@@ -148,7 +148,7 @@ def test_get_library_FT_dict():
             pattern_norms = library_entry["pattern_norms"]
     np.testing.assert_approx_equal(orientations[0][0], 0.0)
     np.testing.assert_approx_equal(np.real(patterns[0][1,1]),1)
-    np.testing.assert_approx_equal(pattern_norms[0][0], 1)
+    np.testing.assert_approx_equal(pattern_norms[0], 1)
 
 
 def test_vector_indexation_generator_init():
