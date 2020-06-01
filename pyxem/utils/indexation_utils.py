@@ -382,12 +382,14 @@ def correlate_library(image, library, n_largest, method, mask):
         average_image_intensity = np.average(image)
         image_std = np.linalg.norm(image - average_image_intensity)
 
+    """
+    Moved to correlate_library_from_dict
     if method == "full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
         fsize = [optimal_fft_size(a, real = True) for a in (size)]
         image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
         image_norm = np.linalg.norm(image)
-
+    """
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
             orientations = library_entry["orientations"]
@@ -421,6 +423,8 @@ def correlate_library(image, library, n_largest, method, mask):
                         pn_local
                     )
 
+                """
+                Moved to correlate_library_from_dict
                 elif method == "full_frame_correlation":
                     corr_local = full_frame_correlation(
                         image_FT,
@@ -429,6 +433,7 @@ def correlate_library(image, library, n_largest, method, mask):
                         px_local,
                         int_local
                     )
+                """
 
                 if corr_local > np.min(corr_saved):
                     or_saved[np.argmin(corr_saved)] = or_local
