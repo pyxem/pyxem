@@ -266,7 +266,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
         size = 2 * np.array(image.shape) - 1
         fsize = [optimal_fft_size(a, real = True) for a in (size)]
         image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
-        image_norm = np.linalg.norm(image)
+        image_norm = np.sqrt(full_frame_correlation(image_FT, 1, image_FT, 1))
 
     if mask == 1:
         for phase_index, library_entry in enumerate(template_dict.values()):
