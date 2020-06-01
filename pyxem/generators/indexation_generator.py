@@ -52,7 +52,7 @@ def get_fourier_transform(template_coordinates, template_intensities, shape, fsi
     template = np.zeros((shape))
     template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
     template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
-    template_norm = np.linalg.norm(template)
+    template_norm = np.sqrt(full_frame_correlation(template_FT, 1, template_FT, 1))
     return template_FT, template_norm
 
 def get_library_FT_dict(template_library, shape, fsize):
