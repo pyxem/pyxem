@@ -124,7 +124,7 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
     indexation = pig.index_peaks(tolerance=0.02)
     np.testing.assert_almost_equal(indexation[0][0], 0.3189193164369)
 
-def test_get_fouriet_transform():
+def test_get_fourier_transform():
     shape = (3,3)
     fsize = (3,3)
     template_coordinates = np.asarray([[1,1]])
