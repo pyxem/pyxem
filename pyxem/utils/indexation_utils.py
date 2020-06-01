@@ -200,7 +200,7 @@ def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
 
     fprod = pattern_FT * image_FT
 
-    res_matrix = np.fft.ifftn(fprod)
+    res_matrix = np.fft.fftshift(np.fft.ifftn(fprod))
     fsize = res_matrix.shape
     corr_local = np.max(np.real(res_matrix[fsize[0] // 2 - 3 : fsize[0] // 2 + 3, fsize[1] // 2 - 3 : fsize[1] // 2 + 3]))
     if (image_norm > 0 and pattern_norm > 0):
