@@ -88,7 +88,7 @@ def test_correlate_library_from_dict():
     new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
     image = np.zeros((3,3))
     image[1,1] = 1
-    match_result = correlate_library_from_dict(image, new_template_dict,n_largest =  1, method = "full_frame_correlation", mask = 1)
+    match_results = correlate_library_from_dict(image, new_template_dict,n_largest =  1, method = "full_frame_correlation", mask = 1)
     np.testing.assert_approx_equal(match_results[0][1][1], 0.0)
     np.testing.assert_approx_equal(match_results[0][2], 1.0)
 
