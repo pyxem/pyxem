@@ -167,6 +167,9 @@ class IndexationGenerator:
             shape = signal.data.shape[-2:]
             size = 2 * np.array(shape) - 1
             fsize = [optimal_fft_size(a, real = True) for a in (size)]
+            if not (list(size) == fsize):
+                raise ValueError("Please select input signal and templates of dimensions 2**n X 2**n")
+            
             library_FT_dict = get_library_FT_dict(library, shape, fsize)
 
             matches = signal.map(
