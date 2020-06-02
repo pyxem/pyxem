@@ -164,7 +164,7 @@ class IndexationGenerator:
             )
 
         elif method in ["full_frame_correlation"] :
-            shape = signal.data.shape[1:]
+            shape = signal.data.shape[-2:]
             size = 2 * np.array(shape) - 1
             fsize = [optimal_fft_size(a, real = True) for a in (size)]
             library_FT_dict = get_library_FT_dict(library, shape, fsize)
@@ -172,10 +172,10 @@ class IndexationGenerator:
             matches = signal.map(
                 correlate_library_from_dict,
                 template_dict = library_FT_dict,
-                n_largest=n_largest,
-                method=method,
-                mask=mask,
-                inplace=False,
+                n_largest = n_largest,
+                method = method,
+                mask = mask,
+                inplace = False,
                 **kwargs,
             )
 
