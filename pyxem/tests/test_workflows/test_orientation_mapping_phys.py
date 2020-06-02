@@ -103,6 +103,12 @@ def get_template_match_results(structure, edc, rot_list, mask=None):
     indexer = IndexationGenerator(dp, library)
     return indexer.correlate(mask=mask, method="zero_mean_normalized_correlation")
 
+def get_template_match_results_fullframe(structure, edc, rot_list, mask=None):
+    dp = generate_diffraction_patterns(structure, edc)
+    library = get_template_library(structure, rot_list, edc)
+    indexer = IndexationGenerator(dp, library)
+    return indexer.correlate(mask=mask, method="full_frame_correlation")
+
 
 """ Tests for template matching """
 
@@ -122,6 +128,15 @@ def test_masked_template_matching(default_structure, rot_list, edc):
     mask = hs.signals.Signal1D(([[[1], [1]], [[0], [1]]]))
     M = get_template_match_results(default_structure, edc, rot_list, mask)
     assert np.all(np.equal(M.inav[0, 1].data, None))
+
+def test_fullframe_orientation_mapping_physical(structure, rot_list, edc):
+    M = get_template_match_results_fullframe(structure, edc, rot_list)
+    assert np.all(M.inav[0, 0] == M.inav[1, 0])
+    match_data = M.inav[0, 0].isig[1].data
+    for result_number in [0, 1, 2]:
+        np.testing.assert_allclose(
+            match_data[result_number][:2], [90, 90]
+        )  # always looking down c
 
 
 """ Testing Vector Matching Results """
