@@ -126,7 +126,7 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
 
 def test_get_fourier_transform():
     shape = (3,3)
-    fsize = (3,3)
+    fsize = (5,5)
     template_coordinates = np.asarray([[1,1]])
     template_intensities = np.asarray([1])
     transform, norm = get_fourier_transform(template_coordinates, template_intensities, shape, fsize)
