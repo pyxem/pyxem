@@ -75,7 +75,7 @@ def sum_absolute_differences(image_intensities, int_local, **kwargs):
         """
         Computes the correlation score between an image and a template, using the formula
         .. math:: sum_absolute_differences
-            \\frac{\\sum_{j=1}^m P(x_j, y_j) - T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+            \\\\sum_{j=1}^m P(x_j, y_j) - T(x_j, y_j)
 
         Parameters
         ----------
@@ -83,8 +83,6 @@ def sum_absolute_differences(image_intensities, int_local, **kwargs):
             list of intensity values in the image, for pixels where the template has a non-zero intensity
         int_local: list
             list of all non-zero intensities in the template
-        pn_local: float
-            pattern norm of the template
 
         Returns
         -------
@@ -132,31 +130,31 @@ def normalized_sum_absolute_differences(image_intensities, int_local, pn_local, 
 
 
 def sum_squared_differences(image_intensities, int_local, **kwargs):
-        """
-        Computes the correlation score between an image and a template, using the formula
-        .. math:: sum_squared_differences
-            \\frac{\\sum_{j=1}^m (P(x_j, y_j) - T(x_j, y_j))^2}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+    """
+    Computes the correlation score between an image and a template, using the formula
+    .. math:: sum_squared_differences
+        \\sum_{j=1}^m (P(x_j, y_j) - T(x_j, y_j))^2
 
-        Parameters
-        ----------
-        image_intensities: list
-            list of intensity values in the image, for pixels where the template has a non-zero intensity
-        int_local: list
-            list of all non-zero intensities in the template
+    Parameters
+    ----------
+    image_intensities: list
+        list of intensity values in the image, for pixels where the template has a non-zero intensity
+    int_local: list
+        list of all non-zero intensities in the template
 
-        Returns
-        -------
-        corr_local: float
-            correlation score between template and image.
+    Returns
+    -------
+    corr_local: float
+        correlation score between template and image.
 
         See also:
-        ---------
-        correlate_library, fast_correlation, normalized_sum_absolute_differences
+    ---------
+    correlate_library, fast_correlation, normalized_sum_absolute_differences
 
-        """
-        return (
-        np.sum((np.subtract(image_intensities, int_local))**2)
-        )
+    """
+    return (
+    np.sum((np.subtract(image_intensities, int_local))**2)
+    )
 
 
 def normalized_sum_squared_differences(image_intensities, int_local, pn_local, **kwargs):
