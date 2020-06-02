@@ -20,6 +20,8 @@ import numpy as np
 
 from diffsims.libraries.diffraction_library import DiffractionLibrary
 
+from pyxem.generators.indexation_generator import get_library_FT_dict
+
 from pyxem.utils.indexation_utils import (
     crystal_from_template_matching,
     crystal_from_vector_matching,
