@@ -24,7 +24,7 @@ from pyxem.utils.indexation_utils import (
     match_vectors,
     zero_mean_normalized_correlation,
     fast_correlation,
-    sum_absolute_differences
+    sum_absolute_differences,
     normalized_sum_absolute_differences,
     sum_squared_differences,
     normalized_sum_squared_differences
