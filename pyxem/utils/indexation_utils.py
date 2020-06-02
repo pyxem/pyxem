@@ -112,7 +112,7 @@ def zero_mean_normalized_correlation(
     image_intensities,
     int_local,
     **kwargs
-):
+    ):
     """
     Computes the correlation score between an image and a template, using the formula
     .. math:: zero_mean_normalized_correlation
