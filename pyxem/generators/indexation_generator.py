@@ -32,6 +32,10 @@ from pyxem.utils.indexation_utils import (
     correlate_library,
     zero_mean_normalized_correlation,
     fast_correlation,
+    sum_absolute_differences,
+    normalized_sum_absolute_differences,
+    sum_squared_differences,
+    normalized_sum_squared_differences,
     index_magnitudes,
     match_vectors,
     OrientationResult,
@@ -103,6 +107,10 @@ class IndexationGenerator:
         method_dict = {
             "fast_correlation": fast_correlation,
             "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
+            "sum_absolute_differences": sum_absolute_differences,
+            "normalized_sum_absolute_differences": normalized_sum_absolute_differences,
+            "sum_squared_differences": sum_squared_differences,
+            "normalized_sum_squared_differences": normalized_sum_squared_differences
         }
 
         if mask is None:

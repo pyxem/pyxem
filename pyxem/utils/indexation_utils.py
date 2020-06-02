@@ -71,6 +71,123 @@ def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
     )  # Correlation is the partially normalized dot product
 
 
+def sum_absolute_differences(image_intensities, int_local, **kwargs):
+        """
+        Computes the correlation score between an image and a template, using the formula
+        .. math:: sum_absolute_differences
+            \\frac{\\sum_{j=1}^m P(x_j, y_j) - T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+        Parameters
+        ----------
+        image_intensities: list
+            list of intensity values in the image, for pixels where the template has a non-zero intensity
+        int_local: list
+            list of all non-zero intensities in the template
+        pn_local: float
+            pattern norm of the template
+
+        Returns
+        -------
+        corr_local: float
+            correlation score between template and image.
+
+        See also:
+        ---------
+        correlate_library, fast_correlation, normalized_sum_squared_differences
+
+        """
+        return (
+        np.sum(np.subtract(image_intensities, int_local))
+        )
+
+
+def normalized_sum_absolute_differences(image_intensities, int_local, pn_local, **kwargs):
+    """
+    Computes the correlation score between an image and a template, using the formula
+    .. math:: normalized_sum_absolute_differences
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) - T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    Parameters
+    ----------
+    image_intensities: list
+        list of intensity values in the image, for pixels where the template has a non-zero intensity
+    int_local: list
+        list of all non-zero intensities in the template
+    pn_local: float
+        pattern norm of the template
+
+    Returns
+    -------
+    corr_local: float
+        correlation score between template and image.
+
+    See also:
+    ---------
+    correlate_library, fast_correlation, normalized_sum_squared_differences
+
+    """
+    return (
+    np.sum(np.subtract(image_intensities, int_local) / pn_local)
+    )
+
+
+def sum_squared_differences(image_intensities, int_local, **kwargs):
+        """
+        Computes the correlation score between an image and a template, using the formula
+        .. math:: sum_squared_differences
+            \\frac{\\sum_{j=1}^m (P(x_j, y_j) - T(x_j, y_j))^2}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+        Parameters
+        ----------
+        image_intensities: list
+            list of intensity values in the image, for pixels where the template has a non-zero intensity
+        int_local: list
+            list of all non-zero intensities in the template
+
+        Returns
+        -------
+        corr_local: float
+            correlation score between template and image.
+
+        See also:
+        ---------
+        correlate_library, fast_correlation, normalized_sum_absolute_differences
+
+        """
+        return (
+        np.sum((np.subtract(image_intensities, int_local))**2)
+        )
+
+
+def normalized_sum_squared_differences(image_intensities, int_local, pn_local, **kwargs):
+    """
+    Computes the correlation score between an image and a template, using the formula
+    .. math:: normalized_sum_squared_differences
+        \\frac{\\sum_{j=1}^m (P(x_j, y_j) - T(x_j, y_j))^2}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    Parameters
+    ----------
+    image_intensities: list
+        list of intensity values in the image, for pixels where the template has a non-zero intensity
+    int_local: list
+        list of all non-zero intensities in the template
+    pn_local: float
+        pattern norm of the template
+
+    Returns
+    -------
+    corr_local: float
+        correlation score between template and image.
+
+    See also:
+    ---------
+    correlate_library, fast_correlation, normalized_sum_absolute_differences
+
+    """
+    return (
+    np.sum((np.subtract(image_intensities, int_local))**2 / pn_local)
+    )
+
 def zero_mean_normalized_correlation(
     nb_pixels,
     image_std,
@@ -107,7 +224,8 @@ def zero_mean_normalized_correlation(
 
     See also:
     ---------
-    correlate_library, fast_correlation
+    correlate_library, fast_correlation, normalized_sum_absolute_differences,
+    normalized_sum_squared_differences
 
     """
 
@@ -205,6 +323,7 @@ def correlate_library(image, library, n_largest, method, mask):
         nb_pixels = image.shape[0] * image.shape[1]
         average_image_intensity = np.average(image)
         image_std = np.linalg.norm(image - average_image_intensity)
+
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
             orientations = library_entry["orientations"]
@@ -230,15 +349,47 @@ def correlate_library(image, library, n_largest, method, mask):
                         image_intensities,
                         int_local,
                     )
+                    best_fit = "highest"
 
                 elif method == "fast_correlation":
                     corr_local = fast_correlation(
                         image_intensities, int_local, pn_local
                     )
+                    best_fit = "highest"
 
-                if corr_local > np.min(corr_saved):
-                    or_saved[np.argmin(corr_saved)] = or_local
-                    corr_saved[np.argmin(corr_saved)] = corr_local
+                elif method == "sum_squared_differences":
+                    corr_local = sum_squared_differences(
+                        image_intensities, int_local
+                    )
+                    best_fit = "lowest"
+
+                elif method == "normalized_sum_squared_differences":
+                    corr_local = normalized_sum_squared_differences(
+                        image_intensities, int_local, pn_local
+                    )
+                    best_fit = "lowest"
+
+                elif method == "sum_absolute_differences":
+                    corr_local = sum_absolute_differences(
+                        image_intensities, int_local
+                    )
+                    best_fit = "lowest"
+
+                elif method == "normalized_sum_absolute_differences":
+                    corr_local = normalized_sum_absolute_differences(
+                        image_intensities, int_local, pn_local
+                    )
+                    best_fit = "lowest"
+
+                if best_fit == "highest":
+                    if corr_local > np.min(corr_saved):
+                        or_saved[np.argmin(corr_saved)] = or_local
+                        corr_saved[np.argmin(corr_saved)] = corr_local
+
+                if best_fit == "lowest":
+                    if corr_local < np.max(corr_saved):
+                        or_saved[np.argmax(corr_saved)] = or_local
+                        corr_saved[np.argmax(corr_saved)] = corr_local
 
                 combined_array = np.hstack((or_saved, corr_saved))
                 combined_array = combined_array[

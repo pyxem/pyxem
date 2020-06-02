@@ -24,6 +24,10 @@ from pyxem.utils.indexation_utils import (
     match_vectors,
     zero_mean_normalized_correlation,
     fast_correlation,
+    sum_absolute_differences
+    normalized_sum_absolute_differences,
+    sum_squared_differences,
+    normalized_sum_squared_differences
 )
 
 
@@ -36,6 +40,30 @@ def test_zero_mean_normalized_correlation():
     )
     # nb_pixels,image_std,average_image_intensity,image_intensities,int_local
     assert zero_mean_normalized_correlation(3, 0, 1, [1, 1, 1], [0, 0, 1]) == 0
+
+
+def test_sad():
+    np.testing.assert_approx_equal(
+        sum_absolute_differences([1, 1, 1], [1, 1, 1], np.sqrt(3)), 0
+    )
+
+
+def test_nsad():
+    np.testing.assert_approx_equal(
+        normalized_sum_absolute_differences([1, 1, 1], [1, 1, 1], np.sqrt(3)), 0
+    )
+
+
+def test_ssd():
+    np.testing.assert_approx_equal(
+        sum_absolute_differences([1, 1, 1], [1, 1, 1], np.sqrt(3)), 0
+    )
+
+
+def test_nssd():
+    np.testing.assert_approx_equal(
+        normalized_sum_squared_differences([1, 1, 1], [1, 1, 1], np.sqrt(3)), 0
+    )
 
 
 def test_fast_correlation():
