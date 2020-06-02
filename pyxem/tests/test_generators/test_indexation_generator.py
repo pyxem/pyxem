@@ -142,14 +142,15 @@ def test_get_library_FT_dict():
                                     "intensities" : np.array([np.array([1,])])}
     shape = (3,3)
     fsize = (5,5)
+    normalization_constant = 0.9278426705718053
     new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
     for phase_index, library_entry in enumerate(new_template_dict.values()):
-            orientations = library_entry["orientations"]
-            patterns = library_entry["patterns"]
-            pattern_norms = library_entry["pattern_norms"]
+        orientations = library_entry["orientations"]
+        patterns = library_entry["patterns"]
+        pattern_norms = library_entry["pattern_norms"]
     np.testing.assert_approx_equal(orientations[0][0], 0.0)
-    np.testing.assert_approx_equal(np.real(patterns[0][1,1]),1)
-    np.testing.assert_approx_equal(pattern_norms[0], 1)
+    np.testing.assert_approx_equal(np.real(patterns[0][2,1]),1)
+    np.testing.assert_approx_equal(pattern_norms[0], normalization_constant)
 
 
 def test_vector_indexation_generator_init():
