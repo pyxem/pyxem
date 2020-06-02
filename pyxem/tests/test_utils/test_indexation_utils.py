@@ -72,7 +72,7 @@ def test_full_frame_correlation():
 
 def test_optimal_fft_size():
     np.testing.assert_approx_equal(
-        optimal_fft_size(7), 8
+        optimal_fft_size(8), 8
     )
     np.testing.assert_approx_equal(
         optimal_fft_size(20), 20
