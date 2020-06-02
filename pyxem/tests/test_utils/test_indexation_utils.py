@@ -44,7 +44,7 @@ def test_zero_mean_normalized_correlation():
 
 def test_sad():
     np.testing.assert_approx_equal(
-        sum_absolute_differences([1, 1, 1], [1, 1, 1], np.sqrt(3)), 0
+        sum_absolute_differences([1, 1, 1], [1, 1, 1]), 0
     )
 
 
@@ -56,7 +56,7 @@ def test_nsad():
 
 def test_ssd():
     np.testing.assert_approx_equal(
-        sum_absolute_differences([1, 1, 1], [1, 1, 1], np.sqrt(3)), 0
+        sum_absolute_differences([1, 1, 1], [1, 1, 1]), 0
     )
 
 
