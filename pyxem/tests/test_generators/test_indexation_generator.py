@@ -127,12 +127,13 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
 def test_get_fourier_transform():
     shape = (3,3)
     fsize = (5,5)
+    normalization_constant = 0.9278426705718053 #Precomputed normalization. Formula full_frame(template, 1, template, 1)
     template_coordinates = np.asarray([[1,1]])
     template_intensities = np.asarray([1])
     transform, norm = get_fourier_transform(template_coordinates, template_intensities, shape, fsize)
-    test_value = np.real(transform[1,1])
+    test_value = np.real(transform[2,1]) #Center value
     np.testing.assert_approx_equal(test_value, 1)
-    np.testing.assert_approx_equal(norm, 1)
+    np.testing.assert_approx_equal(norm, normalization_constant)
 
 def test_get_library_FT_dict():
     new_template_library = DiffractionLibrary()
