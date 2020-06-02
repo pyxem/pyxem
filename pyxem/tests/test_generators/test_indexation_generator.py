@@ -126,14 +126,13 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
 
 def test_get_fourier_transform():
     shape = (3,3)
-    fsize = (5,5)
-    normalization_constant = 0.9278426705718053 #Precomputed normalization. Formula full_frame(template, 1, template, 1)
+    fsize = (3,3)
     template_coordinates = np.asarray([[1,1]])
     template_intensities = np.asarray([1])
     transform, norm = get_fourier_transform(template_coordinates, template_intensities, shape, fsize)
-    test_value = np.real(transform[2,1]) #Center value
+    test_value = np.real(transform[1,1])
     np.testing.assert_approx_equal(test_value, 1)
-    np.testing.assert_approx_equal(norm, normalization_constant)
+    np.testing.assert_approx_equal(norm, 1)
 
 def test_get_library_FT_dict():
     new_template_library = DiffractionLibrary()
@@ -142,15 +141,14 @@ def test_get_library_FT_dict():
                                     "intensities" : np.array([np.array([1,])])}
     shape = (3,3)
     fsize = (5,5)
-    normalization_constant = 0.9278426705718053
     new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
     for phase_index, library_entry in enumerate(new_template_dict.values()):
-        orientations = library_entry["orientations"]
-        patterns = library_entry["patterns"]
-        pattern_norms = library_entry["pattern_norms"]
+            orientations = library_entry["orientations"]
+            patterns = library_entry["patterns"]
+            pattern_norms = library_entry["pattern_norms"]
     np.testing.assert_approx_equal(orientations[0][0], 0.0)
-    np.testing.assert_approx_equal(np.real(patterns[0][2,1]),1)
-    np.testing.assert_approx_equal(pattern_norms[0], normalization_constant)
+    np.testing.assert_approx_equal(np.real(patterns[0][1,1]),1)
+    np.testing.assert_approx_equal(pattern_norms[0], 1)
 
 
 def test_vector_indexation_generator_init():
