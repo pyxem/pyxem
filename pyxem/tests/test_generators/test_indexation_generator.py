@@ -140,7 +140,7 @@ def test_get_library_FT_dict():
                                     "pixel_coords" : np.array([np.asarray([[1,1],])]),
                                     "intensities" : np.array([np.array([1,])])}
     shape = (3,3)
-    fsize = (3,3)
+    fsize = (5,5)
     new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
     for phase_index, library_entry in enumerate(new_template_dict.values()):
             orientations = library_entry["orientations"]
