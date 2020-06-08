@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -30,23 +30,25 @@ def exp_disc():
     ss, disc_radius, upsample_factor = int(60), 6, 10
 
     arr = np.zeros((ss, ss))
-    rr, cc = draw.circle(int(ss / 2) + 20, int(ss / 2) - 10, radius=disc_radius, shape=arr.shape)
+    rr, cc = draw.circle(
+        int(ss / 2) + 20, int(ss / 2) - 10, radius=disc_radius, shape=arr.shape
+    )
     arr[rr, cc] = 1
     return arr
 
 
-@pytest.mark.filterwarnings('ignore::UserWarning')  # various skimage warnings
+@pytest.mark.filterwarnings("ignore::UserWarning")  # various skimage warnings
 def test_experimental_square_size(exp_disc):
     square = get_experimental_square(exp_disc, [17, 19], 6)
     assert square.shape[0] == int(6)
     assert square.shape[1] == int(6)
 
 
-@pytest.mark.xfail(strict=True)
 def test_failure_for_non_even_entry_to_get_simulated_disc():
-    disc = get_simulated_disc(61, 5)
+    with pytest.raises(ValueError, match="'square_size' must be an even number"):
+        disc = get_simulated_disc(61, 5)
 
 
-@pytest.mark.xfail(strict=True)
 def test_failure_for_non_even_errors_get_experimental_square(exp_disc):
-    square = get_experimental_square(exp_disc, [17, 19], 7)
+    with pytest.raises(ValueError, match="'square_size' must be an even number"):
+        square = get_experimental_square(exp_disc, [17, 19], 7)

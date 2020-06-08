@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -45,7 +45,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
 
     """
 
-    if k_xy.shape == (1,) and k_xy.dtype == 'object':
+    if k_xy.shape == (1,) and k_xy.dtype == "object":
         # From ragged array
         k_xy = k_xy[0]
 
@@ -54,7 +54,7 @@ def detector_to_fourier(k_xy, wavelength, camera_length):
     # the wavelength. k_z is calculated courtesy of Pythagoras, then offset by
     # the Ewald sphere radius.
 
-    k_z = np.sqrt(1 / (wavelength**2) - np.sum(k_xy**2, axis=1)) - 1 / wavelength
+    k_z = np.sqrt(1 / (wavelength ** 2) - np.sum(k_xy ** 2, axis=1)) - 1 / wavelength
 
     # Stack the xy-vector and the z vector to get the full k
     k = np.hstack((k_xy, k_z[:, np.newaxis]))
@@ -200,11 +200,19 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
 
     # Create rotation from-plane -> to-plane
     common_valid = ~np.isclose(np.sum(np.abs(plane_common_axes), axis=-1), 0.0)
-    angles = get_angle_cartesian_vec(np.broadcast_to(plane_normal_from, plane_normal_to.shape), plane_normal_to)
+    angles = get_angle_cartesian_vec(
+        np.broadcast_to(plane_normal_from, plane_normal_to.shape), plane_normal_to
+    )
     R1 = np.empty((angles.shape[0], 3, 3))
     if np.any(common_valid):
-        R1[common_valid] = np.array([axangle2mat(axis, angle, is_normalized=True)
-                                     for axis, angle in zip(plane_common_axes[common_valid], angles[common_valid])])
+        R1[common_valid] = np.array(
+            [
+                axangle2mat(axis, angle, is_normalized=True)
+                for axis, angle in zip(
+                    plane_common_axes[common_valid], angles[common_valid]
+                )
+            ]
+        )
     R1[~common_valid] = np.identity(3)
 
     # Rotate from-plane into to-plane
@@ -220,11 +228,19 @@ def get_rotation_matrix_between_vectors(from_v1, from_v2, to_v1, to_v2):
     # Negate angles where the rotation where the rotation axis points the
     # opposite way of the to-plane normal. Einsum gives list of dot
     # products.
-    neg_angle_mask = np.einsum('ij,ij->i', np.cross(rot_from_v1, to_v1, axis=-1), plane_normal_to) < 0
+    neg_angle_mask = (
+        np.einsum("ij,ij->i", np.cross(rot_from_v1, to_v1, axis=-1), plane_normal_to)
+        < 0
+    )
     np.negative(angles, out=angles, where=neg_angle_mask)
 
     # To-plane normal still the same
-    R2 = np.array([axangle2mat(axis, angle, is_normalized=True) for axis, angle in zip(plane_normal_to, angles)])
+    R2 = np.array(
+        [
+            axangle2mat(axis, angle, is_normalized=True)
+            for axis, angle in zip(plane_normal_to, angles)
+        ]
+    )
 
     # Total rotation is the combination of to plane R1 and in plane R2
     R = np.matmul(R2, R1)
@@ -264,13 +280,20 @@ def get_angle_cartesian_vec(a, b):
         List of angles between `a` and `b` in radians.
     """
     if a.shape != b.shape:
-        raise ValueError('The shape of a {} and b {} must be the same.'.format(a.shape, b.shape))
+        raise ValueError(
+            "The shape of a {} and b {} must be the same.".format(a.shape, b.shape)
+        )
 
     denom = np.linalg.norm(a, axis=-1) * np.linalg.norm(b, axis=-1)
     denom_nonzero = denom != 0.0
     angles = np.zeros(a.shape[0])
-    angles[denom_nonzero] = np.arccos(np.clip(
-        np.sum(a[denom_nonzero] * b[denom_nonzero], axis=-1) / denom[denom_nonzero], -1.0, 1.0)).ravel()
+    angles[denom_nonzero] = np.arccos(
+        np.clip(
+            np.sum(a[denom_nonzero] * b[denom_nonzero], axis=-1) / denom[denom_nonzero],
+            -1.0,
+            1.0,
+        )
+    ).ravel()
     return angles
 
 

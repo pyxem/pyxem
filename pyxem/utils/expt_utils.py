@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -26,11 +26,12 @@ from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.morphology import square, opening
-from skimage.filters import (threshold_sauvola, threshold_otsu)
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from scipy.optimize import curve_fit
 from tqdm import tqdm
+
+from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
@@ -84,7 +85,7 @@ def _cart2polar(x, y):
         Polar coordinates
 
     """
-    r = np.sqrt(x**2 + y**2)
+    r = np.sqrt(x ** 2 + y ** 2)
     theta = -np.arctan2(y, x)  # θ = 0 horizontal, +ve = anticlockwise
     return r, theta
 
@@ -108,13 +109,27 @@ def _polar2cart(r, theta):
     return x, y
 
 
-def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
-                        size_1d, unit, kwargs_for_integrator,
-                        kwargs_for_integrate1d):
-    """Calculate the azimuthal integral of z around a determined origin.
+def azimuthal_integrate1d_slow(
+    z,
+    detector_distance,
+    detector,
+    npt_rad,
+    wavelength=None,
+    unit="2th_rad",
+    center=None,
+    mask=None,
+    affine=None,
+    method="splitpixel",
+    correctSolidAngle=True,
+    radial_range=None,
+    azimuth_range=None,
+    azimuthal_kwargs={},
+    integrate_kwargs={},
+):
+    """Calculate the azimuthal integral in 2d around a determined origin.
 
     This method is used for signals where the origin is iterated, compared to
-    azimuthal_integrate_fast which is used when the origin in the data is
+    azimuthal_integrate_fast which is used when the origin, mask and affine transformation in the data is
     constant.
 
     Parameters
@@ -145,17 +160,31 @@ def azimuthal_integrate(z, origin, detector_distance, detector, wavelength,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    p1, p2 = origin[0] * detector.pixel1, origin[1] * detector.pixel2
-    ai = AzimuthalIntegrator(dist=detector_distance, poni1=p1, poni2=p2,
-                             detector=detector, wavelength=wavelength,
-                             **kwargs_for_integrator)
-    tth, I = ai.integrate1d(z, size_1d, unit=unit,
-                            **kwargs_for_integrate1d)
-    return tth, I
+    shape = np.shape(z)
+    ai = get_azimuthal_integrator(
+        detector=detector,
+        detector_distance=detector_distance,
+        shape=shape,
+        center=center,
+        affine=affine,
+        mask=mask,
+        wavelength=wavelength,
+        **azimuthal_kwargs
+    )
+    output = ai.integrate1d(
+        z,
+        npt=npt_rad,
+        method=method,
+        unit=unit,
+        correctSolidAngle=correctSolidAngle,
+        azimuth_range=azimuth_range,
+        radial_range=radial_range,
+        **integrate_kwargs
+    )
+    return output[1]
 
 
-def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
-                             kwargs_for_integrate1d):
+def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -169,15 +198,10 @@ def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
     azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
         An AzimuthalIntegrator that is already initialised and used to calculate
         the integral.
-    size_1d : int
-        The size of the returned 1D signal. (i.e. number of pixels in the 1D
-        azimuthal integral.)
-    unit : str
-        The unit for for PyFAI integrate1d.
-    *args :
-        Arguments to be passed to ai.integrate1d.
+    npt_rad:
+        The number of radial points to integrate
     **kwargs :
-        Keyword arguments to be passed to ai.integrate1d.
+        Keyword arguments to be passed to ai.integrate2d
     Returns
     -------
     tth : np.array()
@@ -185,47 +209,119 @@ def azimuthal_integrate_fast(z, azimuthal_integrator, size_1d, unit,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    tth, I = azimuthal_integrator.integrate1d(z, size_1d, unit=unit,
-                                              **kwargs_for_integrate1d)
-    return tth, I
+    output = azimuthal_integrator.integrate1d(z, npt=npt_rad, **kwargs)
+    return output[1]
 
 
-def radial_average(z, mask=None):
-    """Calculate the radial profile by azimuthal averaging about the center.
+def azimuthal_integrate2d_slow(
+    z,
+    detector_distance,
+    detector,
+    npt_rad,
+    npt_azim=360,
+    wavelength=None,
+    unit="2th_rad",
+    center=None,
+    mask=None,
+    affine=None,
+    method="splitpixel",
+    correctSolidAngle=True,
+    radial_range=None,
+    azimuth_range=None,
+    azimuthal_kwargs={},
+    integrate_kwargs={},
+):
+    """Calculate the azimuthal integral in 2d around a determined origin.
+
+    This method is used for signals where the origin is iterated, compared to
+    azimuthal_integrate_fast which is used when the origin, mask and affine transformation in the data is
+    constant.
 
     Parameters
     ----------
     z : np.array()
-        Two-dimensional data array containing signal.
-    mask : np.array()
-        Array with the same dimensions as z comprizing 0s for excluded pixels
-        and 1s for non-excluded pixels.
-
+        Two-dimensional data array containing the signal.
+    origin : np.array()
+        A size 2 numpy array containing the position of the origin.
+    detector_distance : float
+        Detector distance in meters passed to pyFAI AzimuthalIntegrator.
+    detector : pyFAI.detectors.Detector object
+        A pyFAI detector used for the AzimuthalIntegrator.
+    wavelength : float
+        The electron wavelength in meters. Used by pyFAI AzimuthalIntegrator.
+    size_1d : int
+        The size of the returned 1D signal. (i.e. number of pixels in the 1D
+        azimuthal integral.)
+    unit : str
+        The unit for for PyFAI integrate1d.
+    *args :
+        Arguments to be passed to AzimuthalIntegrator.
+    **kwargs :
+        Keyword arguments to be passed to AzimuthalIntegrator.
     Returns
     -------
-    radial_profile : np.array()
-        One-dimensional radial profile of z.
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
     """
-    # geometric shape work, not 0 indexing
-    center = ((z.shape[0] / 2) - 0.5, (z.shape[1] / 2) - 0.5)
+    shape = np.shape(z)
+    ai = get_azimuthal_integrator(
+        detector=detector,
+        detector_distance=detector_distance,
+        shape=shape,
+        center=center,
+        affine=affine,
+        mask=mask,
+        wavelength=wavelength,
+        **azimuthal_kwargs
+    )
 
-    y, x = np.indices(z.shape)
-    r = np.sqrt((x - center[1])**2 + (y - center[0])**2)
-    r = np.rint(r - 0.5).astype(np.int)
-    # the subtraction of 0.5 gets the 0 in the correct place
+    output = ai.integrate2d(
+        z,
+        npt_rad=npt_rad,
+        npt_azim=npt_azim,
+        method=method,
+        unit=unit,
+        correctSolidAngle=correctSolidAngle,
+        azimuth_range=azimuth_range,
+        radial_range=radial_range,
+        **integrate_kwargs
+    )
+    return np.transpose(output[0])
 
-    if mask is None:
-        tbin = np.bincount(r.ravel(), z.ravel())
-        nr = np.bincount(r.ravel())
-    else:
-        # the mask is applied on the z array.
-        masked_array = z * mask
-        tbin = np.bincount(r.ravel(), masked_array.ravel())
-        nr = np.bincount(r.ravel(), mask.ravel())
 
-    averaged = np.nan_to_num(tbin / nr)
+def azimuthal_integrate2d_fast(
+    z, azimuthal_integrator, npt_rad, npt_azim=None, **kwargs
+):
+    """Calculate the azimuthal integral of z around a determined origin.
 
-    return averaged
+    This method is used for signals where the origin is constant, compared to
+    azimuthal_integrate which is used when the origin in the data changes and
+    is iterated over.
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt_rad:
+        The number of radial points to integrate
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.integrate2d(
+        z, npt_rad=npt_rad, npt_azim=npt_azim, **kwargs
+    )
+    return np.transpose(output[0])
 
 
 def gain_normalise(z, dref, bref):
@@ -270,18 +366,20 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
         Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
-    if deadvalue == 'average':
+    if deadvalue == "average":
         for (i, j) in deadpixels:
-            neighbours = z[i - d:i + d + 1, j - d:j + d + 1].flatten()
+            neighbours = z[i - d : i + d + 1, j - d : j + d + 1].flatten()
             z_bar[i, j] = np.mean(neighbours)
 
-    elif deadvalue == 'nan':
+    elif deadvalue == "nan":
         for (i, j) in deadpixels:
             z_bar[i, j] = np.nan
     else:
-        raise NotImplementedError("The method specified is not implemented. "
-                                  "See documentation for available "
-                                  "implementations.")
+        raise NotImplementedError(
+            "The method specified is not implemented. "
+            "See documentation for available "
+            "implementations."
+        )
 
     return z_bar
 
@@ -348,11 +446,11 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
     Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
     if keep_dtype == False:
-        trans = tf.warp(z, transformation,
-                        order=order, *args, **kwargs)
+        trans = tf.warp(z, transformation, order=order, *args, **kwargs)
     if keep_dtype == True:
-        trans = tf.warp(z, transformation,
-                        order=order, preserve_range=True, *args, **kwargs)
+        trans = tf.warp(
+            z, transformation, order=order, preserve_range=True, *args, **kwargs
+        )
         trans = trans.astype(z.dtype)
 
     return trans
@@ -374,7 +472,7 @@ def regional_filter(z, h):
     seed = np.copy(z)
     seed = z - h
     mask = z
-    dilated = morphology.reconstruction(seed, mask, method='dilation')
+    dilated = morphology.reconstruction(seed, mask, method="dilation")
 
     return z - dilated
 
@@ -527,8 +625,10 @@ def _find_peak_max(arr, sigma, upsample_factor, kind):
 
     try:
         r1 = np.linspace(c1 - window, c1 + window, win_len)
-        f = interp1d(r1, y1[c1 - window: c1 + window + 1], kind=kind)
-        r2 = np.linspace(c1 - window, c1 + window, win_len * m)  # extrapolate for subpixel accuracy
+        f = interp1d(r1, y1[c1 - window : c1 + window + 1], kind=kind)
+        r2 = np.linspace(
+            c1 - window, c1 + window, win_len * m
+        )  # extrapolate for subpixel accuracy
         y2 = f(r2)
         c2 = np.argmax(y2) / m  # find beam center with `m` precision
     except ValueError:  # if c1 is too close to the edges, return initial guess
@@ -587,7 +687,7 @@ def find_beam_center_blur(z, sigma):
     center : np.array
         np.array containing indices of estimated direct beam positon.
     """
-    blurred = ndi.gaussian_filter(z, sigma, mode='wrap')
+    blurred = ndi.gaussian_filter(z, sigma, mode="wrap")
     center = np.unravel_index(blurred.argmax(), blurred.shape)
     return np.array(center)
 
@@ -614,8 +714,10 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
         np.array containing offset (from center) of the direct beam positon.
     """
     radiusList = np.arange(radius_start, radius_finish)
-    errRecord = np.zeros_like(radiusList, dtype='single')
-    origin = np.array([[round(np.size(z, axis=-2) / 2), round(np.size(z, axis=-1) / 2)]])
+    errRecord = np.zeros_like(radiusList, dtype="single")
+    origin = np.array(
+        [[round(np.size(z, axis=-2) / 2), round(np.size(z, axis=-1) / 2)]]
+    )
 
     for ind in np.arange(0, np.size(radiusList)):
         radius = radiusList[ind]
@@ -629,7 +731,9 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
 
-    ref = reference_circle(origin, np.size(z, axis=-2), np.size(z, axis=-1), radiusList[index_min])
+    ref = reference_circle(
+        origin, np.size(z, axis=-2), np.size(z, axis=-1), radiusList[index_min]
+    )
     h0 = np.hanning(np.size(ref, 0))
     h1 = np.hanning(np.size(ref, 1))
     hann2d = np.sqrt(np.outer(h0, h1))
@@ -637,7 +741,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     im = hann2d * z
     shift, error, diffphase = register_translation(ref, im, 100)
 
-    return (shift - 0.5)
+    return shift - 0.5
 
 
 def peaks_as_gvectors(z, center, calibration):
@@ -663,9 +767,9 @@ def peaks_as_gvectors(z, center, calibration):
     return np.array([g[0].T[1], g[0].T[0]]).T
 
 
-def investigate_dog_background_removal_interactive(sample_dp,
-                                                   std_dev_maxs,
-                                                   std_dev_mins):
+def investigate_dog_background_removal_interactive(
+    sample_dp, std_dev_maxs, std_dev_mins
+):
     """Utility function to help the parameter selection for the difference of
     gaussians (dog) background subtraction method
 
@@ -689,24 +793,30 @@ def investigate_dog_background_removal_interactive(sample_dp,
     np.arange : Produces suitable objects for std_dev_maxs
 
     """
-    gauss_processed = np.empty((
-        len(std_dev_maxs),
-        len(std_dev_mins),
-        *sample_dp.axes_manager.signal_shape))
+    gauss_processed = np.empty(
+        (len(std_dev_maxs), len(std_dev_mins), *sample_dp.axes_manager.signal_shape)
+    )
 
     for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
         for j, std_dev_min in enumerate(std_dev_mins):
-            gauss_processed[i, j] = sample_dp.remove_background('gaussian_difference',
-                                                                sigma_min=std_dev_min, sigma_max=std_dev_max,
-                                                                show_progressbar=False)
+            gauss_processed[i, j] = sample_dp.remove_background(
+                "gaussian_difference",
+                sigma_min=std_dev_min,
+                sigma_max=std_dev_max,
+                show_progressbar=False,
+            )
     dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
-    dp_gaussian.metadata.General.title = 'Gaussian preprocessed'
-    dp_gaussian.axes_manager.navigation_axes[0].name = r'$\sigma_{\mathrm{min}}$'
-    dp_gaussian.axes_manager.navigation_axes[1].name = r'$\sigma_{\mathrm{max}}$'
+    dp_gaussian.metadata.General.title = "Gaussian preprocessed"
+    dp_gaussian.axes_manager.navigation_axes[0].name = r"$\sigma_{\mathrm{min}}$"
+    dp_gaussian.axes_manager.navigation_axes[1].name = r"$\sigma_{\mathrm{max}}$"
     for axes_number, axes_value_list in [(0, std_dev_mins), (1, std_dev_maxs)]:
-        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[0]
-        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = axes_value_list[1] - axes_value_list[0]
-        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ''
+        dp_gaussian.axes_manager.navigation_axes[axes_number].offset = axes_value_list[
+            0
+        ]
+        dp_gaussian.axes_manager.navigation_axes[axes_number].scale = (
+            axes_value_list[1] - axes_value_list[0]
+        )
+        dp_gaussian.axes_manager.navigation_axes[axes_number].units = ""
 
-    dp_gaussian.plot(cmap='viridis')
+    dp_gaussian.plot(cmap="viridis")
     return None

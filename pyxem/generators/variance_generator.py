@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -31,7 +31,7 @@ from pyxem.signals import transfer_signal_axes
 from pyxem.signals import transfer_navigation_axes_to_signal_axes
 
 
-class VarianceGenerator():
+class VarianceGenerator:
     """Generates variance images for a specified signal and set of aperture
     positions.
 
@@ -82,7 +82,7 @@ class VarianceGenerator():
         else:
             meansq_dp = Signal2D(np.square(dp.data.astype(set_data_type))).mean((0, 1))
 
-        normvar = (meansq_dp.data / np.square(mean_dp.data)) - 1.
+        normvar = (meansq_dp.data / np.square(mean_dp.data)) - 1.0
         var_dp = Signal2D(normvar)
         corr_var_array = var_dp.data - (np.divide(dqe, mean_dp.data))
         corr_var_array[np.isinf(corr_var_array)] = 0
@@ -125,8 +125,8 @@ class VarianceGenerator():
         """
         im = self.signal.T
         mean_im = im.mean((0, 1))
-        meansq_im = Signal2D(np.square(im.data.astype(np.uint16))).mean((0, 1))
-        normvar = (meansq_im.data / np.square(mean_im.data)) - 1.
+        meansq_im = Signal2D(np.square(im.data)).mean((0, 1))
+        normvar = (meansq_im.data / np.square(mean_im.data)) - 1.0
         var_im = Signal2D(normvar)
         corr_var_array = normvar - (np.divide(dqe, mean_im.data))
         corr_var_array[np.invert(np.isfinite(corr_var_array))] = 0

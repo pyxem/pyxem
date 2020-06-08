@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -20,25 +20,22 @@
 """
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction1d import Diffraction1D
 
 
 class ElectronDiffraction1D(Diffraction1D):
-    _signal_type = "electron_diffraction1d"
+    _signal_type = "electron_diffraction"
 
-    def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
-        super().__init__(*args, **kwargs)
-
-    def set_experimental_parameters(self,
-                                    accelerating_voltage=None,
-                                    camera_length=None,
-                                    scan_rotation=None,
-                                    convergence_angle=None,
-                                    rocking_angle=None,
-                                    rocking_frequency=None,
-                                    exposure_time=None):
+    def set_experimental_parameters(
+        self,
+        accelerating_voltage=None,
+        camera_length=None,
+        scan_rotation=None,
+        convergence_angle=None,
+        rocking_angle=None,
+        rocking_frequency=None,
+        exposure_time=None,
+    ):
         """Set experimental parameters in metadata.
 
         Parameters
@@ -61,28 +58,31 @@ class ElectronDiffraction1D(Diffraction1D):
         md = self.metadata
 
         if accelerating_voltage is not None:
-            md.set_item("Acquisition_instrument.TEM.accelerating_voltage",
-                        accelerating_voltage)
+            md.set_item(
+                "Acquisition_instrument.TEM.accelerating_voltage", accelerating_voltage
+            )
         if camera_length is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.camera_length",
-                camera_length)
+                camera_length,
+            )
         if scan_rotation is not None:
-            md.set_item("Acquisition_instrument.TEM.scan_rotation",
-                        scan_rotation)
+            md.set_item("Acquisition_instrument.TEM.scan_rotation", scan_rotation)
         if convergence_angle is not None:
-            md.set_item("Acquisition_instrument.TEM.convergence_angle",
-                        convergence_angle)
+            md.set_item(
+                "Acquisition_instrument.TEM.convergence_angle", convergence_angle
+            )
         if rocking_angle is not None:
-            md.set_item("Acquisition_instrument.TEM.rocking_angle",
-                        rocking_angle)
+            md.set_item("Acquisition_instrument.TEM.rocking_angle", rocking_angle)
         if rocking_frequency is not None:
-            md.set_item("Acquisition_instrument.TEM.rocking_frequency",
-                        rocking_frequency)
+            md.set_item(
+                "Acquisition_instrument.TEM.rocking_frequency", rocking_frequency
+            )
         if exposure_time is not None:
             md.set_item(
                 "Acquisition_instrument.TEM.Detector.Diffraction.exposure_time",
-                exposure_time)
+                exposure_time,
+            )
 
     def set_diffraction_calibration(self, calibration):
         """Set diffraction profile channel size in reciprocal Angstroms.
@@ -94,9 +94,9 @@ class ElectronDiffraction1D(Diffraction1D):
         """
         dx = self.axes_manager.signal_axes[0]
 
-        dx.name = 'k'
+        dx.name = "k"
         dx.scale = calibration
-        dx.units = '$A^{-1}$'
+        dx.units = "$A^{-1}$"
 
     def set_scan_calibration(self, calibration):
         """Set scan pixel size in nanometres.
@@ -109,51 +109,15 @@ class ElectronDiffraction1D(Diffraction1D):
         x = self.axes_manager.navigation_axes[0]
         y = self.axes_manager.navigation_axes[1]
 
-        x.name = 'x'
+        x.name = "x"
         x.scale = calibration
-        x.units = 'nm'
+        x.units = "nm"
 
-        y.name = 'y'
+        y.name = "y"
         y.scale = calibration
-        y.units = 'nm'
-
-    def as_lazy(self, *args, **kwargs):
-        """Create a copy of the ElectronDiffraction1D object as a
-        :py:class:`~pyxem.signals.electron_diffraction1d.LazyElectronDiffraction1D`.
-
-        Parameters
-        ----------
-        copy_variance : bool
-            If True variance from the original ElectronDiffraction1D object is
-            copied to the new LazyElectronDiffraction1D object.
-
-        Returns
-        -------
-        res : :py:class:`~pyxem.signals.electron_diffraction1d.LazyElectronDiffraction1D`.
-            The lazy signal.
-        """
-        res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyElectronDiffraction1D
-        res.__init__(**res._to_dictionary())
-        return res
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = ElectronDiffraction1D
+        y.units = "nm"
 
 
 class LazyElectronDiffraction1D(LazySignal, ElectronDiffraction1D):
 
-    _lazy = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def compute(self, *args, **kwargs):
-        super().compute(*args, **kwargs)
-        self.__class__ = ElectronDiffraction1D
-        self.__init__(**self._to_dictionary())
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = LazyElectronDiffraction1D
+    pass

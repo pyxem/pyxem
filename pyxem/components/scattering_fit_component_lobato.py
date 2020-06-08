@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,8 +27,7 @@ from diffsims.utils.lobato_scattering_params import ATOMIC_SCATTERING_PARAMS_LOB
 
 
 class ScatteringFitComponentLobato(Component):
-
-    def __init__(self, elements, fracs, N=1., C=0.):
+    def __init__(self, elements, fracs, N=1.0, C=0.0):
         """
         A scattering component to fit background atomic scattering.
         Calculates the sum of the squares sum_squares = sum (ci * fi**2 )
@@ -67,9 +66,9 @@ class ScatteringFitComponentLobato(Component):
         Section A: Foundations and Advances, 70(6), 636-649.
 
         """
-        Component.__init__(self, ['N', 'C'])
-        self._whitelist['elements'] = ('init,sig', elements)
-        self._whitelist['fracs'] = ('init,sig', fracs)
+        Component.__init__(self, ["N", "C"])
+        self._whitelist["elements"] = ("init,sig", elements)
+        self._whitelist["fracs"] = ("init,sig", fracs)
         self.elements = elements
         self.fracs = fracs
         params = []
@@ -98,9 +97,11 @@ class ScatteringFitComponentLobato(Component):
         for i, element in enumerate(params):
             fi = np.zeros(x.size)
             for n in range(len(element)):  # 5 parameters per element
-                fi += (element[n][0] * (2 + element[n][1] * np.square(x))
-                       * np.divide(1, np.square(1 + element[n][1] *
-                                                np.square(x))))
+                fi += (
+                    element[n][0]
+                    * (2 + element[n][1] * np.square(x))
+                    * np.divide(1, np.square(1 + element[n][1] * np.square(x)))
+                )
             elem_frac = fracs[i]
             sum_squares += np.square(fi) * elem_frac
             square_sum += fi * elem_frac

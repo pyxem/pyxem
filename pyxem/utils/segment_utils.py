@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -59,14 +59,22 @@ def norm_cross_corr(image, template):
         corr = 0
     else:
         # no divide by zero to worry about now, normal corr definition in use
-        corr = np.sum(f * t) / np.sqrt(np.sum(f**2) * np.sum(t**2))
+        corr = np.sum(f * t) / np.sqrt(np.sum(f ** 2) * np.sum(t ** 2))
 
     return corr
 
 
-def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
-                       max_number_of_grains=np.inf, marker_radius=1,
-                       threshold=False, exclude_border=False, plot_on=False):
+def separate_watershed(
+    vdf_temp,
+    min_distance=1,
+    min_size=1,
+    max_size=np.inf,
+    max_number_of_grains=np.inf,
+    marker_radius=1,
+    threshold=False,
+    exclude_border=False,
+    plot_on=False,
+):
     """Separate segments from one VDF image using edge-detection by the
     sobel transform and the watershed segmentation implemented in
     scikit-image. See [1,2] for examples from scikit-image.
@@ -122,12 +130,10 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     # Create a mask from the input VDF image.
     if threshold:
         th = threshold_li(vdf_temp)
-        if np.isnan(th):
-            th = 0.
         mask = np.zeros_like(vdf_temp)
         mask[vdf_temp > th] = True
     else:
-        mask = vdf_temp.astype('bool')
+        mask = vdf_temp.astype("bool")
 
     # Calculate the Eucledian distance from each point in the mask to the
     # nearest background point of value 0.
@@ -139,14 +145,17 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     # of the mask.
     if exclude_border > 0:
         distance_mask = binary_erosion(distance, structure=disk(exclude_border))
-        distance = distance * distance_mask.astype('bool')
+        distance = distance * distance_mask.astype("bool")
 
     # Find the coordinates of the local maxima of the distance transform.
-    local_maxi = peak_local_max(distance, indices=False,
-                                min_distance=1,
-                                num_peaks=max_number_of_grains,
-                                exclude_border=exclude_border,
-                                threshold_rel=None)
+    local_maxi = peak_local_max(
+        distance,
+        indices=False,
+        min_distance=1,
+        num_peaks=max_number_of_grains,
+        exclude_border=exclude_border,
+        threshold_rel=None,
+    )
     maxi_coord1 = np.where(local_maxi)
 
     # Discard maxima that are found at pixels that are connected to a
@@ -168,12 +177,13 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     # cluster, only the maximum closest to the average maxima position is
     # used as a marker.
     if min_distance > 1 and np.shape(maxi_coord1)[1] > 1:
-        clusters = DBSCAN(eps=min_distance, metric='euclidean', min_samples=1,
-                          ).fit(np.transpose(maxi_coord1))
+        clusters = DBSCAN(eps=min_distance, metric="euclidean", min_samples=1,).fit(
+            np.transpose(maxi_coord1)
+        )
         local_maxi = np.zeros_like(local_maxi)
         for n in np.arange(clusters.labels_.max() + 1):
             maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]
-            com = np.average(maxi_coord1_n, axis=0).astype('int')
+            com = np.average(maxi_coord1_n, axis=0).astype("int")
             index = distance_matrix([com], maxi_coord1_n).argmin()
             index = maxi_coord1_n[index]
             local_maxi[index[0], index[1]] = True
@@ -189,8 +199,9 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
         for mm in np.arange(1, np.max(markers) + 1):
             im = np.zeros_like(markers)
             im[np.where(markers == mm)] = markers[np.where(markers == mm)]
-            markers_temp = convolve2d(im, disk_mask, boundary='fill',
-                                      mode='same', fillvalue=0)
+            markers_temp = convolve2d(
+                im, disk_mask, boundary="fill", mode="same", fillvalue=0
+            )
             markers[np.where(markers_temp)] = mm
     markers = markers * mask
 
@@ -203,16 +214,18 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
     # (labels) in the area defined by mask.
     labels = watershed(elevation, markers=markers, mask=mask)
 
-    sep = np.zeros((np.shape(vdf_temp)[0], np.shape(vdf_temp)[1],
-                    (np.max(labels))), dtype='int32')
+    sep = np.zeros(
+        (np.shape(vdf_temp)[0], np.shape(vdf_temp)[1], (np.max(labels))), dtype="int32"
+    )
     n, i = 1, 0
     while (np.max(labels)) > n - 1:
         sep_temp = labels * (labels == n) / n
         sep_temp = np.nan_to_num(sep_temp)
         # Discard a segment if it is too small or too large, or else add
         # it to the list of separated segments.
-        if ((np.sum(sep_temp, axis=(0, 1)) < min_size)
-                or np.sum(sep_temp, axis=(0, 1)) > max_size):
+        if (np.sum(sep_temp, axis=(0, 1)) < min_size) or np.sum(
+            sep_temp, axis=(0, 1)
+        ) > max_size:
             sep = np.delete(sep, ((n - i) - 1), axis=2)
             i = i + 1
         else:
@@ -233,12 +246,11 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
         elif np.shape(sep)[2] == 0:
             labels = np.zeros(np.shape(labels))
 
-        seps_img_sum = np.zeros_like(vdf_temp).astype('float64')
+        seps_img_sum = np.zeros_like(vdf_temp).astype("float64")
         for l, vdf in zip(np.arange(1, np.max(labels) + 1), vdf_sep):
-            mask_l = np.zeros_like(labels).astype('bool')
+            mask_l = np.zeros_like(labels).astype("bool")
             mask_l[np.where(labels == l)] = 1
-            seps_img_sum += vdf_temp * mask_l /\
-                np.max(vdf_temp[np.where(labels == l)])
+            seps_img_sum += vdf_temp * mask_l / np.max(vdf_temp[np.where(labels == l)])
             seps_img_sum[np.where(labels == l)] += l
 
         maxi_coord = np.where(local_maxi)
@@ -247,32 +259,31 @@ def separate_watershed(vdf_temp, min_distance=1, min_size=1, max_size=np.inf,
         ax = axes.ravel()
 
         ax[0].imshow(vdf_temp, cmap=plt.cm.magma_r)
-        ax[0].axis('off')
-        ax[0].set_title('VDF')
+        ax[0].axis("off")
+        ax[0].set_title("VDF")
 
         ax[1].imshow(mask, cmap=plt.cm.gray_r)
-        ax[1].axis('off')
-        ax[1].set_title('Mask')
+        ax[1].axis("off")
+        ax[1].set_title("Mask")
 
         ax[2].imshow(distance, cmap=plt.cm.gray_r)
-        ax[2].axis('off')
-        ax[2].set_title('Distance and markers')
-        ax[2].imshow(masked_where(markers == 0, markers),
-                     cmap=plt.cm.gist_rainbow)
-        ax[2].plot(maxi_coord1[1], maxi_coord1[0], 'k+')
-        ax[2].plot(maxi_coord[1], maxi_coord[0], 'gx')
+        ax[2].axis("off")
+        ax[2].set_title("Distance and markers")
+        ax[2].imshow(masked_where(markers == 0, markers), cmap=plt.cm.gist_rainbow)
+        ax[2].plot(maxi_coord1[1], maxi_coord1[0], "k+")
+        ax[2].plot(maxi_coord[1], maxi_coord[0], "gx")
 
         ax[3].imshow(elevation, cmap=plt.cm.magma_r)
-        ax[3].axis('off')
-        ax[3].set_title('Elevation')
+        ax[3].axis("off")
+        ax[3].set_title("Elevation")
 
         ax[4].imshow(labels, cmap=plt.cm.gnuplot2_r)
-        ax[4].axis('off')
-        ax[4].set_title('Labels')
+        ax[4].axis("off")
+        ax[4].set_title("Labels")
 
         ax[5].imshow(seps_img_sum, cmap=plt.cm.magma_r)
-        ax[5].axis('off')
-        ax[5].set_title('Segments')
+        ax[5].axis("off")
+        ax[5].set_title("Segments")
 
     return vdf_sep
 
@@ -305,7 +316,10 @@ def get_gaussian2d(a, xo, yo, x, y, sigma):
     """
 
     # TODO This function should be removed in view of its duplication within diffsims
-    gaussian = a / (2 * np.pi * sigma ** 2) * np.exp(
-        -((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
+    gaussian = (
+        a
+        / (2 * np.pi * sigma ** 2)
+        * np.exp(-((x - xo) ** 2 + (y - yo) ** 2) / (2 * sigma ** 2))
+    )
 
     return gaussian

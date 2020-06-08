@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,9 +22,8 @@ import logging
 import os
 import warnings
 
-from hyperspy.io import load as hyperspyload
+from hyperspy.io import load
 from hyperspy.api import roi
-from pyxem.signals import push_metadata_through
 
 import numpy as np
 
@@ -46,6 +45,8 @@ from .signals.electron_diffraction1d import ElectronDiffraction1D
 from .signals.electron_diffraction2d import ElectronDiffraction2D
 from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
+from .signals.polar_diffraction2d import PolarDiffraction2D
+from .signals.polar_diffraction2d import LazyPolarDiffraction2D
 
 from .signals.crystallographic_map import CrystallographicMap
 
@@ -55,13 +56,13 @@ from .generators.variance_generator import VarianceGenerator
 from .signals.diffraction_variance1d import DiffractionVariance1D
 from .signals.diffraction_variance2d import DiffractionVariance2D
 
-from .signals.diffraction_vectors import DiffractionVectors
+from .signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
 from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
 from .signals.pair_distribution_function1d import PairDistributionFunction1D
 from .signals.reduced_intensity1d import ReducedIntensity1D
 
-from pyxem.utils.io_utils import load, load_mib, load_hspy
+from pyxem.utils.io_utils import load_mib
 
 from . import release_info
 

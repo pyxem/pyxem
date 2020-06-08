@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,14 +21,16 @@ from pyxem.detectors.medipix_515x515 import Medipix515x515Detector
 from pyFAI.detectors import Detector
 import numpy as np
 
+
 def test_medipix_515x515_init():
     detector = Medipix515x515Detector()
-    assert isinstance(detector,Detector)
+    assert isinstance(detector, Detector)
+
 
 def test_medipix_515x515_mask():
     detector = Medipix515x515Detector()
     mask = detector.calc_mask()
-    mask_check = np.zeros((515,515))
-    mask_check[255:260,:] = 1
-    mask_check[:,255:260] = 1
+    mask_check = np.zeros((515, 515))
+    mask_check[255:260, :] = 1
+    mask_check[:, 255:260] = 1
     assert np.array_equal(mask, mask_check)

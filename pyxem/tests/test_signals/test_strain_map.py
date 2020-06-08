@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,8 +19,12 @@
 import hyperspy.api as hs
 import pytest
 import numpy as np
-from pyxem.tests.test_generators.test_displacement_gradient_tensor_generator import generate_test_vectors
-from pyxem.generators.displacement_gradient_tensor_generator import get_DisplacementGradientMap
+from pyxem.tests.test_generators.test_displacement_gradient_tensor_generator import (
+    generate_test_vectors,
+)
+from pyxem.generators.displacement_gradient_tensor_generator import (
+    get_DisplacementGradientMap,
+)
 from pyxem.signals.strain_map import StrainMap, _get_rotation_matrix
 
 
@@ -47,10 +51,10 @@ def test__init__(Displacement_Grad_Map):
 def test_signal_axes_carry_through(Displacement_Grad_Map):
     """ A strain map that is calibrated, should stay calibrated when we change basis """
     strain_map = Displacement_Grad_Map.get_strain_maps()
-    strain_map.axes_manager.signal_axes[1].units = 'nm'
+    strain_map.axes_manager.signal_axes[1].units = "nm"
     strain_map.axes_manager.signal_axes[0].scale = 19
     strain_alpha = strain_map.rotate_strain_basis([np.random.rand(), np.random.rand()])
-    assert strain_alpha.axes_manager.signal_axes[1].units == 'nm'
+    assert strain_alpha.axes_manager.signal_axes[1].units == "nm"
     assert strain_alpha.axes_manager.signal_axes[0].scale == 19
 
 
@@ -62,7 +66,9 @@ def test_something_changes(Displacement_Grad_Map):
     local_D = Displacement_Grad_Map
     strain_alpha = local_D.get_strain_maps()
     oneone_strain_alpha = strain_alpha.rotate_strain_basis([1, 1])
-    assert not np.allclose(oneone_strain_original.data, oneone_strain_alpha.data, atol=0.01)
+    assert not np.allclose(
+        oneone_strain_original.data, oneone_strain_alpha.data, atol=0.01
+    )
 
 
 def test_90_degree_rotation(Displacement_Grad_Map):
@@ -70,9 +76,17 @@ def test_90_degree_rotation(Displacement_Grad_Map):
     local_D = Displacement_Grad_Map
     strain_alpha = local_D.get_strain_maps()
     oneone_strain_alpha = strain_alpha.rotate_strain_basis([0, 1])
-    assert np.allclose(oneone_strain_original.inav[2:].data, oneone_strain_alpha.inav[2:].data, atol=0.01)
-    assert np.allclose(oneone_strain_original.inav[0].data, oneone_strain_alpha.inav[1].data, atol=0.01)
-    assert np.allclose(oneone_strain_original.inav[1].data, oneone_strain_alpha.inav[0].data, atol=0.01)
+    assert np.allclose(
+        oneone_strain_original.inav[2:].data,
+        oneone_strain_alpha.inav[2:].data,
+        atol=0.01,
+    )
+    assert np.allclose(
+        oneone_strain_original.inav[0].data, oneone_strain_alpha.inav[1].data, atol=0.01
+    )
+    assert np.allclose(
+        oneone_strain_original.inav[1].data, oneone_strain_alpha.inav[0].data, atol=0.01
+    )
 
 
 def test_going_back_and_forward_between_bases(Displacement_Grad_Map):
@@ -97,8 +111,12 @@ def test_rotation(Displacement_Grad_Map):
     rotation_beta = original.rotate_strain_basis([np.random.rand(), -np.random.rand()])
 
     # check the functionality has left invarient quantities invarient
-    np.testing.assert_almost_equal(original.inav[3].data, rotation_alpha.inav[3].data, decimal=2)  # rotations
-    np.testing.assert_almost_equal(original.inav[3].data, rotation_beta.inav[3].data, decimal=2)  # rotations
+    np.testing.assert_almost_equal(
+        original.inav[3].data, rotation_alpha.inav[3].data, decimal=2
+    )  # rotations
+    np.testing.assert_almost_equal(
+        original.inav[3].data, rotation_beta.inav[3].data, decimal=2
+    )  # rotations
 
 
 def test_trace(Displacement_Grad_Map):
@@ -112,9 +130,13 @@ def test_trace(Displacement_Grad_Map):
     rotation_alpha = original.rotate_strain_basis([1.3, +1.9])
     rotation_beta = original.rotate_strain_basis([1.7, -0.3])
 
-    np.testing.assert_almost_equal(np.add(original.inav[0].data, original.inav[1].data),
-                                   np.add(rotation_alpha.inav[0].data, rotation_alpha.inav[1].data),
-                                   decimal=2)
-    np.testing.assert_almost_equal(np.add(original.inav[0].data, original.inav[1].data),
-                                   np.add(rotation_beta.inav[0].data, rotation_beta.inav[1].data),
-                                   decimal=2)
+    np.testing.assert_almost_equal(
+        np.add(original.inav[0].data, original.inav[1].data),
+        np.add(rotation_alpha.inav[0].data, rotation_alpha.inav[1].data),
+        decimal=2,
+    )
+    np.testing.assert_almost_equal(
+        np.add(original.inav[0].data, original.inav[1].data),
+        np.add(rotation_beta.inav[0].data, rotation_beta.inav[1].data),
+        decimal=2,
+    )

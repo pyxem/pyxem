@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -20,6 +20,7 @@ import pytest
 from pyxem.detectors.medipix_256x256 import Medipix256x256Detector
 from pyFAI.detectors import Detector
 
+
 def test_medipix_256x256_init():
     detector = Medipix256x256Detector()
-    assert isinstance(detector,Detector)
+    assert isinstance(detector, Detector)

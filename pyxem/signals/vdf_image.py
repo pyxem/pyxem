@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -25,7 +25,6 @@ from hyperspy.signals import Signal2D
 from pyxem.utils.segment_utils import separate_watershed
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals import transfer_signal_axes
-from pyxem.signals import push_metadata_through
 from pyxem.signals.segments import VDFSegment
 
 
@@ -33,14 +32,19 @@ class VDFImage(Signal2D):
     _signal_type = "vdf_image"
 
     def __init__(self, *args, **kwargs):
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
         super().__init__(*args, **kwargs)
         self.vectors = None
 
-    def get_vdf_segments(self, min_distance=1, min_size=1,
-                         max_size=np.inf, max_number_of_grains=np.inf,
-                         marker_radius=1, threshold=False,
-                         exclude_border=False):
+    def get_vdf_segments(
+        self,
+        min_distance=1,
+        min_size=1,
+        max_size=np.inf,
+        max_number_of_grains=np.inf,
+        marker_radius=1,
+        threshold=False,
+        exclude_border=False,
+    ):
         """Separate segments from each of the VDF images using
         edge-detection by the Sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a
@@ -99,43 +103,59 @@ class VDFImage(Signal2D):
         # Create an array of length equal to the number of vectors where each
         # element is a np.object with shape (n: number of segments for this
         # VDFImage, VDFImage size x, VDFImage size y).
-        vdfsegs = np.array(vdfs.map(
-            separate_watershed, show_progressbar=True, inplace=False,
-            min_distance=min_distance, min_size=min_size, max_size=max_size,
-            max_number_of_grains=max_number_of_grains,
-            marker_radius=marker_radius, threshold=threshold,
-            exclude_border=exclude_border), dtype=np.object)
+        vdfsegs = np.array(
+            vdfs.map(
+                separate_watershed,
+                show_progressbar=True,
+                inplace=False,
+                min_distance=min_distance,
+                min_size=min_size,
+                max_size=max_size,
+                max_number_of_grains=max_number_of_grains,
+                marker_radius=marker_radius,
+                threshold=threshold,
+                exclude_border=exclude_border,
+            ),
+            dtype=np.object,
+        )
 
         segments, vectors_of_segments = [], []
         for i, vector in zip(np.arange(vectors.size), vectors):
             segments = np.append(segments, vdfsegs[i])
             num_segs = np.shape(vdfsegs[i])[0]
             vectors_of_segments = np.append(
-                vectors_of_segments, np.broadcast_to(vector, (num_segs, 2)))
+                vectors_of_segments, np.broadcast_to(vector, (num_segs, 2))
+            )
 
         vectors_of_segments = vectors_of_segments.reshape((-1, 2))
-        segments = segments.reshape((np.shape(vectors_of_segments)[0],
-                                     vdfs.axes_manager.signal_shape[0],
-                                     vdfs.axes_manager.signal_shape[1]))
+        segments = segments.reshape(
+            (
+                np.shape(vectors_of_segments)[0],
+                vdfs.axes_manager.signal_shape[0],
+                vdfs.axes_manager.signal_shape[1],
+            )
+        )
         # Calculate the total intensities of each segment
-        segment_intensities = np.array([
-            [np.sum(x, axis=(0, 1))] for x in segments], dtype='object')
+        segment_intensities = np.array(
+            [[np.sum(x, axis=(0, 1))] for x in segments], dtype="object"
+        )
 
         # if TraitError is raised, it is likely no segments were found
-        segments = Signal2D(segments).transpose(navigation_axes=[0],
-                                                signal_axes=[2, 1])
+        segments = Signal2D(segments).transpose(navigation_axes=[0], signal_axes=[2, 1])
         # Create VDFSegment and transfer axes calibrations
-        vdfsegs = VDFSegment(segments, DiffractionVectors(vectors_of_segments),
-                             segment_intensities)
+        vdfsegs = VDFSegment(
+            segments, DiffractionVectors(vectors_of_segments), segment_intensities
+        )
         vdfsegs.segments = transfer_signal_axes(vdfsegs.segments, vdfs)
         n = vdfsegs.segments.axes_manager.navigation_axes[0]
-        n.name = 'n'
-        n.units = 'number'
+        n.name = "n"
+        n.units = "number"
         vdfsegs.vectors_of_segments.axes_manager.set_signal_dimension(1)
         vdfsegs.vectors_of_segments = transfer_signal_axes(
-            vdfsegs.vectors_of_segments, self.vectors)
+            vdfsegs.vectors_of_segments, self.vectors
+        )
         n = vdfsegs.vectors_of_segments.axes_manager.navigation_axes[0]
-        n.name = 'n'
-        n.units = 'number'
+        n.name = "n"
+        n.units = "number"
 
         return vdfsegs

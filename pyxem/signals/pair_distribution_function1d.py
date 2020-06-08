@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,17 +18,14 @@
 """Signal class for Pair Distribution Function (PDF) radial profiles
 as a function of distance r.
 """
-import numpy as np
+
 from hyperspy.signals import Signal1D
 
 from pyxem.utils.pdf_utils import normalise_pdf_signal_to_max
 
 
 class PairDistributionFunction1D(Signal1D):
-    _signal_type = "pair_distribution_function1d"
-
-    def __init__(self, *args, **kwargs):
-        Signal1D.__init__(self, *args, **kwargs)
+    _signal_type = "pair_distribution_function"
 
     def normalise_signal(self, s_min=0, inplace=False, *args, **kwargs):
         """
@@ -53,5 +50,10 @@ class PairDistributionFunction1D(Signal1D):
         s_scale = self.axes_manager.signal_axes[0].scale
         index_min = int(s_min / s_scale)
 
-        return self.map(normalise_pdf_signal_to_max, index_min=index_min,
-                        inplace=inplace, *args, **kwargs)
+        return self.map(
+            normalise_pdf_signal_to_max,
+            index_min=index_min,
+            inplace=inplace,
+            *args,
+            **kwargs
+        )

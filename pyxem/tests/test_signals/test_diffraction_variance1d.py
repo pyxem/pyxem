@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,7 +24,6 @@ from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
 
 
 class TestDiffractionVariance1D:
-
     def test_get_electron_diffraction1D(self):
         rad_signal = Signal1D(np.array([0, 4, 3, 5, 1, 4, 6, 2]))
         difprof = DiffractionVariance1D(rad_signal)

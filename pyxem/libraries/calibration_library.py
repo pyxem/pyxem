@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -33,15 +33,15 @@ class CalibrationDataLibrary(dict):
 
     """
 
-    def __init__(self, au_x_grating_dp=None, au_x_grating_im=None,
-                 moo3_dp=None, moo3_im=None):
+    def __init__(
+        self, au_x_grating_dp=None, au_x_grating_im=None, moo3_dp=None, moo3_im=None
+    ):
         self.au_x_grating_dp = au_x_grating_dp
         self.au_x_grating_im = au_x_grating_im
         self.moo3_dp = moo3_dp
         self.moo3_im = moo3_im
 
-    def plot_calibration_data(self, data_to_plot, roi=None,
-                              *args, **kwargs):
+    def plot_calibration_data(self, data_to_plot, roi=None, *args, **kwargs):
         """ Plot the calibration data.
 
         Parameters
@@ -54,13 +54,13 @@ class CalibrationDataLibrary(dict):
             widget to the calibration data plot.
         """
         # Construct object containing user defined data to plot
-        if data_to_plot == 'au_x_grating_dp':
+        if data_to_plot == "au_x_grating_dp":
             data = self.au_x_grating_dp
-        elif data_to_plot == 'au_x_grating_im':
+        elif data_to_plot == "au_x_grating_im":
             data = self.au_x_grating_im
-        elif data_to_plot == 'moo3_dp':
+        elif data_to_plot == "moo3_dp":
             data = self.moo3_dp
-        elif data_to_plot == 'moo3_im':
+        elif data_to_plot == "moo3_im":
             data = self.moo3_im
         else:
             raise ValueError("Please specify valid data_to_plot.")

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -30,13 +30,15 @@ from pyxem.utils.sim_utils import sim_as_signal
 
 def test_strain_mapping_affine_transform():
     latt = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
-    atom = diffpy.structure.atom.Atom(atype='Zn', xyz=[0, 0, 0], lattice=latt)
+    atom = diffpy.structure.atom.Atom(atype="Zn", xyz=[0, 0, 0], lattice=latt)
     structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
-    ediff = DiffractionGenerator(300., 0.025)
-    affines = [[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-               [[1.04, 0, 0], [0, 1, 0], [0, 0, 1]],
-               [[1.08, 0, 0], [0, 1, 0], [0, 0, 1]],
-               [[1.12, 0, 0], [0, 1, 0], [0, 0, 1]]]
+    ediff = DiffractionGenerator(300.0, 0.025)
+    affines = [
+        [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+        [[1.04, 0, 0], [0, 1, 0], [0, 0, 1]],
+        [[1.08, 0, 0], [0, 1, 0], [0, 0, 1]],
+        [[1.12, 0, 0], [0, 1, 0], [0, 0, 1]],
+    ]
 
     data = []
     for affine in affines:

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,15 +21,18 @@ import pytest
 from pyxem.signals.crystallographic_map import CrystallographicMap
 from pyxem.signals.crystallographic_map import load_mtex_map
 from pyxem.signals.crystallographic_map import _distance_from_fixed_angle
+
+from diffsims.libraries.diffraction_library import DiffractionLibrary
+
 from transforms3d.euler import euler2quat, quat2axangle
 from transforms3d.quaternions import qmult, qinverse
 import os
 
 
 def worker_for_test_CrystallographicMap_io(mapp):
-    mapp.save_mtex_map('file_01.txt')
-    lmap = load_mtex_map('file_01.txt')
-    os.remove('file_01.txt')
+    mapp.save_mtex_map("file_01.txt")
+    lmap = load_mtex_map("file_01.txt")
+    os.remove("file_01.txt")
     return mapp, lmap
 
 
@@ -37,8 +40,8 @@ def get_distance_between_two_angles_longform(angle_1, angle_2):
     """
     Using the long form to find the distance between two angles in euler form
     """
-    q1 = euler2quat(*np.deg2rad(angle_1), axes='rzxz')
-    q2 = euler2quat(*np.deg2rad(angle_2), axes='rzxz')
+    q1 = euler2quat(*np.deg2rad(angle_1), axes="rzxz")
+    q2 = euler2quat(*np.deg2rad(angle_2), axes="rzxz")
     # now assume transform of the form MODAL then Something = TOTAL
     # so we want to calculate MODAL^{-1} TOTAL
 
@@ -52,13 +55,29 @@ def sp_cryst_map():
     """
     Generates a single phase Crystallographic Map
     """
-    base = np.empty((4, 3), dtype='object')
-    base[0] = [0, np.array([5, 17, 6]), {'correlation': 3e-17, 'orientation_reliability': 0.5}]
-    base[1] = [0, np.array([6, 17, 6]), {'correlation': 2e-17, 'orientation_reliability': 0.4}]
-    base[2] = [0, np.array([12, 3, 6]), {'correlation': 4e-17, 'orientation_reliability': 0.3}]
-    base[3] = [0, np.array([12, 3, 5]), {'correlation': 8e-16, 'orientation_reliability': 0.2}]
+    base = np.empty((4, 3), dtype="object")
+    base[0] = [
+        0,
+        np.array([5, 17, 6]),
+        {"correlation": 3e-17, "orientation_reliability": 0.5},
+    ]
+    base[1] = [
+        0,
+        np.array([6, 17, 6]),
+        {"correlation": 2e-17, "orientation_reliability": 0.4},
+    ]
+    base[2] = [
+        0,
+        np.array([12, 3, 6]),
+        {"correlation": 4e-17, "orientation_reliability": 0.3},
+    ]
+    base[3] = [
+        0,
+        np.array([12, 3, 5]),
+        {"correlation": 8e-16, "orientation_reliability": 0.2},
+    ]
     crystal_map = CrystallographicMap(base.reshape((2, 2, 3)))
-    crystal_map.method = 'template_matching'
+    crystal_map.method = "template_matching"
     return crystal_map
 
 
@@ -67,13 +86,45 @@ def dp_cryst_map():
     """
     Generates a Crystallographic Map with two phases
     """
-    base = np.empty((4, 3), dtype='object')
-    base[0] = [0, np.array([5, 17, 6]), {'correlation': 3e-17, 'orientation_reliability': 0.5, 'phase_reliability': 0.6}]
-    base[1] = [1, np.array([6, 17, 6]), {'correlation': 2e-17, 'orientation_reliability': 0.4, 'phase_reliability': 0.7}]
-    base[2] = [0, np.array([12, 3, 6]), {'correlation': 4e-17, 'orientation_reliability': 0.3, 'phase_reliability': 0.1}]
-    base[3] = [0, np.array([12, 3, 5]), {'correlation': 8e-16, 'orientation_reliability': 0.2, 'phase_reliability': 0.8}]
+    base = np.empty((4, 3), dtype="object")
+    base[0] = [
+        0,
+        np.array([5, 17, 6]),
+        {
+            "correlation": 3e-17,
+            "orientation_reliability": 0.5,
+            "phase_reliability": 0.6,
+        },
+    ]
+    base[1] = [
+        1,
+        np.array([6, 17, 6]),
+        {
+            "correlation": 2e-17,
+            "orientation_reliability": 0.4,
+            "phase_reliability": 0.7,
+        },
+    ]
+    base[2] = [
+        0,
+        np.array([12, 3, 6]),
+        {
+            "correlation": 4e-17,
+            "orientation_reliability": 0.3,
+            "phase_reliability": 0.1,
+        },
+    ]
+    base[3] = [
+        0,
+        np.array([12, 3, 5]),
+        {
+            "correlation": 8e-16,
+            "orientation_reliability": 0.2,
+            "phase_reliability": 0.8,
+        },
+    ]
     crystal_map = CrystallographicMap(base.reshape((2, 2, 3)))
-    crystal_map.method = 'template_matching'
+    crystal_map.method = "template_matching"
     return crystal_map
 
 
@@ -82,15 +133,39 @@ def mod_cryst_map():
     """
     Generates a Crystallographic Map with (5,17,6) as the modal angle
     """
-    base = np.empty((6, 3), dtype='object')
-    base[0] = [0, np.array([5, 17, 6]), {'correlation': 5e-17, 'orientation_reliability': 0.5}]
-    base[1] = [0, np.array([5, 17, 6]), {'correlation': 5e-17, 'orientation_reliability': 0.5}]
-    base[2] = [0, np.array([6, 19, 6]), {'correlation': 5e-17, 'orientation_reliability': 0.5}]
-    base[3] = [0, np.array([7, 19, 6]), {'correlation': 5e-17, 'orientation_reliability': 0.5}]
-    base[4] = [0, np.array([8, 19, 6]), {'correlation': 5e-17, 'orientation_reliability': 0.5}]
-    base[5] = [0, np.array([9, 19, 6]), {'correlation': 5e-17, 'orientation_reliability': 0.5}]
+    base = np.empty((6, 3), dtype="object")
+    base[0] = [
+        0,
+        np.array([5, 17, 6]),
+        {"correlation": 5e-17, "orientation_reliability": 0.5},
+    ]
+    base[1] = [
+        0,
+        np.array([5, 17, 6]),
+        {"correlation": 5e-17, "orientation_reliability": 0.5},
+    ]
+    base[2] = [
+        0,
+        np.array([6, 19, 6]),
+        {"correlation": 5e-17, "orientation_reliability": 0.5},
+    ]
+    base[3] = [
+        0,
+        np.array([7, 19, 6]),
+        {"correlation": 5e-17, "orientation_reliability": 0.5},
+    ]
+    base[4] = [
+        0,
+        np.array([8, 19, 6]),
+        {"correlation": 5e-17, "orientation_reliability": 0.5},
+    ]
+    base[5] = [
+        0,
+        np.array([9, 19, 6]),
+        {"correlation": 5e-17, "orientation_reliability": 0.5},
+    ]
     crystal_map = CrystallographicMap(base.reshape((3, 2, 3)))
-    crystal_map.method = 'template_matching'
+    crystal_map.method = "template_matching"
     return crystal_map
 
 
@@ -99,92 +174,162 @@ def dp_cryst_map_vector():
     """
     Generates a Crystallographic Map with two phases from vector matching
     """
-    base = np.empty((4, 3), dtype='object')
-    base[0] = [0, np.array([5, 17, 6]), {
-        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
-        'total_error': 0.1, 'orientation_reliability': 13.2,
-        'phase_reliability': 42.0}]
-    base[1] = [1, np.array([6, 17, 6]), {
-        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
-        'total_error': 0.1, 'orientation_reliability': 13.2,
-        'phase_reliability': 42.0}]
-    base[2] = [0, np.array([12, 3, 6]), {
-        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
-        'total_error': 0.1, 'orientation_reliability': 13.2,
-        'phase_reliability': 42.0}]
-    base[3] = [0, np.array([12, 3, 5]), {
-        'match_rate': 0.5, 'ehkls': np.array([0.1, 0.05, 0.2]),
-        'total_error': 0.1, 'orientation_reliability': 13.2,
-        'phase_reliability': 42.0}]
+    base = np.empty((4, 3), dtype="object")
+    base[0] = [
+        0,
+        np.array([5, 17, 6]),
+        {
+            "match_rate": 0.5,
+            "ehkls": np.array([0.1, 0.05, 0.2]),
+            "total_error": 0.1,
+            "orientation_reliability": 13.2,
+            "phase_reliability": 42.0,
+        },
+    ]
+    base[1] = [
+        1,
+        np.array([6, 17, 6]),
+        {
+            "match_rate": 0.5,
+            "ehkls": np.array([0.1, 0.05, 0.2]),
+            "total_error": 0.1,
+            "orientation_reliability": 13.2,
+            "phase_reliability": 42.0,
+        },
+    ]
+    base[2] = [
+        0,
+        np.array([12, 3, 6]),
+        {
+            "match_rate": 0.5,
+            "ehkls": np.array([0.1, 0.05, 0.2]),
+            "total_error": 0.1,
+            "orientation_reliability": 13.2,
+            "phase_reliability": 42.0,
+        },
+    ]
+    base[3] = [
+        0,
+        np.array([12, 3, 5]),
+        {
+            "match_rate": 0.5,
+            "ehkls": np.array([0.1, 0.05, 0.2]),
+            "total_error": 0.1,
+            "orientation_reliability": 13.2,
+            "phase_reliability": 42.0,
+        },
+    ]
     crystal_map = CrystallographicMap(base.reshape((2, 2, 3)))
-    crystal_map.method = 'vector_matching'
+    crystal_map.method = "vector_matching"
     return crystal_map
 
 
 class TestMapCreation:
-
     def test_get_phase_map(self, sp_cryst_map):
         phasemap = sp_cryst_map.get_phase_map()
         assert phasemap.isig[0, 0] == 0
+
+    def test_plot_phase_map(self, dp_cryst_map):
+        """
+        Generates a CrystallographicMap with two phases and a corresponding DiffractionLibraryself
+        and tests the CrystallographicMap member function plot_phase_map.
+        """
+        crystal_map = dp_cryst_map
+        # Create DiffractionLibrary with two entries
+        lib = DiffractionLibrary()
+        lib["Al"] = ""
+        lib["Si"] = ""
+
+        assert crystal_map.plot_phase_map(lib) == None
 
     def test_get_orientation_map(self, sp_cryst_map):
         orimap = sp_cryst_map.get_orientation_map()
         assert orimap.isig[0, 0] == 0
 
-    @pytest.mark.parametrize('metric, value', [
-        ('correlation', 3e-17),
-        ('orientation_reliability', 0.5),
-        ('phase_reliability', 0.6)
-    ])
+    @pytest.mark.parametrize(
+        "metric, value",
+        [
+            ("correlation", 3e-17),
+            ("orientation_reliability", 0.5),
+            ("phase_reliability", 0.6),
+        ],
+    )
     def test_get_metric_map_template_match(self, dp_cryst_map, metric, value):
         metric_map = dp_cryst_map.get_metric_map(metric)
         assert metric_map.isig[0, 0] == value
 
-    @pytest.mark.parametrize('metric, value', [
-        ('match_rate', 0.5),
-        ('ehkls', np.array([0.1, 0.05, 0.2])),
-        ('total_error', 0.1),
-        ('orientation_reliability', 13.2),
-        ('phase_reliability', 42.0)
-    ])
+    @pytest.mark.parametrize(
+        "metric, value",
+        [
+            ("match_rate", 0.5),
+            ("ehkls", np.array([0.1, 0.05, 0.2])),
+            ("total_error", 0.1),
+            ("orientation_reliability", 13.2),
+            ("phase_reliability", 42.0),
+        ],
+    )
     def test_get_metric_map_vector_match(self, dp_cryst_map_vector, metric, value):
         metric_map = dp_cryst_map_vector.get_metric_map(metric)
         assert np.allclose(metric_map.isig[0, 0], value)
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_template_match_bad_metric(self, sp_cryst_map):
-        metric_map = sp_cryst_map.get_metric_map('no metric')
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            ValueError, match=r"metric .* is not valid for template matching"
+        ):
+            metric_map = sp_cryst_map.get_metric_map("no metric")
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_vector_match_bad_metric(self, dp_cryst_map_vector):
-        metric_map = dp_cryst_map_vector.get_metric_map('no metric')
+        # Note - uses regex via re.search()
+        with pytest.raises(
+            ValueError, match=r"metric .* is not valid for vector matching"
+        ):
+            metric_map = dp_cryst_map_vector.get_metric_map("no metric")
 
-    @pytest.mark.xfail(raises=ValueError)
     def test_get_metric_map_no_method(self):
         crystal_map = CrystallographicMap(np.array([[1]]))
-        metric_map = crystal_map.get_metric_map('no metric')
+
+        with pytest.raises(
+            ValueError, match="crystallographic mapping method must be specified"
+        ):
+            metric_map = crystal_map.get_metric_map("no metric")
 
 
 class TestMTEXIO:
     def test_Crystallographic_Map_io_sp(self, sp_cryst_map):
         saved, loaded = worker_for_test_CrystallographicMap_io(sp_cryst_map)
-        saved.method = 'template_matching'
-        loaded.method = 'template_matching'
-        np.testing.assert_allclose(saved.isig[0].data.astype(np.int), loaded.isig[0].data.astype(np.int))
-        np.testing.assert_allclose(np.array(saved.isig[1].data.tolist()), np.array(loaded.isig[1].data.tolist()))
-        np.testing.assert_allclose(saved.get_metric_map('correlation').data, loaded.get_metric_map('correlation').data)
+        saved.method = "template_matching"
+        loaded.method = "template_matching"
+        np.testing.assert_allclose(
+            saved.isig[0].data.astype(np.int), loaded.isig[0].data.astype(np.int)
+        )
+        np.testing.assert_allclose(
+            np.array(saved.isig[1].data.tolist()),
+            np.array(loaded.isig[1].data.tolist()),
+        )
+        np.testing.assert_allclose(
+            saved.get_metric_map("correlation").data,
+            loaded.get_metric_map("correlation").data,
+        )
 
     def test_Crystallographic_Map_io_dp(self, dp_cryst_map):
         saved, loaded = worker_for_test_CrystallographicMap_io(dp_cryst_map)
-        saved.method = 'template_matching'
-        loaded.method = 'template_matching'
-        np.testing.assert_allclose(saved.isig[0].data.astype(np.int), loaded.isig[0].data.astype(np.int))
-        np.testing.assert_allclose(np.array(saved.isig[1].data.tolist()), np.array(loaded.isig[1].data.tolist()))
-        np.testing.assert_allclose(saved.get_metric_map('correlation').data, loaded.get_metric_map('correlation').data)
+        saved.method = "template_matching"
+        loaded.method = "template_matching"
+        np.testing.assert_allclose(
+            saved.isig[0].data.astype(np.int), loaded.isig[0].data.astype(np.int)
+        )
+        np.testing.assert_allclose(
+            np.array(saved.isig[1].data.tolist()),
+            np.array(loaded.isig[1].data.tolist()),
+        )
+        np.testing.assert_allclose(
+            saved.get_metric_map("correlation").data,
+            loaded.get_metric_map("correlation").data,
+        )
 
 
 class TestModalAngularFunctionality:
-
     def test_get_distance_from_modal(self, mod_cryst_map):
         # function runs without error
         formal = mod_cryst_map.get_distance_from_modal_angle()

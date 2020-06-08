@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,8 +23,9 @@ and other similar operations using pyFAI azimuthalIntegrator.
 
 from pyFAI.detectors import Detector
 
+
 class Medipix256x256Detector(Detector):
-    '''
+    """
     A PyFAI Detector class for a 256256 pixel Medipix direct electron detector.
     The detector class is used for get_azimuthal_integral in a Diffraction2D
     signal. The calibration is not assumed to be constant in scattering vector.
@@ -36,14 +37,15 @@ class Medipix256x256Detector(Detector):
     >>> detector
     Detector Medipix256x256Detector	 Spline= None
     PixelSize= 5.500e-05, 5.500e-05 m
-    '''
+    """
+
     IS_FLAT = False  # this detector is not flat
     IS_CONTIGUOUS = True  # No gaps: all pixels are adjacents
     API_VERSION = "1.0"
     aliases = ["Medipix256x256Detector"]
-    MAX_SHAPE=256,256
+    MAX_SHAPE = 256, 256
 
     def __init__(self):
-        pixel1=55e-6 #55 micron pixel size in x
-        pixel2=55e-6 #55 micron pixel size in y
+        pixel1 = 55e-6  # 55 micron pixel size in x
+        pixel2 = 55e-6  # 55 micron pixel size in y
         Detector.__init__(self, pixel1=pixel1, pixel2=pixel2)

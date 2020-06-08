@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The pyXem developers
+# Copyright 2016-2020 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,16 +24,22 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.expt_utils import _index_coords
 
 
-@pytest.fixture(params=[
-    np.array([[0., 0., 0., 0., 0., 0., 0., 0.],
-              [0., 0., 1., 0., 0., 0., 0., 0.],
-              [0., 1., 2., 1., 0., 0., 0., 0.],
-              [0., 0., 1., 0., 0., 0., 0., 0.],
-              [0., 0., 0., 0., 0., 1., 0., 0.],
-              [0., 0., 0., 0., 1., 2., 1., 0.],
-              [0., 0., 0., 0., 0., 1., 0., 0.],
-              [0., 0., 0., 0., 0., 0., 0., 0.]])
-])
+@pytest.fixture(
+    params=[
+        np.array(
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ]
+        )
+    ]
+)
 def diffraction_pattern(request):
     return ElectronDiffraction2D(request.param)
 
