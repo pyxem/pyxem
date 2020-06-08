@@ -95,7 +95,7 @@ def sum_absolute_differences(image_intensities, int_local, **kwargs):
 
     """
     return (
-        np.sum(np.subtract(image_intensities, int_local))
+        np.sum(np.subtract(np.abs(image_intensities), np.abs(int_local)))
     )
 
 
@@ -125,7 +125,7 @@ def normalized_sum_absolute_differences(image_intensities, int_local, pn_local, 
 
     """
     return (
-        np.sum(np.subtract(image_intensities, int_local) / pn_local)
+        np.sum(np.subtract(np.abs(image_intensities), np.abs(int_local)) / pn_local)
     )
 
 
