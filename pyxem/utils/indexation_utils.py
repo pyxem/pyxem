@@ -95,7 +95,7 @@ def sum_absolute_differences(image_intensities, int_local, **kwargs):
 
     """
     return (
-        np.sum(np.subtract(np.abs(image_intensities), np.abs(int_local)))
+        np.sum(np.abs(np.subtract(image_intensities, int_local)))
     )
 
 
@@ -125,7 +125,7 @@ def normalized_sum_absolute_differences(image_intensities, int_local, pn_local, 
 
     """
     return (
-        np.sum(np.subtract(np.abs(image_intensities), np.abs(int_local)) / pn_local)
+        np.sum(np.abs(np.subtract(image_intensities, int_local)) / pn_local)
     )
 
 
@@ -385,9 +385,10 @@ def correlate_library(image, library, n_largest, method, mask):
                         corr_saved[np.argmin(corr_saved)] = corr_local
 
                 if best_fit == "lowest":
-                    if corr_local < np.max(corr_saved):
+                    eps = 1e-10
+                    if corr_local + eps < np.max(corr_saved):
                         or_saved[np.argmax(corr_saved)] = or_local
-                        corr_saved[np.argmax(corr_saved)] = corr_local
+                        corr_saved[np.argmax(corr_saved)] = corr_local + eps
 
                 combined_array = np.hstack((or_saved, corr_saved))
                 combined_array = combined_array[
