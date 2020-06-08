@@ -83,7 +83,8 @@ class IndexationGenerator:
             The n orientations with the highest correlation values are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'fast_correlation' or 'zero_mean_normalized_correlation'.
+            'fast_correlation', 'zero_mean_normalized_correlation', normalized_sum_absolute_differences,
+            sum_absolute_differences, normalized_sum_squared_differences, sum_squared_differences.
         mask : Array
             Array with the same size as signal (in navigation) or None
         print_help : bool
