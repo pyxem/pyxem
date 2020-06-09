@@ -386,9 +386,10 @@ def correlate_library(image, library, n_largest, method, mask):
 
                 if best_fit == "lowest":
                     eps = 1e-10
-                    if corr_local + eps < np.max(corr_saved):
-                        or_saved[np.argmax(corr_saved)] = or_local
-                        corr_saved[np.argmax(corr_saved)] = corr_local + eps
+                    corr_local = (1 + eps) - corr_local
+                    if corr_local > np.min(corr_saved):
+                        or_saved[np.argmin(corr_saved)] = or_local
+                        corr_saved[np.argmin(corr_saved)] = corr_local
 
                 combined_array = np.hstack((or_saved, corr_saved))
                 combined_array = combined_array[
