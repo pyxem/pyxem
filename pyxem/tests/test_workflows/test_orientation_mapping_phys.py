@@ -139,6 +139,7 @@ def test_orientation_mapping_physical(structure, rot_list, edc):
         )  # always looking down c
 
 @pytest.mark.xfail(raises=ValueError)
+@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
 def test_fullframe_bad_size(structure, rot_list, edc):
     high_scores = get_template_match_results_fullframe_bad_size(structure, edc, rot_list)
 
