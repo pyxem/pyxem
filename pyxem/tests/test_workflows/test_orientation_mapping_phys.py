@@ -118,6 +118,12 @@ def get_template_match_results_fullframe(structure, edc, rot_list, mask=None):
     indexer = IndexationGenerator(dp, library)
     return indexer.correlate(mask=mask, method="full_frame_correlation")
 
+def get_template_match_results_fullframe_bad_size(structure, edc, rot_list, mask=None):
+    dp = generate_difficult_diffraction_patterns(structure, edc)
+    library = get_template_library(structure, rot_list, edc)
+    indexer = IndexationGenerator(dp, library)
+    return indexer.correlate(mask=mask, method="full_frame_correlation")
+
 
 """ Tests for template matching """
 
@@ -131,13 +137,11 @@ def test_orientation_mapping_physical(structure, rot_list, edc):
         np.testing.assert_allclose(
             match_data[result_number][:2], [90, 90]
         )  # always looking down c
-    difficult_diff_pattern = generate_difficult_diffraction_patterns(structure, edc)
-    library = get_template_library(structure, rot_list, edc)
-    indexer_test = IndexationGenerator(difficult_diff_pattern, library)
-    with pytest.raises(
-            ValueError, match="Please select input signal and templates of dimensions 2**n X 2**n",
-        ):
-        indexer_test.correlate(method = "full_frame_correlation")
+
+@pytest.mark.xfail(raises=ValueError)
+def test_fullframe_bad_size(structure, rot_list, edc):
+    high_scores = get_template_match_results_fullframe_bad_size(structure, edc, rot_list)
+
 
 
 @pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])

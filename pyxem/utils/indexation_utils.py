@@ -59,19 +59,19 @@ def optimal_fft_size(target, real = False):
         Optimal FFT size.
     """
 
-    try:
+    try: # pragma: no cover
         from scipy.fft import next_fast_len
 
         support_real = True
 
-    except ImportError:
+    except ImportError: # pragma: no cover
         from scipy.fftpack import next_fast_len
 
         support_real = False
 
-    if support_real:
+    if support_real: # pragma: no cover
         return next_fast_len(target, real)
-    else:
+    else: # pragma: no cover
         return next_fast_len(target)
 
 # Functions used in correlate_library.
