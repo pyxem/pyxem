@@ -96,6 +96,15 @@ def generate_diffraction_patterns(structure, edc):
     dp = pxm.ElectronDiffraction2D([[pattern, pattern], [pattern, pattern]])
     return dp
 
+def generate_difficult_diffraction_patterns(structure, edc):
+    # generates 4, dumb patterns in a 2x2 array, rotated around c axis
+    difficult_diffraction_half_side_length = 73
+    dp_library = get_template_library(structure, [(90, 90, 4)], edc)
+    for sim in dp_library["A"]["simulations"]:
+        pattern = sim_as_signal(sim, 2 * difficult_diffraction_half_side_length, 0.025, 1).data
+    dp = pxm.ElectronDiffraction2D([[pattern, pattern], [pattern, pattern]])
+    return dp
+
 
 def get_template_match_results(structure, edc, rot_list, mask=None):
     dp = generate_diffraction_patterns(structure, edc)
@@ -122,6 +131,14 @@ def test_orientation_mapping_physical(structure, rot_list, edc):
         np.testing.assert_allclose(
             match_data[result_number][:2], [90, 90]
         )  # always looking down c
+    difficult_diff_pattern = generate_difficult_diffraction_patterns(structure, edc)
+    library = get_template_library(structure, rot_list, edc)
+    indexer_test = IndexationGenerator(difficult_diff_pattern, library)
+    with pytest.raises(
+            ValueError, match="Please select input signal and templates of dimensions 2**n X 2**n",
+        ):
+        indexer_test.correlate(method = "full_frame_correlation")
+
 
 @pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
 def test_fullframe_orientation_mapping_physical(structure, rot_list, edc):
