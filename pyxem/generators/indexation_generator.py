@@ -49,6 +49,28 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 import lmfit
 
 def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
+    """
+    Takes a list of template coordinates and the corresponding list of template intensities, and returns the Fourier
+    transform of the template.
+
+    Parameters
+    ----------
+    template_coordinates: numpy array
+        Array containing coordinates for non-zero intensities in the template
+    template_intensities: list
+        List of intensity values for the template.
+    shape: tuple
+        Dimensions of the signal.
+    fsize: list
+        Dimensions of the Fourier transformed signal.
+
+    Returns
+    -------
+    template_FT: numpy array
+        Fourier transform of the template.
+    template_norm: float
+        Self correlation value for the template.
+    """
     template = np.zeros((shape))
     template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
     template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
@@ -56,6 +78,24 @@ def get_fourier_transform(template_coordinates, template_intensities, shape, fsi
     return template_FT, template_norm
 
 def get_library_FT_dict(template_library, shape, fsize):
+    """
+    Takes a template library and converts it to a dictionary of Fourier transformed templates.
+
+    Parameters:
+    ----------
+    template_library: DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+    shape: tuple
+        Dimensions of the signal.
+    fsize: list
+        Dimensions of the Fourier transformed signal.
+
+    Returns:
+    -------
+    library_FT_dict: dict
+        Dictionary containing the fourier transformed template library, together with the corresponding orientations and
+        pattern norms.
+    """
     library_FT_dict = {}
     for entry, library_entry in enumerate(template_library.values()):
         orientations = library_entry["orientations"]

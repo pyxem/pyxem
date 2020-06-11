@@ -238,21 +238,6 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
         correlated simulations for the experimental pattern of interest, where
         each entry is on the form [phase index, [z, x, z], correlation].
 
-    See also
-    --------
-    IndexationGenerator.correlate
-
-    Notes
-    -----
-    Correlation results are defined as,
-        phase_index : int
-            Index of the phase, following the ordering of the library keys
-        [z, x, z] : ndarray
-            numpy array of three floats, specifying the orientation in the
-            Bunge convention, in degrees.
-        correlation : float
-            A coefficient of correlation, only normalised to the template
-            intensity. This is in contrast to the reference work.
 
     References
     ----------
@@ -371,9 +356,6 @@ def correlate_library(image, library, n_largest, method, mask):
     Discussion on Normalized cross correlation (xcdskd):
     https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
 
-    full_frame_correlation:
-    A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
-     a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
     """
 
     top_matches = np.empty((len(library), n_largest, 3), dtype="object")
@@ -383,14 +365,6 @@ def correlate_library(image, library, n_largest, method, mask):
         average_image_intensity = np.average(image)
         image_std = np.linalg.norm(image - average_image_intensity)
 
-    """
-    Moved to correlate_library_from_dict
-    if method == "full_frame_correlation":
-        size = 2 * np.array(image.shape) - 1
-        fsize = [optimal_fft_size(a, real = True) for a in (size)]
-        image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
-        image_norm = np.linalg.norm(image)
-    """
     if mask == 1:
         for phase_index, library_entry in enumerate(library.values()):
             orientations = library_entry["orientations"]
@@ -423,18 +397,6 @@ def correlate_library(image, library, n_largest, method, mask):
                         int_local,
                         pn_local
                     )
-
-                """
-                Moved to correlate_library_from_dict
-                elif method == "full_frame_correlation":
-                    corr_local = full_frame_correlation(
-                        image_FT,
-                        image_norm,
-                        fsize,
-                        px_local,
-                        int_local
-                    )
-                """
 
                 if corr_local > np.min(corr_saved):
                     or_saved[np.argmin(corr_saved)] = or_local
