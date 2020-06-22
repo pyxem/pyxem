@@ -63,7 +63,7 @@ def test_nsad():
 
 def test_ssd():
     np.testing.assert_approx_equal(
-        sum_absolute_differences([1, 1, 1], [1, 1, 1]), 0
+        sum_squared_differences([1, 1, 1], [1, 1, 1]), 0
     )
 
 
@@ -128,15 +128,15 @@ def test_crystal_from_template_matching_sp(sp_template_match_result):
     np.testing.assert_allclose(cmap[1], [2, 3, 4])
     np.testing.assert_allclose(cmap[2]["correlation"], 0.7)
     np.testing.assert_allclose(
-        cmap[2]["orientation_reliability"], 100 * (1 - np.exp(-(0.6-0.7))
+        cmap[2]["orientation_reliability"], 100 * (1 - np.exp(-(0.6-0.7)))
     )
 
 
 def test_crystal_from_template_matching_dp(dp_template_match_result):
     # branch double phase
     cmap = crystal_from_template_matching(dp_template_match_result)
-    r_or = 100 * (1 - np.exp(-(0.7 - 0.8))
-    r_ph = 100 * (1 - np.exp(-(0.5 - 0.8))
+    r_or = 100 * (1 - np.exp(-(0.7 - 0.8)))
+    r_ph = 100 * (1 - np.exp(-(0.5 - 0.8)))
     assert cmap[0] == 0
     np.testing.assert_allclose(cmap[1], [2, 3, 5])
     np.testing.assert_allclose(cmap[2]["correlation"], 0.8)
