@@ -714,27 +714,13 @@ def crystal_from_template_matching(z_matches):
         # get template matching metrics
         metrics = dict()
         metrics["correlation"] = z_matches[0, 2]
-
-        # If the best correlation score is zero, we define the reliability
-        # as second_best_match - best_match, to avoid division by zero
-        try:
-            metrics["orientation_reliability"] = (
-                100 * (1 - z_matches[1, 2] / z_matches[0, 2])
-                if z_matches[0, 2] > 0
-                else 100
-            )
-        except:
-            first_orientation = get_nth_best_solution(
-                z_matches, "template", key="total_error", descending=False
-                )
-            second_orientation = get_nth_best_solution(
-                z_matches, "template", rank=1, key="total_error", descending=False
-            )
-            metrics["orientation_reliability"] = (
-                100 * (second_orientation - first_orientation)
-            )
-
+        metrics["orientation_reliability"] = (100 *(
+             1 - np.exp(-(z_matches[1, 2] - z_matches[0, 2])))
+            if z_matches[0, 2] > 0
+            else 100
+        )
         results_array[2] = metrics
+
     else:
         # get best matching result
         index_best_match = np.argmax(z_matches[:, 2])
@@ -743,37 +729,24 @@ def crystal_from_template_matching(z_matches):
         # get best matching orientation Euler angles.
         results_array[1] = z_matches[index_best_match, 1]
         # get first and second highest correlation orientation for orientation_reliability
-        z1= z_matches[z_matches[:, 0] == results_array[0]]
-        second_orientation = np.partition(z1[:, 2], -2)[-2]
+        z= z_matches[z_matches[:, 0] == results_array[0]]
+        second_orientation = np.partition(z[:, 2], -2)[-2]
         # get first and second highest correlation phase for phase_reliability
-        z2 = z_matches[z_matches[:, 0] != results_array[0]]
-        second_phase = np.max(z2[:, 2])
+        z = z_matches[z_matches[:, 0] != results_array[0]]
+        second_phase = np.max(z[:, 2])
         # get template matching metrics
         metrics = dict()
         metrics["correlation"] = z_matches[index_best_match, 2]
 
-        # If the best correlation score is zero, we define the reliability
-        # as second_best_match - best_match, to avoid division by zero
-        try:
-            metrics["orientation_reliability"] = 100 * (
-                1 - second_orientation / z_matches[index_best_match, 2]
-            )
-            metrics["phase_reliability"] = 100 * (
-                1 - second_phase / z_matches[index_best_match, 2]
-            )
-            results_array[2] = metrics
 
-        except:
-            first_orientation = get_nth_best_solution(
-                z_matches, "template", key="total_error", descending=False
-                )
-            first_phase = np.max(z1[:, 2])
-            metrics["orientation_reliability"] = 100 * (
-                second_orientation - first_orientation
-            )
-            metrics["phase_reliability"] = 100 * (
-                second_phase - first_phase
-            )
+        metrics["orientation_reliability"] = 100 * (
+            1 - np.exp(-(second_orientation - z_matches[0, 2]))
+        )
+        metrics["phase_reliability"] = 100 * (
+            1 - np.exp(-(second_phase - z_matches[0, 2]))
+        )
+        results_array[2] = metrics
+
 
     return results_array
 
