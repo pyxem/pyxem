@@ -23,7 +23,7 @@ from pyxem.utils.indexation_utils import (
     crystal_from_vector_matching,
     match_vectors,
     zero_mean_normalized_correlation,
-    fast_correlation,
+    normalized_cross_correlation,
     sum_absolute_differences,
     normalized_sum_absolute_differences,
     sum_squared_differences,
@@ -66,11 +66,11 @@ def test_nssd():
     )
 
 
-def test_fast_correlation():
+def test_normalized_cross_correlation():
     np.testing.assert_approx_equal(
-        fast_correlation([1, 1, 1], [1, 1, 1], np.sqrt(3)), np.sqrt(3)
+        normalized_cross_correlation([1, 1, 1], [1, 1, 1], np.sqrt(3)), np.sqrt(3)
     )
-    np.testing.assert_approx_equal(fast_correlation([1, 1, 1], [1, 0, 0], 1), 1)
+    np.testing.assert_approx_equal(normalized_cross_correlation([1, 1, 1], [1, 0, 0], 1), 1)
 
 
 def test_crystal_from_template_matching_sp(sp_template_match_result):

@@ -41,7 +41,7 @@ OrientationResult = namedtuple(
 )
 
 # Functions used in correlate_library.
-def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
+def normalized_cross_correlation(image_intensities, int_local, pn_local, **kwargs):
     """
     Computes the correlation score between an image and a template, using the formula
     .. math:: FastCorrelation
@@ -91,7 +91,7 @@ def sum_absolute_differences(image_intensities, int_local, **kwargs):
 
     See also:
     ---------
-    correlate_library, fast_correlation, normalized_sum_squared_differences
+    correlate_library, normalized_cross_correlation, normalized_sum_squared_differences
 
     """
     return (
@@ -121,7 +121,7 @@ def normalized_sum_absolute_differences(image_intensities, int_local, pn_local, 
 
     See also:
     ---------
-    correlate_library, fast_correlation, normalized_sum_squared_differences
+    correlate_library, normalized_cross_correlation, normalized_sum_squared_differences
 
     """
     return (
@@ -149,7 +149,7 @@ def sum_squared_differences(image_intensities, int_local, **kwargs):
 
         See also:
     ---------
-    correlate_library, fast_correlation, normalized_sum_absolute_differences
+    correlate_library, normalized_cross_correlation, normalized_sum_absolute_differences
 
     """
     return (
@@ -179,7 +179,7 @@ def normalized_sum_squared_differences(image_intensities, int_local, pn_local, *
 
     See also:
     ---------
-    correlate_library, fast_correlation, normalized_sum_absolute_differences
+    correlate_library, normalized_cross_correlation, normalized_sum_absolute_differences
 
     """
     return (
@@ -222,7 +222,7 @@ def zero_mean_normalized_correlation(
 
     See also:
     ---------
-    correlate_library, fast_correlation, normalized_sum_absolute_differences,
+    correlate_library, normalized_cross_correlation, normalized_sum_absolute_differences,
     normalized_sum_squared_differences
 
     """
@@ -256,7 +256,7 @@ def correlate_library(image, library, n_largest, method, mask):
     Calculated using the normalised (see return type documentation) dot
     product, or cosine distance,
 
-    .. math:: fast_correlation
+    .. math:: normalized_cross_correlation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
 
     .. math:: zero_mean_normalized_correlation
@@ -274,7 +274,7 @@ def correlate_library(image, library, n_largest, method, mask):
         The number of well correlated simulations to be retained.
     method : str
         Name of method used to compute correlation between templates and diffraction patterns. Can be
-        'fast_correlation' or 'zero_mean_normalized_correlation'. (ADDED in pyxem 0.11.0)
+        'normalized_cross_correlation' or 'zero_mean_normalized_correlation'. (ADDED in pyxem 0.11.0)
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
 
@@ -349,8 +349,8 @@ def correlate_library(image, library, n_largest, method, mask):
                     )
                     best_fit = "highest"
 
-                elif method == "fast_correlation":
-                    corr_local = fast_correlation(
+                elif method == "normalized_cross_correlation":
+                    corr_local = normalized_cross_correlation(
                         image_intensities, int_local, pn_local
                     )
                     best_fit = "highest"

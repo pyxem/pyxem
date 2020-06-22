@@ -31,7 +31,7 @@ from pyxem.signals import select_method_from_method_dict
 from pyxem.utils.indexation_utils import (
     correlate_library,
     zero_mean_normalized_correlation,
-    fast_correlation,
+    normalized_cross_correlation,
     sum_absolute_differences,
     normalized_sum_absolute_differences,
     sum_squared_differences,
@@ -68,7 +68,7 @@ class IndexationGenerator:
     def correlate(
         self,
         n_largest=5,
-        method="fast_correlation",
+        method="normalized_cross_correlation",
         mask=None,
         print_help=False,
         *args,
@@ -83,7 +83,7 @@ class IndexationGenerator:
             The n orientations with the highest correlation values are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'fast_correlation', 'zero_mean_normalized_correlation', normalized_sum_absolute_differences,
+            'normalized_cross_correlation', 'zero_mean_normalized_correlation', normalized_sum_absolute_differences,
             sum_absolute_differences, normalized_sum_squared_differences, sum_squared_differences.
         mask : Array
             Array with the same size as signal (in navigation) or None
@@ -106,7 +106,7 @@ class IndexationGenerator:
         library = self.library
 
         method_dict = {
-            "fast_correlation": fast_correlation,
+            "normalized_cross_correlation": normalized_cross_correlation,
             "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
             "sum_absolute_differences": sum_absolute_differences,
             "normalized_sum_absolute_differences": normalized_sum_absolute_differences,
