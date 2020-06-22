@@ -190,13 +190,14 @@ class IndexationGenerator:
         chosen_function = select_method_from_method_dict(
             method, method_dict, print_help
         )
-        if method in ["fast_correlation", "zero_mean_normalized_correlation"]:
+        if method in ["normalized_cross_correlation", "zero_mean_normalized_correlation",
+        "sum_absolute_differences","normalized_sum_absolute_differences",
+        "sum_squared_differences", "normalized_sum_squared_differences"]:
             # adds a normalisation to library
             for phase in library.keys():
                 norm_array = np.ones(
                     library[phase]["intensities"].shape[0]
                 )  # will store the norms
-
                 for i, intensity_array in enumerate(library[phase]["intensities"]):
                     norm_array[i] = np.linalg.norm(intensity_array)
                 library[phase][
