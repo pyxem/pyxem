@@ -124,6 +124,29 @@ def get_template_match_results_fullframe_bad_size(structure, edc, rot_list, mask
     indexer = IndexationGenerator(dp, library)
     return indexer.correlate(mask=mask, method="full_frame_correlation")
 
+def get_template_match_results_sad(structure, edc, rot_list, mask=None):
+    dp = generate_difficult_diffraction_patterns(structure, edc)
+    library = get_template_library(structure, rot_list, edc)
+    indexer = IndexationGenerator(dp, library)
+    return indexer.correlate(mask=mask, method="sum_absolute_differences")
+
+def get_template_match_results_nsad(structure, edc, rot_list, mask=None):
+    dp = generate_difficult_diffraction_patterns(structure, edc)
+    library = get_template_library(structure, rot_list, edc)
+    indexer = IndexationGenerator(dp, library)
+    return indexer.correlate(mask=mask, method="normalized_sum_absolute_differences")
+
+def get_template_match_results_ssd(structure, edc, rot_list, mask=None):
+    dp = generate_difficult_diffraction_patterns(structure, edc)
+    library = get_template_library(structure, rot_list, edc)
+    indexer = IndexationGenerator(dp, library)
+    return indexer.correlate(mask=mask, method="sum_squared_differences")
+
+def get_template_match_results_nssd(structure, edc, rot_list, mask=None):
+    dp = generate_difficult_diffraction_patterns(structure, edc)
+    library = get_template_library(structure, rot_list, edc)
+    indexer = IndexationGenerator(dp, library)
+    return indexer.correlate(mask=mask, method="normalized_sum_squared_differences")
 
 """ Tests for template matching """
 
@@ -143,7 +166,45 @@ def test_orientation_mapping_physical(structure, rot_list, edc):
 def test_fullframe_bad_size(structure, rot_list, edc):
     high_scores = get_template_match_results_fullframe_bad_size(structure, edc, rot_list)
 
+@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
+def test_method_sad(structure, rot_list, edc):
+    high_scores = get_template_match_results_sad(structure, edc, rot_list)
+    assert np.all(high_scores.inav[0, 0] == high_scores.inav[1, 0])
+    match_data = high_scores.inav[0, 0].isig[1].data
+    for result_number in [0, 1, 2]:
+        np.testing.assert_allclose(
+            match_data[result_number][:2], [90, 90]
+        )
 
+@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
+def test_method_nsad(structure, rot_list, edc):
+    high_scores = get_template_match_results_nsad(structure, edc, rot_list)
+    assert np.all(high_scores.inav[0, 0] == M.inav[1, 0])
+    match_data = high_scores.inav[0, 0].isig[1].data
+    for result_number in [0, 1, 2]:
+        np.testing.assert_allclose(
+            match_data[result_number][:2], [90, 90]
+        )
+
+@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
+def test_method_ssd(structure, rot_list, edc):
+    high_scores = get_template_match_results_ssd(structure, edc, rot_list)
+    assert np.all(high_scores.inav[0, 0] == high_scores.inav[1, 0])
+    match_data = high_scores.inav[0, 0].isig[1].data
+    for result_number in [0, 1, 2]:
+        np.testing.assert_allclose(
+            match_data[result_number][:2], [90, 90]
+        )
+
+@pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
+def test_method_nssd(structure, rot_list, edc):
+    high_scores = get_template_match_results_nssd(structure, edc, rot_list)
+    assert np.all(high_scores.inav[0, 0] == high_scores.inav[1, 0])
+    match_data = high_scores.inav[0, 0].isig[1].data
+    for result_number in [0, 1, 2]:
+        np.testing.assert_allclose(
+            match_data[result_number][:2], [90, 90]
+        )
 
 @pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
 def test_fullframe_orientation_mapping_physical(structure, rot_list, edc):
