@@ -31,7 +31,7 @@ from pyxem.utils.indexation_utils import (
     sum_absolute_differences,
     normalized_sum_absolute_differences,
     sum_squared_differences,
-    normalized_sum_squared_differences
+    normalized_sum_squared_differences,
     full_frame_correlation,
     optimal_fft_size,
     correlate_library_from_dict
