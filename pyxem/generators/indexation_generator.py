@@ -36,10 +36,13 @@ from pyxem.utils.indexation_utils import (
     normalized_sum_absolute_differences,
     sum_squared_differences,
     normalized_sum_squared_differences,
+    full_frame_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
     get_nth_best_solution,
+    correlate_library_from_dict,
+    optimal_fft_size,
 )
 
 
@@ -49,6 +52,69 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 
 import lmfit
 
+def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
+    """
+    Takes a list of template coordinates and the corresponding list of template intensities, and returns the Fourier
+    transform of the template.
+
+    Parameters
+    ----------
+    template_coordinates: numpy array
+        Array containing coordinates for non-zero intensities in the template
+    template_intensities: list
+        List of intensity values for the template.
+    shape: tuple
+        Dimensions of the signal.
+    fsize: list
+        Dimensions of the Fourier transformed signal.
+
+    Returns
+    -------
+    template_FT: numpy array
+        Fourier transform of the template.
+    template_norm: float
+        Self correlation value for the template.
+    """
+    template = np.zeros((shape))
+    template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
+    template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
+    template_norm = np.sqrt(full_frame_correlation(template_FT, 1, template_FT, 1))
+    return template_FT, template_norm
+
+def get_library_FT_dict(template_library, shape, fsize):
+    """
+    Takes a template library and converts it to a dictionary of Fourier transformed templates.
+
+    Parameters:
+    ----------
+    template_library: DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+    shape: tuple
+        Dimensions of the signal.
+    fsize: list
+        Dimensions of the Fourier transformed signal.
+
+    Returns:
+    -------
+    library_FT_dict: dict
+        Dictionary containing the fourier transformed template library, together with the corresponding orientations and
+        pattern norms.
+    """
+    library_FT_dict = {}
+    for entry, library_entry in enumerate(template_library.values()):
+        orientations = library_entry["orientations"]
+        pixel_coords = library_entry["pixel_coords"]
+        intensities = library_entry["intensities"]
+        template_FTs = []
+        pattern_norms = []
+        for coord, intensity in zip(pixel_coords, intensities):
+            template_FT, pattern_norm = get_fourier_transform(coord, intensity, shape, fsize)
+            template_FTs.append(template_FT)
+            pattern_norms.append(pattern_norm)
+
+        library_FT_dict[entry] = {"orientations" : orientations, "patterns" : template_FTs, "pattern_norms" : pattern_norms}
+
+    return library_FT_dict
 
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
@@ -84,7 +150,8 @@ class IndexationGenerator:
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
             'normalized_cross_correlation', 'zero_mean_normalized_correlation', normalized_sum_absolute_differences,
-            sum_absolute_differences, normalized_sum_squared_differences, sum_squared_differences.
+            sum_absolute_differences, normalized_sum_squared_differences, sum_squared_differences or
+            'full_frame_correlation'
         mask : Array
             Array with the same size as signal (in navigation) or None
         print_help : bool
@@ -111,7 +178,8 @@ class IndexationGenerator:
             "sum_absolute_differences": sum_absolute_differences,
             "normalized_sum_absolute_differences": normalized_sum_absolute_differences,
             "sum_squared_differences": sum_squared_differences,
-            "normalized_sum_squared_differences": normalized_sum_squared_differences
+            "normalized_sum_squared_differences": normalized_sum_squared_differences,
+            "full_frame_correlation": full_frame_correlation,
         }
 
         if mask is None:
@@ -122,28 +190,47 @@ class IndexationGenerator:
         chosen_function = select_method_from_method_dict(
             method, method_dict, print_help
         )
+        if method in ["fast_correlation", "zero_mean_normalized_correlation"]:
+            # adds a normalisation to library
+            for phase in library.keys():
+                norm_array = np.ones(
+                    library[phase]["intensities"].shape[0]
+                )  # will store the norms
 
-        # adds a normalisation to library
-        for phase in library.keys():
-            norm_array = np.ones(
-                library[phase]["intensities"].shape[0]
-            )  # will store the norms
+                for i, intensity_array in enumerate(library[phase]["intensities"]):
+                    norm_array[i] = np.linalg.norm(intensity_array)
+                library[phase][
+                    "pattern_norms"
+                ] = norm_array  # puts this normalisation into the library
 
-            for i, intensity_array in enumerate(library[phase]["intensities"]):
-                norm_array[i] = np.linalg.norm(intensity_array)
-            library[phase][
-                "pattern_norms"
-            ] = norm_array  # puts this normalisation into the library
+            matches = signal.map(
+                correlate_library,
+                library=library,
+                n_largest=n_largest,
+                method=method,
+                mask=mask,
+                inplace=False,
+                **kwargs,
+            )
 
-        matches = signal.map(
-            correlate_library,
-            library=library,
-            n_largest=n_largest,
-            method=method,
-            mask=mask,
-            inplace=False,
-            **kwargs,
-        )
+        elif method in ["full_frame_correlation"] :
+            shape = signal.data.shape[-2:]
+            size = 2 * np.array(shape) - 1
+            fsize = [optimal_fft_size(a, real = True) for a in (size)]
+            if not (np.asarray(size) + 1 == np.asarray(fsize)).all():
+                raise ValueError("Please select input signal and templates of dimensions 2**n X 2**n")
+
+            library_FT_dict = get_library_FT_dict(library, shape, fsize)
+
+            matches = signal.map(
+                correlate_library_from_dict,
+                template_dict = library_FT_dict,
+                n_largest = n_largest,
+                method = method,
+                mask = mask,
+                inplace = False,
+                **kwargs,
+            )
 
         matching_results = TemplateMatchingResults(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
