@@ -128,7 +128,7 @@ def test_crystal_from_template_matching_sp(sp_template_match_result):
     np.testing.assert_allclose(cmap[1], [2, 3, 4])
     np.testing.assert_allclose(cmap[2]["correlation"], 0.7)
     np.testing.assert_allclose(
-        cmap[2]["orientation_reliability"], 100 * (0.6 / 0.7)))
+        cmap[2]["orientation_reliability"], 100 * (0.6 / 0.7))
     )
 
 
