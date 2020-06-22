@@ -128,15 +128,15 @@ def test_crystal_from_template_matching_sp(sp_template_match_result):
     np.testing.assert_allclose(cmap[1], [2, 3, 4])
     np.testing.assert_allclose(cmap[2]["correlation"], 0.7)
     np.testing.assert_allclose(
-        cmap[2]["orientation_reliability"], 100 * (1 - np.exp(-(0.6-0.7)))
+        cmap[2]["orientation_reliability"], 100 * (0.6 / 0.7)))
     )
 
 
 def test_crystal_from_template_matching_dp(dp_template_match_result):
     # branch double phase
     cmap = crystal_from_template_matching(dp_template_match_result)
-    r_or = 100 * (1 - np.exp(-(0.7 - 0.8)))
-    r_ph = 100 * (1 - np.exp(-(0.5 - 0.8)))
+    r_or = 100 * (1 - (0.7 / 0.8))
+    r_ph = 100 * (1 - (0.5 / 0.8))
     assert cmap[0] == 0
     np.testing.assert_allclose(cmap[1], [2, 3, 5])
     np.testing.assert_allclose(cmap[2]["correlation"], 0.8)
@@ -153,15 +153,15 @@ def test_crystal_from_vector_matching_sp(sp_vector_match_result):
     np.testing.assert_allclose(cmap[2]["ehkls"], np.array([0.1, 0.05, 0.2]))
     np.testing.assert_allclose(cmap[2]["total_error"], 0.1)
     np.testing.assert_allclose(
-        cmap[2]["orientation_reliability"], 100 * (1 - np.exp(-(0.1 - 0.2)))
+        cmap[2]["orientation_reliability"], 100 * (1 - (0.1 / 0.2))
     )
 
 
 def test_crystal_from_vector_matching_dp(dp_vector_match_result):
     # branch double phase
     cmap = crystal_from_vector_matching(dp_vector_match_result)
-    r_or = 100 * (1 - np.exp(-(0.1 - 0.2))
-    r_ph = 100 * (1 - np.exp(-(0.1 - 0.3))
+    r_or = 100 * (1 - (0.1 / 0.2))
+    r_ph = 100 * (1 - (0.1 / 0.3))
     assert cmap[0] == 1
     np.testing.assert_allclose(cmap[1], [0, 45, 45])
     np.testing.assert_allclose(cmap[2]["match_rate"], 0.8)
