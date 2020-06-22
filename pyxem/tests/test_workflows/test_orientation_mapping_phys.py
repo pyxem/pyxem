@@ -179,7 +179,7 @@ def test_method_sad(structure, rot_list, edc):
 @pytest.mark.parametrize("structure", [create_Ortho(), create_Hex()])
 def test_method_nsad(structure, rot_list, edc):
     high_scores = get_template_match_results_nsad(structure, edc, rot_list)
-    assert np.all(high_scores.inav[0, 0] == M.inav[1, 0])
+    assert np.all(high_scores.inav[0, 0] == high_scores.inav[1, 0])
     match_data = high_scores.inav[0, 0].isig[1].data
     for result_number in [0, 1, 2]:
         np.testing.assert_allclose(
