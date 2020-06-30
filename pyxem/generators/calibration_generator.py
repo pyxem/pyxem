@@ -163,6 +163,35 @@ class CalibrationGenerator:
 
         return affine
 
+    def get_amorphous_elliptical_distortion(
+        self,
+        mask,
+        expected_radial_range=None
+    ):
+        """Determine elliptical distortion of the diffraction pattern from an amorphous ring.
+
+        Parameters
+        ----------
+        mask : boolean array
+            A two dimensional array used to mask the zero beam
+        expected_radial_range: [float, float]
+            The expected radial range to find the first ring in an amorphous diffraction pattern.
+
+        Returns
+        -------
+        affine_matrix : np.array()
+            Array defining the affine transformation that corrects for lens
+            distortions in the diffraction pattern.
+
+        See Also
+        --------
+            pyxem.utils.calibration_utils.call_ring_pattern
+
+        """
+        # Check that necessary calibration data is provided
+        self.calibration_data
+        return affine
+
     def get_distortion_residuals(self, mask_radius, spread):
         """Obtain residuals for experimental data and distortion corrected data
         with respect to a simulated symmetric ring pattern.

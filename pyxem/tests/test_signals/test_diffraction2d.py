@@ -235,6 +235,21 @@ class TestAzimuthalIntegral1d:
         integration = ones.get_azimuthal_integral1d(npt_rad=10)
         assert integration is None
 
+class TestVariance:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        ones_diff.add_navigation_signal(data=np.ones((10, 10)), name="thickness", unit="nm")
+        return ones_diff
+
+    def test_FEM(self, ones):
+        v = ones.get_variance(5)
+        np.testing.assert_equal(v.data, np.zeros(5))
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture

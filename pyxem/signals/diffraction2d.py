@@ -2207,6 +2207,32 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_dead_pixels.compute(progressbar=show_progressbar)
         return s_dead_pixels
 
+    def get_variance(self, npt_rad, method="Omega", thickness_filter=False, dqe=None, **kwargs):
+        """Calculates the variance using a method as described by Kelton in ___.
+        A shot noise corrections and thickness filtering are both possible if a thickness signal
+        and a detector quantum effiency are given.
+
+        Parameters
+        -------------
+        npt_rad: int
+            The number of radial points to calculate
+        method: ["Omega", "r", "re", "VImage"]
+            The method used to calcualte the variance
+        thickness_filter: bool
+            Boolean if a thickness filter should be applied.  Requires that a thickness Navigation signal
+            for the dataset be saved in the metadata.
+        dqe: int
+            The detector quantum efficiency or the pixel value for one electron.
+        **kwargs: dict
+            Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
+        """
+        if method is "Omega":
+            one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
+            variance = ((one_d_integration**2).mean()/one_d_integration.mean()**2) - 1
+            if dqe is not None:
+                variance = variance - dqe/one_d_integration.mean()
+            return variance
+
     def find_hot_pixels(
         self,
         threshold_multiplier=500,

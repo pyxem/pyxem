@@ -44,6 +44,8 @@ class VarianceGenerator:
 
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
+        self.thickness_filter = None
+
 
         # add a check for calibration
 
