@@ -33,7 +33,7 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import (
     call_ring_pattern,
     calc_radius_with_distortion,
-    generate_ring_pattern,
+    generate_ring_pattern,solve_ellipse
 )
 
 
@@ -188,8 +188,8 @@ class CalibrationGenerator:
             pyxem.utils.calibration_utils.call_ring_pattern
 
         """
-        # Check that necessary calibration data is provided
-        self.calibration_data
+
+        center, affine = solve_ellipse(self.calibration_data, mask=mask)
         return affine
 
     def get_distortion_residuals(self, mask_radius, spread):
