@@ -28,51 +28,6 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
 
 
-def _get_dtype_from_header_string(header_string):
-    header_split_list = header_string.split(",")
-    dtype_string = header_split_list[6]
-    if dtype_string == "U08":
-        dtype = ">u1"
-    elif dtype_string == "U16":
-        dtype = ">u2"
-    elif dtype_string == "U32":
-        dtype = ">u4"
-    else:
-        print("dtype {0} not recognized, trying unsigned 16 bit".format(dtype_string))
-        dtype = ">u2"
-    return dtype
-
-
-def _get_detector_pixel_size(header_string):
-    header_split_list = header_string.split(",")
-    det_x_string = header_split_list[4]
-    det_y_string = header_split_list[5]
-    try:
-        det_x = int(det_x_string)
-        det_y = int(det_y_string)
-    except NameError:
-        print(
-            "detector size strings {0} and {1} not recognized, "
-            "trying 256 x 256".format(det_x_string, det_y_string)
-        )
-        det_x, det_y = 256, 256
-    if det_x == 256:
-        det_x_value = det_x
-    elif det_x == 512:
-        det_x_value = det_x
-    else:
-        print("detector x size {0} not recognized, trying 256".format(det_x))
-        det_x_value = 256
-    if det_y == 256:
-        det_y_value = det_y
-    elif det_y == 512:
-        det_y_value = det_y
-    else:
-        print("detector y size {0} not recognized, trying 256".format(det_y))
-        det_y_value = 256
-    return (det_x_value, det_y_value)
-
-
 def _fpd_checker(filename, attr_substring="fpd_version"):
     if h5py.is_hdf5(filename):
         hdf5_file = h5py.File(filename, mode="r")
