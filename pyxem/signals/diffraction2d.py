@@ -1432,9 +1432,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_adf
 
-    def radial_integration(self):
-        raise Exception("radial_integration has been renamed radial_average")
-
     def radial_average(
         self,
         centre_x=None,
