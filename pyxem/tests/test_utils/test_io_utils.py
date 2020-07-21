@@ -21,7 +21,6 @@ import numpy as np
 import pyxem as pxm
 import os
 
-from pyxem.signals.crystallographic_map import CrystallographicMap
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
@@ -36,9 +35,8 @@ from pyxem.signals.vdf_image import VDFImage
         (TemplateMatchingResults, "string2"),
         (DiffractionVectors, "string3"),
         (DiffractionVectors2D, "string3"),
-        (CrystallographicMap, "string4"),
-        (ElectronDiffraction1D, "string5"),
-        (VDFImage, "string6"),
+        (ElectronDiffraction1D, "string4"),
+        (VDFImage, "string5"),
     ],
 )
 def test_load_function_core(class_to_test, meta_string):
