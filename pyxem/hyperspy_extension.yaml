@@ -89,18 +89,6 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.diffraction_vectors
-  TemplateMatchingResults:
-    signal_type: template_matching
-    signal_dimension: 2
-    dtype: real
-    lazy: False
-    module: pyxem.signals.indexation_results
-  VectorMatchingResults:
-    signal_type: vector_matching
-    signal_dimension: 0
-    dtype: real
-    lazy: False
-    module: pyxem.signals.indexation_results
   DisplacementGradientMap:
     signal_type: tensor_field
     signal_dimension: 2

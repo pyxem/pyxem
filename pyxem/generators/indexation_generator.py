@@ -22,8 +22,7 @@
 
 import numpy as np
 
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.signals.indexation_results import VectorMatchingResults
+from orix.crystal_map import CrystalMap
 
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import select_method_from_method_dict
@@ -157,9 +156,8 @@ class IndexationGenerator:
 
         Returns
         -------
-        matching_results : TemplateMatchingResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern, in the form
+        matching_results : orix.crystal_map.CrystalMap
+            A CrystalMap object containing the template matching results as:
             [Library Number , [z, x, z], Correlation Score]
 
         """
@@ -222,7 +220,7 @@ class IndexationGenerator:
                 **kwargs,
             )
 
-        matching_results = TemplateMatchingResults(matches)
+        matching_results = CrystalMap(matches)
         matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results

@@ -56,7 +56,6 @@ from .signals.diffraction_variance1d import DiffractionVariance1D
 from .signals.diffraction_variance2d import DiffractionVariance2D
 from .signals.differential_phase_contrast import DPCBaseSignal, DPCSignal1D, DPCSignal2D
 from .signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
-from .signals.indexation_results import TemplateMatchingResults
 from .signals.vdf_image import VDFImage
 from .signals.pair_distribution_function1d import PairDistributionFunction1D
 from .signals.reduced_intensity1d import ReducedIntensity1D
