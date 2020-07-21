@@ -81,6 +81,7 @@ def generate_marker_inputs_from_peaks(peaks):
 
     return x, y
 
+
 def plot_template_matching_results_on_signal(
     self, signal, library, permanent_markers=True, *args, **kwargs
 ):
@@ -106,6 +107,7 @@ def plot_template_matching_results_on_signal(
     for mx, my in zip(mmx, mmy):
         m = hs.markers.point(x=mx, y=my, color="red", marker="x")
         signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
+
 
 def plot_vector_matching_results_on_signal(
     self, signal, permanent_markers=True, *args, **kwargs
