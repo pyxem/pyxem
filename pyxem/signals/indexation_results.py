@@ -71,7 +71,7 @@ class TemplateMatchingResults(Signal2D):
 
         Returns
         -------
-        cryst_map : CrystallographicMap
+        cryst_map : CrystalMap
             Crystallographic mapping results containing the best matching phase
             and orientation at each navigation position with associated metrics.
 
@@ -127,7 +127,7 @@ class VectorMatchingResults(BaseSignal):
 
         Returns
         -------
-        cryst_map : CrystallographicMap
+        cryst_map : CrystalMap
             Crystallographic mapping results containing the best matching phase
             and orientation at each navigation position with associated metrics.
 
