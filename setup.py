@@ -62,6 +62,7 @@ setup(
         "pyfai",
         "ipywidgets",
         "numba",
+        "orix >= 0.3.0", # First version of orix with CrystalMap
     ],
     package_data={
         "": ["LICENSE", "readme.rst"],
