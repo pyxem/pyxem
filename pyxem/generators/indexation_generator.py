@@ -233,7 +233,6 @@ class IndexationGenerator:
             )
 
         matching_results = CrystalMap(matches)
-        matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
 
