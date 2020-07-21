@@ -29,7 +29,7 @@ from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
-from pyxem import CrystallographicMap
+from orix import CrystalMap
 
 
 class TemplateMatchingResults(Signal2D):
@@ -93,7 +93,7 @@ class TemplateMatchingResults(Signal2D):
             crystal_from_template_matching, inplace=False, *args, **kwargs
         )
 
-        cryst_map = CrystallographicMap(crystal_map)
+        cryst_map = CrystalMap(crystal_map)
         cryst_map = transfer_navigation_axes(cryst_map, self)
         cryst_map.method = "template_matching"
 
@@ -148,7 +148,7 @@ class VectorMatchingResults(BaseSignal):
             crystal_from_vector_matching, inplace=False, *args, **kwargs
         )
 
-        cryst_map = CrystallographicMap(crystal_map)
+        cryst_map = CrystalMap(crystal_map)
         cryst_map = transfer_navigation_axes(cryst_map, self)
         cryst_map.method = "vector_matching"
 
