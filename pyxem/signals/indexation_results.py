@@ -29,7 +29,7 @@ from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
-from orix import CrystalMap
+from orix.crystal_map import CrystalMap
 
 
 class TemplateMatchingResults(Signal2D):
