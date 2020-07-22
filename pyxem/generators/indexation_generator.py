@@ -232,9 +232,9 @@ class IndexationGenerator:
                 **kwargs,
             )
 
-        matching_results = CrystalMap(matches)
+        xmap = CrystalMap()
 
-        return matching_results
+        return xmap
 
 
 class ProfileIndexationGenerator:
