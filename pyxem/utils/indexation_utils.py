@@ -40,7 +40,8 @@ OrientationResult = namedtuple(
     "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split(),
 )
 
-def optimal_fft_size(target, real = False):
+
+def optimal_fft_size(target, real=False):
     """Wrapper around scipy function next_fast_len() for calculating optimal FFT padding.
     scipy.fft was only added in 1.4.0, so we fall back to scipy.fftpack
     if it is not available. The main difference is that next_fast_len()
@@ -59,20 +60,21 @@ def optimal_fft_size(target, real = False):
         Optimal FFT size.
     """
 
-    try: # pragma: no cover
+    try:  # pragma: no cover
         from scipy.fft import next_fast_len
 
         support_real = True
 
-    except ImportError: # pragma: no cover
+    except ImportError:  # pragma: no cover
         from scipy.fftpack import next_fast_len
 
         support_real = False
 
-    if support_real: # pragma: no cover
+    if support_real:  # pragma: no cover
         return next_fast_len(target, real)
-    else: # pragma: no cover
+    else:  # pragma: no cover
         return next_fast_len(target)
+
 
 # Functions used in correlate_library.
 def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
@@ -112,7 +114,7 @@ def zero_mean_normalized_correlation(
     image_intensities,
     int_local,
     **kwargs
-    ):
+):
     """
     Computes the correlation score between an image and a template, using the formula
     .. math:: zero_mean_normalized_correlation
@@ -166,6 +168,7 @@ def zero_mean_normalized_correlation(
 
     return corr_local
 
+
 def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
     """
     Computes the correlation score between an image and a template in Fourier space.
@@ -202,14 +205,21 @@ def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
 
     res_matrix = np.fft.ifftn(fprod)
     fsize = res_matrix.shape
-    corr_local = np.max(np.real(res_matrix[ max(fsize[0] // 2 - 3, 0) : min(fsize[0] // 2 + 3, fsize[0]),\
-                                        max(fsize[1] // 2 - 3, 0) : min(fsize[1] // 2 + 3, fsize[1])]))
-    if (image_norm > 0 and pattern_norm > 0):
+    corr_local = np.max(
+        np.real(
+            res_matrix[
+                max(fsize[0] // 2 - 3, 0) : min(fsize[0] // 2 + 3, fsize[0]),
+                max(fsize[1] // 2 - 3, 0) : min(fsize[1] // 2 + 3, fsize[1]),
+            ]
+        )
+    )
+    if image_norm > 0 and pattern_norm > 0:
         corr_local = corr_local / (image_norm * pattern_norm)
 
-    #Sub-pixel refinement can be done here - Equation (5) in reference article
+    # Sub-pixel refinement can be done here - Equation (5) in reference article
 
     return corr_local
+
 
 def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -250,7 +260,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
 
     if method == "full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
-        fsize = [optimal_fft_size(a, real = True) for a in (size)]
+        fsize = [optimal_fft_size(a, real=True) for a in (size)]
         image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
         image_norm = np.sqrt(full_frame_correlation(image_FT, 1, image_FT, 1))
 
@@ -268,10 +278,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
 
                 if method == "full_frame_correlation":
                     corr_local = full_frame_correlation(
-                        image_FT,
-                        image_norm,
-                        pat_local,
-                        pn_local
+                        image_FT, image_norm, pat_local, pn_local
                     )
 
                 if corr_local > np.min(corr_saved):
@@ -290,6 +297,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
                     ]  # orientation
 
     return top_matches.reshape(-1, 3)
+
 
 def correlate_library(image, library, n_largest, method, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
@@ -380,7 +388,9 @@ def correlate_library(image, library, n_largest, method, mask):
             for (or_local, px_local, int_local, pn_local) in zip_for_locals:
                 # TODO: Factorise out the generation of corr_local to a method='mthd' section
                 # Extract experimental intensities from the diffraction image
-                image_intensities = image[px_local[:, 1], px_local[:, 0]] # Counter intuitive indexing? Why is it not px_local[:, 0], px_local[:, 1]?
+                image_intensities = image[
+                    px_local[:, 1], px_local[:, 0]
+                ]  # Counter intuitive indexing? Why is it not px_local[:, 0], px_local[:, 1]?
 
                 if method == "zero_mean_normalized_correlation":
                     corr_local = zero_mean_normalized_correlation(
@@ -393,9 +403,7 @@ def correlate_library(image, library, n_largest, method, mask):
 
                 elif method == "fast_correlation":
                     corr_local = fast_correlation(
-                        image_intensities,
-                        int_local,
-                        pn_local
+                        image_intensities, int_local, pn_local
                     )
 
                 if corr_local > np.min(corr_saved):
