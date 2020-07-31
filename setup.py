@@ -56,12 +56,11 @@ setup(
         "scikit-image >= 0.15.0",  # exclude_border argument in peak_finder laplacian (PR #436)
         "matplotlib >= 3.1.1",  # 3.1.0 failed
         "scikit-learn >= 0.19",  # reason unknown
-        "hyperspy >= 1.5.2",  # earlier versions incompatible with numpy >= 1.17.0
+        "hyperspy >= 1.6.0",  # first version with 2D peak finding
         "diffsims >= 0.2.3",  # Makes use of functionality introduced in this release
         "lmfit >= 0.9.12",
         "pyfai",
         "ipywidgets",
-        "numba",
     ],
     package_data={
         "": ["LICENSE", "readme.rst"],
