@@ -72,16 +72,6 @@ from pyxem.utils.expt_utils import (
     find_beam_center_interpolate,
 )
 
-from pyxem.utils.peakfinders2D import (
-    find_peaks_zaefferer,
-    find_peaks_stat,
-    find_peaks_dog,
-    find_peaks_log,
-    find_peaks_xc,
-)
-
-from pyxem.utils import peakfinder2D_gui
-
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.marker_tools as mt
