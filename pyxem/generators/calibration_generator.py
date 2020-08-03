@@ -33,7 +33,8 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import (
     call_ring_pattern,
     calc_radius_with_distortion,
-    generate_ring_pattern,solve_ellipse
+    generate_ring_pattern,
+    solve_ellipse
 )
 
 
@@ -54,6 +55,7 @@ class CalibrationGenerator:
         self.affine_matrix = None
         self.rotation_angle = None
         self.correction_matrix = None
+        self.center = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
 
@@ -163,9 +165,24 @@ class CalibrationGenerator:
 
         return affine
 
+    def get_cal_points(self, num_points, mask=None, show=False):
+        data = self.calibration_data.data
+        i_shape = np.shape(data)
+        flattened_array = data.flatten()
+        indexes = np.argsort(flattened_array)
+        if isinstance(flattened_array, np.ma.masked_array):
+            indexes = indexes[flattened_array.mask[indexes] == False]
+        if radius is not None:
+            center = [np.floor_divide(np.mean(indexes[-num_points:]), i_shape[1]),
+                      np.remainder(np.mean(indexes[-num_points:]), i_shape[1])]
+            print(center)
+        # take top 5000 points make sure exclude zero beam
+        cords = [np.floor_divide(indexes[-num_points:], i_shape[1]),
+                 np.remainder(indexes[-num_points:], i_shape[1])]  # [x axis (row),y axis (col)]
+
     def get_amorphous_elliptical_distortion(
         self,
-        mask,
+        mask=None,
         expected_radial_range=None
     ):
         """Determine elliptical distortion of the diffraction pattern from an amorphous ring.
@@ -189,8 +206,10 @@ class CalibrationGenerator:
 
         """
 
-        center, affine = solve_ellipse(self.calibration_data, mask=mask)
-        return affine
+        center, affine = solve_ellipse(self.calibration_data.data, mask=mask)
+        self.affine_matrix = affine
+        self.center = center
+        return center, affine
 
     def get_distortion_residuals(self, mask_radius, spread):
         """Obtain residuals for experimental data and distortion corrected data

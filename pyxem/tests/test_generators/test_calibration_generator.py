@@ -21,12 +21,14 @@ import numpy as np
 
 from hyperspy.signals import Signal2D
 from hyperspy.roi import Line2DROI
+import hyperspy.api as hs
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.generators.calibration_generator import CalibrationGenerator
 from pyxem.utils.calibration_utils import generate_ring_pattern
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+import matplotlib.pyplot as plt
 
 
 @pytest.fixture
@@ -264,3 +266,14 @@ class TestEmptyCalibrationGenerator:
             empty_calgen.get_navigation_calibration(
                 line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
             )
+
+class TestAmorphousCalibration:
+
+    @pytest.fixture
+    def ring(self):
+        ring = hs.load("exRing.hspy")
+        ring = CalibrationGenerator(ring)
+        return ring
+
+    def test_amorphous_calibration(self, ring):
+        ring.get_amorphous_elliptical_distortion()

@@ -213,6 +213,7 @@ def solve_ellipse(img, mask=None, interactive=False, num_points=500, suspected_r
     affine: 3x3 matrix
         The affine matrix defining the elliptical distortion
     """
+    print(img)
     def fit_ellipse(x, y):
         x = x[:, np.newaxis]
         y = y[:, np.newaxis]
@@ -305,7 +306,13 @@ def solve_ellipse(img, mask=None, interactive=False, num_points=500, suspected_r
     print("The center is:", center)
     print("The major and minor axis lengths are:", lengths)
     print("The angle of rotation is:", angle)
-    return center, lengths, angle
+    cos_t = np.cos(angle)
+    sin_t = np.sin(angle)
+    R1 = [[cos_t, sin_t, 0], [-sin_t, cos_t, 0], [0, 0, 1]]
+    R2 = [[cos_t, -sin_t, 0], [sin_t, cos_t, 0], [0, 0, 1]]
+    D = [[1, 0, 0], [0, lengths[0]/lengths[1], 0], [0, 0, 1]]
+    M = np.matmul(np.matmul(R1, D), R2)
+    return center, M
 
 
 def invcot(val):
