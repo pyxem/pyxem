@@ -1,5 +1,5 @@
 name = "pyxem"
-version = "0.12.0dev"
+version = "0.13.0dev"
 author = "Duncan Johnstone, Phillip Crout, Magnus Nord"
 copyright = "Copyright 2016-2020, The pyXem Developers"
 credits = [
@@ -8,11 +8,11 @@ credits = [
     "Magnus Nord",
     "Joonatan Laulainen",
     "Simon Høgås",
+    "Eirik Opheim",
     "Ben Martineau",
     "Tina Bergh",
     "Stef Smeets",
     "Carter Francis",
-    "Eirik Opheim",
     "Eric Prestat",
     "Andrew Ross",
     "Sean Collins",
