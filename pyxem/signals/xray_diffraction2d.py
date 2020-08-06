@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for two-dimensional electron diffraction data.
+"""Signal class for two-dimensional X-ray diffraction data.
 """
 
 import numpy as np
@@ -118,7 +118,7 @@ class XrayDiffraction2D(Diffraction2D):
         y.name = 'y'
         y.scale = calibration
         y.units = 'nm'
-        
+
     def as_lazy(self, *args, **kwargs):
         """Create a copy of the XrayDiffraction2D object as a
         :py:class:`~pyxem.signals.xray_diffraction2d.LazyXrayDiffraction2D`.

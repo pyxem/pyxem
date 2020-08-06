@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Electron Diffraction radial profiles
+"""Signal class for one-dimensional electron diffraction data.
 
 """
 from hyperspy._signals.lazy import LazySignal
