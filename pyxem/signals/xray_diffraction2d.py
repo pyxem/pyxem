@@ -27,11 +27,11 @@ from pyxem.signals.diffraction2d import Diffraction2D
 
 
 class XrayDiffraction2D(Diffraction2D):
-    _signal_type = "xray_diffraction2d"
+    _signal_type = "xray_diffraction"
 
     def __init__(self, *args, **kwargs):
         """
-        Create an XrayDiffraction2D object from a hs.Signal2D or np.array.
+        Create an XrayDiffraction2D object from an numpy.ndarray.
 
         Parameters
         ----------
@@ -86,20 +86,6 @@ class XrayDiffraction2D(Diffraction2D):
                 "Acquisition_instrument.I14.Detector.Diffraction.exposure_time",
                 exposure_time)
 
-    def set_diffraction_calibration(self, calibration, center=None):
-        """Set diffraction pattern pixel size in reciprocal Angstroms and origin
-        location.
-
-        Parameters
-        ----------
-        calibration : float
-            Diffraction pattern calibration in reciprocal Angstroms per pixel.
-        center : tuple
-            Position of the direct beam center, in pixels. If None the center of
-            the data array is assumed to be the center of the pattern.
-        """
-        pass
-
     def set_scan_calibration(self, calibration):
         """Set scan pixel size in nanometres.
 
@@ -119,43 +105,7 @@ class XrayDiffraction2D(Diffraction2D):
         y.scale = calibration
         y.units = 'nm'
 
-    def as_lazy(self, *args, **kwargs):
-        """Create a copy of the XrayDiffraction2D object as a
-        :py:class:`~pyxem.signals.xray_diffraction2d.LazyXrayDiffraction2D`.
-
-        Parameters
-        ----------
-        copy_variance : bool
-            If True variance from the original XrayDiffraction2D object is
-            copied to the new LazyXrayDiffraction2D object.
-
-        Returns
-        -------
-        res : :py:class:`~pyxem.signals.xray_diffraction2d.LazyXrayDiffraction2D`.
-            The lazy signal.
-        """
-        res = super().as_lazy(*args, **kwargs)
-        res.__class__ = LazyXrayDiffraction2D
-        res.__init__(**res._to_dictionary())
-        return res
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = XrayDiffraction2D
-
 
 class LazyXrayDiffraction2D(LazySignal, XrayDiffraction2D):
 
-    _lazy = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def compute(self, *args, **kwargs):
-        super().compute(*args, **kwargs)
-        self.__class__ = XrayDiffraction2D
-        self.__init__(**self._to_dictionary())
-
-    def decomposition(self, *args, **kwargs):
-        super().decomposition(*args, **kwargs)
-        self.__class__ = LazyXrayDiffraction2D
+    pass
