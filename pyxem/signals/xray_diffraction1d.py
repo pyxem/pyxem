@@ -26,10 +26,9 @@ from pyxem.signals.diffraction1d import Diffraction1D
 class XrayDiffraction1D(Diffraction1D):
     _signal_type = "xray_diffraction"
 
-    def set_experimental_parameters(self,
-                                    beam_energy=None,
-                                    camera_length=None,
-                                    exposure_time=None):
+    def set_experimental_parameters(
+        self, beam_energy=None, camera_length=None, exposure_time=None
+    ):
         """Set experimental parameters in metadata.
 
         Parameters
@@ -44,16 +43,17 @@ class XrayDiffraction1D(Diffraction1D):
         md = self.metadata
 
         if beam_energy is not None:
-            md.set_item("Acquisition_instrument.I14.beam_energy",
-                        beam_energy)
+            md.set_item("Acquisition_instrument.I14.beam_energy", beam_energy)
         if camera_length is not None:
             md.set_item(
                 "Acquisition_instrument.I14.Detector.Diffraction.camera_length",
-                camera_length)
+                camera_length,
+            )
         if exposure_time is not None:
             md.set_item(
                 "Acquisition_instrument.I14.Detector.Diffraction.exposure_time",
-                exposure_time)
+                exposure_time,
+            )
 
     def set_scan_calibration(self, calibration):
         """Set scan pixel size in nanometres.
@@ -66,13 +66,13 @@ class XrayDiffraction1D(Diffraction1D):
         x = self.axes_manager.navigation_axes[0]
         y = self.axes_manager.navigation_axes[1]
 
-        x.name = 'x'
+        x.name = "x"
         x.scale = calibration
-        x.units = 'nm'
+        x.units = "nm"
 
-        y.name = 'y'
+        y.name = "y"
         y.scale = calibration
-        y.units = 'nm'
+        y.units = "nm"
 
 
 class LazyXrayDiffraction1D(LazySignal, XrayDiffraction1D):
