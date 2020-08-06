@@ -45,6 +45,10 @@ from .signals.electron_diffraction1d import ElectronDiffraction1D
 from .signals.electron_diffraction2d import ElectronDiffraction2D
 from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
+from .signals.xray_diffraction1d import XrayDiffraction1D
+from .signals.xray_diffraction2d import XrayDiffraction2D
+from .signals.xray_diffraction1d import LazyXrayDiffraction1D
+from .signals.xray_diffraction2d import LazyXrayDiffraction2D
 from .signals.polar_diffraction2d import PolarDiffraction2D
 from .signals.polar_diffraction2d import LazyPolarDiffraction2D
 
