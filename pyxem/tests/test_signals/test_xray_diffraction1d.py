@@ -27,26 +27,15 @@ from pyxem.signals.xray_diffraction1d import LazyXrayDiffraction1D
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
-    def test_set_experimental_parameters(self, electron_diffraction1d):
-        xray_diffraction1d = XrayDiffraction1D(electron_diffraction1d)
+    def test_set_experimental_parameters(self, xray_diffraction1d):
         xray_diffraction1d.set_experimental_parameters(beam_energy=3,
                                                        camera_length=3,
                                                        exposure_time=1)
         assert isinstance(xray_diffraction1d, XrayDiffraction1D)
 
-    def test_set_scan_calibration(self, electron_diffraction1d):
-        xray_diffraction1d = XrayDiffraction1D(electron_diffraction1d)
+    def test_set_scan_calibration(self, xray_diffraction1d):
         xray_diffraction1d.set_scan_calibration(19)
-        assert isinstance(electron_diffraction1d, XrayDiffraction1D)
-
-    @pytest.mark.parametrize('calibration', [1, 0.017, 0.5, ])
-    def test_set_diffraction_calibration(self,
-                                         electron_diffraction1d,
-                                         calibration):
-        xray_diffraction1d = XrayDiffraction1D(electron_diffraction1d)
-        xray_diffraction1d.set_diffraction_calibration(calibration)
-        dx = xray_diffraction1d.axes_manager.signal_axes[0]
-        assert dx.scale == calibration
+        assert isinstance(xray_diffraction1d, XrayDiffraction1D)
 
 
 class TestComputeAndAsLazyXray1D:
@@ -99,6 +88,5 @@ class TestComputeAndAsLazyXray1D:
 
 class TestDecomposition:
     def test_decomposition_class_assignment(self, xray_diffraction1d):
-        xray_diffraction1d = XrayDiffraction1D(electron_diffraction1d)
         xray_diffraction1d.decomposition()
         assert isinstance(xray_diffraction1d, XrayDiffraction1D)

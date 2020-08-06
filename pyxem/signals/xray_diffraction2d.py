@@ -22,7 +22,6 @@ import numpy as np
 from hyperspy.signals import BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction2d import Diffraction2D
 
 

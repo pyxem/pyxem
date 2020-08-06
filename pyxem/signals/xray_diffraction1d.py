@@ -20,7 +20,6 @@
 """
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals import push_metadata_through
 from pyxem.signals.diffraction1d import Diffraction1D
 
 
@@ -29,6 +28,7 @@ class XrayDiffraction1D(Diffraction1D):
 
     def set_experimental_parameters(self,
                                     beam_energy=None,
+                                    camera_length=None,
                                     exposure_time=None):
         """Set experimental parameters in metadata.
 
@@ -45,7 +45,7 @@ class XrayDiffraction1D(Diffraction1D):
 
         if beam_energy is not None:
             md.set_item("Acquisition_instrument.I14.beam_energy",
-                        accelerating_voltage)
+                        beam_energy)
         if camera_length is not None:
             md.set_item(
                 "Acquisition_instrument.I14.Detector.Diffraction.camera_length",
