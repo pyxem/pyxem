@@ -28,37 +28,9 @@ from pyxem.signals.diffraction2d import Diffraction2D
 class XrayDiffraction2D(Diffraction2D):
     _signal_type = "xray_diffraction"
 
-    def __init__(self, *args, **kwargs):
-        """
-        Create an XrayDiffraction2D object from an numpy.ndarray.
-
-        Parameters
-        ----------
-        *args :
-            Passed to the __init__ of Diffraction2D. The first arg should be
-            either a numpy.ndarray or a Signal2D
-        **kwargs :
-            Passed to the __init__ of Diffraction2D
-        """
-        self, args, kwargs = push_metadata_through(self, *args, **kwargs)
-        super().__init__(*args, **kwargs)
-
-        # Set default attributes
-        if 'Acquisition_instrument' in self.metadata.as_dictionary():
-            if 'SEM' in self.metadata.as_dictionary()['Acquisition_instrument']:
-                self.metadata.set_item(
-                    "Acquisition_instrument.I14",
-                    self.metadata.Acquisition_instrument.SEM)
-                del self.metadata.Acquisition_instrument.SEM
-            if 'REM' in self.metadata.as_dictionary()['Acquisition_instrument']:
-                self.metadata.set_item(
-                    "Acquisition_instrument.I14",
-                    self.metadata.Acquisition_instrument.TEM)
-                del self.metadata.Acquisition_instrument.TEM
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
-
     def set_experimental_parameters(self,
                                     beam_energy=None,
+                                    camera_length=None,
                                     exposure_time=None):
         """Set experimental parameters in metadata.
 
@@ -75,7 +47,7 @@ class XrayDiffraction2D(Diffraction2D):
 
         if beam_energy is not None:
             md.set_item("Acquisition_instrument.I14.beam_energy",
-                        accelerating_voltage)
+                        beam_energy)
         if camera_length is not None:
             md.set_item(
                 "Acquisition_instrument.I14.Detector.Diffraction.camera_length",

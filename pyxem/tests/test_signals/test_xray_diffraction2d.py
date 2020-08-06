@@ -47,22 +47,6 @@ class TestSimpleHyperspy:
         diffraction_pattern.set_scan_calibration(19)
         assert isinstance(diffraction_pattern, XrayDiffraction2D)
 
-    @pytest.mark.parametrize('calibration, center', [
-        (1, (4, 4),),
-        (0.017, (3, 3)),
-        (0.5, None,), ])
-    def test_set_diffraction_calibration(self,
-                                         diffraction_pattern,
-                                         calibration, center):
-        diffraction_pattern = XrayDiffraction2D(diffraction_pattern)
-        calibrated_center = calibration * np.array(center) if center is not None else center
-        diffraction_pattern.set_diffraction_calibration(calibration, center=calibrated_center)
-        dx, dy = diffraction_pattern.axes_manager.signal_axes
-        assert dx.scale == calibration and dy.scale == calibration
-        if center is not None:
-            assert np.all(diffraction_pattern.isig[0., 0.].data ==
-                          diffraction_pattern.isig[center[0], center[1]].data)
-
 
 class TestComputeAndAsLazyXray2D:
 
