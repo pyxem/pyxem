@@ -100,6 +100,9 @@ class TestCalibrationGenerator:
             calgen.calibration_data.au_x_grating_dp, ElectronDiffraction2D
         )
 
+    def test_str(self, calgen):
+        print(calgen)
+
     def test_get_elliptical_distortion(self, cal_dist, input_parameters, affine_answer):
         np.testing.assert_allclose(cal_dist.affine_matrix, affine_answer)
         np.testing.assert_allclose(cal_dist.ring_params, input_parameters)
@@ -267,8 +270,8 @@ class TestEmptyCalibrationGenerator:
                 line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
             )
 
-class TestAmorphousCalibration:
 
+class TestAmorphousCalibration:
     @pytest.fixture
     def ring(self):
         ring = hs.load("exRing.hspy")
@@ -277,3 +280,5 @@ class TestAmorphousCalibration:
 
     def test_amorphous_calibration(self, ring):
         ring.get_amorphous_elliptical_distortion()
+
+

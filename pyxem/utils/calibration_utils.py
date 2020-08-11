@@ -18,7 +18,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.linalg import eig, inv
+from numpy.linalg import eigh, inv
 
 
 def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
@@ -213,7 +213,6 @@ def solve_ellipse(img, mask=None, interactive=False, num_points=500, suspected_r
     affine: 3x3 matrix
         The affine matrix defining the elliptical distortion
     """
-    print(img)
     def fit_ellipse(x, y):
         x = x[:, np.newaxis]
         y = y[:, np.newaxis]
@@ -222,7 +221,9 @@ def solve_ellipse(img, mask=None, interactive=False, num_points=500, suspected_r
         C = np.zeros([6, 6])
         C[0, 2] = C[2, 0] = 2
         C[1, 1] = -1
-        E, V = eig(np.dot(inv(S), C))  # eigen decomposition to solve constrained minimization problem
+        E, V = eigh(np.dot(inv(S), C))  # eigen decomposition to solve constrained minimization problem
+        print("This is E:", E)
+        print("This is V:", V)
         n = np.argmax(np.abs(E))   # maximum eigenvalue solution
         a = V[:, n]
         print("a is:", a)
@@ -300,6 +301,7 @@ def solve_ellipse(img, mask=None, interactive=False, num_points=500, suspected_r
     else:
         coords = get_max_positions(img, num_points=num_points, radius=suspected_radius)
     a = fit_ellipse(np.array(coords[0]), np.array(coords[1]))
+    print("A is:", a)
     center = ellipse_center(a)  # (x,y)
     lengths = ellipse_axis_length(a)
     angle = ellipse_angle_of_rotation(a)

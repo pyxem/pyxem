@@ -48,9 +48,14 @@ class CalibrationGenerator:
 
     """
 
-    def __init__(self, calibration_data):
+    def __init__(self,
+                 diffraction_pattern=None,
+                 grating_image=None,
+                 calibration_standard=None):
         # Assign attributes
-        self.calibration_data = calibration_data
+        self.diffraction_pattern = diffraction_pattern
+        self.grating_image = grating_image
+        self.calibration_standard=calibration_standard
         self.ring_params = None
         self.affine_matrix = None
         self.rotation_angle = None
@@ -58,6 +63,13 @@ class CalibrationGenerator:
         self.center = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
+
+    def __str__(self):
+        information_string = ("\n|Calibration Data|\n" + "=================\n"+
+                              "Affine Matrix: " + str(self.affine_matrix) + "\n" +
+                              "Rotation Angle:" + str(self.rotation_angle) + "\n" +
+                              "Center: " + str(self.center))
+        return information_string
 
     def get_elliptical_distortion(
         self,
@@ -68,6 +80,7 @@ class CalibrationGenerator:
         direct_beam_amplitude=500,
         asymmetry=1,
         rotation=0,
+        center=None,
     ):
         """Determine elliptical distortion of the diffraction pattern.
 
@@ -111,11 +124,11 @@ class CalibrationGenerator:
 
         """
         # Check that necessary calibration data is provided
-        if self.calibration_data.au_x_grating_dp is None:
+        if self.diffraction_pattern is None:
             raise ValueError(
-                "This method requires an Au X-grating diffraction "
-                "pattern to be provided. Please update the "
-                "CalibrationDataLibrary."
+                "This method requires a calibration diffraction pattern"
+                "to be provided. Please set self.diffraction_pattern equal"
+                "to some Signal2D."
             )
         # Set diffraction pattern variable
         standard_dp = self.calibration_data.au_x_grating_dp
@@ -124,8 +137,8 @@ class CalibrationGenerator:
         xi = np.linspace(0, image_size - 1, image_size)
         yi = np.linspace(0, image_size - 1, image_size)
         x, y = np.meshgrid(xi, yi)
-        xcenter = (image_size - 1) / 2
-        ycenter = (image_size - 1) / 2
+        if center is None:
+            center = ((image_size - 1) / 2, (image_size - 1) / 2)
         # Calculate eliptical parameters
         mask = calc_radius_with_distortion(
             x, y, (image_size - 1) / 2, (image_size - 1) / 2, 1, 0
@@ -165,7 +178,7 @@ class CalibrationGenerator:
 
         return affine
 
-    def get_cal_points(self, num_points, mask=None, show=False):
+    def get_cal_points(self, num_points, mask=None, show=False, interactive=False):
         data = self.calibration_data.data
         i_shape = np.shape(data)
         flattened_array = data.flatten()
@@ -492,7 +505,7 @@ class CalibrationGenerator:
         return correction_matrix
 
     def plot_calibrated_data(
-        self, data_to_plot, line=None, *args, **kwargs
+        self, data_to_plot, line=None, unwrap=False, *args, **kwargs
     ):  # pragma: no cover
         """ Plot calibrated data for visual inspection.
 

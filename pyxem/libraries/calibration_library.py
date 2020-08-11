@@ -21,6 +21,29 @@ import numpy as np
 from hyperspy.misc.utils import stack as stack_method
 
 
+class GenericCalibrationStandard:
+    def __init__(self, peak_positions=[]):
+        """A generic calibration standard which includes some diffraction
+        pattern and a real space image which is used to create a
+        real space calibration.
+
+        Parameters
+        ------------
+        diffraction_pattern: Signal2D
+            The diffraction pattern used for calibration and distortion correction
+            in reciperical space
+        grating_image:
+            A real space image of some feature of known dimensions.
+
+        """
+        self.peak_positions
+
+    def plot(self):
+        pass
+
+
+
+
 class CalibrationDataLibrary(dict):
     """Maps crystal structure (phase) to diffraction vectors.
 
