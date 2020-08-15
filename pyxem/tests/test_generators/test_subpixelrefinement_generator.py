@@ -138,55 +138,6 @@ class Test_subpixelpeakfinders:
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
-    def test_assertioned_log(self, diffraction_vectors):
-        with pytest.warns(
-            UserWarning,
-            match="peak in your pattern that lies on the edge of the square",
-        ):
-            subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
-
-        self.no_shift_case(subpixelsfound)
-        self.x_shift_case(subpixelsfound)
-
-
-# class Test_misc():
-""" These tests will be removed for 0.11.0, but are needed for the log method &
-security on the x/y conventions until then """
-
-
-def create_spot_gaussian():
-    z1 = np.zeros((128, 128))
-    x = np.arange(0.0, 10, 1.0)
-    y = x[:, np.newaxis]
-    z1[20:30, 50:60] = np.exp(-((x - 5.1) ** 2 + (y - 5.3) ** 2) / 4)
-    dp = ElectronDiffraction2D(
-        np.asarray([[z1, z1], [z1, z1]])
-    )  # this needs to be in 2x2
-    return dp
-
-
-@pytest.mark.parametrize(
-    "dp, diffraction_vectors",
-    [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))],
-)
-@pytest.mark.filterwarnings("ignore::UserWarning")  # our warning
-def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.local_gaussian_method(2)
-
-
-def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
-    """ This was the MWE example code for the issue """
-    dp = get_simulated_disc(100, 20)
-    # translate y by +4
-    shifted = np.pad(dp, ((0, 4), (0, 0)), "constant")[4:].reshape(1, 1, *dp.shape)
-    signal = ElectronDiffraction2D(shifted)
-    spg = SubpixelrefinementGenerator(signal, np.array([[0, 0]]))
-    peaks = spg.conventional_xc(100, 20, 1).data[0, 0, 0]  # as quoted in the issue
-    np.testing.assert_allclose([0, -4], peaks)
-    """ we also test com method for clarity """
-    peaks = spg.center_of_mass_method(60).data[0, 0, 0]
-    np.testing.assert_allclose([0, -4], peaks, atol=1.5)
-    """ we also test reference_xc """
-    peaks = spg.reference_xc(100, dp, 1).data[0, 0, 0]  # as quoted in the issue
-    np.testing.assert_allclose([0, -4], peaks)
+    @pytest.mark.xfail(reason="removed in 0.13, but left to aid users")
+    def test_log(self, diffraction_vectors):
+        subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
