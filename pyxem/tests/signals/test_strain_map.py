@@ -19,7 +19,7 @@
 import hyperspy.api as hs
 import pytest
 import numpy as np
-from pyxem.tests.test_generators.test_displacement_gradient_tensor_generator import (
+from pyxem.tests.generators.test_displacement_gradient_tensor_generator import (
     generate_test_vectors,
 )
 from pyxem.generators.displacement_gradient_tensor_generator import (
