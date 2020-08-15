@@ -27,8 +27,6 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
-
-# @pytest.mark.xfail(raises=ValueError)
 class Test_init_xfails:
     def test_out_of_range_vectors_numpy(self):
         """Test that putting vectors that lie outside of the
@@ -141,3 +139,20 @@ class Test_subpixelpeakfinders:
     @pytest.mark.xfail(reason="removed in 0.13, but left to aid users")
     def test_log(self, diffraction_vectors):
         subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
+
+
+def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
+    """ This was the MWE example code for the issue """
+    dp = get_simulated_disc(100, 20)
+    # translate y by +4
+    shifted = np.pad(dp, ((0, 4), (0, 0)), "constant")[4:].reshape(1, 1, *dp.shape)
+    signal = ElectronDiffraction2D(shifted)
+    spg = SubpixelrefinementGenerator(signal, np.array([[0, 0]]))
+    peaks = spg.conventional_xc(100, 20, 1).data[0, 0, 0]  # as quoted in the issue
+    np.testing.assert_allclose([0, -4], peaks)
+    """ we also test com method for clarity """
+    peaks = spg.center_of_mass_method(60).data[0, 0, 0]
+    np.testing.assert_allclose([0, -4], peaks, atol=1.5)
+    """ we also test reference_xc """
+    peaks = spg.reference_xc(100, dp, 1).data[0, 0, 0]  # as quoted in the issue
+    np.testing.assert_allclose([0, -4], peaks)
