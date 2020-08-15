@@ -138,12 +138,6 @@ class Test_subpixelpeakfinders:
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
-    def test_assertioned_log(self, diffraction_vectors):
-        with pytest.warns(
-            UserWarning,
-            match="peak in your pattern that lies on the edge of the square",
-        ):
-            subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
-
-        self.no_shift_case(subpixelsfound)
-        self.x_shift_case(subpixelsfound)
+    @pytest.mark.xfail(reason="removed in 0.13, but left to aid users")
+    def test_log(self, diffraction_vectors):
+        subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
