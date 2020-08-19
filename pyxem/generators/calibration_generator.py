@@ -71,9 +71,11 @@ class CalibrationGenerator:
                               "Center: " + str(self.center))
         return information_string
 
+    def mask_above(self, value):
+        self.diffraction_pattern
+
     def get_elliptical_distortion(
         self,
-        mask_radius,
         scale=100,
         amplitude=1000,
         spread=2,
@@ -86,10 +88,8 @@ class CalibrationGenerator:
 
         Parameters
         ----------
-        mask_radius : int
-            The radius in pixels for a mask over the direct beam disc
-            (the direct beam disc within given radius will be excluded
-            from the fit)
+        mask: np.Array
+            Pixels to be ignored in the fitting. Must be the same
         scale : float
             An initial guess for the diffraction calibration
             in 1/Angstrom units
@@ -131,23 +131,23 @@ class CalibrationGenerator:
                 "to some Signal2D."
             )
         # Set diffraction pattern variable
-        standard_dp = self.calibration_data.au_x_grating_dp
-        # Define grid values and center indices for ring pattern evaluation
+        standard_dp = self.diffraction_pattern
         image_size = standard_dp.data.shape[0]
-        xi = np.linspace(0, image_size - 1, image_size)
-        yi = np.linspace(0, image_size - 1, image_size)
-        x, y = np.meshgrid(xi, yi)
-        if center is None:
-            center = ((image_size - 1) / 2, (image_size - 1) / 2)
-        # Calculate eliptical parameters
-        mask = calc_radius_with_distortion(
-            x, y, (image_size - 1) / 2, (image_size - 1) / 2, 1, 0
-        )
+        x, y = np.mgrid[0:image_size, 0:image_size]
+        # Define grid values and center indices for ring pattern evaluation
+
+        #if center is None:
+        #    center = ((image_size - 1) / 2, (image_size - 1) / 2)
+        ## Calculate eliptical parameters
+        #mask = calc_radius_with_distortion(
+        #    x, y, (image_size - 1) / 2, (image_size - 1) / 2, 1, 0
+        #)
         # Mask direct beam
-        mask[mask > mask_radius] = 0
-        standard_dp.data[mask > 0] *= 0
+        #mask[mask > mask_radius] = 0
+        if self.mask is not None:
+            standard_dp.data[self.mask] *= 0
         # Manipulate measured data for fitting
-        ref = standard_dp.data[standard_dp.data > 0]
+        ref = standard_dp.data[~self.mask]
         ref = ref.ravel()
         # Define points for fitting
         pts = np.array(

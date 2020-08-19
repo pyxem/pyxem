@@ -41,6 +41,9 @@ class GenericCalibrationStandard:
     def plot(self):
         pass
 
+class GaussianRingStandard(GenericCalibrationStandard):
+    def __init__(self, radius = 100, ):
+
 
 
 

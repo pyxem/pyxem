@@ -31,6 +31,23 @@ def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
     return np.sqrt((xp - xcp) ** 2 + asym * (yp - ycp) ** 2)
 
 
+def calc_radius_with_distortion(points, center, asym, rot):
+    cos_rot = np.cos(rot)
+    sin_rot = np.sin(rot)
+    R1 = [[cos_rot, sin_rot], [-sin_rot, cos_rot]]
+    R2 = [[cos_rot, -sin_rot], [sin_rot, cos_rot]]
+    D = [[1, 0], [0, asym]]
+    M = np.matmul(np.matmul(R1, D), R2)
+    x, y = np.dot(points-center, M)
+    return np.sqrt(x**2 + y**2)
+
+
+def gaussian_function(pts, xcenter, ycenter, sigma, radius, asymmetry, rotation, max):
+    r = calc_radius_with_distortion(pts, xcenter, ycenter, asymmetry, rotation)
+    intensity = (1/(sigma*np.sqrt(2)*np.pi))* np.exp(-.5 * ((r-radius)/sigma)**2)
+    return intensity*max
+
+
 def call_ring_pattern(xcenter, ycenter):
     """
     Function to make a call to the function ring_pattern without passing the
