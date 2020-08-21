@@ -18,13 +18,11 @@
 
 """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
 
-import copy
 import numpy as np
 from warnings import warn
-import matplotlib.pyplot as plt
 
 import hyperspy.api as hs
-from hyperspy.signals import BaseSignal, Signal1D, Signal2D
+from hyperspy.signals import BaseSignal, Signal2D
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
@@ -87,8 +85,7 @@ import pyxem.utils.ransac_ellipse_tools as ret
 
 from skimage import filters
 from skimage.morphology import square
-from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from scipy.ndimage import rotate, gaussian_filter
+from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar

@@ -16,10 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pickle
-import numpy as np
-from hyperspy.misc.utils import stack as stack_method
-
 
 class CalibrationDataLibrary(dict):
     """Maps crystal structure (phase) to diffraction vectors.

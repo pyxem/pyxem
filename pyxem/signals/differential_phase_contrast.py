@@ -28,7 +28,6 @@ from hyperspy._signals.lazy import LazySignal
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from scipy.ndimage import rotate, gaussian_filter
-from tqdm import tqdm
 
 
 class DPCBaseSignal(BaseSignal):

@@ -17,7 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import hyperspy.api as hs
-import pyxem as pxm
 import numpy as np
 
 

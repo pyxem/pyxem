@@ -21,17 +21,13 @@ import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
 
 from scipy.interpolate import interp1d
-from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
 from skimage import morphology, filters
-from skimage.morphology import square, opening
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
 from tqdm import tqdm
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
-
-from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 """

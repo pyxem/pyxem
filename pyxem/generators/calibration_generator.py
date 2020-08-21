@@ -24,9 +24,7 @@ from math import sin, cos
 from hyperspy.roi import CircleROI, Line2DROI
 from hyperspy.misc.utils import stack as stack_method
 import matplotlib.pyplot as plt
-from skimage.transform import rotate
 
-from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import (
     call_ring_pattern,

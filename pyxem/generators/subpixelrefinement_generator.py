@@ -25,8 +25,6 @@ from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
 
-import warnings
-
 
 def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     """Takes two images of disc and finds the shift between them using

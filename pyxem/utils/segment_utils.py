@@ -31,8 +31,6 @@ from skimage.morphology import watershed, disk
 
 from sklearn.cluster import DBSCAN
 
-import warnings
-
 
 def norm_cross_corr(image, template):
     """Calculates the normalised cross-correlation between an image

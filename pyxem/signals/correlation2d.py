@@ -23,7 +23,6 @@ from hyperspy._signals.lazy import LazySignal
 
 from pyxem.utils.correlation_utils import corr_to_power
 from pyxem.signals.common_diffraction import CommonDiffraction
-import numpy as np
 
 
 class Correlation2D(Signal2D, CommonDiffraction):

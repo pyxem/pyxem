@@ -17,10 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from heapq import nlargest
 from itertools import combinations
-import math
-from operator import itemgetter, attrgetter
+from operator import attrgetter
 
 import numpy as np
 
@@ -28,8 +26,7 @@ from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
-from transforms3d.euler import mat2euler, euler2mat
-from transforms3d.quaternions import mat2quat
+from transforms3d.euler import mat2euler
 
 from collections import namedtuple
 

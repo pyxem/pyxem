@@ -21,7 +21,6 @@ import math
 import numpy as np
 from scipy.ndimage import measurements, shift
 from scipy.optimize import leastsq
-from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
 import pyxem.utils.lazy_tools as lt

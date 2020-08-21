@@ -18,7 +18,6 @@
 """Signal class for Reduced Intensity profiles as a fucntion of scattering vector."""
 
 from hyperspy.signals import Signal1D
-import numpy as np
 
 from pyxem.components.reduced_intensity_correction_component import (
     ReducedIntensityCorrectionComponent,

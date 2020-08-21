@@ -20,7 +20,6 @@
 
 import numpy as np
 from skimage import draw
-from skimage.transform import rescale
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
