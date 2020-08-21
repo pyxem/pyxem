@@ -13,12 +13,12 @@ def get_azimuthal_integrator(
     wavelength=None,
     **kwargs
 ):
-    """ This is a basic method for creating a azimuthal integrator.
+    """Basic method for creating a azimuthal integrator.
 
     This helps to deal with taking some of the pyXEM standards and apply them to pyFAI
 
     Parameters
-    -----------
+    ----------
     detector: pyFAI.detectors.Detector
         The detector to be integrated
     detector_distance:
@@ -60,10 +60,12 @@ def get_azimuthal_integrator(
 
 
 def _get_radial_extent(ai, shape=None, unit=None):
-    """This method isn't perfect but it takes some Azimuthal Integrator and calculates the domain of the output
+    """Takes an Azimuthal Integrator and calculates the domain of the output.
+
+    Note: this method isn't perfect.
 
     Parameters
-    -----------
+    ----------
     ai: AzimuthalIntegrator
         The integrator to operate on
     shape: (int, int)
@@ -76,11 +78,11 @@ def _get_radial_extent(ai, shape=None, unit=None):
 
 
 def _get_displacements(center, shape, affine):
-    """ Gets the displacements for a set of points based on some affine transformation
+    """Gets the displacements for a set of points based on some affine transformation
     about some center point.
 
     Parameters
-    -------------
+    ----------
     center: (tuple)
         The center to preform the affine transformation around
     shape: (tuple)
@@ -89,7 +91,7 @@ def _get_displacements(center, shape, affine):
         The affine transformation to apply to the image
 
     Returns
-    ----------
+    -------
     dx: np.array
         The displacement in the x direction of shape = shape
     dy: np.array
@@ -112,8 +114,7 @@ def _get_displacements(center, shape, affine):
 
 
 def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
-    """Returns a generic set up for a flat detector with accounting for Ewald sphere effects
-    """
+    """Returns a generic set up for a flat detector with accounting for Ewald sphere effects."""
     units_table = {
         "2th_deg": [None, 1, "2th_deg"],
         "2th_rad": [None, 1, "2th_rad"],

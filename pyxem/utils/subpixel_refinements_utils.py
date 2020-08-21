@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-utils to support SubpixelrefinementGenerator
-"""
+"""Utils to support SubpixelrefinementGenerator."""
 
 import numpy as np
 from skimage import draw

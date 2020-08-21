@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Signal class for two-dimensional diffraction data in polar coordinates.
-"""
+"""Signal class for two-dimensional diffraction data in polar coordinates."""
 
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
@@ -55,8 +53,9 @@ class Power2D(Signal2D):
            upper and lower k values to integrate over, allows both ints and floats for indexing
         symmetry: int or array-like
             specific integers or list of symmetries to average over when creating the map of the correlations.
+
         Returns
-        ----------
+        -------
         symmetry_map: 2-d array
             2 dimensional map of from the power spectrum
         """
@@ -87,7 +86,7 @@ class Power2D(Signal2D):
         """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguements that imshow does.
 
         Parameters
-        -------------
+        ----------
          k_region: array-like
            upper and lower k values to integrate over, allows both ints and floats for indexing
         symmetry: list or None

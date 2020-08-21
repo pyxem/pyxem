@@ -42,7 +42,7 @@ class CalibrationDataLibrary(dict):
         self.moo3_im = moo3_im
 
     def plot_calibration_data(self, data_to_plot, roi=None, *args, **kwargs):
-        """ Plot the calibration data.
+        """Plot the calibration data.
 
         Parameters
         ----------

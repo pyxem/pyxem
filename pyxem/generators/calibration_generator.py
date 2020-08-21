@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Electron diffraction pattern calibration operations.
-
-"""
+"""Electron diffraction pattern calibration operations."""
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -446,7 +444,7 @@ class CalibrationGenerator:
     def plot_calibrated_data(
         self, data_to_plot, line=None, *args, **kwargs
     ):  # pragma: no cover
-        """ Plot calibrated data for visual inspection.
+        """Plot calibrated data for visual inspection.
 
         Parameters
         ----------

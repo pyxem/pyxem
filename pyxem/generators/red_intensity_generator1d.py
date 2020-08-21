@@ -16,10 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Reduced intensity generator and associated tools.
-
-
-"""
+"""Reduced intensity generator and associated tools."""
 import numpy as np
 
 from pyxem.components.scattering_fit_component_xtables import (
@@ -37,9 +34,7 @@ scattering_factor_dictionary = {
 
 
 class ReducedIntensityGenerator1D:
-    """Generates a reduced intensity 1D profile for a specified diffraction radial
-    profile.
-
+    """Generates a reduced intensity 1D profile for a specified diffraction radial profile.
 
     Parameters
     ----------
@@ -59,8 +54,7 @@ class ReducedIntensityGenerator1D:
         self.normalisation = None
 
     def set_diffraction_calibration(self, calibration):
-        """
-        Defines calibration for the signal axis variable s in terms of
+        """Defines calibration for the signal axis variable s in terms of
         A^-1 per pixel. Note that s is defined here as
         s = 2 sin(theta)/lambda = 1/d, where theta is the scattering angle,
         lambda the wavelength, and d the reciprocal spacing.
@@ -73,8 +67,7 @@ class ReducedIntensityGenerator1D:
         self.signal.axes_manager.signal_axes[0].scale = calibration
 
     def set_diffraction_offset(self, offset):
-        """
-        Defines the offset for the signal axis variable s in terms of
+        """Defines the offset for the signal axis variable s in terms of
         A^-1 per pixel. Note that s is defined here as
         s = 2 sin(theta)/lambda = 1/d, where theta is the scattering angle,
         lambda the wavelength, and d the reciprocal spacing.
@@ -87,8 +80,7 @@ class ReducedIntensityGenerator1D:
         self.signal.axes_manager.signal_axes[0].offset = offset
 
     def set_s_cutoff(self, s_min, s_max):
-        """
-        Scattering vector cutoff for the purposes of fitting an atomic scattering
+        """Scattering vector cutoff for the purposes of fitting an atomic scattering
         factor to the 1D profile. Specified in terms of s (in inverse angstroms).
         s is defined as s = 2 sin(theta)/lambda = 1/d, where theta is the
         scattering angle, lambda the wavelength, and d the reciprocal spacing.
@@ -114,8 +106,9 @@ class ReducedIntensityGenerator1D:
         *args,
         **kwargs,
     ):
-        """Fits a diffraction intensity profile to the background using
-        FIT = N * sum(ci * (fi^2) + C)
+        """Fits a diffraction intensity profile to the background.
+
+        Uses FIT = N * sum(ci * (fi^2) + C)
 
         The cutoff for the scattering factor fit to s is defined via the function
         set_s_cutoff above.
@@ -171,8 +164,9 @@ class ReducedIntensityGenerator1D:
         return
 
     def subtract_bkgd_pattern(self, bkgd_pattern, inplace=True, *args, **kwargs):
-        """Subtracts a background pattern from the signal. This method will edit
-        self.signal.
+        """Subtracts a background pattern from the signal.
+
+        This method will edit self.signal.
 
         Parameters
         ----------
@@ -248,7 +242,8 @@ class ReducedIntensityGenerator1D:
             Arguments to be passed to map().
         **kwargs:
             Keyword arguments to be passed to map().
-    """
+
+        """
 
         mask_array = mask_pattern.astype(np.uint8)
         if np.max(mask_array) != 1 or np.min(mask_array) != 0:
@@ -266,9 +261,11 @@ class ReducedIntensityGenerator1D:
         s_cutoff : list of float
                     A list of the form [s_min, s_max] to change the s_cutoff
                     from the fit.
+
         Returns
         -------
         ri : ReducedIntensity1D
+
         """
 
         s = np.arange(self.signal.axes_manager.signal_axes[0].size, dtype="float64")

@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Signal class for two-dimensional diffraction data in Cartesian coordinates.
-"""
+"""Signal class for two-dimensional diffraction data in Cartesian coordinates."""
 
 import copy
 import numpy as np
@@ -266,7 +264,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         units is passed to pyxem and those units are used.
 
         Parameters
-        ---------------
+        ----------
         npt_rad: int
             The number of radial points to calculate
         center: None or (x,y) or BaseSignal
@@ -301,12 +299,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Any keyword arguements for PyFAI's integrate2d function
 
         Returns
-        ----------
+        -------
         polar: PolarDiffraction2D
             A polar diffraction signal
 
         Examples
-        ----------
+        --------
         Basic case using "2th_deg" units (no wavelength needed)
 
         >>> ds.unit = "2th_deg"
@@ -469,7 +467,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         units is passed to pyxem and those units are used.
 
         Parameters
-        ---------------
+        ----------
         npt_rad: int
             The number of radial points to calculate
         npt_azim: int
@@ -506,12 +504,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Any keyword arguements for PyFAI's integrate2d function
 
         Returns
-        ----------
+        -------
         polar: PolarDiffraction2D
             A polar diffraction signal
 
         Examples
-        ----------
+        --------
         Basic case using "2th_deg" units (no wavelength needed)
 
         >>> ds.unit = "2th_deg"
@@ -797,7 +795,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         positions.
 
         Parameters
-        ---------
+        ----------
         method : str
             Select peak finding algorithm to implement. Available methods are
             {'zaefferer', 'stat', 'laplacian_of_gaussians',
@@ -1589,7 +1587,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ...     disk_r=5, show_progressbar=False)
         >>> s.plot()
 
-        See also
+        See Also
         --------
         template_match_ring
         template_match_with_binary_image
@@ -1628,7 +1626,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_template = s.template_match_ring(show_progressbar=False)
         >>> s.plot()
 
-        See also
+        See Also
         --------
         template_match_disk
         template_match_with_binary_image
@@ -1682,7 +1680,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ...     binary_image, show_progressbar=False)
         >>> s.plot()
 
-        See also
+        See Also
         --------
         template_match_disk
         template_match_ring
@@ -2202,7 +2200,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_dead_pixels = s.find_dead_pixels(
         ...     lazy_result=True, show_progressbar=False)
 
-        See also
+        See Also
         --------
         find_hot_pixels
         correct_bad_pixels
@@ -2270,7 +2268,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     lazy_result=False, show_progressbar=False)
 
-        See also
+        See Also
         --------
         find_dead_pixels
         correct_bad_pixels
@@ -2332,7 +2330,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
         >>> s_corr = s.correct_bad_pixels(s_bad_pixels)
 
-        See also
+        See Also
         --------
         find_dead_pixels
         find_hot_pixels

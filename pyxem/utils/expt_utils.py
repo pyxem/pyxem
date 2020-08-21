@@ -151,6 +151,7 @@ def azimuthal_integrate1d_slow(
         Arguments to be passed to AzimuthalIntegrator.
     **kwargs :
         Keyword arguments to be passed to AzimuthalIntegrator.
+
     Returns
     -------
     tth : np.array()
@@ -204,6 +205,7 @@ def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
         The number of radial points to integrate
     **kwargs :
         Keyword arguments to be passed to ai.integrate2d
+
     Returns
     -------
     tth : np.array()
@@ -260,6 +262,7 @@ def azimuthal_integrate2d_slow(
         Arguments to be passed to AzimuthalIntegrator.
     **kwargs :
         Keyword arguments to be passed to AzimuthalIntegrator.
+
     Returns
     -------
     tth : np.array()
@@ -317,6 +320,7 @@ def azimuthal_integrate2d_fast(
         The number of radial points to integrate
     **kwargs :
         Keyword arguments to be passed to ai.integrate2d
+
     Returns
     -------
     tth : np.array()
@@ -391,7 +395,7 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
 
 
 def convert_affine_to_transform(D, shape):
-    """ Converts an affine transform on a diffraction pattern to a suitable
+    """Converts an affine transform on a diffraction pattern to a suitable
     form for skimage.transform.warp()
 
     Parameters

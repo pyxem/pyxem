@@ -290,7 +290,7 @@ def separate_watershed(
 
 
 def get_gaussian2d(a, xo, yo, x, y, sigma):
-    """ Obtain a 2D Gaussian of amplitude a and standard deviation
+    """Obtain a 2D Gaussian of amplitude a and standard deviation
     sigma, centred at (xo, yo), on a grid given by x and y.
 
     Parameters

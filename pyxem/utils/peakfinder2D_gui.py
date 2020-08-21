@@ -79,9 +79,7 @@ class PeakFinderUIBase:
 
 
 class PeakFinderUIIPYW(PeakFinderUIBase):
-    """
-    Find peaks using a Jupyter notebook-based user interface
-    """
+    """Find peaks using a Jupyter notebook-based user interface."""
 
     def __init__(self, disc_image=None, imshow_kwargs=None):
         super(PeakFinderUIIPYW, self).__init__()

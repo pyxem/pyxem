@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Forward model component for kinematical electron diffraction.
-
-"""
+"""Forward model component for kinematical electron diffraction."""
 
 import numpy as np
 from hyperspy.component import Component

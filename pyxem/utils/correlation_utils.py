@@ -2,11 +2,12 @@ import numpy as np
 
 
 def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
-    """A generic function for applying a correlation with a mask.
+    r"""A generic function for applying a correlation with a mask.
 
-     Takes a nd image and then preforms a auto-correlation on some axis.
-     Used in the electron correlation and angular correlation codes. Uses
-     the fft to speed up the correlation.
+    Takes a nd image and then preforms a auto-correlation on some axis.
+    Used in the electron correlation and angular correlation codes. Uses
+    the fft to speed up the correlation.
+
     Parameters
     ----------
     z: np.array
@@ -81,7 +82,7 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
     during the calculations.
 
     Parameters
-    ----------------
+    ----------
     z: np.array
         Some n-d array to get the power spectrum from.
     axis: int
@@ -95,7 +96,7 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         Choose to normalize the function by the mean.
 
     Returns
-    -----------------
+    -------
     power: np.array
         The power spectrum along some axis
     """
