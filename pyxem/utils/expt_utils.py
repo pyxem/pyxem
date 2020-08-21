@@ -20,7 +20,6 @@ import numpy as np
 import scipy.ndimage as ndi
 import pyxem as pxm  # for ElectronDiffraction2D
 
-from scipy.ndimage.interpolation import shift
 from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit, minimize
 from skimage import transform as tf
@@ -28,7 +27,6 @@ from skimage import morphology, filters
 from skimage.morphology import square, opening
 from skimage.draw import ellipse_perimeter
 from skimage.feature import register_translation
-from scipy.optimize import curve_fit
 from tqdm import tqdm
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
@@ -43,7 +41,7 @@ patterns.
 
 
 def _index_coords(z, origin=None):
-    """Creates x & y coords for the indicies in a numpy array.
+    """Creates x & y coords for the indices in a numpy array.
 
     Parameters
     ----------
@@ -123,8 +121,8 @@ def azimuthal_integrate1d_slow(
     correctSolidAngle=True,
     radial_range=None,
     azimuth_range=None,
-    azimuthal_kwargs={},
-    integrate_kwargs={},
+    azimuthal_kwargs=None,
+    integrate_kwargs=None,
 ):
     """Calculate the azimuthal integral in 2d around a determined origin.
 
@@ -160,6 +158,10 @@ def azimuthal_integrate1d_slow(
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
+
+    azimuthal_kwargs = {} if azimuthal_kwargs is None else azimuthal_kwargs
+    integrate_kwargs = {} if integrate_kwargs is None else integrate_kwargs
+
     shape = np.shape(z)
     ai = get_azimuthal_integrator(
         detector=detector,
@@ -228,8 +230,8 @@ def azimuthal_integrate2d_slow(
     correctSolidAngle=True,
     radial_range=None,
     azimuth_range=None,
-    azimuthal_kwargs={},
-    integrate_kwargs={},
+    azimuthal_kwargs=None,
+    integrate_kwargs=None,
 ):
     """Calculate the azimuthal integral in 2d around a determined origin.
 
@@ -265,6 +267,10 @@ def azimuthal_integrate2d_slow(
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
+
+    azimuthal_kwargs = {} if azimuthal_kwargs is None else azimuthal_kwargs
+    integrate_kwargs = {} if integrate_kwargs is None else integrate_kwargs
+
     shape = np.shape(z)
     ai = get_azimuthal_integrator(
         detector=detector,
@@ -445,9 +451,9 @@ def apply_transformation(z, transformation, keep_dtype, order=1, *args, **kwargs
     -----
     Generally used in combination with pyxem.expt_utils.convert_affine_to_transform
     """
-    if keep_dtype == False:
+    if keep_dtype is False:
         trans = tf.warp(z, transformation, order=order, *args, **kwargs)
-    if keep_dtype == True:
+    if keep_dtype is True:
         trans = tf.warp(
             z, transformation, order=order, preserve_range=True, *args, **kwargs
         )

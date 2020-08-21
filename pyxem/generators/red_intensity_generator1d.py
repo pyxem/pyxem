@@ -155,7 +155,7 @@ class ReducedIntensityGenerator1D:
         fit_model.set_signal_range(self.cutoff)
         fit_model.multifit(*args, **kwargs)
         fit_model.reset_signal_range()
-        if plot_fit == True:
+        if plot_fit is True:
             fit_model.plot()
         fit = fit_model.as_signal()
 

@@ -169,7 +169,7 @@ class VectorMatchingResults(BaseSignal):
         indexed_vectors : DiffractionVectors
             An indexed diffraction vectors object.
         """
-        if overwrite == False:
+        if overwrite is False:
             if vectors.hkls is not None:
                 warn(
                     "The vectors supplied are already associated with hkls set "
@@ -178,7 +178,7 @@ class VectorMatchingResults(BaseSignal):
             else:
                 vectors.hkls = self.hkls
 
-        elif overwrite == True:
+        elif overwrite is True:
             vectors.hkls = self.hkls
 
         return vectors

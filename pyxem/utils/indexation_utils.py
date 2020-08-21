@@ -300,7 +300,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
 
 
 def correlate_library(image, library, n_largest, method, mask):
-    """Correlates all simulated diffraction templates in a DiffractionLibrary
+    r"""Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
     Calculated using the normalised (see return type documentation) dot

@@ -33,7 +33,7 @@ def get_azimuthal_integrator(
         A boolean array to be added to the integrator.
     wavelength: float
         The wavelength of the beam in meter. Needed to accounting for the
-        Ewald sphere. 
+        Ewald sphere.
     kwargs: dict
         Any additional arguments to the Azimuthal Integrator class
     """

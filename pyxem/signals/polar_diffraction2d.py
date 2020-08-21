@@ -24,7 +24,6 @@ from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.utils.correlation_utils import _correlation, _power
-import numpy as np
 
 
 class PolarDiffraction2D(Signal2D):
@@ -49,7 +48,7 @@ class PolarDiffraction2D(Signal2D):
     def get_angular_correlation(
         self, mask=None, normalize=True, inplace=False, **kwargs
     ):
-        """
+        r"""
         Returns the angular auto-correlation function in the form of a Signal2D class.
 
         The angular correlation measures the angular symmetry by computing the self or auto

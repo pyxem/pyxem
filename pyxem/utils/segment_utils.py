@@ -247,11 +247,12 @@ def separate_watershed(
             labels = np.zeros(np.shape(labels))
 
         seps_img_sum = np.zeros_like(vdf_temp).astype("float64")
-        for l, vdf in zip(np.arange(1, np.max(labels) + 1), vdf_sep):
+        for lbl, vdf in zip(np.arange(1, np.max(labels) + 1), vdf_sep):
             mask_l = np.zeros_like(labels).astype("bool")
-            mask_l[np.where(labels == l)] = 1
-            seps_img_sum += vdf_temp * mask_l / np.max(vdf_temp[np.where(labels == l)])
-            seps_img_sum[np.where(labels == l)] += l
+            _idx = np.where(labels == lbl)
+            mask_l[_idx] = 1
+            seps_img_sum += vdf_temp * mask_l / np.max(vdf_temp[_idx])
+            seps_img_sum[_idx] += lbl
 
         maxi_coord = np.where(local_maxi)
 

@@ -277,7 +277,7 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
 
     if (
         data_pxm.metadata.Signal.signal_type == "TEM"
-        and data_pxm.metadata.Signal.exposure_time != None
+        and data_pxm.metadata.Signal.exposure_time is not None
     ):
         print(
             "This mib file appears to be TEM data. The stack is returned with no reshaping."
@@ -840,7 +840,7 @@ def _STEM_flag_dict(exp_times_list):
             scan_X = lines[-1]
             check = np.ravel(np.where(lines == scan_X, True, False))
             # Checking line lengths
-            start_ind = np.where(check == False)[0][-1] + 2
+            start_ind = np.where(check is False)[0][-1] + 2
             frames_to_skip = peaks[start_ind]
 
         flyback_times = list(times_set)
@@ -1116,7 +1116,7 @@ def reshape_4DSTEM_SumFrames(data):
     check = np.ravel(np.where(lines == line_len, True, False))
     # In case there is a False in there take the index of the last False
     if ~np.all(check):
-        start_ind = np.where(check == False)[0][-1] + 2
+        start_ind = np.where(check is False)[0][-1] + 2
         # Adding 2 - instead of 1 -  to be sure scan is OK
         skip_ind = peaks[0][start_ind]
     # In case they are all True take the index of the first True

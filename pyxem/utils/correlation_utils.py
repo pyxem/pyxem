@@ -24,7 +24,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
     if wrap is False:
         z_shape = np.shape(z)
         padder = [(0, 0)] * len(z_shape)
-        pad = z_shape[axis]  #  This will be faster if the length of the axis
+        pad = z_shape[axis]  # This will be faster if the length of the axis
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)

@@ -83,13 +83,13 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
     Find peaks using a Jupyter notebook-based user interface
     """
 
-    def __init__(self, disc_image=None, imshow_kwargs={}):
+    def __init__(self, disc_image=None, imshow_kwargs=None):
         super(PeakFinderUIIPYW, self).__init__()
         self.ax = None
         self.image = None
         self.pts = None
         self.param_container = None
-        self.imshow_kwargs = imshow_kwargs
+        self.imshow_kwargs = {} if imshow_kwargs is None else imshow_kwargs
         # if you want to use xc
         self.params[find_peaks_xc.__name__]["disc_image"] = disc_image
 
@@ -247,12 +247,12 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
                 step=np.abs(a.value - b.value) * 0.01,
                 layout=Layout(flex="1 1 auto", width="60%"),
             )
-            l = FloatText(
+            lbl = FloatText(
                 value=f.value,
                 layout=Layout(flex="0 1 auto", width="10%"),
                 disabled=True,
             )
-            link((f, "value"), (l, "value"))
+            link((f, "value"), (lbl, "value"))
 
             def on_min_change(change):
                 if f.max > change["new"]:
@@ -271,7 +271,7 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
             b.observe(on_min_change, names="value")
             f.observe(on_param_change, names="value")
             a.observe(on_max_change, names="value")
-            children = (p, l, b, f, a)
+            children = (p, lbl, b, f, a)
 
         elif isinstance(value, int):
             from ipywidgets import IntSlider, IntText, BoundedIntText, Label
@@ -292,12 +292,12 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
                 step=1,
                 layout=Layout(flex="1 1 auto", width="60%"),
             )
-            l = IntText(
+            lbl = IntText(
                 value=f.value,
                 layout=Layout(flex="0 1 auto", width="10%"),
                 disabled=True,
             )
-            link((f, "value"), (l, "value"))
+            link((f, "value"), (lbl, "value"))
 
             def on_min_change(change):
                 if f.max > change["new"]:
@@ -316,7 +316,7 @@ class PeakFinderUIIPYW(PeakFinderUIBase):
             b.observe(on_min_change, names="value")
             f.observe(on_param_change, names="value")
             a.observe(on_max_change, names="value")
-            children = (p, l, b, f, a)
+            children = (p, lbl, b, f, a)
         container = HBox(children)
         return container
 

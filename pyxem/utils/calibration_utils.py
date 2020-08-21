@@ -181,7 +181,7 @@ def generate_ring_pattern(
     )
     generated_pattern = np.reshape(generated_pattern, (image_size, image_size))
 
-    if mask == True:
+    if mask is True:
         maskROI = calc_radius_with_distortion(
             x, y, (image_size - 1) / 2, (image_size - 1) / 2, 1, 0
         )

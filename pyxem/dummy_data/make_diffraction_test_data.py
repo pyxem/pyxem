@@ -352,7 +352,7 @@ class Ring(object):
 
     def __init__(self, xx, yy, scale, x0, y0, r, intensity, lr):
         if lr > r:
-            raise ValueError("Ring line width too big".format(lr, r))
+            raise ValueError(f"Ring line width too big ({lr} > {r})")
         self.lr = lr
         self.lw = 1 + 2 * lr  # scalar line width of the ring
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale, lw=lr)
