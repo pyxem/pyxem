@@ -32,6 +32,7 @@ from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.sim_utils import sim_as_signal
 
+
 @pytest.fixture()
 def Displacement_Grad_Map():
     xy = np.asarray([[1, 0], [0, 1]])

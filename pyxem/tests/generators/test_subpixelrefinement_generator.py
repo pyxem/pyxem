@@ -27,6 +27,7 @@ from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
+
 class Test_init_xfails:
     def test_out_of_range_vectors_numpy(self):
         """Test that putting vectors that lie outside of the
@@ -136,9 +137,11 @@ class Test_subpixelpeakfinders:
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
-    @pytest.mark.xfail(reason="removed in 0.13, but left to aid users")
     def test_log(self, diffraction_vectors):
-        subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
+        with pytest.raises(
+            NotImplementedError, match="This functionality was removed in v.0.13.0",
+        ):
+            _ = self.get_spr(diffraction_vectors).local_gaussian_method(12)
 
 
 def test_xy_errors_in_conventional_xc_method_as_per_issue_490():

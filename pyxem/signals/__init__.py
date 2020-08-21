@@ -18,20 +18,16 @@
 
 
 def select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
-    """
-    Streamlines the selection of utils to be mapped in class methods
+    """Streamlines the selection of utils to be mapped in class methods.
 
     Parameters
     ----------
     method : str
         The key to method_dict for the chosen method
-
     method_dict : dict
         dictionary with strings as keys and functions as values
-
     kwargs : dict
         Parameters for the method, if empty help is return
-
     print_help : bool
         If True: Prints information about the chosen method.
 
@@ -56,7 +52,7 @@ def select_method_from_method_dict(method, method_dict, print_help=True, **kwarg
 
 
 def transfer_signal_axes(new_signal, old_signal):
-    """ Transfers signal axis calibrations from an old signal to a new
+    """Transfers signal axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
     Parameters
@@ -83,7 +79,7 @@ def transfer_signal_axes(new_signal, old_signal):
 
 
 def transfer_navigation_axes(new_signal, old_signal):
-    """ Transfers navigation axis calibrations from an old signal to a new
+    """Transfers navigation axis calibrations from an old signal to a new
     signal produced from it by a method or a generator.
 
     Parameters
@@ -118,7 +114,7 @@ def transfer_navigation_axes(new_signal, old_signal):
 
 
 def transfer_navigation_axes_to_signal_axes(new_signal, old_signal):
-    """ Transfers navigation axis calibrations from an old signal to the signal
+    """Transfers navigation axis calibrations from an old signal to the signal
     axes of a new signal produced from it by a method or a generator.
 
     Used from methods that generate a signal with a single value at each

@@ -227,7 +227,7 @@ def mib_to_h5stack(fp, save_path, mmap_mode="r"):
 
 def h5stack_to_pxm(h5_path, mib_path, flip=True):
     """
-    this function reads the saved stack h5 file into a reshaped pyxem.signals.LazyElectronDiffraction2D object
+    Reads the saved stack h5 file into a reshaped pyxem.signals.LazyElectronDiffraction2D object
     chunks are defined as (100, det_x, det_y)
 
     Parameters
@@ -277,7 +277,7 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
 
     if (
         data_pxm.metadata.Signal.signal_type == "TEM"
-        and data_pxm.metadata.Signal.exposure_time != None
+        and data_pxm.metadata.Signal.exposure_time is not None
     ):
         print(
             "This mib file appears to be TEM data. The stack is returned with no reshaping."
@@ -583,17 +583,17 @@ def _get_mib_depth(hdr_info, fp):
 
 
 def _mib_to_daskarr(fp, mmap_mode="r"):
-    """
-    Reads the binary mib file into a numpy memmap object and returns as dask array object
+    """Reads the binary mib file into a numpy memmap object and returns as dask array object.
 
     Parameters
-    --------------
+    ----------
     fp: str
         MIB file name / path
     mmap_mode: str
         memmpap read mode - default is 'r'
+
     Returns
-    --------------
+    -------
     data_da: dask array
         data as a dask array object
     """
@@ -629,8 +629,8 @@ def _mib_to_daskarr(fp, mmap_mode="r"):
 
 
 def _get_hdr_bits(hdr_info):
-    """
-    gets the number of character bits for the header for each frame given the data type
+    """Gets the number of character bits for the header for each frame given the data type.
+
     Parameters
     ----------
     hdr_info: dict
@@ -681,14 +681,14 @@ def _read_exposures(fp, pct_frames_to_read=0.1):
     For this to work, the tick in the Merlin software to print exp time into header must be selected!
 
     Parameters
-    -------------
+    ----------
     fp: str
         MIB file name / path
     pct_frames_to_read : float
         Percentage of frames to read, default value 0.1
 
     Returns
-    ------------
+    -------
     exp_time: list
         List of frame exposure times in seconds
     """
@@ -840,7 +840,7 @@ def _STEM_flag_dict(exp_times_list):
             scan_X = lines[-1]
             check = np.ravel(np.where(lines == scan_X, True, False))
             # Checking line lengths
-            start_ind = np.where(check == False)[0][-1] + 2
+            start_ind = np.where(check is False)[0][-1] + 2
             frames_to_skip = peaks[start_ind]
 
         flyback_times = list(times_set)
@@ -968,20 +968,21 @@ def _h5_chunk_write(data, saving_path):
 
 
 def _untangle_raw(data, hdr_info, stack_size):
-    """
-    Corrects for the tangled raw mib format - Only the case for quad chip is considered here.
+    """Corrects for the tangled raw mib format.
+
+    Only the case for quad chip is considered here.
 
     Parameters
-    --------
-        data: dask array
-            as stack with the detector array unreshaped, e.g. for a single frame 512*512: (1, 262144)
-        hdr_info: dict
-            info read from the header- ouput of the _parse_hdr function
-        stack_size: int
-            The number of frames in the data
-
-    Outputs
     ----------
+    data: dask array
+        as stack with the detector array unreshaped, e.g. for a single frame 512*512: (1, 262144)
+    hdr_info: dict
+        info read from the header- ouput of the _parse_hdr function
+    stack_size: int
+        The number of frames in the data
+
+    Returns
+    -------
     untangled_data: dask array
         corrected dask array object reshaped on the detector plane, e.g. for a single frame case
         as above: (1, 512, 512)
@@ -1031,7 +1032,6 @@ def _untangle_raw(data, hdr_info, stack_size):
 def reshape_4DSTEM_FlyBack(data):
     """Reshapes the lazy-imported frame stack to navigation dimensions determined
     based on stored exposure times.
-
 
     Parameters
     ----------
@@ -1116,7 +1116,7 @@ def reshape_4DSTEM_SumFrames(data):
     check = np.ravel(np.where(lines == line_len, True, False))
     # In case there is a False in there take the index of the last False
     if ~np.all(check):
-        start_ind = np.where(check == False)[0][-1] + 2
+        start_ind = np.where(check is False)[0][-1] + 2
         # Adding 2 - instead of 1 -  to be sure scan is OK
         skip_ind = peaks[0][start_ind]
     # In case they are all True take the index of the first True

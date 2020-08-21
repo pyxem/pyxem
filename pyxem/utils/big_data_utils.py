@@ -17,12 +17,11 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import hyperspy.api as hs
-import pyxem as pxm
 import numpy as np
 
 
 def _get_chunk_size(x_list, y_list):
-    """ finds chunk size and validates list entries """
+    """Finds chunk size and validates list entries."""
     chunk_size = x_list[1] - x_list[0]
     if chunk_size != (y_list[1] - y_list[0]):
         raise ValueError("x_list and y_list need to have the same chunksize")
@@ -38,7 +37,7 @@ def _get_chunk_size(x_list, y_list):
 
 
 def _load_and_cast(filepath, x, y, chunk_size):
-    """ Loads a chunk of a larger diffraction pattern"""
+    """Loads a chunk of a larger diffraction pattern."""
     s = hs.load(filepath, lazy=True)
     s = s.inav[x : x + chunk_size, y : y + chunk_size]
     s.compute(close_file=True)
@@ -47,8 +46,7 @@ def _load_and_cast(filepath, x, y, chunk_size):
 
 
 def _factory(fp, x, y, chunk_size, function):
-    """
-    Loads a chunk of a signal, and applies the UDF function
+    """Loads a chunk of a signal, and applies the UDF function.
 
     See Also
     --------
@@ -60,14 +58,13 @@ def _factory(fp, x, y, chunk_size, function):
 
 
 def _create_columns(results_list, left_index, right_index):
-    """ provides the vstack for ._combine_list_into_navigation_space """
+    """Provides the vstack for ._combine_list_into_navigation_space."""
 
     return np.vstack([x for x in results_list[left_index:right_index]])
 
 
 def _combine_list_into_navigation_space(results_list, x_list, y_list):
-    """
-    Internal function that combines the results_list into a correctly shaped
+    """Internal function that combines the results_list into a correctly shaped
     output object.
 
     See Also
@@ -87,23 +84,19 @@ def _combine_list_into_navigation_space(results_list, x_list, y_list):
 
 
 def chunked_application_of_UDF(filepath, x_list, y_list, function):
-    """
-    Applies a user specificed function to a diffraction pattern object with
+    """Applies a user specificed function to a diffraction pattern object with
     chunking for memory.
 
     Parameters
     ----------
     filepath : str
         Path to the file contain the data to be investigated
-
     x_list : list or np.array
         Iterable running from the "start" index to the final start "index" with a fixed step
         size. ie) Data total is as with dp.inav[start:final+step_size]
-
     y_list : list or np.array
         Iterable running from the "start" index to the final start "index" with a fixed step
         size. Step size must be the same as in x_list.
-
     function : function
         A user defined function that take a ElectronDiffraction2D as an argument and returns the desired output
 

@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""PDF generator and associated tools.
-
-"""
+"""PDF generator and associated tools."""
 
 import numpy as np
 from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
@@ -27,8 +25,7 @@ from pyxem.signals import transfer_navigation_axes
 
 class PDFGenerator1D:
     """Generates a PairDistributionFunction1D signal from a specified
-        ReducedIntensity1D signal.
-
+    ReducedIntensity1D signal.
 
     Parameters
     ----------
@@ -40,25 +37,26 @@ class PDFGenerator1D:
         self.signal = signal
 
     def get_pdf(self, s_min, s_max=None, r_min=0, r_max=20, r_increment=0.01):
-        """ Calculates the pdf from the reduced intensity signal.
+        """Calculates the pdf from the reduced intensity signal.
 
         Parameters
         ----------
         s_min : float
-                    Minimum scattering vector s for the pdf calculation. Note that s is
-                    defined here as s = 2 sin(theta)/lambda = 1/d.
+            Minimum scattering vector s for the pdf calculation. Note that s is
+            defined here as s = 2 sin(theta)/lambda = 1/d.
         s_max : float
-                    Maximum scattering vector s for the pdf calculation. Note that s is
-                    defined here as s = 2 sin(theta)/lambda = 1/d.
+            Maximum scattering vector s for the pdf calculation. Note that s is
+            defined here as s = 2 sin(theta)/lambda = 1/d.
         r_cutoff : list of float
-                    A list with the format [<r_min>, <r_max>], which sets the
-                    limits of the real space axis in the calculated PDF.
+            A list with the format [<r_min>, <r_max>], which sets the
+            limits of the real space axis in the calculated PDF.
         r_increment : float
-                    Step size in r in the extracted PDF.
+            Step size in r in the extracted PDF.
+
         Returns
         -------
         pdf : PDF1D
-                    A signal of pair distribution functions.
+            A signal of pair distribution functions.
         """
         s_scale = self.signal.axes_manager.signal_axes[0].scale
         if s_max is None:
