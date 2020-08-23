@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Indexation generator and associated tools.
-
-"""
+"""Indexation generator and associated tools."""
 
 import numpy as np
 
@@ -50,9 +48,10 @@ import lmfit
 
 
 def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
-    """
-    Takes a list of template coordinates and the corresponding list of template intensities, and returns the Fourier
-    transform of the template.
+    """Returns the Fourier transform of a list of templates.
+
+    Takes a list of template coordinates and the corresponding list of
+    template intensities, and returns the Fourier transform of the template.
 
     Parameters
     ----------
@@ -82,10 +81,9 @@ def get_fourier_transform(template_coordinates, template_intensities, shape, fsi
 
 
 def get_library_FT_dict(template_library, shape, fsize):
-    """
-    Takes a template library and converts it to a dictionary of Fourier transformed templates.
+    """Takes a template library and converts it to a dictionary of Fourier transformed templates.
 
-    Parameters:
+    Parameters
     ----------
     template_library: DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
@@ -94,11 +92,12 @@ def get_library_FT_dict(template_library, shape, fsize):
     fsize: list
         Dimensions of the Fourier transformed signal.
 
-    Returns:
+    Returns
     -------
     library_FT_dict: dict
         Dictionary containing the fourier transformed template library, together with the corresponding orientations and
         pattern norms.
+
     """
     library_FT_dict = {}
     for entry, library_entry in enumerate(template_library.values()):

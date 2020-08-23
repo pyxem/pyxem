@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Generating subpixel resolution on diffraction vectors.
-"""
+"""Generating subpixel resolution on diffraction vectors."""
 
 import numpy as np
 
@@ -26,8 +24,6 @@ from skimage.feature import register_translation
 from pyxem.utils.subpixel_refinements_utils import get_experimental_square
 from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
 from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
-
-import warnings
 
 
 def _conventional_xc(exp_disc, sim_disc, upsample_factor):
@@ -265,7 +261,7 @@ class SubpixelrefinementGenerator:
         return self.vectors_out
 
     def local_gaussian_method(self, square_size):
-        """
-        Removed in v0.13, please install a version prior to v.0.13 to use.
-        """
-        raise NotImplementedError("This functionality was removed in v.0.13.0, please use another method")
+        """Removed in v0.13, please install a version prior to v.0.13 to use."""
+        raise NotImplementedError(
+            "This functionality was removed in v.0.13.0, please use another method"
+        )
