@@ -16,9 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import pytest
 import pyxem.dummy_data.dummy_data as dd
 
-
+@pytest.mark.skip(reason="These tests are slow")
 class TestDummyDataModule:
     def test_simple_disk_shift(self):
         s = dd.get_disk_shift_simple_test_signal()
