@@ -23,8 +23,8 @@ from pyxem.signals.diffraction2d import Diffraction2D
 import pyxem.utils.radial_utils as ra
 import pyxem.dummy_data.make_diffraction_test_data as mdtd
 
+pytestmark = pytest.mark.skip(reason="Tests are slow") #skips module
 
-@pytest.mark.skip(reason="These tests are slow")
 class TestRadialModule:
     def test_centre_comparison(self):
         s = Diffraction2D(np.ones((20, 20)))

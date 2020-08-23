@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import pytest
 from pytest import approx, mark
 import math
 import numpy as np
@@ -27,6 +28,7 @@ import pyxem.dummy_data.make_diffraction_test_data as mdtd
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.signals.diffraction2d import Diffraction2D
 
+pytestmark = pytest.mark.skip(reason="Tests are slow") #skips module
 
 class TestIsEllipseGood:
     def test_simple(self):

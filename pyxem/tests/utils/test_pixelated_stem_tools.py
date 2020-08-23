@@ -23,6 +23,7 @@ from pyxem.signals.diffraction2d import Diffraction2D
 import pyxem.utils.pixelated_stem_tools as pst
 from hyperspy.signals import Signal2D
 
+pytestmark = pytest.mark.skip(reason="Tests are slow") #skips module
 
 class TestRadialIntegrationDaskArray:
     def test_simple(self):

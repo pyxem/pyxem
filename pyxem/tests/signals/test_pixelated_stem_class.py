@@ -29,6 +29,7 @@ import pyxem.dummy_data.make_diffraction_test_data as mdtd
 import pyxem.dummy_data.dummy_data as dd
 import pyxem.dummy_data.dask_test_data as dtd
 
+pytestmark = pytest.mark.skip(reason="Tests are slow") #skips module
 
 class TestDiffraction2D:
     def test_create(self):

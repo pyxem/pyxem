@@ -24,6 +24,7 @@ import pyxem.utils.dask_tools as dt
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.dummy_data.dask_test_data as dtd
 
+pytestmark = pytest.mark.skip(reason="Tests are slow") #skips module
 
 class TestCenterOfMassArray:
     def test_simple(self):
