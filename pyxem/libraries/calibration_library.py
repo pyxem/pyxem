@@ -43,8 +43,10 @@ class GenericCalibrationStandard:
 
 class GaussianRingStandard(GenericCalibrationStandard):
     def __init__(self, radius = 100, ):
-
-
+        pass
+class PolyCrystallineGold(GenericCalibrationStandard):
+    def __init__(self):
+        self.peak_positions[0.4247]
 
 
 class CalibrationDataLibrary(dict):

@@ -52,10 +52,21 @@ class CalibrationGenerator:
                  diffraction_pattern=None,
                  grating_image=None,
                  calibration_standard=None):
+        """
+        Parameters
+        ------------
+        diffraction_pattern: hyperspy.Signal2D
+            Some 2 dimensional signal or numpy array of some
+            standard sample used for calibration
+        grating_image:
+            Some 2 dimensional signal or numpy array of some
+            standard sample used for calibration
+        calibration_standard: diffsims.
+        """
         # Assign attributes
         self.diffraction_pattern = diffraction_pattern
         self.grating_image = grating_image
-        self.calibration_standard=calibration_standard
+        self.calibration_standard = calibration_standard
         self.ring_params = None
         self.affine_matrix = None
         self.rotation_angle = None
@@ -65,7 +76,7 @@ class CalibrationGenerator:
         self.navigation_calibration = None
 
     def __str__(self):
-        information_string = ("\n|Calibration Data|\n" + "=================\n"+
+        information_string = ("\n|Calibration Data|\n" + "=================\n" +
                               "Affine Matrix: " + str(self.affine_matrix) + "\n" +
                               "Rotation Angle:" + str(self.rotation_angle) + "\n" +
                               "Center: " + str(self.center))
@@ -83,6 +94,7 @@ class CalibrationGenerator:
         asymmetry=1,
         rotation=0,
         center=None,
+        standard ="Au"
     ):
         """Determine elliptical distortion of the diffraction pattern.
 
@@ -107,6 +119,9 @@ class CalibrationGenerator:
         rotation : float
             An initial guess for the rotation of the (elliptical) pattern
             in radians.
+        center: None or list
+            The center of the diffraction pattern.
+        standard: str
 
         Returns
         -------
