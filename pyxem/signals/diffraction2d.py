@@ -2207,10 +2207,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_dead_pixels.compute(progressbar=show_progressbar)
         return s_dead_pixels
 
-    def get_variance(self, npt_rad, method="Omega", thickness_filter=False, dqe=None, **kwargs):
-        """Calculates the variance using a method as described by Kelton in ___.
-        A shot noise corrections and thickness filtering are both possible if a thickness signal
-        and a detector quantum effiency are given.
+    def get_variance(self,
+                     npt_rad,
+                     method="Omega",
+                     dqe=None,
+                     spatial=False,
+                     **kwargs,
+                     navigation_axes = None,
+                     ):
+        """Calculates the variance using a method as described by Kelton in Nanobeam diffraction
+           fluctuation electron microscopy technique for structural characterization of disordered
+           materials-Application to Al88-xY7Fe5Tix metallic glasses. A shot noise correction and
+           and specification of axes to operate over are also possible.
 
         Parameters
         -------------
@@ -2218,20 +2226,50 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The number of radial points to calculate
         method: ["Omega", "r", "re", "VImage"]
             The method used to calcualte the variance
-        thickness_filter: bool
-            Boolean if a thickness filter should be applied.  Requires that a thickness Navigation signal
-            for the dataset be saved in the metadata.
         dqe: int
             The detector quantum efficiency or the pixel value for one electron.
+        spatial: bool
+            Included intermediate spatial variance in output if applicable...
+            Only relevant for method = "r"
         **kwargs: dict
             Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
         """
         if method is "Omega":
             one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
-            variance = ((one_d_integration**2).mean()/one_d_integration.mean()**2) - 1
+            variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
             if dqe is not None:
                 variance = variance - dqe/one_d_integration.mean()
             return variance
+
+        elif method is "r":
+            one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
+            integration_squared = (self ** 2).get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
+            # Full variance is the same as the unshifted phi=0 term in angular correlation
+            full_variance = (one_d_integration**2 /integration_squared)-1
+            if dqe is not None:
+                #need to check to make sure this is the proper treatment
+                full_variance = full_variance - dqe/one_d_integration.mean()
+            variance = full_variance.mean(axis=navigation_axes)
+            if spatial:
+                return variance, full_variance
+            else:
+                return variance
+        elif method is "re":
+            pass
+        elif method is "VImage":
+            mean_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
+            variance = mean_image.get_azimuthal_integral1d(npt_rad=npt_rad,**kwargs)
+            return variance
+        else:
+            raise ValueError('Method must be one of ["Omega", "r", "re", "VImage"].'
+                             'for more information read\n'
+                             'Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010).'
+                             ' Nanobeam diffraction fluctuation electron microscopy'
+                             ' technique for structural characterization of disordered'
+                             ' materials-Application to Al88-xY7Fe5Tix metallic glasses.'
+                             ' Ultramicroscopy, 110(10), 1279–1289.\n'
+                             ' https://doi.org/10.1016/j.ultramic.2010.05.010')
+
 
     def find_hot_pixels(
         self,
