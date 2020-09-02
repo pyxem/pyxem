@@ -39,7 +39,7 @@ def load_mib(mib_path, reshape=True, flip=True):
         The full path of the .mib file to be read.
     reshape: boolean
         Keyword argument to control reshaping of the stack (default is True).
-        It attepmts to reshape using the flyback pixel.
+        It attempts to reshape using the flyback pixel.
     flip: boolean
         Keyword argument to vertically flip the diffraction signal (default)
         or return unchanged. The metadata is updated accordingly.
@@ -112,7 +112,7 @@ def load_mib(mib_path, reshape=True, flip=True):
 
     data_pxm = LazyElectronDiffraction2D(data)
 
-    # Tranferring dict info to metadata
+    # Transferring dict info to metadata
     if data_dict["STEM_flag"] == 1:
         data_pxm.metadata.Signal.signal_type = "STEM"
     else:
@@ -263,7 +263,7 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
         exp_times_list = _read_exposures(mib_path)
     data_dict = _STEM_flag_dict(exp_times_list)
 
-    # Tranferring dict info to metadata
+    # Transferring dict info to metadata
     if data_dict["STEM_flag"] == 1:
         data_pxm.metadata.Signal.signal_type = "STEM"
     else:
@@ -389,7 +389,7 @@ def _parse_hdr(fp):
     -------
     hdr_info : dict
         Dictionary containing header info extracted from .mib file.
-        the entries of the dictionary are as follows:
+        The entries of the dictionary are as follows:
         'width': int
             pixels, detector number of pixels in x direction,
         'height': int
@@ -868,7 +868,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False, stack_num=1000)
     raw_binary: boolean
         default False - Need to be True for binary RAW data
     stack_num: int
-        number of frames written to the h5 file in each iteration. default set at 1000
+        number of frames written to the h5 file in each iteration. Default set at 1000
 
     Returns
     -------
@@ -977,7 +977,7 @@ def _untangle_raw(data, hdr_info, stack_size):
     data: dask array
         as stack with the detector array unreshaped, e.g. for a single frame 512*512: (1, 262144)
     hdr_info: dict
-        info read from the header- ouput of the _parse_hdr function
+        info read from the header- output of the _parse_hdr function
     stack_size: int
         The number of frames in the data
 
@@ -1079,7 +1079,7 @@ def reshape_4DSTEM_SumFrames(data):
     Reshapes the lazy-imported stack of dimensions: (xxxxxx|Det_X, Det_Y) to the correct scan pattern
     shape: (x, y | Det_X, Det_Y) when the frame exposure times are not in headre bits.
     It utilises the over-exposed fly-back frame to identify the start of the lines in the first 20
-    lines of frames,checks line length consistancy and finds the number of frames to skip at the
+    lines of frames, checks line length consistency and finds the number of frames to skip at the
     beginning (this number is printed out as string output).
 
     Parameters
@@ -1132,6 +1132,6 @@ def reshape_4DSTEM_SumFrames(data):
     data_skip.get_dimensions_from_data()
     print("Reshaping using the frame intensity sums of the first 20 lines")
     print("Number of frames skipped at the beginning: ", skip_ind)
-    # Cropping the flyaback pixel at the start
+    # Cropping the flyback pixel at the start
     data_skip = data_skip.inav[1:]
     return data_skip
