@@ -249,9 +249,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         map_kwargs={},
         detector=None,
         detector_dist=None,
+        sum=False,
         correctSolidAngle=True,
         ai_kwargs={},
-        sum=False,
         integrate1d_kwargs={},
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
@@ -448,7 +448,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range: None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
-       azimuth_range:None or (float, float)
+        azimuth_range:None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
         wavelength: None or float
@@ -459,10 +459,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             if pyFAI is used for unit handling
         inplace: bool
             If the signal is overwritten or copied to a new signal
+        method: str
+            Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
+            “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
+            to go on GPU. To Specify the device: “csr_ocl_1,2”
         detector: pyFai.detector.Detector
             The detector set up to be used by the integrator
+        sum: bool
+            If true the radial integration is returned rather then the Azimuthal Integration.
         detector_dist: float
             distance sample - detector plan (orthogonal distance, not along the beam), in meter.
+        correctSolidAngle: bool
+            Account for Ewald sphere or not. From PYFAI.
         map_kwargs: dict
             Any other keyword arguments for hyperspys map function
         integrate2d_kwargs:dict
@@ -484,7 +492,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.get_azimuthal_integral1d(npt_rad=100, wavelength=2.5e-12)
+        >>> ds.get_azimuthal_integral2d(npt_rad=100, wavelength=2.5e-12)
 
         Using pyFAI to define a detector case using a curved Ewald Sphere approximation and pyXEM units
 
