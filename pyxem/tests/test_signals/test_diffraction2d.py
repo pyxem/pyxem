@@ -108,7 +108,7 @@ class TestAzimuthalIntegral1d:
     @pytest.mark.parametrize(
         "unit", ["q_nm^-1", "q_A^-1", "k_nm^-1", "k_A^-1", "2th_deg", "2th_rad"]
     )
-    def test_1d_azimuthal_integral_fast_2th_units(self, ones, unit):
+    def test_1d_azimuthal_integral_2th_units(self, ones, unit):
         ones.unit = unit
         az = ones.get_azimuthal_integral1d(
             npt_rad=10, wavelength=1e-9, correctSolidAngle=False
@@ -168,42 +168,11 @@ class TestAzimuthalIntegral1d:
         )
         assert isinstance(az, Diffraction1D)
 
-    def test_1d_azimuthal_integral_slow(self, ones):
-        from hyperspy.signals import BaseSignal
-
-        aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
-        aff_bs = BaseSignal(data=aff)
-        ones.get_azimuthal_integral1d(
-            npt_rad=10,
-            method="BBox",
-            wavelength=1e-9,
-            correctSolidAngle=False,
-            affine=aff_bs,
-        )
-
-    def test_1d_azimuthal_integral_slow_shifted_center(self, ones):
-        from hyperspy.signals import BaseSignal
-
-        aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
-        aff_bs = BaseSignal(data=aff)
-        center = [1, 1]
-        center_bs = BaseSignal(data=center)
-        ones.get_azimuthal_integral1d(
-            npt_rad=10,
-            method="BBox",
-            wavelength=1e-9,
-            correctSolidAngle=False,
-            affine=aff_bs,
-            center=center_bs,
-        )
-
     def test_1d_azimuthal_integral_slow_mask(self, ones):
         from hyperspy.signals import BaseSignal
 
         aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
-        aff_bs = BaseSignal(data=aff)
         center = [1, 1]
-        center_bs = BaseSignal(data=center)
         mask = np.zeros((10, 10))
         mask_bs = BaseSignal(data=mask)
         ones.get_azimuthal_integral1d(
@@ -211,8 +180,8 @@ class TestAzimuthalIntegral1d:
             method="BBox",
             wavelength=1e-9,
             correctSolidAngle=False,
-            affine=aff_bs,
-            center=center_bs,
+            affine=aff,
+            center=center,
             mask=mask_bs,
         )
 
@@ -235,6 +204,11 @@ class TestAzimuthalIntegral1d:
         integration = ones.get_azimuthal_integral1d(npt_rad=10)
         assert integration is None
 
+    def test_1d_azimuthal_integral_sum(self, ones):
+        integration = ones.get_azimuthal_integral1d(npt_rad=5, radial_range=[0, .5], sum=True)
+        # 5^2*pi = 78.5
+        np.testing.assert_almost_equal(integration.data.sum(), 78.5, decimal=0)
+
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture
@@ -247,7 +221,7 @@ class TestAzimuthalIntegral2d:
         ones_diff.unit = "2th_deg"
         return ones_diff
 
-    def test_2d_azimuthal_integral_fast(self, ones):
+    def test_2d_azimuthal_integral(self, ones):
         az = ones.get_azimuthal_integral2d(
             npt_rad=10, npt_azim=10, method="BBox", correctSolidAngle=False
         )
@@ -296,7 +270,7 @@ class TestAzimuthalIntegral2d:
     @pytest.mark.parametrize("correctSolidAngle", [True, False])
     @pytest.mark.parametrize("center", [None, [7, 7]])
     @pytest.mark.parametrize("affine", [None, [[1, 0, 0], [0, 1, 0], [0, 0, 1]]])
-    def test_2d_azimuthal_integral_fast_params(
+    def test_2d_azimuthal_integral_params(
         self, ones, radial_range, azimuth_range, correctSolidAngle, center, affine
     ):
         az = ones.get_azimuthal_integral2d(
@@ -317,44 +291,10 @@ class TestAzimuthalIntegral2d:
         integration = ones.get_azimuthal_integral2d(npt_rad=10)
         assert integration is None
 
-    def test_2d_azimuthal_integral_slow(self, ones):
+    def test_2d_azimuthal_integral_mask_iterate(self, ones):
         from hyperspy.signals import BaseSignal
-
         aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
-        aff_bs = BaseSignal(data=aff)
-        ones.get_azimuthal_integral2d(
-            npt_rad=10,
-            npt_azim=10,
-            method="BBox",
-            wavelength=1e-9,
-            correctSolidAngle=False,
-            affine=aff_bs,
-        )
-
-    def test_2d_azimuthal_integral_slow_shifted_center(self, ones):
-        from hyperspy.signals import BaseSignal
-
-        aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
-        aff_bs = BaseSignal(data=aff)
         center = [1, 1]
-        center_bs = BaseSignal(data=center)
-        ones.get_azimuthal_integral2d(
-            npt_rad=10,
-            npt_azim=10,
-            method="BBox",
-            wavelength=1e-9,
-            correctSolidAngle=False,
-            affine=aff_bs,
-            center=center_bs,
-        )
-
-    def test_2d_azimuthal_integral_slow_mask(self, ones):
-        from hyperspy.signals import BaseSignal
-
-        aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
-        aff_bs = BaseSignal(data=aff)
-        center = [1, 1]
-        center_bs = BaseSignal(data=center)
         mask = np.zeros((10, 10))
         mask_bs = BaseSignal(data=mask)
         ones.get_azimuthal_integral2d(
@@ -363,8 +303,8 @@ class TestAzimuthalIntegral2d:
             method="BBox",
             wavelength=1e-9,
             correctSolidAngle=False,
-            affine=aff_bs,
-            center=center_bs,
+            affine=aff,
+            center=center,
             mask=mask_bs,
         )
 
@@ -381,6 +321,11 @@ class TestAzimuthalIntegral2d:
             correctSolidAngle=False,
             unit="q_nm^-1",
         )
+
+    def test_2d_azimuthal_integral_sum(self, ones):
+        integration = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=15, radial_range=[0, .5], sum=True)
+        #  mostly correct except for at the very center where things get weird...
+        np.testing.assert_almost_equal(integration.data.sum(), 78.5, 0)
 
 
 class TestVirtualImaging:

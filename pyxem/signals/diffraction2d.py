@@ -53,10 +53,8 @@ from pyxem.utils.pyfai_utils import (
 )
 
 from pyxem.utils.expt_utils import (
-    azimuthal_integrate1d_slow,
-    azimuthal_integrate1d_fast,
-    azimuthal_integrate2d_slow,
-    azimuthal_integrate2d_fast,
+    azimuthal_integrate1d,
+    azimuthal_integrate2d,
     gain_normalise,
     remove_dead,
     regional_filter,
@@ -253,7 +251,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         detector_dist=None,
         correctSolidAngle=True,
         ai_kwargs={},
-        integrate2d_kwargs={},
+        sum=False,
+        integrate1d_kwargs={},
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
 
@@ -269,9 +268,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ---------------
         npt_rad: int
             The number of radial points to calculate
-        center: None or (x,y) or BaseSignal
+        center: None or (x,y)
             The center of the pattern in pixels to preform the integration around
-        affine: 3x3 array or BaseSignal
+        affine: 3x3 array
             An affine transformation to apply during the transformation
              (creates a spline map that is used by pyFAI)
         mask:  boolean array or BaseSignal
@@ -280,7 +279,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range: None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
-        azim_range:None or (float, float)
+        azimuth_range:None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
         wavelength: None or float
@@ -291,10 +290,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             if pyFAI is used for unit handling
         inplace: bool
             If the signal is overwritten or copied to a new signal
+        method: str
+             Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
+             “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
+             to go on GPU. To Specify the device: “csr_ocl_1,2”
         detector: pyFai.detector.Detector
             The detector set up to be used by the integrator
         detector_dist: float
             distance sample - detector plan (orthogonal distance, not along the beam), in meter.
+        sum: bool
+            If true returns the pixel split sum rather than the azimuthal integration which
+            gives the mean.
+        correctSolidAngle: bool
+            Account for Ewald sphere or not.
         map_kwargs: dict
             Any other keyword arguments for hyperspys map function
         integrate2d_kwargs:dict
@@ -342,76 +350,35 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 return None
             setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
             detector, detector_dist, radial_range, unit, scale_factor = setup
-        use_iterate = any(
-            [
-                isinstance(mask, BaseSignal),
-                isinstance(affine, BaseSignal),
-                isinstance(center, BaseSignal),
-            ]
-        )
-        if use_iterate:
-            if radial_range is None:  # need consistent range
-                if isinstance(center, BaseSignal):
-                    ind = (0,) * len(self.axes_manager.navigation_shape)
-                    cen = center.inav[ind].data
-                else:
-                    cen = center
-                ai = get_azimuthal_integrator(
-                    detector=detector,
-                    detector_distance=detector_dist,
-                    shape=sig_shape,
-                    center=cen,
-                    wavelength=wavelength,
-                )  # take 1st center
-                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
-                radial_range[0] = 0
-            integration = self.map(
-                azimuthal_integrate1d_slow,
-                detector=detector,
-                center=center,
-                mask=mask,
-                affine=affine,
-                detector_distance=detector_dist,
-                npt_rad=npt_rad,
-                wavelength=wavelength,
-                radial_range=radial_range,
-                azimuth_range=azimuth_range,
-                inplace=inplace,
-                unit=unit,
-                method=method,
-                correctSolidAngle=correctSolidAngle,
-                **integrate2d_kwargs,
-                **map_kwargs
-            )  # Uses slow methodology
-
-        else:  # much simpler and no changing integrator without using map iterate
-            ai = get_azimuthal_integrator(
-                detector=detector,
-                detector_distance=detector_dist,
-                shape=sig_shape,
-                center=center,
-                affine=affine,
-                mask=mask,
-                wavelength=wavelength,
-                **ai_kwargs
+         # much simpler and no changing integrator without using map iterate
+        ai = get_azimuthal_integrator(
+            detector=detector,
+            detector_distance=detector_dist,
+            shape=sig_shape,
+            center=center,
+            affine=affine,
+            mask=mask,
+            wavelength=wavelength,
+            **ai_kwargs
             )
-            if radial_range is None:
-                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
-                radial_range[0] = 0
-            print(radial_range)
+        if radial_range is None:
+            radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+            radial_range[0] = 0
+        print(radial_range)
 
-            integration = self.map(
-                azimuthal_integrate1d_fast,
-                azimuthal_integrator=ai,
-                npt_rad=npt_rad,
-                azimuth_range=azimuth_range,
-                radial_range=radial_range,
-                method=method,
-                inplace=inplace,
-                unit=unit,
-                correctSolidAngle=correctSolidAngle,
-                **integrate2d_kwargs,
-                **map_kwargs
+        integration = self.map(
+            azimuthal_integrate1d,
+            azimuthal_integrator=ai,
+            npt_rad=npt_rad,
+            azimuth_range=azimuth_range,
+            radial_range=radial_range,
+            method=method,
+            inplace=inplace,
+            unit=unit,
+            correctSolidAngle=correctSolidAngle,
+            sum=sum,
+            **integrate1d_kwargs,
+            **map_kwargs
             )
 
         # Dealing with axis changes
@@ -448,6 +415,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method="splitpixel",
         map_kwargs={},
         detector=None,
+        sum=False,
         detector_dist=None,
         correctSolidAngle=True,
         ai_kwargs={},
@@ -469,18 +437,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The number of radial points to calculate
         npt_azim: int
             The number of azimuthal points to calculate
-        center: None or (x,y) or BaseSignal
+        center: None or (x,y)
             The center of the pattern in pixels to preform the integration around
-        affine: 3x3 array or BaseSignal
+        affine: 3x3 array
             An affine transformation to apply during the transformation
-             (creates a spline map that is used by pyFAI)
+            (creates a spline map that is used by pyFAI)
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
             If mask is a baseSignal then it is itereated over as well.
         radial_range: None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
-        azim_range:None or (float, float)
+       azimuth_range:None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
         wavelength: None or float
@@ -522,11 +490,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         >>> from pyFAI.detectors import Detector
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
-        >>> ds.get_azimuthal_integral1d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
+        >>> ds.get_azimuthal_integral2d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
-
         if unit == "pyxem":
             pyxem_units = True
             pixel_scale = [
@@ -541,77 +508,33 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 return
             setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
             detector, detector_dist, radial_range, unit, scale_factor = setup
-        use_iterate = any(
-            [
-                isinstance(mask, BaseSignal),
-                isinstance(affine, BaseSignal),
-                isinstance(center, BaseSignal),
-            ]
-        )
-        if use_iterate:
-            if radial_range is None:  # need consistent range
-                if isinstance(center, BaseSignal):
-                    ind = (0,) * len(self.axes_manager.navigation_shape)
-                    cen = center.inav[ind].data
-                else:
-                    cen = center
-                ai = get_azimuthal_integrator(
-                    detector=detector,
-                    detector_distance=detector_dist,
-                    shape=sig_shape,
-                    center=cen,
-                    wavelength=wavelength,
-                )  # take 1st center
-                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
-                radial_range[0] = 0
-            integration = self.map(
-                azimuthal_integrate2d_slow,
-                npt_azim=npt_azim,
-                detector=detector,
-                center=center,
-                mask=mask,
-                affine=affine,
-                detector_distance=detector_dist,
-                npt_rad=npt_rad,
-                wavelength=wavelength,
-                radial_range=radial_range,
-                azimuth_range=azimuth_range,
-                inplace=inplace,
-                unit=unit,
-                method=method,
-                correctSolidAngle=correctSolidAngle,
-                **integrate2d_kwargs,
-                **map_kwargs
-            )  # Uses slow methodology
-
-        else:  # much simpler and no changing integrator without using map iterate
-            ai = get_azimuthal_integrator(
-                detector=detector,
-                detector_distance=detector_dist,
-                shape=sig_shape,
-                center=center,
-                affine=affine,
-                mask=mask,
-                wavelength=wavelength,
-                **ai_kwargs
+        ai = get_azimuthal_integrator(
+            detector=detector,
+            detector_distance=detector_dist,
+            shape=sig_shape,
+            center=center,
+            affine=affine,
+            wavelength=wavelength,
+            **ai_kwargs
             )
-            if radial_range is None:
-                radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
-                radial_range[0] = 0
-
-            integration = self.map(
-                azimuthal_integrate2d_fast,
-                azimuthal_integrator=ai,
-                npt_rad=npt_rad,
-                npt_azim=npt_azim,
-                azimuth_range=azimuth_range,
-                radial_range=radial_range,
-                method=method,
-                inplace=inplace,
-                unit=unit,
-                correctSolidAngle=correctSolidAngle,
-                **integrate2d_kwargs,
-                **map_kwargs
+        if radial_range is None:
+            radial_range = _get_radial_extent(ai=ai, shape=sig_shape, unit=unit)
+            radial_range[0] = 0
+        integration = self.map(
+            azimuthal_integrate2d,
+            azimuthal_integrator=ai,
+            npt_rad=npt_rad,
+            npt_azim=npt_azim,
+            azimuth_range=azimuth_range,
+            radial_range=radial_range,
+            method=method,
+            inplace=inplace,
+            unit=unit,
+            mask=mask,
+            sum=sum,
+            correctSolidAngle=correctSolidAngle,
+            **integrate2d_kwargs,
+            **map_kwargs
             )
 
         # Dealing with axis changes

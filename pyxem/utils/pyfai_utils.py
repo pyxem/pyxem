@@ -144,3 +144,4 @@ def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
     if radial_range is not None:
         radial_range = [radial_range[0] * scale_factor, radial_range[1] * scale_factor]
     return detector, detector_distance, radial_range, unit, scale_factor
+
