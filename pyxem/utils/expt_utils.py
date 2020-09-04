@@ -109,7 +109,12 @@ def _polar2cart(r, theta):
     return x, y
 
 
-def azimuthal_integrate1d(z, azimuthal_integrator, npt_rad, mask=None, sum=False, **kwargs):
+def azimuthal_integrate1d(z,
+                          azimuthal_integrator,
+                          npt_rad,
+                          mask=None,
+                          sum=False,
+                          **kwargs):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -125,6 +130,10 @@ def azimuthal_integrate1d(z, azimuthal_integrator, npt_rad, mask=None, sum=False
         the integral.
     npt_rad:
         The number of radial points to integrate
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean. 
     **kwargs :
         Keyword arguments to be passed to ai.integrate2d
     Returns
