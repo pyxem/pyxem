@@ -133,7 +133,7 @@ def azimuthal_integrate1d(z,
     mask: Boolean Array
         A boolean array with pixels to ignore
     sum: bool
-        Returns the integrated intensity rather than the mean. 
+        Returns the integrated intensity rather than the mean.
     **kwargs :
         Keyword arguments to be passed to ai.integrate2d
     Returns
