@@ -210,6 +210,8 @@ def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
         One-dimensional azimuthal integral of z.
     """
     output = azimuthal_integrator.integrate1d(z, npt=npt_rad, **kwargs)
+    print("Sum:", output._sum_signal)
+    print("Output:", output)
     return output[1]
 
 
@@ -321,6 +323,7 @@ def azimuthal_integrate2d_fast(
     output = azimuthal_integrator.integrate2d(
         z, npt_rad=npt_rad, npt_azim=npt_azim, **kwargs
     )
+    print("Sum:", output._sum_signal)
     return np.transpose(output[0])
 
 

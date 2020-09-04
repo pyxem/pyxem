@@ -244,12 +244,83 @@ class TestVariance:
         ones_diff.axes_manager.signal_axes[0].name = "kx"
         ones_diff.axes_manager.signal_axes[1].name = "ky"
         ones_diff.unit = "2th_deg"
-        ones_diff.add_navigation_signal(data=np.ones((10, 10)), name="thickness", unit="nm")
+        return ones_diff
+    @pytest.fixture
+    def ones_zeros(self):
+        data = np.ones(shape=(10, 10, 10, 10))
+        data[0:10:2, :, :, :] = 2
+        ones_diff = Diffraction2D(data=data)
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
         return ones_diff
 
-    def test_FEM(self, ones):
-        v = ones.get_variance(5)
-        np.testing.assert_equal(v.data, np.zeros(5))
+    @pytest.fixture
+    def bulls_eye_noisy(self):
+        x, y = np.mgrid[-25:25, -25:25]
+        data = (x**2+y**2)**0.5
+        print(data)
+        data = np.tile(data, (5, 5, 1, 1))
+        # Electron is equal to 1 count in image
+        data = np.random.poisson(lam=data)
+        print(data[1, 1, :, :])
+        ones_diff = Diffraction2D(data=data)
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        return ones_diff
+
+    def test_FEM_Omega(self, ones, ones_zeros, bulls_eye_noisy):
+        ones_variance = ones.get_variance(npt_rad=5, method="Omega")
+        assert ones_variance.axes_manager[0].units == "2th_deg"
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="Omega")
+        np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.ones(5)*.1111, decimal=3)
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="Omega", dqe=1)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="Omega", dqe=10)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
+
+    def test_FEM_r(self, ones, ones_zeros, bulls_eye_noisy):
+        ones_variance = ones.get_variance(npt_rad=5, method="r")
+        assert ones_variance.axes_manager[0].units == "2th_deg"
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="r")
+        np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.zeros(5), decimal=3)
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="r", dqe=1)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="r", dqe=10)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
+
+    def test_FEM_VImage(self, ones):
+        v = ones.get_variance(npt_rad=5, method="VImage")
+        np.testing.assert_array_almost_equal(v.data, np.zeros(5), decimal=3)
+        assert v.axes_manager[0].units == "2th_deg"
+
+    def test_FEM_re(self, ones, ones_zeros, bulls_eye_noisy):
+        ones_variance = ones.get_variance(npt_rad=5, method="re")
+        assert ones_variance.axes_manager[0].units == "2th_deg"
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="re")
+        np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.ones(5)*0.1111, decimal=3)
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="re", dqe=1)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(25, method="re", dqe=10)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
+
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture

@@ -2209,11 +2209,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     def get_variance(self,
                      npt_rad,
+                     npt_azim=300,
                      method="Omega",
                      dqe=None,
                      spatial=False,
+                     navigation_axes=None,
                      **kwargs,
-                     navigation_axes = None,
                      ):
         """Calculates the variance using a method as described by Kelton in Nanobeam diffraction
            fluctuation electron microscopy technique for structural characterization of disordered
@@ -2224,13 +2225,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         -------------
         npt_rad: int
             The number of radial points to calculate
+        npt_azim: int
+            The number of azimuthal points to use.  This is largely unused unless DQE is not None
+            and method = "Omega".  Used to calculate the radial integration.
         method: ["Omega", "r", "re", "VImage"]
-            The method used to calcualte the variance
+            The method used to calculate the variance
         dqe: int
             The detector quantum efficiency or the pixel value for one electron.
         spatial: bool
             Included intermediate spatial variance in output if applicable...
             Only relevant for method = "r"
+        navigation_axes: list or none
+            The axes to calculate the variance over.  The default is to use the navigation axes.
         **kwargs: dict
             Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
         """
@@ -2238,27 +2244,47 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
             variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
             if dqe is not None:
-                variance = variance - dqe/one_d_integration.mean()
+                sum_points = self.get_azimuthal_integral2d(npt_rad=npt_rad,
+                                                           npt_azim=npt_azim,
+                                                           method="BBox",
+                                                           **kwargs).sum(axis=-2).mean(axis=navigation_axes)
+                print("Correction:", sum_points.data)
+                print(variance.data)
+                variance = variance - (sum_points**-1)*(1/dqe)
+                print(variance.data)
             return variance
 
         elif method is "r":
             one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
             integration_squared = (self ** 2).get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
             # Full variance is the same as the unshifted phi=0 term in angular correlation
-            full_variance = (one_d_integration**2 /integration_squared)-1
+            full_variance = (integration_squared/one_d_integration**2)-1
             if dqe is not None:
-                #need to check to make sure this is the proper treatment
-                full_variance = full_variance - dqe/one_d_integration.mean()
+                full_variance = full_variance - (one_d_integration**-1)*(1/dqe)
             variance = full_variance.mean(axis=navigation_axes)
             if spatial:
                 return variance, full_variance
             else:
                 return variance
         elif method is "re":
-            pass
+            one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs).mean(axis=navigation_axes)
+            print(one_d_integration.data)
+            integration_squared = (self ** 2).get_azimuthal_integral1d(
+                                                                       npt_rad=npt_rad,
+                                                                       **kwargs).mean(
+                                                                                     axis=navigation_axes)
+            variance = (integration_squared/one_d_integration**2) - 1
+
+            if dqe is not None:
+                sum_int = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs).mean()
+                print(sum_int.data)
+                variance = variance - (sum_int**-1)*(1/dqe)
+            return variance
         elif method is "VImage":
-            mean_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
-            variance = mean_image.get_azimuthal_integral1d(npt_rad=npt_rad,**kwargs)
+            variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
+            if dqe is not None:
+                variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
+            variance = variance_image.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
             return variance
         else:
             raise ValueError('Method must be one of ["Omega", "r", "re", "VImage"].'
