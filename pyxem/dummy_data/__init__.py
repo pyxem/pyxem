@@ -15,19 +15,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for two-dimensional diffraction variance."""
-
-from pyxem.signals.diffraction2d import Diffraction2D
-from hyperspy.signals import Signal2D
-
-
-class DiffractionVariance2D(Diffraction2D):
-    _signal_type = "diffraction_variance"
-
-    pass
-
-
-class ImageVariance(Signal2D):
-    _signal_type = "image_variance"
-
-    pass

@@ -25,7 +25,6 @@ from hyperspy.signals import BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction2d import Diffraction2D
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from diffsims.utils.sim_utils import get_electron_wavelength
 
 

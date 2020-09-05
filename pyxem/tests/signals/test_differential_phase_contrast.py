@@ -16,8 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import pytest
 from pytest import approx
+from tempfile import TemporaryDirectory
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
 from pyxem.signals.differential_phase_contrast import (
@@ -28,6 +30,7 @@ from pyxem.signals.differential_phase_contrast import (
 import pyxem.dummy_data.dummy_data as dd
 import pyxem.utils.pixelated_stem_tools as pst
 from pyxem.utils.dpc_utils import make_bivariate_histogram
+import pyxem as pxm
 
 
 class TestDpcBasesignalCreate:
@@ -369,3 +372,70 @@ class TestGaussianBlur:
         assert s.data[1, 20, 15] < 0
         assert_almost_equal(10, s.data[0].sum())
         assert_almost_equal(-10, s.data[1].sum())
+
+
+class TestDpcsignalIo:
+    def setup_method(self):
+        self.tmpdir = TemporaryDirectory()
+
+    def teardown_method(self):
+        self.tmpdir.cleanup()
+
+    def test_load_basesignal(self):
+        s = DPCBaseSignal([10, 20]).T
+        assert s.axes_manager.signal_dimension == 0
+        assert s.axes_manager.navigation_dimension == 1
+        filename = os.path.join(self.tmpdir.name, "dpcbasesignal.hspy")
+        s.save(filename)
+        s_load = pxm.load(filename)
+        assert s.__class__ == s_load.__class__
+        assert s_load.axes_manager.signal_dimension == 0
+        assert s_load.axes_manager.navigation_dimension == 1
+
+    def test_load_signal1d(self):
+        s = DPCSignal1D(np.ones((2, 10)))
+        assert s.axes_manager.signal_dimension == 1
+        assert s.axes_manager.navigation_dimension == 1
+        filename = os.path.join(self.tmpdir.name, "dpcsignal1d.hspy")
+        s.save(filename)
+        s_load = pxm.load(filename)
+        assert s.__class__ == s_load.__class__
+        assert s_load.axes_manager.signal_dimension == 1
+        assert s_load.axes_manager.navigation_dimension == 1
+
+    def test_load_signal2d(self):
+        s = DPCSignal2D(np.ones((2, 10, 20)))
+        assert s.axes_manager.signal_dimension == 2
+        assert s.axes_manager.navigation_dimension == 1
+        filename = os.path.join(self.tmpdir.name, "dpcsignal2d.hspy")
+        s.save(filename)
+        s_load = pxm.load(filename)
+        assert s.__class__ == s_load.__class__
+        assert s_load.axes_manager.signal_dimension == 2
+        assert s_load.axes_manager.navigation_dimension == 1
+
+    def test_retain_metadata(self):
+        s = DPCSignal2D(np.ones((2, 10, 5)))
+        s.metadata.General.title = "test_data"
+        filename = os.path.join(self.tmpdir.name, "test_metadata.hspy")
+        s.save(filename)
+        s_load = pxm.load(filename)
+        assert s_load.metadata.General.title == "test_data"
+
+    def test_retain_axes_manager(self):
+        s = DPCSignal2D(np.ones((2, 10, 5)))
+        s_sa0 = s.axes_manager.signal_axes[0]
+        s_sa1 = s.axes_manager.signal_axes[1]
+        s_sa0.offset, s_sa1.offset, s_sa0.scale, s_sa1.scale = 20, 10, 0.2, 0.3
+        s_sa0.units, s_sa1.units, s_sa0.name, s_sa1.name = "a", "b", "e", "f"
+        filename = os.path.join(self.tmpdir.name, "test_axes_manager.hspy")
+        s.save(filename)
+        s_load = pxm.load(filename)
+        assert s_load.axes_manager[1].offset == 20
+        assert s_load.axes_manager[2].offset == 10
+        assert s_load.axes_manager[1].scale == 0.2
+        assert s_load.axes_manager[2].scale == 0.3
+        assert s_load.axes_manager[1].units == "a"
+        assert s_load.axes_manager[2].units == "b"
+        assert s_load.axes_manager[1].name == "e"
+        assert s_load.axes_manager[2].name == "f"

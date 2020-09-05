@@ -29,14 +29,11 @@ from transforms3d.quaternions import qmult, qinverse
 from pyxem.utils.indexation_utils import get_phase_name_and_index
 from pyxem.signals import transfer_navigation_axes_to_signal_axes
 
-"""
-Signal class for crystallographic phase and orientation maps.
-"""
+"""Signal class for crystallographic phase and orientation maps."""
 
 
 def load_mtex_map(filename):
-    """
-    Loads a crystallographic map saved by previously saved via .save_map()
+    """Loads a crystallographic map saved by previously saved via .save_map()
 
     Columns:
     1 = phase id,
@@ -130,7 +127,7 @@ def _distance_from_fixed_angle(angle, fixed_angle):
 
 
 def _metric_from_dict(metric_dict, metric):
-    """ Utility function for retrieving an entry in a dictionary. Used to map
+    """Utility function for retrieving an entry in a dictionary. Used to map
     over dicts in signal space.
 
     Parameters
@@ -187,8 +184,7 @@ class CrystallographicMap(BaseSignal):
     # def get_phase_names(self, library)
 
     def get_phase_map(self):
-        """Obtain a map of the best matching phase at each navigation position.
-        """
+        """Obtain a map of the best matching phase at each navigation position."""
         phase_map = self.isig[0].as_signal2D((0, 1))
         phase_map = transfer_navigation_axes_to_signal_axes(phase_map, self)
         phase_map.change_dtype(np.int)

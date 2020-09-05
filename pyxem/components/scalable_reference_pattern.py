@@ -40,10 +40,8 @@ class ScalableReferencePattern(Component):
 
     Attributes
     ----------
-
     D : list
         List containing matrix components for affine matrix
-
     order : 1, 3
         Interpolation order used when applying image transformation
 
@@ -97,7 +95,6 @@ class ScalableReferencePattern(Component):
 
         Returns
         -------
-
         D : DisplacementGradientMap
             Signal containing the displacement gradient tensor at each
             navigation postion.

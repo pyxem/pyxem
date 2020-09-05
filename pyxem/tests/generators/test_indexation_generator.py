@@ -21,7 +21,10 @@ import numpy as np
 
 from pyxem.generators.indexation_generator import ProfileIndexationGenerator
 from pyxem.generators.indexation_generator import VectorIndexationGenerator
-from pyxem.generators.indexation_generator import get_fourier_transform, get_library_FT_dict
+from pyxem.generators.indexation_generator import (
+    get_fourier_transform,
+    get_library_FT_dict,
+)
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.libraries.diffraction_library import DiffractionLibrary
@@ -102,7 +105,6 @@ def test_profile_indexation_generator_init(profile_simulation):
     assert isinstance(pig, ProfileIndexationGenerator)
 
 
-
 def test_profile_indexation_generator_single_indexation(profile_simulation):
     pig = ProfileIndexationGenerator(
         magnitudes=[
@@ -124,24 +126,30 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
     indexation = pig.index_peaks(tolerance=0.02)
     np.testing.assert_almost_equal(indexation[0][0], 0.3189193164369)
 
+
 def test_get_fourier_transform():
-    shape = (3,3)
-    fsize = (5,5)
-    normalization_constant = 0.9278426705718053 #Precomputed normalization. Formula full_frame(template, 1, template, 1)
-    template_coordinates = np.asarray([[1,1]])
+    shape = (3, 3)
+    fsize = (5, 5)
+    normalization_constant = 0.9278426705718053  # Precomputed normalization. Formula full_frame(template, 1, template, 1)
+    template_coordinates = np.asarray([[1, 1]])
     template_intensities = np.asarray([1])
-    transform, norm = get_fourier_transform(template_coordinates, template_intensities, shape, fsize)
-    test_value = np.real(transform[2,1]) #Center value
+    transform, norm = get_fourier_transform(
+        template_coordinates, template_intensities, shape, fsize
+    )
+    test_value = np.real(transform[2, 1])  # Center value
     np.testing.assert_approx_equal(test_value, 1)
     np.testing.assert_approx_equal(norm, normalization_constant)
 
+
 def test_get_library_FT_dict():
     new_template_library = DiffractionLibrary()
-    new_template_library["GaSb"] = {"orientations" : np.array([[0.0, 0.0, 0.0],]) ,
-                                    "pixel_coords" : np.array([np.asarray([[1,1],])]),
-                                    "intensities" : np.array([np.array([1,])])}
-    shape = (3,3)
-    fsize = (5,5)
+    new_template_library["GaSb"] = {
+        "orientations": np.array([[0.0, 0.0, 0.0],]),
+        "pixel_coords": np.array([np.asarray([[1, 1],])]),
+        "intensities": np.array([np.array([1,])]),
+    }
+    shape = (3, 3)
+    fsize = (5, 5)
     normalization_constant = 0.9278426705718053
     new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
     for phase_index, library_entry in enumerate(new_template_dict.values()):
@@ -149,7 +157,7 @@ def test_get_library_FT_dict():
         patterns = library_entry["patterns"]
         pattern_norms = library_entry["pattern_norms"]
     np.testing.assert_approx_equal(orientations[0][0], 0.0)
-    np.testing.assert_approx_equal(np.real(patterns[0][2,1]),1)
+    np.testing.assert_approx_equal(np.real(patterns[0][2, 1]), 1)
     np.testing.assert_approx_equal(pattern_norms[0], normalization_constant)
 
 

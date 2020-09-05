@@ -30,7 +30,7 @@ from pyxem.utils.indexation_utils import (
     fast_correlation,
     full_frame_correlation,
     optimal_fft_size,
-    correlate_library_from_dict
+    correlate_library_from_dict,
 )
 
 
@@ -51,17 +51,18 @@ def test_fast_correlation():
     )
     np.testing.assert_approx_equal(fast_correlation([1, 1, 1], [1, 0, 0], 1), 1)
 
+
 def test_full_frame_correlation():
-    #Define testing parameters.
-    in1 = np.zeros((10,10))
-    in2 = np.zeros((10,10))
-    in1[5,5] = 1
-    in1[7,7] = 1
-    in1[3,7] = 1
-    in1[7,3] = 1
-    in1_FT = np.fft.fftshift(np.fft.rfftn(in1, (20,20)))
+    # Define testing parameters.
+    in1 = np.zeros((10, 10))
+    in2 = np.zeros((10, 10))
+    in1[5, 5] = 1
+    in1[7, 7] = 1
+    in1[3, 7] = 1
+    in1[7, 3] = 1
+    in1_FT = np.fft.fftshift(np.fft.rfftn(in1, (20, 20)))
     norm_1 = np.sqrt(np.max(np.real(np.fft.ifftn(in1_FT ** 2))))
-    in2_FT = np.fft.fftshift(np.fft.rfftn(in2, (20,20)))
+    in2_FT = np.fft.fftshift(np.fft.rfftn(in2, (20, 20)))
     norm_2 = np.sqrt(np.max(np.real(np.fft.ifftn(in2_FT ** 2))))
     np.testing.assert_approx_equal(
         full_frame_correlation(in1_FT, norm_1, in1_FT, norm_1), 1
@@ -70,25 +71,27 @@ def test_full_frame_correlation():
         full_frame_correlation(in1_FT, norm_1, in2_FT, norm_2), 0
     )
 
+
 def test_optimal_fft_size():
-    np.testing.assert_approx_equal(
-        optimal_fft_size(8), 8
-    )
-    np.testing.assert_approx_equal(
-        optimal_fft_size(20), 20
-    )
+    np.testing.assert_approx_equal(optimal_fft_size(8), 8)
+    np.testing.assert_approx_equal(optimal_fft_size(20), 20)
+
 
 def test_correlate_library_from_dict():
     new_template_library = DiffractionLibrary()
-    new_template_library["GaSb"] = {"orientations" : np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]) ,
-                                    "pixel_coords" : np.array([np.asarray([[1,1]]), np.asarray([[2,2],[1,1]])]),
-                                    "intensities" : np.array([np.array([1,]), np.array([1, 1])])}
-    shape = (3,3)
-    fsize = (5,5)
+    new_template_library["GaSb"] = {
+        "orientations": np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
+        "pixel_coords": np.array([np.asarray([[1, 1]]), np.asarray([[2, 2], [1, 1]])]),
+        "intensities": np.array([np.array([1,]), np.array([1, 1])]),
+    }
+    shape = (3, 3)
+    fsize = (5, 5)
     new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
-    image = np.zeros((3,3))
-    image[1,1] = 1
-    match_results = correlate_library_from_dict(image, new_template_dict,n_largest =  1, method = "full_frame_correlation", mask = 1)
+    image = np.zeros((3, 3))
+    image[1, 1] = 1
+    match_results = correlate_library_from_dict(
+        image, new_template_dict, n_largest=1, method="full_frame_correlation", mask=1
+    )
     np.testing.assert_approx_equal(match_results[0][1][1], 0.0)
     np.testing.assert_approx_equal(match_results[0][2], 1.0)
 

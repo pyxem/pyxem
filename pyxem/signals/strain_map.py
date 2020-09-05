@@ -50,10 +50,11 @@ def _get_rotation_matrix(x_new):
 
 
 class StrainMap(Signal2D):
-    """
-    Class for storing strain maps, if created within pyxem conventions are:
-    The 'y-axis' is 90 degrees from the 'x-axis'
-    Positive rotations are anticlockwise.
+    """Class for storing strain maps.
+
+    If created within pyxem conventions are:
+    - The 'y-axis' is 90 degrees from the 'x-axis'
+    - Positive rotations are anticlockwise.
     """
 
     _signal_type = "strain_map"
@@ -73,7 +74,7 @@ class StrainMap(Signal2D):
         )
 
     def rotate_strain_basis(self, x_new):
-        """ Rotates a strain map to a new basis.
+        """Rotates a strain map to a new basis.
 
         Parameters
         ----------
@@ -94,7 +95,7 @@ class StrainMap(Signal2D):
         """
 
         def apply_rotation(transposed_strain_map, R):
-            """ Rotates a strain matrix to a new basis, for which R maps x_old to x_new """
+            """Rotates a strain matrix to a new basis, for which R maps x_old to x_new."""
             sigmaxx_old = transposed_strain_map[0]
             sigmayy_old = transposed_strain_map[1]
             sigmaxy_old = transposed_strain_map[2]
@@ -105,14 +106,14 @@ class StrainMap(Signal2D):
             return [new[0, 0], new[1, 1], new[0, 1], transposed_strain_map[3]]
 
         def apply_rotation_complete(self, R):
-            """ Mapping solution to return a (unclassed) strain map in a new basis """
+            """Mapping solution to return a (unclassed) strain map in a new basis."""
             from hyperspy.api import transpose
 
             transposed = transpose(self)[0]
             transposed_to_new_basis = transposed.map(apply_rotation, R=R, inplace=False)
             return transposed_to_new_basis.T
 
-        """ Core functionality """
+        """Core functionality."""
 
         if self.current_basis_x != [1, 0]:
             # this takes us back to [1,0] if our current map is in a diferent basis

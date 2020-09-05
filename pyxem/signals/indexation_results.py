@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 from hyperspy.signals import Signal2D
@@ -24,7 +23,6 @@ from warnings import warn
 
 from pyxem.signals import transfer_navigation_axes
 from pyxem.utils.indexation_utils import peaks_from_best_template
-from pyxem.utils.indexation_utils import peaks_from_best_vector_match
 from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
 from pyxem.utils.plot import generate_marker_inputs_from_peaks
@@ -169,7 +167,7 @@ class VectorMatchingResults(BaseSignal):
         indexed_vectors : DiffractionVectors
             An indexed diffraction vectors object.
         """
-        if overwrite == False:
+        if overwrite is False:
             if vectors.hkls is not None:
                 warn(
                     "The vectors supplied are already associated with hkls set "
@@ -178,7 +176,7 @@ class VectorMatchingResults(BaseSignal):
             else:
                 vectors.hkls = self.hkls
 
-        elif overwrite == True:
+        elif overwrite is True:
             vectors.hkls = self.hkls
 
         return vectors
