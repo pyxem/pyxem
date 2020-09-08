@@ -1,6 +1,7 @@
 import numpy as np
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.detectors import Detector
+from pyFAI.units import register_radial_unit,eq_q
 
 
 def get_azimuthal_integrator(
@@ -116,16 +117,14 @@ def _get_displacements(center, shape, affine):
 def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
     """Returns a generic set up for a flat detector with accounting for Ewald sphere effects."""
     units_table = {
-        "2th_deg": [None, 1, "2th_deg"],
-        "2th_rad": [None, 1, "2th_rad"],
-        "q_nm^-1": [1e-9, 1, "q_nm^-1"],
-        "q_A^-1": [1e-10, 1, "q_A^-1"],
-        "k_nm^-1": [1e-9, 2 * np.pi, "q_nm^-1"],  # add to pyFAI
-        "k_A^-1": [1e-10, 2 * np.pi, "q_A^-1"],  # add to pyFAI
+        "2th_deg": None,
+        "2th_rad": None,
+        "q_nm^-1": 1e-9,
+        "q_A^-1": 1e-10,
+        "k_nm^-1": 1e-9,
+        "k_A^-1": 1e-10,
     }
-    wavelength_scale = units_table[pyxem_unit][0]
-    scale_factor = units_table[pyxem_unit][1]
-    unit = units_table[pyxem_unit][2]
+    wavelength_scale = units_table[pyxem_unit]
     detector_distance = 1
     if wavelength_scale is None:
         if pyxem_unit == "2th_deg":
@@ -143,6 +142,24 @@ def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
         )
     detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
     if radial_range is not None:
-        radial_range = [radial_range[0] * scale_factor, radial_range[1] * scale_factor]
-    return detector, detector_distance, radial_range, unit, scale_factor
+        radial_range = [radial_range[0], radial_range[1]]
+    return detector, detector_distance, radial_range,
 
+
+register_radial_unit("k_A^-1",
+                     center="qArray",
+                     delta="deltaQ",
+                     scale=0.1 * 2 * np.pi,
+                     label=r"Scattering vector $k$ ($\AA^{-1}$)",
+                     equation=eq_q,
+                     short_name="k",
+                     unit_symbol=r"\AA^{-1}")
+
+register_radial_unit("k_nm^-1",
+                     center="qArray",
+                     delta="deltaQ",
+                     scale=1.0 * 2 * np.pi,
+                     label=r"Scattering vector $k$ ($\nm^{-1}$)",
+                     equation=eq_q,
+                     short_name="k",
+                     unit_symbol=r"\nm^{-1}")

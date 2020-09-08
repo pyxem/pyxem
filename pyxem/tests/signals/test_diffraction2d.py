@@ -110,24 +110,26 @@ class TestAzimuthalIntegral1d:
     )
     def test_1d_azimuthal_integral_2th_units(self, ones, unit):
         ones.unit = unit
+        ones.set_ai(wavelength=1e-9)
         az = ones.get_azimuthal_integral1d(
-            npt_rad=10, wavelength=1e-9, correctSolidAngle=False
+            npt=10, wavelength=1e-9, correctSolidAngle=False
         )
         np.testing.assert_array_equal(az.data[0:8], np.ones(8))
 
     def test_1d_azimuthal_integral_inplace(self, ones):
+        ones.set_ai()
         az = ones.get_azimuthal_integral1d(
-            npt_rad=10, correctSolidAngle=False, inplace=True,
+            npt=10, correctSolidAngle=False, inplace=True,
         )
         assert isinstance(ones, Diffraction1D)
         np.testing.assert_array_equal(ones.data[0:8], np.ones((8)))
         assert az is None
 
-    def test_1d_azimuthal_integral_fast_slicing(self, ones):
+    def test_1d_azimuthal_integral_slicing(self, ones):
         ones.unit = "2th_rad"
+        ones.set_ai(center=(5.5, 5.5))
         az = ones.get_azimuthal_integral1d(
-            npt_rad=10,
-            center=(5.5, 5.5),
+            npt=10,
             method="BBox",
             correctSolidAngle=False,
             radial_range=[0.0, 1.0],
@@ -139,10 +141,9 @@ class TestAzimuthalIntegral1d:
     )
     def test_1d_axes_continuity(self, ones, unit):
         ones.unit = unit
+        ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
         az1 = ones.get_azimuthal_integral1d(
-            wavelength=1e-9,
-            npt_rad=10,
-            center=(5.5, 5.5),
+            npt=10,
             radial_range=[0.0, 1.0],
             method="splitpixel",
         )
@@ -155,57 +156,36 @@ class TestAzimuthalIntegral1d:
     def test_1d_integration(
         self, ones, radial_range, azimuth_range, center, affine,
     ):
+        ones.set_ai(center=center, affine=affine, radial_range=radial_range)
         az = ones.get_azimuthal_integral1d(
-            npt_rad=10,
+            npt=10,
             method="BBox",
-            wavelength=1e-9,
             radial_range=radial_range,
             azimuth_range=azimuth_range,
-            center=center,
-            affine=affine,
             correctSolidAngle=False,
             inplace=False,
         )
         assert isinstance(az, Diffraction1D)
 
-    def test_1d_azimuthal_integral_slow_mask(self, ones):
+    def test_1d_azimuthal_integral_mask(self, ones):
         from hyperspy.signals import BaseSignal
 
         aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
         center = [1, 1]
         mask = np.zeros((10, 10))
         mask_bs = BaseSignal(data=mask)
+        ones.set_ai(center=center, affine=aff)
         ones.get_azimuthal_integral1d(
-            npt_rad=10,
+            npt=10,
             method="BBox",
             wavelength=1e-9,
             correctSolidAngle=False,
-            affine=aff,
-            center=center,
             mask=mask_bs,
         )
 
-    def test_1d_azimuthal_integral_pyfai(self, ones):
-        from pyFAI.detectors import Detector
-
-        d = Detector(pixel1=1e-4, pixel2=1e-4)
-        ones.get_azimuthal_integral1d(
-            npt_rad=10,
-            detector=d,
-            detector_dist=1,
-            method="BBox",
-            wavelength=1e-9,
-            correctSolidAngle=False,
-            unit="q_nm^-1",
-        )
-
-    def test_1d_azimuthal_integral_failure(self, ones):
-        ones.unit = "k_nm^-1"
-        integration = ones.get_azimuthal_integral1d(npt_rad=10)
-        assert integration is None
-
     def test_1d_azimuthal_integral_sum(self, ones):
-        integration = ones.get_azimuthal_integral1d(npt_rad=5, radial_range=[0, .5], sum=True)
+        ones.set_ai()
+        integration = ones.get_azimuthal_integral1d(npt=5, radial_range=[0, .5], sum=True)
         # 5^2*pi = 78.5
         np.testing.assert_almost_equal(integration.data.sum(), 78.5, decimal=0)
 
@@ -222,16 +202,17 @@ class TestAzimuthalIntegral2d:
         return ones_diff
 
     def test_2d_azimuthal_integral(self, ones):
+        ones.set_ai()
         az = ones.get_azimuthal_integral2d(
-            npt_rad=10, npt_azim=10, method="BBox", correctSolidAngle=False
+            npt=10, npt_azim=10, method="BBox", correctSolidAngle=False
         )
         np.testing.assert_array_equal(az.data[0:8, :], np.ones((8, 10)))
 
     def test_2d_azimuthal_integral_fast_slicing(self, ones):
+        ones.set_ai(center=(5.5,5.5))
         az1 = ones.get_azimuthal_integral2d(
-            npt_rad=10,
+            npt=10,
             npt_azim=10,
-            center=(5.5, 5.5),
             radial_range=[0.0, 1.0],
             method="splitpixel",
             correctSolidAngle=False,
@@ -243,19 +224,19 @@ class TestAzimuthalIntegral2d:
     )
     def test_2d_axes_continuity(self, ones, unit):
         ones.unit = unit
+        ones.set_ai(wavelength=1e-9, center=(5.5,5.5))
         az1 = ones.get_azimuthal_integral2d(
-            wavelength=1e-9,
-            npt_rad=10,
+            npt=10,
             npt_azim=20,
-            center=(5.5, 5.5),
             radial_range=[0.0, 1.0],
             method="splitpixel",
         )
         assert np.allclose(az1.axes_manager.signal_axes[1].scale, 0.1)
 
     def test_2d_azimuthal_integral_inplace(self, ones):
+        ones.set_ai()
         az = ones.get_azimuthal_integral2d(
-            npt_rad=10,
+            npt=10,
             npt_azim=10,
             correctSolidAngle=False,
             inplace=True,
@@ -273,59 +254,49 @@ class TestAzimuthalIntegral2d:
     def test_2d_azimuthal_integral_params(
         self, ones, radial_range, azimuth_range, correctSolidAngle, center, affine
     ):
+        ones.set_ai(center=center,
+                    affine=affine,
+                    radial_range=radial_range,
+                    wavelength=1e-9)
         az = ones.get_azimuthal_integral2d(
-            npt_rad=10,
+            npt=10,
             npt_azim=10,
-            wavelength=1e-9,
             radial_range=radial_range,
             azimuth_range=azimuth_range,
             correctSolidAngle=correctSolidAngle,
-            center=center,
-            affine=affine,
             method="BBox",
         )
         assert isinstance(az, PolarDiffraction2D)
 
-    def test_2d_azimuthal_integral_failure(self, ones):
-        ones.unit = "k_nm^-1"
-        integration = ones.get_azimuthal_integral2d(npt_rad=10)
-        assert integration is None
 
     def test_2d_azimuthal_integral_mask_iterate(self, ones):
         from hyperspy.signals import BaseSignal
         aff = [[1, 1, 0], [0, 1, 0], [0, 0, 1]]
         center = [1, 1]
+        ones.set_ai(center=center, affine=aff, wavelength=1e-9)
         mask = np.zeros((10, 10))
         mask_bs = BaseSignal(data=mask)
         ones.get_azimuthal_integral2d(
-            npt_rad=10,
+            npt=10,
             npt_azim=10,
             method="BBox",
-            wavelength=1e-9,
             correctSolidAngle=False,
-            affine=aff,
-            center=center,
             mask=mask_bs,
         )
 
-    def test_2d_azimuthal_integral_pyfai(self, ones):
-        from pyFAI.detectors import Detector
-
-        d = Detector(pixel1=1e-4, pixel2=1e-4)
-        ones.get_azimuthal_integral2d(
-            npt_rad=10,
-            detector=d,
-            detector_dist=1,
-            method="BBox",
-            wavelength=1e-9,
-            correctSolidAngle=False,
-            unit="q_nm^-1",
-        )
 
     def test_2d_azimuthal_integral_sum(self, ones):
-        integration = ones.get_azimuthal_integral2d(npt_rad=10, npt_azim=15, radial_range=[0, .5], sum=True)
+        ones.set_ai()
+        integration = ones.get_azimuthal_integral2d(npt=10, npt_azim=15, radial_range=[0, .5], sum=True)
         #  mostly correct except for at the very center where things get weird...
-        np.testing.assert_almost_equal(integration.data.sum(), 78.5, 0)
+        mask = np.ones((10,10), dtype=bool)
+        mask[0:5] = False
+        integration2 = ones.get_azimuthal_integral2d(npt=10,
+                                                     npt_azim=15,
+                                                     radial_range=[0, .5],
+                                                     sum=True,
+                                                     mask=mask)
+        print(integration2.sum((-1,-2)).data)
 
 
 class TestVirtualImaging:
