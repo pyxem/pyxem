@@ -36,10 +36,8 @@ from pyxem.utils.expt_utils import (
     investigate_dog_background_removal_interactive,
     find_beam_center_blur,
     find_beam_center_interpolate,
-    azimuthal_integrate1d_slow,
-    azimuthal_integrate1d_fast,
-    azimuthal_integrate2d_slow,
-    azimuthal_integrate2d_fast,
+    azimuthal_integrate1d,
+    azimuthal_integrate2d,
 )
 
 
@@ -211,14 +209,14 @@ class TestAzimuthalIntegration:
         radial[radial == 0] = 1
         return 100 / radial
 
-    def test_1d_integrate_fast(self, radial_pattern):
+    def test_1d_integrate(self, radial_pattern):
         from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
         ai = get_azimuthal_integrator(
             detector=dect, detector_distance=1, shape=np.shape(radial_pattern)
         )
-        integration = azimuthal_integrate1d_fast(
+        integration = azimuthal_integrate1d(
             radial_pattern,
             ai,
             npt_rad=100,
@@ -227,14 +225,14 @@ class TestAzimuthalIntegration:
             correctSolidAngle=True,
         )
 
-    def test_2d_integrate_fast(self, radial_pattern):
+    def test_2d_integrate(self, radial_pattern):
         from pyxem.utils.pyfai_utils import get_azimuthal_integrator
 
         dect = Detector(pixel1=1e-4, pixel2=1e-4)
         ai = get_azimuthal_integrator(
             detector=dect, detector_distance=1, shape=np.shape(radial_pattern)
         )
-        integration = azimuthal_integrate2d_fast(
+        integration = azimuthal_integrate2d(
             radial_pattern,
             ai,
             npt_rad=100,
@@ -242,10 +240,4 @@ class TestAzimuthalIntegration:
             method="numpy",
             unit="2th_rad",
             correctSolidAngle=True,
-        )
-
-    def test_2d_integrate_slow(self, radial_pattern):
-        dect = Detector(pixel1=1e-4, pixel2=1e-4)
-        integration = azimuthal_integrate2d_slow(
-            radial_pattern, detector=dect, detector_distance=1, npt_rad=100
         )
