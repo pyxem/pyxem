@@ -299,6 +299,70 @@ class TestAzimuthalIntegral2d:
         print(integration2.sum((-1,-2)).data)
 
 
+class TestPyFAIIntegration:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = Diffraction2D(data=np.ones(shape=(10, 10)))
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "q_nm^-1"
+        return ones_diff
+
+    def test_integrate_radial(self, ones):
+        ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
+        integration = ones.get_radial_integral(npt=10,
+                                               npt_rad=100,
+                                               method="BBox",
+                                               correctSolidAngle=False,
+                                               )
+        np.testing.assert_array_equal(integration, np.ones(10))
+        integration = ones.get_radial_integral(npt=10,
+                                               npt_rad=100,
+                                               method="BBox",
+                                               correctSolidAngle=False,
+                                               sum=True,
+                                               )
+        integration = ones.get_radial_integral(npt=10,
+                                               npt_rad=100,
+                                               method="BBox",
+                                               correctSolidAngle=False,
+                                               inplace=True)
+        np.testing.assert_array_equal(ones, np.ones(10))
+        assert integration is None
+
+    def test_integrate_med_filter(self, ones):
+        ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
+        integration = ones.get_medfilt1d(npt_rad=10,
+                                         npt_azim=100,
+                                         method="BBox",
+                                         correctSolidAngle=False)
+        np.testing.assert_array_equal(integration, np.ones(10))
+        integration = ones.get_medfilt1d(npt_rad=10,
+                                      npt_azim=100,
+                                      method="BBox",
+                                      correctSolidAngle=False,
+                                      inplace=True)
+        np.testing.assert_array_equal(ones, np.ones(10))
+        assert integration is None
+
+    def test_integrate_sigma_clip(self, ones):
+        ones.set_ai(center=(5.5, 5.5), wavelength=1e-9)
+        integration = ones.sigma_clip(npt_rad=10,
+                                         npt_azim=100,
+                                         method="BBox",
+                                         correctSolidAngle=False)
+        np.testing.assert_array_equal(integration, np.ones(10))
+        integration = ones.sigma_clip(npt_rad=10,
+                                      npt_azim=100,
+                                      method="BBox",
+                                      correctSolidAngle=False,
+                                      inplace=True)
+        np.testing.assert_array_equal(ones, np.ones(10))
+        assert integration is None
+
+
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
@@ -363,3 +427,24 @@ class TestVirtualImaging:
         assert vi.axes_manager.signal_dimension == 1
         assert vi.axes_manager.navigation_dimension == 0
         assert vi.metadata.Diffraction.intergrated_range == "CircleROI(cx=3, cy=3, r=5)"
+
+class TestAzimuthalIntegrator:
+    # Tests the setting of a Azimutal Integrator:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = Diffraction2D(data=np.ones(shape=(10, 10)))
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        return ones_diff
+
+    def test_set_ai_fail(self,ones):
+        ones.unit = "k_nm^-1"
+        ai = ones.set_ai()
+        assert ai is None
+
+    def test_return_ai_fail(self,ones):
+        ai = ones.ai
+        assert ai is None

@@ -652,6 +652,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
+        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         unit = self.unit
         if radial_range is None:
@@ -666,7 +667,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             radial_range=radial_range,
             method=method,
             inplace=inplace,
-            unit=self.unit,
+            radial_unit=self.unit,
             mask=mask,
             sum=sum,
             correctSolidAngle=correctSolidAngle,
@@ -683,7 +684,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis = integration.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.units = unit.unit_symbol
+        #k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration
@@ -693,8 +694,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         npt_rad=1028,
         npt_azim=512,
         mask=None,
-        radial_range=None,
-        azimuth_range=None,
         inplace=False,
         method="splitpixel",
         sum=False,
@@ -712,12 +711,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
             If mask is a baseSignal then it is itereated over as well.
-        radial_range: None or (float, float)
-            The radial range over which to perform the integration. Default is
-            the full frame
-        azimuth_range:None or (float, float)
-            The azimuthal range over which to perform the integration. Default is
-            from -pi to pi
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
@@ -771,23 +764,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
+        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         unit = self.unit
-        if radial_range is None:
-            radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
-            radial_range[0] = 0
+        radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
+        radial_range[0] = 0
         integration = self.map(
             medfilt_1d,
             azimuthal_integrator=self.ai,
             npt_rad=npt_rad,
             npt_azim=npt_azim,
-            azimuth_range=azimuth_range,
-            radial_range=radial_range,
             method=method,
             inplace=inplace,
             unit=self.unit,
             mask=mask,
-            sum=sum,
             correctSolidAngle=correctSolidAngle,
             **kwargs
             )
@@ -801,8 +791,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             transfer_navigation_axes(integration, self)
             k_axis = integration.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.units = unit.unit_symbol
+        k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
+        #k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration
@@ -812,8 +802,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         npt_rad=1028,
         npt_azim=512,
         mask=None,
-        radial_range=None,
-        azimuth_range=None,
         thres=3,
         max_iter=5,
         inplace=False,
@@ -834,12 +822,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
             If mask is a baseSignal then it is itereated over as well.
-        radial_range: None or (float, float)
-            The radial range over which to perform the integration. Default is
-            the full frame
-        azimuth_range:None or (float, float)
-            The azimuthal range over which to perform the integration. Default is
-            from -pi to pi
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
@@ -893,25 +875,22 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> ds.get_radial_integral(npt=100,npt_rad=400)
 
         """
+        signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
         unit = self.unit
-        if radial_range is None:
-            radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
-            radial_range[0] = 0
+        radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
+        radial_range[0] = 0
         integration = self.map(
             sigma_clip,
             azimuthal_integrator=self.ai,
             npt_rad=npt_rad,
             npt_azim=npt_azim,
-            azimuth_range=azimuth_range,
-            radial_range=radial_range,
             method=method,
             max_iter=max_iter,
             thres=thres,
             inplace=inplace,
             unit=self.unit,
             mask=mask,
-            sum=sum,
             correctSolidAngle=correctSolidAngle,
             **kwargs
             )
@@ -925,8 +904,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             transfer_navigation_axes(integration, self)
             k_axis = integration.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
-        k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        k_axis.units = unit.unit_symbol
+        k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
+        #k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration
