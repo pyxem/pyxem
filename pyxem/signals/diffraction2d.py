@@ -16,17 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Signal class for two-dimensional diffraction data in Cartesian coordinates.
-"""
+"""Signal class for two-dimensional diffraction data in Cartesian coordinates."""
 
-import copy
 import numpy as np
 from warnings import warn
-import matplotlib.pyplot as plt
 
 import hyperspy.api as hs
-from hyperspy.signals import BaseSignal, Signal1D, Signal2D
+from hyperspy.signals import BaseSignal, Signal2D
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
@@ -89,8 +85,7 @@ import pyxem.utils.ransac_ellipse_tools as ret
 
 from skimage import filters
 from skimage.morphology import square
-from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from scipy.ndimage import rotate, gaussian_filter
+from scipy.ndimage import rotate
 from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
@@ -248,12 +243,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         unit="pyxem",
         inplace=False,
         method="splitpixel",
-        map_kwargs={},
+        map_kwargs=None,
         detector=None,
         detector_dist=None,
         correctSolidAngle=True,
-        ai_kwargs={},
-        integrate2d_kwargs={},
+        ai_kwargs=None,
+        integrate2d_kwargs=None,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
 
@@ -266,7 +261,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         units is passed to pyxem and those units are used.
 
         Parameters
-        ---------------
+        ----------
         npt_rad: int
             The number of radial points to calculate
         center: None or (x,y) or BaseSignal
@@ -295,18 +290,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The detector set up to be used by the integrator
         detector_dist: float
             distance sample - detector plan (orthogonal distance, not along the beam), in meter.
-        map_kwargs: dict
+        map_kwargs: None or dict
             Any other keyword arguments for hyperspys map function
-        integrate2d_kwargs:dict
+        integrate2d_kwargs: None or dict
             Any keyword arguements for PyFAI's integrate2d function
 
         Returns
-        ----------
+        -------
         polar: PolarDiffraction2D
             A polar diffraction signal
 
         Examples
-        ----------
+        --------
         Basic case using "2th_deg" units (no wavelength needed)
 
         >>> ds.unit = "2th_deg"
@@ -324,6 +319,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
         >>> ds.get_azimuthal_integral1d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
+
+        map_kwargs = {} if map_kwargs is None else map_kwargs
+        ai_kwargs = {} if ai_kwargs is None else ai_kwargs
+        integrate2d_kwargs = {} if integrate2d_kwargs is None else integrate2d_kwargs
+
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
         signal_type = self._signal_type
@@ -446,12 +446,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         unit="pyxem",
         inplace=False,
         method="splitpixel",
-        map_kwargs={},
+        map_kwargs=None,
         detector=None,
         detector_dist=None,
         correctSolidAngle=True,
-        ai_kwargs={},
-        integrate2d_kwargs={},
+        ai_kwargs=None,
+        integrate2d_kwargs=None,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
 
@@ -464,7 +464,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         units is passed to pyxem and those units are used.
 
         Parameters
-        ---------------
+        ----------
         npt_rad: int
             The number of radial points to calculate
         npt_azim: int
@@ -495,18 +495,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The detector set up to be used by the integrator
         detector_dist: float
             distance sample - detector plan (orthogonal distance, not along the beam), in meter.
-        map_kwargs: dict
+        map_kwargs: None or dict
             Any other keyword arguments for hyperspys map function
-        integrate2d_kwargs:dict
+        integrate2d_kwargs: None or dict
             Any keyword arguements for PyFAI's integrate2d function
 
         Returns
-        ----------
+        -------
         polar: PolarDiffraction2D
             A polar diffraction signal
 
         Examples
-        ----------
+        --------
         Basic case using "2th_deg" units (no wavelength needed)
 
         >>> ds.unit = "2th_deg"
@@ -524,6 +524,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
         >>> ds.get_azimuthal_integral1d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
+
+        map_kwargs = {} if map_kwargs is None else map_kwargs
+        ai_kwargs = {} if ai_kwargs is None else ai_kwargs
+        integrate2d_kwargs = {} if integrate2d_kwargs is None else integrate2d_kwargs
+
         pyxem_units = False
         sig_shape = self.axes_manager.signal_shape
 
@@ -683,7 +688,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method,
         half_square_width=None,
         return_shifts=False,
-        align_kwargs={},
+        align_kwargs=None,
         *args,
         **kwargs
     ):
@@ -701,7 +706,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             diffracted spots brighter than the direct beam.
         return_shifts : bool, default False
             If True, the values of applied shifts are returned
-        align_kwargs : dict
+        align_kwargs : None or dict
             To be passed to .align2D() function
         **kwargs:
             To be passed to method function
@@ -712,6 +717,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The centered diffraction data.
 
         """
+
+        align_kwargs = {} if align_kwargs is None else align_kwargs
+
         nav_size = self.axes_manager.navigation_size
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
@@ -784,7 +792,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         positions.
 
         Parameters
-        ---------
+        ----------
         method : str
             Select peak finding algorithm to implement. Available methods are
             {'zaefferer', 'stat', 'laplacian_of_gaussians',
@@ -860,7 +868,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return peaks
 
-    def find_peaks_interactive(self, disc_image=None, imshow_kwargs={}):
+    def find_peaks_interactive(self, disc_image=None, imshow_kwargs=None):
         """Find peaks using an interactive tool.
 
         Parameters
@@ -868,7 +876,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         disc_image : numpy.array
             See .utils.peakfinders2D.peak_finder_xc for details. If not
             given a warning will be raised.
-        imshow_kwargs : arguments
+        imshow_kwargs : None or dict
             kwargs to be passed to internal imshow statements
 
         Notes
@@ -876,6 +884,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Requires `ipywidgets` and `traitlets` to be installed.
 
         """
+
+        imshow_kwargs = {} if imshow_kwargs is None else imshow_kwargs
+
         if disc_image is None:
             warn(
                 "You have not specified a disc image, as such you will not "
@@ -1573,7 +1584,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ...     disk_r=5, show_progressbar=False)
         >>> s.plot()
 
-        See also
+        See Also
         --------
         template_match_ring
         template_match_with_binary_image
@@ -1612,7 +1623,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_template = s.template_match_ring(show_progressbar=False)
         >>> s.plot()
 
-        See also
+        See Also
         --------
         template_match_disk
         template_match_with_binary_image
@@ -1666,7 +1677,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ...     binary_image, show_progressbar=False)
         >>> s.plot()
 
-        See also
+        See Also
         --------
         template_match_disk
         template_match_ring
@@ -2186,7 +2197,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_dead_pixels = s.find_dead_pixels(
         ...     lazy_result=True, show_progressbar=False)
 
-        See also
+        See Also
         --------
         find_hot_pixels
         correct_bad_pixels
@@ -2280,7 +2291,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     lazy_result=False, show_progressbar=False)
 
-        See also
+        See Also
         --------
         find_dead_pixels
         correct_bad_pixels
@@ -2342,7 +2353,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
         >>> s_corr = s.correct_bad_pixels(s_bad_pixels)
 
-        See also
+        See Also
         --------
         find_dead_pixels
         find_hot_pixels

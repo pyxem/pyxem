@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""VDF generator and associated tools.
-
-"""
+"""VDF generator and associated tools."""
 import numpy as np
 
 from hyperspy.api import roi
@@ -29,8 +27,7 @@ from pyxem.signals import transfer_signal_axes, transfer_navigation_axes_to_sign
 
 
 class VDFGenerator:
-    """Generates VDF images for a specified signal and set of aperture
-    positions.
+    """Generates VDF images for a specified signal and set of aperture positions.
 
     Parameters
     ----------

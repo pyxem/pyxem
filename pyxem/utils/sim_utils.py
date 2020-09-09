@@ -27,6 +27,7 @@ def sim_as_signal(diffsim, size, sigma, max_r):
     """Returns the diffraction data as an ElectronDiffraction signal with
     two-dimensional Gaussians representing each diffracted peak. Should only
     be used for qualitative work.
+
     Parameters
     ----------
     diffsim : diffsims.DiffractionSimulation
@@ -38,6 +39,7 @@ def sim_as_signal(diffsim, size, sigma, max_r):
     max_r : float
         Half the side length in reciprocal Angstroms. Defines the signal's
         calibration
+
     Returns
     -------
     dp : ElectronDiffraction

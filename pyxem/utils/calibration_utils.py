@@ -22,7 +22,7 @@ from numpy.linalg import eigh, inv
 
 
 def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
-    """ calculate the distance of each 2D point from the center (xc, yc) """
+    """Calculate the distance of each 2D point from the center (xc, yc)."""
     xp = x * np.cos(rot) - y * np.sin(rot)
     yp = x * np.sin(rot) + y * np.cos(rot)
     xcp = xc * np.cos(rot) - yc * np.sin(rot)
@@ -49,8 +49,7 @@ def gaussian_function(pts, xcenter, ycenter, sigma, radius, asymmetry, rotation,
 
 
 def call_ring_pattern(xcenter, ycenter):
-    """
-    Function to make a call to the function ring_pattern without passing the
+    """Function to make a call to the function ring_pattern without passing the
     variables directly (necessary for using scipy.optimize.curve_fit).
 
     Parameters
@@ -79,7 +78,7 @@ def call_ring_pattern(xcenter, ycenter):
         X-ray scattering factors.
 
         Parameters
-        -----------
+        ----------
         pts : 1D array
             One-dimensional array of points (first half as first-dimension
             coordinates, second half as second-dimension coordinates)
@@ -200,7 +199,7 @@ def generate_ring_pattern(
     )
     generated_pattern = np.reshape(generated_pattern, (image_size, image_size))
 
-    if mask == True:
+    if mask is True:
         maskROI = calc_radius_with_distortion(
             x, y, (image_size - 1) / 2, (image_size - 1) / 2, 1, 0
         )

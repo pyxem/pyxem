@@ -21,8 +21,6 @@ intensity at zero scattering to the reduced intensity profile. This is done to
 reduce the effects of multiple scattering in the pdf.
 
 """
-import numpy as np
-
 from hyperspy.component import Component
 
 

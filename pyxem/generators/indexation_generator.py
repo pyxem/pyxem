@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Indexation generator and associated tools.
-
-"""
+"""Indexation generator and associated tools."""
 
 import numpy as np
 
@@ -48,10 +46,12 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 
 import lmfit
 
+
 def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
-    """
-    Takes a list of template coordinates and the corresponding list of template intensities, and returns the Fourier
-    transform of the template.
+    """Returns the Fourier transform of a list of templates.
+
+    Takes a list of template coordinates and the corresponding list of
+    template intensities, and returns the Fourier transform of the template.
 
     Parameters
     ----------
@@ -72,16 +72,18 @@ def get_fourier_transform(template_coordinates, template_intensities, shape, fsi
         Self correlation value for the template.
     """
     template = np.zeros((shape))
-    template[template_coordinates[:, 1], template_coordinates[:, 0]] = template_intensities[:]
+    template[
+        template_coordinates[:, 1], template_coordinates[:, 0]
+    ] = template_intensities[:]
     template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
     template_norm = np.sqrt(full_frame_correlation(template_FT, 1, template_FT, 1))
     return template_FT, template_norm
 
-def get_library_FT_dict(template_library, shape, fsize):
-    """
-    Takes a template library and converts it to a dictionary of Fourier transformed templates.
 
-    Parameters:
+def get_library_FT_dict(template_library, shape, fsize):
+    """Takes a template library and converts it to a dictionary of Fourier transformed templates.
+
+    Parameters
     ----------
     template_library: DiffractionLibrary
         The library of simulated diffraction patterns for indexation.
@@ -90,11 +92,12 @@ def get_library_FT_dict(template_library, shape, fsize):
     fsize: list
         Dimensions of the Fourier transformed signal.
 
-    Returns:
+    Returns
     -------
     library_FT_dict: dict
         Dictionary containing the fourier transformed template library, together with the corresponding orientations and
         pattern norms.
+
     """
     library_FT_dict = {}
     for entry, library_entry in enumerate(template_library.values()):
@@ -104,13 +107,20 @@ def get_library_FT_dict(template_library, shape, fsize):
         template_FTs = []
         pattern_norms = []
         for coord, intensity in zip(pixel_coords, intensities):
-            template_FT, pattern_norm = get_fourier_transform(coord, intensity, shape, fsize)
+            template_FT, pattern_norm = get_fourier_transform(
+                coord, intensity, shape, fsize
+            )
             template_FTs.append(template_FT)
             pattern_norms.append(pattern_norm)
 
-        library_FT_dict[entry] = {"orientations" : orientations, "patterns" : template_FTs, "pattern_norms" : pattern_norms}
+        library_FT_dict[entry] = {
+            "orientations": orientations,
+            "patterns": template_FTs,
+            "pattern_norms": pattern_norms,
+        }
 
     return library_FT_dict
+
 
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
@@ -203,22 +213,24 @@ class IndexationGenerator:
                 **kwargs,
             )
 
-        elif method in ["full_frame_correlation"] :
+        elif method in ["full_frame_correlation"]:
             shape = signal.data.shape[-2:]
             size = 2 * np.array(shape) - 1
-            fsize = [optimal_fft_size(a, real = True) for a in (size)]
+            fsize = [optimal_fft_size(a, real=True) for a in (size)]
             if not (np.asarray(size) + 1 == np.asarray(fsize)).all():
-                raise ValueError("Please select input signal and templates of dimensions 2**n X 2**n")
+                raise ValueError(
+                    "Please select input signal and templates of dimensions 2**n X 2**n"
+                )
 
             library_FT_dict = get_library_FT_dict(library, shape, fsize)
 
             matches = signal.map(
                 correlate_library_from_dict,
-                template_dict = library_FT_dict,
-                n_largest = n_largest,
-                method = method,
-                mask = mask,
-                inplace = False,
+                template_dict=library_FT_dict,
+                n_largest=n_largest,
+                method=method,
+                mask=mask,
+                inplace=False,
                 **kwargs,
             )
 

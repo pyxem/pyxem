@@ -21,7 +21,6 @@ import math
 import numpy as np
 from scipy.ndimage import measurements, shift
 from scipy.optimize import leastsq
-from hyperspy.signals import Signal2D
 from hyperspy.misc.utils import isiterable
 from matplotlib.colors import hsv_to_rgb
 import pyxem.utils.lazy_tools as lt
@@ -70,8 +69,7 @@ def _shift_single_frame(im, shift_x, shift_y, interpolation_order=1):
 
 
 def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
-    """
-    Make a circular mask in a bool array for masking a region in an image.
+    """Make a circular mask in a bool array for masking a region in an image.
 
     Parameters
     ----------
@@ -103,7 +101,7 @@ def _make_circular_mask(centerX, centerY, imageSizeX, imageSizeY, radius):
 
 
 def _get_signal_mean_position_and_value(signal):
-    """Get the scaled position and mean data value from a signal
+    """Get the scaled position and mean data value from a signal.
 
     Note: due to how HyperSpy numbers the axis values, the results
     can sometimes be not as expected. For example, the signal
@@ -142,7 +140,7 @@ def _get_signal_mean_position_and_value(signal):
 
 
 def _get_corner_values(s, corner_size=0.05):
-    """Get the corner positions and mean values from a 2D signal
+    """Get the corner positions and mean values from a 2D signal.
 
     Returns
     -------
@@ -326,7 +324,8 @@ def _get_lowest_index_radial_array(radial_array):
 
     Returns
     -------
-    Number, lowest index."""
+    Number, lowest index.
+    """
     lowest_index = radial_array.shape[-1]
     for x in range(radial_array.shape[0]):
         for y in range(radial_array.shape[1]):

@@ -16,10 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pickle
-import numpy as np
-from hyperspy.misc.utils import stack as stack_method
-
 
 class GenericCalibrationStandard:
     def __init__(self, peak_positions=[]):
@@ -70,7 +66,7 @@ class CalibrationDataLibrary(dict):
         self.moo3_im = moo3_im
 
     def plot_calibration_data(self, data_to_plot, roi=None, *args, **kwargs):
-        """ Plot the calibration data.
+        """Plot the calibration data.
 
         Parameters
         ----------

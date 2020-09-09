@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Electron diffraction pattern calibration operations.
-
-"""
+"""Electron diffraction pattern calibration operations."""
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -26,9 +24,7 @@ from math import sin, cos
 from hyperspy.roi import CircleROI, Line2DROI
 from hyperspy.misc.utils import stack as stack_method
 import matplotlib.pyplot as plt
-from skimage.transform import rotate
 
-from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.calibration_utils import (
     call_ring_pattern,
@@ -526,7 +522,7 @@ class CalibrationGenerator:
     def plot_calibrated_data(
         self, data_to_plot, line=None, unwrap=False, *args, **kwargs
     ):  # pragma: no cover
-        """ Plot calibrated data for visual inspection.
+        """Plot calibrated data for visual inspection.
 
         Parameters
         ----------
