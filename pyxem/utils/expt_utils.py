@@ -103,87 +103,12 @@ def _polar2cart(r, theta):
     return x, y
 
 
-def azimuthal_integrate1d_slow(
-    z,
-    detector_distance,
-    detector,
-    npt_rad,
-    wavelength=None,
-    unit="2th_rad",
-    center=None,
-    mask=None,
-    affine=None,
-    method="splitpixel",
-    correctSolidAngle=True,
-    radial_range=None,
-    azimuth_range=None,
-    azimuthal_kwargs=None,
-    integrate_kwargs=None,
-):
-    """Calculate the azimuthal integral in 2d around a determined origin.
-
-    This method is used for signals where the origin is iterated, compared to
-    azimuthal_integrate_fast which is used when the origin, mask and affine transformation in the data is
-    constant.
-
-    Parameters
-    ----------
-    z : np.array()
-        Two-dimensional data array containing the signal.
-    origin : np.array()
-        A size 2 numpy array containing the position of the origin.
-    detector_distance : float
-        Detector distance in meters passed to pyFAI AzimuthalIntegrator.
-    detector : pyFAI.detectors.Detector object
-        A pyFAI detector used for the AzimuthalIntegrator.
-    wavelength : float
-        The electron wavelength in meters. Used by pyFAI AzimuthalIntegrator.
-    size_1d : int
-        The size of the returned 1D signal. (i.e. number of pixels in the 1D
-        azimuthal integral.)
-    unit : str
-        The unit for for PyFAI integrate1d.
-    *args :
-        Arguments to be passed to AzimuthalIntegrator.
-    **kwargs :
-        Keyword arguments to be passed to AzimuthalIntegrator.
-
-    Returns
-    -------
-    tth : np.array()
-        One-dimensional scattering vector axis of z.
-    I : np.array()
-        One-dimensional azimuthal integral of z.
-    """
-
-    azimuthal_kwargs = {} if azimuthal_kwargs is None else azimuthal_kwargs
-    integrate_kwargs = {} if integrate_kwargs is None else integrate_kwargs
-
-    shape = np.shape(z)
-    ai = get_azimuthal_integrator(
-        detector=detector,
-        detector_distance=detector_distance,
-        shape=shape,
-        center=center,
-        affine=affine,
-        mask=mask,
-        wavelength=wavelength,
-        **azimuthal_kwargs
-    )
-    output = ai.integrate1d(
-        z,
-        npt=npt_rad,
-        method=method,
-        unit=unit,
-        correctSolidAngle=correctSolidAngle,
-        azimuth_range=azimuth_range,
-        radial_range=radial_range,
-        **integrate_kwargs
-    )
-    return output[1]
-
-
-def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
+def azimuthal_integrate1d(z,
+                          azimuthal_integrator,
+                          npt_rad,
+                          mask=None,
+                          sum=False,
+                          **kwargs):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -199,6 +124,10 @@ def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
         the integral.
     npt_rad:
         The number of radial points to integrate
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean.
     **kwargs :
         Keyword arguments to be passed to ai.integrate2d
 
@@ -209,96 +138,21 @@ def azimuthal_integrate1d_fast(z, azimuthal_integrator, npt_rad, **kwargs):
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.integrate1d(z, npt=npt_rad, **kwargs)
-    return output[1]
+    output = azimuthal_integrator.integrate1d(z, npt=npt_rad, mask=mask, **kwargs)
+    if sum:
+        return np.transpose(output._sum_signal)
+    else:
+        return output[1]
 
 
-def azimuthal_integrate2d_slow(
-    z,
-    detector_distance,
-    detector,
-    npt_rad,
-    npt_azim=360,
-    wavelength=None,
-    unit="2th_rad",
-    center=None,
-    mask=None,
-    affine=None,
-    method="splitpixel",
-    correctSolidAngle=True,
-    radial_range=None,
-    azimuth_range=None,
-    azimuthal_kwargs=None,
-    integrate_kwargs=None,
-):
-    """Calculate the azimuthal integral in 2d around a determined origin.
-
-    This method is used for signals where the origin is iterated, compared to
-    azimuthal_integrate_fast which is used when the origin, mask and affine transformation in the data is
-    constant.
-
-    Parameters
-    ----------
-    z : np.array()
-        Two-dimensional data array containing the signal.
-    origin : np.array()
-        A size 2 numpy array containing the position of the origin.
-    detector_distance : float
-        Detector distance in meters passed to pyFAI AzimuthalIntegrator.
-    detector : pyFAI.detectors.Detector object
-        A pyFAI detector used for the AzimuthalIntegrator.
-    wavelength : float
-        The electron wavelength in meters. Used by pyFAI AzimuthalIntegrator.
-    size_1d : int
-        The size of the returned 1D signal. (i.e. number of pixels in the 1D
-        azimuthal integral.)
-    unit : str
-        The unit for for PyFAI integrate1d.
-    *args :
-        Arguments to be passed to AzimuthalIntegrator.
-    **kwargs :
-        Keyword arguments to be passed to AzimuthalIntegrator.
-
-    Returns
-    -------
-    tth : np.array()
-        One-dimensional scattering vector axis of z.
-    I : np.array()
-        One-dimensional azimuthal integral of z.
-    """
-
-    azimuthal_kwargs = {} if azimuthal_kwargs is None else azimuthal_kwargs
-    integrate_kwargs = {} if integrate_kwargs is None else integrate_kwargs
-
-    shape = np.shape(z)
-    ai = get_azimuthal_integrator(
-        detector=detector,
-        detector_distance=detector_distance,
-        shape=shape,
-        center=center,
-        affine=affine,
-        mask=mask,
-        wavelength=wavelength,
-        **azimuthal_kwargs
-    )
-
-    output = ai.integrate2d(
-        z,
-        npt_rad=npt_rad,
-        npt_azim=npt_azim,
-        method=method,
-        unit=unit,
-        correctSolidAngle=correctSolidAngle,
-        azimuth_range=azimuth_range,
-        radial_range=radial_range,
-        **integrate_kwargs
-    )
-    return np.transpose(output[0])
-
-
-def azimuthal_integrate2d_fast(
-    z, azimuthal_integrator, npt_rad, npt_azim=None, **kwargs
-):
+def azimuthal_integrate2d(z,
+                          azimuthal_integrator,
+                          npt_rad,
+                          npt_azim=None,
+                          mask=None,
+                          sum=False,
+                          **kwargs
+                          ):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -312,8 +166,58 @@ def azimuthal_integrate2d_fast(
     azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
         An AzimuthalIntegrator that is already initialised and used to calculate
         the integral.
-    npt_rad:
+    npt_rad: int
         The number of radial points to integrate
+    npt_azim: int
+        The number of azimuthal points to integrate
+    mask: Boolean Array
+        The mask used to ignore points.
+    sum: bool
+        If True the sum is returned, otherwise the average is returned.
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+
+    Returns
+    -------
+    I : np.array()
+        Two-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.integrate2d(z,
+                                              npt_rad=npt_rad,
+                                              npt_azim=npt_azim,
+                                              mask=mask,
+                                              **kwargs
+                                              )
+    if sum:
+        return np.transpose(output._sum_signal)
+    else:
+        return np.transpose(output[0])
+
+
+def integrate_radially(z,
+                       azimuthal_integrator,
+                       npt,
+                       npt_rad,
+                       mask=None,
+                       sum=False,
+                       **kwargs):
+    """Calculate the radial integrated profile curve as I = f(chi)
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt: int
+         The number of points in the output pattern
+    npt_rad: int
+        The number of points in the radial space. Too few points may lead to huge rounding errors.
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean.
     **kwargs :
         Keyword arguments to be passed to ai.integrate2d
 
@@ -324,10 +228,95 @@ def azimuthal_integrate2d_fast(
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.integrate2d(
-        z, npt_rad=npt_rad, npt_azim=npt_azim, **kwargs
-    )
-    return np.transpose(output[0])
+    output = azimuthal_integrator.integrate_radial(z, npt=npt,npt_rad=npt_rad, mask=mask, **kwargs)
+    if sum:
+        return np.transpose(output._sum_signal)
+    else:
+        return output[1]
+
+
+def medfilt_1d(z,
+              azimuthal_integrator,
+              npt_rad,
+              npt_azim,
+              mask=None,
+              **kwargs):
+    """Perform the 2D integration and filter along each row using a median filter
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt: int
+         The number of points in the output pattern
+    npt_rad: int
+        The number of points in the radial space. Too few points may lead to huge rounding errors.
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean.
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.medfilt1d(z,
+                                            npt_rad=npt_rad,
+                                            npt_azim=npt_azim,
+                                            mask=mask,
+                                            **kwargs)
+    return output[1]
+
+
+def sigma_clip(z,
+               azimuthal_integrator,
+               npt_rad,
+               npt_azim,
+               mask=None,
+               **kwargs):
+    """Perform the 2D integration and perform a sigm-clipping iterative
+     filter along each row. see the doc of scipy.stats.sigmaclip for the options.
+
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt_rad: int
+         The number of points in the output pattern
+    npt_azim: int
+        The number of points in the radial space. Too few points may lead to huge rounding errors.
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean.
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.sigma_clip(z,
+                                             npt_rad=npt_rad,
+                                             npt_azim=npt_azim,
+                                             mask=mask,
+                                             **kwargs)
+    return output[1]
 
 
 def gain_normalise(z, dref, bref):
