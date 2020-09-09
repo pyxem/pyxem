@@ -94,7 +94,7 @@ class CalibrationGenerator:
         asymmetry=1,
         rotation=0,
         center=None,
-        standard ="Au"
+        standard="Au"
     ):
         """Determine elliptical distortion of the diffraction pattern.
 
@@ -171,7 +171,7 @@ class CalibrationGenerator:
         # Set initial parameters for fitting
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
         # Fit ring pattern to experimental data
-        xf, cov = curve_fit(call_ring_pattern(xcenter, ycenter), pts, ref, p0=x0)
+        xf, cov = curve_fit(call_ring_pattern(center[0], center[1]), pts, ref, p0=x0)
         # Set ring fitting parameters to attribute
         self.ring_params = xf
         # Calculate affine transform parameters from fit parameters
@@ -193,7 +193,11 @@ class CalibrationGenerator:
 
         return affine
 
-    def get_cal_points(self, num_points, mask=None, show=False, interactive=False):
+    def get_cal_points(self,
+                       num_points,
+                       mask=None,
+                       show=False,
+                       interactive=False):
         data = self.calibration_data.data
         i_shape = np.shape(data)
         flattened_array = data.flatten()
