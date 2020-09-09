@@ -194,6 +194,171 @@ def azimuthal_integrate2d(z,
         return np.transpose(output[0])
 
 
+def integrate_radially(z,
+                       azimuthal_integrator,
+                       npt,
+                       npt_rad,
+                       mask=None,
+                       sum=False,
+                       **kwargs):
+    """Calculate the radial integrated profile curve as I = f(chi)
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt: int
+         The number of points in the output pattern
+    npt_rad: int
+        The number of points in the radial space. Too few points may lead to huge rounding errors.
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean.
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.integrate_radial(z, npt=npt,npt_rad=npt_rad, mask=mask, **kwargs)
+    if sum:
+        return np.transpose(output._sum_signal)
+    else:
+        return output[1]
+
+
+def medfilt_1d(z,
+              azimuthal_integrator,
+              npt_rad,
+              npt_azim,
+              mask=None,
+              **kwargs):
+    """Perform the 2D integration and filter along each row using a median filter
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt: int
+         The number of points in the output pattern
+    npt_rad: int
+        The number of points in the radial space. Too few points may lead to huge rounding errors.
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean.
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.medfilt1d(z,
+                                            npt_rad=npt_rad,
+                                            npt_azim=npt_azim,
+                                            mask=mask,
+                                            **kwargs)
+    return output[1]
+
+
+def serperate(z,
+              azimuthal_integrator,
+              npt_rad,
+              npt_azim,
+              mask=None,
+              **kwargs):
+    """Separate bragg signal from powder/amorphous signal using
+     azimuthal integration, median filtering and projected back before subtraction.
+
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt_rad: int
+         The number of points in the output pattern
+    npt_azim: int
+        The number of points in the radial space. Too few points may lead to huge rounding errors.
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.seperate(z,
+                                           npt_rad=npt_rad,
+                                           npt_azim=npt_azim,
+                                           mask=mask,
+                                           **kwargs)
+    return output
+
+def sigma_clip(z,
+               azimuthal_integrator,
+               npt_rad,
+               npt_azim,
+               mask=None,
+               **kwargs):
+    """Perform the 2D integration and perform a sigm-clipping iterative
+     filter along each row. see the doc of scipy.stats.sigmaclip for the options.
+
+
+    Parameters
+    ----------
+    z : np.array()
+        Two-dimensional data array containing the signal.
+    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
+        An AzimuthalIntegrator that is already initialised and used to calculate
+        the integral.
+    npt_rad: int
+         The number of points in the output pattern
+    npt_azim: int
+        The number of points in the radial space. Too few points may lead to huge rounding errors.
+    mask: Boolean Array
+        A boolean array with pixels to ignore
+    sum: bool
+        Returns the integrated intensity rather than the mean.
+    **kwargs :
+        Keyword arguments to be passed to ai.integrate2d
+
+    Returns
+    -------
+    tth : np.array()
+        One-dimensional scattering vector axis of z.
+    I : np.array()
+        One-dimensional azimuthal integral of z.
+    """
+    output = azimuthal_integrator.sigma_clip(z,
+                                             npt_rad=npt_rad,
+                                             npt_azim=npt_azim,
+                                             mask=mask,
+                                             **kwargs)
+    return output[1]
+
+
 def gain_normalise(z, dref, bref):
     """Apply gain normalization to experimentally acquired electron
     diffraction pattern.

@@ -104,7 +104,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     @ai.setter
     def ai(self, ai):
-        """ Sets the Azimuthal Integrator property.  See pyFAI.AzimuthalIntegrator for more
+        """ Sets the Azimuthal Integrator property.  See ~pyFAI.AzimuthalIntegrator for more.
         """
         self.metadata.set_item("Signal.ai", ai)
 
@@ -114,6 +114,22 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                affine=None,
                radial_range=None,
                **kwargs):
+        """ This function sets the .ai parameter which stores an ~pyfai.AzimuthalIntegrator object based on
+        the current calibration applied to the diffraction pattern.
+
+        Parameters
+        --------
+        center: (x,y) or None
+            The center of the diffraction pattern.  If None, the center is the middle of the image.
+        wavelength: float
+            The wavelength of the energy in 1/meters.  For proper treatment of Ewald Sphere
+        affine: numpy.Array 3x3
+            A 3x3 array which describes the affine distortion of the pattern. This is translated
+            to a spline interpolation which is used in the pyFAI implementations
+        radial_range: (start,stop)
+            The start and stop of the radial range in real units
+
+        """
         pixel_scale = [
             self.axes_manager.signal_axes[0].scale,
             self.axes_manager.signal_axes[1].scale,
@@ -329,9 +345,28 @@ class Diffraction2D(Signal2D, CommonDiffraction):
              to go on GPU. To Specify the device: “csr_ocl_1,2”
         sum: bool
             If true returns the pixel split sum rather than the azimuthal integration which
-            gives the mean.t.
-        **kwargs: dict
-            Any other keyword arguments for hyperspys map function or PyFAI's Integrate1D function
+            gives the mean.
+
+        Other Parameters
+        -------
+        dummy: float
+            Value for dead/masked pixels
+        delta_dummy: float
+            Percision value for dead/masked pixels
+        correctSolidAngle: bool
+            Correct for the solid angle of each pixel if True
+        dark: ndarray
+            The dark noise image
+        flat: ndarray
+            The flat field correction image
+        safe: bool
+            Do some extra checks to ensure LUT/CSR is still valid. False is faster.
+        show_progressbar: bool
+            If True shows a progress bar for the mapping function
+        parallel: bool
+            If true launches paralell workers for the integration
+        max_workers: int
+            The number of streams to initialize. Only used if parallel=True
 
         Returns
         -------
@@ -400,10 +435,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         azimuth_range=None,
         inplace=False,
         method="splitpixel",
-        map_kwargs=None,
-        detector=None,
         sum=False,
-        detector_dist=None,
         correctSolidAngle=True,
         **kwargs,
     ):
@@ -419,15 +451,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        npt_rad: int
+        npt: int
             The number of radial points to calculate
         npt_azim: int
             The number of azimuthal points to calculate
-        center: None or (x,y)
-            The center of the pattern in pixels to preform the integration around
-        affine: 3x3 array
-            An affine transformation to apply during the transformation
-            (creates a spline map that is used by pyFAI)
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
             If mask is a baseSignal then it is itereated over as well.
@@ -437,28 +464,37 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         azimuth_range:None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
-        wavelength: None or float
-            The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
-            it to properly work.
-        unit: str
-            The unit can be "pyxem" to use the pyxem units and “q_nm^-1”, “q_A^-1”, “2th_deg”, “2th_rad”, “r_mm”
-            if pyFAI is used for unit handling
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
             Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
             “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
             to go on GPU. To Specify the device: “csr_ocl_1,2”
-        detector: pyFai.detector.Detector
-            The detector set up to be used by the integrator
         sum: bool
             If true the radial integration is returned rather then the Azimuthal Integration.
-        detector_dist: float
-            distance sample - detector plan (orthogonal distance, not along the beam), in meter.
         correctSolidAngle: bool
             Account for Ewald sphere or not. From PYFAI.
-        **kwargs:
-            Any keyword arguements for Map or Integrate2D
+
+        Other Parameters
+        -------
+        dummy: float
+            Value for dead/masked pixels
+        delta_dummy: float
+            Percision value for dead/masked pixels
+        correctSolidAngle: bool
+            Correct for the solid angle of each pixel if True
+        dark: ndarray
+            The dark noise image
+        flat: ndarray
+            The flat field correction image
+        safe: bool
+            Do some extra checks to ensure LUT/CSR is still valid. False is faster.
+        show_progressbar: bool
+            If True shows a progress bar for the mapping function
+        parallel: bool
+            If true launches paralell workers for the integration
+        max_workers: int
+            The number of streams to initialize. Only used if parallel=True
 
         Returns
         -------
@@ -483,6 +519,134 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> from pyFAI.detectors import Detector
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
         >>> ds.get_azimuthal_integral2d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
+        """
+        sig_shape = self.axes_manager.signal_shape
+        unit = self.unit
+        if radial_range is None:
+            radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
+            radial_range[0] = 0
+        integration = self.map(
+            azimuthal_integrate2d,
+            azimuthal_integrator=self.ai,
+            npt_rad=npt,
+            npt_azim=npt_azim,
+            azimuth_range=azimuth_range,
+            radial_range=radial_range,
+            method=method,
+            inplace=inplace,
+            unit=self.unit,
+            mask=mask,
+            sum=sum,
+            correctSolidAngle=correctSolidAngle,
+            **kwargs
+            )
+
+        # Dealing with axis changes
+        if inplace:
+            t_axis = self.axes_manager.signal_axes[0]
+            k_axis = self.axes_manager.signal_axes[1]
+            self.set_signal_type("polar_diffraction")
+        else:
+            transfer_navigation_axes(integration, self)
+            integration.set_signal_type("polar_diffraction")
+            t_axis = integration.axes_manager.signal_axes[0]
+            k_axis = integration.axes_manager.signal_axes[1]
+        t_axis.name = "Radians"
+        if azimuth_range is None:
+            t_axis.scale = np.pi * 2 / npt_azim
+            t_axis.offset = -np.pi
+        else:
+            t_axis.scale = (azimuth_range[1] - azimuth_range[0]) / npt
+            t_axis.offset = azimuth_range[0]
+        k_axis.name = "Radius"
+        k_axis.scale = (radial_range[1] - radial_range[0]) / npt
+        k_axis.units = unit
+        k_axis.offset = radial_range[0]
+
+        return integration
+
+    def get_radial_integral(
+        self,
+        npt,
+        npt_rad,
+        mask=None,
+        radial_range=None,
+        azimuth_range=None,
+        inplace=False,
+        method="splitpixel",
+        sum=False,
+        correctSolidAngle=True,
+        **kwargs,
+    ):
+        """Calculate the radial integrated profile curve as I = f(chi)
+
+        Parameters
+        ----------
+        npt: int
+            The number of radial points to calculate
+        npt_rad: int
+            number of points in the radial space. Too few points may lead to huge rounding errors.
+        mask:  boolean array or BaseSignal
+            A boolean mask to apply to the data to exclude some points.
+            If mask is a baseSignal then it is itereated over as well.
+        radial_range: None or (float, float)
+            The radial range over which to perform the integration. Default is
+            the full frame
+        azimuth_range:None or (float, float)
+            The azimuthal range over which to perform the integration. Default is
+            from -pi to pi
+        inplace: bool
+            If the signal is overwritten or copied to a new signal
+        method: str
+            Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
+            “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
+            to go on GPU. To Specify the device: “csr_ocl_1,2”
+        sum: bool
+            If true the radial integration is returned rather then the Azimuthal Integration.
+        correctSolidAngle: bool
+            Account for Ewald sphere or not. From PYFAI.
+
+        Other Parameters
+        -------
+        dummy: float
+            Value for dead/masked pixels
+        delta_dummy: float
+            Percision value for dead/masked pixels
+        correctSolidAngle: bool
+            Correct for the solid angle of each pixel if True
+        dark: ndarray
+            The dark noise image
+        flat: ndarray
+            The flat field correction image
+        safe: bool
+            Do some extra checks to ensure LUT/CSR is still valid. False is faster.
+        show_progressbar: bool
+            If True shows a progress bar for the mapping function
+        parallel: bool
+            If true launches paralell workers for the integration
+        max_workers: int
+            The number of streams to initialize. Only used if parallel=True
+
+        Returns
+        -------
+        polar: PolarDiffraction2D
+            A polar diffraction signal
+
+        Examples
+        --------
+        Basic case using "2th_deg" units (no wavelength needed)
+
+        >>> ds.unit = "2th_deg"
+        >>> ds.set_ai()
+        >>> ds.get_radial_integral(npt=100, npt_rad=400)
+
+        Basic case using a curved Ewald Sphere approximation and pyXEM units
+        (wavelength needed)
+
+        >>> ds.unit = "k_nm^-1" # setting units
+        >>> ds.set_ai(wavelength=2.5e-12)
+        >>> ds.get_radial_integral(npt=100,npt_rad=400)
+
         """
         sig_shape = self.axes_manager.signal_shape
         unit = self.unit
