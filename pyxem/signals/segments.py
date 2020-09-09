@@ -484,7 +484,7 @@ class VDFSegment:
         return vdfseg
 
     def get_virtual_electron_diffraction(self, calibration, shape, sigma):
-        """ Obtain a virtual electron diffraction signal that consists
+        """Obtain a virtual electron diffraction signal that consists
         of one virtual diffraction pattern for each segment. The virtual
         diffraction pattern is composed of Gaussians centered at each
         vector position. If given, the integrated intensities of each

@@ -28,7 +28,6 @@ from hyperspy._signals.lazy import LazySignal
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from scipy.ndimage import rotate, gaussian_filter
-from tqdm import tqdm
 
 
 class DPCBaseSignal(BaseSignal):
@@ -199,7 +198,7 @@ class DPCSignal2D(Signal2D):
         >>> s_magnitude = s.get_magnitude_signal()
         >>> s_magnitude.plot()
 
-        See also
+        See Also
         --------
         get_color_signal : Signal showing both phase and magnitude
         get_phase_signal : Signal showing the phase
@@ -245,7 +244,7 @@ class DPCSignal2D(Signal2D):
         >>> s_color = s.get_phase_signal(rotation=20)
         >>> s_color.plot()
 
-        See also
+        See Also
         --------
         get_color_signal : Signal showing both phase and magnitude
         get_magnitude_signal : Signal showing the magnitude
@@ -295,7 +294,7 @@ class DPCSignal2D(Signal2D):
 
         >>> s_color = s.get_color_signal(rotation=30)
 
-        See also
+        See Also
         --------
         get_color_signal : Signal showing both phase and magnitude
         get_phase_signal : Signal showing the phase

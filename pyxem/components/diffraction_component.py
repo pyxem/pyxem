@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Forward model component for kinematical electron diffraction.
-
-"""
+"""Forward model component for kinematical electron diffraction."""
 
 import numpy as np
 from hyperspy.component import Component
@@ -64,7 +62,7 @@ class ElectronDiffractionForwardModel(Component):
         d33=1.0,
     ):
         Component.__init__(
-            self, ["d11", "d12", "d13", "d21", "d22", "d23", "d31", "d32", "d33",]
+            self, ["d11", "d12", "d13", "d21", "d22", "d23", "d31", "d32", "d33"]
         )
         self.electron_diffraction_calculator = electron_diffraction_calculator
         self.structure = structure

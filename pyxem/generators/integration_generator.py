@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Generating subpixel resolution on diffraction vectors.
-"""
+"""Generating subpixel resolution on diffraction vectors."""
 
 import numpy as np
 from hyperspy.signals import BaseSignal
@@ -66,10 +64,7 @@ def _take_ragged(z, indices, _axis=None, out=None, mode="raise"):
 
 
 def _get_largest_connected_region(segmentation):
-    """
-    Take a binary segmentation image and return the largest connected
-    area.
-    """
+    """Take a binary segmentation image and return the largest connected area."""
     labels = label(segmentation)
     largest = np.argmax(np.bincount(labels.flat, weights=segmentation.flat))
     return (labels == largest).astype(int)
@@ -85,9 +80,11 @@ def _get_intensities_summation_method(
     snr_thresh=3.0,
     verbose: bool = False,
 ):
-    """Integrate reflections using the summation method. Two boxes are defined,
-    the inner box is used to define the integration area. The outer box is used
-    to calculate the average signal-to-noise ratio (SNR).
+    """Integrate reflections using the summation method.
+
+    Two boxes are defined, the inner box is used to define the
+    integration area. The outer box is used to calculate the
+    average signal-to-noise ratio (SNR).
 
     All pixels with a large enough SNR are considered to be signal. The largest region
     of connected signal pixels are summed to calculate the reflection intensity.
@@ -122,7 +119,8 @@ def _get_intensities_summation_method(
     Notes
     -----
     Implementation based on Barty et al, J. Appl. Cryst. (2014). 47, 1118-1131
-                            Lesli, Acta Cryst. (2006). D62, 48-57
+    Lesli, Acta Cryst. (2006). D62, 48-57
+
     """
     if not n_max:  # pragma: no cover
         n_max = box_inner ** 2
