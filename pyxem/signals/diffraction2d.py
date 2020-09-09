@@ -68,7 +68,6 @@ from pyxem.utils.expt_utils import (
     find_beam_center_interpolate,
     integrate_radially,
     medfilt_1d,
-    serperate,
     sigma_clip,
 )
 
