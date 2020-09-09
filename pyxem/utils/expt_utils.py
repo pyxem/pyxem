@@ -276,46 +276,6 @@ def medfilt_1d(z,
     return output[1]
 
 
-def serperate(z,
-              azimuthal_integrator,
-              npt_rad,
-              npt_azim,
-              mask=None,
-              **kwargs):
-    """Separate bragg signal from powder/amorphous signal using
-     azimuthal integration, median filtering and projected back before subtraction.
-
-
-    Parameters
-    ----------
-    z : np.array()
-        Two-dimensional data array containing the signal.
-    azimuthal_integrator : pyFAI.azimuthal_integrator.AzimuthalIntegrator object
-        An AzimuthalIntegrator that is already initialised and used to calculate
-        the integral.
-    npt_rad: int
-         The number of points in the output pattern
-    npt_azim: int
-        The number of points in the radial space. Too few points may lead to huge rounding errors.
-    mask: Boolean Array
-        A boolean array with pixels to ignore
-    **kwargs :
-        Keyword arguments to be passed to ai.integrate2d
-
-    Returns
-    -------
-    tth : np.array()
-        One-dimensional scattering vector axis of z.
-    I : np.array()
-        One-dimensional azimuthal integral of z.
-    """
-    output = azimuthal_integrator.seperate(z,
-                                           npt_rad=npt_rad,
-                                           npt_azim=npt_azim,
-                                           mask=mask,
-                                           **kwargs)
-    return output
-
 def sigma_clip(z,
                azimuthal_integrator,
                npt_rad,
