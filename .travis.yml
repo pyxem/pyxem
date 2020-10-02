@@ -2,7 +2,7 @@ language: shell
 
 env:
   global:
-    - DEPS="hyperspy-base==1.5.2 diffsims lmfit pyfai ipywidgets"
+    - DEPS="scikit-image>=0.15.0 matplotlib>=3.1.1 scikit-learn>=0.19 hyperspy-base==1.5.2 diffsims>=0.2.3 lmfit>=0.9.12 ipywidgets pyfai-base numba"
     - TEST_DEPS="pytest>=5.0 pytest-cov>=2.8.1 coveralls>=1.10 coverage>=5.0"
 
 matrix:
