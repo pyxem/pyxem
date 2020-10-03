@@ -48,7 +48,7 @@ install:
   - conda update -y conda;
   - conda config --append channels conda-forge;
   - conda create -n testenv --yes python=$PYTHON;
-  - if [[ "$TRAVIS_OS_NAME" =~ ^(linux|osx)$ ]]; then
+  - if [ "$TRAVIS_OS_NAME" =~ ^(linux|osx)$ ]; then
       conda activate testenv;
     else
       . activate testenv;
