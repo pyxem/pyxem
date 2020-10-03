@@ -59,5 +59,12 @@ install:
 
 script:
   - export MPLBACKEND=Agg
-  - pytest --pyargs pyxem --cov=pyxem
+  # runs slow tests
+  - if [["$TRAVIS_OS_NAME" =~ ^(linux)$ ]]; then
+      pytest --pyargs pyxem --cov=pyxem --runslow
+    fi
+  # ignores slow tests
+  - if NOT [["$TRAVIS_OS_NAME" =~ ^(linux)$ ]]; then
+      pytest --pyargs pyxem --cov=pyxem
+    fi
   - coveralls
