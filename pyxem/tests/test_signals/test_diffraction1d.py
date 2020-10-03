@@ -20,6 +20,7 @@ import numpy as np
 import dask.array as da
 import hyperspy.api as hs
 import pytest
+from matplotlib import pyplot as plt
 
 from pyxem.signals.diffraction1d import Diffraction1D, LazyDiffraction1D
 
@@ -85,12 +86,14 @@ class TestDecomposition:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    @pytest.mark.parametrize("stack", [True, False])
+    @pytest.mark.parametrize("stack", [False])
     def test_plot_integrated_intensity(self, stack, electron_diffraction1d):
         if stack:
             electron_diffraction1d = hs.stack([electron_diffraction1d] * 3)
         roi = hs.roi.SpanROI(left=1.0, right=2.0)
+        plt.ion()  # to make plotting non-blocking
         electron_diffraction1d.plot_integrated_intensity(roi)
+        plt.close("all")
 
     def test_get_integrated_intensity(self, electron_diffraction1d):
         roi = hs.roi.SpanROI(left=1.0, right=2.0)
