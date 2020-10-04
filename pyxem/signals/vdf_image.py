@@ -15,9 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for virtual diffraction contrast images.
-
-"""
+"""Signal class for virtual diffraction contrast images."""
 import numpy as np
 
 from hyperspy.signals import Signal2D

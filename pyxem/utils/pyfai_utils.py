@@ -1,6 +1,7 @@
 import numpy as np
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.detectors import Detector
+from pyFAI.units import register_radial_unit,eq_q
 
 
 def get_azimuthal_integrator(
@@ -13,12 +14,12 @@ def get_azimuthal_integrator(
     wavelength=None,
     **kwargs
 ):
-    """ This is a basic method for creating a azimuthal integrator.
+    """Basic method for creating a azimuthal integrator.
 
     This helps to deal with taking some of the pyXEM standards and apply them to pyFAI
 
     Parameters
-    -----------
+    ----------
     detector: pyFAI.detectors.Detector
         The detector to be integrated
     detector_distance:
@@ -33,7 +34,7 @@ def get_azimuthal_integrator(
         A boolean array to be added to the integrator.
     wavelength: float
         The wavelength of the beam in meter. Needed to accounting for the
-        Ewald sphere. 
+        Ewald sphere.
     kwargs: dict
         Any additional arguments to the Azimuthal Integrator class
     """
@@ -60,10 +61,12 @@ def get_azimuthal_integrator(
 
 
 def _get_radial_extent(ai, shape=None, unit=None):
-    """This method isn't perfect but it takes some Azimuthal Integrator and calculates the domain of the output
+    """Takes an Azimuthal Integrator and calculates the domain of the output.
+
+    Note: this method isn't perfect.
 
     Parameters
-    -----------
+    ----------
     ai: AzimuthalIntegrator
         The integrator to operate on
     shape: (int, int)
@@ -76,11 +79,11 @@ def _get_radial_extent(ai, shape=None, unit=None):
 
 
 def _get_displacements(center, shape, affine):
-    """ Gets the displacements for a set of points based on some affine transformation
+    """Gets the displacements for a set of points based on some affine transformation
     about some center point.
 
     Parameters
-    -------------
+    ----------
     center: (tuple)
         The center to preform the affine transformation around
     shape: (tuple)
@@ -89,7 +92,7 @@ def _get_displacements(center, shape, affine):
         The affine transformation to apply to the image
 
     Returns
-    ----------
+    -------
     dx: np.array
         The displacement in the x direction of shape = shape
     dy: np.array
@@ -112,19 +115,16 @@ def _get_displacements(center, shape, affine):
 
 
 def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
-    """Returns a generic set up for a flat detector with accounting for Ewald sphere effects
-    """
+    """Returns a generic set up for a flat detector with accounting for Ewald sphere effects."""
     units_table = {
-        "2th_deg": [None, 1, "2th_deg"],
-        "2th_rad": [None, 1, "2th_rad"],
-        "q_nm^-1": [1e-9, 1, "q_nm^-1"],
-        "q_A^-1": [1e-10, 1, "q_A^-1"],
-        "k_nm^-1": [1e-9, 2 * np.pi, "q_nm^-1"],  # add to pyFAI
-        "k_A^-1": [1e-10, 2 * np.pi, "q_A^-1"],  # add to pyFAI
+        "2th_deg": None,
+        "2th_rad": None,
+        "q_nm^-1": 1e-9,
+        "q_A^-1": 1e-10,
+        "k_nm^-1": 1e-9,
+        "k_A^-1": 1e-10,
     }
-    wavelength_scale = units_table[pyxem_unit][0]
-    scale_factor = units_table[pyxem_unit][1]
-    unit = units_table[pyxem_unit][2]
+    wavelength_scale = units_table[pyxem_unit]
     detector_distance = 1
     if wavelength_scale is None:
         if pyxem_unit == "2th_deg":
@@ -142,5 +142,24 @@ def _get_setup(wavelength, pyxem_unit, pixel_scale, radial_range=None):
         )
     detector = Detector(pixel1=pixel_1_size, pixel2=pixel_2_size)
     if radial_range is not None:
-        radial_range = [radial_range[0] * scale_factor, radial_range[1] * scale_factor]
-    return detector, detector_distance, radial_range, unit, scale_factor
+        radial_range = [radial_range[0], radial_range[1]]
+    return detector, detector_distance, radial_range,
+
+
+register_radial_unit("k_A^-1",
+                     center="qArray",
+                     delta="deltaQ",
+                     scale=0.1 * 2 * np.pi,
+                     label=r"Scattering vector $k$ ($\AA^{-1}$)",
+                     equation=eq_q,
+                     short_name="k",
+                     unit_symbol=r"\AA^{-1}")
+
+register_radial_unit("k_nm^-1",
+                     center="qArray",
+                     delta="deltaQ",
+                     scale=1.0 * 2 * np.pi,
+                     label=r"Scattering vector $k$ ($\nm^{-1}$)",
+                     equation=eq_q,
+                     short_name="k",
+                     unit_symbol=r"\nm^{-1}")

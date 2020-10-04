@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Signal class for two-dimensional diffraction data in polar coordinates.
-"""
+"""Signal class for two-dimensional diffraction data in polar coordinates."""
 
 from hyperspy.signals import Signal2D, BaseSignal
 from hyperspy._signals.lazy import LazySignal
@@ -55,8 +53,9 @@ class Power2D(Signal2D):
            upper and lower k values to integrate over, allows both ints and floats for indexing
         symmetry: int or array-like
             specific integers or list of symmetries to average over when creating the map of the correlations.
+
         Returns
-        ----------
+        -------
         symmetry_map: 2-d array
             2 dimensional map of from the power spectrum
         """
@@ -83,24 +82,26 @@ class Power2D(Signal2D):
                 )
         return sym_map
 
-    def plot_symmetries(
-        self, k_region=None, symmetry=[2, 4, 6, 8, 10], *args, **kwargs
-    ):
+    def plot_symmetries(self, k_region=None, symmetry=None, *args, **kwargs):
         """Plots the symmetries in the list of symmetries. Plot symmetries takes all of the arguements that imshow does.
 
         Parameters
-        -------------
+        ----------
          k_region: array-like
            upper and lower k values to integrate over, allows both ints and floats for indexing
-        symmetry: list
+        symmetry: list or None
             specific integers or list of symmetries to average over when creating the map of the correlations.
+            If None, defaults to [2, 4, 6, 8, 10]
         """
+
+        symmetry = [2, 4, 6, 8, 10] if symmetry is None else symmetry
+
         if k_region is None:
             k_region = [0, -1]
         summed = [self.get_map(k_region=k_region)]
         maps = summed + [self.get_map(k_region=k_region, symmetry=i) for i in symmetry]
-        l = ["summed"] + [str(i) + "-fold" for i in symmetry]
-        plot_images(images=maps, label=l, *args, **kwargs)
+        labels = ["summed"] + [str(i) + "-fold" for i in symmetry]
+        plot_images(images=maps, label=labels, *args, **kwargs)
 
 
 class LazyPower2D(LazySignal, Power2D):

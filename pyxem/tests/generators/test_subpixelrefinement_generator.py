@@ -28,7 +28,6 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
 
 
-# @pytest.mark.xfail(raises=ValueError)
 class Test_init_xfails:
     def test_out_of_range_vectors_numpy(self):
         """Test that putting vectors that lie outside of the
@@ -138,41 +137,11 @@ class Test_subpixelpeakfinders:
         self.no_shift_case(subpixelsfound)
         self.x_shift_case(subpixelsfound)
 
-    def test_assertioned_log(self, diffraction_vectors):
-        with pytest.warns(
-            UserWarning,
-            match="peak in your pattern that lies on the edge of the square",
+    def test_log(self, diffraction_vectors):
+        with pytest.raises(
+            NotImplementedError, match="This functionality was removed in v.0.13.0",
         ):
-            subpixelsfound = self.get_spr(diffraction_vectors).local_gaussian_method(12)
-
-        self.no_shift_case(subpixelsfound)
-        self.x_shift_case(subpixelsfound)
-
-
-# class Test_misc():
-""" These tests will be removed for 0.11.0, but are needed for the log method &
-security on the x/y conventions until then """
-
-
-def create_spot_gaussian():
-    z1 = np.zeros((128, 128))
-    x = np.arange(0.0, 10, 1.0)
-    y = x[:, np.newaxis]
-    z1[20:30, 50:60] = np.exp(-((x - 5.1) ** 2 + (y - 5.3) ** 2) / 4)
-    dp = ElectronDiffraction2D(
-        np.asarray([[z1, z1], [z1, z1]])
-    )  # this needs to be in 2x2
-    return dp
-
-
-@pytest.mark.parametrize(
-    "dp, diffraction_vectors",
-    [(create_spot_gaussian(), np.array([[55 - 64, 25 - 64]]))],
-)
-@pytest.mark.filterwarnings("ignore::UserWarning")  # our warning
-def test_bad_square_size_local_gaussian_method(dp, diffraction_vectors):
-    spr = SubpixelrefinementGenerator(dp, diffraction_vectors)
-    s = spr.local_gaussian_method(2)
+            _ = self.get_spr(diffraction_vectors).local_gaussian_method(12)
 
 
 def test_xy_errors_in_conventional_xc_method_as_per_issue_490():
