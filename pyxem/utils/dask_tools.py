@@ -81,6 +81,76 @@ def _process_dask_array(
     *args_process,
     **kwargs_process
 ):
+    """General function for processing a dask array over navigation dimensions.
+
+    This function is intended to process image data, which must be the two last
+    dimensions in the dask array.
+
+    By default, the output data will be the same as the input data. The two last
+    dimensions will be rechunked to one chunk.
+
+    Parameters
+    ----------
+    dask_array : Dask Array
+        Must be atleast two dimensions, and the two last dimensions are
+        assumed to be the signal dimensions.
+    process_func : Function
+        A function which must at least take one parameter, can return anything
+        but the output dimensions must match with drop_axis, new_axis and chunks.
+        See Examples below for how to use it.
+    dtype : NumPy dtype, optional
+    chunks : tuple, optional
+    drop_axis : int or tuple, optional
+        Axes which will be removed from the output array
+    new_axis : int or tuple, optional
+        Axes which will be added to the output array
+    output_signal_size : tuple, optional
+        If the output_array has a different signal size, this must be
+        specified here. See Examples below for how to use it.
+    *args
+        Passed to process_func
+    **kwargs
+        Passed to process_func
+
+    Returns
+    -------
+    output_array : Dask Array
+
+    Examples
+    --------
+    Changing the value of each pixel in the dataset, returning the same
+    sized array as the input and same navigation chunking.
+
+    >>> import dask.array as da
+    >>> from pyxem.utils.dask_tools import _process_dask_array
+    >>> def test_function1(image):
+    ...     return image * 10
+    >>> dask_array = da.ones((4, 6, 10, 15), chunks=(2, 2, 2, 2))
+    >>> output_dask_array = _process_dask_array(dask_array, test_function1)
+    >>> output_array = output_dask_array.compute()
+
+    Getting output which is different shape than the input. For example
+    two coordinates. Note: the output size must be the same for all the
+    navigation positions. If the size is variable, for example with peak
+    finding, use dtype=np.object (see below).
+
+    >>> def test_function2(image):
+    ...     return [10, 3]
+    >>> output_dask_array = _process_dask_array(
+    ...     dask_array, test_function2, chunks=(2, 2, 2), drop_axis=(2, 3),
+    ...     new_axis=2, output_signal_size=(2, ))
+
+    For functions where we don't know the shape of the output data,
+    use dtype=np.object
+
+    >>> def test_function2(image):
+    ...     return list(range(np.random.randint(20)))
+    >>> output_dask_array = _process_dask_array(
+    ...     dask_array, test_function2, chunks=(2, 2), drop_axis=(2, 3),
+    ...     new_axis=None, dtype=np.object, output_signal_size=())
+    >>> output_array = output_dask_array.compute()
+
+    """
     if dtype is None:
         dtype = dask_array.dtype
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
