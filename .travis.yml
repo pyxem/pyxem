@@ -59,7 +59,7 @@ install:
     fi
   - conda activate testenv;
   - if [ "$PIPONLY" = "true" ]; then
-       conda install -y diffpy $TEST_DEPS;
+       conda install -y $TEST_DEPS;
     else
        conda install -y $DEPS $TEST_DEPS;
     fi
