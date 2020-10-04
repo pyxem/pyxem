@@ -57,9 +57,13 @@ class TestProcessChunk:
         assert chunk_output.dtype == dtype
         assert np.all(chunk_output == [5, 2])
 
-    def test_dtype(self):
+    @pytest.mark.parametrize(
+        "dtype",
+        [np.float16, np.float32, np.uint8, np.uint32, np.int8, np.int32, np.bool],
+    )
+    def test_dtype(self, dtype):
         chunk_input = np.zeros((3, 4, 10, 8), dtype=np.int16)
-        block_info = {None: {"dtype": np.float32}}
+        block_info = {None: {"dtype": dtype}}
 
         def test_function(image):
             return 4.8
@@ -69,8 +73,7 @@ class TestProcessChunk:
         )
         output_shape = chunk_input.shape[:-2] + (1,)
         assert output_shape == chunk_output.shape
-        assert chunk_output.dtype == np.float32
-        assert np.all(chunk_output == 4.8)
+        assert chunk_output.dtype == dtype
 
     def test_args_process(self):
         dtype = np.int16
@@ -110,6 +113,149 @@ class TestProcessChunk:
             chunk_input, test_function, block_info=block_info
         )
         assert np.all(chunk_output2 == 1)
+
+    @pytest.mark.parametrize(
+        "shape", [(6, 9), (5, 3, 4), (3, 2, 9, 8), (5, 4, 2, 8, 7)]
+    )
+    def test_input_dimensions(self, shape):
+        dtype = np.int16
+        chunk_input = np.zeros(shape, dtype=dtype)
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image):
+            return image
+
+        chunk_output = dt._process_chunk(
+            chunk_input, test_function, block_info=block_info
+        )
+        assert chunk_input.shape == chunk_output.shape
+
+
+class TestProcessDaskArray:
+    def test_simple(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+
+        def test_function(image):
+            return image
+
+        dask_output = dt._process_dask_array(dask_input, test_function)
+        output_chunks = dask_input.chunksize[:-2] + dask_input.shape[-2:]
+        assert dask_output.chunksize == output_chunks
+        array_output = dask_output.compute()
+        assert dask_input.shape == array_output.shape
+        assert np.all(array_output == 0)
+
+    @pytest.mark.parametrize(
+        "dtype",
+        [np.float16, np.float32, np.uint8, np.uint32, np.int8, np.int32, np.bool],
+    )
+    def test_dtype(self, dtype):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+
+        def test_function(image):
+            return image
+
+        dask_output = dt._process_dask_array(
+            dask_input,
+            test_function,
+            dtype=dtype,
+        )
+        array_output = dask_output.compute()
+        assert array_output.dtype == dtype
+
+    def test_reduced_signal_shape(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+
+        def test_function(image):
+            return [2, 6]
+
+        dask_output = dt._process_dask_array(
+            dask_input,
+            test_function,
+            chunks=(2, 2, 2),
+            drop_axis=(2, 3),
+            new_axis=2,
+            output_signal_size=(2,),
+        )
+        assert dask_output.shape == (4, 6, 2)
+        assert dask_output.chunksize == (2, 2, 2)
+        array_output = dask_output.compute()
+        assert array_output.shape == (4, 6, 2)
+        assert array_output.dtype == dask_input.dtype
+        assert np.all(array_output == [2, 6])
+
+    def test_reduced_signal_shape_object_dtype(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+
+        def test_function(image):
+            return list(range(11))
+
+        dask_output = dt._process_dask_array(
+            dask_input,
+            test_function,
+            chunks=(2, 2),
+            drop_axis=(2, 3),
+            dtype=np.object,
+            new_axis=None,
+            output_signal_size=(),
+        )
+        array_output = dask_output.compute()
+        assert array_output.dtype == np.object
+        for iy, ix in np.ndindex(array_output.shape):
+            assert array_output[iy, ix] == list(range(11))
+
+    def test_args(self):
+        dask_input = da.ones((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+
+        def test_function(image, value1, value2):
+            return (image + value1) / value2
+
+        value1, value2 = 9, 2
+        dask_output = dt._process_dask_array(
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
+        )
+        array_output = dask_output.compute()
+        assert dask_input.shape == array_output.shape
+        assert np.all(array_output == 5)
+
+    def test_kwargs(self):
+        dask_input = da.ones((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+
+        def test_function(image, value1=7, value2=2):
+            return (image + value1) / value2
+
+        value1, value2 = 9, 2
+        dask_output1 = dt._process_dask_array(
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
+        )
+        dask_output2 = dt._process_dask_array(
+            dask_input,
+            test_function,
+        )
+        array_output1 = dask_output1.compute()
+        array_output2 = dask_output2.compute()
+        assert np.all(array_output1 == 5)
+        assert np.all(array_output2 == 4)
+
+    @pytest.mark.parametrize(
+        "shape", [(6, 9), (5, 3, 4), (3, 2, 9, 8), (5, 4, 2, 8, 7)]
+    )
+    def test_input_dimensions(self, shape):
+        chunks = [2] * len(shape)
+        dask_input = da.zeros(shape, chunks=chunks, dtype=np.uint16)
+
+        def test_function(image):
+            return image
+
+        dask_output = dt._process_dask_array(dask_input, test_function)
+        array_output = dask_output.compute()
+        assert dask_input.shape == array_output.shape
 
 
 class TestCenterOfMassArray:
