@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a setup.cfg
 
 ### Changed
-- Azimuthal integration has been refactor (see PR no.625 for details)
+- Azimuthal integration has been refactor (see PR #625 for details)
 
 ### Removed
 - The local_gaussian_method for subpixel refinement has been removed
