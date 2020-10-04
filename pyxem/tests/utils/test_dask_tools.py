@@ -25,6 +25,93 @@ import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.dummy_data.dask_test_data as dtd
 
 
+class TestProcessChunk:
+    def test_simple(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image):
+            return image + 1
+
+        chunk_output = dt._process_chunk(
+            chunk_input, test_function, block_info=block_info
+        )
+        assert chunk_input.shape == chunk_output.shape
+        assert chunk_output.dtype == dtype
+        assert np.all(chunk_output == 1)
+
+    def test_output_signal_size(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image):
+            return (5, 2)
+
+        chunk_output = dt._process_chunk(
+            chunk_input, test_function, output_signal_size=(2,), block_info=block_info
+        )
+        output_shape = chunk_input.shape[:-2] + (2,)
+        assert output_shape == chunk_output.shape
+        assert chunk_output.dtype == dtype
+        assert np.all(chunk_output == [5, 2])
+
+    def test_dtype(self):
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=np.int16)
+        block_info = {None: {"dtype": np.float32}}
+
+        def test_function(image):
+            return 4.8
+
+        chunk_output = dt._process_chunk(
+            chunk_input, test_function, output_signal_size=(1,), block_info=block_info
+        )
+        output_shape = chunk_input.shape[:-2] + (1,)
+        assert output_shape == chunk_output.shape
+        assert chunk_output.dtype == np.float32
+        assert np.all(chunk_output == 4.8)
+
+    def test_args_process(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image, value1, value2):
+            return (image + value1) / value2
+
+        value1, value2 = 24, 4
+        chunk_output = dt._process_chunk(
+            chunk_input,
+            test_function,
+            args_process=[value1, value2],
+            block_info=block_info,
+        )
+        assert np.all(chunk_output == 6)
+
+    def test_kwargs_process(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image, value1=2, value2=2):
+            return (image + value1) / value2
+
+        value1, value2 = 15, 3
+        chunk_output1 = dt._process_chunk(
+            chunk_input,
+            test_function,
+            kwargs_process={"value1": value1, "value2": value2},
+            block_info=block_info,
+        )
+        assert np.all(chunk_output1 == 5)
+
+        chunk_output2 = dt._process_chunk(
+            chunk_input, test_function, block_info=block_info
+        )
+        assert np.all(chunk_output2 == 1)
+
+
 class TestCenterOfMassArray:
     def test_simple(self):
         numpy_array = np.zeros((10, 10, 50, 50))
