@@ -79,6 +79,8 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_xc,
 )
 
+from pyxem.utils.dask_tools import _process_dask_array
+
 from pyxem.utils import peakfinder2D_gui
 
 import pyxem.utils.pixelated_stem_tools as pst
@@ -909,7 +911,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return integration
 
-    def get_direct_beam_position(self, method, **kwargs):
+    def get_direct_beam_position(
+        self, method, chunks=None, lazy_result=False, **kwargs
+    ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -926,6 +930,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Array containing the shifts for each SED pattern.
 
         """
+
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
@@ -937,11 +942,55 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
+        if not self._lazy:
+            if chunks is None:
+                chunks = (32, 32) + signal_shape
+            dask_array = da.from_array(self.data, chunks=chunks)
+        else:
+            dask_array = self.data
+
+        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
+        new_axis = self.axes_manager.navigation_dimension
+        chunks_output = dask_array.chunksize[:-2] + (2,)
+
         if method == "cross_correlate":
-            shifts = self.map(method_function, inplace=False, **kwargs)
-        elif method == "blur" or method == "interpolate":
-            centers = self.map(method_function, inplace=False, **kwargs)
+            shifts = _process_dask_array(
+                dask_array,
+                method_function,
+                dtype=np.float32,
+                output_signal_size=(2,),
+                drop_axis=drop_axis,
+                new_axis=new_axis,
+                chunks=chunks_output,
+                **kwargs,
+            )
+        elif method == "blur":
+            centers = _process_dask_array(
+                dask_array,
+                method_function,
+                dtype=np.int16,
+                output_signal_size=(2,),
+                drop_axis=drop_axis,
+                new_axis=new_axis,
+                chunks=chunks_output,
+                **kwargs,
+            )
             shifts = origin_coordinates - centers
+        elif method == "interpolate":
+            centers = _process_dask_array(
+                dask_array,
+                method_function,
+                dtype=np.float32,
+                output_signal_size=(2,),
+                drop_axis=drop_axis,
+                new_axis=new_axis,
+                chunks=chunks_output,
+                **kwargs,
+            )
+            shifts = origin_coordinates - centers
+
+        if not lazy_result:
+            shifts = shifts.compute()
 
         return shifts
 
