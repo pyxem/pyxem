@@ -86,7 +86,7 @@ def _process_dask_array(
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     output_array = da.map_blocks(
         _process_chunk,
-        dask_array,
+        dask_array_rechunked,
         process_func=process_func,
         dtype=dtype,
         output_signal_size=output_signal_size,
