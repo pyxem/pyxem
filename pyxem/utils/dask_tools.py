@@ -39,6 +39,66 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
+def _get_process_chunk_output_shape(data, output_signal_size):
+    if output_signal_size is None:
+        output_shape = data.shape
+    else:
+        output_shape = data.shape[:-2] + tuple(output_signal_size)
+    return output_shape
+
+
+def _process_chunk(
+    data,
+    process_func,
+    output_signal_size=None,
+    args_process=None,
+    kwargs_process=None,
+    block_info=None,
+):
+    dtype = block_info[None]["dtype"]
+    if args_process is None:
+        args_process = []
+    if kwargs_process is None:
+        kwargs_process = {}
+    output_shape = _get_process_chunk_output_shape(data, output_signal_size)
+    output_array = np.zeros(output_shape, dtype=dtype)
+    for index in np.ndindex(data.shape[:-2]):
+        islice = np.s_[index]
+        output_array[islice] = process_func(
+            data[islice], *args_process, **kwargs_process
+        )
+    return output_array
+
+
+def _process_dask_array(
+    dask_array,
+    process_func,
+    dtype=None,
+    chunks=None,
+    drop_axis=None,
+    new_axis=None,
+    output_signal_size=None,
+    *args_process,
+    **kwargs_process
+):
+    if dtype is None:
+        dtype = dask_array.dtype
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
+    output_array = da.map_blocks(
+        _process_chunk,
+        dask_array,
+        process_func=process_func,
+        dtype=dtype,
+        output_signal_size=output_signal_size,
+        chunks=chunks,
+        drop_axis=drop_axis,
+        new_axis=new_axis,
+        args_process=args_process,
+        kwargs_process=kwargs_process,
+    )
+    return output_array
+
+
 def _mask_array(dask_array, mask_array, fill_value=None):
     """Mask two last dimensions in a dask array.
 
