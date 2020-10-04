@@ -39,14 +39,6 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
-def _get_process_chunk_output_shape(data, output_signal_size):
-    if output_signal_size is None:
-        output_shape = data.shape
-    else:
-        output_shape = data.shape[:-2] + tuple(output_signal_size)
-    return output_shape
-
-
 def _process_chunk(
     data,
     process_func,
@@ -60,7 +52,10 @@ def _process_chunk(
         args_process = []
     if kwargs_process is None:
         kwargs_process = {}
-    output_shape = _get_process_chunk_output_shape(data, output_signal_size)
+    if output_signal_size is None:
+        output_shape = data.shape
+    else:
+        output_shape = data.shape[:-2] + tuple(output_signal_size)
     output_array = np.zeros(output_shape, dtype=dtype)
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
