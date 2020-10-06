@@ -80,7 +80,7 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_xc,
 )
 
-from pyxem.utils.dask_tools import _process_dask_array
+from pyxem.utils.dask_tools import _process_dask_array, _get_dask_array
 
 from pyxem.utils import peakfinder2D_gui
 
@@ -932,7 +932,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
 
-        signal_shape = self.axes_manager.signal_shape
+        signal_shape = self.axes_manager.signal_shape[::-1]
         origin_coordinates = np.array(signal_shape) / 2
 
         method_dict = {
