@@ -451,3 +451,64 @@ class TestAzimuthalIntegrator:
     def test_return_ai_fail(self,ones):
         ai = ones.ai
         assert ai is None
+
+
+class TestGetDirectBeamPosition:
+    def setup_method(self):
+        px, py, dx, dy = 15, 10, 20, 26
+        x_pos_list = np.linspace(dx / 2 - 5, dx / 2 + 5, px, dtype=np.int16)
+        y_pos_list = np.linspace(dy / 2 - 7, dy / 2 + 7, py, dtype=np.int16)
+        data = np.zeros((py, px, dy, dx), dtype=np.uint16)
+        for ix in range(data.shape[1]):
+            for iy in range(data.shape[0]):
+                x_pos, y_pos = x_pos_list[ix], y_pos_list[iy]
+                data[iy, ix, y_pos, x_pos] = 10
+        s = Diffraction2D(data)
+        self.s = s
+        self.dx, self.dy = dx, dy
+        self.x_pos_list, self.y_pos_list = x_pos_list, y_pos_list
+
+    def test_blur(self):
+        dx, dy = self.dx, self.dy
+        s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
+        assert (-(x_pos_list - dx / 2) == s_shift.isig[1].data[0]).all()
+        assert (-(y_pos_list - dy / 2) == s_shift.isig[0].data[:, 0]).all()
+
+    def test_interpolate(self):
+        dx, dy = self.dx, self.dy
+        s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
+        s_shift = s.get_direct_beam_position(
+            method="interpolate",
+            sigma=1,
+            upsample_factor=2,
+            kind="nearest",
+        )
+        assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
+        assert (-(x_pos_list - dx / 2) == s_shift.isig[1].data[0]).all()
+        assert (-(y_pos_list - dy / 2) == s_shift.isig[0].data[:, 0]).all()
+
+    def test_interpolate(self):
+        s = self.s
+        s_shift = s.get_direct_beam_position(
+            method="cross_correlate", radius_start=0, radius_finish=1
+        )
+
+    def test_lazy_result(self):
+        s = self.s
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        assert hasattr(s_shift.data, "compute")
+        s_shift.compute()
+
+    def test_lazy_input_non_lazy_result(self):
+        s = LazyDiffraction2D(da.from_array(self.s.data))
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=False)
+        assert not hasattr(s_shift.data, "compute")
+        assert not hasattr(s_shift, "compute")
+
+    def test_lazy_input_lazy_result(self):
+        s = LazyDiffraction2D(da.from_array(self.s.data))
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        assert hasattr(s_shift.data, "compute")
+        s_shift.compute()
