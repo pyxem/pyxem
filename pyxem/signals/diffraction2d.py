@@ -24,6 +24,7 @@ from warnings import warn
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal2D
 from hyperspy._signals.lazy import LazySignal
+from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
 
@@ -989,10 +990,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             )
             shifts = origin_coordinates - centers
 
-        if not lazy_result:
-            shifts = shifts.compute()
+        s_shifts = LazySignal1D(shifts)
 
-        return shifts
+        if not lazy_result:
+            s_shifts.compute()
+
+        return s_shifts
 
     def center_direct_beam(
         self,
@@ -1001,7 +1004,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return_shifts=False,
         align_kwargs=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
