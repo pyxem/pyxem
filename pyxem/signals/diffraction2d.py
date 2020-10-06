@@ -912,22 +912,22 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return integration
 
-    def get_direct_beam_position(
-        self, method, chunks=None, lazy_result=False, **kwargs
-    ):
+    def get_direct_beam_position(self, method, lazy_result=False, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur", "interpolate"
+            Must be one of "cross_correlate", "blur" or "interpolate"
+        lazy_result : bool
+            If True, will return a LazySignal1D.
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to the method function.
 
         Returns
         -------
-        shifts : ndarray
+        s_shifts : HyperSpy Signal1D
             Array containing the shifts for each SED pattern.
 
         """
@@ -943,12 +943,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
-        if not self._lazy:
-            if chunks is None:
-                chunks = (32, 32) + signal_shape
-            dask_array = da.from_array(self.data, chunks=chunks)
-        else:
-            dask_array = self.data
+        dask_array = _get_dask_array(self)
 
         drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
         new_axis = self.axes_manager.navigation_dimension

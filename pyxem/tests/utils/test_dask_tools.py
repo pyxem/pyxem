@@ -23,6 +23,7 @@ import skimage.morphology as sm
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.dummy_data.dask_test_data as dtd
+from pyxem import Diffraction2D, LazyDiffraction2D
 
 
 class TestProcessChunk:
@@ -256,6 +257,24 @@ class TestProcessDaskArray:
         dask_output = dt._process_dask_array(dask_input, test_function)
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
+
+
+class TestGetDaskArray:
+    def test_simple(self):
+        s = Diffraction2D(np.zeros((2, 3, 10, 10)))
+        array_out = dt._get_dask_array(s)
+        assert hasattr(array_out, "compute")
+
+    def test_size_of_chunk(self):
+        s = Diffraction2D(np.zeros((10, 10, 8, 8)))
+        array_out = dt._get_dask_array(s, size_of_chunk=5)
+        assert array_out.chunksize[:2] == (5, 5)
+
+    def test_lazy_input(self):
+        s = LazyDiffraction2D(da.zeros((20, 20, 30, 30), chunks=(10, 10, 10, 10)))
+        array_out = dt._get_dask_array(s)
+        assert s.data.chunks == array_out.chunks
+        assert s.data.shape == array_out.shape
 
 
 @pytest.mark.slow

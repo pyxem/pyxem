@@ -39,6 +39,17 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
+def _get_dask_array(signal, size_of_chunk=32):
+    if signal._lazy:
+        dask_array = signal.data
+    else:
+        sig_chunks = list(signal.axes_manager.signal_shape)[::-1]
+        chunks = [size_of_chunk] * len(signal.axes_manager.navigation_shape)
+        chunks.extend(sig_chunks)
+        dask_array = da.from_array(signal.data, chunks=chunks)
+    return dask_array
+
+
 def _process_chunk(
     data,
     process_func,
