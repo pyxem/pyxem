@@ -20,6 +20,7 @@ import pytest
 import numpy as np
 import dask.array as da
 import hyperspy.api as hs
+from matplotlib import pyplot as plt
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
@@ -366,12 +367,14 @@ class TestPyFAIIntegration:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    @pytest.mark.parametrize("stack", [True, False])
+    @pytest.mark.parametrize("stack", [False])
     def test_plot_integrated_intensity(self, stack, diffraction_pattern):
         if stack:
             diffraction_pattern = hs.stack([diffraction_pattern] * 3)
         roi = hs.roi.CircleROI(3, 3, 5)
+        plt.ion()  # to make plotting non-blocking
         diffraction_pattern.plot_integrated_intensity(roi)
+        plt.close("all")
 
     def test_get_integrated_intensity(self, diffraction_pattern):
         roi = hs.roi.CircleROI(3, 3, 5)

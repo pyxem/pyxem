@@ -258,6 +258,7 @@ class TestProcessDaskArray:
         assert dask_input.shape == array_output.shape
 
 
+@pytest.mark.slow
 class TestCenterOfMassArray:
     def test_simple(self):
         numpy_array = np.zeros((10, 10, 50, 50))
@@ -295,7 +296,7 @@ class TestCenterOfMassArray:
         data1 = data1.compute()
         assert (data1 == np.ones((2, 10, 10))).all()
 
-
+@pytest.mark.slow
 class TestMaskArray:
     def test_simple(self):
         numpy_array = np.zeros((11, 10, 40, 50))
@@ -313,7 +314,7 @@ class TestMaskArray:
         with pytest.raises(ValueError):
             dt._mask_array(dask_array, mask_array=mask_array)
 
-
+@pytest.mark.slow
 class TestThresholdArray:
     def test_simple(self):
         numpy_array = np.ones((10, 12, 20, 15))
@@ -327,7 +328,7 @@ class TestThresholdArray:
         data[:, :, 10, 5] = False
         assert (data == np.zeros((10, 12, 20, 15))).all()
 
-
+@pytest.mark.slow
 class TestFindDeadPixels:
     def test_2d(self):
         data = dtd._get_dead_pixel_test_data_2d()
@@ -393,7 +394,7 @@ class TestFindDeadPixels:
         with pytest.raises(ValueError):
             dt._find_dead_pixels(data)
 
-
+@pytest.mark.slow
 class TestFindHotPixels:
     def test_2d(self):
         data = dtd._get_hot_pixel_test_data_2d()
@@ -471,7 +472,7 @@ class TestFindHotPixels:
         hot_pixels = hot_pixels.compute()
         assert hot_pixels.all()
 
-
+@pytest.mark.slow
 class TestRemoveBadPixels:
     def test_simple(self):
         data = np.ones((20, 30)) * 12
@@ -531,7 +532,7 @@ class TestRemoveBadPixels:
         with pytest.raises(ValueError):
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
 
-
+@pytest.mark.slow
 class TestTemplateMatchBinaryImage:
     @pytest.mark.parametrize("x, y", [(13, 32), (76, 32), (87, 21), (43, 85)])
     def test_single_frame(self, x, y):
@@ -623,7 +624,7 @@ class TestTemplateMatchBinaryImage:
         with pytest.raises(ValueError):
             dt._template_match_with_binary_image(dask_array, binary_image=binary_image)
 
-
+@pytest.mark.slow
 class TestPeakFindDog:
     @pytest.mark.parametrize("x, y", [(112, 32), (170, 92), (54, 76), (10, 15)])
     def test_single_frame_one_peak(self, x, y):
@@ -834,7 +835,7 @@ class TestPeakFindDog:
         with pytest.raises(ValueError):
             dt._peak_find_dog(dask_array)
 
-
+@pytest.mark.slow
 class TestPeakPositionRefinementCOM:
     def test_single_frame_peak(self):
         numpy_array = np.zeros((50, 50))
@@ -913,7 +914,7 @@ class TestPeakPositionRefinementCOM:
         match_array = match_array_dask.compute()
         assert peak_array_dask.shape == match_array.shape
 
-
+@pytest.mark.slow
 class TestBackgroundRemovalDOG:
     def test_single_frame_min_sigma(self):
         min_sigma = 10
@@ -988,7 +989,7 @@ class TestBackgroundRemovalDOG:
         match_array = match_array_dask.compute()
         assert dask_array.shape == match_array.shape
 
-
+@pytest.mark.slow
 class TestBackgroundRemovalMedianFilter:
     def test_single_frame_footprint(self):
         footprint = 10
@@ -1035,7 +1036,7 @@ class TestBackgroundRemovalMedianFilter:
         match_array = match_array_dask.compute()
         assert dask_array.shape == match_array.shape
 
-
+@pytest.mark.slow
 class TestBackgroundRemovalRadialMedian:
     def test_single_frame_centre(self):
         centre_x = 25
@@ -1093,7 +1094,7 @@ class TestBackgroundRemovalRadialMedian:
         match_array = match_array_dask.compute()
         assert dask_array.shape == match_array.shape
 
-
+@pytest.mark.slow
 class TestIntensityArray:
     def test_intensity_peaks_image_disk_r(self):
         numpy_array = np.zeros((50, 50))
@@ -1192,7 +1193,7 @@ class TestIntensityArray:
         peak_array_dask = da.empty((6, 16), chunks=(3, 2), dtype=np.object)
         dt._intensity_peaks_image(data_array_dask, peak_array_dask, 5)
 
-
+@pytest.mark.slow
 class TestPeakFindLog:
     @pytest.mark.parametrize("x, y", [(112, 32), (170, 92), (54, 76), (10, 15)])
     def test_single_frame_one_peak(self, x, y):
@@ -1403,7 +1404,7 @@ class TestPeakFindLog:
         with pytest.raises(ValueError):
             dt._peak_find_log(dask_array)
 
-
+@pytest.mark.slow
 class TestCenterOfMass:
     def test_centerofmass(self):
         numpy_array = np.zeros((20, 20))
