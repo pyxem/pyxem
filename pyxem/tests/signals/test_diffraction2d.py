@@ -489,7 +489,7 @@ class TestGetDirectBeamPosition:
         assert (-(x_pos_list - dx / 2) == s_shift.isig[1].data[0]).all()
         assert (-(y_pos_list - dy / 2) == s_shift.isig[0].data[:, 0]).all()
 
-    def test_interpolate(self):
+    def test_cross_correlate(self):
         s = self.s
         s_shift = s.get_direct_beam_position(
             method="cross_correlate", radius_start=0, radius_finish=1
