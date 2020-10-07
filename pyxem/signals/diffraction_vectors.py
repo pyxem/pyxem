@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+import itertools
 
 from hyperspy.signals import BaseSignal, Signal1D
 from hyperspy.api import markers
@@ -37,7 +38,6 @@ from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
 from pyxem.utils.vector_utils import get_npeaks, filter_vectors_ragged
 from pyxem.utils.vector_utils import filter_vectors_edge_ragged
 from pyxem.utils.expt_utils import peaks_as_gvectors
-from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 
 """
@@ -52,6 +52,69 @@ peak at every position.
 2. A list of diffraction vectors with dimensions < n | 2 > where n is the
 number of peaks.
 """
+
+def _find_max_length_peaks(peaks):
+    """Worker function for generate_marker_inputs_from_peaks.
+
+    Parameters
+    ----------
+    peaks : :class:`pyxem.diffraction_vectors.DiffractionVectors`
+        Identified peaks in a diffraction signal.
+
+    Returns
+    -------
+    longest_length : int
+        The length of the longest peak list.
+
+    """
+    x_size, y_size = (
+        peaks.axes_manager.navigation_shape[0],
+        peaks.axes_manager.navigation_shape[1],
+    )
+    length_of_longest_peaks_list = 0
+    for x in np.arange(0, x_size):
+        for y in np.arange(0, y_size):
+            if peaks.data[y, x].shape[0] > length_of_longest_peaks_list:
+                length_of_longest_peaks_list = peaks.data[y, x].shape[0]
+    return length_of_longest_peaks_list
+
+
+def generate_marker_inputs_from_peaks(peaks):
+    """Takes a peaks (defined in 2D) object from a STEM (more than 1 image) scan
+    and returns markers.
+
+    Parameters
+    ----------
+    peaks : :class:`pyxem.diffraction_vectors.DiffractionVectors`
+        Identifies peaks in a diffraction signal.
+
+    Example
+    -------
+    How to get these onto images::
+
+        mmx,mmy = generate_marker_inputs_from_peaks(found_peaks)
+        dp.plot(cmap='viridis')
+        for mx,my in zip(mmx,mmy):
+            m = hs.markers.point(x=mx,y=my,color='red',marker='x')
+            dp.add_marker(m,plot_marker=True,permanent=False)
+
+    """
+    max_peak_len = _find_max_length_peaks(peaks)
+    pad = np.array(
+        list(
+            itertools.zip_longest(
+                *np.concatenate(peaks.data), fillvalue=[np.nan, np.nan]
+            )
+        )
+    )
+    pad = pad.reshape((max_peak_len), peaks.data.shape[0], peaks.data.shape[1], 2)
+    xy_cords = np.transpose(pad, [3, 0, 1, 2])  # move the x,y pairs to the front
+    x = xy_cords[0]
+    y = xy_cords[1]
+
+    return x, y
+
+
 
 
 class DiffractionVectors(BaseSignal):
