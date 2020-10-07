@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - The local_gaussian_method for subpixel refinement
 - utils.plot, functionality now in signals.diffraction_vectors
+- utils.subpixelrefinement_utils, upstreamed to subpxielrefinement_generator
 
 ## 2020-10-04 - version 0.12.2
 ### Added
