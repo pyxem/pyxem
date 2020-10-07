@@ -24,6 +24,7 @@ from warnings import warn
 import hyperspy.api as hs
 from hyperspy.signals import BaseSignal, Signal2D
 from hyperspy._signals.lazy import LazySignal
+from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
 from hyperspy.misc.utils import isiterable
 
@@ -78,6 +79,8 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_log,
     find_peaks_xc,
 )
+
+from pyxem.utils.dask_tools import _process_dask_array, _get_dask_array
 
 from pyxem.utils import peakfinder2D_gui
 
@@ -909,24 +912,27 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return integration
 
-    def get_direct_beam_position(self, method, **kwargs):
+    def get_direct_beam_position(self, method, lazy_result=False, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
         Parameters
         ----------
         method : str,
-            Must be one of "cross_correlate", "blur", "interpolate"
+            Must be one of "cross_correlate", "blur" or "interpolate"
+        lazy_result : bool
+            If True, will return a LazySignal1D.
         **kwargs:
-            Keyword arguments to be passed to map().
+            Keyword arguments to be passed to the method function.
 
         Returns
         -------
-        shifts : ndarray
+        s_shifts : HyperSpy Signal1D
             Array containing the shifts for each SED pattern.
 
         """
-        signal_shape = self.axes_manager.signal_shape
+
+        signal_shape = self.axes_manager.signal_shape[::-1]
         origin_coordinates = np.array(signal_shape) / 2
 
         method_dict = {
@@ -937,13 +943,54 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         method_function = select_method_from_method_dict(method, method_dict, **kwargs)
 
+        dask_array = _get_dask_array(self)
+
+        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
+        new_axis = self.axes_manager.navigation_dimension
+        chunks_output = dask_array.chunksize[:-2] + (2,)
+
         if method == "cross_correlate":
-            shifts = self.map(method_function, inplace=False, **kwargs)
-        elif method == "blur" or method == "interpolate":
-            centers = self.map(method_function, inplace=False, **kwargs)
+            shifts = _process_dask_array(
+                dask_array,
+                method_function,
+                dtype=np.float32,
+                output_signal_size=(2,),
+                drop_axis=drop_axis,
+                new_axis=new_axis,
+                chunks=chunks_output,
+                **kwargs,
+            )
+        elif method == "blur":
+            centers = _process_dask_array(
+                dask_array,
+                method_function,
+                dtype=np.int16,
+                output_signal_size=(2,),
+                drop_axis=drop_axis,
+                new_axis=new_axis,
+                chunks=chunks_output,
+                **kwargs,
+            )
+            shifts = origin_coordinates - centers
+        elif method == "interpolate":
+            centers = _process_dask_array(
+                dask_array,
+                method_function,
+                dtype=np.float32,
+                output_signal_size=(2,),
+                drop_axis=drop_axis,
+                new_axis=new_axis,
+                chunks=chunks_output,
+                **kwargs,
+            )
             shifts = origin_coordinates - centers
 
-        return shifts
+        s_shifts = LazySignal1D(shifts)
+
+        if not lazy_result:
+            s_shifts.compute()
+
+        return s_shifts
 
     def center_direct_beam(
         self,
@@ -952,7 +999,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return_shifts=False,
         align_kwargs=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
