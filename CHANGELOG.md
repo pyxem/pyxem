@@ -7,9 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added 
 - Added a setup.cfg
+- get_direct_beam_position now supports lazy proccessing (#648)
 
 ### Changed
-- Azimuthal integration has been refactor (see PR #625 for details)
+- Azimuthal integration has been refactored (see PR #625 for details)
 
 ### Removed
 - The local_gaussian_method for subpixel refinement has been removed
