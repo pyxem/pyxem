@@ -21,11 +21,40 @@ import numpy as np
 
 from pyxem.generators.subpixelrefinement_generator import (
     SubpixelrefinementGenerator,
-    get_simulated_disc,
+    get_simulated_disc, get_experimental_square, get_simulated_disc
 )
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
+
+@pytest.fixture()
+def exp_disc():
+    ss, disc_radius, upsample_factor = int(60), 6, 10
+
+    arr = np.zeros((ss, ss))
+    rr, cc = draw.circle(
+        int(ss / 2) + 20, int(ss / 2) - 10, radius=disc_radius, shape=arr.shape
+    )
+    arr[rr, cc] = 1
+    return arr
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")  # various skimage warnings
+def test_experimental_square_size(exp_disc):
+    square = get_experimental_square(exp_disc, [17, 19], 6)
+    assert square.shape[0] == int(6)
+    assert square.shape[1] == int(6)
+
+
+def test_failure_for_non_even_entry_to_get_simulated_disc():
+    with pytest.raises(ValueError, match="'square_size' must be an even number"):
+        disc = get_simulated_disc(61, 5)
+
+
+def test_failure_for_non_even_errors_get_experimental_square(exp_disc):
+    with pytest.raises(ValueError, match="'square_size' must be an even number"):
+        square = get_experimental_square(exp_disc, [17, 19], 7)
+
 
 
 class Test_init_xfails:
