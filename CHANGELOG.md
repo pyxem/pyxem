@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The local_gaussian_method for subpixel refinement
 - utils.plot, functionality now in signals.diffraction_vectors
 - utils.subpixelrefinement_utils, functionality to subpxielrefinement_generator
-- utils.dpc_tools, downstreamed to diffsims
+- utils.dpc_tools, downstreamed to diffsims or up to differential_phase_contrast.py
 - utils.diffraction_tools, downstreamed to diffsims
 - utils.sim_utils, use the relevant diffsims functionality
 
