@@ -156,11 +156,7 @@ class TestProcessDaskArray:
         def test_function(image):
             return image
 
-        dask_output = dt._process_dask_array(
-            dask_input,
-            test_function,
-            dtype=dtype,
-        )
+        dask_output = dt._process_dask_array(dask_input, test_function, dtype=dtype,)
         array_output = dask_output.compute()
         assert array_output.dtype == dtype
 
@@ -213,10 +209,7 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output = dt._process_dask_array(
-            dask_input,
-            test_function,
-            value1=value1,
-            value2=value2,
+            dask_input, test_function, value1=value1, value2=value2,
         )
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
@@ -230,15 +223,9 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output1 = dt._process_dask_array(
-            dask_input,
-            test_function,
-            value1=value1,
-            value2=value2,
+            dask_input, test_function, value1=value1, value2=value2,
         )
-        dask_output2 = dt._process_dask_array(
-            dask_input,
-            test_function,
-        )
+        dask_output2 = dt._process_dask_array(dask_input, test_function,)
         array_output1 = dask_output1.compute()
         array_output2 = dask_output2.compute()
         assert np.all(array_output1 == 5)
@@ -315,6 +302,7 @@ class TestCenterOfMassArray:
         data1 = data1.compute()
         assert (data1 == np.ones((2, 10, 10))).all()
 
+
 @pytest.mark.slow
 class TestMaskArray:
     def test_simple(self):
@@ -333,6 +321,7 @@ class TestMaskArray:
         with pytest.raises(ValueError):
             dt._mask_array(dask_array, mask_array=mask_array)
 
+
 @pytest.mark.slow
 class TestThresholdArray:
     def test_simple(self):
@@ -346,6 +335,7 @@ class TestThresholdArray:
         assert (data[:, :, 10, 5] == np.ones((10, 12), dtype=np.bool)).all()
         data[:, :, 10, 5] = False
         assert (data == np.zeros((10, 12, 20, 15))).all()
+
 
 @pytest.mark.slow
 class TestFindDeadPixels:
@@ -412,6 +402,7 @@ class TestFindDeadPixels:
         data = da.from_array(data, chunks=(5))
         with pytest.raises(ValueError):
             dt._find_dead_pixels(data)
+
 
 @pytest.mark.slow
 class TestFindHotPixels:
@@ -491,6 +482,7 @@ class TestFindHotPixels:
         hot_pixels = hot_pixels.compute()
         assert hot_pixels.all()
 
+
 @pytest.mark.slow
 class TestRemoveBadPixels:
     def test_simple(self):
@@ -550,6 +542,7 @@ class TestRemoveBadPixels:
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, :, :, :])
         with pytest.raises(ValueError):
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
+
 
 @pytest.mark.slow
 class TestTemplateMatchBinaryImage:
@@ -642,6 +635,7 @@ class TestTemplateMatchBinaryImage:
         dask_array = da.random.random(size=50, chunks=10)
         with pytest.raises(ValueError):
             dt._template_match_with_binary_image(dask_array, binary_image=binary_image)
+
 
 @pytest.mark.slow
 class TestPeakFindDog:
@@ -854,6 +848,7 @@ class TestPeakFindDog:
         with pytest.raises(ValueError):
             dt._peak_find_dog(dask_array)
 
+
 @pytest.mark.slow
 class TestPeakPositionRefinementCOM:
     def test_single_frame_peak(self):
@@ -933,6 +928,7 @@ class TestPeakPositionRefinementCOM:
         match_array = match_array_dask.compute()
         assert peak_array_dask.shape == match_array.shape
 
+
 @pytest.mark.slow
 class TestBackgroundRemovalDOG:
     def test_single_frame_min_sigma(self):
@@ -1008,6 +1004,7 @@ class TestBackgroundRemovalDOG:
         match_array = match_array_dask.compute()
         assert dask_array.shape == match_array.shape
 
+
 @pytest.mark.slow
 class TestBackgroundRemovalMedianFilter:
     def test_single_frame_footprint(self):
@@ -1054,6 +1051,7 @@ class TestBackgroundRemovalMedianFilter:
         assert dask_array.shape == match_array_dask.shape
         match_array = match_array_dask.compute()
         assert dask_array.shape == match_array.shape
+
 
 @pytest.mark.slow
 class TestBackgroundRemovalRadialMedian:
@@ -1112,6 +1110,7 @@ class TestBackgroundRemovalRadialMedian:
         assert dask_array.shape == match_array_dask.shape
         match_array = match_array_dask.compute()
         assert dask_array.shape == match_array.shape
+
 
 @pytest.mark.slow
 class TestIntensityArray:
@@ -1211,6 +1210,7 @@ class TestIntensityArray:
         data_array_dask = da.ones((6, 16, 100, 50), chunks=(6, 4, 50, 25))
         peak_array_dask = da.empty((6, 16), chunks=(3, 2), dtype=np.object)
         dt._intensity_peaks_image(data_array_dask, peak_array_dask, 5)
+
 
 @pytest.mark.slow
 class TestPeakFindLog:
@@ -1422,6 +1422,7 @@ class TestPeakFindLog:
         dask_array = da.random.random(size=50, chunks=10)
         with pytest.raises(ValueError):
             dt._peak_find_log(dask_array)
+
 
 @pytest.mark.slow
 class TestCenterOfMass:

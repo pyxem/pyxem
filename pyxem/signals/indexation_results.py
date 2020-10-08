@@ -22,10 +22,11 @@ from hyperspy.signals import Signal2D
 from warnings import warn
 
 from pyxem.signals import transfer_navigation_axes
+from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
+
 from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
-from pyxem.utils.plot import generate_marker_inputs_from_peaks
 
 from pyxem import CrystallographicMap
 

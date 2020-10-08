@@ -29,6 +29,7 @@ import pyxem.dummy_data.make_diffraction_test_data as mdtd
 import pyxem.dummy_data.dummy_data as dd
 import pyxem.dummy_data.dask_test_data as dtd
 
+
 @pytest.mark.slow
 class TestDiffraction2D:
     def test_create(self):
@@ -46,6 +47,7 @@ class TestDiffraction2D:
         s1 = Diffraction2D(array1)
         assert array1.shape == s1.axes_manager.shape
 
+
 @pytest.mark.slow
 class TestPlotting:
     def test_simple_plot(self):
@@ -62,6 +64,7 @@ class TestPlotting:
         s = Diffraction2D(np.zeros(shape=(3, 4, 6, 10)))
         s_nav = Signal2D(np.zeros((3, 4)))
         s.plot(navigator=s_nav)
+
 
 @pytest.mark.slow
 class TestDiffraction2DFlipDiffraction:
@@ -82,6 +85,7 @@ class TestDiffraction2DFlipDiffraction:
         s_flip = s.flip_diffraction_y()
         assert (s_flip.data[:, :, 3:, :] == 0).all()
         assert (s_flip.data[:, :, :3, :] == 1).all()
+
 
 @pytest.mark.slow
 class TestAddPeakArrayAsMarkers:
@@ -140,6 +144,7 @@ class TestAddPeakArrayAsMarkers:
         s.add_peak_array_as_markers(peak_array)
         marker = list(s.metadata.Markers)[0][1]
         assert marker.data["x1"].shape == ()
+
 
 @pytest.mark.slow
 class TestAddEllipseArrayAsMarkers:

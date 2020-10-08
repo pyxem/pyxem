@@ -55,21 +55,22 @@ class ElectronDiffraction2D(Diffraction2D):
                 del self.metadata.Acquisition_instrument.SEM
         self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
-    def set_ai(self,
-               center=None,
-               energy=None,
-               affine=None,
-               radial_range=None,
-               **kwargs):
+    def set_ai(
+        self, center=None, energy=None, affine=None, radial_range=None, **kwargs
+    ):
         if energy is None and self.beam_energy is not None:
             energy = self.beam_energy
         if energy is not None:
             wavelength = get_electron_wavelength(energy) * 1e-10
         else:
             wavelength = None
-        ai = super().set_ai(center=center,
-                            wavelength=wavelength,
-                            affine=affine,radial_range=radial_range,**kwargs)
+        ai = super().set_ai(
+            center=center,
+            wavelength=wavelength,
+            affine=affine,
+            radial_range=radial_range,
+            **kwargs
+        )
         return ai
 
     @property

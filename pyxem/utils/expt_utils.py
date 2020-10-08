@@ -103,12 +103,9 @@ def _polar2cart(r, theta):
     return x, y
 
 
-def azimuthal_integrate1d(z,
-                          azimuthal_integrator,
-                          npt_rad,
-                          mask=None,
-                          sum=False,
-                          **kwargs):
+def azimuthal_integrate1d(
+    z, azimuthal_integrator, npt_rad, mask=None, sum=False, **kwargs
+):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -145,14 +142,9 @@ def azimuthal_integrate1d(z,
         return output[1]
 
 
-def azimuthal_integrate2d(z,
-                          azimuthal_integrator,
-                          npt_rad,
-                          npt_azim=None,
-                          mask=None,
-                          sum=False,
-                          **kwargs
-                          ):
+def azimuthal_integrate2d(
+    z, azimuthal_integrator, npt_rad, npt_azim=None, mask=None, sum=False, **kwargs
+):
     """Calculate the azimuthal integral of z around a determined origin.
 
     This method is used for signals where the origin is constant, compared to
@@ -182,25 +174,18 @@ def azimuthal_integrate2d(z,
     I : np.array()
         Two-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.integrate2d(z,
-                                              npt_rad=npt_rad,
-                                              npt_azim=npt_azim,
-                                              mask=mask,
-                                              **kwargs
-                                              )
+    output = azimuthal_integrator.integrate2d(
+        z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
+    )
     if sum:
         return np.transpose(output._sum_signal)
     else:
         return np.transpose(output[0])
 
 
-def integrate_radially(z,
-                       azimuthal_integrator,
-                       npt,
-                       npt_rad,
-                       mask=None,
-                       sum=False,
-                       **kwargs):
+def integrate_radially(
+    z, azimuthal_integrator, npt, npt_rad, mask=None, sum=False, **kwargs
+):
     """Calculate the radial integrated profile curve as I = f(chi)
 
     Parameters
@@ -228,19 +213,16 @@ def integrate_radially(z,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.integrate_radial(z, npt=npt,npt_rad=npt_rad, mask=mask, **kwargs)
+    output = azimuthal_integrator.integrate_radial(
+        z, npt=npt, npt_rad=npt_rad, mask=mask, **kwargs
+    )
     if sum:
         return np.transpose(output._sum_signal)
     else:
         return output[1]
 
 
-def medfilt_1d(z,
-              azimuthal_integrator,
-              npt_rad,
-              npt_azim,
-              mask=None,
-              **kwargs):
+def medfilt_1d(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
     """Perform the 2D integration and filter along each row using a median filter
 
     Parameters
@@ -268,20 +250,13 @@ def medfilt_1d(z,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.medfilt1d(z,
-                                            npt_rad=npt_rad,
-                                            npt_azim=npt_azim,
-                                            mask=mask,
-                                            **kwargs)
+    output = azimuthal_integrator.medfilt1d(
+        z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
+    )
     return output[1]
 
 
-def sigma_clip(z,
-               azimuthal_integrator,
-               npt_rad,
-               npt_azim,
-               mask=None,
-               **kwargs):
+def sigma_clip(z, azimuthal_integrator, npt_rad, npt_azim, mask=None, **kwargs):
     """Perform the 2D integration and perform a sigm-clipping iterative
      filter along each row. see the doc of scipy.stats.sigmaclip for the options.
 
@@ -311,11 +286,9 @@ def sigma_clip(z,
     I : np.array()
         One-dimensional azimuthal integral of z.
     """
-    output = azimuthal_integrator.sigma_clip(z,
-                                             npt_rad=npt_rad,
-                                             npt_azim=npt_azim,
-                                             mask=mask,
-                                             **kwargs)
+    output = azimuthal_integrator.sigma_clip(
+        z, npt_rad=npt_rad, npt_azim=npt_azim, mask=mask, **kwargs
+    )
     return output[1]
 
 

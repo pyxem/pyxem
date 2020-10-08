@@ -30,7 +30,6 @@ from pyxem.signals.strain_map import StrainMap, _get_rotation_matrix
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.utils.sim_utils import sim_as_signal
 
 
 @pytest.fixture()
@@ -166,8 +165,8 @@ def test_strain_mapping_affine_transform():
         structure.placeInLattice(latt_rot)
 
         diff_dat = ediff.calculate_ed_data(structure, 2.5)
-        dpi = sim_as_signal(diff_dat, 64, 0.02, 2.5)
-        data.append(dpi.data)
+        dpi = diff_dat.get_diffraction_pattern(64, 0.02)
+        data.append(dpi)
     data = np.array(data)
     dp = ElectronDiffraction2D(data.reshape((2, 2, 64, 64)))
 
