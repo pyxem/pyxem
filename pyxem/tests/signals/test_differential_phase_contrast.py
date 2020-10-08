@@ -23,13 +23,13 @@ from tempfile import TemporaryDirectory
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
 from pyxem.signals.differential_phase_contrast import (
+    make_bivariate_histogram,
     DPCBaseSignal,
     DPCSignal1D,
     DPCSignal2D,
 )
 import pyxem.dummy_data.dummy_data as dd
 import pyxem.utils.pixelated_stem_tools as pst
-from pyxem.utils.dpc_utils import make_bivariate_histogram
 import pyxem as pxm
 
 
