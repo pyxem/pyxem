@@ -23,6 +23,7 @@ from pyxem.signals.diffraction2d import Diffraction2D
 import pyxem.utils.radial_utils as ra
 import pyxem.dummy_data.make_diffraction_test_data as mdtd
 
+
 @pytest.mark.slow
 class TestRadialModule:
     def test_centre_comparison(self):
@@ -157,6 +158,7 @@ class TestRadialModule:
         assert s.axes_manager.signal_axes[0].offset == -x
         assert s.axes_manager.signal_axes[1].offset == -y
 
+
 @pytest.mark.slow
 class TestGetAngleImageComparison:
     def setup_method(self):
@@ -199,6 +201,7 @@ class TestGetAngleImageComparison:
         s_mask = ra.get_angle_image_comparison(s0, s1, mask_radius=40)
         assert s_no_mask.data.sum() != 0.0
         assert s_mask.data.sum() == 0.0
+
 
 @pytest.mark.slow
 class TestFitEllipse:
@@ -313,6 +316,7 @@ class TestFitEllipse:
                 angleN=[20, 30],
                 show_progressbar=False,
             )
+
 
 @pytest.mark.slow
 class TestHolzCalibration:

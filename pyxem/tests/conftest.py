@@ -34,8 +34,9 @@ from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from pyxem.utils.indexation_utils import OrientationResult
 
 
-# a straight lift from 
+# a straight lift from
 # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option--
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -55,6 +56,7 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+
 
 @pytest.fixture
 def default_structure():

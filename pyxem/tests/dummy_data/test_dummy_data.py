@@ -19,6 +19,7 @@
 import pytest
 import pyxem.dummy_data.dummy_data as dd
 
+
 @pytest.mark.slow
 class TestDummyDataModule:
     def test_simple_disk_shift(self):
