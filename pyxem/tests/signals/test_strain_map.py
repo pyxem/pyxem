@@ -166,7 +166,7 @@ def test_strain_mapping_affine_transform():
 
         diff_dat = ediff.calculate_ed_data(structure, 2.5)
         dpi = diff_dat.get_diffraction_pattern(64, 0.02)
-        data.append(dpi.data)
+        data.append(dpi)
     data = np.array(data)
     dp = ElectronDiffraction2D(data.reshape((2, 2, 64, 64)))
 
