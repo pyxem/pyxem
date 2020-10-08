@@ -25,6 +25,7 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from hyperspy.signals import BaseSignal
 from scipy.ndimage import gaussian_filter
 
+
 @pytest.mark.parametrize("radius, offset", [[1, 0], [2, 1], [3, 2]])
 def test_integration_generator(radius, offset):
     pixel_positions = np.array([[0, 0], [15, -15], [-15, 15]])

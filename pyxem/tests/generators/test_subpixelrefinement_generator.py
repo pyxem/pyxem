@@ -21,11 +21,14 @@ import numpy as np
 
 from pyxem.generators.subpixelrefinement_generator import (
     SubpixelrefinementGenerator,
-    get_simulated_disc, get_experimental_square, get_simulated_disc
+    get_simulated_disc,
+    get_experimental_square,
+    get_simulated_disc,
 )
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from skimage import draw
+
 
 @pytest.fixture()
 def exp_disc():
@@ -54,7 +57,6 @@ def test_failure_for_non_even_entry_to_get_simulated_disc():
 def test_failure_for_non_even_errors_get_experimental_square(exp_disc):
     with pytest.raises(ValueError, match="'square_size' must be an even number"):
         square = get_experimental_square(exp_disc, [17, 19], 7)
-
 
 
 class Test_init_xfails:
