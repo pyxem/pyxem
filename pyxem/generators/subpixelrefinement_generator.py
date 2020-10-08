@@ -142,6 +142,7 @@ def _get_pixel_vectors(dp, vectors, calibration, center):
 
     return vector_pixels
 
+
 def _conventional_xc(exp_disc, sim_disc, upsample_factor):
     """Takes two images of disc and finds the shift between them using
     conventional (phase) cross correlation.

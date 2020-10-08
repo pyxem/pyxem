@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from scipy.ndimage import rotate, gaussian_filter
 
+
 def make_bivariate_histogram(
     x_position, y_position, histogram_range=None, masked=None, bins=200, spatial_std=3
 ):
@@ -80,6 +81,7 @@ def make_bivariate_histogram(
     s_hist.axes_manager[1].offset = yedges[0]
     s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
     return s_hist
+
 
 class DPCBaseSignal(BaseSignal):
     """

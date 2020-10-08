@@ -114,12 +114,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         self.metadata.set_item("Signal.ai", ai)
 
-    def set_ai(self,
-               center=None,
-               wavelength=None,
-               affine=None,
-               radial_range=None,
-               **kwargs):
+    def set_ai(
+        self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
+    ):
         """ This function sets the .ai parameter which stores an ~pyfai.AzimuthalIntegrator object based on
         the current calibration applied to the diffraction pattern.
 
@@ -148,10 +145,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             return None
         unit = to_unit(self.unit)
         sig_shape = self.axes_manager.signal_shape
-        setup = _get_setup(wavelength,
-                           self.unit,
-                           pixel_scale,
-                           radial_range)
+        setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
         detector, dist, radial_range = setup
         ai = get_azimuthal_integrator(
             detector=detector,
@@ -160,8 +154,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             center=center,
             affine=affine,
             wavelength=wavelength,
-            **kwargs
-            )
+            **kwargs,
+        )
         self.ai = ai
         return ai
 
@@ -230,7 +224,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             keep_dtype=keep_dtype,
             inplace=inplace,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def apply_gain_normalisation(
@@ -260,7 +254,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             bref=bright_reference,
             inplace=inplace,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def remove_deadpixels(
@@ -270,7 +264,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         inplace=True,
         progress_bar=True,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Remove deadpixels from experimentally acquired diffraction patterns.
 
@@ -298,7 +292,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             inplace=inplace,
             show_progressbar=progress_bar,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def get_azimuthal_integral1d(
@@ -312,7 +306,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         inplace=False,
         method="splitpixel",
         sum=False,
-        **kwargs
+        **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
 
@@ -415,8 +409,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             inplace=inplace,
             unit=unit,
             sum=sum,
-            **kwargs
-            )
+            **kwargs,
+        )
         # Dealing with axis changes
         if inplace:
             k_axis = self.axes_manager.signal_axes[0]
@@ -529,7 +523,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         sig_shape = self.axes_manager.signal_shape
         unit = self.unit
         if radial_range is None:
-            radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
+            radial_range = _get_radial_extent(
+                ai=self.ai, shape=sig_shape, unit=self.unit
+            )
             radial_range[0] = 0
         integration = self.map(
             azimuthal_integrate2d,
@@ -544,8 +540,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             mask=mask,
             sum=sum,
             correctSolidAngle=correctSolidAngle,
-            **kwargs
-            )
+            **kwargs,
+        )
 
         # Dealing with axis changes
         if inplace:
@@ -658,7 +654,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         sig_shape = self.axes_manager.signal_shape
         unit = self.unit
         if radial_range is None:
-            radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
+            radial_range = _get_radial_extent(
+                ai=self.ai, shape=sig_shape, unit=self.unit
+            )
             radial_range[0] = 0
         integration = self.map(
             integrate_radially,
@@ -673,8 +671,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             mask=mask,
             sum=sum,
             correctSolidAngle=correctSolidAngle,
-            **kwargs
-            )
+            **kwargs,
+        )
 
         # Dealing with axis changes
         if inplace:
@@ -686,7 +684,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis = integration.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
-        #k_axis.units = unit.unit_symbol
+        # k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration
@@ -781,8 +779,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             unit=self.unit,
             mask=mask,
             correctSolidAngle=correctSolidAngle,
-            **kwargs
-            )
+            **kwargs,
+        )
 
         # Dealing with axis changes
         if inplace:
@@ -794,7 +792,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis = integration.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
-        #k_axis.units = unit.unit_symbol
+        # k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration
@@ -894,8 +892,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             unit=self.unit,
             mask=mask,
             correctSolidAngle=correctSolidAngle,
-            **kwargs
-            )
+            **kwargs,
+        )
 
         # Dealing with axis changes
         if inplace:
@@ -907,7 +905,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             k_axis = integration.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt_rad
-        #k_axis.units = unit.unit_symbol
+        # k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
         return integration

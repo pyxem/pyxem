@@ -53,6 +53,7 @@ peak at every position.
 number of peaks.
 """
 
+
 def _find_max_length_peaks(peaks):
     """Worker function for generate_marker_inputs_from_peaks.
 
@@ -113,8 +114,6 @@ def generate_marker_inputs_from_peaks(peaks):
     y = xy_cords[1]
 
     return x, y
-
-
 
 
 class DiffractionVectors(BaseSignal):
