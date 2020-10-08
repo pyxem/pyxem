@@ -32,6 +32,36 @@ import pyxem.dummy_data.dummy_data as dd
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem as pxm
 
+class TestMakeBivariateHistogram:
+    def test_single_x(self):
+        size = 100
+        x, y = np.ones(size), np.zeros(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(1.0)
+        hist_iY = s.axes_manager[1].value2index(0.0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x(self):
+        size = 100
+        x, y = -np.ones(size), np.zeros(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x_y(self):
+        size = 100
+        x, y = -np.ones(size), np.ones(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(1)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
 
 class TestDpcBasesignalCreate:
     def test_create(self):
