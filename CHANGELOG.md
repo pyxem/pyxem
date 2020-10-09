@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Azimuthal integration has been refactored (see PR #625 for details)
+- Testing now runs for python version 3.9 and 3.8
 
 ### Removed
 - The local_gaussian_method for subpixel refinement
