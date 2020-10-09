@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Azimuthal integration has been refactored (see PR #625 for details)
+- scikit-image dependancy is now version 0.17 and up
 
 ### Removed
 - The local_gaussian_method for subpixel refinement
