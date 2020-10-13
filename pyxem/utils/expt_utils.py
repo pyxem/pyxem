@@ -629,7 +629,7 @@ def find_beam_center_interpolate(z, sigma, upsample_factor, kind):
     Returns
     -------
     center : np.array
-        np.array containing indices of estimated direct beam positon.
+        np.array, [y, x] containing indices of estimated direct beam positon
     """
     xx = np.sum(z, axis=1)
     yy = np.sum(z, axis=0)
@@ -637,7 +637,7 @@ def find_beam_center_interpolate(z, sigma, upsample_factor, kind):
     cx = _find_peak_max(xx, sigma, upsample_factor=upsample_factor, kind=kind)
     cy = _find_peak_max(yy, sigma, upsample_factor=upsample_factor, kind=kind)
 
-    center = np.array([cx, cy])
+    center = np.array([cy, cx])
     return center
 
 
@@ -653,10 +653,10 @@ def find_beam_center_blur(z, sigma):
     Returns
     -------
     center : np.array
-        np.array containing indices of estimated direct beam positon.
+        np.array [y, x] containing indices of estimated direct beam positon.
     """
     blurred = ndi.gaussian_filter(z, sigma, mode="wrap")
-    center = np.unravel_index(blurred.argmax(), blurred.shape)
+    center = np.unravel_index(blurred.argmax(), blurred.shape)[::-1]
     return np.array(center)
 
 
@@ -679,7 +679,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     Returns
     -------
     shift: np.array
-        np.array containing offset (from center) of the direct beam positon.
+        np.array [y, x] containing offset (from center) of the direct beam positon.
     """
     radiusList = np.arange(radius_start, radius_finish)
     errRecord = np.zeros_like(radiusList, dtype="single")
@@ -709,6 +709,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     im = hann2d * z
     shift, error, diffphase = register_translation(ref, im, 100)
 
+    shift = shift[::-1]
     return shift - 0.5
 
 

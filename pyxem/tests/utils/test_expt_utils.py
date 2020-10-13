@@ -152,7 +152,7 @@ class TestCenteringAlgorithm:
         shifts = find_beam_offset_cross_correlation(z, 1, 4)
         assert np.allclose(shifts, shifts_expected, atol=0.2)
 
-    @pytest.mark.parametrize("shifts_expected", [(-3.5, +0.5)])
+    @pytest.mark.parametrize("shifts_expected", [(+0.5, -3.5)])
     @pytest.mark.parametrize("sigma", [1, 2, 3])
     def test_single_pixel_spot(self, shifts_expected, sigma):
         z = np.zeros((50, 50))
@@ -161,7 +161,7 @@ class TestCenteringAlgorithm:
         shifts = find_beam_offset_cross_correlation(z, 1, 6)
         assert np.allclose(shifts, shifts_expected, atol=0.2)
 
-    @pytest.mark.parametrize("shifts_expected", [(-4.5, -0.5)])
+    @pytest.mark.parametrize("shifts_expected", [(-0.5, -4.5)])
     def test_broader_starting_square_spot(self, shifts_expected):
         z = np.zeros((50, 50))
         z[28:31, 24:27] = 1
@@ -170,7 +170,7 @@ class TestCenteringAlgorithm:
         assert np.allclose(shifts, shifts_expected, atol=0.2)
 
 
-@pytest.mark.parametrize("center_expected", [(29, 25)])
+@pytest.mark.parametrize("center_expected", [(25, 29)])
 @pytest.mark.parametrize("sigma", [1, 2, 3])
 def test_find_beam_center_blur(center_expected, sigma):
     z = np.zeros((50, 50))
@@ -180,7 +180,7 @@ def test_find_beam_center_blur(center_expected, sigma):
     assert np.allclose(shifts, center_expected, atol=0.2)
 
 
-@pytest.mark.parametrize("center_expected", [(29.52, 25.97)])
+@pytest.mark.parametrize("center_expected", [(25.97, 29.52)])
 @pytest.mark.parametrize("sigma", [1, 2, 3])
 def test_find_beam_center_interpolate_1(center_expected, sigma):
     z = np.zeros((50, 50))
@@ -190,7 +190,7 @@ def test_find_beam_center_interpolate_1(center_expected, sigma):
     assert np.allclose(centers, center_expected, atol=0.2)
 
 
-@pytest.mark.parametrize("center_expected", [(9, 44)])
+@pytest.mark.parametrize("center_expected", [(44, 9)])
 @pytest.mark.parametrize("sigma", [2])
 def test_find_beam_center_interpolate_2(center_expected, sigma):
     """Cover unlikely case when beam is close to the edge"""

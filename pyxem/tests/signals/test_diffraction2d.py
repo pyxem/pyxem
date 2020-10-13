@@ -453,8 +453,8 @@ class TestGetDirectBeamPosition:
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
         s_shift = s.get_direct_beam_position(method="blur", sigma=1)
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
-        assert (-(x_pos_list - dx / 2) == s_shift.isig[1].data[0]).all()
-        assert (-(y_pos_list - dy / 2) == s_shift.isig[0].data[:, 0]).all()
+        assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
+        assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0]).all()
 
     def test_interpolate(self):
         dx, dy = self.dx, self.dy
@@ -463,8 +463,8 @@ class TestGetDirectBeamPosition:
             method="interpolate", sigma=1, upsample_factor=2, kind="nearest",
         )
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
-        assert (-(x_pos_list - dx / 2) == s_shift.isig[1].data[0]).all()
-        assert (-(y_pos_list - dy / 2) == s_shift.isig[0].data[:, 0]).all()
+        assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
+        assert (-(y_pos_list - dy / 2) == s_shift.isig[1].data[:, 0]).all()
 
     def test_cross_correlate(self):
         s = self.s
