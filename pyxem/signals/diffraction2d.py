@@ -926,11 +926,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Returns
         -------
         s_shifts : HyperSpy Signal1D
-            Array containing the shifts for each SED pattern.
+            Array containing the shifts for each SED pattern, with the first
+            signal index being the x-shift and the second the y-shift.
 
         """
 
-        signal_shape = self.axes_manager.signal_shape[::-1]
+        signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
         method_dict = {
@@ -1040,7 +1041,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         else:
             shifts = self.get_direct_beam_position(method=method, **kwargs)
 
-        shifts = -1 * shifts.data
+        shifts = -1 * np.flip(shifts.data, -1)
         shifts = shifts.reshape(nav_size, 2)
 
         # Preserve existing behaviour by overriding

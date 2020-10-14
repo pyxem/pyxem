@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Azimuthal integration has been refactored (see PR #625 for details)
+- get_direct_beam_position now has reversed order of the shifts [y, x] to [x, y] (#653)
 
 ### Removed
 - The local_gaussian_method for subpixel refinement
