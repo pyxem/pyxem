@@ -23,15 +23,45 @@ from tempfile import TemporaryDirectory
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
 from pyxem.signals.differential_phase_contrast import (
+    make_bivariate_histogram,
     DPCBaseSignal,
     DPCSignal1D,
     DPCSignal2D,
 )
 import pyxem.dummy_data.dummy_data as dd
 import pyxem.utils.pixelated_stem_tools as pst
-from pyxem.utils.dpc_utils import make_bivariate_histogram
 import pyxem as pxm
 
+class TestMakeBivariateHistogram:
+    def test_single_x(self):
+        size = 100
+        x, y = np.ones(size), np.zeros(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(1.0)
+        hist_iY = s.axes_manager[1].value2index(0.0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x(self):
+        size = 100
+        x, y = -np.ones(size), np.zeros(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x_y(self):
+        size = 100
+        x, y = -np.ones(size), np.ones(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(1)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
 
 class TestDpcBasesignalCreate:
     def test_create(self):

@@ -25,9 +25,7 @@ from diffsims.generators.diffraction_generator import DiffractionGenerator
 from pyxem.components.diffraction_component import ElectronDiffractionForwardModel
 
 
-@pytest.fixture(
-    params=[(300, 0.02, None),]
-)
+@pytest.fixture(params=[(300, 0.02)])
 def diffraction_calculator(request):
     return DiffractionGenerator(*request.param)
 

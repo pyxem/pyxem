@@ -19,7 +19,6 @@
 import copy
 import numpy as np
 
-from pyxem.utils.dpc_utils import make_bivariate_histogram
 import pyxem.utils.pixelated_stem_tools as pst
 
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
@@ -28,6 +27,60 @@ from hyperspy._signals.lazy import LazySignal
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from scipy.ndimage import rotate, gaussian_filter
+
+
+def make_bivariate_histogram(
+    x_position, y_position, histogram_range=None, masked=None, bins=200, spatial_std=3
+):
+    s0_flat = x_position.flatten()
+    s1_flat = y_position.flatten()
+
+    if masked is not None:
+        temp_s0_flat = []
+        temp_s1_flat = []
+        for data0, data1, masked_value in zip(s0_flat, s1_flat, masked.flatten()):
+            if not masked_value:
+                temp_s0_flat.append(data0)
+                temp_s1_flat.append(data1)
+        s0_flat = np.array(temp_s0_flat)
+        s1_flat = np.array(temp_s1_flat)
+
+    if histogram_range is None:
+        if s0_flat.std() > s1_flat.std():
+            s0_range = (
+                s0_flat.mean() - s0_flat.std() * spatial_std,
+                s0_flat.mean() + s0_flat.std() * spatial_std,
+            )
+            s1_range = (
+                s1_flat.mean() - s0_flat.std() * spatial_std,
+                s1_flat.mean() + s0_flat.std() * spatial_std,
+            )
+        else:
+            s0_range = (
+                s0_flat.mean() - s1_flat.std() * spatial_std,
+                s0_flat.mean() + s1_flat.std() * spatial_std,
+            )
+            s1_range = (
+                s1_flat.mean() - s1_flat.std() * spatial_std,
+                s1_flat.mean() + s1_flat.std() * spatial_std,
+            )
+    else:
+        s0_range = histogram_range
+        s1_range = histogram_range
+
+    hist2d, xedges, yedges = np.histogram2d(
+        s0_flat,
+        s1_flat,
+        bins=bins,
+        range=[[s0_range[0], s0_range[1]], [s1_range[0], s1_range[1]]],
+    )
+
+    s_hist = Signal2D(hist2d).swap_axes(0, 1)
+    s_hist.axes_manager[0].offset = xedges[0]
+    s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
+    s_hist.axes_manager[1].offset = yedges[0]
+    s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
+    return s_hist
 
 
 class DPCBaseSignal(BaseSignal):
