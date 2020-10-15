@@ -2527,8 +2527,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return s_dead_pixels
 
     def get_variance(self,
-                     npt_rad,
-                     npt_azim=300,
+                     npt,
                      method="Omega",
                      dqe=None,
                      spatial=False,
@@ -2560,42 +2559,39 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
         """
         if method is "Omega":
-            one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
+            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
             if dqe is not None:
-                sum_points = self.get_azimuthal_integral2d(npt_rad=npt_rad,
-                                                           npt_azim=npt_azim,
-                                                           method="BBox",
-                                                           **kwargs).sum(axis=-2).mean(axis=navigation_axes)
+                sum_points = self.get_azimuthal_integral1d(npt=npt,sum=True,**kwargs).mean(axis=navigation_axes)
                 print("Correction:", sum_points.data)
                 print(variance.data)
-                variance = variance - (sum_points**-1)*(1/dqe)
+                variance = variance - ((sum_points**-1)*dqe)
                 print(variance.data)
             return variance
 
         elif method is "r":
-            one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
-            integration_squared = (self ** 2).get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
+            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
+            integration_squared = (self ** 2).get_azimuthal_integral1d(npt=npt, **kwargs)
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared/one_d_integration**2)-1
             if dqe is not None:
-                full_variance = full_variance - (one_d_integration**-1)*(1/dqe)
+                full_variance = full_variance - ((one_d_integration**-1)*dqe)
             variance = full_variance.mean(axis=navigation_axes)
             if spatial:
                 return variance, full_variance
             else:
                 return variance
         elif method is "re":
-            one_d_integration = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs).mean(axis=navigation_axes)
+            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
             print(one_d_integration.data)
             integration_squared = (self ** 2).get_azimuthal_integral1d(
-                                                                       npt_rad=npt_rad,
+                                                                       npt=npt,
                                                                        **kwargs).mean(
                                                                                      axis=navigation_axes)
             variance = (integration_squared/one_d_integration**2) - 1
 
             if dqe is not None:
-                sum_int = self.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs).mean()
+                sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
                 print(sum_int.data)
                 variance = variance - (sum_int**-1)*(1/dqe)
             return variance
@@ -2603,7 +2599,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
             if dqe is not None:
                 variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
-            variance = variance_image.get_azimuthal_integral1d(npt_rad=npt_rad, **kwargs)
+            variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
             return variance
         else:
             raise ValueError('Method must be one of ["Omega", "r", "re", "VImage"].'
