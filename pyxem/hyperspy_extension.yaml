@@ -101,12 +101,6 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
-  CrystallographicMap:
-    signal_type: crystallographic_map
-    signal_dimension: 1
-    dtype: real
-    lazy: False
-    module: pyxem.signals.crystallographic_map
   DisplacementGradientMap:
     signal_type: tensor_field
     signal_dimension: 2
