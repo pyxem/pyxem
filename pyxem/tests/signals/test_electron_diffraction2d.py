@@ -356,13 +356,15 @@ class TestIntegration:
     @pytest.mark.parametrize("energy", [None, 200])
     def test_1d_azimuthal_integration(self, ones, energy):
         ones.beam_energy = energy
-        integration = ones.get_azimuthal_integral1d(npt_rad=10)
+        ones.set_ai()
+        integration = ones.get_azimuthal_integral1d(npt=10)
         assert isinstance(integration, ElectronDiffraction1D)
 
     @pytest.mark.parametrize("energy", [None, 200])
     def test_2d_azimuthal_integration(self, ones, energy):
         ones.beam_energy = energy
-        integration = ones.get_azimuthal_integral2d(npt_rad=10)
+        ones.set_ai()
+        integration = ones.get_azimuthal_integral2d(npt=10)
         assert isinstance(integration, PolarDiffraction2D)
 
     def test_set_scan_calibration(self):
