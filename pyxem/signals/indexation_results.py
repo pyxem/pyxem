@@ -30,6 +30,9 @@ from pyxem.utils.indexation_utils import crystal_from_vector_matching
 
 from pyxem import CrystallographicMap
 
+def _basic_to_crystal_map():
+    pass
+
 
 class TemplateMatchingResults(Signal2D):
     """Template matching results containing the top n best matching crystal
@@ -97,6 +100,67 @@ class TemplateMatchingResults(Signal2D):
         cryst_map.method = "template_matching"
 
         return cryst_map
+
+class PatternMatchingResults(Signal2D):
+    """Template matching results containing the top n best matching crystal
+    phase and orientation at each navigation position with associated metrics.
+    """
+
+    _signal_type = "pattern_matching"
+
+    def plot_best_matching_results_against_signal(
+        self, signal, library,*args, **kwargs
+    ):
+        """Plot the best matching diffraction vectors on a signal.
+
+        Parameters
+        ----------
+        signal : ElectronDiffraction2D
+            The ElectronDiffraction2D signal object on which to plot the peaks.
+            This signal must have the same navigation dimensions as the peaks.
+        library : DiffractionLibrary
+            Diffraction library containing the phases and rotations
+        *args :
+            Arguments passed to signal.plot()
+        **kwargs :
+            Keyword arguments passed to signal.plot()
+        """
+        pass
+
+    def get_crystallographic_map(self, *args, **kwargs):
+        """Obtain a crystallographic map specifying the best matching phase and
+        orientation at each probe position with corresponding metrics.
+
+        Returns
+        -------
+        cryst_map : CrystallographicMap
+            Crystallographic mapping results containing the best matching phase
+            and orientation at each navigation position with associated metrics.
+
+            The Signal at each navigation position is an array of,
+
+                            [phase, np.array((z,x,z)), dict(metrics)]
+
+            which defines the phase, orientation as Euler angles in the zxz
+            convention and metrics associated with the matching.
+
+            Metrics for template matching results are
+                'correlation'
+                'orientation_reliability'
+                'phase_reliability'
+
+        """
+        # TODO: Add alternative methods beyond highest correlation score.
+        crystal_map = self.map(
+            crystal_from_template_matching, inplace=False, *args, **kwargs
+        )
+
+        cryst_map = CrystallographicMap(crystal_map)
+        cryst_map = transfer_navigation_axes(cryst_map, self)
+        cryst_map.method = "template_matching"
+
+        return cryst_map
+
 
 
 class VectorMatchingResults(BaseSignal):
