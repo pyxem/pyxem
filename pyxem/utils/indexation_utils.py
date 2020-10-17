@@ -37,6 +37,49 @@ OrientationResult = namedtuple(
     "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split(),
 )
 
+def get_nth_best_solution(
+    single_match_result, mode, rank=0, key="match_rate", descending=True
+):
+    """Get the nth best solution by match_rate from a pool of solutions
+
+    Parameters
+    ----------
+    single_match_result : VectorMatchingResults, TemplateMatchingResults
+        Pool of solutions from the vector matching algorithm
+    mode : str
+        'vector' or 'template'
+    rank : int
+        The rank of the solution, i.e. rank=2 returns the third best solution
+    key : str
+        The key to sort the solutions by, default = match_rate
+    descending : bool
+        Rank the keys from large to small
+
+    Returns
+    -------
+    VectorMatching:
+        best_fit : `OrientationResult`
+            Parameters for the best fitting orientation
+            Library Number, rotation_matrix, match_rate, error_hkls, total_error
+    TemplateMatching: np.array
+            Parameters for the best fitting orientation
+            Library Number , [z, x, z], Correlation Score
+    """
+    if mode == "vector":
+        try:
+            best_fit = sorted(
+                single_match_result[0].tolist(), key=attrgetter(key), reverse=descending
+            )[rank]
+        except AttributeError:
+            best_fit = sorted(
+                single_match_result.tolist(), key=attrgetter(key), reverse=descending
+            )[rank]
+    if mode == "template":
+        srt_idx = np.argsort(single_match_result[:, 2])[::-1][rank]
+        best_fit = single_match_result[srt_idx]
+
+    return best_fit
+
 
 def optimal_fft_size(target, real=False):
     """Wrapper around scipy function next_fast_len() for calculating optimal FFT padding.
@@ -277,51 +320,6 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     return angles.argsort()[
         np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=np.int)
     ]
-
-
-def get_nth_best_solution(
-    single_match_result, mode, rank=0, key="match_rate", descending=True
-):
-    """Get the nth best solution by match_rate from a pool of solutions
-
-    Parameters
-    ----------
-    single_match_result : VectorMatchingResults, TemplateMatchingResults
-        Pool of solutions from the vector matching algorithm
-    mode : str
-        'vector' or 'template'
-    rank : int
-        The rank of the solution, i.e. rank=2 returns the third best solution
-    key : str
-        The key to sort the solutions by, default = match_rate
-    descending : bool
-        Rank the keys from large to small
-
-    Returns
-    -------
-    VectorMatching:
-        best_fit : `OrientationResult`
-            Parameters for the best fitting orientation
-            Library Number, rotation_matrix, match_rate, error_hkls, total_error
-    TemplateMatching: np.array
-            Parameters for the best fitting orientation
-            Library Number , [z, x, z], Correlation Score
-    """
-    if mode == "vector":
-        try:
-            best_fit = sorted(
-                single_match_result[0].tolist(), key=attrgetter(key), reverse=descending
-            )[rank]
-        except AttributeError:
-            best_fit = sorted(
-                single_match_result.tolist(), key=attrgetter(key), reverse=descending
-            )[rank]
-    if mode == "template":
-        srt_idx = np.argsort(single_match_result[:, 2])[::-1][rank]
-        best_fit = single_match_result[srt_idx]
-
-    return best_fit
-
 
 def match_vectors(
     peaks, library, mag_tol, angle_tol, index_error_tol, n_peaks_to_index, n_best
