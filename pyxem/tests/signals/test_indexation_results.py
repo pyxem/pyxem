@@ -24,29 +24,22 @@ from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
-def test_template_get_crystallographic_map(
-    dp_template_match_result, sp_template_match_result
-):
-    # Assertion free test, as the tests in test_indexation_utils do the heavy
-    # lifting
-    match_results = np.array(
-        np.vstack((dp_template_match_result[0], sp_template_match_result[0]))
-    )
-    match_results = TemplateMatchingResults(match_results)
-    cryst_map = match_results.get_crystallographic_map()
-    assert cryst_map.method == "template_matching"
+@pytest.mark.parametrize("final_size,fail",[(5,6),(False,True)])
+def test_init_GenericMatchingResults(final_size,fail):
+    data = np.random.rand(10,10,10,final_size)
+
+def test_init_TemplateMatchingResults():
+    pass
+
+def test_init_PatternMatchingResults():
+    pass
+
+def test_init_VectorMatchingResults():
+    pass
 
 
-def test_vector_get_crystallographic_map(
-    dp_vector_match_result, sp_vector_match_result
-):
-    # Assertion free test, as the tests in test_indexation_utils do the heavy
-    # lifting
-    match_results = np.hstack([dp_vector_match_result, sp_vector_match_result])
-    match_results = VectorMatchingResults(match_results)
-    match_results.axes_manager.set_signal_dimension(1)
-    cryst_map = match_results.get_crystallographic_map()
-    assert cryst_map.method == "vector_matching"
+
+
 
 
 @pytest.mark.parametrize(
