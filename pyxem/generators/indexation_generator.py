@@ -171,7 +171,7 @@ def _correlate_templates(image, library, n_largest, method, mask):
         The number of well correlated simulations to be retained.
     method : str
         Name of method used to compute correlation between templates and diffraction patterns. Can be
-        'fast_correlation', 'full_frame_correlation' or 'zero_mean_normalized_correlation'. (ADDED in pyxem 0.11.0)
+        'fast_correlation' or 'zero_mean_normalized_correlation'.
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
 
@@ -187,17 +187,6 @@ def _correlate_templates(image, library, n_largest, method, mask):
     --------
     IndexationGenerator.correlate
 
-    Notes
-    -----
-    Correlation results are defined as,
-        phase_index : int
-            Index of the phase, following the ordering of the library keys
-        [z, x, z] : ndarray
-            numpy array of three floats, specifying the orientation in the
-            Bunge convention, in degrees.
-        correlation : float
-            A coefficient of correlation, only normalised to the template
-            intensity. This is in contrast to the reference work.
 
     References
     ----------
