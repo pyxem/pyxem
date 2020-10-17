@@ -218,8 +218,12 @@ def peaks_from_best_template(single_match_result, library, rank=0):
 def _basic_to_crystal_map():
     pass
 
+class GenericMatchingResults():
+    def __init__(self,data):
+        self.data = hs.signals.Signal2D(data)
 
-class TemplateMatchingResults(Signal2D):
+
+class TemplateMatchingResults(GenericMatchingResults):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
     """
@@ -286,7 +290,7 @@ class TemplateMatchingResults(Signal2D):
 
         return cryst_map
 
-class PatternMatchingResults(Signal2D):
+class PatternMatchingResults(GenericMatchingResults):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
     """
