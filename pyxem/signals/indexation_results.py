@@ -350,27 +350,12 @@ class PatternMatchingResults(Signal2D):
         pass
 
     def get_crystallographic_map(self, *args, **kwargs):
-        """Obtain a crystallographic map specifying the best matching phase and
+        """Obtain a crystamap specifying the best matching phase and
         orientation at each probe position with corresponding metrics.
 
         Returns
         -------
         cryst_map : CrystallographicMap
-            Crystallographic mapping results containing the best matching phase
-            and orientation at each navigation position with associated metrics.
-
-            The Signal at each navigation position is an array of,
-
-                            [phase, np.array((z,x,z)), dict(metrics)]
-
-            which defines the phase, orientation as Euler angles in the zxz
-            convention and metrics associated with the matching.
-
-            Metrics for template matching results are
-                'correlation'
-                'orientation_reliability'
-                'phase_reliability'
-
         """
         # TODO: Add alternative methods beyond highest correlation score.
         crystal_map = self.map(
@@ -412,22 +397,6 @@ class VectorMatchingResults(BaseSignal):
 
         Returns
         -------
-        cryst_map : CrystallographicMap
-            Crystallographic mapping results containing the best matching phase
-            and orientation at each navigation position with associated metrics.
-
-            The Signal at each navigation position is an array of,
-
-                            [phase, np.array((z,x,z)), dict(metrics)]
-
-            which defines the phase, orientation as Euler angles in the zxz
-            convention and metrics associated with the matching.
-
-            Metrics for template matching results are
-                'match_rate'
-                'total_error'
-                'orientation_reliability'
-                'phase_reliability'
         """
         crystal_map = self.map(
             crystal_from_vector_matching, inplace=False, *args, **kwargs
