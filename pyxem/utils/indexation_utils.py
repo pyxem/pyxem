@@ -17,10 +17,8 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from heapq import nlargest
 from itertools import combinations
-import math
-from operator import itemgetter, attrgetter
+from operator import attrgetter
 
 import numpy as np
 
@@ -28,8 +26,7 @@ from pyxem.utils.expt_utils import _cart2polar
 from pyxem.utils.vector_utils import get_rotation_matrix_between_vectors
 from pyxem.utils.vector_utils import get_angle_cartesian
 
-from transforms3d.euler import mat2euler, euler2mat
-from transforms3d.quaternions import mat2quat
+from transforms3d.euler import mat2euler
 
 from collections import namedtuple
 
@@ -43,6 +40,7 @@ OrientationResult = namedtuple(
 
 def optimal_fft_size(target, real=False):
     """Wrapper around scipy function next_fast_len() for calculating optimal FFT padding.
+
     scipy.fft was only added in 1.4.0, so we fall back to scipy.fftpack
     if it is not available. The main difference is that next_fast_len()
     does not take a second argument in the older implementation.
@@ -54,6 +52,7 @@ def optimal_fft_size(target, real=False):
     real : bool, optional
         True if the FFT involves real input or output, only available
         for scipy > 1.4.0
+
     Returns
     -------
     int
@@ -78,8 +77,10 @@ def optimal_fft_size(target, real=False):
 
 # Functions used in correlate_library.
 def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
-    """
-    Computes the correlation score between an image and a template, using the formula
+    r"""Computes the correlation score between an image and a template
+
+    Uses the formula
+
     .. math:: FastCorrelation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
 
@@ -97,8 +98,8 @@ def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
     corr_local: float
         correlation score between template and image.
 
-    See also:
-    ---------
+    See Also
+    --------
     correlate_library, zero_mean_normalized_correlation
 
     """
@@ -115,8 +116,10 @@ def zero_mean_normalized_correlation(
     int_local,
     **kwargs
 ):
-    """
-    Computes the correlation score between an image and a template, using the formula
+    r"""Computes the correlation score between an image and a template.
+
+    Uses the formula
+
     .. math:: zero_mean_normalized_correlation
         \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\\sum_{Not {j}} avg(T)}}
         for a template T and an experimental pattern P.
@@ -141,8 +144,8 @@ def zero_mean_normalized_correlation(
     corr_local: float
         correlation score between template and image.
 
-    See also:
-    ---------
+    See Also
+    --------
     correlate_library, fast_correlation
 
     """
@@ -170,11 +173,10 @@ def zero_mean_normalized_correlation(
 
 
 def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
-    """
-    Computes the correlation score between an image and a template in Fourier space.
+    """Computes the correlation score between an image and a template in Fourier space.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     image: numpy.ndarray
         Intensities of the image in fourier space, stored in a NxM numpy array
     image_norm: float
@@ -186,16 +188,16 @@ def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
     template_intensities: list
         List of intensity values for the template.
 
-    Returns:
-    --------
+    Returns
+    -------
     corr_local: float
         Correlation score between image and template.
 
-    See also:
-    ---------
+    See Also
+    --------
     correlate_library, fast_correlation, zero_mean_normalized_correlation
 
-    Reference:
+    References
     ----------
     A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
      a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
@@ -300,7 +302,7 @@ def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
 
 
 def correlate_library(image, library, n_largest, method, mask):
-    """Correlates all simulated diffraction templates in a DiffractionLibrary
+    r"""Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
     Calculated using the normalised (see return type documentation) dot
@@ -336,7 +338,7 @@ def correlate_library(image, library, n_largest, method, mask):
         correlated simulations for the experimental pattern of interest, where
         each entry is on the form [phase index, [z, x, z], correlation].
 
-    See also
+    See Also
     --------
     IndexationGenerator.correlate
 
@@ -660,10 +662,9 @@ def match_vectors(
 
 
 def get_phase_name_and_index(library):
+    """Get a dictionary of phase names and its corresponding index value in library.keys().
 
-    """ Get a dictionary of phase names and its corresponding index value in library.keys().
-
-     Parameters
+    Parameters
     ----------
     library : DiffractionLibrary
         Diffraction library containing the phases and rotations
@@ -679,7 +680,7 @@ def get_phase_name_and_index(library):
 
 
 def peaks_from_best_template(single_match_result, library, rank=0):
-    """ Takes a TemplateMatchingResults object and return the associated peaks,
+    """Takes a TemplateMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
     Parameters

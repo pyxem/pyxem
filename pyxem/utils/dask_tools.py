@@ -39,6 +39,142 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
+def _get_dask_array(signal, size_of_chunk=32):
+    if signal._lazy:
+        dask_array = signal.data
+    else:
+        sig_chunks = list(signal.axes_manager.signal_shape)[::-1]
+        chunks = [size_of_chunk] * len(signal.axes_manager.navigation_shape)
+        chunks.extend(sig_chunks)
+        dask_array = da.from_array(signal.data, chunks=chunks)
+    return dask_array
+
+
+def _process_chunk(
+    data,
+    process_func,
+    output_signal_size=None,
+    args_process=None,
+    kwargs_process=None,
+    block_info=None,
+):
+    dtype = block_info[None]["dtype"]
+    if args_process is None:
+        args_process = []
+    if kwargs_process is None:
+        kwargs_process = {}
+    if output_signal_size is None:
+        output_shape = data.shape
+    else:
+        output_shape = data.shape[:-2] + tuple(output_signal_size)
+    output_array = np.zeros(output_shape, dtype=dtype)
+    for index in np.ndindex(data.shape[:-2]):
+        islice = np.s_[index]
+        output_array[islice] = process_func(
+            data[islice], *args_process, **kwargs_process
+        )
+    return output_array
+
+
+def _process_dask_array(
+    dask_array,
+    process_func,
+    dtype=None,
+    chunks=None,
+    drop_axis=None,
+    new_axis=None,
+    output_signal_size=None,
+    *args_process,
+    **kwargs_process
+):
+    """General function for processing a dask array over navigation dimensions.
+
+    This function is intended to process image data, which must be the two last
+    dimensions in the dask array.
+
+    By default, the output data will be the same as the input data. The two last
+    dimensions will be rechunked to one chunk.
+
+    Parameters
+    ----------
+    dask_array : Dask Array
+        Must be atleast two dimensions, and the two last dimensions are
+        assumed to be the signal dimensions.
+    process_func : Function
+        A function which must at least take one parameter, can return anything
+        but the output dimensions must match with drop_axis, new_axis and chunks.
+        See Examples below for how to use it.
+    dtype : NumPy dtype, optional
+    chunks : tuple, optional
+    drop_axis : int or tuple, optional
+        Axes which will be removed from the output array
+    new_axis : int or tuple, optional
+        Axes which will be added to the output array
+    output_signal_size : tuple, optional
+        If the output_array has a different signal size, this must be
+        specified here. See Examples below for how to use it.
+    *args
+        Passed to process_func
+    **kwargs
+        Passed to process_func
+
+    Returns
+    -------
+    output_array : Dask Array
+
+    Examples
+    --------
+    Changing the value of each pixel in the dataset, returning the same
+    sized array as the input and same navigation chunking.
+
+    >>> import dask.array as da
+    >>> from pyxem.utils.dask_tools import _process_dask_array
+    >>> def test_function1(image):
+    ...     return image * 10
+    >>> dask_array = da.ones((4, 6, 10, 15), chunks=(2, 2, 2, 2))
+    >>> output_dask_array = _process_dask_array(dask_array, test_function1)
+    >>> output_array = output_dask_array.compute()
+
+    Getting output which is different shape than the input. For example
+    two coordinates. Note: the output size must be the same for all the
+    navigation positions. If the size is variable, for example with peak
+    finding, use dtype=np.object (see below).
+
+    >>> def test_function2(image):
+    ...     return [10, 3]
+    >>> output_dask_array = _process_dask_array(
+    ...     dask_array, test_function2, chunks=(2, 2, 2), drop_axis=(2, 3),
+    ...     new_axis=2, output_signal_size=(2, ))
+
+    For functions where we don't know the shape of the output data,
+    use dtype=np.object
+
+    >>> def test_function2(image):
+    ...     return list(range(np.random.randint(20)))
+    >>> output_dask_array = _process_dask_array(
+    ...     dask_array, test_function2, chunks=(2, 2), drop_axis=(2, 3),
+    ...     new_axis=None, dtype=np.object, output_signal_size=())
+    >>> output_array = output_dask_array.compute()
+
+    """
+    if dtype is None:
+        dtype = dask_array.dtype
+    dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
+    output_array = da.map_blocks(
+        _process_chunk,
+        dask_array_rechunked,
+        process_func=process_func,
+        dtype=dtype,
+        output_signal_size=output_signal_size,
+        chunks=chunks,
+        drop_axis=drop_axis,
+        new_axis=new_axis,
+        args_process=args_process,
+        kwargs_process=kwargs_process,
+    )
+    return output_array
+
+
 def _mask_array(dask_array, mask_array, fill_value=None):
     """Mask two last dimensions in a dask array.
 
