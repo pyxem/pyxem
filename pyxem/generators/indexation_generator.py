@@ -489,8 +489,6 @@ class PatternIndexationGenerator:
         library = self.library
 
         method_dict = {
-            "fast_correlation": fast_correlation,
-            "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
             "full_frame_correlation": full_frame_correlation,
         }
 
