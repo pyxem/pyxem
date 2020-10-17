@@ -178,6 +178,103 @@ class TemplateIndexationGenerator:
             The n orientations with the highest correlation values are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
+            'fast_correlation' or 'zero_mean_normalized_correlation'.
+        mask : Array
+            Array with the same size as signal (in navigation) or None
+        print_help : bool
+            Display information about the method used.
+        *args : arguments
+            Arguments passed to map().
+        **kwargs : arguments
+            Keyword arguments passed map().
+
+        Returns
+        -------
+        matching_results : TemplateMatchingResults
+            Navigation axes of the electron diffraction signal containing
+            correlation results for each diffraction pattern, in the form
+            [Library Number , [z, x, z], Correlation Score]
+
+        """
+        signal = self.signal
+        library = self.library
+
+        method_dict = {
+            "fast_correlation": fast_correlation,
+            "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
+        }
+
+        if mask is None:
+            # Index at all real space pixels
+            mask = 1
+
+        # tests if selected method is a valid argument, and can print help for selected method.
+        chosen_function = select_method_from_method_dict(
+            method, method_dict, print_help
+        )
+        if method in ["fast_correlation", "zero_mean_normalized_correlation"]:
+            # adds a normalisation to library
+            for phase in library.keys():
+                norm_array = np.ones(
+                    library[phase]["intensities"].shape[0]
+                )  # will store the norms
+
+                for i, intensity_array in enumerate(library[phase]["intensities"]):
+                    norm_array[i] = np.linalg.norm(intensity_array)
+                library[phase][
+                    "pattern_norms"
+                ] = norm_array  # puts this normalisation into the library
+
+            matches = signal.map(
+                correlate_library,
+                library=library,
+                n_largest=n_largest,
+                method=method,
+                mask=mask,
+                inplace=False,
+                **kwargs,
+            )
+
+        matching_results = TemplateMatchingResults(matches)
+        matching_results = transfer_navigation_axes(matching_results, signal)
+
+        return matching_results
+
+
+class PatternIndexationGenerator:
+    """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+    """
+
+    def __init__(self, signal, diffraction_library):
+        self.signal = signal
+        self.library = diffraction_library
+
+
+    def correlate(
+        self,
+        n_largest=5,
+        method="fast_correlation",
+        mask=None,
+        print_help=False,
+        *args,
+        **kwargs,
+    ):
+        """Correlates the library of simulated diffraction patterns with the
+        electron diffraction signal.
+
+        Parameters
+        ----------
+        n_largest : int
+            The n orientations with the highest correlation values are returned.
+        method : str
+            Name of method used to compute correlation between templates and diffraction patterns. Can be
             'fast_correlation', 'full_frame_correlation' or 'zero_mean_normalized_correlation'.
         mask : Array
             Array with the same size as signal (in navigation) or None
@@ -213,30 +310,8 @@ class TemplateIndexationGenerator:
         chosen_function = select_method_from_method_dict(
             method, method_dict, print_help
         )
-        if method in ["fast_correlation", "zero_mean_normalized_correlation"]:
-            # adds a normalisation to library
-            for phase in library.keys():
-                norm_array = np.ones(
-                    library[phase]["intensities"].shape[0]
-                )  # will store the norms
 
-                for i, intensity_array in enumerate(library[phase]["intensities"]):
-                    norm_array[i] = np.linalg.norm(intensity_array)
-                library[phase][
-                    "pattern_norms"
-                ] = norm_array  # puts this normalisation into the library
-
-            matches = signal.map(
-                correlate_library,
-                library=library,
-                n_largest=n_largest,
-                method=method,
-                mask=mask,
-                inplace=False,
-                **kwargs,
-            )
-
-        elif method in ["full_frame_correlation"]:
+        if method in ["full_frame_correlation"]:
             shape = signal.data.shape[-2:]
             size = 2 * np.array(shape) - 1
             fsize = [optimal_fft_size(a, real=True) for a in (size)]
@@ -262,21 +337,6 @@ class TemplateIndexationGenerator:
 
         return matching_results
 
-
-class PatternIndexationGenerator:
-    """Generates an indexer for data using a number of methods.
-
-    Parameters
-    ----------
-    signal : ElectronDiffraction2D
-        The signal of electron diffraction patterns to be indexed.
-    diffraction_library : DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
-    """
-
-    def __init__(self, signal, diffraction_library):
-        self.signal = signal
-        self.library = diffraction_library
 
 
 class ProfileIndexationGenerator:
