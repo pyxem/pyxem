@@ -47,6 +47,27 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 import lmfit
 
 
+class IndexationGenerator:
+    """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+
+    Returns
+    -------
+    ValueError : "use TemplateIndexationGenerator or PatternIndexationGenerator"
+    """
+
+    def __init__(self, signal, diffraction_library):
+        self.signal = signal
+        self.library = diffraction_library
+        raise ValueError("use TemplateIndexationGenerator or PatternIndexationGenerator")
+
+
 def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
     """Returns the Fourier transform of a list of templates.
 
@@ -122,7 +143,9 @@ def get_library_FT_dict(template_library, shape, fsize):
     return library_FT_dict
 
 
-class IndexationGenerator:
+
+
+class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
     Parameters
@@ -238,6 +261,22 @@ class IndexationGenerator:
         matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
+
+
+class PatternIndexationGenerator:
+    """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+    """
+
+    def __init__(self, signal, diffraction_library):
+        self.signal = signal
+        self.library = diffraction_library
 
 
 class ProfileIndexationGenerator:
