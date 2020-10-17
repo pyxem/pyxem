@@ -215,43 +215,6 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
-
-def peaks_from_best_vector_match(single_match_result, library, rank=0):
-    """Takes a VectorMatchingResults object and return the associated peaks,
-    to be used in combination with map().
-
-    Parameters
-    ----------
-    single_match_result : ndarray
-        An entry in a VectorMatchingResults
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations
-    rank : int
-        Get peaks from nth best orientation (default: 0, best vector match)
-
-    Returns
-    -------
-    peaks : ndarray
-        Coordinates of peaks in the matching results object in calibrated units.
-    """
-    best_fit = get_nth_best_solution(single_match_result, "vector", rank=rank)
-    phase_index = best_fit.phase_index
-
-    rotation_orientation = mat2euler(best_fit.rotation_matrix)
-    # Don't change the original
-    structure = library.structures[phase_index]
-    sim = library.diffraction_generator.calculate_ed_data(
-        structure,
-        reciprocal_radius=library.reciprocal_radius,
-        rotation=rotation_orientation,
-        with_direct_beam=False,
-    )
-
-    # Cut z
-    return sim.coordinates[:, :2]
-
-
-
 def _basic_to_crystal_map():
     pass
 
@@ -436,27 +399,3 @@ class VectorMatchingResults(BaseSignal):
             vectors.hkls = self.hkls
 
         return vectors
-
-    def plot_best_matching_results_on_signal(
-        self, signal, permanent_markers=True, *args, **kwargs
-    ):
-        """Plot the best matching diffraction vectors on a signal.
-
-        Parameters
-        ----------
-        signal : ElectronDiffraction2D
-            The ElectronDiffraction2D signal object on which to plot the peaks.
-            This signal must have the same navigation dimensions as the peaks.
-        permanent_markers : bool
-            Permanently save the peaks as markers on the signal. Default True.
-        *args :
-            Arguments passed to signal.plot()
-        **kwargs :
-            Keyword arguments passed to signal.plot()
-        """
-        match_peaks = self.vectors
-        mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
-        signal.plot(*args, **kwargs)
-        for mx, my in zip(mmx, mmy):
-            m = hs.markers.point(x=mx, y=my, color="red", marker="x")
-            signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
