@@ -27,7 +27,6 @@ from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import select_method_from_method_dict
 
 from pyxem.utils.indexation_utils import (
-    correlate_library,
     zero_mean_normalized_correlation,
     fast_correlation,
     full_frame_correlation,
@@ -35,7 +34,6 @@ from pyxem.utils.indexation_utils import (
     match_vectors,
     OrientationResult,
     get_nth_best_solution,
-    correlate_library_from_dict,
     optimal_fft_size,
 )
 
@@ -384,7 +382,7 @@ class TemplateIndexationGenerator:
         )
         if True: #unlayer this
             # adds a normalisation to library #TODO: Port to diffsims
-            )
+
             for phase in library.keys():
                 norm_array = np.ones(
                     library[phase]["intensities"].shape[0]
@@ -497,7 +495,7 @@ class PatternIndexationGenerator:
             )
 
         matching_results = PatternMatchingResults(matches)
-        
+
         return matching_results
 
 
