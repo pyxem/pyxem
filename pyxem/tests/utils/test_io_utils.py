@@ -24,7 +24,6 @@ import os
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
-from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.signals.vdf_image import VDFImage
 
 
@@ -32,7 +31,6 @@ from pyxem.signals.vdf_image import VDFImage
     "class_to_test,meta_string",
     [
         (ElectronDiffraction2D, "string1"),
-        (TemplateMatchingResults, "string2"),
         (DiffractionVectors, "string3"),
         (DiffractionVectors2D, "string3"),
         (ElectronDiffraction1D, "string5"),

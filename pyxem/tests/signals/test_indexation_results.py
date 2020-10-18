@@ -24,6 +24,7 @@ from pyxem.signals.indexation_results import VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
+@pytest.mark.skip(reason="Not implemented")
 @pytest.mark.parametrize("final_size,fail",[(5,6),(False,True)])
 def test_init_GenericMatchingResults(final_size,fail):
     data = np.random.rand(10,10,10,final_size)
