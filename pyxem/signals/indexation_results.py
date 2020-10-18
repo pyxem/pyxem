@@ -222,6 +222,9 @@ class GenericMatchingResults():
     def __init__(self,data):
         self.data = hs.signals.Signal2D(data)
 
+    def to_crystal_map():
+        pass
+
 
 class TemplateMatchingResults(GenericMatchingResults):
     """Template matching results containing the top n best matching crystal
@@ -256,39 +259,6 @@ class TemplateMatchingResults(GenericMatchingResults):
             m = hs.markers.point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
 
-    def get_crystallographic_map(self, *args, **kwargs):
-        """Obtain a crystallographic map specifying the best matching phase and
-        orientation at each probe position with corresponding metrics.
-
-        Returns
-        -------
-        cryst_map : CrystallographicMap
-            Crystallographic mapping results containing the best matching phase
-            and orientation at each navigation position with associated metrics.
-
-            The Signal at each navigation position is an array of,
-
-                            [phase, np.array((z,x,z)), dict(metrics)]
-
-            which defines the phase, orientation as Euler angles in the zxz
-            convention and metrics associated with the matching.
-
-            Metrics for template matching results are
-                'correlation'
-                'orientation_reliability'
-                'phase_reliability'
-
-        """
-        # TODO: Add alternative methods beyond highest correlation score.
-        crystal_map = self.map(
-            crystal_from_template_matching, inplace=False, *args, **kwargs
-        )
-
-        cryst_map = CrystallographicMap(crystal_map)
-        cryst_map = transfer_navigation_axes(cryst_map, self)
-        cryst_map.method = "template_matching"
-
-        return cryst_map
 
 class PatternMatchingResults(GenericMatchingResults):
     """Template matching results containing the top n best matching crystal
@@ -315,27 +285,6 @@ class PatternMatchingResults(GenericMatchingResults):
             Keyword arguments passed to signal.plot()
         """
         pass
-
-    def get_crystallographic_map(self, *args, **kwargs):
-        """Obtain a crystamap specifying the best matching phase and
-        orientation at each probe position with corresponding metrics.
-
-        Returns
-        -------
-        cryst_map : CrystallographicMap
-        """
-        # TODO: Add alternative methods beyond highest correlation score.
-        crystal_map = self.map(
-            crystal_from_template_matching, inplace=False, *args, **kwargs
-        )
-
-        cryst_map = CrystallographicMap(crystal_map)
-        cryst_map = transfer_navigation_axes(cryst_map, self)
-        cryst_map.method = "template_matching"
-
-        return cryst_map
-
-
 
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal
