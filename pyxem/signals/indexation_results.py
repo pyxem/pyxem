@@ -208,9 +208,6 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
-def _basic_to_crystal_map():
-    pass
-
 class GenericMatchingResults():
     def __init__(self,data):
         self.data = hs.signals.Signal2D(data)
