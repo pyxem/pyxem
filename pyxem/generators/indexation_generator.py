@@ -68,7 +68,7 @@ class IndexationGenerator:
         raise ValueError("use TemplateIndexationGenerator or PatternIndexationGenerator")
 
 
-def _correlate_patterns(image, template_dict, n_largest, method, mask):
+def _correlate_patterns(image, pattern_library, n_largest, method, mask):
     """Correlates all simulated diffraction templates in a DiffractionLibrary
     with a particular experimental diffraction pattern (image).
 
@@ -76,14 +76,13 @@ def _correlate_patterns(image, template_dict, n_largest, method, mask):
     ----------
     image : numpy.array
         The experimental diffraction pattern of interest.
-    template_dict : dict
-        Dictionary containing orientations, fourier transform of templates and template norms for
-        every phase.
+    pattern_library : dict
+        Dictionary containing orientations, patterns and norms for each phase.
     n_largest : int
         The number of well correlated simulations to be retained.
     method : str
         Name of method used to compute correlation between templates and diffraction patterns. Can be
-         'full_frame_correlation'. (I believe angular decomposition can also fit this framework)
+         'fourier_full_frame_correlation'.
     mask : bool
         A mask for navigation axes. 1 indicates positions to be indexed.
 
@@ -91,59 +90,59 @@ def _correlate_patterns(image, template_dict, n_largest, method, mask):
     Returns
     -------
     top_matches : numpy.array
-        Array of shape (<num phases>*n_largest, 3) containing the top n
+        Array of shape (<num phases>*n_largest, 5) containing the top n
         correlated simulations for the experimental pattern of interest, where
-        each entry is on the form [phase index, [z, x, z], correlation].
+        each entry is on the form [phase index,alpha,beta,gamma,correlation].
 
 
     References
     ----------
-    full_frame_correlation:
+    A. Nakhmani and  A. Tannenbaum, "A New Distance Measure Based on Generalized Image Normalized Cross-Correlation
+    for Robust Video Tracking and Image Recognition"
+    Pattern Recognit Lett. 2013 Feb 1; 34(3): 315–321; doi: 10.1016/j.patrec.2012.10.025
+
+    Discussion on Normalized cross correlation (xcdskd):
+    https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
+
+    fourier_full_frame_correlation:
     A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
      a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
     """
 
-    top_matches = np.empty((len(template_dict), n_largest, 3), dtype="object")
+    phase_count = len(library.keys())
+    top_matches = np.zeros((n_largest*phase_count,5))
 
-    if method == "full_frame_correlation":
+    if method == "fourier_full_frame_correlation":
         size = 2 * np.array(image.shape) - 1
         fsize = [optimal_fft_size(a, real=True) for a in (size)]
         image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
         image_norm = np.sqrt(full_frame_correlation(image_FT, 1, image_FT, 1))
 
     if mask == 1:
-        for phase_index, library_entry in enumerate(template_dict.values()):
-            orientations = library_entry["orientations"]
-            patterns = library_entry["patterns"]
-            pattern_norms = library_entry["pattern_norms"]
+        for phase_number,phase in enumerate(pattern_library.keys()):
+            saved_results = np.zeroes((n_largest,5))
+            saved_results[:,0] = phase_number
 
-            zip_for_locals = zip(orientations, patterns, pattern_norms)
+            for entry in pattern_library[phase]:
+                orientations = entry["orientations"]
+                pattern = entry["patterns"]
+                pattern_norm = entry["pattern_norms"]
 
-            or_saved, corr_saved = np.empty((n_largest, 3)), np.zeros((n_largest, 1))
-
-            for (or_local, pat_local, pn_local) in zip_for_locals:
-
-                if method == "full_frame_correlation":
+                if method == "fourier_full_frame_correlation":
                     corr_local = full_frame_correlation(
-                        image_FT, image_norm, pat_local, pn_local
-                    )
+                        image_FT, image_norm, pattern, pattern_norm)
 
-                if corr_local > np.min(corr_saved):
-                    or_saved[np.argmin(corr_saved)] = or_local
-                    corr_saved[np.argmin(corr_saved)] = corr_local
+                if corr_local > np.min(saved_results[:,4]):
+                    row_index = np.argmin(saved_results[:,4])
+                    or_saved[row_index,1:3] = or_local
+                    corr_saved[row_index,4] = corr_local
 
-                combined_array = np.hstack((or_saved, corr_saved))
-                combined_array = combined_array[
-                    np.flip(combined_array[:, 3].argsort())
-                ]  # see stackoverflow/2828059 for details
-                top_matches[phase_index, :, 0] = phase_index
-                top_matches[phase_index, :, 2] = combined_array[:, 3]  # correlation
-                for i in np.arange(n_largest):
-                    top_matches[phase_index, i, 1] = combined_array[
-                        i, :3
-                    ]  # orientation
+            phase_sorted = saved_results[saved_results[:,4].argsort()]
+            start_slot = phase_number * n_largest
+            end_slot   = (phase_number + 1) * n_largest
+            top_matches[start_slot:end_slot,:] = phase_sorted
 
-    return top_matches.reshape(-1, 3)
+    return top_matches
 
 
 def _correlate_templates(image, library, n_largest, method, mask):
@@ -189,13 +188,6 @@ def _correlate_templates(image, library, n_largest, method, mask):
     E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
        template matching,” vol. 50, no. 1, pp. 87–99, 2005.
 
-    A. Nakhmani and  A. Tannenbaum, "A New Distance Measure Based on Generalized Image Normalized Cross-Correlation
-    for Robust Video Tracking and Image Recognition"
-    Pattern Recognit Lett. 2013 Feb 1; 34(3): 315–321; doi: 10.1016/j.patrec.2012.10.025
-
-    Discussion on Normalized cross correlation (xcdskd):
-    https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
-
     """
     phase_count = len(library.keys())
     top_matches = np.zeros((n_largest*phase_count,5))
@@ -237,7 +229,7 @@ def _correlate_templates(image, library, n_largest, method, mask):
                     or_saved[row_index,1:3] = or_local
                     corr_saved[row_index,4] = corr_local
 
-            phase_sorted = saveed_results[saved_results[:,4].argsort()]
+            phase_sorted = saved_results[saved_results[:,4].argsort()]
             start_slot = phase_number * n_largest
             end_slot   = (phase_number + 1) * n_largest
             top_matches[start_slot:end_slot,:] = phase_sorted
@@ -453,7 +445,7 @@ class PatternIndexationGenerator:
             The n orientations with the highest correlation values are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'fast_correlation', 'full_frame_correlation' or 'zero_mean_normalized_correlation'.
+            'fourier_full_frame_correlation'
         mask : Array
             Array with the same size as signal (in navigation) or None
         print_help : bool
@@ -465,17 +457,13 @@ class PatternIndexationGenerator:
 
         Returns
         -------
-        matching_results : TemplateMatchingResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern, in the form
-            [Library Number , [z, x, z], Correlation Score]
-
+        matching_results : PatternMatchingResults
         """
         signal = self.signal
         library = self.library
 
         method_dict = {
-            "full_frame_correlation": full_frame_correlation,
+            "fourier_full_frame_correlation": full_frame_correlation,
         }
 
         if mask is None:
@@ -487,7 +475,7 @@ class PatternIndexationGenerator:
             method, method_dict, print_help
         )
 
-        if method in ["full_frame_correlation"]:
+        if method in ["fourier_full_frame_correlation"]:
             shape = signal.data.shape[-2:]
             size = 2 * np.array(shape) - 1
             fsize = [optimal_fft_size(a, real=True) for a in (size)]
@@ -499,8 +487,8 @@ class PatternIndexationGenerator:
             library_FT_dict = get_library_FT_dict(library, shape, fsize)
 
             matches = signal.map(
-                correlate_library_from_dict,
-                template_dict=library_FT_dict,
+                _correlate_patterns,
+                pattern_library=library_FT_dict,
                 n_largest=n_largest,
                 method=method,
                 mask=mask,
@@ -508,9 +496,8 @@ class PatternIndexationGenerator:
                 **kwargs,
             )
 
-        matching_results = TemplateMatchingResults(matches)
-        matching_results = transfer_navigation_axes(matching_results, signal)
-
+        matching_results = PatternMatchingResults(matches)
+        
         return matching_results
 
 
