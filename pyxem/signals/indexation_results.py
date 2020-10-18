@@ -24,10 +24,6 @@ from warnings import warn
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
 
-from pyxem.utils.indexation_utils import peaks_from_best_template
-from pyxem.utils.indexation_utils import crystal_from_template_matching
-from pyxem.utils.indexation_utils import crystal_from_vector_matching
-
 def crystal_from_template_matching(z_matches):
     """Takes template matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
