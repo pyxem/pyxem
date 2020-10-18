@@ -118,7 +118,7 @@ def _correlate_patterns(image, pattern_library, n_largest, method, mask):
 
     if mask == 1:
         for phase_number,phase in enumerate(pattern_library.keys()):
-            saved_results = np.zeroes((n_largest,5))
+            saved_results = np.zeros((n_largest,5))
             saved_results[:,0] = phase_number
 
             for entry in pattern_library[phase]:
@@ -197,13 +197,13 @@ def _correlate_templates(image, library, n_largest, method, mask):
 
     if mask == 1:
         for phase_number,phase in enumerate(library.keys()):
-            saved_results = np.zeroes((n_largest,5))
+            saved_results = np.zeros((n_largest,5))
             saved_results[:,0] = phase_number
 
-            for entry in library[phase]:
-                orientations = entry["orientations"]
-                pixel_coords = entry["pixel_coords"]
-                intensities  = entry["intensities"]
+            for entry_number in np.arange(len(library[phase]['orientations'])):
+                orientations = library[phase]["orientations"][entry_number]
+                pixel_coords = library[phase]["pixel_coords"][entry_number]
+                intensities  = library[phase]["intensities"][entry_number]
 
                 # Extract experimental intensities from the diffraction image
                 image_intensities = image[pixel_coords[:, 1], pixel_coords[:, 0]]
@@ -219,7 +219,8 @@ def _correlate_templates(image, library, n_largest, method, mask):
 
                 elif method == "fast_correlation":
                     corr_local = fast_correlation(
-                        image_intensities, intensities, entry["patterns_norms"]
+                        image_intensities, intensities,
+                        library[phase]["pattern_norms"][entry_number]
                     )
 
                 if corr_local > np.min(saved_results[:,4]):

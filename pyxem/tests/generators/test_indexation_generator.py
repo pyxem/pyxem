@@ -19,19 +19,53 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.indexation_generator import ProfileIndexationGenerator
-from pyxem.generators.indexation_generator import VectorIndexationGenerator
+from hyperspy._signals.signal2d import Signal2D
+
+from pyxem import ElectronDiffraction2D
+from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.generators.indexation_generator import (
+    TemplateIndexationGenerator,
+    ProfileIndexationGenerator,
+    VectorIndexationGenerator,
     get_fourier_transform,
     get_library_FT_dict,
 )
+
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
+
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.libraries.diffraction_library import DiffractionLibrary
+from diffsims.libraries.structure_library import StructureLibrary
+
 from pyxem.utils.indexation_utils import OrientationResult
+
+@pytest.mark.parametrize("method",['fast_correlation',
+                        'zero_mean_normalized_correlation'])
+def test_TemplateIndexationGenerator(default_structure,method):
+    identifiers = ["a", "b"]
+    structures = [default_structure, default_structure]
+    orientations = [[(0, 0, 0), (0,1,0),(1,0,0)],
+                    [(0, 0, 1),(0, 0, 2),(0, 0, 3)]]
+    structure_library = StructureLibrary(identifiers, structures, orientations)
+    libgen = DiffractionLibraryGenerator(DiffractionGenerator(300))
+    library = libgen.get_diffraction_library(
+                    structure_library,0.017, 0.02, (100, 100), False
+    )
+
+    edp = ElectronDiffraction2D(np.random.rand(2,2,200,200))
+    indexer = TemplateIndexationGenerator(edp,library)
+
+    z = indexer.correlate(method=method,n_largest=2)
+    assert isinstance(z,TemplateMatchingResults)
+    assert isinstance(z.data,Signal2D)
+    assert z.data.data.shape[0:2] == edp.data.shape[0:2]
+    assert z.data.data.shape[3] == 5
 
 
 @pytest.fixture
