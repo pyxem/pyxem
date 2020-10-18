@@ -28,9 +28,6 @@ from pyxem.utils.indexation_utils import peaks_from_best_template
 from pyxem.utils.indexation_utils import crystal_from_template_matching
 from pyxem.utils.indexation_utils import crystal_from_vector_matching
 
-from pyxem import CrystallographicMap
-
-
 def crystal_from_template_matching(z_matches):
     """Takes template matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
@@ -318,11 +315,11 @@ class VectorMatchingResults(BaseSignal):
             crystal_from_vector_matching, inplace=False, *args, **kwargs
         )
 
-        cryst_map = CrystallographicMap(crystal_map)
-        cryst_map = transfer_navigation_axes(cryst_map, self)
-        cryst_map.method = "vector_matching"
+        #cryst_map = CrystallographicMap(crystal_map)
+        #cryst_map = transfer_navigation_axes(cryst_map, self)
+        #cryst_map.method = "vector_matching"
 
-        return cryst_map
+        return None
 
     def get_indexed_diffraction_vectors(
         self, vectors, overwrite=False, *args, **kwargs
