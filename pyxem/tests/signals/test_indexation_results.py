@@ -19,15 +19,18 @@
 import numpy as np
 import pytest
 
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.signals.indexation_results import VectorMatchingResults
+from pyxem.signals.indexation_results import GenericMatchingResults,TemplateMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
-@pytest.mark.skip(reason="Not implemented")
-@pytest.mark.parametrize("final_size,fail",[(5,6),(False,True)])
-def test_init_GenericMatchingResults(final_size,fail):
-    data = np.random.rand(10,10,10,final_size)
+def test_init_GenericMatchingResults():
+    _ = GenericMatchingResults(np.empty((10,10,10,5)))
+
+@pytest.mark.xfail(strict=True)
+def test_init_GenericMatchingResults_bad():
+    # final dimension must be 5
+    _ = GenericMatchingResults(np.empty((10,10,10,6)))
+
 
 def test_init_TemplateMatchingResults():
     pass

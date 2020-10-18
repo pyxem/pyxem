@@ -334,7 +334,6 @@ class TemplateIndexationGenerator:
         method="fast_correlation",
         mask=None,
         print_help=False,
-        *args,
         **kwargs,
     ):
         """Correlates the library of simulated diffraction patterns with the
@@ -343,7 +342,7 @@ class TemplateIndexationGenerator:
         Parameters
         ----------
         n_largest : int
-            The n orientations with the highest correlation values are returned.
+            The n orientations with the highest correlation values for each phase are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
             'fast_correlation' or 'zero_mean_normalized_correlation'.
@@ -351,8 +350,6 @@ class TemplateIndexationGenerator:
             Array with the same size as signal (in navigation) or None
         print_help : bool
             Display information about the method used.
-        *args : arguments
-            Arguments passed to map().
         **kwargs : arguments
             Keyword arguments passed map().
 
@@ -376,25 +373,21 @@ class TemplateIndexationGenerator:
             # Index at all real space pixels
             mask = 1
 
-        # tests if selected method is a valid argument, and can print help for selected method.
+        # tests if selected method is a valid and can print help for selected method.
         chosen_function = select_method_from_method_dict(
             method, method_dict, print_help
         )
-        if True: #unlayer this
-            # adds a normalisation to library #TODO: Port to diffsims
 
-            for phase in library.keys():
-                norm_array = np.ones(
-                    library[phase]["intensities"].shape[0]
-                )  # will store the norms
+        # adds a normalisation to library #TODO: Port to diffsims
+        for phase in library.keys():
+            # initialise a container for the norms
+            norm_array = np.ones(library[phase]["intensities"].shape[0])
 
-                for i, intensity_array in enumerate(library[phase]["intensities"]):
-                    norm_array[i] = np.linalg.norm(intensity_array)
-                library[phase][
-                    "pattern_norms"
-                ] = norm_array  # puts this normalisation into the library
+            for i, intensity_array in enumerate(library[phase]["intensities"]):
+                norm_array[i] = np.linalg.norm(intensity_array)
+                library[phase]["pattern_norms"] = norm_array
 
-            matches = signal.map(
+        matches = signal.map(
                 _correlate_templates,
                 library=library,
                 n_largest=n_largest,

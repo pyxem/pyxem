@@ -224,8 +224,6 @@ class TemplateMatchingResults(GenericMatchingResults):
     phase and orientation at each navigation position with associated metrics.
     """
 
-    _signal_type = "template_matching"
-
     def plot_best_matching_results_on_signal(
         self, signal, library, permanent_markers=True, *args, **kwargs
     ):
@@ -257,8 +255,6 @@ class PatternMatchingResults(GenericMatchingResults):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
     """
-
-    _signal_type = "pattern_matching"
 
     def plot_best_matching_results_against_signal(
         self, signal, library,*args, **kwargs
@@ -300,7 +296,7 @@ class VectorMatchingResults(BaseSignal):
         self.vectors = None
         self.hkls = None
 
-    def get_crystallographic_map(self, *args, **kwargs):
+    def to_crystal_map(self, *args, **kwargs):
         """Obtain a crystallographic map specifying the best matching phase and
         orientation at each probe position with corresponding metrics.
 
