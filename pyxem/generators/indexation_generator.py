@@ -57,13 +57,13 @@ class IndexationGenerator:
 
     Returns
     -------
-    ValueError : "use TemplateIndexationGenerator or PatternIndexationGenerator"
+    ValueError : "use TemplateIndexationGenerator or PatternIndexationGenerator or VectorIndexationGenerator"
     """
 
     def __init__(self, signal, diffraction_library):
         self.signal = signal
         self.library = diffraction_library
-        raise ValueError("use TemplateIndexationGenerator or PatternIndexationGenerator")
+        raise ValueError("use TemplateIndexationGenerator or PatternIndexationGenerator or VectorIndexationGenerator")
 
 
 def _correlate_patterns(image, pattern_library, n_largest, method, mask):
@@ -311,9 +311,6 @@ def get_library_FT_dict(template_library, shape, fsize):
 
     return library_FT_dict
 
-
-
-
 class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
@@ -357,10 +354,6 @@ class TemplateIndexationGenerator:
         Returns
         -------
         matching_results : TemplateMatchingResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern, in the form
-            [Library Number , [z, x, z], Correlation Score]
-
         """
         signal = self.signal
         library = self.library
