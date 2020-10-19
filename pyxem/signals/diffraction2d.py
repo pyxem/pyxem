@@ -80,7 +80,11 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_xc,
 )
 
-from pyxem.utils.dask_tools import _process_dask_array, _get_dask_array
+from pyxem.utils.dask_tools import (
+    _process_dask_array,
+    _get_dask_array,
+    get_host_chunk_slice,
+)
 
 from pyxem.utils import peakfinder2D_gui
 
@@ -2657,5 +2661,35 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
+    def plot(self, *args, **kwargs):
+        if "navigator" in kwargs:
+            super().plot(*args, **kwargs)
+        elif self.metadata.has_item("Navigators"):
+            nav_sig_shape = self.metadata.Navigators.Probe.shape[::-1]
+            self_nav_shape = self.axes_manager.navigation_shape
+            if nav_sig_shape != self_nav_shape:
+                raise ValueError(
+                    "navigation_signal does not have the same shape "
+                    "({0}) as the signal's navigation shape "
+                    "({1})".format(nav_sig_shape, self_nav_shape)
+                )
+        else:
+            self.make_probe_navigation()
+        s_nav = Diffraction2D(self.metadata.Navigators.Probe)
+        kwargs["navigator"] = s_nav
+        super().plot(*args, **kwargs)
 
-    pass
+    def make_probe_navigation(self, method="fast"):
+        if method == "fast":
+            isig_slice = get_host_chunk_slice(
+                round(self.axes_manager.signal_shape[0] / 2),
+                round(self.axes_manager.signal_shape[1] / 2),
+                self.data.chunks,
+            )
+            s = self.isig[isig_slice]
+        elif method == "slow":
+            s = self
+        s_nav = s.T.sum()
+        s_nav.compute()
+        self.metadata.add_node("Navigators")
+        self.metadata.Navigators.Probe = s_nav.data

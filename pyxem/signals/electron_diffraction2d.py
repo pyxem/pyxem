@@ -24,7 +24,7 @@ import numpy as np
 from hyperspy.signals import BaseSignal
 from hyperspy._signals.lazy import LazySignal
 
-from pyxem.signals.diffraction2d import Diffraction2D
+from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from diffsims.utils.sim_utils import get_electron_wavelength
 
 
@@ -217,6 +217,6 @@ class ElectronDiffraction2D(Diffraction2D):
         y.units = "nm"
 
 
-class LazyElectronDiffraction2D(LazySignal, ElectronDiffraction2D):
+class LazyElectronDiffraction2D(LazyDiffraction2D, ElectronDiffraction2D):
 
     pass
