@@ -20,14 +20,10 @@ import numpy as np
 
 from diffsims.libraries.diffraction_library import DiffractionLibrary
 
-from pyxem.generators.indexation_generator import get_library_FT_dict
-
 from pyxem.utils.indexation_utils import (
     match_vectors,
     zero_mean_normalized_correlation,
-    fast_correlation,
-    full_frame_correlation,
-    optimal_fft_size)
+    fast_correlation)
 
 
 def test_zero_mean_normalized_correlation():
@@ -46,31 +42,6 @@ def test_fast_correlation():
         fast_correlation([1, 1, 1], [1, 1, 1], np.sqrt(3)), np.sqrt(3)
     )
     np.testing.assert_approx_equal(fast_correlation([1, 1, 1], [1, 0, 0], 1), 1)
-
-
-def test_full_frame_correlation():
-    # Define testing parameters.
-    in1 = np.zeros((10, 10))
-    in2 = np.zeros((10, 10))
-    in1[5, 5] = 1
-    in1[7, 7] = 1
-    in1[3, 7] = 1
-    in1[7, 3] = 1
-    in1_FT = np.fft.fftshift(np.fft.rfftn(in1, (20, 20)))
-    norm_1 = np.sqrt(np.max(np.real(np.fft.ifftn(in1_FT ** 2))))
-    in2_FT = np.fft.fftshift(np.fft.rfftn(in2, (20, 20)))
-    norm_2 = np.sqrt(np.max(np.real(np.fft.ifftn(in2_FT ** 2))))
-    np.testing.assert_approx_equal(
-        full_frame_correlation(in1_FT, norm_1, in1_FT, norm_1), 1
-    )
-    np.testing.assert_approx_equal(
-        full_frame_correlation(in1_FT, norm_1, in2_FT, norm_2), 0
-    )
-
-
-def test_optimal_fft_size():
-    np.testing.assert_approx_equal(optimal_fft_size(8), 8)
-    np.testing.assert_approx_equal(optimal_fft_size(20), 20)
 
 def test_match_vectors(vector_match_peaks, vector_library):
     # Wrap to test handling of ragged arrays

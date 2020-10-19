@@ -29,13 +29,10 @@ from pyxem.signals import select_method_from_method_dict
 from pyxem.utils.indexation_utils import (
     zero_mean_normalized_correlation,
     fast_correlation,
-    full_frame_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
-    get_nth_best_solution,
-    optimal_fft_size,
-)
+    get_nth_best_solution)
 
 
 from transforms3d.euler import mat2euler, euler2mat
@@ -57,7 +54,7 @@ class IndexationGenerator:
 
     Returns
     -------
-    ValueError : "use TemplateIndexationGenerator or PatternIndexationGenerator or VectorIndexationGenerator"
+    ValueError : "use TemplateIndexationGenerator or VectorIndexationGenerator"
     """
 
     def __init__(self, signal, diffraction_library):

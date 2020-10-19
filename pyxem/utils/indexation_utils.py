@@ -80,44 +80,6 @@ def get_nth_best_solution(
 
     return best_fit
 
-
-def optimal_fft_size(target, real=False):
-    """Wrapper around scipy function next_fast_len() for calculating optimal FFT padding.
-
-    scipy.fft was only added in 1.4.0, so we fall back to scipy.fftpack
-    if it is not available. The main difference is that next_fast_len()
-    does not take a second argument in the older implementation.
-
-    Parameters
-    ----------
-    target : int
-        Length to start searching from. Must be a positive integer.
-    real : bool, optional
-        True if the FFT involves real input or output, only available
-        for scipy > 1.4.0
-
-    Returns
-    -------
-    int
-        Optimal FFT size.
-    """
-
-    try:  # pragma: no cover
-        from scipy.fft import next_fast_len
-
-        support_real = True
-
-    except ImportError:  # pragma: no cover
-        from scipy.fftpack import next_fast_len
-
-        support_real = False
-
-    if support_real:  # pragma: no cover
-        return next_fast_len(target, real)
-    else:  # pragma: no cover
-        return next_fast_len(target)
-
-
 # Functions used in correlate_library.
 def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
     r"""Computes the correlation score between an image and a template
@@ -449,6 +411,42 @@ def match_vectors(
 
 """ The following private functions are awaiting a new home outside of pyxem """
 
+def _optimal_fft_size(target, real=False):
+    """Wrapper around scipy function next_fast_len() for calculating optimal FFT padding.
+
+    scipy.fft was only added in 1.4.0, so we fall back to scipy.fftpack
+    if it is not available. The main difference is that next_fast_len()
+    does not take a second argument in the older implementation.
+
+    Parameters
+    ----------
+    target : int
+        Length to start searching from. Must be a positive integer.
+    real : bool, optional
+        True if the FFT involves real input or output, only available
+        for scipy > 1.4.0
+
+    Returns
+    -------
+    int
+        Optimal FFT size.
+    """
+
+    try:  # pragma: no cover
+        from scipy.fft import next_fast_len
+
+        support_real = True
+
+    except ImportError:  # pragma: no cover
+        from scipy.fftpack import next_fast_len
+
+        support_real = False
+
+    if support_real:  # pragma: no cover
+        return next_fast_len(target, real)
+    else:  # pragma: no cover
+        return next_fast_len(target)
+
 
 def _get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
     """Returns the Fourier transform of a list of templates.
@@ -573,3 +571,60 @@ def _full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
     # Sub-pixel refinement can be done here - Equation (5) in reference article
 
     return corr_local
+
+def _test_get_fourier_transform():
+    shape = (3, 3)
+    fsize = (5, 5)
+    normalization_constant = 0.9278426705718053  # Precomputed normalization. Formula full_frame(template, 1, template, 1)
+    template_coordinates = np.asarray([[1, 1]])
+    template_intensities = np.asarray([1])
+    transform, norm = get_fourier_transform(
+        template_coordinates, template_intensities, shape, fsize
+    )
+    test_value = np.real(transform[2, 1])  # Center value
+    np.testing.assert_approx_equal(test_value, 1)
+    np.testing.assert_approx_equal(norm, normalization_constant)
+
+
+def _test_get_library_FT_dict():
+    new_template_library = DiffractionLibrary()
+    new_template_library["GaSb"] = {
+        "orientations": np.array([[0.0, 0.0, 0.0],]),
+        "pixel_coords": np.array([np.asarray([[1, 1],])]),
+        "intensities": np.array([np.array([1,])]),
+    }
+    shape = (3, 3)
+    fsize = (5, 5)
+    normalization_constant = 0.9278426705718053
+    new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
+    for phase_index, library_entry in enumerate(new_template_dict.values()):
+        orientations = library_entry["orientations"]
+        patterns = library_entry["patterns"]
+        pattern_norms = library_entry["pattern_norms"]
+    np.testing.assert_approx_equal(orientations[0][0], 0.0)
+    np.testing.assert_approx_equal(np.real(patterns[0][2, 1]), 1)
+    np.testing.assert_approx_equal(pattern_norms[0], normalization_constant)
+
+def _test_full_frame_correlation():
+    # Define testing parameters.
+    in1 = np.zeros((10, 10))
+    in2 = np.zeros((10, 10))
+    in1[5, 5] = 1
+    in1[7, 7] = 1
+    in1[3, 7] = 1
+    in1[7, 3] = 1
+    in1_FT = np.fft.fftshift(np.fft.rfftn(in1, (20, 20)))
+    norm_1 = np.sqrt(np.max(np.real(np.fft.ifftn(in1_FT ** 2))))
+    in2_FT = np.fft.fftshift(np.fft.rfftn(in2, (20, 20)))
+    norm_2 = np.sqrt(np.max(np.real(np.fft.ifftn(in2_FT ** 2))))
+    np.testing.assert_approx_equal(
+        full_frame_correlation(in1_FT, norm_1, in1_FT, norm_1), 1
+    )
+    np.testing.assert_approx_equal(
+        full_frame_correlation(in1_FT, norm_1, in2_FT, norm_2), 0
+    )
+
+
+def _test_optimal_fft_size():
+    np.testing.assert_approx_equal(optimal_fft_size(8), 8)
+    np.testing.assert_approx_equal(optimal_fft_size(20), 20)
