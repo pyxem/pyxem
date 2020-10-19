@@ -214,57 +214,6 @@ def zero_mean_normalized_correlation(
 
     return corr_local
 
-
-def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
-    """Computes the correlation score between an image and a template in Fourier space.
-
-    Parameters
-    ----------
-    image: numpy.ndarray
-        Intensities of the image in fourier space, stored in a NxM numpy array
-    image_norm: float
-        The norm of the real space image, corresponding to image_FT
-    fsize: numpy.ndarray
-        The size of image_FT, for us in transform of template.
-    template_coordinates: numpy array
-        Array containing coordinates for non-zero intensities in the template
-    template_intensities: list
-        List of intensity values for the template.
-
-    Returns
-    -------
-    corr_local: float
-        Correlation score between image and template.
-
-    See Also
-    --------
-    correlate_library, fast_correlation, zero_mean_normalized_correlation
-
-    References
-    ----------
-    A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
-     a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
-    """
-
-    fprod = pattern_FT * image_FT
-
-    res_matrix = np.fft.ifftn(fprod)
-    fsize = res_matrix.shape
-    corr_local = np.max(
-        np.real(
-            res_matrix[
-                max(fsize[0] // 2 - 3, 0) : min(fsize[0] // 2 + 3, fsize[0]),
-                max(fsize[1] // 2 - 3, 0) : min(fsize[1] // 2 + 3, fsize[1]),
-            ]
-        )
-    )
-    if image_norm > 0 and pattern_norm > 0:
-        corr_local = corr_local / (image_norm * pattern_norm)
-
-    # Sub-pixel refinement can be done here - Equation (5) in reference article
-
-    return corr_local
-
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -497,3 +446,130 @@ def match_vectors(
     res[0] = top_matches
     res[1] = np.asarray(res_rhkls)
     return res
+
+""" The following private functions are awaiting a new home outside of pyxem """
+
+
+def _get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
+    """Returns the Fourier transform of a list of templates.
+
+    Takes a list of template coordinates and the corresponding list of
+    template intensities, and returns the Fourier transform of the template.
+
+    Parameters
+    ----------
+    template_coordinates: numpy array
+        Array containing coordinates for non-zero intensities in the template
+    template_intensities: list
+        List of intensity values for the template.
+    shape: tuple
+        Dimensions of the signal.
+    fsize: list
+        Dimensions of the Fourier transformed signal.
+
+    Returns
+    -------
+    template_FT: numpy array
+        Fourier transform of the template.
+    template_norm: float
+        Self correlation value for the template.
+    """
+    template = np.zeros((shape))
+    template[
+        template_coordinates[:, 1], template_coordinates[:, 0]
+    ] = template_intensities[:]
+    template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
+    template_norm = np.sqrt(full_frame_correlation(template_FT, 1, template_FT, 1))
+    return template_FT, template_norm
+
+
+def _get_library_FT_dict(template_library, shape, fsize):
+    """Takes a template library and converts it to a dictionary of Fourier transformed templates.
+
+    Parameters
+    ----------
+    template_library: DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+    shape: tuple
+        Dimensions of the signal.
+    fsize: list
+        Dimensions of the Fourier transformed signal.
+
+    Returns
+    -------
+    library_FT_dict: dict
+        Dictionary containing the fourier transformed template library, together with the corresponding orientations and
+        pattern norms.
+
+    """
+    library_FT_dict = {}
+    for entry, library_entry in enumerate(template_library.values()):
+        orientations = library_entry["orientations"]
+        pixel_coords = library_entry["pixel_coords"]
+        intensities = library_entry["intensities"]
+        template_FTs = []
+        pattern_norms = []
+        for coord, intensity in zip(pixel_coords, intensities):
+            template_FT, pattern_norm = get_fourier_transform(
+                coord, intensity, shape, fsize
+            )
+            template_FTs.append(template_FT)
+            pattern_norms.append(pattern_norm)
+
+        library_FT_dict[entry] = {
+            "orientations": orientations,
+            "patterns": template_FTs,
+            "pattern_norms": pattern_norms,
+        }
+
+    return library_FT_dict
+
+def _full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
+    """Computes the correlation score between an image and a template in Fourier space.
+
+    Parameters
+    ----------
+    image: numpy.ndarray
+        Intensities of the image in fourier space, stored in a NxM numpy array
+    image_norm: float
+        The norm of the real space image, corresponding to image_FT
+    fsize: numpy.ndarray
+        The size of image_FT, for us in transform of template.
+    template_coordinates: numpy array
+        Array containing coordinates for non-zero intensities in the template
+    template_intensities: list
+        List of intensity values for the template.
+
+    Returns
+    -------
+    corr_local: float
+        Correlation score between image and template.
+
+    See Also
+    --------
+    correlate_library, fast_correlation, zero_mean_normalized_correlation
+
+    References
+    ----------
+    A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
+     a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
+    """
+
+    fprod = pattern_FT * image_FT
+
+    res_matrix = np.fft.ifftn(fprod)
+    fsize = res_matrix.shape
+    corr_local = np.max(
+        np.real(
+            res_matrix[
+                max(fsize[0] // 2 - 3, 0) : min(fsize[0] // 2 + 3, fsize[0]),
+                max(fsize[1] // 2 - 3, 0) : min(fsize[1] // 2 + 3, fsize[1]),
+            ]
+        )
+    )
+    if image_norm > 0 and pattern_norm > 0:
+        corr_local = corr_local / (image_norm * pattern_norm)
+
+    # Sub-pixel refinement can be done here - Equation (5) in reference article
+
+    return corr_local

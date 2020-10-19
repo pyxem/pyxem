@@ -63,7 +63,7 @@ class IndexationGenerator:
     def __init__(self, signal, diffraction_library):
         self.signal = signal
         self.library = diffraction_library
-        raise ValueError("use TemplateIndexationGenerator or PatternIndexationGenerator or VectorIndexationGenerator")
+        raise ValueError("use TemplateIndexationGenerator or VectorIndexationGenerator")
 
 
 def _correlate_templates(image, library, n_largest, method, mask):
@@ -158,81 +158,6 @@ def _correlate_templates(image, library, n_largest, method, mask):
 
 
     return top_matches
-
-
-def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
-    """Returns the Fourier transform of a list of templates.
-
-    Takes a list of template coordinates and the corresponding list of
-    template intensities, and returns the Fourier transform of the template.
-
-    Parameters
-    ----------
-    template_coordinates: numpy array
-        Array containing coordinates for non-zero intensities in the template
-    template_intensities: list
-        List of intensity values for the template.
-    shape: tuple
-        Dimensions of the signal.
-    fsize: list
-        Dimensions of the Fourier transformed signal.
-
-    Returns
-    -------
-    template_FT: numpy array
-        Fourier transform of the template.
-    template_norm: float
-        Self correlation value for the template.
-    """
-    template = np.zeros((shape))
-    template[
-        template_coordinates[:, 1], template_coordinates[:, 0]
-    ] = template_intensities[:]
-    template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
-    template_norm = np.sqrt(full_frame_correlation(template_FT, 1, template_FT, 1))
-    return template_FT, template_norm
-
-
-def get_library_FT_dict(template_library, shape, fsize):
-    """Takes a template library and converts it to a dictionary of Fourier transformed templates.
-
-    Parameters
-    ----------
-    template_library: DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
-    shape: tuple
-        Dimensions of the signal.
-    fsize: list
-        Dimensions of the Fourier transformed signal.
-
-    Returns
-    -------
-    library_FT_dict: dict
-        Dictionary containing the fourier transformed template library, together with the corresponding orientations and
-        pattern norms.
-
-    """
-    library_FT_dict = {}
-    for entry, library_entry in enumerate(template_library.values()):
-        orientations = library_entry["orientations"]
-        pixel_coords = library_entry["pixel_coords"]
-        intensities = library_entry["intensities"]
-        template_FTs = []
-        pattern_norms = []
-        for coord, intensity in zip(pixel_coords, intensities):
-            template_FT, pattern_norm = get_fourier_transform(
-                coord, intensity, shape, fsize
-            )
-            template_FTs.append(template_FT)
-            pattern_norms.append(pattern_norm)
-
-        library_FT_dict[entry] = {
-            "orientations": orientations,
-            "patterns": template_FTs,
-            "pattern_norms": pattern_norms,
-        }
-
-    return library_FT_dict
 
 class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.

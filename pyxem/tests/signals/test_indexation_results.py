@@ -38,11 +38,6 @@ def test_init_TemplateMatchingResults():
 def test_init_VectorMatchingResults():
     pass
 
-
-
-
-
-
 @pytest.mark.parametrize(
     "overwrite, result_hkl, current_hkl, expected_hkl",
     [(True, [0, 0, 1], None, [0, 0, 1]), (False, [0, 0, 1], None, [0, 0, 1]),],
