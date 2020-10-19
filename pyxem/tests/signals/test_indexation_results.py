@@ -35,9 +35,6 @@ def test_init_GenericMatchingResults_bad():
 def test_init_TemplateMatchingResults():
     pass
 
-def test_init_PatternMatchingResults():
-    pass
-
 def test_init_VectorMatchingResults():
     pass
 

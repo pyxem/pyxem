@@ -184,31 +184,6 @@ class TemplateMatchingResults(GenericMatchingResults):
             m = hs.markers.point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
 
-
-class PatternMatchingResults(GenericMatchingResults):
-    """Template matching results containing the top n best matching crystal
-    phase and orientation at each navigation position with associated metrics.
-    """
-
-    def plot_best_matching_results_against_signal(
-        self, signal, library,*args, **kwargs
-    ):
-        """Plot the best matching diffraction vectors on a signal.
-
-        Parameters
-        ----------
-        signal : ElectronDiffraction2D
-            The ElectronDiffraction2D signal object on which to plot the peaks.
-            This signal must have the same navigation dimensions as the peaks.
-        library : DiffractionLibrary
-            Diffraction library containing the phases and rotations
-        *args :
-            Arguments passed to signal.plot()
-        **kwargs :
-            Keyword arguments passed to signal.plot()
-        """
-        pass
-
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
