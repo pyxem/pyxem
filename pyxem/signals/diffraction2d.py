@@ -2659,13 +2659,27 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_bad_pixel_removed.compute(progressbar=show_progressbar)
         return s_bad_pixel_removed
 
+    def make_probe_navigation(self, method="fast"):
+        if method == "fast":
+            x = round(self.axes_manager.signal_shape[0] / 2)
+            y = round(self.axes_manager.signal_shape[1] / 2)
+            if self._lazy:
+                isig_slice = get_host_chunk_slice(x, y, self.data.chunks)
+            else:
+                isig_slice = np.s_[x, y]
+            s = self.isig[isig_slice]
+        elif method == "slow":
+            s = self
+        s_nav = s.T.sum()
+        if s_nav._lazy:
+            s_nav.compute()
+        self._navigator_probe = s_nav
 
-class LazyDiffraction2D(LazySignal, Diffraction2D):
     def plot(self, *args, **kwargs):
         if "navigator" in kwargs:
             super().plot(*args, **kwargs)
-        elif self.metadata.has_item("Navigators"):
-            nav_sig_shape = self.metadata.Navigators.Probe.shape[::-1]
+        elif hasattr(self, "_navigator_probe"):
+            nav_sig_shape = self._navigator_probe.axes_manager.shape
             self_nav_shape = self.axes_manager.navigation_shape
             if nav_sig_shape != self_nav_shape:
                 raise ValueError(
@@ -2674,22 +2688,15 @@ class LazyDiffraction2D(LazySignal, Diffraction2D):
                     "({1})".format(nav_sig_shape, self_nav_shape)
                 )
         else:
-            self.make_probe_navigation()
-        s_nav = Diffraction2D(self.metadata.Navigators.Probe)
+            if self._lazy:
+                method = "fast"
+            else:
+                method = "slow"
+            self.make_probe_navigation(method=method)
+        s_nav = self._navigator_probe
         kwargs["navigator"] = s_nav
         super().plot(*args, **kwargs)
 
-    def make_probe_navigation(self, method="fast"):
-        if method == "fast":
-            isig_slice = get_host_chunk_slice(
-                round(self.axes_manager.signal_shape[0] / 2),
-                round(self.axes_manager.signal_shape[1] / 2),
-                self.data.chunks,
-            )
-            s = self.isig[isig_slice]
-        elif method == "slow":
-            s = self
-        s_nav = s.T.sum()
-        s_nav.compute()
-        self.metadata.add_node("Navigators")
-        self.metadata.Navigators.Probe = s_nav.data
+
+class LazyDiffraction2D(LazySignal, Diffraction2D):
+    pass
