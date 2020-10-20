@@ -33,7 +33,7 @@ def get_chunk_slice_list(chunks):
         x_pos = 0
         for sig_x_chunk in sig_x_chunk_list:
             chunk_slice = np.s_[
-                y_pos : y_pos + sig_y_chunk, x_pos : x_pos + sig_x_chunk
+                x_pos : x_pos + sig_x_chunk, y_pos : y_pos + sig_y_chunk
             ]
             x_pos += sig_x_chunk
             chunk_slice_list.append(chunk_slice)
@@ -44,7 +44,7 @@ def get_chunk_slice_list(chunks):
 def get_host_chunk_slice(x, y, chunks):
     chunk_slice_list = get_chunk_slice_list(chunks)
     for chunk_slice in chunk_slice_list:
-        y_slice, x_slice = chunk_slice
+        x_slice, y_slice = chunk_slice
         if y_slice.start <= y < y_slice.stop:
             if x_slice.start <= x < x_slice.stop:
                 return chunk_slice

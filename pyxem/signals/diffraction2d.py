@@ -2660,6 +2660,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return s_bad_pixel_removed
 
     def make_probe_navigation(self, method="fast"):
+        if self.axes_manager.navigation_dimension > 2:
+            raise ValueError(
+                "Probe navigation can only be made for signals with 2 or less "
+                "navigation dimensions"
+            )
         if method == "fast":
             x = round(self.axes_manager.signal_shape[0] / 2)
             y = round(self.axes_manager.signal_shape[1] / 2)
@@ -2678,24 +2683,27 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     def plot(self, *args, **kwargs):
         if "navigator" in kwargs:
             super().plot(*args, **kwargs)
-        elif hasattr(self, "_navigator_probe"):
-            nav_sig_shape = self._navigator_probe.axes_manager.shape
-            self_nav_shape = self.axes_manager.navigation_shape
-            if nav_sig_shape != self_nav_shape:
-                raise ValueError(
-                    "navigation_signal does not have the same shape "
-                    "({0}) as the signal's navigation shape "
-                    "({1})".format(nav_sig_shape, self_nav_shape)
-                )
+        elif self.axes_manager.navigation_dimension > 2:
+            super().plot(*args, **kwargs)
         else:
-            if self._lazy:
-                method = "fast"
+            if hasattr(self, "_navigator_probe"):
+                nav_sig_shape = self._navigator_probe.axes_manager.shape
+                self_nav_shape = self.axes_manager.navigation_shape
+                if nav_sig_shape != self_nav_shape:
+                    raise ValueError(
+                        "navigation_signal does not have the same shape "
+                        "({0}) as the signal's navigation shape "
+                        "({1})".format(nav_sig_shape, self_nav_shape)
+                    )
             else:
-                method = "slow"
-            self.make_probe_navigation(method=method)
-        s_nav = self._navigator_probe
-        kwargs["navigator"] = s_nav
-        super().plot(*args, **kwargs)
+                if self._lazy:
+                    method = "fast"
+                else:
+                    method = "slow"
+                self.make_probe_navigation(method=method)
+            s_nav = self._navigator_probe
+            kwargs["navigator"] = s_nav
+            super().plot(*args, **kwargs)
 
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
