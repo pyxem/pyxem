@@ -489,3 +489,58 @@ class TestGetDirectBeamPosition:
         s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
         assert hasattr(s_shift.data, "compute")
         s_shift.compute()
+
+
+class TestMakeProbeNavigation:
+    def test_fast(self):
+        s = Diffraction2D(np.ones((6, 5, 12, 10)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 1)
+
+    def test_slow(self):
+        s = Diffraction2D(np.ones((5, 5, 12, 10)))
+        s.make_probe_navigation(method="slow")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 120)
+
+    def test_fast_lazy(self):
+        s = LazyDiffraction2D(da.ones((6, 4, 60, 50), chunks=(2, 2, 10, 10)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 100)
+
+    def test_slow_lazy(self):
+        s = LazyDiffraction2D(da.ones((6, 4, 60, 50), chunks=(2, 2, 10, 10)))
+        s.make_probe_navigation(method="slow")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 3000)
+
+    def test_very_asymmetric_size(self):
+        s = Diffraction2D(np.ones((50, 2, 120, 10)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+
+    def test_very_asymmetric_size_lazy(self):
+        s = LazyDiffraction2D(da.ones((50, 2, 120, 10), chunks=(2, 2, 5, 5)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+
+    @pytest.mark.parametrize("shape", [(2, 10, 10), (3, 2, 10, 10)])
+    def test_different_shapes(self, shape):
+        s = Diffraction2D(np.ones(shape))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+
+    def test_0_dimension_navigation_shape(self):
+        s = Diffraction2D(np.ones((10, 20)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert (1,) == s_nav.axes_manager.signal_shape
