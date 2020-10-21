@@ -163,22 +163,3 @@ class CommonDiffraction:
 
         return dark_field_sum
 
-    def add_navigation_signal(self, data, name="nav1", unit=None, nav_plot=False):
-        """ Adds in a navigation signal to the metadata.  Any type of navigation signal is acceptable.
-
-        Parameters
-        -------------------
-        data: np.array
-            The data for the navigation signal.  Should be the same size as the navigation axis.
-        name: str
-            The name of the axis.
-        unit: str
-            The units for the intensity of the plt. i.e. for a thickness sample the unit might be nm
-        """
-        dict_signal = {}
-        dict_signal[name] = {"data": data,
-                             "unit": unit,
-                             "use_as_navigation_plot": nav_plot}
-        if not self.metadata.has_item("Navigation_signals"):
-            self.metadata.add_node("Navigation_signals")
-        self.metadata.Navigation_signals.add_dictionary(dict_signal)

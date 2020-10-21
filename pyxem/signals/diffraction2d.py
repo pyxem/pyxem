@@ -2526,7 +2526,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_dead_pixels.compute(progressbar=show_progressbar)
         return s_dead_pixels
 
-
     def find_hot_pixels(
         self,
         threshold_multiplier=500,
