@@ -199,9 +199,6 @@ class TestVariance:
         ones_diff.add_navigation_signal(data=np.ones((10, 10)), name="thickness", unit="nm")
         return ones_diff
 
-    def test_FEM(self, ones):
-        v = ones.get_variance(5)
-        np.testing.assert_equal(v.data, np.zeros(5))
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture

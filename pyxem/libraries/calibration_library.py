@@ -17,34 +17,6 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-class GenericCalibrationStandard:
-    def __init__(self, peak_positions=[]):
-        """A generic calibration standard which includes some diffraction
-        pattern and a real space image which is used to create a
-        real space calibration.
-
-        Parameters
-        ------------
-        diffraction_pattern: Signal2D
-            The diffraction pattern used for calibration and distortion correction
-            in reciperical space
-        grating_image:
-            A real space image of some feature of known dimensions.
-
-        """
-        self.peak_positions
-
-    def plot(self):
-        pass
-
-class GaussianRingStandard(GenericCalibrationStandard):
-    def __init__(self, radius = 100, ):
-        pass
-class PolyCrystallineGold(GenericCalibrationStandard):
-    def __init__(self):
-        self.peak_positions[0.4247]
-
-
 class CalibrationDataLibrary(dict):
     """Maps crystal structure (phase) to diffraction vectors.
 

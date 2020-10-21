@@ -30,8 +30,8 @@ from pyxem.utils.calibration_utils import (
     call_ring_pattern,
     calc_radius_with_distortion,
     generate_ring_pattern,
-    solve_ellipse
 )
+from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_setup
 
 
 class CalibrationGenerator:
@@ -57,12 +57,14 @@ class CalibrationGenerator:
         grating_image:
             Some 2 dimensional signal or numpy array of some
             standard sample used for calibration
-        calibration_standard: diffsims.
+        calibration_standard: diffpy.structure.Structure for calculating
+        the polycrystalline ring spacing
         """
         # Assign attributes
         self.diffraction_pattern = diffraction_pattern
         self.grating_image = grating_image
         self.calibration_standard = calibration_standard
+        self.mask = None
         self.ring_params = None
         self.affine_matrix = None
         self.rotation_angle = None
@@ -78,11 +80,25 @@ class CalibrationGenerator:
                               "Center: " + str(self.center))
         return information_string
 
-    def mask_above(self, value):
-        self.diffraction_pattern
+    def to_ai(self, wavelength, **kwargs):
+        sig_shape = np.shape(self.diffraction_pattern)
+        unit = "k_A^-1"
+        setup = _get_setup(wavelength, unit, self.diffraction_calibration)
+        detector, dist, radial_range = setup
+        ai = get_azimuthal_integrator(
+            detector=detector,
+            detector_distance=dist,
+            shape=sig_shape,
+            center=self.center,
+            affine=self.affine_matrix,
+            wavelength=wavelength,
+            **kwargs,
+        )
+        return ai
 
     def get_elliptical_distortion(
         self,
+        mask_radius,
         scale=100,
         amplitude=1000,
         spread=2,
@@ -90,14 +106,15 @@ class CalibrationGenerator:
         asymmetry=1,
         rotation=0,
         center=None,
-        standard="Au"
     ):
         """Determine elliptical distortion of the diffraction pattern.
 
         Parameters
         ----------
-        mask: np.Array
-            Pixels to be ignored in the fitting. Must be the same
+        mask_radius : int
+             The radius in pixels for a mask over the direct beam disc
+             (the direct beam disc within given radius will be excluded
+             from the fit)
         scale : float
             An initial guess for the diffraction calibration
             in 1/Angstrom units
@@ -117,7 +134,6 @@ class CalibrationGenerator:
             in radians.
         center: None or list
             The center of the diffraction pattern.
-        standard: str
 
         Returns
         -------
@@ -138,32 +154,20 @@ class CalibrationGenerator:
         if self.diffraction_pattern is None:
             raise ValueError(
                 "This method requires a calibration diffraction pattern"
-                "to be provided. Please set self.diffraction_pattern equal"
-                "to some Signal2D."
+                " to be provided. Please set self.diffraction_pattern equal"
+                " to some Signal2D."
             )
-        # Set diffraction pattern variable
         standard_dp = self.diffraction_pattern
         image_size = standard_dp.data.shape[0]
+        if center is None:
+            center = [(image_size -1)/2, (image_size -1)/2]
+        # Set diffraction pattern variable
         x, y = np.mgrid[0:image_size, 0:image_size]
-        # Define grid values and center indices for ring pattern evaluation
-
-        #if center is None:
-        #    center = ((image_size - 1) / 2, (image_size - 1) / 2)
-        ## Calculate eliptical parameters
-        #mask = calc_radius_with_distortion(
-        #    x, y, (image_size - 1) / 2, (image_size - 1) / 2, 1, 0
-        #)
-        # Mask direct beam
-        #mask[mask > mask_radius] = 0
-        if self.mask is not None:
-            standard_dp.data[self.mask] *= 0
-        # Manipulate measured data for fitting
-        ref = standard_dp.data[~self.mask]
-        ref = ref.ravel()
-        # Define points for fitting
-        pts = np.array(
-            [x[standard_dp.data > 0].ravel(), y[standard_dp.data > 0].ravel()]
-        ).ravel()
+        radius_map = calc_radius_with_distortion(x, y, center[0], center[1], 1, 0)
+        mask = radius_map < mask_radius
+        ref = standard_dp.data[~mask]
+        fullx,fully = [x,y]
+        pts = np.array([fully[~mask], fullx[~mask]]).ravel()
         # Set initial parameters for fitting
         x0 = [scale, amplitude, spread, direct_beam_amplitude, asymmetry, rotation]
         # Fit ring pattern to experimental data
@@ -172,11 +176,8 @@ class CalibrationGenerator:
         self.ring_params = xf
         # Calculate affine transform parameters from fit parameters
         scaling = np.array([[1, 0], [0, xf[4] ** -0.5]])
-
         rotation = np.array([[cos(xf[5]), -sin(xf[5])], [sin(xf[5]), cos(xf[5])]])
-
         correction = np.linalg.inv(np.dot(rotation.T, np.dot(scaling, rotation)))
-
         affine = np.array(
             [
                 [correction[0, 0], correction[0, 1], 0.00],
@@ -186,58 +187,7 @@ class CalibrationGenerator:
         )
         # Set affine matrix to attribute
         self.affine_matrix = affine
-
         return affine
-
-    def get_cal_points(self,
-                       num_points,
-                       mask=None,
-                       show=False,
-                       interactive=False):
-        data = self.calibration_data.data
-        i_shape = np.shape(data)
-        flattened_array = data.flatten()
-        indexes = np.argsort(flattened_array)
-        if isinstance(flattened_array, np.ma.masked_array):
-            indexes = indexes[flattened_array.mask[indexes] == False]
-        if radius is not None:
-            center = [np.floor_divide(np.mean(indexes[-num_points:]), i_shape[1]),
-                      np.remainder(np.mean(indexes[-num_points:]), i_shape[1])]
-            print(center)
-        # take top 5000 points make sure exclude zero beam
-        cords = [np.floor_divide(indexes[-num_points:], i_shape[1]),
-                 np.remainder(indexes[-num_points:], i_shape[1])]  # [x axis (row),y axis (col)]
-
-    def get_amorphous_elliptical_distortion(
-        self,
-        mask=None,
-        expected_radial_range=None
-    ):
-        """Determine elliptical distortion of the diffraction pattern from an amorphous ring.
-
-        Parameters
-        ----------
-        mask : boolean array
-            A two dimensional array used to mask the zero beam
-        expected_radial_range: [float, float]
-            The expected radial range to find the first ring in an amorphous diffraction pattern.
-
-        Returns
-        -------
-        affine_matrix : np.array()
-            Array defining the affine transformation that corrects for lens
-            distortions in the diffraction pattern.
-
-        See Also
-        --------
-            pyxem.utils.calibration_utils.call_ring_pattern
-
-        """
-
-        center, affine = solve_ellipse(self.calibration_data.data, mask=mask)
-        self.affine_matrix = affine
-        self.center = center
-        return center, affine
 
     def get_distortion_residuals(self, mask_radius, spread):
         """Obtain residuals for experimental data and distortion corrected data
@@ -260,7 +210,7 @@ class CalibrationGenerator:
             ring pattern.
         """
         # Check all required parameters are defined as attributes
-        if self.calibration_data.au_x_grating_dp is None:
+        if self.diffraction_pattern is None:
             raise ValueError(
                 "This method requires an Au X-grating diffraction "
                 "pattern to be provided. Please update the "
@@ -273,7 +223,7 @@ class CalibrationGenerator:
                 "to determine this matrix."
             )
         # Set name for experimental data pattern
-        dpeg = self.calibration_data.au_x_grating_dp
+        dpeg = self.diffraction_pattern
         ringP = self.ring_params
         size = dpeg.data.shape[0]
         dpref = generate_ring_pattern(
@@ -317,7 +267,7 @@ class CalibrationGenerator:
 
         """
         # Check all required parameters are defined as attributes
-        if self.calibration_data.au_x_grating_dp is None:
+        if self.diffraction_pattern is None:
             raise ValueError(
                 "This method requires an Au X-grating diffraction "
                 "pattern to be provided. Please update the "
@@ -330,7 +280,7 @@ class CalibrationGenerator:
                 "to determine this matrix."
             )
         # Set name for experimental data pattern
-        dpeg = self.calibration_data.au_x_grating_dp
+        dpeg = self.diffraction_pattern
         # Apply distortion corrections to experimental data
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
@@ -346,9 +296,11 @@ class CalibrationGenerator:
             circ = CircleROI(cx=size / 2, cy=size / 2, r=size / 5, r_inner=0)
             circ.add_widget(dpegm)
 
-    def get_diffraction_calibration(self, mask_length, linewidth):
+    def get_diffraction_calibration(self,
+                                    mask_length,
+                                    linewidth):
         """Determine the diffraction pattern pixel size calibration in units of
-        reciprocal Angsstroms per pixel.
+        reciprocal Angstroms per pixel.
 
         Parameters
         ----------
@@ -366,7 +318,7 @@ class CalibrationGenerator:
 
         """
         # Check that necessary calibration data is provided
-        if self.calibration_data.au_x_grating_dp is None:
+        if self.diffraction_pattern is None:
             raise ValueError(
                 "This method requires an Au X-grating diffraction "
                 "pattern to be provided. Please update the "
@@ -378,7 +330,7 @@ class CalibrationGenerator:
                 "been determined. Use get_elliptical_distortion "
                 "to determine this matrix."
             )
-        dpeg = self.calibration_data.au_x_grating_dp
+        dpeg = self.diffraction_pattern
         size = dpeg.data.shape[0]
         dpegs = stack_method([dpeg, dpeg, dpeg, dpeg])
         dpegs = ElectronDiffraction2D(dpegs.data.reshape((2, 2, size, size)))
@@ -439,14 +391,14 @@ class CalibrationGenerator:
 
         """
         # Check that necessary calibration data is provided
-        if self.calibration_data.au_x_grating_im is None:
+        if self.grating_image is None:
             raise ValueError(
                 "This method requires an Au X-grating image to be "
                 "provided. Please update the "
                 "CalibrationDataLibrary."
             )
         # Obtain line trace
-        trace = line_roi(self.calibration_data.au_x_grating_im).as_signal1D(0)
+        trace = line_roi(self.grating_image).as_signal1D(0)
         # Find peaks in line trace
         pk = trace.find_peaks1D_ohaver(*args, **kwargs)[0]["position"]
         # Determine peak positions
@@ -456,7 +408,6 @@ class CalibrationGenerator:
         x = (n * xspace) / (pk[dif2 == min(dif2)] - pk[dif1 == min(dif1)])
         # Store navigation calibration value as attribute
         self.navigation_calibration = x[0]
-
         return x[0]
 
     def get_rotation_calibration(self, real_line, reciprocal_line):
@@ -542,7 +493,7 @@ class CalibrationGenerator:
         # Construct object containing user defined data to plot and set the
         # calibration checking that it is defined.
         if data_to_plot == "au_x_grating_dp":
-            dpeg = self.calibration_data.au_x_grating_dp
+            dpeg = self.diffraction_pattern
             size = dpeg.data.shape[0]
             if self.correction_matrix is None:
                 self.get_correction_matrix()
@@ -556,7 +507,7 @@ class CalibrationGenerator:
             # Plot the calibrated diffraction data
             data.plot(*args, **kwargs)
         elif data_to_plot == "au_x_grating_im":
-            data = self.calibration_data.au_x_grating_im
+            data = self.diffraction_pattern
             # Plot the calibrated image data
             data.plot(*args, **kwargs)
         elif data_to_plot == "moo3_dp":

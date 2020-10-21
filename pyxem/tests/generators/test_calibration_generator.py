@@ -29,6 +29,7 @@ from pyxem.utils.calibration_utils import generate_ring_pattern
 from pyxem.libraries.calibration_library import CalibrationDataLibrary
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 import matplotlib.pyplot as plt
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
 
 @pytest.fixture
@@ -74,10 +75,20 @@ def calibration_library(request, ring_pattern):
     im = Signal2D(data)
     return CalibrationDataLibrary(au_x_grating_dp=ring_pattern, au_x_grating_im=im)
 
+@pytest.fixture
+def grating_image(request):
+    #  Create a dummy X-grating image
+    data = np.zeros((200, 200))
+    data[:, 10:20] = 100
+    data[:, 30:40] = 50
+    data[:, 150:160] = 50
+    data[:, 170:180] = 100
+    im = Signal2D(data)
+    return im
 
 @pytest.fixture
-def calgen(request, calibration_library):
-    return CalibrationGenerator(calibration_data=calibration_library)
+def calgen(request, ring_pattern, grating_image):
+    return CalibrationGenerator(diffraction_pattern=ring_pattern, grating_image=grating_image)
 
 
 @pytest.fixture
@@ -97,7 +108,7 @@ def cal_dist(request, calgen):
 class TestCalibrationGenerator:
     def test_init(self, calgen):
         assert isinstance(
-            calgen.calibration_data.au_x_grating_dp, ElectronDiffraction2D
+            calgen.diffraction_pattern, ElectronDiffraction2D
         )
 
     def test_str(self, calgen):
@@ -220,14 +231,16 @@ def empty_calibration_library(request):
 
 @pytest.fixture
 def empty_calgen(request, empty_calibration_library):
-    return CalibrationGenerator(calibration_data=empty_calibration_library)
+    return CalibrationGenerator()
 
 
 class TestEmptyCalibrationGenerator:
     def test_get_elliptical_distortion(
         self, empty_calgen, input_parameters, affine_answer
     ):
-        with pytest.raises(ValueError, match="requires an Au X-grating diffraction"):
+        with pytest.raises(ValueError, match="This method requires a calibration diffraction"
+                                             " pattern to be provided. Please set"
+                                             " self.diffraction_pattern equal to some Signal2D."):
             empty_calgen.get_elliptical_distortion(
                 mask_radius=10,
                 direct_beam_amplitude=450,
@@ -270,15 +283,20 @@ class TestEmptyCalibrationGenerator:
                 line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
             )
 
+    def test_to_ai(self,calgen):
+        calgen.get_elliptical_distortion(
+            mask_radius=10,
+            direct_beam_amplitude=450,
+            scale=95,
+            amplitude=1200,
+            asymmetry=1.5,
+            spread=2.8,
+            rotation=10,
+            )
+        calgen.diffraction_calibration = (1,1)
+        ai = calgen.to_ai(wavelength=(2.53*10**-12))
+        assert isinstance(ai, AzimuthalIntegrator)
 
-class TestAmorphousCalibration:
-    @pytest.fixture
-    def ring(self):
-        ring = hs.load("exRing.hspy")
-        ring = CalibrationGenerator(ring)
-        return ring
 
-    def test_amorphous_calibration(self, ring):
-        ring.get_amorphous_elliptical_distortion()
 
 

@@ -31,24 +31,15 @@ def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
     return np.sqrt((xp - xcp) ** 2 + asym * (yp - ycp) ** 2)
 
 
-def calc_radius_with_distortion(points, center, asym, rot):
-    cos_rot = np.cos(rot)
-    sin_rot = np.sin(rot)
-    R1 = [[cos_rot, sin_rot], [-sin_rot, cos_rot]]
-    R2 = [[cos_rot, -sin_rot], [sin_rot, cos_rot]]
-    D = [[1, 0], [0, asym]]
-    M = np.matmul(np.matmul(R1, D), R2)
-    x, y = np.dot(points-center, M)
-    return np.sqrt(x**2 + y**2)
-
-
 def gaussian_function(pts, xcenter, ycenter, sigma, radius, asymmetry, rotation, max):
     r = calc_radius_with_distortion(pts, xcenter, ycenter, asymmetry, rotation)
     intensity = (1/(sigma*np.sqrt(2)*np.pi))* np.exp(-.5 * ((r-radius)/sigma)**2)
     return intensity*max
 
 
-def call_ring_pattern(xcenter, ycenter):
+def call_ring_pattern(xcenter, ycenter,
+                      rings=[0.4247, 0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966],
+                      amps=[1, 0.44, 0.19, 0.16, 0.04, 0.014, 0.038, 0.036]):
     """Function to make a call to the function ring_pattern without passing the
     variables directly (necessary for using scipy.optimize.curve_fit).
 
@@ -60,6 +51,10 @@ def call_ring_pattern(xcenter, ycenter):
     ycenter : float
         The coordinate (fractional pixel units) of the diffraction
         pattern center in the second dimension
+    rings: list
+        The list of ratios for the polycrystaline ring spacing.
+    amps: list
+        The list of amplitudes for the polycrystalline rings.
 
     Returns
     -------
@@ -107,9 +102,7 @@ def call_ring_pattern(xcenter, ycenter):
             at the supplied points.
 
         """
-        rings = [0.4247, 0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966]
-        rings = np.multiply(rings, scale)
-        amps = [1, 0.44, 0.19, 0.16, 0.04, 0.014, 0.038, 0.036]
+        scaled_rings = np.multiply(rings, scale)
 
         x = pts[: round(np.size(pts, 0) / 2)]
         y = pts[round(np.size(pts, 0) / 2) :]
@@ -119,7 +112,7 @@ def call_ring_pattern(xcenter, ycenter):
         denom = 2 * spread ** 2
         v.append(direct_beam_amplitude * Ri ** -2)  # np.exp((-1*(Ri)*(Ri))/d0)
         for i in [0, 1, 2, 3, 4, 5, 6, 7]:
-            v.append(amps[i] * np.exp((-1 * (Ri - rings[i]) * (Ri - rings[i])) / denom))
+            v.append(amps[i] * np.exp((-1 * (Ri - scaled_rings[i]) * (Ri - scaled_rings[i])) / denom))
 
         return (
             amplitude
