@@ -187,18 +187,6 @@ class TestAzimuthalIntegral1d:
         # 5^2*pi = 78.5
         np.testing.assert_almost_equal(integration.data.sum(), 78.5, decimal=0)
 
-class TestVariance:
-    @pytest.fixture
-    def ones(self):
-        ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
-        ones_diff.axes_manager.signal_axes[0].scale = 0.1
-        ones_diff.axes_manager.signal_axes[1].scale = 0.1
-        ones_diff.axes_manager.signal_axes[0].name = "kx"
-        ones_diff.axes_manager.signal_axes[1].name = "ky"
-        ones_diff.unit = "2th_deg"
-        ones_diff.add_navigation_signal(data=np.ones((10, 10)), name="thickness", unit="nm")
-        return ones_diff
-
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture
