@@ -31,12 +31,6 @@ def calc_radius_with_distortion(x, y, xc, yc, asym, rot):
     return np.sqrt((xp - xcp) ** 2 + asym * (yp - ycp) ** 2)
 
 
-def gaussian_function(pts, xcenter, ycenter, sigma, radius, asymmetry, rotation, max):
-    r = calc_radius_with_distortion(pts, xcenter, ycenter, asymmetry, rotation)
-    intensity = (1/(sigma*np.sqrt(2)*np.pi))* np.exp(-.5 * ((r-radius)/sigma)**2)
-    return intensity*max
-
-
 def call_ring_pattern(xcenter, ycenter,
                       rings=[0.4247, 0.4904, 0.6935, 0.8132, 0.8494, 0.9808, 1.0688, 1.0966],
                       amps=[1, 0.44, 0.19, 0.16, 0.04, 0.014, 0.038, 0.036]):
@@ -200,24 +194,3 @@ def generate_ring_pattern(
         generated_pattern[maskROI > 0] *= 0
 
     return generated_pattern
-
-
-def invcot(val):
-    return (np.pi/2) - np.arctan(val)
-
-
-def get_max_positions(image, num_points=None, radius=None):
-    i_shape = np.shape(image)
-    flattened_array = image.flatten()
-    indexes = np.argsort(flattened_array)
-
-    if isinstance(flattened_array, np.ma.masked_array):
-        indexes = indexes[flattened_array.mask[indexes] == False]
-    if radius is not None:
-        center = [np.floor_divide(np.mean(indexes[-num_points:]), i_shape[1]),
-                  np.remainder(np.mean(indexes[-num_points:]), i_shape[1])]
-        print(center)
-    # take top 5000 points make sure exclude zero beam
-    cords = [np.floor_divide(indexes[-num_points:], i_shape[1]),
-             np.remainder(indexes[-num_points:], i_shape[1])]  # [x axis (row),y axis (col)]
-    return cords

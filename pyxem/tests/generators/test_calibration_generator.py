@@ -65,17 +65,6 @@ def ring_pattern(input_parameters):
 
 
 @pytest.fixture
-def calibration_library(request, ring_pattern):
-    #  Create a dummy X-grating image
-    data = np.zeros((200, 200))
-    data[:, 10:20] = 100
-    data[:, 30:40] = 50
-    data[:, 150:160] = 50
-    data[:, 170:180] = 100
-    im = Signal2D(data)
-    return CalibrationDataLibrary(au_x_grating_dp=ring_pattern, au_x_grating_im=im)
-
-@pytest.fixture
 def grating_image(request):
     #  Create a dummy X-grating image
     data = np.zeros((200, 200))
