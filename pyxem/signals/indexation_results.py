@@ -156,6 +156,16 @@ class GenericMatchingResults():
 class TemplateMatchingResults(GenericMatchingResults):
     """Template matching results containing the top n best matching crystal
     phase and orientation at each navigation position with associated metrics.
+
+    Examples
+    --------
+    Saving the signal containing all potential matches at each pixel
+
+    >>> TemplateMatchingResult.data.save("filename")
+
+    Exporting the best matches to a crystal map
+
+    >>> xmap = TemplateMatchingResult.to_crystal_map()
     """
 
     def plot_best_matching_results_on_signal(
