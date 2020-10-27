@@ -83,7 +83,7 @@ from pyxem.utils.peakfinders2D import (
 from pyxem.utils.dask_tools import (
     _process_dask_array,
     _get_dask_array,
-    get_host_chunk_slice,
+    get_signal_dimension_host_chunk_slice,
 )
 
 from pyxem.utils import peakfinder2D_gui
@@ -2669,7 +2669,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             x = round(self.axes_manager.signal_shape[0] / 2)
             y = round(self.axes_manager.signal_shape[1] / 2)
             if self._lazy:
-                isig_slice = get_host_chunk_slice(x, y, self.data.chunks)
+                isig_slice = get_signal_dimension_host_chunk_slice(
+                    x, y, self.data.chunks)
             else:
                 isig_slice = np.s_[x, y]
             s = self.isig[isig_slice]

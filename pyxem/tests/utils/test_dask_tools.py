@@ -26,6 +26,93 @@ import pyxem.dummy_data.dask_test_data as dtd
 from pyxem import Diffraction2D, LazyDiffraction2D
 
 
+class TestSignalDimensionGetChunkSliceList:
+    @pytest.mark.parametrize(
+        "sig_chunks",
+        [(10, 10), (5, 10), (5, 10), (5, 5), (20, 10), (20, 20)],
+    )
+    def test_chunksizes(self, sig_chunks):
+        xchunk, ychunk = sig_chunks
+        data = da.zeros((20, 20, 20, 20), chunks=(10, 10, ychunk, xchunk))
+        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data.chunks)
+        assert len(data.chunks[-1]) * len(data.chunks[-2]) == len(chunk_slice_list)
+        for chunk_slice in chunk_slice_list:
+            xsize = chunk_slice[0].stop - chunk_slice[0].start
+            ysize = chunk_slice[1].stop - chunk_slice[1].start
+            assert xsize == xchunk
+            assert ysize == ychunk
+
+    def test_non_square_chunks(self):
+        data = da.zeros((2, 2, 20, 20), chunks=(2, 2, 15, 15))
+        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data.chunks)
+        assert chunk_slice_list[0] == (slice(0, 15, None), slice(0, 15, None))
+        assert chunk_slice_list[1] == (slice(15, 20, None), slice(0, 15, None))
+        assert chunk_slice_list[2] == (slice(0, 15, None), slice(15, 20, None))
+        assert chunk_slice_list[3] == (slice(15, 20, None), slice(15, 20, None))
+
+    def test_one_signal_chunk(self):
+        data = da.zeros((2, 2, 20, 20), chunks=(1, 1, 20, 20))
+        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data.chunks)
+        assert len(chunk_slice_list) == 1
+        assert chunk_slice_list[0] == np.s_[0:20, 0:20]
+
+    def test_rechunk(self):
+        data = da.zeros((2, 2, 20, 20), chunks=(1, 1, 20, 20))
+        data1 = data.rechunk((2, 2, 10, 10))
+        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data1.chunks)
+        assert len(chunk_slice_list) == 4
+
+    def test_slice_navigation(self):
+        data = da.zeros((2, 2, 20, 20), chunks=(1, 1, 20, 20))
+        data1 = data[0, 1]
+        chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data1.chunks)
+        assert len(chunk_slice_list) == 1
+        assert chunk_slice_list[0] == np.s_[0:20, 0:20]
+
+
+class TestGetSignalDimensionHostChunkSlice:
+    @pytest.mark.parametrize(
+        "xy, sig_slice, xchunk, ychunk",
+        [
+            ((0, 0), np.s_[0:10, 0:10], 10, 10),
+            ((5, 5), np.s_[0:10, 0:10], 10, 10),
+            ((15, 5), np.s_[10:20, 0:10], 10, 10),
+            ((5, 15), np.s_[0:10, 10:20], 10, 10),
+            ((19, 19), np.s_[10:20, 10:20], 10, 10),
+            ((15, 9), np.s_[0:20, 0:20], 20, 20),
+            ((17, 16), np.s_[15:20, 15:20], 15, 15),
+            ((17, 16), np.s_[15:20, 10:20], 15, 10),
+            ((7, 16), np.s_[0:15, 10:20], 15, 10),
+            ((25, 2), False, 10, 10),
+            ((2, 25), False, 10, 10),
+            ((22, 25), False, 10, 10),
+            ((-5, 10), False, 10, 10),
+            ((5, -1), False, 10, 10),
+        ],
+    )
+    def test_simple(self, xy, sig_slice, xchunk, ychunk):
+        x, y = xy
+        data = da.zeros((2, 2, 20, 20), chunks=(1, 1, ychunk, xchunk))
+        chunk_slice = dt.get_signal_dimension_host_chunk_slice(x, y, data.chunks)
+        assert chunk_slice == sig_slice
+
+    @pytest.mark.parametrize(
+        "xy, sig_slice",
+        [
+            ((0, 0), np.s_[0:10, 0:10]),
+            ((28, 5), False),
+            ((5, 28), np.s_[0:10, 20:30]),
+            ((5, 32), False),
+            ((12, 18), np.s_[10:20, 10:20]),
+        ],
+    )
+    def test_non_square(self, xy, sig_slice):
+        x, y = xy
+        data = da.zeros((2, 2, 30, 20), chunks=(1, 1, 10, 10))
+        chunk_slice = dt.get_signal_dimension_host_chunk_slice(x, y, data.chunks)
+        assert chunk_slice == sig_slice
+
+
 class TestProcessChunk:
     def test_simple(self):
         dtype = np.int16
