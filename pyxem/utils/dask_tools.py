@@ -24,6 +24,31 @@ import scipy.ndimage as ndi
 from skimage import morphology
 
 
+def get_signal_dimension_chunk_slice_list(chunks):
+    """Convenience function for getting the signal chunks as slices
+
+    The slices are assumed to be used on a HyperSpy signal object.
+    Thus the input will be in the Dask chunk order (y, x), while the
+    output will be in the HyperSpy order (x, y).
+
+    """
+    chunk_slice_raw_list = da.core.slices_from_chunks(chunks[-2:])
+    chunk_slice_list = []
+    for chunk_slice_raw in chunk_slice_raw_list:
+        chunk_slice_list.append((chunk_slice_raw[1], chunk_slice_raw[0]))
+    return chunk_slice_list
+
+
+def get_signal_dimension_host_chunk_slice(x, y, chunks):
+    chunk_slice_list = get_signal_dimension_chunk_slice_list(chunks)
+    for chunk_slice in chunk_slice_list:
+        x_slice, y_slice = chunk_slice
+        if y_slice.start <= y < y_slice.stop:
+            if x_slice.start <= x < x_slice.stop:
+                return chunk_slice
+    return False
+
+
 def _rechunk_signal2d_dim_one_chunk(dask_array):
     array_dims = len(dask_array.shape)
     if array_dims < 2:

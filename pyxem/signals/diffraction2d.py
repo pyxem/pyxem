@@ -80,7 +80,11 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_xc,
 )
 
-from pyxem.utils.dask_tools import _process_dask_array, _get_dask_array
+from pyxem.utils.dask_tools import (
+    _process_dask_array,
+    _get_dask_array,
+    get_signal_dimension_host_chunk_slice,
+)
 
 from pyxem.utils import peakfinder2D_gui
 
@@ -2655,7 +2659,57 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_bad_pixel_removed.compute(progressbar=show_progressbar)
         return s_bad_pixel_removed
 
+    def make_probe_navigation(self, method="fast"):
+        nav_dim = self.axes_manager.navigation_dimension
+        if (0 == nav_dim) or (nav_dim > 2):
+            raise ValueError(
+                "Probe navigation can only be made for signals with 1 or 2 "
+                "navigation dimensions"
+            )
+        if method == "fast":
+            x = round(self.axes_manager.signal_shape[0] / 2)
+            y = round(self.axes_manager.signal_shape[1] / 2)
+            if self._lazy:
+                isig_slice = get_signal_dimension_host_chunk_slice(
+                    x, y, self.data.chunks
+                )
+            else:
+                isig_slice = np.s_[x, y]
+            s = self.isig[isig_slice]
+        elif method == "slow":
+            s = self
+        s_nav = s.T.sum()
+        if s_nav._lazy:
+            s_nav.compute()
+        self._navigator_probe = s_nav
+
+    def plot(self, *args, **kwargs):
+        if "navigator" in kwargs:
+            super().plot(*args, **kwargs)
+        elif self.axes_manager.navigation_dimension > 2:
+            super().plot(*args, **kwargs)
+        elif self.axes_manager.navigation_dimension == 0:
+            super().plot(*args, **kwargs)
+        else:
+            if hasattr(self, "_navigator_probe"):
+                nav_sig_shape = self._navigator_probe.axes_manager.shape
+                self_nav_shape = self.axes_manager.navigation_shape
+                if nav_sig_shape != self_nav_shape:
+                    raise ValueError(
+                        "navigation_signal does not have the same shape "
+                        "({0}) as the signal's navigation shape "
+                        "({1})".format(nav_sig_shape, self_nav_shape)
+                    )
+            else:
+                if self._lazy:
+                    method = "fast"
+                else:
+                    method = "slow"
+                self.make_probe_navigation(method=method)
+            s_nav = self._navigator_probe
+            kwargs["navigator"] = s_nav
+            super().plot(*args, **kwargs)
+
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
-
     pass
