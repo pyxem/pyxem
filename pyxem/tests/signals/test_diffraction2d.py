@@ -560,6 +560,7 @@ class TestPlotNavigator:
         s = Diffraction2D(np.random.randint(0, 256, shape), dtype=np.uint8)
         plt.ion()  # To make plotting non-blocking
         s.plot()
+        s.plot()
         plt.close("all")
 
     @pytest.mark.parametrize(
@@ -568,6 +569,7 @@ class TestPlotNavigator:
     def test_lazy(self, shape):
         s = LazyDiffraction2D(da.random.randint(0, 256, shape), dtype=np.uint8)
         plt.ion()  # To make plotting non-blocking
+        s.plot()
         s.plot()
         plt.close("all")
 

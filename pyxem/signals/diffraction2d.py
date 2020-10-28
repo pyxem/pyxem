@@ -2660,9 +2660,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return s_bad_pixel_removed
 
     def make_probe_navigation(self, method="fast"):
-        if self.axes_manager.navigation_dimension > 2:
+        nav_dim = self.axes_manager.navigation_dimension
+        if (0 == nav_dim) or (nav_dim > 2):
             raise ValueError(
-                "Probe navigation can only be made for signals with 2 or less "
+                "Probe navigation can only be made for signals with 1 or 2 "
                 "navigation dimensions"
             )
         if method == "fast":
@@ -2686,6 +2687,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if "navigator" in kwargs:
             super().plot(*args, **kwargs)
         elif self.axes_manager.navigation_dimension > 2:
+            super().plot(*args, **kwargs)
+        elif self.axes_manager.navigation_dimension == 0:
             super().plot(*args, **kwargs)
         else:
             if hasattr(self, "_navigator_probe"):
