@@ -2670,7 +2670,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             y = round(self.axes_manager.signal_shape[1] / 2)
             if self._lazy:
                 isig_slice = get_signal_dimension_host_chunk_slice(
-                    x, y, self.data.chunks)
+                    x, y, self.data.chunks
+                )
             else:
                 isig_slice = np.s_[x, y]
             s = self.isig[isig_slice]
