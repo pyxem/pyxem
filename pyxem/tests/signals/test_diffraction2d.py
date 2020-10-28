@@ -539,14 +539,8 @@ class TestMakeProbeNavigation:
         s_nav = s._navigator_probe
         assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
 
-    def test_0_dimension_navigation_shape(self):
-        s = Diffraction2D(np.ones((10, 20)))
-        s.make_probe_navigation(method="fast")
-        s_nav = s._navigator_probe
-        assert (1,) == s_nav.axes_manager.signal_shape
-
-    @pytest.mark.parametrize("shape", [(2, 3, 4, 5, 6), (2, 3, 4, 5, 6, 7)])
-    def test_too_many_navigation_dimensions(self, shape):
+    @pytest.mark.parametrize("shape", [(10, 20), (2, 3, 4, 5, 6), (2, 3, 4, 5, 6, 7)])
+    def test_wrong_navigation_dimensions(self, shape):
         s = Diffraction2D(np.ones(shape))
         with pytest.raises(ValueError):
             s.make_probe_navigation(method="fast")
