@@ -70,10 +70,10 @@ class Correlation2D(Signal2D, CommonDiffraction):
         power = self.map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         else:
             power.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
         fourier_axis.offset = 0.5
@@ -98,10 +98,10 @@ class Correlation2D(Signal2D, CommonDiffraction):
         power = self.sum().map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         else:
             power.set_signal_type("power")
-            fourier_axis = self.axes_manager.signal_axes[1]
+            fourier_axis = self.axes_manager.signal_axes[0]
         fourier_axis.name = "Fourier Coefficient"
         fourier_axis.units = "a.u"
         fourier_axis.offset = 0.5

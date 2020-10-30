@@ -113,4 +113,4 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
 
 
 def corr_to_power(z):
-    return np.fft.rfft(z, axis=1).real
+    return np.power(np.fft.rfft(z, axis=1), 2).real

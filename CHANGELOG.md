@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - get_direct_beam_position now supports lazy proccessing (#648)
 
 ### Changed
+- Calibration workflow has been altered (see PR #640 for details)
 - Azimuthal integration has been refactored (see PR #625 for details)
 - get_direct_beam_position now has reversed order of the shifts [y, x] to [x, y] (#653)
 - Plotting large, lazy, datasets will be much faster now (#655)
