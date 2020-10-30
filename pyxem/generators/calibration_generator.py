@@ -51,14 +51,14 @@ class CalibrationGenerator:
         """
         Parameters
         ------------
-        diffraction_pattern: hyperspy.Signal2D
+        diffraction_pattern : hyperspy.Signal2D
             Some 2 dimensional signal or numpy array of some
             standard sample used for calibration
-        grating_image:
+        grating_image : array_like
             Some 2 dimensional signal or numpy array of some
             standard sample used for calibration
-        calibration_standard: diffpy.structure.Structure for calculating
-        the polycrystalline ring spacing
+        calibration_standard : diffpy.structure.Structure 
+            for calculating the polycrystalline ring spacing
         """
         # Assign attributes
         self.diffraction_pattern = diffraction_pattern
@@ -132,7 +132,7 @@ class CalibrationGenerator:
         rotation : float
             An initial guess for the rotation of the (elliptical) pattern
             in radians.
-        center: None or list
+        center : None or list
             The center of the diffraction pattern.
 
         Returns
