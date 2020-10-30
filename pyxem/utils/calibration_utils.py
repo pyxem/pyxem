@@ -45,9 +45,9 @@ def call_ring_pattern(xcenter, ycenter,
     ycenter : float
         The coordinate (fractional pixel units) of the diffraction
         pattern center in the second dimension
-    rings: list
+    rings : list
         The list of ratios for the polycrystaline ring spacing.
-    amps: list
+    amps : list
         The list of amplitudes for the polycrystalline rings.
 
     Returns
