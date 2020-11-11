@@ -31,12 +31,12 @@ def test_init_GenericMatchingResults_bad():
     # final dimension must be 5
     _ = GenericMatchingResults(np.empty((10,10,10,6)))
 
-
-def test_init_TemplateMatchingResults():
+def test_TemplateMatchingResults_to_crystal_map():
     pass
 
-def test_init_VectorMatchingResults():
+def test_VectorMatchingResults_to_crystal_map():
     pass
+
 
 @pytest.mark.parametrize(
     "overwrite, result_hkl, current_hkl, expected_hkl",
