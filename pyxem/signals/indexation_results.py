@@ -24,6 +24,8 @@ from warnings import warn
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
 
+from orix.quaternion import Rotation
+
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
@@ -145,12 +147,55 @@ def peaks_from_best_template(single_match_result, library, rank=0):
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
+def _get_best_match(z):
+    """ Returns the match with the highest score for a given navigation pixel
+
+    Parameters
+    ----------
+    z : np.array
+        array with shape (5,n_matches), the 5 elements are phase, alpha, beta, gamma, score
+
+    Returns
+    -------
+    z_best : np.array
+        array with shape (5,)
+    """
+    return z[:,np.argmax(z[-1,:])]
+
 class GenericMatchingResults():
     def __init__(self,data):
         self.data = hs.signals.Signal2D(data)
 
     def to_crystal_map():
-        pass
+        #TODO: docstrings
+
+        _s = self.map(_get_best_match,inplace=False)
+
+        """ Gets properties """
+        phase_id = _s.isig[0].data.flatten()
+        alpha = _s.isig[1].data.flatten()
+        beta = _s.isig[2].data.flatten()
+        gamma = _s.isig[3].data.flatten()
+        score = _s.isig[4].data.flatten()
+
+        """ Gets navigation placements """
+        xy = np.indices(_s.data.shape[:2])
+        x = xy[1].flatten()
+        y = xy[0].flatten()
+
+        """ Tidies up so we can put these things into CrystalMap """
+        euler = np.vstack((alpha,beta,gamma)).T
+        rotations = Rotation.from_euler(euler,convention="bunge", direction="crystal2lab")
+        properties = {"score":score}
+
+
+        return CrystalMap(
+                rotations=rotations,
+                phase_id=phase_id,
+                x=x,
+                y=y,
+                prop=properties)
+
 
 
 class TemplateMatchingResults(GenericMatchingResults):
