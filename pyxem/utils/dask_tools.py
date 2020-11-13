@@ -64,6 +64,16 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
+def _expand_iter_dimensions(iter_dask_array, dask_array_dims):
+    iter_dask_array_shape = list(iter_dask_array.shape)
+    iter_dims = len(iter_dask_array_shape)
+    if dask_array_dims > iter_dims:
+        for i in range(dask_array_dims - iter_dims):
+            iter_dask_array_shape.append(1)
+    iter_dask_array = iter_dask_array.reshape(iter_dask_array_shape)
+    return iter_dask_array
+
+
 def _get_dask_array(signal, size_of_chunk=32):
     if signal._lazy:
         dask_array = signal.data
@@ -77,6 +87,7 @@ def _get_dask_array(signal, size_of_chunk=32):
 
 def _process_chunk(
     data,
+    iter_array,
     process_func,
     output_signal_size=None,
     args_process=None,
@@ -95,15 +106,22 @@ def _process_chunk(
     output_array = np.zeros(output_shape, dtype=dtype)
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
-        output_array[islice] = process_func(
-            data[islice], *args_process, **kwargs_process
-        )
+        if iter_array is not None:
+            iter_value = iter_array[islice].squeeze()
+            output_array[islice] = process_func(
+                data[islice], iter_value, *args_process, **kwargs_process
+            )
+        else:
+            output_array[islice] = process_func(
+                data[islice], *args_process, **kwargs_process
+            )
     return output_array
 
 
 def _process_dask_array(
     dask_array,
     process_func,
+    iter_array=None,
     dtype=None,
     chunks=None,
     drop_axis=None,
@@ -185,9 +203,13 @@ def _process_dask_array(
     if dtype is None:
         dtype = dask_array.dtype
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
+    if iter_array is not None:
+        iter_array = _expand_iter_dimensions(
+            iter_array, len(dask_array.shape))
     output_array = da.map_blocks(
         _process_chunk,
         dask_array_rechunked,
+        iter_array,
         process_func=process_func,
         dtype=dtype,
         output_signal_size=output_signal_size,
