@@ -24,6 +24,22 @@ import scipy.ndimage as ndi
 from skimage import morphology
 
 
+def align_single_frame(image, shifts):
+    """Not subpixel"""
+    shift_y, shift_x = shifts
+    shift_x = int(round(shift_x))
+    shift_y = int(round(shift_y))
+    temp_image = np.roll(image, shift_x, axis=0)
+    temp_image = np.roll(temp_image, shift_y, axis=1)
+    return temp_image
+
+
+def align_single_frame_subpixel(image, shifts, order=3):
+    """Subpixel"""
+    temp_image = ndi.shift(image, shifts[::-1], order=order)
+    return temp_image
+
+
 def get_signal_dimension_chunk_slice_list(chunks):
     """Convenience function for getting the signal chunks as slices
 

@@ -84,6 +84,8 @@ from pyxem.utils.dask_tools import (
     _process_dask_array,
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
+    align_single_frame,
+    align_single_frame_subpixel,
 )
 
 from pyxem.utils import peakfinder2D_gui
@@ -997,10 +999,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     def center_direct_beam(
         self,
-        method,
+        shifts=None,
+        method=None,
         half_square_width=None,
         return_shifts=False,
         align_kwargs=None,
+        subpixel=False,
+        lazy_result=True,
         *args,
         **kwargs,
     ):
@@ -1025,38 +1030,47 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        centered : ElectronDiffraction2D
+        centered : Diffraction2D
             The centered diffraction data.
 
         """
-
-        align_kwargs = {} if align_kwargs is None else align_kwargs
 
         nav_size = self.axes_manager.navigation_size
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        if half_square_width is not None:
-            min_index = np.int(origin_coordinates[0] - half_square_width)
-            # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + half_square_width)
-            cropped = self.isig[min_index:max_index, min_index:max_index]
-            shifts = cropped.get_direct_beam_position(method=method, **kwargs)
+        if shifts is None:
+            if half_square_width is not None:
+                min_index = np.int(origin_coordinates[0] - half_square_width)
+                # fails if non-square dp
+                max_index = np.int(origin_coordinates[0] + half_square_width)
+                temp_data = self.isig[min_index:max_index, min_index:max_index]
+            else:
+                temp_data = self
+            shifts = temp_data.get_direct_beam_position(
+                method=method,
+                lazy_result=True,
+                **kwargs,
+            )
+
+        data_dask_array = _get_dask_array(self)
+        shifts_dask_array = _get_dask_array(shifts)
+
+        if subpixel:
+            align_func = align_single_frame_subpixel
         else:
-            shifts = self.get_direct_beam_position(method=method, **kwargs)
+            align_func = align_single_frame
 
-        shifts = -1 * np.flip(shifts.data, -1)
-        shifts = shifts.reshape(nav_size, 2)
+        output_dask_array = _process_dask_array(
+            data_dask_array,
+            align_func,
+            iter_array=shifts_dask_array,
+        )
+        s_output = LazyDiffraction2D(output_dask_array)
 
-        # Preserve existing behaviour by overriding
-        # crop & fill_value
-        align_kwargs.pop("crop", None)
-        align_kwargs.pop("fill_value", None)
-
-        self.align2D(shifts=shifts, crop=False, fill_value=0, **align_kwargs)
-
-        if return_shifts:
-            return shifts
+        if not lazy_result:
+            s_output.compute()
+        return s_output
 
     def remove_background(self, method, **kwargs):
         """Perform background subtraction via multiple methods.
