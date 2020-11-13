@@ -204,8 +204,7 @@ def _process_dask_array(
         dtype = dask_array.dtype
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
     if iter_array is not None:
-        iter_array = _expand_iter_dimensions(
-            iter_array, len(dask_array.shape))
+        iter_array = _expand_iter_dimensions(iter_array, len(dask_array.shape))
     output_array = da.map_blocks(
         _process_chunk,
         dask_array_rechunked,
