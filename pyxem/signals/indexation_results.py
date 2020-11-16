@@ -166,7 +166,7 @@ class GenericMatchingResults():
     def __init__(self,data):
         self.data = hs.signals.Signal2D(data)
 
-    def to_crystal_map():
+    def to_crystal_map(self):
         #TODO: docstrings
 
         _s = self.map(_get_best_match,inplace=False)
@@ -260,7 +260,7 @@ class VectorMatchingResults(BaseSignal):
         self.vectors = None
         self.hkls = None
 
-    def to_crystal_map(self, *args, **kwargs):
+    def to_crystal_map(self):
         """Obtain a crystallographic map specifying the best matching phase and
         orientation at each probe position with corresponding metrics.
 
@@ -268,8 +268,7 @@ class VectorMatchingResults(BaseSignal):
         -------
         """
         _s = self.map(
-            crystal_from_vector_matching, inplace=False, *args, **kwargs
-        )
+            crystal_from_vector_matching, inplace=False)
 
         """ Gets phase, the easy bit """
         phase_id = _s.isig[0].data.flatten()
