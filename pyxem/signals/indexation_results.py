@@ -267,15 +267,50 @@ class VectorMatchingResults(BaseSignal):
         Returns
         -------
         """
-        crystal_map = self.map(
+        _s = self.map(
             crystal_from_vector_matching, inplace=False, *args, **kwargs
         )
 
-        #cryst_map = CrystallographicMap(crystal_map)
-        #cryst_map = transfer_navigation_axes(cryst_map, self)
-        #cryst_map.method = "vector_matching"
+        """ Gets phase, the easy bit """
+        phase_id = _s.isig[0].data.flatten()
 
-        return None
+        """ Deals with the properties, hard coded as of v0.13 """
+        # need to invert an array of dicts into a dict of arrays
+        def _map_to_get_property(prop):
+            return d[prop]
+
+        # assume same properties at every point of the signal
+        key_list = []
+        for key in _s.inav[0,0].isig[2]:
+            key_list.append(key)
+
+        properties = {}
+        for key in key_list:
+            _key_signal = _s.isig[2].map(_map_to_get_property,prop=key,inplace=False)
+            properties[key] = _key_signal
+
+        """ Deal with the rotations """
+        def _map_for_alpha_beta_gamma(ix):
+            return z[ix]
+
+        alpha = _s.isig[1].map(_map_for_alpha_beta_gamma,ix=0,inplace=False)
+        beta =  _s.isig[1].map(_map_for_alpha_beta_gamma,ix=1,inplace=False)
+        gamma = _s.isig[1].map(_map_for_alpha_beta_gamma,ix=2,inplace=False)
+
+        euler = np.vstack((alpha,beta,gamma)).T
+        rotations = Rotation.from_euler(euler,convention="bunge", direction="crystal2lab")
+
+        """ Gets navigation placements """
+        xy = np.indices(_s.data.shape[:2])
+        x = xy[1].flatten()
+        y = xy[0].flatten()
+
+        return CrystalMap(
+                rotations=rotations,
+                phase_id=phase_id,
+                x=x,
+                y=y,
+                prop=properties)
 
     def get_indexed_diffraction_vectors(
         self, vectors, overwrite=False, *args, **kwargs
