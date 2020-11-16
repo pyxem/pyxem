@@ -351,6 +351,72 @@ class TestGetDaskArray:
         assert s.data.shape == array_out.shape
 
 
+class TestAlignSingleFrame:
+    @pytest.mark.parametrize(
+        "shifts", [[0, 0], [1, 0], [-1, 0], [0, -1], [-1, -1], [-2, -3], [-2, -5]]
+    )
+    def test_simple(self, shifts):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.uint16)
+        x, y = 3, 7
+        image[y, x] = 7
+        image_shifted = dt.align_single_frame(image, shifts)
+        pos = np.s_[y + shifts[1], x + shifts[0]]
+        assert image_shifted[pos] == 7
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize(
+        "shifts,pos",
+        [
+            [[0.5, 0.5], np.s_[7:9, 3:5]],
+            [[0.0, 0.5], np.s_[7:9, 3]],
+            [[0.0, -0.5], np.s_[6:8, 3]],
+            [[1.0, -1.5], np.s_[5:7, 4]],
+        ],
+    )
+    def test_subpixel_integer_image(self, shifts, pos):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.uint16)
+        x, y = 3, 7
+        image[y, x] = 8
+        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        assert (image_shifted[pos] >= 2).all()
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize(
+        "shifts,pos",
+        [
+            [[-1.0, -2.0], np.s_[5, 2]],
+            [[-0.5, -2.0], np.s_[5, 2:4]],
+            [[-0.5, -2.5], np.s_[4:6, 2:4]],
+            [[-0.25, 0.0], np.s_[7, 2:4]],
+        ],
+    )
+    def test_subpixel_float_image(self, shifts, pos):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.float32)
+        x, y = 3, 7
+        image[y, x] = 9
+        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        assert image_shifted[pos].sum() == 9
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize("shifts", [[-0.7, -2.7], [1.1, -1.1]])
+    def test_not_subpixel_float_image(self, shifts):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.float32)
+        x, y = 3, 7
+        image[y, x] = 9
+        image_shifted = dt.align_single_frame(image, shifts, order=0)
+        pos = np.s_[y + round(shifts[1]), x + round(shifts[0])]
+        assert image_shifted[pos] == 9.0
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+
 @pytest.mark.slow
 class TestCenterOfMassArray:
     def test_simple(self):
