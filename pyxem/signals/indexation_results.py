@@ -20,6 +20,7 @@ import hyperspy.api as hs
 from hyperspy.signal import BaseSignal
 from hyperspy.signals import Signal2D
 from warnings import warn
+import numpy as np
 
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
