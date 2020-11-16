@@ -26,10 +26,6 @@ def test_TemplateMatchingResults_to_crystal_map():
     t = TemplateMatchingResults(np.empty((10,10,10,5)))
     return t.to_crystal_map()
 
-def test_VectorMatchingResults_to_crystal_map():
-    pass
-
-
 @pytest.mark.parametrize(
     "overwrite, result_hkl, current_hkl, expected_hkl",
     [(True, [0, 0, 1], None, [0, 0, 1]), (False, [0, 0, 1], None, [0, 0, 1]),],
