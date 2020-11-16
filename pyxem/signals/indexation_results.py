@@ -26,6 +26,7 @@ from pyxem.signals import transfer_navigation_axes
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
 
 from orix.quaternion import Rotation
+from orix.crystal_map import CrystalMap
 
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
