@@ -169,7 +169,7 @@ class GenericMatchingResults():
     def to_crystal_map(self):
         #TODO: docstrings
 
-        _s = self.map(_get_best_match,inplace=False)
+        _s = self.data.map(_get_best_match,inplace=False)
 
         """ Gets properties """
         phase_id = _s.isig[0].data.flatten()
