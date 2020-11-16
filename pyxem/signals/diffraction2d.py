@@ -85,7 +85,6 @@ from pyxem.utils.dask_tools import (
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
     align_single_frame,
-    align_single_frame_subpixel,
 )
 
 from pyxem.utils import peakfinder2D_gui
@@ -999,19 +998,27 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     def center_direct_beam(
         self,
-        shifts=None,
         method=None,
         half_square_width=None,
+        shifts=None,
         return_shifts=False,
         align_kwargs=None,
-        subpixel=False,
-        lazy_result=True,
+        subpixel=True,
+        lazy_result=None,
         *args,
         **kwargs,
     ):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern and translate it to the center of the
         image square.
+
+        The direct beam position can either be passed to the method with the shifts
+        parameter, or the function can calculate it on its own.
+
+        Note: if the signal has an integer dtype, and subpixel=True is used (the default)
+        the total intensity in the diffraction images will most likely not be preserved.
+        This is due to subpixel=True utilizing interpolation. To keep the total intensity
+        use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         Parameters
         ----------
@@ -1021,19 +1028,30 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
+        shifts : Signal, optional
+            Position of the direct beam, for each navigation position in the signal
+            which should be shifted. Both shifts and the signal need to have the
+            same navigation shape, and shifts needs to have one signal dimension
+            with size 2.
         return_shifts : bool, default False
             If True, the values of applied shifts are returned
-        align_kwargs : None or dict
-            To be passed to .align2D() function
-        **kwargs:
-            To be passed to method function
-
-        Returns
-        -------
-        centered : Diffraction2D
-            The centered diffraction data.
+        subpixel : bool, optional
+            If True, the data will be interpolated, allowing for subpixel shifts of
+            the diffraction patterns. This can lead to changes in the total intensity
+            of the diffraction images. If False, the data is not interpolated.
+            Default True.
+        lazy_result : optional
+            If True, the result will be a lazy signal. If False, a non-lazy signal.
+            By default, if the signal is lazy, the result will also be lazy.
+            If the signal is non-lazy, the result will be non-lazy.
+        *args, **kwargs :
+            Passed to the function which estimate the direct beam position
 
         """
+        if lazy_result is None:
+            lazy_result = self._lazy
+        if align_kwargs is None:
+            align_kwargs = {}
 
         nav_size = self.axes_manager.navigation_size
         signal_shape = self.axes_manager.signal_shape
@@ -1053,24 +1071,47 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **kwargs,
             )
 
+        if not 'order' in align_kwargs:
+            if subpixel:
+                align_kwargs['order'] = 1
+            else:
+                align_kwargs['order'] = 0
+
         data_dask_array = _get_dask_array(self)
         shifts_dask_array = _get_dask_array(shifts)
 
-        if subpixel:
-            align_func = align_single_frame_subpixel
-        else:
-            align_func = align_single_frame
-
         output_dask_array = _process_dask_array(
             data_dask_array,
-            align_func,
+            align_single_frame,
             iter_array=shifts_dask_array,
+            **align_kwargs,
         )
-        s_output = LazyDiffraction2D(output_dask_array)
 
-        if not lazy_result:
-            s_output.compute()
-        return s_output
+        if lazy_result:
+            if not self._lazy:
+                self._lazy = True
+                self._assign_subclass()
+            self.data = output_dask_array
+        else:
+            if self._lazy:
+                self.data = np.empty(
+                    output_dask_array.shape, dtype=output_dask_array.dtype)
+                self._lazy = False
+                self._assign_subclass()
+            shifts.data = np.empty(
+                shifts_dask_array.shape, dtype=shifts_dask_array.dtype)
+            shifts._lazy = False
+            shifts._assign_subclass()
+            with ProgressBar():
+                da.store(
+                    [shifts_dask_array, output_dask_array],
+                    [shifts.data, self.data],
+                )
+
+        self.events.data_changed.trigger(obj=self)
+
+        if return_shifts:
+            return shifts
 
     def remove_background(self, method, **kwargs):
         """Perform background subtraction via multiple methods.
