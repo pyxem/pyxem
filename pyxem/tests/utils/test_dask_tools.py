@@ -70,6 +70,22 @@ class TestSignalDimensionGetChunkSliceList:
         assert chunk_slice_list[0] == np.s_[0:20, 0:20]
 
 
+@pytest.mark.parametrize(
+    "input_shape,iter_shape",
+    [
+        [(9, 8, 6, 6), (9, 8, 2)],
+        [(9, 8, 6, 6), (9, 8, 2, 2)],
+        [(9, 8, 6), (9, 8)],
+        [(9, 8, 6, 20, 20), (9, 8)],
+    ],
+)
+def test_expand_iter_dimensions(input_shape, iter_shape):
+    data_dask = da.zeros(input_shape, chunks=[2] * len(input_shape))
+    iter_dask = da.zeros(iter_shape, chunks=[2] * len(iter_shape))
+    output_array = dt._expand_iter_dimensions(iter_dask, len(data_dask.shape))
+    assert len(data_dask.shape) == len(output_array.shape)
+
+
 class TestGetSignalDimensionHostChunkSlice:
     @pytest.mark.parametrize(
         "xy, sig_slice, xchunk, ychunk",
