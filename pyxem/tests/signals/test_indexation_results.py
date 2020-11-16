@@ -19,20 +19,12 @@
 import numpy as np
 import pytest
 
-from pyxem.signals.indexation_results import GenericMatchingResults,TemplateMatchingResults, VectorMatchingResults
+from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
-
-def test_init_GenericMatchingResults():
-    _ = GenericMatchingResults(np.empty((10,10,10,5)))
-
-@pytest.mark.xfail(strict=True)
-def test_init_GenericMatchingResults_bad():
-    # final dimension must be 5
-    _ = GenericMatchingResults(np.empty((10,10,10,6)))
-
 def test_TemplateMatchingResults_to_crystal_map():
-    pass
+    t = TemplateMatchingResults(np.empty((10,10,10,5)))
+    return t.to_crystal_map()
 
 def test_VectorMatchingResults_to_crystal_map():
     pass
