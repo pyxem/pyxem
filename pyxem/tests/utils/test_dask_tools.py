@@ -349,6 +349,60 @@ class TestProcessDaskArray:
         assert dask_input.shape == array_output.shape
 
 
+class TestGetIterArray:
+    def test_too_large_iter_array(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros(
+            (4, 6, 8, 10, 12), chunks=(2, 2, 2, 2, 2), dtype=np.uint16
+        )
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array, dask_array)
+
+    def test_wrong_nav_shape(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array0 = da.zeros((4, 6, 2), chunks=(2, 2, 2), dtype=np.uint16)
+        iter_array1 = da.zeros((4, 5, 2), chunks=(2, 2, 2), dtype=np.uint16)
+
+        dt._get_iter_array(iter_array0, dask_array)
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array1, dask_array)
+
+    def test_non_dask_iter_array(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = np.zeros((4, 6, 2), dtype=np.uint16)
+
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array, dask_array)
+
+    def test_chunks_not_aligned(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros((4, 6, 2), chunks=(2, 2, 2), dtype=np.uint16)
+
+        dask_array0 = dask_array[:, 1:]
+        iter_array0 = iter_array[:, 1:]
+        iter_array1 = iter_array[:, :-1]
+
+        dt._get_iter_array(iter_array0, dask_array0)
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array1, dask_array0)
+
+    @pytest.mark.parametrize(
+        "iter_array_shape,chunk_shape",
+        [[(4, 6, 8, 12), (2, 2, 4, 6)], [(4, 6, 2), (2, 2, 1)], [(4, 6), (2, 2)]],
+    )
+    def test_iter_array_shape_and_chunks(self, iter_array_shape, chunk_shape):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros(iter_array_shape, chunks=chunk_shape, dtype=np.uint16)
+
+        iter_array_output = dt._get_iter_array(iter_array, dask_array)
+        assert len(iter_array_output.shape) == len(dask_array.shape)
+        nav_shape = len(dask_array.shape) - 2
+        assert iter_array_output.chunks[:nav_shape] == dask_array.chunks[:nav_shape]
+        chunk_sig_iter = iter_array_output.chunks[nav_shape:]
+        chunk_sig_iter = tuple(np.array(chunk_sig_iter).squeeze())
+        assert chunk_sig_iter == iter_array_output.shape[nav_shape:]
+
+
 class TestGetDaskArray:
     def test_simple(self):
         s = Diffraction2D(np.zeros((2, 3, 10, 10)))
