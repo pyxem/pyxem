@@ -56,6 +56,10 @@ def get_signal_dimension_host_chunk_slice(x, y, chunks):
 
 def _rechunk_signal2d_dim_one_chunk(dask_array):
     array_dims = len(dask_array.shape)
+    if not hasattr(dask_array, "chunks"):
+        raise AttributeError(
+            "dask_array must be a dask array, not {0}".format(type(dask_array))
+        )
     if array_dims < 2:
         raise ValueError(
             "dask_array must be at least two dimensions, not {0}".format(array_dims)
@@ -99,6 +103,14 @@ def _process_chunk(
     kwargs_process=None,
     block_info=None,
 ):
+    if iter_array is not None:
+        nav_shape = data.shape[:-2]
+        iter_nav_shape = iter_array.shape[: len(nav_shape)]
+        if nav_shape != iter_nav_shape:
+            raise ValueError(
+                "iter_array nav shape {0} must be the same as the navigation shape as "
+                "the data {1}".format(iter_nav_shape, nav_shape)
+            )
     dtype = block_info[None]["dtype"]
     if args_process is None:
         args_process = []

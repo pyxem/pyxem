@@ -134,12 +134,13 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return image + 1
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert chunk_input.shape == chunk_output.shape
         assert chunk_output.dtype == dtype
@@ -149,12 +150,17 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return (5, 2)
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, output_signal_size=(2,), block_info=block_info
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(2,),
+            block_info=block_info,
         )
         output_shape = chunk_input.shape[:-2] + (2,)
         assert output_shape == chunk_output.shape
@@ -168,12 +174,17 @@ class TestProcessChunk:
     def test_dtype(self, dtype):
         chunk_input = np.zeros((3, 4, 10, 8), dtype=np.int16)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return 4.8
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, output_signal_size=(1,), block_info=block_info
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(1,),
+            block_info=block_info,
         )
         output_shape = chunk_input.shape[:-2] + (1,)
         assert output_shape == chunk_output.shape
@@ -183,6 +194,7 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image, value1, value2):
             return (image + value1) / value2
@@ -190,6 +202,7 @@ class TestProcessChunk:
         value1, value2 = 24, 4
         chunk_output = dt._process_chunk(
             chunk_input,
+            iter_array,
             test_function,
             args_process=[value1, value2],
             block_info=block_info,
@@ -200,6 +213,7 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image, value1=2, value2=2):
             return (image + value1) / value2
@@ -207,6 +221,7 @@ class TestProcessChunk:
         value1, value2 = 15, 3
         chunk_output1 = dt._process_chunk(
             chunk_input,
+            iter_array,
             test_function,
             kwargs_process={"value1": value1, "value2": value2},
             block_info=block_info,
@@ -214,7 +229,7 @@ class TestProcessChunk:
         assert np.all(chunk_output1 == 5)
 
         chunk_output2 = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert np.all(chunk_output2 == 1)
 
@@ -225,14 +240,51 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros(shape, dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return image
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert chunk_input.shape == chunk_output.shape
+
+    def test_iter_array(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        iter_array = np.random.randint(0, 256, (3, 4, 1, 1))
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image, value):
+            return value
+
+        chunk_output = dt._process_chunk(
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(1,),
+            block_info=block_info,
+        )
+        assert (chunk_output.squeeze() == iter_array.squeeze()).all()
+
+    def test_iter_array_wrong_shape(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        iter_array = np.random.randint(0, 256, (3, 5, 1, 1))
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image, value):
+            return value
+
+        with pytest.raises(ValueError):
+            chunk_output = dt._process_chunk(
+                chunk_input,
+                iter_array,
+                test_function,
+                output_signal_size=(1,),
+                block_info=block_info,
+            )
 
 
 class TestProcessDaskArray:
@@ -259,7 +311,11 @@ class TestProcessDaskArray:
         def test_function(image):
             return image
 
-        dask_output = dt._process_dask_array(dask_input, test_function, dtype=dtype,)
+        dask_output = dt._process_dask_array(
+            dask_input,
+            test_function,
+            dtype=dtype,
+        )
         array_output = dask_output.compute()
         assert array_output.dtype == dtype
 
@@ -312,7 +368,10 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output = dt._process_dask_array(
-            dask_input, test_function, value1=value1, value2=value2,
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
         )
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
@@ -326,9 +385,15 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output1 = dt._process_dask_array(
-            dask_input, test_function, value1=value1, value2=value2,
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
         )
-        dask_output2 = dt._process_dask_array(dask_input, test_function,)
+        dask_output2 = dt._process_dask_array(
+            dask_input,
+            test_function,
+        )
         array_output1 = dask_output1.compute()
         array_output2 = dask_output2.compute()
         assert np.all(array_output1 == 5)
