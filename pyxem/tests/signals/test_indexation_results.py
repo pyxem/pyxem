@@ -19,7 +19,7 @@
 import numpy as np
 import pytest
 
-from pyxem.signals.indexation_results import GenericMatchingResults,TemplateMatchingResults
+from pyxem.signals.indexation_results import GenericMatchingResults,TemplateMatchingResults, VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
