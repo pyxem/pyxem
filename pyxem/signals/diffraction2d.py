@@ -1071,11 +1071,11 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 **kwargs,
             )
 
-        if not 'order' in align_kwargs:
+        if not "order" in align_kwargs:
             if subpixel:
-                align_kwargs['order'] = 1
+                align_kwargs["order"] = 1
             else:
-                align_kwargs['order'] = 0
+                align_kwargs["order"] = 0
 
         data_dask_array = _get_dask_array(self)
         shifts_dask_array = _get_dask_array(shifts)
@@ -1095,11 +1095,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         else:
             if self._lazy:
                 self.data = np.empty(
-                    output_dask_array.shape, dtype=output_dask_array.dtype)
+                    output_dask_array.shape, dtype=output_dask_array.dtype
+                )
                 self._lazy = False
                 self._assign_subclass()
             shifts.data = np.empty(
-                shifts_dask_array.shape, dtype=shifts_dask_array.dtype)
+                shifts_dask_array.shape, dtype=shifts_dask_array.dtype
+            )
             shifts._lazy = False
             shifts._assign_subclass()
             with ProgressBar():
