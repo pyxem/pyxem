@@ -413,6 +413,73 @@ class TestProcessDaskArray:
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
 
+    @pytest.mark.parametrize(
+        "dask_shape,iter_shape",
+        [
+            [(8, 10), ()],
+            [(6, 8, 10), (6,)],
+            [(4, 6, 8, 10), (4, 6)],
+            [(2, 4, 6, 8, 10), (2, 4, 6)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6)],
+            [(8, 10), (10,)],
+            [(6, 8, 10), (6, 10)],
+            [(4, 6, 8, 10), (4, 6, 10)],
+            [(2, 4, 6, 8, 10), (2, 4, 6, 10)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6, 10)],
+            [(8, 10), (8, 10)],
+            [(6, 8, 10), (6, 8, 10)],
+            [(4, 6, 8, 10), (4, 6, 8, 10)],
+            [(2, 4, 6, 8, 10), (2, 4, 6, 8, 10)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6, 8, 10)],
+        ],
+    )
+    def test_iter_array1d(self, dask_shape, iter_shape):
+        dask_chunks = [2] * len(dask_shape)
+        iter_chunks = [2] * len(iter_shape)
+        dask_input = da.zeros(dask_shape, chunks=dask_chunks, dtype=np.uint16)
+        iter_input = da.random.randint(0, 256, iter_shape, chunks=iter_chunks)
+
+        def test_function(image, value):
+            temp_image = image.copy()
+            temp_image[:] = value
+            return temp_image
+
+        dask_output = dt._process_dask_array(dask_input, test_function, iter_input)
+        data_output = dask_output.compute()
+        iter_array = iter_input.compute()
+        for i in np.ndindex(data_output.shape[:-2]):
+            data = data_output[i]
+            value = iter_array[i]
+            assert (data == value).all()
+
+    def test_too_large_iter_array(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 6, 2, 2, 4), chunks=(2, 2, 2, 2, 4))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_wrong_nav_shape(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 3), chunks=(2, 2))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_non_dask_iter_array(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = np.zeros((4, 6))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_chunks_not_aligned(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 6, 2), chunks=(2, 3, 2))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
 
 class TestGetIterArray:
     def test_too_large_iter_array(self):
