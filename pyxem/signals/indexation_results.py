@@ -121,7 +121,7 @@ def get_phase_name_and_index(library):
     return phase_name_index_dict
 
 
-def peaks_from_best_template(single_match_result, library, rank=0):
+def _peaks_from_best_template(single_match_result, library, rank=0):
     """Takes a TemplateMatchingResults object and return the associated peaks,
     to be used in combination with map().
 
@@ -234,7 +234,7 @@ class TemplateMatchingResults(GenericMatchingResults):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = self.map(peaks_from_best_template, library=library, inplace=False)
+        match_peaks = self.map(_peaks_from_best_template, library=library, inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
