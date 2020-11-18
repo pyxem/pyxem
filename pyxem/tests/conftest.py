@@ -158,3 +158,7 @@ def electron_diffraction1d():
     )
 
     return ElectronDiffraction1D(data)
+
+@pytest.fixture
+def vector_match_peaks():
+    return np.array([[1, 0.1, 0], [0, 2, 0], [1, 2, 3],])
