@@ -162,3 +162,22 @@ def electron_diffraction1d():
 @pytest.fixture
 def vector_match_peaks():
     return np.array([[1, 0.1, 0], [0, 2, 0], [1, 2, 3],])
+
+@pytest.fixture
+def vector_library():
+    library = DiffractionVectorLibrary()
+    library["A"] = {
+        "indices": np.array(
+            [[[0, 2, 0], [1, 0, 0]], [[1, 2, 3], [0, 2, 0]], [[1, 2, 3], [1, 0, 0]],]
+        ),
+        "measurements": np.array(
+            [
+                [2, 1, np.pi / 2],
+                [np.sqrt(14), 2, 1.006853685],
+                [np.sqrt(14), 1, 1.300246564],
+            ]
+        ),
+    }
+    lattice = diffpy.structure.Lattice(1, 1, 1, 90, 90, 90)
+    library.structures = [diffpy.structure.Structure(lattice=lattice)]
+    return library
