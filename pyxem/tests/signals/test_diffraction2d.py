@@ -600,6 +600,16 @@ class TestCenterDirectBeam:
         s.data[:, :, 10:12, 8:10] = 0.0
         assert not s.data.any()
 
+    def test_not_subpixel(self):
+        s = self.s
+        s_shifts = s.get_direct_beam_position(method="blur", sigma=1)
+        s_shifts += 0.3
+        s.change_dtype("float32")
+        s.center_direct_beam(shifts=s_shifts, subpixel=False)
+        assert (s.data[:, :, 10, 8] == 9).all()
+        s.data[:, :, 10, 8] = 0.0
+        assert not s.data.any()
+
     @pytest.mark.parametrize(
         "shape", [(20, 20), (10, 20, 20), (8, 10, 20, 20), (6, 8, 10, 20, 20)]
     )
@@ -630,7 +640,7 @@ class TestCenterDirectBeam:
         s = self.s
         s.center_direct_beam(method="interpolate", sigma=1, upsample_factor=10, kind=1)
 
-    def test_method_interpolate(self):
+    def test_method_cross_correlate(self):
         s = self.s
         s.center_direct_beam(method="cross_correlate", radius_start=0, radius_finish=2)
 
