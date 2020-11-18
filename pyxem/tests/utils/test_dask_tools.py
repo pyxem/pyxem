@@ -273,10 +273,7 @@ class TestProcessChunk:
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         iter_array = np.random.randint(0, 256, (3, 5, 1, 1))
         block_info = {None: {"dtype": dtype}}
-
-        def test_function(image, value):
-            return value
-
+        test_function = lambda a: 1
         with pytest.raises(ValueError):
             chunk_output = dt._process_chunk(
                 chunk_input,
@@ -412,6 +409,12 @@ class TestProcessDaskArray:
         dask_output = dt._process_dask_array(dask_input, test_function)
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
+
+    def test_dask_array_wrong_type(self):
+        array_input = np.zeros((4, 6, 10, 10))
+        test_function = lambda a: 1
+        with pytest.raises(AttributeError):
+            dt._process_dask_array(array_input, test_function)
 
     @pytest.mark.parametrize(
         "dask_shape,iter_shape",
