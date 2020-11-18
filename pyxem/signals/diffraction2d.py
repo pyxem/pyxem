@@ -914,7 +914,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return integration
 
-    def get_direct_beam_position(self, method, lazy_result=False, **kwargs):
+    def get_direct_beam_position(self, method, lazy_result=None, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -922,8 +922,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur" or "interpolate"
-        lazy_result : bool
-            If True, will return a LazySignal1D.
+        lazy_result : optional
+            If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
+            By default, if the signal is lazy, the result will also be lazy.
+            If the signal is non-lazy, the result will be non-lazy.
         **kwargs:
             Keyword arguments to be passed to the method function.
 
@@ -934,6 +936,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
+        if lazy_result is None:
+            lazy_result = self._lazy
 
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2

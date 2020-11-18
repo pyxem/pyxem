@@ -472,6 +472,16 @@ class TestGetDirectBeamPosition:
             method="cross_correlate", radius_start=0, radius_finish=1
         )
 
+    def test_lazy_result_none_non_lazy_signal(self):
+        s = self.s
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        assert not s_shift._lazy
+
+    def test_lazy_result_none_lazy_signal(self):
+        s = self.s.as_lazy()
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        assert s_shift._lazy
+
     def test_lazy_result(self):
         s = self.s
         s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
