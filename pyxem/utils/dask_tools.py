@@ -159,13 +159,22 @@ def _process_dask_array(
     ----------
     dask_array : Dask Array
         Must be atleast two dimensions, and the two last dimensions are
-        assumed to be the signal dimensions.
+        assumed to be the signal dimensions. The rest of the dimensions are assumed
+        to be the navigation dimensions.
     process_func : Function
         A function which must at least take one parameter, can return anything
         but the output dimensions must match with drop_axis, new_axis and chunks.
         See Examples below for how to use it.
+    iter_array : Dask Array, optional
+        Array which will be iterated over together with the dask_array. iter_array
+        must have the same shape and chunking for the navigation dimensions, as the
+        dask_array. For example, the process_func for the dask_array[10, 5] position
+        will also receive the value in iter_array[10, 5].
+        iter_array can not have more dimensions than the dask_array.
     dtype : NumPy dtype, optional
+        dtype for the output array
     chunks : tuple, optional
+        Chunking for the output array
     drop_axis : int or tuple, optional
         Axes which will be removed from the output array
     new_axis : int or tuple, optional
@@ -195,24 +204,33 @@ def _process_dask_array(
     >>> output_dask_array = _process_dask_array(dask_array, test_function1)
     >>> output_array = output_dask_array.compute()
 
+    Using iter_array
+
+    >>> def test_function2(image, value):
+    ...     return image * value
+    >>> dask_array = da.ones((4, 6, 10, 15), chunks=(2, 2, 2, 2))
+    >>> iter_array = da.random.randint(0, 99, (4, 6), chunks=(2, 2))
+    >>> output_dask_array = _process_dask_array(dask_array, test_function2)
+    >>> output_array = output_dask_array.compute()
+
     Getting output which is different shape than the input. For example
     two coordinates. Note: the output size must be the same for all the
     navigation positions. If the size is variable, for example with peak
     finding, use dtype=np.object (see below).
 
-    >>> def test_function2(image):
+    >>> def test_function3(image):
     ...     return [10, 3]
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function2, chunks=(2, 2, 2), drop_axis=(2, 3),
+    ...     dask_array, test_function3, chunks=(2, 2, 2), drop_axis=(2, 3),
     ...     new_axis=2, output_signal_size=(2, ))
 
     For functions where we don't know the shape of the output data,
     use dtype=np.object
 
-    >>> def test_function2(image):
+    >>> def test_function4(image):
     ...     return list(range(np.random.randint(20)))
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function2, chunks=(2, 2), drop_axis=(2, 3),
+    ...     dask_array, test_function4, chunks=(2, 2), drop_axis=(2, 3),
     ...     new_axis=None, dtype=np.object, output_signal_size=())
     >>> output_array = output_dask_array.compute()
 

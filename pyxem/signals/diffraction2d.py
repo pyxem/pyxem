@@ -1002,9 +1002,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         half_square_width=None,
         shifts=None,
         return_shifts=False,
-        align_kwargs=None,
         subpixel=True,
         lazy_result=None,
+        align_kwargs=None,
         *args,
         **kwargs,
     ):
@@ -1044,6 +1044,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             If True, the result will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is lazy, the result will also be lazy.
             If the signal is non-lazy, the result will be non-lazy.
+        align_kwargs : dict
+            Parameters passed to the alignment function. See scipy.ndimage.shift
+            for more information about the parameters.
         *args, **kwargs :
             Passed to the function which estimate the direct beam position
 
