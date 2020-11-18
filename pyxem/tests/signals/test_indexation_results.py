@@ -53,7 +53,7 @@ def sp_vector_match_result():
         0,
         0,
     )
-    return VectorMatchingResult(res)
+    return VectorMatchingResults(res)
 
 @pytest.fixture
 def dp_vector_match_result():
@@ -98,7 +98,7 @@ def dp_vector_match_result():
         0,
         0,
     )
-    return VectorMatchingResult(res)
+    return VectorMatchingResults(res)
 
 def test_single_vector_to_crystal_map(sp_vector_match_result):
     _ = sp_vector_match_result.to_crystal_map()
