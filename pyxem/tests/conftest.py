@@ -28,7 +28,7 @@ import numpy as np
 from pyxem.signals.diffraction2d import Diffraction2D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-
+from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
 # a straight lift from
 # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option--

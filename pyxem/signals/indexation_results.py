@@ -21,6 +21,7 @@ from hyperspy.signal import BaseSignal
 from hyperspy.signals import Signal2D
 from warnings import warn
 import numpy as np
+from operator import attrgetter
 
 from pyxem.signals import transfer_navigation_axes
 from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
@@ -28,6 +29,8 @@ from pyxem.utils.indexation_utils import get_nth_best_solution
 
 from orix.quaternion import Rotation
 from orix.crystal_map import CrystalMap
+
+from transforms3d.euler import mat2euler
 
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
@@ -178,7 +181,6 @@ class GenericMatchingResults():
         -------
         orix.CrystalMap
         """
-
         _s = self.data.map(_get_best_match,inplace=False)
 
         """ Gets properties """
@@ -274,9 +276,13 @@ class VectorMatchingResults(BaseSignal):
         """Obtain a crystallographic map specifying the best matching phase and
         orientation at each probe position with corresponding metrics.
 
-        Returns
+        Raises
         -------
+        ValueError("Currently under development")
         """
+
+        raise ValueError("Currently under development")
+
         _s = self.map(
             crystal_from_vector_matching, inplace=False)
 
