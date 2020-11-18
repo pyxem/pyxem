@@ -169,7 +169,14 @@ class GenericMatchingResults():
         self.data = hs.signals.Signal2D(data)
 
     def to_crystal_map(self):
-        #TODO: docstrings
+        """
+        Exports an indexation result with multiple results per navigation position to
+        crystal map with one result per pixel
+
+        Returns
+        -------
+        orix.CrystalMap
+        """
 
         _s = self.data.map(_get_best_match,inplace=False)
 

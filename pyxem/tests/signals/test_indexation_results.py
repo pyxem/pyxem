@@ -21,10 +21,91 @@ import pytest
 
 from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
+from diffsims.libraries.vector_library import DiffractionVectorLibrary
+from pyxem.utils.indexation_utils import OrientationResult
+from transforms3d.euler import euler2mat
 
 def test_TemplateMatchingResults_to_crystal_map():
     t = TemplateMatchingResults(np.empty((10,10,10,5)))
     return t.to_crystal_map()
+
+@pytest.fixture
+def sp_vector_match_result():
+    # We require (total_error of row_1 > correlation row_2)
+    res = np.empty(2, dtype="object")
+    res[0] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.5,
+        np.array([0.1, 0.05, 0.2]),
+        0.1,
+        1.0,
+        0,
+        0,
+    )
+    res[1] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.6,
+        np.array([0.1, 0.10, 0.2]),
+        0.2,
+        1.0,
+        0,
+        0,
+    )
+    return VectorMatchingResult(res)
+
+@pytest.fixture
+def dp_vector_match_result():
+    res = np.empty(4, dtype="object")
+    res[0] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([90, 0, 0]), "rzxz"),
+        0.6,
+        np.array([0.1, 0.10, 0.2]),
+        0.3,
+        1.0,
+        0,
+        0,
+    )
+    res[1] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 10, 20]), "rzxz"),
+        0.5,
+        np.array([0.1, 0.05, 0.2]),
+        0.4,
+        1.0,
+        0,
+        0,
+    )
+    res[2] = OrientationResult(
+        1,
+        euler2mat(*np.deg2rad([0, 45, 45]), "rzxz"),
+        0.8,
+        np.array([0.1, 0.30, 0.2]),
+        0.1,
+        1.0,
+        0,
+        0,
+    )
+    res[3] = OrientationResult(
+        1,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.7,
+        np.array([0.1, 0.05, 0.1]),
+        0.2,
+        1.0,
+        0,
+        0,
+    )
+    return VectorMatchingResult(res)
+
+def test_single_vector_to_crystal_map(sp_vector_match_result):
+    _ = sp_vector_match_result.to_crystal_map()
+
+def test_double_vector_to_crystal_map(dp_vector_match_result):
+    _ = dp_vector_match_result.to_crystal_map()
+
 
 @pytest.mark.parametrize(
     "overwrite, result_hkl, current_hkl, expected_hkl",
