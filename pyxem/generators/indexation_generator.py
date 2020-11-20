@@ -212,7 +212,7 @@ class TemplateIndexationGenerator:
             # Index at all real space pixels
             mask = 1
 
-        # tests if selected method is a valid and can print help for selected method.
+        # tests if selected method is valid and can print help for selected method.
         chosen_function = select_method_from_method_dict(
             method, method_dict, print_help
         )
