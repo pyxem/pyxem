@@ -271,6 +271,100 @@ class DPCSignal2D(Signal2D):
         pst._copy_signal2d_axes_manager_metadata(self, signal)
         return signal
 
+    def phase_retrieval(self, method='kottler'):
+        """Retrieve the phase from two orthogonal phase gradients.
+
+        The formulae taken for different methods are from the following refs:
+
+        'kottler' --- Equation 4
+        C. Kottler, C. David, F. Pfeiffer, and O. Bunk, "A two-directional
+        approach for grating based differential phase contrast imaging using
+        hard x-rays," Opt. Express 15, 1175-1181, 2007
+
+        'arnison' --- Equation 6
+        Arnison MR, Larkin KG, Sheppard CJ, Smith NI, Cogswell CJ. Linear
+        phase imaging using differential interference contrast microscopy.
+        J Microsc. 2004 Apr;214(Pt 1):7-12.
+
+        'frankot' --- Equation 21
+        R. T. Frankot and R. Chellappa, "A method for enforcing integrability
+        in shape from shading algorithms," in IEEE Transactions on Pattern
+        Analysis and Machine Intelligence, vol. 10, no. 4, pp. 439-451, 1988
+
+        Parameters
+        ----------
+        method : string, optional
+            the formula to use. The default is 'kottler'.
+
+        Raises
+        ------
+        ValueError
+            if the method is not implemented
+
+        Returns
+        -------
+        retrieved : ndarray
+            the phase retrieved.
+
+        Examples
+        --------
+        >>> from pyxem.dummy_data import dummy_data
+        >>> s = dummy_data.get_square_dpc_signal()
+        >>> s_phase = s.phase_retrieval()
+        >>> s_phase.plot()
+        """
+
+        method = method.lower()
+        if method not in ('kottler', 'arnison', 'frankot'):
+            raise ValueError("Method '{}' not recognised. 'kottler', 'arnison'"
+                             " and 'frankot' are available.".format(method))
+
+        # get x and y beam shift
+        dx = self.inav[0].data
+        dy = self.inav[1].data
+        nc, nr = dx.shape[1], dx.shape[0]
+
+        # get scan step size
+        calX = np.diff(self.axes_manager.signal_axes[0].axis).mean()
+        calY = np.diff(self.axes_manager.signal_axes[1].axis).mean()
+
+        # construct Fourier-space grids
+        kx = (2*np.pi) * np.fft.fftshift(np.fft.fftfreq(nc))
+        ky = (2*np.pi) * np.fft.fftshift(np.fft.fftfreq(nr))
+        kx_grid, ky_grid = np.meshgrid(kx, ky)
+
+        if method == 'kottler':
+            gxy = dx + 1j*dy
+            numerator = np.fft.fftshift(np.fft.fft2(gxy))
+            denominator = 2*np.pi*1j*(kx_grid + 1j*ky_grid)
+        elif method == 'arnison':
+            gxy = dx + 1j*dy
+            numerator = np.fft.fftshift(np.fft.fft2(gxy))
+            denominator = 2j*(np.sin(2*np.pi*calX*kx_grid) +
+                              1j*np.sin(2*np.pi*calY*ky_grid))
+        elif method == 'frankot':
+            kx_grid /= calX
+            ky_grid /= calY
+            fx = np.fft.fftshift(np.fft.fft2(dx))
+            fy = np.fft.fftshift(np.fft.fft2(dy))
+            wx, wy = 0.5, 0.5
+
+            numerator = -1j*(wx*kx_grid*fx + wy*ky_grid*fy)
+            denominator = wx*kx_grid**2 + wy*ky_grid**2
+
+        # handle the division by zero in the central pixel
+        # set the undefined/infinity pixel to 0
+        with np.errstate(divide='ignore', invalid='ignore'):
+            res = numerator / denominator
+        res = np.nan_to_num(res, nan=0, posinf=0, neginf=0)
+
+        retrieved = np.fft.ifft2(np.fft.ifftshift(res)).real
+
+        signal = Signal2D(retrieved)
+        pst._copy_signal2d_axes_manager_metadata(self, signal)
+
+        return signal
+
     def get_phase_signal(self, rotation=None):
         """Get DPC phase image visualized using continuous color scale.
 
