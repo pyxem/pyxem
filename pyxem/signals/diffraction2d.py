@@ -924,8 +924,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Must be one of "cross_correlate", "blur" or "interpolate"
         lazy_result : optional
             If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
-            By default, if the signal is lazy, the result will also be lazy.
-            If the signal is non-lazy, the result will be non-lazy.
+            By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
         **kwargs:
             Keyword arguments to be passed to the method function.
 
