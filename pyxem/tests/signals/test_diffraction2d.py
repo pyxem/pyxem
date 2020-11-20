@@ -460,7 +460,10 @@ class TestGetDirectBeamPosition:
         dx, dy = self.dx, self.dy
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
         s_shift = s.get_direct_beam_position(
-            method="interpolate", sigma=1, upsample_factor=2, kind="nearest",
+            method="interpolate",
+            sigma=1,
+            upsample_factor=2,
+            kind="nearest",
         )
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
         assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
@@ -471,6 +474,16 @@ class TestGetDirectBeamPosition:
         s_shift = s.get_direct_beam_position(
             method="cross_correlate", radius_start=0, radius_finish=1
         )
+
+    def test_lazy_result_none_non_lazy_signal(self):
+        s = self.s
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        assert not s_shift._lazy
+
+    def test_lazy_result_none_lazy_signal(self):
+        s = self.s.as_lazy()
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        assert s_shift._lazy
 
     def test_lazy_result(self):
         s = self.s
