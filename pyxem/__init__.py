@@ -48,8 +48,6 @@ from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 from .signals.polar_diffraction2d import PolarDiffraction2D
 from .signals.polar_diffraction2d import LazyPolarDiffraction2D
 
-from .signals.crystallographic_map import CrystallographicMap
-
 from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
 from .generators.pdf_generator1d import PDFGenerator1D
 from .generators.variance_generator import VarianceGenerator

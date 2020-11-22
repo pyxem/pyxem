@@ -27,17 +27,12 @@ from pyxem.signals import transfer_navigation_axes
 from pyxem.signals import select_method_from_method_dict
 
 from pyxem.utils.indexation_utils import (
-    correlate_library,
     zero_mean_normalized_correlation,
     fast_correlation,
-    full_frame_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
-    get_nth_best_solution,
-    correlate_library_from_dict,
-    optimal_fft_size,
-)
+    get_nth_best_solution)
 
 
 from transforms3d.euler import mat2euler, euler2mat
@@ -47,82 +42,121 @@ from diffsims.utils.sim_utils import get_electron_wavelength
 import lmfit
 
 
-def get_fourier_transform(template_coordinates, template_intensities, shape, fsize):
-    """Returns the Fourier transform of a list of templates.
-
-    Takes a list of template coordinates and the corresponding list of
-    template intensities, and returns the Fourier transform of the template.
-
-    Parameters
-    ----------
-    template_coordinates: numpy array
-        Array containing coordinates for non-zero intensities in the template
-    template_intensities: list
-        List of intensity values for the template.
-    shape: tuple
-        Dimensions of the signal.
-    fsize: list
-        Dimensions of the Fourier transformed signal.
-
-    Returns
-    -------
-    template_FT: numpy array
-        Fourier transform of the template.
-    template_norm: float
-        Self correlation value for the template.
-    """
-    template = np.zeros((shape))
-    template[
-        template_coordinates[:, 1], template_coordinates[:, 0]
-    ] = template_intensities[:]
-    template_FT = np.fft.fftshift(np.fft.rfftn(template, fsize))
-    template_norm = np.sqrt(full_frame_correlation(template_FT, 1, template_FT, 1))
-    return template_FT, template_norm
-
-
-def get_library_FT_dict(template_library, shape, fsize):
-    """Takes a template library and converts it to a dictionary of Fourier transformed templates.
-
-    Parameters
-    ----------
-    template_library: DiffractionLibrary
-        The library of simulated diffraction patterns for indexation.
-    shape: tuple
-        Dimensions of the signal.
-    fsize: list
-        Dimensions of the Fourier transformed signal.
-
-    Returns
-    -------
-    library_FT_dict: dict
-        Dictionary containing the fourier transformed template library, together with the corresponding orientations and
-        pattern norms.
-
-    """
-    library_FT_dict = {}
-    for entry, library_entry in enumerate(template_library.values()):
-        orientations = library_entry["orientations"]
-        pixel_coords = library_entry["pixel_coords"]
-        intensities = library_entry["intensities"]
-        template_FTs = []
-        pattern_norms = []
-        for coord, intensity in zip(pixel_coords, intensities):
-            template_FT, pattern_norm = get_fourier_transform(
-                coord, intensity, shape, fsize
-            )
-            template_FTs.append(template_FT)
-            pattern_norms.append(pattern_norm)
-
-        library_FT_dict[entry] = {
-            "orientations": orientations,
-            "patterns": template_FTs,
-            "pattern_norms": pattern_norms,
-        }
-
-    return library_FT_dict
-
-
 class IndexationGenerator:
+    """Generates an indexer for data using a number of methods.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+
+    Returns
+    -------
+    ValueError : "use TemplateIndexationGenerator or VectorIndexationGenerator"
+    """
+
+    def __init__(self, signal, diffraction_library):
+        raise ValueError("use TemplateIndexationGenerator or VectorIndexationGenerator")
+
+
+def _correlate_templates(image, library, n_largest, method, mask):
+    r"""Correlates all simulated diffraction templates in a DiffractionLibrary
+    with a particular experimental diffraction pattern (image).
+
+    Calculated using the normalised (see return type documentation) dot
+    product, or cosine distance,
+
+    .. math:: fast_correlation
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
+
+    .. math:: zero_mean_normalized_correlation
+        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\sum_{j=1}^m P(x_j,y_j)-avg(P)}}
+        for a template T and an experimental pattern P.
+
+    Parameters
+    ----------
+    image : numpy.array
+        The experimental diffraction pattern of interest.
+    library : DiffractionLibrary
+        The library of diffraction simulations to be correlated with the
+        experimental data.
+    n_largest : int
+        The number of well correlated simulations to be retained per phase
+    method : str
+        Name of method used to compute correlation between templates and diffraction patterns. Can be
+        'fast_correlation' or 'zero_mean_normalized_correlation'.
+    mask : bool
+        A mask for navigation axes. 1 indicates positions to be indexed.
+
+
+    Returns
+    -------
+    top_matches : numpy.array
+        Array of shape (<num phases>*n_largest, 5) containing the top n
+        correlated simulations for the experimental pattern of interest, where
+        each entry is on the form [phase index,alpha,beta,gamma,correlation].
+
+
+    References
+    ----------
+    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
+       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
+
+    """
+    phase_count = len(library.keys())
+    top_matches = np.zeros((n_largest*phase_count,5))
+
+    # return for the masked data
+    if mask != 1:
+        return top_matches
+
+    if method == "zero_mean_normalized_correlation":
+        nb_pixels = image.shape[0] * image.shape[1]
+        average_image_intensity = np.average(image)
+        image_std = np.linalg.norm(image - average_image_intensity)
+
+    for phase_number,phase in enumerate(library.keys()):
+        saved_results = np.zeros((n_largest,5))
+        saved_results[:,0] = phase_number
+
+        for entry_number in np.arange(len(library[phase]['orientations'])):
+            orientations = library[phase]["orientations"][entry_number]
+            pixel_coords = library[phase]["pixel_coords"][entry_number]
+            intensities  = library[phase]["intensities"][entry_number]
+
+            # Extract experimental intensities from the diffraction image
+            image_intensities = image[pixel_coords[:, 1], pixel_coords[:, 0]]
+
+            if method == "zero_mean_normalized_correlation":
+                corr_local = zero_mean_normalized_correlation(
+                        nb_pixels,
+                        image_std,
+                        average_image_intensity,
+                        image_intensities,
+                        intensities,
+                    )
+
+            elif method == "fast_correlation":
+                corr_local = fast_correlation(
+                        image_intensities, intensities,
+                        library[phase]["pattern_norms"][entry_number]
+                    )
+
+            if corr_local > np.min(saved_results[:,4]):
+                row_index = np.argmin(saved_results[:,4])
+                or_saved[row_index,1:3] = or_local
+                corr_saved[row_index,4] = corr_local
+
+        phase_sorted = saved_results[saved_results[:,4].argsort()]
+        start_slot = phase_number * n_largest
+        end_slot   = (phase_number + 1) * n_largest
+        top_matches[start_slot:end_slot,:] = phase_sorted
+
+    return top_matches
+
+class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
 
     Parameters
@@ -143,7 +177,6 @@ class IndexationGenerator:
         method="fast_correlation",
         mask=None,
         print_help=False,
-        *args,
         **kwargs,
     ):
         """Correlates the library of simulated diffraction patterns with the
@@ -152,26 +185,20 @@ class IndexationGenerator:
         Parameters
         ----------
         n_largest : int
-            The n orientations with the highest correlation values are returned.
+            The n orientations with the highest correlation values for each phase are returned.
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
-            'fast_correlation', 'full_frame_correlation' or 'zero_mean_normalized_correlation'.
+            'fast_correlation' or 'zero_mean_normalized_correlation'.
         mask : Array
             Array with the same size as signal (in navigation) or None
         print_help : bool
             Display information about the method used.
-        *args : arguments
-            Arguments passed to map().
         **kwargs : arguments
             Keyword arguments passed map().
 
         Returns
         -------
         matching_results : TemplateMatchingResults
-            Navigation axes of the electron diffraction signal containing
-            correlation results for each diffraction pattern, in the form
-            [Library Number , [z, x, z], Correlation Score]
-
         """
         signal = self.signal
         library = self.library
@@ -179,32 +206,28 @@ class IndexationGenerator:
         method_dict = {
             "fast_correlation": fast_correlation,
             "zero_mean_normalized_correlation": zero_mean_normalized_correlation,
-            "full_frame_correlation": full_frame_correlation,
         }
 
         if mask is None:
             # Index at all real space pixels
             mask = 1
 
-        # tests if selected method is a valid argument, and can print help for selected method.
+        # tests if selected method is valid and can print help for selected method.
         chosen_function = select_method_from_method_dict(
             method, method_dict, print_help
         )
-        if method in ["fast_correlation", "zero_mean_normalized_correlation"]:
-            # adds a normalisation to library
-            for phase in library.keys():
-                norm_array = np.ones(
-                    library[phase]["intensities"].shape[0]
-                )  # will store the norms
 
-                for i, intensity_array in enumerate(library[phase]["intensities"]):
-                    norm_array[i] = np.linalg.norm(intensity_array)
-                library[phase][
-                    "pattern_norms"
-                ] = norm_array  # puts this normalisation into the library
+        # adds a normalisation to library #TODO: Port to diffsims
+        for phase in library.keys():
+            # initialise a container for the norms
+            norm_array = np.ones(library[phase]["intensities"].shape[0])
 
-            matches = signal.map(
-                correlate_library,
+            for i, intensity_array in enumerate(library[phase]["intensities"]):
+                norm_array[i] = np.linalg.norm(intensity_array)
+                library[phase]["pattern_norms"] = norm_array
+
+        matches = signal.map(
+                _correlate_templates,
                 library=library,
                 n_largest=n_largest,
                 method=method,
@@ -213,29 +236,7 @@ class IndexationGenerator:
                 **kwargs,
             )
 
-        elif method in ["full_frame_correlation"]:
-            shape = signal.data.shape[-2:]
-            size = 2 * np.array(shape) - 1
-            fsize = [optimal_fft_size(a, real=True) for a in (size)]
-            if not (np.asarray(size) + 1 == np.asarray(fsize)).all():
-                raise ValueError(
-                    "Please select input signal and templates of dimensions 2**n X 2**n"
-                )
-
-            library_FT_dict = get_library_FT_dict(library, shape, fsize)
-
-            matches = signal.map(
-                correlate_library_from_dict,
-                template_dict=library_FT_dict,
-                n_largest=n_largest,
-                method=method,
-                mask=mask,
-                inplace=False,
-                **kwargs,
-            )
-
         matching_results = TemplateMatchingResults(matches)
-        matching_results = transfer_navigation_axes(matching_results, signal)
 
         return matching_results
 
