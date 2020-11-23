@@ -469,3 +469,66 @@ class TestDpcsignalIo:
         assert s_load.axes_manager[2].units == "b"
         assert s_load.axes_manager[1].name == "e"
         assert s_load.axes_manager[2].name == "f"
+
+class TestPhaseRetrieval:
+
+    def setup_method(self):
+        # construct the surface, two point with Gaussian distribution
+        rng = np.linspace(-20,10,num=512)
+        x, y = np.meshgrid(rng, rng)
+        surface = np.exp(-(x**2+y**2)/2) + np.exp(-((x-2)**2+(y+4)**2)/2)
+
+        # x and y phase gradient of the Gaussians, analytical form
+        dx = x*(-np.exp(-x**2/2 - y**2/2)) +\
+            (x-2)*-np.exp((-0.5*(x-2)**2-0.5*(y+4)**2))
+        dy = y*(-np.exp(-x**2/2 - y**2/2)) +\
+            (y+4)*-np.exp((-0.5*(x-2)**2-0.5*(y+4)**2))
+
+        data = np.empty((2, 512, 512))
+        data[0] = dx
+        data[1] = dy
+        self.s = DPCSignal2D(data)
+        self.s.axes_manager.signal_axes[0].axis = rng
+        self.s.axes_manager.signal_axes[1].axis = rng
+
+        # normalise for comparison later
+        surface -= surface.min()
+        surface /= surface.max()
+        self.surface = surface
+
+    def test_kottler(self):
+        s_recon = self.s.phase_retrieval('kottler')
+        recon = s_recon.data
+        recon -= recon.min()
+        recon /= recon.max()
+
+        assert np.isclose(self.surface, recon).all()
+
+    def test_arnison(self):
+        s_recon = self.s.phase_retrieval('arnison')
+        recon = s_recon.data
+        recon -= recon.min()
+        recon /= recon.max()
+
+        # higher tol as this recon produces sinusoidal signal
+        assert np.isclose(self.surface, recon, atol=1e-3).all()
+
+    def test_frankot(self):
+        s_recon = self.s.phase_retrieval('frankot')
+        recon = s_recon.data
+        recon -= recon.min()
+        recon /= recon.max()
+
+        assert np.isclose(self.surface, recon).all()
+
+    def test_mirroring(self):
+        s_recon = self.s.phase_retrieval('kottler', mirroring=True)
+        recon = s_recon.data
+        recon -= recon.min()
+        recon /= recon.max()
+
+        assert np.isclose(self.surface, recon).all()
+
+    def test_unavailable_method(self):
+        with pytest.raises(ValueError):
+            self.s.phase_retrieval('magic!')
