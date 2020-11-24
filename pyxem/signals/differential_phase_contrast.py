@@ -271,7 +271,8 @@ class DPCSignal2D(Signal2D):
         pst._copy_signal2d_axes_manager_metadata(self, signal)
         return signal
 
-    def phase_retrieval(self, method='kottler', mirroring=False):
+    def phase_retrieval(self, method='kottler', mirroring=False,
+                        mirror_flip=False):
         """Retrieve the phase from two orthogonal phase gradients.
 
         The formulae taken for different methods are from the following refs:
@@ -297,7 +298,12 @@ class DPCSignal2D(Signal2D):
             the formula to use. The default is 'kottler'.
         mirroring : bool, optional
             whether to mirror the phase gradients before Fourier transformed.
-            The default is False. It doesn't work well with centre of mass.
+            Attempt to reduce boundary effect. The default is False.
+        mirror_flip : bool, optional
+            only active when 'mirroring' is True. Flip the direction of the
+            derivatives which results in negation during signal mirroring.
+            The default is False. If the retrieved phase is not sensible after
+            mirroring, set this to True may resolve it.
 
         Raises
         ------
@@ -306,7 +312,7 @@ class DPCSignal2D(Signal2D):
 
         Returns
         -------
-        retrieved : ndarray
+        signal : HyperSpy 2D signal
             the phase retrieved.
 
         Examples
@@ -326,14 +332,25 @@ class DPCSignal2D(Signal2D):
         dx = self.inav[0].data
         dy = self.inav[1].data
 
+        # attempt to reduce boundary effect
         if mirroring:
-            col1 = np.vstack([dx, np.flip(dx, axis=0)])
-            col2 = np.vstack([-np.flip(dx, axis=1), -np.flip(dx)])
-            dx = np.hstack([col1, col2])
+            Ax = dx
+            Bx = np.flip(dx, axis=1)
+            Cx = np.flip(dx, axis=0)
+            Dx = np.flip(dx)
 
-            col1 = np.vstack([dy, -np.flip(dy, axis=0)])
-            col2 = np.vstack([np.flip(dy, axis=1), -np.flip(dy)])
-            dy = np.hstack([col1, col2])
+            Ay = dy
+            By = np.flip(dy, axis=1)
+            Cy = np.flip(dy, axis=0)
+            Dy = np.flip(dy)
+
+            # the -ve depends on the direction of derivatives
+            if not mirror_flip:
+                dx = np.bmat([[Ax, -Bx], [Cx, -Dx]]).A
+                dy = np.bmat([[Ay, By], [-Cy, -Dy]]).A
+            else:
+                dx = np.bmat([[Ax, Bx], [-Cx, -Dx]]).A
+                dy = np.bmat([[Ay, -By], [Cy, -Dy]]).A
 
         nc, nr = dx.shape[1], dx.shape[0]
 
@@ -373,6 +390,7 @@ class DPCSignal2D(Signal2D):
 
         retrieved = np.fft.ifft2(np.fft.ifftshift(res)).real
 
+        # get 1/4 of the result if mirroring
         if mirroring:
             M, N = retrieved.shape
             retrieved = retrieved[:M//2, :N//2]

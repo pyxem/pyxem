@@ -529,6 +529,23 @@ class TestPhaseRetrieval:
 
         assert np.isclose(self.surface, recon).all()
 
+    def test_mirror_flip(self):
+        s_noflip = self.s.phase_retrieval('kottler', mirroring=True, 
+                                          mirror_flip=False)
+        s_flip = self.s.phase_retrieval('kottler', mirroring=True, 
+                                        mirror_flip=True)
+        noflip = s_noflip.data
+        noflip -= noflip.min()
+        noflip /= noflip.max()
+        flip = s_flip.data
+        flip -= flip.min()
+        flip /= flip.max()
+        
+        noflip_sum_diff = np.abs(self.surface - noflip).sum()
+        flip_sum_diff = np.abs(self.surface - flip).sum()
+        
+        assert (noflip_sum_diff != flip_sum_diff)
+
     def test_unavailable_method(self):
         with pytest.raises(ValueError):
             self.s.phase_retrieval('magic!')
