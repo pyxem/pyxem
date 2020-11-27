@@ -500,8 +500,6 @@ class TestCenterDirectBeam:
         for ix in range(len(x_pos_list)):
             for iy in range(len(y_pos_list)):
                 data[iy, ix, y_pos_list[iy], x_pos_list[ix]] = 9
-        x_pos_list = x_pos_list
-        y_pos_list = y_pos_list
         s = Diffraction2D(data)
         s.axes_manager[0].scale = 0.5
         s.axes_manager[1].scale = 0.6
@@ -518,6 +516,7 @@ class TestCenterDirectBeam:
         s.center_direct_beam(method="blur", sigma=1)
         assert s._lazy is False
         assert (s.data[:, :, 10, 8] == 9).all()
+        # Make sure only the pixel we expect to change, has actually changed
         s.data[:, :, 10, 8] = 0
         assert not s.data.any()
 
@@ -643,6 +642,16 @@ class TestCenterDirectBeam:
     def test_method_cross_correlate(self):
         s = self.s
         s.center_direct_beam(method="cross_correlate", radius_start=0, radius_finish=2)
+
+    def test_parameter_both_method_and_shifts(self):
+        s = self.s
+        with pytest.raises(ValueError):
+            s.center_direct_beam(method="blur", sigma=1, shifts=np.ones((8, 6, 2)))
+
+    def test_parameter_neither_method_and_shifts(self):
+        s = self.s
+        with pytest.raises(ValueError):
+            s.center_direct_beam()
 
 
 class TestMakeProbeNavigation:

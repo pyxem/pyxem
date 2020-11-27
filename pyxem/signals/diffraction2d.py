@@ -1061,6 +1061,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
+        if (shifts is None) and (method is None):
+            raise ValueError("Either method or shifts parameter must be specified")
+        if (shifts is not None) and (method is not None):
+            raise ValueError(
+                "Only one of the shifts or method parameters should be specified, "
+                "not both"
+            )
         if lazy_result is None:
             lazy_result = self._lazy
         if align_kwargs is None:
