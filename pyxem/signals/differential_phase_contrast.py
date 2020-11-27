@@ -275,27 +275,11 @@ class DPCSignal2D(Signal2D):
                         mirror_flip=False):
         """Retrieve the phase from two orthogonal phase gradients.
 
-        The formulae taken for different methods are from the following refs:
-
-        'kottler' --- Equation 4
-        C. Kottler, C. David, F. Pfeiffer, and O. Bunk, "A two-directional
-        approach for grating based differential phase contrast imaging using
-        hard x-rays," Opt. Express 15, 1175-1181, 2007
-
-        'arnison' --- Equation 6
-        Arnison MR, Larkin KG, Sheppard CJ, Smith NI, Cogswell CJ. Linear
-        phase imaging using differential interference contrast microscopy.
-        J Microsc. 2004 Apr;214(Pt 1):7-12.
-
-        'frankot' --- Equation 21
-        R. T. Frankot and R. Chellappa, "A method for enforcing integrability
-        in shape from shading algorithms," in IEEE Transactions on Pattern
-        Analysis and Machine Intelligence, vol. 10, no. 4, pp. 439-451, 1988
-
         Parameters
         ----------
-        method : string, optional
-            the formula to use. The default is 'kottler'.
+        method : 'kottler', 'arnison' or 'frankot', optional
+            the formula to use, 'kottler'[1], 'arnison'[2] and 'frankot'[3]
+            are available. The default is 'kottler'.
         mirroring : bool, optional
             whether to mirror the phase gradients before Fourier transformed.
             Attempt to reduce boundary effect. The default is False.
@@ -314,6 +298,22 @@ class DPCSignal2D(Signal2D):
         -------
         signal : HyperSpy 2D signal
             the phase retrieved.
+
+        References
+        ----------
+        .. [1] Kottler, C., David, C., Pfeiffer, F. and Bunk, O., 2007. A
+        two-directional approach for grating based differential phase contrast
+        imaging using hard x-rays. Optics Express, 15(3), p.1175. (Equation 4)
+
+        .. [2] Arnison, M., Larkin, K., Sheppard, C., Smith, N. and
+        Cogswell, C., 2004. Linear phase imaging using differential
+        interference contrast microscopy. Journal of Microscopy, 214(1),
+        pp.7-12. (Equation 6)
+
+        .. [3] Frankot, R. and Chellappa, R., 1988. A method for enforcing
+        integrability in shape from shading algorithms.
+        IEEE Transactions on Pattern Analysis and Machine Intelligence,
+        10(4), pp.439-451. (Equation 21)
 
         Examples
         --------
