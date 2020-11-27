@@ -1012,34 +1012,27 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         electron diffraction pattern and translate it to the center of the
         image square.
 
-        The direct beam position can either be passed to the method with the shifts
-        parameter, or the function can calculate it on its own.
-
-        Note: if the signal has an integer dtype, and subpixel=True is used (the default)
-        the total intensity in the diffraction images will most likely not be preserved.
-        This is due to subpixel=True utilizing interpolation. To keep the total intensity
-        use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
-
         Parameters
         ----------
         method : str {'cross_correlate', 'blur', 'interpolate'}
-            Method used to estimate the direct beam position
+            Method used to estimate the direct beam position. The direct
+            beam position can also be passed directly with the shifts parameter.
         half_square_width : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
         shifts : Signal, optional
-            Position of the direct beam, for each navigation position in the signal
-            which should be shifted. Both shifts and the signal need to have the
-            same navigation shape, and shifts needs to have one signal dimension
-            with size 2.
+            The position of the direct beam, which can either be passed with this
+            parameter (shifts), or calculated on its own.
+            Both shifts and the signal need to have the same navigation shape, and
+            shifts needs to have one signal dimension with size 2.
         return_shifts : bool, default False
             If True, the values of applied shifts are returned
         subpixel : bool, optional
             If True, the data will be interpolated, allowing for subpixel shifts of
             the diffraction patterns. This can lead to changes in the total intensity
-            of the diffraction images. If False, the data is not interpolated.
-            Default True.
+            of the diffraction images, see Notes for more information. If False, the
+            data is not interpolated. Default True.
         lazy_result : optional
             If True, the result will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is lazy, the result will also be lazy.
@@ -1049,6 +1042,23 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             for more information about the parameters.
         *args, **kwargs :
             Passed to the function which estimate the direct beam position
+
+        Example
+        -------
+        >>> s.center_direct_beam(method='blur', sigma=1)
+
+        Using the shifts parameter
+
+        >>> s_shifts = s.get_direct_beam_position(
+        ...    method="interpolate", sigma=1, upsample_factor=2, kind="nearest")
+        >>> s.center_direct_beam(shifts=s_shifts)
+
+        Notes
+        -----
+        If the signal has an integer dtype, and subpixel=True is used (the default)
+        the total intensity in the diffraction images will most likely not be preserved.
+        This is due to subpixel=True utilizing interpolation. To keep the total intensity
+        use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
         if lazy_result is None:
