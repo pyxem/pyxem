@@ -474,8 +474,8 @@ class TestPhaseRetrieval:
 
     def setup_method(self):
         # construct the surface, two point with Gaussian distribution
-        rng = np.linspace(-20,10,num=512)
-        x, y = np.meshgrid(rng, rng)
+        coords = np.linspace(-20,10,num=512)
+        x, y = np.meshgrid(coords, coords)
         surface = np.exp(-(x**2+y**2)/2) + np.exp(-((x-2)**2+(y+4)**2)/2)
 
         # x and y phase gradient of the Gaussians, analytical form
@@ -488,64 +488,50 @@ class TestPhaseRetrieval:
         data[0] = dx
         data[1] = dy
         self.s = DPCSignal2D(data)
-        self.s.axes_manager.signal_axes[0].axis = rng
-        self.s.axes_manager.signal_axes[1].axis = rng
+        self.s.axes_manager.signal_axes[0].axis = coords
+        self.s.axes_manager.signal_axes[1].axis = coords
 
         # normalise for comparison later
-        surface -= surface.min()
-        surface /= surface.max()
+        surface -= surface.mean()
+        surface /= surface.std()
         self.surface = surface
 
-    def test_kottler(self):
-        s_recon = self.s.phase_retrieval('kottler')
+    @pytest.mark.parametrize('method', ['kottler', 'arnison', 'frankot'])
+    def test_kottler(self, method):
+        s_recon = self.s.phase_retrieval(method=method)
         recon = s_recon.data
-        recon -= recon.min()
-        recon /= recon.max()
+        recon -= recon.mean()
+        recon /= recon.std()
 
-        assert np.isclose(self.surface, recon).all()
-
-    def test_arnison(self):
-        s_recon = self.s.phase_retrieval('arnison')
-        recon = s_recon.data
-        recon -= recon.min()
-        recon /= recon.max()
-
-        # higher tol as this recon produces sinusoidal signal
         assert np.isclose(self.surface, recon, atol=1e-3).all()
 
-    def test_frankot(self):
-        s_recon = self.s.phase_retrieval('frankot')
+    @pytest.mark.parametrize('method', ['kottler', 'arnison', 'frankot'])
+    def test_mirroring(self, method):
+        s_recon = self.s.phase_retrieval(method, mirroring=True)
         recon = s_recon.data
-        recon -= recon.min()
-        recon /= recon.max()
+        recon -= recon.mean()
+        recon /= recon.std()
 
-        assert np.isclose(self.surface, recon).all()
+        assert np.isclose(self.surface, recon, atol=1e-3).all()
 
-    def test_mirroring(self):
-        s_recon = self.s.phase_retrieval('kottler', mirroring=True)
-        recon = s_recon.data
-        recon -= recon.min()
-        recon /= recon.max()
-
-        assert np.isclose(self.surface, recon).all()
-
-    def test_mirror_flip(self):
-        s_noflip = self.s.phase_retrieval('kottler', mirroring=True, 
+    @pytest.mark.parametrize('method', ['kottler', 'arnison', 'frankot'])
+    def test_mirror_flip(self, method):
+        s_noflip = self.s.phase_retrieval(method, mirroring=True,
                                           mirror_flip=False)
-        s_flip = self.s.phase_retrieval('kottler', mirroring=True, 
+        s_flip = self.s.phase_retrieval(method, mirroring=True,
                                         mirror_flip=True)
         noflip = s_noflip.data
-        noflip -= noflip.min()
-        noflip /= noflip.max()
+        noflip -= noflip.mean()
+        noflip /= noflip.std()
         flip = s_flip.data
-        flip -= flip.min()
-        flip /= flip.max()
-        
+        flip -= flip.mean()
+        flip /= flip.std()
+
         noflip_sum_diff = np.abs(self.surface - noflip).sum()
         flip_sum_diff = np.abs(self.surface - flip).sum()
-        
+
         assert (noflip_sum_diff != flip_sum_diff)
 
+    @pytest.mark.xfail(reason="invalid_method")
     def test_unavailable_method(self):
-        with pytest.raises(ValueError):
-            self.s.phase_retrieval('magic!')
+        self.s.phase_retrieval('magic!')
