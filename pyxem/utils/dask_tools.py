@@ -243,7 +243,7 @@ def _process_dask_array(
     output_array = da.map_blocks(
         _process_chunk,
         dask_array_rechunked,
-        iter_array,
+        iter_array,  # This MUST be passed as an argument, NOT an keyword argument
         process_func=process_func,
         dtype=dtype,
         output_signal_size=output_signal_size,
@@ -257,6 +257,47 @@ def _process_dask_array(
 
 
 def _get_iter_array(iter_array, dask_array):
+    """Make sure a dask array can be used together with another dask array in map_blocks.
+
+    It is possible to pass two dask arrays to da.map_blocks, where map_blocks will
+    iterate over the two dask arrays at the same time. However, this requires both
+    dask_arrays to have:
+
+    - i) the same number of dimensions
+    - ii) the same shape in the "navigation" dimensions
+    - iii) the same chunking in the "navigation" dimensions
+
+    Here, we call dask_array the "main" data, which contains some kind of image data.
+    iter_array contains some kind of process parameter, which is necessary to do the
+    processing. For example the position of the center diffraction beam. The navigation
+    dimensions are the non-signal dimensions in the dask_array. So if the dask_array
+    has the shape (20, 20, 100, 100), the signal dimensions are the two last ones
+    (100, 100), and the navigation dimensions (20, 20).
+
+    In practice, this means that if dask_array has the navigation shape (20, 20), the
+    iter_array must also have the navigation shape (20, 20). However, the signal
+    shape can be different. So if dask_array has the shape (20, 20, 100, 100), the
+    iter_array can have the shape (20, 20, 2). But due to i), iter_array will be
+    reshaped to (20, 20, 2, 1).
+
+    In addition, the signal dimensions MUST be in one chunk, and the navigation
+    chunks must be the same. So if dask_array has the chunking (5, 5, 100, 100),
+    the iter_array must have the chunking (5, 5, 2, 1).
+
+    This function checks all of these requirements, extend the dimensions, and rechunk
+    the signal dimension of the iter_array if necessary.
+
+    Example
+    -------
+    >>> import dask.array as da
+    >>> dask_array = da.ones((20, 20, 100, 100), chunks=(5, 5, 100, 100))
+    >>> iter_array = da.ones((20, 20, 2), chunks=(5, 5, 2))
+    >>> import pyxem.utils.dask_tools as dt
+    >>> iter_array_new = dt._get_iter_array(iter_array, dask_array)
+    >>> iter_array_new.shape
+    (20, 20, 2, 1)
+
+    """
     if len(iter_array.shape) > len(dask_array.shape):
         raise ValueError(
             "iter_array {0} can not have more dimensions than dask_array {1}".format(
