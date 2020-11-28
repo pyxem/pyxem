@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added a setup.cfg
 - get_direct_beam_position now supports lazy proccessing (#648)
+- center_direct_beam now supports lazy processing (#658)
+- Several functions for processing large datasets using dask (#648, #658)
 
 ### Changed
 - Calibration workflow has been altered (see PR #640 for details)

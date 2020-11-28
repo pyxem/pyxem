@@ -24,6 +24,11 @@ import scipy.ndimage as ndi
 from skimage import morphology
 
 
+def align_single_frame(image, shifts, **kwargs):
+    temp_image = ndi.shift(image, shifts[::-1], **kwargs)
+    return temp_image
+
+
 def get_signal_dimension_chunk_slice_list(chunks):
     """Convenience function for getting the signal chunks as slices
 
@@ -51,6 +56,10 @@ def get_signal_dimension_host_chunk_slice(x, y, chunks):
 
 def _rechunk_signal2d_dim_one_chunk(dask_array):
     array_dims = len(dask_array.shape)
+    if not hasattr(dask_array, "chunks"):
+        raise AttributeError(
+            "dask_array must be a dask array, not {0}".format(type(dask_array))
+        )
     if array_dims < 2:
         raise ValueError(
             "dask_array must be at least two dimensions, not {0}".format(array_dims)
@@ -62,6 +71,16 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     chunks = tuple(chunks)
     dask_array_rechunked = dask_array.rechunk(chunks=chunks)
     return dask_array_rechunked
+
+
+def _expand_iter_dimensions(iter_dask_array, dask_array_dims):
+    iter_dask_array_shape = list(iter_dask_array.shape)
+    iter_dims = len(iter_dask_array_shape)
+    if dask_array_dims > iter_dims:
+        for i in range(dask_array_dims - iter_dims):
+            iter_dask_array_shape.append(1)
+    iter_dask_array = iter_dask_array.reshape(iter_dask_array_shape)
+    return iter_dask_array
 
 
 def _get_dask_array(signal, size_of_chunk=32):
@@ -77,12 +96,21 @@ def _get_dask_array(signal, size_of_chunk=32):
 
 def _process_chunk(
     data,
+    iter_array,
     process_func,
     output_signal_size=None,
     args_process=None,
     kwargs_process=None,
     block_info=None,
 ):
+    if iter_array is not None:
+        nav_shape = data.shape[:-2]
+        iter_nav_shape = iter_array.shape[: len(nav_shape)]
+        if nav_shape != iter_nav_shape:
+            raise ValueError(
+                "iter_array nav shape {0} must be the same as the navigation shape as "
+                "the data {1}".format(iter_nav_shape, nav_shape)
+            )
     dtype = block_info[None]["dtype"]
     if args_process is None:
         args_process = []
@@ -95,15 +123,22 @@ def _process_chunk(
     output_array = np.zeros(output_shape, dtype=dtype)
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
-        output_array[islice] = process_func(
-            data[islice], *args_process, **kwargs_process
-        )
+        if iter_array is not None:
+            iter_value = iter_array[islice].squeeze()
+            output_array[islice] = process_func(
+                data[islice], iter_value, *args_process, **kwargs_process
+            )
+        else:
+            output_array[islice] = process_func(
+                data[islice], *args_process, **kwargs_process
+            )
     return output_array
 
 
 def _process_dask_array(
     dask_array,
     process_func,
+    iter_array=None,
     dtype=None,
     chunks=None,
     drop_axis=None,
@@ -124,13 +159,22 @@ def _process_dask_array(
     ----------
     dask_array : Dask Array
         Must be atleast two dimensions, and the two last dimensions are
-        assumed to be the signal dimensions.
+        assumed to be the signal dimensions. The rest of the dimensions are assumed
+        to be the navigation dimensions.
     process_func : Function
         A function which must at least take one parameter, can return anything
         but the output dimensions must match with drop_axis, new_axis and chunks.
         See Examples below for how to use it.
+    iter_array : Dask Array, optional
+        Array which will be iterated over together with the dask_array. iter_array
+        must have the same shape and chunking for the navigation dimensions, as the
+        dask_array. For example, the process_func for the dask_array[10, 5] position
+        will also receive the value in iter_array[10, 5].
+        iter_array can not have more dimensions than the dask_array.
     dtype : NumPy dtype, optional
+        dtype for the output array
     chunks : tuple, optional
+        Chunking for the output array
     drop_axis : int or tuple, optional
         Axes which will be removed from the output array
     new_axis : int or tuple, optional
@@ -160,24 +204,33 @@ def _process_dask_array(
     >>> output_dask_array = _process_dask_array(dask_array, test_function1)
     >>> output_array = output_dask_array.compute()
 
+    Using iter_array
+
+    >>> def test_function2(image, value):
+    ...     return image * value
+    >>> dask_array = da.ones((4, 6, 10, 15), chunks=(2, 2, 2, 2))
+    >>> iter_array = da.random.randint(0, 99, (4, 6), chunks=(2, 2))
+    >>> output_dask_array = _process_dask_array(dask_array, test_function2)
+    >>> output_array = output_dask_array.compute()
+
     Getting output which is different shape than the input. For example
     two coordinates. Note: the output size must be the same for all the
     navigation positions. If the size is variable, for example with peak
     finding, use dtype=np.object (see below).
 
-    >>> def test_function2(image):
+    >>> def test_function3(image):
     ...     return [10, 3]
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function2, chunks=(2, 2, 2), drop_axis=(2, 3),
+    ...     dask_array, test_function3, chunks=(2, 2, 2), drop_axis=(2, 3),
     ...     new_axis=2, output_signal_size=(2, ))
 
     For functions where we don't know the shape of the output data,
     use dtype=np.object
 
-    >>> def test_function2(image):
+    >>> def test_function4(image):
     ...     return list(range(np.random.randint(20)))
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function2, chunks=(2, 2), drop_axis=(2, 3),
+    ...     dask_array, test_function4, chunks=(2, 2), drop_axis=(2, 3),
     ...     new_axis=None, dtype=np.object, output_signal_size=())
     >>> output_array = output_dask_array.compute()
 
@@ -185,9 +238,12 @@ def _process_dask_array(
     if dtype is None:
         dtype = dask_array.dtype
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
+    if iter_array is not None:
+        iter_array = _get_iter_array(iter_array, dask_array_rechunked)
     output_array = da.map_blocks(
         _process_chunk,
         dask_array_rechunked,
+        iter_array,  # This MUST be passed as an argument, NOT an keyword argument
         process_func=process_func,
         dtype=dtype,
         output_signal_size=output_signal_size,
@@ -198,6 +254,83 @@ def _process_dask_array(
         kwargs_process=kwargs_process,
     )
     return output_array
+
+
+def _get_iter_array(iter_array, dask_array):
+    """Make sure a dask array can be used together with another dask array in map_blocks.
+
+    It is possible to pass two dask arrays to da.map_blocks, where map_blocks will
+    iterate over the two dask arrays at the same time. However, this requires both
+    dask_arrays to have:
+
+    - i) the same number of dimensions
+    - ii) the same shape in the "navigation" dimensions
+    - iii) the same chunking in the "navigation" dimensions
+
+    Here, we call dask_array the "main" data, which contains some kind of image data.
+    iter_array contains some kind of process parameter, which is necessary to do the
+    processing. For example the position of the center diffraction beam. The navigation
+    dimensions are the non-signal dimensions in the dask_array. So if the dask_array
+    has the shape (20, 20, 100, 100), the signal dimensions are the two last ones
+    (100, 100), and the navigation dimensions (20, 20).
+
+    In practice, this means that if dask_array has the navigation shape (20, 20), the
+    iter_array must also have the navigation shape (20, 20). However, the signal
+    shape can be different. So if dask_array has the shape (20, 20, 100, 100), the
+    iter_array can have the shape (20, 20, 2). But due to i), iter_array will be
+    reshaped to (20, 20, 2, 1).
+
+    In addition, the signal dimensions MUST be in one chunk, and the navigation
+    chunks must be the same. So if dask_array has the chunking (5, 5, 100, 100),
+    the iter_array must have the chunking (5, 5, 2, 1).
+
+    This function checks all of these requirements, extend the dimensions, and rechunk
+    the signal dimension of the iter_array if necessary.
+
+    Example
+    -------
+    >>> import dask.array as da
+    >>> dask_array = da.ones((20, 20, 100, 100), chunks=(5, 5, 100, 100))
+    >>> iter_array = da.ones((20, 20, 2), chunks=(5, 5, 2))
+    >>> import pyxem.utils.dask_tools as dt
+    >>> iter_array_new = dt._get_iter_array(iter_array, dask_array)
+    >>> iter_array_new.shape
+    (20, 20, 2, 1)
+
+    """
+    if len(iter_array.shape) > len(dask_array.shape):
+        raise ValueError(
+            "iter_array {0} can not have more dimensions than dask_array {1}".format(
+                iter_array.shape, dask_array.shape
+            )
+        )
+
+    nav_shape_dask_array = dask_array.shape[:-2]
+    nav_dim_dask_array = len(nav_shape_dask_array)
+    nav_shape_iter_array = iter_array.shape[:nav_dim_dask_array]
+    if nav_shape_iter_array != nav_shape_dask_array:
+        raise ValueError(
+            "iter_array nav shape {0} must be same as dask_array nav shape {1}".format(
+                nav_shape_iter_array, nav_shape_dask_array
+            )
+        )
+
+    if not hasattr(iter_array, "chunks"):
+        raise ValueError(
+            "iter_array must be dask array, not {0}".format(type(iter_array))
+        )
+    nav_chunks_dask_array = dask_array.chunks[:nav_dim_dask_array]
+    nav_chunks_iter_array = iter_array.chunks[:nav_dim_dask_array]
+    if nav_chunks_dask_array != nav_chunks_iter_array:
+        raise ValueError(
+            "iter_array nav chunks {0} must be same as dask_array nav chunks {1}".format(
+                nav_chunks_iter_array, nav_chunks_dask_array
+            )
+        )
+
+    iter_array = _expand_iter_dimensions(iter_array, len(dask_array.shape))
+    iter_array = _rechunk_signal2d_dim_one_chunk(iter_array)
+    return iter_array
 
 
 def _mask_array(dask_array, mask_array, fill_value=None):

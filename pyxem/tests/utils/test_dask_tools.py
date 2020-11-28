@@ -70,6 +70,22 @@ class TestSignalDimensionGetChunkSliceList:
         assert chunk_slice_list[0] == np.s_[0:20, 0:20]
 
 
+@pytest.mark.parametrize(
+    "input_shape,iter_shape",
+    [
+        [(9, 8, 6, 6), (9, 8, 2)],
+        [(9, 8, 6, 6), (9, 8, 2, 2)],
+        [(9, 8, 6), (9, 8)],
+        [(9, 8, 6, 20, 20), (9, 8)],
+    ],
+)
+def test_expand_iter_dimensions(input_shape, iter_shape):
+    data_dask = da.zeros(input_shape, chunks=[2] * len(input_shape))
+    iter_dask = da.zeros(iter_shape, chunks=[2] * len(iter_shape))
+    output_array = dt._expand_iter_dimensions(iter_dask, len(data_dask.shape))
+    assert len(data_dask.shape) == len(output_array.shape)
+
+
 class TestGetSignalDimensionHostChunkSlice:
     @pytest.mark.parametrize(
         "xy, sig_slice, xchunk, ychunk",
@@ -118,12 +134,13 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return image + 1
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert chunk_input.shape == chunk_output.shape
         assert chunk_output.dtype == dtype
@@ -133,12 +150,17 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return (5, 2)
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, output_signal_size=(2,), block_info=block_info
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(2,),
+            block_info=block_info,
         )
         output_shape = chunk_input.shape[:-2] + (2,)
         assert output_shape == chunk_output.shape
@@ -152,12 +174,17 @@ class TestProcessChunk:
     def test_dtype(self, dtype):
         chunk_input = np.zeros((3, 4, 10, 8), dtype=np.int16)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return 4.8
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, output_signal_size=(1,), block_info=block_info
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(1,),
+            block_info=block_info,
         )
         output_shape = chunk_input.shape[:-2] + (1,)
         assert output_shape == chunk_output.shape
@@ -167,6 +194,7 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image, value1, value2):
             return (image + value1) / value2
@@ -174,6 +202,7 @@ class TestProcessChunk:
         value1, value2 = 24, 4
         chunk_output = dt._process_chunk(
             chunk_input,
+            iter_array,
             test_function,
             args_process=[value1, value2],
             block_info=block_info,
@@ -184,6 +213,7 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image, value1=2, value2=2):
             return (image + value1) / value2
@@ -191,6 +221,7 @@ class TestProcessChunk:
         value1, value2 = 15, 3
         chunk_output1 = dt._process_chunk(
             chunk_input,
+            iter_array,
             test_function,
             kwargs_process={"value1": value1, "value2": value2},
             block_info=block_info,
@@ -198,7 +229,7 @@ class TestProcessChunk:
         assert np.all(chunk_output1 == 5)
 
         chunk_output2 = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert np.all(chunk_output2 == 1)
 
@@ -209,14 +240,48 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros(shape, dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return image
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert chunk_input.shape == chunk_output.shape
+
+    def test_iter_array(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        iter_array = np.random.randint(0, 256, (3, 4, 1, 1))
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image, value):
+            return value
+
+        chunk_output = dt._process_chunk(
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(1,),
+            block_info=block_info,
+        )
+        assert (chunk_output.squeeze() == iter_array.squeeze()).all()
+
+    def test_iter_array_wrong_shape(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        iter_array = np.random.randint(0, 256, (3, 5, 1, 1))
+        block_info = {None: {"dtype": dtype}}
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            chunk_output = dt._process_chunk(
+                chunk_input,
+                iter_array,
+                test_function,
+                output_signal_size=(1,),
+                block_info=block_info,
+            )
 
 
 class TestProcessDaskArray:
@@ -243,7 +308,11 @@ class TestProcessDaskArray:
         def test_function(image):
             return image
 
-        dask_output = dt._process_dask_array(dask_input, test_function, dtype=dtype,)
+        dask_output = dt._process_dask_array(
+            dask_input,
+            test_function,
+            dtype=dtype,
+        )
         array_output = dask_output.compute()
         assert array_output.dtype == dtype
 
@@ -296,7 +365,10 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output = dt._process_dask_array(
-            dask_input, test_function, value1=value1, value2=value2,
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
         )
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
@@ -310,9 +382,15 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output1 = dt._process_dask_array(
-            dask_input, test_function, value1=value1, value2=value2,
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
         )
-        dask_output2 = dt._process_dask_array(dask_input, test_function,)
+        dask_output2 = dt._process_dask_array(
+            dask_input,
+            test_function,
+        )
         array_output1 = dask_output1.compute()
         array_output2 = dask_output2.compute()
         assert np.all(array_output1 == 5)
@@ -332,6 +410,133 @@ class TestProcessDaskArray:
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
 
+    def test_dask_array_wrong_type(self):
+        array_input = np.zeros((4, 6, 10, 10))
+        test_function = lambda a: 1
+        with pytest.raises(AttributeError):
+            dt._process_dask_array(array_input, test_function)
+
+    @pytest.mark.parametrize(
+        "dask_shape,iter_shape",
+        [
+            [(8, 10), ()],
+            [(6, 8, 10), (6,)],
+            [(4, 6, 8, 10), (4, 6)],
+            [(2, 4, 6, 8, 10), (2, 4, 6)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6)],
+            [(8, 10), (10,)],
+            [(6, 8, 10), (6, 10)],
+            [(4, 6, 8, 10), (4, 6, 10)],
+            [(2, 4, 6, 8, 10), (2, 4, 6, 10)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6, 10)],
+            [(8, 10), (8, 10)],
+            [(6, 8, 10), (6, 8, 10)],
+            [(4, 6, 8, 10), (4, 6, 8, 10)],
+            [(2, 4, 6, 8, 10), (2, 4, 6, 8, 10)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6, 8, 10)],
+        ],
+    )
+    def test_iter_array1d(self, dask_shape, iter_shape):
+        dask_chunks = [2] * len(dask_shape)
+        iter_chunks = [2] * len(iter_shape)
+        dask_input = da.zeros(dask_shape, chunks=dask_chunks, dtype=np.uint16)
+        iter_input = da.random.randint(0, 256, iter_shape, chunks=iter_chunks)
+
+        def test_function(image, value):
+            temp_image = image.copy()
+            temp_image[:] = value
+            return temp_image
+
+        dask_output = dt._process_dask_array(dask_input, test_function, iter_input)
+        data_output = dask_output.compute()
+        iter_array = iter_input.compute()
+        for i in np.ndindex(data_output.shape[:-2]):
+            data = data_output[i]
+            value = iter_array[i]
+            assert (data == value).all()
+
+    def test_too_large_iter_array(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 6, 2, 2, 4), chunks=(2, 2, 2, 2, 4))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_wrong_nav_shape(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 3), chunks=(2, 2))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_non_dask_iter_array(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = np.zeros((4, 6))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_chunks_not_aligned(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 6, 2), chunks=(2, 3, 2))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+
+class TestGetIterArray:
+    def test_too_large_iter_array(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros(
+            (4, 6, 8, 10, 12), chunks=(2, 2, 2, 2, 2), dtype=np.uint16
+        )
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array, dask_array)
+
+    def test_wrong_nav_shape(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array0 = da.zeros((4, 6, 2), chunks=(2, 2, 2), dtype=np.uint16)
+        iter_array1 = da.zeros((4, 5, 2), chunks=(2, 2, 2), dtype=np.uint16)
+
+        dt._get_iter_array(iter_array0, dask_array)
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array1, dask_array)
+
+    def test_non_dask_iter_array(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = np.zeros((4, 6, 2), dtype=np.uint16)
+
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array, dask_array)
+
+    def test_chunks_not_aligned(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros((4, 6, 2), chunks=(2, 2, 2), dtype=np.uint16)
+
+        dask_array0 = dask_array[:, 1:]
+        iter_array0 = iter_array[:, 1:]
+        iter_array1 = iter_array[:, :-1]
+
+        dt._get_iter_array(iter_array0, dask_array0)
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array1, dask_array0)
+
+    @pytest.mark.parametrize(
+        "iter_array_shape,chunk_shape",
+        [[(4, 6, 8, 12), (2, 2, 4, 6)], [(4, 6, 2), (2, 2, 1)], [(4, 6), (2, 2)]],
+    )
+    def test_iter_array_shape_and_chunks(self, iter_array_shape, chunk_shape):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros(iter_array_shape, chunks=chunk_shape, dtype=np.uint16)
+
+        iter_array_output = dt._get_iter_array(iter_array, dask_array)
+        assert len(iter_array_output.shape) == len(dask_array.shape)
+        nav_shape = len(dask_array.shape) - 2
+        assert iter_array_output.chunks[:nav_shape] == dask_array.chunks[:nav_shape]
+        chunk_sig_iter = iter_array_output.chunks[nav_shape:]
+        chunk_sig_iter = tuple(np.array(chunk_sig_iter).squeeze())
+        assert chunk_sig_iter == iter_array_output.shape[nav_shape:]
+
 
 class TestGetDaskArray:
     def test_simple(self):
@@ -349,6 +554,72 @@ class TestGetDaskArray:
         array_out = dt._get_dask_array(s)
         assert s.data.chunks == array_out.chunks
         assert s.data.shape == array_out.shape
+
+
+class TestAlignSingleFrame:
+    @pytest.mark.parametrize(
+        "shifts", [[0, 0], [1, 0], [-1, 0], [0, -1], [-1, -1], [-2, -3], [-2, -5]]
+    )
+    def test_simple(self, shifts):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.uint16)
+        x, y = 3, 7
+        image[y, x] = 7
+        image_shifted = dt.align_single_frame(image, shifts)
+        pos = np.s_[y + shifts[1], x + shifts[0]]
+        assert image_shifted[pos] == 7
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize(
+        "shifts,pos",
+        [
+            [[0.5, 0.5], np.s_[7:9, 3:5]],
+            [[0.0, 0.5], np.s_[7:9, 3]],
+            [[0.0, -0.5], np.s_[6:8, 3]],
+            [[1.0, -1.5], np.s_[5:7, 4]],
+        ],
+    )
+    def test_subpixel_integer_image(self, shifts, pos):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.uint16)
+        x, y = 3, 7
+        image[y, x] = 8
+        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        assert (image_shifted[pos] >= 2).all()
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize(
+        "shifts,pos",
+        [
+            [[-1.0, -2.0], np.s_[5, 2]],
+            [[-0.5, -2.0], np.s_[5, 2:4]],
+            [[-0.5, -2.5], np.s_[4:6, 2:4]],
+            [[-0.25, 0.0], np.s_[7, 2:4]],
+        ],
+    )
+    def test_subpixel_float_image(self, shifts, pos):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.float32)
+        x, y = 3, 7
+        image[y, x] = 9
+        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        assert image_shifted[pos].sum() == 9
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize("shifts", [[-0.7, -2.7], [1.1, -1.1]])
+    def test_not_subpixel_float_image(self, shifts):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.float32)
+        x, y = 3, 7
+        image[y, x] = 9
+        image_shifted = dt.align_single_frame(image, shifts, order=0)
+        pos = np.s_[y + round(shifts[1]), x + round(shifts[0])]
+        assert image_shifted[pos] == 9.0
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
 
 
 @pytest.mark.slow
