@@ -24,7 +24,7 @@ jobs:
         run: python -V; pip -V
       - name: Install depedencies and package
         shell: bash
-        run: pip install -U -e .
+        run: pip install -U -e . '[tests]'
       - name: Run tests
         run: pytest --cov=pyxem --pyargs pyxem
       - name: Generate line coverage
