@@ -62,7 +62,7 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
     packages=find_packages(),
-    extras_require=extra_feature_requirements
+    extras_require=extra_feature_requirements,
     install_requires=[
         "scikit-image >= 0.15.0, < 0.17",  # 0.17 is currently not avaliable on conda
         "matplotlib >= 3.1.1",  # 3.1.0 failed
