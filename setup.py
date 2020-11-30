@@ -25,11 +25,7 @@ exec(open("pyxem/release_info.py").read())  # grab version info
 # tests. From setuptools:
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
 extra_feature_requirements = {
-    "tests": [
-    	"pytest>=5.0", 
-    	 "pytest-cov>=2.8.1",
-    	 "coveralls>=1.10",
-    	 "coverage>=5.0"]
+    "tests": ["pytest>=5.0", "pytest-cov>=2.8.1", "coveralls>=1.10", "coverage>=5.0"]
 }
 
 
