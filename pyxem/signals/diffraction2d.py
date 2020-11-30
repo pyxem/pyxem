@@ -404,18 +404,24 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=unit)
             radial_range[0] = 0
 
-        integration = self.map(
+        data_dask_array = _get_dask_array(self)
+        integration = _process_dask_array(
+            data_dask_array,
             azimuthal_integrate1d,
+            drop_axis=(2, 3),
+            new_axis=2,
+            output_signal_size=(npt, ),
             azimuthal_integrator=self.ai,
             npt_rad=npt,
             azimuth_range=azimuth_range,
             radial_range=radial_range,
             method=method,
-            inplace=inplace,
             unit=unit,
             sum=sum,
             **kwargs,
         )
+        integration = LazySignal1D(integration)
+
         # Dealing with axis changes
         if inplace:
             k_axis = self.axes_manager.signal_axes[0]
