@@ -32,6 +32,7 @@ import pyxem.dummy_data.dummy_data as dd
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem as pxm
 
+
 class TestMakeBivariateHistogram:
     def test_single_x(self):
         size = 100
@@ -62,6 +63,7 @@ class TestMakeBivariateHistogram:
         assert s.data[hist_iY, hist_iX] == size
         s.data[hist_iY, hist_iX] = 0
         assert not s.data.any()
+
 
 class TestDpcBasesignalCreate:
     def test_create(self):
@@ -469,3 +471,71 @@ class TestDpcsignalIo:
         assert s_load.axes_manager[2].units == "b"
         assert s_load.axes_manager[1].name == "e"
         assert s_load.axes_manager[2].name == "f"
+
+
+class TestPhaseRetrieval:
+    def setup_method(self):
+        # construct the surface, two point with Gaussian distribution
+        coords = np.linspace(-20, 10, num=512)
+        x, y = np.meshgrid(coords, coords)
+        surface = np.exp(-(x ** 2 + y ** 2) / 2) + np.exp(
+            -((x - 2) ** 2 + (y + 4) ** 2) / 2
+        )
+
+        # x and y phase gradient of the Gaussians, analytical form
+        dx = x * (-np.exp(-(x ** 2) / 2 - y ** 2 / 2)) + (x - 2) * -np.exp(
+            (-0.5 * (x - 2) ** 2 - 0.5 * (y + 4) ** 2)
+        )
+        dy = y * (-np.exp(-(x ** 2) / 2 - y ** 2 / 2)) + (y + 4) * -np.exp(
+            (-0.5 * (x - 2) ** 2 - 0.5 * (y + 4) ** 2)
+        )
+
+        data = np.empty((2, 512, 512))
+        data[0] = dx
+        data[1] = dy
+        self.s = DPCSignal2D(data)
+        self.s.axes_manager.signal_axes[0].axis = coords
+        self.s.axes_manager.signal_axes[1].axis = coords
+
+        # normalise for comparison later
+        surface -= surface.mean()
+        surface /= surface.std()
+        self.surface = surface
+
+    @pytest.mark.parametrize("method", ["kottler", "arnison", "frankot"])
+    def test_kottler(self, method):
+        s_recon = self.s.phase_retrieval(method=method)
+        recon = s_recon.data
+        recon -= recon.mean()
+        recon /= recon.std()
+
+        assert np.isclose(self.surface, recon, atol=1e-3).all()
+
+    @pytest.mark.parametrize("method", ["kottler", "arnison", "frankot"])
+    def test_mirroring(self, method):
+        s_recon = self.s.phase_retrieval(method, mirroring=True)
+        recon = s_recon.data
+        recon -= recon.mean()
+        recon /= recon.std()
+
+        assert np.isclose(self.surface, recon, atol=1e-3).all()
+
+    @pytest.mark.parametrize("method", ["kottler", "arnison", "frankot"])
+    def test_mirror_flip(self, method):
+        s_noflip = self.s.phase_retrieval(method, mirroring=True, mirror_flip=False)
+        s_flip = self.s.phase_retrieval(method, mirroring=True, mirror_flip=True)
+        noflip = s_noflip.data
+        noflip -= noflip.mean()
+        noflip /= noflip.std()
+        flip = s_flip.data
+        flip -= flip.mean()
+        flip /= flip.std()
+
+        noflip_sum_diff = np.abs(self.surface - noflip).sum()
+        flip_sum_diff = np.abs(self.surface - flip).sum()
+
+        assert noflip_sum_diff != flip_sum_diff
+
+    @pytest.mark.xfail(reason="invalid_method")
+    def test_unavailable_method(self):
+        self.s.phase_retrieval("magic!")
