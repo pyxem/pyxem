@@ -15,13 +15,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
-"""Signal class for Reduced Intensity profiles as a fucntion of scattering
-vector.
-
-"""
+"""Signal class for Reduced Intensity profiles as a fucntion of scattering vector."""
 
 from hyperspy.signals import Signal1D
-import numpy as np
 
 from pyxem.components.reduced_intensity_correction_component import (
     ReducedIntensityCorrectionComponent,
@@ -38,7 +34,7 @@ class ReducedIntensity1D(Signal1D):
     _signal_type = "reduced_intensity"
 
     def damp_exponential(self, b, inplace=True, *args, **kwargs):
-        """ Damps the reduced intensity signal to reduce noise in the high s
+        """Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of exp(-b*(s^2)), where b is the damping parameter.
 
         Parameters
@@ -70,7 +66,7 @@ class ReducedIntensity1D(Signal1D):
         )
 
     def damp_lorch(self, s_max=None, inplace=True, *args, **kwargs):
-        """ Damps the reduced intensity signal to reduce noise in the high s
+        """Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of sin(s*delta) / (s*delta), where
         delta = pi / s_max. See [1].
 
@@ -110,7 +106,7 @@ class ReducedIntensity1D(Signal1D):
         )
 
     def damp_updated_lorch(self, s_max=None, inplace=True, *args, **kwargs):
-        """ Damps the reduced intensity signal to reduce noise in the high s
+        """Damps the reduced intensity signal to reduce noise in the high s
         region by a factor of 3 / (s*delta)^3 (sin(s*delta)-s*delta(cos(s*delta))),
         where delta = pi / s_max. From [1].
 
@@ -153,7 +149,7 @@ class ReducedIntensity1D(Signal1D):
     def damp_low_q_region_erfc(
         self, scale=20, offset=1.3, inplace=True, *args, **kwargs
     ):
-        """ Damps the reduced intensity signal in the low q region as a
+        """Damps the reduced intensity signal in the low q region as a
         correction to central beam effects. The reduced intensity profile is
         damped by (erf(scale * s - offset) + 1) / 2
 
@@ -188,7 +184,7 @@ class ReducedIntensity1D(Signal1D):
         )
 
     def fit_thermal_multiple_scattering_correction(self, s_max=None, plot=False):
-        """ Fits a 4th order polynomial function to the reduced intensity.
+        """Fits a 4th order polynomial function to the reduced intensity.
         This is used to calculate the error in the reduced intensity due to
         the effects of multiple and thermal diffuse scattering, which
         results in the earlier background fit being incorrect for either

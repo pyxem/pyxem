@@ -329,8 +329,7 @@ def get_square_dpc_signal(add_ramp=False):
 
 
 def get_fem_signal(lazy=False):
-    """Get a 2D signal that approximates a fluctuation electron microscopy
-    (FEM) dataset.
+    """Get a 2D signal approximating a fluctuation electron microscopy (FEM) dataset.
 
     Parameters
     ----------
@@ -422,8 +421,7 @@ def get_fem_signal(lazy=False):
 
 
 def get_simple_fem_signal(lazy=False):
-    """Get a 2D signal that approximates a very small fluctuation electron
-    microscopy (FEM) dataset.
+    """2D signal approximating a very small fluctuation electron microscopy (FEM) dataset.
 
     Parameters
     ----------
@@ -517,8 +515,7 @@ def get_simple_fem_signal(lazy=False):
 
 
 def get_generic_fem_signal(probe_x=2, probe_y=2, image_x=50, image_y=50, lazy=False):
-    """Get a 2D signal that approximates a fluctuation electron
-    microscopy (FEM) dataset with user defined dimensions.
+    """2D signal approximating a fluctuation electron microscopy (FEM) dataset with user defined dimensions.
 
     Parameters
     ----------

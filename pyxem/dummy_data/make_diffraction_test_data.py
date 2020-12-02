@@ -31,7 +31,8 @@ import pyxem.utils.ransac_ellipse_tools as ret
 
 
 def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
-    """
+    """Private function to generate an elliptical disk.
+
     Parameters
     ----------
     xx, yy : 2D NumPy array
@@ -71,7 +72,8 @@ def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
 
 
 def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
-    """
+    """Private function to generate an elliptical ring.
+
     Parameters
     ----------
     xx, yy : 2D NumPy array
@@ -112,35 +114,36 @@ def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
 
 
 class EllipseRing(object):
+    """Generate an elliptical ring.
+
+    Parameters
+    ----------
+    xx, yy : int
+        Size of the image
+    x, y : float
+        Centre positions for the ellipse
+    semi_len0, semi_len1 : float
+    rotation : float
+        In radians
+    lw_r : optional, default 1
+
+    Methods
+    -------
+    get_signal
+        Generate numpy array with the ellipse ring
+
+    Examples
+    --------
+    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> ellipse = mdtd.EllipseRing(
+    ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
+    ...     rotation=1.57, intensity=10, lw_r=2)
+
+    """
+
     def __init__(
         self, xx, yy, x0, y0, semi_len0, semi_len1, rotation, intensity, lw_r=1
     ):
-        """
-
-        Parameters
-        ----------
-        xx, yy : int
-            Size of the image
-        x, y : float
-            Centre positions for the ellipse
-        semi_len0, semi_len1 : float
-        rotation : float
-            In radians
-        lw_r : optional, default 1
-
-        Methods
-        -------
-        get_signal
-            Generate numpy array with the ellipse ring
-
-        Examples
-        --------
-        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
-        >>> ellipse = mdtd.EllipseRing(
-        ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
-        ...     rotation=1.57, intensity=10, lw_r=2)
-
-        """
         self.x0, self.y0 = x0, y0
         self.semi_len0 = semi_len0
         self.semi_len1 = semi_len1
@@ -181,33 +184,34 @@ class EllipseRing(object):
 
 
 class EllipseDisk(object):
+    """Generate an elliptical disk.
+
+    Parameters
+    ----------
+    xx, yy : int
+        Size of the image
+    x, y : float
+        Centre positions for the ellipse
+    semi_len0, semi_len1 : float
+    rotation : float
+        In radians
+    lw_r : optional, default 1
+
+    Methods
+    -------
+    get_signal
+        Generate numpy array with the elliptical disk
+
+    Examples
+    --------
+    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> ellipse_disk = mdtd.EllipseDisk(
+    ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
+    ...     rotation=1.57, intensity=10)
+
+    """
+
     def __init__(self, xx, yy, x0, y0, semi_len0, semi_len1, rotation, intensity):
-        """
-
-        Parameters
-        ----------
-        xx, yy : int
-            Size of the image
-        x, y : float
-            Centre positions for the ellipse
-        semi_len0, semi_len1 : float
-        rotation : float
-            In radians
-        lw_r : optional, default 1
-
-        Methods
-        -------
-        get_signal
-            Generate numpy array with the elliptical disk
-
-        Examples
-        --------
-        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
-        >>> ellipse_disk = mdtd.EllipseDisk(
-        ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
-        ...     rotation=1.57, intensity=10)
-
-        """
         self.x0, self.y0 = x0, y0
         self.semi_len0 = semi_len0
         self.semi_len1 = semi_len1
@@ -276,14 +280,13 @@ class Circle(object):
             return True
 
     def get_centre_pixel(self, xx, yy, scale):
-        """
-        This function sets the indices for the pixels on which the centre
-        point is. Because the centre point can sometimes be exactly on the
+        """Sets the indices for the pixels on which the centre point is.
+
+        Because the centre point can sometimes be exactly on the
         boundary of two pixels, the pixels are held in a list. One
         list for x (self.centre_x_pixels) and one for y
         (self.centre_x_pixels). If the centre is outside the image, the
         lists will be empty.
-
         """
         if self.centre_on_image(xx, yy):
             x1 = np.where(xx > (self.x0 - 0.5 * scale))[1][0]
@@ -306,9 +309,7 @@ class Circle(object):
 
 
 class Disk(object):
-    """
-    Disk object, with outer edge of the ring at r
-    """
+    """Disk object, with outer edge of the ring at r."""
 
     def __init__(self, xx, yy, scale, x0, y0, r, intensity):
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale)
@@ -325,9 +326,9 @@ class Disk(object):
         )
 
     def set_centre_intensity(self):
-        """
-        Sets the intensity of the centre pixels to I. Coordinates are
-        self.z.circle[y, x], due to how numpy works.
+        """Sets the intensity of the centre pixels to I.
+
+        Coordinates are self.z.circle[y, x], due to how numpy works.
         """
         for x in self.z.centre_x_pixels:
             for y in self.z.centre_y_pixels:
@@ -352,7 +353,7 @@ class Ring(object):
 
     def __init__(self, xx, yy, scale, x0, y0, r, intensity, lr):
         if lr > r:
-            raise ValueError("Ring line width too big".format(lr, r))
+            raise ValueError(f"Ring line width too big ({lr} > {r})")
         self.lr = lr
         self.lw = 1 + 2 * lr  # scalar line width of the ring
         self.z = Circle(xx, yy, x0, y0, r, intensity, scale, lw=lr)
@@ -419,7 +420,6 @@ class MakeTestData(object):
 
     Examples
     --------
-
     Default settings
 
     >>> from pyxem.dummy_data.make_diffraction_test_data import MakeTestData

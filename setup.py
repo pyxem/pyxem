@@ -69,6 +69,7 @@ setup(
         "pyfai",
         "ipywidgets",
         "numba",
+        "orix >= 0.3"
     ],
     package_data={
         "": ["LICENSE", "readme.rst"],

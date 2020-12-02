@@ -70,9 +70,7 @@ def _centre_comparison(s, steps, step_size, crop_radial_signal=None, angleN=8):
 
 
 def get_coordinate_of_min(s):
-    """
-    Returns the x and y values of the minimum in a signal.
-    """
+    """Returns the x and y values of the minimum in a signal."""
     z = s.data
     idx = np.argwhere(z == np.min(z))
     x = s.axes_manager[0].index2value(idx[0][1])
@@ -201,7 +199,7 @@ def refine_signal_centre_position(
     **kwargs
         Passed to get_optimal_centre_position
 
-    See also
+    See Also
     --------
     get_optimal_centre_position : finds the centre positions for a step_size
 

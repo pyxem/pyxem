@@ -39,7 +39,7 @@ def load_mib(mib_path, reshape=True, flip=True):
         The full path of the .mib file to be read.
     reshape: boolean
         Keyword argument to control reshaping of the stack (default is True).
-        It attepmts to reshape using the flyback pixel.
+        It attempts to reshape using the flyback pixel.
     flip: boolean
         Keyword argument to vertically flip the diffraction signal (default)
         or return unchanged. The metadata is updated accordingly.
@@ -112,7 +112,7 @@ def load_mib(mib_path, reshape=True, flip=True):
 
     data_pxm = LazyElectronDiffraction2D(data)
 
-    # Tranferring dict info to metadata
+    # Transferring dict info to metadata
     if data_dict["STEM_flag"] == 1:
         data_pxm.metadata.Signal.signal_type = "STEM"
     else:
@@ -227,7 +227,7 @@ def mib_to_h5stack(fp, save_path, mmap_mode="r"):
 
 def h5stack_to_pxm(h5_path, mib_path, flip=True):
     """
-    this function reads the saved stack h5 file into a reshaped pyxem.signals.LazyElectronDiffraction2D object
+    Reads the saved stack h5 file into a reshaped pyxem.signals.LazyElectronDiffraction2D object
     chunks are defined as (100, det_x, det_y)
 
     Parameters
@@ -263,7 +263,7 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
         exp_times_list = _read_exposures(mib_path)
     data_dict = _STEM_flag_dict(exp_times_list)
 
-    # Tranferring dict info to metadata
+    # Transferring dict info to metadata
     if data_dict["STEM_flag"] == 1:
         data_pxm.metadata.Signal.signal_type = "STEM"
     else:
@@ -277,7 +277,7 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
 
     if (
         data_pxm.metadata.Signal.signal_type == "TEM"
-        and data_pxm.metadata.Signal.exposure_time != None
+        and data_pxm.metadata.Signal.exposure_time is not None
     ):
         print(
             "This mib file appears to be TEM data. The stack is returned with no reshaping."
@@ -389,7 +389,7 @@ def _parse_hdr(fp):
     -------
     hdr_info : dict
         Dictionary containing header info extracted from .mib file.
-        the entries of the dictionary are as follows:
+        The entries of the dictionary are as follows:
         'width': int
             pixels, detector number of pixels in x direction,
         'height': int
@@ -583,17 +583,17 @@ def _get_mib_depth(hdr_info, fp):
 
 
 def _mib_to_daskarr(fp, mmap_mode="r"):
-    """
-    Reads the binary mib file into a numpy memmap object and returns as dask array object
+    """Reads the binary mib file into a numpy memmap object and returns as dask array object.
 
     Parameters
-    --------------
+    ----------
     fp: str
         MIB file name / path
     mmap_mode: str
         memmpap read mode - default is 'r'
+
     Returns
-    --------------
+    -------
     data_da: dask array
         data as a dask array object
     """
@@ -629,8 +629,8 @@ def _mib_to_daskarr(fp, mmap_mode="r"):
 
 
 def _get_hdr_bits(hdr_info):
-    """
-    gets the number of character bits for the header for each frame given the data type
+    """Gets the number of character bits for the header for each frame given the data type.
+
     Parameters
     ----------
     hdr_info: dict
@@ -681,14 +681,14 @@ def _read_exposures(fp, pct_frames_to_read=0.1):
     For this to work, the tick in the Merlin software to print exp time into header must be selected!
 
     Parameters
-    -------------
+    ----------
     fp: str
         MIB file name / path
     pct_frames_to_read : float
         Percentage of frames to read, default value 0.1
 
     Returns
-    ------------
+    -------
     exp_time: list
         List of frame exposure times in seconds
     """
@@ -840,7 +840,7 @@ def _STEM_flag_dict(exp_times_list):
             scan_X = lines[-1]
             check = np.ravel(np.where(lines == scan_X, True, False))
             # Checking line lengths
-            start_ind = np.where(check == False)[0][-1] + 2
+            start_ind = np.where(check is False)[0][-1] + 2
             frames_to_skip = peaks[start_ind]
 
         flyback_times = list(times_set)
@@ -868,7 +868,7 @@ def _stack_h5dump(data, hdr_info, saving_path, raw_binary=False, stack_num=1000)
     raw_binary: boolean
         default False - Need to be True for binary RAW data
     stack_num: int
-        number of frames written to the h5 file in each iteration. default set at 1000
+        number of frames written to the h5 file in each iteration. Default set at 1000
 
     Returns
     -------
@@ -968,20 +968,21 @@ def _h5_chunk_write(data, saving_path):
 
 
 def _untangle_raw(data, hdr_info, stack_size):
-    """
-    Corrects for the tangled raw mib format - Only the case for quad chip is considered here.
+    """Corrects for the tangled raw mib format.
+
+    Only the case for quad chip is considered here.
 
     Parameters
-    --------
-        data: dask array
-            as stack with the detector array unreshaped, e.g. for a single frame 512*512: (1, 262144)
-        hdr_info: dict
-            info read from the header- ouput of the _parse_hdr function
-        stack_size: int
-            The number of frames in the data
-
-    Outputs
     ----------
+    data: dask array
+        as stack with the detector array unreshaped, e.g. for a single frame 512*512: (1, 262144)
+    hdr_info: dict
+        info read from the header- output of the _parse_hdr function
+    stack_size: int
+        The number of frames in the data
+
+    Returns
+    -------
     untangled_data: dask array
         corrected dask array object reshaped on the detector plane, e.g. for a single frame case
         as above: (1, 512, 512)
@@ -1032,7 +1033,6 @@ def reshape_4DSTEM_FlyBack(data):
     """Reshapes the lazy-imported frame stack to navigation dimensions determined
     based on stored exposure times.
 
-
     Parameters
     ----------
     data : pyxem / hyperspy lazy Signal2D
@@ -1079,7 +1079,7 @@ def reshape_4DSTEM_SumFrames(data):
     Reshapes the lazy-imported stack of dimensions: (xxxxxx|Det_X, Det_Y) to the correct scan pattern
     shape: (x, y | Det_X, Det_Y) when the frame exposure times are not in headre bits.
     It utilises the over-exposed fly-back frame to identify the start of the lines in the first 20
-    lines of frames,checks line length consistancy and finds the number of frames to skip at the
+    lines of frames, checks line length consistency and finds the number of frames to skip at the
     beginning (this number is printed out as string output).
 
     Parameters
@@ -1116,7 +1116,7 @@ def reshape_4DSTEM_SumFrames(data):
     check = np.ravel(np.where(lines == line_len, True, False))
     # In case there is a False in there take the index of the last False
     if ~np.all(check):
-        start_ind = np.where(check == False)[0][-1] + 2
+        start_ind = np.where(check is False)[0][-1] + 2
         # Adding 2 - instead of 1 -  to be sure scan is OK
         skip_ind = peaks[0][start_ind]
     # In case they are all True take the index of the first True
@@ -1132,6 +1132,6 @@ def reshape_4DSTEM_SumFrames(data):
     data_skip.get_dimensions_from_data()
     print("Reshaping using the frame intensity sums of the first 20 lines")
     print("Number of frames skipped at the beginning: ", skip_ind)
-    # Cropping the flyaback pixel at the start
+    # Cropping the flyback pixel at the start
     data_skip = data_skip.inav[1:]
     return data_skip

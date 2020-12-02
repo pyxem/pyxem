@@ -19,7 +19,6 @@
 import copy
 import numpy as np
 
-from pyxem.utils.dpc_utils import make_bivariate_histogram
 import pyxem.utils.pixelated_stem_tools as pst
 
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
@@ -28,7 +27,60 @@ from hyperspy._signals.lazy import LazySignal
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from scipy.ndimage import rotate, gaussian_filter
-from tqdm import tqdm
+
+
+def make_bivariate_histogram(
+    x_position, y_position, histogram_range=None, masked=None, bins=200, spatial_std=3
+):
+    s0_flat = x_position.flatten()
+    s1_flat = y_position.flatten()
+
+    if masked is not None:
+        temp_s0_flat = []
+        temp_s1_flat = []
+        for data0, data1, masked_value in zip(s0_flat, s1_flat, masked.flatten()):
+            if not masked_value:
+                temp_s0_flat.append(data0)
+                temp_s1_flat.append(data1)
+        s0_flat = np.array(temp_s0_flat)
+        s1_flat = np.array(temp_s1_flat)
+
+    if histogram_range is None:
+        if s0_flat.std() > s1_flat.std():
+            s0_range = (
+                s0_flat.mean() - s0_flat.std() * spatial_std,
+                s0_flat.mean() + s0_flat.std() * spatial_std,
+            )
+            s1_range = (
+                s1_flat.mean() - s0_flat.std() * spatial_std,
+                s1_flat.mean() + s0_flat.std() * spatial_std,
+            )
+        else:
+            s0_range = (
+                s0_flat.mean() - s1_flat.std() * spatial_std,
+                s0_flat.mean() + s1_flat.std() * spatial_std,
+            )
+            s1_range = (
+                s1_flat.mean() - s1_flat.std() * spatial_std,
+                s1_flat.mean() + s1_flat.std() * spatial_std,
+            )
+    else:
+        s0_range = histogram_range
+        s1_range = histogram_range
+
+    hist2d, xedges, yedges = np.histogram2d(
+        s0_flat,
+        s1_flat,
+        bins=bins,
+        range=[[s0_range[0], s0_range[1]], [s1_range[0], s1_range[1]]],
+    )
+
+    s_hist = Signal2D(hist2d).swap_axes(0, 1)
+    s_hist.axes_manager[0].offset = xedges[0]
+    s_hist.axes_manager[0].scale = xedges[1] - xedges[0]
+    s_hist.axes_manager[1].offset = yedges[0]
+    s_hist.axes_manager[1].scale = yedges[1] - yedges[0]
+    return s_hist
 
 
 class DPCBaseSignal(BaseSignal):
@@ -199,7 +251,7 @@ class DPCSignal2D(Signal2D):
         >>> s_magnitude = s.get_magnitude_signal()
         >>> s_magnitude.plot()
 
-        See also
+        See Also
         --------
         get_color_signal : Signal showing both phase and magnitude
         get_phase_signal : Signal showing the phase
@@ -217,6 +269,138 @@ class DPCSignal2D(Signal2D):
 
         signal = Signal2D(magnitude)
         pst._copy_signal2d_axes_manager_metadata(self, signal)
+        return signal
+
+    def phase_retrieval(self, method="kottler", mirroring=False, mirror_flip=False):
+        """Retrieve the phase from two orthogonal phase gradients.
+
+        Parameters
+        ----------
+        method : 'kottler', 'arnison' or 'frankot', optional
+            the formula to use, 'kottler'[1], 'arnison'[2] and 'frankot'[3]
+            are available. The default is 'kottler'.
+        mirroring : bool, optional
+            whether to mirror the phase gradients before Fourier transformed.
+            Attempt to reduce boundary effect. The default is False.
+        mirror_flip : bool, optional
+            only active when 'mirroring' is True. Flip the direction of the
+            derivatives which results in negation during signal mirroring.
+            The default is False. If the retrieved phase is not sensible after
+            mirroring, set this to True may resolve it.
+
+        Raises
+        ------
+        ValueError
+            if the method is not implemented
+
+        Returns
+        -------
+        signal : HyperSpy 2D signal
+            the phase retrieved.
+
+        References
+        ----------
+        .. [1] Kottler, C., David, C., Pfeiffer, F. and Bunk, O., 2007. A
+        two-directional approach for grating based differential phase contrast
+        imaging using hard x-rays. Optics Express, 15(3), p.1175. (Equation 4)
+
+        .. [2] Arnison, M., Larkin, K., Sheppard, C., Smith, N. and
+        Cogswell, C., 2004. Linear phase imaging using differential
+        interference contrast microscopy. Journal of Microscopy, 214(1),
+        pp.7-12. (Equation 6)
+
+        .. [3] Frankot, R. and Chellappa, R., 1988. A method for enforcing
+        integrability in shape from shading algorithms.
+        IEEE Transactions on Pattern Analysis and Machine Intelligence,
+        10(4), pp.439-451. (Equation 21)
+
+        Examples
+        --------
+        >>> from pyxem.dummy_data import dummy_data
+        >>> s = dummy_data.get_square_dpc_signal()
+        >>> s_phase = s.phase_retrieval()
+        >>> s_phase.plot()
+        """
+
+        method = method.lower()
+        if method not in ("kottler", "arnison", "frankot"):
+            raise ValueError(
+                "Method '{}' not recognised. 'kottler', 'arnison'"
+                " and 'frankot' are available.".format(method)
+            )
+
+        # get x and y phase gradient
+        dx = self.inav[0].data
+        dy = self.inav[1].data
+
+        # attempt to reduce boundary effect
+        if mirroring:
+            Ax = dx
+            Bx = np.flip(dx, axis=1)
+            Cx = np.flip(dx, axis=0)
+            Dx = np.flip(dx)
+
+            Ay = dy
+            By = np.flip(dy, axis=1)
+            Cy = np.flip(dy, axis=0)
+            Dy = np.flip(dy)
+
+            # the -ve depends on the direction of derivatives
+            if not mirror_flip:
+                dx = np.bmat([[Ax, -Bx], [Cx, -Dx]]).A
+                dy = np.bmat([[Ay, By], [-Cy, -Dy]]).A
+            else:
+                dx = np.bmat([[Ax, Bx], [-Cx, -Dx]]).A
+                dy = np.bmat([[Ay, -By], [Cy, -Dy]]).A
+
+        nc, nr = dx.shape[1], dx.shape[0]
+
+        # get scan step size
+        calX = np.diff(self.axes_manager.signal_axes[0].axis).mean()
+        calY = np.diff(self.axes_manager.signal_axes[1].axis).mean()
+
+        # construct Fourier-space grids
+        kx = (2 * np.pi) * np.fft.fftshift(np.fft.fftfreq(nc))
+        ky = (2 * np.pi) * np.fft.fftshift(np.fft.fftfreq(nr))
+        kx_grid, ky_grid = np.meshgrid(kx, ky)
+
+        if method == "kottler":
+            gxy = dx + 1j * dy
+            numerator = np.fft.fftshift(np.fft.fft2(gxy))
+            denominator = 2 * np.pi * 1j * (kx_grid + 1j * ky_grid)
+        elif method == "arnison":
+            gxy = dx + 1j * dy
+            numerator = np.fft.fftshift(np.fft.fft2(gxy))
+            denominator = 2j * (
+                np.sin(2 * np.pi * calX * kx_grid)
+                + 1j * np.sin(2 * np.pi * calY * ky_grid)
+            )
+        elif method == "frankot":
+            kx_grid /= calX
+            ky_grid /= calY
+            fx = np.fft.fftshift(np.fft.fft2(dx))
+            fy = np.fft.fftshift(np.fft.fft2(dy))
+            wx, wy = 0.5, 0.5
+
+            numerator = -1j * (wx * kx_grid * fx + wy * ky_grid * fy)
+            denominator = wx * kx_grid ** 2 + wy * ky_grid ** 2
+
+        # handle the division by zero in the central pixel
+        # set the undefined/infinity pixel to 0
+        with np.errstate(divide="ignore", invalid="ignore"):
+            res = numerator / denominator
+        res = np.nan_to_num(res, nan=0, posinf=0, neginf=0)
+
+        retrieved = np.fft.ifft2(np.fft.ifftshift(res)).real
+
+        # get 1/4 of the result if mirroring
+        if mirroring:
+            M, N = retrieved.shape
+            retrieved = retrieved[: M // 2, : N // 2]
+
+        signal = Signal2D(retrieved)
+        pst._copy_signal2d_axes_manager_metadata(self, signal)
+
         return signal
 
     def get_phase_signal(self, rotation=None):
@@ -245,7 +429,7 @@ class DPCSignal2D(Signal2D):
         >>> s_color = s.get_phase_signal(rotation=20)
         >>> s_color.plot()
 
-        See also
+        See Also
         --------
         get_color_signal : Signal showing both phase and magnitude
         get_magnitude_signal : Signal showing the magnitude
@@ -295,7 +479,7 @@ class DPCSignal2D(Signal2D):
 
         >>> s_color = s.get_color_signal(rotation=30)
 
-        See also
+        See Also
         --------
         get_color_signal : Signal showing both phase and magnitude
         get_phase_signal : Signal showing the phase

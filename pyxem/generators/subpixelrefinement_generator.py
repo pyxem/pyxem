@@ -16,18 +16,131 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Generating subpixel resolution on diffraction vectors.
-"""
+"""Generating subpixel resolution on diffraction vectors."""
 
 import numpy as np
 
 from skimage.feature import register_translation
-from pyxem.utils.subpixel_refinements_utils import get_experimental_square
-from pyxem.utils.subpixel_refinements_utils import get_simulated_disc
-from pyxem.utils.subpixel_refinements_utils import _get_pixel_vectors
+from skimage import draw
 
-import warnings
+from pyxem.signals.diffraction_vectors import DiffractionVectors
+
+
+def get_experimental_square(z, vector, square_size):
+    """Defines a square region around a given diffraction vector and returns.
+
+    Parameters
+    ----------
+    z : np.array()
+        Single diffraction pattern
+    vector : np.array()
+        Single vector in pixels (int) [x,y] with top left as [0,0]
+    square_size : int
+        The length of one side of the bounding square (must be even)
+
+    Returns
+    -------
+    square : np.array()
+        Of size (L,L) where L = square_size
+
+    """
+    if square_size % 2 != 0:
+        raise ValueError("'square_size' must be an even number")
+
+    cx, cy, half_ss = vector[0], vector[1], int(square_size / 2)
+    # select square with correct x,y see PR for details
+    _z = z[cy - half_ss : cy + half_ss, cx - half_ss : cx + half_ss]
+    return _z
+
+
+def get_simulated_disc(square_size, disc_radius):
+    """Create a uniform disc for correlating with the experimental square.
+
+    Parameters
+    ----------
+    square size : int
+        (even) - size of the bounding box
+    disc_radius : int
+        radius of the disc
+
+    Returns
+    -------
+    arr: np.array()
+        Upsampled copy of the simulated disc as a numpy array
+
+    """
+
+    if square_size % 2 != 0:
+        raise ValueError("'square_size' must be an even number")
+
+    ss = int(square_size)
+    arr = np.zeros((ss, ss))
+    rr, cc = draw.circle(
+        int(ss / 2), int(ss / 2), radius=disc_radius, shape=arr.shape
+    )  # is the thin disc a good idea
+    arr[rr, cc] = 1
+    return arr
+
+
+def _get_pixel_vectors(dp, vectors, calibration, center):
+    """Get the pixel coordinates for the given diffraction
+    pattern and vectors.
+
+    Parameters
+    ----------
+    dp: :obj:`pyxem.signals.ElectronDiffraction2D`
+        Instance of ElectronDiffraction2D
+    vectors : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        List of diffraction vectors
+    calibration : [float, float]
+        Calibration values
+    center : float, float
+        Image origin in pixel coordinates
+
+    Returns
+    -------
+    vector_pixels : :obj:`pyxem.signals.diffraction_vectors.DiffractionVectors`
+        Pixel coordinates for given diffraction pattern and vectors.
+    """
+
+    def _floor(vectors, calibration, center):
+        if vectors.shape == (1,) and vectors.dtype == np.object:
+            vectors = vectors[0]
+        return np.floor((vectors.astype(np.float64) / calibration) + center).astype(
+            np.int
+        )
+
+    if isinstance(vectors, DiffractionVectors):
+        if vectors.axes_manager.navigation_shape != dp.axes_manager.navigation_shape:
+            raise ValueError(
+                "Vectors with shape {} must have the same navigation shape "
+                "as the diffraction patterns which has shape {}.".format(
+                    vectors.axes_manager.navigation_shape,
+                    dp.axes_manager.navigation_shape,
+                )
+            )
+        vector_pixels = vectors.map(
+            _floor, calibration=calibration, center=center, inplace=False
+        )
+    else:
+        vector_pixels = _floor(vectors, calibration, center)
+
+    if isinstance(vector_pixels, DiffractionVectors):
+        if np.any(vector_pixels.data > (np.max(dp.data.shape) - 1)) or (
+            np.any(vector_pixels.data < 0)
+        ):
+            raise ValueError(
+                "Some of your vectors do not lie within your diffraction pattern, check your calibration"
+            )
+    elif isinstance(vector_pixels, np.ndarray):
+        if np.any((vector_pixels > np.max(dp.data.shape) - 1)) or (
+            np.any(vector_pixels < 0)
+        ):
+            raise ValueError(
+                "Some of your vectors do not lie within your diffraction pattern, check your calibration"
+            )
+
+    return vector_pixels
 
 
 def _conventional_xc(exp_disc, sim_disc, upsample_factor):
@@ -265,103 +378,7 @@ class SubpixelrefinementGenerator:
         return self.vectors_out
 
     def local_gaussian_method(self, square_size):
-        """ Refinement based on the mathematics of a local maxima on a
-        continious region, using the (discrete) maxima pixel as a starting point.
-        See Notes.
-
-        Parameters
-        ----------
-        square_size : int
-            Length (in pixels) of one side of a square the contains the peak to
-            be refined.
-
-        Returns
-        -------
-        vector_out : DiffractionVectors
-            DiffractionVectors containing the refined vectors in calibrated
-            units with the same navigation shape as the diffraction patterns.
-
-        Notes
-        -----
-        This method works by first locating the maximum intenisty value within the square.
-        The four adjacent pixels are then considered and used to form two independant
-        quadratic equations. Solving these gives the x_center and y_center coordinates,
-        which are then returned.
-        """
-
-        def _new_lg_idea(z):
-            """ Internal function providing the algebra for the local_gaussian_method,
-            see docstring of that function for details
-
-            Parameters
-            ----------
-            z : np.array
-                subsquare containing the peak to be localised
-
-            Returns
-            -------
-            (x,y) : tuple
-                Containing subpixel resolved values for the center
-            """
-            si = np.unravel_index(np.argmax(z), z.shape)
-            z_ref = z[si[0] - 1 : si[0] + 2, si[1] - 1 : si[1] + 2]
-            if z_ref.shape != (3, 3):
-                return (si[1] - z.shape[1] // 2, si[0] - z.shape[0] // 2)
-            M = z_ref[1, 1]
-            LX, RX = z_ref[1, 0], z_ref[1, 2]
-            UY, DY = z_ref[0, 1], z_ref[2, 1]
-            x_ans = 0.5 * (LX - RX) / (LX + RX - 2 * M)
-            y_ans = 0.5 * (UY - DY) / (UY + DY - 2 * M)
-            return (si[1] - z.shape[1] // 2 + x_ans, si[0] - z.shape[0] // 2 + y_ans)
-
-        def _lg_map(dp, vectors, square_size, center, calibration):
-            shifts = np.zeros_like(vectors, dtype=np.float64)
-            for i, vector in enumerate(vectors):
-                expt_disc = get_experimental_square(dp, vector, square_size)
-                shifts[i] = _new_lg_idea(expt_disc)
-
-            return ((vectors + shifts) - center) * calibration
-
-        self.vectors_out = self.dp.map(
-            _lg_map,
-            vectors=self.vector_pixels,
-            square_size=square_size,
-            center=self.center,
-            calibration=self.calibration,
-            inplace=False,
+        """Removed in v0.13, please install a version prior to v.0.13 to use."""
+        raise NotImplementedError(
+            "This functionality was removed in v.0.13.0, please use another method"
         )
-        self.vectors_out.set_signal_type("diffraction_vectors")
-
-        # check for unrefined peaks
-        def check_bad_square(z):
-            si = np.unravel_index(np.argmax(z), z.shape)
-            z_ref = z[si[0] - 1 : si[0] + 2, si[1] - 1 : si[1] + 2]
-            if z_ref.shape == (3, 3):
-                return False
-            else:
-                return True
-
-        def _check_bad_square_map(dp, vectors, square_size):
-            bad_square = False
-            for i, vector in enumerate(vectors):
-                expt_disc = get_experimental_square(dp, vector, square_size)
-                bad_square = check_bad_square(expt_disc)
-                if bad_square:
-                    return True
-            return False
-
-        bad_squares = self.dp.map(
-            _check_bad_square_map,
-            vectors=self.vector_pixels,
-            square_size=square_size,
-            inplace=False,
-        )
-
-        if np.any(bad_squares):
-            warnings.warn(
-                "You have a peak in your pattern that lies on the edge of the square. "
-                "Consider increasing the square size."
-            )
-
-        self.last_method = "lg_method"
-        return self.vectors_out

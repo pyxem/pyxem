@@ -16,17 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Generating DisplacementGradientMaps from diffraction vectors
-"""
+"""Generating DisplacementGradientMaps from diffraction vectors."""
 
 import numpy as np
 from pyxem.signals.tensor_field import DisplacementGradientMap
 
 
 def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=None):
-    """Calculates the displacement gradient tensor at each navigation position
-    in a map by comparing vectors to determine the 2 x 2 matrix,
+    r"""Calculates the displacement gradient tensor at each navigation position in a map.
+
+    Compares vectors to determine the 2 x 2 matrix,
     :math:`\\mathbf(L)`, that maps unstrained vectors, Vu, to strained vectors,
     Vs, using the np.lingalg.inv() function to find L that satisfies
     :math:`Vs = \\mathbf(L) Vu`.
@@ -72,8 +71,9 @@ def get_DisplacementGradientMap(strained_vectors, unstrained_vectors, weights=No
 
 
 def get_single_DisplacementGradientTensor(Vs, Vu=None, weights=None):
-    """Calculates the displacement gradient tensor from a pairs of vectors by
-    determining the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
+    r"""Calculates the displacement gradient tensor from a pairs of vectors.
+
+    Determines the 2 x 2 matrix, :math:`\\mathbf(L)`, that maps unstrained
     vectors, Vu, onto strained vectors, Vs
 
     The transformation is returned as a 3 x 3 displacement gradient tensor.

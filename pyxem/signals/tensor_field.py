@@ -23,9 +23,7 @@ from hyperspy.utils import stack
 import math
 from pyxem.signals.strain_map import StrainMap
 
-"""
-Signal class for Tensor Fields
-"""
+"""Signal class for Tensor Fields."""
 
 
 def _polar_decomposition(image, side):
@@ -81,7 +79,6 @@ class DisplacementGradientMap(Signal2D):
         -------
         R : TensorField
             The orthogonal matrix describing the rotation field.
-
         U : TensorField
             The strain tensor field.
 
@@ -95,7 +92,6 @@ class DisplacementGradientMap(Signal2D):
 
         Returns
         -------
-
         strain_results : BaseSignal
             Signal of shape < 4 | , > , navigation order is e11,e22,e12,theta
         """

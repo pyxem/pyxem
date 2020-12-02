@@ -16,10 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Variance generators in real and reciprocal space for fluctuation electron
-microscopy.
-
-"""
+"""Variance generators in real and reciprocal space for fluctuation electron microscopy."""
 
 import numpy as np
 from hyperspy.signals import Signal2D
@@ -106,14 +103,12 @@ class VarianceGenerator:
 
         Parameters
         ----------
-
         dqe : float
             Detective quantum efficiency of the detector for Poisson noise
             correction.
 
         Returns
         -------
-
         varims : ImageVariance
             A two dimensional Signal class object containing the mean DP, mean
             squared DP, and variance DP, and a Poisson noise-corrected variance

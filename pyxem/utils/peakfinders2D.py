@@ -425,12 +425,10 @@ def find_peaks_log(
 
 
 def find_peaks_xc(z, disc_image, min_distance=5, peak_threshold=0.2):
-    """
-    Find peaks using the the correlation between the image and a reference peaks
+    """Find peaks using the the correlation between the image and a reference peaks.
 
     Parameters
     ----------
-
     z: numpy.ndarray
         Array of image intensities.
     disc_image: numpy.ndarray (square)

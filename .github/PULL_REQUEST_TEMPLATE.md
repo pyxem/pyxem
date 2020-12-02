@@ -4,9 +4,9 @@ about: A pull request that fixes a bug or adds a feature
 
 ---
 
-**Release Notes**
-> new feature / improvement / bugfix / developer change
-> Summary: 1 line per end-user relevant change
+**Checklist**
+- [ ] Updated CHANGELOG.md
+- [ ] (if finished) Requested a review (from pc494 if you are unsure who is most suitable)
 
 **What does this PR do? Please describe and/or link to an open issue.**
 A clear and concise description of what the code in this PR does. Does it fix a bug or add a new feature?
@@ -22,5 +22,3 @@ If the code isn't quite working as you want it to, tell us here so we can help y
 If you know there is more to do, make a checklist here:
 - [ ] TODO 1
 - [ ] TODO 2
-
-<i> And then once it's all good to go, hit the request review button and an admin will get it checked and merged </i>
