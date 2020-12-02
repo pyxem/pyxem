@@ -1,0 +1,35 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build-with-pip:
+    name: ${{ matrix.os }}/py${{ matrix.python-version }}/pip
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      MPLBACKEND: agg
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.7, 3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display versions
+        run: python -V; pip -V
+      - name: Install depedencies and package
+        shell: bash
+        run: pip install -U -e .'[tests]'
+      - name: Run tests
+        run: pytest --cov=pyxem --pyargs pyxem
+      - name: Generate line coverage
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: coverage report --show-missing
+      - name: Upload coverage to Coveralls
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: AndreMiras/coveralls-python-action@develop
