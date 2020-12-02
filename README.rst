@@ -1,7 +1,7 @@
-|Travis|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
+|Actions|_ |Coveralls|_ |pypi_version|_ |downloads|_ |black|_ |doi|_
 
-.. |Travis| image:: https://travis-ci.org/pyxem/pyxem.svg?branch=master
-.. _Travis: https://travis-ci.org/pyxem/pyxem
+.. |Actions| image:: https://github.com/pyxem/pyxem/workflows/build/badge.svg
+.. _Actions: https://github.com/pyxem/pyxem/actions
 
 .. |Coveralls| image:: https://coveralls.io/repos/github/pyxem/pyxem/badge.svg?branch=master
 .. _Coveralls: https://coveralls.io/github/pyxem/pyxem?branch=master

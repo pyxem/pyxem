@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.diffraction_tools, downstreamed to diffsims
 - utils.sim_utils, use the relevant diffsims functionality
 
+## 2020-12-02 - version 0.12.3
+### Changed
+- CI is now provided by github actions
+- Code now depends on hyperspy==1.6.1 and skimage>=0.17.0
+
 ## 2020-10-04 - version 0.12.2
 ### Added
 - This project now keeps a Changelog
