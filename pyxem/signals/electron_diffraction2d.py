@@ -21,8 +21,6 @@ coordinates.
 """
 
 import numpy as np
-from hyperspy.signals import BaseSignal
-from hyperspy._signals.lazy import LazySignal
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from diffsims.utils.sim_utils import get_electron_wavelength
@@ -53,7 +51,6 @@ class ElectronDiffraction2D(Diffraction2D):
                     self.metadata.Acquisition_instrument.SEM,
                 )
                 del self.metadata.Acquisition_instrument.SEM
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
     def set_ai(
         self, center=None, energy=None, affine=None, radial_range=None, **kwargs
