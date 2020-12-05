@@ -21,7 +21,7 @@ import numpy as np
 
 import hyperspy.api as hs
 
-from pyxem.utils.vdf_utils import normalize_vdf
+from pyxem.utils.virtual_images_utils import normalize_virtual_images
 
 
 NORMALISE_DOCSTRING = """normalize : boolean
@@ -170,7 +170,7 @@ class VirtualImageGenerator:
             setattr(new_axis, k, v)
 
         if normalize:
-            vdfim.map(normalize_vdf)
+            vdfim.map(normalize_virtual_images)
 
         return vdfim
 
