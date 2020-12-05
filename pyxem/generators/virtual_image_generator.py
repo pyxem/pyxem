@@ -31,72 +31,22 @@ NORMALISE_DOCSTRING = """normalize : boolean
 
 
 class VirtualImageGenerator:
-    """Generates VDF images for a specified signal and set of aperture
-    positions.
+    """Generates virtual images for a specified signal and set of aperture.
 
     Attributes
     ----------
-    signal : ElectronDiffraction2D
+    signal : Diffraction2D or subclass
         The signal of electron diffraction patterns to be indexed.
-    vectors: DiffractionVectors (optional)
-        The vector positions, in calibrated units, at which to position
-        integration windows for VDF formation.
 
     """
 
-    def __init__(self, signal, vectors=None, *args, **kwargs):
-        # If ragged the signal axes will not be defined
-
-        if vectors is None:
-            unique_vectors = None
-        elif len(vectors.axes_manager.signal_axes) == 0:
-            unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
-        else:
-            unique_vectors = vectors
-
+    def __init__(self, signal, *args, **kwargs):
         self.signal = signal
-        self.vectors = unique_vectors
 
-    def get_vector_vdf_images(self, radius, normalize=False):
-        """Obtain the intensity scattered to each diffraction vector at each
-        navigation position in an ElectronDiffraction2D Signal by summation in a
-        circular window of specified radius.
-
-        Parameters
-        ----------
-        radius : float
-            Radius of the integration window - in units of the reciprocal
-            space.
-        %s
-
-        Returns
-        -------
-        vdfs : VDFImage
-            VDFImage object containing virtual dark field images for all unique
-            vectors.
-        """
-        if self.vectors:
-            roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
-            new_axis_dict = {'name': 'Vector index'}
-            vdfim = self._get_virtual_images(roi_args_list, normalize,
-                                             new_axis_dict=new_axis_dict)
-
-        else:
-            raise ValueError(
-                "DiffractionVectors not specified by user. Please "
-                "initialize VirtualImageGenerator with some vectors. "
-            )
-
-        # Assign vectors used to generate images to vdfim attribute.
-        vdfim.vectors = self.vectors
-
-        return vdfim
-
-    get_vector_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
-
-    def get_concentric_virtual_images(self, k_min, k_max, k_steps, normalize=False):
+    def get_concentric_virtual_images(self, k_min, k_max, k_steps,
+                                      normalize=False):
         """Obtain the intensity scattered at each navigation position in an
-        ElectronDiffraction2D Signal by summation over a series of concentric
+        Diffraction2D Signal by summation over a series of concentric
         in annuli between a specified inner and outer radius in a number of
         steps.
 
@@ -116,8 +66,8 @@ class VirtualImageGenerator:
 
         Returns
         -------
-        vdfs : VDFImage
-            VDFImage object containing virtual dark field images for all steps
+        virtual_images : VDFImage
+            VDFImage object containing virtual images for all steps
             within the annulus.
         """
         k_step = (k_max - k_min) / k_steps
@@ -140,7 +90,7 @@ class VirtualImageGenerator:
 
     def _get_virtual_images(self, roi_args_list, normalize, new_axis_dict):
         """Obtain the intensity scattered at each navigation position in an
-        ElectronDiffraction2D Signal by summation over the roi defined by the
+        Diffraction2D Signal by summation over the roi defined by the
         ``roi_args_list`` parameter.
 
         Parameters
@@ -151,8 +101,8 @@ class VirtualImageGenerator:
 
         Returns
         -------
-        vdfs : VDFImage
-            VDFImage object containing virtual dark field images
+        virtual_images : VDFImage
+            VDFImage object containing the virtual images
         """
         vdfs = [
             self.signal.get_integrated_intensity(hs.roi.CircleROI(*roi_args))
@@ -175,3 +125,57 @@ class VirtualImageGenerator:
         return vdfim
 
     _get_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
+
+
+class VirtualDarkFieldGenerator(VirtualImageGenerator):
+    """Generates VDF images for a specified signal and set of aperture
+    positions.
+
+    Attributes
+    ----------
+    signal : Diffraction2D of subclass
+        The signal of diffraction patterns to be indexed.
+    vectors: DiffractionVectors
+        The vector positions, in calibrated units, at which to position
+        integration windows for virtual dark field formation.
+
+    """
+
+    def __init__(self, signal, vectors, *args, **kwargs):
+        super().__init__(signal)
+        if len(vectors.axes_manager.signal_axes) == 0:
+            unique_vectors = vectors.get_unique_vectors(*args, **kwargs)
+        else:
+            unique_vectors = vectors
+
+        self.vectors = unique_vectors
+
+    def get_vector_vdf_images(self, radius, normalize=False):
+        """Obtain the intensity scattered to each diffraction vector at each
+        navigation position in an Diffraction2D Signal by summation in a
+        circular window of specified radius.
+
+        Parameters
+        ----------
+        radius : float
+            Radius of the integration window - in units of the reciprocal
+            space.
+        %s
+
+        Returns
+        -------
+        vdfs : VDFImage
+            VDFImage object containing virtual dark field images for all unique
+            vectors.
+        """
+        roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
+        new_axis_dict = {'name': 'Vector index'}
+        vdfim = self._get_virtual_images(roi_args_list, normalize,
+                                         new_axis_dict=new_axis_dict)
+
+        # Assign vectors used to generate images to vdfim attribute.
+        vdfim.vectors = self.vectors
+
+        return vdfim
+
+    get_vector_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
