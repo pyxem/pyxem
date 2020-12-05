@@ -2648,7 +2648,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             materials-Application to Al88-xY7Fe5Tix metallic glasses.
         """
         
-        if method not in ['Omega','r','re','VImage']):
+        if method not in ['Omega','r','re','VImage']:
             raise ValueError('Method must be one of ['Omega', 'r', 're', 'VImage'].'
                              'for more information read\n'
                              'Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010).'
