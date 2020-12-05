@@ -380,6 +380,7 @@ class DPCSignal2D(Signal2D):
             ky_grid /= calY
             fx = np.fft.fftshift(np.fft.fft2(dx))
             fy = np.fft.fftshift(np.fft.fft2(dy))
+            # weights in x,y directins, currently hardcoded, but easy to extend if required
             wx, wy = 0.5, 0.5
 
             numerator = -1j * (wx * kx_grid * fx + wy * ky_grid * fy)
