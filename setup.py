@@ -21,6 +21,13 @@ from setuptools import setup, find_packages
 
 exec(open("pyxem/release_info.py").read())  # grab version info
 
+# Projects with optional features for building the documentation and running
+# tests. From setuptools:
+# https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
+extra_feature_requirements = {
+    "tests": ["pytest>=5.0", "pytest-cov>=2.8.1", "coveralls>=1.10", "coverage>=5.0"]
+}
+
 
 setup(
     name=name,
@@ -51,17 +58,18 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
     packages=find_packages(),
-    # adjust the tabbing
+    extras_require=extra_feature_requirements,
     install_requires=[
-        "scikit-image >= 0.15.0, < 0.17",  # 0.17 is currently not avaliable on conda
+        "scikit-image >= 0.17.0", 
         "matplotlib >= 3.1.1",  # 3.1.0 failed
         "scikit-learn >= 0.19",  # reason unknown
-        "hyperspy == 1.5.2",  # earlier versions incompatible with numpy >= 1.17.0 and hyperspy == 1.6.0 has a histogram bug
+        "hyperspy == 1.6.1",  # earlier versions incompatible with numpy >= 1.17.0 and hyperspy == 1.6.0 has a histogram bug
         "diffsims >= 0.3",  # Makes use of functionality introduced in this release
         "lmfit >= 0.9.12",
         "pyfai",
         "ipywidgets",
         "numba",
+        "orix >= 0.3"
     ],
     package_data={
         "": ["LICENSE", "readme.rst"],

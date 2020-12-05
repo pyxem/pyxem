@@ -18,6 +18,8 @@
 
 import pytest
 import numpy as np
+import matplotlib.pyplot as plt
+import time
 
 from pyxem.generators.calibration_generator import CalibrationGenerator
 
@@ -114,3 +116,4 @@ def test_generate_ring_pattern(input_parameters, known_values, reference_indices
     assert np.allclose(
         known_values, rings[reference_indices[:, 0], reference_indices[:, 1]]
     )
+

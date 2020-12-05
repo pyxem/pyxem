@@ -53,14 +53,14 @@ class TestSimpleMaps:
             radius_finish=3,
             return_shifts=True,
         )
-        ans = np.array([[-0.45, -0.45], [0.57, 0.57], [-0.45, -0.45], [0.52, 0.52]])
+        ans = np.array([[[0.45, 0.45], [-0.57, -0.57]], [[0.45, 0.45], [-0.52, -0.52]]])
         np.testing.assert_almost_equal(shifts, ans)
 
     def test_center_direct_beam_blur_return_shifts(self, diffraction_pattern):
         shifts = diffraction_pattern.center_direct_beam(
             method="blur", sigma=5, half_square_width=3, return_shifts=True
         )
-        ans = np.array([[-1.0, -1.0], [-0.0, -0.0], [-1.0, -1.0], [-0.0, -0.0]])
+        ans = np.array([[[1.0, 1.0], [0.0, 0.0]], [[1.0, 1.0], [0.0, 0.0]]])
         np.testing.assert_almost_equal(shifts, ans)
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):

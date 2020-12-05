@@ -80,7 +80,12 @@ from pyxem.utils.peakfinders2D import (
     find_peaks_xc,
 )
 
-from pyxem.utils.dask_tools import _process_dask_array, _get_dask_array
+from pyxem.utils.dask_tools import (
+    _process_dask_array,
+    _get_dask_array,
+    get_signal_dimension_host_chunk_slice,
+    align_single_frame,
+)
 
 from pyxem.utils import peakfinder2D_gui
 
@@ -180,7 +185,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return signal_mask
 
     def apply_affine_transformation(
-        self, D, order=3, keep_dtype=False, inplace=True, *args, **kwargs
+        self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
     ):
         """Correct geometric distortion by applying an affine transformation.
 
@@ -190,7 +195,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             3x3 np.array (or Signal2D thereof) specifying the affine transform
             to be applied.
         order : 1,2,3,4 or 5
-            The order of interpolation on the transform. Default is 3.
+            The order of interpolation on the transform. Default is 1.
         keep_dtype : bool
             If True dtype of returned ElectronDiffraction2D Signal is that of
             the input, if False, casting to higher precision may occur.
@@ -910,7 +915,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return integration
 
-    def get_direct_beam_position(self, method, lazy_result=False, **kwargs):
+    def get_direct_beam_position(self, method, lazy_result=None, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
 
@@ -918,8 +923,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ----------
         method : str,
             Must be one of "cross_correlate", "blur" or "interpolate"
-        lazy_result : bool
-            If True, will return a LazySignal1D.
+        lazy_result : optional
+            If True, s_shifts will be a lazy signal. If False, a non-lazy signal.
+            By default, if the signal is (non-)lazy, the result will also be (non-)lazy.
         **kwargs:
             Keyword arguments to be passed to the method function.
 
@@ -930,6 +936,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             signal index being the x-shift and the second the y-shift.
 
         """
+        if lazy_result is None:
+            lazy_result = self._lazy
 
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
@@ -993,9 +1001,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
     def center_direct_beam(
         self,
-        method,
+        method=None,
         half_square_width=None,
+        shifts=None,
         return_shifts=False,
+        subpixel=True,
+        lazy_result=None,
         align_kwargs=None,
         *args,
         **kwargs,
@@ -1007,49 +1018,122 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         Parameters
         ----------
         method : str {'cross_correlate', 'blur', 'interpolate'}
-            Method used to estimate the direct beam position
+            Method used to estimate the direct beam position. The direct
+            beam position can also be passed directly with the shifts parameter.
         half_square_width : int
             Half the side length of square that captures the direct beam in all
             scans. Means that the centering algorithm is stable against
             diffracted spots brighter than the direct beam.
+        shifts : Signal, optional
+            The position of the direct beam, which can either be passed with this
+            parameter (shifts), or calculated on its own.
+            Both shifts and the signal need to have the same navigation shape, and
+            shifts needs to have one signal dimension with size 2.
         return_shifts : bool, default False
             If True, the values of applied shifts are returned
-        align_kwargs : None or dict
-            To be passed to .align2D() function
-        **kwargs:
-            To be passed to method function
+        subpixel : bool, optional
+            If True, the data will be interpolated, allowing for subpixel shifts of
+            the diffraction patterns. This can lead to changes in the total intensity
+            of the diffraction images, see Notes for more information. If False, the
+            data is not interpolated. Default True.
+        lazy_result : optional
+            If True, the result will be a lazy signal. If False, a non-lazy signal.
+            By default, if the signal is lazy, the result will also be lazy.
+            If the signal is non-lazy, the result will be non-lazy.
+        align_kwargs : dict
+            Parameters passed to the alignment function. See scipy.ndimage.shift
+            for more information about the parameters.
+        *args, **kwargs :
+            Passed to the function which estimate the direct beam position
 
-        Returns
+        Example
         -------
-        centered : ElectronDiffraction2D
-            The centered diffraction data.
+        >>> s.center_direct_beam(method='blur', sigma=1)
+
+        Using the shifts parameter
+
+        >>> s_shifts = s.get_direct_beam_position(
+        ...    method="interpolate", sigma=1, upsample_factor=2, kind="nearest")
+        >>> s.center_direct_beam(shifts=s_shifts)
+
+        Notes
+        -----
+        If the signal has an integer dtype, and subpixel=True is used (the default)
+        the total intensity in the diffraction images will most likely not be preserved.
+        This is due to subpixel=True utilizing interpolation. To keep the total intensity
+        use a float dtype, which can be done by s.change_dtype('float32', rechunk=False).
 
         """
-
-        align_kwargs = {} if align_kwargs is None else align_kwargs
+        if (shifts is None) and (method is None):
+            raise ValueError("Either method or shifts parameter must be specified")
+        if (shifts is not None) and (method is not None):
+            raise ValueError(
+                "Only one of the shifts or method parameters should be specified, "
+                "not both"
+            )
+        if lazy_result is None:
+            lazy_result = self._lazy
+        if align_kwargs is None:
+            align_kwargs = {}
 
         nav_size = self.axes_manager.navigation_size
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
-        if half_square_width is not None:
-            min_index = np.int(origin_coordinates[0] - half_square_width)
-            # fails if non-square dp
-            max_index = np.int(origin_coordinates[0] + half_square_width)
-            cropped = self.isig[min_index:max_index, min_index:max_index]
-            shifts = cropped.get_direct_beam_position(method=method, **kwargs)
+        if shifts is None:
+            if half_square_width is not None:
+                min_index = np.int(origin_coordinates[0] - half_square_width)
+                # fails if non-square dp
+                max_index = np.int(origin_coordinates[0] + half_square_width)
+                temp_data = self.isig[min_index:max_index, min_index:max_index]
+            else:
+                temp_data = self
+            shifts = temp_data.get_direct_beam_position(
+                method=method,
+                lazy_result=True,
+                **kwargs,
+            )
+
+        if not "order" in align_kwargs:
+            if subpixel:
+                align_kwargs["order"] = 1
+            else:
+                align_kwargs["order"] = 0
+
+        data_dask_array = _get_dask_array(self)
+        shifts_dask_array = _get_dask_array(shifts)
+
+        output_dask_array = _process_dask_array(
+            data_dask_array,
+            align_single_frame,
+            iter_array=shifts_dask_array,
+            **align_kwargs,
+        )
+
+        if lazy_result:
+            if not self._lazy:
+                self._lazy = True
+                self._assign_subclass()
+            self.data = output_dask_array
         else:
-            shifts = self.get_direct_beam_position(method=method, **kwargs)
+            if self._lazy:
+                self.data = np.empty(
+                    output_dask_array.shape, dtype=output_dask_array.dtype
+                )
+                self._lazy = False
+                self._assign_subclass()
+            shifts.data = np.empty(
+                shifts_dask_array.shape, dtype=shifts_dask_array.dtype
+            )
+            shifts._lazy = False
+            shifts._assign_subclass()
+            with ProgressBar():
+                da.store(
+                    [shifts_dask_array, output_dask_array],
+                    [shifts.data, self.data],
+                )
 
-        shifts = -1 * np.flip(shifts.data, -1)
-        shifts = shifts.reshape(nav_size, 2)
-
-        # Preserve existing behaviour by overriding
-        # crop & fill_value
-        align_kwargs.pop("crop", None)
-        align_kwargs.pop("fill_value", None)
-
-        self.align2D(shifts=shifts, crop=False, fill_value=0, **align_kwargs)
+        self.events.data_changed.trigger(obj=self)
 
         if return_shifts:
             return shifts
@@ -2741,7 +2825,57 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_bad_pixel_removed.compute(progressbar=show_progressbar)
         return s_bad_pixel_removed
 
+    def make_probe_navigation(self, method="fast"):
+        nav_dim = self.axes_manager.navigation_dimension
+        if (0 == nav_dim) or (nav_dim > 2):
+            raise ValueError(
+                "Probe navigation can only be made for signals with 1 or 2 "
+                "navigation dimensions"
+            )
+        if method == "fast":
+            x = round(self.axes_manager.signal_shape[0] / 2)
+            y = round(self.axes_manager.signal_shape[1] / 2)
+            if self._lazy:
+                isig_slice = get_signal_dimension_host_chunk_slice(
+                    x, y, self.data.chunks
+                )
+            else:
+                isig_slice = np.s_[x, y]
+            s = self.isig[isig_slice]
+        elif method == "slow":
+            s = self
+        s_nav = s.T.sum()
+        if s_nav._lazy:
+            s_nav.compute()
+        self._navigator_probe = s_nav
+
+    def plot(self, *args, **kwargs):
+        if "navigator" in kwargs:
+            super().plot(*args, **kwargs)
+        elif self.axes_manager.navigation_dimension > 2:
+            super().plot(*args, **kwargs)
+        elif self.axes_manager.navigation_dimension == 0:
+            super().plot(*args, **kwargs)
+        else:
+            if hasattr(self, "_navigator_probe"):
+                nav_sig_shape = self._navigator_probe.axes_manager.shape
+                self_nav_shape = self.axes_manager.navigation_shape
+                if nav_sig_shape != self_nav_shape:
+                    raise ValueError(
+                        "navigation_signal does not have the same shape "
+                        "({0}) as the signal's navigation shape "
+                        "({1})".format(nav_sig_shape, self_nav_shape)
+                    )
+            else:
+                if self._lazy:
+                    method = "fast"
+                else:
+                    method = "slow"
+                self.make_probe_navigation(method=method)
+            s_nav = self._navigator_probe
+            kwargs["navigator"] = s_nav
+            super().plot(*args, **kwargs)
+
 
 class LazyDiffraction2D(LazySignal, Diffraction2D):
-
     pass
