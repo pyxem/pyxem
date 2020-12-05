@@ -174,7 +174,7 @@ class CommonDiffraction:
         name: str
             The name of the axis.
         unit: str
-            The units for the intensity of the plt. i.e. for a thickness sample the unit might be nm
+            The units for the intensity of the plot. e.g 'nm' for thickness.
         """
         dict_signal = {}
         dict_signal[name] = {"data": data,
