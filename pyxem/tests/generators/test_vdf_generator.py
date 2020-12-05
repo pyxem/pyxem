@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.vdf_generator import VDFGenerator
+from pyxem.generators.virtual_image_generator import VirtualImageGenerator
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
@@ -38,10 +38,10 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
     diffraction_pattern.data = np.where(
         diffraction_pattern.data == 0, 0.01, diffraction_pattern.data
     )  # avoid divide by zeroes
-    return VDFGenerator(diffraction_pattern, diffraction_vectors)
+    return VirtualImageGenerator(diffraction_pattern, diffraction_vectors)
 
 
-class TestVDFGenerator:
+class TestVirtualImageGenerator:
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
         dvm = DiffractionVectors(
             np.array(
@@ -54,18 +54,18 @@ class TestVDFGenerator:
         )
         dvm.axes_manager.set_signal_dimension(0)
 
-        vdfgen = VDFGenerator(diffraction_pattern, dvm)
+        vdfgen = VirtualImageGenerator(diffraction_pattern, dvm)
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
         assert isinstance(vdfgen.vectors, DiffractionVectors)
 
     def test_vdf_generator_init_without_vectors(self, diffraction_pattern):
 
-        vdfgen = VDFGenerator(diffraction_pattern)
+        vdfgen = VirtualImageGenerator(diffraction_pattern)
         assert isinstance(vdfgen.signal, ElectronDiffraction2D)
         assert isinstance(vdfgen.vectors, type(None))
 
     def test_vector_vdfs_without_vectors(self, diffraction_pattern):
-        vdfgen = VDFGenerator(diffraction_pattern)
+        vdfgen = VirtualImageGenerator(diffraction_pattern)
         with pytest.raises(
             ValueError, match="DiffractionVectors not specified by user"
         ):
@@ -73,7 +73,7 @@ class TestVDFGenerator:
 
     @pytest.mark.parametrize("radius, normalize", [(4.0, False), (4.0, True)])
     def test_get_vector_vdf_images(
-        self, vdf_generator: VDFGenerator, radius, normalize
+        self, vdf_generator: VirtualImageGenerator, radius, normalize
     ):
         vdfs = vdf_generator.get_vector_vdf_images(radius, normalize)
         assert isinstance(vdfs, VDFImage)
@@ -81,10 +81,11 @@ class TestVDFGenerator:
     @pytest.mark.parametrize(
         "k_min, k_max, k_steps, normalize", [(0.0, 4.0, 2, False), (0.0, 4.0, 2, True)]
     )
-    def test_get_concentric_vdf_images(
-        self, vdf_generator: VDFGenerator, k_min, k_max, k_steps, normalize
+    def test_get_concentric_virtual_images(
+        self, vdf_generator: VirtualImageGenerator, k_min, k_max, k_steps, normalize
     ):
-        vdfs = vdf_generator.get_concentric_vdf_images(k_min, k_max, k_steps, normalize)
+        vdfs = vdf_generator.get_concentric_virtual_images(
+            k_min, k_max, k_steps, normalize)
         assert isinstance(vdfs, VDFImage)
 
     def test_calibration_vdf_images(self):
@@ -99,9 +100,9 @@ class TestVDFGenerator:
             sig_axis.offset = -1.0
             sig_axis.units = 'rad'
             sig_axis.name = 'Scattering Angle'
-        virtual_image_generator = VDFGenerator(dp)
+        virtual_image_generator = VirtualImageGenerator(dp)
         k_min, k_max, k_steps = 0.1, 0.6, 2
-        vi = virtual_image_generator.get_concentric_vdf_images(
+        vi = virtual_image_generator.get_concentric_virtual_images(
             k_min, k_max, k_steps)
 
         assert vi.data.shape == (2, 5)
@@ -131,5 +132,5 @@ def test_vdf_generator_from_map(diffraction_pattern):
     )
     dvm.axes_manager.set_signal_dimension(0)
 
-    vdfgen = VDFGenerator(diffraction_pattern, dvm)
-    assert isinstance(vdfgen, VDFGenerator)
+    vdfgen = VirtualImageGenerator(diffraction_pattern, dvm)
+    assert isinstance(vdfgen, VirtualImageGenerator)

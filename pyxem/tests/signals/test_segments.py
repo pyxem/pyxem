@@ -22,7 +22,7 @@ import numpy as np
 
 from hyperspy.signals import Signal2D
 
-from pyxem.generators.vdf_generator import VDFGenerator
+from pyxem.generators.virtual_image_generator import VirtualImageGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from pyxem.signals.segments import LearningSegment, VDFSegment
@@ -162,7 +162,7 @@ def unique_vectors(request):
 
 @pytest.fixture
 def vdf_segments(signal_data, unique_vectors):
-    vdfgen = VDFGenerator(signal_data, unique_vectors)
+    vdfgen = VirtualImageGenerator(signal_data, unique_vectors)
     vdfs = vdfgen.get_vector_vdf_images(radius=1)
     return vdfs.get_vdf_segments()
 

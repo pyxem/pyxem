@@ -30,8 +30,9 @@ NORMALISE_DOCSTRING = """normalize : boolean
         """
 
 
-class VDFGenerator:
-    """Generates VDF images for a specified signal and set of aperture positions.
+class VirtualImageGenerator:
+    """Generates VDF images for a specified signal and set of aperture
+    positions.
 
     Attributes
     ----------
@@ -83,7 +84,7 @@ class VDFGenerator:
         else:
             raise ValueError(
                 "DiffractionVectors not specified by user. Please "
-                "initialize VDFGenerator with some vectors. "
+                "initialize VirtualImageGenerator with some vectors. "
             )
 
         # Assign vectors used to generate images to vdfim attribute.
@@ -93,7 +94,7 @@ class VDFGenerator:
 
     get_vector_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
 
-    def get_concentric_vdf_images(self, k_min, k_max, k_steps, normalize=False):
+    def get_concentric_virtual_images(self, k_min, k_max, k_steps, normalize=False):
         """Obtain the intensity scattered at each navigation position in an
         ElectronDiffraction2D Signal by summation over a series of concentric
         in annuli between a specified inner and outer radius in a number of
@@ -135,7 +136,7 @@ class VDFGenerator:
         return self._get_virtual_images(roi_args_list, normalize,
                                         new_axis_dict=new_axis_dict)
 
-    get_concentric_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
+    get_concentric_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
 
     def _get_virtual_images(self, roi_args_list, normalize, new_axis_dict):
         """Obtain the intensity scattered at each navigation position in an
