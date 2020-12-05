@@ -87,6 +87,37 @@ class TestVDFGenerator:
         vdfs = vdf_generator.get_concentric_vdf_images(k_min, k_max, k_steps, normalize)
         assert isinstance(vdfs, VDFImage)
 
+    def test_calibration_vdf_images(self):
+        dp = ElectronDiffraction2D(np.arange(500).reshape(5, 10, 10))
+        nav_axis = dp.axes_manager.navigation_axes[0]
+        nav_axis.scale = 0.2
+        nav_axis.offset = 10
+        nav_axis.units = 'nm'
+        nav_axis.name = 'position'
+        for sig_axis in dp.axes_manager.signal_axes:
+            sig_axis.scale = 0.2
+            sig_axis.offset = -1.0
+            sig_axis.units = 'rad'
+            sig_axis.name = 'Scattering Angle'
+        virtual_image_generator = VDFGenerator(dp)
+        k_min, k_max, k_steps = 0.1, 0.6, 2
+        vi = virtual_image_generator.get_concentric_vdf_images(
+            k_min, k_max, k_steps)
+
+        assert vi.data.shape == (2, 5)
+
+        vi_nav_axis = vi.axes_manager[0]
+        assert vi_nav_axis.name == 'Annular bins'
+        assert vi_nav_axis.units == sig_axis.units
+        assert vi_nav_axis.scale == (k_max - k_min) / k_steps
+        assert vi_nav_axis.offset == k_min
+        assert vi_nav_axis.size == k_steps
+
+        vi_sig_axis = vi.axes_manager[1]
+        for attr in ['scale', 'offset', 'units', 'name']:
+            assert getattr(vi_sig_axis, attr) == getattr(nav_axis, attr)
+
+
 
 def test_vdf_generator_from_map(diffraction_pattern):
     dvm = DiffractionVectors(

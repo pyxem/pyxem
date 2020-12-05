@@ -76,7 +76,9 @@ class VDFGenerator:
         """
         if self.vectors:
             roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
-            vdfim = self._get_vdf_images(roi_args_list, normalize)
+            new_axis_dict = {'name': 'Vector index'}
+            vdfim = self._get_virtual_images(roi_args_list, normalize,
+                                             new_axis_dict=new_axis_dict)
 
         else:
             raise ValueError(
@@ -100,11 +102,13 @@ class VDFGenerator:
         Parameters
         ----------
         k_min : float
-            Minimum radius of the annular integration window in reciprocal
-            angstroms.
+            Minimum radius of the annular integration window in units of
+            reciprocal space.
+
         k_max : float
-            Maximum radius of the annular integration window in reciprocal
-            angstroms.
+            Maximum radius of the annular integration window in units of
+            reciprocal space.
+
         k_steps : int
             Number of steps within the annular integration window
         %s
@@ -123,11 +127,17 @@ class VDFGenerator:
 
         roi_args_list = [(0, 0, r[1], r[0]) for r in ks]
 
-        return self._get_vdf_images(roi_args_list, normalize)
+        new_axis_dict = {'name': 'Annular bins',
+                         'scale': k_step,
+                         'units': self.signal.axes_manager[-1].units,
+                         'offset': k_min}
+
+        return self._get_virtual_images(roi_args_list, normalize,
+                                        new_axis_dict=new_axis_dict)
 
     get_concentric_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
 
-    def _get_vdf_images(self, roi_args_list, normalize):
+    def _get_virtual_images(self, roi_args_list, normalize, new_axis_dict):
         """Obtain the intensity scattered at each navigation position in an
         ElectronDiffraction2D Signal by summation over the roi defined by the
         ``roi_args_list`` parameter.
@@ -148,12 +158,19 @@ class VDFGenerator:
             for roi_args in roi_args_list
             ]
 
-        vdfim = hs.stack(vdfs)
+        vdfim = hs.stack(vdfs, new_axis_name=new_axis_dict['name'],
+                         show_progressbar=False)
+
         vdfim.set_signal_type("vdf_image")
+
+        # Set new axis properties
+        new_axis = vdfim.axes_manager[new_axis_dict['name']]
+        for k, v in new_axis_dict.items():
+            setattr(new_axis, k, v)
 
         if normalize:
             vdfim.map(normalize_vdf)
 
         return vdfim
 
-    _get_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
+    _get_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
