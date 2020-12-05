@@ -185,7 +185,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return signal_mask
 
     def apply_affine_transformation(
-        self, D, order=3, keep_dtype=False, inplace=True, *args, **kwargs
+        self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
     ):
         """Correct geometric distortion by applying an affine transformation.
 
@@ -195,7 +195,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             3x3 np.array (or Signal2D thereof) specifying the affine transform
             to be applied.
         order : 1,2,3,4 or 5
-            The order of interpolation on the transform. Default is 3.
+            The order of interpolation on the transform. Default is 1.
         keep_dtype : bool
             If True dtype of returned ElectronDiffraction2D Signal is that of
             the input, if False, casting to higher precision may occur.
