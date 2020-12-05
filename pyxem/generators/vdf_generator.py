@@ -19,21 +19,25 @@
 """VDF generator and associated tools."""
 import numpy as np
 
-from hyperspy.api import roi
+import hyperspy.api as hs
 
-from pyxem.signals.vdf_image import VDFImage
 from pyxem.utils.vdf_utils import normalize_vdf
-from pyxem.signals import transfer_signal_axes, transfer_navigation_axes_to_signal_axes
+
+
+NORMALISE_DOCSTRING = """normalize : boolean
+            If True each VDF image is normalized so that the maximum intensity
+            in each VDF is 1.
+        """
 
 
 class VDFGenerator:
     """Generates VDF images for a specified signal and set of aperture positions.
 
-    Parameters
+    Attributes
     ----------
     signal : ElectronDiffraction2D
         The signal of electron diffraction patterns to be indexed.
-    vectors: DiffractionVectors(optional)
+    vectors: DiffractionVectors (optional)
         The vector positions, in calibrated units, at which to position
         integration windows for VDF formation.
 
@@ -60,11 +64,9 @@ class VDFGenerator:
         Parameters
         ----------
         radius : float
-            Radius of the integration window in reciprocal angstroms.
-
-        normalize : boolean
-            If True each VDF image is normalized so that the maximum intensity
-            in each VDF is 1.
+            Radius of the integration window - in units of the reciprocal
+            space.
+        %s
 
         Returns
         -------
@@ -73,16 +75,8 @@ class VDFGenerator:
             vectors.
         """
         if self.vectors:
-            vdfs = []
-            for v in self.vectors.data:
-                disk = roi.CircleROI(cx=v[0], cy=v[1], r=radius, r_inner=0)
-                vdf = disk(self.signal, axes=self.signal.axes_manager.signal_axes)
-                vdfs.append(vdf.sum((2, 3)).as_signal2D((0, 1)).data)
-
-            vdfim = VDFImage(np.asarray(vdfs))
-
-            if normalize:
-                vdfim.map(normalize_vdf)
+            roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
+            vdfim = self._get_vdf_images(roi_args_list, normalize)
 
         else:
             raise ValueError(
@@ -90,14 +84,12 @@ class VDFGenerator:
                 "initialize VDFGenerator with some vectors. "
             )
 
-        # Set calibration to same as signal
-        vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
-
         # Assign vectors used to generate images to vdfim attribute.
         vdfim.vectors = self.vectors
-        vdfim.vectors = transfer_signal_axes(vdfim.vectors, self.vectors)
 
         return vdfim
+
+    get_vector_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
 
     def get_concentric_vdf_images(self, k_min, k_max, k_steps, normalize=False):
         """Obtain the intensity scattered at each navigation position in an
@@ -110,13 +102,12 @@ class VDFGenerator:
         k_min : float
             Minimum radius of the annular integration window in reciprocal
             angstroms.
-
         k_max : float
             Maximum radius of the annular integration window in reciprocal
             angstroms.
-
         k_steps : int
             Number of steps within the annular integration window
+        %s
 
         Returns
         -------
@@ -130,18 +121,39 @@ class VDFGenerator:
 
         ks = np.array((k0s, k1s)).T
 
-        vdfs = []
-        for k in ks:
-            annulus = roi.CircleROI(cx=0, cy=0, r=k[1], r_inner=k[0])
-            vdf = annulus(self.signal, axes=self.signal.axes_manager.signal_axes)
-            vdfs.append(vdf.sum((2, 3)).as_signal2D((0, 1)).data)
+        roi_args_list = [(0, 0, r[1], r[0]) for r in ks]
 
-        vdfim = VDFImage(np.asarray(vdfs))
+        return self._get_vdf_images(roi_args_list, normalize)
+
+    get_concentric_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
+
+    def _get_vdf_images(self, roi_args_list, normalize):
+        """Obtain the intensity scattered at each navigation position in an
+        ElectronDiffraction2D Signal by summation over the roi defined by the
+        ``roi_args_list`` parameter.
+
+        Parameters
+        ----------
+        roi_args_list : list of `hyperspy.roi.CircleROI` arguments
+            Arguments required to initialise a CircleROI
+        %s
+
+        Returns
+        -------
+        vdfs : VDFImage
+            VDFImage object containing virtual dark field images
+        """
+        vdfs = [
+            self.signal.get_integrated_intensity(hs.roi.CircleROI(*roi_args))
+            for roi_args in roi_args_list
+            ]
+
+        vdfim = hs.stack(vdfs)
+        vdfim.set_signal_type("vdf_image")
 
         if normalize:
             vdfim.map(normalize_vdf)
 
-        # Set calibration to same as signal
-        vdfim = transfer_navigation_axes_to_signal_axes(vdfim, self.signal)
-
         return vdfim
+
+    _get_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
