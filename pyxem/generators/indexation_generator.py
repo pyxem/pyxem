@@ -37,6 +37,7 @@ from pyxem.utils.indexation_utils import (
     get_nth_best_solution,
     correlate_library_from_dict,
     optimal_fft_size,
+    index_dataset_with_template_rotation,
 )
 
 
@@ -120,6 +121,54 @@ def get_library_FT_dict(template_library, shape, fsize):
         }
 
     return library_FT_dict
+
+
+class RotationIndexationGenerator:
+    """Generates a template-based indexer that also calculates relative
+    rotation of templates.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+
+    Notes
+    -----
+    To be used with minimal template libraries whereby the first euler
+    angle is 0. It is this angle that is optimized during indexation.
+    """
+    def __init__(self, signal, diffraction_library):
+        self.signal = signal
+        self.library = diffraction_library
+
+    def correlate(self,
+                  n_largest=5,
+                  method="fast_correlation",
+                  include_phases=None,
+                  optimize_direct_beam=False,
+                  chunks="auto",
+                  delta_r=1,
+                  delta_theta=1,
+                  keep=100,
+                  **kwargs,
+                  ):
+        if method != "fast_correlation":
+            raise NotImplementedError(f"{method} not supported currently")
+        if include_phases is None:
+            include_phases = self.library.keys()
+        return index_dataset_with_template_rotation(self.signal,
+                                                    self.library,
+                                                    include_phases,
+                                                    optimize_direct_beam,
+                                                    chunks,
+                                                    delta_r,
+                                                    delta_theta,
+                                                    n_largest,
+                                                    method,
+                                                    keep,
+                                                    **kwargs)
 
 
 class IndexationGenerator:
