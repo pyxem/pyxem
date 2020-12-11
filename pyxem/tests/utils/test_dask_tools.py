@@ -1056,55 +1056,6 @@ class TestPeakFindDog:
         )
         assert len(peaks1) == 1
 
-    def test_single_frame_min_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[54, 29] = 100
-        image[54, 32] = 100
-        max_sigma, sigma_ratio = 5, 5
-        threshold, overlap = 0.01, 0.1
-        peaks0 = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=1,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks0) == 2
-        peaks1 = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=2,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks1) == 1
-
-    def test_single_frame_max_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[52:58, 22:28] = 100
-        min_sigma, sigma_ratio = 0.1, 5
-        threshold, overlap = 0.1, 0.01
-        peaks = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=1.0,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) > 1
-        peaks = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=5.0,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) == 1
-
     def test_single_frame_normalize_value(self):
         image = np.zeros((100, 100), dtype=np.uint16)
         image[49:52, 49:52] = 100
@@ -1306,24 +1257,6 @@ class TestBackgroundRemovalDOG:
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[0, :].all() == 0
-
-    def test_chunk_min_sigma(self):
-        min_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_dog(numpy_array, min_sigma=min_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    def test_chunk_max_sigma(self):
-        max_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_dog(numpy_array, max_sigma=max_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
 
     def test_dask_min_sigma(self):
         min_sigma = 10
@@ -1630,55 +1563,6 @@ class TestPeakFindLog:
             overlap=overlap,
         )
         assert len(peaks1) == 1
-
-    def test_single_frame_min_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[54, 29] = 100
-        image[54, 32] = 100
-        max_sigma, num_sigma = 5, 10
-        threshold, overlap = 0.01, 0.1
-        peaks0 = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=1,
-            max_sigma=max_sigma,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks0) == 2
-        peaks1 = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=2,
-            max_sigma=max_sigma,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks1) == 1
-
-    def test_single_frame_max_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[52:58, 22:28] = 100
-        min_sigma, num_sigma = 0.1, 10
-        threshold, overlap = 0.1, 0.01
-        peaks = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=1.0,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) > 1
-        peaks = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=5.0,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) == 2
 
     def test_single_frame_normalize_value(self):
         image = np.zeros((100, 100), dtype=np.uint16)

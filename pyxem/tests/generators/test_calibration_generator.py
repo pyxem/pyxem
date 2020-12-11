@@ -104,8 +104,8 @@ class TestCalibrationGenerator:
         print(calgen)
 
     def test_get_elliptical_distortion(self, cal_dist, input_parameters, affine_answer):
-        np.testing.assert_allclose(cal_dist.affine_matrix, affine_answer)
-        np.testing.assert_allclose(cal_dist.ring_params, input_parameters)
+        np.testing.assert_allclose(cal_dist.affine_matrix, affine_answer,rtol=1e-3)
+        np.testing.assert_allclose(cal_dist.ring_params, input_parameters,rtol=1e-3)
 
     def test_get_distortion_residuals(self, cal_dist):
         residuals = cal_dist.get_distortion_residuals(mask_radius=10, spread=2)
@@ -116,14 +116,14 @@ class TestCalibrationGenerator:
 
     def test_get_diffraction_calibration(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30, linewidth=5)
-        np.testing.assert_almost_equal(cal_dist.diffraction_calibration, 0.01061096)
+        np.testing.assert_almost_equal(cal_dist.diffraction_calibration, 0.01061096,decimal=3)
 
     def test_get_navigation_calibration(self, calgen):
         line = Line2DROI(x1=2.5, y1=13.0, x2=193.0, y2=12.5, linewidth=3.5)
         value = calgen.get_navigation_calibration(
             line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
         )
-        np.testing.assert_almost_equal(calgen.navigation_calibration, value)
+        np.testing.assert_almost_equal(calgen.navigation_calibration, value,decimal=3)
 
     def test_get_rotation_calibration(self, calgen):
         real_line = Line2DROI(
@@ -135,7 +135,7 @@ class TestCalibrationGenerator:
         value = calgen.get_rotation_calibration(
             real_line=real_line, reciprocal_line=recip_line
         )
-        np.testing.assert_almost_equal(value, -80.24669411537899)
+        np.testing.assert_almost_equal(value, -80.24669411537899,decimal=3)
 
     def test_plot_calibrated_data_dp(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30, linewidth=5)
@@ -162,6 +162,7 @@ class TestGetCorrectionMatrix:
                     [0.0, 0.0, 1.0],
                 ]
             ),
+            decimal=3
         )
 
     def test_get_correction_affine_only(self, calgen):
@@ -174,7 +175,7 @@ class TestGetCorrectionMatrix:
         )
         calgen.affine_matrix = affine
         corr = calgen.get_correction_matrix()
-        np.testing.assert_almost_equal(corr, affine)
+        np.testing.assert_almost_equal(corr, affine,decimal=3)
 
     def test_get_correction_affine_and_rotation(self, calgen):
         affine = np.array(
@@ -204,6 +205,7 @@ class TestGetCorrectionMatrix:
                     [0.0, 0.0, 1.0],
                 ]
             ),
+            decimal=3
         )
 
     def test_no_attributes_correction_matrix(self, calgen):
@@ -285,7 +287,3 @@ class TestEmptyCalibrationGenerator:
         calgen.diffraction_calibration = (1,1)
         ai = calgen.to_ai(wavelength=(2.53*10**-12))
         assert isinstance(ai, AzimuthalIntegrator)
-
-
-
-

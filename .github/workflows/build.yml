@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: pip install -U -e .'[tests]'
       - name: Run tests
-        run: pytest --cov=pyxem --pyargs pyxem
+        run: pytest --cov=pyxem --runslow --pyargs pyxem
       - name: Generate line coverage
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: coverage report --show-missing
