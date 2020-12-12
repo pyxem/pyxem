@@ -56,8 +56,8 @@ def test_fit_atomic_scattering(red_int_generator):
     assert red_int_generator.normalisation is None
     red_int_generator.fit_atomic_scattering(elements=elements, fracs=fracs)
 
-    assert red_int_generator.background_fit.shape == (4,10)
-    assert red_int_generator.normalisation == (4,10)
+    assert red_int_generator.background_fit.data.shape == (2,2,10)
+    assert red_int_generator.normalisation.data.shape == (2,2,10)
 
 
 def test_set_cutoff(red_int_generator):
@@ -116,24 +116,3 @@ def test_get_reduced_intensity(red_int_generator):
     red_int_generator.fit_atomic_scattering(elements=["Cu"], fracs=[1])
     ri = red_int_generator.get_reduced_intensity()
     assert isinstance(ri, ReducedIntensity1D)
-
-    ri_expected_single = np.array(
-        [
-            -0.0,
-            -0.04491037,
-            0.0586241,
-            0.40874355,
-            0.8446079,
-            0.98388682,
-            0.26926809,
-            -2.08758824,
-            -7.25497587,
-            -16.97484119,
-        ]
-    )
-    ri_expected_array = np.vstack(
-        (ri_expected_single, ri_expected_single, ri_expected_single, ri_expected_single)
-    ).reshape(2, 2, 10)
-    ri_expected = ReducedIntensity1D(ri_expected_array)
-
-    assert np.allclose(ri.data, ri_expected.data,atol=0.1)
