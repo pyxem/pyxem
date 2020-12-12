@@ -34,7 +34,6 @@ from diffsims.generators.library_generator import DiffractionLibraryGenerator
 from diffsims.generators.library_generator import VectorLibraryGenerator
 from diffsims.sims.diffraction_simulation import DiffractionSimulation
 
-from .components.diffraction_component import ElectronDiffractionForwardModel
 from .generators.calibration_generator import CalibrationGenerator
 
 from .signals.diffraction1d import Diffraction1D
