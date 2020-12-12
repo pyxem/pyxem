@@ -346,10 +346,7 @@ class TestPyFAIIntegration:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    @pytest.mark.parametrize("stack", [False])
-    def test_plot_integrated_intensity(self, stack, diffraction_pattern):
-        if stack:
-            diffraction_pattern = hs.stack([diffraction_pattern] * 3)
+    def test_plot_integrated_intensity(self,diffraction_pattern):
         roi = hs.roi.CircleROI(3, 3, 5)
         plt.ion()  # to make plotting non-blocking
         diffraction_pattern.plot_integrated_intensity(roi)
