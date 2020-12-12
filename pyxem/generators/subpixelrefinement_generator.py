@@ -20,7 +20,7 @@
 
 import numpy as np
 
-from skimage.feature import register_translation
+from skimage.registeration import phase_correlation
 from skimage import draw
 
 from pyxem.signals.diffraction_vectors import DiffractionVectors
@@ -164,7 +164,7 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
 
     """
 
-    shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)
+    shifts, error, _ = phase_correlation(exp_disc, sim_disc, upsample_factor)
     shifts = np.flip(shifts)  # to comply with hyperspy conventions - see issue#490
     return shifts
 
