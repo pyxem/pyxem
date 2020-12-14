@@ -33,3 +33,14 @@ jobs:
       - name: Upload coverage to Coveralls
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel: true
+
+  coveralls-finish:
+    needs: build-with-pip
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls finished
+      uses: AndreMiras/coveralls-python-action@develop
+      with:
+        parallel-finished: true

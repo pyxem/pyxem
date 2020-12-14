@@ -53,6 +53,7 @@ def pytest_collection_modifyitems(config, items):
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
 
+# End of the code lift, it's regular code from here on out
 
 @pytest.fixture
 def default_structure():
