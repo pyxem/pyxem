@@ -262,44 +262,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
-    def remove_deadpixels(
-        self,
-        deadpixels,
-        deadvalue="average",
-        inplace=True,
-        progress_bar=True,
-        *args,
-        **kwargs,
-    ):
-        """Remove deadpixels from experimentally acquired diffraction patterns.
-
-        Parameters
-        ----------
-        deadpixels : list
-            List of deadpixels to be removed.
-        deadvalue : str
-            Specify how deadpixels should be treated. 'average' sets the dead
-            pixel value to the average of adjacent pixels. 'nan' sets the dead
-            pixel to nan
-        inplace : bool
-            If True (default), this signal is overwritten. Otherwise, returns a
-            new signal.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to be passed to map().
-
-        """
-        return self.map(
-            remove_dead,
-            deadpixels=deadpixels,
-            deadvalue=deadvalue,
-            inplace=inplace,
-            show_progressbar=progress_bar,
-            *args,
-            **kwargs,
-        )
-
     def get_azimuthal_integral1d(
         self,
         npt,
@@ -2564,6 +2526,44 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if not lazy_result:
             s_hot_pixels.compute(progressbar=show_progressbar)
         return s_hot_pixels
+
+    def remove_deadpixels(
+        self,
+        deadpixels,
+        deadvalue="average",
+        inplace=True,
+        progress_bar=True,
+        *args,
+        **kwargs,
+    ):
+        """Remove deadpixels from experimentally acquired diffraction patterns.
+
+        Parameters
+        ----------
+        deadpixels : list
+            List of deadpixels to be removed.
+        deadvalue : str
+            Specify how deadpixels should be treated. 'average' sets the dead
+            pixel value to the average of adjacent pixels. 'nan' sets the dead
+            pixel to nan
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
+
+        """
+        return self.map(
+            remove_dead,
+            deadpixels=deadpixels,
+            deadvalue=deadvalue,
+            inplace=inplace,
+            show_progressbar=progress_bar,
+            *args,
+            **kwargs,
+        )
 
     def correct_bad_pixels(
         self, bad_pixel_array, lazy_result=True, show_progressbar=True
