@@ -309,15 +309,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         sum=False,
         **kwargs,
     ):
-        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
-
-        This function is designed to be fairly flexible to account for 2 different cases:
-
-        1 - If the unit is "pyxem" then it lets pyXEM take the lead. If wavelength is none in that case
-        it doesn't account for the Ewald sphere.
-
-        2 - If unit is any of the options from pyFAI then detector cannot be None and the handling of
-        units is passed to pyxem and those units are used.
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
+        with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
+        no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,
+        in which case the detector kwarg must be provided.
 
         Parameters
         ----------
@@ -437,15 +432,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correctSolidAngle=True,
         **kwargs,
     ):
-        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
-
-        This function is designed to be fairly flexible to account for 2 different cases:
-
-        1 - If the unit is "pyxem" then it lets pyXEM take the lead. If wavelength is none in that case
-        it doesn't account for the Ewald sphere.
-
-        2 - If unit is any of the options from pyFAI then detector cannot be None and the handling of
-        units is passed to pyxem and those units are used.
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
+        with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
+        no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,
+        in which case the detector kwarg must be provided.
 
         Parameters
         ----------
