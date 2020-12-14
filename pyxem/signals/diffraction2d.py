@@ -304,7 +304,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range=None,
         azimuth_range=None,
         wavelength=None,
-        unit="k_nm^-1",
         inplace=False,
         method="splitpixel",
         sum=False,
@@ -336,9 +335,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         wavelength: None or float
             The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
             it to properly work.
-        unit: str
-            The unit can be "pyxem" to use the pyxem units and “q_nm^-1”, “q_A^-1”, “2th_deg”, “2th_rad”, “r_mm”
-            if pyFAI is used for unit handling
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
