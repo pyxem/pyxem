@@ -113,12 +113,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         except (AttributeError):
             raise ValueError("ai property is not currently set")
 
-    @ai.setter
-    def ai(self, ai):
-        """ Sets the Azimuthal Integrator property.  See ~pyFAI.AzimuthalIntegrator for more.
-        """
-        self.metadata.set_item("Signal.ai", ai)
-
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
     ):
@@ -137,17 +131,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range: (start,stop)
             The start and stop of the radial range in real units
 
+        Returns
+        -------
+        None :
+            The metadata item Signal.ai is set
+
         """
+        if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
+            raise ValueError('if the unit is not \'2th_deg\' or \'2th_rad\' then a wavelength must be given.')
+
         pixel_scale = [
             self.axes_manager.signal_axes[0].scale,
             self.axes_manager.signal_axes[1].scale,
         ]
-        if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
-            print(
-                'if the unit is not "2th_deg", "2th_rad"'
-                "then a wavelength must be given. "
-            )
-            return None
+
         unit = to_unit(self.unit)
         sig_shape = self.axes_manager.signal_shape
         setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
@@ -161,8 +158,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             wavelength=wavelength,
             **kwargs,
         )
-        self.ai = ai
-        return ai
+        self.metadata.set_item("Signal.ai", ai)
+        return None
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
