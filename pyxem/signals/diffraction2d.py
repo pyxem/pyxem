@@ -111,7 +111,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         try:
             return self.metadata.Signal["ai"]
         except (AttributeError):
-            return None
+            raise ValueError("ai property is not currently set")
 
     @ai.setter
     def ai(self, ai):
