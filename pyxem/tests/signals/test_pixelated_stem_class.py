@@ -1558,21 +1558,21 @@ class TestDiffraction2DIntensityPeaks:
 class TestDiffraction2DPeakPositionRefinement:
     def test_simple(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
         assert s.data.shape[:2] == refined_peak_array.shape
         assert hasattr(peak_array, "compute")
 
     def test_wrong_square_size(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         with pytest.raises(ValueError):
             s.peak_position_refinement_com(peak_array, square_size=5)
 
     def test_lazy_input(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
         assert s.data.shape[:2] == refined_peak_array.shape
         assert hasattr(refined_peak_array, "compute")
@@ -1580,7 +1580,7 @@ class TestDiffraction2DPeakPositionRefinement:
     def test_lazy_output(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         refined_peak_array = s.peak_position_refinement_com(
             peak_array, 4, lazy_result=False
         )
@@ -1598,7 +1598,7 @@ class TestDiffraction2DPeakPositionRefinement:
         s = Diffraction2D(data)
         min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
         threshold, overlap = 0.06, 0.01
-        peaks = s.find_peaks_lazy(
+        peaks = s.find_peaks(
             min_sigma=min_sigma,
             max_sigma=max_sigma,
             sigma_ratio=sigma_ratio,
@@ -1618,7 +1618,7 @@ class TestDiffraction2DPeakPositionRefinement:
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = Diffraction2D(np.random.random(size=shape))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         refined_peak_array = s.peak_position_refinement_com(
             peak_array, 4, lazy_result=False
         )
