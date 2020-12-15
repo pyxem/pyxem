@@ -1953,31 +1953,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        method: string, optional
-            'dog': difference of Gaussians. 'log': Laplacian of Gaussian.
-            Default 'dog'.
-        min_sigma : float, optional
-            Default 0.98.
-        max_sigma : float, optional
-            Default 55.
-        sigma_ratio : float, optional
-            For method 'dog'. Default 1.76.
-        num_sigma: float, optional
-            For method 'log'. Default 10.
-        threshold : float, optional
-            Default 0.36.
-        overlap : float, optional
-            Default 0.81.
-        normalize_value : float, optional
-            All the values in the signal will be divided by this value.
-            If no value is specified, the max value in each individual image
-            will be used.
-        max_r : float
-            Maximum radius compared from the center of the diffraction pattern
+        method : string, optional
+            'dog'(default) for difference of Gaussians. 'log' for Laplacian of Gaussian.
         lazy_result : bool, optional
             Default True
         show_progressbar : bool, optional
             Default True
+        **kwargs :
+            Passed to the peakfinder, see skimage docs for details
 
         Returns
         -------
@@ -2016,13 +1999,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s.plot()
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        if not self._lazy:
+            raise ValueError("Signal is not lazy, please use the non-lazy version")
+
+        dask_array = self.data
 
         if method == "dog":
             output_array = dt._peak_find_dog(dask_array, **kwargs)
