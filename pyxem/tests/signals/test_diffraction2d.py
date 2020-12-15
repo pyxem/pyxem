@@ -772,7 +772,7 @@ class TestDiffraction2DPeakPositionRefinement:
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = Diffraction2D(np.random.random(size=shape)).as_lazy()
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks_lazy()
         refined_peak_array = s.peak_position_refinement_com(
             peak_array, 4, lazy_result=False
         )
