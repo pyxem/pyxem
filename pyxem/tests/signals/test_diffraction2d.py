@@ -855,7 +855,7 @@ class TestPlotNavigator:
         s.plot(navigator=s_nav)
         plt.close("all")
 
-    @pytest.mark.xfail()
+    @pytest.mark.xfail(reason="Designed failure")
     def test_wrong_navigator_shape_kwarg(self):
         s = Diffraction2D(np.random.randint(0, 256, (8, 9, 10, 30), dtype=np.uint8))
         s_nav = Diffraction2D(np.zeros((2, 19)))
