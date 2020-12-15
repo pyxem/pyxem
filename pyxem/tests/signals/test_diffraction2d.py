@@ -700,6 +700,84 @@ class TestDiffraction2DFindPeaksLazy:
         peak_array = s.find_peaks_lazy(method=methods, lazy_result=False)
         assert peak_array.shape == tuple(shape[:-2])
 
+
+class TestDiffraction2DIntensityPeaks:
+    def test_simple(self):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, "compute")
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, "compute")
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array, lazy_result=False)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert not hasattr(intensity_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape))
+        peak_array = s.find_peaks()
+        intensity_array = s.intensity_peaks(peak_array, disk_r=1)
+        assert intensity_array.shape == tuple(shape[:-2])
+
+
+class TestDiffraction2DPeakPositionRefinement:
+    def test_simple(self):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(peak_array, "compute")
+
+    def test_wrong_square_size(self):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        with pytest.raises(ValueError):
+            s.peak_position_refinement_com(peak_array, square_size=5)
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(refined_peak_array, "compute")
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False
+        )
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert not hasattr(refined_peak_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape))
+        peak_array = s.find_peaks()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False
+        )
+        assert refined_peak_array.shape == tuple(shape[:-2])
+
 class TestMakeProbeNavigation:
     def test_fast(self):
         s = Diffraction2D(np.ones((6, 5, 12, 10)))
