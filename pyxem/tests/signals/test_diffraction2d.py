@@ -663,6 +663,42 @@ class TestCenterDirectBeam:
         with pytest.raises(ValueError):
             s.center_direct_beam()
 
+class TestDiffraction2DFindPeaksLazy:
+
+    method1 = ["dog", "log"]
+
+    @pytest.mark.parametrize("methods", method1)
+    @pytest.mark.xfali(reason="Non-lazy input")
+    def test_simple(self, methods):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks_lazy(method=methods)
+        assert s.data.shape[:2] == peak_array.shape
+        assert hasattr(peak_array, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_input(self, methods):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy(method=methods)
+        assert s.data.shape[:2] == peak_array.shape
+        assert hasattr(peak_array, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_output(self, methods):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy(method=methods, lazy_result=False)
+        assert s.data.shape[:2] == peak_array.shape
+        assert not hasattr(peak_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize("methods", method1)
+    def test_different_dimensions(self, nav_dims, methods):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape))
+        peak_array = s.find_peaks_lazy(method=methods, lazy_result=False)
+        assert peak_array.shape == tuple(shape[:-2])
 
 class TestMakeProbeNavigation:
     def test_fast(self):
