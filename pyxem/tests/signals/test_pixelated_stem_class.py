@@ -1497,7 +1497,7 @@ class TestSubtractingDiffractionBackground:
 class TestDiffraction2DIntensityPeaks:
     def test_simple(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         intensity_array = s.intensity_peaks(peak_array)
         assert s.data.shape[:2] == intensity_array.shape
         assert hasattr(intensity_array, "compute")
@@ -1505,7 +1505,7 @@ class TestDiffraction2DIntensityPeaks:
     def test_lazy_input(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         intensity_array = s.intensity_peaks(peak_array)
         assert s.data.shape[:2] == intensity_array.shape
         assert hasattr(intensity_array, "compute")
@@ -1513,44 +1513,17 @@ class TestDiffraction2DIntensityPeaks:
     def test_lazy_output(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))
         s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         intensity_array = s.intensity_peaks(peak_array, lazy_result=False)
         assert s.data.shape[:2] == intensity_array.shape
         assert not hasattr(intensity_array, "compute")
-
-    def test_with_data(self):
-        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
-        data[0, 0, 50, 20] = 100
-        data[0, 1, 51, 21] = 200
-        data[0, 2, 52, 22] = 100
-        data[1, 0, 53, 23] = 200
-        data[1, 1, 54, 24] = 100
-        data[1, 2, 55, 25] = 200
-        s = Diffraction2D(data)
-        min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
-        threshold, overlap = 0.06, 0.01
-        peaks = s.find_peaks_lazy(
-            min_sigma=min_sigma,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        intensity_array = s.intensity_peaks(peaks, disk_r=1)
-        intensity_array = intensity_array.compute()
-        np.testing.assert_almost_equal(intensity_array[0, 0][0][2], 100 / 9)
-        np.testing.assert_almost_equal(intensity_array[0, 1][0][2], 200 / 9)
-        np.testing.assert_almost_equal(intensity_array[0, 2][0][2], 100 / 9)
-        np.testing.assert_almost_equal(intensity_array[1, 0][0][2], 200 / 9)
-        np.testing.assert_almost_equal(intensity_array[1, 1][0][2], 100 / 9)
-        np.testing.assert_almost_equal(intensity_array[1, 2][0][2], 200 / 9)
 
     @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
     def test_different_dimensions(self, nav_dims):
         shape = list(np.random.randint(2, 6, size=nav_dims))
         shape.extend([50, 50])
         s = Diffraction2D(np.random.random(size=shape))
-        peak_array = s.find_peaks_lazy()
+        peak_array = s.find_peaks()
         intensity_array = s.intensity_peaks(peak_array, disk_r=1)
         assert intensity_array.shape == tuple(shape[:-2])
 
@@ -1586,32 +1559,6 @@ class TestDiffraction2DPeakPositionRefinement:
         )
         assert s.data.shape[:2] == refined_peak_array.shape
         assert not hasattr(refined_peak_array, "compute")
-
-    def test_with_data(self):
-        data = np.zeros(shape=(2, 3, 200, 100), dtype=np.float64)
-        data[0, 0, 50, 20] = 100
-        data[0, 1, 51, 21] = 100
-        data[0, 2, 52, 22] = 100
-        data[1, 0, 53, 23] = 100
-        data[1, 1, 54, 24] = 100
-        data[1, 2, 55, 25] = 100
-        s = Diffraction2D(data)
-        min_sigma, max_sigma, sigma_ratio = 0.08, 1, 1.76
-        threshold, overlap = 0.06, 0.01
-        peaks = s.find_peaks(
-            min_sigma=min_sigma,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        refined_peaks = s.peak_position_refinement_com(peaks, 4, lazy_result=False)
-        assert refined_peaks[0, 0][0].tolist() == [50.0, 20.0]
-        assert refined_peaks[0, 1][0].tolist() == [51.0, 21.0]
-        assert refined_peaks[0, 2][0].tolist() == [52.0, 22.0]
-        assert refined_peaks[1, 0][0].tolist() == [53.0, 23.0]
-        assert refined_peaks[1, 1][0].tolist() == [54.0, 24.0]
-        assert refined_peaks[1, 2][0].tolist() == [55.0, 25.0]
 
     @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
     def test_different_dimensions(self, nav_dims):
