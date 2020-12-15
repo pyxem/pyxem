@@ -65,9 +65,18 @@ class TestDummyDataModule:
         s_ramp.plot()
 
     def test_get_dead_pixel_signal(self):
-        s = dd.get_dead_pixel_signal()
+        s = dd.get_dead_pixel_signal(lazy=True)
+        assert hasattr(s,"compute")
+        s = dd.get_dead_pixel_signal(lazy=False)
         assert hasattr(s, "plot")
         assert (s.data == 0).any()
+
+    def test_get_hot_pixel_signal(self):
+        s = dd.get_hot_pixel_signal(lazy=True)
+        assert hasattr(s,"compute")
+        s = dd.get_hot_pixel_signal(lazy=False)
+        assert hasattr(s, "plot")
+        assert (s.data == 50000).any()
 
     def test_get_cbed_signal(self):
         s = dd.get_cbed_signal()
