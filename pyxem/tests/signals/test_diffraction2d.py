@@ -187,6 +187,93 @@ class TestAzimuthalIntegral1d:
         # 5^2*pi = 78.5
         np.testing.assert_almost_equal(integration.data.sum(), 78.5, decimal=0)
 
+class TestVariance:
+    @pytest.fixture
+    def ones(self):
+        ones_diff = Diffraction2D(data=np.ones(shape=(10, 10, 10, 10)))
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        ones_diff.set_ai()
+        return ones_diff
+    @pytest.fixture
+    def ones_zeros(self):
+        data = np.ones(shape=(10, 10, 10, 10))
+        data[0:10:2, :, :, :] = 2
+        ones_diff = Diffraction2D(data=data)
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        ones_diff.set_ai()
+        return ones_diff
+
+    @pytest.fixture
+    def bulls_eye_noisy(self):
+        x, y = np.mgrid[-25:25, -25:25]
+        data = (x**2+y**2)**0.5
+        data = np.tile(data, (5, 5, 1, 1))
+        # Electron is equal to 1 count in image
+        data = np.random.poisson(lam=data)
+        ones_diff = Diffraction2D(data=data)
+        ones_diff.axes_manager.signal_axes[0].scale = 0.1
+        ones_diff.axes_manager.signal_axes[1].scale = 0.1
+        ones_diff.axes_manager.signal_axes[0].name = "kx"
+        ones_diff.axes_manager.signal_axes[1].name = "ky"
+        ones_diff.unit = "2th_deg"
+        ones_diff.set_ai()
+        return ones_diff
+
+    def test_FEM_Omega(self, ones, ones_zeros):
+        ones_variance = ones.get_variance(npt=5, method="Omega")
+        #assert ones_variance.axes_manager[0].units == "2th_deg"
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="Omega")
+        np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.ones(5)*.1111, decimal=3)
+
+    def test_FEM_Omega_piosson_noise(self, bulls_eye_noisy):
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="Omega", dqe=1)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="Omega", dqe=10)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
+
+    def test_FEM_r(self, ones, ones_zeros, bulls_eye_noisy):
+        ones_variance = ones.get_variance(npt=5, method="r")
+        #assert ones_variance.axes_manager[0].units == "2th_deg"
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="r")
+        np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.zeros(5), decimal=3)
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="r", dqe=1)
+        # This fails at small radii and might still fail because it is random..
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="r", dqe=10)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
+
+    def test_FEM_VImage(self, ones):
+        v = ones.get_variance(npt=5, method="VImage")
+        np.testing.assert_array_almost_equal(v.data, np.zeros(5), decimal=3)
+
+    def test_FEM_re(self, ones, ones_zeros, bulls_eye_noisy):
+        ones_variance = ones.get_variance(npt=5, method="re")
+        np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
+        ones_zeros_variance = ones_zeros.get_variance(5, method="re")
+        np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.ones(5)*0.1111, decimal=3)
+        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="re", dqe=1)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
+        # Testing for non dqe=1
+        bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(25, method="re", dqe=10)
+        # This fails at small radii and might still fail because it is random...
+        np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=1)
+
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture
@@ -281,7 +368,6 @@ class TestAzimuthalIntegral2d:
         integration2 = ones.get_azimuthal_integral2d(
             npt=10, npt_azim=15, radial_range=[0, 0.5], sum=True, mask=mask
         )
-        print(integration2.sum((-1, -2)).data)
 
 
 class TestPyFAIIntegration:
@@ -428,7 +514,7 @@ class TestAzimuthalIntegrator:
 
     @pytest.mark.xfail()
     def test_return_ai_fail(self, ones):
-        # .ai hasn't been set 
+        # .ai hasn't been set
         ai = ones.ai
 
 
