@@ -702,7 +702,7 @@ class TestDiffraction2DFindPeaksLazy:
 class TestDiffraction2DIntensityPeaks:
     def test_non_lazy(self):
         s = Diffraction2D(np.random.rand(3, 2, 10, 20))
-        peak_array = s.find_peaks()
+        peak_array = s.find_peaks(interactive=False)
         intensity_array = s.intensity_peaks(peak_array.data)
         assert s.data.shape[:2] == intensity_array.shape
         assert hasattr(intensity_array, "compute")
@@ -736,10 +736,10 @@ class TestDiffraction2DIntensityPeaks:
 class TestDiffraction2DPeakPositionRefinement:
     def test_non_lazy(self):
         s = Diffraction2D(np.random.rand(3, 2, 10, 20))
-        peak_array = s.find_peaks()
-        refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
-        assert s.data.shape[:2] == intensity_array.shape
-        assert hasattr(intensity_array, "compute")
+        peak_array = s.find_peaks(interactive=False)
+        refined_peak_array = s.peak_position_refinement_com(peak_array.data, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(refined_peak_array, "compute")
 
     @pytest.mark.xfail(reason="Designed failure")
     def test_wrong_square_size(self):
