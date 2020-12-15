@@ -31,7 +31,6 @@ from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 import matplotlib.pyplot as plt
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 
-
 @pytest.fixture
 def input_parameters():
     x0 = [95, 1200, 2.8, 450, 1.5, 10]

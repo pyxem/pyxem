@@ -2419,54 +2419,68 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                      navigation_axes=None,
                      **kwargs,
                      ):
-        """Calculates the variance using a method as described by Kelton in Nanobeam diffraction
-           fluctuation electron microscopy technique for structural characterization of disordered
-           materials-Application to Al88-xY7Fe5Tix metallic glasses. A shot noise correction and
+        """Calculates the variance using one of the methods described in [1]. A shot noise correction and
            and specification of axes to operate over are also possible.
 
         Parameters
-        -------------
-        npt_rad: int
-            The number of radial points to calculate
-        npt_azim: int
-            The number of azimuthal points to use.  This is largely unused unless DQE is not None
-            and method = "Omega".  Used to calculate the radial integration.
-        method: ["Omega", "r", "re", "VImage"]
-            The method used to calculate the variance
-        dqe: int
+        ----------
+        npt : int
+            The number of points to use in the azimuthal integration
+        method : 'Omega' or 'r' or 're' or 'VImage', optional
+            The method used to calculate the variance. Details in [1]
+        dqe : int, optional
             The detector quantum efficiency or the pixel value for one electron.
-        spatial: bool
-            Included intermediate spatial variance in output if applicable...
-            Only relevant for method = "r"
-        navigation_axes: list or none
+        spatial : bool, optional
+            Included intermediate spatial variance in output (only avaliable if method=='r')
+        navigation_axes : list or none, optional
             The axes to calculate the variance over.  The default is to use the navigation axes.
         **kwargs: dict
             Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
+        
+        Returns
+        -------
+        variance : array-like
+            Calculate variance as it's own signal
+            
+        References
+        ----------
+        [1] Daulton, T. L et al, Ultramicroscopy, 110(10), 1279–1289, https://doi.org/10.1016/j.ultramic.2010.05.010
+            Nanobeam diffraction fluctuation electron microscopy technique for structural characterization of disordered
+            materials-Application to Al88-xY7Fe5Tix metallic glasses.
         """
-        if method is "Omega":
+        
+        if method not in ['Omega','r','re','VImage']:
+            raise ValueError('Method must be one of ['Omega', 'r', 're', 'VImage'].'
+                             'for more information read\n'
+                             'Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010).'
+                             ' Nanobeam diffraction fluctuation electron microscopy'
+                             ' technique for structural characterization of disordered'
+                             ' materials-Application to Al88-xY7Fe5Tix metallic glasses.'
+                             ' Ultramicroscopy, 110(10), 1279–1289.\n'
+                             ' https://doi.org/10.1016/j.ultramic.2010.05.010')
+            
+        if method is 'Omega':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
             if dqe is not None:
                 sum_points = self.get_azimuthal_integral1d(npt=npt,sum=True,**kwargs).mean(axis=navigation_axes)
-                print("Correction:", sum_points.data)
-                print(variance.data)
                 variance = variance - ((sum_points**-1)*dqe)
-                print(variance.data)
-            return variance
-
-        elif method is "r":
+            
+        elif method is 'r':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             integration_squared = (self ** 2).get_azimuthal_integral1d(npt=npt, **kwargs)
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared/one_d_integration**2)-1
+            
             if dqe is not None:
                 full_variance = full_variance - ((one_d_integration**-1)*dqe)
+                
             variance = full_variance.mean(axis=navigation_axes)
+            
             if spatial:
                 return variance, full_variance
-            else:
-                return variance
-        elif method is "re":
+            
+        elif method is 're':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
             print(one_d_integration.data)
             integration_squared = (self ** 2).get_azimuthal_integral1d(
@@ -2479,23 +2493,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
                 print(sum_int.data)
                 variance = variance - (sum_int**-1)*(1/dqe)
-            return variance
-        elif method is "VImage":
+                
+            
+        elif method is 'VImage':
             variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
             if dqe is not None:
                 variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
             variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
-            return variance
-        else:
-            raise ValueError('Method must be one of ["Omega", "r", "re", "VImage"].'
-                             'for more information read\n'
-                             'Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010).'
-                             ' Nanobeam diffraction fluctuation electron microscopy'
-                             ' technique for structural characterization of disordered'
-                             ' materials-Application to Al88-xY7Fe5Tix metallic glasses.'
-                             ' Ultramicroscopy, 110(10), 1279–1289.\n'
-                             ' https://doi.org/10.1016/j.ultramic.2010.05.010')
-
+          
+        return variance
 
     def find_hot_pixels(
         self,

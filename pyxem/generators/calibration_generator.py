@@ -69,6 +69,7 @@ class CalibrationGenerator:
         self.affine_matrix = None
         self.rotation_angle = None
         self.correction_matrix = None
+        self.center = None
         self.diffraction_calibration = None
         self.navigation_calibration = None
 
