@@ -111,13 +111,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         try:
             return self.metadata.Signal["ai"]
         except (AttributeError):
-            return None
-
-    @ai.setter
-    def ai(self, ai):
-        """ Sets the Azimuthal Integrator property.  See ~pyFAI.AzimuthalIntegrator for more.
-        """
-        self.metadata.set_item("Signal.ai", ai)
+            raise ValueError("ai property is not currently set")
 
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
@@ -137,17 +131,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range: (start,stop)
             The start and stop of the radial range in real units
 
+        Returns
+        -------
+        None :
+            The metadata item Signal.ai is set
+
         """
+        if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
+            raise ValueError('if the unit is not \'2th_deg\' or \'2th_rad\' then a wavelength must be given.')
+
         pixel_scale = [
             self.axes_manager.signal_axes[0].scale,
             self.axes_manager.signal_axes[1].scale,
         ]
-        if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
-            print(
-                'if the unit is not "2th_deg", "2th_rad"'
-                "then a wavelength must be given. "
-            )
-            return None
+
         unit = to_unit(self.unit)
         sig_shape = self.axes_manager.signal_shape
         setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
@@ -161,8 +158,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             wavelength=wavelength,
             **kwargs,
         )
-        self.ai = ai
-        return ai
+        self.metadata.set_item("Signal.ai", ai)
+        return None
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
@@ -307,21 +304,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range=None,
         azimuth_range=None,
         wavelength=None,
-        unit="k_nm^-1",
         inplace=False,
         method="splitpixel",
         sum=False,
         **kwargs,
     ):
-        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
-
-        This function is designed to be fairly flexible to account for 2 different cases:
-
-        1 - If the unit is "pyxem" then it lets pyXEM take the lead. If wavelength is none in that case
-        it doesn't account for the Ewald sphere.
-
-        2 - If unit is any of the options from pyFAI then detector cannot be None and the handling of
-        units is passed to pyxem and those units are used.
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
+        with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
+        no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,
+        in which case the detector kwarg must be provided.
 
         Parameters
         ----------
@@ -339,9 +330,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         wavelength: None or float
             The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
             it to properly work.
-        unit: str
-            The unit can be "pyxem" to use the pyxem units and “q_nm^-1”, “q_A^-1”, “2th_deg”, “2th_rad”, “r_mm”
-            if pyFAI is used for unit handling
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
@@ -444,15 +432,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correctSolidAngle=True,
         **kwargs,
     ):
-        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
-
-        This function is designed to be fairly flexible to account for 2 different cases:
-
-        1 - If the unit is "pyxem" then it lets pyXEM take the lead. If wavelength is none in that case
-        it doesn't account for the Ewald sphere.
-
-        2 - If unit is any of the options from pyFAI then detector cannot be None and the handling of
-        units is passed to pyxem and those units are used.
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
+        with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
+        no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,
+        in which case the detector kwarg must be provided.
 
         Parameters
         ----------
