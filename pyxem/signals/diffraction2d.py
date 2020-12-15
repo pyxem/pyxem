@@ -2450,7 +2450,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         
         if method not in ['Omega','r','re','VImage']:
-            raise ValueError('Method must be one of ['Omega', 'r', 're', 'VImage'].'
+            raise ValueError('Method must be one of [Omega, r, re, VImage].'
                              'for more information read\n'
                              'Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010).'
                              ' Nanobeam diffraction fluctuation electron microscopy'
@@ -2482,7 +2482,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             
         elif method is 're':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
-            print(one_d_integration.data)
             integration_squared = (self ** 2).get_azimuthal_integral1d(
                                                                        npt=npt,
                                                                        **kwargs).mean(
@@ -2491,16 +2490,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
             if dqe is not None:
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
-                print(sum_int.data)
                 variance = variance - (sum_int**-1)*(1/dqe)
-                
             
         elif method is 'VImage':
             variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
             if dqe is not None:
                 variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
             variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
-          
         return variance
 
     def find_hot_pixels(
