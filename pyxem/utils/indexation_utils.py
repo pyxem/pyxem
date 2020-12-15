@@ -37,43 +37,48 @@ OrientationResult = namedtuple(
     "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split(),
 )
 
-
-def optimal_fft_size(target, real=False):
-    """Wrapper around scipy function next_fast_len() for calculating optimal FFT padding.
-
-    scipy.fft was only added in 1.4.0, so we fall back to scipy.fftpack
-    if it is not available. The main difference is that next_fast_len()
-    does not take a second argument in the older implementation.
+def get_nth_best_solution(
+    single_match_result, mode, rank=0, key="match_rate", descending=True
+):
+    """Get the nth best solution by match_rate from a pool of solutions
 
     Parameters
     ----------
-    target : int
-        Length to start searching from. Must be a positive integer.
-    real : bool, optional
-        True if the FFT involves real input or output, only available
-        for scipy > 1.4.0
+    single_match_result : VectorMatchingResults, TemplateMatchingResults
+        Pool of solutions from the vector matching algorithm
+    mode : str
+        'vector' or 'template'
+    rank : int
+        The rank of the solution, i.e. rank=2 returns the third best solution
+    key : str
+        The key to sort the solutions by, default = match_rate
+    descending : bool
+        Rank the keys from large to small
 
     Returns
     -------
-    int
-        Optimal FFT size.
+    VectorMatching:
+        best_fit : `OrientationResult`
+            Parameters for the best fitting orientation
+            Library Number, rotation_matrix, match_rate, error_hkls, total_error
+    TemplateMatching: np.array
+            Parameters for the best fitting orientation
+            Library Number , [z, x, z], Correlation Score
     """
+    if mode == "vector":
+        try:
+            best_fit = sorted(
+                single_match_result[0].tolist(), key=attrgetter(key), reverse=descending
+            )[rank]
+        except AttributeError:
+            best_fit = sorted(
+                single_match_result.tolist(), key=attrgetter(key), reverse=descending
+            )[rank]
+    if mode == "template":
+        srt_idx = np.argsort(single_match_result[:, 2])[::-1][rank]
+        best_fit = single_match_result[srt_idx]
 
-    try:  # pragma: no cover
-        from scipy.fft import next_fast_len
-
-        support_real = True
-
-    except ImportError:  # pragma: no cover
-        from scipy.fftpack import next_fast_len
-
-        support_real = False
-
-    if support_real:  # pragma: no cover
-        return next_fast_len(target, real)
-    else:  # pragma: no cover
-        return next_fast_len(target)
-
+    return best_fit
 
 # Functions used in correlate_library.
 def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
@@ -171,261 +176,6 @@ def zero_mean_normalized_correlation(
 
     return corr_local
 
-
-def full_frame_correlation(image_FT, image_norm, pattern_FT, pattern_norm):
-    """Computes the correlation score between an image and a template in Fourier space.
-
-    Parameters
-    ----------
-    image: numpy.ndarray
-        Intensities of the image in fourier space, stored in a NxM numpy array
-    image_norm: float
-        The norm of the real space image, corresponding to image_FT
-    fsize: numpy.ndarray
-        The size of image_FT, for us in transform of template.
-    template_coordinates: numpy array
-        Array containing coordinates for non-zero intensities in the template
-    template_intensities: list
-        List of intensity values for the template.
-
-    Returns
-    -------
-    corr_local: float
-        Correlation score between image and template.
-
-    See Also
-    --------
-    correlate_library, fast_correlation, zero_mean_normalized_correlation
-
-    References
-    ----------
-    A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
-     a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
-    """
-
-    fprod = pattern_FT * image_FT
-
-    res_matrix = np.fft.ifftn(fprod)
-    fsize = res_matrix.shape
-    corr_local = np.max(
-        np.real(
-            res_matrix[
-                max(fsize[0] // 2 - 3, 0) : min(fsize[0] // 2 + 3, fsize[0]),
-                max(fsize[1] // 2 - 3, 0) : min(fsize[1] // 2 + 3, fsize[1]),
-            ]
-        )
-    )
-    if image_norm > 0 and pattern_norm > 0:
-        corr_local = corr_local / (image_norm * pattern_norm)
-
-    # Sub-pixel refinement can be done here - Equation (5) in reference article
-
-    return corr_local
-
-
-def correlate_library_from_dict(image, template_dict, n_largest, method, mask):
-    """Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image).
-
-    Parameters
-    ----------
-    image : numpy.array
-        The experimental diffraction pattern of interest.
-    template_dict : dict
-        Dictionary containing orientations, fourier transform of templates and template norms for
-        every phase.
-    n_largest : int
-        The number of well correlated simulations to be retained.
-    method : str
-        Name of method used to compute correlation between templates and diffraction patterns. Can be
-         'full_frame_correlation'. (I believe angular decomposition can also fit this framework)
-    mask : bool
-        A mask for navigation axes. 1 indicates positions to be indexed.
-
-
-    Returns
-    -------
-    top_matches : numpy.array
-        Array of shape (<num phases>*n_largest, 3) containing the top n
-        correlated simulations for the experimental pattern of interest, where
-        each entry is on the form [phase index, [z, x, z], correlation].
-
-
-    References
-    ----------
-    full_frame_correlation:
-    A. Foden, D. M. Collins, A. J. Wilkinson and T. B. Britton "Indexing electron backscatter diffraction patterns with
-     a refined template matching approach" doi: https://doi.org/10.1016/j.ultramic.2019.112845
-    """
-
-    top_matches = np.empty((len(template_dict), n_largest, 3), dtype="object")
-
-    if method == "full_frame_correlation":
-        size = 2 * np.array(image.shape) - 1
-        fsize = [optimal_fft_size(a, real=True) for a in (size)]
-        image_FT = np.fft.fftshift(np.fft.rfftn(image, fsize))
-        image_norm = np.sqrt(full_frame_correlation(image_FT, 1, image_FT, 1))
-
-    if mask == 1:
-        for phase_index, library_entry in enumerate(template_dict.values()):
-            orientations = library_entry["orientations"]
-            patterns = library_entry["patterns"]
-            pattern_norms = library_entry["pattern_norms"]
-
-            zip_for_locals = zip(orientations, patterns, pattern_norms)
-
-            or_saved, corr_saved = np.empty((n_largest, 3)), np.zeros((n_largest, 1))
-
-            for (or_local, pat_local, pn_local) in zip_for_locals:
-
-                if method == "full_frame_correlation":
-                    corr_local = full_frame_correlation(
-                        image_FT, image_norm, pat_local, pn_local
-                    )
-
-                if corr_local > np.min(corr_saved):
-                    or_saved[np.argmin(corr_saved)] = or_local
-                    corr_saved[np.argmin(corr_saved)] = corr_local
-
-                combined_array = np.hstack((or_saved, corr_saved))
-                combined_array = combined_array[
-                    np.flip(combined_array[:, 3].argsort())
-                ]  # see stackoverflow/2828059 for details
-                top_matches[phase_index, :, 0] = phase_index
-                top_matches[phase_index, :, 2] = combined_array[:, 3]  # correlation
-                for i in np.arange(n_largest):
-                    top_matches[phase_index, i, 1] = combined_array[
-                        i, :3
-                    ]  # orientation
-
-    return top_matches.reshape(-1, 3)
-
-
-def correlate_library(image, library, n_largest, method, mask):
-    r"""Correlates all simulated diffraction templates in a DiffractionLibrary
-    with a particular experimental diffraction pattern (image).
-
-    Calculated using the normalised (see return type documentation) dot
-    product, or cosine distance,
-
-    .. math:: fast_correlation
-        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)}{\\sqrt{\\sum_{j=1}^m T^2(x_j, y_j)}}
-
-    .. math:: zero_mean_normalized_correlation
-        \\frac{\\sum_{j=1}^m P(x_j, y_j) T(x_j, y_j)- avg(P)avg(T)}{\\sqrt{\\sum_{j=1}^m (T(x_j, y_j)-avg(T))^2+\sum_{j=1}^m P(x_j,y_j)-avg(P)}}
-        for a template T and an experimental pattern P.
-
-    Parameters
-    ----------
-    image : numpy.array
-        The experimental diffraction pattern of interest.
-    library : DiffractionLibrary
-        The library of diffraction simulations to be correlated with the
-        experimental data.
-    n_largest : int
-        The number of well correlated simulations to be retained.
-    method : str
-        Name of method used to compute correlation between templates and diffraction patterns. Can be
-        'fast_correlation', 'full_frame_correlation' or 'zero_mean_normalized_correlation'. (ADDED in pyxem 0.11.0)
-    mask : bool
-        A mask for navigation axes. 1 indicates positions to be indexed.
-
-
-    Returns
-    -------
-    top_matches : numpy.array
-        Array of shape (<num phases>*n_largest, 3) containing the top n
-        correlated simulations for the experimental pattern of interest, where
-        each entry is on the form [phase index, [z, x, z], correlation].
-
-    See Also
-    --------
-    IndexationGenerator.correlate
-
-    Notes
-    -----
-    Correlation results are defined as,
-        phase_index : int
-            Index of the phase, following the ordering of the library keys
-        [z, x, z] : ndarray
-            numpy array of three floats, specifying the orientation in the
-            Bunge convention, in degrees.
-        correlation : float
-            A coefficient of correlation, only normalised to the template
-            intensity. This is in contrast to the reference work.
-
-    References
-    ----------
-    E. F. Rauch and L. Dupuy, “Rapid Diffraction Patterns identification through
-       template matching,” vol. 50, no. 1, pp. 87–99, 2005.
-
-    A. Nakhmani and  A. Tannenbaum, "A New Distance Measure Based on Generalized Image Normalized Cross-Correlation
-    for Robust Video Tracking and Image Recognition"
-    Pattern Recognit Lett. 2013 Feb 1; 34(3): 315–321; doi: 10.1016/j.patrec.2012.10.025
-
-    Discussion on Normalized cross correlation (xcdskd):
-    https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
-
-    """
-
-    top_matches = np.empty((len(library), n_largest, 3), dtype="object")
-
-    if method == "zero_mean_normalized_correlation":
-        nb_pixels = image.shape[0] * image.shape[1]
-        average_image_intensity = np.average(image)
-        image_std = np.linalg.norm(image - average_image_intensity)
-
-    if mask == 1:
-        for phase_index, library_entry in enumerate(library.values()):
-            orientations = library_entry["orientations"]
-            pixel_coords = library_entry["pixel_coords"]
-            intensities = library_entry["intensities"]
-            # TODO: This is only applicable some of the time, probably use an if + special_local in the for
-            pattern_norms = library_entry["pattern_norms"]
-
-            zip_for_locals = zip(orientations, pixel_coords, intensities, pattern_norms)
-
-            or_saved, corr_saved = np.empty((n_largest, 3)), np.zeros((n_largest, 1))
-
-            for (or_local, px_local, int_local, pn_local) in zip_for_locals:
-                # TODO: Factorise out the generation of corr_local to a method='mthd' section
-                # Extract experimental intensities from the diffraction image
-                image_intensities = image[
-                    px_local[:, 1], px_local[:, 0]
-                ]  # Counter intuitive indexing? Why is it not px_local[:, 0], px_local[:, 1]?
-
-                if method == "zero_mean_normalized_correlation":
-                    corr_local = zero_mean_normalized_correlation(
-                        nb_pixels,
-                        image_std,
-                        average_image_intensity,
-                        image_intensities,
-                        int_local,
-                    )
-
-                elif method == "fast_correlation":
-                    corr_local = fast_correlation(
-                        image_intensities, int_local, pn_local
-                    )
-
-                if corr_local > np.min(corr_saved):
-                    or_saved[np.argmin(corr_saved)] = or_local
-                    corr_saved[np.argmin(corr_saved)] = corr_local
-
-                combined_array = np.hstack((or_saved, corr_saved))
-                combined_array = combined_array[
-                    np.flip(combined_array[:, 3].argsort())
-                ]  # see stackoverflow/2828059 for details
-                top_matches[phase_index, :, 0] = phase_index
-                top_matches[phase_index, :, 2] = combined_array[:, 3]  # correlation
-                for i in np.arange(n_largest):
-                    top_matches[phase_index, i, 1] = combined_array[
-                        i, :3
-                    ]  # orientation
-
-    return top_matches.reshape(-1, 3)
-
-
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -481,51 +231,6 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     return angles.argsort()[
         np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=np.int)
     ]
-
-
-def get_nth_best_solution(
-    single_match_result, mode, rank=0, key="match_rate", descending=True
-):
-    """Get the nth best solution by match_rate from a pool of solutions
-
-    Parameters
-    ----------
-    single_match_result : VectorMatchingResults, TemplateMatchingResults
-        Pool of solutions from the vector matching algorithm
-    mode : str
-        'vector' or 'template'
-    rank : int
-        The rank of the solution, i.e. rank=2 returns the third best solution
-    key : str
-        The key to sort the solutions by, default = match_rate
-    descending : bool
-        Rank the keys from large to small
-
-    Returns
-    -------
-    VectorMatching:
-        best_fit : `OrientationResult`
-            Parameters for the best fitting orientation
-            Library Number, rotation_matrix, match_rate, error_hkls, total_error
-    TemplateMatching: np.array
-            Parameters for the best fitting orientation
-            Library Number , [z, x, z], Correlation Score
-    """
-    if mode == "vector":
-        try:
-            best_fit = sorted(
-                single_match_result[0].tolist(), key=attrgetter(key), reverse=descending
-            )[rank]
-        except AttributeError:
-            best_fit = sorted(
-                single_match_result.tolist(), key=attrgetter(key), reverse=descending
-            )[rank]
-    if mode == "template":
-        srt_idx = np.argsort(single_match_result[:, 2])[::-1][rank]
-        best_fit = single_match_result[srt_idx]
-
-    return best_fit
-
 
 def match_vectors(
     peaks, library, mag_tol, angle_tol, index_error_tol, n_peaks_to_index, n_best
@@ -703,223 +408,3 @@ def match_vectors(
     res[0] = top_matches
     res[1] = np.asarray(res_rhkls)
     return res
-
-
-def crystal_from_template_matching(z_matches):
-    """Takes template matching results for a single navigation position and
-    returns the best matching phase and orientation with correlation and
-    reliability to define a crystallographic map.
-
-    Parameters
-    ----------
-    z_matches : numpy.array
-        Template matching results in an array of shape (m,3) sorted by
-        correlation (descending) within each phase, with entries
-        [phase, [z, x, z], correlation]
-
-    Returns
-    -------
-    results_array : numpy.array
-        Crystallographic mapping results in an array of shape (3) with entries
-        [phase, np.array((z, x, z)), dict(metrics)]
-
-    """
-    # Create empty array for results.
-    results_array = np.empty(3, dtype="object")
-    # Consider single phase and multi-phase matching cases separately
-    if np.unique(z_matches[:, 0]).shape[0] == 1:
-        # get best matching phase (there is only one here)
-        results_array[0] = z_matches[0, 0]
-        # get best matching orientation Euler angles
-        results_array[1] = z_matches[0, 1]
-        # get template matching metrics
-        metrics = dict()
-        metrics["correlation"] = z_matches[0, 2]
-        metrics["orientation_reliability"] = (
-            100 * (1 - z_matches[1, 2] / z_matches[0, 2])
-            if z_matches[0, 2] > 0
-            else 100
-        )
-        results_array[2] = metrics
-    else:
-        # get best matching result
-        index_best_match = np.argmax(z_matches[:, 2])
-        # get best matching phase
-        results_array[0] = z_matches[index_best_match, 0]
-        # get best matching orientation Euler angles.
-        results_array[1] = z_matches[index_best_match, 1]
-        # get second highest correlation orientation for orientation_reliability
-        z = z_matches[z_matches[:, 0] == results_array[0]]
-        second_orientation = np.partition(z[:, 2], -2)[-2]
-        # get second highest correlation phase for phase_reliability
-        z = z_matches[z_matches[:, 0] != results_array[0]]
-        second_phase = np.max(z[:, 2])
-        # get template matching metrics
-        metrics = dict()
-        metrics["correlation"] = z_matches[index_best_match, 2]
-        metrics["orientation_reliability"] = 100 * (
-            1 - second_orientation / z_matches[index_best_match, 2]
-        )
-        metrics["phase_reliability"] = 100 * (
-            1 - second_phase / z_matches[index_best_match, 2]
-        )
-        results_array[2] = metrics
-
-    return results_array
-
-
-def crystal_from_vector_matching(z_matches):
-    """Takes vector matching results for a single navigation position and
-    returns the best matching phase and orientation with correlation and
-    reliability to define a crystallographic map.
-
-    Parameters
-    ----------
-    z_matches : numpy.array
-        Template matching results in an array of shape (m,5) sorted by
-        total_error (ascending) within each phase, with entries
-        [phase, R, match_rate, ehkls, total_error]
-
-    Returns
-    -------
-    results_array : numpy.array
-        Crystallographic mapping results in an array of shape (3) with entries
-        [phase, np.array((z, x, z)), dict(metrics)]
-    """
-    if z_matches.shape == (1,):  # pragma: no cover
-        z_matches = z_matches[0]
-
-    # Create empty array for results.
-    results_array = np.empty(3, dtype="object")
-
-    # get best matching phase
-    best_match = get_nth_best_solution(
-        z_matches, "vector", key="total_error", descending=False
-    )
-    results_array[0] = best_match.phase_index
-
-    # get best matching orientation Euler angles
-    results_array[1] = np.rad2deg(mat2euler(best_match.rotation_matrix, "rzxz"))
-
-    # get vector matching metrics
-    metrics = dict()
-    metrics["match_rate"] = best_match.match_rate
-    metrics["ehkls"] = best_match.error_hkls
-    metrics["total_error"] = best_match.total_error
-
-    # get second highest correlation phase for phase_reliability (if present)
-    other_phase_matches = [
-        match for match in z_matches if match.phase_index != best_match.phase_index
-    ]
-
-    if other_phase_matches:
-        second_best_phase = sorted(
-            other_phase_matches, key=attrgetter("total_error"), reverse=False
-        )[0]
-
-        metrics["phase_reliability"] = 100 * (
-            1 - best_match.total_error / second_best_phase.total_error
-        )
-
-        # get second best matching orientation for orientation_reliability
-        same_phase_matches = [
-            match for match in z_matches if match.phase_index == best_match.phase_index
-        ]
-        second_match = sorted(
-            same_phase_matches, key=attrgetter("total_error"), reverse=False
-        )[1]
-    else:
-        # get second best matching orientation for orientation_reliability
-        second_match = get_nth_best_solution(
-            z_matches, "vector", rank=1, key="total_error", descending=False
-        )
-
-    metrics["orientation_reliability"] = 100 * (
-        1 - best_match.total_error / (second_match.total_error or 1.0)
-    )
-
-    results_array[2] = metrics
-
-    return results_array
-
-
-def get_phase_name_and_index(library):
-    """Get a dictionary of phase names and its corresponding index value in library.keys().
-
-    Parameters
-    ----------
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations
-
-    Returns
-    -------
-    phase_name_index_dict : Dictionary {str : int}
-    typically on the form {'phase_name 1' : 0, 'phase_name 2': 1, ...}
-    """
-
-    phase_name_index_dict = dict([(y, x) for x, y in enumerate(list(library.keys()))])
-    return phase_name_index_dict
-
-
-def peaks_from_best_template(single_match_result, library, rank=0):
-    """Takes a TemplateMatchingResults object and return the associated peaks,
-    to be used in combination with map().
-
-    Parameters
-    ----------
-    single_match_result : ndarray
-        An entry in a TemplateMatchingResults.
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations.
-    rank : int
-        Get peaks from nth best orientation (default: 0, best vector match)
-
-    Returns
-    -------
-    peaks : array
-        Coordinates of peaks in the matching results object in calibrated units.
-    """
-    best_fit = get_nth_best_solution(single_match_result, "template", rank=rank)
-
-    phase_names = list(library.keys())
-    phase_index = int(best_fit[0])
-    phase = phase_names[phase_index]
-    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1]))["Sim"]
-
-    peaks = simulation.coordinates[:, :2]  # cut z
-    return peaks
-
-
-def peaks_from_best_vector_match(single_match_result, library, rank=0):
-    """Takes a VectorMatchingResults object and return the associated peaks,
-    to be used in combination with map().
-
-    Parameters
-    ----------
-    single_match_result : ndarray
-        An entry in a VectorMatchingResults
-    library : DiffractionLibrary
-        Diffraction library containing the phases and rotations
-    rank : int
-        Get peaks from nth best orientation (default: 0, best vector match)
-
-    Returns
-    -------
-    peaks : ndarray
-        Coordinates of peaks in the matching results object in calibrated units.
-    """
-    best_fit = get_nth_best_solution(single_match_result, "vector", rank=rank)
-    phase_index = best_fit.phase_index
-
-    rotation_orientation = mat2euler(best_fit.rotation_matrix)
-    # Don't change the original
-    structure = library.structures[phase_index]
-    sim = library.diffraction_generator.calculate_ed_data(
-        structure,
-        reciprocal_radius=library.reciprocal_radius,
-        rotation=rotation_orientation,
-        with_direct_beam=False,
-    )
-
-    # Cut z
-    return sim.coordinates[:, :2]

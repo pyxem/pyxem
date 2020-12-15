@@ -439,10 +439,7 @@ class TestPyFAIIntegration:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    @pytest.mark.parametrize("stack", [False])
-    def test_plot_integrated_intensity(self, stack, diffraction_pattern):
-        if stack:
-            diffraction_pattern = hs.stack([diffraction_pattern] * 3)
+    def test_plot_integrated_intensity(self,diffraction_pattern):
         roi = hs.roi.CircleROI(3, 3, 5)
         plt.ion()  # to make plotting non-blocking
         diffraction_pattern.plot_integrated_intensity(roi)
@@ -516,14 +513,16 @@ class TestAzimuthalIntegrator:
         ones_diff.unit = "2th_deg"
         return ones_diff
 
+    @pytest.mark.xfail()
     def test_set_ai_fail(self, ones):
+        # Not enough parameters fed into .set_ai()
         ones.unit = "k_nm^-1"
         ai = ones.set_ai()
-        assert ai is None
 
+    @pytest.mark.xfail()
     def test_return_ai_fail(self, ones):
+        # .ai hasn't been set
         ai = ones.ai
-        assert ai is None
 
 
 class TestGetDirectBeamPosition:
@@ -553,7 +552,10 @@ class TestGetDirectBeamPosition:
         dx, dy = self.dx, self.dy
         s, x_pos_list, y_pos_list = self.s, self.x_pos_list, self.y_pos_list
         s_shift = s.get_direct_beam_position(
-            method="interpolate", sigma=1, upsample_factor=2, kind="nearest",
+            method="interpolate",
+            sigma=1,
+            upsample_factor=2,
+            kind="nearest",
         )
         assert s.axes_manager.navigation_shape == s_shift.axes_manager.navigation_shape
         assert (-(x_pos_list - dx / 2) == s_shift.isig[0].data[0]).all()
@@ -564,6 +566,16 @@ class TestGetDirectBeamPosition:
         s_shift = s.get_direct_beam_position(
             method="cross_correlate", radius_start=0, radius_finish=1
         )
+
+    def test_lazy_result_none_non_lazy_signal(self):
+        s = self.s
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        assert not s_shift._lazy
+
+    def test_lazy_result_none_lazy_signal(self):
+        s = self.s.as_lazy()
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1)
+        assert s_shift._lazy
 
     def test_lazy_result(self):
         s = self.s
@@ -582,3 +594,365 @@ class TestGetDirectBeamPosition:
         s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
         assert hasattr(s_shift.data, "compute")
         s_shift.compute()
+
+
+class TestCenterDirectBeam:
+    def setup_method(self):
+        data = np.zeros((8, 6, 20, 16), dtype=np.int16)
+        x_pos_list = np.random.randint(8 - 2, 8 + 2, 6, dtype=np.int16)
+        x_pos_list[x_pos_list == 8] = 9
+        y_pos_list = np.random.randint(10 - 2, 10 + 2, 8, dtype=np.int16)
+        for ix in range(len(x_pos_list)):
+            for iy in range(len(y_pos_list)):
+                data[iy, ix, y_pos_list[iy], x_pos_list[ix]] = 9
+        s = Diffraction2D(data)
+        s.axes_manager[0].scale = 0.5
+        s.axes_manager[1].scale = 0.6
+        s.axes_manager[2].scale = 3
+        s.axes_manager[3].scale = 4
+        s_lazy = s.as_lazy()
+        self.s = s
+        self.s_lazy = s_lazy
+        self.x_pos_list = x_pos_list
+        self.y_pos_list = y_pos_list
+
+    def test_non_lazy(self):
+        s = self.s
+        s.center_direct_beam(method="blur", sigma=1)
+        assert s._lazy is False
+        assert (s.data[:, :, 10, 8] == 9).all()
+        # Make sure only the pixel we expect to change, has actually changed
+        s.data[:, :, 10, 8] = 0
+        assert not s.data.any()
+
+    def test_non_lazy_lazy_result(self):
+        s = self.s
+        s.center_direct_beam(method="blur", sigma=1, lazy_result=True)
+        assert s._lazy is True
+        s.compute()
+        assert (s.data[:, :, 10, 8] == 9).all()
+        s.data[:, :, 10, 8] = 0
+        assert not s.data.any()
+
+    def test_lazy(self):
+        s_lazy = self.s_lazy
+        s_lazy.center_direct_beam(method="blur", sigma=1)
+        assert s_lazy._lazy is True
+        s_lazy.compute()
+        assert (s_lazy.data[:, :, 10, 8] == 9).all()
+        s_lazy.data[:, :, 10, 8] = 0
+        assert not s_lazy.data.any()
+
+    def test_lazy_not_lazy_result(self):
+        s_lazy = self.s_lazy
+        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_result=False)
+        assert s_lazy._lazy is False
+        assert (s_lazy.data[:, :, 10, 8] == 9).all()
+        s_lazy.data[:, :, 10, 8] = 0
+        assert not s_lazy.data.any()
+
+    def test_return_shifts_non_lazy(self):
+        s = self.s
+        s_shifts = s.center_direct_beam(method="blur", sigma=1, return_shifts=True)
+        assert s_shifts._lazy is False
+        nav_dim = s.axes_manager.navigation_dimension
+        assert nav_dim == s_shifts.axes_manager.navigation_dimension
+        x_pos_list, y_pos_list = self.x_pos_list, self.y_pos_list
+        assert ((8 - x_pos_list) == s_shifts.isig[0].data[0]).all()
+        assert ((10 - y_pos_list) == s_shifts.isig[1].data[:, 0]).all()
+
+    def test_return_shifts_lazy(self):
+        s_lazy = self.s_lazy
+        s_shifts = s_lazy.center_direct_beam(method="blur", sigma=1, return_shifts=True)
+        assert s_shifts._lazy is True
+        s_shifts.compute()
+        x_pos_list, y_pos_list = self.x_pos_list, self.y_pos_list
+        assert ((8 - x_pos_list) == s_shifts.isig[0].data[0]).all()
+        assert ((10 - y_pos_list) == s_shifts.isig[1].data[:, 0]).all()
+
+    def test_return_axes_manager(self):
+        s = self.s
+        s.center_direct_beam(method="blur", sigma=1)
+        assert s.axes_manager[0].scale == 0.5
+        assert s.axes_manager[1].scale == 0.6
+        assert s.axes_manager[2].scale == 3
+        assert s.axes_manager[3].scale == 4
+
+    def test_shifts_input(self):
+        s = self.s
+        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=False)
+        s.center_direct_beam(shifts=s_shifts)
+        assert (s.data[:, :, 10, 8] == 9).all()
+        s.data[:, :, 10, 8] = 0
+        assert not s.data.any()
+
+    def test_shifts_input_lazy(self):
+        s = self.s
+        s_shifts = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        s.center_direct_beam(shifts=s_shifts)
+        assert (s.data[:, :, 10, 8] == 9).all()
+        s.data[:, :, 10, 8] = 0
+        assert not s.data.any()
+
+    def test_subpixel(self):
+        s = self.s
+        s_shifts = s.get_direct_beam_position(method="blur", sigma=1)
+        s_shifts += 0.5
+        s.change_dtype("float32")
+        s.center_direct_beam(shifts=s_shifts, subpixel=True)
+        assert (s.data[:, :, 10:12, 8:10] == 9 / 4).all()
+        s.data[:, :, 10:12, 8:10] = 0.0
+        assert not s.data.any()
+
+    def test_not_subpixel(self):
+        s = self.s
+        s_shifts = s.get_direct_beam_position(method="blur", sigma=1)
+        s_shifts += 0.3
+        s.change_dtype("float32")
+        s.center_direct_beam(shifts=s_shifts, subpixel=False)
+        assert (s.data[:, :, 10, 8] == 9).all()
+        s.data[:, :, 10, 8] = 0.0
+        assert not s.data.any()
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 20), (10, 20, 20), (8, 10, 20, 20), (6, 8, 10, 20, 20)]
+    )
+    def test_different_dimensions(self, shape):
+        s = Diffraction2D(np.random.randint(0, 256, size=shape))
+        s.center_direct_beam(method="blur", sigma=1)
+        assert s.data.shape == shape
+
+    def test_half_square_width(self):
+        s = self.s.isig[:, 2:-2]
+        s.data[:, :, 1, -1] = 1000
+        s1 = s.deepcopy()
+        s.center_direct_beam(method="blur", sigma=1)
+        assert (s.data[:, :, 8, 8] == 1000).all()
+        s1.center_direct_beam(method="blur", sigma=1, half_square_width=5)
+        assert (s1.data[:, :, 8, 8] == 9).all()
+
+    def test_align_kwargs(self):
+        s = self.s
+        s.data += 1
+        s1 = s.deepcopy()
+        s.center_direct_beam(method="blur", sigma=1)
+        assert (s.data == 0).any()
+        s1.center_direct_beam(method="blur", sigma=1, align_kwargs={"mode": "wrap"})
+        assert not (s1.data == 0).any()
+
+    def test_method_interpolate(self):
+        s = self.s
+        s.center_direct_beam(method="interpolate", sigma=1, upsample_factor=10, kind=1)
+
+    def test_method_cross_correlate(self):
+        s = self.s
+        s.center_direct_beam(method="cross_correlate", radius_start=0, radius_finish=2)
+
+    def test_parameter_both_method_and_shifts(self):
+        s = self.s
+        with pytest.raises(ValueError):
+            s.center_direct_beam(method="blur", sigma=1, shifts=np.ones((8, 6, 2)))
+
+    def test_parameter_neither_method_and_shifts(self):
+        s = self.s
+        with pytest.raises(ValueError):
+            s.center_direct_beam()
+
+class TestDiffraction2DFindPeaksLazy:
+
+    method1 = ["dog", "log"]
+
+    @pytest.mark.parametrize("methods", method1)
+    @pytest.mark.xfail(reason="Non-lazy input")
+    def test_simple(self, methods):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks_lazy(method=methods)
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_input(self, methods):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy(method=methods)
+        assert s.data.shape[:2] == peak_array.shape
+        assert hasattr(peak_array, "compute")
+
+    @pytest.mark.parametrize("methods", method1)
+    def test_lazy_output(self, methods):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy(method=methods, lazy_result=False)
+        assert s.data.shape[:2] == peak_array.shape
+        assert not hasattr(peak_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize("methods", method1)
+    def test_different_dimensions(self, nav_dims, methods):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape)).as_lazy()
+        peak_array = s.find_peaks_lazy(method=methods, lazy_result=False)
+        assert peak_array.shape == tuple(shape[:-2])
+
+
+class TestDiffraction2DIntensityPeaks:
+    def test_non_lazy(self):
+        s = Diffraction2D(np.random.rand(3, 2, 10, 20))
+        peak_array = s.find_peaks(interactive=False)
+        intensity_array = s.intensity_peaks(peak_array.data)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, "compute")
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        intensity_array = s.intensity_peaks(peak_array)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert hasattr(intensity_array, "compute")
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        intensity_array = s.intensity_peaks(peak_array, lazy_result=False)
+        assert s.data.shape[:2] == intensity_array.shape
+        assert not hasattr(intensity_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape)).as_lazy()
+        peak_array = s.find_peaks_lazy()
+        intensity_array = s.intensity_peaks(peak_array, disk_r=1)
+        assert intensity_array.shape == tuple(shape[:-2])
+
+
+class TestDiffraction2DPeakPositionRefinement:
+    def test_non_lazy(self):
+        s = Diffraction2D(np.random.rand(3, 2, 10, 20))
+        peak_array = s.find_peaks(interactive=False)
+        refined_peak_array = s.peak_position_refinement_com(peak_array.data, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(refined_peak_array, "compute")
+
+    @pytest.mark.xfail(reason="Designed failure")
+    def test_wrong_square_size(self):
+        s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
+        peak_array = s.find_peaks()
+        s.peak_position_refinement_com(peak_array, square_size=5)
+
+    def test_lazy_input(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        refined_peak_array = s.peak_position_refinement_com(peak_array, 4)
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert hasattr(refined_peak_array, "compute")
+
+    def test_lazy_output(self):
+        data = np.random.randint(100, size=(3, 2, 10, 20))
+        s = LazyDiffraction2D(da.from_array(data, chunks=(1, 1, 5, 10)))
+        peak_array = s.find_peaks_lazy()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False
+        )
+        assert s.data.shape[:2] == refined_peak_array.shape
+        assert not hasattr(refined_peak_array, "compute")
+
+    @pytest.mark.parametrize("nav_dims", [0, 1, 2, 3, 4])
+    def test_different_dimensions(self, nav_dims):
+        shape = list(np.random.randint(2, 6, size=nav_dims))
+        shape.extend([50, 50])
+        s = Diffraction2D(np.random.random(size=shape)).as_lazy()
+        peak_array = s.find_peaks_lazy()
+        refined_peak_array = s.peak_position_refinement_com(
+            peak_array, 4, lazy_result=False
+        )
+        assert refined_peak_array.shape == tuple(shape[:-2])
+
+class TestMakeProbeNavigation:
+    def test_fast(self):
+        s = Diffraction2D(np.ones((6, 5, 12, 10)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 1)
+
+    def test_slow(self):
+        s = Diffraction2D(np.ones((5, 5, 12, 10)))
+        s.make_probe_navigation(method="slow")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 120)
+
+    def test_fast_lazy(self):
+        s = LazyDiffraction2D(da.ones((6, 4, 60, 50), chunks=(2, 2, 10, 10)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 100)
+
+    def test_slow_lazy(self):
+        s = LazyDiffraction2D(da.ones((6, 4, 60, 50), chunks=(2, 2, 10, 10)))
+        s.make_probe_navigation(method="slow")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+        assert np.all(s_nav.data == 3000)
+
+    def test_very_asymmetric_size(self):
+        s = Diffraction2D(np.ones((50, 2, 120, 10)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+
+    def test_very_asymmetric_size_lazy(self):
+        s = LazyDiffraction2D(da.ones((50, 2, 120, 10), chunks=(2, 2, 5, 5)))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+
+    @pytest.mark.parametrize("shape", [(2, 10, 10), (3, 2, 10, 10)])
+    def test_different_shapes(self, shape):
+        s = Diffraction2D(np.ones(shape))
+        s.make_probe_navigation(method="fast")
+        s_nav = s._navigator_probe
+        assert s.axes_manager.navigation_shape == s_nav.axes_manager.signal_shape
+
+    @pytest.mark.parametrize("shape", [(10, 20), (2, 3, 4, 5, 6), (2, 3, 4, 5, 6, 7)])
+    def test_wrong_navigation_dimensions(self, shape):
+        s = Diffraction2D(np.ones(shape))
+        with pytest.raises(ValueError):
+            s.make_probe_navigation(method="fast")
+
+
+class TestPlotNavigator:
+
+    @pytest.mark.parametrize(
+        "shape", [(9, 8), (5, 9, 8), (4, 5, 9, 8), (8, 4, 5, 9, 8), (9, 8, 4, 5, 9, 8)]
+    )
+    def test_non_lazy(self, shape):
+        s = Diffraction2D(np.random.randint(0, 256, shape), dtype=np.uint8)
+        s.plot()
+        plt.close("all")
+
+    @pytest.mark.parametrize(
+        "shape", [(9, 8), (5, 9, 8), (4, 5, 9, 8), (8, 4, 5, 9, 8), (9, 8, 4, 5, 9, 8)]
+    )
+    def test_lazy(self, shape):
+        s = LazyDiffraction2D(da.random.randint(0, 256, shape), dtype=np.uint8)
+        s.plot()
+        plt.close("all")
+
+    def test_navigator_kwarg(self):
+        s = Diffraction2D(np.random.randint(0, 256, (8, 9, 10, 30), dtype=np.uint8))
+        s_nav = Diffraction2D(np.zeros((8, 9)))
+        s.plot(navigator=s_nav)
+        plt.close("all")
+
+    @pytest.mark.xfail(reason="Designed failure")
+    def test_wrong_navigator_shape_kwarg(self):
+        s = Diffraction2D(np.random.randint(0, 256, (8, 9, 10, 30), dtype=np.uint8))
+        s_nav = Diffraction2D(np.zeros((2, 19)))
+        s._navigator_probe = s_nav
+        s.plot()

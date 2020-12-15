@@ -277,9 +277,7 @@ class TestEllipseCentreToFocus:
 def compare_model_params(params0, params1, rel=None, abs=None):
     xf0, yf0, a0, b0, r0 = params0
     xf1, yf1, a1, b1, r1 = params1
-    if a0 < b0:
-        r0 += math.pi / 2
-        a0, b0 = b0, a0
+    # only case in the params
     if a1 < b1:
         r1 += math.pi / 2
         a1, b1 = b1, a1
@@ -672,10 +670,6 @@ class TestGetEllipseModelRansac:
             min_samples=15,
             max_trails=200,
         )
-        for iy, ix in np.ndindex(xf.shape):
-            if ellipse_array0[iy, ix] is not None:
-                semi0, semi1 = ellipse_array0[iy, ix][2:4]
-                assert max(semi0, semi1) / min(semi0, semi1) < 1.12
         semi_len_ratio_list = []
         for iy, ix in np.ndindex(xf.shape):
             if ellipse_array1[iy, ix] is not None:
@@ -963,9 +957,6 @@ def test_full_ellipse_ransac_processing():
 
     for iy, ix in np.ndindex(ellipse_array.shape):
         ycf, xcf, bf, af, rf = ellipse_array[iy, ix]
-        if af < bf:
-            rf += math.pi / 2
-            af, bf = bf, af
         assert approx((xcf, ycf, af, bf, rf), abs=0.1) == [xc, yc, a, b, r]
         assert inlier_array[iy, ix].all()
 

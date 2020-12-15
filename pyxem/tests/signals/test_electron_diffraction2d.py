@@ -53,14 +53,14 @@ class TestSimpleMaps:
             radius_finish=3,
             return_shifts=True,
         )
-        ans = np.array([[-0.45, -0.45], [0.57, 0.57], [-0.45, -0.45], [0.52, 0.52]])
+        ans = np.array([[[0.45, 0.45], [-0.57, -0.57]], [[0.45, 0.45], [-0.52, -0.52]]])
         np.testing.assert_almost_equal(shifts, ans)
 
     def test_center_direct_beam_blur_return_shifts(self, diffraction_pattern):
         shifts = diffraction_pattern.center_direct_beam(
             method="blur", sigma=5, half_square_width=3, return_shifts=True
         )
-        ans = np.array([[-1.0, -1.0], [-0.0, -0.0], [-1.0, -1.0], [-0.0, -0.0]])
+        ans = np.array([[[1.0, 1.0], [0.0, 0.0]], [[1.0, 1.0], [0.0, 0.0]]])
         np.testing.assert_almost_equal(shifts, ans)
 
     def test_center_direct_beam_in_small_region(self, diffraction_pattern):
@@ -213,57 +213,6 @@ class TestBackgroundMethods:
             TypeError, match="missing 1 required positional argument: 'h'",
         ):
             bgr = diffraction_pattern.remove_background(method="h-dome")
-
-
-class TestPeakFinding:
-    # This is assertion free testing
-
-    @pytest.fixture
-    def ragged_peak(self):
-        """
-        A small selection of peaks in an ElectronDiffraction2D, to allow
-        flexibilty of test building here.
-        """
-        pattern = np.zeros((2, 2, 128, 128))
-        pattern[:, :, 40:42, 45] = 1
-        pattern[:, :, 110, 30:32] = 1
-        pattern[1, 0, 71:73, 21:23] = 1
-        dp = ElectronDiffraction2D(pattern)
-        dp.set_diffraction_calibration(1)
-        return dp
-
-    methods = [
-        "zaefferer",
-        "laplacian_of_gaussians",
-        "difference_of_gaussians",
-        "stat",
-        "xc",
-    ]
-
-    @pytest.mark.parametrize("method", methods)
-    # skimage internals
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
-    def test_findpeaks_ragged(self, ragged_peak, method):
-        if method == "xc":
-            disc = np.ones((2, 2))
-            output = ragged_peak.find_peaks(
-                method="xc", disc_image=disc, min_distance=3
-            )
-        else:
-            output = ragged_peak.find_peaks(method=method, show_progressbar=False)
-
-
-class TestsAssertionless:
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
-    # we don't want to use xc in this bit
-    @pytest.mark.filterwarnings("ignore::UserWarning")
-    def test_find_peaks_interactive(self, diffraction_pattern):
-        from matplotlib import pyplot as plt
-
-        plt.ion()  # to make plotting non-blocking
-        diffraction_pattern.find_peaks_interactive()
-        plt.close("all")
-
 
 class TestNotImplemented:
     def test_failing_run(self, diffraction_pattern):
