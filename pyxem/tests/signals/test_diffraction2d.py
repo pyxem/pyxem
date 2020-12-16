@@ -867,7 +867,7 @@ class TestDiffraction2DPeakPositionRefinement:
 class TestCorrectBadPixel:
     @pytest.fixture()
     def data(self):
-        data = np.ones((5,5,100,90))
+        data = np.ones((2,2,100,90))
         data[:,:,9, 81] = 50000
         data[:,:,41, 21] = 0
         return data
@@ -876,20 +876,33 @@ class TestCorrectBadPixel:
     def bad_pixels(self):
         return np.asarray([[41,21],[9,81]])
 
-    @pytest.mark.reason(reason="This array shape is not currently supported")
+    @pytest.mark.skip(reason="This array shape is not currently supported")
     def test_lazy(self,data,bad_pixels):
         s_lazy = Diffraction2D(data).as_lazy()
         s_lazy.correct_bad_pixels(bad_pixels,lazy_result=True)
         assert s_lazy._lazy == True
         s_lazy.compute()
-        assert np.isclose(s.data[0,0,9,81],1)
-        assert np.isclose(s.data[0,0,41,21],1)
+        assert np.isclose(s_lazy.data[0,0,9,81],1)
+        assert np.isclose(s_lazy.data[0,0,41,21],1)
 
     def test_nonlazy(self,data,bad_pixels):
         s = Diffraction2D(data)
         s.correct_bad_pixels(bad_pixels,inplace=True)
         assert np.isclose(s.data[0,0,9,81],1)
         assert np.isclose(s.data[0,0,41,21],1)
+
+    @pytest.mark.parametrize("lazy_result",(True,False))
+    def test_lazy_with_bad_pixel_finders(self,data,lazy_result):
+        s_lazy = Diffraction2D(data).as_lazy()
+        hot = s_lazy.find_hot_pixels(lazy_result=lazy_result)
+        dead = s_lazy.find_dead_pixels(lazy_result=lazy_result)
+        bad = hot + dead
+        assert s_lazy._lazy == True
+        s_lazy = s_lazy.correct_bad_pixels(bad,lazy_result=True)
+        assert s_lazy._lazy == True
+        s_lazy.compute()
+        assert np.isclose(s_lazy.data[0,0,9,81],1)
+        assert np.isclose(s_lazy.data[0,0,41,21],1)
 
 
 class TestMakeProbeNavigation:
