@@ -2381,7 +2381,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> import numpy as np
         >>> mask_array = np.zeros((128, 128), dtype=np.bool)
         >>> mask_array[:, 100:] = True
-        >>> s = ps.dummy_data.get_dead_pixel_signal()
+        >>> s = pxm.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(
         ...     mask_array=mask_array, show_progressbar=False)
 
@@ -2396,13 +2396,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
+
         dead_pixels = dt._find_dead_pixels(
             dask_array, dead_pixel_value=dead_pixel_value, mask_array=mask_array
         )
@@ -2436,19 +2431,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The axes to calculate the variance over.  The default is to use the navigation axes.
         **kwargs: dict
             Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
-        
+
         Returns
         -------
         variance : array-like
             Calculate variance as it's own signal
-            
+
         References
         ----------
         [1] Daulton, T. L et al, Ultramicroscopy, 110(10), 1279–1289, https://doi.org/10.1016/j.ultramic.2010.05.010
             Nanobeam diffraction fluctuation electron microscopy technique for structural characterization of disordered
             materials-Application to Al88-xY7Fe5Tix metallic glasses.
         """
-        
+
         if method not in ['Omega','r','re','VImage']:
             raise ValueError('Method must be one of [Omega, r, re, VImage].'
                              'for more information read\n'
@@ -2458,28 +2453,28 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                              ' materials-Application to Al88-xY7Fe5Tix metallic glasses.'
                              ' Ultramicroscopy, 110(10), 1279–1289.\n'
                              ' https://doi.org/10.1016/j.ultramic.2010.05.010')
-            
+
         if method is 'Omega':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
             if dqe is not None:
                 sum_points = self.get_azimuthal_integral1d(npt=npt,sum=True,**kwargs).mean(axis=navigation_axes)
                 variance = variance - ((sum_points**-1)*dqe)
-            
+
         elif method is 'r':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             integration_squared = (self ** 2).get_azimuthal_integral1d(npt=npt, **kwargs)
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared/one_d_integration**2)-1
-            
+
             if dqe is not None:
                 full_variance = full_variance - ((one_d_integration**-1)*dqe)
-                
+
             variance = full_variance.mean(axis=navigation_axes)
-            
+
             if spatial:
                 return variance, full_variance
-            
+
         elif method is 're':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
             integration_squared = (self ** 2).get_azimuthal_integral1d(
@@ -2491,7 +2486,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             if dqe is not None:
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
                 variance = variance - (sum_int**-1)*(1/dqe)
-            
+
         elif method is 'VImage':
             variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
             if dqe is not None:
@@ -2529,7 +2524,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(show_progressbar=False)
 
         Using a mask array
@@ -2537,7 +2532,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> import numpy as np
         >>> mask_array = np.zeros((128, 128), dtype=np.bool)
         >>> mask_array[:, 100:] = True
-        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     mask_array=mask_array, show_progressbar=False)
 
@@ -2552,13 +2547,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
+
         hot_pixels = dt._find_hot_pixels(
             dask_array, threshold_multiplier=threshold_multiplier, mask_array=mask_array
         )
