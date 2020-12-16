@@ -2582,7 +2582,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         lazy_result : bool, optional
             When working lazily, determines if the result is computed. Default is True (ie. no .compute)
         inplace : bool, optional
-            When working in memory, determines if operation is performed inplace, default is True
+            When working in memory, determines if operation is performed inplace, default is True. When
+            working lazily the result will NOT be inplace.
         *args :
             passed to .map() if working in memory
         **kwargs :
