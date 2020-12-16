@@ -866,14 +866,11 @@ class TestDiffraction2DPeakPositionRefinement:
 
 class TestCorrectBadPixel:
 
-    def test_remove_dead_pixels(self, diffraction_pattern):
-        dpr = diffraction_pattern.remove_deadpixels(
-                [[1, 2], [5, 6]], method, inplace=False)
-            assert isinstance(dpr, ElectronDiffraction2D)
+
 
     # test that lazy and non-lazy paths go to the same place
     # test that the types are fine
-
+    pass
 
 class TestMakeProbeNavigation:
     def test_fast(self):
