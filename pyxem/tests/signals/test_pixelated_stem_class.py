@@ -27,7 +27,6 @@ from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 import pyxem.dummy_data.make_diffraction_test_data as mdtd
 import pyxem.dummy_data.dummy_data as dd
-import pyxem.dummy_data.dask_test_data as dtd
 
 
 @pytest.mark.slow
