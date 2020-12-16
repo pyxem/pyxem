@@ -865,52 +865,32 @@ class TestDiffraction2DPeakPositionRefinement:
         assert refined_peak_array.shape == tuple(shape[:-2])
 
 class TestCorrectBadPixel:
-        def test_2d(self):
-            data = np.ones((100, 90))
-            data[41, 21] = 0
-            data[9, 81] = 50000
-            dask_array = da.from_array(data, chunks=(10, 10))
-            s = LazyDiffraction2D(dask_array)
-            s_dead_pixels = s.find_dead_pixels(lazy_result=True)
-            s_hot_pixels = s.find_hot_pixels(lazy_result=True)
-            s_bad_pixels = s_dead_pixels + s_hot_pixels
-            s_corr = s.correct_bad_pixels(s_bad_pixels)
-            assert s_dead_pixels.data.shape == data.shape
-            assert s_dead_pixels._lazy
-            s_corr.compute()
-            assert (s_corr.data == 1.0).all()
+    @pytest.fixture()
+    def data(self):
+        data = np.ones((5,5,100,90))
+        data[:,:,9, 81] = 50000
+        data[:,:,41, 21] = 0
+        return data
 
-        def test_non_lazy_result(self):
-            data = np.ones((100, 90))
-            data[41, 21] = 0
-            data[9, 81] = 50000
-            dask_array = da.from_array(data, chunks=(10, 10))
-            s = LazyDiffraction2D(dask_array)
-            s_dead_pixels = s.find_dead_pixels(lazy_result=True)
-            s_hot_pixels = s.find_hot_pixels(lazy_result=True)
-            s_bad_pixels = s_dead_pixels + s_hot_pixels
-            s_corr = s.correct_bad_pixels(s_bad_pixels, lazy_result=False)
-            assert s_dead_pixels.data.shape == data.shape
-            assert not s_corr._lazy
-            assert (s_corr.data == 1.0).all()
+    @pytest.fixture()
+    def bad_pixels(self):
+        return np.asarray([[41,21],[9,81]])
 
-        def test_non_lazy_input(self):
-            data = np.ones((100, 90))
-            data[41, 21] = 0
-            data[9, 81] = 50000
-            s = Diffraction2D(data)
-            s_dead_pixels = s.find_dead_pixels()
-            s_hot_pixels = s.find_hot_pixels()
-            s_bad_pixels = s_dead_pixels + s_hot_pixels
-            s_corr = s.correct_bad_pixels(s_bad_pixels, lazy_result=False)
-            assert s_dead_pixels.data.shape == data.shape
-            assert not s_corr._lazy
-            assert (s_corr.data == 1.0).all()
+    @pytest.mark.reason(reason="This array shape is not currently supported")
+    def test_lazy(self,data,bad_pixels):
+        s_lazy = Diffraction2D(data).as_lazy()
+        s_lazy.correct_bad_pixels(bad_pixels,lazy_result=True)
+        assert s_lazy._lazy == True
+        s_lazy.compute()
+        assert np.isclose(s.data[0,0,9,81],1)
+        assert np.isclose(s.data[0,0,41,21],1)
 
+    def test_nonlazy(self,data,bad_pixels):
+        s = Diffraction2D(data)
+        s.correct_bad_pixels(bad_pixels,inplace=True)
+        assert np.isclose(s.data[0,0,9,81],1)
+        assert np.isclose(s.data[0,0,41,21],1)
 
-    # test that lazy and non-lazy paths go to the same place
-    # test that the types are fine
-    pass
 
 class TestMakeProbeNavigation:
     def test_fast(self):
