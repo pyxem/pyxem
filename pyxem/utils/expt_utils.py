@@ -313,7 +313,7 @@ def gain_normalise(z, dref, bref):
     return ((z - dref) / (bref - dref)) * np.mean((bref - dref))
 
 
-def remove_dead(z, deadpixels, deadvalue="average", d=1):
+def remove_dead(z, deadpixels):
     """Remove dead pixels from experimental electron diffraction patterns.
 
     Parameters
@@ -323,10 +323,6 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
     deadpixels : np.array()
         Array containing the array indices of dead pixels in the diffraction
         pattern.
-    deadvalue : str
-        Specify how deadpixels should be treated, options are;
-            'average': takes the average of adjacent pixels
-            'nan':  sets the dead pixel to nan
 
     Returns
     -------
@@ -334,20 +330,9 @@ def remove_dead(z, deadpixels, deadvalue="average", d=1):
         Two-dimensional data array containing z with dead pixels removed.
     """
     z_bar = np.copy(z)
-    if deadvalue == "average":
-        for (i, j) in deadpixels:
-            neighbours = z[i - d : i + d + 1, j - d : j + d + 1].flatten()
-            z_bar[i, j] = np.mean(neighbours)
-
-    elif deadvalue == "nan":
-        for (i, j) in deadpixels:
-            z_bar[i, j] = np.nan
-    else:
-        raise NotImplementedError(
-            "The method specified is not implemented. "
-            "See documentation for available "
-            "implementations."
-        )
+    for (i, j) in deadpixels:
+        neighbours = z[i - d : i + d + 1, j - d : j + d + 1].flatten()
+        z_bar[i, j] = np.mean(neighbours)
 
     return z_bar
 
