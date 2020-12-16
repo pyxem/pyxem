@@ -21,6 +21,7 @@ import numpy as np
 import dask.array as da
 import hyperspy.api as hs
 from matplotlib import pyplot as plt
+from numpy.random import default_rng
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
@@ -217,7 +218,8 @@ class TestVariance:
         data = (x**2+y**2)**0.5
         data = np.tile(data, (5, 5, 1, 1))
         # Electron is equal to 1 count in image
-        data = np.random.poisson(lam=data)
+        rng = default_rng(seed=1)
+        data = rng.poisson(lam=data)
         ones_diff = Diffraction2D(data=data)
         ones_diff.axes_manager.signal_axes[0].scale = 0.1
         ones_diff.axes_manager.signal_axes[1].scale = 0.1
@@ -234,9 +236,9 @@ class TestVariance:
         ones_zeros_variance = ones_zeros.get_variance(5, method="Omega")
         np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.ones(5)*.1111, decimal=3)
 
-    def test_FEM_Omega_piosson_noise(self, bulls_eye_noisy):
+    def test_FEM_Omega_poisson_noise(self, bulls_eye_noisy):
         bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="Omega", dqe=1)
-        # This fails at small radii and might still fail because it is random...
+        # We exclude small radii
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
         # Testing for non dqe=1
         bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="Omega", dqe=10)
@@ -250,11 +252,11 @@ class TestVariance:
         ones_zeros_variance = ones_zeros.get_variance(5, method="r")
         np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.zeros(5), decimal=3)
         bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="r", dqe=1)
-        # This fails at small radii and might still fail because it is random..
+        # We exclude small radii
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
         # Testing for non dqe=1
         bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="r", dqe=10)
-        # This fails at small radii and might still fail because it is random...
+        # We exclude small radii
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
 
     def test_FEM_VImage(self, ones):
