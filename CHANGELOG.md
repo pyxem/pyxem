@@ -13,11 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Calibration workflow has been altered (see PR #640 for details)
-- Azimuthal integration has been refactored (see PR #625 for details)
+- Azimuthal integration has been refactored (see PRs #625,#676 for details)
 - get_direct_beam_position now has reversed order of the shifts [y, x] to [x, y] (#653)
 - Plotting large, lazy, datasets will be much faster now (#655)
 - Methods to retrieve phase from DPC signal are added (#662)
 - .apply_affine_transform now uses a default order of 1 (changed from 3)
+- find_peaks is now provided by hyperspy, method 'xc' now called 'template_matching'
 
 ### Removed
 - The local_gaussian_method for subpixel refinement

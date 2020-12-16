@@ -72,22 +72,12 @@ from pyxem.utils.expt_utils import (
     sigma_clip,
 )
 
-from pyxem.utils.peakfinders2D import (
-    find_peaks_zaefferer,
-    find_peaks_stat,
-    find_peaks_dog,
-    find_peaks_log,
-    find_peaks_xc,
-)
-
 from pyxem.utils.dask_tools import (
     _process_dask_array,
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
     align_single_frame,
 )
-
-from pyxem.utils import peakfinder2D_gui
 
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
@@ -111,13 +101,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         try:
             return self.metadata.Signal["ai"]
         except (AttributeError):
-            return None
-
-    @ai.setter
-    def ai(self, ai):
-        """ Sets the Azimuthal Integrator property.  See ~pyFAI.AzimuthalIntegrator for more.
-        """
-        self.metadata.set_item("Signal.ai", ai)
+            raise ValueError("ai property is not currently set")
 
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
@@ -137,17 +121,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range: (start,stop)
             The start and stop of the radial range in real units
 
+        Returns
+        -------
+        None :
+            The metadata item Signal.ai is set
+
         """
+        if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
+            raise ValueError('if the unit is not \'2th_deg\' or \'2th_rad\' then a wavelength must be given.')
+
         pixel_scale = [
             self.axes_manager.signal_axes[0].scale,
             self.axes_manager.signal_axes[1].scale,
         ]
-        if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
-            print(
-                'if the unit is not "2th_deg", "2th_rad"'
-                "then a wavelength must be given. "
-            )
-            return None
+
         unit = to_unit(self.unit)
         sig_shape = self.axes_manager.signal_shape
         setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
@@ -161,8 +148,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             wavelength=wavelength,
             **kwargs,
         )
-        self.ai = ai
-        return ai
+        self.metadata.set_item("Signal.ai", ai)
+        return None
 
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
@@ -262,44 +249,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             **kwargs,
         )
 
-    def remove_deadpixels(
-        self,
-        deadpixels,
-        deadvalue="average",
-        inplace=True,
-        progress_bar=True,
-        *args,
-        **kwargs,
-    ):
-        """Remove deadpixels from experimentally acquired diffraction patterns.
-
-        Parameters
-        ----------
-        deadpixels : list
-            List of deadpixels to be removed.
-        deadvalue : str
-            Specify how deadpixels should be treated. 'average' sets the dead
-            pixel value to the average of adjacent pixels. 'nan' sets the dead
-            pixel to nan
-        inplace : bool
-            If True (default), this signal is overwritten. Otherwise, returns a
-            new signal.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to be passed to map().
-
-        """
-        return self.map(
-            remove_dead,
-            deadpixels=deadpixels,
-            deadvalue=deadvalue,
-            inplace=inplace,
-            show_progressbar=progress_bar,
-            *args,
-            **kwargs,
-        )
-
     def get_azimuthal_integral1d(
         self,
         npt,
@@ -307,21 +256,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         radial_range=None,
         azimuth_range=None,
         wavelength=None,
-        unit="k_nm^-1",
         inplace=False,
         method="splitpixel",
         sum=False,
         **kwargs,
     ):
-        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
-
-        This function is designed to be fairly flexible to account for 2 different cases:
-
-        1 - If the unit is "pyxem" then it lets pyXEM take the lead. If wavelength is none in that case
-        it doesn't account for the Ewald sphere.
-
-        2 - If unit is any of the options from pyFAI then detector cannot be None and the handling of
-        units is passed to pyxem and those units are used.
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
+        with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
+        no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,
+        in which case the detector kwarg must be provided.
 
         Parameters
         ----------
@@ -339,9 +282,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         wavelength: None or float
             The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
             it to properly work.
-        unit: str
-            The unit can be "pyxem" to use the pyxem units and “q_nm^-1”, “q_A^-1”, “2th_deg”, “2th_rad”, “r_mm”
-            if pyFAI is used for unit handling
         inplace: bool
             If the signal is overwritten or copied to a new signal
         method: str
@@ -444,15 +384,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correctSolidAngle=True,
         **kwargs,
     ):
-        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d.
-
-        This function is designed to be fairly flexible to account for 2 different cases:
-
-        1 - If the unit is "pyxem" then it lets pyXEM take the lead. If wavelength is none in that case
-        it doesn't account for the Ewald sphere.
-
-        2 - If unit is any of the options from pyFAI then detector cannot be None and the handling of
-        units is passed to pyxem and those units are used.
+        """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
+        with 2 cases in mind. (1) the signal has pyxem style units, if a wavelength is not provided
+        no account is made for the curvature of the Ewald sphere. (2) the signal has pyFAI style units,
+        in which case the detector kwarg must be provided.
 
         Parameters
         ----------
@@ -1175,120 +1110,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
 
         return bg_subtracted
-
-    def find_peaks(self, method, *args, **kwargs):
-        """Find the position of diffraction peaks.
-
-        Function to locate the positive peaks in an image using various, user
-        specified, methods. Returns a structured array containing the peak
-        positions.
-
-        Parameters
-        ----------
-        method : str
-            Select peak finding algorithm to implement. Available methods are
-            {'zaefferer', 'stat', 'laplacian_of_gaussians',
-            'difference_of_gaussians', 'xc'}
-        *args : arguments
-            Arguments to be passed to the peak finders.
-        **kwargs : arguments
-            Keyword arguments to be passed to the peak finders.
-
-        Returns
-        -------
-        peaks : DiffractionVectors
-            A DiffractionVectors object with navigation dimensions identical to
-            the original ElectronDiffraction2D object. Each signal is a BaseSignal
-            object contiaining the diffraction vectors found at each navigation
-            position, in calibrated units.
-
-        Notes
-        -----
-        Peak finding methods are detailed as:
-
-            * 'zaefferer' - based on gradient thresholding and refinement
-              by local region of interest optimisation
-            * 'stat' - statistical approach requiring no free params.
-            * 'laplacian_of_gaussians' - a blob finder implemented in
-              `scikit-image` which uses the laplacian of Gaussian matrices
-              approach.
-            * 'difference_of_gaussians' - a blob finder implemented in
-              `scikit-image` which uses the difference of Gaussian matrices
-              approach.
-            * 'xc' - A cross correlation peakfinder
-
-        """
-        method_dict = {
-            "zaefferer": find_peaks_zaefferer,
-            "stat": find_peaks_stat,
-            "laplacian_of_gaussians": find_peaks_log,
-            "difference_of_gaussians": find_peaks_dog,
-            "xc": find_peaks_xc,
-        }
-        if method in method_dict:
-            method = method_dict[method]
-        else:
-            raise NotImplementedError(
-                "The method `{}` is not implemented. "
-                "See documentation for available "
-                "implementations.".format(method)
-            )
-
-        peaks = self.map(method, *args, **kwargs, inplace=False, ragged=True)
-        peaks.map(
-            peaks_as_gvectors,
-            center=np.array(self.axes_manager.signal_shape) / 2 - 0.5,
-            calibration=self.axes_manager.signal_axes[0].scale,
-        )
-        peaks.set_signal_type("diffraction_vectors")
-
-        # Set DiffractionVectors attributes
-        peaks.pixel_calibration = self.axes_manager.signal_axes[0].scale
-        peaks.detector_shape = self.axes_manager.signal_shape
-
-        # Set calibration to same as signal
-        x = peaks.axes_manager.navigation_axes[0]
-        y = peaks.axes_manager.navigation_axes[1]
-
-        x.name = "x"
-        x.scale = self.axes_manager.navigation_axes[0].scale
-        x.units = "nm"
-
-        y.name = "y"
-        y.scale = self.axes_manager.navigation_axes[1].scale
-        y.units = "nm"
-
-        return peaks
-
-    def find_peaks_interactive(self, disc_image=None, imshow_kwargs=None):
-        """Find peaks using an interactive tool.
-
-        Parameters
-        ----------
-        disc_image : numpy.array
-            See .utils.peakfinders2D.peak_finder_xc for details. If not
-            given a warning will be raised.
-        imshow_kwargs : None or dict
-            kwargs to be passed to internal imshow statements
-
-        Notes
-        -----
-        Requires `ipywidgets` and `traitlets` to be installed.
-
-        """
-
-        imshow_kwargs = {} if imshow_kwargs is None else imshow_kwargs
-
-        if disc_image is None:
-            warn(
-                "You have not specified a disc image, as such you will not "
-                "be able to use the xc method in this session"
-            )
-
-        peakfinder = peakfinder2D_gui.PeakFinderUIIPYW(
-            disc_image=disc_image, imshow_kwargs=imshow_kwargs
-        )
-        peakfinder.interactive(self)
 
     def shift_diffraction(
         self,
@@ -2105,31 +1926,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        method: string, optional
-            'dog': difference of Gaussians. 'log': Laplacian of Gaussian.
-            Default 'dog'.
-        min_sigma : float, optional
-            Default 0.98.
-        max_sigma : float, optional
-            Default 55.
-        sigma_ratio : float, optional
-            For method 'dog'. Default 1.76.
-        num_sigma: float, optional
-            For method 'log'. Default 10.
-        threshold : float, optional
-            Default 0.36.
-        overlap : float, optional
-            Default 0.81.
-        normalize_value : float, optional
-            All the values in the signal will be divided by this value.
-            If no value is specified, the max value in each individual image
-            will be used.
-        max_r : float
-            Maximum radius compared from the center of the diffraction pattern
+        method : string, optional
+            'dog'(default) for difference of Gaussians. 'log' for Laplacian of Gaussian.
         lazy_result : bool, optional
             Default True
         show_progressbar : bool, optional
             Default True
+        **kwargs :
+            Passed to the peakfinder, see skimage docs for details
 
         Returns
         -------
@@ -2168,13 +1972,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> s.plot()
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        if not self._lazy:
+            raise ValueError("Signal is not lazy, please use the non-lazy version")
+
+        dask_array = self.data
 
         if method == "dog":
             output_array = dt._peak_find_dog(dask_array, **kwargs)
@@ -2610,6 +2411,94 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_dead_pixels.compute(progressbar=show_progressbar)
         return s_dead_pixels
 
+    def get_variance(self,
+                     npt,
+                     method="Omega",
+                     dqe=None,
+                     spatial=False,
+                     navigation_axes=None,
+                     **kwargs,
+                     ):
+        """Calculates the variance using one of the methods described in [1]. A shot noise correction and
+           and specification of axes to operate over are also possible.
+
+        Parameters
+        ----------
+        npt : int
+            The number of points to use in the azimuthal integration
+        method : 'Omega' or 'r' or 're' or 'VImage', optional
+            The method used to calculate the variance. Details in [1]
+        dqe : int, optional
+            The detector quantum efficiency or the pixel value for one electron.
+        spatial : bool, optional
+            Included intermediate spatial variance in output (only avaliable if method=='r')
+        navigation_axes : list or none, optional
+            The axes to calculate the variance over.  The default is to use the navigation axes.
+        **kwargs: dict
+            Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
+        
+        Returns
+        -------
+        variance : array-like
+            Calculate variance as it's own signal
+            
+        References
+        ----------
+        [1] Daulton, T. L et al, Ultramicroscopy, 110(10), 1279–1289, https://doi.org/10.1016/j.ultramic.2010.05.010
+            Nanobeam diffraction fluctuation electron microscopy technique for structural characterization of disordered
+            materials-Application to Al88-xY7Fe5Tix metallic glasses.
+        """
+        
+        if method not in ['Omega','r','re','VImage']:
+            raise ValueError('Method must be one of [Omega, r, re, VImage].'
+                             'for more information read\n'
+                             'Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010).'
+                             ' Nanobeam diffraction fluctuation electron microscopy'
+                             ' technique for structural characterization of disordered'
+                             ' materials-Application to Al88-xY7Fe5Tix metallic glasses.'
+                             ' Ultramicroscopy, 110(10), 1279–1289.\n'
+                             ' https://doi.org/10.1016/j.ultramic.2010.05.010')
+            
+        if method is 'Omega':
+            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
+            variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
+            if dqe is not None:
+                sum_points = self.get_azimuthal_integral1d(npt=npt,sum=True,**kwargs).mean(axis=navigation_axes)
+                variance = variance - ((sum_points**-1)*dqe)
+            
+        elif method is 'r':
+            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
+            integration_squared = (self ** 2).get_azimuthal_integral1d(npt=npt, **kwargs)
+            # Full variance is the same as the unshifted phi=0 term in angular correlation
+            full_variance = (integration_squared/one_d_integration**2)-1
+            
+            if dqe is not None:
+                full_variance = full_variance - ((one_d_integration**-1)*dqe)
+                
+            variance = full_variance.mean(axis=navigation_axes)
+            
+            if spatial:
+                return variance, full_variance
+            
+        elif method is 're':
+            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
+            integration_squared = (self ** 2).get_azimuthal_integral1d(
+                                                                       npt=npt,
+                                                                       **kwargs).mean(
+                                                                                     axis=navigation_axes)
+            variance = (integration_squared/one_d_integration**2) - 1
+
+            if dqe is not None:
+                sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
+                variance = variance - (sum_int**-1)*(1/dqe)
+            
+        elif method is 'VImage':
+            variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
+            if dqe is not None:
+                variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
+            variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
+        return variance
+
     def find_hot_pixels(
         self,
         threshold_multiplier=500,
@@ -2678,6 +2567,44 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if not lazy_result:
             s_hot_pixels.compute(progressbar=show_progressbar)
         return s_hot_pixels
+
+    def remove_deadpixels(
+        self,
+        deadpixels,
+        deadvalue="average",
+        inplace=True,
+        progress_bar=True,
+        *args,
+        **kwargs,
+    ):
+        """Remove deadpixels from experimentally acquired diffraction patterns.
+
+        Parameters
+        ----------
+        deadpixels : list
+            List of deadpixels to be removed.
+        deadvalue : str
+            Specify how deadpixels should be treated. 'average' sets the dead
+            pixel value to the average of adjacent pixels. 'nan' sets the dead
+            pixel to nan
+        inplace : bool
+            If True (default), this signal is overwritten. Otherwise, returns a
+            new signal.
+        *args:
+            Arguments to be passed to map().
+        **kwargs:
+            Keyword arguments to be passed to map().
+
+        """
+        return self.map(
+            remove_dead,
+            deadpixels=deadpixels,
+            deadvalue=deadvalue,
+            inplace=inplace,
+            show_progressbar=progress_bar,
+            *args,
+            **kwargs,
+        )
 
     def correct_bad_pixels(
         self, bad_pixel_array, lazy_result=True, show_progressbar=True

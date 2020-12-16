@@ -62,7 +62,7 @@ class TestDummyDataModule:
         s = dd.get_square_dpc_signal()
         assert hasattr(s, "plot")
         s_ramp = dd.get_square_dpc_signal(add_ramp=True)
-        s_ramp.plot()
+        assert hasattr(s, "plot")
 
     def test_get_dead_pixel_signal(self):
         s = dd.get_dead_pixel_signal(lazy=True)
@@ -80,23 +80,22 @@ class TestDummyDataModule:
 
     def test_get_cbed_signal(self):
         s = dd.get_cbed_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_fem_signal(self):
         s = dd.get_fem_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_simple_fem_signal(self):
         s = dd.get_simple_fem_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_nanobeam_electron_diffraction_signal(self):
         s = dd.get_nanobeam_electron_diffraction_signal()
-        s.plot()
+        assert hasattr(s, "plot")
 
     def test_get_generic_fem_signal(self):
         s = dd.get_generic_fem_signal(probe_x=2, probe_y=3, image_x=20, image_y=25)
-        s.plot()
         assert s.axes_manager.shape == (2, 3, 20, 25)
         assert hasattr(s, "plot")
 
