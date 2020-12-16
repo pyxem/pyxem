@@ -866,6 +866,110 @@ class TestDiffraction2DPeakPositionRefinement:
         )
         assert refined_peak_array.shape == tuple(shape[:-2])
 
+
+class TestFindHotPixels:
+    def test_2d(self):
+        s = LazyDiffraction2D(dtd._get_hot_pixel_test_data_2d())
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels._lazy
+        s_hot_pixels.compute()
+        assert s_hot_pixels.data.shape == s.data.shape
+        assert s_hot_pixels.data[21, 11]
+        assert s_hot_pixels.data[5, 38]
+        s_hot_pixels.data[21, 11] = False
+        s_hot_pixels.data[5, 38] = False
+        assert not s_hot_pixels.data.any()
+
+    def test_3d(self):
+        s = LazyDiffraction2D(dtd._get_hot_pixel_test_data_3d())
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels.data.shape == s.data.shape
+
+    def test_4d(self):
+        s = LazyDiffraction2D(dtd._get_hot_pixel_test_data_4d())
+        s_hot_pixels = s.find_hot_pixels()
+        assert s_hot_pixels.data.shape == s.data.shape
+
+    def test_lazy_result(self):
+        s = LazyDiffraction2D(dtd._get_hot_pixel_test_data_4d())
+        s_hot_pixels = s.find_hot_pixels(lazy_result=True)
+        assert s_hot_pixels._lazy
+
+    def test_threshold_multiplier(self):
+        s = LazyDiffraction2D(dtd._get_hot_pixel_test_data_4d())
+        s_hot_pixels = s.find_hot_pixels(threshold_multiplier=1000000)
+        assert not s_hot_pixels.data.any()
+
+    def test_mask_array(self):
+        s = LazyDiffraction2D(dtd._get_hot_pixel_test_data_2d())
+        mask_array = np.ones_like(s.data, dtype=np.bool)
+        s_hot_pixels = s.find_hot_pixels(mask_array=mask_array)
+        assert not s_hot_pixels.data.any()
+
+    def test_non_lazy_signal(self):
+        data = dtd._get_hot_pixel_test_data_2d()
+        s = Diffraction2D(data.compute())
+        s_hot_pixels = s.find_hot_pixels()
+        s_hot_pixels.compute()
+        assert s_hot_pixels.data.shape == s.data.shape
+        assert s_hot_pixels.data[21, 11]
+        assert s_hot_pixels.data[5, 38]
+        s_hot_pixels.data[21, 11] = False
+        s_hot_pixels.data[5, 38] = False
+        assert not s_hot_pixels.data.any()
+
+
+class TestFindDeadPixels:
+    def test_2d(self):
+        s = LazyDiffraction2D(dtd._get_dead_pixel_test_data_2d())
+        s_dead_pixels = s.find_dead_pixels()
+        assert not s_dead_pixels._lazy
+        assert s_dead_pixels.data.shape == s.data.shape
+        assert s_dead_pixels.data[14, 42]
+        assert s_dead_pixels.data[2, 12]
+        s_dead_pixels.data[14, 42] = False
+        s_dead_pixels.data[2, 12] = False
+        assert not s_dead_pixels.data.any()
+
+    def test_3d(self):
+        s = LazyDiffraction2D(dtd._get_dead_pixel_test_data_3d())
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape[-2:]
+
+    def test_4d(self):
+        s = LazyDiffraction2D(dtd._get_dead_pixel_test_data_4d())
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape[-2:]
+
+    def test_lazy_result(self):
+        s = LazyDiffraction2D(dtd._get_dead_pixel_test_data_2d())
+        s_dead_pixels = s.find_dead_pixels(lazy_result=True)
+        assert s_dead_pixels._lazy
+
+    def test_dead_pixel_value(self):
+        s = LazyDiffraction2D(dtd._get_dead_pixel_test_data_2d())
+        s_dead_pixels = s.find_dead_pixels(dead_pixel_value=-10)
+        assert not s_dead_pixels.data.any()
+
+    def test_mask_array(self):
+        s = LazyDiffraction2D(dtd._get_dead_pixel_test_data_2d())
+        mask_array = np.ones_like(s.data, dtype=np.bool)
+        s_dead_pixels = s.find_dead_pixels(mask_array=mask_array)
+        assert not s_dead_pixels.data.any()
+
+    def test_non_lazy_signal(self):
+        data = dtd._get_dead_pixel_test_data_2d()
+        s = Diffraction2D(data.compute())
+        s_dead_pixels = s.find_dead_pixels()
+        assert s_dead_pixels.data.shape == s.data.shape
+        assert s_dead_pixels.data[14, 42]
+        assert s_dead_pixels.data[2, 12]
+        s_dead_pixels.data[14, 42] = False
+        s_dead_pixels.data[2, 12] = False
+        assert not s_dead_pixels.data.any()
+
+
+
 class TestMakeProbeNavigation:
     def test_fast(self):
         s = Diffraction2D(np.ones((6, 5, 12, 10)))
