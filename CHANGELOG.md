@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.diffraction_tools, downstreamed to diffsims
 - utils.sim_utils, use the relevant diffsims functionality
 - The diffraction_component and scalable_reference_pattern modules have been removed (#674)
-- Diffraction2D.remove_dead_pixels has been removed, use .correct_bad_pixels
+- Diffraction2D.remove_dead_pixels has been removed, use .correct_bad_pixels (#tbc)
 
 ## 2020-12-02 - version 0.12.3
 ### Changed

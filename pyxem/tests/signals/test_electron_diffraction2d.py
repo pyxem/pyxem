@@ -101,16 +101,6 @@ class TestSimpleMaps:
 
         assert transformed_dp.data.dtype == "uint8"
 
-    methods = ["average", "nan"]
-
-    @pytest.mark.parametrize("method", methods)
-    def test_remove_dead_pixels(self, diffraction_pattern, method):
-        dpr = diffraction_pattern.remove_deadpixels(
-            [[1, 2], [5, 6]], method, inplace=False
-        )
-        assert isinstance(dpr, ElectronDiffraction2D)
-
-
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
