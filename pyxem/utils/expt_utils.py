@@ -331,7 +331,7 @@ def remove_dead(z, deadpixels):
     """
     z_bar = np.copy(z)
     for (i, j) in deadpixels:
-        neighbours = z[i - d : i + d + 1, j - d : j + d + 1].flatten()
+        neighbours = z[i - 1 : i + 2, j - 1 : j + 2].flatten()
         z_bar[i, j] = np.mean(neighbours)
 
     return z_bar
