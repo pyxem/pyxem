@@ -1033,7 +1033,7 @@ class TestMakeProbeNavigation:
         with pytest.raises(ValueError):
             s.make_probe_navigation(method="fast")
 
-
+@pytest.mark.slow
 class TestPlotNavigator:
 
     @pytest.mark.parametrize(
