@@ -898,7 +898,8 @@ class TestCorrectBadPixel:
         assert s_lazy._lazy == True
         s_lazy = s_lazy.correct_bad_pixels(bad,lazy_result=lazy_result)
         assert s_lazy._lazy == lazy_result
-        s_lazy.compute()
+        if lazy_result:
+            s_lazy.compute()
         assert np.isclose(s_lazy.data[0,0,9,81],1)
         assert np.isclose(s_lazy.data[0,0,41,21],1)
 
