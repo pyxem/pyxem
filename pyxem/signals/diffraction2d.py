@@ -2558,60 +2558,26 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_hot_pixels.compute(progressbar=show_progressbar)
         return s_hot_pixels
 
-    def remove_deadpixels(
-        self,
-        deadpixels,
-        deadvalue="average",
-        inplace=True,
-        progress_bar=True,
-        *args,
-        **kwargs,
-    ):
-        """Remove deadpixels from experimentally acquired diffraction patterns.
-
-        Parameters
-        ----------
-        deadpixels : list
-            List of deadpixels to be removed.
-        deadvalue : str
-            Specify how deadpixels should be treated. 'average' sets the dead
-            pixel value to the average of adjacent pixels. 'nan' sets the dead
-            pixel to nan
-        inplace : bool
-            If True (default), this signal is overwritten. Otherwise, returns a
-            new signal.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to be passed to map().
-
-        """
-        return self.map(
-            remove_dead,
-            deadpixels=deadpixels,
-            deadvalue=deadvalue,
-            inplace=inplace,
-            show_progressbar=progress_bar,
-            *args,
-            **kwargs,
-        )
-
     def correct_bad_pixels(
-        self, bad_pixel_array, lazy_result=True, show_progressbar=True
+        self, bad_pixel_array, show_progressbar=True, lazy_result=True, inplace=True ,*args,**kwargs,
     ):
-        """Correct bad pixels by getting mean value of neighbors.
-
-        Note: this method is currently not very optimized with regards
-        to memory use, so currently be careful when using it on
-        large datasets.
+        """Correct bad (dead/hot) pixels by replacing their values with the mean value of neighbors.
 
         Parameters
         ----------
         bad_pixel_array : array-like
-        lazy_result : bool
-            Default True.
-        show_progressbar : bool
+            List of pixels to correct
+        show_progressbar : bool, optional
             Default True
+        lazy_result : bool, optional
+            When working lazily, determines if the result is computed. Default is True (ie. no .compute)
+        inplace : bool, optional
+            When working in memory, determines if operation is performed inplace, default is True. When
+            working lazily the result will NOT be inplace.
+        *args :
+            passed to .map() if working in memory
+        **kwargs :
+            passed to .map() if working in memory
 
         Returns
         -------
@@ -2619,22 +2585,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     show_progressbar=False, lazy_result=True)
         >>> s_corr = s.correct_bad_pixels(s_hot_pixels)
-
-        Dead pixels
-
-        >>> s = ps.dummy_data.get_dead_pixel_signal()
-        >>> s_dead_pixels = s.find_dead_pixels(
-        ...     show_progressbar=False, lazy_result=True)
-        >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
-
-        Combine both dead pixels and hot pixels
-
-        >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
-        >>> s_corr = s.correct_bad_pixels(s_bad_pixels)
 
         See Also
         --------
@@ -2642,13 +2596,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         find_hot_pixels
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        if not self._lazy:
+            return self.map(
+                remove_dead,
+                deadpixels=bad_pixel_array,
+                inplace=inplace,
+                show_progressbar=show_progressbar,
+                *args,
+                **kwargs,
+            )
+
+        # working on the lazy case
+        dask_array = self.data
         bad_pixel_removed = dt._remove_bad_pixels(dask_array, bad_pixel_array.data)
         s_bad_pixel_removed = LazyDiffraction2D(bad_pixel_removed)
         pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)
