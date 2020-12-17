@@ -892,12 +892,12 @@ class TestCorrectBadPixel:
     @pytest.mark.parametrize("lazy_result",(True,False))
     def test_lazy_with_bad_pixel_finders(self,data,lazy_result):
         s_lazy = Diffraction2D(data).as_lazy()
-        hot = s_lazy.find_hot_pixels(lazy_result=lazy_result)
-        dead = s_lazy.find_dead_pixels(lazy_result=lazy_result)
+        hot = s_lazy.find_hot_pixels(lazy_result=True)
+        dead = s_lazy.find_dead_pixels(lazy_result=True)
         bad = hot + dead
         assert s_lazy._lazy == True
-        s_lazy = s_lazy.correct_bad_pixels(bad,lazy_result=True)
-        assert s_lazy._lazy == True
+        s_lazy = s_lazy.correct_bad_pixels(bad,lazy_result=lazy_result)
+        assert s_lazy._lazy == lazy_result
         s_lazy.compute()
         assert np.isclose(s_lazy.data[0,0,9,81],1)
         assert np.isclose(s_lazy.data[0,0,41,21],1)
