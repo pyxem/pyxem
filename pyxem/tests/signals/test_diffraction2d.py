@@ -878,7 +878,7 @@ class TestCorrectBadPixel:
     def bad_pixels(self):
         return np.asarray([[41,21],[9,81]])
 
-    @pytest.mark.skip(reason="This array shape is not currently supported")
+    @pytest.mark.xfail(reason="This array shape is not currently supported")
     def test_lazy(self,data,bad_pixels):
         s_lazy = Diffraction2D(data).as_lazy()
         s_lazy.correct_bad_pixels(bad_pixels,lazy_result=True)
