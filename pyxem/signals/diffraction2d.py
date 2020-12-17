@@ -2436,19 +2436,19 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The axes to calculate the variance over.  The default is to use the navigation axes.
         **kwargs: dict
             Any keywords accepted for the get_azimuthal_integral1d() or get_azimuthal_integral2d() function
-        
+
         Returns
         -------
         variance : array-like
             Calculate variance as it's own signal
-            
+
         References
         ----------
         [1] Daulton, T. L et al, Ultramicroscopy, 110(10), 1279–1289, https://doi.org/10.1016/j.ultramic.2010.05.010
             Nanobeam diffraction fluctuation electron microscopy technique for structural characterization of disordered
             materials-Application to Al88-xY7Fe5Tix metallic glasses.
         """
-        
+
         if method not in ['Omega','r','re','VImage']:
             raise ValueError('Method must be one of [Omega, r, re, VImage].'
                              'for more information read\n'
@@ -2458,28 +2458,28 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                              ' materials-Application to Al88-xY7Fe5Tix metallic glasses.'
                              ' Ultramicroscopy, 110(10), 1279–1289.\n'
                              ' https://doi.org/10.1016/j.ultramic.2010.05.010')
-            
+
         if method is 'Omega':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
             if dqe is not None:
                 sum_points = self.get_azimuthal_integral1d(npt=npt,sum=True,**kwargs).mean(axis=navigation_axes)
                 variance = variance - ((sum_points**-1)*dqe)
-            
+
         elif method is 'r':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             integration_squared = (self ** 2).get_azimuthal_integral1d(npt=npt, **kwargs)
             # Full variance is the same as the unshifted phi=0 term in angular correlation
             full_variance = (integration_squared/one_d_integration**2)-1
-            
+
             if dqe is not None:
                 full_variance = full_variance - ((one_d_integration**-1)*dqe)
-                
+
             variance = full_variance.mean(axis=navigation_axes)
-            
+
             if spatial:
                 return variance, full_variance
-            
+
         elif method is 're':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
             integration_squared = (self ** 2).get_azimuthal_integral1d(
@@ -2491,7 +2491,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             if dqe is not None:
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
                 variance = variance - (sum_int**-1)*(1/dqe)
-            
+
         elif method is 'VImage':
             variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
             if dqe is not None:
@@ -2568,60 +2568,26 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_hot_pixels.compute(progressbar=show_progressbar)
         return s_hot_pixels
 
-    def remove_deadpixels(
-        self,
-        deadpixels,
-        deadvalue="average",
-        inplace=True,
-        progress_bar=True,
-        *args,
-        **kwargs,
-    ):
-        """Remove deadpixels from experimentally acquired diffraction patterns.
-
-        Parameters
-        ----------
-        deadpixels : list
-            List of deadpixels to be removed.
-        deadvalue : str
-            Specify how deadpixels should be treated. 'average' sets the dead
-            pixel value to the average of adjacent pixels. 'nan' sets the dead
-            pixel to nan
-        inplace : bool
-            If True (default), this signal is overwritten. Otherwise, returns a
-            new signal.
-        *args:
-            Arguments to be passed to map().
-        **kwargs:
-            Keyword arguments to be passed to map().
-
-        """
-        return self.map(
-            remove_dead,
-            deadpixels=deadpixels,
-            deadvalue=deadvalue,
-            inplace=inplace,
-            show_progressbar=progress_bar,
-            *args,
-            **kwargs,
-        )
-
     def correct_bad_pixels(
-        self, bad_pixel_array, lazy_result=True, show_progressbar=True
+        self, bad_pixel_array, show_progressbar=True, lazy_result=True, inplace=True ,*args,**kwargs,
     ):
-        """Correct bad pixels by getting mean value of neighbors.
-
-        Note: this method is currently not very optimized with regards
-        to memory use, so currently be careful when using it on
-        large datasets.
+        """Correct bad (dead/hot) pixels by replacing their values with the mean value of neighbors.
 
         Parameters
         ----------
         bad_pixel_array : array-like
-        lazy_result : bool
-            Default True.
-        show_progressbar : bool
+            List of pixels to correct
+        show_progressbar : bool, optional
             Default True
+        lazy_result : bool, optional
+            When working lazily, determines if the result is computed. Default is True (ie. no .compute)
+        inplace : bool, optional
+            When working in memory, determines if operation is performed inplace, default is True. When
+            working lazily the result will NOT be inplace.
+        *args :
+            passed to .map() if working in memory
+        **kwargs :
+            passed to .map() if working in memory
 
         Returns
         -------
@@ -2629,22 +2595,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     show_progressbar=False, lazy_result=True)
         >>> s_corr = s.correct_bad_pixels(s_hot_pixels)
-
-        Dead pixels
-
-        >>> s = ps.dummy_data.get_dead_pixel_signal()
-        >>> s_dead_pixels = s.find_dead_pixels(
-        ...     show_progressbar=False, lazy_result=True)
-        >>> s_corr = s.correct_bad_pixels(s_dead_pixels)
-
-        Combine both dead pixels and hot pixels
-
-        >>> s_bad_pixels = s_hot_pixels + s_dead_pixels
-        >>> s_corr = s.correct_bad_pixels(s_bad_pixels)
 
         See Also
         --------
@@ -2652,13 +2606,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         find_hot_pixels
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        if not self._lazy:
+            return self.map(
+                remove_dead,
+                deadpixels=bad_pixel_array,
+                inplace=inplace,
+                show_progressbar=show_progressbar,
+                *args,
+                **kwargs,
+            )
+
+        # working on the lazy case
+        dask_array = self.data
         bad_pixel_removed = dt._remove_bad_pixels(dask_array, bad_pixel_array.data)
         s_bad_pixel_removed = LazyDiffraction2D(bad_pixel_removed)
         pst._copy_signal2d_axes_manager_metadata(self, s_bad_pixel_removed)

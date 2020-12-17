@@ -333,51 +333,6 @@ class TestFindDeadPixels:
         s_dead_pixels.data[2, 12] = False
         assert not s_dead_pixels.data.any()
 
-
-class TestCorrectBadPixels:
-    def test_2d(self):
-        data = np.ones((100, 90))
-        data[41, 21] = 0
-        data[9, 81] = 50000
-        dask_array = da.from_array(data, chunks=(10, 10))
-        s = LazyDiffraction2D(dask_array)
-        s_dead_pixels = s.find_dead_pixels(lazy_result=True)
-        s_hot_pixels = s.find_hot_pixels(lazy_result=True)
-        s_bad_pixels = s_dead_pixels + s_hot_pixels
-        s_corr = s.correct_bad_pixels(s_bad_pixels)
-        assert s_dead_pixels.data.shape == data.shape
-        assert s_dead_pixels._lazy
-        s_corr.compute()
-        assert (s_corr.data == 1.0).all()
-
-    def test_non_lazy_result(self):
-        data = np.ones((100, 90))
-        data[41, 21] = 0
-        data[9, 81] = 50000
-        dask_array = da.from_array(data, chunks=(10, 10))
-        s = LazyDiffraction2D(dask_array)
-        s_dead_pixels = s.find_dead_pixels(lazy_result=True)
-        s_hot_pixels = s.find_hot_pixels(lazy_result=True)
-        s_bad_pixels = s_dead_pixels + s_hot_pixels
-        s_corr = s.correct_bad_pixels(s_bad_pixels, lazy_result=False)
-        assert s_dead_pixels.data.shape == data.shape
-        assert not s_corr._lazy
-        assert (s_corr.data == 1.0).all()
-
-    def test_non_lazy_input(self):
-        data = np.ones((100, 90))
-        data[41, 21] = 0
-        data[9, 81] = 50000
-        s = Diffraction2D(data)
-        s_dead_pixels = s.find_dead_pixels()
-        s_hot_pixels = s.find_hot_pixels()
-        s_bad_pixels = s_dead_pixels + s_hot_pixels
-        s_corr = s.correct_bad_pixels(s_bad_pixels, lazy_result=False)
-        assert s_dead_pixels.data.shape == data.shape
-        assert not s_corr._lazy
-        assert (s_corr.data == 1.0).all()
-
-
 class TestDiffraction2DCenterOfMass:
     def test_center_of_mass_0d(self):
         x0, y0 = 2, 3

@@ -101,16 +101,6 @@ class TestSimpleMaps:
 
         assert transformed_dp.data.dtype == "uint8"
 
-    methods = ["average", "nan"]
-
-    @pytest.mark.parametrize("method", methods)
-    def test_remove_dead_pixels(self, diffraction_pattern, method):
-        dpr = diffraction_pattern.remove_deadpixels(
-            [[1, 2], [5, 6]], method, inplace=False
-        )
-        assert isinstance(dpr, ElectronDiffraction2D)
-
-
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
@@ -215,23 +205,6 @@ class TestBackgroundMethods:
             bgr = diffraction_pattern.remove_background(method="h-dome")
 
 class TestNotImplemented:
-    def test_failing_run(self, diffraction_pattern):
-        # Note - uses regex via re.search()
-        with pytest.raises(
-            NotImplementedError,
-            match=r"The method .* is not implemented. See documentation for available implementations",
-        ):
-            diffraction_pattern.find_peaks(method="no_such_method_exists")
-
-    def test_remove_dead_pixels_failing(self, diffraction_pattern):
-        with pytest.raises(
-            NotImplementedError,
-            match="The method specified is not implemented. See documentation for available implementations",
-        ):
-            dpr = diffraction_pattern.remove_deadpixels(
-                [[1, 2], [5, 6]], "fake_method", inplace=False, progress_bar=False
-            )
-
     def test_remove_background_fake_method(self, diffraction_pattern):
         # Note - uses regex via re.search()
         with pytest.raises(
