@@ -882,10 +882,6 @@ class TestCorrectBadPixel:
     def test_lazy(self,data,bad_pixels):
         s_lazy = Diffraction2D(data).as_lazy()
         s_lazy.correct_bad_pixels(bad_pixels,lazy_result=True)
-        assert s_lazy._lazy == True
-        s_lazy.compute()
-        assert np.isclose(s_lazy.data[0,0,9,81],1)
-        assert np.isclose(s_lazy.data[0,0,41,21],1)
 
     def test_nonlazy(self,data,bad_pixels):
         s = Diffraction2D(data)
