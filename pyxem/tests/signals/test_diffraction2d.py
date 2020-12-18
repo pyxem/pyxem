@@ -503,6 +503,14 @@ class TestGetDirectBeamPosition:
         assert hasattr(s_shift.data, "compute")
         s_shift.compute()
 
+    def test_non_uniform_chunks(self):
+        s = LazyDiffraction2D(da.from_array(self.s.data, chunks=(8, 7, 10, 12)))
+        s_shift = s.get_direct_beam_position(method="blur", sigma=1, lazy_result=True)
+        shift_data_shape = s.data.shape[:-2] + (2,)
+        assert s_shift.data.shape == shift_data_shape
+        s_shift.compute()
+        assert s_shift.data.shape == shift_data_shape
+
 
 class TestCenterDirectBeam:
     def setup_method(self):
@@ -558,6 +566,18 @@ class TestCenterDirectBeam:
         assert (s_lazy.data[:, :, 10, 8] == 9).all()
         s_lazy.data[:, :, 10, 8] = 0
         assert not s_lazy.data.any()
+
+    def test_non_uniform_chunks(self):
+        s_lazy = self.s_lazy
+        s_lazy.data = s_lazy.data.rechunk((5, 4, 12, 14))
+        s_lazy_shape = s_lazy.axes_manager.shape
+        data_lazy_shape = s_lazy.data.shape
+        s_lazy.center_direct_beam(method="blur", sigma=1, lazy_result=True)
+        assert s_lazy.axes_manager.shape == s_lazy_shape
+        assert s_lazy.data.shape == data_lazy_shape
+        s_lazy.compute()
+        assert s_lazy.axes_manager.shape == s_lazy_shape
+        assert s_lazy.data.shape == data_lazy_shape
 
     def test_return_shifts_non_lazy(self):
         s = self.s
