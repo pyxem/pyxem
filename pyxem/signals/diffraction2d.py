@@ -889,7 +889,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
         new_axis = self.axes_manager.navigation_dimension
-        chunks_output = dask_array.chunksize[:-2] + (2,)
+        chunks_output = dask_array.chunks[:-2] + ((2,),)
 
         if method == "cross_correlate":
             shifts = _process_dask_array(
