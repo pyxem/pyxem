@@ -405,11 +405,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             radial_range[0] = 0
 
         data_dask_array = _get_dask_array(self)
-        integration = _process_dask_array(
+        chunks = self.data.chunks[:-2] + ((npt,),)
+        integration_dask_array = _process_dask_array(
             data_dask_array,
             azimuthal_integrate1d,
             drop_axis=(2, 3),
             new_axis=2,
+            chunks=chunks,
             output_signal_size=(npt, ),
             azimuthal_integrator=self.ai,
             npt_rad=npt,
@@ -420,13 +422,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             sum=sum,
             **kwargs,
         )
-        integration = LazySignal1D(integration)
 
         # Dealing with axis changes
         if inplace:
+            self.data = integration_dask_array
+            self.axes_manager.remove(self.axes_manager.signal_axes[0])
             k_axis = self.axes_manager.signal_axes[0]
+            self.events.data_changed.trigger(obj=self)
             self.set_signal_type(signal_type)
+            integration = None
         else:
+            integration = LazySignal1D(integration_dask_array)
             integration.set_signal_type(signal_type)
             transfer_navigation_axes(integration, self)
             k_axis = integration.axes_manager.signal_axes[0]
