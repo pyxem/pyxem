@@ -22,7 +22,6 @@ import dask.array as da
 import skimage.morphology as sm
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.pixelated_stem_tools as pst
-import pyxem.dummy_data.dask_test_data as dtd
 from pyxem import Diffraction2D, LazyDiffraction2D
 
 
@@ -694,153 +693,6 @@ class TestThresholdArray:
         data[:, :, 10, 5] = False
         assert (data == np.zeros((10, 12, 20, 15))).all()
 
-
-@pytest.mark.slow
-class TestFindDeadPixels:
-    def test_2d(self):
-        data = dtd._get_dead_pixel_test_data_2d()
-        dead_pixels = dt._find_dead_pixels(data)
-        assert data.shape == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[14, 42]
-        assert dead_pixels[2, 12]
-        dead_pixels[14, 42] = False
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_3d(self):
-        data = dtd._get_dead_pixel_test_data_3d()
-        dead_pixels = dt._find_dead_pixels(data)
-        assert data.shape[-2:] == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[14, 42]
-        assert dead_pixels[2, 12]
-        dead_pixels[14, 42] = False
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_4d(self):
-        data = dtd._get_dead_pixel_test_data_4d()
-        dead_pixels = dt._find_dead_pixels(data)
-        assert data.shape[-2:] == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[14, 42]
-        assert dead_pixels[2, 12]
-        dead_pixels[14, 42] = False
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_dead_pixel_value(self):
-        data = np.random.randint(10, 100, size=(20, 30))
-        data[5, 9] = 3
-        data[2, 1] = 3
-        data = da.from_array(data, chunks=(5, 5))
-        dead_pixels = dt._find_dead_pixels(data, dead_pixel_value=3)
-        assert data.shape == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[5, 9]
-        assert dead_pixels[2, 1]
-        dead_pixels[5, 9] = False
-        dead_pixels[2, 1] = False
-        assert not dead_pixels.any()
-
-    def test_mask_array(self):
-        data = dtd._get_dead_pixel_test_data_2d()
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        dead_pixels = dt._find_dead_pixels(data, mask_array=mask_array)
-        assert data.shape == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[2, 12]
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_1d_wrong_shape(self):
-        data = np.random.randint(10, 100, size=40)
-        data = da.from_array(data, chunks=(5))
-        with pytest.raises(ValueError):
-            dt._find_dead_pixels(data)
-
-
-@pytest.mark.slow
-class TestFindHotPixels:
-    def test_2d(self):
-        data = dtd._get_hot_pixel_test_data_2d()
-        hot_pixels = dt._find_hot_pixels(data)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[21, 11]
-        assert hot_pixels[5, 38]
-        hot_pixels[21, 11] = False
-        hot_pixels[5, 38] = False
-        assert not hot_pixels.any()
-
-    def test_3d(self):
-        data = dtd._get_hot_pixel_test_data_3d()
-        hot_pixels = dt._find_hot_pixels(data)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[2, 21, 11]
-        assert hot_pixels[1, 5, 38]
-        hot_pixels[2, 21, 11] = False
-        hot_pixels[1, 5, 38] = False
-        assert not hot_pixels.any()
-
-    def test_4d(self):
-        data = dtd._get_hot_pixel_test_data_4d()
-        hot_pixels = dt._find_hot_pixels(data)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[4, 2, 21, 11]
-        assert hot_pixels[6, 1, 5, 38]
-        hot_pixels[4, 2, 21, 11] = False
-        hot_pixels[6, 1, 5, 38] = False
-        assert not hot_pixels.any()
-
-    def test_2d_mask(self):
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        data = dtd._get_hot_pixel_test_data_2d()
-        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[21, 11]
-        hot_pixels[21, 11] = False
-        assert not hot_pixels.any()
-
-    def test_3d_mask(self):
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        data = dtd._get_hot_pixel_test_data_3d()
-        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[2, 21, 11]
-        hot_pixels[2, 21, 11] = False
-        assert not hot_pixels.any()
-
-    def test_4d_mask(self):
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        data = dtd._get_hot_pixel_test_data_4d()
-        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[4, 2, 21, 11]
-        hot_pixels[4, 2, 21, 11] = False
-        assert not hot_pixels.any()
-
-    def test_threshold_multiplier(self):
-        data = dtd._get_hot_pixel_test_data_2d()
-        hot_pixels = dt._find_hot_pixels(data, threshold_multiplier=1000000)
-        hot_pixels = hot_pixels.compute()
-        assert not hot_pixels.any()
-
-        hot_pixels = dt._find_hot_pixels(data, threshold_multiplier=-1000000)
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels.all()
-
-
 @pytest.mark.slow
 class TestRemoveBadPixels:
     def test_simple(self):
@@ -1056,55 +908,6 @@ class TestPeakFindDog:
         )
         assert len(peaks1) == 1
 
-    def test_single_frame_min_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[54, 29] = 100
-        image[54, 32] = 100
-        max_sigma, sigma_ratio = 5, 5
-        threshold, overlap = 0.01, 0.1
-        peaks0 = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=1,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks0) == 2
-        peaks1 = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=2,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks1) == 1
-
-    def test_single_frame_max_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[52:58, 22:28] = 100
-        min_sigma, sigma_ratio = 0.1, 5
-        threshold, overlap = 0.1, 0.01
-        peaks = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=1.0,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) > 1
-        peaks = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=5.0,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) == 1
-
     def test_single_frame_normalize_value(self):
         image = np.zeros((100, 100), dtype=np.uint16)
         image[49:52, 49:52] = 100
@@ -1306,24 +1109,6 @@ class TestBackgroundRemovalDOG:
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[0, :].all() == 0
-
-    def test_chunk_min_sigma(self):
-        min_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_dog(numpy_array, min_sigma=min_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    def test_chunk_max_sigma(self):
-        max_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_dog(numpy_array, max_sigma=max_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
 
     def test_dask_min_sigma(self):
         min_sigma = 10
@@ -1630,55 +1415,6 @@ class TestPeakFindLog:
             overlap=overlap,
         )
         assert len(peaks1) == 1
-
-    def test_single_frame_min_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[54, 29] = 100
-        image[54, 32] = 100
-        max_sigma, num_sigma = 5, 10
-        threshold, overlap = 0.01, 0.1
-        peaks0 = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=1,
-            max_sigma=max_sigma,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks0) == 2
-        peaks1 = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=2,
-            max_sigma=max_sigma,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks1) == 1
-
-    def test_single_frame_max_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[52:58, 22:28] = 100
-        min_sigma, num_sigma = 0.1, 10
-        threshold, overlap = 0.1, 0.01
-        peaks = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=1.0,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) > 1
-        peaks = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=5.0,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) == 2
 
     def test_single_frame_normalize_value(self):
         image = np.zeros((100, 100), dtype=np.uint16)

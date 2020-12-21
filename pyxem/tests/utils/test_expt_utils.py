@@ -122,14 +122,9 @@ def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
 
-
-methods = ["average", "nan"]
-
-
-@pytest.mark.parametrize("method", methods)
-def test_remove_dead_pixels(dp_single, method):
+def test_remove_dead_pixels(dp_single):
     z = dp_single.data
-    dead_removed = remove_dead(z, [[3, 3]], deadvalue=method)
+    dead_removed = remove_dead(z, [[3, 3]])
     assert z[3, 3] != dead_removed[3, 3]
 
 

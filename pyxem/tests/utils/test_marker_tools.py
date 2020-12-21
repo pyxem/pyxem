@@ -152,30 +152,6 @@ class TestAddPeakArrayToSignalAsMarkers:
         peak_array_computed = peak_array.compute()
         s.add_peak_array_as_markers(peak_array_computed)
 
-
-def test_peak_finding_to_marker():
-    data = np.zeros(shape=(3, 2, 10, 12))
-    data[0, 0, 2, 7] = 1
-    data[0, 1, 7, 3] = 1
-    data[1, 0, 4, 6] = 1
-    data[1, 1, 2, 3] = 1
-    data[2, 0, 3, 6] = 1
-    data[2, 1, 2, 2] = 1
-    s = Diffraction2D(data)
-    peak_array = s.find_peaks_lazy(
-        min_sigma=0.1, max_sigma=2, threshold=0.01, lazy_result=False
-    )
-    marker_list = mt._get_4d_points_marker_list(peak_array, s.axes_manager.signal_axes)
-    assert len(marker_list) == 1
-    marker = marker_list[0]
-    mt._add_permanent_markers_to_signal(s, marker_list)
-    s.plot()
-    for ix, iy in s.axes_manager:
-        px, py = marker.get_data_position("x1"), marker.get_data_position("y1")
-        value = s.inav[ix, iy].isig[int(px), int(py)].data[0]
-        assert value == 1.0
-
-
 class TestPixelToScaledValue:
     def test_simple(self):
         s = Diffraction2D(np.zeros((50, 60)))
