@@ -405,7 +405,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             radial_range[0] = 0
 
         data_dask_array = _get_dask_array(self)
-        chunks = self.data.chunks[:-2] + ((npt,),)
+        chunks = data_dask_array.chunks[:-2] + ((npt,),)
         integration_dask_array = _process_dask_array(
             data_dask_array,
             azimuthal_integrate1d,
