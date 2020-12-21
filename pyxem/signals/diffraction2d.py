@@ -2381,7 +2381,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> import numpy as np
         >>> mask_array = np.zeros((128, 128), dtype=np.bool)
         >>> mask_array[:, 100:] = True
-        >>> s = ps.dummy_data.get_dead_pixel_signal()
+        >>> s = pxm.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(
         ...     mask_array=mask_array, show_progressbar=False)
 
@@ -2396,13 +2396,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
+
         dead_pixels = dt._find_dead_pixels(
             dask_array, dead_pixel_value=dead_pixel_value, mask_array=mask_array
         )
@@ -2529,7 +2524,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(show_progressbar=False)
 
         Using a mask array
@@ -2537,7 +2532,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> import numpy as np
         >>> mask_array = np.zeros((128, 128), dtype=np.bool)
         >>> mask_array[:, 100:] = True
-        >>> s = ps.dummy_data.get_hot_pixel_signal()
+        >>> s = pxm.dummy_data.get_hot_pixel_signal()
         >>> s_hot_pixels = s.find_hot_pixels(
         ...     mask_array=mask_array, show_progressbar=False)
 
@@ -2552,13 +2547,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
+
         hot_pixels = dt._find_hot_pixels(
             dask_array, threshold_multiplier=threshold_multiplier, mask_array=mask_array
         )
