@@ -112,7 +112,7 @@ class VirtualImageGenerator:
         vdfim = hs.stack(vdfs, new_axis_name=new_axis_dict['name'],
                          show_progressbar=False)
 
-        vdfim.set_signal_type("vdf_image")
+        vdfim.set_signal_type("virtual_dark_field")
 
         # Set new axis properties
         new_axis = vdfim.axes_manager[new_axis_dict['name']]
@@ -150,7 +150,7 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
         self.vectors = unique_vectors
 
-    def get_vector_vdf_images(self, radius, normalize=False):
+    def get_virtual_dark_field_images(self, radius, normalize=False):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an Diffraction2D Signal by summation in a
         circular window of specified radius.
@@ -178,4 +178,4 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
         return vdfim
 
-    get_vector_vdf_images.__doc__ %= (NORMALISE_DOCSTRING)
+    get_virtual_dark_field_images.__doc__ %= (NORMALISE_DOCSTRING)

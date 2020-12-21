@@ -163,7 +163,7 @@ def unique_vectors(request):
 @pytest.fixture
 def vdf_segments(signal_data, unique_vectors):
     vdfgen = VirtualDarkFieldGenerator(signal_data, unique_vectors)
-    vdfs = vdfgen.get_vector_vdf_images(radius=1)
+    vdfs = vdfgen.get_virtual_dark_field_images(radius=1)
     return vdfs.get_vdf_segments()
 
 
@@ -328,7 +328,7 @@ class TestVDFSegment:
         assert isinstance(corrsegs.intensities, np.ndarray)
 
     def test_correlate_segments_small_vector_threshold(self, vdf_segments: VDFSegment):
-        corrsegs = vdf_segments.correlate_vdf_segments(
+        _ = vdf_segments.correlate_vdf_segments(
             corr_threshold=0.7, vector_threshold=0, segment_threshold=-1
         )
 
@@ -337,7 +337,7 @@ class TestVDFSegment:
             ValueError,
             match="segment_threshold must be smaller than or equal to vector_threshold",
         ):
-            corrsegs = vdf_segments.correlate_vdf_segments(
+            _ = vdf_segments.correlate_vdf_segments(
                 vector_threshold=4, segment_threshold=5
             )
 

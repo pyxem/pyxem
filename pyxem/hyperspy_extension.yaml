@@ -107,12 +107,12 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.tensor_field
-  VDFImage:
-    signal_type: vdf_image
+  VirtualDarkFieldImage:
+    signal_type: virtual_dark_field
     signal_dimension: 2
     dtype: real
     lazy: False
-    module: pyxem.signals.vdf_image
+    module: pyxem.signals.virtual_dark_field_image
   ReducedIntensity1D:
     signal_type: reduced_intensity
     signal_dimension: 1

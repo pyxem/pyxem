@@ -24,7 +24,7 @@ import os
 from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
-from pyxem.signals.vdf_image import VDFImage
+from pyxem.signals.virtual_dark_field_image import VirtualDarkFieldImage
 
 
 @pytest.mark.parametrize(
@@ -34,7 +34,7 @@ from pyxem.signals.vdf_image import VDFImage
         (DiffractionVectors, "string3"),
         (DiffractionVectors2D, "string3"),
         (ElectronDiffraction1D, "string5"),
-        (VDFImage, "string6"),
+        (VirtualDarkFieldImage, "string6"),
     ],
 )
 def test_load_function_core(class_to_test, meta_string):

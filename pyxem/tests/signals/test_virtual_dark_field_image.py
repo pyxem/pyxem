@@ -82,7 +82,7 @@ def vdf_generator_seg(signal_data, unique_vectors):
 
 @pytest.fixture
 def vdf_vector_images_seg(vdf_generator_seg):
-    return vdf_generator_seg.get_vector_vdf_images(radius=1)
+    return vdf_generator_seg.get_virtual_dark_field_images(radius=1)
 
 
 class TestVDFImage:

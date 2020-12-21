@@ -25,7 +25,7 @@ from pyxem.generators.virtual_image_generator import (VirtualImageGenerator,
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.signals.diffraction2d import Diffraction2D
 from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.vdf_image import VDFImage
+from pyxem.signals.virtual_dark_field_image import VirtualDarkFieldImage
 
 
 @pytest.fixture(params=[np.array([[1, 1], [2, 2]])])
@@ -68,9 +68,9 @@ class TestVirtualDarkFieldGenerator:
         assert isinstance(vdfgen.vectors, DiffractionVectors)
 
     @pytest.mark.parametrize("radius, normalize", [(4.0, False), (4.0, True)])
-    def test_get_vector_vdf_images(self, vdf_generator, radius, normalize):
-        vdfs = vdf_generator.get_vector_vdf_images(radius, normalize)
-        assert isinstance(vdfs, VDFImage)
+    def test_get_virtual_dark_field_images(self, vdf_generator, radius, normalize):
+        vdfs = vdf_generator.get_virtual_dark_field_images(radius, normalize)
+        assert isinstance(vdfs, VirtualDarkFieldImage)
 
 
 class TestVirtualImageGenerator:
@@ -88,7 +88,7 @@ class TestVirtualImageGenerator:
     def test_get_concentric_virtual_images(self, k_min, k_max, k_steps, normalize):
         vdfs = self.virtual_image_generator.get_concentric_virtual_images(
             k_min, k_max, k_steps, normalize)
-        assert isinstance(vdfs, VDFImage)
+        assert isinstance(vdfs, VirtualDarkFieldImage)
 
     def test_calibration_vdf_images(self):
         diffraction_pattern = self.diffraction_pattern
