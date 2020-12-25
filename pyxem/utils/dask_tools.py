@@ -174,7 +174,11 @@ def _process_dask_array(
     dtype : NumPy dtype, optional
         dtype for the output array
     chunks : tuple, optional
-        Chunking for the output array
+        Chunking for the output array. This is the (only?) way to set the size of the
+        output signal, if the size is not the same as the input signal.
+        Use a modified version of dask_array.chunks, NOT dask_array.chunksize. Using
+        chunk_size can lead to issues if the chunks are not exactly the same size.
+        See example below for more information.
     drop_axis : int or tuple, optional
         Axes which will be removed from the output array
     new_axis : int or tuple, optional
@@ -220,17 +224,22 @@ def _process_dask_array(
 
     >>> def test_function3(image):
     ...     return [10, 3]
+    >>> chunks = dask_array.chunks[:-2] + ((2,),)
+    >>> drop_axis = (len(dask_array.shape) - 2, len(dask_array.shape) - 1)
+    >>> new_axis = len(dask_array.shape) - 2
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function3, chunks=(2, 2, 2), drop_axis=(2, 3),
-    ...     new_axis=2, output_signal_size=(2, ))
+    ...     dask_array, test_function3, chunks=chunks, drop_axis=drop_axis,
+    ...     new_axis=new_axis, output_signal_size=(2, ))
 
     For functions where we don't know the shape of the output data,
     use dtype=np.object
 
     >>> def test_function4(image):
     ...     return list(range(np.random.randint(20)))
+    >>> chunks = dask_array.chunks[:-2]
+    >>> drop_axis = (len(dask_array.shape) - 2, len(dask_array.shape) - 1)
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function4, chunks=(2, 2), drop_axis=(2, 3),
+    ...     dask_array, test_function4, chunks=chunks, drop_axis=drop_axis,
     ...     new_axis=None, dtype=np.object, output_signal_size=())
     >>> output_array = output_dask_array.compute()
 
