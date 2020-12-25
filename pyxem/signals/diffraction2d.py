@@ -259,6 +259,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         inplace=False,
         method="splitpixel",
         sum=False,
+        lazy_result=None,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -291,6 +292,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         sum: bool
             If true returns the pixel split sum rather than the azimuthal integration which
             gives the mean.
+        lazy_result : optional
+            If True, the result will be a lazy signal. If False, a non-lazy signal.
+            By default, if the signal is lazy, the result will also be lazy.
+            If the signal is non-lazy, the result will be non-lazy.
 
         Other Parameters
         -------
@@ -337,6 +342,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
         >>> ds.get_azimuthal_integral1d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
+        if lazy_result is None:
+            lazy_result = self._lazy
         signal_type = self._signal_type
         unit = to_unit(self.unit)
         sig_shape = self.axes_manager.signal_shape
@@ -346,13 +353,15 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         data_dask_array = _get_dask_array(self)
         chunks = data_dask_array.chunks[:-2] + ((npt,),)
+        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
+        new_axis = self.axes_manager.navigation_dimension
         integration_dask_array = _process_dask_array(
             data_dask_array,
             azimuthal_integrate1d,
-            drop_axis=(2, 3),
-            new_axis=2,
+            drop_axis=drop_axis,
+            new_axis=new_axis,
             chunks=chunks,
-            output_signal_size=(npt, ),
+            output_signal_size=(npt,),
             azimuthal_integrator=self.ai,
             npt_rad=npt,
             azimuth_range=azimuth_range,
@@ -365,23 +374,26 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         # Dealing with axis changes
         if inplace:
-            self.data = integration_dask_array
-            self.axes_manager.remove(self.axes_manager.signal_axes[0])
-            k_axis = self.axes_manager.signal_axes[0]
-            self.events.data_changed.trigger(obj=self)
-            self.set_signal_type(signal_type)
-            integration = None
+            result = self
+            result.axes_manager.remove(self.axes_manager.signal_axes[0])
+            result.data = integration_dask_array
+            result._lazy = True
         else:
-            integration = LazySignal1D(integration_dask_array)
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+            result = LazySignal1D(integration_dask_array)
+            result.set_signal_type(signal_type)
+            transfer_navigation_axes(result, self)
+        k_axis = result.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
-        return integration
+        result.set_signal_type(signal_type)
+        if not lazy_result:
+            result.compute()
+
+        if not inplace:
+            return result
 
     def get_azimuthal_integral2d(
         self,
