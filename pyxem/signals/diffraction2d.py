@@ -2110,7 +2110,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             The number of radial points to calculate
         mask:  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
-            If mask is a baseSignal then it is itereated over as well.
+            If mask is a BaseSignal then it is iterated over as well.
         radial_range: None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
@@ -2139,7 +2139,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         dummy: float
             Value for dead/masked pixels
         delta_dummy: float
-            Percision value for dead/masked pixels
+            Precision value for dead/masked pixels
         correctSolidAngle: bool
             Correct for the solid angle of each pixel if True
         dark: ndarray
@@ -2151,7 +2151,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         show_progressbar: bool
             If True shows a progress bar for the mapping function
         parallel: bool
-            If true launches paralell workers for the integration
+            If true launches parallel workers for the integration
         max_workers: int
             The number of streams to initialize. Only used if parallel=True
 
