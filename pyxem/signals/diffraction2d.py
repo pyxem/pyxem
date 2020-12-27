@@ -2206,6 +2206,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             method=method,
             unit=unit,
             sum=sum,
+            dtype=np.float32,  # pyFAI does the calculation in float32
             **kwargs,
         )
 
