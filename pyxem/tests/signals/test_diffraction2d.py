@@ -188,6 +188,107 @@ class TestAzimuthalIntegral1d:
         # 5^2*pi = 78.5
         np.testing.assert_almost_equal(integration.data.sum(), 78.5, decimal=0)
 
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_lazy_output_different_shapes(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        s_a = s.get_azimuthal_integral1d(npt=npt)
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+        s_a.compute()
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_non_lazy_input_lazy_output(self, shape):
+        s = Diffraction2D(np.ones(shape))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_result=True)
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+        s_a.compute()
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_non_lazy_output(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        s_a = s.get_azimuthal_integral1d(npt=npt, lazy_result=False)
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        assert s_a.axes_manager.shape == output_signal_shape
+        assert s_a.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_lazy_result_inplace(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=True)
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+        s.compute()
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_lazy_input_non_lazy_result_inplace(self, shape):
+        chunks = [5] * len(shape)
+        s = LazyDiffraction2D(da.ones(shape, chunks=chunks))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=False)
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+
+    @pytest.mark.parametrize(
+        "shape", [(20, 16), (3, 20, 16), (4, 3, 20, 16), (6, 4, 3, 20, 16)]
+    )
+    def test_non_lazy_input_lazy_result_inplace(self, shape):
+        s = Diffraction2D(np.ones(shape))
+        s.unit = "2th_deg"
+        s.set_ai()
+        npt = 10
+        output_signal_shape = s.axes_manager.shape[:-2] + (npt,)
+        output_data_shape = shape[:-2] + (npt,)
+        s.get_azimuthal_integral1d(npt=npt, inplace=True, lazy_result=True)
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+        s.compute()
+        assert s.axes_manager.shape == output_signal_shape
+        assert s.data.shape == output_data_shape
+
+
 class TestVariance:
     @pytest.fixture
     def ones(self):
