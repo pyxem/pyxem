@@ -2086,7 +2086,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         self.metadata.set_item("Signal.ai", ai)
         return None
 
-
     def get_azimuthal_integral1d(
         self,
         npt,
@@ -2097,6 +2096,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         inplace=False,
         method="splitpixel",
         sum=False,
+        lazy_result=None,
+        show_progressbar=None,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -2106,75 +2107,78 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        npt: int
+        npt : int
             The number of radial points to calculate
-        mask:  boolean array or BaseSignal
+        mask :  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
-            If mask is a baseSignal then it is itereated over as well.
-        radial_range: None or (float, float)
+            If mask is a BaseSignal then it is iterated over as well.
+        radial_range : None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
-        azimuth_range:None or (float, float)
+        azimuth_range : None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
-        wavelength: None or float
+        wavelength : None or float
             The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
             it to properly work.
-        inplace: bool
+        inplace : bool
             If the signal is overwritten or copied to a new signal
-        method: str
+        method : str
              Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
              “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
              to go on GPU. To Specify the device: “csr_ocl_1,2”
-        sum: bool
+        sum : bool
             If true returns the pixel split sum rather than the azimuthal integration which
             gives the mean.
+        lazy_result : optional
+            If True, the result will be a lazy signal. If False, a non-lazy signal.
+            By default, if the signal is lazy, the result will also be lazy.
+            If the signal is non-lazy, the result will be non-lazy.
+        show_progressbar : None or bool
+            If True and lazy_result is True, show a progressbar for the calculation.
+            If None, the preference from the settings will be used.
 
         Other Parameters
         -------
-        dummy: float
+        dummy : float
             Value for dead/masked pixels
-        delta_dummy: float
-            Percision value for dead/masked pixels
-        correctSolidAngle: bool
+        delta_dummy : float
+            Precision value for dead/masked pixels
+        correctSolidAngle : bool
             Correct for the solid angle of each pixel if True
-        dark: ndarray
+        dark : ndarray
             The dark noise image
-        flat: ndarray
+        flat : ndarray
             The flat field correction image
-        safe: bool
+        safe : bool
             Do some extra checks to ensure LUT/CSR is still valid. False is faster.
-        show_progressbar: bool
-            If True shows a progress bar for the mapping function
-        parallel: bool
-            If true launches paralell workers for the integration
-        max_workers: int
-            The number of streams to initialize. Only used if parallel=True
 
         Returns
         -------
-        polar: PolarDiffraction2D
-            A polar diffraction signal
+        integration : Diffraction1D
+            A 1D diffraction signal
 
         Examples
         --------
         Basic case using "2th_deg" units (no wavelength needed)
 
         >>> ds.unit = "2th_deg"
-        >>> ds.get_azimuthal_integral1d(npt_rad=100)
+        >>> ds.get_azimuthal_integral1d(npt=100)
 
         Basic case using a curved Ewald Sphere approximation and pyXEM units
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.get_azimuthal_integral1d(npt_rad=100, wavelength=2.5e-12)
+        >>> ds.get_azimuthal_integral1d(npt=100, wavelength=2.5e-12)
 
         Using pyFAI to define a detector case using a curved Ewald Sphere approximation and pyXEM units
 
         >>> from pyFAI.detectors import Detector
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
-        >>> ds.get_azimuthal_integral1d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
+        >>> ds.get_azimuthal_integral1d(npt=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
+        if lazy_result is None:
+            lazy_result = self._lazy
         signal_type = self._signal_type
         unit = to_unit(self.unit)
         sig_shape = self.axes_manager.signal_shape
@@ -2182,32 +2186,50 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=unit)
             radial_range[0] = 0
 
-        integration = self.map(
+        data_dask_array = _get_dask_array(self)
+        chunks = data_dask_array.chunks[:-2] + ((npt,),)
+        drop_axis = (len(self.axes_manager.shape) - 2, len(self.axes_manager.shape) - 1)
+        new_axis = self.axes_manager.navigation_dimension
+        integration_dask_array = _process_dask_array(
+            data_dask_array,
             azimuthal_integrate1d,
+            drop_axis=drop_axis,
+            new_axis=new_axis,
+            chunks=chunks,
+            output_signal_size=(npt,),
             azimuthal_integrator=self.ai,
             npt_rad=npt,
             azimuth_range=azimuth_range,
             radial_range=radial_range,
             method=method,
-            inplace=inplace,
             unit=unit,
             sum=sum,
+            dtype=np.float32,  # pyFAI does the calculation in float32
             **kwargs,
         )
+
         # Dealing with axis changes
         if inplace:
-            k_axis = self.axes_manager.signal_axes[0]
-            self.set_signal_type(signal_type)
+            result = self
+            result.axes_manager.remove(self.axes_manager.signal_axes[0])
+            result.data = integration_dask_array
+            result._lazy = True
         else:
-            integration.set_signal_type(signal_type)
-            transfer_navigation_axes(integration, self)
-            k_axis = integration.axes_manager.signal_axes[0]
+            result = LazySignal1D(integration_dask_array)
+            result.set_signal_type(signal_type)
+            transfer_navigation_axes(result, self)
+        k_axis = result.axes_manager.signal_axes[0]
         k_axis.name = "Radius"
         k_axis.scale = (radial_range[1] - radial_range[0]) / npt
         k_axis.units = unit.unit_symbol
         k_axis.offset = radial_range[0]
 
-        return integration
+        result.set_signal_type(signal_type)
+        if not lazy_result:
+            result.compute(show_progressbar=show_progressbar)
+
+        if not inplace:
+            return result
 
     def get_azimuthal_integral2d(
         self,
