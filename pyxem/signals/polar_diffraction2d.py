@@ -18,7 +18,7 @@
 
 """Signal class for two-dimensional diffraction data in polar coordinates."""
 
-from hyperspy.signals import Signal2D, BaseSignal
+from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 
 from pyxem.utils.correlation_utils import _correlation, _power
@@ -39,8 +39,6 @@ class PolarDiffraction2D(Signal2D):
             Passed to the __init__ of Signal2D
         """
         super().__init__(*args, **kwargs)
-
-        self.decomposition.__func__.__doc__ = BaseSignal.decomposition.__doc__
 
     def get_angular_correlation(
         self, mask=None, normalize=True, inplace=False, **kwargs

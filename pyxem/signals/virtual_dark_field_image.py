@@ -26,8 +26,8 @@ from pyxem.signals import transfer_signal_axes
 from pyxem.signals.segments import VDFSegment
 
 
-class VDFImage(Signal2D):
-    _signal_type = "vdf_image"
+class VirtualDarkFieldImage(Signal2D):
+    _signal_type = "virtual_dark_field"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,8 +43,8 @@ class VDFImage(Signal2D):
         threshold=False,
         exclude_border=False,
     ):
-        """Separate segments from each of the VDF images using
-        edge-detection by the Sobel transform and the watershed
+        """Separate segments from each of the virtual dark field (VDF) images
+        using edge-detection by the Sobel transform and the watershed
         segmentation method implemented in scikit-image [1,2]. Obtain a
         VDFSegment, similar to VDFImage, but where each image is a
         segment of a VDF and the vectors correspond to each segment and

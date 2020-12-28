@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-def normalize_vdf(im):
+def normalize_virtual_images(im):
     """Normalizes image intensity by dividing by maximum value.
 
     Parameters
