@@ -2097,6 +2097,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         method="splitpixel",
         sum=False,
         lazy_result=None,
+        show_progressbar=None,
         **kwargs,
     ):
         """Creates a polar reprojection using pyFAI's azimuthal integrate 2d. This method is designed
@@ -2106,78 +2107,75 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Parameters
         ----------
-        npt: int
+        npt : int
             The number of radial points to calculate
-        mask:  boolean array or BaseSignal
+        mask :  boolean array or BaseSignal
             A boolean mask to apply to the data to exclude some points.
             If mask is a BaseSignal then it is iterated over as well.
-        radial_range: None or (float, float)
+        radial_range : None or (float, float)
             The radial range over which to perform the integration. Default is
             the full frame
-        azimuth_range:None or (float, float)
+        azimuth_range : None or (float, float)
             The azimuthal range over which to perform the integration. Default is
             from -pi to pi
-        wavelength: None or float
+        wavelength : None or float
             The wavelength of for the microscope. Has to be in the same units as the pyxem units if you want
             it to properly work.
-        inplace: bool
+        inplace : bool
             If the signal is overwritten or copied to a new signal
-        method: str
+        method : str
              Can be “numpy”, “cython”, “BBox” or “splitpixel”, “lut”, “csr”,
              “nosplit_csr”, “full_csr”, “lut_ocl” and “csr_ocl” if you want
              to go on GPU. To Specify the device: “csr_ocl_1,2”
-        sum: bool
+        sum : bool
             If true returns the pixel split sum rather than the azimuthal integration which
             gives the mean.
         lazy_result : optional
             If True, the result will be a lazy signal. If False, a non-lazy signal.
             By default, if the signal is lazy, the result will also be lazy.
             If the signal is non-lazy, the result will be non-lazy.
+        show_progressbar : None or bool
+            If True and lazy_result is True, show a progressbar for the calculation.
+            If None, the preference from the settings will be used.
 
         Other Parameters
         -------
-        dummy: float
+        dummy : float
             Value for dead/masked pixels
-        delta_dummy: float
+        delta_dummy : float
             Precision value for dead/masked pixels
-        correctSolidAngle: bool
+        correctSolidAngle : bool
             Correct for the solid angle of each pixel if True
-        dark: ndarray
+        dark : ndarray
             The dark noise image
-        flat: ndarray
+        flat : ndarray
             The flat field correction image
-        safe: bool
+        safe : bool
             Do some extra checks to ensure LUT/CSR is still valid. False is faster.
-        show_progressbar: bool
-            If True shows a progress bar for the mapping function
-        parallel: bool
-            If true launches parallel workers for the integration
-        max_workers: int
-            The number of streams to initialize. Only used if parallel=True
 
         Returns
         -------
-        polar: PolarDiffraction2D
-            A polar diffraction signal
+        integration : Diffraction1D
+            A 1D diffraction signal
 
         Examples
         --------
         Basic case using "2th_deg" units (no wavelength needed)
 
         >>> ds.unit = "2th_deg"
-        >>> ds.get_azimuthal_integral1d(npt_rad=100)
+        >>> ds.get_azimuthal_integral1d(npt=100)
 
         Basic case using a curved Ewald Sphere approximation and pyXEM units
         (wavelength needed)
 
         >>> ds.unit = "k_nm^-1" # setting units
-        >>> ds.get_azimuthal_integral1d(npt_rad=100, wavelength=2.5e-12)
+        >>> ds.get_azimuthal_integral1d(npt=100, wavelength=2.5e-12)
 
         Using pyFAI to define a detector case using a curved Ewald Sphere approximation and pyXEM units
 
         >>> from pyFAI.detectors import Detector
         >>> det = Detector(pixel1=1e-4, pixel2=1e-4)
-        >>> ds.get_azimuthal_integral1d(npt_rad=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
+        >>> ds.get_azimuthal_integral1d(npt=100, detector_dist=.2, detector= det, wavelength=2.508e-12)
         """
         if lazy_result is None:
             lazy_result = self._lazy
@@ -2228,7 +2226,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         result.set_signal_type(signal_type)
         if not lazy_result:
-            result.compute()
+            result.compute(show_progressbar=show_progressbar)
 
         if not inplace:
             return result
