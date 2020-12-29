@@ -226,18 +226,6 @@ class TestGetDpcSignal:
             scalebar_size=10,
         )
         s.get_color_image_with_indicator(only_phase=True)
-
-    def test_get_color_image_with_indicator(self):
-        s = DPCSignal2D(np.random.random(size=(2, 100, 100)))
-        s.get_color_image_with_indicator()
-        s.get_color_image_with_indicator(
-            phase_rotation=45,
-            indicator_rotation=10,
-            autolim=True,
-            autolim_sigma=1,
-            scalebar_size=10,
-        )
-        s.get_color_image_with_indicator(only_phase=True)
         fig, ax = subplots()
         s.get_color_image_with_indicator(ax=ax)
 
