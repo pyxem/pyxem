@@ -244,6 +244,20 @@ class TestBivariateHistogram:
         s_random = DPCSignal2D(data_random)
         s_random.get_bivariate_histogram()
 
+    def test_masked_get_bivariate_histogram(self):
+        s = pxm.DPCSignal2D(np.zeros((2, 5, 5)))
+        value = 3
+        s.data[0, 0, 0] = value
+        s_hist = s.get_bivariate_histogram(bins=10, histogram_range=(-5, 5))
+        assert s_hist.isig[3.0, 0.0] == float(value)
+
+        masked = np.zeros((11, 11), dtype=np.bool)
+        masked[0, 0] = True
+        s_hist = s.get_bivariate_histogram(
+            bins=10, histogram_range=(-5, 5), masked=masked
+        )
+        assert s_hist.isig[3.0, 0.0] == 0.0
+
     def test_make_bivariate_histogram(self):
         x, y = np.ones((100, 100)), np.ones((100, 100))
         make_bivariate_histogram(
