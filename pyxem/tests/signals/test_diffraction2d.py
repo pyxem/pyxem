@@ -377,6 +377,10 @@ class TestVariance:
         # This fails at small radii and might still fail because it is random...
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=1)
 
+    def test_not_existing_method(self, ones):
+        with pytest.raises(ValueError):
+            ones.get_variance(npt=5, method="magic")
+
 
 class TestAzimuthalIntegral2d:
     @pytest.fixture
@@ -884,6 +888,11 @@ class TestDiffraction2DFindPeaksLazy:
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
         peak_array = s.find_peaks_lazy(method=methods)
 
+    def test_not_existing_method(self):
+        s = LazyDiffraction2D(da.zeros((2, 2, 5, 5), chunks=(1, 1, 5, 5)))
+        with pytest.raises(ValueError):
+            s.find_peaks_lazy(method="magic")
+
     @pytest.mark.parametrize("methods", method1)
     def test_lazy_input(self, methods):
         data = np.random.randint(100, size=(3, 2, 10, 20))
@@ -952,11 +961,11 @@ class TestDiffraction2DPeakPositionRefinement:
         assert s.data.shape[:2] == refined_peak_array.shape
         assert hasattr(refined_peak_array, "compute")
 
-    @pytest.mark.xfail(reason="Designed failure")
     def test_wrong_square_size(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 10, 20)))
-        peak_array = s.find_peaks()
-        s.peak_position_refinement_com(peak_array, square_size=5)
+        peak_array = s.find_peaks(interactive=False)
+        with pytest.raises(ValueError):
+            s.peak_position_refinement_com(peak_array, square_size=5)
 
     def test_lazy_input(self):
         data = np.random.randint(100, size=(3, 2, 10, 20))

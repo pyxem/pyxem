@@ -182,6 +182,11 @@ class TestAddEllipseArrayAsMarkers:
         )
         assert len(list(s.metadata.Markers)) < len(list(s1.metadata.Markers))
 
+    def test_wrong_input_dimensions(self):
+        s = Diffraction2D(np.zeros((2, 5, 5)))
+        with pytest.raises(ValueError):
+            s.add_ellipse_array_as_markers(ellipse_array=None)
+
 
 class TestDiffraction2DThresholdAndMask:
     @pytest.mark.parametrize("shape", [(9, 9, 9, 9), (4, 8, 6, 3), (6, 3, 2, 5)])
@@ -229,7 +234,8 @@ class TestDiffraction2DThresholdAndMask:
         s = dd.get_disk_shift_simple_test_signal(lazy=True)
         with pytest.raises(NotImplementedError):
             s.threshold_and_mask()
-            
+
+
 class TestDiffraction2DCenterOfMass:
     def test_center_of_mass_0d(self):
         x0, y0 = 2, 3
@@ -546,6 +552,16 @@ class TestDiffraction2DCenterOfMass:
         np.testing.assert_allclose(s_lazy_com.inav[0].data, x)
         np.testing.assert_allclose(s_lazy_com.inav[1].data, y)
 
+        s_lazy_1d = s_lazy.inav[0]
+        s_lazy_1d_com = s_lazy_1d.center_of_mass()
+        np.testing.assert_allclose(s_lazy_1d_com.inav[0].data, x[:, 0])
+        np.testing.assert_allclose(s_lazy_1d_com.inav[1].data, y[:, 0])
+
+        s_lazy_0d = s_lazy.inav[0, 0]
+        s_lazy_0d_com = s_lazy_0d.center_of_mass()
+        np.testing.assert_allclose(s_lazy_0d_com.inav[0].data, x[0, 0])
+        np.testing.assert_allclose(s_lazy_0d_com.inav[1].data, y[0, 0])
+
     def test_compare_lazy_and_nonlazy(self):
         y, x = np.mgrid[75:83:9j, 85:95:11j]
         s = mdtd.generate_4d_data(
@@ -582,7 +598,7 @@ class TestDiffraction2DCenterOfMass:
         assert s_lazy_com._lazy
 
 
-class TestDiffraction2DRadialIntegration:
+class TestDiffraction2DRadialAverage:
     def test_simple(self):
         array0 = np.ones(shape=(10, 10, 40, 40))
         s0 = Diffraction2D(array0)
@@ -598,6 +614,10 @@ class TestDiffraction2DRadialIntegration:
         s1_r = s1.radial_average()
         assert np.all(s1_r.data[:, :, 0] == 1)
         assert np.all(s1_r.data[:, :, 1:] == 0)
+
+        s1_r_cx_cy = s1.radial_average(centre_x=5, centre_y=5)
+        assert np.all(s1_r_cx_cy.data[:, :, 0] == 1)
+        assert np.all(s1_r_cx_cy.data[:, :, 1:] == 0)
 
     def test_different_shape(self):
         array = np.ones(shape=(7, 9, 30, 40))
@@ -697,6 +717,11 @@ class TestDiffraction2DRadialIntegration:
         s_r = s_r.isig[15:]  # Do not include the disk
         r -= 15  # Need to shift the radius, due to not including the disk
         assert (s_r.data.argmax(axis=-1) == r).all()
+
+    def test_deprecated_method(self):
+        s = Diffraction2D(np.zeros((2, 2, 5, 5)))
+        with pytest.raises(Exception):
+            s.radial_integration()
 
 
 class TestDiffraction2DRadialIntegrationLazy:
@@ -875,7 +900,7 @@ class TestDiffraction2DAngleSector:
         )
 
 
-class TestAngularSliceRadialIntegration:
+class TestAngularSliceRadialAverage:
     def test_same_radius(self):
         x, y, r, px, py, angleN = 56, 48, 20, 4, 5, 20
         s = mdtd.generate_4d_data(
@@ -1004,6 +1029,11 @@ class TestAngularSliceRadialIntegration:
         with pytest.raises(ValueError):
             s.angular_slice_radial_average(slice_overlap=-0.2)
 
+    def test_deprecated_method(self):
+        s = Diffraction2D(np.zeros((2, 2, 10, 10)))
+        with pytest.raises(Exception):
+            s.angular_slice_radial_integration()
+
 
 class TestDiffraction2DVirtualAnnularDarkField:
     def test_simple(self):
@@ -1012,6 +1042,12 @@ class TestDiffraction2DVirtualAnnularDarkField:
         s1 = s.virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
         assert s1.axes_manager.signal_shape == (shape[1], shape[0])
         assert s1.data.sum() == 0.0
+
+    def test_r_smaller_than_r_inner(self):
+        shape = (5, 9, 12, 14)
+        s = Diffraction2D(np.zeros(shape))
+        with pytest.raises(ValueError):
+            s.virtual_annular_dark_field(cx=2, cy=2, r_inner=5, r=2)
 
     def test_one_value(self):
         shape = (5, 9, 12, 14)
@@ -1344,6 +1380,12 @@ class TestSubtractingDiffractionBackground:
         s = Diffraction2D(np.random.random(size=shape))
         st = s.subtract_diffraction_background(method=methods)
         assert st.data.shape == tuple(shape)
+
+    def test_exception_not_implemented_method(self):
+        s = Diffraction2D(np.zeros((2, 2, 10, 10)))
+        with pytest.raises(NotImplementedError):
+            s.subtract_diffraction_background(method="magic")
+
 
 class TestComputeAndAsLazy:
     def test_2d_data_compute(self):
