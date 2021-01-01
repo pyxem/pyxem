@@ -646,6 +646,9 @@ class TestCenterOfMassArray:
         data1 = dt._center_of_mass_array(dask_array, mask_array=mask_array)
         data1 = data1.compute()
         assert (data1 == np.ones((2, 10, 10)) * 25).all()
+        mask_array_wrong_size = np.ones((25, 40))
+        with pytest.raises(ValueError):
+            dt._center_of_mass_array(dask_array, mask_array=mask_array_wrong_size)
 
     def test_threshold(self):
         numpy_array = np.zeros((10, 10, 50, 50))
@@ -681,17 +684,27 @@ class TestMaskArray:
 
 @pytest.mark.slow
 class TestThresholdArray:
-    def test_simple(self):
-        numpy_array = np.ones((10, 12, 20, 15))
-        numpy_array[:, :, 10, 5] = 10000000
-        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+    @pytest.mark.parametrize("shape", [(20, 15), (12, 20, 15), (10, 12, 20, 15)])
+    def test_shape(self, shape):
+        numpy_array = np.ones(shape)
+        slice_array = [slice(None)] * len(shape)
+        slice_array[-1] = slice(5, 6)
+        slice_array[-2] = slice(10, 11)
+        numpy_array[slice_array] = 10000000
+        dask_array = da.from_array(numpy_array)
         data = dt._threshold_array(dask_array, threshold_value=1)
         data = data.compute()
-        assert data.shape == (10, 12, 20, 15)
+        assert data.shape == shape
         assert data.dtype == np.bool
-        assert (data[:, :, 10, 5] == np.ones((10, 12), dtype=np.bool)).all()
-        data[:, :, 10, 5] = False
-        assert (data == np.zeros((10, 12, 20, 15))).all()
+        assert (data[slice_array] == np.ones((10, 12), dtype=np.bool)).all()
+        data[slice_array] = False
+        assert (data == np.zeros(shape)).all()
+
+    def test_wrong_input_dimension(self):
+        dask_array = da.zeros((3, 2, 5, 20, 20))
+        with pytest.raises(ValueError):
+            dt._threshold_array(dask_array)
+
 
 @pytest.mark.slow
 class TestRemoveBadPixels:
