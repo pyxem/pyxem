@@ -21,48 +21,21 @@ import pytest
 from pytest import approx
 from tempfile import TemporaryDirectory
 import numpy as np
+import dask.array as da
 from numpy.testing import assert_almost_equal, assert_allclose
+from matplotlib.pyplot import subplots
 from pyxem.signals.differential_phase_contrast import (
     make_bivariate_histogram,
     DPCBaseSignal,
     DPCSignal1D,
     DPCSignal2D,
+    LazyDPCBaseSignal,
+    LazyDPCSignal1D,
+    LazyDPCSignal2D,
 )
 import pyxem.dummy_data.dummy_data as dd
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem as pxm
-
-
-class TestMakeBivariateHistogram:
-    def test_single_x(self):
-        size = 100
-        x, y = np.ones(size), np.zeros(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(1.0)
-        hist_iY = s.axes_manager[1].value2index(0.0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x(self):
-        size = 100
-        x, y = -np.ones(size), np.zeros(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(0)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
-
-    def test_single_negative_x_y(self):
-        size = 100
-        x, y = -np.ones(size), np.ones(size)
-        s = make_bivariate_histogram(x, y)
-        hist_iX = s.axes_manager[0].value2index(-1)
-        hist_iY = s.axes_manager[1].value2index(1)
-        assert s.data[hist_iY, hist_iX] == size
-        s.data[hist_iY, hist_iX] = 0
-        assert not s.data.any()
 
 
 class TestDpcBasesignalCreate:
@@ -70,11 +43,19 @@ class TestDpcBasesignalCreate:
         data = np.ones(shape=(2))
         DPCBaseSignal(data)
 
+    def test_create_lazy(self):
+        data = da.ones(shape=(2))
+        LazyDPCBaseSignal(data)
+
 
 class TestDpcSignal1dCreate:
     def test_create(self):
         data = np.ones(shape=(2, 10))
         DPCSignal1D(data)
+
+    def test_create_lazy(self):
+        data = da.ones(shape=(2, 10))
+        LazyDPCSignal1D(data)
 
 
 class TestDpcSignal2dCreate:
@@ -83,6 +64,10 @@ class TestDpcSignal2dCreate:
         DPCSignal2D(data)
         with pytest.raises(ValueError):
             DPCSignal2D(np.zeros(10))
+
+    def test_create_lazy(self):
+        data = da.ones(shape=(2, 10, 10))
+        LazyDPCSignal2D(data)
 
 
 class TestDpcSignal2dCorrectRamp:
@@ -241,9 +226,15 @@ class TestGetDpcSignal:
             scalebar_size=10,
         )
         s.get_color_image_with_indicator(only_phase=True)
+        fig, ax = subplots()
+        s.get_color_image_with_indicator(ax=ax)
 
 
-class TestDpcSignal2dBivariateHistogram:
+class TestBivariateHistogram:
+    def test_get_bivariate_histogram_1d(self):
+        s = DPCSignal1D(np.random.random((2, 10)))
+        s.get_bivariate_histogram()
+
     def test_get_bivariate_histogram(self):
         array_x, array_y = np.meshgrid(range(64), range(64))
         data_tilt = np.swapaxes(
@@ -252,6 +243,20 @@ class TestDpcSignal2dBivariateHistogram:
         data_random = data_tilt + np.random.random(size=(2, 64, 64)) * 10
         s_random = DPCSignal2D(data_random)
         s_random.get_bivariate_histogram()
+
+    def test_masked_get_bivariate_histogram(self):
+        s = pxm.DPCSignal2D(np.zeros((2, 5, 5)))
+        value = 3
+        s.data[0, 0, 0] = value
+        s_hist = s.get_bivariate_histogram(bins=10, histogram_range=(-5, 5))
+        assert s_hist.isig[3.0, 0.0] == float(value)
+
+        masked = np.zeros((11, 11), dtype=np.bool)
+        masked[0, 0] = True
+        s_hist = s.get_bivariate_histogram(
+            bins=10, histogram_range=(-5, 5), masked=masked
+        )
+        assert s_hist.isig[3.0, 0.0] == 0.0
 
     def test_make_bivariate_histogram(self):
         x, y = np.ones((100, 100)), np.ones((100, 100))
@@ -263,6 +268,36 @@ class TestDpcSignal2dBivariateHistogram:
             bins=200,
             spatial_std=3,
         )
+
+    def test_single_x(self):
+        size = 100
+        x, y = np.ones(size), np.zeros(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(1.0)
+        hist_iY = s.axes_manager[1].value2index(0.0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x(self):
+        size = 100
+        x, y = -np.ones(size), np.zeros(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(0)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
+
+    def test_single_negative_x_y(self):
+        size = 100
+        x, y = -np.ones(size), np.ones(size)
+        s = make_bivariate_histogram(x, y)
+        hist_iX = s.axes_manager[0].value2index(-1)
+        hist_iY = s.axes_manager[1].value2index(1)
+        assert s.data[hist_iY, hist_iX] == size
+        s.data[hist_iY, hist_iX] = 0
+        assert not s.data.any()
 
 
 class TestRotateData:
