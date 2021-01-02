@@ -767,12 +767,12 @@ class TestRemoveBadPixels:
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
 
     def test_find_dead_pixels_wrong_input(self):
-        dask_array = da.zeros((20, ))
+        dask_array = da.zeros((20,))
         with pytest.raises(ValueError):
             dt._find_dead_pixels(dask_array)
 
     def test_find_hot_pixels_wrong_input(self):
-        dask_array = da.zeros((20, ))
+        dask_array = da.zeros((20,))
         with pytest.raises(ValueError):
             dt._find_hot_pixels(dask_array)
 
@@ -1048,7 +1048,11 @@ class TestPeakPositionRefinementCOM:
         assert data[1][0] == 10.0
         assert data[1][1] == 14.0
 
-        peak_outside = np.array([[65., 10.], ])
+        peak_outside = np.array(
+            [
+                [65.0, 10.0],
+            ]
+        )
         data_outside = dt._peak_refinement_centre_of_mass_frame(
             numpy_array, peak_outside, square_size
         )
@@ -1326,6 +1330,15 @@ class TestIntensityArray:
         assert intensity1[1].all() == np.array([11.0, 15.0, 1 / 25]).all()
         assert intensity0.shape == intensity1.shape == (2, 3)
 
+    def test_intensity_peaks_image_region_outside_image(self):
+        # If any part of the region around the peak (defined via disk_r) is outside
+        # the image, the intensity should be 0
+        image = np.ones((50, 50))
+        peak = np.array([[10, 1], [1, 10], [10, 49], [49, 10]])
+        intensity_list = dt._intensity_peaks_image_single_frame(image, peak, 2)
+        for intensity in intensity_list:
+            assert intensity[2] == 0
+
     def test_intensity_peaks_chunk(self):
         numpy_array = np.zeros((2, 2, 50, 50))
         numpy_array[:, :, 27, 27] = 1
@@ -1381,6 +1394,12 @@ class TestIntensityArray:
         assert len(dask_array.shape) == nav_dims + 2
         match_array = match_array_dask.compute()
         assert peak_array_dask.shape == match_array.shape
+
+    def test_wrong_input_sizes(self):
+        dask_array = da.zeros((10, 9, 20, 20))
+        peak_array = da.zeros((12, 6))
+        with pytest.raises(ValueError):
+            dt._intensity_peaks_image(dask_array, peak_array, 5)
 
     def test_non_dask_array(self):
         data_array = np.ones((10, 10, 50, 50))
@@ -1600,5 +1619,7 @@ class TestCenterOfMass:
         assert subf.shape[1] == 6
         assert subf.sum() == (square_size - 1) ** 2
 
-        subf1 = dt._center_of_mass_experimental_square(numpy_array, [40, 8], square_size)
+        subf1 = dt._center_of_mass_experimental_square(
+            numpy_array, [40, 8], square_size
+        )
         assert subf1 is None
