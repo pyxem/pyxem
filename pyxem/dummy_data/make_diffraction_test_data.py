@@ -367,11 +367,6 @@ class Ring(object):
     def get_signal(self):
         return self.z.circle
 
-    def update_axis(self, xx, yy):
-        self.z.update_axis(xx, yy)
-        self.mask_inside_r()
-        self.z.set_uniform_intensity()
-
 
 class MakeTestData(object):
     """MakeTestData is an object containing a generated test signal.
