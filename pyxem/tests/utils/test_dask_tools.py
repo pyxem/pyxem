@@ -646,6 +646,9 @@ class TestCenterOfMassArray:
         data1 = dt._center_of_mass_array(dask_array, mask_array=mask_array)
         data1 = data1.compute()
         assert (data1 == np.ones((2, 10, 10)) * 25).all()
+        mask_array_wrong_size = np.ones((25, 40))
+        with pytest.raises(ValueError):
+            dt._center_of_mass_array(dask_array, mask_array=mask_array_wrong_size)
 
     def test_threshold(self):
         numpy_array = np.zeros((10, 10, 50, 50))
@@ -681,17 +684,27 @@ class TestMaskArray:
 
 @pytest.mark.slow
 class TestThresholdArray:
-    def test_simple(self):
-        numpy_array = np.ones((10, 12, 20, 15))
-        numpy_array[:, :, 10, 5] = 10000000
-        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+    @pytest.mark.parametrize("shape", [(20, 15), (12, 20, 15), (10, 12, 20, 15)])
+    def test_shape(self, shape):
+        numpy_array = np.ones(shape)
+        slice_array = [slice(None)] * len(shape)
+        slice_array[-1] = slice(5, 6)
+        slice_array[-2] = slice(10, 11)
+        numpy_array[slice_array] = 10000000
+        dask_array = da.from_array(numpy_array)
         data = dt._threshold_array(dask_array, threshold_value=1)
         data = data.compute()
-        assert data.shape == (10, 12, 20, 15)
+        assert data.shape == shape
         assert data.dtype == np.bool
-        assert (data[:, :, 10, 5] == np.ones((10, 12), dtype=np.bool)).all()
-        data[:, :, 10, 5] = False
-        assert (data == np.zeros((10, 12, 20, 15))).all()
+        assert (data[slice_array] == np.ones((10, 12), dtype=np.bool)).all()
+        data[slice_array] = False
+        assert (data == np.zeros(shape)).all()
+
+    def test_wrong_input_dimension(self):
+        dask_array = da.zeros((3, 2, 5, 20, 20))
+        with pytest.raises(ValueError):
+            dt._threshold_array(dask_array)
+
 
 @pytest.mark.slow
 class TestRemoveBadPixels:
@@ -752,6 +765,16 @@ class TestRemoveBadPixels:
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, :, :, :])
         with pytest.raises(ValueError):
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
+
+    def test_find_dead_pixels_wrong_input(self):
+        dask_array = da.zeros((20,))
+        with pytest.raises(ValueError):
+            dt._find_dead_pixels(dask_array)
+
+    def test_find_hot_pixels_wrong_input(self):
+        dask_array = da.zeros((20,))
+        with pytest.raises(ValueError):
+            dt._find_hot_pixels(dask_array)
 
 
 @pytest.mark.slow
@@ -1025,15 +1048,24 @@ class TestPeakPositionRefinementCOM:
         assert data[1][0] == 10.0
         assert data[1][1] == 14.0
 
+        peak_outside = np.array(
+            [
+                [65.0, 10.0],
+            ]
+        )
+        data_outside = dt._peak_refinement_centre_of_mass_frame(
+            numpy_array, peak_outside, square_size
+        )
+        assert (peak_outside == data_outside).all()
+
     def test_chunk_peak(self):
-        numpy_array = np.zeros((2, 2, 50, 50))
+        shape = (2, 2, 50, 50)
+        numpy_array = np.zeros(shape)
         numpy_array[:, :, 25, 25] = 1
 
-        peak_array = np.zeros(
-            (numpy_array.shape[0], numpy_array.shape[1], 1, 1), dtype=np.object
-        )
-        real_array = np.zeros((numpy_array.shape[:-2]), dtype=np.object)
-        for index in np.ndindex(numpy_array.shape[:-2]):
+        peak_array = np.zeros((shape[0], shape[1], 1, 1), dtype=np.object)
+        real_array = np.zeros((shape[:-2]), dtype=np.object)
+        for index in np.ndindex(shape[:-2]):
             islice = np.s_[index]
             peak_array[islice][0, 0] = np.asarray([(27, 27)])
             real_array[islice] = np.asarray([(25, 25)])
@@ -1045,6 +1077,11 @@ class TestPeakPositionRefinementCOM:
         )
         assert data.shape == (2, 2)
         assert np.sum(data - real_array).sum() == 0
+
+        peak_array_smaller = peak_array.squeeze()
+        data = dt._peak_refinement_centre_of_mass_chunk(
+            numpy_array, peak_array_smaller, square_size
+        )
 
     def test_dask_array(self):
         numpy_array = np.zeros((10, 10, 50, 50))
@@ -1088,6 +1125,24 @@ class TestPeakPositionRefinementCOM:
         assert len(dask_array.shape) == nav_dims + 2
         match_array = match_array_dask.compute()
         assert peak_array_dask.shape == match_array.shape
+
+    def test_wrong_input_sizes(self):
+        dask_array = da.zeros((10, 9, 20, 20))
+        peak_array = da.zeros((12, 6))
+        with pytest.raises(ValueError):
+            dt._peak_refinement_centre_of_mass(dask_array, peak_array, square_size=10)
+
+    def test_wrong_input_not_dask(self):
+        dask_array = da.zeros((9, 8, 10, 10))
+        peak_array = da.zeros((9, 8))
+        with pytest.raises(ValueError):
+            dt._peak_refinement_centre_of_mass(
+                dask_array.compute(), peak_array, square_size=10
+            )
+        with pytest.raises(ValueError):
+            dt._peak_refinement_centre_of_mass(
+                dask_array, peak_array.compute(), square_size=10
+            )
 
 
 @pytest.mark.slow
@@ -1275,6 +1330,15 @@ class TestIntensityArray:
         assert intensity1[1].all() == np.array([11.0, 15.0, 1 / 25]).all()
         assert intensity0.shape == intensity1.shape == (2, 3)
 
+    def test_intensity_peaks_image_region_outside_image(self):
+        # If any part of the region around the peak (defined via disk_r) is outside
+        # the image, the intensity should be 0
+        image = np.ones((50, 50))
+        peak = np.array([[10, 1], [1, 10], [10, 49], [49, 10]])
+        intensity_list = dt._intensity_peaks_image_single_frame(image, peak, 2)
+        for intensity in intensity_list:
+            assert intensity[2] == 0
+
     def test_intensity_peaks_chunk(self):
         numpy_array = np.zeros((2, 2, 50, 50))
         numpy_array[:, :, 27, 27] = 1
@@ -1330,6 +1394,12 @@ class TestIntensityArray:
         assert len(dask_array.shape) == nav_dims + 2
         match_array = match_array_dask.compute()
         assert peak_array_dask.shape == match_array.shape
+
+    def test_wrong_input_sizes(self):
+        dask_array = da.zeros((10, 9, 20, 20))
+        peak_array = da.zeros((12, 6))
+        with pytest.raises(ValueError):
+            dt._intensity_peaks_image(dask_array, peak_array, 5)
 
     def test_non_dask_array(self):
         data_array = np.ones((10, 10, 50, 50))
@@ -1536,6 +1606,10 @@ class TestCenterOfMass:
         assert subf.shape[1] == 6
         assert subf.all() == 1
 
+    def test_get_experimental_square_wrong_input_odd_square_size(self):
+        with pytest.raises(ValueError):
+            dt._get_experimental_square(np.zeros((99, 99)), [13, 8], 9)
+
     def test_com_experimental_square(self):
         numpy_array = np.zeros((20, 20))
         numpy_array[10:16, 5:11] = 1
@@ -1544,3 +1618,8 @@ class TestCenterOfMass:
         assert subf.shape[0] == 6
         assert subf.shape[1] == 6
         assert subf.sum() == (square_size - 1) ** 2
+
+        subf1 = dt._center_of_mass_experimental_square(
+            numpy_array, [40, 8], square_size
+        )
+        assert subf1 is None

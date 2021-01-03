@@ -920,48 +920,6 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     return beam_shifts
 
 
-def _get_border_slices(nav_dim_size):
-    """Get a list of slices for doing pixel interpolation.
-
-    Parameters
-    ----------
-    nav_dim_size : scalar
-
-    Returns
-    -------
-    slice_mi, slice_xp, slice_xm, slice_yp, slice_ym : list of slices
-
-    Examples
-    --------
-    >>> import pyxem.utils.dask_tools as dt
-    >>> s_mi, s_xp, s_xm, s_yp, s_ym = dt._get_border_slices(2)
-
-    """
-    nav_slice = [slice(None, None, None)] * nav_dim_size
-
-    slice_mi = copy.deepcopy(nav_slice)
-    slice_mi.extend(np.s_[1:-1, 1:-1])
-    slice_mi = tuple(slice_mi)
-
-    slice_xp = copy.deepcopy(nav_slice)
-    slice_xp.extend(np.s_[0:-2, 1:-1])
-    slice_xp = tuple(slice_xp)
-
-    slice_xm = copy.deepcopy(nav_slice)
-    slice_xm.extend(np.s_[2:None, 1:-1])
-    slice_xm = tuple(slice_xm)
-
-    slice_yp = copy.deepcopy(nav_slice)
-    slice_yp.extend(np.s_[1:-1, 0:-2])
-    slice_yp = tuple(slice_yp)
-
-    slice_ym = copy.deepcopy(nav_slice)
-    slice_ym.extend(np.s_[1:-1, 2:None])
-    slice_ym = tuple(slice_ym)
-
-    return (slice_mi, slice_xp, slice_xm, slice_yp, slice_ym)
-
-
 def _remove_bad_pixels(dask_array, bad_pixel_array):
     """Replace values in bad pixels with mean of neighbors.
 
@@ -1593,6 +1551,7 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
             subframe = _center_of_mass_experimental_square(
                 frame, np.asarray(peaks[i], dtype=np.uint16), square_size
             )
+            # If the peak is outside the subframe, return the same position
             if subframe is None:
                 new_peak[i, 0] = peaks[i, 0].astype("float64")
                 new_peak[i, 1] = peaks[i, 1].astype("float64")
