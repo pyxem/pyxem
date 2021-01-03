@@ -596,6 +596,17 @@ class TestDiffraction2DCenterOfMass:
         s_lazy = LazyDiffraction2D(data)
         s_lazy_com = s_lazy.center_of_mass(lazy_result=True)
         assert s_lazy_com._lazy
+        assert s_lazy_com.axes_manager.signal_shape == (10, 10)
+
+        s_lazy_1d = s_lazy.inav[0]
+        s_lazy_1d_com = s_lazy_1d.center_of_mass(lazy_result=True)
+        assert s_lazy_1d_com._lazy
+        assert s_lazy_1d_com.axes_manager.signal_shape == (10,)
+
+        s_lazy_0d = s_lazy.inav[0, 0]
+        s_lazy_0d_com = s_lazy_0d.center_of_mass(lazy_result=True)
+        assert s_lazy_0d_com._lazy
+        assert s_lazy_0d_com.axes_manager.signal_shape == ()
 
 
 class TestDiffraction2DRadialAverage:
