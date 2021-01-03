@@ -303,10 +303,6 @@ class Circle(object):
         circle_ring_indices = self.circle > 0
         self.circle[circle_ring_indices] = self.intensity
 
-    def update_axis(self, xx, yy):
-        self.circle = (xx - self.x0) ** 2 + (yy - self.y0) ** 2
-        self.mask_outside_r()
-
 
 class Disk(object):
     """Disk object, with outer edge of the ring at r."""
@@ -336,11 +332,6 @@ class Disk(object):
 
     def get_signal(self):
         return self.z.circle
-
-    def update_axis(self, xx, yy):
-        self.z.update_axis(xx, yy)
-        self.z.set_uniform_intensity()
-        self.set_centre_intensity()
 
 
 class Ring(object):
@@ -589,13 +580,6 @@ class MakeTestData(object):
         self.signal = Diffraction2D(self.z_blurred)
         self.signal.axes_manager[0].scale = self.scale
         self.signal.axes_manager[1].scale = self.scale
-
-    def set_downscale_factor(self, factor):
-        self.downscale_factor = factor
-        self.generate_mesh()
-        for i in self.z_list:
-            i.update_axis(self.xx, self.yy)
-        self.update_signal()
 
     def set_signal_zero(self):
         self.z_list = []
