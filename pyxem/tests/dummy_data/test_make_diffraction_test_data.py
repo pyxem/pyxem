@@ -17,13 +17,14 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import pytest
 from pytest import approx
 import numpy as np
 from hyperspy.signals import Signal2D
 import pyxem.dummy_data.make_diffraction_test_data as mdtd
 
 
-class TestMakeDiffractionTestData:
+class TestMakeTestData:
     def test_init(self):
         mdtd.MakeTestData(default=True)
         mdtd.MakeTestData(size_x=1, size_y=10, scale=0.05)
@@ -49,6 +50,15 @@ class TestMakeDiffractionTestData:
         test = mdtd.MakeTestData(size_x=250)
         repr_string = test.__repr__()
         assert str(250) in repr_string
+
+
+def test_circle_repr():
+    xx, yy = np.zeros((2, 10, 10))
+    circle = mdtd.Circle(
+        xx, yy, x0=7, y0=5, r=3, intensity=2, scale=1
+    )
+    repr_string = circle.__repr__()
+    assert str(7) in repr_string
 
 
 class TestMakeDiffractionTestDataDisks:
@@ -340,6 +350,11 @@ class TestMakeDiffractionTestDataRing:
         test.add_ring(x0=70)
         repr_string = test.z_list[0].__repr__()
         assert str(70) in repr_string
+
+    def test_bad_input_too_wide_ring(self):
+        test = mdtd.MakeTestData()
+        with pytest.raises(ValueError):
+            test.add_ring(r=5, lw_pix=10)
 
 
 class TestMakeDiffractionTestDataDisksEllipse:
@@ -794,6 +809,11 @@ class TestDiffractionTestImage:
     def test_simple(self):
         mdtd.DiffractionTestImage()
 
+    def test_repr(self):
+        di = mdtd.DiffractionTestImage(image_y=111)
+        repr_string = di.__repr__()
+        assert str(111) in repr_string
+
     def test_plot(self):
         di = mdtd.DiffractionTestImage()
         di.plot()
@@ -896,6 +916,13 @@ class TestDiffractionTestImage:
         data = di.get_diffraction_test_image()
         assert data[0, 0] == 2.0
 
+    def test_disk_bad_input(self):
+        di = mdtd.DiffractionTestImage()
+        with pytest.raises(ValueError):
+            di.add_disk(1.5, 5)
+        with pytest.raises(ValueError):
+            di.add_disk(5, 1.5)
+
     def test_rotation(self):
         di = mdtd.DiffractionTestImage(
             diff_intensity_reduction=False, intensity_noise=False, blur=0
@@ -933,6 +960,11 @@ class TestDiffractionTestImage:
 class TestDiffractionTestDataset:
     def test_simple(self):
         mdtd.DiffractionTestDataset()
+
+    def test_repr(self):
+        dtd = mdtd.DiffractionTestDataset(probe_x=21)
+        repr_string = dtd.__repr__()
+        assert str(21) in repr_string
 
     def test_dataset_size(self):
         dtd = mdtd.DiffractionTestDataset(
