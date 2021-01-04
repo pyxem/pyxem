@@ -689,10 +689,11 @@ def investigate_dog_background_removal_interactive(
 
     for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
         for j, std_dev_min in enumerate(std_dev_mins):
-            gauss_processed[i, j] = sample_dp.remove_background(
-                "gaussian_difference",
-                sigma_min=std_dev_min,
-                sigma_max=std_dev_max,
+            gauss_processed[i, j] = sample_dp.subtract_diffraction_background(
+                'difference of gaussians',
+                lazy_result=False,
+                min_sigma=std_dev_min,
+                max_sigma=std_dev_max,
                 show_progressbar=False,
             )
     dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
