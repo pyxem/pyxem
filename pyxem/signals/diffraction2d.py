@@ -1123,13 +1123,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         template_match_ring
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
+
         output_array = dt._template_match_with_binary_image(dask_array, binary_image)
         if not lazy_result:
             if show_progressbar:
@@ -1264,13 +1259,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             raise ValueError(
                 "square_size must be even number, not {0}".format(square_size)
             )
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
@@ -1325,13 +1314,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> intensity_array_computed = intensity_array.compute()
 
         """
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
