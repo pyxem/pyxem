@@ -186,7 +186,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_disk_shift_simple_test_signal()
+        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
         >>> s_c = s.center_of_mass(threshold=3., show_progressbar=False)
         >>> s_c -= 25 # To shift the center disk to the middle (25, 25)
         >>> s_shift = s.shift_diffraction(
@@ -203,7 +203,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
 
         if (not isiterable(shift_x)) or (not isiterable(shift_y)):
-            shift_x, shift_y = pst._make_centre_array_from_signal(
+            shift_x, shift_y = pxmt._make_centre_array_from_signal(
                 self, x=shift_x, y=shift_y
             )
         shift_x = shift_x.flatten()
@@ -241,7 +241,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s_rot = s.rotate_diffraction(30, show_progressbar=False)
 
         """
@@ -274,7 +274,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Example
         -------
-        >>> s = ps.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_x()
 
         To avoid changing the original object afterwards
@@ -305,7 +305,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Example
         -------
-        >>> s = ps.dummy_data.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s_flip = s.flip_diffraction_y()
 
         To avoid changing the original object afterwards
@@ -467,7 +467,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_dead_pixel_signal()
+        >>> s = pxm.dummy_data.get_dead_pixel_signal()
         >>> s_dead_pixels = s.find_dead_pixels(show_progressbar=False)
 
         Using a mask array
@@ -1019,7 +1019,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> s_template = s.template_match_disk(
         ...     disk_r=5, show_progressbar=False)
         >>> s.plot()
@@ -1059,7 +1059,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> s_template = s.template_match_ring(show_progressbar=False)
         >>> s.plot()
 
@@ -1111,7 +1111,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> binary_image = np.random.randint(0, 2, (6, 6))
         >>> s_template = s.template_match_with_binary_image(
         ...     binary_image, show_progressbar=False)
@@ -1174,7 +1174,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Example
         -------
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks_lazy()
         >>> peak_array_computed = peak_array.compute(show_progressbar=False)
         >>> peak02 = peak_array_computed[0, 2]
@@ -1190,7 +1190,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Using Laplacian of Gaussian
 
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks_lazy(
         ...     method='log', min_sigma=5, max_sigma=55, num_sigma=10,
         ...     threshold=0.2, overlap=0.86, lazy_result=False,
@@ -1251,7 +1251,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks_lazy()
         >>> refined_peak_array = s.peak_position_refinement_com(peak_array, 20)
         >>> refined_peak_array_com = refined_peak_array.compute(
@@ -1319,7 +1319,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> peak_array = s.find_peaks_lazy()
         >>> intensity_array = s.intensity_peaks(peak_array, disk_r=6)
         >>> intensity_array_computed = intensity_array.compute()
@@ -1425,7 +1425,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s, parray = ps.dummy_data.get_simple_ellipse_signal_peak_array()
+        >>> s, parray = pxm.dummy_data.get_simple_ellipse_signal_peak_array()
         >>> s.add_peak_array_as_markers(parray)
         >>> s.plot()
 
@@ -1477,7 +1477,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s, parray = ps.dummy_data.get_simple_ellipse_signal_peak_array()
+        >>> s, parray = pxm.dummy_data.get_simple_ellipse_signal_peak_array()
         >>> import pyxem.utils.ransac_ellipse_tools as ret
         >>> ellipse_array, inlier_array = ret.get_ellipse_model_ransac(
         ...     parray, xf=95, yf=95, rf_lim=20, semi_len_min=40,
@@ -1532,7 +1532,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
+        >>> s = pxm.dummy_data.get_holz_heterostructure_test_signal()
         >>> s_bf = s.virtual_bright_field(show_progressbar=False)
         >>> s_bf.plot()
 
@@ -1589,7 +1589,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_holz_heterostructure_test_signal()
+        >>> s = pxm.dummy_data.get_holz_heterostructure_test_signal()
         >>> s_adf = s.virtual_annular_dark_field(
         ...     40, 40, 20, 40, show_progressbar=False)
         >>> s_adf.plot()
