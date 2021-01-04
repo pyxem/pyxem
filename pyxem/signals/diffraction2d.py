@@ -203,7 +203,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
 
         if (not isiterable(shift_x)) or (not isiterable(shift_y)):
-            shift_x, shift_y = pxmt._make_centre_array_from_signal(
+            shift_x, shift_y = pst._make_centre_array_from_signal(
                 self, x=shift_x, y=shift_y
             )
         shift_x = shift_x.flatten()
@@ -1488,7 +1488,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         mt._add_permanent_markers_to_signal(self, marker_list)
 
-    def virtual_bright_field(
+    def lazy_virtual_bright_field(
         self, cx=None, cy=None, r=None, lazy_result=False, show_progressbar=True
     ):
         """Get a virtual bright field signal.
@@ -1548,7 +1548,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         return s_bf
 
-    def virtual_annular_dark_field(
+    def lazy_virtual_annular_dark_field(
         self, cx, cy, r_inner, r, lazy_result=False, show_progressbar=True
     ):
         """Get a virtual annular dark field signal.
