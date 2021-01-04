@@ -878,6 +878,70 @@ class TestCenterDirectBeam:
         with pytest.raises(ValueError):
             s.center_direct_beam()
 
+class TestDiffraction2DVirtualAnnularDarkField:
+    def test_simple(self):
+        shape = (5, 9, 12, 14)
+        s = Diffraction2D(np.zeros(shape))
+        s1 = s.lazy_virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert s1.data.sum() == 0.0
+
+    def test_r_smaller_than_r_inner(self):
+        shape = (5, 9, 12, 14)
+        s = Diffraction2D(np.zeros(shape))
+        with pytest.raises(ValueError):
+            s.lazy_virtual_annular_dark_field(cx=2, cy=2, r_inner=5, r=2)
+
+    def test_one_value(self):
+        shape = (5, 9, 12, 14)
+        s = Diffraction2D(np.zeros(shape))
+        s.data[:, :, 9, 9] = 1
+        s1 = s.lazy_virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert (s1.data == 1.0).all()
+
+    def test_lazy(self):
+        shape = (5, 9, 12, 14)
+        data = da.zeros((5, 9, 12, 14), chunks=(10, 10, 10, 10))
+        s = LazyDiffraction2D(data)
+        s1 = s.lazy_virtual_annular_dark_field(cx=6, cy=6, r_inner=2, r=5)
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+
+
+class TestDiffraction2DVirtualBrightField:
+    def test_simple(self):
+        shape = (5, 9, 12, 14)
+        s = Diffraction2D(np.zeros(shape))
+        s1 = s.lazy_virtual_bright_field()
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert s1.data.sum() == 0.0
+
+    def test_one_value(self):
+        shape = (5, 9, 12, 14)
+        s = Diffraction2D(np.zeros(shape))
+        s.data[:, :, 10, 13] = 1
+        s1 = s.lazy_virtual_bright_field()
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+        assert (s1.data == 1.0).all()
+
+        s2 = s.lazy_virtual_bright_field(6, 6, 2)
+        assert s2.axes_manager.signal_shape == (shape[1], shape[0])
+        assert s2.data.sum() == 0
+
+    def test_lazy(self):
+        shape = (5, 9, 12, 14)
+        data = da.zeros((5, 9, 12, 14), chunks=(10, 10, 10, 10))
+        s = LazyDiffraction2D(data)
+        s1 = s.lazy_virtual_bright_field(cx=6, cy=6, r=5)
+        assert s1.axes_manager.signal_shape == (shape[1], shape[0])
+
+    def test_lazy_result(self):
+        data = da.ones((10, 10, 20, 20), chunks=(10, 10, 10, 10))
+        s = LazyDiffraction2D(data)
+        s_out = s.lazy_virtual_bright_field(lazy_result=True)
+        assert s_out._lazy
+
+
 class TestDiffraction2DFindPeaksLazy:
 
     method1 = ["dog", "log"]
