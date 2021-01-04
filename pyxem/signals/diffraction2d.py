@@ -57,9 +57,6 @@ from pyxem.utils.expt_utils import (
     gain_normalise,
     remove_dead,
     regional_filter,
-    subtract_background_dog,
-    subtract_background_median,
-    subtract_reference,
     circular_mask,
     find_beam_offset_cross_correlation,
     peaks_as_gvectors,
@@ -324,7 +321,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
 
     """ Masking and other non-geometrical 'correction' to patterns """
-    
+
     def get_direct_beam_mask(self, radius):
         """Generate a signal mask for the direct beam.
 
@@ -376,80 +373,24 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
 
 
-    def remove_background(self, method, **kwargs):
-        """Perform background subtraction via multiple methods.
-
-        Parameters
-        ----------
-        method : str
-            Specifies the method, from:
-            {'h-dome','gaussian_difference','median','reference_pattern'}
-        **kwargs:
-            Keyword arguments to be passed to map(), including method specific ones,
-            running a method with no kwargs will return help
-
-        Returns
-        -------
-        bg_subtracted : :obj:`ElectronDiffraction2D`
-            A copy of the data with the background subtracted. Be aware that
-            this function will only return inplace.
-        """
-        method_dict = {
-            "h-dome": regional_filter,
-            "gaussian_difference": subtract_background_dog,
-            "median": subtract_background_median,
-            "reference_pattern": subtract_reference,
-        }
-
-        method_function = select_method_from_method_dict(method, method_dict, **kwargs)
-
-        if method != "h-dome":
-            bg_subtracted = self.map(method_function, inplace=False, **kwargs)
-        elif method == "h-dome":
-            scale = self.data.max()
-            self.data = self.data / scale
-            bg_subtracted = self.map(method_function, inplace=False, **kwargs)
-            bg_subtracted.map(filters.rank.mean, selem=square(3))
-            bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
-
-        return bg_subtracted
-
     def subtract_diffraction_background(
         self, method="median kernel", lazy_result=True, show_progressbar=True, **kwargs
     ):
         """Background subtraction of the diffraction data.
 
-        There are three different methods for doing this:
-        - Difference of Gaussians
-        - Median kernel
-        - Radial median
-
         Parameters
         ----------
-        method : string
-            'difference of gaussians', 'median kernel' and 'radial median'.
-            Default 'median kernel'.
-        lazy_result : bool, default True
-            If True, will return a LazyDiffraction2D object. If False,
+        method : str, optional
+            'difference of gaussians', 'median kernel', 'radial median', 'h-dome'
+            'h-dome' is for non-lazy data only. Default 'median kernel'.
+        lazy_result : bool, optional
+            If True (default), will return a LazyDiffraction2D object. If False,
             will compute the result and return a Diffraction2D object.
-        show_progressbar : bool, default True
-        sigma_min : float, optional
-            Standard deviation for the minimum Gaussian convolution
-            (difference of Gaussians only)
-        sigma_max : float, optional
-            Standard deviation for the maximum Gaussian convolution
-            (difference of Gaussians only)
-        footprint : int, optional
-            Size of the window that is convoluted with the
-            array to determine the median. Should be large enough
-            that it is about 3x as big as the size of the
-            peaks (median kernel only).
-        centre_x : int, optional
-            Centre x position of the coordinate system on which to map
-            to radial coordinates (radial median only).
-        centre_y : int, optional
-            Centre y position of the coordinate system on which to map
-            to radial coordinates (radial median only).
+        show_progressbar : bool, optional
+            Default True
+        **kwargs :
+            To be passed to the method chosen: sigma_min/sigma_max, footprint,
+            centre_x,centre_y / h
 
         Returns
         -------
@@ -457,12 +398,22 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_cbed_signal()
+        >>> s = pxm.dummy_data.get_cbed_signal()
         >>> s_r = s.subtract_diffraction_background(method='median kernel',
         ...     footprint=20, lazy_result=False, show_progressbar=False)
         >>> s_r.plot()
 
         """
+
+        # Ugly, should look into making this lazy compatible
+        if method == "h-dome":
+            scale = self.data.max()
+            self.data = self.data / scale
+            bg_subtracted = self.map(regional_filter, inplace=False, **kwargs)
+            bg_subtracted.map(filters.rank.mean, selem=square(3))
+            bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
+            return bg_subtracted
+
         if self._lazy:
             dask_array = self.data
         else:
