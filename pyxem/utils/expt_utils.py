@@ -331,7 +331,7 @@ def remove_dead(z, deadpixels):
     """
     z_bar = np.copy(z)
     for (i, j) in deadpixels:
-        z_bar[i, j] = (z[i-1,j] + z[i+1,j] + z[i,j-1] + z[i,j+1]) / 4  
+        z_bar[i, j] = (z[i-1,j] + z[i+1,j] + z[i,j-1] + z[i,j+1]) / 4
 
     return z_bar
 
@@ -427,69 +427,6 @@ def regional_filter(z, h):
     dilated = morphology.reconstruction(seed, mask, method="dilation")
 
     return z - dilated
-
-
-def subtract_background_dog(z, sigma_min, sigma_max):
-    """Difference of gaussians method for background removal.
-
-    Parameters
-    ----------
-    sigma_max : float
-        Large gaussian blur sigma.
-    sigma_min : float
-        Small gaussian blur sigma.
-
-    Returns
-    -------
-        Denoised diffraction pattern as np.array
-    """
-    blur_max = ndi.gaussian_filter(z, sigma_max)
-    blur_min = ndi.gaussian_filter(z, sigma_min)
-
-    return np.maximum(np.where(blur_min > blur_max, z, 0) - blur_max, 0)
-
-
-def subtract_background_median(z, footprint):
-    """Remove background using a median filter.
-
-    Parameters
-    ----------
-    footprint : int
-        size of the window that is convoluted with the array to determine
-        the median. Should be large enough that it is about 3x as big as the
-        size of the peaks.
-
-    Returns
-    -------
-        Pattern with background subtracted as np.array
-    """
-
-    selem = morphology.square(footprint)
-    # skimage only accepts input image as uint16
-    bg_subtracted = z - filters.median(z.astype(np.uint16), selem).astype(z.dtype)
-
-    return np.maximum(bg_subtracted, 0)
-
-
-def subtract_reference(z, bg):
-    """Subtracts background using a user-defined background pattern.
-
-    Parameters
-    ----------
-    z : np.array()
-        Two-dimensional data array containing signal.
-    bg: array()
-        User-defined diffraction pattern to be subtracted as background.
-
-    Returns
-    -------
-    im : np.array()
-        Two-dimensional data array containing signal with background removed.
-    """
-    im = z.astype(np.float64) - bg
-    im = np.where(im > 0, im, 0)
-    return im
-
 
 def circular_mask(shape, radius, center=None):
     """Produces a mask of radius 'r' centered on 'center' of shape 'shape'.
