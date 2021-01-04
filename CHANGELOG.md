@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - get_direct_beam_position now supports lazy proccessing (#648)
 - center_direct_beam now supports lazy processing (#658)
 - Several functions for processing large datasets using dask (#648, #658)
+- Methods to retrieve phase from DPC signal are added (#662)
 
 ### Changed
 - Calibration workflow has been altered (see PR #640 for details)
 - Azimuthal integration has been refactored (see PRs #625,#676 for details)
 - get_direct_beam_position now has reversed order of the shifts [y, x] to [x, y] (#653)
 - Plotting large, lazy, datasets will be much faster now (#655)
-- Methods to retrieve phase from DPC signal are added (#662)
 - .apply_affine_transform now uses a default order of 1 (changed from 3)
 - find_peaks is now provided by hyperspy, method 'xc' now called 'template_matching'
 
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.sim_utils, use the relevant diffsims functionality
 - The diffraction_component and scalable_reference_pattern modules have been removed (#674)
 - Diffraction2D.remove_dead_pixels has been removed, use .correct_bad_pixels (#681)
+- Diffraction2D.remove_background, has been moved to .subtract_diffraction_background (#697)
 
 ## 2020-12-02 - version 0.12.3
 ### Changed

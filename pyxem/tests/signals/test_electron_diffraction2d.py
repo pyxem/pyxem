@@ -182,38 +182,6 @@ class TestDirectBeamMethods:
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
 
-
-class TestBackgroundMethods:
-    @pytest.mark.parametrize(
-        "method, kwargs",
-        [
-            ("h-dome", {"h": 1,}),
-            ("gaussian_difference", {"sigma_min": 0.5, "sigma_max": 1,}),
-            ("median", {"footprint": 4,}),
-            ("reference_pattern", {"bg": np.ones((8, 8)),}),
-        ],
-    )
-    def test_remove_background(self, diffraction_pattern, method, kwargs):
-        bgr = diffraction_pattern.remove_background(method=method, **kwargs)
-        assert bgr.data.shape == diffraction_pattern.data.shape
-        assert bgr.max() <= diffraction_pattern.max()
-
-    def test_no_kwarg(self, diffraction_pattern):
-        with pytest.raises(
-            TypeError, match="missing 1 required positional argument: 'h'",
-        ):
-            bgr = diffraction_pattern.remove_background(method="h-dome")
-
-class TestNotImplemented:
-    def test_remove_background_fake_method(self, diffraction_pattern):
-        # Note - uses regex via re.search()
-        with pytest.raises(
-            NotImplementedError,
-            match=r"The method .* is not implemented. See documentation for available implementations",
-        ):
-            bgr = diffraction_pattern.remove_background(method="fake_method")
-
-
 class TestComputeAndAsLazyElectron2D:
     def test_2d_data_compute(self):
         dask_array = da.random.random((100, 150), chunks=(50, 50))
