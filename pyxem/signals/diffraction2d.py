@@ -414,13 +414,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             bg_subtracted.data = bg_subtracted.data / bg_subtracted.data.max()
             return bg_subtracted
 
-        if self._lazy:
-            dask_array = self.data
-        else:
-            sig_chunks = list(self.axes_manager.signal_shape)[::-1]
-            chunks = [8] * len(self.axes_manager.navigation_shape)
-            chunks.extend(sig_chunks)
-            dask_array = da.from_array(self.data, chunks=chunks)
+        dask_array = _get_dask_array(self,size_of_chunk=8)
 
         if method == "difference of gaussians":
             output_array = dt._background_removal_dog(dask_array, **kwargs)
@@ -432,7 +426,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             raise NotImplementedError(
                 "The method specified, '{}', is not implemented. "
                 "The different methods are: 'difference of gaussians',"
-                " 'median kernel' or 'radial median'.".format(method)
+                " 'median kernel','radial median' or 'h-dome'.".format(method)
             )
 
         if not lazy_result:
