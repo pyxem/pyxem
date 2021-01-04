@@ -449,28 +449,3 @@ class TestAxesManagerMetadataCopying:
             pst._copy_signal_all_axes_metadata(s0, s1)
         with pytest.raises(ValueError):
             pst._copy_signal_all_axes_metadata(s0, s2)
-
-
-class TestFindAndRemoveDeadPixels:
-    def test_no_changes(self):
-        s = Diffraction2D(np.ones((10, 10, 10, 10)))
-        s_orig = s.deepcopy()
-        pst.find_and_remove_dead_pixels(s)
-        assert (s.data == s_orig.data).all()
-
-    def test_some_dead_pixels(self):
-        s = Diffraction2D(np.ones((10, 10, 10, 10)))
-        s.data[:, :, 5, 2] = 0
-        s.data[:, :, 2, 4] = 0
-        pst.find_and_remove_dead_pixels(s)
-        assert len(np.where(s.data == 0)[0]) == 0
-
-    def test_dead_pixel_camera_edge(self):
-        s = Diffraction2D(np.ones((10, 10, 10, 10)))
-        s.data[:, :, 0, 5] = 0
-        s.data[:, :, 2, 0] = 0
-        s.data[:, :, 2, -1] = 0
-        s.data[:, :, -1, 7] = 0
-        s_orig = s.deepcopy()
-        pst.find_and_remove_dead_pixels(s)
-        assert (s.data == s_orig.data).all()

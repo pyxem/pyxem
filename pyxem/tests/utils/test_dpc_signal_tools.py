@@ -226,6 +226,9 @@ class TestGetCornerValues:
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
         with pytest.raises(ValueError):
             pst._get_corner_values(s)
+        s = hs.signals.Signal1D(np.ones((2, 2, 10)))
+        with pytest.raises(ValueError):
+            pst._get_corner_values(s)
 
 
 class TestFitRampToImage:
@@ -271,6 +274,17 @@ class TestFitRampToImage:
         assert approx(s.data[-5:, -5:].mean()) == 0.0
         assert s.data[5:95, 5:95].mean() != 0
 
+    def test_wrong_input_dimensions(self):
+        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
+        s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
+        s = hs.signals.Signal1D(np.ones((2, 2, 10)))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
+
 
 class TestGetSignalMeanPositionAndValue:
     def test_simple(self):
@@ -299,6 +313,9 @@ class TestGetSignalMeanPositionAndValue:
         with pytest.raises(ValueError):
             pst._get_signal_mean_position_and_value(s)
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_signal_mean_position_and_value(s)
+        s = hs.signals.Signal1D(np.ones((2, 2, 10)))
         with pytest.raises(ValueError):
             pst._get_signal_mean_position_and_value(s)
 
