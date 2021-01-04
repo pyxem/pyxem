@@ -101,13 +101,11 @@ def dp_vector_match_result():
     )
     return VectorMatchingResults(res)
 
-@pytest.mark.skip(reason="Under development")
-def test_single_vector_to_crystal_map(sp_vector_match_result):
-    _ = sp_vector_match_result.to_crystal_map()
+def test_single_vector_get_crystallographic_map(sp_vector_match_result):
+    _ = sp_vector_match_result.get_crystallographic_map()
 
-@pytest.mark.skip(reason="Under development")
-def test_double_vector_to_crystal_map(dp_vector_match_result):
-    _ = dp_vector_match_result.to_crystal_map()
+def test_double_vector_get_crystallographic_map(dp_vector_match_result):
+    _ = dp_vector_match_result.get_crystallographic_map()
 
 
 @pytest.mark.parametrize(
