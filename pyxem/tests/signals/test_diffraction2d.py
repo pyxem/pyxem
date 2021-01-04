@@ -1001,7 +1001,7 @@ class TestSubtractingDiffractionBackground:
 
     method1 = ["difference of gaussians", "median kernel", "radial median"]
 
-    def test_simple_hdome():
+    def test_simple_hdome(self):
         s = Diffraction2D(np.random.randint(100, size=(3, 2, 200, 150)))
         s_rem = s.subtract_diffraction_background(method='h-dome')
         assert s_rem.data.shape == s.data.shape
