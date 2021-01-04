@@ -389,7 +389,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         show_progressbar : bool, optional
             Default True
         **kwargs :
-            To be passed to the method chosen: sigma_min/sigma_max, footprint,
+            To be passed to the method chosen: min_sigma/max_sigma, footprint,
             centre_x,centre_y / h
 
         Returns
