@@ -34,8 +34,6 @@ from diffsims.generators.library_generator import DiffractionLibraryGenerator
 from diffsims.generators.library_generator import VectorLibraryGenerator
 from diffsims.sims.diffraction_simulation import DiffractionSimulation
 
-from .generators.calibration_generator import CalibrationGenerator
-
 from .signals.diffraction1d import Diffraction1D
 from .signals.diffraction2d import Diffraction2D
 from .signals.diffraction1d import LazyDiffraction1D
@@ -46,10 +44,6 @@ from .signals.electron_diffraction1d import LazyElectronDiffraction1D
 from .signals.electron_diffraction2d import LazyElectronDiffraction2D
 from .signals.polar_diffraction2d import PolarDiffraction2D
 from .signals.polar_diffraction2d import LazyPolarDiffraction2D
-
-from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
-from .generators.pdf_generator1d import PDFGenerator1D
-from .generators.variance_generator import VarianceGenerator
 
 from .signals.diffraction_variance1d import DiffractionVariance1D
 from .signals.diffraction_variance2d import DiffractionVariance2D

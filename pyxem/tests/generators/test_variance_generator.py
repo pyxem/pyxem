@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.variance_generator import VarianceGenerator
+from pyxem.generators import VarianceGenerator
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 
 from pyxem.signals.diffraction_variance2d import DiffractionVariance2D

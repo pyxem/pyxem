@@ -23,21 +23,19 @@ from hyperspy._signals.signal2d import Signal2D
 
 from pyxem import ElectronDiffraction2D
 from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.generators.indexation_generator import (
+from pyxem.generators import (
     TemplateIndexationGenerator,
     ProfileIndexationGenerator,
     VectorIndexationGenerator)
 
 
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
-from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 
 
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
-from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.libraries.structure_library import StructureLibrary
 
 from pyxem.utils.indexation_utils import OrientationResult

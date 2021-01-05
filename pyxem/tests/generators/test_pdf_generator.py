@@ -18,7 +18,7 @@
 
 import pytest
 import numpy as np
-from pyxem.generators.pdf_generator1d import PDFGenerator1D
+from pyxem.generators import PDFGenerator1D
 from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
 from pyxem.signals.pair_distribution_function1d import PairDistributionFunction1D
 

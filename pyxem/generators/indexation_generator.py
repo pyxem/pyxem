@@ -213,9 +213,7 @@ class TemplateIndexationGenerator:
             mask = 1
 
         # tests if selected method is valid and can print help for selected method.
-        chosen_function = select_method_from_method_dict(
-            method, method_dict, print_help
-        )
+        _ = select_method_from_method_dict(method, method_dict, print_help)
 
         # adds a normalisation to library #TODO: Port to diffsims
         for phase in library.keys():
@@ -652,8 +650,6 @@ class VectorIndexationGenerator:
             Navigation axes of the diffraction vectors signal containing vector
             indexation results for each probe position.
         """
-        vectors = self.vectors
-        library = self.library
 
         return self.refine_n_best_orientations(
             orientations,
