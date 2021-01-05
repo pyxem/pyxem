@@ -220,7 +220,7 @@ class VirtualImageGenerator:
         vdfim.set_signal_type("virtual_dark_field")
 
         if vdfim.metadata.has_item('Diffraction.integrated_range'):
-            del vdfs.metadata.Diffraction.integrated_range
+            del vdfim.metadata.Diffraction.integrated_range
         vdfim.metadata.set_item('Diffraction.roi_list',
                                 [f"{roi}" for roi in self.roi_list]
                                 )
@@ -231,7 +231,7 @@ class VirtualImageGenerator:
             setattr(new_axis, k, v)
 
         if normalize:
-            vdfim.map(normalize_virtual_images)
+            vdfim.map(normalize_virtual_images, show_progressbar=False)
 
         return vdfim
 

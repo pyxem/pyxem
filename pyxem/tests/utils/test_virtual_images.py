@@ -17,6 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+import pytest
 
 from pyxem.utils.virtual_images_utils import get_vectors_mesh
 
@@ -69,3 +70,6 @@ def test_get_vectors_mesh():
 
     mesh = get_vectors_mesh(1.0, 1.2, g_norm_max=1.5, angle=30.0, shear=0.1)
     np.testing.assert_allclose(mesh, mesh4)
+
+    with pytest.raises(ValueError):
+        get_vectors_mesh(1.0, 1.0, g_norm_max=1.5, angle=0.0, shear=2.0)

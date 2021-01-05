@@ -149,7 +149,7 @@ def test_vi_generator_set_ROI_mesh(diffraction_pattern):
 
 @pytest.mark.parametrize('nav_shape', [[2], [2, 4]])
 def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
-    n = np.multiply(*nav_shape)*32**2 if len(nav_shape) > 1 else nav_shape[0]*32**2
+    n = np.prod(nav_shape)*32**2
     s = Diffraction2D(np.arange(n).reshape((*nav_shape, 32, 32)))
     vi_generator = VirtualImageGenerator(s)
 
@@ -167,6 +167,10 @@ def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
     assert vi_nav_axis.size == 21
     assert vi_nav_axis.name == 'ROI index'
     assert vi_nav_axis.scale == 1.0
+    assert len(vi_generator.roi_list) == 21
+
+    vi_generator.set_ROI_mesh(0.5, 0.6, 1.0)
+    assert len(vi_generator.roi_list) == 11
 
     vi = vi_generator.get_virtual_images_from_mesh(normalize=True)
 
