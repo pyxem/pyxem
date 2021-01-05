@@ -18,6 +18,7 @@
 
 import pytest
 import numpy as np
+import hyperspy.api as hs
 
 from pyxem.generators.virtual_image_generator import (VirtualImageGenerator,
                                                       VirtualDarkFieldGenerator)
@@ -49,6 +50,7 @@ def virtual_image_generator(diffraction_pattern):
         diffraction_pattern.data == 0, 0.01, diffraction_pattern.data
     )  # avoid divide by zeroes
     return VirtualDarkFieldGenerator(diffraction_pattern)
+
 
 class TestVirtualDarkFieldGenerator:
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
@@ -135,3 +137,58 @@ def test_vdf_generator_from_map(diffraction_pattern):
 
     vdfgen = VirtualImageGenerator(diffraction_pattern, dvm)
     assert isinstance(vdfgen, VirtualImageGenerator)
+
+
+def test_vi_generator_set_ROI_mesh(diffraction_pattern):
+    vi_generator = VirtualImageGenerator(diffraction_pattern)
+    diffraction_pattern.plot()
+    vi_generator.set_ROI_mesh(1.0, 1.2, 1.0)
+    assert len(vi_generator.roi_list) == 3
+    assert isinstance(vi_generator.roi_list[0], hs.roi.CircleROI)
+
+
+@pytest.mark.parametrize('nav_shape', [[2], [2, 4]])
+def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
+    n = np.prod(nav_shape)*32**2
+    s = Diffraction2D(np.arange(n).reshape((*nav_shape, 32, 32)))
+    vi_generator = VirtualImageGenerator(s)
+
+    with pytest.raises(ValueError):
+        vi_generator.get_virtual_images_from_mesh()
+
+    for axis in s.axes_manager.signal_axes:
+        axis.scale = 0.1
+        axis.offset = -1.6
+        axis.units = '1/nm'
+
+    vi_generator.set_ROI_mesh(0.5, 0.6, 1.4)
+    vi = vi_generator.get_virtual_images_from_mesh()
+    vi_nav_axis = vi.axes_manager.navigation_axes[0]
+    assert vi_nav_axis.size == 21
+    assert vi_nav_axis.name == 'ROI index'
+    assert vi_nav_axis.scale == 1.0
+    assert len(vi_generator.roi_list) == 21
+
+    vi_generator.set_ROI_mesh(0.5, 0.6, 1.0)
+    assert len(vi_generator.roi_list) == 11
+
+    vi = vi_generator.get_virtual_images_from_mesh(normalize=True)
+
+
+def test_vi_generator_get_virtual_images_from_mesh_nav_dim3():
+    s = Diffraction2D(np.arange(2*4*10*32**2).reshape((2, 4, 10, 32, 32)))
+    for axis in s.axes_manager.signal_axes:
+        axis.scale = 0.1
+        axis.offset = -1.6
+        axis.units = '1/nm'
+    vi_generator = VirtualImageGenerator(s)
+
+    vi_generator.set_ROI_mesh(0.5, 0.6, 0.6)
+    vi = vi_generator.get_virtual_images_from_mesh()
+
+    assert vi.axes_manager.navigation_shape == (2, 5)
+
+    vi = vi_generator.get_virtual_images_from_mesh(out_signal_axes=[1, 2])
+
+    assert vi.axes_manager.navigation_shape == (10, 5)
+
