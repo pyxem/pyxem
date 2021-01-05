@@ -71,6 +71,7 @@ setup(
         "numba",
         "orix >= 0.3"
     ],
+    python_requires='>=3.0, <3.9', # some dependencies do not currently support 3.9 (Jan 2020)
     package_data={
         "": ["LICENSE", "readme.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],
