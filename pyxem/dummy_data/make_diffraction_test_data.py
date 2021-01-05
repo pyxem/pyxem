@@ -26,7 +26,7 @@ import dask.array as da
 
 from hyperspy.misc.utils import isiterable
 
-from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
+from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 
 
@@ -879,7 +879,7 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     >>> rot = np.random.random(size=(4, 5)) * 0.2
     >>> peak_array = mdtd._make_4d_peak_array_test_data(
     ...        xf, yf, semi0, semi1, rot)
-    >>> s = pxm.Diffraction2D(np.zeros(shape=(4, 5, 200, 210)))
+    >>> s = pxm.signals.Diffraction2D(np.zeros(shape=(4, 5, 200, 210)))
     >>> import pyxem.utils.marker_tools as mt
     >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)
 

@@ -26,14 +26,13 @@ from tqdm import tqdm
 
 from hyperspy.signals import Signal2D
 
+from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
+from pyxem.utils.signal import transfer_signal_axes
 from pyxem.utils.segment_utils import (
     norm_cross_corr,
     separate_watershed,
     get_gaussian2d,
 )
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals import transfer_signal_axes
 
 
 class LearningSegment:

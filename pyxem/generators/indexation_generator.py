@@ -19,27 +19,25 @@
 """Indexation generator and associated tools."""
 
 import numpy as np
+import lmfit
+from transforms3d.euler import mat2euler, euler2mat
 
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.signals.indexation_results import VectorMatchingResults
+from diffsims.utils.sim_utils import get_electron_wavelength
 
-from pyxem.signals import transfer_navigation_axes
-from pyxem.signals import select_method_from_method_dict
-
+from pyxem.signals import TemplateMatchingResults, VectorMatchingResults
 from pyxem.utils.indexation_utils import (
     zero_mean_normalized_correlation,
     fast_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
-    get_nth_best_solution)
-
-
-from transforms3d.euler import mat2euler, euler2mat
+    get_nth_best_solution
+)
 from pyxem.utils.vector_utils import detector_to_fourier
-from diffsims.utils.sim_utils import get_electron_wavelength
-
-import lmfit
+from pyxem.utils.signal import (
+    select_method_from_method_dict,
+    transfer_navigation_axes,
+)
 
 
 class IndexationGenerator:

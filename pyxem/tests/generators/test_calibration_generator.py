@@ -24,7 +24,7 @@ from hyperspy.signals import Signal2D
 from hyperspy.roi import Line2DROI
 from diffsims.utils.ring_pattern_utils import generate_ring_pattern
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals import ElectronDiffraction2D
 from pyxem.generators import CalibrationGenerator
 from pyxem.libraries import CalibrationDataLibrary
 

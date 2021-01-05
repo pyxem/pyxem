@@ -31,7 +31,7 @@ from diffsims.utils.ring_pattern_utils import (
     generate_ring_pattern,
 )
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals import ElectronDiffraction2D
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_setup
 
 

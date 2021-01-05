@@ -21,9 +21,10 @@ import numpy as np
 from numpy.random import randint
 import dask.array as da
 from skimage import morphology
+
 from hyperspy.signals import Signal2D
 
-from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
+from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
 import pyxem.dummy_data as dd

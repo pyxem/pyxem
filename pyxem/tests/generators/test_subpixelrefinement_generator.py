@@ -19,14 +19,13 @@
 import pytest
 import numpy as np
 
+from skimage import draw
+
 from pyxem.generators import SubpixelrefinementGenerator
 from pyxem.generators.subpixelrefinement_generator import (
-    get_simulated_disc,
-    get_experimental_square,
+    get_simulated_disc, get_experimental_square
 )
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from skimage import draw
+from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
 
 
 @pytest.fixture()

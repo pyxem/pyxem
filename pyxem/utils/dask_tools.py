@@ -1312,9 +1312,9 @@ def _background_removal_dog(dask_array, **kwargs):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5,5,25, 25))
-    >>> s_rem = pxm.Diffraction2D(
+    >>> s_rem = pxm.signals.Diffraction2D(
     ...     dt._background_removal_dog(dask_array))
 
     """
@@ -1340,7 +1340,7 @@ def _background_removal_single_frame_median(frame, footprint=19):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """
@@ -1365,7 +1365,7 @@ def _background_removal_chunk_median(data, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_median(s.data[0:10, 0:10,:,:])
 
     """
@@ -1396,9 +1396,9 @@ def _background_removal_median(dask_array, **kwargs):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_rem = pxm.Diffraction2D(
+    >>> s_rem = pxm.signals.Diffraction2D(
     ...     dt._background_removal_median(dask_array), footprint=20)
 
     """
@@ -1429,7 +1429,7 @@ def _background_removal_single_frame_radial_median(frame, centre_x=128, centre_y
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
     """
 
@@ -1467,7 +1467,7 @@ def _background_removal_chunk_radial_median(data, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = _background_removal_chunk_radial_median(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1500,9 +1500,9 @@ def _background_removal_radial_median(dask_array, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_r = pxm.Diffraction2D(
+    >>> s_r = pxm.signals.Diffraction2D(
     ...     dt._background_removal_radial_median(
     ...     dask_array, centre_x=128, centre_y=128))
 
@@ -1535,7 +1535,7 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = np.array(([48.,48.],[25.,48.]))
     >>> r_p_array = dt._peak_refinement_centre_of_mass_frame(
     ...     s.data[0,0,:,:], peak_array, 20)
@@ -1585,7 +1585,7 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
     >>> r_p_array = dt._peak_refinement_centre_of_mass_chunk(
     ...     s.data, peak_array, 20)

@@ -16,21 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import hyperspy.api as hs
-from hyperspy.signal import BaseSignal
-from hyperspy.signals import Signal2D
 from warnings import warn
 import numpy as np
-from operator import attrgetter
+from transforms3d.euler import mat2euler
 
-from pyxem.signals import transfer_navigation_axes
-from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
-from pyxem.utils.indexation_utils import get_nth_best_solution
-
+import hyperspy.api as hs
+from hyperspy.signal import BaseSignal
 from orix.quaternion import Rotation
 from orix.crystal_map import CrystalMap
 
-from transforms3d.euler import mat2euler
+from pyxem.signals.diffraction_vectors import generate_marker_inputs_from_peaks
+from pyxem.utils.signal import transfer_navigation_axes
+from pyxem.utils.indexation_utils import get_nth_best_solution
+
+
 
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and

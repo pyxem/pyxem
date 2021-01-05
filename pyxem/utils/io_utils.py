@@ -19,15 +19,15 @@
 # a lot of stuff depends on this, so we have to create it first
 
 import os
+from struct import unpack
 
 import numpy as np
 import dask.array as da
 from math import floor
 from scipy.signal import find_peaks
 import h5py
-from struct import unpack
 
-from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
+from pyxem.signals import LazyElectronDiffraction2D
 
 
 def load_mib(mib_path, reshape=True, flip=True):

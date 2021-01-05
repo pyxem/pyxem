@@ -27,6 +27,7 @@ from .indexation_generator import (
     TemplateIndexationGenerator,
     ProfileIndexationGenerator
     )
+from .integration_generator import IntegrationGenerator
 from .pdf_generator1d import PDFGenerator1D
 from .red_intensity_generator1d import ReducedIntensityGenerator1D
 from .subpixelrefinement_generator import SubpixelrefinementGenerator
@@ -45,6 +46,7 @@ __all__ = [
     "VectorIndexationGenerator",
     "TemplateIndexationGenerator",
     "ProfileIndexationGenerator",
+    "IntegrationGenerator",
     "PDFGenerator1D",
     "ReducedIntensityGenerator1D",
     "SubpixelrefinementGenerator",

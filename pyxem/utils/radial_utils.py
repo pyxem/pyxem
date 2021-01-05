@@ -656,7 +656,7 @@ def fit_single_ellipse_to_signal(
     Examples
     --------
     >>> import pyxem.dummy_data import make_diffraction_test_data as mdtd
-    >>> s = pxm.Diffraction2D(np.zeros((200, 220)))
+    >>> s = pxm.signals.Diffraction2D(np.zeros((200, 220)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -100, -110
     >>> xx, yy = np.meshgrid(s.axes_manager[0].axis, s.axes_manager[1].axis)
     >>> ellipse_ring = mdtd._get_elliptical_ring(xx, yy, 0, 0, 50, 70, 0.8)

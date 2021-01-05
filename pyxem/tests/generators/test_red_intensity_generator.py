@@ -19,9 +19,8 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.generators.red_intensity_generator1d import ReducedIntensityGenerator1D
+from pyxem.signals import ElectronDiffraction1D, ReducedIntensity1D
+from pyxem.generators import ReducedIntensityGenerator1D
 
 
 @pytest.fixture

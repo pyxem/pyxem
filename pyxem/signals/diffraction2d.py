@@ -19,6 +19,13 @@
 """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
 
 import numpy as np
+from skimage import filters
+from skimage.morphology import square
+from scipy.ndimage import rotate
+from skimage import morphology
+import dask.array as da
+from dask.diagnostics import ProgressBar
+from tqdm import tqdm
 
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D
@@ -29,24 +36,20 @@ from hyperspy.misc.utils import isiterable
 
 from pyFAI.units import to_unit
 
-from pyxem.signals.differential_phase_contrast import (
+from pyxem.signals import (
+    CommonDiffraction,
     DPCBaseSignal,
     DPCSignal1D,
     DPCSignal2D,
-)
-from pyxem.signals.differential_phase_contrast import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
 )
-from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
-from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
     _get_radial_extent,
     _get_setup,
 )
-
 from pyxem.utils.expt_utils import (
     azimuthal_integrate1d,
     azimuthal_integrate2d,
@@ -63,26 +66,20 @@ from pyxem.utils.expt_utils import (
     medfilt_1d,
     sigma_clip,
 )
-
 from pyxem.utils.dask_tools import (
     _process_dask_array,
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
     align_single_frame,
 )
-
+from pyxem.utils.signal import (
+    select_method_from_method_dict,
+    transfer_navigation_axes,
+)
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
-
-from skimage import filters
-from skimage.morphology import square
-from scipy.ndimage import rotate
-from skimage import morphology
-import dask.array as da
-from dask.diagnostics import ProgressBar
-from tqdm import tqdm
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):

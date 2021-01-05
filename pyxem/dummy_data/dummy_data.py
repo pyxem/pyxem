@@ -26,8 +26,7 @@ from skimage.draw import polygon
 from hyperspy.components1d import Gaussian
 
 from pyxem.dummy_data import make_diffraction_test_data as mdtd
-from pyxem.signals.differential_phase_contrast import DPCSignal2D
-from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
+from pyxem.signals import DPCSignal2D, Diffraction2D, LazyDiffraction2D
 
 
 def get_disk_shift_simple_test_signal(lazy=False):

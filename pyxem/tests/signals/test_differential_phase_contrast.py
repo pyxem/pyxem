@@ -17,15 +17,18 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from tempfile import TemporaryDirectory
+
 import pytest
 from pytest import approx
-from tempfile import TemporaryDirectory
-import numpy as np
 import dask.array as da
+import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
 from matplotlib.pyplot import subplots
-from pyxem.signals.differential_phase_contrast import (
-    make_bivariate_histogram,
+
+import hyperspy.api as hs
+
+from pyxem.signals import (
     DPCBaseSignal,
     DPCSignal1D,
     DPCSignal2D,
@@ -33,6 +36,7 @@ from pyxem.signals.differential_phase_contrast import (
     LazyDPCSignal1D,
     LazyDPCSignal2D,
 )
+from pyxem.signals.differential_phase_contrast import make_bivariate_histogram
 import pyxem.dummy_data as dd
 import pyxem as pxm
 
@@ -244,7 +248,7 @@ class TestBivariateHistogram:
         s_random.get_bivariate_histogram()
 
     def test_masked_get_bivariate_histogram(self):
-        s = pxm.DPCSignal2D(np.zeros((2, 5, 5)))
+        s = pxm.signals.DPCSignal2D(np.zeros((2, 5, 5)))
         value = 3
         s.data[0, 0, 0] = value
         s_hist = s.get_bivariate_histogram(bins=10, histogram_range=(-5, 5))
@@ -453,7 +457,7 @@ class TestDpcsignalIo:
         assert s.axes_manager.navigation_dimension == 1
         filename = os.path.join(self.tmpdir.name, "dpcbasesignal.hspy")
         s.save(filename)
-        s_load = pxm.load(filename)
+        s_load = hs.load(filename)
         assert s.__class__ == s_load.__class__
         assert s_load.axes_manager.signal_dimension == 0
         assert s_load.axes_manager.navigation_dimension == 1
@@ -464,7 +468,7 @@ class TestDpcsignalIo:
         assert s.axes_manager.navigation_dimension == 1
         filename = os.path.join(self.tmpdir.name, "dpcsignal1d.hspy")
         s.save(filename)
-        s_load = pxm.load(filename)
+        s_load = hs.load(filename)
         assert s.__class__ == s_load.__class__
         assert s_load.axes_manager.signal_dimension == 1
         assert s_load.axes_manager.navigation_dimension == 1
@@ -475,7 +479,7 @@ class TestDpcsignalIo:
         assert s.axes_manager.navigation_dimension == 1
         filename = os.path.join(self.tmpdir.name, "dpcsignal2d.hspy")
         s.save(filename)
-        s_load = pxm.load(filename)
+        s_load = hs.load(filename)
         assert s.__class__ == s_load.__class__
         assert s_load.axes_manager.signal_dimension == 2
         assert s_load.axes_manager.navigation_dimension == 1
@@ -485,7 +489,7 @@ class TestDpcsignalIo:
         s.metadata.General.title = "test_data"
         filename = os.path.join(self.tmpdir.name, "test_metadata.hspy")
         s.save(filename)
-        s_load = pxm.load(filename)
+        s_load = hs.load(filename)
         assert s_load.metadata.General.title == "test_data"
 
     def test_retain_axes_manager(self):
@@ -496,7 +500,7 @@ class TestDpcsignalIo:
         s_sa0.units, s_sa1.units, s_sa0.name, s_sa1.name = "a", "b", "e", "f"
         filename = os.path.join(self.tmpdir.name, "test_axes_manager.hspy")
         s.save(filename)
-        s_load = pxm.load(filename)
+        s_load = hs.load(filename)
         assert s_load.axes_manager[1].offset == 20
         assert s_load.axes_manager[2].offset == 10
         assert s_load.axes_manager[1].scale == 0.2

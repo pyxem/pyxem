@@ -17,16 +17,16 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import copy
-import numpy as np
 
-import pyxem.utils.pixelated_stem_tools as pst
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+from scipy.ndimage import rotate, gaussian_filter
 
 from hyperspy.signals import BaseSignal, Signal1D, Signal2D
 from hyperspy._signals.lazy import LazySignal
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from scipy.ndimage import rotate, gaussian_filter
+import pyxem.utils.pixelated_stem_tools as pst
 
 
 def make_bivariate_histogram(

@@ -16,9 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import Signal2D
 import numpy as np
-from pyxem.signals import transfer_signal_axes
+
+from hyperspy.signals import Signal2D
+
+from pyxem.utils.signal import transfer_signal_axes
 
 
 def _get_rotation_matrix(x_new):

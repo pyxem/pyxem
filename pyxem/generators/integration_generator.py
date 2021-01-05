@@ -19,14 +19,15 @@
 """Generating subpixel resolution on diffraction vectors."""
 
 import numpy as np
-from hyperspy.signals import BaseSignal
 from skimage import morphology
 from skimage.measure import label
 from scipy import ndimage as ndi
 from scipy.ndimage.measurements import center_of_mass
 
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from hyperspy.signals import BaseSignal
+
 from pyxem.generators.subpixelrefinement_generator import _get_pixel_vectors
+from pyxem.signals import DiffractionVectors
 
 
 def _get_intensities(z, vectors, radius=1):

@@ -20,7 +20,8 @@ import pytest
 import numpy as np
 from numpy.testing import assert_equal
 import dask.array as da
-from pyxem.signals.diffraction2d import Diffraction2D
+
+from pyxem.signals import Diffraction2D
 import pyxem.utils.marker_tools as mt
 
 
