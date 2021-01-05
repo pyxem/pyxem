@@ -19,6 +19,7 @@
 import numpy as np
 import pytest
 import diffsims as ds
+from matplotlib import pyplot as plt
 
 from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
@@ -50,7 +51,7 @@ def test_TemplateMatchingResults_plot_best_results_on_signal(diffraction_pattern
     )
     indexer = TemplateIndexationGenerator(diffraction_pattern, library)
     match_results = indexer.correlate()
-    match_results.plot_best_matching_results_on_signal(diffraction_pasttern, library=library)
+    match_results.plot_best_matching_results_on_signal(diffraction_pattern, library=library)
     plt.close("all")
 
 

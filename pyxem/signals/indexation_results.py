@@ -98,7 +98,7 @@ def _peaks_from_best_template(single_match_result, library, rank=0):
     phase_names = list(library.keys())
     phase_index = int(best_fit[0])
     phase = phase_names[phase_index]
-    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1]))["Sim"]
+    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1:4]))["Sim"]
 
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
@@ -194,7 +194,7 @@ class TemplateMatchingResults(GenericMatchingResults):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = self.map(_peaks_from_best_template, library=library, inplace=False)
+        match_peaks = self.data.map(_peaks_from_best_template, library=library, inplace=False)
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
