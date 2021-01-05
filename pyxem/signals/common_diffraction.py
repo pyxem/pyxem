@@ -163,7 +163,7 @@ class CommonDiffraction:
         roi_info = f"{roi}"
         if self.metadata.get_item("General.title") not in ("", None):
             roi_info += f" of {self.metadata.General.title}"
-        dark_field_sum.metadata.set_item("Diffraction.intergrated_range", roi_info)
+        dark_field_sum.metadata.set_item("Diffraction.integrated_range", roi_info)
 
         return dark_field_sum
 
