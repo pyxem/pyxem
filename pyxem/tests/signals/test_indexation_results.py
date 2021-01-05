@@ -18,16 +18,43 @@
 
 import numpy as np
 import pytest
+import diffsims as ds
+from matplotlib import pyplot as plt
 
 from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
 from pyxem.signals.diffraction_vectors import DiffractionVectors
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
+from diffsims.libraries.structure_library import StructureLibrary
 from pyxem.utils.indexation_utils import OrientationResult
+from pyxem.generators.indexation_generator import TemplateIndexationGenerator
 from transforms3d.euler import euler2mat
+
 
 def test_TemplateMatchingResults_to_crystal_map():
     t = TemplateMatchingResults(np.empty((10,10,10,5)))
     return t.to_crystal_map()
+
+def test_TemplateMatchingResults_plot_best_results_on_signal(diffraction_pattern,default_structure):
+    """ Coverage testing """
+    edc = ds.DiffractionGenerator(300, 5e-2)
+    half_side_length = 4
+    rot_list = [[0,1,0],[1,0,0]]
+
+    diff_gen = ds.DiffractionLibraryGenerator(edc)
+    struc_lib = StructureLibrary(["A"], [default_structure], [rot_list])
+    library = diff_gen.get_diffraction_library(
+        struc_lib,
+        calibration=1 / half_side_length,
+        reciprocal_radius=0.8,
+        half_shape=(half_side_length,half_side_length),
+        with_direct_beam=True,
+    )
+    indexer = TemplateIndexationGenerator(diffraction_pattern, library)
+    match_results = indexer.correlate()
+    match_results.plot_best_matching_results_on_signal(diffraction_pattern, library=library)
+    plt.close("all")
+
+
 
 @pytest.fixture
 def sp_vector_match_result():
