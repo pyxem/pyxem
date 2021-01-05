@@ -21,16 +21,17 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from math import sin, cos
-from hyperspy.roi import CircleROI, Line2DROI
-from hyperspy.misc.utils import stack as stack_method
 import matplotlib.pyplot as plt
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from hyperspy.roi import CircleROI, Line2DROI
+from hyperspy.misc.utils import stack as stack_method
 from diffsims.utils.ring_pattern_utils import (
     call_ring_pattern,
     calc_radius_with_distortion,
     generate_ring_pattern,
 )
+
+from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_setup
 
 

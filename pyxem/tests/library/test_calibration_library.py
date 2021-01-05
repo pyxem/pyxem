@@ -23,7 +23,7 @@ from hyperspy.signals import Signal2D
 from hyperspy.roi import Line2DROI
 
 from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.libraries.calibration_library import CalibrationDataLibrary
+from pyxem.libraries import CalibrationDataLibrary
 
 
 @pytest.fixture
