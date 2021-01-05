@@ -60,11 +60,11 @@ setup(
     packages=find_packages(),
     extras_require=extra_feature_requirements,
     install_requires=[
-        "scikit-image >= 0.17.0", 
+        "scikit-image >= 0.17.0",
         "matplotlib >= 3.1.1",  # 3.1.0 failed
         "scikit-learn >= 0.19",  # reason unknown
         "hyperspy == 1.6.1",  # earlier versions incompatible with numpy >= 1.17.0 and hyperspy == 1.6.0 has a histogram bug
-        "diffsims >= 0.3",  # Makes use of functionality introduced in this release
+        "diffsims == 0.4.0-rc.2",  # Makes use of functionality introduced in this release
         "lmfit >= 0.9.12",
         "pyfai",
         "ipywidgets",
