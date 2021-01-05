@@ -19,3 +19,10 @@
 from .reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
 from .scattering_fit_component_lobato import ScatteringFitComponentLobato
 from .scattering_fit_component_xtables import ScatteringFitComponentXTables
+
+
+__all__ = [
+    "ReducedIntensityCorrectionComponent",
+    "ScatteringFitComponentLobato",
+    "ScatteringFitComponentXTables"
+]
