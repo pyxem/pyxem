@@ -21,7 +21,7 @@ import pytest
 from pytest import approx
 import numpy as np
 from hyperspy.signals import Signal2D
-import pyxem.dummy_data.make_diffraction_test_data as mdtd
+from pyxem.dummy_data import make_diffraction_test_data as mdtd
 
 
 class TestMakeTestData:

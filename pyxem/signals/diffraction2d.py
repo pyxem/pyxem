@@ -862,8 +862,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_disk_shift_simple_test_signal()
+        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_out = s.threshold_and_mask(
         ...     mask=mask, threshold=2, show_progressbar=False)
@@ -931,8 +930,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
 
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_disk_shift_simple_test_signal()
+        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
         >>> s_color = s_com.get_color_signal()
@@ -1623,8 +1621,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
         >>> mask_array = s.angular_mask(0.5*np.pi, np.pi)
@@ -1778,8 +1775,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s_r = s.radial_average(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
         >>> s_r.plot()
@@ -1899,8 +1895,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_average(
         ...     angleN=10, centre_x=s_com.inav[0].data,

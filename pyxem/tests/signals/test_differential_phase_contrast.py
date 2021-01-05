@@ -33,8 +33,7 @@ from pyxem.signals.differential_phase_contrast import (
     LazyDPCSignal1D,
     LazyDPCSignal2D,
 )
-import pyxem.dummy_data.dummy_data as dd
-import pyxem.utils.pixelated_stem_tools as pst
+import pyxem.dummy_data as dd
 import pyxem as pxm
 
 

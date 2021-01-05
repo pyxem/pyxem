@@ -17,7 +17,7 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-import pyxem.dummy_data.dummy_data as dd
+import pyxem.dummy_data as dd
 
 
 @pytest.mark.slow
@@ -61,7 +61,7 @@ class TestDummyDataModule:
     def test_get_square_dpc_signal(self):
         s = dd.get_square_dpc_signal()
         assert hasattr(s, "plot")
-        s_ramp = dd.get_square_dpc_signal(add_ramp=True)
+        _ = dd.get_square_dpc_signal(add_ramp=True)
         assert hasattr(s, "plot")
 
     def test_get_dead_pixel_signal(self):

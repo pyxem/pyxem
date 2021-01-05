@@ -48,7 +48,7 @@ def _get_elliptical_disk(xx, yy, x, y, semi_len0, semi_len1, rotation):
     Examples
     --------
     >>> from hyperspy.signals import Signal2D
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
     >>> xx, yy = np.meshgrid(
@@ -90,7 +90,7 @@ def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
     Examples
     --------
     >>> from hyperspy.signals import Signal2D
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> from pyxem.dummy_data importmake_diffraction_test_data as mdtd
     >>> s = Signal2D(np.zeros((110, 130)))
     >>> s.axes_manager[0].offset, s.axes_manager[1].offset = -50, -80
     >>> xx, yy = np.meshgrid(
@@ -113,7 +113,7 @@ def _get_elliptical_ring(xx, yy, x, y, semi_len0, semi_len1, rotation, lw_r=1):
     return ellipse
 
 
-class EllipseRing(object):
+class EllipseRing:
     """Generate an elliptical ring.
 
     Parameters
@@ -134,7 +134,7 @@ class EllipseRing(object):
 
     Examples
     --------
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
     >>> ellipse = mdtd.EllipseRing(
     ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
     ...     rotation=1.57, intensity=10, lw_r=2)
@@ -183,7 +183,7 @@ class EllipseRing(object):
         return self.ellipse
 
 
-class EllipseDisk(object):
+class EllipseDisk:
     """Generate an elliptical disk.
 
     Parameters
@@ -204,7 +204,7 @@ class EllipseDisk(object):
 
     Examples
     --------
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
     >>> ellipse_disk = mdtd.EllipseDisk(
     ...     xx=20, yy=30, x0=10, y0=15, semi_len0=4, semi_len1=6,
     ...     rotation=1.57, intensity=10)
@@ -244,7 +244,7 @@ class EllipseDisk(object):
         return self.ellipse
 
 
-class Circle(object):
+class Circle:
     def __init__(self, xx, yy, x0, y0, r, intensity, scale, lw=None):
         self.x0 = x0
         self.y0 = y0
@@ -304,7 +304,7 @@ class Circle(object):
         self.circle[circle_ring_indices] = self.intensity
 
 
-class Disk(object):
+class Disk:
     """Disk object, with outer edge of the ring at r."""
 
     def __init__(self, xx, yy, scale, x0, y0, r, intensity):
@@ -334,7 +334,7 @@ class Disk(object):
         return self.z.circle
 
 
-class Ring(object):
+class Ring:
     """Ring object, with outer edge of the ring at r+lr, and inner r-lr.
 
     The radius of the ring is defined as in the middle of the line making
@@ -368,7 +368,7 @@ class Ring(object):
         return self.z.circle
 
 
-class MakeTestData(object):
+class MakeTestData:
     """MakeTestData is an object containing a generated test signal.
 
     The default signal consists of a Disk and concentric Ring, with the
@@ -698,7 +698,7 @@ def generate_4d_data(
 
     Examples
     --------
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
     >>> s = mdtd.generate_4d_data(show_progressbar=False)
     >>> s.plot()
 
@@ -871,7 +871,7 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     Examples
     --------
     >>> import pyxem as pxm
-    >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+    >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
     >>> xf = np.random.randint(65, 70, size=(4, 5))
     >>> yf = np.random.randint(115, 120, size=(4, 5))
     >>> semi0 = np.random.randint(35, 40, size=(4, 5))
@@ -892,7 +892,7 @@ def _make_4d_peak_array_test_data(xf, yf, semi0, semi1, rot, nt=20):
     return peak_array
 
 
-class DiffractionTestImage(object):
+class DiffractionTestImage:
     def __init__(
         self,
         disk_r=7,
@@ -940,7 +940,7 @@ class DiffractionTestImage(object):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+        >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
         >>> di = mdtd.DiffractionTestImage()
         >>> di.add_disk(x=128, y=128, intensity=10.)
         >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)
@@ -1083,7 +1083,7 @@ class DiffractionTestImage(object):
         s.plot()
 
 
-class DiffractionTestDataset(object):
+class DiffractionTestDataset:
     def __init__(
         self,
         probe_x=10,
@@ -1107,7 +1107,7 @@ class DiffractionTestDataset(object):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.make_diffraction_test_data as mdtd
+        >>> from pyxem.dummy_data import make_diffraction_test_data as mdtd
         >>> di = mdtd.DiffractionTestImage(intensity_noise=False)
         >>> di.add_disk(x=128, y=128, intensity=10.)
         >>> di.add_cubic_disks(vx=20, vy=20, intensity=2., n=5)

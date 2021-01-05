@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 import numpy as np
 import dask.array as da
 from skimage.feature import match_template, blob_dog, blob_log
@@ -595,7 +594,7 @@ def _peak_find_dog_single_frame(
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> import pyxem.utils.dask_tools as dt
     >>> peaks = _peak_find_dog_single_frame(s.data[0, 0])
 
@@ -1630,7 +1629,7 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
     >>> peak_array = dt._peak_find_dog(dask_array)
     >>> r_p_array = dt._peak_refinement_centre_of_mass(
@@ -1745,8 +1744,7 @@ def _get_experimental_square(z, vector, square_size):
 
     Examples
     --------
-    >>> import pyxem.dummy_data.dummy_data as dd
-    >>> d = dd.get_cbed_signal()
+    >>> d = pxm.dummy_data.get_cbed_signal()
     >>> import pyxem.utils.dask_tools as dt
     >>> sub_d = dt._get_experimental_square(d.data[0,0,:,:], [50,50], 30)
 

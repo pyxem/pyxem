@@ -203,7 +203,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=True)
+        >>> s = pxm.dummy_data.get_square_dpc_signal(add_ramp=True)
         >>> s_corr = s.correct_ramp()
         >>> s_corr.plot()
 
@@ -247,7 +247,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.dummy_data.get_simple_dpc_signal()
         >>> s_magnitude = s.get_magnitude_signal()
         >>> s_magnitude.plot()
 
@@ -316,8 +316,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> from pyxem.dummy_data import dummy_data
-        >>> s = dummy_data.get_square_dpc_signal()
+        >>> s = pxm.dummy_data.get_square_dpc_signal()
         >>> s_phase = s.phase_retrieval()
         >>> s_phase.plot()
         """
@@ -426,7 +425,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.dummy_data.get_simple_dpc_signal()
         >>> s_color = s.get_phase_signal(rotation=20)
         >>> s_color.plot()
 
@@ -472,7 +471,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.dummy_data.get_simple_dpc_signal()
         >>> s_color = s.get_color_signal()
         >>> s_color.plot()
 
@@ -547,7 +546,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.dummy_data.get_simple_dpc_signal()
         >>> fig = s.get_color_image_with_indicator()
         >>> fig.savefig("simple_dpc_test_signal.png")
 
@@ -626,7 +625,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
+        >>> s = pxm.dummy_data.get_stripe_pattern_dpc_signal()
         >>> s_hist = s.get_bivariate_histogram()
         >>> s_hist.plot()
 
@@ -660,7 +659,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_stripe_pattern_dpc_signal()
+        >>> s = pxm.dummy_data.get_stripe_pattern_dpc_signal()
         >>> s
         <DPCSignal2D, title: , dimensions: (2|50, 100)>
         >>> s_rot = s.flip_axis_90_degrees()
@@ -704,7 +703,7 @@ class DPCSignal2D(Signal2D):
 
         Rotate data by 10 degrees clockwise
 
-        >>> s = ps.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.dummy_data.get_simple_dpc_signal()
         >>> s_rot = s.rotate_data(10)
         >>> s_rot.plot()
 
@@ -731,7 +730,7 @@ class DPCSignal2D(Signal2D):
 
         Rotate beam shifts by 10 degrees clockwise
 
-        >>> s = ps.dummy_data.get_simple_dpc_signal()
+        >>> s = pxm.dummy_data.get_simple_dpc_signal()
         >>> s_new = s.rotate_beam_shifts(10)
         >>> s_new.plot()
 
@@ -759,7 +758,7 @@ class DPCSignal2D(Signal2D):
 
         Examples
         --------
-        >>> s = ps.dummy_data.get_square_dpc_signal(add_ramp=False)
+        >>> s = pxm.dummy_data.get_square_dpc_signal(add_ramp=False)
         >>> s_blur = s.gaussian_blur()
 
         Different sigma
