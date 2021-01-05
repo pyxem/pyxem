@@ -21,6 +21,7 @@ import numpy as np
 
 import hyperspy.api as hs
 
+from pyxem.signals.common_diffraction import OUT_SIGNAL_AXES_DOCSTRING
 from pyxem.utils.virtual_images_utils import (normalize_virtual_images,
                                               get_vectors_mesh)
 
@@ -49,7 +50,7 @@ class VirtualImageGenerator:
         self.roi_list = []
 
     def get_concentric_virtual_images(self, k_min, k_max, k_steps,
-                                      normalize=False):
+                                      normalize=False, out_signal_axes=None):
         """
         Obtain the intensity scattered at each navigation position in an
         Diffraction2D Signal by summation over a series of concentric
@@ -68,6 +69,7 @@ class VirtualImageGenerator:
 
         k_steps : int
             Number of steps within the annular integration window
+        %s
         %s
 
         Returns
@@ -90,9 +92,11 @@ class VirtualImageGenerator:
                          'offset': k_min}
 
         return self._get_virtual_images(roi_args_list, normalize,
-                                        new_axis_dict=new_axis_dict)
+                                        new_axis_dict=new_axis_dict,
+                                        out_signal_axes=out_signal_axes)
 
-    get_concentric_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
+    get_concentric_virtual_images.__doc__ %= (NORMALISE_DOCSTRING,
+                                              OUT_SIGNAL_AXES_DOCSTRING)
 
     def set_ROI_mesh(self, vector1_norm, vector2_norm, vector_norm_max,
                      angle=0.0, shear=0.0, ROI_radius=None):
@@ -146,7 +150,8 @@ class VirtualImageGenerator:
                             axes=self.signal.axes_manager.signal_axes)
             self.roi_list.append(roi)
 
-    def get_virtual_images_from_mesh(self, normalize=False):
+    def get_virtual_images_from_mesh(self, normalize=False,
+                                     out_signal_axes=None):
         """
         Obtain the intensity scattered at each navigation position in an
         Diffraction2D Signal by summation over the ROIs defined in the
@@ -154,6 +159,7 @@ class VirtualImageGenerator:
 
         Parameters
         ----------
+        %s
         %s
 
 
@@ -170,14 +176,17 @@ class VirtualImageGenerator:
                              "`set_ROI_mesh` method.")
         new_axis_dict = {'name': 'ROI index'}
         out = self._get_virtual_images(self.roi_list, normalize,
-                                       new_axis_dict=new_axis_dict)
+                                       new_axis_dict=new_axis_dict,
+                                       out_signal_axes=out_signal_axes)
 
         return out
 
-    get_virtual_images_from_mesh.__doc__ %= (NORMALISE_DOCSTRING)
+    get_virtual_images_from_mesh.__doc__ %= (NORMALISE_DOCSTRING,
+                                             OUT_SIGNAL_AXES_DOCSTRING)
 
 
-    def _get_virtual_images(self, roi_list, normalize, new_axis_dict):
+    def _get_virtual_images(self, roi_list, normalize, new_axis_dict,
+                            out_signal_axes=None):
         """
         Obtain the intensity scattered at each navigation position in an
         Diffraction2D Signal by summation over the roi defined by the
@@ -187,6 +196,7 @@ class VirtualImageGenerator:
         ----------
         roi_list : list of hyperspy ROI or list of `hyperspy.roi.CircleROI` arguments
             List of ROI or Arguments required to initialise a CircleROI
+        %s
         %s
 
         Returns
@@ -200,7 +210,7 @@ class VirtualImageGenerator:
             self.roi_list = [hs.roi.CircleROI(*r) for r in roi_list]
 
         vdfs = [
-            self.signal.get_integrated_intensity(roi)
+            self.signal.get_integrated_intensity(roi, out_signal_axes)
             for roi in self.roi_list
             ]
 
@@ -211,7 +221,9 @@ class VirtualImageGenerator:
 
         if vdfim.metadata.has_item('Diffraction.integrated_range'):
             del vdfs.metadata.Diffraction.integrated_range
-        vdfim.metadata.set_item('Diffraction.roi_list', self.roi_list)
+        vdfim.metadata.set_item('Diffraction.roi_list',
+                                [f"{roi}" for roi in self.roi_list]
+                                )
 
         # Set new axis properties
         new_axis = vdfim.axes_manager[new_axis_dict['name']]
@@ -223,7 +235,8 @@ class VirtualImageGenerator:
 
         return vdfim
 
-    _get_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
+    _get_virtual_images.__doc__ %= (NORMALISE_DOCSTRING,
+                                    OUT_SIGNAL_AXES_DOCSTRING)
 
 
 class VirtualDarkFieldGenerator(VirtualImageGenerator):
@@ -249,7 +262,8 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
         self.vectors = unique_vectors
 
-    def get_virtual_dark_field_images(self, radius, normalize=False):
+    def get_virtual_dark_field_images(self, radius, normalize=False,
+                                      out_signal_axes=None):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an Diffraction2D Signal by summation in a
         circular window of specified radius.
@@ -259,6 +273,7 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
         radius : float
             Radius of the integration window - in units of the reciprocal
             space.
+        %s
         %s
 
         Returns
@@ -270,11 +285,13 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
         roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
         new_axis_dict = {'name': 'Vector index'}
         vdfim = self._get_virtual_images(roi_args_list, normalize,
-                                         new_axis_dict=new_axis_dict)
+                                         new_axis_dict=new_axis_dict,
+                                         out_signal_axes=out_signal_axes)
 
         # Assign vectors used to generate images to vdfim attribute.
         vdfim.vectors = self.vectors
 
         return vdfim
 
-    get_virtual_dark_field_images.__doc__ %= (NORMALISE_DOCSTRING)
+    get_virtual_dark_field_images.__doc__ %= (NORMALISE_DOCSTRING,
+                                              OUT_SIGNAL_AXES_DOCSTRING)
