@@ -24,6 +24,7 @@ from hyperspy._signals.signal2d import Signal2D
 from pyxem import ElectronDiffraction2D
 from pyxem.signals.indexation_results import TemplateMatchingResults
 from pyxem.generators.indexation_generator import (
+    IndexationGenerator
     TemplateIndexationGenerator,
     ProfileIndexationGenerator,
     VectorIndexationGenerator)
@@ -42,6 +43,10 @@ from diffsims.libraries.structure_library import StructureLibrary
 
 from pyxem.utils.indexation_utils import OrientationResult
 
+def test_old_indexer_routine():
+    with pytest.raise(ValueError):
+        _ = IndexationGenerator('a','b')
+
 @pytest.mark.parametrize("method",['fast_correlation',
                         'zero_mean_normalized_correlation'])
 def test_TemplateIndexationGenerator(default_structure,method):
@@ -58,7 +63,7 @@ def test_TemplateIndexationGenerator(default_structure,method):
     edp = ElectronDiffraction2D(np.random.rand(2,2,200,200))
     indexer = TemplateIndexationGenerator(edp,library)
 
-    z = indexer.correlate(method=method,n_largest=2)
+    z = indexer.correlate(method=method,n_largest=2,mask=np.array([[1,0],[1,1]]))
     assert isinstance(z,TemplateMatchingResults)
     assert isinstance(z.data,Signal2D)
     assert z.data.data.shape[0:2] == edp.data.shape[0:2]
