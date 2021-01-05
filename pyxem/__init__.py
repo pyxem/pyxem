@@ -32,6 +32,15 @@ from pyxem.utils.io_utils import load_mib
 
 from . import release_info
 
+__all__ = [
+    "components",
+    "detectors",
+    "dummy_data",
+    "generators",
+    "signals",
+    "load_mib",
+    ]
+
 __version__ = release_info.version
 __author__ = release_info.author
 __copyright__ = release_info.copyright
@@ -40,4 +49,3 @@ __license__ = release_info.license
 __maintainer__ = release_info.maintainer
 __email__ = release_info.email
 __status__ = release_info.status
-
