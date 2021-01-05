@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.dpc_tools, downstreamed to diffsims or up to differential_phase_contrast.py
 - utils.diffraction_tools, downstreamed to diffsims
 - utils.sim_utils, use the relevant diffsims functionality
+- utils.calibration_utils, downstreamed to diffsims
 - The diffraction_component and scalable_reference_pattern modules have been removed (#674)
 - Diffraction2D.remove_dead_pixels has been removed, use .correct_bad_pixels (#681)
 - Diffraction2D.remove_background, has been moved to .subtract_diffraction_background (#697)
