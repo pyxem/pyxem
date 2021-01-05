@@ -37,15 +37,15 @@ def normalize_virtual_images(im):
     return imn
 
 
-def get_vectors_mesh(g_norm, g_norm_max, angle=0.0, shear=0.0):
+def get_vectors_mesh(g1_norm, g2_norm, g_norm_max, angle=0.0, shear=0.0):
     """
     Calculate vectors coordinates of a mesh defined by a norm, a rotation and
     a shear component.
 
     Parameters
     ----------
-    g_norm : float
-        The norm of one of the two vectors of the mesh.
+    g1_norm, g2_norm : float
+        The norm of the two vectors of the mesh.
     g_norm_max : float
         The maximum value for the norm of each vector.
     angle : float, optional
@@ -71,8 +71,13 @@ def get_vectors_mesh(g_norm, g_norm_max, angle=0.0, shear=0.0):
     if shear < 0 or shear > 1:
         raise ValueError("The `shear` value must be in the interval [0, 1].")
 
-    order = int(np.ceil(g_norm_max/g_norm))
-    x = y = np.arange(-g_norm*order, g_norm*(order+1), g_norm)
+    order1 = int(np.ceil(g_norm_max/g1_norm))
+    order2 = int(np.ceil(g_norm_max/g2_norm))
+    order = max(order1, order2)
+
+    x = np.arange(-g1_norm*order, g1_norm*(order+1), g1_norm)
+    y = np.arange(-g2_norm*order, g2_norm*(order+1), g2_norm)
+
     xx, yy = np.meshgrid(x, y)
     vectors = np.stack(np.meshgrid(x, y)).reshape((2, (2*order+1)**2))
 
@@ -81,4 +86,4 @@ def get_vectors_mesh(g_norm, g_norm_max, angle=0.0, shear=0.0):
     vectors = transformation @ vectors
     norm = np.linalg.norm(vectors, axis=0)
 
-    return vectors[:, norm<g_norm_max].T
+    return vectors[:, norm<=g_norm_max].T

@@ -38,6 +38,9 @@ class VirtualImageGenerator:
     ----------
     signal : Diffraction2D or subclass
         The signal of electron diffraction patterns to be indexed.
+    roi_list: list of roi
+        The list of roi used to defined the integration area of the virtual
+        images in the signal space.
 
     """
 
@@ -47,7 +50,8 @@ class VirtualImageGenerator:
 
     def get_concentric_virtual_images(self, k_min, k_max, k_steps,
                                       normalize=False):
-        """Obtain the intensity scattered at each navigation position in an
+        """
+        Obtain the intensity scattered at each navigation position in an
         Diffraction2D Signal by summation over a series of concentric
         in annuli between a specified inner and outer radius in a number of
         steps.
@@ -68,9 +72,9 @@ class VirtualImageGenerator:
 
         Returns
         -------
-        virtual_images : VDFImage
-            VDFImage object containing virtual images for all steps
-            within the annulus.
+        virtual_images : VirtualDarkFieldImage
+            VirtualDarkFieldImage object containing virtual images for all
+            steps within the annulus.
         """
         k_step = (k_max - k_min) / k_steps
         k0s = np.linspace(k_min, k_max - k_step, k_steps)
@@ -90,10 +94,38 @@ class VirtualImageGenerator:
 
     get_concentric_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
 
-    def set_mesh(self, g_norm, g_norm_max, angle=0.0, shear=0.0,
-                 ROI_radius=None):
+    def set_ROI_mesh(self, vector1_norm, vector2_norm, vector_norm_max,
+                     angle=0.0, shear=0.0, ROI_radius=None):
+        """
+        Set and display a mesh of ROI in the signal space. The ROIs are stored
+        in the ``roi_list`` attribute and will be by the
+        ``get_virtual_images_from_mesh`` method.
 
-        vectors = get_vectors_mesh(g_norm, g_norm_max, angle, shear)
+        Parameters
+        ----------
+        vector1_norm, vector2_norm : float
+            The norm of one of the two vectors of the mesh. The position of the
+            other vector is defined by the shear parameter.
+        vector_norm_max : float
+            The maximum value for the norm of each vector.
+        angle : float, optional
+            The rotation of the mesh in degree.
+        shear : float, optional
+            The shear of the mesh. It must be in the interval [0, 1].
+            The default is 0.0.
+        ROI_radius : None or float, optional
+            The radius of the ROI. If None, half of the minimum value between
+            ``vector1_norm`` and ``vector1_norm`` is used.
+            The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
+
+        vectors = get_vectors_mesh(vector1_norm, vector2_norm, vector_norm_max,
+                                   angle, shear)
 
         if len(self.roi_list) > 0:
             for roi in self.roi_list:
@@ -101,29 +133,53 @@ class VirtualImageGenerator:
             self.roi_list = []
 
         if ROI_radius is None:
-            ROI_radius = g_norm / 2
+            ROI_radius = min(vector1_norm, vector2_norm) / 2
 
-        self.roi_list = [(*v, ROI_radius) for v in vectors]
+        roi_args_list = [(*v, ROI_radius) for v in vectors]
 
         if self.signal._plot is None:
             self.signal.plot()
 
-        for r in self.roi_list:
-            roi = hs.roi.CircleROI(*r, ROI_radius)
+        for roi_args in roi_args_list:
+            roi = hs.roi.CircleROI(*roi_args)
             roi.add_widget(self.signal,
-                           axes=self.signal.axes_manager.signal_axes)
+                            axes=self.signal.axes_manager.signal_axes)
             self.roi_list.append(roi)
 
     def get_virtual_images_from_mesh(self, normalize=False):
+        """
+        Obtain the intensity scattered at each navigation position in an
+        Diffraction2D Signal by summation over the ROIs defined in the
+        ``roi_list`` attribute.
 
-        new_axis_dict = {'name': 'Vector index'}
+        Parameters
+        ----------
+        %s
+
+
+        Returns
+        -------
+        virtual_images : VirtualDarkFieldImage
+            VirtualDarkFieldImage object containing the virtual images for all
+            ROIs, with the navigation axis as ROI index.
+
+        """
+        if len(self.roi_list) == 0:
+            raise ValueError("The `roi_list` attribute can't be of length 0. "
+                             "You can set it manually and use the convenience "
+                             "`set_ROI_mesh` method.")
+        new_axis_dict = {'name': 'ROI index'}
         out = self._get_virtual_images(self.roi_list, normalize,
                                        new_axis_dict=new_axis_dict)
 
         return out
 
+    get_virtual_images_from_mesh.__doc__ %= (NORMALISE_DOCSTRING)
+
+
     def _get_virtual_images(self, roi_list, normalize, new_axis_dict):
-        """Obtain the intensity scattered at each navigation position in an
+        """
+        Obtain the intensity scattered at each navigation position in an
         Diffraction2D Signal by summation over the roi defined by the
         ``roi_list`` parameter.
 
@@ -138,7 +194,7 @@ class VirtualImageGenerator:
         virtual_images : VDFImage
             VDFImage object containing the virtual images
         """
-        if isinstance(roi_list[0], hs.roi.BaseROI):
+        if isinstance(roi_list[0], hs.roi.CircleROI):
             self.roi_list = self.roi_list
         else:
             self.roi_list = [hs.roi.CircleROI(*r) for r in roi_list]
@@ -207,9 +263,9 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
         Returns
         -------
-        vdfs : VDFImage
-            VDFImage object containing virtual dark field images for all unique
-            vectors.
+        vdfs : VirtualDarkFieldImage
+            VirtualDarkFieldImage object containing virtual dark field images
+            for all unique vectors.
         """
         roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
         new_axis_dict = {'name': 'Vector index'}
