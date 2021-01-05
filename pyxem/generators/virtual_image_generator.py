@@ -21,7 +21,8 @@ import numpy as np
 
 import hyperspy.api as hs
 
-from pyxem.utils.virtual_images_utils import normalize_virtual_images
+from pyxem.utils.virtual_images_utils import (normalize_virtual_images,
+                                              get_vectors_mesh)
 
 
 NORMALISE_DOCSTRING = """normalize : boolean
@@ -42,6 +43,7 @@ class VirtualImageGenerator:
 
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
+        self.roi_list = []
 
     def get_concentric_virtual_images(self, k_min, k_max, k_steps,
                                       normalize=False):
@@ -88,15 +90,47 @@ class VirtualImageGenerator:
 
     get_concentric_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
 
-    def _get_virtual_images(self, roi_args_list, normalize, new_axis_dict):
+    def set_mesh(self, g_norm, g_norm_max, angle=0.0, shear=0.0,
+                 ROI_radius=None):
+
+        vectors = get_vectors_mesh(g_norm, g_norm_max, angle, shear)
+
+        if len(self.roi_list) > 0:
+            for roi in self.roi_list:
+                roi.remove_widget(self.signal)
+            self.roi_list = []
+
+        if ROI_radius is None:
+            ROI_radius = g_norm / 2
+
+        self.roi_list = [(*v, ROI_radius) for v in vectors]
+
+        if self.signal._plot is None:
+            self.signal.plot()
+
+        for r in self.roi_list:
+            roi = hs.roi.CircleROI(*r, ROI_radius)
+            roi.add_widget(self.signal,
+                           axes=self.signal.axes_manager.signal_axes)
+            self.roi_list.append(roi)
+
+    def get_virtual_images_from_mesh(self, normalize=False):
+
+        new_axis_dict = {'name': 'Vector index'}
+        out = self._get_virtual_images(self.roi_list, normalize,
+                                       new_axis_dict=new_axis_dict)
+
+        return out
+
+    def _get_virtual_images(self, roi_list, normalize, new_axis_dict):
         """Obtain the intensity scattered at each navigation position in an
         Diffraction2D Signal by summation over the roi defined by the
-        ``roi_args_list`` parameter.
+        ``roi_list`` parameter.
 
         Parameters
         ----------
-        roi_args_list : list of `hyperspy.roi.CircleROI` arguments
-            Arguments required to initialise a CircleROI
+        roi_list : list of hyperspy ROI or list of `hyperspy.roi.CircleROI` arguments
+            List of ROI or Arguments required to initialise a CircleROI
         %s
 
         Returns
@@ -104,15 +138,24 @@ class VirtualImageGenerator:
         virtual_images : VDFImage
             VDFImage object containing the virtual images
         """
+        if isinstance(roi_list[0], hs.roi.BaseROI):
+            self.roi_list = self.roi_list
+        else:
+            self.roi_list = [hs.roi.CircleROI(*r) for r in roi_list]
+
         vdfs = [
-            self.signal.get_integrated_intensity(hs.roi.CircleROI(*roi_args))
-            for roi_args in roi_args_list
+            self.signal.get_integrated_intensity(roi)
+            for roi in self.roi_list
             ]
 
         vdfim = hs.stack(vdfs, new_axis_name=new_axis_dict['name'],
                          show_progressbar=False)
 
         vdfim.set_signal_type("virtual_dark_field")
+
+        if vdfim.metadata.has_item('Diffraction.integrated_range'):
+            del vdfs.metadata.Diffraction.integrated_range
+        vdfim.metadata.set_item('Diffraction.roi_list', self.roi_list)
 
         # Set new axis properties
         new_axis = vdfim.axes_manager[new_axis_dict['name']]
