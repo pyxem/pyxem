@@ -19,10 +19,9 @@
 """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
 
 import numpy as np
-from warnings import warn
 
 import hyperspy.api as hs
-from hyperspy.signals import BaseSignal, Signal2D
+from hyperspy.signals import Signal2D
 from hyperspy._signals.lazy import LazySignal
 from hyperspy._signals.signal1d import LazySignal1D
 from hyperspy._signals.signal2d import LazySignal2D
@@ -30,9 +29,6 @@ from hyperspy.misc.utils import isiterable
 
 from pyFAI.units import to_unit
 
-from pyxem.signals.diffraction1d import Diffraction1D
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
 from pyxem.signals.differential_phase_contrast import (
     DPCBaseSignal,
     DPCSignal1D,
@@ -59,7 +55,6 @@ from pyxem.utils.expt_utils import (
     regional_filter,
     circular_mask,
     find_beam_offset_cross_correlation,
-    peaks_as_gvectors,
     convert_affine_to_transform,
     apply_transformation,
     find_beam_center_blur,
@@ -784,7 +779,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         if align_kwargs is None:
             align_kwargs = {}
 
-        nav_size = self.axes_manager.navigation_size
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
@@ -1696,14 +1690,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                              ' Ultramicroscopy, 110(10), 1279–1289.\n'
                              ' https://doi.org/10.1016/j.ultramic.2010.05.010')
 
-        if method is 'Omega':
+        if method == 'Omega':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
             if dqe is not None:
                 sum_points = self.get_azimuthal_integral1d(npt=npt,sum=True,**kwargs).mean(axis=navigation_axes)
                 variance = variance - ((sum_points**-1)*dqe)
 
-        elif method is 'r':
+        elif method == 'r':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
             integration_squared = (self ** 2).get_azimuthal_integral1d(npt=npt, **kwargs)
             # Full variance is the same as the unshifted phi=0 term in angular correlation
@@ -1717,7 +1711,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             if spatial:
                 return variance, full_variance
 
-        elif method is 're':
+        elif method == 're':
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
             integration_squared = (self ** 2).get_azimuthal_integral1d(
                                                                        npt=npt,
@@ -1729,7 +1723,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
                 variance = variance - (sum_int**-1)*(1/dqe)
 
-        elif method is 'VImage':
+        elif method == 'VImage':
             variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
             if dqe is not None:
                 variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
@@ -1997,7 +1991,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             self.axes_manager.signal_axes[1].scale,
         ]
 
-        unit = to_unit(self.unit)
         sig_shape = self.axes_manager.signal_shape
         setup = _get_setup(wavelength, self.unit, pixel_scale, radial_range)
         detector, dist, radial_range = setup
@@ -2379,7 +2372,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
-        unit = self.unit
         if radial_range is None:
             radial_range = _get_radial_extent(
                 ai=self.ai, shape=sig_shape, unit=self.unit
@@ -2493,7 +2485,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
-        unit = self.unit
         radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
         radial_range[0] = 0
         integration = self.map(
@@ -2604,7 +2595,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         """
         signal_type = self._signal_type
         sig_shape = self.axes_manager.signal_shape
-        unit = self.unit
         radial_range = _get_radial_extent(ai=self.ai, shape=sig_shape, unit=self.unit)
         radial_range[0] = 0
         integration = self.map(

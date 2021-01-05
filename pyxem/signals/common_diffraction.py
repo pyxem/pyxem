@@ -23,6 +23,12 @@ from hyperspy.api import interactive
 from traits.trait_base import Undefined
 
 
+OUT_SIGNAL_AXES_DOCSTRING = """out_signal_axes : None, iterable of int or string
+            Specify which navigation axes to use as signal axes in the virtual
+            image. If None, the two first navigation axis are used.
+        """
+
+
 class CommonDiffraction:
     @property
     def unit(self):
@@ -128,9 +134,7 @@ class CommonDiffraction:
         ----------
         roi : :obj:`hyperspy.roi.BaseInteractiveROI`
             Any interactive ROI detailed in HyperSpy.
-        out_signal_axes : None, iterable of int or string
-            Specify which navigation axes to use as signal axes in the virtual
-            image. If None, the two first navigation axis are used.
+        %s
 
         Returns
         -------
@@ -159,9 +163,11 @@ class CommonDiffraction:
         roi_info = f"{roi}"
         if self.metadata.get_item("General.title") not in ("", None):
             roi_info += f" of {self.metadata.General.title}"
-        dark_field_sum.metadata.set_item("Diffraction.intergrated_range", roi_info)
+        dark_field_sum.metadata.set_item("Diffraction.integrated_range", roi_info)
 
         return dark_field_sum
+
+    get_integrated_intensity.__doc__ %= (OUT_SIGNAL_AXES_DOCSTRING)
 
 
     def add_navigation_signal(self, data, name="nav1", unit=None, nav_plot=False):

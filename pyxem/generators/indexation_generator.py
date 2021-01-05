@@ -146,8 +146,8 @@ def _correlate_templates(image, library, n_largest, method, mask):
 
             if corr_local > np.min(saved_results[:,4]):
                 row_index = np.argmin(saved_results[:,4])
-                or_saved[row_index,1:3] = or_local
-                corr_saved[row_index,4] = corr_local
+                saved_results[row_index,1:4] = orientations
+                saved_results[row_index,4] = corr_local
 
         phase_sorted = saved_results[saved_results[:,4].argsort()]
         start_slot = phase_number * n_largest

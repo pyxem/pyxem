@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - center_direct_beam now supports lazy processing (#658)
 - Several functions for processing large datasets using dask (#648, #658)
 - Methods to retrieve phase from DPC signal are added (#662)
+- Add VirtualImageGenerator.set_ROI_mesh method to set mesh of CircleROI (#700)
 
 ### Changed
 - Calibration workflow has been altered (see PR #640 for details)

@@ -21,7 +21,9 @@ import numpy as np
 
 import hyperspy.api as hs
 
-from pyxem.utils.virtual_images_utils import normalize_virtual_images
+from pyxem.signals.common_diffraction import OUT_SIGNAL_AXES_DOCSTRING
+from pyxem.utils.virtual_images_utils import (normalize_virtual_images,
+                                              get_vectors_mesh)
 
 
 NORMALISE_DOCSTRING = """normalize : boolean
@@ -37,15 +39,20 @@ class VirtualImageGenerator:
     ----------
     signal : Diffraction2D or subclass
         The signal of electron diffraction patterns to be indexed.
+    roi_list: list of roi
+        The list of roi used to defined the integration area of the virtual
+        images in the signal space.
 
     """
 
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
+        self.roi_list = []
 
     def get_concentric_virtual_images(self, k_min, k_max, k_steps,
-                                      normalize=False):
-        """Obtain the intensity scattered at each navigation position in an
+                                      normalize=False, out_signal_axes=None):
+        """
+        Obtain the intensity scattered at each navigation position in an
         Diffraction2D Signal by summation over a series of concentric
         in annuli between a specified inner and outer radius in a number of
         steps.
@@ -63,12 +70,13 @@ class VirtualImageGenerator:
         k_steps : int
             Number of steps within the annular integration window
         %s
+        %s
 
         Returns
         -------
-        virtual_images : VDFImage
-            VDFImage object containing virtual images for all steps
-            within the annulus.
+        virtual_images : VirtualDarkFieldImage
+            VirtualDarkFieldImage object containing virtual images for all
+            steps within the annulus.
         """
         k_step = (k_max - k_min) / k_steps
         k0s = np.linspace(k_min, k_max - k_step, k_steps)
@@ -84,19 +92,111 @@ class VirtualImageGenerator:
                          'offset': k_min}
 
         return self._get_virtual_images(roi_args_list, normalize,
-                                        new_axis_dict=new_axis_dict)
+                                        new_axis_dict=new_axis_dict,
+                                        out_signal_axes=out_signal_axes)
 
-    get_concentric_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
+    get_concentric_virtual_images.__doc__ %= (NORMALISE_DOCSTRING,
+                                              OUT_SIGNAL_AXES_DOCSTRING)
 
-    def _get_virtual_images(self, roi_args_list, normalize, new_axis_dict):
-        """Obtain the intensity scattered at each navigation position in an
-        Diffraction2D Signal by summation over the roi defined by the
-        ``roi_args_list`` parameter.
+    def set_ROI_mesh(self, vector1_norm, vector2_norm, vector_norm_max,
+                     angle=0.0, shear=0.0, ROI_radius=None):
+        """
+        Set and display a mesh of ROI in the signal space. The ROIs are stored
+        in the ``roi_list`` attribute and will be by the
+        ``get_virtual_images_from_mesh`` method.
 
         Parameters
         ----------
-        roi_args_list : list of `hyperspy.roi.CircleROI` arguments
-            Arguments required to initialise a CircleROI
+        vector1_norm, vector2_norm : float
+            The norm of one of the two vectors of the mesh. The position of the
+            other vector is defined by the shear parameter.
+        vector_norm_max : float
+            The maximum value for the norm of each vector.
+        angle : float, optional
+            The rotation of the mesh in degree.
+        shear : float, optional
+            The shear of the mesh. It must be in the interval [0, 1].
+            The default is 0.0.
+        ROI_radius : None or float, optional
+            The radius of the ROI. If None, half of the minimum value between
+            ``vector1_norm`` and ``vector1_norm`` is used.
+            The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
+
+        vectors = get_vectors_mesh(vector1_norm, vector2_norm, vector_norm_max,
+                                   angle, shear)
+
+        if len(self.roi_list) > 0:
+            for roi in self.roi_list:
+                roi.remove_widget(self.signal)
+            self.roi_list = []
+
+        if ROI_radius is None:
+            ROI_radius = min(vector1_norm, vector2_norm) / 2
+
+        roi_args_list = [(*v, ROI_radius) for v in vectors]
+
+        if self.signal._plot is None:
+            self.signal.plot()
+
+        for roi_args in roi_args_list:
+            roi = hs.roi.CircleROI(*roi_args)
+            roi.add_widget(self.signal,
+                            axes=self.signal.axes_manager.signal_axes)
+            self.roi_list.append(roi)
+
+    def get_virtual_images_from_mesh(self, normalize=False,
+                                     out_signal_axes=None):
+        """
+        Obtain the intensity scattered at each navigation position in an
+        Diffraction2D Signal by summation over the ROIs defined in the
+        ``roi_list`` attribute.
+
+        Parameters
+        ----------
+        %s
+        %s
+
+
+        Returns
+        -------
+        virtual_images : VirtualDarkFieldImage
+            VirtualDarkFieldImage object containing the virtual images for all
+            ROIs, with the navigation axis as ROI index.
+
+        """
+        if len(self.roi_list) == 0:
+            raise ValueError("The `roi_list` attribute can't be of length 0. "
+                             "You can set it manually and use the convenience "
+                             "`set_ROI_mesh` method.")
+        new_axis_dict = {'name': 'ROI index'}
+        out = self._get_virtual_images(self.roi_list, normalize,
+                                       new_axis_dict=new_axis_dict,
+                                       out_signal_axes=out_signal_axes)
+
+        return out
+
+    get_virtual_images_from_mesh.__doc__ %= (NORMALISE_DOCSTRING,
+                                             OUT_SIGNAL_AXES_DOCSTRING)
+
+
+    def _get_virtual_images(self, roi_list, normalize, new_axis_dict,
+                            out_signal_axes=None):
+        """
+        Obtain the intensity scattered at each navigation position in an
+        Diffraction2D Signal by summation over the roi defined by the
+        ``roi_list`` parameter.
+
+        Parameters
+        ----------
+        roi_list : list of hyperspy ROI or list of `hyperspy.roi.CircleROI` arguments
+            List of ROI or Arguments required to initialise a CircleROI
+        %s
         %s
 
         Returns
@@ -104,9 +204,14 @@ class VirtualImageGenerator:
         virtual_images : VDFImage
             VDFImage object containing the virtual images
         """
+        if isinstance(roi_list[0], hs.roi.CircleROI):
+            self.roi_list = self.roi_list
+        else:
+            self.roi_list = [hs.roi.CircleROI(*r) for r in roi_list]
+
         vdfs = [
-            self.signal.get_integrated_intensity(hs.roi.CircleROI(*roi_args))
-            for roi_args in roi_args_list
+            self.signal.get_integrated_intensity(roi, out_signal_axes)
+            for roi in self.roi_list
             ]
 
         vdfim = hs.stack(vdfs, new_axis_name=new_axis_dict['name'],
@@ -114,17 +219,24 @@ class VirtualImageGenerator:
 
         vdfim.set_signal_type("virtual_dark_field")
 
+        if vdfim.metadata.has_item('Diffraction.integrated_range'):
+            del vdfim.metadata.Diffraction.integrated_range
+        vdfim.metadata.set_item('Diffraction.roi_list',
+                                [f"{roi}" for roi in self.roi_list]
+                                )
+
         # Set new axis properties
         new_axis = vdfim.axes_manager[new_axis_dict['name']]
         for k, v in new_axis_dict.items():
             setattr(new_axis, k, v)
 
         if normalize:
-            vdfim.map(normalize_virtual_images)
+            vdfim.map(normalize_virtual_images, show_progressbar=False)
 
         return vdfim
 
-    _get_virtual_images.__doc__ %= (NORMALISE_DOCSTRING)
+    _get_virtual_images.__doc__ %= (NORMALISE_DOCSTRING,
+                                    OUT_SIGNAL_AXES_DOCSTRING)
 
 
 class VirtualDarkFieldGenerator(VirtualImageGenerator):
@@ -150,7 +262,8 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
 
         self.vectors = unique_vectors
 
-    def get_virtual_dark_field_images(self, radius, normalize=False):
+    def get_virtual_dark_field_images(self, radius, normalize=False,
+                                      out_signal_axes=None):
         """Obtain the intensity scattered to each diffraction vector at each
         navigation position in an Diffraction2D Signal by summation in a
         circular window of specified radius.
@@ -161,21 +274,24 @@ class VirtualDarkFieldGenerator(VirtualImageGenerator):
             Radius of the integration window - in units of the reciprocal
             space.
         %s
+        %s
 
         Returns
         -------
-        vdfs : VDFImage
-            VDFImage object containing virtual dark field images for all unique
-            vectors.
+        vdfs : VirtualDarkFieldImage
+            VirtualDarkFieldImage object containing virtual dark field images
+            for all unique vectors.
         """
         roi_args_list = [(v[0], v[1], radius, 0) for v in self.vectors.data]
         new_axis_dict = {'name': 'Vector index'}
         vdfim = self._get_virtual_images(roi_args_list, normalize,
-                                         new_axis_dict=new_axis_dict)
+                                         new_axis_dict=new_axis_dict,
+                                         out_signal_axes=out_signal_axes)
 
         # Assign vectors used to generate images to vdfim attribute.
         vdfim.vectors = self.vectors
 
         return vdfim
 
-    get_virtual_dark_field_images.__doc__ %= (NORMALISE_DOCSTRING)
+    get_virtual_dark_field_images.__doc__ %= (NORMALISE_DOCSTRING,
+                                              OUT_SIGNAL_AXES_DOCSTRING)

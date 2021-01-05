@@ -25,7 +25,6 @@ from numpy.random import default_rng
 
 from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.detectors.generic_flat_detector import GenericFlatDetector
 from pyxem.signals.diffraction1d import Diffraction1D
 
 
@@ -579,7 +578,7 @@ class TestVirtualImaging:
         assert vi.axes_manager.navigation_dimension == 0
         assert vi.metadata.General.title == "Integrated intensity"
         assert (
-            vi.metadata.Diffraction.intergrated_range
+            vi.metadata.Diffraction.integrated_range
             == "CircleROI(cx=3, cy=3, r=5) of Stack of "
         )
 
@@ -598,7 +597,7 @@ class TestVirtualImaging:
         assert vi.data.shape == (2,)
         assert vi.axes_manager.signal_dimension == 1
         assert vi.axes_manager.navigation_dimension == 0
-        assert vi.metadata.Diffraction.intergrated_range == "CircleROI(cx=3, cy=3, r=5)"
+        assert vi.metadata.Diffraction.integrated_range == "CircleROI(cx=3, cy=3, r=5)"
 
 
 class TestAzimuthalIntegrator:
@@ -1148,7 +1147,7 @@ class TestSubtractingDiffractionBackground:
 class TestFindHotPixels:
     @pytest.fixture()
     def hot_pixel_data_2d(self):
-        """ Values are 50, except [21, 11] and [5, 38]
+        """ Values are 50, except [21, 11] and [5, 38]
         being 50000 (to represent a "hot pixel").
         """
         data = np.ones((40, 50)) * 50
@@ -1204,7 +1203,7 @@ class TestFindHotPixels:
 class TestFindDeadPixels:
     @pytest.fixture()
     def dead_pixel_data_2d(self):
-        """Values are 50, except [14, 42] and [2, 12]
+        """Values are 50, except [14, 42] and [2, 12]
         being 0 (to represent a "dead pixel").
         """
         data = np.ones((40, 50)) * 50
