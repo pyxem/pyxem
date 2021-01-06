@@ -28,6 +28,7 @@ from diffsims.generators.library_generator import DiffractionLibraryGenerator
 from diffsims.libraries.structure_library import StructureLibrary
 
 from pyxem.generators import (
+    IndexationGenerator,
     TemplateIndexationGenerator,
     ProfileIndexationGenerator,
     VectorIndexationGenerator
