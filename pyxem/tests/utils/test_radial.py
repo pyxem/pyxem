@@ -19,9 +19,10 @@
 import pytest
 from pytest import approx
 import numpy as np
-from pyxem.signals.diffraction2d import Diffraction2D
+
+from pyxem.signals import Diffraction2D
 import pyxem.utils.radial_utils as ra
-import pyxem.dummy_data.make_diffraction_test_data as mdtd
+from pyxem.dummy_data import make_diffraction_test_data as mdtd
 
 
 @pytest.mark.slow

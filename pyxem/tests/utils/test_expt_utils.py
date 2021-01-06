@@ -21,11 +21,8 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 from matplotlib import pyplot as plt
 
-from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.detectors import Detector
-from pyxem.detectors.generic_flat_detector import GenericFlatDetector
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
 from pyxem.utils.expt_utils import (
     _index_coords,
     _cart2polar,

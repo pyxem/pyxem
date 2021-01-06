@@ -20,10 +20,9 @@ import numpy as np
 
 from hyperspy.signals import Signal2D
 
+from pyxem.signals import DiffractionVectors, VDFSegment
+from pyxem.utils.signal import transfer_signal_axes
 from pyxem.utils.segment_utils import separate_watershed
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals import transfer_signal_axes
-from pyxem.signals.segments import VDFSegment
 
 
 class VirtualDarkFieldImage(Signal2D):

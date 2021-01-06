@@ -20,3 +20,10 @@
 from .generic_flat_detector import GenericFlatDetector
 from .medipix_256x256 import Medipix256x256Detector
 from .medipix_515x515 import Medipix515x515Detector
+
+
+__all__ = [
+    "GenericFlatDetector",
+    "Medipix256x256Detector",
+    "Medipix515x515Detector",
+]

@@ -21,6 +21,7 @@ import tempfile
 
 import numpy as np
 import pytest
+
 import pyxem as pxm
 from pyxem.utils.big_data_utils import chunked_application_of_UDF, _get_chunk_size
 
@@ -50,7 +51,7 @@ the chunked version is compared with doing the entire operation in memory.
 @pytest.fixture()
 def big_electron_diffraction_pattern():
     z = np.arange(0, 160, step=1).reshape(4, 10, 2, 2)  # x_size=10, y_size=4 in hspy
-    dp = pxm.ElectronDiffraction2D(z)
+    dp = pxm.signals.ElectronDiffraction2D(z)
     return dp
 
 

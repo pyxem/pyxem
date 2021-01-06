@@ -23,9 +23,9 @@ import hyperspy.api as hs
 from matplotlib import pyplot as plt
 from numpy.random import default_rng
 
-from pyxem.signals.diffraction2d import Diffraction2D, LazyDiffraction2D
-from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals.diffraction1d import Diffraction1D
+from pyxem.signals import (
+    Diffraction1D, Diffraction2D, LazyDiffraction2D, PolarDiffraction2D
+)
 
 
 class TestComputeAndAsLazy2D:

@@ -19,19 +19,20 @@
 import pytest
 import numpy as np
 import dask.array as da
-import hyperspy.api as hs
 
-from hyperspy.signals import Signal1D, Signal2D
+from hyperspy.signals import Signal2D
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.polar_diffraction2d import PolarDiffraction2D
-from pyxem.signals.electron_diffraction2d import LazyElectronDiffraction2D
+from pyxem.signals import (
+    ElectronDiffraction1D,
+    ElectronDiffraction2D,
+    PolarDiffraction2D,
+    LazyElectronDiffraction2D
+)
 
 
 def test_init():
     z = np.zeros((2, 2, 2, 2))
-    dp = ElectronDiffraction2D(
+    _ = ElectronDiffraction2D(
         z, metadata={"Acquisition_instrument": {"SEM": "Expensive-SEM"}}
     )
 

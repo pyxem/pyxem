@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .apply_affine_transform now uses a default order of 1 (changed from 3)
 - find_peaks is now provided by hyperspy, method 'xc' now called 'template_matching'
 - virtual_annular_dark_field and virtual_bright_field renamed; now have a "lazy_" prefixing (#698)
+- Standardise how to import pyxem objects (#704)
 
 ### Removed
 - The local_gaussian_method for subpixel refinement
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.dpc_tools, downstreamed to diffsims or up to differential_phase_contrast.py
 - utils.diffraction_tools, downstreamed to diffsims
 - utils.sim_utils, use the relevant diffsims functionality
+- utils.calibration_utils, downstreamed to diffsims
 - The diffraction_component and scalable_reference_pattern modules have been removed (#674)
 - Diffraction2D.remove_dead_pixels has been removed, use .correct_bad_pixels (#681)
 - Diffraction2D.remove_background, has been moved to .subtract_diffraction_background (#697)

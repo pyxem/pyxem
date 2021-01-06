@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 from numpy.random import randint
-from pyxem.signals.diffraction2d import Diffraction2D
+from pyxem.signals import Diffraction2D
 import pyxem.utils.cluster_tools as ct
 
 

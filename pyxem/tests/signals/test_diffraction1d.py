@@ -18,11 +18,12 @@
 
 import numpy as np
 import dask.array as da
-import hyperspy.api as hs
 import pytest
 from matplotlib import pyplot as plt
 
-from pyxem.signals.diffraction1d import Diffraction1D, LazyDiffraction1D
+import hyperspy.api as hs
+
+from pyxem.signals import Diffraction1D, LazyDiffraction1D
 
 
 class TestComputeAndAsLazy1D:

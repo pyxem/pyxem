@@ -18,18 +18,13 @@
 
 import hyperspy.api as hs
 import pytest
-import diffpy.structure
 import numpy as np
-from diffsims.generators.diffraction_generator import DiffractionGenerator
 
 from pyxem.tests.generators.test_displacement_gradient_tensor_generator import (
     generate_test_vectors,
 )
-from pyxem.generators.displacement_gradient_tensor_generator import (
-    get_DisplacementGradientMap,
-)
-from pyxem.signals.strain_map import StrainMap, _get_rotation_matrix
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.generators import get_DisplacementGradientMap
+from pyxem.signals.strain_map import _get_rotation_matrix
 
 
 @pytest.fixture()

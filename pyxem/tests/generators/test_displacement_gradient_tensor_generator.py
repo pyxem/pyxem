@@ -16,10 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyxem.generators.displacement_gradient_tensor_generator import (
-    get_DisplacementGradientMap,
-    get_single_DisplacementGradientTensor,
-)
+from pyxem.generators import get_DisplacementGradientMap
 import hyperspy.api as hs
 import pytest
 import numpy as np

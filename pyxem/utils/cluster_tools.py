@@ -449,7 +449,7 @@ def _add_peak_dicts_to_signal(
     >>> peak_dicts['centre'] = np.random.randint(99, size=(2, 3, 10, 2))
     >>> peak_dicts['rest'] = np.random.randint(99, size=(2, 3, 3, 2))
     >>> peak_dicts['none'] = np.random.randint(99, size=(2, 3, 2, 2))
-    >>> s = pxm.Diffraction2D(np.random.random((2, 3, 100, 100)))
+    >>> s = pxm.signals.Diffraction2D(np.random.random((2, 3, 100, 100)))
     >>> import pyxem.utils.cluster_tools as ct
     >>> ct._add_peak_dicts_to_signal(s, peak_dicts)
     >>> s.plot()
@@ -502,7 +502,7 @@ def _sorted_cluster_dict_to_marker_list(
     >>> marker_list = ct._sorted_cluster_dict_to_marker_list(
     ...     sorted_cluster_dict)
     >>> import pyxem.utils.marker_tools as mt
-    >>> s = pxm.Diffraction2D(np.random.random((3, 4, 100, 100)))
+    >>> s = pxm.signals.Diffraction2D(np.random.random((3, 4, 100, 100)))
     >>> mt._add_permanent_markers_to_signal(s, marker_list)
 
     Different colors

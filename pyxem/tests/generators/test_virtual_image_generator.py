@@ -20,13 +20,13 @@ import pytest
 import numpy as np
 import hyperspy.api as hs
 
-from pyxem.generators.virtual_image_generator import (VirtualImageGenerator,
-                                                      VirtualDarkFieldGenerator)
-
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.diffraction2d import Diffraction2D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.virtual_dark_field_image import VirtualDarkFieldImage
+from pyxem.generators import VirtualImageGenerator, VirtualDarkFieldGenerator
+from pyxem.signals import (
+    Diffraction2D,
+    ElectronDiffraction2D,
+    DiffractionVectors,
+    VirtualDarkFieldImage
+)
 
 
 @pytest.fixture(params=[np.array([[1, 1], [2, 2]])])

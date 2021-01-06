@@ -17,52 +17,29 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import glob
 import logging
-import os
-import warnings
 
-from hyperspy.io import load
-from hyperspy.api import roi
+_logger = logging.getLogger(__name__)
 
-import numpy as np
 
-from natsort import natsorted
-
-from diffsims.generators.diffraction_generator import DiffractionGenerator
-from diffsims.generators.library_generator import DiffractionLibraryGenerator
-from diffsims.generators.library_generator import VectorLibraryGenerator
-from diffsims.sims.diffraction_simulation import DiffractionSimulation
-
-from .generators.calibration_generator import CalibrationGenerator
-
-from .signals.diffraction1d import Diffraction1D
-from .signals.diffraction2d import Diffraction2D
-from .signals.diffraction1d import LazyDiffraction1D
-from .signals.diffraction2d import LazyDiffraction2D
-from .signals.electron_diffraction1d import ElectronDiffraction1D
-from .signals.electron_diffraction2d import ElectronDiffraction2D
-from .signals.electron_diffraction1d import LazyElectronDiffraction1D
-from .signals.electron_diffraction2d import LazyElectronDiffraction2D
-from .signals.polar_diffraction2d import PolarDiffraction2D
-from .signals.polar_diffraction2d import LazyPolarDiffraction2D
-
-from .generators.red_intensity_generator1d import ReducedIntensityGenerator1D
-from .generators.pdf_generator1d import PDFGenerator1D
-from .generators.variance_generator import VarianceGenerator
-
-from .signals.diffraction_variance1d import DiffractionVariance1D
-from .signals.diffraction_variance2d import DiffractionVariance2D
-from .signals.differential_phase_contrast import DPCBaseSignal, DPCSignal1D, DPCSignal2D
-from .signals.diffraction_vectors import DiffractionVectors, DiffractionVectors2D
-from .signals.indexation_results import TemplateMatchingResults
-from .signals.virtual_dark_field_image import VirtualDarkFieldImage
-from .signals.pair_distribution_function1d import PairDistributionFunction1D
-from .signals.reduced_intensity1d import ReducedIntensity1D
+from pyxem import components
+from pyxem import detectors
+from pyxem import dummy_data
+from pyxem import generators
+from pyxem import signals
 
 from pyxem.utils.io_utils import load_mib
 
 from . import release_info
+
+__all__ = [
+    "components",
+    "detectors",
+    "dummy_data",
+    "generators",
+    "signals",
+    "load_mib",
+    ]
 
 __version__ = release_info.version
 __author__ = release_info.author
@@ -72,5 +49,3 @@ __license__ = release_info.license
 __maintainer__ = release_info.maintainer
 __email__ = release_info.email
 __status__ = release_info.status
-
-_logger = logging.getLogger(__name__)

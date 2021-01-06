@@ -15,3 +15,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
+
+from .reduced_intensity_correction_component import ReducedIntensityCorrectionComponent
+from .scattering_fit_component_lobato import ScatteringFitComponentLobato
+from .scattering_fit_component_xtables import ScatteringFitComponentXTables
+
+
+__all__ = [
+    "ReducedIntensityCorrectionComponent",
+    "ScatteringFitComponentLobato",
+    "ScatteringFitComponentXTables"
+]

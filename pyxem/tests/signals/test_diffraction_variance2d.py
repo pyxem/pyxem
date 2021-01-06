@@ -16,13 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
 import numpy as np
 
-from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
-from pyxem.signals.diffraction_variance2d import ImageVariance
-from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.signals import (
+    DiffractionVariance2D, ImageVariance, DiffractionVariance1D,
+)
+
 
 
 class TestDiffractionVariance:
