@@ -64,7 +64,8 @@ def test_TemplateIndexationGenerator(default_structure,method):
     edp = ElectronDiffraction2D(np.random.rand(2,2,200,200))
     indexer = TemplateIndexationGenerator(edp,library)
 
-    z = indexer.correlate(method=method,n_largest=2,mask=hs.signals.Signal2D(np.array([[1,0],[1,1]])))
+    mask_signal = hs.signals.Signal2D(np.array([[1,0],[1,1]])).T
+    z = indexer.correlate(method=method,n_largest=2,mask=mask_signal)
     assert isinstance(z,TemplateMatchingResults)
     assert isinstance(z.data,Signal2D)
     assert z.data.data.shape[0:2] == edp.data.shape[0:2]
