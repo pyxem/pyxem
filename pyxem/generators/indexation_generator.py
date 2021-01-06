@@ -189,8 +189,8 @@ class TemplateIndexationGenerator:
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
             'fast_correlation' or 'zero_mean_normalized_correlation'.
-        mask : Array
-            Array with the same size as signal (in navigation) or None
+        mask : hs.BaseSignal or None
+            Only apply the method a unmasked (value=1) pixel, default is None (index all pixels)
         print_help : bool
             Display information about the method used.
         **kwargs : arguments
