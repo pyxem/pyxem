@@ -11,6 +11,7 @@ def mock_simulation():
                                                 [5, 12, 0],  # 13
                                                 [8, 15, 0],  # 17
                                                 [7, 24, 0]])  # 25
+    mock_sim.intensities = np.array([1, 2, 3, 4])
     return mock_sim
 
     
@@ -23,7 +24,7 @@ def mock_simulation():
         )
 def test_template_to_polar(max_r, expected_r):
     simulation = mock_simulation()
-    r, theta = ptu.get_template_polar_coordinates(simulation,
+    r, theta, _ = ptu.get_template_polar_coordinates(simulation,
                                                   max_r = max_r)
     np.testing.assert_array_almost_equal(r, expected_r)
 
@@ -32,12 +33,13 @@ def test_template_to_polar(max_r, expected_r):
         "angle, window, expected_x, expected_y",
         [
             (0, None, np.array([3, 5, 8, 7]), np.array([4, 12, 15, 24])),
+            (90, None, -np.array([4, 12, 15, 24]), np.array([3, 5, 8, 7])),
             (90, (7, 7), np.array([]), np.array([])),
         ]
         )
 def test_cartesian_coordinates(angle, window, expected_x, expected_y):
     simulation = mock_simulation()
-    x, y = ptu.get_template_cartesian_coordinates(simulation,
+    x, y, _ = ptu.get_template_cartesian_coordinates(simulation,
                                                   in_plane_angle=angle,
                                                   window_size=window)
     np.testing.assert_array_almost_equal(x, expected_x)

@@ -7,7 +7,7 @@ def get_template_polar_coordinates(simulation,
                                    in_plane_angle=0.,
                                    delta_r = 1,
                                    delta_theta=1,
-                                   max_r = None
+                                   max_r = None,
                                    ):
     """
     Convert a single simulation to polar coordinates
@@ -38,9 +38,12 @@ def get_template_polar_coordinates(simulation,
     theta : np.ndarray
         The theta coordinates of the diffraction spots in the template, scaled
         by delta_theta
+    intensities : np.ndarray
+        The intensities of the diffraction spots
     """
     x = simulation.calibrated_coordinates[:,0]
     y = simulation.calibrated_coordinates[:,1]
+    intensities = simulation.intensities
     imag = x+1j*y
     r = abs(imag)
     theta = np.rad2deg(np.angle(imag))
@@ -49,7 +52,8 @@ def get_template_polar_coordinates(simulation,
         condition = r < max_r
         r = r[condition]
         theta = theta[condition]
-    return r/delta_r, theta/delta_theta
+        intensities = intensities[condition]
+    return r/delta_r, theta/delta_theta, intensities
 
 
 def get_template_cartesian_coordinates(simulation,
@@ -72,6 +76,8 @@ def get_template_cartesian_coordinates(simulation,
     window_size : 2-tuple, optional
         Only return the reflections within the (width, height) in pixels
         of the image
+    intensities : np.ndarray
+        The intensities of the diffraction spots
 
     Returns
     -------
@@ -80,14 +86,15 @@ def get_template_cartesian_coordinates(simulation,
     y : np.ndarray
         y coordinates of the diffraction spots in the template in pixel units
     """
-    r, theta = get_template_polar_coordinates(simulation, in_plane_angle, 1, 1)
+    r, theta, intensities = get_template_polar_coordinates(simulation, in_plane_angle, 1, 1)
     x = r*np.cos(np.deg2rad(theta)) + center[0]
     y = r*np.sin(np.deg2rad(theta)) + center[1]
     if window_size is not None:
         condition = (x < window_size[0]) & (y < window_size[1]) & (y >= 0) & (x >= 0)
         x = x[condition]
         y = y[condition]
-    return x, y
+        intensities = intensities[condition]
+    return x, y, intensities
 
 
 def get_polar_pattern_shape(image_shape,
@@ -175,6 +182,7 @@ def image_to_polar(image,
 def _chunk_to_polar_njit(images, pimage_shape, delta_r, delta_theta, max_r, find_maximum,
                          direct_beam_positions):
     polar_chunk = np.empty((images.shape[0], images.shape[1], pimage_shape[0], pimage_shape[1]), dtype=np.float64)
+    # somewhat ugly solution because numba does not accept array of None
     if direct_beam_positions is not None:
         for idx in prange(images.shape[0]):
             for idy in prange(images.shape[1]):
