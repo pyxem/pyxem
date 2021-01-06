@@ -82,7 +82,7 @@ def _expand_iter_dimensions(iter_dask_array, dask_array_dims):
     return iter_dask_array
 
 
-def _get_dask_array(signal, size_of_chunk=32):
+def _get_dask_array(signal, size_of_chunk=8):
     if signal._lazy:
         dask_array = signal.data
     else:
