@@ -67,7 +67,7 @@ def plot_template_over_pattern(pattern, simulation, in_plane_angle=0., find_dire
     if find_direct_beam:
         c_x, c_y = get_direct_beam_center(pattern)
     else:
-        c_y, c_y = pattern.shape[0] // 2, pattern.shape[1] // 2
+        c_y, c_x = pattern.shape[0] // 2, pattern.shape[1] // 2
     if coordinate_system == "polar":
         pattern = image_to_polar(pattern, find_maximum=find_direct_beam)
         x, y = get_template_polar_coordinates(simulation, in_plane_angle=in_plane_angle)

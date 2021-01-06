@@ -127,6 +127,9 @@ def _chunk_to_polar(images, delta_r, delta_theta, find_maximum):
     """
     Convert a chunk of images to polar coordinates
 
+    The intensities in the polar images are scaled such that the mean is 0
+    and the norm is 1.
+
     Parameters
     ----------
     images : (scan_x, scan_y, x, y) np.ndarray
@@ -156,6 +159,7 @@ def _chunk_to_polar(images, delta_r, delta_theta, find_maximum):
             with objmode(polar_image='float64[:,:]'):
                 polar_image = image_to_polar(image, delta_r=delta_r,
                                              delta_theta=delta_theta, find_maximum=find_maximum)
+            polar_image = polar_image - np.mean(polar_image)
             polar_image = polar_image / np.sqrt(np.sum(polar_image**2))
             polar_chunk[idx, idy] = polar_image
     return polar_chunk

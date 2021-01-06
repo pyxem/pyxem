@@ -974,7 +974,6 @@ def _simulations_to_arrays(simulations, max_radius = None):
             x = x[condition]
             y = y[condition]
             intensity = intensity[condition]
-        intensity = intensity/np.linalg.norm(intensity)
         positions[i, 0, :x.shape[0]]=x
         positions[i, 1, :y.shape[0]]=y
         intensities[i, :intensity.shape[0]]=intensity
@@ -1005,56 +1004,27 @@ def _match_polar_to_polar_template(polar_image, r_template, theta_template, inte
     the template along the azimuthal axis. Return an array representing the
     correlation at each in-plane angle."""
     correlation = np.zeros(polar_image.shape[0], dtype=np.float64)
+    n = polar_image.shape[0]*polar_image.shape[1]
     for i in prange(polar_image.shape[0]):
         theta_compare = np.mod(theta_template + i, polar_image.shape[0])
         image_intensities = _extract_pixel_intensities(polar_image, r_template, theta_compare)
-        correlation[i] = np.sum(np.multiply(image_intensities, intensities))
+        correlation[i] = _pearson_correlation(image_intensities, intensities, n)
+        #correlation[i] = np.sum(np.multiply(image_intensities, intensities))
     return correlation
 
 
-def get_in_plane_rotation_correlation(image, simulation,
-                                      delta_r=1, delta_theta=1, find_direct_beam=True, **kwargs):
-    """
-    Correlate a single image and simulation over the in-plane rotation angle
+@njit
+def _pearson_correlation(image_intensities, template_intensities, n):
+    """Pearson correlation coefficient between image and template"""
+    template_sum = np.sum(template_intensities)
+    numerator = np.sum(np.multiply(image_intensities, template_intensities))
+    denominator = np.sqrt(1-template_sum**2/n)
+    return numerator/denominator
 
-    Parameters
-    ----------
-    image : 2D numpy.ndarray
-        The image of the diffraction pattern
-    simulation : diffsims.sims.diffraction_simulation.DiffractionSimulation
-        The diffraction pattern simulation
-    delta_r : float
-        The sampling of the radial coordinate
-    delta_theta : float
-        The sampling of the azimuthal coordinate
-    find_direct_beam : bool
-        Whether to optimize the direct beam, otherwise the center of the image
-        is chosen
-    **kwargs: passed to the direct beam finding algorithm
 
-    Returns
-    -------
-    angle_array : 1D np.ndarray
-        The in-plane angles at which the correlation is calculated
-    correlation_array : 1D np.ndarray
-        The correlation corresponding to these angles
-    """
-    polar_image = image_to_polar(image, delta_r, delta_theta, find_maximum=find_direct_beam, **kwargs)
-    r, theta = get_template_polar_coordinates(simulation, in_plane_angle=0.,
-                                              delta_r=delta_r, delta_theta=delta_theta)
-    r = np.rint(r).astype(np.int64)
-    theta = np.rint(theta).astype(np.int64)
-    condition = (r>0) & (r<polar_image.shape[1])
-    intensity = simulation.intensities
-    r = r[condition]
-    theta = theta[condition]
-    intensity = intensity[condition]
-    # norm of polar image
-    polar_image_norm = np.sqrt(np.sum(np.power(polar_image.ravel(), 2)))
-    polar_image = polar_image/polar_image_norm
-    correlation_array = _match_polar_to_polar_template(polar_image, r, theta, intensity)
-    angle_array = np.arange(correlation_array.shape[0])*delta_theta
-    return angle_array, correlation_array
+@njit
+def _norm_array(ar):
+    return ar/np.sqrt(np.sum(ar**2))
 
 
 @njit(nogil=True)
@@ -1077,8 +1047,9 @@ def _match_polar_to_polar_library(polar_image, r_templates, theta_templates, int
 
 @njit
 def _get_correlation_at_angle(polar_image, r_templates, theta_templates, intensities, angle_shifts):
-    """Get the correlation between a polar image and polar templates at particular theta-shifts"""
+    """Get the correlation between a polar image and the polar templates at particular theta-shifts"""
     correlations = np.zeros(r_templates.shape[0], dtype=np.float64)
+    n = polar_image.shape[0]*polar_image.shape[1]
     for i in range(r_templates.shape[0]):
         angle = angle_shifts[i]
         r = r_templates[i]
@@ -1087,46 +1058,23 @@ def _get_correlation_at_angle(polar_image, r_templates, theta_templates, intensi
         theta = theta.astype(np.int64)
         intensity = intensities[i]
         image_intensities = _extract_pixel_intensities(polar_image, r, theta)
-        correlations[i] = np.sum(np.multiply(image_intensities, intensity))
+        correlations[i] = _pearson_correlation(image_intensities, intensity, n)
+        #correlations[i] = np.sum(np.multiply(image_intensities, intensity))
     return correlations
     
-    
-def correlate_library_to_pattern(image, simulations, delta_r=1, delta_theta=1, find_direct_beam=True, **kwargs):
-    """
-    Get the best angle and associated correlation values, as well as the correlation with the inverted templates
-    
-    Parameters
-    ----------
-    image : 2d numpy.ndarray
-        The pattern
-    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
-        The diffraction pattern simulation
-    delta_r : float
-        The sampling of the radial coordinate
-    delta_theta : float
-        The sampling of the azimuthal coordinate
-    find_direct_beam : bool
-        Whether to optimize the direct beam, otherwise the center of the image
-        is chosen
-    **kwargs: passed to the direct beam finding algorithm
 
-    Returns
-    -------
-    angles : 1D numpy.ndarray
-        best fit in-plane angle for each template
-    correlations : 1D numpy.ndarray
-        best correlation for each template
-    correlations_inverse : 1D numpy.ndarray
-        correlation for inverse template of best fit
-    """
-    polar_image = image_to_polar(image, delta_r, delta_theta, find_maximum=find_direct_beam, **kwargs)
-    polar_image = polar_image / np.sqrt(np.sum(polar_image**2))
-    positions, intensities = _simulations_to_arrays(simulations)
-    r, theta = _cartesian_positions_to_polar(positions[:,0], positions[:,1], delta_r, delta_theta)
-    correlations, angles = _match_polar_to_polar_library(polar_image, r, theta, intensities)
-    angles_180 = np.mod((angles+180)/delta_theta, 360/delta_theta).astype(np.uint64)
-    correlations_inverse = _get_correlation_at_angle(polar_image, r, theta, intensities, angles_180)
-    return angles, correlations, correlations_inverse
+@njit
+def _norm_intensities(intensities):
+    norms = np.sqrt(np.sum(intensities**2, axis=1))
+    intensities = (intensities.T / norms).T
+    return intensities
+
+
+def _norm_integrated_templates(integrated_templates):
+    # normalize each template vector
+    norm_integrated_templates = np.sqrt(np.sum(integrated_templates**2, axis=1))
+    integrated_templates = (integrated_templates.T / norm_integrated_templates).T
+    return integrated_templates
 
 
 def _get_integrated_polar_templates(r_max, r_templates, intensities_templates):
@@ -1142,9 +1090,7 @@ def _get_integrated_polar_templates(r_max, r_templates, intensities_templates):
             inten = intensity[j]
             r_p = r_template[j]
             integrated_templates[i, r_p] = integrated_templates[i, r_p] + inten
-    # normalize each template vector
-    norm_integrated_templates = np.sqrt(np.sum(integrated_templates**2, axis=1))
-    integrated_templates = (integrated_templates.T / norm_integrated_templates).T
+    integrated_templates = _norm_integrated_templates(integrated_templates)
     return integrated_templates
 
 
@@ -1153,109 +1099,31 @@ def _match_library_to_polar_fast(polar_image, integrated_templates):
     """Compare a polar image to azimuthally integrated templates and return
     a 1D array of correlations with length = number of templates"""
     polar_sum = np.sum(polar_image, axis=0)
+    polar_sum = polar_sum - np.mean(polar_sum)
     polar_sum = polar_sum / np.linalg.norm(polar_sum)
     coors = np.zeros(integrated_templates.shape[0], dtype=np.float64)
+    n = polar_sum.shape[0]
     for i in range(integrated_templates.shape[0]):
         intensity = integrated_templates[i]
-        coors[i] = np.sum(np.multiply(intensity, polar_sum))
+        coors[i] = _pearson_correlation(polar_sum, intensity, n)
+        # coors[i] = np.sum(np.multiply(intensity, polar_sum))
     return coors
 
 
-def correlate_library_to_pattern_fast(image, simulations, delta_r=1, delta_theta=1,
-                                      find_direct_beam=True, **kwargs):
-    """
-    Get the correlation between azimuthally integrated templates and patterns
-    
-    Parameters
-    ----------
-    image : 2d numpy.ndarray
-        The pattern
-    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
-        The diffraction pattern simulation
-    delta_r : float
-        The sampling of the radial coordinate
-    delta_theta : float
-        The sampling of the azimuthal coordinate
-    find_direct_beam : bool
-        Whether to optimize the direct beam, otherwise the center of the image
-        is chosen
-    **kwargs: passed to the direct beam finding algorithm
-
-    Returns
-    -------
-    correlations : 1D numpy.ndarray
-        azimuthally integrated correlation for each template
-    """
+def _prepare_image_and_templates(image, simulations, delta_r, delta_theta,
+        intensity_transform_function, find_direct_beam, **kwargs):
+    """Prepare an image and template library for comparison"""
     polar_image = image_to_polar(image, delta_r, delta_theta, find_maximum=find_direct_beam, **kwargs)
-    positions, intensities = _simulations_to_arrays(simulations)
+    max_radius = polar_image.shape[1]*delta_r
+    positions, intensities = _simulations_to_arrays(simulations, max_radius = max_radius)
+    if intensity_transform_function is not None:
+        intensities = intensity_transform_function(intensities)
+        polar_image = intensity_transform_function(polar_image)
+    polar_image = polar_image - np.mean(polar_image)
+    polar_image = _norm_array(polar_image)
+    intensities = _norm_intensities(intensities)
     r, theta = _cartesian_positions_to_polar(positions[:,0], positions[:,1], delta_r, delta_theta)
-    integrated_templates = _get_integrated_polar_templates(polar_image.shape[1], r, intensities)
-    correlations = _match_library_to_polar_fast(polar_image, integrated_templates)
-    return correlations
-
-
-def correlate_library_to_pattern_partial(image, simulations, keep=100,
-                                         delta_r=1, delta_theta=1, find_direct_beam=True, **kwargs):
-    """
-    Get the best angle and associated correlation values, as well as the correlation with the inverted templates
-    
-    Parameters
-    ----------
-    image : 2d numpy.ndarray
-        The pattern
-    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
-        The diffraction pattern simulation
-    keep : float or int
-        The number or fraction of templates to perform full indexation on
-    delta_r : float
-        The sampling of the radial coordinate
-    delta_theta : float
-        The sampling of the azimuthal coordinate
-    find_direct_beam : bool
-        Whether to optimize the direct beam, otherwise the center of the image
-        is chosen
-    **kwargs: passed to the direct beam finding algorithm
-
-    Returns
-    -------
-    indexes : 1D numpy.ndarray
-        indexes of templates on which a full calculation has been performed
-    angles : 1D numpy.ndarray
-        best fit in-plane angle for the top "keep" templates
-    correlations : 1D numpy.ndarray
-        best correlation for the top "keep" templates
-    correlations_inverse : 1D numpy.ndarray
-        correlation for inverse template of best fit
-    """
-    polar_image = image_to_polar(image, delta_r, delta_theta, find_maximum=find_direct_beam, **kwargs)
-    polar_image = polar_image / np.sqrt(np.sum(polar_image**2))
-    positions, intensities = _simulations_to_arrays(simulations)
-    r, theta = _cartesian_positions_to_polar(positions[:,0], positions[:,1], delta_r, delta_theta)
-    if keep >= 1.:
-        fraction = max((theta.shape[0] - keep) / theta.shape[0], 0.)
-    elif 0. < keep <= 1.:
-        fraction = 1. - keep
-    else:
-        raise ValueError("keep should be an integer >1 or a float [0-1]")
-    integrated_templates = _get_integrated_polar_templates(polar_image.shape[1], r, intensities)
-    correlations_fast = _match_library_to_polar_fast(polar_image, integrated_templates)
-    template_indexes = np.arange(theta.shape[0])
-    lowest = np.percentile(correlations_fast, fraction * 100)
-    condition = correlations_fast > lowest
-    r_templates_filter = r[condition]
-    theta_templates_filter = theta[condition]
-    intensities_templates_filter = intensities[condition]
-    template_indexes_filter = template_indexes[condition]
-    full_cors, full_angles = _match_polar_to_polar_library(polar_image,
-                                                           r_templates_filter,
-                                                           theta_templates_filter,
-                                                           intensities_templates_filter,
-                                                           )
-    full_angles_180 =  np.mod((full_angles+180)/delta_theta, 360/delta_theta).astype(np.uint64)
-    full_cors_180 = _get_correlation_at_angle(polar_image, r_templates_filter,
-                                              theta_templates_filter, intensities_templates_filter,
-                                              full_angles_180)
-    return template_indexes_filter, full_angles, full_cors, full_cors_180
+    return polar_image, r, theta, intensities
 
 
 @njit(["float64[:,:](float64[:,:], float64[:,:], int64[:,:], int64[:,:], float64[:,:], float64, int64)"])
@@ -1297,59 +1165,6 @@ def _mixed_matching_lib_to_polar(polar_image, integrated_templates, r_templates,
     return answer
 
 
-def get_n_best_matches(image, simulations, n_best=1, keep=100, delta_r=1, delta_theta=1,
-                       find_direct_beam=True, **kwargs):
-    """
-    Get the best angle and associated correlation values, as well as the correlation with the inverted templates
-    
-    Parameters
-    ----------
-    image : 2d numpy.ndarray
-        The pattern
-    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
-        The diffraction pattern simulation
-    n_best : int
-        Number of best solutions to return, in order of descending match
-    keep : float or int
-        The number or fraction of templates to perform full indexation on
-    delta_r : float
-        The sampling of the radial coordinate
-    delta_theta : float
-        The sampling of the azimuthal coordinate
-    find_direct_beam : bool
-        Whether to optimize the direct beam, otherwise the center of the image
-        is chosen
-    **kwargs: passed to the direct beam finding algorithm
-
-    Returns
-    -------
-    indexes : 1D numpy.ndarray
-        indexes of best fit templates
-    angles : 1D numpy.ndarray
-        corresponding best fit in-plane angles
-    correlations : 1D numpy.ndarray
-        corresponding correlation values
-    """
-    polar_image = image_to_polar(image, delta_r, delta_theta, find_maximum=find_direct_beam, **kwargs)
-    polar_image = polar_image / np.sqrt(np.sum(polar_image**2))
-    positions, intensities = _simulations_to_arrays(simulations)
-    r_templates, theta_templates = _cartesian_positions_to_polar(positions[:,0], positions[:,1],
-                                                                 delta_r, delta_theta)
-    if keep >= 1.:
-        fraction = max((theta_templates.shape[0] - keep) / theta_templates.shape[0], 0.)
-    elif 0. < keep <= 1.:
-        fraction = 1. - keep
-    else:
-        raise ValueError("keep should be an integer >1 or a float [0-1]")
-    integrated_templates = _get_integrated_polar_templates(polar_image.shape[1], r_templates, intensities)
-    answer = _mixed_matching_lib_to_polar(polar_image, integrated_templates, r_templates,
-                                 theta_templates, intensities, fraction, n_best)
-    indices = answer[:, 0].astype(np.int64)
-    cors = answer[:, 1]
-    angles = answer[:, 2]
-    return indices, cors, angles
-
-
 @njit(["float64[:,:,:,:](float64[:,:,:,:], float64[:,:], int64[:,:], int64[:,:], float64[:,:], float64, int64)"],
       nogil=True,
       parallel=True,
@@ -1372,6 +1187,255 @@ def _index_chunk(polar_images, integrated_templates, r_templates, theta_template
     return indexation_result_chunk
 
 
+@njit
+def _renormalize_polar_block(polar_chunk):
+    normed_polar = np.zeros_like(polar_chunk)
+    for i in np.ndindex(polar_chunk.shape[:-2]):
+        polar_image = polar_chunk[i]
+        polar_image = polar_image - np.mean(polar_image)
+        polar_image = _norm_array(polar_image)
+        normed_polar[i] = polar_image
+    return normed_polar
+
+
+def get_in_plane_rotation_correlation(image, simulation,
+                                   intensity_transform_function,
+                                      delta_r=1, delta_theta=1, find_direct_beam=False, **kwargs):
+    """
+    Correlate a single image and simulation over the in-plane rotation angle
+
+    Parameters
+    ----------
+    image : 2D numpy.ndarray
+        The image of the diffraction pattern
+    simulation : diffsims.sims.diffraction_simulation.DiffractionSimulation
+        The diffraction pattern simulation
+    delta_r : float
+        The sampling of the radial coordinate
+    delta_theta : float
+        The sampling of the azimuthal coordinate
+    find_direct_beam : bool
+        Whether to optimize the direct beam, otherwise the center of the image
+        is chosen
+    **kwargs: passed to the direct beam finding algorithm
+
+    Returns
+    -------
+    angle_array : 1D np.ndarray
+        The in-plane angles at which the correlation is calculated
+    correlation_array : 1D np.ndarray
+        The correlation corresponding to these angles
+    """
+    polar_image = image_to_polar(image, delta_r, delta_theta, find_maximum=find_direct_beam, **kwargs)
+    r, theta = get_template_polar_coordinates(simulation, in_plane_angle=0.,
+                                              delta_r=delta_r, delta_theta=delta_theta)
+    r = np.rint(r).astype(np.int64)
+    theta = np.rint(theta).astype(np.int64)
+    condition = (r>0) & (r<polar_image.shape[1])
+    intensity = simulation.intensities
+    r = r[condition]
+    theta = theta[condition]
+    intensity = intensity[condition]
+    if intensity_transform_function is not None:
+        intensity = intensity_transform_function(intensity)
+        intensity = _norm_array(intensity)
+        polar_image = intensity_transform_function(polar_image)
+    polar_image = polar_image - np.mean(polar_image)
+    polar_image = _norm_array(polar_image)
+    correlation_array = _match_polar_to_polar_template(polar_image, r, theta, intensity)
+    angle_array = np.arange(correlation_array.shape[0])*delta_theta
+    return angle_array, correlation_array
+
+
+def correlate_library_to_pattern(image, simulations, delta_r=1, delta_theta=1,
+                                    intensity_transform_function = None,
+                                find_direct_beam=True, **kwargs):
+    """
+    Get the best angle and associated correlation values, as well as the correlation with the inverted templates
+    
+    Parameters
+    ----------
+    image : 2d numpy.ndarray
+        The pattern
+    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
+        The diffraction pattern simulation
+    delta_r : float
+        The sampling of the radial coordinate
+    delta_theta : float
+        The sampling of the azimuthal coordinate
+    find_direct_beam : bool
+        Whether to optimize the direct beam, otherwise the center of the image
+        is chosen
+    **kwargs: passed to the direct beam finding algorithm
+
+    Returns
+    -------
+    angles : 1D numpy.ndarray
+        best fit in-plane angle for each template
+    correlations : 1D numpy.ndarray
+        best correlation for each template
+    correlations_inverse : 1D numpy.ndarray
+        correlation for inverse template of best fit
+    """
+    polar_image, r, theta, intensities = _prepare_image_and_templates(image, simulations, delta_r, delta_theta,
+            intensity_transform_function, find_direct_beam, **kwargs)
+    correlations, angles = _match_polar_to_polar_library(polar_image, r, theta, intensities)
+    angles_180 = np.mod((angles+180)/delta_theta, 360/delta_theta).astype(np.uint64)
+    correlations_inverse = _get_correlation_at_angle(polar_image, r, theta, intensities, angles_180)
+    return angles, correlations, correlations_inverse
+
+
+def correlate_library_to_pattern_fast(image, simulations, delta_r=1, delta_theta=1,
+                                        intensity_transform_function = None,
+                                      find_direct_beam=False, **kwargs):
+    """
+    Get the correlation between azimuthally integrated templates and patterns
+    
+    Parameters
+    ----------
+    image : 2d numpy.ndarray
+        The pattern
+    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
+        The diffraction pattern simulation
+    delta_r : float
+        The sampling of the radial coordinate
+    delta_theta : float
+        The sampling of the azimuthal coordinate
+    find_direct_beam : bool
+        Whether to optimize the direct beam, otherwise the center of the image
+        is chosen
+    **kwargs: passed to the direct beam finding algorithm
+
+    Returns
+    -------
+    correlations : 1D numpy.ndarray
+        azimuthally integrated correlation for each template
+    """
+    polar_image, r, theta, intensities = _prepare_image_and_templates(image, simulations, delta_r, delta_theta,
+            intensity_transform_function, find_direct_beam, **kwargs)
+    integrated_templates = _get_integrated_polar_templates(polar_image.shape[1], r, intensities)
+    correlations = _match_library_to_polar_fast(polar_image, integrated_templates)
+    return correlations
+
+
+def correlate_library_to_pattern_partial(image, simulations, keep=100,
+                                        intensity_transform_function = None,
+                                         delta_r=1, delta_theta=1, find_direct_beam=False, **kwargs):
+    """
+    Get the best angle and associated correlation values, as well as the correlation with the inverted templates
+    
+    Parameters
+    ----------
+    image : 2d numpy.ndarray
+        The pattern
+    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
+        The diffraction pattern simulation
+    keep : float or int
+        The number or fraction of templates to perform full indexation on
+    delta_r : float
+        The sampling of the radial coordinate
+    delta_theta : float
+        The sampling of the azimuthal coordinate
+    find_direct_beam : bool
+        Whether to optimize the direct beam, otherwise the center of the image
+        is chosen
+    **kwargs: passed to the direct beam finding algorithm
+
+    Returns
+    -------
+    indexes : 1D numpy.ndarray
+        indexes of templates on which a full calculation has been performed
+    angles : 1D numpy.ndarray
+        best fit in-plane angle for the top "keep" templates
+    correlations : 1D numpy.ndarray
+        best correlation for the top "keep" templates
+    correlations_inverse : 1D numpy.ndarray
+        correlation for inverse template of best fit
+    """
+    polar_image, r, theta, intensities = _prepare_image_and_templates(image, simulations, delta_r, delta_theta,
+            intensity_transform_function, find_direct_beam, **kwargs)
+    if keep >= 1.:
+        fraction = max((theta.shape[0] - keep) / theta.shape[0], 0.)
+    elif 0. < keep <= 1.:
+        fraction = 1. - keep
+    else:
+        raise ValueError("keep should be an integer >1 or a float [0-1]")
+    integrated_templates = _get_integrated_polar_templates(polar_image.shape[1], r, intensities)
+    correlations_fast = _match_library_to_polar_fast(polar_image, integrated_templates)
+    template_indexes = np.arange(theta.shape[0])
+    lowest = np.percentile(correlations_fast, fraction * 100)
+    condition = correlations_fast > lowest
+    r_templates_filter = r[condition]
+    theta_templates_filter = theta[condition]
+    intensities_templates_filter = intensities[condition]
+    template_indexes_filter = template_indexes[condition]
+    full_cors, full_angles = _match_polar_to_polar_library(polar_image,
+                                                           r_templates_filter,
+                                                           theta_templates_filter,
+                                                           intensities_templates_filter,
+                                                           )
+    full_angles_180 =  np.mod((full_angles+180)/delta_theta, 360/delta_theta).astype(np.uint64)
+    full_cors_180 = _get_correlation_at_angle(polar_image, r_templates_filter,
+                                              theta_templates_filter, intensities_templates_filter,
+                                              full_angles_180)
+    return template_indexes_filter, full_angles, full_cors, full_cors_180
+
+
+def get_n_best_matches(image, simulations, n_best=1, keep=100, delta_r=1, delta_theta=1,
+                       intensity_transform_function=None,
+                       find_direct_beam=False, **kwargs):
+    """
+    Get the best angle and associated correlation values, as well as the correlation with the inverted templates
+    
+    Parameters
+    ----------
+    image : 2d numpy.ndarray
+        The pattern
+    simulations : list of diffsims.sims.diffraction_simulation.DiffractionSimulation
+        The diffraction pattern simulation
+    n_best : int
+        Number of best solutions to return, in order of descending match
+    keep : float or int
+        The number or fraction of templates to perform full indexation on
+    delta_r : float
+        The sampling of the radial coordinate
+    delta_theta : float
+        The sampling of the azimuthal coordinate
+    intensity_transform_function : Callable
+        A function to apply both to the image pixels and template intensities,
+        for example a logarithmic or square root function, before they are
+        compared to each other.
+    find_direct_beam : bool
+        Whether to optimize the direct beam, otherwise the center of the image
+        is chosen
+    **kwargs: passed to the direct beam finding algorithm
+
+    Returns
+    -------
+    indexes : 1D numpy.ndarray
+        indexes of best fit templates
+    angles : 1D numpy.ndarray
+        corresponding best fit in-plane angles
+    correlations : 1D numpy.ndarray
+        corresponding correlation values
+    """
+    polar_image, r_templates, theta_templates, intensities = _prepare_image_and_templates(image, simulations, delta_r, delta_theta,
+            intensity_transform_function, find_direct_beam, **kwargs)
+    if keep >= 1.:
+        fraction = max((theta_templates.shape[0] - keep) / theta_templates.shape[0], 0.)
+    elif 0. < keep <= 1.:
+        fraction = 1. - keep
+    else:
+        raise ValueError("keep should be an integer >1 or a float [0-1]")
+    integrated_templates = _get_integrated_polar_templates(polar_image.shape[1], r_templates, intensities)
+    answer = _mixed_matching_lib_to_polar(polar_image, integrated_templates, r_templates,
+                                 theta_templates, intensities, fraction, n_best)
+    indices = answer[:, 0].astype(np.int64)
+    cors = answer[:, 1]
+    angles = answer[:, 2]
+    return indices, cors, angles
+
+
 def index_dataset_with_template_rotation(signal,
                                          library,
                                          phases,
@@ -1381,11 +1445,29 @@ def index_dataset_with_template_rotation(signal,
                                          delta_theta=1,
                                          n_best=1,
                                          keep=100,
+                                         intensity_transform_function=None,
+                                         parallel_workers="auto",
                                          **kwargs):
-    workers = os.cpu_count()
+    if parallel_workers == "auto":
+        workers = os.cpu_count()
+    else:
+        workers = parallel_workers
+    if not isinstance(workers, int):
+        raise TypeError("Number of workers should be an integer")
     result = {}
     # get the dataset as a dask array and rechunk if necessary
     data = _get_dask_array(signal)
+    # check if we have a 4D dataset, and if not, make it
+    navdim = signal.axes_manager.navigation_dimension
+    if navdim==0:
+        data = data[np.newaxis, np.newaxis, ...]
+    elif navdim==1:
+        data = data[np.newaxis, ...]
+    elif navdim==2:
+        pass
+    else:
+        raise ValueError(f"Dataset has {navdim} navigation dimensions, max "
+                         "is 2")
     if chunks is None:
         pass
     elif chunks == "auto":
@@ -1406,10 +1488,19 @@ def index_dataset_with_template_rotation(signal,
                                  chunks=polar_chunking,
                                  new_axis=(2, 3),
                                  )
+    
+    if intensity_transform_function is not None:
+        polar_data = polar_data.map_blocks(intensity_transform_function,
+                                           dtype=np.float64,)
+        polar_data = polar_data.map_blocks(_renormalize_polar_block,
+                                           dtype=np.float64,)
     max_radius = int(np.ceil(np.sqrt((data.shape[-1] / 2)**2 + (data.shape[-2] / 2)**2)))
     for phase_key in phases:
         phase_library = library[phase_key]
         positions, intensities = _simulations_to_arrays(phase_library["simulations"], max_radius)
+        if intensity_transform_function is not None:
+            intensities = intensity_transform_function(intensities)
+            intensities = _norm_intensities(intensities)
         x = positions[:,0]
         y = positions[:,1]
         r, theta = _cartesian_positions_to_polar(x, y,
