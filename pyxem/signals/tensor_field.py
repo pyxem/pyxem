@@ -16,12 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from hyperspy.signals import Signal2D
 import numpy as np
 from scipy.linalg import polar
-from hyperspy.utils import stack
 import math
-from pyxem.signals.strain_map import StrainMap
+
+from hyperspy.signals import Signal2D
+from hyperspy.utils import stack
+
+from pyxem.signals import StrainMap
 
 """Signal class for Tensor Fields."""
 

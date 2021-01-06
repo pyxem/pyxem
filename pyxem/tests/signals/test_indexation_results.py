@@ -18,18 +18,20 @@
 
 import numpy as np
 import pytest
-import diffsims as ds
 from matplotlib import pyplot as plt
+from transforms3d.euler import euler2mat
 
-from pyxem.signals.indexation_results import TemplateMatchingResults, VectorMatchingResults
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from diffsims.libraries.vector_library import DiffractionVectorLibrary
 from diffsims.libraries.structure_library import StructureLibrary
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
+
+from pyxem.generators import TemplateIndexationGenerator
+from pyxem.signals import (
+    TemplateMatchingResults,
+    VectorMatchingResults,
+    DiffractionVectors,
+)
 from pyxem.utils.indexation_utils import OrientationResult
-from pyxem.generators.indexation_generator import TemplateIndexationGenerator
-from transforms3d.euler import euler2mat
 
 
 def test_TemplateMatchingResults_to_crystal_map():

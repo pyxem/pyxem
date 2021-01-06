@@ -696,7 +696,7 @@ def investigate_dog_background_removal_interactive(
                 max_sigma=std_dev_max,
                 show_progressbar=False,
             )
-    dp_gaussian = pxm.ElectronDiffraction2D(gauss_processed)
+    dp_gaussian = pxm.signals.ElectronDiffraction2D(gauss_processed)
     dp_gaussian.metadata.General.title = "Gaussian preprocessed"
     dp_gaussian.axes_manager.navigation_axes[0].name = r"$\sigma_{\mathrm{min}}$"
     dp_gaussian.axes_manager.navigation_axes[1].name = r"$\sigma_{\mathrm{max}}$"

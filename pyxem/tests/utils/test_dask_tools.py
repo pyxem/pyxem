@@ -20,9 +20,10 @@ import pytest
 import numpy as np
 import dask.array as da
 import skimage.morphology as sm
+
+from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.pixelated_stem_tools as pst
-from pyxem import Diffraction2D, LazyDiffraction2D
 
 
 class TestSignalDimensionGetChunkSliceList:

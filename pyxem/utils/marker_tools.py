@@ -51,7 +51,7 @@ def _get_4d_points_marker_list(
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pyxem.utils.marker_tools as mt
     >>> marker_list = mt._get_4d_points_marker_list(
@@ -275,7 +275,7 @@ def _add_permanent_markers_to_signal(signal, marker_list):
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pyxem.utils.marker_tools as mt
     >>> marker_list = mt._get_4d_points_marker_list(
@@ -312,7 +312,7 @@ def add_peak_array_to_signal_as_markers(
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = s.find_peaks(lazy_result=False, show_progressbar=False)
     >>> import pyxem.utils.marker_tools as mt
     >>> mt.add_peak_array_to_signal_as_markers(s, peak_array)

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .apply_affine_transform now uses a default order of 1 (changed from 3)
 - find_peaks is now provided by hyperspy, method 'xc' now called 'template_matching'
 - virtual_annular_dark_field and virtual_bright_field renamed; now have a "lazy_" prefixing (#698)
+- Standardise how to import pyxem objects (#704)
 
 ### Removed
 - The local_gaussian_method for subpixel refinement

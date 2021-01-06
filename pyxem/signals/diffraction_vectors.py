@@ -16,27 +16,30 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 import itertools
+from warnings import warn
 
-from hyperspy.signals import BaseSignal, Signal1D
-from hyperspy.api import markers
-
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 from scipy.spatial import distance_matrix
 from sklearn.cluster import DBSCAN
 
-from warnings import warn
+from hyperspy.signals import BaseSignal, Signal1D
+from hyperspy.api import markers
 
-from pyxem.signals import (
+from pyxem.utils.signal import (
     transfer_navigation_axes,
     transfer_navigation_axes_to_signal_axes,
 )
-from pyxem.utils.vector_utils import detector_to_fourier
-from pyxem.utils.vector_utils import calculate_norms, calculate_norms_ragged
-from pyxem.utils.vector_utils import get_npeaks, filter_vectors_ragged
-from pyxem.utils.vector_utils import filter_vectors_edge_ragged
+from pyxem.utils.vector_utils import (
+    detector_to_fourier,
+    calculate_norms,
+    calculate_norms_ragged,
+    get_npeaks,
+    filter_vectors_ragged,
+    filter_vectors_edge_ragged
+)
 from pyxem.utils.expt_utils import peaks_as_gvectors
 
 

@@ -20,8 +20,7 @@ import numpy as np
 import dask.array as da
 import pytest
 
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
-from pyxem.signals.electron_diffraction1d import LazyElectronDiffraction1D
+from pyxem.signals import ElectronDiffraction1D, LazyElectronDiffraction1D
 
 
 class TestSimpleHyperspy:
