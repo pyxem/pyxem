@@ -544,15 +544,15 @@ class TestGetDaskArray:
         array_out = dt._get_dask_array(s)
         assert hasattr(array_out, "compute")
 
-    def test_size_of_chunk(self):
+    def test_chunk_shape(self):
         s = Diffraction2D(np.zeros((10, 10, 8, 8)))
-        array_out = dt._get_dask_array(s, size_of_chunk=5)
+        array_out = dt._get_dask_array(s, chunk_shape=5)
         assert array_out.chunksize[:2] == (5, 5)
 
-    def test_chunk_limit(self):
+    def test_chunk_bytes(self):
         s = Diffraction2D(np.zeros((10, 10, 8, 8)))
         array_out0 = dt._get_dask_array(s)
-        array_out1 = dt._get_dask_array(s, chunk_limit="25KiB")
+        array_out1 = dt._get_dask_array(s, chunk_bytes="25KiB")
         assert array_out0.chunksize[:2] != array_out1.chunksize[:2]
 
     def test_lazy_input(self):
@@ -568,14 +568,14 @@ class TestGetChunking:
         chunks = dt._get_chunking(s)
         assert len(chunks) == 4
 
-    def test_size_of_chunk(self):
+    def test_chunk_shape(self):
         s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
-        chunks = dt._get_chunking(s, size_of_chunk=16)
+        chunks = dt._get_chunking(s, chunk_shape=16)
         assert chunks == ((16, 16), (16, 16), (256,), (256,))
 
-    def test_chunk_limit(self):
+    def test_chunk_bytes(self):
         s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
-        chunks = dt._get_chunking(s, chunk_limit="15MiB")
+        chunks = dt._get_chunking(s, chunk_bytes="15MiB")
         assert chunks == ((8, 8, 8, 8), (8, 8, 8, 8), (256,), (256,))
 
 
