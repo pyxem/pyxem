@@ -322,7 +322,7 @@ class TestFitEllipse:
         from pyxem.utils.radial_utils import _get_ellipse_parameters
         g_a_greater_than_c_b_zero = np.asarray([2,0,1,0,0,0])
         g_a_less_than_c_b_zero    = np.asarray([1,0,2,0,0,0])
-        for g in [g_a_less_than_c_b_zero,g_a_less_than_c_b_zero]:
+        for g in [g_a_greater_than_c_b_zero,g_a_less_than_c_b_zero]:
             _ = _get_ellipse_parameters(g)
 
 
