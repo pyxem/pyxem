@@ -330,60 +330,60 @@ class TestDiffractionVariance:
         return ones_diff
 
     def test_FEM_Omega(self, ones, ones_zeros):
-        ones_variance = ones.get_variance(npt=5, method="Omega")
+        ones_variance = ones.get_diffraction_variance(npt=5, method="Omega")
         #assert ones_variance.axes_manager[0].units == "2th_deg"
         np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
-        ones_zeros_variance = ones_zeros.get_variance(5, method="Omega")
+        ones_zeros_variance = ones_zeros.get_diffraction_variance(5, method="Omega")
         np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.ones(5)*.1111, decimal=3)
 
     def test_FEM_Omega_poisson_noise(self, bulls_eye_noisy):
-        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="Omega", dqe=1)
+        bulls_eye_variance = bulls_eye_noisy.get_diffraction_variance(25, method="Omega", dqe=1)
         # We exclude small radii
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
         # Testing for non dqe=1
-        bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="Omega", dqe=10)
+        bulls_eye_variance = (bulls_eye_noisy*10).get_diffraction_variance(25, method="Omega", dqe=10)
         # This fails at small radii and might still fail because it is random...
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
 
     def test_FEM_r(self, ones, ones_zeros, bulls_eye_noisy):
-        ones_variance = ones.get_variance(npt=5, method="r")
+        ones_variance = ones.get_diffraction_variance(npt=5, method="r")
         #assert ones_variance.axes_manager[0].units == "2th_deg"
         np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
-        ones_zeros_variance = ones_zeros.get_variance(5, method="r")
+        ones_zeros_variance = ones_zeros.get_diffraction_variance(5, method="r")
         np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.zeros(5), decimal=3)
-        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="r", dqe=1)
+        bulls_eye_variance = bulls_eye_noisy.get_diffraction_variance(25, method="r", dqe=1)
         # We exclude small radii
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
         # Testing for non dqe=1
-        bulls_eye_variance = (bulls_eye_noisy*10).get_variance(25, method="r", dqe=10)
+        bulls_eye_variance = (bulls_eye_noisy*10).get_diffraction_variance(25, method="r", dqe=10)
         # We exclude small radii
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
 
     def test_FEM_r_spatial_kwarg(self,ones,ones_zeros,bulls_eye_noisy):
-        v, fv = ones.get_variance(npt=5, method="r",spatial=True)
+        v, fv = ones.get_diffraction_variance(npt=5, method="r",spatial=True)
 
     @pytest.mark.parametrize('dqe_choice',[None,0.3])
     def test_FEM_VImage(self, ones, dqe_choice):
-        v = ones.get_variance(npt=5, method="VImage",dqe=dqe_choice)
+        v = ones.get_diffraction_variance(npt=5, method="VImage",dqe=dqe_choice)
         if dqe_choice is None:
             np.testing.assert_array_almost_equal(v.data, np.zeros(5), decimal=3)
 
     def test_FEM_re(self, ones, ones_zeros, bulls_eye_noisy):
-        ones_variance = ones.get_variance(npt=5, method="re")
+        ones_variance = ones.get_diffraction_variance(npt=5, method="re")
         np.testing.assert_array_almost_equal(ones_variance.data, np.zeros(5), decimal=3)
-        ones_zeros_variance = ones_zeros.get_variance(5, method="re")
+        ones_zeros_variance = ones_zeros.get_diffraction_variance(5, method="re")
         np.testing.assert_array_almost_equal(ones_zeros_variance.data, np.ones(5)*0.1111, decimal=3)
-        bulls_eye_variance = bulls_eye_noisy.get_variance(25, method="re", dqe=1)
+        bulls_eye_variance = bulls_eye_noisy.get_diffraction_variance(25, method="re", dqe=1)
         # This fails at small radii and might still fail because it is random...
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[5:], np.zeros(20), decimal=2)
         # Testing for non dqe=1
-        bulls_eye_variance = (bulls_eye_noisy * 10).get_variance(25, method="re", dqe=10)
+        bulls_eye_variance = (bulls_eye_noisy * 10).get_diffraction_variance(25, method="re", dqe=10)
         # This fails at small radii and might still fail because it is random...
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=1)
 
     def test_not_existing_method(self, ones):
         with pytest.raises(ValueError):
-            ones.get_variance(npt=5, method="magic")
+            ones.get_diffraction_variance(npt=5, method="magic")
 
 class TestImageVariance:
     @pytest.fixture
@@ -439,27 +439,25 @@ class TestImageVariance:
             )
         )
 
+    @pytest.mark.parametrize("dqe", [0.5, 0.6])
+    def test_get_image_variance(self,dp, dqe):
 
-    class TestVarianceGenerator:
-        @pytest.mark.parametrize("dqe", [0.5, 0.6])
-        def test_get_image_variance(self,dp, dqe):
+        varims = dp.get_image_variance(dqe)
+        assert isinstance(varims, ImageVariance)
 
-            varims = dp.get_image_variance(dqe)
-            assert isinstance(varims, ImageVariance)
-
-            mean_im = np.array([[0.51765625, 0.504375], [0.47625, 0.47125]]).reshape(2, 2)
-            meansq_im = np.array(
+        mean_im = np.array([[0.51765625, 0.504375], [0.47625, 0.47125]]).reshape(2, 2)
+        meansq_im = np.array(
                 [[0.34353281, 0.33261875], [0.31661875, 0.3085875]]
             ).reshape(2, 2)
-            var_im = np.array([[0.28199196, 0.30749375], [0.39593968, 0.38955456]]).reshape(
+        var_im = np.array([[0.28199196, 0.30749375], [0.39593968, 0.38955456]]).reshape(
                 2, 2
             )
-            corr_var_im = var_im - np.divide(dqe, mean_im)
+        corr_var_im = var_im - np.divide(dqe, mean_im)
 
-            assert np.allclose(varims.data[0, 0], mean_im, atol=1e-6)
-            assert np.allclose(varims.data[0, 1], meansq_im, atol=1e-6)
-            assert np.allclose(varims.data[1, 0], var_im, atol=1e-14)
-            assert np.allclose(varims.data[1, 1], corr_var_im, atol=1e-14)
+        assert np.allclose(varims.data[0, 0], mean_im, atol=1e-6)
+        assert np.allclose(varims.data[0, 1], meansq_im, atol=1e-6)
+        assert np.allclose(varims.data[1, 0], var_im, atol=1e-14)
+        assert np.allclose(varims.data[1, 1], corr_var_im, atol=1e-14)
 
 
 class TestAzimuthalIntegral2d:

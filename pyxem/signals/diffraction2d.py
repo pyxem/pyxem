@@ -1639,7 +1639,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
 
     """ Variance generation methods """
-    def get_variance(self,
+    def get_diffraction_variance(self,
                      npt,
                      method="Omega",
                      dqe=None,
