@@ -18,8 +18,9 @@
 """Signal class for two-dimensional diffraction variance."""
 
 from hyperspy.signals import Signal2D
+from pyxem.signals import Diffraction2D
 
-class DiffractionVariance2D(Signal2D):
+class DiffractionVariance2D(Diffraction2D):
     _signal_type = "diffraction_variance"
 
     pass
