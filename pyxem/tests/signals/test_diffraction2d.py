@@ -388,7 +388,7 @@ class TestDiffractionVariance:
 class TestImageVariance:
     @pytest.fixture
     def dp(self):
-        return ElectronDiffraction2D(
+        return Diffraction2D(
             np.array(
                 [
                     [

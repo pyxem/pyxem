@@ -44,6 +44,8 @@ from pyxem.signals import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
+    ImageVariance,
+    DiffractionVariance2D,
 )
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
@@ -1664,8 +1666,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Returns
         -------
-        variance : array-like
-            Calculate variance as it's own signal
+        DiffractionVariance2D :
+            Calculated variance as its own signal
 
         References
         ----------
@@ -1722,18 +1724,14 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             if dqe is not None:
                 variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
             variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
-        return variance
+
+
+        return DiffractionVariance2D(variance)
 
 
     def get_image_variance(self, dqe):
         """Calculates the variance in scattered intensity as a function of
-        scattering vector. The calculated variance is normalised by the mean
-        squared, as is appropriate for the distribution of intensities. This
-        causes a problem if Poisson noise is significant in the data, resulting
-        in a divergence of the Poisson noise term. To in turn remove this
-        effect, we subtract a dqe/mean_dp term (although it is suggested that
-        dqe=1) from the data, creating a "poisson noise-free" corrected variance
-        pattern. DQE is fitted to make this pattern flat.
+        scattering vector.
 
         Parameters
         ----------
@@ -1747,8 +1745,18 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             A two dimensional Signal class object containing the mean DP, mean
             squared DP, and variance DP, and a Poisson noise-corrected variance
             DP.
+
+        Notes
+        -----
+        The calculated variance is normalised by the mean
+        squared, as is appropriate for the distribution of intensities. This
+        causes a problem if Poisson noise is significant in the data, resulting
+        in a divergence of the Poisson noise term. To remove this
+        effect, we subtract a dqe/mean_dp term (although it is suggested that
+        dqe=1) from the data, creating a "poisson noise-free" corrected variance
+        pattern. DQE is fitted to make this pattern flat.
         """
-        im = self.signal.T
+        im = self.T
         mean_im = im.mean((0, 1))
         meansq_im = Signal2D(np.square(im.data)).mean((0, 1))
         normvar = (meansq_im.data / np.square(mean_im.data)) - 1.0
@@ -1756,7 +1764,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         corr_var_array = normvar - (np.divide(dqe, mean_im.data))
         corr_var_array[np.invert(np.isfinite(corr_var_array))] = 0
         corr_var = Signal2D(corr_var_array)
-        varims = stack((mean_im, meansq_im, var_im, corr_var))
+        varims = hs.stack((mean_im, meansq_im, var_im, corr_var))
 
         sig_x = varims.data.shape[1]
         sig_y = varims.data.shape[2]
@@ -1764,7 +1772,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         iv = transfer_navigation_axes_to_signal_axes(iv, self.signal)
 
         return iv
-        
+
     """ Methods associated with radial integration, not pyFAI based """
 
     def radial_integration(self):
