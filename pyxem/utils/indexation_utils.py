@@ -304,7 +304,7 @@ def match_vectors(
             q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
 
             # Ensure q1 is longer than q2 for consistent order.
-            if q1_len < q2_len:
+            if q1_len < q2_len: #pragma: no cover
                 q1, q2 = q2, q1
                 q1_len, q2_len = q2_len, q1_len
 
@@ -323,7 +323,7 @@ def match_vectors(
 
             # Iterate over matched library vectors determining the error in the
             # associated indexation.
-            if np.count_nonzero(tolerance_mask) == 0:
+            if np.count_nonzero(tolerance_mask) == 0: #pragma: no cover
                 continue
 
             # Reference vectors are cartesian coordinates of hkls

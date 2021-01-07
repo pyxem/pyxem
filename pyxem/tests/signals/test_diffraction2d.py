@@ -359,9 +359,14 @@ class TestVariance:
         # We exclude small radii
         np.testing.assert_array_almost_equal(bulls_eye_variance.data[6:], np.zeros(19), decimal=2)
 
-    def test_FEM_VImage(self, ones):
-        v = ones.get_variance(npt=5, method="VImage")
-        np.testing.assert_array_almost_equal(v.data, np.zeros(5), decimal=3)
+    def test_FEM_r_spatial_kwarg(self,ones,ones_zeros,bulls_eye_noisy):
+        v, fv = ones.get_variance(npt=5, method="r",spatial=True)
+
+    @pytest.mark.parametrize('dqe_choice',[None,0.3])
+    def test_FEM_VImage(self, ones, dqe_choice):
+        v = ones.get_variance(npt=5, method="VImage",dqe=dqe_choice)
+        if dqe_choice is None:
+            np.testing.assert_array_almost_equal(v.data, np.zeros(5), decimal=3)
 
     def test_FEM_re(self, ones, ones_zeros, bulls_eye_noisy):
         ones_variance = ones.get_variance(npt=5, method="re")

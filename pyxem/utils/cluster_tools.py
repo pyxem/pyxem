@@ -406,15 +406,15 @@ def _cluster_and_sort_peak_array(
         )
         if "centre" in sorted_cluster_dict:
             peak_centre_array[islice] = sorted_cluster_dict["centre"]
-        else:
+        else: #pragma: no cover
             peak_centre_array[islice] = []
         if "rest" in sorted_cluster_dict:
             peak_rest_array[islice] = sorted_cluster_dict["rest"]
-        else:
+        else: #pragma: no cover
             peak_rest_array[islice] = []
         if "none" in sorted_cluster_dict:
             peak_none_array[islice] = sorted_cluster_dict["none"]
-        else:
+        else: #pragma: no cover
             peak_rest_array[islice] = []
 
     peak_dicts = {}

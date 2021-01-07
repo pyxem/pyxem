@@ -43,15 +43,6 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
     )  # avoid divide by zeroes
     return VirtualDarkFieldGenerator(diffraction_pattern, diffraction_vectors)
 
-
-@pytest.fixture
-def virtual_image_generator(diffraction_pattern):
-    diffraction_pattern.data = np.where(
-        diffraction_pattern.data == 0, 0.01, diffraction_pattern.data
-    )  # avoid divide by zeroes
-    return VirtualDarkFieldGenerator(diffraction_pattern)
-
-
 class TestVirtualDarkFieldGenerator:
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
         dvm = DiffractionVectors(
@@ -191,4 +182,3 @@ def test_vi_generator_get_virtual_images_from_mesh_nav_dim3():
     vi = vi_generator.get_virtual_images_from_mesh(out_signal_axes=[1, 2])
 
     assert vi.axes_manager.navigation_shape == (10, 5)
-
