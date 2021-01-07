@@ -44,8 +44,6 @@ from pyxem.signals import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
-    ImageVariance,
-    DiffractionVariance2D,
 )
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
@@ -1676,6 +1674,8 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             Nanobeam diffraction fluctuation electron microscopy technique for structural characterization of disordered
             materials-Application to Al88-xY7Fe5Tix metallic glasses.
         """
+        # import output form, done here to avoid a circular import
+        from pyxem.signals import DiffractionVariance1D
 
         if method not in ['Omega','r','re','VImage']:
             raise ValueError('Method must be one of [Omega, r, re, VImage].'
@@ -1726,8 +1726,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
             variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
 
-
-        return DiffractionVariance2D(variance)
+        return DiffractionVariance1D(variance)
 
 
     def get_image_variance(self, dqe):
@@ -1757,6 +1756,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         dqe=1) from the data, creating a "poisson noise-free" corrected variance
         pattern. DQE is fitted to make this pattern flat.
         """
+        # Imports output form, here to avoid a circular import
+        from pyxem.signals import ImageVariance
+
         im = self.T
         mean_im = im.mean((0, 1))
         meansq_im = Signal2D(np.square(im.data)).mean((0, 1))
