@@ -82,13 +82,72 @@ def _expand_iter_dimensions(iter_dask_array, dask_array_dims):
     return iter_dask_array
 
 
-def _get_dask_array(signal, size_of_chunk=32):
+def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
+    """Get chunk tuple based on the size of the dataset.
+
+    The signal dimensions will be within one chunk, and the navigation
+    dimensions will be chunked based on either chunk_shape, or
+    be optimized based on the chunk_bytes.
+
+    Parameters
+    ----------
+    signal : hyperspy or pyxem signal
+    chunk_shape : int, optional
+        Size of the navigation chunk, of None (the default), the chunk
+        size will be set automatically.
+    chunk_bytes : int or string, optional
+        Number of bytes in each chunk. For example '60MiB'. If None (the default),
+        the limit will be '30MiB'. Will not be used if chunk_shape is None.
+
+    Returns
+    -------
+    chunks : tuple
+
+    Examples
+    --------
+    >>> import dask.array as da
+    >>> import pyxem as pxm
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.LazySignal2D(da.zeros((32, 32, 256, 256), chunks=(16, 16, 256, 256)))
+    >>> chunks = dt._get_chunking(s)
+
+    Limiting to 60 MiB per chunk
+
+    >>> chunks = dt._get_chunking(s, chunk_bytes="60MiB")
+
+    Specifying the navigation chunk size
+
+    >>> chunks = dt._get_chunking(s, chunk_shape=8)
+
+    """
+    if chunk_bytes is None:
+        chunk_bytes = "30MiB"
+    nav_dim = signal.axes_manager.navigation_dimension
+    sig_dim = signal.axes_manager.signal_dimension
+
+    chunks_dict = {}
+    for i in range(nav_dim):
+        if chunk_shape is None:
+            chunks_dict[i] = "auto"
+        else:
+            chunks_dict[i] = chunk_shape
+    for i in range(nav_dim, nav_dim + sig_dim):
+        chunks_dict[i] = -1
+
+    chunks = da.core.normalize_chunks(
+        chunks=chunks_dict,
+        shape=signal.data.shape,
+        limit=chunk_bytes,
+        dtype=signal.data.dtype,
+    )
+    return chunks
+
+
+def _get_dask_array(signal, chunk_shape=None, chunk_bytes=None):
     if signal._lazy:
         dask_array = signal.data
     else:
-        sig_chunks = list(signal.axes_manager.signal_shape)[::-1]
-        chunks = [size_of_chunk] * len(signal.axes_manager.navigation_shape)
-        chunks.extend(sig_chunks)
+        chunks = _get_chunking(signal, chunk_shape, chunk_bytes)
         dask_array = da.from_array(signal.data, chunks=chunks)
     return dask_array
 
