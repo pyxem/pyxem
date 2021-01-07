@@ -79,10 +79,24 @@ class TestIsEllipseGood:
         )
         assert is_good == out
 
-    @mark.parametrize("semi_len_max,out", [(6.6, True), (4, False), (9, True)])
-    def test_semi_len_max(self, semi_len_max, out):
+    @mark.parametrize(
+        "a,b,semi_len_max,out",
+        [
+            (3, 6.5, 6.6, True),
+            (3, 6.5, 4, False),
+            (3, 6.5, 9, True),
+            (6.5, 3, 4, False),
+        ],
+    )
+    def test_semi_len_max(self, a, b, semi_len_max, out):
         model = ret.EllipseModel()
-        model.params = ret._make_ellipse_model_params_focus(50, 30, 3, 6.5, 0)
+        model.params = ret._make_ellipse_model_params_focus(50, 30, a, b, 0)
+        params = list(model.params)
+        # Changing the params like this is necessary to test if b is larger
+        # than semi_len_max. This is due to the content in model.params not being
+        # the same as the input in ret._make_ellipse_model_params_focus.
+        params[2:5] = a, b, 0.0
+        model.params = tuple(params)
         is_good = ret.is_ellipse_good(
             ellipse_model=model,
             data=None,
@@ -324,6 +338,10 @@ class TestGetEllipseModelRansacSingleFrame:
             max_trails=100,
         )
         assert inliers1.all()
+
+    def test_min_samples_smaller_than_data(self):
+        data = ret.make_ellipse_data_points(50, 55, 20, 16, 2, nt=15)
+        ret.get_ellipse_model_ransac_single_frame(data, min_samples=25)
 
     def test_all_inliers(self):
         xf, yf, a, b, r = 50, 55, 20, 16, 2
@@ -777,6 +795,21 @@ class TestGetInlierOutlierPeakArrays:
             assert (peak_array[iy, ix][:4] == inlier_parray[iy, ix]).all()
             assert (peak_array[iy, ix][4:] == outlier_parray[iy, ix]).all()
 
+    def test_inlier_none(self):
+        x, y, n = 2, 3, 10
+        peak_array = np.arange(y * x * n * 2).reshape((y, x, n, 2))
+        inlier_array = np.empty((y, x), dtype=np.object)
+        for iy, ix in np.ndindex(inlier_array.shape):
+            inlier_array[iy, ix] = None
+
+        inlier_parray, outlier_parray = ret._get_inlier_outlier_peak_arrays(
+            peak_array, inlier_array
+        )
+
+        for iy, ix in np.ndindex(inlier_array.shape):
+            assert inlier_parray[iy, ix] is None
+            assert len(outlier_parray[iy, ix]) == n
+
 
 class TestGetLinesListFromEllipseParams:
     def test_nr(self):
@@ -818,6 +851,14 @@ class TestGetLinesArrayFromEllipseArray:
             assert approx(lines_list[1]) == [yc, xc + sx, yc - sy, xc]
             assert approx(lines_list[2]) == [yc - sy, xc, yc, xc - sx]
             assert approx(lines_list[3]) == [yc, xc - sx, yc + sy, xc]
+
+    def test_ellipse_array_none(self):
+        ellipse_array = np.empty(shape=(2, 3), dtype=np.object)
+        for ix, iy in np.ndindex(ellipse_array.shape):
+            ellipse_array[ix, iy] = None
+        lines_array = ret._get_lines_array_from_ellipse_array(ellipse_array)
+        for ix, iy in np.ndindex(lines_array.shape):
+            assert lines_array[ix, iy] is None
 
     def test_nr(self):
         nr0, nr1 = 5, 9
