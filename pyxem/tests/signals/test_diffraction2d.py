@@ -24,7 +24,7 @@ from matplotlib import pyplot as plt
 from numpy.random import default_rng
 
 from pyxem.signals import (
-    Diffraction1D, Diffraction2D, LazyDiffraction2D, PolarDiffraction2D
+    Diffraction1D, Diffraction2D, LazyDiffraction2D, PolarDiffraction2D, ImageVariance
 )
 
 

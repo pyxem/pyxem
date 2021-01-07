@@ -19,10 +19,7 @@
 
 from hyperspy.signals import Signal2D
 
-from pyxem.signals.diffraction2d import Diffraction2D
-
-
-class DiffractionVariance2D(Diffraction2D):
+class DiffractionVariance2D(Signal2D):
     _signal_type = "diffraction_variance"
 
     pass

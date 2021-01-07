@@ -77,6 +77,7 @@ from pyxem.utils.dask_tools import (
 from pyxem.utils.signal import (
     select_method_from_method_dict,
     transfer_navigation_axes,
+    transfer_navigation_axes_to_signal_axes,
 )
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
@@ -1769,7 +1770,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         sig_x = varims.data.shape[1]
         sig_y = varims.data.shape[2]
         iv = ImageVariance(varims.data.reshape((2, 2, sig_x, sig_y)))
-        iv = transfer_navigation_axes_to_signal_axes(iv, self.signal)
+        iv = transfer_navigation_axes_to_signal_axes(iv, self)
 
         return iv
 
