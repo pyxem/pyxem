@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 import numpy as np
 import dask.array as da
 from skimage.feature import match_template, blob_dog, blob_log
@@ -83,13 +82,72 @@ def _expand_iter_dimensions(iter_dask_array, dask_array_dims):
     return iter_dask_array
 
 
-def _get_dask_array(signal, size_of_chunk=32):
+def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
+    """Get chunk tuple based on the size of the dataset.
+
+    The signal dimensions will be within one chunk, and the navigation
+    dimensions will be chunked based on either chunk_shape, or
+    be optimized based on the chunk_bytes.
+
+    Parameters
+    ----------
+    signal : hyperspy or pyxem signal
+    chunk_shape : int, optional
+        Size of the navigation chunk, of None (the default), the chunk
+        size will be set automatically.
+    chunk_bytes : int or string, optional
+        Number of bytes in each chunk. For example '60MiB'. If None (the default),
+        the limit will be '30MiB'. Will not be used if chunk_shape is None.
+
+    Returns
+    -------
+    chunks : tuple
+
+    Examples
+    --------
+    >>> import dask.array as da
+    >>> import pyxem as pxm
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.LazySignal2D(da.zeros((32, 32, 256, 256), chunks=(16, 16, 256, 256)))
+    >>> chunks = dt._get_chunking(s)
+
+    Limiting to 60 MiB per chunk
+
+    >>> chunks = dt._get_chunking(s, chunk_bytes="60MiB")
+
+    Specifying the navigation chunk size
+
+    >>> chunks = dt._get_chunking(s, chunk_shape=8)
+
+    """
+    if chunk_bytes is None:
+        chunk_bytes = "30MiB"
+    nav_dim = signal.axes_manager.navigation_dimension
+    sig_dim = signal.axes_manager.signal_dimension
+
+    chunks_dict = {}
+    for i in range(nav_dim):
+        if chunk_shape is None:
+            chunks_dict[i] = "auto"
+        else:
+            chunks_dict[i] = chunk_shape
+    for i in range(nav_dim, nav_dim + sig_dim):
+        chunks_dict[i] = -1
+
+    chunks = da.core.normalize_chunks(
+        chunks=chunks_dict,
+        shape=signal.data.shape,
+        limit=chunk_bytes,
+        dtype=signal.data.dtype,
+    )
+    return chunks
+
+
+def _get_dask_array(signal, chunk_shape=None, chunk_bytes=None):
     if signal._lazy:
         dask_array = signal.data
     else:
-        sig_chunks = list(signal.axes_manager.signal_shape)[::-1]
-        chunks = [size_of_chunk] * len(signal.axes_manager.navigation_shape)
-        chunks.extend(sig_chunks)
+        chunks = _get_chunking(signal, chunk_shape, chunk_bytes)
         dask_array = da.from_array(signal.data, chunks=chunks)
     return dask_array
 
@@ -595,7 +653,7 @@ def _peak_find_dog_single_frame(
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> import pyxem.utils.dask_tools as dt
     >>> peaks = _peak_find_dog_single_frame(s.data[0, 0])
 
@@ -1313,9 +1371,9 @@ def _background_removal_dog(dask_array, **kwargs):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5,5,25, 25))
-    >>> s_rem = pxm.Diffraction2D(
+    >>> s_rem = pxm.signals.Diffraction2D(
     ...     dt._background_removal_dog(dask_array))
 
     """
@@ -1341,7 +1399,7 @@ def _background_removal_single_frame_median(frame, footprint=19):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """
@@ -1366,7 +1424,7 @@ def _background_removal_chunk_median(data, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_median(s.data[0:10, 0:10,:,:])
 
     """
@@ -1397,9 +1455,9 @@ def _background_removal_median(dask_array, **kwargs):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_rem = pxm.Diffraction2D(
+    >>> s_rem = pxm.signals.Diffraction2D(
     ...     dt._background_removal_median(dask_array), footprint=20)
 
     """
@@ -1430,7 +1488,7 @@ def _background_removal_single_frame_radial_median(frame, centre_x=128, centre_y
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
     """
 
@@ -1468,7 +1526,7 @@ def _background_removal_chunk_radial_median(data, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = _background_removal_chunk_radial_median(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1501,9 +1559,9 @@ def _background_removal_radial_median(dask_array, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_r = pxm.Diffraction2D(
+    >>> s_r = pxm.signals.Diffraction2D(
     ...     dt._background_removal_radial_median(
     ...     dask_array, centre_x=128, centre_y=128))
 
@@ -1536,7 +1594,7 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = np.array(([48.,48.],[25.,48.]))
     >>> r_p_array = dt._peak_refinement_centre_of_mass_frame(
     ...     s.data[0,0,:,:], peak_array, 20)
@@ -1586,7 +1644,7 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
     >>> r_p_array = dt._peak_refinement_centre_of_mass_chunk(
     ...     s.data, peak_array, 20)
@@ -1630,7 +1688,7 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
     >>> peak_array = dt._peak_find_dog(dask_array)
     >>> r_p_array = dt._peak_refinement_centre_of_mass(
@@ -1745,8 +1803,7 @@ def _get_experimental_square(z, vector, square_size):
 
     Examples
     --------
-    >>> import pyxem.dummy_data.dummy_data as dd
-    >>> d = dd.get_cbed_signal()
+    >>> d = pxm.dummy_data.get_cbed_signal()
     >>> import pyxem.utils.dask_tools as dt
     >>> sub_d = dt._get_experimental_square(d.data[0,0,:,:], [50,50], 30)
 

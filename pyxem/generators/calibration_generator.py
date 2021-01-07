@@ -21,16 +21,17 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from math import sin, cos
-from hyperspy.roi import CircleROI, Line2DROI
-from hyperspy.misc.utils import stack as stack_method
 import matplotlib.pyplot as plt
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.utils.calibration_utils import (
+from hyperspy.roi import CircleROI, Line2DROI
+from hyperspy.misc.utils import stack as stack_method
+from diffsims.utils.ring_pattern_utils import (
     call_ring_pattern,
     calc_radius_with_distortion,
     generate_ring_pattern,
 )
+
+from pyxem.signals import ElectronDiffraction2D
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator, _get_setup
 
 
@@ -57,7 +58,7 @@ class CalibrationGenerator:
         grating_image : array_like
             Some 2 dimensional signal or numpy array of some
             standard sample used for calibration
-        calibration_standard : diffpy.structure.Structure 
+        calibration_standard : diffpy.structure.Structure
             for calculating the polycrystalline ring spacing
         """
         # Assign attributes

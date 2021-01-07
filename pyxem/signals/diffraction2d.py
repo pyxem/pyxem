@@ -19,6 +19,13 @@
 """Signal class for two-dimensional diffraction data in Cartesian coordinates."""
 
 import numpy as np
+from skimage import filters
+from skimage.morphology import square
+from scipy.ndimage import rotate
+from skimage import morphology
+import dask.array as da
+from dask.diagnostics import ProgressBar
+from tqdm import tqdm
 
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D
@@ -29,24 +36,20 @@ from hyperspy.misc.utils import isiterable
 
 from pyFAI.units import to_unit
 
-from pyxem.signals.differential_phase_contrast import (
+from pyxem.signals import (
+    CommonDiffraction,
     DPCBaseSignal,
     DPCSignal1D,
     DPCSignal2D,
-)
-from pyxem.signals.differential_phase_contrast import (
     LazyDPCBaseSignal,
     LazyDPCSignal1D,
     LazyDPCSignal2D,
 )
-from pyxem.signals import transfer_navigation_axes, select_method_from_method_dict
-from pyxem.signals.common_diffraction import CommonDiffraction
 from pyxem.utils.pyfai_utils import (
     get_azimuthal_integrator,
     _get_radial_extent,
     _get_setup,
 )
-
 from pyxem.utils.expt_utils import (
     azimuthal_integrate1d,
     azimuthal_integrate2d,
@@ -63,26 +66,20 @@ from pyxem.utils.expt_utils import (
     medfilt_1d,
     sigma_clip,
 )
-
 from pyxem.utils.dask_tools import (
     _process_dask_array,
     _get_dask_array,
     get_signal_dimension_host_chunk_slice,
     align_single_frame,
 )
-
+from pyxem.utils.signal import (
+    select_method_from_method_dict,
+    transfer_navigation_axes,
+)
 import pyxem.utils.pixelated_stem_tools as pst
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.marker_tools as mt
 import pyxem.utils.ransac_ellipse_tools as ret
-
-from skimage import filters
-from skimage.morphology import square
-from scipy.ndimage import rotate
-from skimage import morphology
-import dask.array as da
-from dask.diagnostics import ProgressBar
-from tqdm import tqdm
 
 
 class Diffraction2D(Signal2D, CommonDiffraction):
@@ -408,7 +405,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             bg_subtracted.data = bg_subtracted.data / np.max(bg_subtracted.data)
             return bg_subtracted
 
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         if method == "difference of gaussians":
             output_array = dt._background_removal_dog(dask_array, **kwargs)
@@ -485,7 +482,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         dead_pixels = dt._find_dead_pixels(
             dask_array, dead_pixel_value=dead_pixel_value, mask_array=mask_array
@@ -549,7 +546,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         hot_pixels = dt._find_hot_pixels(
             dask_array, threshold_multiplier=threshold_multiplier, mask_array=mask_array
@@ -862,8 +859,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_disk_shift_simple_test_signal()
+        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_out = s.threshold_and_mask(
         ...     mask=mask, threshold=2, show_progressbar=False)
@@ -931,8 +927,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         --------
         With mask centered at x=105, y=120 and 30 pixel radius
 
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_disk_shift_simple_test_signal()
+        >>> s = pxm.dummy_data.get_disk_shift_simple_test_signal()
         >>> mask = (25, 25, 10)
         >>> s_com = s.center_of_mass(mask=mask, show_progressbar=False)
         >>> s_color = s_com.get_color_signal()
@@ -1117,7 +1112,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         template_match_ring
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         output_array = dt._template_match_with_binary_image(dask_array, binary_image)
         if not lazy_result:
@@ -1253,7 +1248,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             raise ValueError(
                 "square_size must be even number, not {0}".format(square_size)
             )
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
@@ -1308,7 +1303,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> intensity_array_computed = intensity_array.compute()
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
@@ -1623,8 +1618,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s.axes_manager.signal_axes[0].offset = -25
         >>> s.axes_manager.signal_axes[1].offset = -25
         >>> mask_array = s.angular_mask(0.5*np.pi, np.pi)
@@ -1778,8 +1772,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s_r = s.radial_average(centre_x=25, centre_y=25,
         ...     show_progressbar=False)
         >>> s_r.plot()
@@ -1899,8 +1892,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         Examples
         --------
-        >>> import pyxem.dummy_data.dummy_data as dd
-        >>> s = dd.get_holz_simple_test_signal()
+        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
         >>> s_com = s.center_of_mass(show_progressbar=False)
         >>> s_ar = s.angular_slice_radial_average(
         ...     angleN=10, centre_x=s_com.inav[0].data,

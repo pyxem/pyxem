@@ -19,27 +19,25 @@
 """Indexation generator and associated tools."""
 
 import numpy as np
+import lmfit
+from transforms3d.euler import mat2euler, euler2mat
 
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.signals.indexation_results import VectorMatchingResults
+from diffsims.utils.sim_utils import get_electron_wavelength
 
-from pyxem.signals import transfer_navigation_axes
-from pyxem.signals import select_method_from_method_dict
-
+from pyxem.signals import TemplateMatchingResults, VectorMatchingResults
 from pyxem.utils.indexation_utils import (
     zero_mean_normalized_correlation,
     fast_correlation,
     index_magnitudes,
     match_vectors,
     OrientationResult,
-    get_nth_best_solution)
-
-
-from transforms3d.euler import mat2euler, euler2mat
+    get_nth_best_solution
+)
 from pyxem.utils.vector_utils import detector_to_fourier
-from diffsims.utils.sim_utils import get_electron_wavelength
-
-import lmfit
+from pyxem.utils.signal import (
+    select_method_from_method_dict,
+    transfer_navigation_axes,
+)
 
 
 class IndexationGenerator:
@@ -189,8 +187,8 @@ class TemplateIndexationGenerator:
         method : str
             Name of method used to compute correlation between templates and diffraction patterns. Can be
             'fast_correlation' or 'zero_mean_normalized_correlation'.
-        mask : Array
-            Array with the same size as signal (in navigation) or None
+        mask : hs.BaseSignal or None
+            Only apply the method a unmasked (value=1) pixel, default is None (index all pixels)
         print_help : bool
             Display information about the method used.
         **kwargs : arguments
@@ -213,9 +211,7 @@ class TemplateIndexationGenerator:
             mask = 1
 
         # tests if selected method is valid and can print help for selected method.
-        chosen_function = select_method_from_method_dict(
-            method, method_dict, print_help
-        )
+        _ = select_method_from_method_dict(method, method_dict, print_help)
 
         # adds a normalisation to library #TODO: Port to diffsims
         for phase in library.keys():
@@ -652,8 +648,6 @@ class VectorIndexationGenerator:
             Navigation axes of the diffraction vectors signal containing vector
             indexation results for each probe position.
         """
-        vectors = self.vectors
-        library = self.library
 
         return self.refine_n_best_orientations(
             orientations,

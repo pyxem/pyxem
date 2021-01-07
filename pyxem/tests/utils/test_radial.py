@@ -19,9 +19,10 @@
 import pytest
 from pytest import approx
 import numpy as np
-from pyxem.signals.diffraction2d import Diffraction2D
+
+from pyxem.signals import Diffraction2D
 import pyxem.utils.radial_utils as ra
-import pyxem.dummy_data.make_diffraction_test_data as mdtd
+from pyxem.dummy_data import make_diffraction_test_data as mdtd
 
 
 @pytest.mark.slow
@@ -316,6 +317,13 @@ class TestFitEllipse:
                 angleN=[20, 30],
                 show_progressbar=False,
             )
+
+    def test_private_functionality_uncovered_above(self):
+        from pyxem.utils.radial_utils import _get_ellipse_parameters
+        g_a_greater_than_c_b_zero = np.asarray([2,0,1,0,0,0])
+        g_a_less_than_c_b_zero    = np.asarray([1,0,2,0,0,0])
+        for g in [g_a_greater_than_c_b_zero,g_a_less_than_c_b_zero]:
+            _ = _get_ellipse_parameters(g)
 
 
 @pytest.mark.slow

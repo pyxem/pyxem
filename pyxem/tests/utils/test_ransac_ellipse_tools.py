@@ -23,9 +23,9 @@ from numpy.testing import assert_allclose
 from scipy.signal import convolve2d
 from skimage import morphology
 
-import pyxem.dummy_data.make_diffraction_test_data as mdtd
+from pyxem.dummy_data import make_diffraction_test_data as mdtd
+from pyxem.signals import Diffraction2D
 import pyxem.utils.ransac_ellipse_tools as ret
-from pyxem.signals.diffraction2d import Diffraction2D
 
 
 class TestIsEllipseGood:

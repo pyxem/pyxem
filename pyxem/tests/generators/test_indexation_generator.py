@@ -18,29 +18,29 @@
 
 import pytest
 import numpy as np
+import hyperspy.api as hs
 
 from hyperspy._signals.signal2d import Signal2D
-
-from pyxem import ElectronDiffraction2D
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.generators.indexation_generator import (
-    TemplateIndexationGenerator,
-    ProfileIndexationGenerator,
-    VectorIndexationGenerator)
-
-
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
-from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-
-
 from diffsims.generators.diffraction_generator import DiffractionGenerator
 from diffsims.generators.library_generator import DiffractionLibraryGenerator
-from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.libraries.structure_library import StructureLibrary
 
+from pyxem.generators import (
+    IndexationGenerator,
+    TemplateIndexationGenerator,
+    ProfileIndexationGenerator,
+    VectorIndexationGenerator
+)
+from pyxem.signals import (
+    ElectronDiffraction2D, TemplateMatchingResults, DiffractionVectors
+)
 from pyxem.utils.indexation_utils import OrientationResult
+
+def test_old_indexer_routine():
+    with pytest.raises(ValueError):
+        _ = IndexationGenerator('a','b')
 
 @pytest.mark.parametrize("method",['fast_correlation',
                         'zero_mean_normalized_correlation'])
@@ -58,7 +58,8 @@ def test_TemplateIndexationGenerator(default_structure,method):
     edp = ElectronDiffraction2D(np.random.rand(2,2,200,200))
     indexer = TemplateIndexationGenerator(edp,library)
 
-    z = indexer.correlate(method=method,n_largest=2)
+    mask_signal = hs.signals.Signal2D(np.array([[1,0],[1,1]])).T
+    z = indexer.correlate(method=method,n_largest=2,mask=mask_signal)
     assert isinstance(z,TemplateMatchingResults)
     assert isinstance(z.data,Signal2D)
     assert z.data.data.shape[0:2] == edp.data.shape[0:2]

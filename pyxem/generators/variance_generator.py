@@ -22,10 +22,11 @@ import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy.api import stack
 
-from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
-from pyxem.signals.diffraction_variance2d import ImageVariance
-from pyxem.signals import transfer_signal_axes
-from pyxem.signals import transfer_navigation_axes_to_signal_axes
+from pyxem.signals import DiffractionVariance2D, ImageVariance
+from pyxem.utils.signal import (
+    transfer_navigation_axes_to_signal_axes,
+    transfer_signal_axes,
+)
 
 
 class VarianceGenerator:

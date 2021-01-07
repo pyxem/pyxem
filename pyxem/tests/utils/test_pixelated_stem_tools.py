@@ -19,9 +19,11 @@
 import pytest
 import numpy as np
 import dask.array as da
-from pyxem.signals.diffraction2d import Diffraction2D
-import pyxem.utils.pixelated_stem_tools as pst
+
 from hyperspy.signals import Signal2D
+
+from pyxem.signals import Diffraction2D
+import pyxem.utils.pixelated_stem_tools as pst
 
 
 class TestRadialIntegrationDaskArray:

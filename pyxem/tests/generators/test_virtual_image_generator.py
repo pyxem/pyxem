@@ -20,13 +20,13 @@ import pytest
 import numpy as np
 import hyperspy.api as hs
 
-from pyxem.generators.virtual_image_generator import (VirtualImageGenerator,
-                                                      VirtualDarkFieldGenerator)
-
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.diffraction2d import Diffraction2D
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.virtual_dark_field_image import VirtualDarkFieldImage
+from pyxem.generators import VirtualImageGenerator, VirtualDarkFieldGenerator
+from pyxem.signals import (
+    Diffraction2D,
+    ElectronDiffraction2D,
+    DiffractionVectors,
+    VirtualDarkFieldImage
+)
 
 
 @pytest.fixture(params=[np.array([[1, 1], [2, 2]])])
@@ -42,15 +42,6 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
         diffraction_pattern.data == 0, 0.01, diffraction_pattern.data
     )  # avoid divide by zeroes
     return VirtualDarkFieldGenerator(diffraction_pattern, diffraction_vectors)
-
-
-@pytest.fixture
-def virtual_image_generator(diffraction_pattern):
-    diffraction_pattern.data = np.where(
-        diffraction_pattern.data == 0, 0.01, diffraction_pattern.data
-    )  # avoid divide by zeroes
-    return VirtualDarkFieldGenerator(diffraction_pattern)
-
 
 class TestVirtualDarkFieldGenerator:
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
@@ -191,4 +182,3 @@ def test_vi_generator_get_virtual_images_from_mesh_nav_dim3():
     vi = vi_generator.get_virtual_images_from_mesh(out_signal_axes=[1, 2])
 
     assert vi.axes_manager.navigation_shape == (10, 5)
-

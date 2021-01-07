@@ -19,9 +19,7 @@
 
 from hyperspy.signals import Signal1D
 
-from pyxem.components.reduced_intensity_correction_component import (
-    ReducedIntensityCorrectionComponent,
-)
+from pyxem.components import ReducedIntensityCorrectionComponent
 from pyxem.utils.ri_utils import (
     damp_ri_exponential,
     damp_ri_lorch,

@@ -19,11 +19,10 @@
 """Generating subpixel resolution on diffraction vectors."""
 
 import numpy as np
-
 from skimage.registration import phase_cross_correlation
 from skimage import draw
 
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals import DiffractionVectors
 
 
 def get_experimental_square(z, vector, square_size):

@@ -19,7 +19,7 @@
 import pytest
 import numpy as np
 
-from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
+from pyxem.signals import ReducedIntensity1D
 
 
 @pytest.fixture

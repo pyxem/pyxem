@@ -25,9 +25,9 @@ import pytest
 import diffpy.structure
 import numpy as np
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
+
+from pyxem.signals import ElectronDiffraction1D, ElectronDiffraction2D
 
 # a straight lift from
 # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option--
@@ -47,10 +47,11 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--runslow"):
         # --runslow given in cli: do not skip slow tests
         return
-    skip_slow = pytest.mark.skip(reason="need --runslow option to run")
-    for item in items:
-        if "slow" in item.keywords:
-            item.add_marker(skip_slow)
+    else: #pragma: no cover
+        skip_slow = pytest.mark.skip(reason="need --runslow option to run")
+        for item in items:
+            if "slow" in item.keywords:
+                item.add_marker(skip_slow)
 
 # End of the code lift, it's regular code from here on out
 

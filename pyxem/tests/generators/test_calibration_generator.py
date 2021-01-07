@@ -19,17 +19,14 @@
 import pytest
 import numpy as np
 
+from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from hyperspy.signals import Signal2D
 from hyperspy.roi import Line2DROI
-import hyperspy.api as hs
+from diffsims.utils.ring_pattern_utils import generate_ring_pattern
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.generators.calibration_generator import CalibrationGenerator
-from pyxem.utils.calibration_utils import generate_ring_pattern
-from pyxem.libraries.calibration_library import CalibrationDataLibrary
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-import matplotlib.pyplot as plt
-from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
+from pyxem.signals import ElectronDiffraction2D
+from pyxem.generators import CalibrationGenerator
+from pyxem.libraries import CalibrationDataLibrary
 
 @pytest.fixture
 def input_parameters():

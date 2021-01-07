@@ -18,10 +18,9 @@
 
 import pytest
 import numpy as np
-from pyxem.signals.reduced_intensity1d import ReducedIntensity1D
-from pyxem.components.scattering_fit_component_lobato import (
-    ScatteringFitComponentLobato,
-)
+
+from pyxem.signals import ReducedIntensity1D
+from pyxem.components import ScatteringFitComponentLobato
 
 
 def test_scattering_component_init_lobato():
