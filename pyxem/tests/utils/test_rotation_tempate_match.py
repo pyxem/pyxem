@@ -1,0 +1,259 @@
+from pyxem.utils import indexation_utils as iutls
+import numpy as np
+import pytest
+from unittest.mock import Mock
+
+
+def mock_library():
+    mock_sim_1 = Mock()
+    mock_sim_1.calibrated_coordinates = np.array([[3, 4, 0],  # 5
+                                                [5, 12, 0],  # 13
+                                                [8, 15, 0],  # 17
+                                                [-8, 15, 0],  # 17
+                                                ]) 
+    mock_sim_1.intensities = np.array([2, 3, 4, 2])
+    mock_sim_2 = Mock()
+    mock_sim_2.calibrated_coordinates = np.array([ 
+                                                [5, 12, 0],  # 13
+                                                [8, 15, 0],  # 17
+                                                [7, 24, 0]]  # 25
+    )
+    mock_sim_2.intensities = np.array([1, 2, 10])
+    mock_sim_3 = Mock()
+    mock_sim_3.calibrated_coordinates = np.array([ 
+                                                [3, 4, 0], #5
+                                                [5, 12, 0],  # 13
+                                                ]
+    )
+    mock_sim_3.intensities = np.array([8, 1])
+    simlist = [mock_sim_1, mock_sim_2, mock_sim_3]
+    return simlist
+
+
+
+@pytest.mark.parametrize(
+    "max_radius, expected_shapes, test_pos, test_int",
+    [
+        (None, ((3, 2, 4), (3, 4)), np.array((-8, 15)), 2),
+        (15, ((3, 2, 4), (3, 4)), np.array((0, 0)), 0),
+    ]
+    )
+def test_simulations_to_arrays(max_radius, expected_shapes, test_pos, test_int):
+    simulations = mock_library()
+    positions, intensities = iutls._simulations_to_arrays(simulations, max_radius=max_radius)
+    np.testing.assert_array_equal(positions.shape, expected_shapes[0])
+    np.testing.assert_array_equal(intensities.shape, expected_shapes[1])
+    np.testing.assert_array_equal(positions[0, :, -1], test_pos)
+    np.testing.assert_array_equal(intensities[0, -1], test_int)
+
+
+def test_match_polar_to_polar_template():
+    image = np.ones((123, 50))
+    r = np.linspace(2, 40, 30, dtype=np.uint64)
+    theta = np.linspace(10, 110, 30, dtype=np.uint64)
+    intensities = np.ones(30, dtype=np.float64)
+    image_norm = 1.
+    template_norm = 1.
+    cor = iutls._match_polar_to_polar_template(image, r, theta, intensities, image_norm, template_norm)
+    np.testing.assert_array_almost_equal(cor, np.ones(123, dtype=np.float64)*30)
+
+
+@pytest.mark.parametrize(
+    "itf, norim, nortemp",
+    [
+        (None, True, False),
+        (np.sqrt, False, True),
+    ]
+)
+def test_get_in_plane_rotation_correlation(itf, norim, nortemp):
+    image = np.ones((123, 50))
+    simulation = mock_library()[0]
+    ang, cor = iutls.get_in_plane_rotation_correlation(image, simulation,
+            intensity_transform_function=itf, delta_r=2.6, delta_theta=1.3,
+            normalize_image=norim, normalize_template=nortemp)
+    assert ang.shape[0] == 277
+    assert cor.shape[0] == 277
+
+
+def test_match_polar_to_polar_library():
+    image = np.ones((123, 50))
+    r = np.linspace(2, 40, 30, dtype=np.uint64)
+    r = np.repeat(r[np.newaxis, ...], 4, axis=0)
+    theta = np.linspace(10, 110, 30, dtype=np.uint64)
+    theta = np.repeat(theta[np.newaxis, ...], 4, axis=0)
+    intensities = np.ones(30, dtype=np.float64)
+    intensities = np.repeat(intensities[np.newaxis, ...], 4, axis=0)
+    image_norm = 1. 
+    template_norms = np.ones(4, dtype=np.float64) 
+    cor, angles = iutls._match_polar_to_polar_library(image, r, theta, intensities, image_norm, template_norms)
+    assert cor.shape[0] == 4
+    assert angles.shape[0] == 4
+    assert cor.dtype == np.float64
+    assert angles.dtype == np.float64
+
+
+@pytest.mark.parametrize(
+    "norim, nortemp",
+    [
+        (True, False),
+        (False, True),
+    ]
+)
+def test_correlate_library_to_pattern(norim, nortemp):
+    image = np.ones((123, 50))
+    simulations = mock_library()
+    ang, cor = iutls.correlate_library_to_pattern(image, simulations,
+            delta_r=2.6, delta_theta=1.3,
+            normalize_image=norim, normalize_templates=nortemp)
+    assert ang.shape[0] == 3
+    assert cor.shape[0] == 3
+    assert cor.dtype == np.float64
+    assert ang.dtype == np.float64
+    
+
+def test_correlation_at_angle():
+    image = np.ones((123, 50))
+    r = np.linspace(2, 40, 30, dtype=np.uint64)
+    r = np.repeat(r[np.newaxis, ...], 4, axis=0)
+    theta = np.linspace(10, 110, 30, dtype=np.uint64)
+    theta = np.repeat(theta[np.newaxis, ...], 4, axis=0)
+    intensities = np.ones(30, dtype=np.float64)
+    intensities = np.repeat(intensities[np.newaxis, ...], 4, axis=0)
+    angles = np.empty(4, dtype=np.uint64)
+    angles.fill(40)
+    image_norm = 1.
+    template_norms = np.ones(4, dtype=np.float64) 
+    cor = iutls._get_correlation_at_angle(image, r, theta, intensities, angles, image_norm, template_norms)
+    assert cor.shape[0] == 4
+    assert cor.dtype == np.float64
+
+
+def test_get_integrated_templates():
+    rmax = 50
+    r = np.linspace(2, 40, 30, dtype=np.uint64)
+    r = np.repeat(r[np.newaxis, ...], 4, axis=0)
+    intensities = np.ones(30, dtype=np.float64)
+    intensities = np.repeat(intensities[np.newaxis, ...], 4, axis=0)
+    integrated = iutls._get_integrated_polar_templates(rmax, r, intensities)
+    assert integrated.shape[0] == 4
+    assert integrated.shape[1] == 50
+
+
+def test_match_library_to_polar_fast():
+    polar_sum = np.ones(50, dtype=np.float64)
+    integrated_temp = np.arange(0, 50, dtype=np.float64)
+    integrated_temp = np.repeat(integrated_temp[np.newaxis, ...], 5, axis=0)
+    template_norms = np.ones(5, dtype=np.float64)
+    polar_norm = 1
+    coors = iutls._match_library_to_polar_fast(polar_sum, integrated_temp, polar_norm, template_norms)
+    assert coors.shape[0] == 5
+    assert coors.ndim == 1
+
+
+@pytest.mark.parametrize(
+    "norim, nortemp",
+    [
+        (True, False),
+        (False, True),
+    ]
+)
+def test_correlate_library_to_pattern_fast(norim, nortemp):
+    image = np.ones((123, 50))
+    simulations = mock_library()
+    cor = iutls.correlate_library_to_pattern_fast(image, simulations,
+            delta_r=2.6, delta_theta=1.3,
+            normalize_image=norim, normalize_templates=nortemp)
+    assert cor.shape[0] == 3
+    assert cor.dtype == np.float64
+
+
+@pytest.mark.parametrize(
+    "intensity_transform_function",
+    [np.sqrt, None]
+)
+def test_prep_image_and_templates(intensity_transform_function):
+    image = np.ones((123, 51))
+    simulations = mock_library()
+    pim, r, t, i = iutls._prepare_image_and_templates(image, simulations, 2.1, 3.2, 33.3, intensity_transform_function, False, None)
+    assert pim.shape[0] == 112
+    assert pim.shape[1] == 15
+    assert r.max() <= 15
+    assert t.min() >= 0
+    assert t.max() < 112 
+    assert i.shape[0] == 3
+    assert i.shape[1] == 4
+
+
+@pytest.mark.parametrize(
+    "nbest",
+    [1, 2],
+)
+def test_mixed_matching_lib_to_polar(nbest):
+    image = np.ones((123, 51), dtype=np.float64)
+    polar_norm = 1.
+    polar_sum = np.sum(image, axis=0)
+    polar_sum_norm = 2.3
+    integrated_templates = np.ones((5, 51), dtype=np.float64)
+    integrated_template_norms = np.sum(integrated_templates, axis=1)
+    r = np.linspace(2, 40, 30, dtype=np.uint64)
+    r = np.repeat(r[np.newaxis, ...], 5, axis=0)
+    theta = np.linspace(10, 110, 30, dtype=np.uint64)
+    theta = np.repeat(theta[np.newaxis, ...], 5, axis=0)
+    intensities = np.ones(30, dtype=np.float64)
+    intensities = np.repeat(intensities[np.newaxis, ...], 5, axis=0)
+    template_norms = np.ones(5, dtype = np.float64)*3
+    fraction = 0.6
+    answer = iutls._mixed_matching_lib_to_polar(image,
+                                 polar_norm,
+                                 polar_sum,
+                                 polar_sum_norm,
+                                 integrated_templates,
+                                 integrated_template_norms,
+                                 r,
+                                 theta,
+                                 intensities,
+                                 template_norms,
+                                 fraction,
+                                 nbest)
+    assert answer.shape[0] == nbest
+    assert answer.shape[1] == 3
+
+
+
+    
+@pytest.mark.parametrize(
+    "frk, norim, nortemp",
+    [
+        (None, True, False),
+        (0.5, False, True),
+    ]
+)
+def test_correlate_library_to_pattern_partial(frk, norim, nortemp):
+    image = np.ones((123, 50))
+    simulations = mock_library()
+    indx, angs, cor = iutls.correlate_library_to_pattern_partial(image, simulations,
+            frac_keep = frk,
+            delta_r=2.6, delta_theta=1.3,
+            normalize_image=norim, normalize_templates=nortemp)
+    assert cor.dtype == np.float64
+    assert cor.shape[0] == indx.shape[0] == angs.shape[0]
+
+
+@pytest.mark.parametrize(
+    "nbest, frk, norim, nortemp",
+    [
+        (3, None, True, False),
+        (1, 0.5, False, True),
+    ]
+)
+def test_get_n_best_matches(nbest, frk, norim, nortemp):
+    image = np.ones((123, 50))
+    simulations = mock_library()
+    indx, angs, cor = iutls.get_n_best_matches(image, simulations,
+            n_best=nbest,
+            frac_keep = frk,
+            delta_r=2.6, delta_theta=1.3,
+            normalize_image=norim, normalize_templates=nortemp)
+    assert cor.dtype == np.float64
+    assert cor.shape[0] == indx.shape[0] == angs.shape[0] == nbest
+    

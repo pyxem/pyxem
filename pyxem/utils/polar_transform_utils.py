@@ -123,7 +123,7 @@ def get_polar_pattern_shape(image_shape,
         half_x = image_shape[1] / 2
         r_dim = int(np.ceil(np.sqrt(half_x**2 + half_y**2)) / delta_r)
     else:
-        r_dim = max_r / delta_r
+        r_dim = int(max_r / delta_r)
     theta_dim = int(round(360 / delta_theta))
     return (theta_dim, r_dim)
 
