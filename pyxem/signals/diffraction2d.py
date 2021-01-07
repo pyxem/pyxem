@@ -405,7 +405,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             bg_subtracted.data = bg_subtracted.data / np.max(bg_subtracted.data)
             return bg_subtracted
 
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         if method == "difference of gaussians":
             output_array = dt._background_removal_dog(dask_array, **kwargs)
@@ -482,7 +482,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         dead_pixels = dt._find_dead_pixels(
             dask_array, dead_pixel_value=dead_pixel_value, mask_array=mask_array
@@ -546,7 +546,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         correct_bad_pixels
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         hot_pixels = dt._find_hot_pixels(
             dask_array, threshold_multiplier=threshold_multiplier, mask_array=mask_array
@@ -1112,7 +1112,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         template_match_ring
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         output_array = dt._template_match_with_binary_image(dask_array, binary_image)
         if not lazy_result:
@@ -1248,7 +1248,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             raise ValueError(
                 "square_size must be even number, not {0}".format(square_size)
             )
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
@@ -1303,7 +1303,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         >>> intensity_array_computed = intensity_array.compute()
 
         """
-        dask_array = _get_dask_array(self,size_of_chunk=8)
+        dask_array = _get_dask_array(self)
 
         chunks_peak = dask_array.chunks[:-2]
         if hasattr(peak_array, "chunks"):
