@@ -26,6 +26,7 @@ from skimage import morphology
 import dask.array as da
 from dask.diagnostics import ProgressBar
 from tqdm import tqdm
+import warnings
 
 import hyperspy.api as hs
 from hyperspy.signals import Signal2D
@@ -1770,23 +1771,12 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         -------
         HyperSpy signal, one less signal dimension than the input signal.
 
-        Examples
+        See Also
         --------
-        >>> s = pxm.dummy_data.get_holz_simple_test_signal()
-        >>> s_r = s.radial_average(centre_x=25, centre_y=25,
-        ...     show_progressbar=False)
-        >>> s_r.plot()
-
-        Using center_of_mass to find bright field disk position
-
-        >>> s = dd.get_disk_shift_simple_test_signal()
-        >>> s_com = s.center_of_mass(threshold=2, show_progressbar=False)
-        >>> s_r = s.radial_average(
-        ...     centre_x=s_com.inav[0].data, centre_y=s_com.inav[1].data,
-        ...     show_progressbar=False)
-        >>> s_r.plot()
+        .get_azimuthal_integral1d
 
         """
+        warnings.warn('This method is depreacted, and will be removed in version 0.14.0, please use .get_azimuthal_integral1d',FutureWarning)
         if (centre_x is None) or (centre_y is None):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
         elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
