@@ -243,7 +243,11 @@ class TestProcessDaskArray:
         def test_function(image):
             return image
 
-        dask_output = dt._process_dask_array(dask_input, test_function, dtype=dtype,)
+        dask_output = dt._process_dask_array(
+            dask_input,
+            test_function,
+            dtype=dtype,
+        )
         array_output = dask_output.compute()
         assert array_output.dtype == dtype
 
@@ -296,7 +300,10 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output = dt._process_dask_array(
-            dask_input, test_function, value1=value1, value2=value2,
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
         )
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
@@ -310,9 +317,15 @@ class TestProcessDaskArray:
 
         value1, value2 = 9, 2
         dask_output1 = dt._process_dask_array(
-            dask_input, test_function, value1=value1, value2=value2,
+            dask_input,
+            test_function,
+            value1=value1,
+            value2=value2,
         )
-        dask_output2 = dt._process_dask_array(dask_input, test_function,)
+        dask_output2 = dt._process_dask_array(
+            dask_input,
+            test_function,
+        )
         array_output1 = dask_output1.compute()
         array_output2 = dask_output2.compute()
         assert np.all(array_output1 == 5)

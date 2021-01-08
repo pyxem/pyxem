@@ -69,7 +69,8 @@ class Test_PyFai_utils:
         max_rad = 50 * np.sqrt(2)
         calc_extent = np.arctan(max_rad * 1e-4 / 1)
         np.testing.assert_almost_equal(
-            extent[1], calc_extent,
+            extent[1],
+            calc_extent,
         )
 
     @pytest.mark.parametrize("wavelength", [0, 1e-9])

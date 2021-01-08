@@ -82,7 +82,16 @@ def test_correlate_library_from_dict():
     new_template_library["GaSb"] = {
         "orientations": np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
         "pixel_coords": np.array([np.asarray([[1, 1]]), np.asarray([[2, 2], [1, 1]])]),
-        "intensities": np.array([np.array([1,]), np.array([1, 1])]),
+        "intensities": np.array(
+            [
+                np.array(
+                    [
+                        1,
+                    ]
+                ),
+                np.array([1, 1]),
+            ]
+        ),
     }
     shape = (3, 3)
     fsize = (5, 5)

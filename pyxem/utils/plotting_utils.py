@@ -1,24 +1,27 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from pyxem.utils.polar_transform_utils import (
-        get_template_cartesian_coordinates,
-        get_template_polar_coordinates,
-        image_to_polar)
+    get_template_cartesian_coordinates,
+    get_template_polar_coordinates,
+    image_to_polar,
+)
 from pyxem.utils.expt_utils import find_beam_center_blur
 
 
-def plot_template_over_pattern(pattern,
-                               simulation,
-                               ax = None,
-                               in_plane_angle=0.,
-                               max_r=None,
-                               find_direct_beam=True,
-                               direct_beam_position=None,
-                               coordinate_system="cartesian",
-                               marker_color="red",
-                               marker_type="x",
-                               size_factor=1.,
-                               **kwargs):
+def plot_template_over_pattern(
+    pattern,
+    simulation,
+    ax=None,
+    in_plane_angle=0.0,
+    max_r=None,
+    find_direct_beam=True,
+    direct_beam_position=None,
+    coordinate_system="cartesian",
+    marker_color="red",
+    marker_type="x",
+    size_factor=1.0,
+    **kwargs
+):
     """
     A quick utility function to plot a simulated pattern over an experimental image
 
@@ -73,12 +76,32 @@ def plot_template_over_pattern(pattern,
     else:
         c_y, c_x = pattern.shape[0] // 2, pattern.shape[1] // 2
     if coordinate_system == "polar":
-        pattern = image_to_polar(pattern, max_r = max_r, find_direct_beam=find_direct_beam, direct_beam_position=direct_beam_position)
-        x, y, intensities = get_template_polar_coordinates(simulation, in_plane_angle=in_plane_angle, max_r=max_r)
+        pattern = image_to_polar(
+            pattern,
+            max_r=max_r,
+            find_direct_beam=find_direct_beam,
+            direct_beam_position=direct_beam_position,
+        )
+        x, y, intensities = get_template_polar_coordinates(
+            simulation, in_plane_angle=in_plane_angle, max_r=max_r
+        )
     elif coordinate_system == "cartesian":
-        x, y, intensities = get_template_cartesian_coordinates(simulation, center=(c_x, c_y), in_plane_angle=in_plane_angle, window_size=pattern.shape[::-1])
+        x, y, intensities = get_template_cartesian_coordinates(
+            simulation,
+            center=(c_x, c_y),
+            in_plane_angle=in_plane_angle,
+            window_size=pattern.shape[::-1],
+        )
     else:
-        raise NotImplementedError("Only polar and cartesian are accepted coordinate systems")
+        raise NotImplementedError(
+            "Only polar and cartesian are accepted coordinate systems"
+        )
     im = ax.imshow(pattern, **kwargs)
-    sp = ax.scatter(x, y, s=size_factor * np.sqrt(intensities), marker=marker_type, color=marker_color)
+    sp = ax.scatter(
+        x,
+        y,
+        s=size_factor * np.sqrt(intensities),
+        marker=marker_type,
+        color=marker_color,
+    )
     return (ax, im, sp)
