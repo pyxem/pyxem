@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,8 +22,8 @@ import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy.roi import Line2DROI
 
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.libraries.calibration_library import CalibrationDataLibrary
+from pyxem.signals import ElectronDiffraction2D
+from pyxem.libraries import CalibrationDataLibrary
 
 
 @pytest.fixture

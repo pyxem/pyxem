@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,18 +18,13 @@
 
 import hyperspy.api as hs
 import pytest
-import diffpy.structure
 import numpy as np
+
 from pyxem.tests.generators.test_displacement_gradient_tensor_generator import (
     generate_test_vectors,
 )
-from pyxem.generators.displacement_gradient_tensor_generator import (
-    get_DisplacementGradientMap,
-)
-from pyxem.signals.strain_map import StrainMap, _get_rotation_matrix
-from diffsims.generators.diffraction_generator import DiffractionGenerator
-from pyxem.components.scalable_reference_pattern import ScalableReferencePattern
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
+from pyxem.generators import get_DisplacementGradientMap
+from pyxem.signals.strain_map import _get_rotation_matrix
 
 
 @pytest.fixture()
@@ -144,36 +139,3 @@ def test_trace(Displacement_Grad_Map):
         np.add(rotation_beta.inav[0].data, rotation_beta.inav[1].data),
         decimal=2,
     )
-
-
-def test_strain_mapping_affine_transform():
-    latt = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90)
-    atom = diffpy.structure.atom.Atom(atype="Zn", xyz=[0, 0, 0], lattice=latt)
-    structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
-    ediff = DiffractionGenerator(300.0, 0.025)
-    affines = [
-        [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-        [[1.04, 0, 0], [0, 1, 0], [0, 0, 1]],
-        [[1.08, 0, 0], [0, 1, 0], [0, 0, 1]],
-        [[1.12, 0, 0], [0, 1, 0], [0, 0, 1]],
-    ]
-
-    data = []
-    for affine in affines:
-        # same coords as used for latt above
-        latt_rot = diffpy.structure.lattice.Lattice(3, 3, 3, 90, 90, 90, baserot=affine)
-        structure.placeInLattice(latt_rot)
-
-        diff_dat = ediff.calculate_ed_data(structure, 2.5)
-        dpi = diff_dat.get_diffraction_pattern(64, 0.02)
-        data.append(dpi)
-    data = np.array(data)
-    dp = ElectronDiffraction2D(data.reshape((2, 2, 64, 64)))
-
-    m = dp.create_model()
-    ref = ScalableReferencePattern(dp.inav[0, 0])
-    m.append(ref)
-    m.multifit()
-    disp_grad = ref.construct_displacement_gradient()
-
-    assert disp_grad.data.shape == np.asarray(affines).reshape(2, 2, 3, 3).shape

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -17,10 +17,9 @@
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import pytest
 
 from hyperspy.signals import Signal1D
-from pyxem.signals.diffraction_variance1d import DiffractionVariance1D
+from pyxem.signals import DiffractionVariance1D
 
 
 class TestDiffractionVariance1D:

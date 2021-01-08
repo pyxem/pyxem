@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,11 +19,12 @@
 import pytest
 import numpy as np
 
-from pyxem.generators.integration_generator import IntegrationGenerator
-from pyxem.signals.diffraction_vectors import DiffractionVectors
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from hyperspy.signals import BaseSignal
 from scipy.ndimage import gaussian_filter
+
+from hyperspy.signals import BaseSignal
+
+from pyxem.generators import IntegrationGenerator
+from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
 
 
 @pytest.mark.parametrize("radius, offset", [[1, 0], [2, 1], [3, 2]])

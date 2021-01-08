@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -101,24 +101,18 @@ signals:
     dtype: real
     lazy: False
     module: pyxem.signals.indexation_results
-  CrystallographicMap:
-    signal_type: crystallographic_map
-    signal_dimension: 1
-    dtype: real
-    lazy: False
-    module: pyxem.signals.crystallographic_map
   DisplacementGradientMap:
     signal_type: tensor_field
     signal_dimension: 2
     dtype: real
     lazy: False
     module: pyxem.signals.tensor_field
-  VDFImage:
-    signal_type: vdf_image
+  VirtualDarkFieldImage:
+    signal_type: virtual_dark_field
     signal_dimension: 2
     dtype: real
     lazy: False
-    module: pyxem.signals.vdf_image
+    module: pyxem.signals.virtual_dark_field_image
   ReducedIntensity1D:
     signal_type: reduced_intensity
     signal_dimension: 1

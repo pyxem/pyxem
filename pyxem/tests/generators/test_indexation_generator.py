@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,20 +18,59 @@
 
 import pytest
 import numpy as np
+import hyperspy.api as hs
 
-from pyxem.generators.indexation_generator import ProfileIndexationGenerator
-from pyxem.generators.indexation_generator import VectorIndexationGenerator
-from pyxem.generators.indexation_generator import (
-    get_fourier_transform,
-    get_library_FT_dict,
-)
-
+from hyperspy._signals.signal2d import Signal2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
-from diffsims.libraries.diffraction_library import DiffractionLibrary
 from diffsims.sims.diffraction_simulation import ProfileSimulation
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.library_generator import DiffractionLibraryGenerator
+from diffsims.libraries.structure_library import StructureLibrary
 
+from pyxem.generators import (
+    IndexationGenerator,
+    TemplateIndexationGenerator,
+    ProfileIndexationGenerator,
+    VectorIndexationGenerator,
+)
+from pyxem.signals import (
+    ElectronDiffraction2D,
+    TemplateMatchingResults,
+    DiffractionVectors,
+)
 from pyxem.utils.indexation_utils import OrientationResult
+
+
+def test_old_indexer_routine():
+    with pytest.raises(ValueError):
+        _ = IndexationGenerator("a", "b")
+
+
+@pytest.mark.parametrize(
+    "method", ["fast_correlation", "zero_mean_normalized_correlation"]
+)
+def test_TemplateIndexationGenerator(default_structure, method):
+    identifiers = ["a", "b"]
+    structures = [default_structure, default_structure]
+    orientations = [
+        [(0, 0, 0), (0, 1, 0), (1, 0, 0)],
+        [(0, 0, 1), (0, 0, 2), (0, 0, 3)],
+    ]
+    structure_library = StructureLibrary(identifiers, structures, orientations)
+    libgen = DiffractionLibraryGenerator(DiffractionGenerator(300))
+    library = libgen.get_diffraction_library(
+        structure_library, 0.017, 0.02, (100, 100), False
+    )
+
+    edp = ElectronDiffraction2D(np.random.rand(2, 2, 200, 200))
+    indexer = TemplateIndexationGenerator(edp, library)
+
+    mask_signal = hs.signals.Signal2D(np.array([[1, 0], [1, 1]])).T
+    z = indexer.correlate(method=method, n_largest=2, mask=mask_signal)
+    assert isinstance(z, TemplateMatchingResults)
+    assert isinstance(z.data, Signal2D)
+    assert z.data.data.shape[0:2] == edp.data.shape[0:2]
+    assert z.data.data.shape[3] == 5
 
 
 @pytest.fixture
@@ -125,40 +164,6 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
     )
     indexation = pig.index_peaks(tolerance=0.02)
     np.testing.assert_almost_equal(indexation[0][0], 0.3189193164369)
-
-
-def test_get_fourier_transform():
-    shape = (3, 3)
-    fsize = (5, 5)
-    normalization_constant = 0.9278426705718053  # Precomputed normalization. Formula full_frame(template, 1, template, 1)
-    template_coordinates = np.asarray([[1, 1]])
-    template_intensities = np.asarray([1])
-    transform, norm = get_fourier_transform(
-        template_coordinates, template_intensities, shape, fsize
-    )
-    test_value = np.real(transform[2, 1])  # Center value
-    np.testing.assert_approx_equal(test_value, 1)
-    np.testing.assert_approx_equal(norm, normalization_constant)
-
-
-def test_get_library_FT_dict():
-    new_template_library = DiffractionLibrary()
-    new_template_library["GaSb"] = {
-        "orientations": np.array([[0.0, 0.0, 0.0],]),
-        "pixel_coords": np.array([np.asarray([[1, 1],])]),
-        "intensities": np.array([np.array([1,])]),
-    }
-    shape = (3, 3)
-    fsize = (5, 5)
-    normalization_constant = 0.9278426705718053
-    new_template_dict = get_library_FT_dict(new_template_library, shape, fsize)
-    for phase_index, library_entry in enumerate(new_template_dict.values()):
-        orientations = library_entry["orientations"]
-        patterns = library_entry["patterns"]
-        pattern_norms = library_entry["pattern_norms"]
-    np.testing.assert_approx_equal(orientations[0][0], 0.0)
-    np.testing.assert_approx_equal(np.real(patterns[0][2, 1]), 1)
-    np.testing.assert_approx_equal(pattern_norms[0], normalization_constant)
 
 
 def test_vector_indexation_generator_init():

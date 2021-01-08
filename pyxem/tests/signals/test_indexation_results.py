@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -18,40 +18,140 @@
 
 import numpy as np
 import pytest
+from matplotlib import pyplot as plt
+from transforms3d.euler import euler2mat
 
-from pyxem.signals.indexation_results import TemplateMatchingResults
-from pyxem.signals.indexation_results import VectorMatchingResults
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from diffsims.libraries.structure_library import StructureLibrary
+from diffsims.generators.diffraction_generator import DiffractionGenerator
+from diffsims.generators.library_generator import DiffractionLibraryGenerator
+
+from pyxem.generators import TemplateIndexationGenerator
+from pyxem.signals import (
+    TemplateMatchingResults,
+    VectorMatchingResults,
+    DiffractionVectors,
+)
+from pyxem.utils.indexation_utils import OrientationResult
 
 
-def test_template_get_crystallographic_map(
-    dp_template_match_result, sp_template_match_result
+def test_TemplateMatchingResults_to_crystal_map():
+    t = TemplateMatchingResults(np.empty((10, 10, 10, 5)))
+    return t.to_crystal_map()
+
+
+def test_TemplateMatchingResults_plot_best_results_on_signal(
+    diffraction_pattern, default_structure
 ):
-    # Assertion free test, as the tests in test_indexation_utils do the heavy
-    # lifting
-    match_results = np.array(
-        np.vstack((dp_template_match_result[0], sp_template_match_result[0]))
+    """ Coverage testing """
+    edc = DiffractionGenerator(300)
+    half_side_length = 4
+    rot_list = [[0, 1, 0], [1, 0, 0]]
+
+    diff_gen = DiffractionLibraryGenerator(edc)
+    struc_lib = StructureLibrary(["A"], [default_structure], [rot_list])
+    library = diff_gen.get_diffraction_library(
+        struc_lib,
+        calibration=1 / half_side_length,
+        reciprocal_radius=0.8,
+        half_shape=(half_side_length, half_side_length),
+        with_direct_beam=True,
     )
-    match_results = TemplateMatchingResults(match_results)
-    cryst_map = match_results.get_crystallographic_map()
-    assert cryst_map.method == "template_matching"
+    indexer = TemplateIndexationGenerator(diffraction_pattern, library)
+    match_results = indexer.correlate()
+    match_results.plot_best_matching_results_on_signal(
+        diffraction_pattern, library=library
+    )
+    plt.close("all")
 
 
-def test_vector_get_crystallographic_map(
-    dp_vector_match_result, sp_vector_match_result
-):
-    # Assertion free test, as the tests in test_indexation_utils do the heavy
-    # lifting
-    match_results = np.hstack([dp_vector_match_result, sp_vector_match_result])
-    match_results = VectorMatchingResults(match_results)
-    match_results.axes_manager.set_signal_dimension(1)
-    cryst_map = match_results.get_crystallographic_map()
-    assert cryst_map.method == "vector_matching"
+@pytest.fixture
+def sp_vector_match_result():
+    # We require (total_error of row_1 > correlation row_2)
+    res = np.empty(2, dtype="object")
+    res[0] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.5,
+        np.array([0.1, 0.05, 0.2]),
+        0.1,
+        1.0,
+        0,
+        0,
+    )
+    res[1] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.6,
+        np.array([0.1, 0.10, 0.2]),
+        0.2,
+        1.0,
+        0,
+        0,
+    )
+    return VectorMatchingResults(res)
+
+
+@pytest.fixture
+def dp_vector_match_result():
+    res = np.empty(4, dtype="object")
+    res = res.reshape(2, 2)
+    res[0, 0] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([90, 0, 0]), "rzxz"),
+        0.6,
+        np.array([0.1, 0.10, 0.2]),
+        0.3,
+        1.0,
+        0,
+        0,
+    )
+    res[0, 1] = OrientationResult(
+        0,
+        euler2mat(*np.deg2rad([0, 10, 20]), "rzxz"),
+        0.5,
+        np.array([0.1, 0.05, 0.2]),
+        0.4,
+        1.0,
+        0,
+        0,
+    )
+    res[1, 0] = OrientationResult(
+        1,
+        euler2mat(*np.deg2rad([0, 45, 45]), "rzxz"),
+        0.8,
+        np.array([0.1, 0.30, 0.2]),
+        0.1,
+        1.0,
+        0,
+        0,
+    )
+    res[1, 1] = OrientationResult(
+        1,
+        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
+        0.7,
+        np.array([0.1, 0.05, 0.1]),
+        0.2,
+        1.0,
+        0,
+        0,
+    )
+    return VectorMatchingResults(res)
+
+
+def test_single_vector_get_crystallographic_map(sp_vector_match_result):
+    _ = sp_vector_match_result.get_crystallographic_map()
+
+
+def test_double_vector_get_crystallographic_map(dp_vector_match_result):
+    _ = dp_vector_match_result.get_crystallographic_map()
 
 
 @pytest.mark.parametrize(
     "overwrite, result_hkl, current_hkl, expected_hkl",
-    [(True, [0, 0, 1], None, [0, 0, 1]), (False, [0, 0, 1], None, [0, 0, 1]),],
+    [
+        (True, [0, 0, 1], None, [0, 0, 1]),
+        (False, [0, 0, 1], None, [0, 0, 1]),
+    ],
 )
 def test_vector_get_indexed_diffraction_vectors(
     overwrite, result_hkl, current_hkl, expected_hkl

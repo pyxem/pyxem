@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,12 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 import numpy as np
 import dask.array as da
 from skimage.feature import match_template, blob_dog, blob_log
 import scipy.ndimage as ndi
 from skimage import morphology
+
+
+def align_single_frame(image, shifts, **kwargs):
+    temp_image = ndi.shift(image, shifts[::-1], **kwargs)
+    return temp_image
 
 
 def get_signal_dimension_chunk_slice_list(chunks):
@@ -51,6 +55,10 @@ def get_signal_dimension_host_chunk_slice(x, y, chunks):
 
 def _rechunk_signal2d_dim_one_chunk(dask_array):
     array_dims = len(dask_array.shape)
+    if not hasattr(dask_array, "chunks"):
+        raise AttributeError(
+            "dask_array must be a dask array, not {0}".format(type(dask_array))
+        )
     if array_dims < 2:
         raise ValueError(
             "dask_array must be at least two dimensions, not {0}".format(array_dims)
@@ -64,25 +72,103 @@ def _rechunk_signal2d_dim_one_chunk(dask_array):
     return dask_array_rechunked
 
 
-def _get_dask_array(signal, size_of_chunk=32):
+def _expand_iter_dimensions(iter_dask_array, dask_array_dims):
+    iter_dask_array_shape = list(iter_dask_array.shape)
+    iter_dims = len(iter_dask_array_shape)
+    if dask_array_dims > iter_dims:
+        for i in range(dask_array_dims - iter_dims):
+            iter_dask_array_shape.append(1)
+    iter_dask_array = iter_dask_array.reshape(iter_dask_array_shape)
+    return iter_dask_array
+
+
+def _get_chunking(signal, chunk_shape=None, chunk_bytes=None):
+    """Get chunk tuple based on the size of the dataset.
+
+    The signal dimensions will be within one chunk, and the navigation
+    dimensions will be chunked based on either chunk_shape, or
+    be optimized based on the chunk_bytes.
+
+    Parameters
+    ----------
+    signal : hyperspy or pyxem signal
+    chunk_shape : int, optional
+        Size of the navigation chunk, of None (the default), the chunk
+        size will be set automatically.
+    chunk_bytes : int or string, optional
+        Number of bytes in each chunk. For example '60MiB'. If None (the default),
+        the limit will be '30MiB'. Will not be used if chunk_shape is None.
+
+    Returns
+    -------
+    chunks : tuple
+
+    Examples
+    --------
+    >>> import dask.array as da
+    >>> import pyxem as pxm
+    >>> import pyxem.utils.dask_tools as dt
+    >>> s = pxm.LazySignal2D(da.zeros((32, 32, 256, 256), chunks=(16, 16, 256, 256)))
+    >>> chunks = dt._get_chunking(s)
+
+    Limiting to 60 MiB per chunk
+
+    >>> chunks = dt._get_chunking(s, chunk_bytes="60MiB")
+
+    Specifying the navigation chunk size
+
+    >>> chunks = dt._get_chunking(s, chunk_shape=8)
+
+    """
+    if chunk_bytes is None:
+        chunk_bytes = "30MiB"
+    nav_dim = signal.axes_manager.navigation_dimension
+    sig_dim = signal.axes_manager.signal_dimension
+
+    chunks_dict = {}
+    for i in range(nav_dim):
+        if chunk_shape is None:
+            chunks_dict[i] = "auto"
+        else:
+            chunks_dict[i] = chunk_shape
+    for i in range(nav_dim, nav_dim + sig_dim):
+        chunks_dict[i] = -1
+
+    chunks = da.core.normalize_chunks(
+        chunks=chunks_dict,
+        shape=signal.data.shape,
+        limit=chunk_bytes,
+        dtype=signal.data.dtype,
+    )
+    return chunks
+
+
+def _get_dask_array(signal, chunk_shape=None, chunk_bytes=None):
     if signal._lazy:
         dask_array = signal.data
     else:
-        sig_chunks = list(signal.axes_manager.signal_shape)[::-1]
-        chunks = [size_of_chunk] * len(signal.axes_manager.navigation_shape)
-        chunks.extend(sig_chunks)
+        chunks = _get_chunking(signal, chunk_shape, chunk_bytes)
         dask_array = da.from_array(signal.data, chunks=chunks)
     return dask_array
 
 
 def _process_chunk(
     data,
+    iter_array,
     process_func,
     output_signal_size=None,
     args_process=None,
     kwargs_process=None,
     block_info=None,
 ):
+    if iter_array is not None:
+        nav_shape = data.shape[:-2]
+        iter_nav_shape = iter_array.shape[: len(nav_shape)]
+        if nav_shape != iter_nav_shape:
+            raise ValueError(
+                "iter_array nav shape {0} must be the same as the navigation shape as "
+                "the data {1}".format(iter_nav_shape, nav_shape)
+            )
     dtype = block_info[None]["dtype"]
     if args_process is None:
         args_process = []
@@ -95,15 +181,22 @@ def _process_chunk(
     output_array = np.zeros(output_shape, dtype=dtype)
     for index in np.ndindex(data.shape[:-2]):
         islice = np.s_[index]
-        output_array[islice] = process_func(
-            data[islice], *args_process, **kwargs_process
-        )
+        if iter_array is not None:
+            iter_value = iter_array[islice].squeeze()
+            output_array[islice] = process_func(
+                data[islice], iter_value, *args_process, **kwargs_process
+            )
+        else:
+            output_array[islice] = process_func(
+                data[islice], *args_process, **kwargs_process
+            )
     return output_array
 
 
 def _process_dask_array(
     dask_array,
     process_func,
+    iter_array=None,
     dtype=None,
     chunks=None,
     drop_axis=None,
@@ -124,13 +217,26 @@ def _process_dask_array(
     ----------
     dask_array : Dask Array
         Must be atleast two dimensions, and the two last dimensions are
-        assumed to be the signal dimensions.
+        assumed to be the signal dimensions. The rest of the dimensions are assumed
+        to be the navigation dimensions.
     process_func : Function
         A function which must at least take one parameter, can return anything
         but the output dimensions must match with drop_axis, new_axis and chunks.
         See Examples below for how to use it.
+    iter_array : Dask Array, optional
+        Array which will be iterated over together with the dask_array. iter_array
+        must have the same shape and chunking for the navigation dimensions, as the
+        dask_array. For example, the process_func for the dask_array[10, 5] position
+        will also receive the value in iter_array[10, 5].
+        iter_array can not have more dimensions than the dask_array.
     dtype : NumPy dtype, optional
+        dtype for the output array
     chunks : tuple, optional
+        Chunking for the output array. This is the (only?) way to set the size of the
+        output signal, if the size is not the same as the input signal.
+        Use a modified version of dask_array.chunks, NOT dask_array.chunksize. Using
+        chunk_size can lead to issues if the chunks are not exactly the same size.
+        See example below for more information.
     drop_axis : int or tuple, optional
         Axes which will be removed from the output array
     new_axis : int or tuple, optional
@@ -160,24 +266,38 @@ def _process_dask_array(
     >>> output_dask_array = _process_dask_array(dask_array, test_function1)
     >>> output_array = output_dask_array.compute()
 
+    Using iter_array
+
+    >>> def test_function2(image, value):
+    ...     return image * value
+    >>> dask_array = da.ones((4, 6, 10, 15), chunks=(2, 2, 2, 2))
+    >>> iter_array = da.random.randint(0, 99, (4, 6), chunks=(2, 2))
+    >>> output_dask_array = _process_dask_array(dask_array, test_function2)
+    >>> output_array = output_dask_array.compute()
+
     Getting output which is different shape than the input. For example
     two coordinates. Note: the output size must be the same for all the
     navigation positions. If the size is variable, for example with peak
     finding, use dtype=np.object (see below).
 
-    >>> def test_function2(image):
+    >>> def test_function3(image):
     ...     return [10, 3]
+    >>> chunks = dask_array.chunks[:-2] + ((2,),)
+    >>> drop_axis = (len(dask_array.shape) - 2, len(dask_array.shape) - 1)
+    >>> new_axis = len(dask_array.shape) - 2
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function2, chunks=(2, 2, 2), drop_axis=(2, 3),
-    ...     new_axis=2, output_signal_size=(2, ))
+    ...     dask_array, test_function3, chunks=chunks, drop_axis=drop_axis,
+    ...     new_axis=new_axis, output_signal_size=(2, ))
 
     For functions where we don't know the shape of the output data,
     use dtype=np.object
 
-    >>> def test_function2(image):
+    >>> def test_function4(image):
     ...     return list(range(np.random.randint(20)))
+    >>> chunks = dask_array.chunks[:-2]
+    >>> drop_axis = (len(dask_array.shape) - 2, len(dask_array.shape) - 1)
     >>> output_dask_array = _process_dask_array(
-    ...     dask_array, test_function2, chunks=(2, 2), drop_axis=(2, 3),
+    ...     dask_array, test_function4, chunks=chunks, drop_axis=drop_axis,
     ...     new_axis=None, dtype=np.object, output_signal_size=())
     >>> output_array = output_dask_array.compute()
 
@@ -185,9 +305,12 @@ def _process_dask_array(
     if dtype is None:
         dtype = dask_array.dtype
     dask_array_rechunked = _rechunk_signal2d_dim_one_chunk(dask_array)
+    if iter_array is not None:
+        iter_array = _get_iter_array(iter_array, dask_array_rechunked)
     output_array = da.map_blocks(
         _process_chunk,
         dask_array_rechunked,
+        iter_array,  # This MUST be passed as an argument, NOT an keyword argument
         process_func=process_func,
         dtype=dtype,
         output_signal_size=output_signal_size,
@@ -198,6 +321,83 @@ def _process_dask_array(
         kwargs_process=kwargs_process,
     )
     return output_array
+
+
+def _get_iter_array(iter_array, dask_array):
+    """Make sure a dask array can be used together with another dask array in map_blocks.
+
+    It is possible to pass two dask arrays to da.map_blocks, where map_blocks will
+    iterate over the two dask arrays at the same time. However, this requires both
+    dask_arrays to have:
+
+    - i) the same number of dimensions
+    - ii) the same shape in the "navigation" dimensions
+    - iii) the same chunking in the "navigation" dimensions
+
+    Here, we call dask_array the "main" data, which contains some kind of image data.
+    iter_array contains some kind of process parameter, which is necessary to do the
+    processing. For example the position of the center diffraction beam. The navigation
+    dimensions are the non-signal dimensions in the dask_array. So if the dask_array
+    has the shape (20, 20, 100, 100), the signal dimensions are the two last ones
+    (100, 100), and the navigation dimensions (20, 20).
+
+    In practice, this means that if dask_array has the navigation shape (20, 20), the
+    iter_array must also have the navigation shape (20, 20). However, the signal
+    shape can be different. So if dask_array has the shape (20, 20, 100, 100), the
+    iter_array can have the shape (20, 20, 2). But due to i), iter_array will be
+    reshaped to (20, 20, 2, 1).
+
+    In addition, the signal dimensions MUST be in one chunk, and the navigation
+    chunks must be the same. So if dask_array has the chunking (5, 5, 100, 100),
+    the iter_array must have the chunking (5, 5, 2, 1).
+
+    This function checks all of these requirements, extend the dimensions, and rechunk
+    the signal dimension of the iter_array if necessary.
+
+    Example
+    -------
+    >>> import dask.array as da
+    >>> dask_array = da.ones((20, 20, 100, 100), chunks=(5, 5, 100, 100))
+    >>> iter_array = da.ones((20, 20, 2), chunks=(5, 5, 2))
+    >>> import pyxem.utils.dask_tools as dt
+    >>> iter_array_new = dt._get_iter_array(iter_array, dask_array)
+    >>> iter_array_new.shape
+    (20, 20, 2, 1)
+
+    """
+    if len(iter_array.shape) > len(dask_array.shape):
+        raise ValueError(
+            "iter_array {0} can not have more dimensions than dask_array {1}".format(
+                iter_array.shape, dask_array.shape
+            )
+        )
+
+    nav_shape_dask_array = dask_array.shape[:-2]
+    nav_dim_dask_array = len(nav_shape_dask_array)
+    nav_shape_iter_array = iter_array.shape[:nav_dim_dask_array]
+    if nav_shape_iter_array != nav_shape_dask_array:
+        raise ValueError(
+            "iter_array nav shape {0} must be same as dask_array nav shape {1}".format(
+                nav_shape_iter_array, nav_shape_dask_array
+            )
+        )
+
+    if not hasattr(iter_array, "chunks"):
+        raise ValueError(
+            "iter_array must be dask array, not {0}".format(type(iter_array))
+        )
+    nav_chunks_dask_array = dask_array.chunks[:nav_dim_dask_array]
+    nav_chunks_iter_array = iter_array.chunks[:nav_dim_dask_array]
+    if nav_chunks_dask_array != nav_chunks_iter_array:
+        raise ValueError(
+            "iter_array nav chunks {0} must be same as dask_array nav chunks {1}".format(
+                nav_chunks_iter_array, nav_chunks_dask_array
+            )
+        )
+
+    iter_array = _expand_iter_dimensions(iter_array, len(dask_array.shape))
+    iter_array = _rechunk_signal2d_dim_one_chunk(iter_array)
+    return iter_array
 
 
 def _mask_array(dask_array, mask_array, fill_value=None):
@@ -453,7 +653,7 @@ def _peak_find_dog_single_frame(
 
     Example
     -------
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> import pyxem.utils.dask_tools as dt
     >>> peaks = _peak_find_dog_single_frame(s.data[0, 0])
 
@@ -776,48 +976,6 @@ def _center_of_mass_array(dask_array, threshold_value=None, mask_array=None):
     beam_shifts = da.stack((x_shift, y_shift))
     beam_shifts = da.divide(beam_shifts[:], sum_array, dtype=np.float64)
     return beam_shifts
-
-
-def _get_border_slices(nav_dim_size):
-    """Get a list of slices for doing pixel interpolation.
-
-    Parameters
-    ----------
-    nav_dim_size : scalar
-
-    Returns
-    -------
-    slice_mi, slice_xp, slice_xm, slice_yp, slice_ym : list of slices
-
-    Examples
-    --------
-    >>> import pyxem.utils.dask_tools as dt
-    >>> s_mi, s_xp, s_xm, s_yp, s_ym = dt._get_border_slices(2)
-
-    """
-    nav_slice = [slice(None, None, None)] * nav_dim_size
-
-    slice_mi = copy.deepcopy(nav_slice)
-    slice_mi.extend(np.s_[1:-1, 1:-1])
-    slice_mi = tuple(slice_mi)
-
-    slice_xp = copy.deepcopy(nav_slice)
-    slice_xp.extend(np.s_[0:-2, 1:-1])
-    slice_xp = tuple(slice_xp)
-
-    slice_xm = copy.deepcopy(nav_slice)
-    slice_xm.extend(np.s_[2:None, 1:-1])
-    slice_xm = tuple(slice_xm)
-
-    slice_yp = copy.deepcopy(nav_slice)
-    slice_yp.extend(np.s_[1:-1, 0:-2])
-    slice_yp = tuple(slice_yp)
-
-    slice_ym = copy.deepcopy(nav_slice)
-    slice_ym.extend(np.s_[1:-1, 2:None])
-    slice_ym = tuple(slice_ym)
-
-    return (slice_mi, slice_xp, slice_xm, slice_yp, slice_ym)
 
 
 def _remove_bad_pixels(dask_array, bad_pixel_array):
@@ -1213,9 +1371,9 @@ def _background_removal_dog(dask_array, **kwargs):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5,5,25, 25))
-    >>> s_rem = pxm.Diffraction2D(
+    >>> s_rem = pxm.signals.Diffraction2D(
     ...     dt._background_removal_dog(dask_array))
 
     """
@@ -1241,7 +1399,7 @@ def _background_removal_single_frame_median(frame, footprint=19):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_median(s.data[0, 0])
 
     """
@@ -1266,7 +1424,7 @@ def _background_removal_chunk_median(data, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_chunk_median(s.data[0:10, 0:10,:,:])
 
     """
@@ -1297,9 +1455,9 @@ def _background_removal_median(dask_array, **kwargs):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_rem = pxm.Diffraction2D(
+    >>> s_rem = pxm.signals.Diffraction2D(
     ...     dt._background_removal_median(dask_array), footprint=20)
 
     """
@@ -1330,7 +1488,7 @@ def _background_removal_single_frame_radial_median(frame, centre_x=128, centre_y
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = dt._background_removal_single_frame_radial_median(s.data[0, 0])
     """
 
@@ -1368,7 +1526,7 @@ def _background_removal_chunk_radial_median(data, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> s_rem = _background_removal_chunk_radial_median(s.data[0:10, 0:10,:,:])
     """
     output_array = np.zeros_like(data, dtype=np.float32)
@@ -1401,9 +1559,9 @@ def _background_removal_radial_median(dask_array, **kwargs):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data+1e3, chunks=(5,5,25, 25))
-    >>> s_r = pxm.Diffraction2D(
+    >>> s_r = pxm.signals.Diffraction2D(
     ...     dt._background_removal_radial_median(
     ...     dask_array, centre_x=128, centre_y=128))
 
@@ -1436,7 +1594,7 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = np.array(([48.,48.],[25.,48.]))
     >>> r_p_array = dt._peak_refinement_centre_of_mass_frame(
     ...     s.data[0,0,:,:], peak_array, 20)
@@ -1451,6 +1609,7 @@ def _peak_refinement_centre_of_mass_frame(frame, peaks, square_size):
             subframe = _center_of_mass_experimental_square(
                 frame, np.asarray(peaks[i], dtype=np.uint16), square_size
             )
+            # If the peak is outside the subframe, return the same position
             if subframe is None:
                 new_peak[i, 0] = peaks[i, 0].astype("float64")
                 new_peak[i, 1] = peaks[i, 1].astype("float64")
@@ -1485,7 +1644,7 @@ def _peak_refinement_centre_of_mass_chunk(data, peak_array, square_size):
     Examples
     --------
     >>> import pyxem.utils.dask_tools as dt
-    >>> s = pxm.dummy_data.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> peak_array = dt._peak_find_dog_chunk(s.data)
     >>> r_p_array = dt._peak_refinement_centre_of_mass_chunk(
     ...     s.data, peak_array, 20)
@@ -1529,7 +1688,7 @@ def _peak_refinement_centre_of_mass(dask_array, peak_array, square_size):
     --------
     >>> import pyxem.utils.dask_tools as dt
     >>> import dask.array as da
-    >>> s = ps.dummy_data.get_cbed_signal()
+    >>> s = pxm.dummy_data.get_cbed_signal()
     >>> dask_array = da.from_array(s.data, chunks=(5, 5, 25, 25))
     >>> peak_array = dt._peak_find_dog(dask_array)
     >>> r_p_array = dt._peak_refinement_centre_of_mass(
@@ -1644,8 +1803,7 @@ def _get_experimental_square(z, vector, square_size):
 
     Examples
     --------
-    >>> import pyxem.dummy_data.dummy_data as dd
-    >>> d = dd.get_cbed_signal()
+    >>> d = pxm.dummy_data.get_cbed_signal()
     >>> import pyxem.utils.dask_tools as dt
     >>> sub_d = dt._get_experimental_square(d.data[0,0,:,:], [50,50], 30)
 

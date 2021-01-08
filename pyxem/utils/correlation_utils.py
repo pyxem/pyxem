@@ -29,7 +29,9 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)
-        slicer = [slice(None),] * len(z_shape)
+        slicer = [
+            slice(None),
+        ] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))

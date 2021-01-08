@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,15 +24,10 @@ matplotlib.use("agg")
 import pytest
 import diffpy.structure
 import numpy as np
-from transforms3d.euler import euler2mat
 
-from pyxem.signals.diffraction2d import Diffraction2D
-from pyxem.signals.electron_diffraction2d import ElectronDiffraction2D
-from pyxem.signals.electron_diffraction1d import ElectronDiffraction1D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
 
-from pyxem.utils.indexation_utils import OrientationResult
-
+from pyxem.signals import ElectronDiffraction1D, ElectronDiffraction2D
 
 # a straight lift from
 # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option--
@@ -52,16 +47,19 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--runslow"):
         # --runslow given in cli: do not skip slow tests
         return
-    skip_slow = pytest.mark.skip(reason="need --runslow option to run")
-    for item in items:
-        if "slow" in item.keywords:
-            item.add_marker(skip_slow)
+    else:  # pragma: no cover
+        skip_slow = pytest.mark.skip(reason="need --runslow option to run")
+        for item in items:
+            if "slow" in item.keywords:
+                item.add_marker(skip_slow)
+
+
+# End of the code lift, it's regular code from here on out
 
 
 @pytest.fixture
 def default_structure():
-    """An atomic structure represented using diffpy
-    """
+    """An atomic structure represented using diffpy"""
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
     atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
     hexagonal_structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
@@ -166,7 +164,13 @@ def electron_diffraction1d():
 
 @pytest.fixture
 def vector_match_peaks():
-    return np.array([[1, 0.1, 0], [0, 2, 0], [1, 2, 3],])
+    return np.array(
+        [
+            [1, 0.1, 0],
+            [0, 2, 0],
+            [1, 2, 3],
+        ]
+    )
 
 
 @pytest.fixture
@@ -174,7 +178,11 @@ def vector_library():
     library = DiffractionVectorLibrary()
     library["A"] = {
         "indices": np.array(
-            [[[0, 2, 0], [1, 0, 0]], [[1, 2, 3], [0, 2, 0]], [[1, 2, 3], [1, 0, 0]],]
+            [
+                [[0, 2, 0], [1, 0, 0]],
+                [[1, 2, 3], [0, 2, 0]],
+                [[1, 2, 3], [1, 0, 0]],
+            ]
         ),
         "measurements": np.array(
             [
@@ -187,93 +195,3 @@ def vector_library():
     lattice = diffpy.structure.Lattice(1, 1, 1, 90, 90, 90)
     library.structures = [diffpy.structure.Structure(lattice=lattice)]
     return library
-
-
-@pytest.fixture
-def sp_template_match_result():
-    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype="object")
-    row_2 = np.array([0, np.array([2, 3, 5]), 0.6], dtype="object")
-    # note we require (correlation of row_1 > correlation row_2)
-    return np.vstack((row_1, row_2))
-
-
-@pytest.fixture
-def dp_template_match_result():
-    row_1 = np.array([0, np.array([2, 3, 4]), 0.7], dtype="object")
-    row_2 = np.array([0, np.array([2, 3, 5]), 0.8], dtype="object")
-    row_3 = np.array([1, np.array([2, 3, 4]), 0.5], dtype="object")
-    row_4 = np.array([1, np.array([2, 3, 5]), 0.3], dtype="object")
-    return np.vstack((row_1, row_2, row_3, row_4))
-
-
-@pytest.fixture
-def sp_vector_match_result():
-    # We require (total_error of row_1 > correlation row_2)
-    res = np.empty(2, dtype="object")
-    res[0] = OrientationResult(
-        0,
-        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
-        0.5,
-        np.array([0.1, 0.05, 0.2]),
-        0.1,
-        1.0,
-        0,
-        0,
-    )
-    res[1] = OrientationResult(
-        0,
-        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
-        0.6,
-        np.array([0.1, 0.10, 0.2]),
-        0.2,
-        1.0,
-        0,
-        0,
-    )
-    return res
-
-
-@pytest.fixture
-def dp_vector_match_result():
-    res = np.empty(4, dtype="object")
-    res[0] = OrientationResult(
-        0,
-        euler2mat(*np.deg2rad([90, 0, 0]), "rzxz"),
-        0.6,
-        np.array([0.1, 0.10, 0.2]),
-        0.3,
-        1.0,
-        0,
-        0,
-    )
-    res[1] = OrientationResult(
-        0,
-        euler2mat(*np.deg2rad([0, 10, 20]), "rzxz"),
-        0.5,
-        np.array([0.1, 0.05, 0.2]),
-        0.4,
-        1.0,
-        0,
-        0,
-    )
-    res[2] = OrientationResult(
-        1,
-        euler2mat(*np.deg2rad([0, 45, 45]), "rzxz"),
-        0.8,
-        np.array([0.1, 0.30, 0.2]),
-        0.1,
-        1.0,
-        0,
-        0,
-    )
-    res[3] = OrientationResult(
-        1,
-        euler2mat(*np.deg2rad([0, 0, 90]), "rzxz"),
-        0.7,
-        np.array([0.1, 0.05, 0.1]),
-        0.2,
-        1.0,
-        0,
-        0,
-    )
-    return res

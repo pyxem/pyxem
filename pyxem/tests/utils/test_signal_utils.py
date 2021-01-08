@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -16,20 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
+import pytest
 
-def normalize_vdf(im):
-    """Normalizes image intensity by dividing by maximum value.
+from pyxem.utils.signal import select_method_from_method_dict
 
-    Parameters
-    ----------
-    im : np.array()
-        Array of image intensities
 
-    Returns
-    -------
-    imn : np.array()
-        Array of normalized image intensities
+@pytest.fixture()
+def method_dict():
+    return {"dummy_choice": select_method_from_method_dict}
 
-    """
-    imn = im / im.max()
-    return imn
+
+def test_select_fake_method_from_method_dict(method_dict):
+    with pytest.raises(NotImplementedError):
+        _ = select_method_from_method_dict("fake_choice", method_dict, print_help=True)
+
+
+def test_select_method_from_method_dict_print_help(method_dict):
+    method_dict = {"dummy_choice": select_method_from_method_dict}
+    _ = select_method_from_method_dict("dummy_choice", method_dict, print_help=True)

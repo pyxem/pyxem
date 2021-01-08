@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,10 +22,11 @@ import numpy as np
 from hyperspy.signals import Signal2D
 from hyperspy.api import stack
 
-from pyxem.signals.diffraction_variance2d import DiffractionVariance2D
-from pyxem.signals.diffraction_variance2d import ImageVariance
-from pyxem.signals import transfer_signal_axes
-from pyxem.signals import transfer_navigation_axes_to_signal_axes
+from pyxem.signals import DiffractionVariance2D, ImageVariance
+from pyxem.utils.signal import (
+    transfer_navigation_axes_to_signal_axes,
+    transfer_signal_axes,
+)
 
 
 class VarianceGenerator:
@@ -41,6 +42,7 @@ class VarianceGenerator:
 
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
+        self.thickness_filter = None
 
         # add a check for calibration
 

@@ -16,11 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with pyXem.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyxem.signals import LazyElectronDiffraction1D
+import numpy as np
+
+from pyxem.signals import Diffraction2D
 
 
-class TestDecomposition:
-    def test_decomposition_class_assignment(self, electron_diffraction1d):
-        s = electron_diffraction1d.as_lazy()
-        s.decomposition()
-        assert isinstance(s, LazyElectronDiffraction1D)
+class TestAdjustMetadata:
+    def test_add_navigation_signal(self):
+        d = Diffraction2D(np.ones((10, 10, 10, 10)))
+        data = np.ones((10, 10))
+        d.add_navigation_signal(data=data, name="Test", unit="nm", nav_plot=True)
+        d.add_navigation_signal(data=data, name="Test2", unit="nm", nav_plot=True)
+        np.testing.assert_equal(d.metadata.Navigation_signals.Test["data"], data)
+        np.testing.assert_equal(d.metadata.Navigation_signals.Test2["data"], data)

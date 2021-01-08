@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -21,9 +21,11 @@ import pytest
 from pytest import approx
 import numpy as np
 from numpy.testing import assert_allclose
+
 import hyperspy.api as hs
-import pyxem.utils.pixelated_stem_tools as pst
+
 from pyxem.signals.differential_phase_contrast import make_bivariate_histogram
+import pyxem.utils.pixelated_stem_tools as pst
 
 
 class TestGetRgbPhaseMagnitudeArray:
@@ -226,6 +228,9 @@ class TestGetCornerValues:
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
         with pytest.raises(ValueError):
             pst._get_corner_values(s)
+        s = hs.signals.Signal1D(np.ones(10))
+        with pytest.raises(ValueError):
+            pst._get_corner_values(s)
 
 
 class TestFitRampToImage:
@@ -271,6 +276,17 @@ class TestFitRampToImage:
         assert approx(s.data[-5:, -5:].mean()) == 0.0
         assert s.data[5:95, 5:95].mean() != 0
 
+    def test_wrong_input_dimensions(self):
+        s = hs.signals.Signal2D(np.ones((2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
+        s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
+        s = hs.signals.Signal1D(np.ones(10))
+        with pytest.raises(ValueError):
+            pst._fit_ramp_to_image(s)
+
 
 class TestGetSignalMeanPositionAndValue:
     def test_simple(self):
@@ -299,6 +315,9 @@ class TestGetSignalMeanPositionAndValue:
         with pytest.raises(ValueError):
             pst._get_signal_mean_position_and_value(s)
         s = hs.signals.Signal2D(np.ones((2, 2, 10, 10)))
+        with pytest.raises(ValueError):
+            pst._get_signal_mean_position_and_value(s)
+        s = hs.signals.Signal1D(np.ones(10))
         with pytest.raises(ValueError):
             pst._get_signal_mean_position_and_value(s)
 

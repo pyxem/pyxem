@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,11 +19,10 @@
 """Generating subpixel resolution on diffraction vectors."""
 
 import numpy as np
-
-from skimage.feature import register_translation
+from skimage.registration import phase_cross_correlation
 from skimage import draw
 
-from pyxem.signals.diffraction_vectors import DiffractionVectors
+from pyxem.signals import DiffractionVectors
 
 
 def get_experimental_square(z, vector, square_size):
@@ -164,7 +163,9 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
 
     """
 
-    shifts, error, _ = register_translation(exp_disc, sim_disc, upsample_factor)
+    shifts, error, _ = phase_cross_correlation(
+        exp_disc, sim_disc, upsample_factor=upsample_factor
+    )
     shifts = np.flip(shifts)  # to comply with hyperspy conventions - see issue#490
     return shifts
 

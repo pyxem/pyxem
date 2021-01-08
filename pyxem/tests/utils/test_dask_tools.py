@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -20,10 +20,10 @@ import pytest
 import numpy as np
 import dask.array as da
 import skimage.morphology as sm
+
+from pyxem.signals import Diffraction2D, LazyDiffraction2D
 import pyxem.utils.dask_tools as dt
 import pyxem.utils.pixelated_stem_tools as pst
-import pyxem.dummy_data.dask_test_data as dtd
-from pyxem import Diffraction2D, LazyDiffraction2D
 
 
 class TestSignalDimensionGetChunkSliceList:
@@ -68,6 +68,22 @@ class TestSignalDimensionGetChunkSliceList:
         chunk_slice_list = dt.get_signal_dimension_chunk_slice_list(data1.chunks)
         assert len(chunk_slice_list) == 1
         assert chunk_slice_list[0] == np.s_[0:20, 0:20]
+
+
+@pytest.mark.parametrize(
+    "input_shape,iter_shape",
+    [
+        [(9, 8, 6, 6), (9, 8, 2)],
+        [(9, 8, 6, 6), (9, 8, 2, 2)],
+        [(9, 8, 6), (9, 8)],
+        [(9, 8, 6, 20, 20), (9, 8)],
+    ],
+)
+def test_expand_iter_dimensions(input_shape, iter_shape):
+    data_dask = da.zeros(input_shape, chunks=[2] * len(input_shape))
+    iter_dask = da.zeros(iter_shape, chunks=[2] * len(iter_shape))
+    output_array = dt._expand_iter_dimensions(iter_dask, len(data_dask.shape))
+    assert len(data_dask.shape) == len(output_array.shape)
 
 
 class TestGetSignalDimensionHostChunkSlice:
@@ -118,12 +134,13 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return image + 1
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert chunk_input.shape == chunk_output.shape
         assert chunk_output.dtype == dtype
@@ -133,12 +150,17 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return (5, 2)
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, output_signal_size=(2,), block_info=block_info
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(2,),
+            block_info=block_info,
         )
         output_shape = chunk_input.shape[:-2] + (2,)
         assert output_shape == chunk_output.shape
@@ -152,12 +174,17 @@ class TestProcessChunk:
     def test_dtype(self, dtype):
         chunk_input = np.zeros((3, 4, 10, 8), dtype=np.int16)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return 4.8
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, output_signal_size=(1,), block_info=block_info
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(1,),
+            block_info=block_info,
         )
         output_shape = chunk_input.shape[:-2] + (1,)
         assert output_shape == chunk_output.shape
@@ -167,6 +194,7 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image, value1, value2):
             return (image + value1) / value2
@@ -174,6 +202,7 @@ class TestProcessChunk:
         value1, value2 = 24, 4
         chunk_output = dt._process_chunk(
             chunk_input,
+            iter_array,
             test_function,
             args_process=[value1, value2],
             block_info=block_info,
@@ -184,6 +213,7 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image, value1=2, value2=2):
             return (image + value1) / value2
@@ -191,6 +221,7 @@ class TestProcessChunk:
         value1, value2 = 15, 3
         chunk_output1 = dt._process_chunk(
             chunk_input,
+            iter_array,
             test_function,
             kwargs_process={"value1": value1, "value2": value2},
             block_info=block_info,
@@ -198,7 +229,7 @@ class TestProcessChunk:
         assert np.all(chunk_output1 == 5)
 
         chunk_output2 = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert np.all(chunk_output2 == 1)
 
@@ -209,14 +240,48 @@ class TestProcessChunk:
         dtype = np.int16
         chunk_input = np.zeros(shape, dtype=dtype)
         block_info = {None: {"dtype": dtype}}
+        iter_array = None
 
         def test_function(image):
             return image
 
         chunk_output = dt._process_chunk(
-            chunk_input, test_function, block_info=block_info
+            chunk_input, iter_array, test_function, block_info=block_info
         )
         assert chunk_input.shape == chunk_output.shape
+
+    def test_iter_array(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        iter_array = np.random.randint(0, 256, (3, 4, 1, 1))
+        block_info = {None: {"dtype": dtype}}
+
+        def test_function(image, value):
+            return value
+
+        chunk_output = dt._process_chunk(
+            chunk_input,
+            iter_array,
+            test_function,
+            output_signal_size=(1,),
+            block_info=block_info,
+        )
+        assert (chunk_output.squeeze() == iter_array.squeeze()).all()
+
+    def test_iter_array_wrong_shape(self):
+        dtype = np.int16
+        chunk_input = np.zeros((3, 4, 10, 8), dtype=dtype)
+        iter_array = np.random.randint(0, 256, (3, 5, 1, 1))
+        block_info = {None: {"dtype": dtype}}
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            chunk_output = dt._process_chunk(
+                chunk_input,
+                iter_array,
+                test_function,
+                output_signal_size=(1,),
+                block_info=block_info,
+            )
 
 
 class TestProcessDaskArray:
@@ -345,6 +410,133 @@ class TestProcessDaskArray:
         array_output = dask_output.compute()
         assert dask_input.shape == array_output.shape
 
+    def test_dask_array_wrong_type(self):
+        array_input = np.zeros((4, 6, 10, 10))
+        test_function = lambda a: 1
+        with pytest.raises(AttributeError):
+            dt._process_dask_array(array_input, test_function)
+
+    @pytest.mark.parametrize(
+        "dask_shape,iter_shape",
+        [
+            [(8, 10), ()],
+            [(6, 8, 10), (6,)],
+            [(4, 6, 8, 10), (4, 6)],
+            [(2, 4, 6, 8, 10), (2, 4, 6)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6)],
+            [(8, 10), (10,)],
+            [(6, 8, 10), (6, 10)],
+            [(4, 6, 8, 10), (4, 6, 10)],
+            [(2, 4, 6, 8, 10), (2, 4, 6, 10)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6, 10)],
+            [(8, 10), (8, 10)],
+            [(6, 8, 10), (6, 8, 10)],
+            [(4, 6, 8, 10), (4, 6, 8, 10)],
+            [(2, 4, 6, 8, 10), (2, 4, 6, 8, 10)],
+            [(2, 2, 4, 6, 8, 10), (2, 2, 4, 6, 8, 10)],
+        ],
+    )
+    def test_iter_array1d(self, dask_shape, iter_shape):
+        dask_chunks = [2] * len(dask_shape)
+        iter_chunks = [2] * len(iter_shape)
+        dask_input = da.zeros(dask_shape, chunks=dask_chunks, dtype=np.uint16)
+        iter_input = da.random.randint(0, 256, iter_shape, chunks=iter_chunks)
+
+        def test_function(image, value):
+            temp_image = image.copy()
+            temp_image[:] = value
+            return temp_image
+
+        dask_output = dt._process_dask_array(dask_input, test_function, iter_input)
+        data_output = dask_output.compute()
+        iter_array = iter_input.compute()
+        for i in np.ndindex(data_output.shape[:-2]):
+            data = data_output[i]
+            value = iter_array[i]
+            assert (data == value).all()
+
+    def test_too_large_iter_array(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 6, 2, 2, 4), chunks=(2, 2, 2, 2, 4))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_wrong_nav_shape(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 3), chunks=(2, 2))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_non_dask_iter_array(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = np.zeros((4, 6))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+    def test_chunks_not_aligned(self):
+        dask_input = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_input = da.zeros((4, 6, 2), chunks=(2, 3, 2))
+        test_function = lambda a: 1
+        with pytest.raises(ValueError):
+            dt._process_dask_array(dask_input, test_function, iter_input)
+
+
+class TestGetIterArray:
+    def test_too_large_iter_array(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros(
+            (4, 6, 8, 10, 12), chunks=(2, 2, 2, 2, 2), dtype=np.uint16
+        )
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array, dask_array)
+
+    def test_wrong_nav_shape(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array0 = da.zeros((4, 6, 2), chunks=(2, 2, 2), dtype=np.uint16)
+        iter_array1 = da.zeros((4, 5, 2), chunks=(2, 2, 2), dtype=np.uint16)
+
+        dt._get_iter_array(iter_array0, dask_array)
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array1, dask_array)
+
+    def test_non_dask_iter_array(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = np.zeros((4, 6, 2), dtype=np.uint16)
+
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array, dask_array)
+
+    def test_chunks_not_aligned(self):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros((4, 6, 2), chunks=(2, 2, 2), dtype=np.uint16)
+
+        dask_array0 = dask_array[:, 1:]
+        iter_array0 = iter_array[:, 1:]
+        iter_array1 = iter_array[:, :-1]
+
+        dt._get_iter_array(iter_array0, dask_array0)
+        with pytest.raises(ValueError):
+            dt._get_iter_array(iter_array1, dask_array0)
+
+    @pytest.mark.parametrize(
+        "iter_array_shape,chunk_shape",
+        [[(4, 6, 8, 12), (2, 2, 4, 6)], [(4, 6, 2), (2, 2, 1)], [(4, 6), (2, 2)]],
+    )
+    def test_iter_array_shape_and_chunks(self, iter_array_shape, chunk_shape):
+        dask_array = da.zeros((4, 6, 8, 10), chunks=(2, 2, 2, 2), dtype=np.uint16)
+        iter_array = da.zeros(iter_array_shape, chunks=chunk_shape, dtype=np.uint16)
+
+        iter_array_output = dt._get_iter_array(iter_array, dask_array)
+        assert len(iter_array_output.shape) == len(dask_array.shape)
+        nav_shape = len(dask_array.shape) - 2
+        assert iter_array_output.chunks[:nav_shape] == dask_array.chunks[:nav_shape]
+        chunk_sig_iter = iter_array_output.chunks[nav_shape:]
+        chunk_sig_iter = tuple(np.array(chunk_sig_iter).squeeze())
+        assert chunk_sig_iter == iter_array_output.shape[nav_shape:]
+
 
 class TestGetDaskArray:
     def test_simple(self):
@@ -352,16 +544,105 @@ class TestGetDaskArray:
         array_out = dt._get_dask_array(s)
         assert hasattr(array_out, "compute")
 
-    def test_size_of_chunk(self):
+    def test_chunk_shape(self):
         s = Diffraction2D(np.zeros((10, 10, 8, 8)))
-        array_out = dt._get_dask_array(s, size_of_chunk=5)
+        array_out = dt._get_dask_array(s, chunk_shape=5)
         assert array_out.chunksize[:2] == (5, 5)
+
+    def test_chunk_bytes(self):
+        s = Diffraction2D(np.zeros((10, 10, 8, 8)))
+        array_out0 = dt._get_dask_array(s)
+        array_out1 = dt._get_dask_array(s, chunk_bytes="25KiB")
+        assert array_out0.chunksize[:2] != array_out1.chunksize[:2]
 
     def test_lazy_input(self):
         s = LazyDiffraction2D(da.zeros((20, 20, 30, 30), chunks=(10, 10, 10, 10)))
         array_out = dt._get_dask_array(s)
         assert s.data.chunks == array_out.chunks
         assert s.data.shape == array_out.shape
+
+
+class TestGetChunking:
+    def test_simple(self):
+        s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
+        chunks = dt._get_chunking(s)
+        assert len(chunks) == 4
+
+    def test_chunk_shape(self):
+        s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
+        chunks = dt._get_chunking(s, chunk_shape=16)
+        assert chunks == ((16, 16), (16, 16), (256,), (256,))
+
+    def test_chunk_bytes(self):
+        s = LazyDiffraction2D(da.zeros((32, 32, 256, 256), dtype=np.uint16))
+        chunks = dt._get_chunking(s, chunk_bytes="15MiB")
+        assert chunks == ((8, 8, 8, 8), (8, 8, 8, 8), (256,), (256,))
+
+
+class TestAlignSingleFrame:
+    @pytest.mark.parametrize(
+        "shifts", [[0, 0], [1, 0], [-1, 0], [0, -1], [-1, -1], [-2, -3], [-2, -5]]
+    )
+    def test_simple(self, shifts):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.uint16)
+        x, y = 3, 7
+        image[y, x] = 7
+        image_shifted = dt.align_single_frame(image, shifts)
+        pos = np.s_[y + shifts[1], x + shifts[0]]
+        assert image_shifted[pos] == 7
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize(
+        "shifts,pos",
+        [
+            [[0.5, 0.5], np.s_[7:9, 3:5]],
+            [[0.0, 0.5], np.s_[7:9, 3]],
+            [[0.0, -0.5], np.s_[6:8, 3]],
+            [[1.0, -1.5], np.s_[5:7, 4]],
+        ],
+    )
+    def test_subpixel_integer_image(self, shifts, pos):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.uint16)
+        x, y = 3, 7
+        image[y, x] = 8
+        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        assert (image_shifted[pos] >= 2).all()
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize(
+        "shifts,pos",
+        [
+            [[-1.0, -2.0], np.s_[5, 2]],
+            [[-0.5, -2.0], np.s_[5, 2:4]],
+            [[-0.5, -2.5], np.s_[4:6, 2:4]],
+            [[-0.25, 0.0], np.s_[7, 2:4]],
+        ],
+    )
+    def test_subpixel_float_image(self, shifts, pos):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.float32)
+        x, y = 3, 7
+        image[y, x] = 9
+        image_shifted = dt.align_single_frame(image, shifts, order=1)
+        assert image_shifted[pos].sum() == 9
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
+
+    @pytest.mark.parametrize("shifts", [[-0.7, -2.7], [1.1, -1.1]])
+    def test_not_subpixel_float_image(self, shifts):
+        x_size, y_size = 5, 9
+        image = np.zeros((y_size, x_size), dtype=np.float32)
+        x, y = 3, 7
+        image[y, x] = 9
+        image_shifted = dt.align_single_frame(image, shifts, order=0)
+        pos = np.s_[y + round(shifts[1]), x + round(shifts[0])]
+        assert image_shifted[pos] == 9.0
+        image_shifted[pos] = 0
+        assert not image_shifted.any()
 
 
 @pytest.mark.slow
@@ -389,6 +670,9 @@ class TestCenterOfMassArray:
         data1 = dt._center_of_mass_array(dask_array, mask_array=mask_array)
         data1 = data1.compute()
         assert (data1 == np.ones((2, 10, 10)) * 25).all()
+        mask_array_wrong_size = np.ones((25, 40))
+        with pytest.raises(ValueError):
+            dt._center_of_mass_array(dask_array, mask_array=mask_array_wrong_size)
 
     def test_threshold(self):
         numpy_array = np.zeros((10, 10, 50, 50))
@@ -424,163 +708,26 @@ class TestMaskArray:
 
 @pytest.mark.slow
 class TestThresholdArray:
-    def test_simple(self):
-        numpy_array = np.ones((10, 12, 20, 15))
-        numpy_array[:, :, 10, 5] = 10000000
-        dask_array = da.from_array(numpy_array, chunks=(5, 5, 5, 5))
+    @pytest.mark.parametrize("shape", [(20, 15), (12, 20, 15), (10, 12, 20, 15)])
+    def test_shape(self, shape):
+        numpy_array = np.ones(shape)
+        slice_array = [slice(None)] * len(shape)
+        slice_array[-1] = slice(5, 6)
+        slice_array[-2] = slice(10, 11)
+        numpy_array[slice_array] = 10000000
+        dask_array = da.from_array(numpy_array)
         data = dt._threshold_array(dask_array, threshold_value=1)
         data = data.compute()
-        assert data.shape == (10, 12, 20, 15)
+        assert data.shape == shape
         assert data.dtype == np.bool
-        assert (data[:, :, 10, 5] == np.ones((10, 12), dtype=np.bool)).all()
-        data[:, :, 10, 5] = False
-        assert (data == np.zeros((10, 12, 20, 15))).all()
+        assert (data[slice_array] == np.ones((10, 12), dtype=np.bool)).all()
+        data[slice_array] = False
+        assert (data == np.zeros(shape)).all()
 
-
-@pytest.mark.slow
-class TestFindDeadPixels:
-    def test_2d(self):
-        data = dtd._get_dead_pixel_test_data_2d()
-        dead_pixels = dt._find_dead_pixels(data)
-        assert data.shape == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[14, 42]
-        assert dead_pixels[2, 12]
-        dead_pixels[14, 42] = False
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_3d(self):
-        data = dtd._get_dead_pixel_test_data_3d()
-        dead_pixels = dt._find_dead_pixels(data)
-        assert data.shape[-2:] == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[14, 42]
-        assert dead_pixels[2, 12]
-        dead_pixels[14, 42] = False
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_4d(self):
-        data = dtd._get_dead_pixel_test_data_4d()
-        dead_pixels = dt._find_dead_pixels(data)
-        assert data.shape[-2:] == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[14, 42]
-        assert dead_pixels[2, 12]
-        dead_pixels[14, 42] = False
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_dead_pixel_value(self):
-        data = np.random.randint(10, 100, size=(20, 30))
-        data[5, 9] = 3
-        data[2, 1] = 3
-        data = da.from_array(data, chunks=(5, 5))
-        dead_pixels = dt._find_dead_pixels(data, dead_pixel_value=3)
-        assert data.shape == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[5, 9]
-        assert dead_pixels[2, 1]
-        dead_pixels[5, 9] = False
-        dead_pixels[2, 1] = False
-        assert not dead_pixels.any()
-
-    def test_mask_array(self):
-        data = dtd._get_dead_pixel_test_data_2d()
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        dead_pixels = dt._find_dead_pixels(data, mask_array=mask_array)
-        assert data.shape == dead_pixels.shape
-        dead_pixels = dead_pixels.compute()
-        assert dead_pixels[2, 12]
-        dead_pixels[2, 12] = False
-        assert not dead_pixels.any()
-
-    def test_1d_wrong_shape(self):
-        data = np.random.randint(10, 100, size=40)
-        data = da.from_array(data, chunks=(5))
+    def test_wrong_input_dimension(self):
+        dask_array = da.zeros((3, 2, 5, 20, 20))
         with pytest.raises(ValueError):
-            dt._find_dead_pixels(data)
-
-
-@pytest.mark.slow
-class TestFindHotPixels:
-    def test_2d(self):
-        data = dtd._get_hot_pixel_test_data_2d()
-        hot_pixels = dt._find_hot_pixels(data)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[21, 11]
-        assert hot_pixels[5, 38]
-        hot_pixels[21, 11] = False
-        hot_pixels[5, 38] = False
-        assert not hot_pixels.any()
-
-    def test_3d(self):
-        data = dtd._get_hot_pixel_test_data_3d()
-        hot_pixels = dt._find_hot_pixels(data)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[2, 21, 11]
-        assert hot_pixels[1, 5, 38]
-        hot_pixels[2, 21, 11] = False
-        hot_pixels[1, 5, 38] = False
-        assert not hot_pixels.any()
-
-    def test_4d(self):
-        data = dtd._get_hot_pixel_test_data_4d()
-        hot_pixels = dt._find_hot_pixels(data)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[4, 2, 21, 11]
-        assert hot_pixels[6, 1, 5, 38]
-        hot_pixels[4, 2, 21, 11] = False
-        hot_pixels[6, 1, 5, 38] = False
-        assert not hot_pixels.any()
-
-    def test_2d_mask(self):
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        data = dtd._get_hot_pixel_test_data_2d()
-        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[21, 11]
-        hot_pixels[21, 11] = False
-        assert not hot_pixels.any()
-
-    def test_3d_mask(self):
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        data = dtd._get_hot_pixel_test_data_3d()
-        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[2, 21, 11]
-        hot_pixels[2, 21, 11] = False
-        assert not hot_pixels.any()
-
-    def test_4d_mask(self):
-        mask_array = np.zeros((40, 50), dtype=np.bool)
-        mask_array[:, 30:] = True
-        data = dtd._get_hot_pixel_test_data_4d()
-        hot_pixels = dt._find_hot_pixels(data, mask_array=mask_array)
-        assert data.shape == hot_pixels.shape
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels[4, 2, 21, 11]
-        hot_pixels[4, 2, 21, 11] = False
-        assert not hot_pixels.any()
-
-    def test_threshold_multiplier(self):
-        data = dtd._get_hot_pixel_test_data_2d()
-        hot_pixels = dt._find_hot_pixels(data, threshold_multiplier=1000000)
-        hot_pixels = hot_pixels.compute()
-        assert not hot_pixels.any()
-
-        hot_pixels = dt._find_hot_pixels(data, threshold_multiplier=-1000000)
-        hot_pixels = hot_pixels.compute()
-        assert hot_pixels.all()
+            dt._threshold_array(dask_array)
 
 
 @pytest.mark.slow
@@ -642,6 +789,16 @@ class TestRemoveBadPixels:
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, :, :, :])
         with pytest.raises(ValueError):
             dt._remove_bad_pixels(dask_array, bad_pixel_array[1, 1, :-2, :])
+
+    def test_find_dead_pixels_wrong_input(self):
+        dask_array = da.zeros((20,))
+        with pytest.raises(ValueError):
+            dt._find_dead_pixels(dask_array)
+
+    def test_find_hot_pixels_wrong_input(self):
+        dask_array = da.zeros((20,))
+        with pytest.raises(ValueError):
+            dt._find_hot_pixels(dask_array)
 
 
 @pytest.mark.slow
@@ -798,55 +955,6 @@ class TestPeakFindDog:
         )
         assert len(peaks1) == 1
 
-    def test_single_frame_min_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[54, 29] = 100
-        image[54, 32] = 100
-        max_sigma, sigma_ratio = 5, 5
-        threshold, overlap = 0.01, 0.1
-        peaks0 = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=1,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks0) == 2
-        peaks1 = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=2,
-            max_sigma=max_sigma,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks1) == 1
-
-    def test_single_frame_max_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[52:58, 22:28] = 100
-        min_sigma, sigma_ratio = 0.1, 5
-        threshold, overlap = 0.1, 0.01
-        peaks = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=1.0,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) > 1
-        peaks = dt._peak_find_dog_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=5.0,
-            sigma_ratio=sigma_ratio,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) == 1
-
     def test_single_frame_normalize_value(self):
         image = np.zeros((100, 100), dtype=np.uint16)
         image[49:52, 49:52] = 100
@@ -964,15 +1072,24 @@ class TestPeakPositionRefinementCOM:
         assert data[1][0] == 10.0
         assert data[1][1] == 14.0
 
+        peak_outside = np.array(
+            [
+                [65.0, 10.0],
+            ]
+        )
+        data_outside = dt._peak_refinement_centre_of_mass_frame(
+            numpy_array, peak_outside, square_size
+        )
+        assert (peak_outside == data_outside).all()
+
     def test_chunk_peak(self):
-        numpy_array = np.zeros((2, 2, 50, 50))
+        shape = (2, 2, 50, 50)
+        numpy_array = np.zeros(shape)
         numpy_array[:, :, 25, 25] = 1
 
-        peak_array = np.zeros(
-            (numpy_array.shape[0], numpy_array.shape[1], 1, 1), dtype=np.object
-        )
-        real_array = np.zeros((numpy_array.shape[:-2]), dtype=np.object)
-        for index in np.ndindex(numpy_array.shape[:-2]):
+        peak_array = np.zeros((shape[0], shape[1], 1, 1), dtype=np.object)
+        real_array = np.zeros((shape[:-2]), dtype=np.object)
+        for index in np.ndindex(shape[:-2]):
             islice = np.s_[index]
             peak_array[islice][0, 0] = np.asarray([(27, 27)])
             real_array[islice] = np.asarray([(25, 25)])
@@ -984,6 +1101,11 @@ class TestPeakPositionRefinementCOM:
         )
         assert data.shape == (2, 2)
         assert np.sum(data - real_array).sum() == 0
+
+        peak_array_smaller = peak_array.squeeze()
+        data = dt._peak_refinement_centre_of_mass_chunk(
+            numpy_array, peak_array_smaller, square_size
+        )
 
     def test_dask_array(self):
         numpy_array = np.zeros((10, 10, 50, 50))
@@ -1028,6 +1150,24 @@ class TestPeakPositionRefinementCOM:
         match_array = match_array_dask.compute()
         assert peak_array_dask.shape == match_array.shape
 
+    def test_wrong_input_sizes(self):
+        dask_array = da.zeros((10, 9, 20, 20))
+        peak_array = da.zeros((12, 6))
+        with pytest.raises(ValueError):
+            dt._peak_refinement_centre_of_mass(dask_array, peak_array, square_size=10)
+
+    def test_wrong_input_not_dask(self):
+        dask_array = da.zeros((9, 8, 10, 10))
+        peak_array = da.zeros((9, 8))
+        with pytest.raises(ValueError):
+            dt._peak_refinement_centre_of_mass(
+                dask_array.compute(), peak_array, square_size=10
+            )
+        with pytest.raises(ValueError):
+            dt._peak_refinement_centre_of_mass(
+                dask_array, peak_array.compute(), square_size=10
+            )
+
 
 @pytest.mark.slow
 class TestBackgroundRemovalDOG:
@@ -1048,24 +1188,6 @@ class TestBackgroundRemovalDOG:
         assert data.sum() != numpy_array.sum()
         assert data.shape == numpy_array.shape
         assert data[0, :].all() == 0
-
-    def test_chunk_min_sigma(self):
-        min_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_dog(numpy_array, min_sigma=min_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
-
-    def test_chunk_max_sigma(self):
-        max_sigma = 10
-        numpy_array = np.ones((10, 10, 50, 50))
-        numpy_array[:, :20:30, 20:30] = 5
-        data = dt._background_removal_chunk_dog(numpy_array, max_sigma=max_sigma)
-        assert data.sum() != numpy_array.sum()
-        assert data.shape == numpy_array.shape
-        assert data[:, :, 0, :].all() == 0
 
     def test_dask_min_sigma(self):
         min_sigma = 10
@@ -1232,6 +1354,15 @@ class TestIntensityArray:
         assert intensity1[1].all() == np.array([11.0, 15.0, 1 / 25]).all()
         assert intensity0.shape == intensity1.shape == (2, 3)
 
+    def test_intensity_peaks_image_region_outside_image(self):
+        # If any part of the region around the peak (defined via disk_r) is outside
+        # the image, the intensity should be 0
+        image = np.ones((50, 50))
+        peak = np.array([[10, 1], [1, 10], [10, 49], [49, 10]])
+        intensity_list = dt._intensity_peaks_image_single_frame(image, peak, 2)
+        for intensity in intensity_list:
+            assert intensity[2] == 0
+
     def test_intensity_peaks_chunk(self):
         numpy_array = np.zeros((2, 2, 50, 50))
         numpy_array[:, :, 27, 27] = 1
@@ -1287,6 +1418,12 @@ class TestIntensityArray:
         assert len(dask_array.shape) == nav_dims + 2
         match_array = match_array_dask.compute()
         assert peak_array_dask.shape == match_array.shape
+
+    def test_wrong_input_sizes(self):
+        dask_array = da.zeros((10, 9, 20, 20))
+        peak_array = da.zeros((12, 6))
+        with pytest.raises(ValueError):
+            dt._intensity_peaks_image(dask_array, peak_array, 5)
 
     def test_non_dask_array(self):
         data_array = np.ones((10, 10, 50, 50))
@@ -1372,55 +1509,6 @@ class TestPeakFindLog:
             overlap=overlap,
         )
         assert len(peaks1) == 1
-
-    def test_single_frame_min_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[54, 29] = 100
-        image[54, 32] = 100
-        max_sigma, num_sigma = 5, 10
-        threshold, overlap = 0.01, 0.1
-        peaks0 = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=1,
-            max_sigma=max_sigma,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks0) == 2
-        peaks1 = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=2,
-            max_sigma=max_sigma,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks1) == 1
-
-    def test_single_frame_max_sigma(self):
-        image = np.zeros(shape=(200, 100), dtype=np.float64)
-        image[52:58, 22:28] = 100
-        min_sigma, num_sigma = 0.1, 10
-        threshold, overlap = 0.1, 0.01
-        peaks = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=1.0,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) > 1
-        peaks = dt._peak_find_log_single_frame(
-            image,
-            min_sigma=min_sigma,
-            max_sigma=5.0,
-            num_sigma=num_sigma,
-            threshold=threshold,
-            overlap=overlap,
-        )
-        assert len(peaks) == 2
 
     def test_single_frame_normalize_value(self):
         image = np.zeros((100, 100), dtype=np.uint16)
@@ -1542,6 +1630,10 @@ class TestCenterOfMass:
         assert subf.shape[1] == 6
         assert subf.all() == 1
 
+    def test_get_experimental_square_wrong_input_odd_square_size(self):
+        with pytest.raises(ValueError):
+            dt._get_experimental_square(np.zeros((99, 99)), [13, 8], 9)
+
     def test_com_experimental_square(self):
         numpy_array = np.zeros((20, 20))
         numpy_array[10:16, 5:11] = 1
@@ -1550,3 +1642,8 @@ class TestCenterOfMass:
         assert subf.shape[0] == 6
         assert subf.shape[1] == 6
         assert subf.sum() == (square_size - 1) ** 2
+
+        subf1 = dt._center_of_mass_experimental_square(
+            numpy_array, [40, 8], square_size
+        )
+        assert subf1 is None

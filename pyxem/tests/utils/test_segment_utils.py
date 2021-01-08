@@ -99,7 +99,8 @@ def test_separate_watershed(
         exclude_border=exclude_border,
         threshold=threshold,
     )
-    np.testing.assert_equal(sep.shape, sep_shape_expt)
+    # we don't care how many clusters we generate
+    assert sep.shape[1:] == sep_shape_expt[1:]
 
 
 @pytest.mark.parametrize(
