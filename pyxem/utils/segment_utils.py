@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -175,9 +175,11 @@ def separate_watershed(
     # cluster, only the maximum closest to the average maxima position is
     # used as a marker.
     if min_distance > 1 and np.shape(maxi_coord1)[1] > 1:
-        clusters = DBSCAN(eps=min_distance, metric="euclidean", min_samples=1,).fit(
-            np.transpose(maxi_coord1)
-        )
+        clusters = DBSCAN(
+            eps=min_distance,
+            metric="euclidean",
+            min_samples=1,
+        ).fit(np.transpose(maxi_coord1))
         local_maxi = np.zeros_like(local_maxi)
         for n in np.arange(clusters.labels_.max() + 1):
             maxi_coord1_n = np.transpose(maxi_coord1)[clusters.labels_ == n]

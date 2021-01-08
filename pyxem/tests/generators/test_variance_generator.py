@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -20,9 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.generators import VarianceGenerator
-from pyxem.signals import (
-    ElectronDiffraction2D, DiffractionVariance2D, ImageVariance
-)
+from pyxem.signals import ElectronDiffraction2D, DiffractionVariance2D, ImageVariance
 
 
 @pytest.fixture

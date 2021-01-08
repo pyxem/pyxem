@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,23 +19,20 @@
 from .calibration_generator import CalibrationGenerator
 from .displacement_gradient_tensor_generator import (
     get_DisplacementGradientMap,
-    get_single_DisplacementGradientTensor
-    )
+    get_single_DisplacementGradientTensor,
+)
 from .indexation_generator import (
     IndexationGenerator,
     VectorIndexationGenerator,
     TemplateIndexationGenerator,
-    ProfileIndexationGenerator
-    )
+    ProfileIndexationGenerator,
+)
 from .integration_generator import IntegrationGenerator
 from .pdf_generator1d import PDFGenerator1D
 from .red_intensity_generator1d import ReducedIntensityGenerator1D
 from .subpixelrefinement_generator import SubpixelrefinementGenerator
 from .variance_generator import VarianceGenerator
-from .virtual_image_generator import (
-    VirtualImageGenerator,
-    VirtualDarkFieldGenerator
-    )
+from .virtual_image_generator import VirtualImageGenerator, VirtualDarkFieldGenerator
 
 
 __all__ = [
@@ -52,5 +49,5 @@ __all__ = [
     "SubpixelrefinementGenerator",
     "VarianceGenerator",
     "VirtualImageGenerator",
-    "VirtualDarkFieldGenerator"
+    "VirtualDarkFieldGenerator",
 ]

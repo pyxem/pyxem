@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -1046,6 +1046,7 @@ class TestAngularSliceRadialAverage:
         with pytest.raises(Exception):
             s.angular_slice_radial_integration()
 
+
 class TestDiffraction2DTemplateMatchDisk:
     def test_simple(self):
         s = Diffraction2D(np.random.randint(100, size=(5, 5, 20, 20)))
@@ -1171,6 +1172,7 @@ class TestDiffraction2DTemplateWithBinaryImage:
         with pytest.raises(ValueError):
             s.template_match_with_binary_image(template)
 
+
 class TestDiffraction2DRotateDiffraction:
     def test_rotate_diffraction_keep_shape(self):
         shape = (7, 5, 4, 15)
@@ -1255,6 +1257,7 @@ class TestDiffraction2DShiftDiffraction:
         assert s_shift.data[0, 0, y - shift_y, x - shift_x] == 1
         s_shift.data[:, :, y - shift_y, x - shift_x] = 0
         assert s_shift.data.sum() == 0
+
 
 class TestComputeAndAsLazy:
     def test_2d_data_compute(self):

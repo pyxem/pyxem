@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -257,7 +257,7 @@ def test_multiple_scatter_correction(RedIntData):
 
     ri.fit_thermal_multiple_scattering_correction()
 
-    assert ri.data.shape == (2,2,10)
+    assert ri.data.shape == (2, 2, 10)
 
 
 @pytest.mark.filterwarnings("ignore::RuntimeWarning")

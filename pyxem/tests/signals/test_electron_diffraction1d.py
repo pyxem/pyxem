@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -42,7 +42,14 @@ class TestSimpleHyperspy:
         electron_diffraction1d.set_scan_calibration(19)
         assert isinstance(electron_diffraction1d, ElectronDiffraction1D)
 
-    @pytest.mark.parametrize("calibration", [1, 0.017, 0.5,])
+    @pytest.mark.parametrize(
+        "calibration",
+        [
+            1,
+            0.017,
+            0.5,
+        ],
+    )
     def test_set_diffraction_calibration(self, electron_diffraction1d, calibration):
         electron_diffraction1d.set_diffraction_calibration(calibration)
         dx = electron_diffraction1d.axes_manager.signal_axes[0]

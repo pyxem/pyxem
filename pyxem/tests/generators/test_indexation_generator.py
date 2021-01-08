@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -31,37 +31,44 @@ from pyxem.generators import (
     IndexationGenerator,
     TemplateIndexationGenerator,
     ProfileIndexationGenerator,
-    VectorIndexationGenerator
+    VectorIndexationGenerator,
 )
 from pyxem.signals import (
-    ElectronDiffraction2D, TemplateMatchingResults, DiffractionVectors
+    ElectronDiffraction2D,
+    TemplateMatchingResults,
+    DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
 
+
 def test_old_indexer_routine():
     with pytest.raises(ValueError):
-        _ = IndexationGenerator('a','b')
+        _ = IndexationGenerator("a", "b")
 
-@pytest.mark.parametrize("method",['fast_correlation',
-                        'zero_mean_normalized_correlation'])
-def test_TemplateIndexationGenerator(default_structure,method):
+
+@pytest.mark.parametrize(
+    "method", ["fast_correlation", "zero_mean_normalized_correlation"]
+)
+def test_TemplateIndexationGenerator(default_structure, method):
     identifiers = ["a", "b"]
     structures = [default_structure, default_structure]
-    orientations = [[(0, 0, 0), (0,1,0),(1,0,0)],
-                    [(0, 0, 1),(0, 0, 2),(0, 0, 3)]]
+    orientations = [
+        [(0, 0, 0), (0, 1, 0), (1, 0, 0)],
+        [(0, 0, 1), (0, 0, 2), (0, 0, 3)],
+    ]
     structure_library = StructureLibrary(identifiers, structures, orientations)
     libgen = DiffractionLibraryGenerator(DiffractionGenerator(300))
     library = libgen.get_diffraction_library(
-                    structure_library,0.017, 0.02, (100, 100), False
+        structure_library, 0.017, 0.02, (100, 100), False
     )
 
-    edp = ElectronDiffraction2D(np.random.rand(2,2,200,200))
-    indexer = TemplateIndexationGenerator(edp,library)
+    edp = ElectronDiffraction2D(np.random.rand(2, 2, 200, 200))
+    indexer = TemplateIndexationGenerator(edp, library)
 
-    mask_signal = hs.signals.Signal2D(np.array([[1,0],[1,1]])).T
-    z = indexer.correlate(method=method,n_largest=2,mask=mask_signal)
-    assert isinstance(z,TemplateMatchingResults)
-    assert isinstance(z.data,Signal2D)
+    mask_signal = hs.signals.Signal2D(np.array([[1, 0], [1, 1]])).T
+    z = indexer.correlate(method=method, n_largest=2, mask=mask_signal)
+    assert isinstance(z, TemplateMatchingResults)
+    assert isinstance(z.data, Signal2D)
     assert z.data.data.shape[0:2] == edp.data.shape[0:2]
     assert z.data.data.shape[3] == 5
 
@@ -157,6 +164,7 @@ def test_profile_indexation_generator_single_indexation(profile_simulation):
     )
     indexation = pig.index_peaks(tolerance=0.02)
     np.testing.assert_almost_equal(indexation[0][0], 0.3189193164369)
+
 
 def test_vector_indexation_generator_init():
     vectors = DiffractionVectors([[1], [2]])

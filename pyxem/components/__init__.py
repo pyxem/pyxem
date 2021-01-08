@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,5 +24,5 @@ from .scattering_fit_component_xtables import ScatteringFitComponentXTables
 __all__ = [
     "ReducedIntensityCorrectionComponent",
     "ScatteringFitComponentLobato",
-    "ScatteringFitComponentXTables"
+    "ScatteringFitComponentXTables",
 ]

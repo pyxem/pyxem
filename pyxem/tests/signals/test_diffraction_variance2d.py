@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -19,9 +19,10 @@
 import numpy as np
 
 from pyxem.signals import (
-    DiffractionVariance2D, ImageVariance, DiffractionVariance1D,
+    DiffractionVariance2D,
+    ImageVariance,
+    DiffractionVariance1D,
 )
-
 
 
 class TestDiffractionVariance:
@@ -30,7 +31,16 @@ class TestDiffractionVariance:
         assert isinstance(difvar, DiffractionVariance2D)
 
     def test_1d_azimuthal_integration(self):
-        var = DiffractionVariance2D(data=np.ones((3, 3, 3, 3,)))
+        var = DiffractionVariance2D(
+            data=np.ones(
+                (
+                    3,
+                    3,
+                    3,
+                    3,
+                )
+            )
+        )
         var.unit = "2th_rad"
         var.set_ai()
         integration = var.get_azimuthal_integral1d(npt=10)

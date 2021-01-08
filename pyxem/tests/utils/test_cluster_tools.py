@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -315,7 +315,15 @@ class TestGetClusterDict:
     def test_three_clusters(self):
         peak_array0 = randint(6, size=(100, 2)) + 80
         peak_array1 = randint(6, size=(100, 2))
-        peak_array = np.vstack((peak_array0, peak_array1, [[54, 21],]))
+        peak_array = np.vstack(
+            (
+                peak_array0,
+                peak_array1,
+                [
+                    [54, 21],
+                ],
+            )
+        )
         cluster_dict = ct._get_cluster_dict(peak_array, min_samples=2)
         labels = sorted(list(cluster_dict.keys()))
         assert labels == [-1, 0, 1]

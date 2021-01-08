@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -24,7 +24,10 @@ from hyperspy.signals import Signal2D
 
 from pyxem.generators import VirtualDarkFieldGenerator
 from pyxem.signals import (
-    ElectronDiffraction2D, DiffractionVectors, LearningSegment, VDFSegment
+    ElectronDiffraction2D,
+    DiffractionVectors,
+    LearningSegment,
+    VDFSegment,
 )
 
 

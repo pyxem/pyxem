@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -43,7 +43,6 @@ class VarianceGenerator:
     def __init__(self, signal, *args, **kwargs):
         self.signal = signal
         self.thickness_filter = None
-
 
         # add a check for calibration
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -31,7 +31,7 @@ from pyxem.utils.indexation_utils import (
     index_magnitudes,
     match_vectors,
     OrientationResult,
-    get_nth_best_solution
+    get_nth_best_solution,
 )
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.signal import (
@@ -104,7 +104,7 @@ def _correlate_templates(image, library, n_largest, method, mask):
 
     """
     phase_count = len(library.keys())
-    top_matches = np.zeros((n_largest*phase_count,5))
+    top_matches = np.zeros((n_largest * phase_count, 5))
 
     # return for the masked data
     if mask != 1:
@@ -115,44 +115,46 @@ def _correlate_templates(image, library, n_largest, method, mask):
         average_image_intensity = np.average(image)
         image_std = np.linalg.norm(image - average_image_intensity)
 
-    for phase_number,phase in enumerate(library.keys()):
-        saved_results = np.zeros((n_largest,5))
-        saved_results[:,0] = phase_number
+    for phase_number, phase in enumerate(library.keys()):
+        saved_results = np.zeros((n_largest, 5))
+        saved_results[:, 0] = phase_number
 
-        for entry_number in np.arange(len(library[phase]['orientations'])):
+        for entry_number in np.arange(len(library[phase]["orientations"])):
             orientations = library[phase]["orientations"][entry_number]
             pixel_coords = library[phase]["pixel_coords"][entry_number]
-            intensities  = library[phase]["intensities"][entry_number]
+            intensities = library[phase]["intensities"][entry_number]
 
             # Extract experimental intensities from the diffraction image
             image_intensities = image[pixel_coords[:, 1], pixel_coords[:, 0]]
 
             if method == "zero_mean_normalized_correlation":
                 corr_local = zero_mean_normalized_correlation(
-                        nb_pixels,
-                        image_std,
-                        average_image_intensity,
-                        image_intensities,
-                        intensities,
-                    )
+                    nb_pixels,
+                    image_std,
+                    average_image_intensity,
+                    image_intensities,
+                    intensities,
+                )
 
             elif method == "fast_correlation":
                 corr_local = fast_correlation(
-                        image_intensities, intensities,
-                        library[phase]["pattern_norms"][entry_number]
-                    )
+                    image_intensities,
+                    intensities,
+                    library[phase]["pattern_norms"][entry_number],
+                )
 
-            if corr_local > np.min(saved_results[:,4]):
-                row_index = np.argmin(saved_results[:,4])
-                saved_results[row_index,1:4] = orientations
-                saved_results[row_index,4] = corr_local
+            if corr_local > np.min(saved_results[:, 4]):
+                row_index = np.argmin(saved_results[:, 4])
+                saved_results[row_index, 1:4] = orientations
+                saved_results[row_index, 4] = corr_local
 
-        phase_sorted = saved_results[saved_results[:,4].argsort()]
+        phase_sorted = saved_results[saved_results[:, 4].argsort()]
         start_slot = phase_number * n_largest
-        end_slot   = (phase_number + 1) * n_largest
-        top_matches[start_slot:end_slot,:] = phase_sorted
+        end_slot = (phase_number + 1) * n_largest
+        top_matches[start_slot:end_slot, :] = phase_sorted
 
     return top_matches
+
 
 class TemplateIndexationGenerator:
     """Generates an indexer for data using a number of methods.
@@ -223,14 +225,14 @@ class TemplateIndexationGenerator:
                 library[phase]["pattern_norms"] = norm_array
 
         matches = signal.map(
-                _correlate_templates,
-                library=library,
-                n_largest=n_largest,
-                method=method,
-                mask=mask,
-                inplace=False,
-                **kwargs,
-            )
+            _correlate_templates,
+            library=library,
+            n_largest=n_largest,
+            method=method,
+            mask=mask,
+            inplace=False,
+            **kwargs,
+        )
 
         matching_results = TemplateMatchingResults(matches)
 

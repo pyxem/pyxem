@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -163,7 +163,9 @@ def _conventional_xc(exp_disc, sim_disc, upsample_factor):
 
     """
 
-    shifts, error, _ = phase_cross_correlation(exp_disc, sim_disc, upsample_factor=upsample_factor)
+    shifts, error, _ = phase_cross_correlation(
+        exp_disc, sim_disc, upsample_factor=upsample_factor
+    )
     shifts = np.flip(shifts)  # to comply with hyperspy conventions - see issue#490
     return shifts
 

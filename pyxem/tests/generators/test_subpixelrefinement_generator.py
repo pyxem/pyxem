@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -23,7 +23,8 @@ from skimage import draw
 
 from pyxem.generators import SubpixelrefinementGenerator
 from pyxem.generators.subpixelrefinement_generator import (
-    get_simulated_disc, get_experimental_square
+    get_simulated_disc,
+    get_experimental_square,
 )
 from pyxem.signals import DiffractionVectors, ElectronDiffraction2D
 
@@ -129,9 +130,9 @@ class set_up_for_subpixelpeakfinders:
 
 
 class Test_subpixelpeakfinders:
-    """ Tests the various peak finders have the correct x,y conventions for
+    """Tests the various peak finders have the correct x,y conventions for
     both the vectors and the shifts, in both the numpy and the DiffractionVectors
-    cases as well as confirming we have avoided 'off by one' errors """
+    cases as well as confirming we have avoided 'off by one' errors"""
 
     set_up = set_up_for_subpixelpeakfinders()
 
@@ -168,7 +169,8 @@ class Test_subpixelpeakfinders:
 
     def test_log(self, diffraction_vectors):
         with pytest.raises(
-            NotImplementedError, match="This functionality was removed in v.0.13.0",
+            NotImplementedError,
+            match="This functionality was removed in v.0.13.0",
         ):
             _ = self.get_spr(diffraction_vectors).local_gaussian_method(12)
 

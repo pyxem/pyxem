@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -331,7 +331,7 @@ def remove_dead(z, deadpixels):
     """
     z_bar = np.copy(z)
     for (i, j) in deadpixels:
-        z_bar[i, j] = (z[i-1,j] + z[i+1,j] + z[i,j-1] + z[i,j+1]) / 4
+        z_bar[i, j] = (z[i - 1, j] + z[i + 1, j] + z[i, j - 1] + z[i, j + 1]) / 4
 
     return z_bar
 
@@ -427,6 +427,7 @@ def regional_filter(z, h):
     dilated = morphology.reconstruction(seed, mask, method="dilation")
 
     return z - dilated
+
 
 def circular_mask(shape, radius, center=None):
     """Produces a mask of radius 'r' centered on 'center' of shape 'shape'.
@@ -690,7 +691,7 @@ def investigate_dog_background_removal_interactive(
     for i, std_dev_max in enumerate(tqdm(std_dev_maxs, leave=False)):
         for j, std_dev_min in enumerate(std_dev_mins):
             gauss_processed[i, j] = sample_dp.subtract_diffraction_background(
-                'difference of gaussians',
+                "difference of gaussians",
                 lazy_result=False,
                 min_sigma=std_dev_min,
                 max_sigma=std_dev_max,

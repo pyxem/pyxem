@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -27,6 +27,7 @@ from diffsims.utils.ring_pattern_utils import generate_ring_pattern
 from pyxem.signals import ElectronDiffraction2D
 from pyxem.generators import CalibrationGenerator
 from pyxem.libraries import CalibrationDataLibrary
+
 
 @pytest.fixture
 def input_parameters():
@@ -71,9 +72,12 @@ def grating_image(request):
     im = Signal2D(data)
     return im
 
+
 @pytest.fixture
 def calgen(request, ring_pattern, grating_image):
-    return CalibrationGenerator(diffraction_pattern=ring_pattern, grating_image=grating_image)
+    return CalibrationGenerator(
+        diffraction_pattern=ring_pattern, grating_image=grating_image
+    )
 
 
 @pytest.fixture
@@ -92,16 +96,14 @@ def cal_dist(request, calgen):
 
 class TestCalibrationGenerator:
     def test_init(self, calgen):
-        assert isinstance(
-            calgen.diffraction_pattern, ElectronDiffraction2D
-        )
+        assert isinstance(calgen.diffraction_pattern, ElectronDiffraction2D)
 
     def test_str(self, calgen):
         print(calgen)
 
     def test_get_elliptical_distortion(self, cal_dist, input_parameters, affine_answer):
-        np.testing.assert_allclose(cal_dist.affine_matrix, affine_answer,rtol=1e-3)
-        np.testing.assert_allclose(cal_dist.ring_params, input_parameters,rtol=1e-3)
+        np.testing.assert_allclose(cal_dist.affine_matrix, affine_answer, rtol=1e-3)
+        np.testing.assert_allclose(cal_dist.ring_params, input_parameters, rtol=1e-3)
 
     def test_get_distortion_residuals(self, cal_dist):
         residuals = cal_dist.get_distortion_residuals(mask_radius=10, spread=2)
@@ -112,14 +114,16 @@ class TestCalibrationGenerator:
 
     def test_get_diffraction_calibration(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30, linewidth=5)
-        np.testing.assert_almost_equal(cal_dist.diffraction_calibration, 0.01061096,decimal=3)
+        np.testing.assert_almost_equal(
+            cal_dist.diffraction_calibration, 0.01061096, decimal=3
+        )
 
     def test_get_navigation_calibration(self, calgen):
         line = Line2DROI(x1=2.5, y1=13.0, x2=193.0, y2=12.5, linewidth=3.5)
         value = calgen.get_navigation_calibration(
             line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
         )
-        np.testing.assert_almost_equal(calgen.navigation_calibration, value,decimal=3)
+        np.testing.assert_almost_equal(calgen.navigation_calibration, value, decimal=3)
 
     def test_get_rotation_calibration(self, calgen):
         real_line = Line2DROI(
@@ -131,7 +135,7 @@ class TestCalibrationGenerator:
         value = calgen.get_rotation_calibration(
             real_line=real_line, reciprocal_line=recip_line
         )
-        np.testing.assert_almost_equal(value, -80.24669411537899,decimal=3)
+        np.testing.assert_almost_equal(value, -80.24669411537899, decimal=3)
 
     def test_plot_calibrated_data_dp(self, cal_dist):
         cal_dist.get_diffraction_calibration(mask_length=30, linewidth=5)
@@ -158,7 +162,7 @@ class TestGetCorrectionMatrix:
                     [0.0, 0.0, 1.0],
                 ]
             ),
-            decimal=3
+            decimal=3,
         )
 
     def test_get_correction_affine_only(self, calgen):
@@ -171,7 +175,7 @@ class TestGetCorrectionMatrix:
         )
         calgen.affine_matrix = affine
         corr = calgen.get_correction_matrix()
-        np.testing.assert_almost_equal(corr, affine,decimal=3)
+        np.testing.assert_almost_equal(corr, affine, decimal=3)
 
     def test_get_correction_affine_and_rotation(self, calgen):
         affine = np.array(
@@ -201,12 +205,13 @@ class TestGetCorrectionMatrix:
                     [0.0, 0.0, 1.0],
                 ]
             ),
-            decimal=3
+            decimal=3,
         )
 
     def test_no_attributes_correction_matrix(self, calgen):
         with pytest.raises(
-            ValueError, match="requires either an affine matrix to correct distortion",
+            ValueError,
+            match="requires either an affine matrix to correct distortion",
         ):
             calgen.get_correction_matrix()
 
@@ -225,9 +230,12 @@ class TestEmptyCalibrationGenerator:
     def test_get_elliptical_distortion(
         self, empty_calgen, input_parameters, affine_answer
     ):
-        with pytest.raises(ValueError, match="This method requires a calibration diffraction"
-                                             " pattern to be provided. Please set"
-                                             " self.diffraction_pattern equal to some Signal2D."):
+        with pytest.raises(
+            ValueError,
+            match="This method requires a calibration diffraction"
+            " pattern to be provided. Please set"
+            " self.diffraction_pattern equal to some Signal2D.",
+        ):
             empty_calgen.get_elliptical_distortion(
                 mask_radius=10,
                 direct_beam_amplitude=450,
@@ -270,7 +278,7 @@ class TestEmptyCalibrationGenerator:
                 line_roi=line, x1=12.0, x2=172.0, n=1, xspace=500.0
             )
 
-    def test_to_ai(self,calgen):
+    def test_to_ai(self, calgen):
         calgen.get_elliptical_distortion(
             mask_radius=10,
             direct_beam_amplitude=450,
@@ -279,7 +287,7 @@ class TestEmptyCalibrationGenerator:
             asymmetry=1.5,
             spread=2.8,
             rotation=10,
-            )
-        calgen.diffraction_calibration = (1,1)
-        ai = calgen.to_ai(wavelength=(2.53*10**-12))
+        )
+        calgen.diffraction_calibration = (1, 1)
+        ai = calgen.to_ai(wavelength=(2.53 * 10 ** -12))
         assert isinstance(ai, AzimuthalIntegrator)

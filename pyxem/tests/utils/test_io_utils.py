@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -22,12 +22,12 @@ import os
 
 import hyperspy.api as hs
 
-from pyxem.signals import(
+from pyxem.signals import (
     ElectronDiffraction1D,
     ElectronDiffraction2D,
     DiffractionVectors,
     DiffractionVectors2D,
-    VirtualDarkFieldImage
+    VirtualDarkFieldImage,
 )
 
 

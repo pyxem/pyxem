@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -36,6 +36,7 @@ OrientationResult = namedtuple(
     "OrientationResult",
     "phase_index rotation_matrix match_rate error_hkls total_error scale center_x center_y".split(),
 )
+
 
 def get_nth_best_solution(
     single_match_result, mode, rank=0, key="match_rate", descending=True
@@ -79,6 +80,7 @@ def get_nth_best_solution(
         best_fit = single_match_result[srt_idx]
 
     return best_fit
+
 
 # Functions used in correlate_library.
 def fast_correlation(image_intensities, int_local, pn_local, **kwargs):
@@ -176,6 +178,7 @@ def zero_mean_normalized_correlation(
 
     return corr_local
 
+
 def index_magnitudes(z, simulation, tolerance):
     """Assigns hkl indices to peaks in the diffraction profile.
 
@@ -231,6 +234,7 @@ def _choose_peak_ids(peaks, n_peaks_to_index):
     return angles.argsort()[
         np.linspace(0, angles.shape[0] - 1, n_peaks_to_index, dtype=np.int)
     ]
+
 
 def match_vectors(
     peaks, library, mag_tol, angle_tol, index_error_tol, n_peaks_to_index, n_best
@@ -304,7 +308,7 @@ def match_vectors(
             q1_len, q2_len = np.linalg.norm(q1), np.linalg.norm(q2)
 
             # Ensure q1 is longer than q2 for consistent order.
-            if q1_len < q2_len: #pragma: no cover
+            if q1_len < q2_len:  # pragma: no cover
                 q1, q2 = q2, q1
                 q1_len, q2_len = q2_len, q1_len
 
@@ -323,7 +327,7 @@ def match_vectors(
 
             # Iterate over matched library vectors determining the error in the
             # associated indexation.
-            if np.count_nonzero(tolerance_mask) == 0: #pragma: no cover
+            if np.count_nonzero(tolerance_mask) == 0:  # pragma: no cover
                 continue
 
             # Reference vectors are cartesian coordinates of hkls

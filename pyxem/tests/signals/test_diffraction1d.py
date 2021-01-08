@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -87,7 +87,7 @@ class TestDecomposition:
 class TestVirtualImaging:
     # Tests that virtual imaging runs without failure
 
-    def test_plot_integrated_intensity(self,electron_diffraction1d):
+    def test_plot_integrated_intensity(self, electron_diffraction1d):
         roi = hs.roi.SpanROI(left=1.0, right=2.0)
         plt.ion()  # to make plotting non-blocking
         electron_diffraction1d.plot_integrated_intensity(roi)

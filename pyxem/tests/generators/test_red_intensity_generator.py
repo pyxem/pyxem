@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -46,6 +46,7 @@ def test_scattering_calibration(red_int_generator):
     s_offset = red_int_generator.signal.axes_manager.signal_axes[0].offset
     assert s_offset == offset
 
+
 def test_fit_atomic_scattering(red_int_generator):
     calib = 0.1
     red_int_generator.set_diffraction_calibration(calibration=calib)
@@ -55,8 +56,8 @@ def test_fit_atomic_scattering(red_int_generator):
     assert red_int_generator.normalisation is None
     red_int_generator.fit_atomic_scattering(elements=elements, fracs=fracs)
 
-    assert red_int_generator.background_fit.data.shape == (2,2,10)
-    assert red_int_generator.normalisation.data.shape == (2,2,10)
+    assert red_int_generator.background_fit.data.shape == (2, 2, 10)
+    assert red_int_generator.normalisation.data.shape == (2, 2, 10)
 
 
 def test_set_cutoff(red_int_generator):
@@ -109,6 +110,7 @@ def test_incorrect_mask(red_int_generator):
         ValueError, match="Masking array does not consist of zeroes and ones"
     ):
         red_int_generator.mask_reduced_intensity(mask_pattern)
+
 
 def test_get_reduced_intensity(red_int_generator):
     red_int_generator.set_diffraction_calibration(calibration=0.1)

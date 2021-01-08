@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -278,7 +278,12 @@ def _get_rgb_phase_magnitude_array(
 
 
 def _find_longest_distance(
-    imX, imY, centreX_min, centreY_min, centreX_max, centreY_max,
+    imX,
+    imY,
+    centreX_min,
+    centreY_min,
+    centreX_max,
+    centreY_max,
 ):
     max_value = max(
         int(((imX - centreX_min) ** 2 + (imY - centreY_min) ** 2) ** 0.5),

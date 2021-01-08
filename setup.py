@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -69,9 +69,9 @@ setup(
         "pyfai",
         "ipywidgets",
         "numba",
-        "orix >= 0.3"
+        "orix >= 0.3",
     ],
-    python_requires='>=3.0, <3.9', # some dependencies do not currently support 3.9 (Jan 2020)
+    python_requires=">=3.0, <3.9",  # some dependencies do not currently support 3.9 (Jan 2020)
     package_data={
         "": ["LICENSE", "readme.rst"],
         "pyxem": ["*.py", "hyperspy_extension.yaml"],

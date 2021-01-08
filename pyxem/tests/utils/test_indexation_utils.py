@@ -23,7 +23,8 @@ from diffsims.libraries.diffraction_library import DiffractionLibrary
 from pyxem.utils.indexation_utils import (
     match_vectors,
     zero_mean_normalized_correlation,
-    fast_correlation)
+    fast_correlation,
+)
 
 
 def test_zero_mean_normalized_correlation():
@@ -42,6 +43,7 @@ def test_fast_correlation():
         fast_correlation([1, 1, 1], [1, 1, 1], np.sqrt(3)), np.sqrt(3)
     )
     np.testing.assert_approx_equal(fast_correlation([1, 1, 1], [1, 0, 0], 1), 1)
+
 
 def test_match_vectors(vector_match_peaks, vector_library):
     # Wrap to test handling of ragged arrays

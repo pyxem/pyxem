@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -38,7 +38,7 @@ from pyxem.utils.vector_utils import (
     calculate_norms_ragged,
     get_npeaks,
     filter_vectors_ragged,
-    filter_vectors_edge_ragged
+    filter_vectors_edge_ragged,
 )
 from pyxem.utils.expt_utils import peaks_as_gvectors
 

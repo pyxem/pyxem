@@ -26,7 +26,7 @@ from pyxem.signals import (
     PolarDiffraction2D,
     LazyPolarDiffraction2D,
     Correlation2D,
-    Power2D
+    Power2D,
 )
 
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2020 The pyXem developers
+# Copyright 2016-2021 The pyXem developers
 #
 # This file is part of pyXem.
 #
@@ -54,9 +54,7 @@ class TestMakeTestData:
 
 def test_circle_repr():
     xx, yy = np.zeros((2, 10, 10))
-    circle = mdtd.Circle(
-        xx, yy, x0=7, y0=5, r=3, intensity=2, scale=1
-    )
+    circle = mdtd.Circle(xx, yy, x0=7, y0=5, r=3, intensity=2, scale=1)
     repr_string = circle.__repr__()
     assert str(7) in repr_string
 
