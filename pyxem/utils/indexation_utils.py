@@ -1800,8 +1800,8 @@ def index_dataset_with_template_rotation(signal,
                                          n_best=1,
                                          n_keep=100,
                                          frac_keep=None,
-                                         delta_r=1,
-                                         delta_theta=1,
+                                         delta_r=1.,
+                                         delta_theta=1.,
                                          max_r=None,
                                          intensity_transform_function=None,
                                          find_direct_beam=False,
@@ -1865,8 +1865,10 @@ def index_dataset_with_template_rotation(signal,
 
     Returns
     -------
-    result :
-
+    result : dict
+        Results dictionary containing keys [template_index, orientation], with
+        values numpy arrays of shape (scan_x, scan_y, n_best) and (scan_x, scan_y, n_best, 3)
+        respectively
     """
     result = {}
     # calculate number of workers
