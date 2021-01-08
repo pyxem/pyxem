@@ -44,7 +44,6 @@ class VarianceGenerator:
         self.signal = signal
         self.thickness_filter = None
 
-
         # add a check for calibration
 
     def get_diffraction_variance(self, dqe, set_data_type=None):

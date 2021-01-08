@@ -18,6 +18,4 @@
 
 from .calibration_library import CalibrationDataLibrary
 
-__all__ = [
-    "CalibrationDataLibrary"
-]
+__all__ = ["CalibrationDataLibrary"]

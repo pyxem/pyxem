@@ -47,18 +47,19 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--runslow"):
         # --runslow given in cli: do not skip slow tests
         return
-    else: #pragma: no cover
+    else:  # pragma: no cover
         skip_slow = pytest.mark.skip(reason="need --runslow option to run")
         for item in items:
             if "slow" in item.keywords:
                 item.add_marker(skip_slow)
 
+
 # End of the code lift, it's regular code from here on out
+
 
 @pytest.fixture
 def default_structure():
-    """An atomic structure represented using diffpy
-    """
+    """An atomic structure represented using diffpy"""
     latt = diffpy.structure.lattice.Lattice(3, 3, 5, 90, 90, 120)
     atom = diffpy.structure.atom.Atom(atype="Ni", xyz=[0, 0, 0], lattice=latt)
     hexagonal_structure = diffpy.structure.Structure(atoms=[atom], lattice=latt)
@@ -160,16 +161,28 @@ def electron_diffraction1d():
 
     return ElectronDiffraction1D(data)
 
+
 @pytest.fixture
 def vector_match_peaks():
-    return np.array([[1, 0.1, 0], [0, 2, 0], [1, 2, 3],])
+    return np.array(
+        [
+            [1, 0.1, 0],
+            [0, 2, 0],
+            [1, 2, 3],
+        ]
+    )
+
 
 @pytest.fixture
 def vector_library():
     library = DiffractionVectorLibrary()
     library["A"] = {
         "indices": np.array(
-            [[[0, 2, 0], [1, 0, 0]], [[1, 2, 3], [0, 2, 0]], [[1, 2, 3], [1, 0, 0]],]
+            [
+                [[0, 2, 0], [1, 0, 0]],
+                [[1, 2, 3], [0, 2, 0]],
+                [[1, 2, 3], [1, 0, 0]],
+            ]
         ),
         "measurements": np.array(
             [

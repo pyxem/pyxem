@@ -23,50 +23,58 @@ from pyxem.utils.virtual_images_utils import get_vectors_mesh
 
 
 def test_get_vectors_mesh():
-    mesh1 = np.array([[-1., -1.],
-       [ 0., -1.],
-       [ 1., -1.],
-       [-1.,  0.],
-       [ 0.,  0.],
-       [ 1.,  0.],
-       [-1.,  1.],
-       [ 0.,  1.],
-       [ 1.,  1.]])
+    mesh1 = np.array(
+        [
+            [-1.0, -1.0],
+            [0.0, -1.0],
+            [1.0, -1.0],
+            [-1.0, 0.0],
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [-1.0, 1.0],
+            [0.0, 1.0],
+            [1.0, 1.0],
+        ]
+    )
     mesh = get_vectors_mesh(1.0, 1.0, g_norm_max=1.5, angle=0.0, shear=0.0)
     np.testing.assert_allclose(mesh, mesh1)
 
     mesh = get_vectors_mesh(2.0, 2.0, g_norm_max=3.0, angle=0.0, shear=0.0)
-    np.testing.assert_allclose(mesh, mesh1*2)
+    np.testing.assert_allclose(mesh, mesh1 * 2)
 
     mesh = get_vectors_mesh(1.5, 1.0, g_norm_max=1.9, angle=0.0, shear=0.0)
-    np.testing.assert_allclose(mesh.T[0], mesh1.T[0]*1.5)
+    np.testing.assert_allclose(mesh.T[0], mesh1.T[0] * 1.5)
     np.testing.assert_allclose(mesh.T[1], mesh1.T[1])
 
-    mesh2 = np.array([[ 0.5      , -0.8660254],
-       [-0.8660254, -0.5      ],
-       [ 0.       ,  0.       ],
-       [ 0.8660254,  0.5      ],
-       [-0.5      ,  0.8660254]])
+    mesh2 = np.array(
+        [
+            [0.5, -0.8660254],
+            [-0.8660254, -0.5],
+            [0.0, 0.0],
+            [0.8660254, 0.5],
+            [-0.5, 0.8660254],
+        ]
+    )
 
     mesh = get_vectors_mesh(1.0, 1.0, g_norm_max=1.0, angle=30, shear=0.0)
     np.testing.assert_allclose(mesh, mesh2)
 
-    mesh3 = np.array([[-0.1, -1. ],
-       [-1. ,  0. ],
-       [ 0. ,  0. ],
-       [ 1. ,  0. ],
-       [ 0.1,  1. ]])
+    mesh3 = np.array([[-0.1, -1.0], [-1.0, 0.0], [0.0, 0.0], [1.0, 0.0], [0.1, 1.0]])
 
     mesh = get_vectors_mesh(1.0, 1.0, g_norm_max=1.2, angle=0.0, shear=0.1)
     np.testing.assert_allclose(mesh, mesh3)
 
-    mesh4 = np.array([[ 0.49607695, -1.09923048],
-       [ 1.36210236, -0.59923048],
-       [-0.8660254 , -0.5       ],
-       [ 0.        ,  0.        ],
-       [ 0.8660254 ,  0.5       ],
-       [-1.36210236,  0.59923048],
-       [-0.49607695,  1.09923048]])
+    mesh4 = np.array(
+        [
+            [0.49607695, -1.09923048],
+            [1.36210236, -0.59923048],
+            [-0.8660254, -0.5],
+            [0.0, 0.0],
+            [0.8660254, 0.5],
+            [-1.36210236, 0.59923048],
+            [-0.49607695, 1.09923048],
+        ]
+    )
 
     mesh = get_vectors_mesh(1.0, 1.2, g_norm_max=1.5, angle=30.0, shear=0.1)
     np.testing.assert_allclose(mesh, mesh4)

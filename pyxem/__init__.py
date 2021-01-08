@@ -39,7 +39,7 @@ __all__ = [
     "generators",
     "signals",
     "load_mib",
-    ]
+]
 
 __version__ = release_info.version
 __author__ = release_info.author

@@ -1,4 +1,3 @@
-
 def select_method_from_method_dict(method, method_dict, print_help=True, **kwargs):
     """Streamlines the selection of utils to be mapped in class methods.
 

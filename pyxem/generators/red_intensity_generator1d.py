@@ -19,10 +19,7 @@
 """Reduced intensity generator and associated tools."""
 import numpy as np
 
-from pyxem.components import (
-    ScatteringFitComponentXTables,
-    ScatteringFitComponentLobato
-)
+from pyxem.components import ScatteringFitComponentXTables, ScatteringFitComponentLobato
 from pyxem.utils.ri_utils import subtract_pattern, mask_from_pattern
 
 scattering_factor_dictionary = {

@@ -26,7 +26,7 @@ from pyxem.signals import (
     ElectronDiffraction1D,
     ElectronDiffraction2D,
     PolarDiffraction2D,
-    LazyElectronDiffraction2D
+    LazyElectronDiffraction2D,
 )
 
 
@@ -102,6 +102,7 @@ class TestSimpleMaps:
 
         assert transformed_dp.data.dtype == "uint8"
 
+
 class TestSimpleHyperspy:
     # Tests functions that assign to hyperspy metadata
 
@@ -122,7 +123,18 @@ class TestSimpleHyperspy:
         assert isinstance(diffraction_pattern, ElectronDiffraction2D)
 
     @pytest.mark.parametrize(
-        "calibration, center", [(1, (4, 4),), (0.017, (3, 3)), (0.5, None,),]
+        "calibration, center",
+        [
+            (
+                1,
+                (4, 4),
+            ),
+            (0.017, (3, 3)),
+            (
+                0.5,
+                None,
+            ),
+        ],
     )
     def test_set_diffraction_calibration(
         self, diffraction_pattern, calibration, center
@@ -144,7 +156,12 @@ class TestSimpleHyperspy:
 
 class TestGainNormalisation:
     @pytest.mark.parametrize(
-        "dark_reference, bright_reference", [(-1, 1), (0, 1), (0, 256),]
+        "dark_reference, bright_reference",
+        [
+            (-1, 1),
+            (0, 1),
+            (0, 256),
+        ],
     )
     def test_apply_gain_normalisation(
         self, diffraction_pattern, dark_reference, bright_reference
@@ -182,6 +199,7 @@ class TestDirectBeamMethods:
         mask_calculated = diffraction_pattern.get_direct_beam_mask(2)
         assert isinstance(mask_calculated, Signal2D)
         assert np.equal(mask_calculated, mask_expected)
+
 
 class TestComputeAndAsLazyElectron2D:
     def test_2d_data_compute(self):

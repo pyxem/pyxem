@@ -25,7 +25,7 @@ from pyxem.signals import (
     Diffraction2D,
     ElectronDiffraction2D,
     DiffractionVectors,
-    VirtualDarkFieldImage
+    VirtualDarkFieldImage,
 )
 
 
@@ -42,6 +42,7 @@ def vdf_generator(diffraction_pattern, diffraction_vectors):
         diffraction_pattern.data == 0, 0.01, diffraction_pattern.data
     )  # avoid divide by zeroes
     return VirtualDarkFieldGenerator(diffraction_pattern, diffraction_vectors)
+
 
 class TestVirtualDarkFieldGenerator:
     def test_vdf_generator_init_with_vectors(self, diffraction_pattern):
@@ -67,7 +68,6 @@ class TestVirtualDarkFieldGenerator:
 
 
 class TestVirtualImageGenerator:
-
     def setup_method(self, method):
         # Navigation dimension of the diffraction patterns
         diffraction_pattern = Diffraction2D(np.arange(2000).reshape(4, 5, 10, 10))
@@ -80,7 +80,8 @@ class TestVirtualImageGenerator:
     )
     def test_get_concentric_virtual_images(self, k_min, k_max, k_steps, normalize):
         vdfs = self.virtual_image_generator.get_concentric_virtual_images(
-            k_min, k_max, k_steps, normalize)
+            k_min, k_max, k_steps, normalize
+        )
         assert isinstance(vdfs, VirtualDarkFieldImage)
 
     def test_calibration_vdf_images(self):
@@ -89,28 +90,29 @@ class TestVirtualImageGenerator:
         nav_axis = diffraction_pattern.axes_manager.navigation_axes[0]
         nav_axis.scale = 0.2
         nav_axis.offset = 10
-        nav_axis.units = 'nm'
-        nav_axis.name = 'position'
+        nav_axis.units = "nm"
+        nav_axis.name = "position"
         for sig_axis in diffraction_pattern.axes_manager.signal_axes:
             sig_axis.scale = 0.2
             sig_axis.offset = -1.0
-            sig_axis.units = 'rad'
-            sig_axis.name = 'Scattering Angle'
+            sig_axis.units = "rad"
+            sig_axis.name = "Scattering Angle"
         k_min, k_max, k_steps = 0.1, 0.6, 2
         vi = virtual_image_generator.get_concentric_virtual_images(
-            k_min, k_max, k_steps)
+            k_min, k_max, k_steps
+        )
 
         assert vi.data.shape == (2, 4, 5)
 
         vi_nav_axis = vi.axes_manager[0]
-        assert vi_nav_axis.name == 'Annular bins'
+        assert vi_nav_axis.name == "Annular bins"
         assert vi_nav_axis.units == sig_axis.units
         assert vi_nav_axis.scale == (k_max - k_min) / k_steps
         assert vi_nav_axis.offset == k_min
         assert vi_nav_axis.size == k_steps
 
         vi_sig_axis = vi.axes_manager[1]
-        for attr in ['scale', 'offset', 'units', 'name']:
+        for attr in ["scale", "offset", "units", "name"]:
             assert getattr(vi_sig_axis, attr) == getattr(nav_axis, attr)
 
 
@@ -138,9 +140,9 @@ def test_vi_generator_set_ROI_mesh(diffraction_pattern):
     assert isinstance(vi_generator.roi_list[0], hs.roi.CircleROI)
 
 
-@pytest.mark.parametrize('nav_shape', [[2], [2, 4]])
+@pytest.mark.parametrize("nav_shape", [[2], [2, 4]])
 def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
-    n = np.prod(nav_shape)*32**2
+    n = np.prod(nav_shape) * 32 ** 2
     s = Diffraction2D(np.arange(n).reshape((*nav_shape, 32, 32)))
     vi_generator = VirtualImageGenerator(s)
 
@@ -150,13 +152,13 @@ def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
     for axis in s.axes_manager.signal_axes:
         axis.scale = 0.1
         axis.offset = -1.6
-        axis.units = '1/nm'
+        axis.units = "1/nm"
 
     vi_generator.set_ROI_mesh(0.5, 0.6, 1.4)
     vi = vi_generator.get_virtual_images_from_mesh()
     vi_nav_axis = vi.axes_manager.navigation_axes[0]
     assert vi_nav_axis.size == 21
-    assert vi_nav_axis.name == 'ROI index'
+    assert vi_nav_axis.name == "ROI index"
     assert vi_nav_axis.scale == 1.0
     assert len(vi_generator.roi_list) == 21
 
@@ -167,11 +169,11 @@ def test_vi_generator_get_virtual_images_from_mesh(nav_shape):
 
 
 def test_vi_generator_get_virtual_images_from_mesh_nav_dim3():
-    s = Diffraction2D(np.arange(2*4*10*32**2).reshape((2, 4, 10, 32, 32)))
+    s = Diffraction2D(np.arange(2 * 4 * 10 * 32 ** 2).reshape((2, 4, 10, 32, 32)))
     for axis in s.axes_manager.signal_axes:
         axis.scale = 0.1
         axis.offset = -1.6
-        axis.units = '1/nm'
+        axis.units = "1/nm"
     vi_generator = VirtualImageGenerator(s)
 
     vi_generator.set_ROI_mesh(0.5, 0.6, 0.6)

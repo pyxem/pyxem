@@ -87,6 +87,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     _signal_type = "diffraction"
 
     """ Methods that make geometrical changes to a diffraction pattern """
+
     def apply_affine_transformation(
         self, D, order=1, keep_dtype=False, inplace=True, *args, **kwargs
     ):
@@ -312,7 +313,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         s_out.data = np.flip(self.data, axis=-2)
         return s_out
 
-
     """ Masking and other non-geometrical 'correction' to patterns """
 
     def get_direct_beam_mask(self, radius):
@@ -364,7 +364,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             *args,
             **kwargs,
         )
-
 
     def subtract_diffraction_background(
         self, method="median kernel", lazy_result=True, show_progressbar=True, **kwargs
@@ -493,7 +492,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_dead_pixels.compute(progressbar=show_progressbar)
         return s_dead_pixels
 
-
     def find_hot_pixels(
         self,
         threshold_multiplier=500,
@@ -559,7 +557,13 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return s_hot_pixels
 
     def correct_bad_pixels(
-        self, bad_pixel_array, show_progressbar=True, lazy_result=True, inplace=True ,*args,**kwargs,
+        self,
+        bad_pixel_array,
+        show_progressbar=True,
+        lazy_result=True,
+        inplace=True,
+        *args,
+        **kwargs,
     ):
         """Correct bad (dead/hot) pixels by replacing their values with the mean value of neighbors.
 
@@ -616,6 +620,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         return s_bad_pixel_removed
 
     """ Direct beam and peak finding tools """
+
     def get_direct_beam_position(self, method, lazy_result=None, **kwargs):
         """Estimate the direct beam position in each experimentally acquired
         electron diffraction pattern.
@@ -889,7 +894,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         return s_out
 
-
     def center_of_mass(
         self,
         threshold=None,
@@ -986,7 +990,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         ):
             pst._copy_axes_object_metadata(nav_axes, sig_axes)
         return s_com
-
 
     def template_match_disk(self, disk_r=4, lazy_result=True, show_progressbar=True):
         """Template match the signal dimensions with a disk.
@@ -1323,8 +1326,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
                 pbar.unregister()
         return output_array
 
-
-
     """ Plotting (or plotting adjacent) methods """
 
     def make_probe_navigation(self, method="fast"):
@@ -1377,8 +1378,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             s_nav = self._navigator_probe
             kwargs["navigator"] = s_nav
             super().plot(*args, **kwargs)
-
-
 
     def add_peak_array_as_markers(
         self, peak_array, color="red", size=20, bool_array=None, bool_invert=False
@@ -1635,16 +1634,17 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         )
         return bool_array
 
-
     """ Variance generation methods """
-    def get_variance(self,
-                     npt,
-                     method="Omega",
-                     dqe=None,
-                     spatial=False,
-                     navigation_axes=None,
-                     **kwargs,
-                     ):
+
+    def get_variance(
+        self,
+        npt,
+        method="Omega",
+        dqe=None,
+        spatial=False,
+        navigation_axes=None,
+        **kwargs,
+    ):
         """Calculates the variance using one of the methods described in [1]. A shot noise correction and
            and specification of axes to operate over are also possible.
 
@@ -1675,53 +1675,70 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             materials-Application to Al88-xY7Fe5Tix metallic glasses.
         """
 
-        if method not in ['Omega','r','re','VImage']:
-            raise ValueError('Method must be one of [Omega, r, re, VImage].'
-                             'for more information read\n'
-                             'Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010).'
-                             ' Nanobeam diffraction fluctuation electron microscopy'
-                             ' technique for structural characterization of disordered'
-                             ' materials-Application to Al88-xY7Fe5Tix metallic glasses.'
-                             ' Ultramicroscopy, 110(10), 1279–1289.\n'
-                             ' https://doi.org/10.1016/j.ultramic.2010.05.010')
+        if method not in ["Omega", "r", "re", "VImage"]:
+            raise ValueError(
+                "Method must be one of [Omega, r, re, VImage]."
+                "for more information read\n"
+                "Daulton, T. L., Bondi, K. S., & Kelton, K. F. (2010)."
+                " Nanobeam diffraction fluctuation electron microscopy"
+                " technique for structural characterization of disordered"
+                " materials-Application to Al88-xY7Fe5Tix metallic glasses."
+                " Ultramicroscopy, 110(10), 1279–1289.\n"
+                " https://doi.org/10.1016/j.ultramic.2010.05.010"
+            )
 
-        if method == 'Omega':
+        if method == "Omega":
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
-            variance = ((one_d_integration**2).mean(axis=navigation_axes)/one_d_integration.mean(axis=navigation_axes)**2) - 1
+            variance = (
+                (one_d_integration ** 2).mean(axis=navigation_axes)
+                / one_d_integration.mean(axis=navigation_axes) ** 2
+            ) - 1
             if dqe is not None:
-                sum_points = self.get_azimuthal_integral1d(npt=npt,sum=True,**kwargs).mean(axis=navigation_axes)
-                variance = variance - ((sum_points**-1)*dqe)
+                sum_points = self.get_azimuthal_integral1d(
+                    npt=npt, sum=True, **kwargs
+                ).mean(axis=navigation_axes)
+                variance = variance - ((sum_points ** -1) * dqe)
 
-        elif method == 'r':
+        elif method == "r":
             one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs)
-            integration_squared = (self ** 2).get_azimuthal_integral1d(npt=npt, **kwargs)
+            integration_squared = (self ** 2).get_azimuthal_integral1d(
+                npt=npt, **kwargs
+            )
             # Full variance is the same as the unshifted phi=0 term in angular correlation
-            full_variance = (integration_squared/one_d_integration**2)-1
+            full_variance = (integration_squared / one_d_integration ** 2) - 1
 
             if dqe is not None:
-                full_variance = full_variance - ((one_d_integration**-1)*dqe)
+                full_variance = full_variance - ((one_d_integration ** -1) * dqe)
 
             variance = full_variance.mean(axis=navigation_axes)
 
             if spatial:
                 return variance, full_variance
 
-        elif method == 're':
-            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(axis=navigation_axes)
-            integration_squared = (self ** 2).get_azimuthal_integral1d(
-                                                                       npt=npt,
-                                                                       **kwargs).mean(
-                                                                                     axis=navigation_axes)
-            variance = (integration_squared/one_d_integration**2) - 1
+        elif method == "re":
+            one_d_integration = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean(
+                axis=navigation_axes
+            )
+            integration_squared = (
+                (self ** 2)
+                .get_azimuthal_integral1d(npt=npt, **kwargs)
+                .mean(axis=navigation_axes)
+            )
+            variance = (integration_squared / one_d_integration ** 2) - 1
 
             if dqe is not None:
                 sum_int = self.get_azimuthal_integral1d(npt=npt, **kwargs).mean()
-                variance = variance - (sum_int**-1)*(1/dqe)
+                variance = variance - (sum_int ** -1) * (1 / dqe)
 
-        elif method == 'VImage':
-            variance_image = ((self ** 2).mean(axis=navigation_axes)/self.mean(axis=navigation_axes)**2)-1
+        elif method == "VImage":
+            variance_image = (
+                (self ** 2).mean(axis=navigation_axes)
+                / self.mean(axis=navigation_axes) ** 2
+            ) - 1
             if dqe is not None:
-                variance_image = variance_image - (self.sum(axis=navigation_axes)**-1)*(1/dqe)
+                variance_image = variance_image - (
+                    self.sum(axis=navigation_axes) ** -1
+                ) * (1 / dqe)
             variance = variance_image.get_azimuthal_integral1d(npt=npt, **kwargs)
         return variance
 
@@ -1776,7 +1793,10 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         .get_azimuthal_integral1d
 
         """
-        warnings.warn('This method is depreacted, and will be removed in version 0.14.0, please use .get_azimuthal_integral1d',FutureWarning)
+        warnings.warn(
+            "This method is depreacted, and will be removed in version 0.14.0, please use .get_azimuthal_integral1d",
+            FutureWarning,
+        )
         if (centre_x is None) or (centre_y is None):
             centre_x, centre_y = pst._make_centre_array_from_signal(self)
         elif (not isiterable(centre_x)) or (not isiterable(centre_y)):
@@ -1944,7 +1964,7 @@ class Diffraction2D(Signal2D, CommonDiffraction):
     def set_ai(
         self, center=None, wavelength=None, affine=None, radial_range=None, **kwargs
     ):
-        """ This function sets the .ai parameter which stores an ~pyfai.AzimuthalIntegrator object based on
+        """This function sets the .ai parameter which stores an ~pyfai.AzimuthalIntegrator object based on
         the current calibration applied to the diffraction pattern.
 
         Parameters
@@ -1966,7 +1986,9 @@ class Diffraction2D(Signal2D, CommonDiffraction):
 
         """
         if wavelength is None and self.unit not in ["2th_deg", "2th_rad"]:
-            raise ValueError('if the unit is not \'2th_deg\' or \'2th_rad\' then a wavelength must be given.')
+            raise ValueError(
+                "if the unit is not '2th_deg' or '2th_rad' then a wavelength must be given."
+            )
 
         pixel_scale = [
             self.axes_manager.signal_axes[0].scale,

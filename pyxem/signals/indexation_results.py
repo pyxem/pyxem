@@ -30,7 +30,6 @@ from pyxem.utils.signal import transfer_navigation_axes
 from pyxem.utils.indexation_utils import get_nth_best_solution
 
 
-
 def crystal_from_vector_matching(z_matches):
     """Takes vector matching results for a single navigation position and
     returns the best matching phase and orientation with correlation and
@@ -74,6 +73,7 @@ def crystal_from_vector_matching(z_matches):
 
     return results_array
 
+
 def _peaks_from_best_template(single_match_result, library, rank=0):
     """Takes a TemplateMatchingResults object and return the associated peaks,
     to be used in combination with map().
@@ -97,13 +97,16 @@ def _peaks_from_best_template(single_match_result, library, rank=0):
     phase_names = list(library.keys())
     phase_index = int(best_fit[0])
     phase = phase_names[phase_index]
-    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1:4]))["Sim"]
+    simulation = library.get_library_entry(phase=phase, angle=tuple(best_fit[1:4]))[
+        "Sim"
+    ]
 
     peaks = simulation.coordinates[:, :2]  # cut z
     return peaks
 
+
 def _get_best_match(z):
-    """ Returns the match with the highest score for a given navigation pixel
+    """Returns the match with the highest score for a given navigation pixel
 
     Parameters
     ----------
@@ -115,10 +118,11 @@ def _get_best_match(z):
     z_best : np.array
         array with shape (5,)
     """
-    return z[:,np.argmax(z[-1,:])]
+    return z[:, np.argmax(z[-1, :])]
 
-class GenericMatchingResults():
-    def __init__(self,data):
+
+class GenericMatchingResults:
+    def __init__(self, data):
         self.data = hs.signals.Signal2D(data)
 
     def to_crystal_map(self):
@@ -130,7 +134,7 @@ class GenericMatchingResults():
         -------
         orix.CrystalMap
         """
-        _s = self.data.map(_get_best_match,inplace=False)
+        _s = self.data.map(_get_best_match, inplace=False)
 
         """ Gets properties """
         phase_id = _s.isig[0].data.flatten()
@@ -145,18 +149,15 @@ class GenericMatchingResults():
         y = xy[0].flatten()
 
         """ Tidies up so we can put these things into CrystalMap """
-        euler = np.vstack((alpha,beta,gamma)).T
-        rotations = Rotation.from_euler(euler,convention="bunge", direction="crystal2lab")
-        properties = {"score":score}
-
+        euler = np.vstack((alpha, beta, gamma)).T
+        rotations = Rotation.from_euler(
+            euler, convention="bunge", direction="crystal2lab"
+        )
+        properties = {"score": score}
 
         return CrystalMap(
-                rotations=rotations,
-                phase_id=phase_id,
-                x=x,
-                y=y,
-                prop=properties)
-
+            rotations=rotations, phase_id=phase_id, x=x, y=y, prop=properties
+        )
 
 
 class TemplateMatchingResults(GenericMatchingResults):
@@ -193,12 +194,15 @@ class TemplateMatchingResults(GenericMatchingResults):
         **kwargs :
             Keyword arguments passed to signal.plot()
         """
-        match_peaks = self.data.map(_peaks_from_best_template, library=library, inplace=False)
+        match_peaks = self.data.map(
+            _peaks_from_best_template, library=library, inplace=False
+        )
         mmx, mmy = generate_marker_inputs_from_peaks(match_peaks)
         signal.plot(*args, **kwargs)
         for mx, my in zip(mmx, mmy):
             m = hs.markers.point(x=mx, y=my, color="red", marker="x")
             signal.add_marker(m, plot_marker=True, permanent=permanent_markers)
+
 
 class VectorMatchingResults(BaseSignal):
     """Vector matching results containing the top n best matching crystal

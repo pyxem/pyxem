@@ -22,12 +22,12 @@ import os
 
 import hyperspy.api as hs
 
-from pyxem.signals import(
+from pyxem.signals import (
     ElectronDiffraction1D,
     ElectronDiffraction2D,
     DiffractionVectors,
     DiffractionVectors2D,
-    VirtualDarkFieldImage
+    VirtualDarkFieldImage,
 )
 
 

@@ -257,7 +257,7 @@ def test_multiple_scatter_correction(RedIntData):
 
     ri.fit_thermal_multiple_scattering_correction()
 
-    assert ri.data.shape == (2,2,10)
+    assert ri.data.shape == (2, 2, 10)
 
 
 @pytest.mark.filterwarnings("ignore::RuntimeWarning")

@@ -119,6 +119,7 @@ def test_peaks_as_gvectors(z, center, calibration, g):
     gc = peaks_as_gvectors(z=z, center=center, calibration=calibration)
     np.testing.assert_almost_equal(gc, g)
 
+
 def test_remove_dead_pixels(dp_single):
     z = dp_single.data
     dead_removed = remove_dead(z, [[3, 3]])

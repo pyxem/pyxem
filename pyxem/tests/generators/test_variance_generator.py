@@ -20,9 +20,7 @@ import pytest
 import numpy as np
 
 from pyxem.generators import VarianceGenerator
-from pyxem.signals import (
-    ElectronDiffraction2D, DiffractionVariance2D, ImageVariance
-)
+from pyxem.signals import ElectronDiffraction2D, DiffractionVariance2D, ImageVariance
 
 
 @pytest.fixture

@@ -24,5 +24,5 @@ from .scattering_fit_component_xtables import ScatteringFitComponentXTables
 __all__ = [
     "ReducedIntensityCorrectionComponent",
     "ScatteringFitComponentLobato",
-    "ScatteringFitComponentXTables"
+    "ScatteringFitComponentXTables",
 ]

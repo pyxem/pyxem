@@ -24,7 +24,10 @@ from hyperspy.signals import Signal2D
 
 from pyxem.generators import VirtualDarkFieldGenerator
 from pyxem.signals import (
-    ElectronDiffraction2D, DiffractionVectors, LearningSegment, VDFSegment
+    ElectronDiffraction2D,
+    DiffractionVectors,
+    LearningSegment,
+    VDFSegment,
 )
 
 
