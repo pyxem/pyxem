@@ -1002,9 +1002,9 @@ def _cartesian_positions_to_polar(x, y, delta_r=1, delta_theta=1):
         theta coordinate or y coordinate in the polar image
     """
     imag = (x) + 1j * (y)
-    r = np.rint(np.abs(imag) / delta_r).astype(np.int64)
+    r = (np.abs(imag) / delta_r).astype(np.int64)
     angle = np.rad2deg(np.angle(imag))
-    theta = np.rint(np.mod(angle, 360) / delta_theta).astype(np.uint64)
+    theta = (np.mod(angle, 360) / delta_theta).astype(np.uint64)
     return r, theta
 
 
@@ -1056,34 +1056,6 @@ def _match_polar_to_polar_template(polar_image, r_template, theta_template, inte
         image_intensities = _extract_pixel_intensities(polar_image, r_template, theta_compare)
         correlation[i] = _simple_correlation(image_intensities, intensities, image_norm, template_norm)
     return correlation
-
-
-# @njit
-# def _pearson_correlation(image_intensities, template_intensities, n):
-    # """
-    # Pearson correlation coefficient between image and template. n is the
-    # total number of pixels in the image.
-    # """
-    # template_sum = np.sum(template_intensities)
-    # numerator = np.sum(np.multiply(image_intensities, template_intensities))
-    # denominator = np.sqrt(1-template_sum**2/n)
-    # return numerator/denominator
-# 
-# 
-# @njit
-# def _match_polar_to_polar_template_pearson(polar_image, r_template, theta_template, intensities):
-    # """
-    # Correlate a single polar template to a single polar image by shifting
-    # the template along the azimuthal axis. Return an array representing the
-    # correlation at each in-plane angle. Uses the pearson correlation coefficient.
-    # """
-    # correlation = np.zeros(polar_image.shape[0], dtype=np.float64)
-    # n = polar_image.shape[0]*polar_image.shape[1]
-    # for i in prange(polar_image.shape[0]):
-        # theta_compare = np.mod(theta_template + i, polar_image.shape[0])
-        # image_intensities = _extract_pixel_intensities(polar_image, r_template, theta_compare)
-        # correlation[i] = _pearson_correlation(image_intensities, intensities, n)
-    # return correlation
 
 
 @njit
@@ -1323,7 +1295,7 @@ def _prepare_image_and_templates(image, simulations, delta_r, delta_theta, max_r
     r, theta = _cartesian_positions_to_polar(positions[:,0], positions[:,1], delta_r, delta_theta)
     return polar_image, r, theta, intensities
 
-#@njit(["float64[:,:](float64[:,:], float64, float64[:], float64, float64[:,:], float64[:], uint64[:,:], uint64[:,:], float64[:,:], float64[:], float64, uint64)"])
+
 @njit
 def _mixed_matching_lib_to_polar(polar_image,
                                  polar_norm,
@@ -1413,11 +1385,7 @@ def _mixed_matching_lib_to_polar(polar_image,
     return answer
 
 
-# @njit(["float64[:,:,:,:](float64[:,:,:,:], float64[:,:], int64[:,:], int64[:,:], float64[:,:], float64, int64)"],
-      # nogil=True,
-      # parallel=True,
-      # )
-@njit
+@njit(nogil=True, parallel=True)
 def _index_chunk(polar_images,
                  integrated_templates,
                  integrated_template_norms,
@@ -1468,7 +1436,7 @@ def _renormalize_polar_block(polar_chunk):
 
 
 def get_in_plane_rotation_correlation(image, simulation,
-                                   intensity_transform_function=None,
+                                      intensity_transform_function=None,
                                       delta_r=1, delta_theta=1, 
                                       max_r = None,
                                       find_direct_beam=False,
@@ -1925,11 +1893,11 @@ def index_dataset_with_template_rotation(signal,
     else:
         data = data.rechunk(chunks)
     # convert to polar dataset
-    r_dim, theta_dim = get_polar_pattern_shape(data.shape[-2:],
+    theta_dim, r_dim = get_polar_pattern_shape(data.shape[-2:],
                                                 delta_r,
                                                 delta_theta,
                                                 max_r=max_r)
-    polar_chunking = (data.chunks[0], data.chunks[1], theta_dim, r_dim)
+    polar_chunking = (*data.chunks[0], *data.chunks[1], theta_dim, r_dim)
     polar_data = data.map_blocks(chunk_to_polar,
                                  delta_r,
                                  delta_theta,
@@ -1959,7 +1927,7 @@ def index_dataset_with_template_rotation(signal,
                                                  delta_r=delta_r,
                                                  delta_theta=delta_theta)
         # integrated intensity library for fast comparison
-        integrated_templates = _get_integrated_polar_templates(max_radius, r, intensities)
+        integrated_templates = _get_integrated_polar_templates(r_dim, r, intensities)
         N = r.shape[0]
         fraction = max((N - abs(n_keep)) / N, 0.)
         if frac_keep is not None:
@@ -1992,7 +1960,7 @@ def index_dataset_with_template_rotation(signal,
         with ProgressBar():
             res_index = indexation.compute(scheduler="threads", num_workers=parallel_workers, optimize_graph=True)
         result[phase_key] = {}
-        result[phase_key]["template_index"] = res_index[:,:,:,0]
+        result[phase_key]["template_index"] = res_index[:,:,:,0].astype(np.uint64)
         oris = phase_library["orientations"]
         orimap = oris[res_index[:,:,:,0].astype(np.uint64)]
         orimap[:,:,:,0] = res_index[:,:,:,2]

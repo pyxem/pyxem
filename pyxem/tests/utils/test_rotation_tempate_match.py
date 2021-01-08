@@ -2,6 +2,7 @@ from pyxem.utils import indexation_utils as iutls
 import numpy as np
 import pytest
 from unittest.mock import Mock
+import dask.array as da
 
 
 def mock_library():
@@ -30,7 +31,7 @@ def mock_library():
     return simlist
 
 
-
+# 
 @pytest.mark.parametrize(
     "max_radius, expected_shapes, test_pos, test_int",
     [
@@ -220,7 +221,6 @@ def test_mixed_matching_lib_to_polar(nbest):
 
 
 
-    
 @pytest.mark.parametrize(
     "frk, norim, nortemp",
     [
@@ -257,3 +257,70 @@ def test_get_n_best_matches(nbest, frk, norim, nortemp):
     assert cor.dtype == np.float64
     assert cor.shape[0] == indx.shape[0] == angs.shape[0] == nbest
     
+
+def mock_dataset(shape):
+    dataset = Mock()
+    data = np.ones(shape)
+    dataset.data = da.from_array(data)
+    dataset._lazy = True
+    dataset.axes_manager.navigation_dimension = len(shape) - 2
+    dataset.axes_manager.signal_indices_in_array = (len(shape)-2, len(shape)-1)
+    return dataset
+
+
+def mock_full_library():
+    library = {}
+    mock_sim_1 = Mock()
+    mock_sim_1.calibrated_coordinates = np.array([[0, 1, 0],
+                                                [1, 0, 0],
+                                                [1, 2, 0],
+                                                [-1, 2, 0],
+                                                ]) 
+    mock_sim_1.intensities = np.array([2, 3, 4, 2])
+    mock_sim_2 = Mock()
+    mock_sim_2.calibrated_coordinates = np.array([ 
+                                                [-1, -2, 0],
+                                                [1, 2, 0],
+                                                [-2, 1, 0]]
+    )
+    mock_sim_2.intensities = np.array([1, 2, 10])
+    simlist = [mock_sim_1, mock_sim_2]
+    orientations = np.array([[1, 2, 3],
+                             [3, 4, 5],])
+    library["dummyphase"] = {"simulations" : simlist,
+                             "orientations" : orientations}
+    return library
+
+
+
+@pytest.mark.parametrize(
+    "sigdim, norim, nort, chu",
+    [
+        ((2, 3), True, False, None),
+        ((2, 3, 4), False, True, "auto"),
+        ((2, 3, 4, 5), False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
+    ]
+)
+def test_index_dataset_with_template_rotation(sigdim, norim, nort, chu):
+    signal = mock_dataset(sigdim)
+    library = mock_full_library()
+    result = iutls.index_dataset_with_template_rotation(signal,
+                                         library,
+                                         frac_keep=0.5,
+                                         delta_r=0.5,
+                                         delta_theta=36,
+                                         max_r=None,
+                                         intensity_transform_function=np.sqrt,
+                                         normalize_images = norim,
+                                         normalize_templates = nort,
+                                         chunks=chu,
+                                         )
+
+
+@pytest.mark.xfail(raises=ValueError)
+def test_fail_index_dataset_with_template_rot():
+    signal = mock_dataset((3, 2, 4, 1, 2))
+    library = mock_library()
+    result = iutls.index_dataset_with_template_rotation(signal,
+                                         library,
+                                         )

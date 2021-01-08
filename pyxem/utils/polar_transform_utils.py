@@ -102,7 +102,7 @@ def get_polar_pattern_shape(image_shape,
                             delta_theta,
                             max_r=None):
     """
-    Returns the (r, theta) shape of images if they would be transformed
+    Returns the shape of images if they would be transformed
     to polar coordinates.
 
     Parameters
@@ -117,6 +117,13 @@ def get_polar_pattern_shape(image_shape,
         maximum radius of the polar image, by default the cartesian distance 
         in pixels from the center of the image to the corner, rounded up to
         the nearest integer.
+
+    Returns
+    -------
+    theta_dim : int
+        size of the theta dimension
+    r_dim : int
+        size of the r dimension
     """
     if max_r is None:
         half_y = image_shape[0] / 2
