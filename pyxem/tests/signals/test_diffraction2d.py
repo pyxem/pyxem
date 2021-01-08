@@ -903,13 +903,21 @@ class TestCenterDirectBeam:
         assert s.data.shape == shape
 
     def test_half_square_width(self):
-        s = self.s.isig[:, 2:-2]
+        # Generating a larger dataset to check that half_square_width
+        # works properly with the automatic chunking in dask_tools._get_dask_array
+        s = Diffraction2D(np.zeros((10, 10, 200, 200)))
+        x_pos_list = np.random.randint(100 - 2, 100 + 2, 10, dtype=np.int16)
+        y_pos_list = np.random.randint(100 - 2, 100 + 2, 10, dtype=np.int16)
+        for ix in range(len(x_pos_list)):
+            for iy in range(len(y_pos_list)):
+                s.data[iy, ix, y_pos_list[iy], x_pos_list[ix]] = 9
         s.data[:, :, 1, -1] = 1000
+
         s1 = s.deepcopy()
         s.center_direct_beam(method="blur", sigma=1)
-        assert (s.data[:, :, 8, 8] == 1000).all()
+        assert (s.data[:, :, 100, 100] == 1000).all()
         s1.center_direct_beam(method="blur", sigma=1, half_square_width=5)
-        assert (s1.data[:, :, 8, 8] == 9).all()
+        assert (s1.data[:, :, 100, 100] == 9).all()
 
     def test_align_kwargs(self):
         s = self.s
