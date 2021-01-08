@@ -785,15 +785,20 @@ class Diffraction2D(Signal2D, CommonDiffraction):
         signal_shape = self.axes_manager.signal_shape
         origin_coordinates = np.array(signal_shape) / 2
 
+        data_dask_array = _get_dask_array(self)
+        if not self._lazy:
+            temp_signal = self.as_lazy()
+            temp_signal.data = da.from_array(self.data, chunks=data_dask_array.chunks)
+        else:
+            temp_signal = self
+
         if shifts is None:
             if half_square_width is not None:
                 min_index = np.int(origin_coordinates[0] - half_square_width)
                 # fails if non-square dp
                 max_index = np.int(origin_coordinates[0] + half_square_width)
-                temp_data = self.isig[min_index:max_index, min_index:max_index]
-            else:
-                temp_data = self
-            shifts = temp_data.get_direct_beam_position(
+                temp_signal = temp_signal.isig[min_index:max_index, min_index:max_index]
+            shifts = temp_signal.get_direct_beam_position(
                 method=method,
                 lazy_result=True,
                 **kwargs,
@@ -805,7 +810,6 @@ class Diffraction2D(Signal2D, CommonDiffraction):
             else:
                 align_kwargs["order"] = 0
 
-        data_dask_array = _get_dask_array(self)
         shifts_dask_array = _get_dask_array(shifts)
 
         output_dask_array = _process_dask_array(
