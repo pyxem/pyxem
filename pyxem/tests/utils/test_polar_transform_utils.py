@@ -34,7 +34,7 @@ def test_template_to_polar(max_r, expected_r):
         (90, (7, 7), np.array([]), np.array([])),
     ],
 )
-def test_cartesian_coordinates(angle, window, expected_x, expected_y):
+def test_get_template_cartesian_coordinates(angle, window, expected_x, expected_y):
     simulation = mock_simulation()
     x, y, _ = ptu.get_template_cartesian_coordinates(
         simulation, in_plane_angle=angle, window_size=window
@@ -50,7 +50,7 @@ def test_cartesian_coordinates(angle, window, expected_x, expected_y):
         ((20, 20), 10, (360, 10)),
     ],
 )
-def test_cartesian_coordinates(image_shape, max_r, expected):
+def test_get_polar_pattern_shape(image_shape, max_r, expected):
     result = ptu.get_polar_pattern_shape(image_shape, max_r=max_r)
     np.testing.assert_array_almost_equal(result, expected)
 
@@ -63,7 +63,7 @@ def test_cartesian_coordinates(image_shape, max_r, expected):
         (1, 1, 200, True, None, (360, 200)),
     ],
 )
-def test_cartesian_coordinates(delta_r, delta_theta, max_r, fdb, db, expected_shape):
+def test_image_to_polar(delta_r, delta_theta, max_r, fdb, db, expected_shape):
     image = np.ones((200, 151))
     result = ptu.image_to_polar(
         image,
