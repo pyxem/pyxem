@@ -51,7 +51,7 @@ def test_get_template_cartesian_coordinates(angle, window, expected_x, expected_
     ],
 )
 def test_get_polar_pattern_shape(image_shape, max_r, expected):
-    result = ptu.get_polar_pattern_shape(image_shape, max_r=max_r)
+    result = ptu.get_polar_pattern_shape(image_shape, 1, 1, max_r=max_r)
     np.testing.assert_array_almost_equal(result, expected)
 
 
