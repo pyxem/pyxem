@@ -4,6 +4,7 @@ import numpy as np
 from unittest.mock import Mock
 
 
+@pytest.fixture()
 def mock_simulation():
     mock_sim = Mock()
     mock_sim.calibrated_coordinates = np.array(
@@ -20,9 +21,8 @@ def mock_simulation():
         (15, np.array([5, 13])),
     ],
 )
-def test_template_to_polar(max_r, expected_r):
-    simulation = mock_simulation()
-    r, theta, _ = ptu.get_template_polar_coordinates(simulation, max_r=max_r)
+def test_template_to_polar(mock_simulation,max_r, expected_r):
+    r, theta, _ = ptu.get_template_polar_coordinates(mock_simulation, max_r=max_r)
     np.testing.assert_array_almost_equal(r, expected_r)
 
 
@@ -34,10 +34,9 @@ def test_template_to_polar(max_r, expected_r):
         (90, (7, 7), np.array([]), np.array([])),
     ],
 )
-def test_get_template_cartesian_coordinates(angle, window, expected_x, expected_y):
-    simulation = mock_simulation()
+def test_get_template_cartesian_coordinates(mock_simulation,angle, window, expected_x, expected_y):
     x, y, _ = ptu.get_template_cartesian_coordinates(
-        simulation, in_plane_angle=angle, window_size=window
+        mock_simulation, in_plane_angle=angle, window_size=window
     )
     np.testing.assert_array_almost_equal(x, expected_x)
     np.testing.assert_array_almost_equal(y, expected_y)
@@ -92,8 +91,7 @@ def test_chunk_polar(beam_positions, parallelize, expected_shape):
     )
     np.testing.assert_array_almost_equal(polar_chunk.shape, expected_shape)
 
-
-@pytest.mark.xfail(raises=ValueError)
 def test_chunk_polar_fail():
     chunk = np.ones((3, 2, 10, 7))
-    polar_chunk = ptu.chunk_to_polar(chunk, direct_beam_positions=np.ones((1, 2, 3, 4)))
+    with pytest.raises(ValueError):
+        polar_chunk = ptu.chunk_to_polar(chunk, direct_beam_positions=np.ones((1, 2, 3, 4)))

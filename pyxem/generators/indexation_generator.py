@@ -38,8 +38,6 @@ from pyxem.utils.signal import (
     select_method_from_method_dict,
     transfer_navigation_axes,
 )
-from orix.crystal_map.crystal_map import CrystalMap
-
 
 class IndexationGenerator:
     """Generates an indexer for data using a number of methods.
@@ -211,7 +209,7 @@ class AcceleratedIndexationGenerator:
             Maximum radius to consider in pixel units. By default it is the
             distance from the center of the image to a corner
         intensity_transform_function : Callable, optional
-            Function to apply to both image and template intensities on an 
+            Function to apply to both image and template intensities on an
             element by element basis prior to comparison
         find_direct_beam : bool, optional
             Whether to optimize the direct beam, otherwise the center of the image
@@ -229,7 +227,7 @@ class AcceleratedIndexationGenerator:
         chunks : string or 4-tuple, optional
             internally the work is done on dask datasets and this parameter determines
             the chunking. If set to None then no re-chunking will happen if the dataset
-            was loaded lazily. If set to "auto" then dask attempts to find the optimal 
+            was loaded lazily. If set to "auto" then dask attempts to find the optimal
             chunk size. If None, no changes will be made to the chunking.
         parallel_workers: int, optional
             the number of workers to use in parallel. If set to "auto", the number
@@ -237,7 +235,7 @@ class AcceleratedIndexationGenerator:
 
         Returns
         -------
-        crystalmap
+        result : dict
         """
         result =  index_dataset_with_template_rotation(self.signal,
                                                     self.library,

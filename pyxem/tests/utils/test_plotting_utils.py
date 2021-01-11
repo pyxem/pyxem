@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 _, ax = plt.subplots()
 
-
+@pytest.fixture()
 def mock_simulation():
     mock_sim = Mock()
     mock_sim.calibrated_coordinates = np.array(
@@ -25,22 +25,19 @@ def mock_simulation():
     ],
 )
 def test_plot_sim_over_pattern(
-    axis, find_direct_beam, direct_beam_position, coordinate_system
+    mock_simulation, axis, find_direct_beam, direct_beam_position, coordinate_system
 ):
     pattern = np.ones((15, 20))
-    simulation = mock_simulation()
     plu.plot_template_over_pattern(
         pattern,
-        simulation,
+        mock_simulation,
         axis,
         find_direct_beam=find_direct_beam,
         direct_beam_position=direct_beam_position,
         coordinate_system=coordinate_system,
     )
 
-
-@pytest.mark.xfail(raises=NotImplementedError)
-def test_plot_sim_over_pattern_fail():
+def test_plot_sim_over_pattern_fail(mock_simulation):
     pattern = np.ones((15, 20))
-    simulation = mock_simulation()
-    plu.plot_template_over_pattern(pattern, simulation, coordinate_system="dracula")
+    with pytest.raises(NotImplementedError):
+        plu.plot_template_over_pattern(pattern, mock_simulation, coordinate_system="dracula")

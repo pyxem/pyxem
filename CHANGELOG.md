@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Faster rotation indexing, using in place speeds up, added as AcceleratedIndexationGenerator (#673)
 - get_direct_beam_position now supports lazy proccessing (#648)
 - center_direct_beam now supports lazy processing (#658)
 - Several functions for processing large datasets using dask (#648, #658)

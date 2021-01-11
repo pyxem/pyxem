@@ -24,7 +24,7 @@ from scipy.interpolate import interp1d
 from skimage import transform as tf
 from skimage import morphology, filters
 from skimage.draw import ellipse_perimeter
-from skimage.feature import register_translation
+from skimage.registration import phase_cross_correlation
 from tqdm import tqdm
 
 from pyxem.utils.pyfai_utils import get_azimuthal_integrator
@@ -617,7 +617,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
         hann2d = np.sqrt(np.outer(h0, h1))
         ref = hann2d * ref
         im = hann2d * z
-        shift, error, diffphase = register_translation(ref, im, 10)
+        shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=10)
         errRecord[ind] = error
         index_min = np.argmin(errRecord)
 
@@ -629,7 +629,7 @@ def find_beam_offset_cross_correlation(z, radius_start, radius_finish):
     hann2d = np.sqrt(np.outer(h0, h1))
     ref = hann2d * ref
     im = hann2d * z
-    shift, error, diffphase = register_translation(ref, im, 100)
+    shift, error, diffphase = phase_cross_correlation(ref, im, upsample_factor=100)
 
     shift = shift[::-1]
     return shift - 0.5
