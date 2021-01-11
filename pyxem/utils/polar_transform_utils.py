@@ -3,6 +3,7 @@ from numba import njit, prange, objmode
 from skimage.transform import warp_polar
 from pyxem.utils.expt_utils import find_beam_center_blur
 
+""" These are designed to be fast and used for indexation, for data correction, see radial_utils"""
 
 def get_template_polar_coordinates(
     simulation,
