@@ -4,8 +4,8 @@ import pytest
 from unittest.mock import Mock
 import dask.array as da
 
-
-def mock_library():
+@pytest.fixture()
+def simulations():
     mock_sim_1 = Mock()
     mock_sim_1.calibrated_coordinates = np.array(
         [
@@ -41,8 +41,7 @@ def mock_library():
         (15, ((3, 2, 4), (3, 4)), np.array((0, 0)), 0),
     ],
 )
-def test_simulations_to_arrays(max_radius, expected_shapes, test_pos, test_int):
-    simulations = mock_library()
+def test_simulations_to_arrays(simulations,max_radius, expected_shapes, test_pos, test_int):
     positions, intensities = iutls._simulations_to_arrays(
         simulations, max_radius=max_radius
     )
@@ -72,9 +71,9 @@ def test_match_polar_to_polar_template():
         (np.sqrt, False, True),
     ],
 )
-def test_get_in_plane_rotation_correlation(itf, norim, nortemp):
+def test_get_in_plane_rotation_correlation(simulations,itf, norim, nortemp):
     image = np.ones((123, 50))
-    simulation = mock_library()[0]
+    simulation = simulations[0]
     ang, cor = iutls.get_in_plane_rotation_correlation(
         image,
         simulation,
@@ -114,9 +113,8 @@ def test_match_polar_to_polar_library():
         (False, True),
     ],
 )
-def test_correlate_library_to_pattern(norim, nortemp):
+def test_correlate_library_to_pattern(simulations,norim, nortemp):
     image = np.ones((123, 50))
-    simulations = mock_library()
     ang, cor = iutls.correlate_library_to_pattern(
         image,
         simulations,
@@ -181,9 +179,8 @@ def test_match_library_to_polar_fast():
         (False, True),
     ],
 )
-def test_correlate_library_to_pattern_fast(norim, nortemp):
+def test_correlate_library_to_pattern_fast(simulations,norim, nortemp):
     image = np.ones((123, 50))
-    simulations = mock_library()
     cor = iutls.correlate_library_to_pattern_fast(
         image,
         simulations,
@@ -197,9 +194,8 @@ def test_correlate_library_to_pattern_fast(norim, nortemp):
 
 
 @pytest.mark.parametrize("intensity_transform_function", [np.sqrt, None])
-def test_prep_image_and_templates(intensity_transform_function):
+def test_prep_image_and_templates(simulations,intensity_transform_function):
     image = np.ones((123, 51))
-    simulations = mock_library()
     pim, r, t, i = iutls._prepare_image_and_templates(
         image, simulations, 2.1, 3.2, 33.3, intensity_transform_function, False, None
     )
@@ -256,9 +252,8 @@ def test_mixed_matching_lib_to_polar(nbest):
         (0.5, False, True),
     ],
 )
-def test_correlate_library_to_pattern_partial(frk, norim, nortemp):
+def test_correlate_library_to_pattern_partial(simulations,frk, norim, nortemp):
     image = np.ones((123, 50))
-    simulations = mock_library()
     indx, angs, cor = iutls.correlate_library_to_pattern_partial(
         image,
         simulations,
@@ -279,9 +274,8 @@ def test_correlate_library_to_pattern_partial(frk, norim, nortemp):
         (1, 0.5, False, True),
     ],
 )
-def test_get_n_best_matches(nbest, frk, norim, nortemp):
+def test_get_n_best_matches(simulations,nbest, frk, norim, nortemp):
     image = np.ones((123, 50))
-    simulations = mock_library()
     indx, angs, cor = iutls.get_n_best_matches(
         image,
         simulations,
@@ -296,7 +290,7 @@ def test_get_n_best_matches(nbest, frk, norim, nortemp):
     assert cor.shape[0] == indx.shape[0] == angs.shape[0] == nbest
 
 
-def mock_dataset(shape):
+def create_dataset(shape):
     dataset = Mock()
     data = np.ones(shape)
     dataset.data = da.from_array(data)
@@ -305,8 +299,8 @@ def mock_dataset(shape):
     dataset.axes_manager.signal_indices_in_array = (len(shape) - 2, len(shape) - 1)
     return dataset
 
-
-def mock_full_library():
+@pytest.fixture()
+def library():
     library = {}
     mock_sim_1 = Mock()
     mock_sim_1.calibrated_coordinates = np.array(
@@ -340,9 +334,8 @@ def mock_full_library():
         ((2, 3, 4, 5), False, False, {0: "auto", 1: "auto", 2: None, 3: None}),
     ],
 )
-def test_index_dataset_with_template_rotation(sigdim, norim, nort, chu):
-    signal = mock_dataset(sigdim)
-    library = mock_full_library()
+def test_index_dataset_with_template_rotation(library,sigdim, norim, nort, chu):
+    signal = create_dataset(sigdim)
     result = iutls.index_dataset_with_template_rotation(
         signal,
         library,
@@ -357,11 +350,10 @@ def test_index_dataset_with_template_rotation(sigdim, norim, nort, chu):
     )
 
 
-@pytest.mark.xfail(raises=ValueError)
-def test_fail_index_dataset_with_template_rot():
-    signal = mock_dataset((3, 2, 4, 1, 2))
-    library = mock_library()
-    result = iutls.index_dataset_with_template_rotation(
+def test_fail_index_dataset_with_template_rot(library):
+    signal = create_dataset((3, 2, 4, 1, 2))
+    with pytest.raises(ValueError):
+        result = iutls.index_dataset_with_template_rotation(
         signal,
         library,
-    )
+        )
