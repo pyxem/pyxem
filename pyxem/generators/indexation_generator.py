@@ -38,6 +38,7 @@ from pyxem.utils.signal import (
     select_method_from_method_dict,
     transfer_navigation_axes,
 )
+from orix.crystal_map.crystal_map import CrystalMap
 
 
 class IndexationGenerator:
@@ -152,8 +153,102 @@ def _correlate_templates(image, library, n_largest, method, mask):
         start_slot = phase_number * n_largest
         end_slot = (phase_number + 1) * n_largest
         top_matches[start_slot:end_slot, :] = phase_sorted
-
     return top_matches
+
+
+class AcceleratedIndexationGenerator:
+    """
+    Generates a template-based indexer that also calculates relative
+    rotation of templates.
+
+    Parameters
+    ----------
+    signal : ElectronDiffraction2D
+        The signal of electron diffraction patterns to be indexed.
+    diffraction_library : DiffractionLibrary
+        The library of simulated diffraction patterns for indexation.
+
+    Notes
+    -----
+    To be used with minimal template libraries whereby the first euler
+    angle is 0. It is this angle that is optimized during indexation.
+    """
+    def __init__(self, signal, diffraction_library):
+        # test that the first euler angle is always 0
+        for k, v in diffraction_library:
+            if not np.allclose(np.sum(v["orientations"][:,0]), 0):
+                raise ValueError("Invalid diffraction library! Templates must be generated from orientations where "
+                        "the first Euler angle is 0")
+        self.signal = signal
+        self.library = diffraction_library
+
+    def correlate(self,
+                  n_largest=5,
+                  include_phases=None,
+                  **kwargs,
+                  ):
+        """
+        Correlates the library of simulated diffraction patterns with the
+        electron diffraction signal.
+
+        Parameters
+        ----------
+        n_largest : int, optional
+            Number of best solutions to return, in order of descending match
+        include_phases : list, optional
+            Names of phases in the library to do an indexation for. By default this is
+            all phases in the library.
+        n_keep : int, optional
+            Number of templates to do a full matching on in the second matching step
+        frac_keep : float, optional
+            Fraction (between 0-1) of templates to do a full matching on. When set
+            n_keep will be ignored
+        delta_r : float, optional
+            The sampling interval of the radial coordinate in pixels
+        delta_theta : float, optional
+            The sampling interval of the azimuthal coordinate in degrees
+        max_r : float, optional
+            Maximum radius to consider in pixel units. By default it is the
+            distance from the center of the image to a corner
+        intensity_transform_function : Callable, optional
+            Function to apply to both image and template intensities on an 
+            element by element basis prior to comparison
+        find_direct_beam : bool, optional
+            Whether to optimize the direct beam, otherwise the center of the image
+            is chosen
+        direct_beam_positions : 2-tuple of floats or 3D numpy array of shape (scan_x, scan_y, 2), optional
+            (x, y) coordinates of the direct beam in pixel units. Overrides other
+            settings for finding the direct beam
+        normalize_images : bool, optional
+            normalize the images to calculate the correlation coefficient
+        normalize_templates : bool, optional
+            normalize the templates to calculate the correlation coefficient
+        parallelize_polar_conversion : bool, optional
+            use multiple workers for converting the dataset to polar coordinates. Overhead
+            could make this slower on some hardware and for some datasets.
+        chunks : string or 4-tuple, optional
+            internally the work is done on dask datasets and this parameter determines
+            the chunking. If set to None then no re-chunking will happen if the dataset
+            was loaded lazily. If set to "auto" then dask attempts to find the optimal 
+            chunk size. If None, no changes will be made to the chunking.
+        parallel_workers: int, optional
+            the number of workers to use in parallel. If set to "auto", the number
+            will be determined from os.cpu_count()
+
+        Returns
+        -------
+        crystalmap
+        """
+        result =  index_dataset_with_template_rotation(self.signal,
+                                                    self.library,
+                                                    phases=include_phases,
+                                                    n_best=n_largest,
+                                                    **kwargs)
+        return result
+
+
+
+
 
 
 class TemplateIndexationGenerator:
