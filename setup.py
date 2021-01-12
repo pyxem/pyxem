@@ -70,6 +70,7 @@ setup(
         "ipywidgets",
         "numba",
         "orix >= 0.3",
+        "wcwidth == 0.1.9", #ideally a temporary fix while they sort out with pip, (Jan 2020)
     ],
     python_requires=">=3.0, <3.9",  # some dependencies do not currently support 3.9 (Jan 2020)
     package_data={
