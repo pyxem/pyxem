@@ -82,7 +82,7 @@ def test_AcceleratedIndexationGenerator(good_library):
     #signal.data = signal.data.rechunk({0: "auto", 1: "auto", 2: None, 3: None})
     library = generate_library(good_library=good_library)
 
-    """
+    #"""
     # WHAT IS GOING ON HERE?
     result = iutls.index_dataset_with_template_rotation(
             signal,
@@ -96,7 +96,7 @@ def test_AcceleratedIndexationGenerator(good_library):
             normalize_templates=False,
             chunks='auto',
         )
-    """
+    #"""
     if good_library:
         acgen = AcceleratedIndexationGenerator(signal,library)
         assert np.allclose(acgen.signal.data,signal.data)
