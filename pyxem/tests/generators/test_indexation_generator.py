@@ -19,6 +19,7 @@
 import pytest
 import numpy as np
 import hyperspy.api as hs
+import dask.array as da
 
 from hyperspy._signals.signal2d import Signal2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
@@ -41,6 +42,11 @@ from pyxem.signals import (
 )
 from pyxem.utils.indexation_utils import OrientationResult
 from unittest.mock import Mock
+
+#taken from https://stackoverflow.com/questions/5061582/setting-stacksize-in-a-python-script
+import resource, sys
+resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY,-1))
+sys.setrecursionlimit(10**6)
 
 def generate_library(good_library):
     """Here we're testing the __init__ so we focus on 0 being the first entry of the orientations"""
@@ -69,17 +75,43 @@ def test_old_indexer_routine():
     with pytest.raises(ValueError):
         _ = IndexationGenerator("a", "b")
 
-@pytest.mark.parametrize("good_library",[True,False])
-def test_AcceleratedIndexationGenerator(diffraction_pattern,good_library):
+@pytest.mark.parametrize("good_library",[True])
+def test_AcceleratedIndexationGenerator(good_library):
+    from pyxem.utils import indexation_utils as iutls
+    signal = ElectronDiffraction2D((np.ones((2,2,256,256)))).as_lazy()
+    #signal.data = signal.data.rechunk({0: "auto", 1: "auto", 2: None, 3: None})
     library = generate_library(good_library=good_library)
-    if good_library:
-        acgen = AcceleratedIndexationGenerator(diffraction_pattern,library)
-    else:
-        with pytest.raises(ValueError):
-            acgen = AcceleratedIndexationGenerator(diffraction_pattern,library)
 
-    d = acgen.correlate(chunks='auto')
-    return None
+    """
+    # WHAT IS GOING ON HERE?
+    result = iutls.index_dataset_with_template_rotation(
+            signal,
+            library,
+            frac_keep=0.5,
+            delta_r=0.5,
+            delta_theta=36,
+            max_r=None,
+            intensity_transform_function=np.sqrt,
+            normalize_images=False,
+            normalize_templates=False,
+            chunks='auto',
+        )
+    """
+    if good_library:
+        acgen = AcceleratedIndexationGenerator(signal,library)
+        assert np.allclose(acgen.signal.data,signal.data)
+    elif not good_library:
+        with pytest.raises(ValueError):
+            acgen = AcceleratedIndexationGenerator(signal,library)
+
+    d = acgen.correlate(frac_keep=0.5,
+    delta_r=0.5,
+    delta_theta=36,
+    max_r=None,
+    intensity_transform_function=np.sqrt,
+    normalize_images=False,
+    normalize_templates=False,
+    chunks=None)
 
 @pytest.mark.parametrize(
     "method", ["fast_correlation", "zero_mean_normalized_correlation"]
