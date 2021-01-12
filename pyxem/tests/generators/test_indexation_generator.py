@@ -43,11 +43,6 @@ from pyxem.signals import (
 from pyxem.utils.indexation_utils import OrientationResult
 from unittest.mock import Mock
 
-#taken from https://stackoverflow.com/questions/5061582/setting-stacksize-in-a-python-script
-#import resource, sys
-#resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY,-1))
-#sys.setrecursionlimit(10**6)
-
 def generate_library(good_library):
     """Here we're testing the __init__ so we focus on 0 being the first entry of the orientations"""
     mock_sim_1 = Mock()
@@ -77,7 +72,6 @@ def test_old_indexer_routine():
 
 @pytest.mark.parametrize("good_library",[True,False])
 def test_AcceleratedIndexationGenerator(good_library):
-    from pyxem.utils import indexation_utils as iutls
     signal = ElectronDiffraction2D((np.ones((2,2,256,256)))).as_lazy()
     library = generate_library(good_library=good_library)
 
