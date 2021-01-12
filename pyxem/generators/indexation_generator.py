@@ -172,14 +172,16 @@ class AcceleratedIndexationGenerator:
     To be used with minimal template libraries whereby the first euler
     angle is 0. It is this angle that is optimized during indexation.
     """
-    def __init__(self, signal, diffraction_library):
+    def __init__(self,signal,diffraction_library):
         # test that the first euler angle is always 0
+
         for phase in diffraction_library:
             if not np.allclose(np.sum(diffraction_library[phase]["orientations"][:,0]), 0):
                 raise ValueError("Invalid diffraction library! Templates must be generated from orientations where "
                         "the first Euler angle is 0")
         self.signal = signal
         self.library = diffraction_library
+
 
     def correlate(self,
                   n_largest=5,

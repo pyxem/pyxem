@@ -81,25 +81,9 @@ def test_AcceleratedIndexationGenerator(good_library):
     signal = ElectronDiffraction2D((np.ones((2,2,256,256)))).as_lazy()
     library = generate_library(good_library=good_library)
 
-
-    # This section 'prevents' my segementation fault locally?! (pc494 2020-01-12)
-    result = iutls.index_dataset_with_template_rotation(
-            signal,
-            library,
-            frac_keep=0.5,
-            delta_r=0.5,
-            delta_theta=36,
-            max_r=None,
-            intensity_transform_function=np.sqrt,
-            normalize_images=False,
-            normalize_templates=False,
-            chunks='auto',
-        )
-
     if good_library:
         acgen = AcceleratedIndexationGenerator(signal,library)
-        assert np.allclose(acgen.signal.data,signal.data)
-        d = acgen.correlate()
+        d = acgen.correlate(n_largest=2)
 
     elif not good_library:
         with pytest.raises(ValueError):
