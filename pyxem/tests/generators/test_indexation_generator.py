@@ -44,9 +44,9 @@ from pyxem.utils.indexation_utils import OrientationResult
 from unittest.mock import Mock
 
 #taken from https://stackoverflow.com/questions/5061582/setting-stacksize-in-a-python-script
-import resource, sys
-resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY,-1))
-sys.setrecursionlimit(10**6)
+#import resource, sys
+#resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY,-1))
+#sys.setrecursionlimit(10**6)
 
 def generate_library(good_library):
     """Here we're testing the __init__ so we focus on 0 being the first entry of the orientations"""
