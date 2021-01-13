@@ -32,8 +32,6 @@ def simulations():
     simlist = [mock_sim_1, mock_sim_2, mock_sim_3]
     return simlist
 
-
-#
 @pytest.mark.parametrize(
     "max_radius, expected_shapes, test_pos, test_int",
     [

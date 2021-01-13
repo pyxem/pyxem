@@ -26,6 +26,7 @@ from .indexation_generator import (
     VectorIndexationGenerator,
     TemplateIndexationGenerator,
     ProfileIndexationGenerator,
+    AcceleratedIndexationGenerator,
 )
 from .integration_generator import IntegrationGenerator
 from .pdf_generator1d import PDFGenerator1D
@@ -43,6 +44,7 @@ __all__ = [
     "VectorIndexationGenerator",
     "TemplateIndexationGenerator",
     "ProfileIndexationGenerator",
+    "AcceleratedIndexationGenerator",
     "IntegrationGenerator",
     "PDFGenerator1D",
     "ReducedIntensityGenerator1D",

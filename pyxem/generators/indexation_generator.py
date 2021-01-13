@@ -32,6 +32,7 @@ from pyxem.utils.indexation_utils import (
     match_vectors,
     OrientationResult,
     get_nth_best_solution,
+    index_dataset_with_template_rotation,
 )
 from pyxem.utils.vector_utils import detector_to_fourier
 from pyxem.utils.signal import (
@@ -171,14 +172,16 @@ class AcceleratedIndexationGenerator:
     To be used with minimal template libraries whereby the first euler
     angle is 0. It is this angle that is optimized during indexation.
     """
-    def __init__(self, signal, diffraction_library):
+    def __init__(self,signal,diffraction_library):
         # test that the first euler angle is always 0
-        for k, v in diffraction_library:
-            if not np.allclose(np.sum(v["orientations"][:,0]), 0):
+
+        for phase in diffraction_library:
+            if not np.allclose(np.sum(diffraction_library[phase]["orientations"][:,0]), 0):
                 raise ValueError("Invalid diffraction library! Templates must be generated from orientations where "
                         "the first Euler angle is 0")
         self.signal = signal
         self.library = diffraction_library
+
 
     def correlate(self,
                   n_largest=5,
@@ -236,6 +239,11 @@ class AcceleratedIndexationGenerator:
         Returns
         -------
         result : dict
+
+        Notes
+        -----
+        Internally, this code is compiled to LLVM machine code, so stack traces are often hard to follow on failure. As such it is
+        important to be careful with your parameters selection.
         """
         result =  index_dataset_with_template_rotation(self.signal,
                                                     self.library,

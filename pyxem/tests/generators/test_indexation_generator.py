@@ -19,6 +19,7 @@
 import pytest
 import numpy as np
 import hyperspy.api as hs
+import dask.array as da
 
 from hyperspy._signals.signal2d import Signal2D
 from diffsims.libraries.vector_library import DiffractionVectorLibrary
@@ -32,6 +33,7 @@ from pyxem.generators import (
     TemplateIndexationGenerator,
     ProfileIndexationGenerator,
     VectorIndexationGenerator,
+    AcceleratedIndexationGenerator,
 )
 from pyxem.signals import (
     ElectronDiffraction2D,
@@ -39,12 +41,49 @@ from pyxem.signals import (
     DiffractionVectors,
 )
 from pyxem.utils.indexation_utils import OrientationResult
+from unittest.mock import Mock
 
+def generate_library(good_library):
+    """Here we're testing the __init__ so we focus on 0 being the first entry of the orientations"""
+    mock_sim_1 = Mock()
+    mock_sim_1.calibrated_coordinates = np.array(
+            [
+                [0, 1, 0],
+                [1, 0, 0],
+            ]
+        )
+    mock_sim_1.intensities = np.array([2, 3,])
+    simlist = [mock_sim_1, mock_sim_1]
+
+    lead_number = 0 if good_library else 1
+    orientations = np.array(
+            [
+                [0, 2, 3],
+                [lead_number, 4, 5],
+            ]
+        )
+    library = {}
+    library["dummyphase"] = {"simulations": simlist, "orientations": orientations}
+    return library
 
 def test_old_indexer_routine():
     with pytest.raises(ValueError):
         _ = IndexationGenerator("a", "b")
 
+@pytest.mark.parametrize("good_library",[True,False])
+def test_AcceleratedIndexationGenerator(good_library):
+    signal = ElectronDiffraction2D((np.ones((2,2,256,256)))).as_lazy()
+    library = generate_library(good_library=good_library)
+
+    if good_library:
+        acgen = AcceleratedIndexationGenerator(signal,library)
+        d = acgen.correlate(n_largest=2)
+
+    elif not good_library:
+        with pytest.raises(ValueError):
+            acgen = AcceleratedIndexationGenerator(signal,library)
+
+    return None
 
 @pytest.mark.parametrize(
     "method", ["fast_correlation", "zero_mean_normalized_correlation"]
