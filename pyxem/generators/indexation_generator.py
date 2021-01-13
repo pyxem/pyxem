@@ -239,6 +239,11 @@ class AcceleratedIndexationGenerator:
         Returns
         -------
         result : dict
+
+        Notes
+        -----
+        Internally, this code is compiled to C, so stack traces are often hard to follow on failure. As such it is
+        important to be careful with your parameters selection.
         """
         result =  index_dataset_with_template_rotation(self.signal,
                                                     self.library,
