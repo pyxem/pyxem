@@ -198,14 +198,6 @@ signals:
     lazy: True
     module: pyxem.signals.power2d
 
-components2D:
-    DiffractionComponent:
-      module: pyxem.components.diffraction_component
-      class: DiffractionComponent
-    ScalableReferencePattern:
-      module: pyxem.components.scalable_reference_component
-      class: ScalableReferencePattern
-
 components1D:
     ReducedIntensityCorrectionComponent:
       module: pyxem.components.reduced_intensity_correction_component
