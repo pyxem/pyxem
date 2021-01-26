@@ -104,66 +104,44 @@ def load_mib(mib_path, reshape=True, flip=True):
         exp_times_list = _read_exposures(mib_path, pct_frames_to_read=1.0)
     else:
         exp_times_list = _read_exposures(mib_path)
-    data_dict = _STEM_flag_dict(exp_times_list)
+    om_dict = _STEM_flag_dict(exp_times_list)
+
+    hdr_filename = f'{os.path.splitext(mib_path)[0]}.hdr'
+    if os.path.exists(hdr_filename):
+        om_dict['hdr_file'] = _parse_hdr_file(hdr_filename)
+        om_dict["scan_X"] = int(om_dict['hdr_file']['Frames per Trigger (Number)'])
 
     if hdr_stuff["Assembly Size"] == "2x2":
         # add_crosses expects a dask array object
         data = _add_crosses(data)
 
-    data_pxm = LazyElectronDiffraction2D(data)
+    data_pxm = LazyElectronDiffraction2D(data, original_metadata=om_dict)
 
-    # Transferring dict info to metadata
-    if data_dict["STEM_flag"] == 1:
-        data_pxm.metadata.Signal.signal_type = "STEM"
-    else:
-        data_pxm.metadata.Signal.signal_type = "TEM"
-    data_pxm.metadata.Signal.scan_X = data_dict["scan_X"]
-    data_pxm.metadata.Signal.exposure_time = data_dict["exposure time"]
-    data_pxm.metadata.Signal.frames_number_skipped = data_dict[
-        "number of frames_to_skip"
-    ]
-    data_pxm.metadata.Signal.flyback_times = data_dict["flyback_times"]
     if reshape:
         # only attempt reshaping if it is not already reshaped!
         if len(data_pxm.data.shape) == 3:
-            try:
-                if data_pxm.metadata.Signal.signal_type == "TEM":
-                    print(
-                        "This mib file appears to be TEM data. The stack is returned with no reshaping."
-                    )
-                    return data_pxm
-                # to catch single frames:
-                if data_pxm.axes_manager[0].size == 1:
-                    print("This mib file is a single frame.")
-                    return data_pxm
-                # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
-                # to reshape otherwise use reshape_4DSTEM_FlyBack function
-                if (
-                    data_pxm.metadata.Signal.signal_type == "STEM"
-                    and data_pxm.metadata.Signal.exposure_time is None
-                ):
-                    print("reshaping using sum frames intensity")
-                    (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
-                    data_pxm.metadata.Signal.signal_type = "STEM"
-                    data_pxm.metadata.Signal.frames_number_skipped = skip_ind
-                else:
-                    print("reshaping using flyback pixel")
-                    data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
-            except TypeError:
+            if om_dict["scan_X"] is None:
                 print(
-                    "Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!"
+                    "This mib file appears to be TEM data. The stack is returned with no reshaping."
                 )
                 return data_pxm
-            except ValueError:
-                print(
-                    "Warning: Reshaping did not work or TEM data with no exposure info. Returning the stack with no reshaping!"
-                )
+            # to catch single frames:
+            if data_pxm.axes_manager[0].size == 1:
+                print("This mib file is a single frame.")
                 return data_pxm
+            # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
+            # to reshape otherwise use reshape_4DSTEM_FlyBack function
+            if data_pxm.original_metadata.exposure_time is None:
+                print("reshaping using sum frames intensity")
+                data_pxm, skip_ind = reshape_4DSTEM_SumFrames(data_pxm)
+                data_pxm.original_metadata.frames_number_skipped = skip_ind
+            else:
+                print("reshaping using flyback pixel")
+                data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
     if flip:
         data_pxm.data = np.flip(data_pxm.data, axis=2)
-        data_pxm.metadata.Signal.flip = True
-    else:
-        data_pxm.metadata.Signal.flip = False
+    data_pxm.original_metadata.flip = flip
+
     return data_pxm
 
 
@@ -203,15 +181,12 @@ def mib_to_h5stack(fp, save_path, mmap_mode="r"):
     depth = _get_mib_depth(hdr_info, fp)
 
     data = _mib_to_daskarr(fp)
-    hdr_bits = _get_hdr_bits(hdr_info)
 
     if record_by == "vector":  # spectral image
         size = (height, width, depth)
         data = data.reshape(size)
 
     elif record_by == "image":  # stack of images
-        width_height = width * height
-
         # remove headers at the beginning of each frame and reshape
         if hdr_info["raw"] == "R64":
             if hdr_info["Assembly Size"] == "2x2":
@@ -265,19 +240,19 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
 
     # Transferring dict info to metadata
     if data_dict["STEM_flag"] == 1:
-        data_pxm.metadata.Signal.signal_type = "STEM"
+        data_pxm.original_metadata.signal_type = "STEM"
     else:
-        data_pxm.metadata.Signal.signal_type = "TEM"
-    data_pxm.metadata.Signal.scan_X = data_dict["scan_X"]
-    data_pxm.metadata.Signal.exposure_time = data_dict["exposure time"]
-    data_pxm.metadata.Signal.frames_number_skipped = data_dict[
-        "number of frames_to_skip"
+        data_pxm.original_metadata.signal_type = "TEM"
+    data_pxm.original_metadata.scan_X = data_dict["scan_X"]
+    data_pxm.original_metadata.exposure_time = data_dict["exposure time"]
+    data_pxm.original_metadata.frames_number_skipped = data_dict[
+        "frames_number_skipped"
     ]
-    data_pxm.metadata.Signal.flyback_times = data_dict["flyback_times"]
+    data_pxm.original_metadata.flyback_times = data_dict["flyback_times"]
 
     if (
-        data_pxm.metadata.Signal.signal_type == "TEM"
-        and data_pxm.metadata.Signal.exposure_time is not None
+        data_pxm.original_metadata.signal_type == "TEM"
+        and data_pxm.original_metadata.exposure_time is not None
     ):
         print(
             "This mib file appears to be TEM data. The stack is returned with no reshaping."
@@ -290,10 +265,10 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
     try:
         # If the exposure time info not appearing in the header bits use reshape_4DSTEM_SumFrames
         # to reshape otherwise use reshape_4DSTEM_FlyBack function
-        if data_pxm.metadata.Signal.exposure_time is None:
+        if data_pxm.original_metadata.exposure_time is None:
             (data_pxm, skip_ind) = reshape_4DSTEM_SumFrames(data_pxm)
-            data_pxm.metadata.Signal.signal_type = "STEM"
-            data_pxm.metadata.Signal.frames_number_skipped = skip_ind
+            data_pxm.original_metadata.signal_type = "STEM"
+            data_pxm.original_metadata.frames_number_skipped = skip_ind
         else:
             print("reshaping using flyback pixel")
             data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
@@ -307,9 +282,9 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
         )
     if flip:
         data_pxm.data = np.flip(data_pxm.data, axis=2)
-        data_pxm.metadata.Signal.flip = True
+        data_pxm.original_metadata.flip = True
     else:
-        data_pxm.metadata.Signal.flip = False
+        data_pxm.original_metadata.flip = False
     return data_pxm
 
 
@@ -474,6 +449,20 @@ def _parse_hdr(fp):
     hdr_info["data offset"] = read_hdr[0]
 
     return hdr_info
+
+
+def _parse_hdr_file(path):
+    result = {}
+    with open(path, "r") as f:
+        for line in f:
+            if line.startswith("HDR") or line.startswith("End\t"):
+                continue
+            k, v = line.split("\t", 1)
+            k = k.rstrip(':')
+            v = v.rstrip("\n")
+            result[k] = v
+
+    return result
 
 
 def _add_crosses(a):
@@ -674,9 +663,11 @@ def _get_hdr_bits(hdr_info):
 
 def _read_exposures(fp, pct_frames_to_read=0.1):
     """
-    Looks into the frame times of the first frames to see if they are all the same (TEM) or there is a more intense
-    flyback (4D-STEM). This works due to the way we trigger the 4DSTEM acquisitions at ePSIC.
-    For this to work, the tick in the Merlin software to print exp time into header must be selected!
+    Looks into the frame times of the first frames to see if they are all the
+    same (TEM) or there is a more intense flyback (4D-STEM). This works due to
+    the way we trigger the 4DSTEM acquisitions at ePSIC.
+    For this to work, the tick in the Merlin software to print exp time into
+    header must be selected!
 
     Parameters
     ----------
@@ -793,7 +784,7 @@ def _STEM_flag_dict(exp_times_list):
             number of probe positions in a line,
          'exposure time': float
             exposure time detected per frame in seconds,
-         'number of frames_to_skip': int
+         'frames_number_skipped': int
             number of frames to skip at the beginning before reshaping,
          'flyback_times': list of floats
             list of detected overexposed flyback frames as list
@@ -805,14 +796,14 @@ def _STEM_flag_dict(exp_times_list):
         output["STEM_flag"] = 0
         output["scan_X"] = None
         output["exposure time"] = list(times_set)
-        output["number of frames_to_skip"] = None
+        output["frames_number_skipped"] = 0
         output["flyback_times"] = None
     # In case exp times not appearing in header treat as TEM data
     elif len(times_set) == 0:
         output["STEM_flag"] = 0
         output["scan_X"] = None
         output["exposure time"] = None
-        output["number of frames_to_skip"] = None
+        output["frames_number_skipped"] = 0
         output["flyback_times"] = None
     # Otherwise, treat as STEM data.
     else:
@@ -843,7 +834,7 @@ def _STEM_flag_dict(exp_times_list):
         output["STEM_flag"] = STEM_flag
         output["scan_X"] = scan_X
         output["exposure time"] = exp_time
-        output["number of frames_to_skip"] = frames_to_skip
+        output["frames_number_skipped"] = frames_to_skip
         output["flyback_times"] = flyback_times
 
     return output
@@ -1052,8 +1043,8 @@ def reshape_4DSTEM_FlyBack(data):
     # detector size in pixels
     det_size = data.axes_manager[1].size
     # Read metadata
-    skip_ind = data.metadata.Signal.frames_number_skipped
-    line_len = data.metadata.Signal.scan_X
+    skip_ind = data.original_metadata.frames_number_skipped
+    line_len = data.original_metadata.scan_X
 
     n_lines = floor((data.data.shape[0] - skip_ind) / line_len)
 
