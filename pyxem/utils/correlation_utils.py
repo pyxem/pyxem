@@ -29,7 +29,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         # is a power of 2.  Based on the numpy implementation.  Not terribly
         # faster I think..
         padder[axis] = (pad, pad)
-        slicer = [slice(None),] * len(z_shape)
+        slicer = [slice(None), ] * len(z_shape)
         slicer[axis] = slice(0, -2 * pad)  # creating the proper slices
         if mask is None:
             mask = np.zeros(shape=np.shape(z))
@@ -52,7 +52,7 @@ def _correlation(z, axis=0, mask=None, wrap=True, normalize=True):
         ).real
         number_unmasked[
             number_unmasked < 1
-        ] = 1  # get rid of divide by zero error for completely masked rows
+            ] = 1  # get rid of divide by zero error for completely masked rows
         z[m] = 0
 
     # fast method uses a FFT and is a process which is O(n) = n log(n)
@@ -110,6 +110,19 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
             ),
             2,
         ).real
+
+
+def _pearson_correlation(z):
+    """
+    Calculate Pearson cross-correlation of the image with itself
+    after rotation as a function of rotation
+
+    """
+    z_length = np.shape(z)[1]
+    I_fft = np.fft.fft(z, axis=1) / z_length
+    a = np.fft.ifft(I_fft * I_fft.conj(), axis=1).real * z_length
+    a = (np.mean(a, axis=0) - np.mean(z) ** 2) / (np.mean(z ** 2) - np.mean(z) ** 2)
+    return a
 
 
 def corr_to_power(z):

@@ -20,10 +20,11 @@ import pytest
 import numpy as np
 import dask.array as da
 
-from hyperspy.signals import Signal2D
+from hyperspy.signals import Signal2D, Signal1D
 
 from pyxem.signals.polar_diffraction2d import PolarDiffraction2D, LazyPolarDiffraction2D
 from pyxem.signals.correlation2d import Correlation2D
+from pyxem.signals.symmetry1d import Symmetry1D
 from pyxem.signals.power2d import Power2D
 
 
@@ -139,6 +140,29 @@ class TestCorrelations:
         assert ac is None
         assert isinstance(flat_pattern, Power2D)
 
+class TestPearsonCorrelation:
+    @pytest.fixture
+    def flat_pattern(self):
+        pd = PolarDiffraction2D(data=np.ones(shape=(2, 2, 5, 5)))
+        pd.axes_manager.signal_axes[0].scale = 0.5
+        pd.axes_manager.signal_axes[0].name = "theta"
+        pd.axes_manager.signal_axes[1].scale = 2
+        pd.axes_manager.signal_axes[1].name = "k"
+        return pd
+
+    @pytest.mark.parametrize("selectk", [False, True])
+    @pytest.mark.parametrize("kmin", [0, 1])
+    @pytest.mark.parametrize("kmax", [4, 5])
+    def test_pcorrelation_signal(self, flat_pattern, selectk, kmin, kmax):
+        rho = flat_pattern.get_pearson_correlation(selectk=selectk, kmin=kmin, kmax=kmax)
+        assert isinstance(rho, Symmetry1D)
+
+    def test_axes_transfer(self, flat_pattern):
+        rho = flat_pattern.get_pearson_correlation()
+        assert (
+            rho.axes_manager.signal_axes[0].scale
+            == flat_pattern.axes_manager.signal_axes[0].scale
+        )
 
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):
