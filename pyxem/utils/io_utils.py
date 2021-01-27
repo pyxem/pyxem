@@ -119,7 +119,7 @@ def load_mib(mib_path, reshape=True, flip=True):
 
     if reshape:
         # only attempt reshaping if it is not already reshaped!
-        if len(data_pxm.data.shape) == 3:
+        if len(data_pxm.data.shape) == 3 and reshape:
             if om_dict["scan_X"] is None:
                 print(
                     "This mib file appears to be TEM data. The stack is returned with no reshaping."
@@ -135,9 +135,12 @@ def load_mib(mib_path, reshape=True, flip=True):
                 print("reshaping using sum frames intensity")
                 data_pxm, skip_ind = reshape_4DSTEM_SumFrames(data_pxm)
                 data_pxm.original_metadata.frames_number_skipped = skip_ind
-            else:
+            elif data_pxm.original_metadata.frames_number_skipped > 0:
                 print("reshaping using flyback pixel")
                 data_pxm = reshape_4DSTEM_FlyBack(data_pxm)
+            else:
+                print("reshaping using scan_x")
+                data_pxm = reshape_4DSTEM(data_pxm)
     if flip:
         data_pxm.data = np.flip(data_pxm.data, axis=2)
     data_pxm.original_metadata.flip = flip
@@ -1015,6 +1018,17 @@ def _untangle_raw(data, hdr_info, stack_size):
     return untangled_data
 
 
+def reshape_4DSTEM(signal):
+    width = signal.original_metadata.scan_X
+    signal.data = signal.data.reshape(floor(signal.data.shape[0] / width),
+                                      width,
+                                      *signal.axes_manager.signal_shape)
+    signal.axes_manager._axes.insert(0, signal.axes_manager[0].copy())
+    signal.get_dimensions_from_data()
+
+    return signal
+
+
 def reshape_4DSTEM_FlyBack(data):
     """Reshapes the lazy-imported frame stack to navigation dimensions determined
     based on stored exposure times.
@@ -1078,7 +1092,7 @@ def reshape_4DSTEM_SumFrames(data):
     data_reshaped : pyxem.signals.LazyElectronDiffraction2D
         reshaped data (x, y | Det_X, Det_Y)
     """
-    # Assuming sacn_x, i.e. number of probe positions in a line is square root
+    # Assuming scan_x, i.e. number of probe positions in a line is square root
     # of total number of frames
     scan_x = int(np.sqrt(data.axes_manager[0].size))
     # detector size in pixels
@@ -1109,6 +1123,7 @@ def reshape_4DSTEM_SumFrames(data):
     else:
         # number of frames to skip at the beginning
         skip_ind = peaks[0][0]
+
     # Number of lines
     n_lines = floor((data.data.shape[0] - skip_ind) / line_len)
     # with the skipped frames removed
