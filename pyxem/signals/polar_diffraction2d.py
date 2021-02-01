@@ -132,11 +132,13 @@ class PolarDiffraction2D(Signal2D):
         fourier_axis.scale = 1
         return power
 
-    def get_pearson_correlation(self, selectk=False, kmin=0, kmax=0, inplace=False, **kwargs):
+    def get_pearson_correlation(self, mask = None, selectk=False, kmin=0, kmax=0, inplace=False, **kwargs):
         """Returns the pearson rotational correlation in the form of a Signal2D class.
 
         Parameters
         ----------
+        mask: Numpy array
+            A bool mask of values to ignore of shape equal to the signal shape.
         selectk: bool
             Select k range for correlation over a ring segment
         kmin: float
@@ -153,9 +155,15 @@ class PolarDiffraction2D(Signal2D):
         """
         if selectk is True:
             self_slice = self.isig[:, kmin:kmax]
-            correlation = self_slice._map_iterate(_pearson_correlation, inplace=inplace, **kwargs)
+            if mask is not None:
+                mask_signal = Signal2D(mask)
+                mask_signal.axes_manager.signal_axes[1].scale = self.axes_manager[-1].scale
+                mask_slice = mask_signal.isig[:, kmin:kmax]
+                correlation = self_slice._map_iterate(_pearson_correlation, mask=mask_slice, inplace=inplace, **kwargs)
+            else:
+                correlation = self_slice._map_iterate(_pearson_correlation, inplace=inplace, **kwargs)
         else:
-            correlation = self._map_iterate(_pearson_correlation, inplace=inplace, **kwargs)
+            correlation = self._map_iterate(_pearson_correlation, mask=mask, inplace=inplace, **kwargs)
 
         if inplace:
             self.set_signal_type("symmetry")

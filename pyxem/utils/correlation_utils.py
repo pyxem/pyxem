@@ -112,15 +112,38 @@ def _power(z, axis=0, mask=None, wrap=True, normalize=True):
         ).real
 
 
-def _pearson_correlation(z):
+def _pearson_correlation(z, mask=None):
     """
     Calculate Pearson cross-correlation of the image with itself
     after rotation as a function of rotation
 
+     Parameters
+    ----------
+    z: np.array
+        Input image in 2D array
+    mask: np.array
+        A boolean mask to be applied.
+
+    Returns
+    -------
+    a: np.array
+        Pearson correlation of the input image
+
     """
-    z_length = np.shape(z)[1]
-    I_fft = np.fft.fft(z, axis=1) / z_length
-    a = np.fft.ifft(I_fft * I_fft.conj(), axis=1).real * z_length
+    if mask is not None:
+        m = np.array(mask, dtype=bool)
+        mask_bool = ~m
+        mask_fft = np.fft.fft(mask_bool, axis=1)
+        n_unmasked = np.fft.ifft(mask_fft * mask_fft.conj()).real
+        n_unmasked[n_unmasked < 1] = 1
+        z[m] = 0
+        I_fft = np.divide(np.fft.fft(z, axis=1), n_unmasked)
+        a = np.multiply(np.fft.ifft(I_fft * I_fft.conj()).real, n_unmasked)
+    else:
+        z_length = np.shape(z)[1]
+        I_fft = np.fft.fft(z, axis=1) / z_length
+        a = np.fft.ifft(I_fft * I_fft.conj(), axis=1).real * z_length
+
     a = (np.mean(a, axis=0) - np.mean(z) ** 2) / (np.mean(z ** 2) - np.mean(z) ** 2)
     return a
 

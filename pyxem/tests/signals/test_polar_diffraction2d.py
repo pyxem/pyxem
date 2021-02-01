@@ -164,6 +164,17 @@ class TestPearsonCorrelation:
             == flat_pattern.axes_manager.signal_axes[0].scale
         )
 
+    @pytest.mark.parametrize(
+        "mask", [None, np.zeros(shape=(5, 5))]
+    )
+    def test_masking_pcorrelation(self, flat_pattern, mask):
+        rho_0 = flat_pattern.get_pearson_correlation(mask=mask)
+        print(rho_0)
+        assert isinstance(rho_0, Symmetry1D)
+        rho = flat_pattern.get_pearson_correlation(mask=mask, selectk=True, kmin=0, kmax=4)
+        print(rho)
+        assert isinstance(rho, Symmetry1D)
+
 class TestDecomposition:
     def test_decomposition_is_performed(self, diffraction_pattern):
         s = PolarDiffraction2D(diffraction_pattern)

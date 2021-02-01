@@ -43,7 +43,7 @@ class Symmetry1D(Signal1D):
 
     def get_symmetry_coefficient(self):
         """Return symmetry coefficient from pearson correlation function at all real
-        space positions.
+        space positions (n from 2 to 10).
 
         Returns
         -------
