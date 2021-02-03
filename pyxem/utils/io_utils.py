@@ -30,7 +30,7 @@ import h5py
 from pyxem.signals import LazyElectronDiffraction2D
 
 
-def load_mib(mib_path, reshape=True, flip=True):
+def load_mib(mib_path, reshape=True, flip=True, add_quadrant_gap=None):
     """Read a .mib file or an h5 stack file using dask and return as a lazy pyXem / hyperspy signal.
 
     Parameters
@@ -111,9 +111,13 @@ def load_mib(mib_path, reshape=True, flip=True):
         om_dict['hdr_file'] = _parse_hdr_file(hdr_filename)
         om_dict["scan_X"] = int(om_dict['hdr_file']['Frames per Trigger (Number)'])
 
-    if hdr_stuff["Assembly Size"] == "2x2":
+    if (add_quadrant_gap is None and 'hdr_file' in om_dict.keys() and
+            om_dict['hdr_file']['Gap Fill Mode'] == 'None'):
+        # Check the 'Gap Fill Mode' value and add the gap accordingly
+        add_quadrant_gap = True
+    if add_quadrant_gap and hdr_stuff["Assembly Size"] == "2x2":
         # add_crosses expects a dask array object
-        data = _add_crosses(data)
+        data = _add_quadrant_gap(data)
 
     data_pxm = LazyElectronDiffraction2D(data, original_metadata=om_dict)
 
@@ -232,7 +236,7 @@ def h5stack_to_pxm(h5_path, mib_path, flip=True):
     if hdr_info["Assembly Size"] == "2x2":
         data = data_pxm.data
         # add_crosses expects a dask array object
-        data = _add_crosses(data)
+        data = _add_quadrant_gap(data)
         data_pxm = LazyElectronDiffraction2D(data)
 
     if os.stat(mib_path).st_size * 1e9 < 0.1:
@@ -468,59 +472,65 @@ def _parse_hdr_file(path):
     return result
 
 
-def _add_crosses(a):
+def _add_quadrant_gap(array):
     """
     Adds 3 pixel buffer cross to quad chip data.
 
     Parameters
     ----------
-    a : dask.array
-        Stack of raw frames or reshaped dask array object, prior to dimension reshaping, to insert
-        3 pixel buffer cross into.
+    array : array
+        Stack of raw frames or reshaped array object, prior to dimension
+        reshaping, to insert 3 pixel buffer cross into.
 
     Returns
     -------
-    b : dask.array
-        Stack of frames or reshaped 4DSTEM object including 3 pixel buffer cross in the diffraction plane.
+    out : array
+        Stack of frames or reshaped 4DSTEM object including 3 pixel buffer
+        cross in the diffraction plane.
     """
-    original_shape = a.shape
+    original_shape = array.shape
+    half_shape = int(original_shape[-1] / 2), int(original_shape[-2] / 2)
+    dtype = array.dtype
 
     if len(original_shape) == 4:
-        a = a.reshape(
+        array = array.reshape(
             original_shape[0] * original_shape[1], original_shape[2], original_shape[3]
         )
 
-    a_half = int(original_shape[-1] / 2), int(original_shape[-2] / 2)
     # Define 3 pixel wide cross of zeros to pad raw data
     if len(original_shape) == 4:
-        z_array = da.zeros(
+        z_array = np.zeros(
             (original_shape[0] * original_shape[1], original_shape[-2], 3),
-            dtype=a.dtype,
+            dtype=dtype,
         )
-        z_array2 = da.zeros(
+        z_array2 = np.zeros(
             (original_shape[0] * original_shape[1], 3, original_shape[-1] + 3),
-            dtype=a.dtype,
+            dtype=dtype,
         )
     else:
-        z_array = da.zeros((original_shape[0], original_shape[-2], 3), dtype=a.dtype)
-        z_array2 = da.zeros(
-            (original_shape[0], 3, original_shape[-1] + 3), dtype=a.dtype
+        z_array = np.zeros((original_shape[0], original_shape[-2], 3), dtype=dtype)
+        z_array2 = np.zeros(
+            (original_shape[0], 3, original_shape[-1] + 3), dtype=dtype
         )
 
     # Insert blank cross into raw data
-    b = da.concatenate((a[:, :, : a_half[1]], z_array, a[:, :, a_half[1] :]), axis=-1)
+    out = np.concatenate((array[:, :, : half_shape[1]],
+                          z_array, array[:, :, half_shape[1] :]),
+                         axis=-1)
 
-    b = da.concatenate((b[:, : a_half[0], :], z_array2, b[:, a_half[0] :, :]), axis=-2)
+    out = np.concatenate((out[:, : half_shape[0], :],
+                          z_array2, out[:, half_shape[0] :, :]),
+                         axis=-2)
 
     if len(original_shape) == 4:
-        b = b.reshape(
+        out = out.reshape(
             original_shape[0],
             original_shape[1],
             original_shape[2] + 3,
             original_shape[3] + 3,
         )
 
-    return b
+    return out
 
 
 def _get_mib_depth(hdr_info, fp):

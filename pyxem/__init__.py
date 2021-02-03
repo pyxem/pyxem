@@ -18,9 +18,9 @@
 
 
 import logging
+from hyperspy.defaults_parser import preferences
 
-_logger = logging.getLogger(__name__)
-
+logging.getLogger('pyxem').setLevel(preferences.General.logging_level)
 
 from pyxem import components
 from pyxem import detectors
@@ -31,6 +31,9 @@ from pyxem import signals
 from pyxem.utils.io_utils import load_mib
 
 from . import release_info
+
+
+_logger = logging.getLogger(__name__)
 
 __all__ = [
     "components",
