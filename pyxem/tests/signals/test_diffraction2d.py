@@ -605,12 +605,15 @@ class TestVirtualImaging:
         diffraction_pattern.plot_integrated_intensity(roi)
         plt.close("all")
 
-    def test_get_integrated_intensity(self, diffraction_pattern):
+    @pytest.mark.parametrize('has_nan', [True, False])
+    def test_get_integrated_intensity(self, diffraction_pattern, has_nan):
         roi = hs.roi.CircleROI(3, 3, 5)
+        if has_nan:
+            diffraction_pattern.isig[:2] = np.nan
         vi = diffraction_pattern.get_integrated_intensity(roi)
-        assert vi.data.shape == (2, 2)
         assert vi.axes_manager.signal_dimension == 2
         assert vi.axes_manager.navigation_dimension == 0
+        np.testing.assert_allclose(vi.data, np.array([[ 6.,  6.], [ 8., 10.]]))
 
     @pytest.mark.parametrize("out_signal_axes", [None, (0, 1), (1, 2), ("x", "y")])
     def test_get_integrated_intensity_stack(self, diffraction_pattern, out_signal_axes):
