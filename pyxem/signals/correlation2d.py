@@ -93,7 +93,7 @@ class Correlation2D(Signal2D, CommonDiffraction):
         power: Power2D
             The power spectrum of summed angular correlation
         """
-        power = self.sum().map(corr_to_power, inplace=inplace, **kwargs)
+        power = self.nansum().map(corr_to_power, inplace=inplace, **kwargs)
         if inplace:
             self.set_signal_type("power")
             fourier_axis = self.axes_manager.signal_axes[0]
